@@ -39,6 +39,9 @@ export class AawakEntryComponent implements OnInit {
   amnt: any;
   aawak_types: any = [];
   products: any = [];
+  categories: any = [];
+  isCondition: any = false;
+  productsAll: any = [];
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -67,7 +70,6 @@ export class AawakEntryComponent implements OnInit {
       nimmit: [null],
       item_detail: [null],
       description: [null],
-      remaining_qty:[null]
     });
   }
 
@@ -78,11 +80,12 @@ export class AawakEntryComponent implements OnInit {
     this.states = this.gs.Lists.state;
     this.mms = this.gs.Lists.mm;
     this.conditions = this.gs.Lists.condition;
-    this.subitems = this.gs.Lists.subitem;
+    // this.subitems = this.gs.Lists.subitem;
     this.departments = this.gs.Lists.department;
     this.pbks = this.gs.Lists.pbk;
     this.aawak_types = this.gs.Lists.aawak_type;
     this.products = this.gs.Lists.product;
+    this.categories = this.gs.Lists.category;
   }
 
   openModal(name: any) {
@@ -117,8 +120,7 @@ export class AawakEntryComponent implements OnInit {
         actual_amt: changes.getData.currentValue.actual_amt,
         nimmit: changes.getData.currentValue.nimmit,
         item_detail: changes.getData.currentValue.item_detail,
-        description: changes.getData.currentValue.description,
-        remaining_qty:changes.getData.currentValue.remaining_qty
+        description: changes.getData.currentValue.description
       });
       console.log(" this.aawakForm.value", this.aawakForm.value);
 
@@ -129,9 +131,6 @@ export class AawakEntryComponent implements OnInit {
   aawakFormSubmit() {
     if (this.aawakForm.valid) {
       this.isLoader = true;
-      this.aawakForm.patchValue({
-        remaining_qty:this.qty
-      })
       this.http.post(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.aawakForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.qty = null;
@@ -329,6 +328,57 @@ export class AawakEntryComponent implements OnInit {
     }
   }
 
+  ammAddResponse(ev: any) {
+    if (ev._id) {
+      this.isLoader = true;
+      $('#aawakEntryComponent > #showModal').modal('hide');
+      this.showModal = '';
+      this.aawakForm.patchValue(
+        {
+          aawak_mm_id: ev._id
+        });
+      this.isLoader = false;
+    }
+    else {
+      this.isLoader = false;
+      console.log("err", ev);
+    }
+  }
+
+  pbkAddResponse(ev: any) {
+    if (ev._id) {
+      this.isLoader = true;
+      $('#aawakEntryComponent > #showModal').modal('hide');
+      this.showModal = '';
+      this.aawakForm.patchValue(
+        {
+          pbk_id: ev._id
+        });
+      this.isLoader = false;
+    }
+    else {
+      this.isLoader = false;
+      console.log("err", ev);
+    }
+  }
+
+  productAddResponse(ev: any) {
+    if (ev._id) {
+      this.isLoader = true;
+      $('#aawakEntryComponent > #showModal').modal('hide');
+      this.showModal = '';
+      this.aawakForm.patchValue(
+        {
+          product_id: ev._id
+        });
+      this.isLoader = false;
+    }
+    else {
+      this.isLoader = false;
+      console.log("err", ev);
+    }
+  }
+
 
   setView(type: string) {
     this.viewType = type;
@@ -406,5 +456,68 @@ export class AawakEntryComponent implements OnInit {
   }
 
   pbkbystate(ev: any) { }
+
+  stateSelected(ev: any) {
+    if (ev) {
+      this.pbks = this.gs.Lists.pbk.filter((p: { state_id: any; }) => p.state_id == ev);
+    }
+    else {
+      this.pbks = this.gs.Lists.pbk;
+    }
+  }
+
+  catSelected(ev: any) {
+    if (ev) {
+      this.items = this.gs.Lists.item.filter((i: { category_id: any; }) => i.category_id == ev);
+      // this.subitems = this.gs.Lists.subitem.filter((s: { category_id: any; }) => s.category_id == ev);
+    }
+    else {
+      this.items = this.gs.Lists.item;
+      // this.subitems = this.gs.Lists.subitem;
+    }
+  }
+
+  itemSelected(ev: any) {
+    if (ev) {
+      let item = this.items.find((i: { _id: any; }) => i._id == ev);
+      this.subitems = this.gs.Lists.subitem.filter((s: { item_id: any; }) => s.item_id == ev);
+      this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
+      this.aawakForm.patchValue({
+        unit_id: item.unit_id
+      });
+    }
+    else {
+      this.subitems = [];
+      this.aawakForm.patchValue({
+        unit_id: null
+      });
+    }
+  }
+
+  subitemSelected(ev: any) {
+    if (ev) {
+      let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
+      this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
+      this.aawakForm.patchValue({
+        unit_id: subitem.unit_id
+      });
+    }
+    else {
+      this.products = this.productsAll;
+    }
+  }
+
+  productSelected(ev: any) {
+    this.isCondition = true;
+    let product = this.products.find((p: { _id: any; }) => p._id == ev);
+    this.aawakForm.patchValue({
+      condition_id: product ? product.condition_id : null
+    });
+  }
+
+  deptSelected(ev: any) {
+    console.log("ev", ev);
+  }
+
 
 }

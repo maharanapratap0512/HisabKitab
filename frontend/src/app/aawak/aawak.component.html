@@ -50,18 +50,13 @@
                            <th style="width: 70px;">Manage</th>
                            <th style="width: 70px;">Pkt No.</th>
                            <th style="width: 101px;">Date</th>
-                           <th style="width: 150px;">Mm</th>
+                           <th *ngIf="auth.webUser.dept_id != 2" style="width: 150px;">Mm</th>
                            <th style="width: 150px;">Aawak Mm</th>
-                           <th>Department</th>
-                           <th style="width: 200px;">Pbk</th>
-                           <th style="width: 120px;">Entry Type</th>
-                           <th>Item</th>
-                           <th>Subitem</th>
-                           <th>Product</th>
-                           <th>Unit</th>
-                           <th>Condition</th>
+                           <th *ngIf="auth.webUser.dept_id != 3" style="width: 200px;">Pbk</th>
+                           <th style="width: 120px;">Aawak Type</th>
+                           <th>Item - Subitem</th>
+                           <th *ngIf="auth.webUser.dept_id != 3">Product</th>
                            <th>Qty</th>
-                           <th>Rate</th>
                            <th>Actual Amt</th>
                            <th>Nimmit</th>
                            <th style="width: 200px;">Item Detail</th>
@@ -80,26 +75,30 @@
 
                            <td>{{data.pkt_num?data.pkt_num:'-'}}</td>
                            <td>{{data.date?data.date:'-'}}</td>
-                           <td>{{data.mm_id?data.mm_eng +' : '+ data.mm_hin:'-'}}{{data.mm_code?' : '+
-                              data.mm_code:''}}</td>
-                           <td>{{data.aawak_mm_id?data.aawak_mm_eng +' : '+ data.aawak_mm_hin:'-'}}
-                              {{data.aawak_mm_code?' : '+data.aawak_mm_code:''}}</td>
-                           <td>{{data.dept_id?data.dept_eng +' : '+ data.dept_hin:'-'}}{{data.dept_coed?' :
-                              '+data.dept_coed:''}}</td>
-                           <td>{{data.pbk_id?data.pbk_eng+' : '+data.pbk_hin:'-'}}{{data.pbk_code?' :
-                              '+data.pbk_code:''}}</td>
-                           <td>{{data.aawak_type_id?data.aawak_type_hin +' : '+ data.aawak_type_eng:'-'}}</td>
-                           <td>{{data.item_id?data.item_eng+' : '+data.item_hin:'-'}}{{data.item_code?' :
-                              '+data.item_code:''}}</td>
-                           <td>{{data.subitem_id?data.subitem_eng+' : '+data.subitem_hin:'-'}}{{data.subitem_code?' :
-                              '+data.subitem_code:''}}
+                           <td>
+                              {{data.mm_hin}} - {{data.mm_code}}<br />
+                              {{data.mm_eng}}
                            </td>
-                           <td>{{data.product_id?data.product_id:'-'}}</td>
-                           <td>{{data.unit_id?data.unit_full+' : '+data.unit_short:'-'}}</td>
-                           <td>{{data.condition_id?data.condition_eng +':'+ data.condition_hin:'-'}}</td>
-                           <td>{{data.qty?data.qty:'-'}}</td>
-                           <td>{{data.rate?data.rate:'-'}}</td>
-                           <td>{{data.actual_amt?data.actual_amt:'-'}}</td>
+                           <td>
+                              {{data.aawak_mm_hin}} - {{data.aawak_mm_code}}<br />
+                              {{data.aawak_mm_eng}}
+                           </td>
+                           <td>
+                              {{data.pbk_hin}} <br />
+                              {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
+                           </td>
+                           <td>{{data.aawak_type_id?data.aawak_type_hin +' : '+ data.aawak_type_eng:'-'}}</td>
+                           <td>
+                              {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
+                              {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
+                           </td>
+                           <td>
+                              {{data.product_code ? data.product_code : ''}}
+                              {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
+                           </td>
+                           <td> {{data.qty}} {{data.unit_short}}</td>
+                           <td>@ {{data.rate?data.rate:'-'}} <br>
+                              = {{data.actual_amt?data.actual_amt:'-'}}</td>
                            <td>{{data.nimmit?data.nimmit:'-'}}</td>
                            <td>{{data.item_detail?data.item_detail:'-'}}</td>
                            <td>{{data.description?data.description:'-'}}</td>

@@ -24,10 +24,14 @@
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label"> MM</label>
+                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                     onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add MM'">
+                     + Add
+                  </button>
                   <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="false"
                      [virtualScroll]="true" formControlName="mm_id"
                      [ngClass]="{'validation':aawakForm.get('mm_id')?.errors && (aawakForm.get('mm_id')?.touched || aawakForm.get ('mm_id')?.dirty)}">
-                     <ng-option selected="selected" disabled value="">Incoming(Aawak) MM</ng-option>
+                     <ng-option selected="selected" disabled value="">MM</ng-option>
                      <ng-option *ngFor="let item of mms" [value]="item._id">
                         {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
                   </ng-select>
@@ -37,6 +41,10 @@
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Aawak MM</label>
+                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                     onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add AMM'">
+                     + Add
+                  </button>
                   <ng-select class="custom" style="width: 100%;" placeholder="Incoming(Aawak) MM" [clearable]="false"
                      [virtualScroll]="true" formControlName="aawak_mm_id"
                      [ngClass]="{'validation':aawakForm.get('aawak_mm_id')?.errors && (aawakForm.get('aawak_mm_id')?.touched || aawakForm.get ('aawak_mm_id')?.dirty)}">
@@ -47,42 +55,30 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
-               <div class="form-group">
-                  <label class="form-label">Product</label>
-                  <!-- <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
-                        onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add Item'">
-                        + Item
-                     </button>
-                  </div> -->
-                  <ng-select class="custom" style="width: 100%;" placeholder="Select Product" [clearable]="false"
-                     [virtualScroll]="true" formControlName="product_id"
-                     [ngClass]="{'validation':aawakForm.get('product_id')?.errors && (aawakForm.get('product_id')?.touched || aawakForm.get ('product_id')?.dirty)}">
-                     <ng-option selected="selected" disabled value="">Select Product</ng-option>
-                     <ng-option *ngFor="let item of products" [value]="item._id">{{item.product_hin}} :
-                        {{item.product_eng}} : {{item.product_code}}</ng-option>
-                  </ng-select>
-               </div>
-            </div>
-
             <div class="col-md-2 mb-3">
                <div class="form-group">
-                  <label class="form-label">State Wise Pbks </label>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Filter Pbks" [clearable]="true"
-                     [virtualScroll]="true" (change)="pbkbystate($event)">
-                     <ng-option selected="selected" disabled value="">Select State For Filter Pbks
-                     </ng-option>
-                     <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}} :
-                        {{item.state_eng}}</ng-option>
-                  </ng-select>
+                  <label class="form-label">Nimmit</label>
+                  <input type="text" class="form-control" placeholder="Nimmit" formControlName="nimmit"
+                     [ngClass]="{'validation':aawakForm.get('nimmit')?.errors && (aawakForm.get('nimmit')?.touched || aawakForm.get ('nimmit')?.dirty)}">
                </div>
             </div>
 
-            <div class="col-md-4 mb-3">
+            <div class="col-md-3 mb-3">
                <div class="form-group">
-                  <label class="form-label">Pbk Sewadhari</label>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Select Roll no. or Pbk name"
+                  <label class="form-label">Sewadhari</label>
+                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                     onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add PBK'">
+                     + PBK
+                  </button>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Filter PBK by State" [clearable]="true"
+                     [virtualScroll]="true" (change)="stateSelected($event)">
+                     <ng-option selected="selected" disabled value="">Select State to Filter Pbk
+                     </ng-option>
+                     <ng-option *ngFor="let item of states" [value]="item._id">
+                        {{item.state_hin}} : {{item.state_eng}}
+                     </ng-option>
+                  </ng-select>
+                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Roll no. or Pbk name"
                      [clearable]="false" [virtualScroll]="true" formControlName="pbk_id"
                      [ngClass]="{'validation':aawakForm.get('pbk_id')?.errors && (aawakForm.get('pbk_id')?.touched || aawakForm.get ('pbk_id')?.dirty)}">
                      <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
@@ -95,41 +91,89 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="departments.length || categories.length">
                <div class="form-group">
-                  <label class="form-label">Item</label>
-                  <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
-                        onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add Item'">
-                        + Item
-                     </button>
-                  </div>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
-                     [virtualScroll]="true" formControlName="item_id"
-                     [ngClass]="{'validation':aawakForm.get('item_id')?.errors && (aawakForm.get('item_id')?.touched || aawakForm.get ('item_id')?.dirty)}">
-                     <ng-option selected="selected" disabled value="">Select Item</ng-option>
-                     <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
-                        {{item.item_eng}} : {{item.item_code}}</ng-option>
+                  <label class="form-label">Filter Items By</label>
+                  <!-- <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+              onclick="$('#aawakEntryComponent > #showModal').modal('show')"
+              (click)="showModal = 'Add Department'">
+              + Add
+           </button> -->
+                  <ng-select *ngIf="departments && departments.length" class="custom" style="width: 100%;"
+                     placeholder="Select Department" [clearable]="false" [virtualScroll]="true"
+                     (change)="deptSelected($event)" [ngModelOptions]="{standalone: true}">
+                     <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :
+                        {{item.dept_eng}}{{item.dept_code?' : '+item.dept_code:''}}</ng-option>
+                  </ng-select>
+                  <ng-select *ngIf="categories && categories.length" class="custom mt-1" style="width: 100%;"
+                     placeholder="Select Category" [clearable]="false" [virtualScroll]="true"
+                     (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
+                     <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
+                        {{item.category_eng}}</ng-option>
                   </ng-select>
                </div>
             </div>
 
             <div class="col-md-3 mb-3">
                <div class="form-group">
-                  <label class="form-label">Subitem</label>
+                  <label class="form-label">Item & Subitem</label>
                   <div class="float-end">
+                     <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
+                        onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add Item'">
+                        + Item
+                     </button>
                      <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-outline-primary" onclick="$('#aawakEntryComponent > #showModal').modal('show')"
                         (click)="showModal = 'Add Subitem'">
                         + Subitem
                      </button>
                   </div>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
+                     [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)"
+                     [ngClass]="{'validation':aawakForm.get('item_id')?.errors && (aawakForm.get('item_id')?.touched || aawakForm.get ('item_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                     <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                        {{item.item_eng}} : {{item.item_code}}</ng-option>
+                  </ng-select>
                   <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
                      [clearable]="false" [virtualScroll]="true" formControlName="subitem_id"
                      [ngClass]="{'validation':aawakForm.get('subitem_id')?.errors && (aawakForm.get('subitem_id')?.touched || aawakForm.get ('subitem_id')?.dirty)}">
                      <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
                      <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}} :
                         {{item.subitem_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Product & Condition</label>
+                  <div class="float-end">
+                     <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
+                        onclick="$('#aawakEntryComponent > #showModal').modal('show')"
+                        (click)="showModal = 'Add Product'">
+                        + Product
+                     </button>
+                     <!-- <button type=" button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-outline-primary" (click)="openModal('Add Condition')">
+                        + Condition
+                     </button> -->
+                  </div>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Product" [clearable]="true"
+                     [virtualScroll]="true" formControlName="product_id" (change)="productSelected($event)"
+                     [ngClass]="{'validation':aawakForm.get('product_id')?.errors && (aawakForm.get('product_id')?.touched || aawakForm.get ('product_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Product</ng-option>
+                     <ng-option *ngFor="let item of products" [value]="item._id">{{item.item_hin}} :
+                        {{item.subitem_hin}}
+                        : {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num : ''}}
+                     </ng-option>
+                  </ng-select>
+                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition" [clearable]="false"
+                     [virtualScroll]="true" formControlName="condition_id" *ngIf="isCondition"
+                     [ngClass]="{'validation':aawakForm.get('condition_id')?.errors && (aawakForm.get('condition_id')?.touched || aawakForm.get ('condition_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Condition</ng-option>
+                     <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
+                        {{item.list_name_eng}} </ng-option>
                   </ng-select>
                </div>
             </div>
@@ -185,31 +229,6 @@
                </div>
             </div>
 
-
-            <div class="col-md-3 mb-3">
-               <div class="form-group">
-                  <label class="form-label">Condition</label>
-                  <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
-                        class="btn btn-sm btn-outline-primary" (click)="setView('Condition')">
-                        <i class=" dripicons-view-list"></i>
-                     </button>
-                     <button type="button" style="padding: 1px 6px !important;"
-                        class="btn btn-outline-primary float-end"
-                        onclick="$('#aawakEntryComponent > #showModal').modal('show')"
-                        (click)="showModal = 'Add Condition'">+ Add
-                     </button>
-                  </div>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Select SubitemList" [clearable]="false"
-                     [virtualScroll]="true" formControlName="condition_id"
-                     [ngClass]="{'validation':aawakForm.get('condition_id')?.errors && (aawakForm.get('condition_id')?.touched || aawakForm.get ('condition_id')?.dirty)}">
-                     <ng-option selected="selected" disabled value="">Select Condition List</ng-option>
-                     <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
-                        {{item.list_name_eng}}</ng-option>
-                  </ng-select>
-               </div>
-            </div>
-
             <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id < 3 ">
                <div class="form-group">
                   <label class="form-label">Department</label>
@@ -244,14 +263,6 @@
                         {{item.list_name_hin}} : {{item.list_name_eng}}
                      </ng-option>
                   </ng-select>
-               </div>
-            </div>
-
-            <div class="col-md-2 mb-3">
-               <div class="form-group">
-                  <label class="form-label">Nimit Name</label>
-                  <input type="text" class="form-control" placeholder="Nimit Name" formControlName="nimmit"
-                     [ngClass]="{'validation':aawakForm.get('nimmit')?.errors && (aawakForm.get('nimmit')?.touched || aawakForm.get ('nimmit')?.dirty)}">
                </div>
             </div>
 
@@ -322,6 +333,19 @@
                <!-- Add Condition -->
                <app-support-list-entry *ngIf="showModal == 'Add Condition'" (response)='conditionAddResponse($event)'
                   list_type="condition"> </app-support-list-entry>
+
+               <!-- Add PBK -->
+               <app-pbk-entry *ngIf="showModal == 'Add PBK'" (response)='pbkAddResponse($event)'>
+               </app-pbk-entry>
+
+               <!-- Add AMM -->
+               <app-mm-entry *ngIf="showModal == 'Add AMM'" (response)='ammAddResponse($event)'>
+               </app-mm-entry>
+
+               <!-- Add Product -->
+               <app-product-entry *ngIf="showModal == 'Add Product'" (response)='productAddResponse($event)'>
+               </app-product-entry>
+
             </div>
             <div class="modal-footer">
                <button type="button" class="btn btn-secondary" style="width: 120px;"
