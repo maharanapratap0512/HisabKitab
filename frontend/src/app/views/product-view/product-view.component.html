@@ -1,0 +1,177 @@
+<div class="row" id="productViewComponent">
+    <div class="card-body">
+        <div class="row" *ngIf="product">
+            <div class="col-lg-8" style="border-right: 0.5px #4c5763 dashed ;">
+                <!-- Product image -->
+                <a href="javascript: void(0);" class="text-center d-block mb-4">
+                    <img [src]="product.image1" class="img-fluid" style="max-width: 80%;" alt="Product-img" />
+                </a>
+
+                <div class="d-lg-flex d-none justify-content-center">
+                    <a href="javascript: void(0);" (click)="changeImage(1)" *ngIf="product.image1">
+                        <img [src]="product.image1" class="img-fluid img-thumbnail p-2"
+                            style="max-width: 75px;" alt="Product-img" />
+                    </a>
+                    <a href="javascript: void(0);" class="ms-2" (click)="changeImage(1)" *ngIf="product.image2">
+                        <img [src]="product.image2" class="img-fluid img-thumbnail p-2"
+                            style="max-width: 75px;" alt="Product-img" />
+                    </a>
+                    <a href="javascript: void(0);" class="ms-2" (click)="changeImage(1)" *ngIf="product.image3">
+                        <img [src]="product.image3" class="img-fluid img-thumbnail p-2"
+                            style="max-width: 75px;" alt="Product-img" />
+                    </a>
+                </div>
+            </div> <!-- end col -->
+            <div class="col-lg-4" style="overflow-y: auto; height: 30vw;">
+                <form class="ps-lg-4">
+                    <!-- Product title -->
+                    <h3 class="mt-0">
+                        {{product.subitem_hin+'-' ? product.subitem_hin:''}} {{product.item_hin ? product.item_hin:''}}
+                        -
+                        {{product.subitem_eng+'-' ? product.subitem_eng:''}} {{product.item_eng ? product.item_eng:''}}
+                        <!-- <span class="badge badge-success-lighten">New</span>
+                        <span class="badge badge-warning-lighten">Old</span>
+                        <span class="badge badge-danger-lighten">Bad</span> -->
+                        <!-- <a href="javascript: void(0);" class="text-muted"><i
+                                class="mdi mdi-square-edit-outline ms-2"></i></a> -->
+                    </h3>
+                    <h4>
+                        {{product.company_name?product.company_name:''}} {{product.model_name?product.model_name:''}}
+                    </h4>
+                    <div class="mt-2">
+                        <h5>
+                            <span class=" font-16 badge badge-secondary-lighten m-1">Purchased Date : </span>
+                            {{product.purchase_date
+                            | date:'dd-MM-yyyy'}}
+                        </h5>
+                    </div>
+
+                    <!-- MM -->
+                    <div class="mt-2">
+                        <h5>
+                            <span class="font-16 badge badge-secondary-lighten m-1">MM : </span>
+                            <span class="font-14">
+                                {{product.mm_hin ? product.mm_hin : ''}} {{product.mm_eng ? ' - '+product.mm_eng : ''}}
+                                {{product.mm_code ? ' : ' + product.mm_code : ''}}
+                            </span>
+                        </h5>
+                    </div>
+
+                    <!-- Warranty -->
+                    <div class="mt-2">
+                        <h5>
+                            <span class="font-16 badge badge-secondary-lighten m-1">Warranty : </span>
+                            <span class="font-14 m-1 p-1">
+                                {{product.warranty_period ? product.warranty_period + ' Months' :''}}
+                                {{product.warranty_from ? ' Form ' + product.warranty_from :''}}
+                            </span>
+                        </h5>
+                    </div>
+
+                    <!-- Condition -->
+                    <div class="mt-2">
+                        <h5>
+                            <span class="font-16 badge badge-secondary-lighten m-1">Condition : </span>
+                            <span class="font-14 m-1 p-1">
+                                {{product.condition_id ? product.condition_eng + ' - ' + product.condition_hin :'Not
+                                Available'}}
+                            </span>
+                        </h5>
+                    </div>
+
+                    <!-- S/r -->
+                    <div class="mt-2">
+                        <h5>
+                            <span class="font-16 badge badge-secondary-lighten m-1">S/R Number / Product Code : </span>
+                            <span class="font-14 m-1 p-1">
+                                {{product.sr_num ? product.sr_num :'Not Available'}} /
+                                {{product.product_code ? product.product_code:'Not Available'}}
+                            </span>
+                        </h5>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="mt-2">
+                        <h5>
+                            <span class="font-16 badge badge-secondary-lighten m-1">Price : </span>
+                            <span class="font-14 m-1 p-1">
+                                {{product.price ? product.price :'Not Available'}}
+                            </span>
+                        </h5>
+                    </div>
+
+                    <!-- Pruchased From -->
+                    <div class="mt-2">
+                        <h5>
+                            <span class="font-16 badge badge-secondary-lighten m-1">Pruchased From : </span>
+                            <span class="font-14 m-1 p-1">
+                                {{product.purchase_from ? product.purchase_from :'Not Available'}}
+                            </span>
+                        </h5>
+                    </div>
+
+                    <!-- Purchased By -->
+                    <div class="mt-2">
+                        <h5>
+                            <span class="font-16 badge badge-secondary-lighten m-1">Purchased By : </span>
+                            <span class="font-14 m-1 p-1">
+                                {{product.purchased_by ? product.purchased_by :'Not Available'}}
+                            </span>
+                        </h5>
+                    </div>
+
+                    <!-- Accessories -->
+                    <div class="mt-2">
+                        <h5>
+                            <span class="font-16 badge badge-secondary-lighten m-1">Accessories : </span>
+                            <span class="font-14 m-1 p-1">
+                                {{product.accessories ? product.accessories :'Not Available'}}
+                            </span>
+                        </h5>
+                    </div>
+
+                    <!-- Nimmit -->
+                    <div class="mt-2">
+                        <h5>
+                            <span class="font-16 badge badge-secondary-lighten m-1">Nimmit : </span>
+                            <span class="font-14 m-1 p-1">
+                                {{product.nimmit ? product.nimmit :'Not Available'}}
+                            </span>
+                        </h5>
+                    </div>
+
+                    <!-- Product Detail -->
+                    <div class="mt-2">
+                        <h5>
+                            <span class="font-16 badge badge-secondary-lighten m-1">Product Detail : </span>
+                            <span class="font-14 m-1 p-1">
+                                {{product.product_detail ? product.product_detail :'Not Available'}}
+                            </span>
+                        </h5>
+                    </div>
+
+
+                </form>
+            </div> <!-- end col -->
+        </div> <!-- end row-->
+
+        <!-- <div class="table-responsive mt-4">
+            <table class="table table-bordered table-centered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Outlets</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr></tr>
+                </tbody>
+            </table>
+        </div> end table-responsive -->
+
+    </div> <!-- end card-body-->
+</div>

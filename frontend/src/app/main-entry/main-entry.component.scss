@@ -1,0 +1,70 @@
+.table>:not(caption)>*>* {
+   padding: .95rem .70rem;
+}
+
+.file {
+   position: relative;
+   overflow: hidden;
+}
+
+.inputtag {
+   position: absolute;
+   // font-size: 50px;
+   opacity: 0;
+   right: 0;
+   top: 0;
+}
+
+.tab-content .active {
+   font-size: small !important;
+   color: #fff !important;
+   font-weight: normal !important;
+}
+
+.nav-item .active {
+   font-size: larger !important;
+   color: #fff !important;
+   font-weight: bold !important;
+}
+
+.bell {
+   position: relative;
+   right: -4px;
+}
+
+.marked {
+   font-weight: 800;
+   color: #140a0a;
+   border: 0.5px solid #da2534;
+   background-color: #f0a8ae;
+}
+
+.warned {
+   font-weight: 800;
+   color: #140a0a;
+   border: 0.5px solid #ffc400;
+   background-color: #ffe799;
+}
+
+.success {
+   font-weight: 800;
+   color: #140a0a;
+   border: 0.5px solid #4bb464;
+   background-color: #b7e1c1;
+}
+
+.duplicate {
+   font-weight: 800;
+   color: #140a0a;
+   border: 0.5px solid #bf7d40;
+   background-color: #e6ccb3;
+}
+
+// .marked:hover {
+//    //  transform: scale(101.9%);
+//    transition: border-width 0.6s e;
+// }
+
+// .card-body{
+//    padding: 0px !important;
+// }

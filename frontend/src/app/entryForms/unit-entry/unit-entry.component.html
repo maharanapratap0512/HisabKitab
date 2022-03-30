@@ -1,0 +1,36 @@
+<div class="row" id="">
+    <div class="card-body">
+        <form [formGroup]="unitForm">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Unit Name (Full)</label>
+                        <input type="text" class="form-control" placeholder="Unit Full Name "
+                            formControlName="unit_full"
+                            [ngClass]="{'validation':unitForm.get('unit_full')?.errors && (unitForm.get('unit_full')?.touched || unitForm.get ('unit_full')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Unit Name (Short)</label>
+                        <input type="text" class="form-control" placeholder="Unit Short Name "
+                            formControlName="unit_short"
+                            [ngClass]="{'validation':unitForm.get('unit_short')?.errors && (unitForm.get('unit_short')?.touched || unitForm.get ('unit_short')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3 text-center" *ngIf="isEdit">
+                    <label class="form-label">Active</label><br>
+                    <input type="checkbox" id="active" checked data-switch="success" formControlName="active" />
+                    <label for="active" style="position: relative; top: 6px;"></label>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <button class="btn btn-primary submit mx-3" type="submit" (click)="unitFormSubmit()"
+                        *ngIf="!isEdit">Submit</button>
+                    <button class="btn btn-warning submit mx-3" type="submit" (click)="unitFormUpdate()"
+                        *ngIf="isEdit">Update</button>
+                    <!-- <button class="btn btn-light submit mx-3" type="button" (click)="unitForm.reset()">Clear</button> -->
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

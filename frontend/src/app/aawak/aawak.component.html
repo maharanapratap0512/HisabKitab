@@ -1,0 +1,142 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> Loading... </p>
+</ngx-spinner>
+
+<!-- Begin page -->
+<div class="wrapper">
+   <div class="content-page">
+      <div class="content">
+         <div class="container-fluid">
+
+            <!-- First Row -->
+            <!-- Add Button, Search Field, Filter button, Total Count -->
+            <div class="row">
+               <div class="card-body">
+                  <div class="row d-flex justify-content-between">
+                     <div class="col-2">
+                        <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
+                           (click)="showModal = 'Add Aawak'">
+                           <i class="dripicons-plus" style="font-size: large;"> </i>Add Aawak
+                        </button>
+                     </div>
+                     <div class="col-5">
+                        <div class="form-group">
+                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                              name="search">
+                        </div>
+                     </div>
+                     <div class="col-2">
+                        <button type="button" class="btn btn-outline-light w-100">Advance Filter
+                           <i style="font-weight: 700;" class="dripicons-chevron-down"> </i>
+                        </button>
+                     </div>
+                     <div class="col-2">
+                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
+                           Count : {{total_count?total_count:'0'}}
+                           <!-- {{productData? productData.length:''}} -->
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div class="row" *ngIf="aawakData.length">
+               <div class="card-body" style="overflow: auto;">
+                  <table id="datatable-buttons" class="table table-hover dt-responsive" style="width:max-content;">
+                     <thead>
+                        <tr>
+                           <th style="width: 80px;">No.</th>
+                           <th style="width: 70px;">Manage</th>
+                           <th style="width: 70px;">Pkt No.</th>
+                           <th style="width: 101px;">Date</th>
+                           <th style="width: 150px;">Mm</th>
+                           <th style="width: 150px;">Aawak Mm</th>
+                           <th>Department</th>
+                           <th style="width: 200px;">Pbk</th>
+                           <th style="width: 120px;">Entry Type</th>
+                           <th>Item</th>
+                           <th>Subitem</th>
+                           <th>Product</th>
+                           <th>Unit</th>
+                           <th>Condition</th>
+                           <th>Qty</th>
+                           <th>Rate</th>
+                           <th>Actual Amt</th>
+                           <th>Nimmit</th>
+                           <th style="width: 200px;">Item Detail</th>
+                           <th style="width: 200px;">Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let data of aawakData | filter:term; let i=index">
+                           <td>{{i+1}}</td>
+                           <td>
+                              <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
+                                    class="uil uil-pen"></i></button><br>
+                              <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                    class="uil-trash"></i></button>
+                           </td>
+
+                           <td>{{data.pkt_num?data.pkt_num:'-'}}</td>
+                           <td>{{data.date?data.date:'-'}}</td>
+                           <td>{{data.mm_id?data.mm_eng +' : '+ data.mm_hin:'-'}}{{data.mm_code?' : '+
+                              data.mm_code:''}}</td>
+                           <td>{{data.aawak_mm_id?data.aawak_mm_eng +' : '+ data.aawak_mm_hin:'-'}}
+                              {{data.aawak_mm_code?' : '+data.aawak_mm_code:''}}</td>
+                           <td>{{data.dept_id?data.dept_eng +' : '+ data.dept_hin:'-'}}{{data.dept_coed?' :
+                              '+data.dept_coed:''}}</td>
+                           <td>{{data.pbk_id?data.pbk_eng+' : '+data.pbk_hin:'-'}}{{data.pbk_code?' :
+                              '+data.pbk_code:''}}</td>
+                           <td>{{data.aawak_type_id?data.aawak_type_hin +' : '+ data.aawak_type_eng:'-'}}</td>
+                           <td>{{data.item_id?data.item_eng+' : '+data.item_hin:'-'}}{{data.item_code?' :
+                              '+data.item_code:''}}</td>
+                           <td>{{data.subitem_id?data.subitem_eng+' : '+data.subitem_hin:'-'}}{{data.subitem_code?' :
+                              '+data.subitem_code:''}}
+                           </td>
+                           <td>{{data.product_id?data.product_id:'-'}}</td>
+                           <td>{{data.unit_id?data.unit_full+' : '+data.unit_short:'-'}}</td>
+                           <td>{{data.condition_id?data.condition_eng +':'+ data.condition_hin:'-'}}</td>
+                           <td>{{data.qty?data.qty:'-'}}</td>
+                           <td>{{data.rate?data.rate:'-'}}</td>
+                           <td>{{data.actual_amt?data.actual_amt:'-'}}</td>
+                           <td>{{data.nimmit?data.nimmit:'-'}}</td>
+                           <td>{{data.item_detail?data.item_detail:'-'}}</td>
+                           <td>{{data.description?data.description:'-'}}</td>
+
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+
+         </div>
+      </div>
+   </div>
+</div>
+
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
+               aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <app-aawak-entry *ngIf="showModal == 'Add Aawak'" (response)='addAawakResponse($event)'></app-aawak-entry>
+            <app-aawak-entry *ngIf="showModal == 'Edit Aawak'" (response)='editAawakResponse($event)'
+               [getData]="editData" [isEdit]="true"></app-aawak-entry>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+         </div>
+      </div>
+   </div>
+</div>

@@ -1,0 +1,31 @@
+<div class="row">
+    <div class="card-body">
+        <form [formGroup]="countryForm">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Country Name (Hin)</label>
+                        <input type="text" class="form-control" placeholder="Country Name (Hin)"
+                            formControlName="country_hin"
+                            [ngClass]="{'validation':countryForm.get('country_hin')?.errors && (countryForm.get('country_hin')?.touched || countryForm.get ('country_hin')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Country Name (Eng)</label>
+                        <input type="text" class="form-control" placeholder="Country Name (Eng)"
+                            formControlName="country_eng"
+                            [ngClass]="{'validation':countryForm.get('country_eng')?.errors && (countryForm.get('country_eng')?.touched || countryForm.get ('country_eng')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type=" mx-3"
+                        (click)="countryFormSubmit()">Submit</button>
+                    <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                        (click)="countryFormUpdate()">Update</button>
+                    <!-- <button class="btn btn-light submit mx-3" type="button" (click)="countryForm.reset()">Clear</button> -->
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

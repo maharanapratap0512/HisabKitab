@@ -1,0 +1,332 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> Loading... </p>
+</ngx-spinner>
+
+<div class="row" id="productEntryComponent">
+   <div class="card-body">
+      <form [formGroup]="productForm">
+         <div class="row">
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Purchase Date</label>
+                  <input type="date" class="form-control" placeholder="Purchase Date" formControlName="purchase_date"
+                     [ngClass]="{'validation':productForm.get('purchase_date')?.errors && (productForm.get('purchase_date')?.touched || productForm.get ('purchase_date')?.dirty)}">
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">MM</label>
+                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                     onclick="$('#productEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add MM'">
+                     + Add
+                  </button>
+                  <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="false"
+                     [virtualScroll]="true" formControlName="mm_id"
+                     [ngClass]="{'validation':productForm.get('mm_id')?.errors && (productForm.get('mm_id')?.touched || productForm.get ('mm_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">MM</ng-option>
+                     <ng-option *ngFor="let item of mms" [value]="item._id">
+                        {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code?' : '+item.mm_code:''}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Purchased By</label>
+                  <input type="text" class="form-control" placeholder="Purchased By" formControlName="purchased_by"
+                     [ngClass]="{'validation':productForm.get('purchased_by')?.errors && (productForm.get('purchased_by')?.touched || productForm.get ('purchased_by')?.dirty)}">
+               </div>
+            </div>
+
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Purchase From</label>
+                  <input type="text" class="form-control" placeholder="Purchase From" formControlName="purchase_from"
+                     [ngClass]="{'validation':productForm.get('purchase_from')?.errors && (productForm.get('purchase_from')?.touched || productForm.get ('purchase_from')?.dirty)}">
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3" *ngIf="departments.length || categories.length">
+               <div class="form-group">
+                  <label class="form-label">Filter Items By</label>
+                  <!-- <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                     onclick="$('#productEntryComponent > #showModal').modal('show')"
+                     (click)="showModal = 'Add Department'">
+                     + Add
+                  </button> -->
+                  <ng-select *ngIf="departments && departments.length" class="custom" style="width: 100%;"
+                     placeholder="Select Department" [clearable]="false" [virtualScroll]="true"
+                     (change)="deptSelected($event)" [ngModelOptions]="{standalone: true}">
+                     <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :
+                        {{item.dept_eng}}{{item.dept_code?' : '+item.dept_code:''}}</ng-option>
+                  </ng-select>
+                  <ng-select *ngIf="categories && categories.length" class="custom mt-1" style="width: 100%;"
+                     placeholder="Select Category" [clearable]="false" [virtualScroll]="true"
+                     (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
+                     <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
+                        {{item.category_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Item & Subitem</label>
+                  <div class="float-end">
+                     <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
+                        onclick="$('#productEntryComponent > #showModal').modal('show')"
+                        (click)="showModal = 'Add Item'">
+                        + Item
+                     </button>
+                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-outline-primary" onclick="$('#productEntryComponent > #showModal').modal('show')"
+                        (click)="showModal = 'Add Subitem'">
+                        + Subitem
+                     </button>
+                  </div>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
+                     [virtualScroll]="true" formControlName="item_id"
+                     [ngClass]="{'validation':productForm.get('item_id')?.errors && (productForm.get('item_id')?.touched || productForm.get ('item_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                     <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                        {{item.item_eng}} : {{item.item_code}}</ng-option>
+                  </ng-select>
+                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
+                     [clearable]="false" [virtualScroll]="true" formControlName="subitem_id"
+                     [ngClass]="{'validation':productForm.get('subitem_id')?.errors && (productForm.get('subitem_id')?.touched || productForm.get ('subitem_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
+                     <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}} :
+                        {{item.subitem_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Company & Model</label>
+                  <input type="text" class="form-control" placeholder="Company Name" formControlName="company_name"
+                     [ngClass]="{'validation':productForm.get('company_name')?.errors && (productForm.get('company_name')?.touched || productForm.get ('company_name')?.dirty)}">
+                  <input type="text" class="form-control mt-1" placeholder="Model Name" formControlName="model_name"
+                     [ngClass]="{'validation':productForm.get('model_name')?.errors && (productForm.get('model_name')?.touched || productForm.get ('model_name')?.dirty)}">
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Serial No / Product Code</label>
+                  <input type="text" class="form-control" placeholder="S/R Number" formControlName="sr_num"
+                     [ngClass]="{'validation':productForm.get('sr_num')?.errors && (productForm.get('sr_num')?.touched || productForm.get ('sr_num')?.dirty)}">
+                  <input type="text" class="form-control mt-1" placeholder="Product Code" formControlName="product_code"
+                     [ngClass]="{'validation':productForm.get('product_code')?.errors && (productForm.get('product_code')?.touched || productForm.get ('product_code')?.dirty)}">
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Condition</label>
+                  <div class="float-end">
+                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-sm btn-outline-primary" (click)="setView('Condition')">
+                        <i class=" dripicons-view-list"></i>
+                     </button>
+                     <button type="button" style="padding: 1px 6px !important;"
+                        class="btn btn-outline-primary float-end"
+                        onclick="$('#productEntryComponent > #showModal').modal('show')"
+                        (click)="showModal = 'Add Condition'">+ Add
+                     </button>
+                  </div>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select SubitemList" [clearable]="false"
+                     [virtualScroll]="true" formControlName="condition_id"
+                     [ngClass]="{'validation':productForm.get('condition_id')?.errors && (productForm.get('condition_id')?.touched || productForm.get ('condition_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Condition List</ng-option>
+                     <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
+                        {{item.list_name_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Warranty Period</label>
+                  <input type="number" class="form-control" placeholder="ex. 6,12,24 (Month)"
+                     formControlName="warranty_period"
+                     [ngClass]="{'validation':productForm.get('warranty_period')?.errors && (productForm.get('warranty_period')?.touched || productForm.get ('warranty_period')?.dirty)}">
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Warranty From / Address</label>
+                  <input type="text" class="form-control" placeholder="Warranty From" formControlName="warranty_from"
+                     [ngClass]="{'validation':productForm.get('warranty_from')?.errors && (productForm.get('warranty_from')?.touched || productForm.get ('warranty_from')?.dirty)}">
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Accessories</label>
+                  <input type="text" class="form-control" placeholder="Accessories" formControlName="accessories"
+                     [ngClass]="{'validation':productForm.get('accessories')?.errors && (productForm.get('accessories')?.touched || productForm.get ('accessories')?.dirty)}">
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Price</label>
+                  <input type="number" class="form-control" placeholder="Price" formControlName="price"
+                     [ngClass]="{'validation':productForm.get('price')?.errors && (productForm.get('price')?.touched || productForm.get ('price')?.dirty)}">
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Nimmit</label>
+                  <input type="text" class="form-control" placeholder="Nimmit" formControlName="nimmit"
+                     [ngClass]="{'validation':productForm.get('nimmit')?.errors && (productForm.get('nimmit')?.touched || productForm.get ('nimmit')?.dirty)}">
+               </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Product Details</label>
+                  <textarea class="form-control" placeholder="Product Details" formControlName="product_detail"
+                     [ngClass]="{'validation':productForm.get('product_detail')?.errors && (productForm.get('product_detail')?.touched || productForm.get ('product_detail')?.dirty)}"></textarea>
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Image</label>
+                  <a onclick="$('#productEntryComponent > #addImages').modal('show')" (click)="showModal='Add Image'"
+                     class="form-control" style="cursor: pointer;">
+                     <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
+                     <img src="{{this.api.getUrl('BASE')+imagepath}}" alt="image" class="rounded m-1" height="48"
+                        *ngIf="imagepath">
+                     <i *ngIf="!imagepath">Click To Change</i>
+                  </a>
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+               <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!this.isEdit"
+                  (click)="productFormSubmit()">Submit</button>
+               <button class="btn btn-warning submit mx-3" type="submit" *ngIf="this.isEdit"
+                  (click)="productFormUpdate()">Update</button>
+               <!-- <button class="btn btn-light submit" type="button" (click)="productForm.reset()">Clear</button> -->
+            </div>
+
+         </div>
+      </form>
+   </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   <!-- Image upload Model -->
+   <div class="modal fade" id="addImages" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" style="width:95%">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">Select Images</h5>
+               <button type="button" class="btn-close" onclick="$('#productEntryComponent > #addImages').modal('hide')"
+                  aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)">
+               </app-files-view>
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" style="width: 120px;"
+                  onclick="$('#productEntryComponent > #addImages').modal('hide')">Close</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal -->
+   <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" style="width:95%">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+               <button type="button" class="btn-close" onclick="$('#productEntryComponent > #showModal').modal('hide')"
+                  (click)="showModal = ''" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <!-- Add MM -->
+               <app-mm-entry *ngIf="showModal == 'Add MM'" (response)="mmAddResponse($event)"></app-mm-entry>
+
+               <!-- Add Category  -->
+               <!-- <app-category-entry *ngIf="showModal == 'Add Category'" (response)="categoryAddResponse($event)">
+               </app-category-entry> -->
+
+               <!-- Add Item  -->
+               <app-item-entry *ngIf="showModal == 'Add Item'" (response)="itemAddResponse($event)"></app-item-entry>
+
+               <!-- Add Subitem  -->
+               <app-subitem-entry *ngIf="showModal == 'Add Subitem'" (response)="subitemAddResponse($event)">
+               </app-subitem-entry>
+
+               <!-- Add Condition -->
+               <app-support-list-entry *ngIf="showModal == 'Add Condition'" (response)='conditionAddResponse($event)'
+                  list_type="condition"> </app-support-list-entry>
+
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" style="width: 120px;"
+                  onclick="$('#productEntryComponent > #showModal').modal('hide')"
+                  (click)="showModal = ''">Close</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+
+   <!-- Data View For Small List -->
+   <div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" style="width: 90%;">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
+               <button type="button" class="btn-close" onclick="$('#productEntryComponent > #dataView').modal('hide')"
+                  aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <!-- Relation List -->
+               <app-data-view *ngIf="viewType == 'Relation'" [getData]="viewData" Type="relation"></app-data-view>
+
+               <!-- Condition List -->
+               <app-data-view *ngIf="viewType == 'Condition'" [getData]="viewData" Type="condition"></app-data-view>
+
+               <!-- Status List -->
+               <app-data-view *ngIf="viewType == 'Status'" [getData]="viewData" Type="status"></app-data-view>
+
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" style="width: 120px;"
+                  onclick="$('#productEntryComponent > #dataView').modal('hide')">Close</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+
+</div>

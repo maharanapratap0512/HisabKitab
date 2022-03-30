@@ -1,0 +1,99 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> Loading... </p>
+</ngx-spinner>
+
+<!-- Begin page -->
+<div class="wrapper">
+   <div class="content-page">
+      <div class="content">
+         <div class="container-fluid">
+
+            <!-- First Row -->
+            <!-- Add Button, Search Field, Filter button, Total Count -->
+            <div class="row">
+               <div class="card-body" style="overflow: auto;">
+                  <div class="row justify-content-between" style="margin-bottom: 65px;">
+                     <div class="col-2">
+                        <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
+                           (click)="showModal = 'Add Item'">
+                           <i class="dripicons-plus" style="font-size: large;"> </i>Add Item
+                        </button>
+                     </div>
+                     <div class="col-5">
+                        <div class="form-group">
+                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                              name="search">
+                        </div>
+                     </div>
+                     <div class="col-2">
+                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total
+                           Count : {{itemData.length}}
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div class="row" *ngIf="itemData.length">
+               <div class="card-body" style="overflow: auto;">
+                  <table id="datatable-buttons" class="table table-hover dt-responsive">
+                     <thead>
+                        <tr>
+                           <th>No.</th>
+                           <th>Manage</th>
+                           <th>Item Name (Hin-Eng)</th>
+                           <th>Item Code</th>
+                           <th>Default Unit</th>
+                           <th>Category</th>
+                           <th>Extra Note</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let data of itemData | filter:term; let i=index">
+                           <td>{{i+1}}</td>
+                           <td>
+                              <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                                    class="uil uil-pen"></i></button>
+                              <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                    class="uil-trash"></i></button>
+                           </td>
+                           <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
+                           <td>{{data.item_code?data.item_code:'-'}}</td>
+                           <td>{{data.unit_id?data.unit_short + ' : ' + data.unit_full:'-'}}</td>
+                           <td>{{data.category_id?data.category_hin + ' : ' + data.category_eng:'-'}}</td>
+                           <td>{{data.extra_note?data.extra_note:'-'}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+
+
+<!-- addItem Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
+               aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <app-item-entry *ngIf="showModal == 'Add Item'" (response)='addItemResponse($event)'></app-item-entry>
+            <app-item-entry *ngIf="showModal == 'Edit Item'" (response)='editItemResponse($event)' [getData]="editData"
+               [isEdit]="true"></app-item-entry>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+         </div>
+      </div>
+   </div>
+</div>

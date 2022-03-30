@@ -1,0 +1,181 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color: white"> Loading... </p>
+</ngx-spinner>
+<div class="row" id="mmEntryComponent">
+    <div class="card-body">
+        <form [formGroup]="mmForm">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Parent MM</label>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Parent MM" [clearable]="true"
+                            [virtualScroll]="true" formControlName="parent_mm_id"
+                            [ngClass]="{'validation':mmForm.get('parent_mm_id')?.errors && (mmForm.get('parent_mm_id')?.touched || mmForm.get ('parent_mm_id')?.dirty)}"
+                            (change)="parentMmSelected($event)">
+                            <ng-option selected="selected" disabled value="">Select Parent MM</ng-option>
+                            <ng-option *ngFor="let item of mms" [value]="item._id">
+                                {{item.mm_hin}}:{{item.mm_eng}}{{item.mm_code? ' : '+item.mm_code:''}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 mb-3" *ngIf="!parentMM">
+                    <div class="form-group">
+                        <label class="form-label">MM(Hin)</label>
+                        <input type="text" class="form-control" placeholder="MM(Hin)" formControlName="mm_hin"
+                            [ngClass]="{'validation':mmForm.get('mm_hin')?.errors && (mmForm.get('mm_hin')?.touched || mmForm.get ('mm_hin')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3" *ngIf="!parentMM">
+                    <div class="form-group">
+                        <label class="form-label">MM(Eng)</label>
+                        <input type="text" class="form-control" placeholder="MM(Eng)" formControlName="mm_eng"
+                            [ngClass]="{'validation':mmForm.get('mm_eng')?.errors && (mmForm.get('mm_eng')?.touched || mmForm.get ('mm_eng')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">MM Code</label>
+                        <input type="text" class="form-control" placeholder="MM Code" formControlName="mm_code"
+                            [ngClass]="{'validation':mmForm.get('mm_code')?.errors && (mmForm.get('mm_code')?.touched || mmForm.get ('mm_code')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3" *ngIf="!parentMM">
+                    <div class="form-group">
+                        <label class="form-label">MM State</label>
+                        <button type="button" style="padding: 1px 6px !important;"
+                            class="btn btn-outline-primary float-end"
+                            onclick="$('#mmEntryComponent > #showModal').modal('show')"
+                            (click)="showModal='Add State'">+
+                            Add</button>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select MM State" [clearable]="false"
+                            [virtualScroll]="true" formControlName="state_id"
+                            [ngClass]="{'validation':mmForm.get('state_id')?.errors && (mmForm.get('state_id')?.touched || mmForm.get ('state_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select MM Statessss</ng-option>
+                            <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}} :
+                                {{item.state_eng}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Department</label>
+                        <div class="float-end">
+                            <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                                class="btn btn-sm btn-outline-primary" (click)="setView('Department')"><i
+                                    class=" dripicons-view-list"></i></button>
+                            <button type="button" style="padding: 1px 6px !important;"
+                                class="btn btn-outline-primary float-end"
+                                onclick="$('#mmEntryComponent > #showModal').modal('show')"
+                                (click)="showModal='Add Department'">+
+                                Add</button>
+                        </div>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Department"
+                            [clearable]="false" [virtualScroll]="true" formControlName="dept_id"
+                            [ngClass]="{'validation':mmForm.get('dept_id')?.errors && (mmForm.get('dept_id')?.touched || mmForm.get ('dept_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Department</ng-option>
+                            <ng-option *ngFor="let item of departments" [value]="item._id">
+                                {{item.dept_hin}}:{{item.dept_eng}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+                <!-- <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Department</label>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Department" [clearable]="false"
+                            [virtualScroll]="true" formControlName="dept_id"
+                            [ngClass]="{'validation':mmForm.get('dept_id')?.errors && (mmForm.get('dept_id')?.touched || mmForm.get ('dept_id')?.dirty)}">
+                            <ng-option disabled value="">Select Department</ng-option>
+                            <ng-option selected="selected" value="MM">MM</ng-option>
+                            <ng-option selected="selected" value="Stock">Stock</ng-option>
+                            <ng-option selected="selected" value="Khet">Khet</ng-option>
+                            <ng-option selected="selected" value="Medical">Medical</ng-option>
+                            <ng-option selected="selected" value="Khatti">Khatti</ng-option>
+                            <ng-option selected="selected" value="Computer">Computer</ng-option>
+                            <ng-option selected="selected" value="Ghar Kharch">Ghar Kharch</ng-option>
+                        </ng-select>
+                    </div>
+                </div> -->
+
+
+                <div class="col-md-2 mb-3">
+                    <label for="date" class="form-label">Opening Date</label>
+                    <input class="form-control" id="date" type="date" formControlName="opening_date"
+                        [ngClass]="{'validation':mmForm.get('opening_date')?.errors && (mmForm.get('opening_date')?.touched || mmForm.get ('opening_date')?.dirty)}">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Nimmit</label>
+                        <input type="text" class="form-control" placeholder="Default NIMMIT name"
+                            formControlName="nimmit"
+                            [ngClass]="{'validation':mmForm.get('nimmit')?.errors && (mmForm.get('nimmit')?.touched || mmForm.get ('nimmit')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                        (click)="mmFormSubmit()">Submit</button>
+                    <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                        (click)="mmFormUpdate()">Update</button>
+                    <!-- <button class="btn btn-light submit mx-3" type="button" (click)="mmForm.reset()">clear</button> -->
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+                    <button type="button" class="btn-close" onclick="$('#mmEntryComponent > #showModal').modal('hide')"
+                        (click)="showModal = ''" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Add State  -->
+                    <app-state-entry *ngIf="showModal == 'Add State'" (response)="stateAddResponse($event)">
+                    </app-state-entry>
+
+                    <!-- Add Department -->
+                    <app-support-list-entry *ngIf="showModal == 'Add Department'"
+                        (response)='departmentAddResponse($event)' list_type="dept_id"> </app-support-list-entry>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        onclick="$('#mmEntryComponent > #showModal').modal('hide')"
+                        (click)="showModal = ''">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Data View For Small List -->
+    <div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
+                    <button type="button" class="btn-close" onclick="$('#mmEntryComponent > #dataView').modal('hide')"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Department List -->
+                    <app-data-view *ngIf="viewType == 'Department'" [getData]="viewData" Type="dept_id"></app-data-view>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        onclick="$('#mmEntryComponent > #dataView').modal('hide')">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

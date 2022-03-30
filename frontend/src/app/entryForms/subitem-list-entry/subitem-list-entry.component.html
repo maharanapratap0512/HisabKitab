@@ -1,0 +1,32 @@
+<div class="row" id="subitemComponent">
+   <div class="card-body">
+      <form [formGroup]="subitemListForm">
+         <div class="row">
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Subitem Name (Hin)</label>
+                  <input type="text" class="form-control" placeholder="Subitem Name (Hin)"
+                     formControlName="subitem_hin"
+                     [ngClass]="{'validation':subitemListForm.get('subitem_hin')?.errors && (subitemListForm.get('subitem_hin')?.touched || subitemListForm.get ('subitem_hin')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Subitem Name (Eng)</label>
+                  <input type="text" class="form-control" placeholder="Subitem Name (Eng)"
+                     formControlName="subitem_eng"
+                     [ngClass]="{'validation':subitemListForm.get('subitem_eng')?.errors && (subitemListForm.get('subitem_eng')?.touched || subitemListForm.get ('subitem_eng')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                  (click)="subitemListFormSubmit()">Submit</button>
+               <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                  (click)="subitemListFormUpdate()">Update</button>
+               <!-- <button class="btn btn-light submit mx-3" type="button" (click)="subitemListForm.reset()">Clear</button> -->
+            </div>
+         </div>
+      </form>
+   </div>
+
+</div>

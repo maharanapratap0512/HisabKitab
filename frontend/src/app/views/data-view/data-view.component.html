@@ -1,0 +1,62 @@
+<div class="row" id="dataViewComponent">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12 px-2" style="margin-bottom: 10px;">
+                <div class="float-start col-4">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                            name="search">
+                    </div>
+                </div>
+
+                <div class="float-end">
+                    <!-- <button type="button" style="font-weight: 700 !important;" class="btn btn-primary mx-3"
+                         (click)="mmtype()">Set MM Type = MM</button> -->
+                    <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total Count :
+                        {{records.length}} </button>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="overflow-y: auto; max-height: 26vw;">
+            <table id="datatable-buttons" class="table table-hover dt-responsive" style="width:98%;">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">No.</th>
+                        <th style="width: 100px;">Manage</th>
+                        <th *ngFor="let row of fields">
+                            {{row.title}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let data of records | filter:term; let i=index"
+                        [ngClass]="{'highlight': data.hl == true}">
+                        <td>{{i+1}}
+                            <br>
+                            <div class="form-check form-switch" style="cursor: pointer;">
+                                <!-- <input type="checkbox" name="hl" class="form-check-input" [checked]=data.hl
+                               (change)="highlight($event,data)"> -->
+                            </div>
+                        </td>
+                        <td>
+                            <!-- <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
+                               class="uil uil-pen"></i></button><br /> -->
+                            <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                    class="uil-trash"></i></button>
+                        </td>
+                        <td *ngFor="let row of fields">
+                            <ng-container *ngFor="let col of row.field;let z = index">
+                                <span *ngIf="z != row.field.length-1">
+                                    {{data[col] ? data[col] + ' : ' : ''}}
+                                </span>
+                                <span *ngIf="z == row.field.length-1">
+                                    {{(data[col] ? data[col]: '')}}
+                                </span>
+                            </ng-container>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

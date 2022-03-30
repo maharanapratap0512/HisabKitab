@@ -1,0 +1,142 @@
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { ToastrService } from 'ngx-toastr';
+import { ApiService } from 'src/app/services/api.service';
+import { GlobalService } from 'src/app/services/global.service';
+import { HttpService } from 'src/app/services/http.service';
+import Swal from 'sweetalert2';
+import { AuthService } from '../services/auth.service';
+declare var $: any;
+
+@Component({
+  selector: 'app-aawak',
+  templateUrl: './aawak.component.html',
+  styleUrls: ['./aawak.component.scss']
+})
+export class AawakComponent implements OnInit {
+
+  isLoader: boolean = false;
+  term: any;
+  showModal: string = '';
+  editData: any = {};
+  aawakData: any = [];
+  aawakAll: any = [];
+  total_count: any;
+
+
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpService,
+    private api: ApiService,
+    public gs: GlobalService,
+    private toastr: ToastrService,
+    private spinner: NgxSpinnerService,
+    public auth: AuthService
+  ) { }
+
+  ngOnInit(): void {
+    this.spinner.show();
+    this.getaawakData();
+    console.log("aawak component", this.gs.Lists);
+    // this.states = this.gs.Lists.state ? this.gs.Lists.state : [];
+    // this.departments = this.gs.Lists.department ? this.gs.Lists.department : [];
+  }
+
+  getaawakData() {
+    this.isLoader = true;
+    this.http.get(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id).subscribe((data) => {
+      if (data['result'] && data['success']) {
+        this.aawakData = data['result'];
+        this.aawakAll = data['result'];
+        this.total_count = data['total_count'];
+        this.isLoader = false;
+      }
+      this.isLoader = false;
+    });
+  }
+
+  stateSelected(ev: any) {
+    if (ev)
+      this.aawakData = this.aawakAll.filter((aawak: { state_id: any; }) => aawak.state_id == ev);
+    else
+      this.aawakData = this.aawakAll;
+  }
+
+  aawakDeptSelected(ev: any) {
+
+    if (ev) {
+      this.aawakData = this.aawakAll.filter((aawak: { dept_id: any; }) => aawak.dept_id == ev);
+    }
+    else {
+      this.aawakData = this.aawakAll;
+    }
+  }
+
+  addAawakResponse(ev: any) {
+    console.log("res", ev);
+
+    if (ev._id) {
+      console.log("if res", ev);
+
+      this.isLoader = true;
+      $('#showModal').modal('hide');
+      this.showModal = '';
+      this.aawakData.unshift(ev);
+      this.isLoader = false;
+    }
+    else {
+      this.toastr.error("Something went Wrong.")
+      console.log("message", ev)
+    }
+  }
+
+  editAawakResponse(ev: any) {
+    if (ev._id) {
+      this.isLoader = true;
+      $('#showModal').modal('hide');
+      this.showModal = '';
+      this.aawakData.splice(this.aawakData.indexOf(this.editData), 1, ev);
+      this.isLoader = false;
+    }
+    else {
+      this.toastr.error("Something went Wrong.")
+      console.log("message", ev);
+    }
+  }
+
+  edit(data: any) {
+    this.editData = data;
+    this.showModal = 'Edit Aawak'
+    $('#showModal').modal('show');
+  }
+
+  delete(i: any, id: any) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http.delete(this.api.getUrl('AAWAK') + '/' + id).subscribe((data: any) => {
+          if (data['success']) {
+            this.isLoader = false;
+            this.aawakData.splice(i, 1);
+            this.gs.Lists.aawak.splice(this.gs.Lists.aawak.indexOf((i: { _id: any; }) => i._id == id), 1);
+            this.total_count -= 1;
+            this.toastr.success('Deleted Successfully');
+          }
+          else {
+            this.toastr.error(data['message']);
+            this.isLoader = false;
+          }
+        });
+      }
+    })
+  }
+
+}

@@ -1,0 +1,140 @@
+<div class="row" id="itemComponent">
+    <div class="card-body">
+        <form [formGroup]="itemForm">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Item Name (Hin)</label>
+                        <input type="text" class="form-control" placeholder="Item Name (Hin)" formControlName="item_hin"
+                            [ngClass]="{'validation':itemForm.get('item_hin')?.errors && (itemForm.get('item_hin')?.touched || itemForm.get ('item_hin')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Item Name (Eng)</label>
+                        <input type="text" class="form-control" placeholder="Item Name (Eng)" formControlName="item_eng"
+                            [ngClass]="{'validation':itemForm.get('item_eng')?.errors && (itemForm.get('item_eng')?.touched || itemForm.get ('item_eng')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Item Code</label>
+                        <input type="text" class="form-control" placeholder="Item Code" formControlName="item_code"
+                            [ngClass]="{'validation':itemForm.get('item_code')?.errors && (itemForm.get('item_code')?.touched || itemForm.get ('item_code')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Default Unit</label>
+                        <div class="float-end">
+                            <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                                class="btn btn-sm btn-outline-primary" (click)="setView('Unit')">
+                                <i class=" dripicons-view-list"></i>
+                            </button>
+                            <button type="button" style="padding: 1px 6px !important;"
+                                class="btn btn-outline-primary float-end"
+                                onclick="$('#itemComponent > #showModal').modal('show')"
+                                (click)="showModal = 'Add Unit'">+
+                                Add
+                            </button>
+                        </div>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Default Unit"
+                            [clearable]="false" [virtualScroll]="true" formControlName="unit_id"
+                            [ngClass]="{'validation':itemForm.get('unit_id')?.errors && (itemForm.get('unit_id')?.touched || itemForm.get ('unit_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Default Unit</ng-option>
+                            <ng-option *ngFor="let item of units" [value]="item._id">{{item.unit_short}} :
+                                {{item.unit_full}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <div class="float-end">
+                            <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                                class="btn btn-sm btn-outline-primary" (click)="setView('Category')"><i
+                                    class=" dripicons-view-list"></i></button>
+                            <button type="button" style="padding: 1px 6px !important;"
+                                class="btn btn-outline-primary float-end"
+                                onclick="$('#itemComponent > #showModal').modal('show')"
+                                (click)="showModal = 'Add Category'">+
+                                Add</button>
+                        </div>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="false"
+                            [virtualScroll]="true" formControlName="category_id"
+                            [ngClass]="{'validation':itemForm.get('category_id')?.errors && (itemForm.get('category_id')?.touched || itemForm.get ('category_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Category</ng-option>
+                            <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
+                                {{item.category_eng}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Extra Note</label>
+                        <textarea class="form-control" placeholder="Extra Note" formControlName="extra_note"
+                            [ngClass]="{'validation':itemForm.get('extra_note')?.errors && (itemForm.get('extra_note')?.touched || itemForm.get ('extra_note')?.dirty)}"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!isEdit"
+                        (click)="itemFormSubmit()">Submit</button>
+                    <button class="btn btn-warning submit mx-3" type="submit" *ngIf="isEdit"
+                        (click)="itemFormUpdate()">Update</button>
+                    <!-- <button class="btn btn-light submit mx-3" type="button" (click)="itemForm.reset()">Clear</button> -->
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+                    <button type="button" class="btn-close" onclick="$('#itemComponent > #showModal').modal('hide')"
+                        (click)="showModal = ''" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <app-unit-entry *ngIf=" showModal=='Add Unit'" (response)="unitAddResponse($event)">
+                    </app-unit-entry>
+
+                    <app-category-entry *ngIf="showModal == 'Add Category'" (response)="categoryAddResponse($event)">
+                    </app-category-entry>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        onclick="$('#itemComponent > #showModal').modal('hide')" (click)="showModal = ''">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data View For Small List -->
+    <div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
+                    <button type="button" class="btn-close" onclick="$('#itemComponent > #dataView').modal('hide')"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <app-data-view *ngIf="viewType == 'Unit'" [getData]="viewData" Type="unit"></app-data-view>
+                    <app-data-view *ngIf="viewType == 'Category'" [getData]="viewData" Type="category"></app-data-view>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        onclick="$('#itemComponent > #dataView').modal('hide')">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

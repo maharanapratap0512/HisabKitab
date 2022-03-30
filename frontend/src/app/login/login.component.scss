@@ -1,0 +1,22 @@
+.authentication-bg {
+   background-image: url("/assets/images/bg-pattern-light.svg");
+   background-size: cover;
+   background-position: center;
+   height: 100vh;
+}
+
+.centered {
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+}
+
+.card {
+   background-color: #061621;
+}
+
+/* background-color: #343a40; */
+/* background-color: #2b333b; */
+/* background-color: rgba(6, 22, 33, 0.9); */
+//  background-color: #061621;

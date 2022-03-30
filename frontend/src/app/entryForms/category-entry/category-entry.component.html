@@ -1,0 +1,31 @@
+<div class="row">
+    <div class="card-body">
+        <form [formGroup]="categoryForm">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Category Name (Hin)</label>
+                        <input type="text" class="form-control" placeholder="Category Name (Hin)"
+                            formControlName="category_hin"
+                            [ngClass]="{'validation':categoryForm.get('category_hin')?.errors && (categoryForm.get('category_hin')?.touched || categoryForm.get ('category_hin')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Category Name (Eng)</label>
+                        <input type="text" class="form-control" placeholder="Category Name (Eng)"
+                            formControlName="category_eng"
+                            [ngClass]="{'validation':categoryForm.get('category_eng')?.errors && (categoryForm.get('category_eng')?.touched || categoryForm.get ('category_eng')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                        (click)="categoryFormSubmit()">Submit</button>
+                    <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                        (click)="categoryFormUpdate()">Update</button>
+                    <!-- <button class="btn btn-light submit mx-3" type="button" (click)="categoryForm.reset()">Clear</button> -->
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

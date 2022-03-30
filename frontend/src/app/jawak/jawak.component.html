@@ -1,0 +1,158 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> Loading... </p>
+</ngx-spinner>
+
+<!-- Begin page -->
+<div class="wrapper">
+   <div class="content-page">
+      <div class="content">
+         <div class="container-fluid">
+
+            <!-- First Row -->
+            <!-- Add Button, Search Field, Filter button, Total Count -->
+            <div class="row">
+               <div class="card-body" style="overflow: auto;">
+                  <div class="col-12 px-2" style="margin-bottom: 65px;">
+                     <div class="float-start col-3">
+                        <!-- <button class="btn btn-primary" (click)="openModal('Add Jawak')">
+                           <i class="dripicons-plus" style="font-size: large;"> </i>Add Jawak
+                        </button> -->
+                     </div>
+                     <div class="float-start col-4">
+                        <div class="form-group">
+                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                              name="search">
+                        </div>
+                     </div>
+                     <div class="float-start col-2 mx-3">
+                        <button type="button" class="btn btn-outline-light">Advance Filter
+                           <i style="font-weight: 700;" class="dripicons-chevron-down"> </i>
+                        </button>
+                     </div>
+                     <div class="float-end" *ngIf="total_count">
+                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total
+                           Count : {{total_count}}
+                           <!-- {{productData? productData.length:''}} -->
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+
+            <!-- Jawak Table -->
+            <div class="row" *ngIf="jawakData.length">
+               <div class="card-body" style="overflow: auto;">
+                  <table id="datatable-buttons" class="table table-hover dt-responsive" style="width:100%;">
+                     <thead>
+                        <tr>
+                           <th>No.</th>
+                           <th>Manage</th>
+                           <th *ngIf="auth.webUser.dept_id != 2" >MM</th>
+                           <th>Pkt No</th>
+                           <th>Date</th>
+                           <th>Jawak MM</th>
+                           <th *ngIf="auth.webUser.dept_id != 3">PBK</th>
+                           <th>Item - Subitem</th>
+                           <th *ngIf="auth.webUser.dept_id != 3">Product</th>
+                           <th>Quantity</th>
+                           <th>Item Detail</th>
+                           <th>Jawak Type</th>
+                           <th>Description</th>
+                           <th>Nimmit</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let data of jawakData | filter:term; let i=index">
+                           <td>{{i+1}}</td>
+                           <td>
+                              <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                                    class="uil uil-pen"></i></button>
+                              <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                    class="uil-trash"></i></button>
+                           </td>
+                           <td *ngIf="auth.webUser.dept_id != 2">
+                              {{data.mm_hin}} {{data.mm_code ? '('+data.mm_code+')': ''}}<br/>
+                              {{data.mm_eng}}
+                           </td>
+                           <td>{{data.pkt_num}}</td>
+                           <td>{{data.date}}</td>
+                           <td>
+                              {{data.jawak_mm_hin}}<br/>
+                              {{data.jawak_mm_eng}}
+                           </td>
+                           <td *ngIf="auth.webUser.dept_id != 3">
+                              {{data.pbk_hin}} <br/>
+                              {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
+                           </td>
+                           <td>
+                              {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br/>
+                              {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
+                           </td>
+                           <td *ngIf="auth.webUser.dept_id != 3">
+                              {{data.sr_num ? data.sr_num : ''}} <br/>
+                              {{data.product_code ? data.product_code : ''}}
+                              {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
+                           </td>
+                           <td>
+                              {{data.qty}} {{data.unit_short}}
+                           </td>
+                           <td>{{data.item_detail}}</td>
+                           <td>{{data.jawak_type_hin}}<br/>
+                               {{data.jawak_type_eng}}</td>
+                           <td>{{data.description}}</td>
+                           <td>{{data.nimmit}}</td>                        
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+
+
+<!-- Add Aawak Entry Model -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <button type="button" onclick="$('#showModal').modal('hide')" class="btn-close" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <app-jawak-entry (response)='addJawakResponse($event)' *ngIf="showModal == 'Add Jawak'"></app-jawak-entry>
+
+            <app-jawak-entry (response)='editJawakResponse($event)' *ngIf="showModal == 'Edit Jawak'" [getData]="editData" isEdit="true">
+            </app-jawak-entry>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+
+<!-- Edit Aawak Entry Model -->
+<!-- <div class="modal fade" id="editAawakEntry" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Edit Aawak Entry</h5>
+            <button type="button" onclick="$('#editAawakEntry').modal('hide')" class="btn-close"
+               aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <app-aawak-entry (response)='editJawakResponse($event)'>
+            </app-aawak-entry>
+         </div>
+      </div>
+   </div>
+</div> -->

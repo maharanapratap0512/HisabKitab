@@ -1,0 +1,44 @@
+<div class="row">
+   <div class="card-body">
+      <form [formGroup]="supportListForm">
+         <div class="row">
+            <div class="col-md-2 mb-3" style="display: none;">
+               <div class="form-group">
+                  <label class="form-label">List Type</label>
+
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select List Type" [clearable]="false"
+                     [virtualScroll]="true" formControlName="list_type" [disabled]="true">
+                     <ng-option selected="selected" disabled value="">List Type</ng-option>
+                     <ng-option selected="selected" value="mm_type">MM Type</ng-option>
+                     <ng-option selected="selected" value="gender">Gender</ng-option>
+                     <ng-option selected="selected" value="relation">Relation</ng-option>
+                     <!-- <ng-option selected="selected" value="Other Kumar"></ng-option> -->
+                  </ng-select>
+
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Name (Hin)</label>
+                  <input type="text" class="form-control" placeholder="Name (Hin)" formControlName="list_name_hin"
+                     [ngClass]="{'validation':supportListForm.get('list_name_hin')?.errors && (supportListForm.get('list_name_hin')?.touched || supportListForm.get ('list_name_hin')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Name (Eng)</label>
+                  <input type="text" class="form-control" placeholder="Name (Eng)" formControlName="list_name_eng"
+                     [ngClass]="{'validation':supportListForm.get('list_name_eng')?.errors && (supportListForm.get('list_name_eng')?.touched || supportListForm.get ('list_name_eng')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type=" mx-3"
+                  (click)="supportListFormSubmit()">Submit</button>
+               <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                  (click)="supportListFormUpdate()">Update</button>
+               <!-- <button class="btn btn-light submit mx-3" type="button" (click)="countryForm.reset()">Clear</button> -->
+            </div>
+         </div>
+      </form>
+   </div>
+</div>

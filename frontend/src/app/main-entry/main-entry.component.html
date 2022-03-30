@@ -1,0 +1,1160 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> Loading... </p>
+</ngx-spinner>
+
+<!-- Begin page -->
+<div class="wrapper">
+   <div class="content-page">
+      <div class="content">
+         <div class="container-fluid">
+
+            <div class="row">
+               <div class="card-body">
+                  <form [formGroup]="entryForm">
+                     <div class="row">
+                        <div class="col-md-1 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Parchi No.</label>
+                              <input type="text" class="form-control" placeholder="पर्ची न." formControlName="parchi_no"
+                                 [ngClass]="{'validation':entryForm.get('parchi_no')?.errors && (entryForm.get('parchi_no')?.touched || entryForm.get ('parchi_no')?.dirty)}">
+                           </div>
+                        </div>
+
+                        <div class="col-md-2 mb-3">
+                           <label for="example-date" class="form-label">Date</label>
+                           <input class="form-control" id="example-date" type="date" formControlName="date"
+                              [ngClass]="{'validation':entryForm.get('date')?.errors && (entryForm.get('date')?.touched || entryForm.get ('date')?.dirty)}">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Aawak MM</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Incoming(Aawak) MM"
+                                 [clearable]="false" [virtualScroll]="true" formControlName="aawak_mm_id"
+                                 [ngClass]="{'validation':entryForm.get('aawak_mm_id')?.errors && (entryForm.get('aawak_mm_id')?.touched || entryForm.get ('aawak_mm_id')?.dirty)}">
+                                 <ng-option selected="selected" disabled value="">Incoming(Aawak) MM</ng-option>
+                                 <ng-option *ngFor="let item of mmFormData" [value]="item._id">
+                                    {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-2 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">State Wise Pbks </label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select State For Filter Pbks"
+                                 [clearable]="true" [virtualScroll]="true" (change)="pbkbystate($event)">
+                                 <ng-option selected="selected" disabled value="">Select State For Filter Pbks
+                                 </ng-option>
+                                 <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}} :
+                                    {{item.state_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Pbk Sewadhari</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Roll no. or Pbk name"
+                                 [clearable]="false" [virtualScroll]="true" formControlName="pbk_id"
+                                 [ngClass]="{'validation':entryForm.get('pbk_id')?.errors && (entryForm.get('pbk_id')?.touched || entryForm.get ('pbk_id')?.dirty)}">
+                                 <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
+                                 </ng-option>
+                                 <ng-option *ngFor="let item of pbkList" [value]="item._id">
+                                    {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.sdw_of}} :
+                                    {{item.sdw_of_name}}
+                                 </ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <!-- <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Item Name *</label>
+                              <select class="form-select item_id" style="width: 100%;" formControlName="item_id"
+                                 [ngClass]="{'validation':entryForm.get('item_id')?.errors && (entryForm.get('item_id')?.touched || entryForm.get ('item_id')?.dirty)}">
+                                 <option selected="selected" value="">Add New Item</option>
+                                 <option>कुर्ता (कलर) : Kurta ( color ) ( bhai )</option>
+                                 <option>कुर्ता (सफ़ेद) : Kurta ( white ) ( bhai )</option>
+                                 <option>शर्ट कलर (नया/पु.) : Shirt color ( new/old ) ( bhai )</option>
+                                 <option>शर्ट का कपड़ा (सफ़ेद) : Shirt ka kapda ( white ) ( bhai )</option>
+                              </select>
+                           </div>
+                        </div> -->
+
+                        <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Item</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Item Name"
+                                 [clearable]="false" [virtualScroll]="true" formControlName="item_id"
+                                 (change)="patchUnit($event)" (change)="patchSubitem($event)"
+                                 [ngClass]="{'validation':entryForm.get('item_id')?.errors && (entryForm.get('item_id')?.touched || entryForm.get ('item_id')?.dirty)}">
+                                 <ng-option selected="selected" disabled value="">Select Item Name</ng-option>
+                                 <ng-option *ngFor="let item of itemFormData" [value]="item._id">{{item.item_hin}} :
+                                    {{item.item_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Sub Item</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Sub Item Name"
+                                 [clearable]="true" [virtualScroll]="true" formControlName="subitem_id"
+                                 (change)="patchItem($event,false,'i')"
+                                 [ngClass]="{'validation':entryForm.get('subitem_id')?.errors && (entryForm.get('subitem_id')?.touched || entryForm.get ('subitem_id')?.dirty)}">
+                                 <ng-option selected="selected" disabled value="">Select Sub Item Name</ng-option>
+                                 <ng-option *ngFor="let item of subitemFormData" [value]="item._id">{{item.subitem_hin}}
+                                    : {{item.subitem_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-2 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Unit</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Unit"
+                                 [clearable]="false" [virtualScroll]="true" formControlName="unit_id"
+                                 [ngClass]="{'validation':entryForm.get('unit_id')?.errors && (entryForm.get('unit_id')?.touched || entryForm.get ('unit_id')?.dirty)}">
+                                 <ng-option selected="selected" disabled value="">Select Unit</ng-option>
+                                 <ng-option *ngFor="let item of unitFormData" [value]="item._id">{{item.unit_short}} :
+                                    {{item.unit_full}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-1 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Quantity</label>
+                              <input type="text" class="form-control" placeholder="Quantity" formControlName="quantity"
+                                 [(ngModel)]="qnt" (keyup)="qntclick()"
+                                 [ngClass]="{'validation':entryForm.get('quantity')?.errors && (entryForm.get('quantity')?.touched || entryForm.get ('quantity')?.dirty)}">
+                           </div>
+                        </div>
+                        <div class="col-md-1 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Rate</label>
+                              <input type="text" class="form-control" placeholder="Rate" formControlName="rate"
+                                 [(ngModel)]="rate" (keyup)="rateclick()"
+                                 [ngClass]="{'validation':entryForm.get('rate')?.errors && (entryForm.get('rate')?.touched || entryForm.get ('rate')?.dirty)}">
+                           </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Amount</label>
+                              <input type="text" class="form-control" placeholder="Amount" formControlName="amount"
+                                 [(ngModel)]="amnt" (keyup)="amntclick()"
+                                 [ngClass]="{'validation':entryForm.get('amount')?.errors && (entryForm.get('amount')?.touched || entryForm.get ('amount')?.dirty)}">
+                           </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Item Details</label>
+                              <input type="text" class="form-control" placeholder="Item Details"
+                                 formControlName="item_detail"
+                                 [ngClass]="{'validation':entryForm.get('item_detail')?.errors && (entryForm.get('item_detail')?.touched || entryForm.get ('item_detail')?.dirty)}">
+                           </div>
+                        </div>
+                        <!-- <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Aawak Type</label>
+                              <select class="form-select" style="width: 100%;" formControlName="entry_type"
+                                 [ngClass]="{'validation':entryForm.get('entry_type')?.errors && (entryForm.get('entry_type')?.touched || entryForm.get ('entry_type')?.dirty)}">
+                                 <option selected="selected" value="">किस प्रकार का आवक है?</option>
+                                 <option>सेवा में आया हुआ : New</option>
+                              </select>
+                           </div>
+                        </div> -->
+
+
+
+                        <!-- <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Kaha Use hua?</label>
+                              <select class="form-select jawak_mm_id" style="width: 100%;" formControlName="jawak_mm_id"
+                                 [ngClass]="{'validation':entryForm.get('jawak_mm_id')?.errors && (entryForm.get('jawak_mm_id')?.touched || entryForm.get ('jawak_mm_id')?.dirty)}">
+                                 <option selected="selected" value="">Select Jawak MM</option>
+                                 <option value="rajkot">Rajkot</option>
+                                 <option value="surat">Surat</option>
+                                 <option value="delhi">Delhi</option>
+                                 <option value="kampil">Kampil</option>
+                                 <option value="aagra">Aagra</option>
+                                 <option value="mount abu">Mount Abu</option>
+                              </select>
+                           </div>
+                        </div> -->
+
+                        <div class="col-md-2 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Aawak Type</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="किस प्रकार का आवक है?"
+                                 [clearable]="false" [virtualScroll]="true" formControlName="aawak_itemtype"
+                                 [ngClass]="{'validation':entryForm.get('aawak_itemtype')?.errors && (entryForm.get('aawak_itemtype')?.touched || entryForm.get ('aawak_itemtype')?.dirty)}">
+                                 <ng-option selected="selected" disabled value="">किस प्रकार का आवक है?</ng-option>
+                                 <ng-option *ngFor="let item of awakTypeData" [value]="item._id">
+                                    {{item.itemtype_hin}}:{{item.itemtype_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Description</label>
+                              <input type="text" class="form-control" placeholder="विवरण" formControlName="desc"
+                                 [ngClass]="{'validation':entryForm.get('desc')?.errors && (entryForm.get('desc')?.touched || entryForm.get ('desc')?.dirty)}">
+                           </div>
+                        </div>
+                        <div class="col-md-1 mb-3 text-center">
+                           <label class="form-label">Highlight</label><br>
+                           <input type="checkbox" id="hl" data-switch="success" formControlName="hl" />
+                           <label for="hl" style="position: relative; top: 6px;"></label>
+                        </div>
+
+                        <div class="col-md-8 mb-3">
+                           <div class=" card card-body">
+                              <h5 class="card-title">Jawak Details</h5>
+                              <!-- <label class="form-label">Jawak Details</label> -->
+                              <div class="" formArrayName="jawak_detail"
+                                 *ngFor="let a of formJawakDetails.controls; let i = index">
+                                 <div [formGroupName]="i">
+                                    <div class="row">
+                                       <div class="col-md-7 mb-1">
+                                          <div class="form-group">
+                                             <label class="form-label" *ngIf="i == 0">Jawak MM</label>
+                                             <ng-select class="custom" *ngIf="i == 0" style="width: 100%;"
+                                                placeholder="कहा यूज़ हुआ ?" [clearable]="false" [virtualScroll]="true"
+                                                formControlName="jawak_mm_id" (change)="jawakmmclick()"
+                                                [ngClass]="{'validation':a.get('jawak_mm_id')?.errors && (a.get('jawak_mm_id')?.touched || a.get ('jawak_mm_id')?.dirty)}">
+                                                <ng-option selected="selected" disabled value="">कहा यूज़ हुआ ?
+                                                </ng-option>
+                                                <ng-option *ngFor="let item of mmFormData" [value]="item._id">
+                                                   {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                             </ng-select>
+                                             <ng-select class="custom" *ngIf="i != 0" style="width: 100%;"
+                                                placeholder="कहा यूज़ हुआ ?" [clearable]="false" [virtualScroll]="true"
+                                                formControlName="jawak_mm_id"
+                                                [ngClass]="{'validation':a.get('jawak_mm_id')?.errors && (a.get('jawak_mm_id')?.touched || a.get ('jawak_mm_id')?.dirty)}">
+                                                <ng-option selected="selected" disabled value="">कहा यूज़ हुआ ?
+                                                </ng-option>
+                                                <ng-option *ngFor="let item of mmFormData" [value]="item._id">
+                                                   {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                             </ng-select>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4 mb-1">
+                                          <div class="form-group">
+                                             <label class="form-label" *ngIf="i == 0">Quantity</label>
+                                             <input type="text" *ngIf="i == 0" class="form-control"
+                                                placeholder="Quantity" formControlName="jawak_quantity"
+                                                [ngClass]="{'validation':a.get('jawak_quantity')?.errors && (a.get('jawak_quantity')?.touched || a.get ('jawak_quantity')?.dirty)}">
+                                             <input type="text" *ngIf="i != 0" class="form-control"
+                                                placeholder="Quantity" formControlName="jawak_quantity"
+                                                [ngClass]="{'validation':a.get('jawak_quantity')?.errors && (a.get('jawak_quantity')?.touched || a.get ('jawak_quantity')?.dirty)}">
+                                          </div>
+                                       </div>
+
+                                       <div class="col-1 mb-1">
+                                          <label class="form-label" *ngIf="i == 0">Clear</label>
+                                          <button class="btn btn-light" type="button"
+                                             (click)="removeJawakDetails(i)">X</button>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                              <button type="button" class="btn btn-primary mt-3" [disabled]="!jawak_detail.valid"
+                                 (click)="addJawakDetails()">+ Add</button>
+                           </div>
+                        </div>
+
+                        <!-- <div class="col-md-1 mb-3 text-center">
+                           <label class="form-label">Active</label><br>
+                           <input type="checkbox" id="active" checked data-switch="success" formControlName="active"
+                              [ngClass]="{'validation':entryForm.get('active')?.errors && (entryForm.get('active')?.touched || entryForm.get ('active')?.dirty)}" />
+                           <label for="active" style="position: relative; top: 6px;"></label>
+                        </div> -->
+
+                        <div class="col-md-4 mb-3 text-center">
+                           <button class="btn btn-primary submit mx-3" type="submit"
+                              (click)="entryFormSubmit()">Submit</button>
+                           <button class="btn btn-light submit" type="button" (click)="clearall()">Clear</button>
+                        </div>
+
+                     </div>
+                  </form>
+               </div>
+            </div>
+
+            <div class="row">
+               <div class="card-body" style="overflow: auto;">
+                  <div class="col-12 px-2" style="margin-bottom: 65px;">
+                     <div class="float-start col-4">
+                        <div class="form-group">
+                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                              name="search">
+                        </div>
+                     </div>
+
+                     <div class="float-end">
+                        <div class="file btn btn-success mx-2" style="font-weight: 700 !important;">
+                           <i class="uil uil-arrow-to-bottom"></i> Import Entry Excel
+                           <input type="file" class="inputtag"
+                              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                              (change)="importEntryExcel($event)" [ngModel]="inputFile"
+                              [ngModelOptions]="{standalone: true}" />
+                        </div>
+                        <button type="button" style="font-weight: 700 !important;" class="btn btn-primary mx-3"
+                           (click)="resultModal()" *ngIf="tempdata.length">Excel File Result
+                        </button>
+                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total Count :
+                           {{total_count}}
+                        </button>
+                     </div>
+                  </div>
+                  <table id="datatable-buttons" class="table table-hover dt-responsive">
+                     <thead>
+                        <tr>
+                           <th>No.</th>
+                           <th>Manage</th>
+                           <th>Parchi No.</th>
+                           <th>Date</th>
+                           <!-- <th>Date1</th> -->
+                           <th>Pbk Sewadhari</th>
+                           <th>Item/Subitem Name</th>
+                           <th>Item Details</th>
+                           <th>Quantity</th>
+                           <th>Rate</th>
+                           <th>Amount</th>
+                           <th>Aawak Type</th>
+                           <th>Aawak MM</th>
+                           <th>Jawak Detail</th>
+                           <th>Description</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let data of entryFormData | filter:term; let i=index"
+                           [ngClass]="{'highlight': data.hl == true}">
+                           <td>{{i+1}}
+                              <br>
+                              <div class="form-check form-switch" style="cursor: pointer;">
+                                 <input type="checkbox" name="hl" class="form-check-input" [checked]=data.hl
+                                    (change)="highlight($event,data)">
+                              </div>
+                           </td>
+                           <td>
+                              <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
+                                    class="uil uil-pen"></i></button><br />
+                              <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                    class="uil-trash"></i></button>
+                           </td>
+                           <td>{{data.parchi_no?data.parchi_no:'-'}}</td>
+                           <!-- <td>{{data.date}}</td> -->
+                           <td>{{data.date | date:'yyyy-MM-dd'}}</td>
+                           <td>{{data.roll_no ? data.roll_no : '______'}} - {{data.pbk_hin}}<br>
+                              {{data.sdw_of}} : {{data.sdw_of_name}}</td>
+                           <td>{{data.item_hin}} :{{data.item_eng}}<br>
+                              {{data.subitem_id?(data.subitem_hin?data.subitem_hin:'-') + ' : ' +
+                              (data.subitem_eng?data.subitem_eng:'-') : ''}}
+                           </td>
+                           <td>{{data.item_detail?data.item_detail:'-'}}</td>
+                           <td>{{data.quantity}} {{data.unit_short}}</td>
+                           <td>{{data.rate?data.rate:'-'}}</td>
+                           <td>{{data.amount?data.amount:'-'}}</td>
+                           <td>
+                              {{data.itemtype_hin?data.itemtype_hin:'-'}}
+                              :<br>{{data.itemtype_eng?data.itemtype_eng:'-'}}
+                           </td>
+                           <td>{{data.aawak_mm_hin}}:{{data.aawak_mm_code}}<br>
+                              {{data.aawak_mm_eng}}</td>
+                           <td>
+                              <ng-container *ngFor="let subdata of data.jawak_detail">
+                                 {{subdata.jawak_mm_hin}}-{{subdata.jawak_quantity}}
+                                 <br>
+                              </ng-container>
+                           </td>
+                           <td>{{data.desc?data.desc:'-'}}</td>
+
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!--  Edit Entry Modal -->
+<div class="modal fade" id="editEntry" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Entry Data Edit</h5>
+            <button type="button" (click)="softclear();this.entryForm.reset({ active: true });" class="btn-close"
+               data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+               <div class="card-body">
+                  <form [formGroup]="entryForm">
+                     <div class="row">
+                        <div class="col-md-1 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Parchi No.</label>
+                              <input type="text" class="form-control" placeholder="पर्ची न." formControlName="parchi_no"
+                                 [ngClass]="{'validation':entryForm.get('parchi_no')?.errors && (entryForm.get('parchi_no')?.touched || entryForm.get ('parchi_no')?.dirty)}">
+                           </div>
+                        </div>
+
+                        <div class="col-md-2 mb-3">
+                           <label for="example-date" class="form-label">Date</label>
+                           <input class="form-control" id="example-date" type="date" formControlName="date"
+                              [ngClass]="{'validation':entryForm.get('date')?.errors && (entryForm.get('date')?.touched || entryForm.get ('date')?.dirty)}">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Aawak MM</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Incoming(Aawak) MM"
+                                 [clearable]="false" [virtualScroll]="true" formControlName="aawak_mm_id"
+                                 [ngClass]="{'validation':entryForm.get('aawak_mm_id')?.errors && (entryForm.get('aawak_mm_id')?.touched || entryForm.get ('aawak_mm_id')?.dirty)}">
+                                 <ng-option selected="selected" disabled value="">Incoming(Aawak) MM</ng-option>
+                                 <ng-option *ngFor="let item of mmFormData" [value]="item._id">
+                                    {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-2 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">State Wise Pbks </label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select State For Filter Pbks"
+                                 [clearable]="true" [virtualScroll]="true" (change)="pbkbystate($event)">
+                                 <ng-option selected="selected" disabled value="">Select State For Filter Pbks
+                                 </ng-option>
+                                 <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}} :
+                                    {{item.state_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Pbk Sewadhari</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Roll no. or Pbk name"
+                                 [clearable]="false" [virtualScroll]="true" formControlName="pbk_id"
+                                 [ngClass]="{'validation':entryForm.get('pbk_id')?.errors && (entryForm.get('pbk_id')?.touched || entryForm.get ('pbk_id')?.dirty)}">
+                                 <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
+                                 </ng-option>
+                                 <ng-option *ngFor="let item of pbkList" [value]="item._id">
+                                    {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.sdw_of}} :
+                                    {{item.sdw_of_name}}
+                                 </ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <!-- <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Item Name *</label>
+                              <select class="form-select item_id" style="width: 100%;" formControlName="item_id"
+                                 [ngClass]="{'validation':entryForm.get('item_id')?.errors && (entryForm.get('item_id')?.touched || entryForm.get ('item_id')?.dirty)}">
+                                 <option selected="selected" value="">Add New Item</option>
+                                 <option>कुर्ता (कलर) : Kurta ( color ) ( bhai )</option>
+                                 <option>कुर्ता (सफ़ेद) : Kurta ( white ) ( bhai )</option>
+                                 <option>शर्ट कलर (नया/पु.) : Shirt color ( new/old ) ( bhai )</option>
+                                 <option>शर्ट का कपड़ा (सफ़ेद) : Shirt ka kapda ( white ) ( bhai )</option>
+                              </select>
+                           </div>
+                        </div> -->
+
+                        <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Item</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Item Name"
+                                 [clearable]="false" [virtualScroll]="true" formControlName="item_id"
+                                 (change)="patchUnit($event)" (change)="patchSubitem($event)"
+                                 [ngClass]="{'validation':entryForm.get('item_id')?.errors && (entryForm.get('item_id')?.touched || entryForm.get ('item_id')?.dirty)}">
+                                 <ng-option selected="selected" disabled value="">Select Item Name</ng-option>
+                                 <ng-option *ngFor="let item of itemFormData" [value]="item._id">{{item.item_hin}} :
+                                    {{item.item_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Sub Item</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Sub Item Name"
+                                 [clearable]="true" [virtualScroll]="true" formControlName="subitem_id"
+                                 (change)="patchItem($event,false,'i')"
+                                 [ngClass]="{'validation':entryForm.get('subitem_id')?.errors && (entryForm.get('subitem_id')?.touched || entryForm.get ('subitem_id')?.dirty)}">
+                                 <ng-option selected="selected" disabled value="">Select Sub Item Name</ng-option>
+                                 <ng-option *ngFor="let item of subitemFormData" [value]="item._id">{{item.subitem_hin}}
+                                    : {{item.subitem_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-2 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Unit</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Unit"
+                                 [clearable]="false" [virtualScroll]="true" formControlName="unit_id"
+                                 [ngClass]="{'validation':entryForm.get('unit_id')?.errors && (entryForm.get('unit_id')?.touched || entryForm.get ('unit_id')?.dirty)}">
+                                 <ng-option selected="selected" disabled value="">Select Unit</ng-option>
+                                 <ng-option *ngFor="let item of unitFormData" [value]="item._id">{{item.unit_short}} :
+                                    {{item.unit_full}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-1 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Quantity</label>
+                              <input type="text" class="form-control" placeholder="Quantity" formControlName="quantity"
+                                 [(ngModel)]="qnt" (keyup)="qntclick()"
+                                 [ngClass]="{'validation':entryForm.get('quantity')?.errors && (entryForm.get('quantity')?.touched || entryForm.get ('quantity')?.dirty)}">
+                           </div>
+                        </div>
+                        <div class="col-md-1 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Rate</label>
+                              <input type="text" class="form-control" placeholder="Rate" formControlName="rate"
+                                 [(ngModel)]="rate" (keyup)="rateclick()"
+                                 [ngClass]="{'validation':entryForm.get('rate')?.errors && (entryForm.get('rate')?.touched || entryForm.get ('rate')?.dirty)}">
+                           </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Amount</label>
+                              <input type="text" class="form-control" placeholder="Amount" formControlName="amount"
+                                 [(ngModel)]="amnt" (keyup)="amntclick()"
+                                 [ngClass]="{'validation':entryForm.get('amount')?.errors && (entryForm.get('amount')?.touched || entryForm.get ('amount')?.dirty)}">
+                           </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Item Details</label>
+                              <input type="text" class="form-control" placeholder="Item Details"
+                                 formControlName="item_detail"
+                                 [ngClass]="{'validation':entryForm.get('item_detail')?.errors && (entryForm.get('item_detail')?.touched || entryForm.get ('item_detail')?.dirty)}">
+                           </div>
+                        </div>
+                        <!-- <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Aawak Type</label>
+                              <select class="form-select" style="width: 100%;" formControlName="entry_type"
+                                 [ngClass]="{'validation':entryForm.get('entry_type')?.errors && (entryForm.get('entry_type')?.touched || entryForm.get ('entry_type')?.dirty)}">
+                                 <option selected="selected" value="">किस प्रकार का आवक है?</option>
+                                 <option>सेवा में आया हुआ : New</option>
+                              </select>
+                           </div>
+                        </div> -->
+
+
+
+                        <!-- <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Kaha Use hua?</label>
+                              <select class="form-select jawak_mm_id" style="width: 100%;" formControlName="jawak_mm_id"
+                                 [ngClass]="{'validation':entryForm.get('jawak_mm_id')?.errors && (entryForm.get('jawak_mm_id')?.touched || entryForm.get ('jawak_mm_id')?.dirty)}">
+                                 <option selected="selected" value="">Select Jawak MM</option>
+                                 <option value="rajkot">Rajkot</option>
+                                 <option value="surat">Surat</option>
+                                 <option value="delhi">Delhi</option>
+                                 <option value="kampil">Kampil</option>
+                                 <option value="aagra">Aagra</option>
+                                 <option value="mount abu">Mount Abu</option>
+                              </select>
+                           </div>
+                        </div> -->
+
+                        <div class="col-md-2 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Aawak Type</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="किस प्रकार का आवक है?"
+                                 [clearable]="false" [virtualScroll]="true" formControlName="aawak_itemtype"
+                                 [ngClass]="{'validation':entryForm.get('aawak_itemtype')?.errors && (entryForm.get('aawak_itemtype')?.touched || entryForm.get ('aawak_itemtype')?.dirty)}">
+                                 <ng-option selected="selected" disabled value="">किस प्रकार का आवक है?</ng-option>
+                                 <ng-option *ngFor="let item of awakTypeData" [value]="item._id">
+                                    {{item.itemtype_hin}}:{{item.itemtype_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Description</label>
+                              <input type="text" class="form-control" placeholder="विवरण" formControlName="desc"
+                                 [ngClass]="{'validation':entryForm.get('desc')?.errors && (entryForm.get('desc')?.touched || entryForm.get ('desc')?.dirty)}">
+                           </div>
+                        </div>
+                        <div class="col-md-1 mb-3 text-center">
+                           <label class="form-label">Highlight</label><br>
+                           <input type="checkbox" id="hl1" data-switch="success" formControlName="hl" />
+                           <label for="hl1" style="position: relative; top: 6px;"></label>
+                        </div>
+
+                        <div class="col-md-8 mb-3">
+                           <div class=" card card-body">
+                              <h5 class="card-title">Jawak Details</h5>
+                              <!-- <label class="form-label">Jawak Details</label> -->
+                              <div class="" formArrayName="jawak_detail"
+                                 *ngFor="let a of formJawakDetails.controls; let i = index">
+                                 <div [formGroupName]="i">
+                                    <div class="row">
+                                       <div class="col-md-7 mb-1">
+                                          <div class="form-group">
+                                             <label class="form-label" *ngIf="i == 0">Jawak MM</label>
+                                             <ng-select class="custom" *ngIf="i == 0" style="width: 100%;"
+                                                placeholder="कहा यूज़ हुआ ?" [clearable]="false" [virtualScroll]="true"
+                                                formControlName="jawak_mm_id" (change)="jawakmmclick()"
+                                                [ngClass]="{'validation':a.get('jawak_mm_id')?.errors && (a.get('jawak_mm_id')?.touched || a.get ('jawak_mm_id')?.dirty)}">
+                                                <ng-option selected="selected" disabled value="">कहा यूज़ हुआ ?
+                                                </ng-option>
+                                                <ng-option *ngFor="let item of mmFormData" [value]="item._id">
+                                                   {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                             </ng-select>
+                                             <ng-select class="custom" *ngIf="i != 0" style="width: 100%;"
+                                                placeholder="कहा यूज़ हुआ ?" [clearable]="false" [virtualScroll]="true"
+                                                formControlName="jawak_mm_id"
+                                                [ngClass]="{'validation':a.get('jawak_mm_id')?.errors && (a.get('jawak_mm_id')?.touched || a.get ('jawak_mm_id')?.dirty)}">
+                                                <ng-option selected="selected" disabled value="">कहा यूज़ हुआ ?
+                                                </ng-option>
+                                                <ng-option *ngFor="let item of mmFormData" [value]="item._id">
+                                                   {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                             </ng-select>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4 mb-1">
+                                          <div class="form-group">
+                                             <label class="form-label" *ngIf="i == 0">Quantity</label>
+                                             <input type="text" *ngIf="i == 0" class="form-control"
+                                                placeholder="Quantity" formControlName="jawak_quantity"
+                                                [ngClass]="{'validation':a.get('jawak_quantity')?.errors && (a.get('jawak_quantity')?.touched || a.get ('jawak_quantity')?.dirty)}">
+                                             <input type="text" *ngIf="i != 0" class="form-control"
+                                                placeholder="Quantity" formControlName="jawak_quantity"
+                                                [ngClass]="{'validation':a.get('jawak_quantity')?.errors && (a.get('jawak_quantity')?.touched || a.get ('jawak_quantity')?.dirty)}">
+                                          </div>
+                                       </div>
+
+                                       <div class="col-1 mb-1">
+                                          <label class="form-label" *ngIf="i == 0">Clear</label>
+                                          <button class="btn btn-light" type="button"
+                                             (click)="removeJawakDetails(i)">X</button>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                              <button type="button" class="btn btn-primary mt-3" [disabled]="!jawak_detail.valid"
+                                 (click)="addJawakDetails()">+ Add</button>
+                           </div>
+                        </div>
+
+                        <!-- <div class="col-md-1 mb-3 text-center">
+                           <label class="form-label">Active</label><br>
+                           <input type="checkbox" id="active" checked data-switch="success" formControlName="active"
+                              [ngClass]="{'validation':entryForm.get('active')?.errors && (entryForm.get('active')?.touched || entryForm.get ('active')?.dirty)}" />
+                           <label for="active" style="position: relative; top: 6px;"></label>
+                        </div> -->
+
+                     </div>
+                  </form>
+               </div>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+               (click)="this.entryForm.reset({ active: true });softclear();">Close</button>
+            <button type="submit" class="btn btn-primary" (click)="entryEditSubmit()">Save changes</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+
+<!--Imported Excel result Modal -->
+<div class="modal fade" id="result" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog modal-dialog-scrollable" style="width: 99%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Imported Excel Result</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+
+         <div class="row" style="padding: 10px 50px;">
+            <ul class="nav nav-pills bg-nav-pills">
+               <li class="nav-item">
+                  <a href="#exceldata" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0 active"
+                     (click)="getExcelData()">
+                     Excel Data
+                     <span class="translate-middle bell badge rounded-pill bg-danger">
+                        {{tempdata.length}}
+                     </span>
+                  </a>
+               </li>
+               <li class="nav-item mx-2">
+                  <div style="width: 15vw;margin-top: 1.5px;">
+                     <ng-select class="custom" style="width: 100%;" placeholder="Select Aawak MM" [clearable]="false"
+                        [virtualScroll]="true" (change)="setAawakMM($event)" [ngModel]="excel_aawak_mm"
+                        [ngModelOptions]="{standalone: true}">
+                        <ng-option selected="selected" disabled value="">Select Aawak MM</ng-option>
+                        <ng-option *ngFor="let item of mmFormData" [value]="" value="{{item.mm_hin}}:{{item._id}}">
+                           {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                     </ng-select>
+                  </div>
+               </li>
+               <li class="nav-item">
+                  <a href="#correction" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+                     Make Correction
+                     <!-- <span class="translate-middle bell badge rounded-pill bg-danger">
+                        {{tempdata.length}}
+                     </span> -->
+                  </a>
+               </li>
+               <li class="nav-item">
+                  <a href="#tobeimport" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0"
+                     (click)="getDataToBeImported()">
+                     Data To Be Imported
+                     <!-- <span class="translate-middle bell badge rounded-pill bg-danger">
+                     {{tempdata.length}}
+                  </span> -->
+                  </a>
+               </li>
+               <li class="nav-item" *ngIf="this.duplicatedata.length > 0">
+                  <a href="#duplicate" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+                     Duplicate Data
+                     <span class="translate-middle bell badge rounded-pill" style="background-color: #bf7d40;">
+                        {{this.duplicatedata.length}}
+                     </span>
+                  </a>
+               </li>
+               <li class="nav-item" *ngIf="skippeddata.length > 0">
+                  <a href="#skipped" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+                     Skipped Data
+                     <span class="translate-middle bell badge rounded-pill" style="background-color: #da2534;">
+                        {{skippeddata.length}}
+                     </span>
+                  </a>
+               </li>
+               <!-- <li class="nav-item" style="margin-left: auto;">
+                     <a class="nav-link rounded-0">
+                        Total Excel File Data
+                        <span class="translate-middle bell badge rounded-pill bg-primary">
+                           {{totaldata}}
+                        </span>
+                     </a>
+                  </li> -->
+
+               <li class="nav-item" *ngIf="this.finaldata.length" style="margin-left: auto;">
+                  <a class="nav-link rounded-0">
+                     Successfully Imported
+                     <span class="translate-middle bell badge rounded-pill bg-success">
+                        {{finaldata.length}}
+                     </span>
+                  </a>
+               </li>
+               <!-- <li class="nav-item" *ngIf="tempdata && tempdata.length && tempdata[0].aawak_mm"
+                  style="margin-left: auto;">
+                  <button type="button" style="font-weight: 700 !important;" class="btn btn-primary mr-3"
+                     (click)="nexttab()">Next-></button>
+                  <a href="#next" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+                     <span class="translate-middle bell badge rounded-pill bg-danger">
+                        {{duplicatedata.length}}
+                     </span> 
+                  </a>
+               </li> -->
+            </ul>
+         </div>
+
+         <div class="modal-body">
+            <div class="row">
+               <div class="card-body">
+                  <div class="tab-content">
+
+
+                     <!-- exceldata -->
+                     <div class="tab-pane show active" id="exceldata" style="overflow: auto;">
+                        <table id="datatable-buttons" class="table table-hover dt-responsive"
+                           style="width:max-content;">
+                           <thead>
+                              <tr>
+                                 <th>No.</th>
+                                 <th>Parchi No.</th>
+                                 <th>Date</th>
+                                 <th>Roll No.</th>
+                                 <th>Name</th>
+                                 <th>Relation Name</th>
+                                 <th>Mobile No.</th>
+                                 <th>Category Name</th>
+                                 <th>Item Name</th>
+                                 <th>Subitem Name</th>
+                                 <th>Item Details</th>
+                                 <th>Quantity</th>
+                                 <th>Unit</th>
+                                 <th>Per Rate</th>
+                                 <th>Total</th>
+                                 <th>Aawak MM</th>
+                                 <th>Aawak Type</th>
+                                 <th>Uses</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr *ngFor="let data of tempdata | filter:term; let i=index">
+                                 <td>{{i+1}}</td>
+                                 <td>{{data.Parchi_no ? data.Parchi_no : '-'}} </td>
+                                 <td [ngClass]="{'marked': !data.Date}">{{data.Date?data.Date:'-'}}
+                                 </td>
+                                 <td [ngClass]="{'marked': !data.pbk_id}">{{data.Roll_no?data.Roll_no:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.pbk_id}">{{data.Name?data.Name:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.pbk_id}">{{data.RelationName?data.RelationName:'-'}}
+                                 </td>
+                                 <td>{{data.Mobileno?data.Mobileno:'-'}}</td>
+                                 <td [ngClass]="{'warned': !data.category_id}">{{data.Category?data.Category:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.item_id}">{{data.Item?data.Item:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.subitem_id && data.Subitem && !data.itemverified,
+                                 'warned':  !data.subitem_id && data.Subitem && data.itemverified}">
+                                    {{data.Subitem?data.Subitem:'-'}}</td>
+                                 <td>{{data.item_detail?data.item_detail:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.quantity}">{{data.quantity?data.quantity:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.unit_id}">{{data.Unit?data.Unit:'-'}}</td>
+                                 <td>{{data.rate?data.rate:'-'}}</td>
+                                 <td>{{data.amount?data.amount:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.aawak_mm_id}">{{data.aawak_mm?data.aawak_mm:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.aawak_itemtype_id}">
+                                    {{data.aawak_itemtype?data.aawak_itemtype:'-'}}</td>
+                                 <td>
+                                    <span class="px-1" *ngFor="let subdata of data.jawak_detail"
+                                       [ngClass]="{'marked': !subdata.jawak_mm_id}">
+                                       {{subdata.uses}}-{{subdata.jawak_quantity}}
+                                       <br>
+                                    </span>
+                                 </td>
+                                 <!-- <ng-container *ngFor="let subdata of data.jawak_detail"> -->
+                                 <!-- </ng-container> -->
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+
+
+                     <!-- correction -->
+                     <div class="tab-pane" id="correction" style="overflow: auto;">
+                        <table id="datatable-buttons" class="table dt-responsive" style="width:max-content;">
+                           <thead>
+                              <tr>
+                                 <th>No.</th>
+                                 <th>Unmatched Value</th>
+                                 <th>Detail</th>
+                                 <th>Field Type</th>
+                                 <th>Correct Value</th>
+
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr *ngFor="let data of correctiondata | filter:term; let i=index"
+                                 [ngClass]="{'marked': !data.isCorrected, 'warned': data.itemverified && data.item_id, 'success': data.isCorrected }">
+                                 <td>{{i+1}}</td>
+                                 <td>{{data.text ? data.text : '-'}} </td>
+                                 <td>{{data.detail ? data.detail:'-'}} </td>
+                                 <td>{{data.type ? data.type:'-'}}</td>
+                                 <td width="100%">
+                                    <ng-container *ngIf="data.type=='Jawak MM'">
+                                       <ng-select class="custom" style="width: 100%;" placeholder="Jawak MM"
+                                          [clearable]="false" [virtualScroll]="true"
+                                          (change)="makeCorrection($event,data,i)">
+                                          <ng-option *ngFor="let item of mmFormData" [value]="item._id">
+                                             {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                       </ng-select>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="data.type=='Item'">
+                                       <div class="row gx-1">
+                                          <div class="col-6">
+                                             <ng-select class="custom" style="width: 100%;"
+                                                placeholder="Select Item Name" [clearable]="false"
+                                                [virtualScroll]="true" (change)="makeCorrection($event,data,i)"
+                                                (change)="patchSubitem($event)">
+                                                <ng-option *ngFor="let item of itemFormData" [value]="item._id">
+                                                   {{item.item_hin}}:{{item.item_eng}}</ng-option>
+                                             </ng-select>
+                                          </div>
+                                          <div class="col-6">
+                                             <ng-select class="custom" style="width: 100%;"
+                                                placeholder="Select Subitem Name" [clearable]="false"
+                                                [virtualScroll]="true" (change)="subitemCorrection($event,data,i)">
+                                                <ng-option *ngFor="let item of subitemFormData" [value]="item._id">
+                                                   {{item.subitem_hin}} : {{item.subitem_eng}}</ng-option>
+                                             </ng-select>
+                                          </div>
+                                       </div>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="data.type=='Pbk'">
+                                       <div class="row gx-1">
+                                          <div class="col-5">
+                                             <ng-select class="custom" style="width: 100%;"
+                                                placeholder="Select State For Filter Pbks" [clearable]="true"
+                                                [virtualScroll]="true" (change)="pbkbystate($event)">
+                                                <ng-option *ngFor="let item of states" [value]="item._id">
+                                                   {{item.state_hin}} :
+                                                   {{item.state_eng}}</ng-option>
+                                             </ng-select>
+                                          </div>
+                                          <div class="col-7">
+                                             <ng-select class="custom" style="width: 100%;"
+                                                placeholder="Select Roll no. or Pbk name" [clearable]="false"
+                                                [virtualScroll]="true" (change)="makeCorrection($event,data,i)">
+                                                <ng-option *ngFor="let item of pbkList" [value]="item._id">
+                                                   {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} :
+                                                   {{item.sdw_of}} :
+                                                   {{item.sdw_of_name}}
+                                                </ng-option>
+                                             </ng-select>
+                                          </div>
+                                       </div>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="data.type=='Unit'">
+                                       <ng-select class="custom" style="width: 100%;" placeholder="Select Unit"
+                                          [clearable]="false" [virtualScroll]="true"
+                                          (change)="makeCorrection($event,data,i)">
+                                          <ng-option *ngFor="let item of unitFormData" [value]="item._id">
+                                             {{item.unit_short}} :
+                                             {{item.unit_full}}</ng-option>
+                                       </ng-select>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="data.type=='Aawak Type'">
+                                       <ng-select class="custom" style="width: 100%;" placeholder="Awak Type"
+                                          [clearable]="false" [virtualScroll]="true"
+                                          (change)="makeCorrection($event,data,i)">
+                                          <ng-option *ngFor="let item of awakTypeData" [value]="item._id">
+                                             {{item.itemtype_hin}}:{{item.itemtype_eng}}</ng-option>
+                                       </ng-select>
+                                    </ng-container>
+
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+
+
+                     <!-- tobeimport -->
+                     <div class="tab-pane" id="tobeimport" style="overflow: auto;">
+                        <button type="submit" class="btn btn-success float-end mx-2"
+                           style="margin-right: 80px !important;" (click)="finalExcelImport()">Final Import</button>
+                        <table id="datatable-buttons" class="table dt-responsive" style="width:max-content;">
+                           <thead>
+                              <tr>
+                                 <th>No.</th>
+                                 <th>Parchi No.</th>
+                                 <th style="width: 6vw;">Date</th>
+                                 <th>Pbk Sewadhari</th>
+                                 <th>Mobile No.</th>
+                                 <th>Category/Item/Subitem Name</th>
+                                 <th>Item Details</th>
+                                 <th>Quantity</th>
+                                 <th>Per Rate</th>
+                                 <th>Total</th>
+                                 <th>Aawak MM</th>
+                                 <th>Aawak Type</th>
+                                 <th>Uses</th>
+                                 <th>Description</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr *ngFor="let data of datatobeimported | filter:term; let i=index"
+                                 (mouseover)="entity = i"
+                                 [ngClass]="{'marked':data.status == 'skipped', 'duplicate':data.status == 'duplicate'}">
+                                 <td>{{i+1}}</td>
+                                 <td>{{data.Parchi_no ? data.Parchi_no : '-'}} </td>
+                                 <!-- <td>{{data.Date?data.Date:'-'}}</td> -->
+                                 <td>
+                                    <!-- <input class="form-control" id="example-date" type="date" formControlName="date"
+                              [ngClass]="{'validation':entryForm.get('date')?.errors && (entryForm.get('date')?.touched || entryForm.get ('date')?.dirty)}"> -->
+                                    <span *ngIf="data.Date || entity != i">{{data.Date?data.Date:'-'}}
+                                    </span>
+                                    <input type="date" *ngIf="entity == i && !data.Date" class='form-control'
+                                       style="width: 6vw;"
+                                       (mouseleave)="tempEntryUpdate($any($event.target).value,i,data._id,'Date')">
+                                    <!-- <textarea *ngIf="entity == i" value="{{data.desc?data.desc:''}}"
+                                       (mouseleave)="tempEntryUpdate($any($event.target).value,i,data._id,'desc')">
+                                    </textarea> -->
+                                 </td>
+                                 <td>{{data.Roll_no?data.Roll_no:'______'}} :
+                                    {{data.Name?data.Name:'-'}} : <br>{{data.RelationName?data.RelationName:'-'}}
+                                 </td>
+                                 <td>{{data.Mobileno?data.Mobileno:'-'}}</td>
+                                 <td>{{data.Category?data.Category:'-'}} :
+                                    {{data.Item?data.Item:'-'}} {{data.Subitem? ' : ' + data.Subitem:''}}
+                                 </td>
+                                 <td>
+                                    <span *ngIf="entity != i">{{data.item_detail?data.item_detail:'-'}}
+                                    </span>
+                                    <textarea *ngIf="entity == i" value="{{data.item_detail?data.item_detail:''}}"
+                                       class='form-control'
+                                       (mouseleave)="tempEntryUpdate($any($event.target).value,i,data._id,'item_detail')">
+                                    </textarea>
+                                 </td>
+                                 <td>
+                                    {{data.quantity?data.quantity:'-'}} :
+                                    {{data.Unit?data.Unit:'-'}}
+                                 </td>
+                                 <td>{{data.rate?data.rate:'-'}}</td>
+                                 <td>{{data.amount?data.amount:'-'}}</td>
+                                 <td>{{data.aawak_mm?data.aawak_mm:'-'}}</td>
+                                 <td>
+                                    {{data.aawak_itemtype?data.aawak_itemtype:'-'}}</td>
+                                 <td>
+                                    <span class="px-1" *ngFor="let subdata of data.jawak_detail"
+                                       [ngClass]="{'marked': !subdata.jawak_mm_id}">
+                                       {{subdata.uses?subdata.uses:'__'}}-{{subdata.jawak_quantity}}
+                                       <br>
+                                    </span>
+                                 </td>
+                                 <td>
+                                    <span *ngIf="entity != i">{{data.desc?data.desc:'-'}}
+                                    </span>
+                                    <textarea *ngIf="entity == i" value="{{data.desc?data.desc:''}}"
+                                       class='form-control'
+                                       (mouseleave)="tempEntryUpdate($any($event.target).value,i,data._id,'desc')">
+                                    </textarea>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+
+
+                     <!-- duplicate -->
+                     <div class="tab-pane" id="duplicate" style="overflow: auto;">
+                        <table id="datatable-buttons" class="table table-hover dt-responsive">
+                           <thead>
+                              <tr>
+                                 <th>No.</th>
+                                 <th>Parchi No.</th>
+                                 <th>Date</th>
+                                 <th>Pbk Sewadhari</th>
+                                 <th>Item/Subitem Name</th>
+                                 <th>Item Details</th>
+                                 <th>Quantity</th>
+                                 <th>Rate</th>
+                                 <th>Amount</th>
+                                 <th>Aawak Type</th>
+                                 <th>Aawak MM</th>
+                                 <th>Jawak Detail</th>
+                                 <th>Description</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr *ngFor="let data of duplicatedata | filter:term; let i=index"
+                                 [ngClass]="{'highlight': data.hl == true}">
+                                 <td>{{i+1}}</td>
+                                 <td>{{data.parchi_no?data.parchi_no:'-'}}</td>
+                                 <td>{{data.date}}</td>
+                                 <td>{{data.roll_no ? data.roll_no : '______'}} - {{data.pbk_hin}}<br>
+                                    {{data.sdw_of}} : {{data.sdw_of_name}}</td>
+                                 <td>{{data.item_hin}} :{{data.item_eng}}<br>
+                                    {{data.subitem_id?(data.subitem_hin?data.subitem_hin:'-') + ' : ' +
+                                    (data.subitem_eng?data.subitem_eng:'-') : '--'}}
+                                 </td>
+                                 <td>{{data.item_detail?data.item_detail:'-'}}</td>
+                                 <td>{{data.quantity}} {{data.unit_short}}</td>
+                                 <td>{{data.rate?data.rate:'-'}}</td>
+                                 <td>{{data.amount?data.amount:'-'}}</td>
+                                 <td>
+                                    {{data.itemtype_hin?data.itemtype_hin:'-'}}
+                                    :<br>{{data.itemtype_eng?data.itemtype_eng:'-'}}
+                                 </td>
+                                 <td>{{data.aawak_mm_hin}}:{{data.aawak_mm_code}}<br>
+                                    {{data.aawak_mm_eng}}</td>
+                                 <td>
+                                    <ng-container *ngFor="let subdata of data.jawak_detail">
+                                       {{subdata.jawak_mm_hin}}-{{subdata.jawak_quantity}}
+                                       <br>
+                                    </ng-container>
+                                 </td>
+                                 <td>{{data.desc?data.desc:'-'}}</td>
+
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+
+
+                     <!-- skipped -->
+                     <div class="tab-pane" id="skipped" style="overflow: auto;">
+                        <table id="datatable-buttons" class="table table-hover dt-responsive"
+                           style="width:max-content;">
+                           <thead>
+                              <tr>
+                                 <th>No.</th>
+                                 <th>Parchi No.</th>
+                                 <th>Date</th>
+                                 <th>Roll No.</th>
+                                 <th>Name</th>
+                                 <th>Relation Name</th>
+                                 <th>Mobile No.</th>
+                                 <th>Category Name</th>
+                                 <th>Item Name</th>
+                                 <th>Subitem Name</th>
+                                 <th>Item Details</th>
+                                 <th>Quantity</th>
+                                 <th>Unit</th>
+                                 <th>Per Rate</th>
+                                 <th>Total</th>
+                                 <th>Aawak MM</th>
+                                 <th>Aawak Type</th>
+                                 <th>Uses</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr *ngFor="let data of skippeddata | filter:term; let i=index">
+                                 <td>{{i+1}}</td>
+                                 <td>{{data.Parchi_no ? data.Parchi_no : '-'}} </td>
+                                 <td [ngClass]="{'marked': !data.Date}">{{data.Date?data.Date:'-'}}
+                                 </td>
+                                 <td [ngClass]="{'marked': !data.pbk_id}">{{data.Roll_no?data.Roll_no:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.pbk_id}">{{data.Name?data.Name:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.pbk_id}">{{data.RelationName?data.RelationName:'-'}}
+                                 </td>
+                                 <td>{{data.Mobileno?data.Mobileno:'-'}}</td>
+                                 <td [ngClass]="{'warned': !data.category_id}">{{data.Category?data.Category:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.item_id}">{{data.Item?data.Item:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.subitem_id && data.Subitem && !data.itemverified,
+                                 'warned':  !data.subitem_id && data.Subitem && data.itemverified}">
+                                    {{data.Subitem?data.Subitem:'-'}}</td>
+                                 <td>{{data.item_detail?data.item_detail:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.quantity}">{{data.quantity?data.quantity:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.unit_id}">{{data.Unit?data.Unit:'-'}}</td>
+                                 <td>{{data.rate?data.rate:'-'}}</td>
+                                 <td>{{data.amount?data.amount:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.aawak_mm_id}">{{data.aawak_mm?data.aawak_mm:'-'}}</td>
+                                 <td [ngClass]="{'marked': !data.aawak_itemtype_id}">
+                                    {{data.aawak_itemtype?data.aawak_itemtype:'-'}}</td>
+                                 <td>
+                                    <span class="px-1" *ngFor="let subdata of data.jawak_detail"
+                                       [ngClass]="{'marked': !subdata.jawak_mm_id}">
+                                       {{subdata.uses}}-{{subdata.jawak_quantity}}
+                                       <br>
+                                    </span>
+                                 </td>
+                                 <!-- <ng-container *ngFor="let subdata of data.jawak_detail"> -->
+                                 <!-- </ng-container> -->
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+
+
+
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

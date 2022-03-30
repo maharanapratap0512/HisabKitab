@@ -1,0 +1,319 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> Loading... </p>
+</ngx-spinner>
+
+<div class="row" id="pbkEntryComponent">
+   <div class="card-body">
+      <form [formGroup]="pbkForm">
+         <div class="row">
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Roll No.</label>
+                  <input type="number" class="form-control" placeholder="Roll No." formControlName="roll_no"
+                     [ngClass]="{'validation':pbkForm.get('roll_no')?.errors && (pbkForm.get('roll_no')?.touched || pbkForm.get ('roll_no')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Name (Hin)</label>
+                  <input type="text" class="form-control" placeholder="Name (Hin)" formControlName="pbk_hin"
+                     [ngClass]="{'validation':pbkForm.get('pbk_hin')?.errors && (pbkForm.get('pbk_hin')?.touched || pbkForm.get ('pbk_hin')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Name (Eng)</label>
+                  <input type="text" class="form-control" placeholder="Name (Eng)" formControlName="pbk_eng"
+                     [ngClass]="{'validation':pbkForm.get('pbk_eng')?.errors && (pbkForm.get('pbk_eng')?.touched || pbkForm.get ('pbk_eng')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Gender</label>
+                  <div class="float-end">
+                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-sm btn-outline-primary" (click)="setView('Gender')"><i
+                           class=" dripicons-view-list"></i></button>
+                     <button type="button" style="padding: 1px 6px !important;"
+                        class="btn btn-outline-primary float-end"
+                        onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal='Add Gender'">+
+                        Add</button>
+                  </div>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Gender" [clearable]="false"
+                     [virtualScroll]="true" formControlName="gender"
+                     [ngClass]="{'validation':pbkForm.get('gender')?.errors && (pbkForm.get('gender')?.touched || pbkForm.get ('gender')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Gender</ng-option>
+                     <ng-option *ngFor="let item of genders" [value]="item.list_name_eng">
+                        {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">State</label>
+                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                     onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add State'">+
+                     Add</button>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select State" [clearable]="false"
+                     [virtualScroll]="true" formControlName="state_id" (change)="stateSelected($event)"
+                     [ngClass]="{'validation':pbkForm.get('state_id')?.errors && (pbkForm.get('state_id')?.touched || pbkForm.get ('state_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select State</ng-option>
+                     <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}} :
+                        {{item.state_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Relation</label>
+                  <div class="float-end">
+                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-sm btn-outline-primary" (click)="setView('Relation')"><i
+                           class=" dripicons-view-list"></i></button>
+                     <button type="button" style="padding: 1px 6px !important;"
+                        class="btn btn-outline-primary float-end"
+                        onclick="$('#pbkEntryComponent > #showModal').modal('show')"
+                        (click)="showModal='Add Relation'">+
+                        Add</button>
+                  </div>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Relation" [clearable]="false"
+                     [virtualScroll]="true" formControlName="relation"
+                     [ngClass]="{'validation':pbkForm.get('relation')?.errors && (pbkForm.get('relation')?.touched || pbkForm.get ('relation')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Gender</ng-option>
+                     <ng-option *ngFor="let item of relations" [value]="item.list_name_eng">
+                        {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                  </ng-select>
+
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Relative Name</label>
+                  <input type="text" class="form-control" placeholder="Relative Name" formControlName="relative_name"
+                     [ngClass]="{'validation':pbkForm.get('relative_name')?.errors && (pbkForm.get('relative_name')?.touched || pbkForm.get ('relative_name')?.dirty)}">
+               </div>
+            </div>
+            <!-- <div class="col-md-4 mb-3">
+               <label class="form-label">S/o, D/o, W/o Name</label>
+               <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  (click)="relative2 = !relative2">+</button>
+               <div class="row gx-1">
+                  <div class="col-3">
+                     <ng-select class="custom" style="width: 100%;" placeholder="Select Relation" [clearable]="false"
+                        [virtualScroll]="true" formControlName="relation"
+                        [ngClass]="{'validation':pbkForm.get('relation')?.errors && (pbkForm.get('relation')?.touched || pbkForm.get ('relation')?.dirty)}">
+                        <ng-option selected="selected" disabled value="">Relation</ng-option>
+                        <ng-option *ngFor="let item of relations" [value]="item.list_name_eng">
+                           {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                     </ng-select>
+                  </div>
+                  
+               </div>
+               <br>
+               <div class="row gx-1" *ngIf="relative2">
+                  <div class="col-3">
+                     <ng-select class="custom" style="width: 100%;" placeholder="Select S/o, D/o, W/o"
+                        [clearable]="true" [virtualScroll]="true" formControlName="sdw_of_2"
+                        [ngClass]="{'validation':pbkForm.get('sdw_of_2')?.errors && (pbkForm.get('sdw_of_2')?.touched || pbkForm.get ('sdw_of_2')?.dirty)}">
+                        <ng-option selected="selected" disabled value="">S/D/W of</ng-option>
+                        <ng-option value="s/o">S/O</ng-option>
+                        <ng-option value="d/o">D/O</ng-option>
+                        <ng-option value="w/o">W/O</ng-option>
+                     </ng-select>
+                  </div>
+                  <div class="col-9">
+                     <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Second Relative Name"
+                           formControlName="sdw_of_name_2"
+                           [ngClass]="{'validation':pbkForm.get('sdw_of_name_2')?.errors && (pbkForm.get('sdw_of_name_2')?.touched || pbkForm.get ('sdw_of_name_2')?.dirty)}">
+                     </div>
+                  </div>
+               </div>
+            </div> -->
+            <div class="col-md-2 mb-3">
+               <label for="dob1" class="form-label">Birth Date</label>
+               <input class="form-control" id="dob1" type="date" formControlName="birth_date"
+                  (change)="age($any($event.target).value)"
+                  [ngClass]="{'validation':pbkForm.get('birth_date')?.errors && (pbkForm.get('birth_date')?.touched || pbkForm.get ('birth_date')?.dirty)}">
+            </div>
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Age</label>
+                  <input type="number" class="form-control" placeholder="Age" formControlName="age"
+                     [ngClass]="{'validation':pbkForm.get('age')?.errors && (pbkForm.get('age')?.touched || pbkForm.get ('age')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Address</label>
+                  <textarea class="form-control" placeholder="Address" formControlName="address"
+                     [ngClass]="{'validation':pbkForm.get('address')?.errors && (pbkForm.get('address')?.touched || pbkForm.get ('address')?.dirty)}"></textarea>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Townarea</label>
+                  <input type="text" class="form-control" placeholder="Townarea" formControlName="townarea"
+                     [ngClass]="{'validation':pbkForm.get('townarea')?.errors && (pbkForm.get('townarea')?.touched || pbkForm.get ('townarea')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">City</label>
+                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                     onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add City'">+
+                     Add</button>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select City" [clearable]="false"
+                     [virtualScroll]="true" formControlName="city_id" (change)="citySelected($event)"
+                     [ngClass]="{'validation':pbkForm.get('city_id')?.errors && (pbkForm.get('city_id')?.touched || pbkForm.get ('city_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select City</ng-option>
+                     <ng-option *ngFor="let item of cities" [value]="item._id">{{item.city_hin}} :
+                        {{item.city_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Mobile No.</label>
+                  <input type="text" class="form-control" placeholder="Mobile No." formControlName="mo_no"
+                     [ngClass]="{'validation':pbkForm.get('mo_no')?.errors && (pbkForm.get('mo_no')?.touched || pbkForm.get ('mo_no')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Alternative Mobile No.</label>
+                  <textarea class="form-control" placeholder="Alternative Mobile No." formControlName="alt_mo_no"
+                     [ngClass]="{'validation':pbkForm.get('alt_mo_no')?.errors && (pbkForm.get('alt_mo_no')?.touched || pbkForm.get ('alt_mo_no')?.dirty)}"></textarea>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Daily Class MM</label>
+                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                     onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add MM'">+
+                     Add</button>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Daily Class MM" [clearable]="false"
+                     [virtualScroll]="true" formControlName="class_mm_id"
+                     [ngClass]="{'validation':pbkForm.get('class_mm_id')?.errors && (pbkForm.get('class_mm_id')?.touched || pbkForm.get ('class_mm_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Daily Class MM</ng-option>
+                     <ng-option *ngFor="let item of mms" [value]="item._id">
+                        {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">भट्टी कब की? </label>
+                  <input type="date" class="form-control" placeholder="भट्टी कब की?	" formControlName="bhatti_date"
+                     [ngClass]="{'validation':pbkForm.get('bhatti_date')?.errors && (pbkForm.get('bhatti_date')?.touched || pbkForm.get ('bhatti_date')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Status</label>
+                  <div class="float-end">
+                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-sm btn-outline-primary" (click)="setView('Status')"><i
+                           class=" dripicons-view-list"></i></button>
+                     <button type="button" style="padding: 1px 6px !important;"
+                        class="btn btn-outline-primary float-end"
+                        onclick="$('#pbkEntryComponent > #showModal').modal('show')"
+                        (click)="showModal='Add Status'">+
+                        Add</button>
+                  </div>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Status" [clearable]="false"
+                     [virtualScroll]="true" formControlName="status"
+                     [ngClass]="{'validation':pbkForm.get('status')?.errors && (pbkForm.get('status')?.touched || pbkForm.get ('status')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Gender</ng-option>
+                     <ng-option *ngFor="let item of statuses" [value]="item.list_name_eng">
+                        {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                  </ng-select>
+
+               </div>
+            </div>
+            <div class="col-md-4 mb-3">
+               <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!this.isEdit"
+                  (click)="pbkFormSubmit()">Submit</button>
+               <button class="btn btn-warning submit mx-3" type="submit" *ngIf="this.isEdit"
+                  (click)="pbkFormUpdate()">Update</button>
+               <!-- <button class="btn btn-light submit" type="button" (click)="pbkForm.reset()">Clear</button> -->
+            </div>
+         </div>
+      </form>
+   </div>
+
+   <!-- AddState Modal -->
+   <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" style="width: 90%;">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+               <button type="button" class="btn-close" onclick="$('#pbkEntryComponent > #showModal').modal('hide')"
+                  (click)="showModal = ''" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <!-- Add State  -->
+               <app-state-entry *ngIf="showModal == 'Add State'" (response)="StateAddResponse($event)">
+               </app-state-entry>
+
+               <!-- Add City  -->
+               <app-city-entry *ngIf="showModal == 'Add City'" (response)="cityAddResponse($event)"></app-city-entry>
+
+               <!-- Add MM -->
+               <app-mm-entry *ngIf="showModal == 'Add MM'" (response)="mmAddResponse($event)"></app-mm-entry>
+
+               <!-- Add Gender -->
+               <app-support-list-entry *ngIf="showModal == 'Add Gender'" (response)='genderAddResponse($event)'
+                  list_type="gender"> </app-support-list-entry>
+
+               <!-- Add Relation -->
+               <app-support-list-entry *ngIf="showModal == 'Add Relation'" (response)='relationAddResponse($event)'
+                  list_type="relation"> </app-support-list-entry>
+
+               <!-- Add Status -->
+               <app-support-list-entry *ngIf="showModal == 'Add Status'" (response)='statusAddResponse($event)'
+                  list_type="status"> </app-support-list-entry>
+
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" style="width: 120px;"
+                  onclick="$('#pbkEntryComponent > #showModal').modal('hide')" (click)="showModal = ''">Close</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+
+   <!-- Data View For Small List -->
+   <div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" style="width: 90%;">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
+               <button type="button" class="btn-close" onclick="$('#pbkEntryComponent > #dataView').modal('hide')"
+                  aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <!-- Relation List -->
+               <app-data-view *ngIf="viewType == 'Relation'" [getData]="viewData" Type="relation"></app-data-view>
+
+               <!-- Gender List -->
+               <app-data-view *ngIf="viewType == 'Gender'" [getData]="viewData" Type="gender"></app-data-view>
+
+               <!-- Status List -->
+               <app-data-view *ngIf="viewType == 'Status'" [getData]="viewData" Type="status"></app-data-view>
+
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" style="width: 120px;"
+                  onclick="$('#pbkEntryComponent > #dataView').modal('hide')">Close</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+
+</div>

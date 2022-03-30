@@ -1,0 +1,165 @@
+<div class="row" id="subitemComponent">
+   <div class="card-body">
+      <form [formGroup]="subitemForm">
+         <div class="row">
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Item</label>
+                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                     onclick="$('#subitemComponent > #showModal').modal('show')" (click)="showModal = 'Add Item'">+
+                     Add</button>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
+                     [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)"
+                     [ngClass]="{'validation':subitemForm.get('item_id')?.errors && (subitemForm.get('item_id')?.touched || subitemForm.get ('item_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                     <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                        {{item.item_eng}} : {{item.item_code}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Subitem List</label>
+                  <div class="float-end">
+                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-sm btn-outline-primary" (click)="setView('Subitem List')"><i
+                           class=" dripicons-view-list"></i></button>
+                     <button type="button" style="padding: 1px 6px !important;"
+                        class="btn btn-outline-primary float-end"
+                        onclick="$('#subitemComponent > #showModal').modal('show')"
+                        (click)="showModal = 'Add Subitem List'">+
+                        Add</button>
+                  </div>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select SubitemList" [clearable]="false"
+                     [virtualScroll]="true" formControlName="subitem_list_id"
+                     [ngClass]="{'validation':subitemForm.get('subitem_list')?.errors && (subitemForm.get('subitem_list')?.touched || subitemForm.get ('subitem_list')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Subitem List</ng-option>
+                     <ng-option *ngFor="let item of subitem_list" [value]="item._id">{{item.subitem_hin}} :
+                        {{item.subitem_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Category</label>
+                  <div class="float-end">
+                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-sm btn-outline-primary" (click)="setView('Category')"><i
+                           class=" dripicons-view-list"></i></button>
+                     <button type="button" style="padding: 1px 6px !important;"
+                        class="btn btn-outline-primary float-end"
+                        onclick="$('#subitemComponent > #showModal').modal('show')"
+                        (click)="showModal = 'Add Category'">+
+                        Add</button>
+                  </div>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="false"
+                     [virtualScroll]="true" formControlName="category_id"
+                     [ngClass]="{'validation':subitemForm.get('category_id')?.errors && (subitemForm.get('category_id')?.touched || subitemForm.get ('category_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Category</ng-option>
+                     <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
+                        {{item.category_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Default Unit</label>
+                  <div class="float-end">
+                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-sm btn-outline-primary" (click)="setView('Unit')"><i
+                           class=" dripicons-view-list"></i></button>
+                     <button type="button" style="padding: 1px 6px !important;"
+                        class="btn btn-outline-primary float-end"
+                        onclick="$('#subitemComponent > #showModal').modal('show')" (click)="showModal = 'Add Unit'">+
+                        Add</button>
+                  </div>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Default Unit" [clearable]="false"
+                     [virtualScroll]="true" formControlName="unit_id"
+                     [ngClass]="{'validation':subitemForm.get('unit_id')?.errors && (subitemForm.get('unit_id')?.touched || subitemForm.get ('unit_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Default Unit</ng-option>
+                     <ng-option *ngFor="let item of units" [value]="item._id">{{item.unit_short}} :
+                        {{item.unit_full}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-6 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Extra Note</label>
+                  <textarea class="form-control" placeholder="Extra Note" formControlName="extra_note"
+                     [ngClass]="{'validation':subitemForm.get('extra_note')?.errors && (subitemForm.get('extra_note')?.touched || subitemForm.get ('extra_note')?.dirty)}"></textarea>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                  (click)="subitemFormSubmit()">Submit</button>
+               <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                  (click)="subitemFormUpdate()">Update</button>
+               <!-- <button class="btn btn-light submit mx-3" type="button" (click)="subitemForm.reset()">Clear</button> -->
+            </div>
+         </div>
+      </form>
+   </div>
+
+
+   <!-- Modal -->
+   <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" style="width: 90%;">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+               <button type="button" class="btn-close" onclick="$('#subitemComponent > #showModal').modal('hide')"
+                  (click)="showModal = ''" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+
+               <!-- Add Unit  -->
+               <app-unit-entry *ngIf="showModal == 'Add Unit'" (response)="unitAddResponse($event)"></app-unit-entry>
+
+               <!-- Add Category  -->
+               <app-category-entry *ngIf="showModal == 'Add Category'" (response)="categoryAddResponse($event)">
+               </app-category-entry>
+
+               <!-- Add Item  -->
+               <app-item-entry *ngIf="showModal == 'Add Item'" (response)="itemAddResponse($event)"></app-item-entry>
+
+               <!-- Add Subitem_List  -->
+               <app-subitem-list-entry *ngIf="showModal == 'Add Subitem List'"
+                  (response)="subitemListAddResponse($event)">
+               </app-subitem-list-entry>
+
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" style="width: 120px;"
+                  onclick="$('#subitemComponent > #showModal').modal('hide')" (click)="showModal = ''">Close</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Data View For Small List -->
+   <div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" style="width: 90%;">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
+               <button type="button" class="btn-close" onclick="$('#subitemComponent > #dataView').modal('hide')"
+                  aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <app-data-view *ngIf="viewType == 'Unit'" [getData]="viewData" Type="unit"></app-data-view>
+               <app-data-view *ngIf="viewType == 'Category'" [getData]="viewData" Type="category"></app-data-view>
+               <app-data-view *ngIf="viewType == 'Subitem List'" [getData]="viewData" Type="subitem_list">
+               </app-data-view>
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" style="width: 120px;"
+                  onclick="$('#subitemComponent > #dataView').modal('hide')">Close</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+</div>

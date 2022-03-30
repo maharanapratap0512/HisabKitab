@@ -1,0 +1,47 @@
+<div class="row">
+    <div class="card-body">
+        <form [formGroup]="deptForm">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Department Name (Eng)</label>
+                        <input type="text" class="form-control" placeholder="Department Name (Eng)"
+                            formControlName="dept_eng"
+                            [ngClass]="{'validation':deptForm.get('dept_eng')?.errors && (deptForm.get('dept_eng')?.touched || deptForm.get ('dept_eng')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Department Name (Hin)</label>
+                        <input type="text" class="form-control" placeholder="Department Name (Hin)"
+                            formControlName="dept_hin"
+                            [ngClass]="{'validation':deptForm.get('dept_hin')?.errors && (deptForm.get('dept_hin')?.touched || deptForm.get ('dept_hin')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Department Code</label>
+                        <input type="text" class="form-control" placeholder="Department Code"
+                            formControlName="dept_code"
+                            [ngClass]="{'validation':deptForm.get('dept_code')?.errors && (deptForm.get('dept_code')?.touched || deptForm.get ('dept_code')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" placeholder="password"
+                            formControlName="password"
+                            [ngClass]="{'validation':deptForm.get('password')?.errors && (deptForm.get('password')?.touched || deptForm.get ('password')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type=" mx-3"
+                        (click)="deptFormSubmit()">Submit</button>
+                    <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                        (click)="deptFormUpdate()">Update</button>
+                    <!-- <button class="btn btn-light submit mx-3" type="button" (click)="deptForm.reset()">Clear</button> -->
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,188 @@
+<!-- 
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+[fullScreen]="true">
+<p style="color: white"> Loading... </p>
+</ngx-spinner> -->
+
+<!-- Begin page -->
+<div class="wrapper">
+   <div class="content-page">
+      <div class="content">
+         <div class="container-fluid">
+
+            <div class="row mt-3">
+
+               <!-- Aawak Clearance Card -->
+               <div class="col-md-8 col-12">
+                  <div class="card card-body">
+                     <h5 class="card-title">
+                        Pending Aawak Clearance
+                     </h5>
+                     <div class="row">
+                        <div class="col-12 px-2" style="margin-bottom: 10px;">
+                           <div class="float-start col-4">
+                              <div class="form-group">
+                                 <input type="text" class="form-control" placeholder="Search Here"
+                                    [(ngModel)]="termAawak" name="search">
+                              </div>
+                           </div>
+
+                           <div class="float-end">
+                              <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total
+                                 Count : {{pendingAawakData.length?pendingAawakData.length:'0'}} </button>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row" style="overflow-y: scroll; max-height: 500px;">
+                        <table id="datatable-buttons" class="table table-hover dt-responsive">
+                           <thead>
+                              <tr>
+                                 <td>No.</td>
+                                 <td>Date</td>
+                                 <td>Pkt No</td>
+                                 <td>Aawak MM</td>
+                                 <td>MM</td>
+                                 <td>Item</td>
+                                 <td>Remaining Qty</td>
+                                 <td>Amount</td>
+                                 <td>Aawak Type</td>
+                                 <td>Jawak</td>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr *ngFor="let data of pendingAawakData | filter:termAawak; let i=index">
+                                 <td>{{i+1}}</td>
+                                 <td>{{data.date}}</td>
+                                 <td>{{data.pkt_num}}</td>
+                                 <td>{{data.mm_hin}}<br />
+                                    {{data.mm_eng}}</td>
+                                 <td>{{data.aawak_mm_hin}}<br />
+                                    {{data.aawak_mm_eng}}</td>
+                                 <td>{{data.item_hin}} : {{data.subitem_hin}}<br />
+                                    {{data.item_eng}} : {{data.subitem_eng}}</td>
+                                 <td>
+                                    <span style="font-weight:bold; color: red;">
+                                       {{data.remaining_qty}} {{data.unit_short}}
+                                    </span><br />
+                                    Total : {{data.qty}} {{data.unit_short}}
+                                 </td>
+                                 <td>@ {{data.rate}}<br />
+                                    = {{data.actual_amt}}
+                                 </td>
+                                 <td>{{data.aawak_type_hin}} <br />
+                                    {{data.aawak_type_eng}}
+                                 </td>
+                                 <td>
+                                    <button class="btn btn-sm btn-warning" (click)="addJawak(data)">
+                                       <i class="mdi mdi-plus noti-icon"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-primary" (click)="showJawak(data._id)">
+                                       <i class="dripicons-view-list noti-icon"></i>
+                                    </button>
+                                 </td>
+
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </div>
+
+
+               <!-- Stock/bachat Card -->
+               <div class="col-md-4 col-12">
+                  <div class="card card-body">
+                     <h5 class="card-title">
+                        Stock/Ghar me Use
+                     </h5>
+                     <div class="row">
+                        <div class="col-12 px-2" style="margin-bottom: 10px;">
+                           <div class="row">
+                              <div class="col-6">
+                                 <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Search Here"
+                                       [(ngModel)]="termBachat" name="search">
+                                 </div>
+                              </div>
+                              <div class="col-6">
+                                 <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
+                                    [clearable]="true" [virtualScroll]="true" (change)="mmSelected($event)">
+                                    <ng-option *ngFor="let item of mms" [value]="item._id">
+                                       {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
+                                 </ng-select>
+                              </div>
+                              <!-- <div class="float-end">                           
+                                 <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total
+                                    Count : {{bachatData.length?bachatData.length:'0'}} </button>
+                              </div> -->
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row" style="overflow-y: scroll; max-height: 500px;">
+                        <table id="datatable-buttons" class="table table-hover dt-responsive">
+                           <thead>
+                              <tr>
+                                 <td>No.</td>
+                                 <td>MM</td>
+                                 <td>Type</td>
+                                 <td>Item</td>
+                                 <td>Qty</td>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <ng-container *ngFor="let data of bachatData | filter:termBachat; let i=index">
+
+                                 <tr *ngIf="data.qty>0">
+                                    <td>{{i+1}}</td>
+                                    <td>
+                                       {{data.mm_hin}}<br />
+                                       {{data.mm_eng}}
+                                    </td>
+                                    <td>
+                                       {{data.bachat_type_hin}}<br/>
+                                       {{data.bachat_type_eng}}
+                                    </td>
+                                    <td>
+                                       {{data.item_hin}} : {{data.subitem_hin}} <br />
+                                       {{data.item_eng}} : {{data.subitem_eng}}
+                                    </td>
+                                    <td>{{data.qty}} {{data.unit_short}}</td>
+
+                                 </tr>
+                              </ng-container>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+         </div>
+      </div>
+   </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
+               aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
+               [getData]="editData"></app-jawak-entry>
+            <!-- <app-jawak-entry *ngIf="showModal == 'Edit Aawak'" (response)='editAawakResponse($event)'
+               [getData]="editData" [isEdit]="true"></app-jawak-entry> -->
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+         </div>
+      </div>
+   </div>
+</div>

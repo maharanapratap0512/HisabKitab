@@ -1,0 +1,102 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color: white"> Loading... </p>
+</ngx-spinner>
+
+<div class="row" id="cityEntryComponent">
+    <div class="card-body">
+        <form [formGroup]="cityForm">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">City Name (Hin)</label>
+                        <input type="text" class="form-control" placeholder="City Name (Hin)" formControlName="city_hin"
+                            [ngClass]="{'validation':cityForm.get('city_hin')?.errors && (cityForm.get('city_hin')?.touched || cityForm.get ('city_hin')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">City Name (Eng)</label>
+                        <input type="text" class="form-control" placeholder="City Name (Eng)" formControlName="city_eng"
+                            [ngClass]="{'validation':cityForm.get('city_eng')?.errors && (cityForm.get('city_eng')?.touched || cityForm.get ('city_eng')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">State</label>
+                        <div class="float-end">
+                            <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                                class="btn btn-sm btn-outline-primary" (click)="setView('State')">
+                                <i class=" dripicons-view-list"></i>
+                            </button>
+                            <button type="button" style="padding: 1px 6px !important;"
+                                class="btn btn-outline-primary float-end"
+                                onclick="$('#cityEntryComponent > #addState').modal('show')"
+                                (click)="showModal = 'addState'">+ Add
+                            </button>
+                        </div>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select State" [clearable]="false"
+                            [virtualScroll]="true" formControlName="state_id"
+                            [ngClass]="{'validation':cityForm.get('state_id')?.errors && (cityForm.get('state_id')?.touched || cityForm.get ('state_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select State</ng-option>
+                            <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}} :
+                                {{item.state_eng}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!isEdit"
+                        (click)="cityFormSubmit()">Submit</button>
+                    <button class="btn btn-warning submit mx-3" type="submit" *ngIf="isEdit"
+                        (click)="cityFormUpdate()">Update</button>
+                    <!-- <button class="btn btn-light submit mx-3" type="button" (click)="cityForm.reset()">Clear</button> -->
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- AddState Modal -->
+    <div class="modal fade" id="addState" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add State</h5>
+                    <button type="button" class="btn-close" aria-label="Close"
+                        onclick="$('#cityEntryComponent > #addState').modal('hide')" (click)="showModal = ''"></button>
+                </div>
+                <div class="modal-body" *ngIf="showModal == 'addState'">
+                    <app-state-entry (response)="StateAddResponse($event)">
+                    </app-state-entry>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data View For Small List -->
+    <div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
+                    <button type="button" class="btn-close" onclick="$('#cityEntryComponent > #dataView').modal('hide')"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- MM type List -->
+                    <app-data-view *ngIf="viewType == 'State'" [getData]="viewData" Type="state"></app-data-view>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        onclick="$('#cityEntryComponent > #dataView').modal('hide')">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

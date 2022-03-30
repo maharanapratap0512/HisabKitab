@@ -1,0 +1,122 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> Loading... </p>
+</ngx-spinner>
+
+<!-- Begin page -->
+<div class="wrapper">
+   <div class="content-page">
+      <div class="content">
+
+         <!-- Start Content-->
+         <div class="container-fluid">
+            <div class="row">
+               <div class="card-body">
+                  <div class="row">
+                     <div class="col-8">
+                        <table id="datatable-buttons" class="table table-hover dt-responsive">
+                           <thead>
+                              <tr style="text-align: center;">
+                                 <th>No.</th>
+                                 <th style="width: 50%; ">Name</th>
+                                 <th>
+                                    <!-- Manage -->
+                                    <div class="file btn btn-success mx-2">
+                                       <i class="uil uil-arrow-to-bottom"></i> Import All
+                                       <input type="file" class="inputtag" accept="*.zip, application/ZIP"
+                                          (change)="importAll($event)" />
+                                    </div>
+                                    <!-- <div class="file btn btn-success mx-2">
+                                       <i class="uil uil-arrow-to-bottom"></i> Import All
+                                    </div> -->
+                                    <button class="btn btn-primary mx-2" type="button" (click)="exportAll()">
+                                       <i class="uil uil-top-arrow-from-top"></i> Export All
+                                    </button>
+                                 </th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr style="text-align: center;" *ngFor="let data of tableData;let i = index">
+                                 <td>{{i+1}}</td>
+                                 <td>{{data}}</td>
+                                 <td>
+                                    <!-- <button class="btn btn-success mx-2" type="button" (change)="import(data,$event)">
+                                       <i class="uil uil-arrow-to-bottom"></i> Import
+                                    </button> -->
+                                    <div class="file btn btn-success mx-2">
+                                       <i class="uil uil-arrow-to-bottom"></i> Import
+                                       <input type="file" class="inputtag" accept="*.json, application/JSON"
+                                          (change)="import(data,$event)" [ngModel]="inputFile"
+                                          [ngModelOptions]="{standalone: true}" />
+                                    </div>
+                                    <button class="btn btn-primary mx-2" type="button" (click)="export(data)">
+                                       <i class="uil uil-top-arrow-from-top"></i> Export
+                                    </button>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                     <div class="col-4">
+                        <div class="card">
+                           <div class="card-body">
+                              <table id="" class="table table-stripped dt-responsive">
+                                 <thead>
+                                    <tr style="text-align: center;">
+                                       <th colspan="2">Export Sewa Software</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+                                    <tr>
+                                       <td>MM</td>
+                                       <td>
+                                          <div>
+                                             <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
+                                                [clearable]="false" [virtualScroll]="true" [(ngModel)]="mmstate"
+                                                [ngModelOptions]="{standalone: true}" (change)="mmChanged($event)">
+                                                <ng-option *ngFor="let item of mms"
+                                                   value="{{item.mm_hin}}-{{item.mm_eng}}:{{item.state_id}}">
+                                                   {{item.mm_hin}} :
+                                                   {{item.mm_eng}} :
+                                                   {{item.mm_code}}</ng-option>
+                                             </ng-select>
+                                          </div>
+                                       </td>
+                                    </tr>
+                                    <tr>
+                                       <td>State</td>
+                                       <td>
+                                          <div>
+                                             <ng-select class="custom" style="width: 100%;" placeholder="Select State"
+                                                [clearable]="false" [virtualScroll]="true" [(ngModel)]="singlestate"
+                                                [ngModelOptions]="{standalone: true}">
+                                                <ng-option *ngFor="let item of states" [value]="item._id">
+                                                   {{item.state_hin}} :
+                                                   {{item.state_eng}}</ng-option>
+                                             </ng-select>
+                                          </div>
+                                       </td>
+                                    </tr>
+                                    <tr>
+                                       <td colspan="2">
+                                          <div class="d-grid">
+                                             <button class="btn btn-info btn-block mx-2" type="button"
+                                                [disabled]="!this.singlestate && !this.mmstate"
+                                                (click)="exportProject()">
+                                                <i class="uil uil-arrow-to-bottom"></i> Download
+                                             </button>
+                                          </div>
+                                       </td>
+                                    </tr>
+                                 </tbody>
+                              </table>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

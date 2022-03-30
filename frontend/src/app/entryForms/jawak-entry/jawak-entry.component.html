@@ -1,0 +1,361 @@
+<div class="row" id="jawakEntryComponent">
+    <div class="card-body">
+        <form [formGroup]="jawakForm">
+            <div class="row">
+
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Pkt No</label>
+                        <input type="text" class="form-control" placeholder="Pkt No" formControlName="pkt_num"
+                            [ngClass]="{'validation':jawakForm.get('pkt_num')?.errors && (jawakForm.get('pkt_num')?.touched || jawakForm.get ('pkt_num')?.dirty)}">
+                    </div>
+                </div>
+
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-control" placeholder="Date" formControlName="date"
+                            [ngClass]="{'validation':jawakForm.get('date')?.errors && (jawakForm.get('date')?.touched || jawakForm.get ('date')?.dirty)}">
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">MM</label>
+                        <button type="button" style="padding: 1px 6px !important;"
+                            class="btn btn-outline-primary float-end"
+                            onclick="$('#jawakEntryComponent > #showModal').modal('show')"
+                            (click)="showModal = 'Add MM'">
+                            + Add
+                        </button>
+                        <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="false"
+                            [virtualScroll]="true" formControlName="mm_id"
+                            [ngClass]="{'validation':jawakForm.get('mm_id')?.errors && (jawakForm.get('mm_id')?.touched || jawakForm.get ('mm_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">MM</ng-option>
+                            <ng-option *ngFor="let item of mms" [value]="item._id">
+                                {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code?' : '+item.mm_code:''}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Jawak MM</label>
+                        <button type="button" style="padding: 1px 6px !important;"
+                            class="btn btn-outline-primary float-end"
+                            onclick="$('#jawakEntryComponent > #showModal').modal('show')"
+                            (click)="showModal = 'Add MM'">
+                            + Add
+                        </button>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Jawak MM" [clearable]="false"
+                            [virtualScroll]="true" formControlName="jawak_mm_id"
+                            [ngClass]="{'validation':jawakForm.get('jawak_mm_id')?.errors && (jawakForm.get('jawak_mm_id')?.touched || jawakForm.get ('jawak_mm_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Jawak MM</ng-option>
+                            <ng-option *ngFor="let item of mms" [value]="item._id">
+                                {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code?' : '+item.mm_code:''}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Nimmit</label>
+                        <input type="text" class="form-control" placeholder="Nimmit" formControlName="nimmit"
+                            [ngClass]="{'validation':jawakForm.get('nimmit')?.errors && (jawakForm.get('nimmit')?.touched || jawakForm.get ('nimmit')?.dirty)}">
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id != 3">
+                    <div class="form-group">
+                        <label class="form-label">Sewadhari</label>
+                        <button type="button" style="padding: 1px 6px !important;"
+                            class="btn btn-outline-primary float-end" (click)="openModal('Add PBK')">
+                            + PBK
+                        </button>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Filter PBK by State"
+                            [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)">
+                            <ng-option selected="selected" disabled value="">Select State to Filter Pbk
+                            </ng-option>
+                            <ng-option *ngFor="let item of states" [value]="item._id">
+                                {{item.state_hin}} : {{item.state_eng}}
+                            </ng-option>
+                        </ng-select>
+                        <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Roll no. or Pbk name"
+                            [clearable]="false" [virtualScroll]="true" formControlName="pbk_id"
+                            [ngClass]="{'validation':jawakForm.get('pbk_id')?.errors && (jawakForm.get('pbk_id')?.touched || jawakForm.get ('pbk_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
+                            </ng-option>
+                            <ng-option *ngFor="let item of pbks" [value]="item._id">
+                                {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :
+                                {{item.relative_name}}
+                            </ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3" *ngIf="departments.length || categories.length">
+                    <div class="form-group">
+                        <label class="form-label">Filter Items By</label>
+                        <!-- <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                      onclick="$('#jawakEntryComponent > #showModal').modal('show')"
+                      (click)="showModal = 'Add Department'">
+                      + Add
+                   </button> -->
+                        <ng-select *ngIf="departments && departments.length" class="custom" style="width: 100%;"
+                            placeholder="Select Department" [clearable]="false" [virtualScroll]="true"
+                            (change)="deptSelected($event)" [ngModelOptions]="{standalone: true}">
+                            <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :
+                                {{item.dept_eng}}{{item.dept_code?' : '+item.dept_code:''}}</ng-option>
+                        </ng-select>
+                        <ng-select *ngIf="categories && categories.length" class="custom mt-1" style="width: 100%;"
+                            placeholder="Select Category" [clearable]="false" [virtualScroll]="true"
+                            (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
+                            <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
+                                {{item.category_eng}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+
+
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Item & Subitem</label>
+                        <div class="float-end">
+                            <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
+                                onclick="$('#jawakEntryComponent > #showModal').modal('show')"
+                                (click)="showModal = 'Add Item'">
+                                + Item
+                            </button>
+                            <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                                class="btn btn-outline-primary"
+                                onclick="$('#jawakEntryComponent > #showModal').modal('show')"
+                                (click)="showModal = 'Add Subitem'">
+                                + Subitem
+                            </button>
+                        </div>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
+                            [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)"
+                            [ngClass]="{'validation':jawakForm.get('item_id')?.errors && (jawakForm.get('item_id')?.touched || jawakForm.get ('item_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                            <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                                {{item.item_eng}} : {{item.item_code}}</ng-option>
+                        </ng-select>
+                        <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
+                            [clearable]="false" [virtualScroll]="true" formControlName="subitem_id"
+                            [ngClass]="{'validation':jawakForm.get('subitem_id')?.errors && (jawakForm.get('subitem_id')?.touched || jawakForm.get ('subitem_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
+                            <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}} :
+                                {{item.subitem_eng}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id != 3">
+                    <div class="form-group">
+                        <label class="form-label">Product & Condition</label>
+                        <div class="float-end">
+                            <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
+                                (click)="openModal('Add Product')">
+                                + product
+                            </button>
+                            <!-- <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                                class="btn btn-outline-primary" (click)="openModal('Add Condition')">
+                                + Condition
+                            </button> -->
+                        </div>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Product" [clearable]="true"
+                            [virtualScroll]="true" formControlName="product_id" (change)="productSelected($event)"
+                            [ngClass]="{'validation':jawakForm.get('product_id')?.errors && (jawakForm.get('product_id')?.touched || jawakForm.get ('product_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Product</ng-option>
+                            <ng-option *ngFor="let item of products" [value]="item._id">{{item.item_hin}} :
+                                {{item.subitem_hin}}
+                                : {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num : ''}}
+                            </ng-option>
+                        </ng-select>
+                        <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition"
+                            [clearable]="false" [virtualScroll]="true" formControlName="condition_id"
+                            *ngIf="isCondition"
+                            [ngClass]="{'validation':jawakForm.get('condition_id')?.errors && (jawakForm.get('condition_id')?.touched || jawakForm.get ('condition_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Condition</ng-option>
+                            <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
+                                {{item.list_name_eng}} </ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Quantity (in {{unit_short}})</label>
+                        <input type="number" class="form-control" placeholder="{{'i.e. 10 '+ unit_short }}" formControlName="qty"
+                            [ngClass]="{'validation':jawakForm.get('qty')?.errors && (jawakForm.get('qty')?.touched || jawakForm.get ('qty')?.dirty)}">
+
+                    </div>
+                </div>
+
+                <!-- <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Unit</label>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Unit"
+                            [clearable]="false" [virtualScroll]="true" formControlName="unit_id" [disabled]="true"
+                            [ngClass]="{'validation':jawakForm.get('unit_id')?.errors && (jawakForm.get('unit_id')?.touched || jawakForm.get ('unit_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Unit</ng-option>
+                            <ng-option *ngFor="let item of units" [value]="item._id">{{item.unit_short}} :
+                                {{item.unit_full}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div> -->
+
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Jawak Type</label>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Jawak Type"
+                            [clearable]="false" [virtualScroll]="true" formControlName="jawak_type_id"
+                            [ngClass]="{'validation':jawakForm.get('jawak_type_id')?.errors && (jawakForm.get('jawak_type_id')?.touched || jawakForm.get ('jawak_type_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Jawak Type</ng-option>
+                            <ng-option *ngFor="let item of jawak_types" [value]="item._id">{{item.list_name_hin}} :
+                                {{item.list_name_eng}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Item Detail</label>
+                        <textarea class="form-control" placeholder="Item Detail" formControlName="item_detail"
+                            [ngClass]="{'validation':jawakForm.get('item_detail')?.errors && (jawakForm.get('item_detail')?.touched || jawakForm.get ('item_detail')?.dirty)}"></textarea>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Jawak Description</label>
+                        <textarea class="form-control" placeholder="Jawak Description" formControlName="description"
+                            [ngClass]="{'validation':jawakForm.get('description')?.errors && (jawakForm.get('description')?.touched || jawakForm.get ('description')?.dirty)}"></textarea>
+                    </div>
+                </div>
+
+                <div class="col-md-2 mb-3">
+                    <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!this.isEdit"
+                        (click)="jawakFormSubmit()">Submit</button>
+                    <button class="btn btn-warning submit mx-3" type="submit" *ngIf="this.isEdit"
+                        (click)="jawakFormUpdate()">Update</button>
+                    <!-- <button class="btn btn-light submit" type="button" (click)="jawakForm.reset()">Clear</button> -->
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Image upload Model -->
+    <!-- <div class="modal fade" id="addImages" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+       aria-hidden="true">
+       <div class="modal-dialog" style="width:95%">
+          <div class="modal-content">
+             <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Select Images</h5>
+                <button type="button" class="btn-close" onclick="$('#jawakEntryComponent > #addImages').modal('hide')"
+                   aria-label="Close"></button>
+             </div>
+             <div class="modal-body">
+                <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)">
+                </app-files-view>
+             </div>
+             <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" style="width: 120px;"
+                   onclick="$('#jawakEntryComponent > #addImages').modal('hide')">Close</button>
+             </div>
+          </div>
+       </div> -->
+    <!-- </div> -->
+
+    <!-- Modal -->
+    <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width:95%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+                    <button type="button" class="btn-close"
+                        onclick="$('#jawakEntryComponent > #showModal').modal('hide')" (click)="showModal = ''"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Add MM -->
+                    <app-mm-entry *ngIf="showModal == 'Add MM'" (response)="mmAddResponse($event)"></app-mm-entry>
+
+                    <!-- Add Item  -->
+                    <app-item-entry *ngIf="showModal == 'Add Item'" (response)="itemAddResponse($event)">
+                    </app-item-entry>
+
+                    <!-- Add Subitem_List  -->
+                    <app-subitem-entry *ngIf="showModal == 'Add Subitem'" (response)="subitemAddResponse($event)">
+                    </app-subitem-entry>
+
+                    <!-- Add Condition -->
+                    <app-support-list-entry *ngIf="showModal == 'Add Condition'"
+                        (response)='conditionAddResponse($event)' list_type="condition"> </app-support-list-entry>
+
+                    <!-- Add PBK -->
+                    <app-pbk-entry *ngIf="showModal == 'Add PBK'" (response)='pbkAddResponse($event)'>
+                    </app-pbk-entry>
+
+                    <!-- Add JMM -->
+                    <app-mm-entry *ngIf="showModal == 'Add JMM'" (response)='jmmAddResponse($event)'>
+                    </app-mm-entry>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        onclick="$('#jawakEntryComponent > #showModal').modal('hide')"
+                        (click)="showModal = ''">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Data View For Small List -->
+    <div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
+                    <button type="button" class="btn-close"
+                        onclick="$('#jawakEntryComponent > #dataView').modal('hide')" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Relation List -->
+                    <app-data-view *ngIf="viewType == 'Relation'" [getData]="viewData" Type="relation"></app-data-view>
+
+                    <!-- Gender List -->
+                    <app-data-view *ngIf="viewType == 'Condition'" [getData]="viewData" Type="condition">
+                    </app-data-view>
+
+                    <!-- Status List -->
+                    <app-data-view *ngIf="viewType == 'Status'" [getData]="viewData" Type="status"></app-data-view>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        onclick="$('#jawakEntryComponent > #dataView').modal('hide')">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>

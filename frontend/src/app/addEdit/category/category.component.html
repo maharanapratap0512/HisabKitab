@@ -1,0 +1,95 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> Loading... </p>
+</ngx-spinner>
+
+<!-- Begin page -->
+<div class="wrapper">
+   <div class="content-page">
+      <div class="content">
+         <div class="container-fluid">
+
+            <!-- First Row -->
+            <!-- Add Button, Search Field, Filter button, Total Count -->
+            <div class="row">
+               <div class="card-body" style="overflow: auto;">
+                  <div class="row justify-content-between">
+                     <div class="col-2">
+                        <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
+                           (click)="showModal = 'Add Category'">
+                           <i class="dripicons-plus" style="font-size: large;"> </i>Add Category
+                        </button>
+                     </div>
+                     <div class="col-5">
+                        <div class="form-group">
+
+                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                              name="search">
+                        </div>
+                     </div>
+                     <div class="col-2">
+                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total
+                           Count : {{categoryData.length?categoryData.length:'-'}}
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div class="row" *ngIf="categoryData.length">
+               <div class="card-body" style="overflow: auto;">
+                  <table id="datatable-buttons" class="table table-hover dt-responsive">
+                     <thead>
+                        <tr>
+                           <th>No.</th>
+                           <th>Manage</th>
+                           <th>Categoty (Hin)</th>
+                           <th>Categoty (Eng)</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let data of categoryData | filter:term; let i=index">
+                           <td>{{i+1}}</td>
+                           <td>
+                              <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                                    class="uil uil-pen"></i></button>
+                              <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                    class="uil-trash"></i></button>
+                           </td>
+                           <td>{{data.category_eng}}</td>
+                           <td>{{data.category_hin}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+
+
+<!-- addCategory Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
+               aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <app-category-entry *ngIf="showModal == 'Add Category'" (response)='addCategoryResponse($event)'>
+            </app-category-entry>
+            <app-category-entry *ngIf="showModal == 'Edit Category'" (response)='editCategoryResponse($event)'
+               [getData]="editData" [isEdit]="true"></app-category-entry>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+         </div>
+      </div>
+   </div>
+</div>

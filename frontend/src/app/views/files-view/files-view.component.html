@@ -1,0 +1,48 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color: white"> Loading... </p>
+</ngx-spinner>
+
+<div class="row" id="fileViewComponent">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2 mb-3">
+                <div class="add-container" (click)="uploadDocument.click()">
+                    <input type="file" class="form-control" #uploadDocument (change)="changeDocument($event)" hidden
+                        accept="image/*" />
+                    <i class="uil-image-plus" style="font-size:400%; "></i>
+                    <p class="add-title">ADD IMAGE</p>
+                    <div class="overlay"></div>
+
+                </div>
+            </div>
+
+            <div class="col-md-2 mb-3" *ngFor="let file of imageName">
+                <div class="container">
+                    <img [src]="baseUrl+imageFolder+file" alt="image" />
+                    <p class="title">{{file}}</p>
+                    <div class="overlay"></div>
+                    <div class="close btn btn-sm btn-outline-danger" (click)="imageDelete(file)">
+                        <i class="mdi mdi-trash-can-outline"></i>
+                    </div>
+                    <div class="button btn btn-sm btn-outline-success" (click)="imageClicked(file)">
+                        <i class="mdi mdi-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="wrapper">
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+
+
+
+                
+            </div>
+        </div>
+    </div>
+</div> -->

@@ -1,0 +1,52 @@
+@import '~@ng-select/ng-select/scss/default.theme';
+
+.submit {
+  top: 28px;
+  position: relative;
+  width: 120px;
+}
+
+.validation {
+  border: 1px solid red !important;
+}
+
+// .ng-select .custom{
+//     display: block;
+//     width: 100%;
+//     padding: .45rem 2.5rem .45rem .9rem;
+//     font-size: .9rem;
+//     font-weight: 400;
+//     line-height: 1.5;
+//     color: #6c757d;
+//     background-color: #fff;
+//     background-repeat: no-repeat;
+//     background-position: right .9rem center;
+//     background-size: 16px 12px;
+//     border: 1px solid #dee2e6;
+//     border-radius: .25rem;
+//     appearance: none;
+// }
+
+
+
+// ::-webkit-scrollbar {
+//     width: 10px;
+//     height: 10px;
+//     padding: 10px;
+
+//   }
+
+//   /* Track */
+//   ::-webkit-scrollbar-track {
+//     background: #d4d4d4; 
+//   }
+
+//   /* Handle */
+//   ::-webkit-scrollbar-thumb {
+//     background: #243245; 
+//   }
+
+//   /* Handle on hover */
+//   ::-webkit-scrollbar-thumb:hover {
+//     background: #071c38; 
+//   }
