@@ -74,6 +74,7 @@ export class GlobalService {
           this.Lists.subitem_list = data['result'].subitem_list;
           this.Lists.subitem = data['result'].subitem;
           this.Lists.department = data['result'].department;
+          this.Lists.sitem = data['result'].sitem;
 
         }
         return resolve(1);

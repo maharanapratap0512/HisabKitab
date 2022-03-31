@@ -858,6 +858,8 @@ class DBContex {
 
         bachat_history: ``,
 
+        sitem: `select * from sitem`
+
     };
 
     fullListForConfig = {

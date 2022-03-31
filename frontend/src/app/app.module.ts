@@ -11,6 +11,7 @@ import { Ng2SearchPipeModule } from 'ng2-search-filter';
 import { FileSaverModule } from 'ngx-filesaver';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgtUniversalModule } from '@ng-toolkit/universal';
+import { DropDownTreeModule } from '@syncfusion/ej2-angular-dropdowns';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -108,6 +109,7 @@ import { DepartmentEntryComponent } from './entryForms/department-entry/departme
   ],
   imports: [
     BrowserModule,
+    DropDownTreeModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
