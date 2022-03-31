@@ -22,6 +22,8 @@ export class ItemComponent implements OnInit {
   editData: any = {};
   itemData: any = [];
   total_count: any;
+  si_total_count: any;
+  subitemData: any = [];
 
   constructor(
     private fb: FormBuilder,
@@ -36,6 +38,7 @@ export class ItemComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getItemData();
+    this.getSubitemData();
   }
 
   getItemData() {
@@ -44,6 +47,18 @@ export class ItemComponent implements OnInit {
       if (data['result'] && data['success']) {
         this.itemData = data['result'];
         this.total_count = data['total_count'];
+        this.isLoader = false;
+      }
+      this.isLoader = false;
+    });
+  }
+
+  getSubitemData() {
+    this.isLoader = true;
+    this.http.get(this.api.getUrl('SUBITEM') + this.auth.webUser.dept_id).subscribe((data) => {
+      if (data['result'] && data['success']) {
+        this.subitemData = data['result'];
+        this.si_total_count = data['total_count'];
         this.isLoader = false;
       }
       this.isLoader = false;

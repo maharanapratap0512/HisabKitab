@@ -113,6 +113,12 @@
                                        [(ngModel)]="termBachat" name="search">
                                  </div>
                               </div>
+                              <!-- <div class="col-6">
+                                 <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
+                                    [clearable]="true" [virtualScroll]="true" (change)="mmSelected($event)"
+                                    groupBy="state_id" [selectableGroup]="true" bindLabel="mm_hin" bindValue="_id">
+                                 </ng-select>
+                              </div> -->
                               <div class="col-6">
                                  <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
                                     [clearable]="true" [virtualScroll]="true" (change)="mmSelected($event)">
@@ -148,7 +154,7 @@
                                        {{data.mm_eng}}
                                     </td>
                                     <td>
-                                       {{data.bachat_type_hin}}<br/>
+                                       {{data.bachat_type_hin}}<br />
                                        {{data.bachat_type_eng}}
                                     </td>
                                     <td>

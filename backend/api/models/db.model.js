@@ -3824,7 +3824,7 @@ const insertData = {
         json('[{"_id":null,"relation":"S/o","relative_name":"स्व. सुरेशचन्द्र दास"}]'),null,null,
         'गांव हाविभांगा पोस्ट कलाई गांव',null,4,243, 9395503238, null, 43,'2004-01-01', 1);`,
   category: `insert into category(category_hin, category_eng, active) values('फल','Fruits',1), ('सब्जी','vegetables',1);`,
-  item: `insert into item(item_hin, item_eng, category_id, unit_id, active) values('आम','Mangos',1, 3, 1), ('केला','Banana',1, 3, 1);`,
+  item: `insert into item(item_hin, item_eng, category_id, unit_id, active) values('आम','Mangos',1, 3, 1), ('केला','Banana',1, 3, 1), (संतरा, Orange, 1, 3, 1 ),(नारियल, Coconut, 1, 3, 1 ),(सीताफल, Custard Apple, 1, 3, 1 ),(खरबूज, Musk Melon, 1, 3, 1 ),(तरबूज, Water Melon, 1, 3, 1 ),(अनान्नास, Pineapple, 1, 3, 1 ),(चीकू, Sapota, 1, 3, 1 ),(गन्ना, Sugarcane, 1, 3, 1 ),(अनार, Pomegranate, 1, 3, 1 ),(मौसम्बी, Sweet Lime, 1, 3, 1 ),(लिची, Lychee, 1, 3, 1 ),(नाशपाती, Pear, 1, 3, 1 ),(बेर, Ber, 1, 3, 1 ),(चेरी, Cherry, 1, 3, 1 ),(ताड फल, Palm Fruit, 1, 3, 1 ),(बेल, Wood Apple, 1, 3, 1 ),(आलूबुखार, Plum, 1, 3, 1 ),(अमरक, Star Fruit, 1, 3, 1 ),(किवी, Kiwi, 1, 3, 1 ),(ड्रैगन फ्रूट, Dragon Fruit, 1, 3, 1 ),(कैथा, Limonia Acidissima, 1, 3, 1 ),(सेब, Apple, 1, 3, 1 ),(आडू, Peach, 1, 3, 1 ),(रसभरी, Raspberry, 1, 3, 1 ),(रामफल, Soursop, 1, 3, 1 ),(स्टोबरी, Strawberry, 1, 3, 1 ),(पपिता, Papaya, 1, 3, 1 ),(अंगूर, Grapes, 1, 3, 1 );`,
   subitem_list: `insert into subitem_list(subitem_hin, subitem_eng, active) values('kachha','Kacha', 1), ('पका','Pakaa', 1);`,
   subitem: `insert into subitem(item_id, subitem_list_id, category_id, unit_id, active) values(1, 1, 2, 3, 1), (1, 2, 1, 3, 1), 
         (2, 1, 2, 3, 1), (2, 2, 1, 3, 1);`,

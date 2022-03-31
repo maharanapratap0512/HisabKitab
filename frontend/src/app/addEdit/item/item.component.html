@@ -37,6 +37,7 @@
 
             <div class="row" *ngIf="itemData.length">
                <div class="card-body" style="overflow: auto;">
+
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
@@ -49,21 +50,72 @@
                            <th>Extra Note</th>
                         </tr>
                      </thead>
-                     <tbody>
-                        <tr *ngFor="let data of itemData | filter:term; let i=index">
-                           <td>{{i+1}}</td>
-                           <td>
-                              <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
-                                    class="uil uil-pen"></i></button>
-                              <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
-                                    class="uil-trash"></i></button>
-                           </td>
-                           <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
-                           <td>{{data.item_code?data.item_code:'-'}}</td>
-                           <td>{{data.unit_id?data.unit_short + ' : ' + data.unit_full:'-'}}</td>
-                           <td>{{data.category_id?data.category_hin + ' : ' + data.category_eng:'-'}}</td>
-                           <td>{{data.extra_note?data.extra_note:'-'}}</td>
-                        </tr>
+                     <tbody class="accordion" id="accordionExample">
+                        <ng-container class="accordion-item" *ngFor="let data of itemData | filter:term; let i=index">
+                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
+                              [attr.aria-controls]="'#collapse-' + i" style="background-color:#00000099">
+                              <td>{{i+1}}</td>
+                              <td>
+                                 <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                                       class="uil uil-pen"></i></button>
+                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                       class="uil-trash"></i></button>
+                              </td>
+                              <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
+                              <td>{{data.item_code?data.item_code:'-'}}</td>
+                              <td>{{data.unit_id?data.unit_short + ' : ' + data.unit_full:'-'}}</td>
+                              <td>{{data.category_id?data.category_hin + ' : ' + data.category_eng:'-'}}</td>
+                              <td>{{data.extra_note?data.extra_note:'-'}}</td>
+                           </tr>
+                           <!-- <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse"
+                              aria-labelledby="headingOne">
+                              <th>No.</th>
+                              <th>Manage</th>
+                              <th>Subitem Name (Hin-Eng)</th>
+                              <th>Item</th>
+                              <th>Categoty</th>
+                              <th>Default Unit</th>
+                              <th>Extra Note</th>
+                           </tr> -->
+                           <ng-container *ngFor="let si of subitemData ;let j=index">
+                              <ng-container *ngIf="data._id == si.item_id">
+                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show"
+                                    aria-labelledby="headingOne">
+                                    <td colspan="7">
+                                       <div class="d-flex justify-content-evenly">
+                                          <div class="m-auto"><i class="uil-corner-down-right pl-4"></i></div>
+                                          <div class="m-auto">
+                                             <button class="btn btn-sm btn-primary mx-1" type="button"
+                                                (click)="edit(si)"><i class="uil uil-pen"></i></button>
+                                             <button class="btn btn-sm btn-danger" type="button"
+                                                (click)="delete(j,si._id)"><i class="uil-trash"></i></button>
+                                          </div>
+                                          <div class="nav-item">
+                                             <b>Subitem = </b>
+                                             {{si.subitem_list_id?si.subitem_hin +' : '+ si.subitem_eng:'-'}}
+                                          </div>
+                                          <div class="nav-item">
+                                             <b>Item = </b>
+                                             {{si.item_id?si.item_hin + ' : ' + si.item_eng:'-'}}
+                                          </div>
+                                          <div class="nav-item">
+                                             <b>Category = </b>
+                                             {{si.category_id?si.category_hin + ' : ' + si.category_eng:'-'}}
+                                          </div>
+                                          <div class="nav-item">
+                                             <b>Unit = </b>
+                                             {{si.unit_id?si.unit_short + ' : ' + si.unit_full:'-'}}
+                                          </div>
+                                          <div class="nav-item">
+                                             <b>Extra Note = </b>
+                                             {{si.extra_note?si.extra_note:'N/A'}}
+                                          </div>
+                                       </div>
+                                    </td>
+                                 </tr>
+                              </ng-container>
+                           </ng-container>
+                        </ng-container>
                      </tbody>
                   </table>
                </div>
