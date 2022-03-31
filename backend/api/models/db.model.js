@@ -15,8 +15,8 @@ const localDB = new Sqlite.Database(dbPath, (err) => {
 const Migrations = [
   () => {
     //creating all table .
+    console.log('creating tables...');
     for (let keys of Object.keys(createTables)) {
-      console.log('creating table', keys);
       localDB.serialize(() => {
         localDB.run(createTables[keys], (err) => {
           if (err) console.log(keys, 'error: ', err);
@@ -28,10 +28,15 @@ const Migrations = [
   () => {
 
     //creating triggers
+    console.log('creating triggers...');
     for (let keys of Object.keys(triggers)) {
-      console.log('creating triggers', keys);
       localDB.run(triggers[keys], (err) => {
-        if (err) console.log(keys, 'error: ', err);
+        if (err) {
+          // localDB.run(`ROLLBACK TRANSACTION`, (err)=>{
+          //   console.log('ROLLBACK', 'error: ', err);  
+          // });
+          console.log(keys, 'error: ', err);
+        };
       });
     }
   },
@@ -39,9 +44,9 @@ const Migrations = [
   () => {
     //insering row data.
 
+    console.log('inserting default data...');
     for (let keys of Object.keys(insertData)) {
 
-      console.log('inserting data to', keys);
       localDB.serialize(() => {
         localDB.run(insertData[keys], (err) => {
           if (err) console.log(keys, 'error: ', err);
@@ -399,34 +404,32 @@ const createTables = {
 }
 
 
+
 const triggers = {
   dept_ins_config_ins:
     `CREATE TRIGGER IF NOT EXISTS "dept_ins_config_ins"
       AFTER INSERT ON "department"
       FOR EACH ROW
       BEGIN
-        insert into department_config(dept_id, config_key, config_value, active) values(NEW._id, 'mm', '', NEW.active),(NEW._id, 'item', '', NEW.active),
-        (NEW._id, 'category', '', NEW.active), (NEW._id, 'subitem', '', NEW.active), (NEW._id, 'subitem_list', '', NEW.active),(NEW._id, 'pbk', '', NEW.active),(NEW._id, 'department', '', NEW.active),
-        (NEW._id, 'aj_type', '', NEW.active), (NEW._id, 'dept', '', NEW.active);
+        insert into department_config(dept_id, config_key, config_value, active) values(NEW._id, 'mm', '', NEW.active),(NEW._id, 'item', '', NEW.active),(NEW._id, 'category', '', NEW.active), (NEW._id, 'subitem', '', NEW.active), (NEW._id, 'subitem_list', '', NEW.active),(NEW._id, 'pbk', '', NEW.active),(NEW._id, 'department', '', NEW.active),(NEW._id, 'aj_type', '', NEW.active), (NEW._id, 'dept', '', NEW.active), (NEW._id, 'pbk_fields', '', NEW.active), (NEW._id, 'product_fields', '', NEW.active),(NEW._id, 'aawak_fields', '', NEW.active), (NEW._id, 'jawak_fields', '', NEW.active);
       END;`,
   awk_ins_bcht_updt:
     `CREATE TRIGGER IF not exists "awk_ins_bcht_updt" 
         AFTER INSERT ON "aawak" 
         FOR EACH ROW
-        WHEN EXISTS(select _id from bachat where dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND 
-                  item_id = NEW.item_id AND subitem_id = NEW.subitem_id AND bachat_type_id = 28 AND created_at != NEW.created_at)
+        WHEN EXISTS(select _id from bachat where created_at != NEW.created_at AND dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND 
+                  item_id = NEW.item_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id)  )
         BEGIN
             update bachat set qty = qty + NEW.qty 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND subitem_id = NEW.subitem_id 
-            AND dept_id = NEW.dept_id AND bachat_type_id = 28;     
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);     
         END;`,
   awk_ins_bcht_ins:
     `CREATE TRIGGER "awk_ins_bcht_ins" 
         AFTER INSERT ON "aawak" 
         FOR EACH ROW
         WHEN NOT EXISTS(select _id from bachat where dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND 
-          item_id = NEW.item_id AND subitem_id = NEW.subitem_id AND bachat_type_id = 28)
-        BEGIN
+          item_id = NEW.item_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
+        BEGIN        
               insert into bachat(mm_id,bachat_type_id,item_id,subitem_id, qty, unit_id, dept_id) 
               values(NEW.mm_id, 28, NEW.item_id, NEW.subitem_id, NEW.qty, NEW.unit_id, NEW.dept_id);                    
         END;`,
@@ -436,8 +439,7 @@ const triggers = {
         FOR EACH ROW
         BEGIN
           update bachat set qty = qty - OLD.qty 
-          where mm_id = OLD.mm_id AND item_id = OLD.item_id AND subitem_id = OLD.subitem_id 
-          AND dept_id = OLD.dept_id AND bachat_type_id = 28;                        
+          where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND bachat_type_id = 28 AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id);                        
         END;`,
 
   jwk_ins_bcht_updt:
@@ -447,22 +449,18 @@ const triggers = {
         When NEW.jawak_type_id != 27
         BEGIN
             update bachat set qty = qty - NEW.qty 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND subitem_id = NEW.subitem_id AND dept_id = NEW.dept_id
-             AND bachat_type_id = 28;     
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);     
         END;`,
   used_jwk_ins_bcht_updt:
     `CREATE TRIGGER IF not exists "jwk_ins_used_bcht_updt" 
         AFTER INSERT ON "jawak" 
         FOR EACH ROW
-        When NEW.jawak_type_id = 27 AND EXISTS(select _id from bachat where dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND 
-          item_id = NEW.item_id AND subitem_id = NEW.subitem_id AND bachat_type_id = 27 AND created_at != NEW.created_at)
+        When NEW.jawak_type_id = 27 AND EXISTS(select _id from bachat where created_at != NEW.created_at AND dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 27 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
         BEGIN
             update bachat set qty = qty + NEW.qty 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND subitem_id = NEW.subitem_id AND dept_id = NEW.dept_id
-             AND bachat_type_id = 27;     
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND bachat_type_id = 27 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);     
              update bachat set qty = qty - NEW.qty 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND subitem_id = NEW.subitem_id AND dept_id = NEW.dept_id
-             AND bachat_type_id = 28;  
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);  
         END;`,
   jwk_del_bcht_updt:
     `CREATE TRIGGER IF not exists "jwk_del_bcht_updt" 
@@ -471,8 +469,7 @@ const triggers = {
         When OLD.jawak_type_id != 27
         BEGIN
             update bachat set qty = qty + OLD.qty 
-            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND subitem_id = OLD.subitem_id AND dept_id = OLD.dept_id
-             AND bachat_type_id = 28;     
+            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND bachat_type_id = 28 AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id);     
         END;`,
   used_jwk_del_bcht_updt:
     `CREATE TRIGGER IF not exists "jwk_del_used_bcht_updt" 
@@ -481,11 +478,9 @@ const triggers = {
         When OLD.jawak_type_id = 27
         BEGIN
             update bachat set qty = qty - OLD.qty 
-            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND subitem_id = OLD.subitem_id AND dept_id = OLD.dept_id
-             AND bachat_type_id = 27; 
+            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND bachat_type_id = 27 AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id); 
              update bachat set qty = qty + OLD.qty 
-            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND subitem_id = OLD.subitem_id AND dept_id = OLD.dept_id
-             AND bachat_type_id = 28;      
+            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND bachat_type_id = 28 AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id);      
         END;`,
   jwk_del_updt_ref_awk:
     `CREATE TRIGGER IF not exists "jwk_del_updt_ref_awk" 
@@ -500,13 +495,12 @@ const triggers = {
         AFTER INSERT ON "jawak" 
         FOR EACH ROW
         When NEW.jawak_type_id = 27 AND NOT EXISTS(select _id from bachat where dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND 
-          item_id = NEW.item_id AND subitem_id = NEW.subitem_id AND bachat_type_id = 27)
+          item_id = NEW.item_id AND bachat_type_id = 27 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
         BEGIN
           insert into bachat(mm_id,bachat_type_id,item_id,subitem_id, qty, unit_id, dept_id) 
           values(NEW.mm_id, 27, NEW.item_id, NEW.subitem_id, NEW.qty, NEW.unit_id, NEW.dept_id);    
           update bachat set qty = qty - NEW.qty 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND subitem_id = NEW.subitem_id AND dept_id = NEW.dept_id
-             AND bachat_type_id = 28; 
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id); 
         END;`,
   jwk_ins_avk_ref_updt:
     `CREATE TRIGGER if not EXISTS "jwk_ins_avk_ref_updt"
@@ -528,19 +522,16 @@ const triggers = {
     `CREATE TRIGGER IF NOT EXISTS "prdct_ins_bcht_updt"
         AFTER INSERT ON "product"
         FOR EACH ROW
-        when EXISTS(select _id from bachat where dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND 
-          subitem_id = NEW.subitem_id AND bachat_type_id = 28 AND created_at != NEW.created_at)
+        when EXISTS(select _id from bachat where  created_at != NEW.created_at AND dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
         BEGIN 
             update bachat set qty = qty + 1 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND
-            subitem_id = NEW.subitem_id AND dept_id = NEW.dept_id;
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
         END;`,
   prdct_ins_bcht_ins:
     `CREATE TRIGGER IF NOT EXISTS "prdct_ins_bcht_ins"
         AFTER INSERT ON "product"
         FOR EACH ROW
-        when NOT EXISTS(select _id from bachat where dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND 
-          subitem_id = NEW.subitem_id AND bachat_type_id = 28)
+        when NOT EXISTS(select _id from bachat where dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
         BEGIN 
           insert into bachat(mm_id,bachat_type_id,item_id,subitem_id, qty, unit_id, dept_id) 
           values(NEW.mm_id, 28, NEW.item_id, NEW.subitem_id, 1, 1, NEW.dept_id);  
@@ -551,8 +542,7 @@ const triggers = {
         FOR EACH ROW        
         BEGIN 
           update bachat set qty = qty - 1 
-          where mm_id = OLD.mm_id AND item_id = OLD.item_id AND bachat_type_id = 28 AND
-          subitem_id = OLD.subitem_id AND dept_id = OLD.dept_id;
+          where mm_id = OLD.mm_id AND item_id = OLD.item_id AND bachat_type_id = 28 AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id);
         END;`,
   awk_updt_bcht_updt:
     `CREATE TRIGGER IF NOT EXISTS "awk_updt_bcht_updt"
@@ -561,8 +551,8 @@ const triggers = {
         WHEN OLD.qty != NEW.qty
         BEGIN
             update bachat SET qty = qty + (NEW.qty - OLD.qty) 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND
-            subitem_id = NEW.subitem_id AND dept_id = NEW.dept_id;
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
+            
         END;`,
   jwk_updt_bcht_updt:
     `CREATE TRIGGER IF NOT EXISTS "jwk_updt_bcht_updt"
@@ -571,8 +561,7 @@ const triggers = {
         WHEN OLD.qty != NEW.qty AND NEW.jawak_type_id != 27
         BEGIN
             update bachat SET qty = qty - (NEW.qty - OLD.qty) 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND
-            subitem_id = NEW.subitem_id AND dept_id = NEW.dept_id;
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
         END;`,
   jwk_updt_used_bcht_updt:
     `CREATE TRIGGER IF NOT EXISTS "jwk_updt_used_bcht_updt"
@@ -581,11 +570,9 @@ const triggers = {
         WHEN OLD.qty != NEW.qty AND NEW.jawak_type_id = 27
         BEGIN
             update bachat SET qty = qty + (NEW.qty - OLD.qty) 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 27 AND
-            subitem_id = NEW.subitem_id AND dept_id = NEW.dept_id;
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 27 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
             update bachat SET qty = qty - (NEW.qty - OLD.qty) 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND
-            subitem_id = NEW.subitem_id AND dept_id = NEW.dept_id;
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
         END;`,
   ins_temp_updt_ids: `CREATE TRIGGER "ins_temp_updt_id"
         AFTER INSERT ON "import_temp"
@@ -3823,11 +3810,12 @@ const insertData = {
         (null, 'सुकुमार चन्द्र', 'Sukumar Chandra','Kumar','S/o','स्व. सुरेशचन्द्र दास',
         json('[{"_id":null,"relation":"S/o","relative_name":"स्व. सुरेशचन्द्र दास"}]'),null,null,
         'गांव हाविभांगा पोस्ट कलाई गांव',null,4,243, 9395503238, null, 43,'2004-01-01', 1);`,
-  category: `insert into category(category_hin, category_eng, active) values('फल','Fruits',1), ('सब्जी','vegetables',1);`,
-  item: `insert into item(item_hin, item_eng, category_id, unit_id, active) values('आम','Mangos',1, 3, 1), ('केला','Banana',1, 3, 1), (संतरा, Orange, 1, 3, 1 ),(नारियल, Coconut, 1, 3, 1 ),(सीताफल, Custard Apple, 1, 3, 1 ),(खरबूज, Musk Melon, 1, 3, 1 ),(तरबूज, Water Melon, 1, 3, 1 ),(अनान्नास, Pineapple, 1, 3, 1 ),(चीकू, Sapota, 1, 3, 1 ),(गन्ना, Sugarcane, 1, 3, 1 ),(अनार, Pomegranate, 1, 3, 1 ),(मौसम्बी, Sweet Lime, 1, 3, 1 ),(लिची, Lychee, 1, 3, 1 ),(नाशपाती, Pear, 1, 3, 1 ),(बेर, Ber, 1, 3, 1 ),(चेरी, Cherry, 1, 3, 1 ),(ताड फल, Palm Fruit, 1, 3, 1 ),(बेल, Wood Apple, 1, 3, 1 ),(आलूबुखार, Plum, 1, 3, 1 ),(अमरक, Star Fruit, 1, 3, 1 ),(किवी, Kiwi, 1, 3, 1 ),(ड्रैगन फ्रूट, Dragon Fruit, 1, 3, 1 ),(कैथा, Limonia Acidissima, 1, 3, 1 ),(सेब, Apple, 1, 3, 1 ),(आडू, Peach, 1, 3, 1 ),(रसभरी, Raspberry, 1, 3, 1 ),(रामफल, Soursop, 1, 3, 1 ),(स्टोबरी, Strawberry, 1, 3, 1 ),(पपिता, Papaya, 1, 3, 1 ),(अंगूर, Grapes, 1, 3, 1 );`,
-  subitem_list: `insert into subitem_list(subitem_hin, subitem_eng, active) values('kachha','Kacha', 1), ('पका','Pakaa', 1);`,
-  subitem: `insert into subitem(item_id, subitem_list_id, category_id, unit_id, active) values(1, 1, 2, 3, 1), (1, 2, 1, 3, 1), 
-        (2, 1, 2, 3, 1), (2, 2, 1, 3, 1);`,
+  category: `insert into category(category_hin, category_eng, active) values('फल','Fruits',1), ('सब्जी','vegetables',1), ('फुल','Flower',1), ('रस','Juice',1);`,
+  // item: `insert into item(item_hin, item_eng, category_id, unit_id, active) values('आम','Mangos',1, 3, 1), ('केला','Banana',1, 3, 1), (संतरा, Orange, 1, 3, 1 ),(नारियल, Coconut, 1, 3, 1 ),(सीताफल, Custard Apple, 1, 3, 1 ),(खरबूज, Musk Melon, 1, 3, 1 ),(तरबूज, Water Melon, 1, 3, 1 ),(अनान्नास, Pineapple, 1, 3, 1 ),(चीकू, Sapota, 1, 3, 1 ),(गन्ना, Sugarcane, 1, 3, 1 ),(अनार, Pomegranate, 1, 3, 1 ),(मौसम्बी, Sweet Lime, 1, 3, 1 ),(लिची, Lychee, 1, 3, 1 ),(नाशपाती, Pear, 1, 3, 1 ),(बेर, Ber, 1, 3, 1 ),(चेरी, Cherry, 1, 3, 1 ),(ताड फल, Palm Fruit, 1, 3, 1 ),(बेल, Wood Apple, 1, 3, 1 ),(आलूबुखार, Plum, 1, 3, 1 ),(अमरक, Star Fruit, 1, 3, 1 ),(किवी, Kiwi, 1, 3, 1 ),(ड्रैगन फ्रूट, Dragon Fruit, 1, 3, 1 ),(कैथा, Limonia Acidissima, 1, 3, 1 ),(सेब, Apple, 1, 3, 1 ),(आडू, Peach, 1, 3, 1 ),(रसभरी, Raspberry, 1, 3, 1 ),(रामफल, Soursop, 1, 3, 1 ),(स्टोबरी, Strawberry, 1, 3, 1 ),(पपिता, Papaya, 1, 3, 1 ),(अंगूर, Grapes, 1, 3, 1 );`,
+  itemsabji:`insert into item(item_hin, item_eng, category_id, unit_id, active) values('हरा मटर','Green pea',2, 3, 1),('गाजर','Carrot',2, 3, 1),('टमाटर','Tomatar',2, 3, 1),('आलू','Potato',2, 3, 1),('सेम','Lima bean',2, 3, 1),('लौकी','Bottle gourd',2, 3, 1),('बिटरूट','Beetroot',2, 3, 1),('भुट्टा','Corn',2, 1, 1),('सुरन','Elephant foot Yam',2, 3, 1),('अदरक','Ginger',2, 2, 1),('बैगन','Brinjal',2, 3, 1),('निम्बू','Lemon',2, 1, 1),('मशरूम','Toadstool',2, 3, 1),('भिन्डी','Ladies finger',2, 3, 1),('कद्दू','Pumpkin',2, 3, 1),('मुली','Radish',2, 3, 1),('चिचिंडा','Snake gourd',2, 3, 1),('शकरकंद','Sweet potato',2, 3, 1),('कटहल','Jackfruit',2, 3, 1),('आँवला','Gooseberry (Indian)',2, 3, 1),('करेला','Bitter gourd',2, 3, 1),('खीरा','Cucumber',2, 3, 1),('सहजन','Drumstick',2, 3, 1),('कुंदरू','Little gourd',2, 3, 1),('तुरई','Ridge guard',2, 3, 1),('रतालू','yam',2, 3, 1),('टिंडा','Tinda',2, 3, 1),('हल्दी हरा','Turmeric Raw',2, 3, 1),('पेठा','Ash gourd',2, 3, 1),('ईमली','Tamarind',2, 3, 1),('पत्ता','leaves',2, 3, 1),('ब्रोकोली','Broccoli',2, 3, 1),('शलगम','Turnip',2, 3, 1),('अरवी','Taro root',2, 3, 1),('परवल','Pointed gourd',2, 3, 1),('सिंघाड़ा','Water chestnut',2, 3, 1),('ग्वारफली','Cluster beans',2, 3, 1),('मिक्स सब्जी','Mix sabji',2, 3, 1),('मिर्च','Chilli',2, 3, 1),('बरबटी','Cowpea Green',2, 3, 1),('गांठ गोभी','lump cabbage',2, 3, 1),('फुलगोभी','Caullflower',2, 3, 1),('पत्तागोभी','Cabbage',2, 3, 1),('Greem gram','हरा चना',2, 3, 1),('कचरी','Snap melon',2, 3, 1);`,
+  
+  subitem_list: `insert into subitem_list(subitem_hin, subitem_eng, active) values('कच्चा','Kaccha', 1), ('पका','Pakaa', 1), ('काला','Black', 1), ('हरा','Green', 1), ('पानी वाला','Green(Juicy)', 1), ('सूखा','Dry', 1), ('रस','Juice', 1), ('फूल','Flower', 1), ('Capsicum', 'शिमला', 1), ('Spinach', 'पालक', 1), ('Fenugreek', 'मेथी', 1) ;`,
+  // subitem: `insert into subitem(item_id, subitem_list_id, category_id, unit_id, active) values(2, 1, 2, 3, 1), (2, 2, 1, 3, 1);`,
 }
 
 

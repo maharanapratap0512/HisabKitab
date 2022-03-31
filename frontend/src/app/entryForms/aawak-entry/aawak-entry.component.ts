@@ -35,6 +35,7 @@ export class AawakEntryComponent implements OnInit {
   subitems: any = [];
   pbks: any = [];
   qty: any;
+  oldQty: any;
   rate: any;
   amnt: any;
   aawak_types: any = [];
@@ -70,6 +71,7 @@ export class AawakEntryComponent implements OnInit {
       nimmit: [null],
       item_detail: [null],
       description: [null],
+      remaining_qty:[null]
     });
   }
 
@@ -120,8 +122,10 @@ export class AawakEntryComponent implements OnInit {
         actual_amt: changes.getData.currentValue.actual_amt,
         nimmit: changes.getData.currentValue.nimmit,
         item_detail: changes.getData.currentValue.item_detail,
-        description: changes.getData.currentValue.description
+        description: changes.getData.currentValue.description,
+        remaining_qty:changes.getData.currentValue.remaining_qty
       });
+      this.oldQty =changes.getData.currentValue.remaining_qty
       console.log(" this.aawakForm.value", this.aawakForm.value);
 
     }
@@ -131,6 +135,9 @@ export class AawakEntryComponent implements OnInit {
   aawakFormSubmit() {
     if (this.aawakForm.valid) {
       this.isLoader = true;
+      this.aawakForm.patchValue({
+        remaining_qty:this.qty
+      })
       this.http.post(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.aawakForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.qty = null;
@@ -180,7 +187,8 @@ export class AawakEntryComponent implements OnInit {
         actual_amt: this.aawakForm.value.actual_amt,
         nimmit: this.aawakForm.value.nimmit,
         item_detail: this.aawakForm.value.item_detail,
-        description: this.aawakForm.value.description
+        description: this.aawakForm.value.description,
+        remaining_qty: this.aawakForm.value.remaining_qty + (this.aawakForm.value.qty - this.oldQty),
       };
       this.http.put(this.api.getUrl('AAWAK'), body).subscribe((data: any) => {
         if (data && data['success']) {
