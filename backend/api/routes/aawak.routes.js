@@ -110,14 +110,9 @@ router.put('/', async (req, res, next) => {
             if (err) {
                 return next(err);
             }
-            // await DB.updateToCache('aawak', req.body.set, condition, (err) => { })
-            await DB.select('aawak', ['*'], condition).then((resolve) => {
-                res.json({
-                    success: true,
-                    result: resolve || []
-                });
-            }, (err) => {
-                return next(err);
+            res.json({
+                success: true,
+                result: data || {}
             });
         });
     }

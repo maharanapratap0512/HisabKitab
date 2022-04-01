@@ -8,8 +8,8 @@ class DBContex {
         'pbk',
         'mm',
         'subitem',
-        'subitem_list',
-        'category'
+        'category',
+        'department'
     ]
     entry_list = [
         'product',
@@ -107,11 +107,9 @@ class DBContex {
                 else {
                     sql = `select * from ${list_name}`;
                 }
-                // sql = "select * from sqlite_master where type = 'trigger'";
-                console.log(sql);
                 await this.localDB.all(sql, (err, data) => {
                     if (err) {
-                        console.log(err);
+                        console.log(sql, err);
                         reject(err)
                     }
                     else {
@@ -132,14 +130,6 @@ class DBContex {
                 if (list_name && dept_id) {
                     let sql = "";
                     let exclude_dept = ['1', '2'];
-                    let dept_list_arr = [
-                        'item',
-                        'pbk',
-                        'mm',
-                        'subitem',
-                        'category',
-                        'department'
-                    ];
                     let list_name_arr = [
                         'mm_type',
                         'gender',
@@ -150,12 +140,24 @@ class DBContex {
                         'jawak_type'
                     ]
 
-                    if (dept_list_arr.includes(list_name)) {
-                        sql = `select * from ${list_name}`;
+                    if (this.dept_config_list.includes(list_name)) {
 
                         if (!exclude_dept.includes(dept_id)) {
-
-                            sql = `select * from ${list_name} where (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||_id||'%' OR (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%'||_id||',%'`;
+                            if (list_name_arr.includes(list_name)) {
+                                sql = `select * from support_list where list_type = '${list_name}' AND `;
+                            }
+                            else {
+                                sql = `select * from ${list_name} where `;
+                            }
+                            sql += `(select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
+                        }
+                        else {
+                            if (list_name_arr.includes(list_name)) {
+                                sql = `select * from support_list where list_type = '${list_name}'`;
+                            }
+                            else {
+                                sql = `select * from ${list_name}`;
+                            }
                         }
 
                     }
@@ -165,9 +167,9 @@ class DBContex {
                     else {
                         sql = `select * from ${list_name}`;
                     }
-                    console.log(sql);
                     await this.localDB.all(sql, (err, data) => {
                         if (err) {
+                            console.log({sql: sql,  err:err});
                             reject(err)
                         }
                         else {
@@ -191,11 +193,11 @@ class DBContex {
 
                 let sql = `select * from support_list where list_type IN ('aawak_type', 'jawak_type')`;
                 if (!['1', '2'].includes(dept_id)) {
-                    sql = ` AND ((select config_value from department_config where dept_id = ${dept_id} AND config_key IN ('aawak_type', 'jawak_type')) LIKE '%,'||_id||'%' 
-                        OR (select config_value from department_config where dept_id = ${dept_id} AND config_key IN ('aawak_type', 'jawak_type')) LIKE '%'||_id||',%')`;
+                    sql += ` AND (select config_value from department_config where dept_id = ${dept_id} AND config_key = 'aj_type') LIKE '%,'||_id||',%'`;
                 }
                 this.localDB.all(sql, (err, data) => {
                     if (err) {
+                        console.log("ajtype", sql, err);
                         reject(err);
                     }
                     else {
@@ -215,11 +217,9 @@ class DBContex {
 
                 let sql1 = `select *, ? as chk from support_list where list_type IN ('aawak_type', 'jawak_type')`;
                 let sql2 = `select *, ? as chk from support_list where list_type IN ('aawak_type', 'jawak_type')`;
-                sql1 += ` AND ((select config_value from department_config where dept_id = ${dept_id} AND config_key = 'aj_type') LIKE '%,'||_id||'%' 
-                        OR (select config_value from department_config where dept_id = ${dept_id} AND config_key = 'aj_type') LIKE '%'||_id||',%')`;
-                sql2 += ` AND NOT ((select config_value from department_config where dept_id = ${dept_id} AND config_key = 'aj_type') LIKE '%,'||_id||'%' 
-                        OR (select config_value from department_config where dept_id = ${dept_id} AND config_key = 'aj_type') LIKE '%'||_id||',%')`;
-                this.localDB.all(`${sql1} UNION ${sql2} order by chk desc`, [true, false], (err, data) => {
+                sql1 += ` AND (select config_value from department_config where dept_id = ${dept_id} AND config_key = 'aj_type') LIKE '%,'||_id||',%'`;
+                sql2 += ` AND NOT (select config_value from department_config where dept_id = ${dept_id} AND config_key = 'aj_type') LIKE '%,'||_id||',%'`;
+                this.localDB.all(`${sql1} UNION ${sql2} order by chk`, [true, false], (err, data) => {
                     if (err) {
                         reject(err);
                     }
@@ -315,7 +315,7 @@ class DBContex {
                 if (this.dept_config_list.includes(list_name)) {
                     let exclude_dept = ['1', '2'];
                     if (!exclude_dept.includes(dept_id)) {
-                        sql += ` where (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||'%' OR (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%'||${list_name}._id||',%'`;
+                        sql += ` where (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
                         if (listId && listId != '') {
                             sql += ` AND ${list_name}._id = ${listId}`;
                         }
@@ -338,10 +338,10 @@ class DBContex {
                 }
 
                 let sort = this.fullListConfig[list_name + 'sort'];
-                sql += ` ${sort ? sort : ''} `;
-                console.log(sql);
+                sql += ` ${sort ? 'order by ' + sort : ''} `;
                 await this.localDB.all(sql, (err, data) => {
                     if (err) {
+                        console.log({sql: sql, err:err});
                         reject(err)
                     }
                     else {
@@ -366,8 +366,8 @@ class DBContex {
                     sql += ` where ${conditionString} `;
                 }
 
-                if(sort){
-                    sql += sort;
+                if (sort) {
+                    sql += ` order by ${sort}`;
                 }
 
                 this.localDB.all(sql, (err, data) => {
@@ -391,9 +391,9 @@ class DBContex {
                 let sql = this.fullListConfig[list_name];
                 sql += ` where ${list_name}._id = ${listId}`;
 
-                console.log(sql);
                 await this.localDB.get(sql, (err, data) => {
                     if (err) {
+                        console.log({sql: sql,  err:err});
                         reject(err)
                     }
                     else {
@@ -416,13 +416,12 @@ class DBContex {
                     sql += ` where ${condition}`;
                 }
 
-                console.log(sql);
                 await this.localDB.get(sql, (err, data) => {
                     if (err) {
+                        console.log({sql: sql, err:err});
                         reject(err)
                     }
                     else {
-                        console.log(data);
                         resolve(data)
                     }
                 })
@@ -431,34 +430,6 @@ class DBContex {
                 reject(ex);
             }
         })
-    }
-
-    select = async (tableName, columnList = ['*'], conditionString = "") => {
-        return new Promise(async (resolve, reject) => {
-            try {
-                let sql = `select `;
-                for (let i = 0; i < columnList.length; i++) {
-                    sql += `${columnList[i]},`;
-                }
-                sql = sql.slice(0, -1);
-                sql += ` from ${tableName}`;
-
-                if (conditionString || conditionString != "") {
-                    sql += ` where ${conditionString}`;
-                }
-                console.log(sql);
-                await this.localDB.all(sql, function (err, result) {
-                    if (err) {
-                        reject(err)
-                    }
-                    resolve(result);
-                });
-            }
-            catch (ex) {
-                reject(ex)
-            }
-        })
-
     }
 
     insertMany = async (table_name, dataArr) => {
@@ -520,12 +491,12 @@ class DBContex {
                 cols = cols.slice(0, -1);
                 val = val.slice(0, -1);
                 let sql = `insert into ${table_name}(${cols}) values(${val})`;
-                console.log(sql);
                 this.run(sql, params).then((resolve) => {
                     let selectSql = this.fullListConfig[table_name];
                     selectSql += ` where ${table_name}._id = ${resolve.lastID}`;
                     this.localDB.get(selectSql, async (err, rows) => {
                         if (err) {
+                            console.log({sql: sql, err:err});
                             return callback(err);
                         }
                         return callback(null, rows);
@@ -557,7 +528,6 @@ class DBContex {
                     cols = cols.slice(0, -1);
                     val = val.slice(0, -1);
                     let sql = `insert into ${table_name}(${cols}) values(${val})`;
-                    console.log(sql);
                     this.run(sql, params).then((res) => {
                         let selectSql = this.fullListConfig[table_name];
                         selectSql += ` where ${table_name}._id = ${res.lastID}`;
@@ -566,7 +536,7 @@ class DBContex {
                         }
                         this.localDB.get(selectSql, async (err, rows) => {
                             if (err) {
-                                console.log('get err', selectSql);
+                                console.log({sql: sql, err:err});
                                 return reject(err);
                             }
                             return resolve(rows);
@@ -588,17 +558,15 @@ class DBContex {
             let params = [];
             let sql = `UPDATE ${tableName} SET `;
             for (const [field, value] of Object.entries(dataObj)) {
-                console.log("[field, value]", value);
                 sql += `${field} = ?,`;
                 params.push(value);
             }
             // sql = sql.slice(0, -1);
             sql += `updated_at = current_timestamp`;
             sql += ` where ${conditionString}`;
-            console.log(sql, params);
             await this.localDB.run(sql, params, async (err) => {
                 if (err) {
-                    console.log(sql);
+                    console.log({sql: sql, params: params, err:err});
                     return callback(err)
                 }
                 else {
@@ -640,36 +608,14 @@ class DBContex {
         return new Promise((resolve, reject) => {
             let query = `update department_config set config_value = CASE WHEN(config_value = '') THEN ',' ELSE config_value END  || ? || ','
                         where dept_id = '${dept_id}' AND config_key = '${tableName}'`;
-            console.log('query', query);
             this.run(query, [Newid]).then((data) => {
                 return resolve(data || {})
             }, (err) => {
+                console.log(query, err);
                 return reject(err);
             });
         });
     }
-
-    selectQuery = {
-        pending_aawak: `select * from aawak ae 
-                        where remaining_qty > 0 and dept_id = ?`
-    }
-
-    selectAllQuery(query_name, params = []) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                await this.localDB.all(this.selectQuery[query_name], params, function (err, result) {
-                    if (err) {
-                        reject(err)
-                    }
-                    resolve(result);
-                });
-            }
-            catch (ex) {
-                reject(ex)
-            }
-        })
-    }
-
 
     listForJawak = {
         item: `select * from item where _id in (select distinct item_id from aawak where remaining_qty > 0 and dept_id = ?)`,
@@ -682,9 +628,9 @@ class DBContex {
             try {
                 let sql = this.listForJawak[list_name];
 
-                console.log(sql);
                 await this.localDB.all(sql, [dept_id], (err, data) => {
                     if (err) {
+                        console.log(sql, err);
                         reject(err)
                     }
                     else {
@@ -704,38 +650,52 @@ class DBContex {
     fullListConfig = {
 
         country: `select * from country`,
+        countrysort:`country_hin, country_eng`,
 
         category: `select * from category`,
+        categorysort: `category_hin, category_eng`,
 
         unit: `select * from unit`,
+        unitsort: `unit_sort, unit_full`,
 
         support_list: `select * from support_list`,
+        support_listsort: `list_name_hin, list_name_eng`,
 
         aawak_type: `select * from support_list where list_type = 'aawak_type'`,
+        aawak_typesort: `list_name_hin, list_name_eng`,
 
         jawak_type: `select * from support_list where list_type = 'jawak_type'`,
+        jawak_typesort: `list_name_hin, list_name_eng`,
 
         mm_type: `select * from support_list where list_type = 'mm_type'`,
+        mm_typesort: `list_name_hin, list_name_eng`,
 
         gender: `select * from support_list where list_type = 'gender'`,
+        gendersort: `list_name_hin, list_name_eng`,
 
         condition: `select * from support_list where list_type = 'condition'`,
+        conditionsort: `list_name_hin, list_name_eng`,
 
         relation: `select * from support_list where list_type = 'relation'`,
+        relationsort: `list_name_hin, list_name_eng`,
 
         status: `select * from support_list where list_type = 'status'`,
+        statussort: `list_name_hin, list_name_eng`,
 
         department: `select * from department`,
+        departmentsort: `dept_hin, dept_eng`,
 
         state: `select state.*, 
         cnt.country_hin, cnt.country_eng 
         from state 
         left join country cnt on cnt._id = state.country_id`,
+        statesort: `state_hin, state_eng`,
 
         city: `select city.*, 
         st.state_hin, st.state_eng 
         from city
         left join state st on st._id=city.state_id`,
+        citysort: `city_hin, city_eng`,
 
         mm: `select mm.*, 
         st.state_hin, st.state_eng, 
@@ -745,6 +705,7 @@ class DBContex {
         left join state st on st._id = mm.state_id
         left join mm pm on pm._id = mm.parent_mm_id
         left join department dept on dept._id = mm.dept_id`,
+        mmsort: `mm_hin, mm_eng`,
 
         item: `select item.*, 
         cat.category_hin, cat.category_eng, 
@@ -752,6 +713,7 @@ class DBContex {
         from item
         left join category cat on cat._id = item.category_id
         left join unit on unit._id = item.unit_id`,
+        itemsort: `item_hin, item_eng`,
 
         subitem: `select subitem.*, 
         cat.category_hin, cat.category_eng, 
@@ -763,8 +725,10 @@ class DBContex {
         left join unit on unit._id = subitem.unit_id
         left join item on  item._id = subitem.item_id
         left join subitem_list on  subitem_list._id = subitem.subitem_list_id`,
+        subitemsort: `subitem_hin, subitem_eng`,
 
         subitem_list: `select * from subitem_list`,
+        subitem_listsort: `subitem_hin, subitem_eng`,
 
         department_config: `select department_config.*, 
         dept.dept_hin, dept.dept_eng, dept.dept_code 
@@ -779,9 +743,8 @@ class DBContex {
         left join state on state._id = pbk.state_id
         left join city on city._id = pbk.city_id
         left join mm on mm._id = pbk.class_mm_id`,
-
-        pbksort: `order by roll_no`,
-
+        pbksort: `roll_no`,
+        
         product: `select product.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, 
         item.item_hin,item.item_eng,item.item_code,
@@ -793,6 +756,7 @@ class DBContex {
         left join subitem on subitem._id = product.subitem_id
         left join subitem_list on subitem_list._id = subitem.subitem_list_id
         left join support_list on support_list._id = product.condition_id`,
+        productsort: `purchase_date, mm_hin, mm_eng, item_hin, item_eng, subitem_hin, subitem_eng`,
 
         aawak: `select aawak.*, 
         mm.mm_hin,mm.mm_eng,mm.mm_code,
@@ -816,6 +780,7 @@ class DBContex {
         left join unit on unit._id = aawak.unit_id
         left join department dept on dept._id = aawak.dept_id
         left join support_list slat on slat._id = aawak.aawak_type_id`,
+        aawaksort: `date, mm_hin, mm_eng, pkt_num`,
 
         jawak: `select jawak.*,
         amm.mm_hin,amm.mm_eng,amm.mm_code,
@@ -839,6 +804,7 @@ class DBContex {
         left join support_list jsl on jsl._id = jawak.jawak_type_id
         left join unit on unit._id = jawak.unit_id
         left join department dept on dept._id = jawak.dept_id`,
+        jawaksort: `date, mm_hin, mm_eng, pkt_num`,
 
         bachat: `select bachat.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code,        
@@ -855,6 +821,7 @@ class DBContex {
         left join subitem_list sil on sil._id = si.subitem_list_id
         left join unit on unit._id = bachat.unit_id
         left join department dept on dept._id = bachat.dept_id`,
+        bachatsort: `mm_hin, mm_eng, item_hin, subitem_hin, item_eng, subitem_eng`,
 
         bachat_history: ``,
 
@@ -927,300 +894,4 @@ class DBContex {
 
     };
 }
-module.exports = new DBContex();
-
-
-
-
-
-
-
-
-
-
-
-
-// initialiseLocalDB = async (tbl_count) => {
-//     try {
-//         if (tbl_count == 0) {
-
-//             const dbSql = this.fs.readFileSync(this.path.resolve(__dirname, "db.sql")).toString();
-//             const sqlArr = dbSql.toString().split(";");
-//             await this.localDB.serialize(() => {
-//                 this.localDB.run('BEGIN TRANSACTION;');
-//                 let i = 0;
-
-//                 sqlArr.forEach(query => {
-//                     if (query && query.trim() != "") {
-//                         // Add the delimiter back to each query before you run them
-//                         // In my case the it was `);`
-//                         query += ";";
-//                         // console.log("query",query);
-//                         this.localDB.run(query, err => {
-//                             if (err) return console.log('err', query, err);
-//                         });
-//                     }
-//                 });
-
-//                 for (const [field, value] of Object.entries(this.triggers)) {
-//                     console.log(field, value);
-//                     this.localDB.run(value, err => {
-//                         if (err) return console.log(field, err);
-//                     });
-//                 }
-
-//                 this.localDB.run('COMMIT;');
-//                 console.log("LocalDB initialised successfully.");
-//             });
-//             // setTimeout(() => {
-//             //     this.initialiseLocalCache();
-//             // }, 3000);
-//         }
-//         else {
-//             await this.localDB.serialize(() => {
-//                 this.localDB.run('BEGIN TRANSACTION;');
-//                 for (const [field, value] of Object.entries(this.triggers)) {
-//                     console.log(field, value);
-//                     this.localDB.run(value, err => {
-//                         if (err) return console.log(field, err);
-//                     });
-//                 }
-
-//                 this.localDB.run('COMMIT;');
-//                 // await this.initialiseLocalCache();
-//                 console.log("LocalDB already initialised.");
-//             });
-//         }
-//     }
-//     catch (ex) {
-//         return console.log(ex);
-//     }
-// }
-
-
-
-
-    // cacheDBConfig = [{
-    //     tbl_to: 'country',
-    //     col_list: '_id, country_hin, country_eng'
-    // }, {
-    //     tbl_to: 'state',
-    //     col_list: '_id, state_hin, state_eng, country_id'
-    // }, {
-    //     tbl_to: 'city',
-    //     col_list: '_id, city_hin, city_eng, state_id'
-    // }, {
-    //     tbl_to: 'category',
-    //     col_list: '_id, category_hin, category_eng'
-    // }, {
-    //     tbl_to: 'unit',
-    //     col_list: '_id, unit_short, unit_full'
-    // }, {
-    //     tbl_to: 'item',
-    //     col_list: '_id, item_hin, item_eng, item_roman, item_code, category_id, unit_id'
-    // }, {
-    //     tbl_to: 'subitem_list',
-    //     col_list: '_id, subitem_hin, subitem_eng, subitem_roman, subitem_code'
-    // }, {
-    //     tbl_to: 'subitem',
-    //     col_list: '_id, item_id, subitem_id, category_id, unit_id'
-    // }, {
-    //     tbl_to: 'entry_type',
-    //     col_list: '_id, type_hin, type_eng'
-    // }, {
-    //     tbl_to: 'mm',
-    //     col_list: '_id, mm_hin, mm_eng, mm_roman, mm_code, mm_type, state_id'
-    // }, {
-    //     tbl_to: 'pbk',
-    //     col_list: '_id, roll_no, pbk_hin, pbk_eng, pbk_roman, relation, relative_name, status, state_id'
-    // }, {
-    //     tbl_to: 'support_list',
-    //     col_list: '_id, list_type, list_name_hin, list_name_eng, list_name_roman'
-    // }];
-
-
-
-
-// initialiseLocalCache = async () => {
-    //     try {
-    //         const dbPath = this.path.resolve(__dirname, '../../Data/localDB.db');
-
-    //         await this.cacheDB.serialize(() => {
-    //             this.cacheDB.run('BEGIN TRANSACTION;');
-
-    //             this.cacheDB.run('attach ? as DB', [dbPath], (err) => {
-    //                 if (err) throw err;
-    //             });
-
-    //             this.cacheDBConfig.forEach(table => {
-    //                 const query = 'create table ' + table.tbl_to + ' as select ' + table.col_list + ' from  DB.' + table.tbl_to + ';';
-    //                 this.cacheDB.run(query, (err, result) => {
-    //                     if (err) {
-    //                         throw err;
-    //                     }
-    //                 });
-    //             });
-
-    //             this.cacheDB.run('COMMIT;');
-
-    //             this.cacheDB.run('detach DB', (err) => {
-    //                 if (err) throw err;
-    //             });
-
-    //             // this.cacheDB.close();
-    //         });
-    //     }
-    //     catch (ex) {
-    //         callback(ex);
-    //     }
-
-    // }
-
-    // list_name is table name
-    //posible list names - table names  plus relation, gender, mm_type
-
-
-    // getCachedList = async (list_name, callback) => {
-    //     try {
-    //         let sql = "";
-    //         if (list_name == 'mm_type' || list_name == 'gender' || list_name == 'relation') {
-    //             sql = `select * from support_list where list_type = ${list_name}`;
-    //         }
-    //         else {
-    //             sql = `select * from ${list_name}`;
-    //         }
-    //         if (listId) {
-    //             sql = sql + ` where _id = ${listId}`;
-    //         }
-    //         this.cacheDB.all(sql, (err, data) => {
-    //             if (err) {
-    //                 callback(err);
-    //             }
-    //             else {
-    //                 callback(null, data);
-    //             }
-    //         });
-    //     }
-    //     catch (ex) {
-    //         callback(ex);
-    //     }
-    // }
-
-    // array of table names
-    // getMultipleCachedList = async (tableList = [], callback) => {
-    //     try {
-    //         if (tableList.length > 0) {
-    //             let lists = {}, sql = "";
-    //             await this.cacheDB.serialize(async () => {
-    //                 this.cacheDB.run('BEGIN;');
-    //                 for (let i = 0; i < tableList.length; i++) {
-    //                     if (tableList[i] == 'mm_type' || tableList[i] == 'gender' || tableList[i] == 'relation') {
-    //                         sql = `select * from support_list where list_type = '${tableList[i]}'`;
-    //                     }
-    //                     else {
-    //                         sql = `select * from ${tableList[i]}`;
-    //                     }
-    //                     await this.cacheDB.all(sql, async (err, data) => {
-    //                         if (err) {
-    //                             lists[tableList[i]] = null;
-    //                         }
-    //                         else {
-    //                             console.log("///////", tableList[i], data);
-    //                             lists[tableList[i]] = await data || [];
-    //                             if (i == tableList.length - 1) {
-    //                                 this.cacheDB.run('END;');
-    //                                 return callback(null, lists)
-    //                             }
-    //                         }
-    //                     });
-    //                 }
-
-    //             });
-
-    //         }
-    //         else {
-    //             callback('minimun 1 table name require.')
-    //         }
-    //     }
-    //     catch (ex) {
-    //         callback(ex);
-    //     }
-    // }
-
-
-// insertToCache = async (tableName, dataObj, callback) => {
-    //     try {
-    //         if (dataObj) {
-    //             let cols = "", values = "";
-    //             let tableConf = this.cacheDBConfig.find(i => i.tbl_to == tableName)
-    //             for (const [field, value] of Object.entries(dataObj)) {
-    //                 if (tableConf.col_list.includes(field)) {
-    //                     cols += field + ",";
-    //                     values += "'" + value + "',";
-    //                 }
-    //             }
-    //             cols = cols.slice(0, -1);
-    //             values = values.slice(0, -1);
-    //             let sql = `insert into ${table_name}(${cols}) values(${values})`;
-    //             console.log(sql);
-    //             await this.localDB.run(sql, function (err) {
-    //                 if (err) {
-    //                     console.log(`error: `, err);
-    //                     callback(err)
-    //                 }
-    //                 else {
-    //                     callback(null, { _id: this.lastID, ...dataObj });
-    //                 }
-
-
-    //             });
-    //         }
-    //         else callback('no data found');
-    //     }
-    //     catch (ex) {
-    //         callback(ex);
-    //     }
-    // }
-
-    // updateToCache = async (tableName, dataObj, conditionString, callback) => {
-    //     try {
-    //         let sql = `UPDATE ${tableName} SET `;
-    //         let tableConf = this.cacheDBConfig.find(i => i.tbl_to == tableName)
-    //         for (const [field, value] of Object.entries(dataObj)) {
-    //             if (tableConf.col_list.includes(field)) {
-    //                 sql += `${field} = '${value}',`;
-    //             }
-    //         }
-    //         sql = sql.slice(0, -1);
-    //         sql += `where ${conditionString}`;
-    //         await this.cacheDB.run(sql, function (err) {
-    //             if (err) {
-    //                 console.log(sql);
-    //                 callback(err)
-    //             }
-    //             else {
-    //                 callback(null, this.changes);
-    //             }
-    //         });
-    //     }
-    //     catch (ex) {
-    //         callback(ex)
-    //     }
-
-    // }
-
-    // deleteToCache = async (tableName, conditionString, callback) => {
-    //     try {
-    //         let sql = `DELETE from ${tableName} where ${conditionString}`;
-    //         await this.cacheDB.run(sql, function (err) {
-    //             if (err) {
-    //                 return callback(err)
-    //             }
-    //             return callback(null, this.changes);
-    //         });
-    //     }
-    //     catch (ex) {
-    //         return callback(ex)
-    //     }
-
-    // }
+module.exports = new DBContex(); 

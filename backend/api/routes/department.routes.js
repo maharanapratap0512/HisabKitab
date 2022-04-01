@@ -27,7 +27,6 @@ router.post('/', async (req, res, next) => {
 router.get('/', async (req, res, next) => {
     await DB.getFullList('department').then(async (resolve) => {
         let count = await DB.getCount('department');
-        console.log(resolve);
         res.json({
             success: true,
             result: resolve || [],
@@ -41,7 +40,6 @@ router.get('/:dept_id', async (req, res, next) => {
     if (['1', '2'].includes(req.params.dept_id)) {
         await DB.getFullList('department').then(async (resolve) => {
             let count = await DB.getCount('department');
-            console.log(resolve);
             res.json({
                 success: true,
                 result: resolve || [],
@@ -83,7 +81,6 @@ router.put('/login', async (req, res, next) => {
     if (req.body.dept_id && req.body.dept_id != 4 && req.body.password) {
         let condition = `_id = ${req.body.dept_id} AND password = '${req.body.password}' `;
         await DB.getCount('department', condition).then((response) => {
-            console.log("Login", response);
             res.json(response || {});
         },
             (err) => {

@@ -66,8 +66,10 @@ export class GlobalService {
           this.Lists.relation = data['result'].relation;
           this.Lists.status = data['result'].status;
           this.Lists.condition = data['result'].condition;
-          this.Lists.aawak_type = data['result'].aawak_type;
-          this.Lists.jawak_type = data['result'].jawak_type;
+          this.Lists.aawak_type = data['result'].aj_type.filter((aj: { list_type: string; })=>aj.list_type == 'aawak_type');
+          this.Lists.jawak_type = data['result'].aj_type.filter((aj: { list_type: string; })=>aj.list_type == 'jawak_type');
+          // this.Lists.aawak_type = data['result'].aawak_type;
+          // this.Lists.jawak_type = data['result'].jawak_type;
           this.Lists.category = data['result'].category;
           this.Lists.unit = data['result'].unit;
           this.Lists.item = data['result'].item;

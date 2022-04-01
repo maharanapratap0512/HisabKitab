@@ -71,7 +71,6 @@ router.put('/save', async (req, res, next) => {
                 });
             }
         }
-        console.log(req.body);
         res.json({
             success: true,
             result: req.body || {}
@@ -114,13 +113,10 @@ router.put('/add', async (req, res, next) => {
         // let set = `list = json_remove(list, json_find(list,'$[?]'))`;
         let set = `config_value = json_set(config_value, '$[#]', json(?))`;
         let query = `update dept_config set ${set} where ${condition}`;
-        console.log('query', query);
         await DB.localDB.run(query, [req.body.new_id], async (err, data) => {
             if (err) {
                 return next(err);
             }
-            console.log(data);
-            // await DB.updateToCache('dept_config', req.body.set, condition, (err) => { })
             res.json({
                 success: true,
                 result: data || {}
