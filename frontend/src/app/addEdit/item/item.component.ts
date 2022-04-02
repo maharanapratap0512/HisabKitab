@@ -20,7 +20,9 @@ export class ItemComponent implements OnInit {
   term: any;
   showModal: string = '';
   editData: any = {};
+  itemDataAll: any = [];
   itemData: any = [];
+  categories: any = [];
   total_count: any;
   si_total_count: any;
   subitemData: any = [];
@@ -39,13 +41,15 @@ export class ItemComponent implements OnInit {
     this.spinner.show();
     this.getItemData();
     this.getSubitemData();
+    this.categories = this.gs.Lists.category;
   }
 
   getItemData() {
     this.isLoader = true;
     this.http.get(this.api.getUrl('ITEM') + this.auth.webUser.dept_id).subscribe((data) => {
       if (data['result'] && data['success']) {
-        this.itemData = data['result'];
+        this.itemDataAll = data['result'];
+        this.itemData = this.itemDataAll;
         this.total_count = data['total_count'];
         this.isLoader = false;
       }
@@ -63,6 +67,51 @@ export class ItemComponent implements OnInit {
       }
       this.isLoader = false;
     });
+  }
+
+  catSelected(ev: any) {
+    //   if (ev) {
+    //     let backup = this.itemDataAll
+    //     this.itemData = [];
+    //     let temp = {
+    //       subitems: <any>[]
+    //     }
+    //     // let j = 0;
+    //     for (let i in backup) {
+    //       if (backup[i].category_id == ev || backup[i].categories.includes(ev)) {
+    //         temp == backup[i];
+    //         console.log("b4 temp", temp);
+    //         temp.subitems = [];
+    //         for (let k in backup[i].subitems) {
+    //           if (backup[i].subitems[k].category_id == ev) {
+    //             temp.subitems.push(backup[i].subitems[k]);
+    //             console.log("aftre temp", temp);
+    //           }
+    //         }
+    //         this.itemData.push(temp);
+    //         // j++;
+    //       }
+    //     }
+    //     this.itemDataAll = backup;
+    //     // this.itemData = temp;
+    //     console.log("this.itemData", this.itemData);
+    //     console.log("this.itemDataAll", this.itemDataAll);
+
+    //   // this.itemData = this.itemDataAll.filter((i: { category_id: any, categories: any}) => i.category_id == ev || i.categories.includes(ev));
+
+    //   // for(let i in this.itemData){
+    //   //   this.itemData[i].subitems = this.itemData[i].subitems.filter((s: { category_id: any; })=>s.category_id == ev);
+    //   // }
+    //   // this.itemData = this.itemDataAll.filter((i: { category_id: any, categories: any, subitems:any })=>{
+    //   //   if(i.category_id == ev || i.categories.includes(ev)){
+    //   //     i.subitems = i.subitems.filter((s: { category_id: any; })=>s.category_id == ev);
+    //   //     console.log(i);
+    //   //   }
+    //   // });
+    // }
+    // else {
+    //   this.getItemData();
+    // }
   }
 
   addItemResponse(ev: any) {

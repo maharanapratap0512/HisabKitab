@@ -12,8 +12,8 @@
             <!-- First Row -->
             <!-- Add Button, Search Field, Filter button, Total Count -->
             <div class="row">
-               <div class="card-body" style="overflow: auto;">
-                  <div class="row justify-content-between">
+               <div class="card-body">
+                  <div class="row d-flex justify-content-between">
                      <div class="col-2">
                         <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
                            (click)="showModal = 'Add Item'">
@@ -24,6 +24,16 @@
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
+                        </div>
+                     </div>
+                     <div class="col-2">
+                        <div class="form-group">
+                           <ng-select *ngIf="categories && categories.length" class="custom" style="width: 100%;"
+                              placeholder="Select Category" [clearable]="false" [virtualScroll]="true"
+                              (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
+                              <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
+                                 {{item.category_eng}}</ng-option>
+                           </ng-select>
                         </div>
                      </div>
                      <div class="col-2">
@@ -53,7 +63,7 @@
                      <tbody class="accordion" id="accordionExample">
                         <ng-container class="accordion-item" *ngFor="let data of itemData | filter:term; let i=index">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
-                              [attr.aria-controls]="'#collapse-' + i" style="background-color:#00000099" >
+                              [attr.aria-controls]="'#collapse-' + i" style="background-color:#00000099">
                               <td>{{i+1}}</td>
                               <td>
                                  <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
@@ -77,14 +87,17 @@
                               <th>Default Unit</th>
                               <th>Extra Note</th>
                            </tr> -->
-                           <tr [attr.id]="'collapse-' + i" class="table-active accordion-collapse collapse show" *ngIf="data.subitems.length > 0"
-                              aria-labelledby="headingOne">
+                           <!-- <ng-container *ngFor="let si of subitemData ;let j=index">
+                              <ng-container *ngIf="data._id == si.item_id">
+                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show" -->
+                           <tr [attr.id]="'collapse-' + i" class="table-active accordion-collapse collapse show"
+                              *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
                               <td colspan="7">
-                                 <table class="table table-sm table-borderless mb-0">
-                                    <tbody>
+                                 <table class="table mb-0">
+                                    
                                        <tr *ngFor="let si of data.subitems; let j = index" class="pt-0">
                                           <td style="width: 50px;">
-                                             <i class="uil-corner-down-right pl-4"></i>
+                                             <i class="uil-corner-down-right pl-4"></i>{{j+1}}
                                           </td>
                                           <td style="width: 160px;">
                                              <button class="btn btn-sm btn-primary mx-1" type="button"
@@ -112,7 +125,7 @@
                                              {{si.extra_note?si.extra_note:'N/A'}}
                                           </td>
                                        </tr>
-                                    </tbody>
+                                    
                                  </table>
                               </td>
 
