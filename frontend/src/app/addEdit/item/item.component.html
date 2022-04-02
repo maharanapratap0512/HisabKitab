@@ -13,7 +13,7 @@
             <!-- Add Button, Search Field, Filter button, Total Count -->
             <div class="row">
                <div class="card-body">
-                  <div class="row justify-content-between">
+                  <div class="row d-flex justify-content-between">
                      <div class="col-2">
                         <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
                            (click)="showModal = 'Add Item'">
@@ -24,6 +24,16 @@
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
+                        </div>
+                     </div>
+                     <div class="col-2">
+                        <div class="form-group">
+                           <ng-select *ngIf="categories && categories.length" class="custom" style="width: 100%;"
+                              placeholder="Select Category" [clearable]="false" [virtualScroll]="true"
+                              (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
+                              <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
+                                 {{item.category_eng}}</ng-option>
+                           </ng-select>
                         </div>
                      </div>
                      <div class="col-2">
@@ -41,13 +51,13 @@
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
-                           <th>No.</th>
-                           <th>Manage</th>
-                           <th>Item Name (Hin-Eng)</th>
-                           <th>Item Code</th>
-                           <th>Default Unit</th>
-                           <th>Category</th>
-                           <th>Extra Note</th>
+                           <th style="width: 50px;">No.</th>
+                           <th style="width: 160px;">Manage</th>
+                           <th style="min-width: 250px;">Item Name (Hin-Eng)</th>
+                           <th style="width: 180px;">Item Code</th>
+                           <th style="width: 180px;">Default Unit</th>
+                           <th style="width: 180px;">Category</th>
+                           <th style="min-width: 250px;">Extra Note</th>
                         </tr>
                      </thead>
                      <tbody class="accordion" id="accordionExample">
@@ -77,11 +87,49 @@
                               <th>Default Unit</th>
                               <th>Extra Note</th>
                            </tr> -->
-                           <ng-container *ngFor="let si of subitemData ;let j=index">
+                           <!-- <ng-container *ngFor="let si of subitemData ;let j=index">
                               <ng-container *ngIf="data._id == si.item_id">
-                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show"
-                                    aria-labelledby="headingOne">
-                                    <td colspan="7">
+                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show" -->
+                           <tr [attr.id]="'collapse-' + i" class="table-active accordion-collapse collapse show"
+                              *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
+                              <td colspan="7">
+                                 <table class="table mb-0">
+
+                                    <tr *ngFor="let si of data.subitems; let j = index" class="pt-0">
+                                       <td style="width: 50px;">
+                                          <i class="uil-corner-down-right pl-4"></i>{{j+1}}
+                                       </td>
+                                       <td style="width: 160px;">
+                                          <button class="btn btn-sm btn-primary mx-1" type="button"
+                                             (click)="edit(si)"><i class="uil uil-pen"></i></button>
+                                          <button class="btn btn-sm btn-danger" type="button"
+                                             (click)="delete(j,si._id)"><i class="uil-trash"></i></button>
+                                       </td>
+                                       <td style="min-width: 250px;" class="nav-item">
+                                          {{si.subitem_hin +' : '+ si.subitem_eng}}
+                                       </td>
+                                       <td style="width: 180px;" class="nav-item">
+                                          <!-- <b>Item = </b> -->
+                                          <!-- {{si.item_id?si.item_hin + ' : ' + si.item_eng:'-'}} -->
+                                       </td>
+                                       <td style="width: 180px;" class="nav-item">
+                                          <!-- <b>Unit = </b> -->
+                                          {{si.unit_id?si.unit_short + ' : ' + si.unit_full:'-'}}
+                                       </td>
+                                       <td style="width: 180px;" class="nav-item">
+                                          <!-- <b>Category = </b> -->
+                                          {{si.category_id?si.category_hin + ' : ' + si.category_eng:'-'}}
+                                       </td>
+                                       <td style="min-width: 250px;" class="nav-item">
+                                          <!-- <b>Extra Note = </b> -->
+                                          {{si.extra_note?si.extra_note:'N/A'}}
+                                       </td>
+                                    </tr>
+
+                                 </table>
+                              </td>
+
+                              <!-- <td colspan="7">
                                        <div class="d-flex justify-content-evenly">
                                           <div class="m-auto"><i class="uil-corner-down-right pl-4"></i></div>
                                           <div class="m-auto">
@@ -111,10 +159,8 @@
                                              {{si.extra_note?si.extra_note:'N/A'}}
                                           </div>
                                        </div>
-                                    </td>
-                                 </tr>
-                              </ng-container>
-                           </ng-container>
+                                    </td> -->
+                           </tr>
                         </ng-container>
                      </tbody>
                   </table>

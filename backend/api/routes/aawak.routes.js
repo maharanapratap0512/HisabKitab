@@ -105,19 +105,14 @@ router.get('/', async (req, res, next) => {
 // aawak update
 router.put('/', async (req, res, next) => {
     if (req.body.set && req.body.query) {
-        let condition = '_id = ' + req.body.query._id;
+        let condition = 'aawak._id = ' + req.body.query._id;
         await DB.update('aawak', req.body.set, condition, async (err, data) => {
             if (err) {
                 return next(err);
             }
-            // await DB.updateToCache('aawak', req.body.set, condition, (err) => { })
-            await DB.select('aawak', ['*'], condition).then((resolve) => {
-                res.json({
-                    success: true,
-                    result: resolve || []
-                });
-            }, (err) => {
-                return next(err);
+            res.json({
+                success: true,
+                result: data || {}
             });
         });
     }

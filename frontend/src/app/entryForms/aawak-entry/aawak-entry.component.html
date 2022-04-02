@@ -7,7 +7,7 @@
       <form [formGroup]="aawakForm">
          <div class="row">
 
-            <div class="col-md-1 mb-3">
+            <div class="col-md-2 mb-3">
                <div class="form-group">
                   <label class="form-label">Pkt No.</label>
                   <input type="text" class="form-control" placeholder="पर्ची न." formControlName="pkt_num"
@@ -63,7 +63,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id != 3">
                <div class="form-group">
                   <label class="form-label">Sewadhari</label>
                   <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -99,7 +99,7 @@
               (click)="showModal = 'Add Department'">
               + Add
            </button> -->
-                  <ng-select *ngIf="departments && departments.length" class="custom" style="width: 100%;"
+                  <ng-select *ngIf="auth.webUser.dept_id != 3" class="custom" style="width: 100%;"
                      placeholder="Select Department" [clearable]="false" [virtualScroll]="true"
                      (change)="deptSelected($event)" [ngModelOptions]="{standalone: true}">
                      <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :
@@ -145,7 +145,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id != 3">
                <div class="form-group">
                   <label class="form-label">Product & Condition</label>
                   <div class="float-end">

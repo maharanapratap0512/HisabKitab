@@ -180,12 +180,12 @@
                         <i class="uil-home-alt me-1"></i>Home
                      </a>
                   </li>
-                  <li class="nav-item">
+                  <li class="nav-item" *ngIf="auth.webUser.dept_id !=3">
                      <a class="nav-link" routerLinkActive="active" routerLink="product" role="button">
                         <i class="uil-archive me-1"></i>Products
                      </a>
                   </li>
-                  <li class="nav-item">
+                  <li class="nav-item" *ngIf="auth.webUser.dept_id !=3">
                      <a class="nav-link" routerLinkActive="active" routerLink="pbk" role="button">
                         <i class="uil-user me-1"></i>PBK
                      </a>

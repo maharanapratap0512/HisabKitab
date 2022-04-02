@@ -64,9 +64,12 @@ router.get('/all/:dept_id', async (req, res, next) => {
         lists.relation= await DB.getListByDept('relation', req.params.dept_id) || [],
         lists.gender= await DB.getListByDept('gender', req.params.dept_id) || []
         lists.status= await DB.getListByDept('status', req.params.dept_id) || []
-        lists.aawak_type= await DB.getListByDept('aawak_type', req.params.dept_id) || []
-        lists.jawak_type= await DB.getListByDept('jawak_type', req.params.dept_id) || []
+        // lists.aawak_type= await DB.getListByDept('aawak_type', req.params.dept_id) || []
+        // lists.jawak_type= await DB.getListByDept('jawak_type', req.params.dept_id) || []
+        lists.aj_type= await DB.getAJtypeByDept(req.params.dept_id) || []
         lists.condition= await DB.getListByDept('condition', req.params.dept_id) || []
+        lists.sitem=  []
+        // lists.sitem= await DB.getListByDept('sitem', req.params.dept_id) || []
         res.json({
             success: true,
             result: lists

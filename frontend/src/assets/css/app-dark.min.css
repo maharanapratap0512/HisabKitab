@@ -2279,7 +2279,7 @@ progress {
 }
 
 .table>thead {
-   vertical-align: bottom;
+   /* vertical-align: bottom; */
    font-size: medium;
    background-color: #39afd124;
    color: #ffffffed;

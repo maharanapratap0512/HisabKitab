@@ -35,8 +35,7 @@
 
                      <div class="float-end">
                         <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total
-                           Count :
-                           <!-- {{productData? productData.length:''}} -->
+                           Count : {{pbkData.length}}
                         </button>
                      </div>
                   </div>
@@ -45,7 +44,7 @@
 
             <div class="row" *ngIf="pbkData.length">
                <div class="card-body" style="overflow: auto;">
-                  <table id="datatable-buttons" class="table table-hover dt-responsive" style="width:max-content;">
+                  <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
                            <th style="width: 80px;">No.</th>
@@ -79,7 +78,7 @@
                            <td>{{data.relation}}:<br>{{data.relative_name}}</td>
                            <td>{{data.gender}}</td>
                            <td>{{data.birth_date | date:'dd-MM-yyyy'}}
-                           <br /> Age : {{data.age}}</td>
+                           <br>{{data.age?'Age : '+data.age:'-'}}</td>
                            <td>{{data.status}}</td>
                            <td>{{data.address?data.address:'-'}}</td>
                            <td>{{data.townarea?data.townarea:'-'}}</td>
