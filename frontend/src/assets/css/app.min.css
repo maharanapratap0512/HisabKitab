@@ -2271,7 +2271,12 @@ progress {
 }
 
 .table>thead {
-   vertical-align: bottom
+   /* vertical-align: bottom */
+   font-size: medium;
+   /* background-color: #39afd124; */
+   /* color: #ffffffed; */
+   height: 50px;
+   /* box-shadow: 0px -1px 5px 1px #39afd1 !important; */
 }
 
 .table>:not(:last-child)>:last-child>* {

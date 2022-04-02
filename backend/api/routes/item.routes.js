@@ -42,7 +42,12 @@ router.post('/:dept_id', async (req, res, next) => {
 
 //  item get by dept
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getFullListByDept('item', req.params.dept_id).then((resolve) => {
+    await DB.getFullListByDept('itemMix', req.params.dept_id).then((resolve) => {
+        for(let i = 0; i < resolve.length; i++){
+            
+            resolve[i].subitems = (resolve[i].subitems != "[null]" ? JSON.parse(resolve[i].subitems) : []);
+            resolve[i].categories = (resolve[i].categories != "[null]" ? JSON.parse(resolve[i].categories) : []);
+        }
         res.json({
             success: true,
             result: resolve || []

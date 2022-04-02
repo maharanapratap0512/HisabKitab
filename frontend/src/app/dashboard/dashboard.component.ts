@@ -343,7 +343,7 @@ export class DashboardComponent implements OnInit {
     // this.isLoader = true;
     this.http.get(this.api.getUrl('BACHAT') + this.auth.webUser.dept_id).subscribe((data: any) => {
       if (data['result'] && data['success']) {
-        this.bachatDataAll = data['result'].filter((b: { qty: number; }) => b.qty > 0);
+        this.bachatDataAll = data['result'].filter((b: { qty: number; }) => b.qty != 0);
         this.bachatData = this.bachatDataAll;
         console.log("bachat", this.bachatData);
 

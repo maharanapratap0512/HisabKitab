@@ -45,28 +45,28 @@ router.get('/:dept_id', async (req, res, next) => {
 
 
 // category update
-router.put('/', async (req, res, next) => {
-    if (req.body.set && req.body.query) {
-        let condition = '_id = ' + req.body.query._id;
-        await DB.update('bachat', req.body.set, condition, async (err, data) => {
-            if (err) {
-                return next(err);
-            }
-            // await DB.updateToCache('bachat', req.body.set, condition, (err) => { })
-            await DB.select('bachat', ['*'], condition).then((resolve) => {
-                res.json({
-                    success: true,
-                    result: resolve || []
-                });
-            }, (err)=>{
-                return next(err);
-            });
-        });
-    }
-    else {
-        return next(new Error('Id not found.'))
-    }
-});
+// router.put('/', async (req, res, next) => {
+//     if (req.body.set && req.body.query) {
+//         let condition = '_id = ' + req.body.query._id;
+//         await DB.update('bachat', req.body.set, condition, async (err, data) => {
+//             if (err) {
+//                 return next(err);
+//             }
+//             // await DB.updateToCache('bachat', req.body.set, condition, (err) => { })
+//             await DB.select('bachat', ['*'], condition).then((resolve) => {
+//                 res.json({
+//                     success: true,
+//                     result: resolve || []
+//                 });
+//             }, (err)=>{
+//                 return next(err);
+//             });
+//         });
+//     }
+//     else {
+//         return next(new Error('Id not found.'))
+//     }
+// });
 
 
 // category delete

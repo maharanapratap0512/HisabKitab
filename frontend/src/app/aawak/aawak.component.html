@@ -33,7 +33,7 @@
                      </div>
                      <div class="col-2">
                         <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
-                           Count : {{total_count?total_count:'0'}}
+                           Count : {{aawakData.length}}
                            <!-- {{productData? productData.length:''}} -->
                         </button>
                      </div>
@@ -43,22 +43,22 @@
 
             <div class="row" *ngIf="aawakData.length">
                <div class="card-body" style="overflow: auto;">
-                  <table id="datatable-buttons" class="table table-hover dt-responsive" style="width:max-content;">
+                  <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
-                           <th style="width: 80px;">No.</th>
-                           <th style="width: 70px;">Manage</th>
+                           <th style="width: 30px;">No.</th>
+                           <th style="width: 80px;">Manage</th>
                            <th style="width: 70px;">Pkt No.</th>
                            <th style="width: 101px;">Date</th>
-                           <th *ngIf="auth.webUser.dept_id != 2" style="width: 150px;">Mm</th>
+                           <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
                            <th style="width: 150px;">Aawak Mm</th>
-                           <th *ngIf="auth.webUser.dept_id != 3" style="width: 200px;">Pbk</th>
+                           <th style="width: 200px;" *ngIf="auth.webUser.dept_id != 3">Pbk</th>
                            <th style="width: 120px;">Aawak Type</th>
-                           <th>Item - Subitem</th>
-                           <th *ngIf="auth.webUser.dept_id != 3">Product</th>
-                           <th>Qty</th>
-                           <th>Actual Amt</th>
-                           <th>Nimmit</th>
+                           <th style="width: 150px;" >Item - Subitem</th>
+                           <th style="width: 200px;" *ngIf="auth.webUser.dept_id != 3">Product</th>
+                           <th style="width: 100px;">Qty</th>
+                           <th style="width: 100px;">Actual Amt</th>
+                           <th style="width: 100px;">Nimmit</th>
                            <th style="width: 200px;">Item Detail</th>
                            <th style="width: 200px;">Description</th>
                         </tr>
@@ -75,7 +75,7 @@
 
                            <td>{{data.pkt_num?data.pkt_num:'-'}}</td>
                            <td>{{data.date?data.date:'-'}}</td>
-                           <td>
+                           <td *ngIf="auth.webUser.dept_id != 2">
                               {{data.mm_hin}} - {{data.mm_code}}<br />
                               {{data.mm_eng}}
                            </td>
@@ -83,7 +83,7 @@
                               {{data.aawak_mm_hin}} - {{data.aawak_mm_code}}<br />
                               {{data.aawak_mm_eng}}
                            </td>
-                           <td>
+                           <td *ngIf="auth.webUser.dept_id != 3">
                               {{data.pbk_hin}} <br />
                               {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
                            </td>
@@ -92,11 +92,16 @@
                               {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
                               {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
                            </td>
-                           <td>
+                           <td *ngIf="auth.webUser.dept_id != 3">
                               {{data.product_code ? data.product_code : ''}}
                               {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
                            </td>
-                           <td> {{data.qty}} {{data.unit_short}}</td>
+                           <td> 
+                              {{data.qty}} {{data.unit_short}} <br />
+                              <span style="font-weight:bold; color: red;" *ngIf="data.remaining_qty != 0">
+                                 बचत: {{data.remaining_qty}}
+                              </span>                              
+                           </td>
                            <td>@ {{data.rate?data.rate:'-'}} <br>
                               = {{data.actual_amt?data.actual_amt:'-'}}</td>
                            <td>{{data.nimmit?data.nimmit:'-'}}</td>

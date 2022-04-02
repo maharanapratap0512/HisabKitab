@@ -715,6 +715,19 @@ class DBContex {
         left join unit on unit._id = item.unit_id`,
         itemsort: `item_hin, item_eng`,
 
+        itemMix: `select item.*, 
+        cat.category_hin, cat.category_eng, 
+        unit.unit_full, unit.unit_short ,
+        json_group_array(JSON('{"_id": ' || si._id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || '}')) as subitems, json_group_array(si.category_id) as categories
+        from item
+        left join category cat on cat._id = item.category_id
+        left join unit on unit._id = item.unit_id
+        left join subitem si on si.item_id = item._id
+        left join category ct on ct._id = si.category_id
+        left join unit ut on ut._id = si.unit_id
+        left join subitem_list sl on  sl._id = si.subitem_list_id group by item._id`,
+        itemMixsort: `item_hin, item_eng`,
+
         subitem: `select subitem.*, 
         cat.category_hin, cat.category_eng, 
         unit.unit_full, unit.unit_short, 
@@ -780,7 +793,7 @@ class DBContex {
         left join unit on unit._id = aawak.unit_id
         left join department dept on dept._id = aawak.dept_id
         left join support_list slat on slat._id = aawak.aawak_type_id`,
-        aawaksort: `date, mm_hin, mm_eng, pkt_num`,
+        aawaksort: `date, aawak_mm_hin, aawak_mm_eng, pkt_num`,
 
         jawak: `select jawak.*,
         amm.mm_hin,amm.mm_eng,amm.mm_code,
@@ -804,7 +817,7 @@ class DBContex {
         left join support_list jsl on jsl._id = jawak.jawak_type_id
         left join unit on unit._id = jawak.unit_id
         left join department dept on dept._id = jawak.dept_id`,
-        jawaksort: `date, mm_hin, mm_eng, pkt_num`,
+        jawaksort: `date, jawak_mm_hin, jawak_mm_eng, pkt_num`,
 
         bachat: `select bachat.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code,        
