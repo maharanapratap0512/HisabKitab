@@ -31,6 +31,7 @@ export class ApiService {
     CITY: base_url + 'cities/',
     PRODUCT: base_url + 'products/',
     ITEM: base_url + 'items/',
+    ITEMMIX: base_url + 'items/itemmix/',
     SUBITEM: base_url + 'subitems/',
     SUBITEMLIST: base_url + 'subitemlists/',
     CATEGORY: base_url + 'categories/',

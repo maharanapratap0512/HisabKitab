@@ -23,9 +23,11 @@ export class ItemComponent implements OnInit {
   itemDataAll: any = [];
   itemData: any = [];
   categories: any = [];
+  subitem_lists: any = [];
   total_count: any;
   si_total_count: any;
   subitemData: any = [];
+  conditionObj: any = {};
 
   constructor(
     private fb: FormBuilder,
@@ -40,80 +42,69 @@ export class ItemComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getItemData();
-    this.getSubitemData();
+    // this.getSubitemData();
     this.categories = this.gs.Lists.category;
+    this.subitem_lists = this.gs.Lists.subitem_list;
   }
 
   getItemData() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('ITEM') + this.auth.webUser.dept_id).subscribe((data) => {
+    this.http.put(this.api.getUrl('ITEMMIX') + this.auth.webUser.dept_id, this.conditionObj).subscribe((data: any) => {
       if (data['result'] && data['success']) {
-        this.itemDataAll = data['result'];
-        this.itemData = this.itemDataAll;
+        // this.itemDataAll = data['result'];
+        this.itemData = data['result'];
         this.total_count = data['total_count'];
+        this.si_total_count = data['subitem_count']
         this.isLoader = false;
       }
       this.isLoader = false;
     });
   }
 
-  getSubitemData() {
-    this.isLoader = true;
-    this.http.get(this.api.getUrl('SUBITEM') + this.auth.webUser.dept_id).subscribe((data) => {
-      if (data['result'] && data['success']) {
-        this.subitemData = data['result'];
-        this.si_total_count = data['total_count'];
-        this.isLoader = false;
-      }
-      this.isLoader = false;
-    });
-  }
+  // getSubitemData() {
+  //   this.isLoader = true;
+  //   this.http.get(this.api.getUrl('SUBITEM') + this.auth.webUser.dept_id).subscribe((data) => {
+  //     if (data['result'] && data['success']) {
+  //       this.subitemData = data['result'];
+  //       this.si_total_count = data['total_count'];
+  //       this.isLoader = false;
+  //     }
+  //     this.isLoader = false;
+  //   });
+  // }
 
   catSelected(ev: any) {
-    //   if (ev) {
-    //     let backup = this.itemDataAll
-    //     this.itemData = [];
-    //     let temp = {
-    //       subitems: <any>[]
-    //     }
-    //     // let j = 0;
-    //     for (let i in backup) {
-    //       if (backup[i].category_id == ev || backup[i].categories.includes(ev)) {
-    //         temp == backup[i];
-    //         console.log("b4 temp", temp);
-    //         temp.subitems = [];
-    //         for (let k in backup[i].subitems) {
-    //           if (backup[i].subitems[k].category_id == ev) {
-    //             temp.subitems.push(backup[i].subitems[k]);
-    //             console.log("aftre temp", temp);
-    //           }
-    //         }
-    //         this.itemData.push(temp);
-    //         // j++;
-    //       }
-    //     }
-    //     this.itemDataAll = backup;
-    //     // this.itemData = temp;
-    //     console.log("this.itemData", this.itemData);
-    //     console.log("this.itemDataAll", this.itemDataAll);
-
-    //   // this.itemData = this.itemDataAll.filter((i: { category_id: any, categories: any}) => i.category_id == ev || i.categories.includes(ev));
-
-    //   // for(let i in this.itemData){
-    //   //   this.itemData[i].subitems = this.itemData[i].subitems.filter((s: { category_id: any; })=>s.category_id == ev);
-    //   // }
-    //   // this.itemData = this.itemDataAll.filter((i: { category_id: any, categories: any, subitems:any })=>{
-    //   //   if(i.category_id == ev || i.categories.includes(ev)){
-    //   //     i.subitems = i.subitems.filter((s: { category_id: any; })=>s.category_id == ev);
-    //   //     console.log(i);
-    //   //   }
-    //   // });
-    // }
-    // else {
-    //   this.getItemData();
-    // }
+    if (ev) {
+      this.conditionObj.category_id = ev;
+      this.getItemData();
+    }
+    else {
+      this.conditionObj.category_id = null;
+      this.getItemData();
+    }
   }
 
+  SubitemListSelected(ev: any) {
+    if (ev) {
+      this.conditionObj.subitem_list_id = ev;
+      this.getItemData();
+    }
+    else {
+      this.conditionObj.subitem_list_id = null;
+      this.getItemData();
+    }
+  }
+
+  addSubitem(item:any){
+
+    this.editData = {
+      item_id:item._id,
+      category_id: item.category_id,
+      unit_id: item.unit_id
+    }
+    this.showModal = 'Add Subitem From Item';
+    $('#showModal').modal('show');
+  }
   addItemResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
@@ -140,9 +131,45 @@ export class ItemComponent implements OnInit {
     }
   }
 
-  edit(data: any) {
-    this.editData = data;
-    this.showModal = 'Edit Item'
+
+  addSubitemResponse(ev: any) {
+    if (ev._id) {
+      this.isLoader = true;
+      $('#showModal').modal('hide');
+      this.showModal = '';
+      let i = this.itemData.findIndex((i: { _id: any; }) => i._id == ev.item_id);
+      this.itemData[i].subitems.unshift(ev);
+      this.isLoader = false;
+    }
+    else {
+      console.log("message", ev)
+    }
+  }
+
+  editSubitemResponse(ev: any) {
+    if (ev._id) {
+      this.isLoader = true;
+      $('#showModal').modal('hide');
+      this.showModal = '';
+      let i = this.itemData.findIndex((i: { _id: any; }) => i._id == ev.item_id);
+      let j = this.itemData[i].subitems.findIndex((i: { _id: any; }) => i._id == ev._id);
+      this.itemData[i].subitems.splice(j, 1, ev);
+      this.isLoader = false;
+    }
+    else {
+      console.log("message", ev);
+    }
+  }
+
+  edit(data: any, type: any = null) {
+    if (type == 'subitem') {
+      this.editData = data;
+      this.showModal = 'Edit Subitem'
+    }
+    else {
+      this.editData = data;
+      this.showModal = 'Edit Item'
+    }
     $('#showModal').modal('show');
   }
 
@@ -162,6 +189,34 @@ export class ItemComponent implements OnInit {
             this.isLoader = false;
             this.itemData.splice(i, 1);
             this.gs.Lists.mm.splice(this.gs.Lists.mm.indexOf((i: { _id: any; }) => i._id == id), 1);
+            this.total_count -= 1;
+            this.toastr.success('Deleted Successfully');
+          }
+          else {
+            this.toastr.error(data['message']);
+            this.isLoader = false;
+          }
+        });
+      }
+    })
+  }
+
+  deleteSubitem(i: any, j: any, id: any) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http.delete(this.api.getUrl('SUBITEM') + '/' + id).subscribe((data: any) => {
+          if (data['success']) {
+            this.isLoader = false;
+            this.itemData[i].subitems.splice(j, 1);
+            // this.gs.Lists.item.splice(this.gs.Lists.mm.indexOf((i: { _id: any; }) => i._id == id), 1);
             this.total_count -= 1;
             this.toastr.success('Deleted Successfully');
           }

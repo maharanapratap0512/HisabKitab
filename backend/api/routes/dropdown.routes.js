@@ -52,9 +52,17 @@ router.get('/all/:dept_id', async (req, res, next) => {
         lists.category= await DB.getListByDept('category', req.params.dept_id) || [],
         lists.city= await DB.getListByDept('city', req.params.dept_id) || [],
         lists.item= await DB.getListByDept('item', req.params.dept_id) || [],
+        lists.itemmix = await DB.getFullListByDept('itemMix', req.params.dept_id).then((resolve) => {
+            for(let i = 0; i < resolve.length; i++){                
+                resolve[i].subitems = (resolve[i].subitems != "[null]" ? JSON.parse(resolve[i].subitems) : []);
+                resolve[i].categories = (resolve[i].categories != "[null]" ? JSON.parse(resolve[i].categories) : []);
+            }
+            return resolve;            
+        }, (err) => { return [] });
         lists.mm= await DB.getListByDept('mm', req.params.dept_id) || [],
         lists.pbk= await DB.getListByDept('pbk', req.params.dept_id) || [],
         lists.state= await DB.getListByDept('state', req.params.dept_id) || [],
+        // lists.item= await DB.getFullListByDept('item', req.params.dept_id) || [],
         lists.subitem= await DB.getFullListByDept('subitem', req.params.dept_id) || [],
         lists.subitem_list= await DB.getListByDept('subitem_list', req.params.dept_id) || [],
         lists.departmen_config= await DB.getListByDept('department_config', req.params.dept_id) || [],

@@ -142,9 +142,9 @@
                               <tr>
                                  <td>No.</td>
                                  <td>MM</td>
-                                 <td>Type</td>
                                  <td>Item</td>
-                                 <td>Qty</td>
+                                 <td>Used</td>
+                                 <td>Stock</td>
                               </tr>
                            </thead>
                            <tbody>
@@ -157,18 +157,18 @@
                                        {{data.mm_eng}}
                                     </td>
                                     <td>
-                                       {{data.bachat_type_hin}}<br />
-                                       {{data.bachat_type_eng}}
+                                       {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}} <br />
+                                       {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
                                     </td>
                                     <td>
-                                       {{data.item_hin}} : {{data.subitem_hin}} <br />
-                                       {{data.item_eng}} : {{data.subitem_eng}}
+                                          {{data.Used ? data.Used + " " + data.unit_short : "-"}}
                                     </td>
                                     <td>
-                                       <span class="px-1" [ngClass]="{'error': data.qty < 0}">
-                                          {{data.qty}} {{data.unit_short}}
+                                       <span class="px-1" [ngClass]="{'error': data.Stock < 0}">
+                                          {{data.Stock ? data.Stock + " " + data.unit_short : "-"}}
                                        </span>
                                     </td>
+
 
                                  </tr>
                               </ng-container>

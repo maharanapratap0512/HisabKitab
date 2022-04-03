@@ -30,7 +30,7 @@ export class JawakEntryComponent implements OnInit {
   imagebase: any = [];
   imagepath: any;
   departments: any = [];
-  unit_short:any = "";
+  unit_short: any = "";
   conditions: any = [];
   subitems: any = [];
   items: any = [];
@@ -39,7 +39,8 @@ export class JawakEntryComponent implements OnInit {
   states: any = [];
   categories: any = [];
   isCondition: any = false;
-  remaining_qty:any;
+  remaining_qty: any;
+  cat: any;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -77,7 +78,7 @@ export class JawakEntryComponent implements OnInit {
     this.conditions = this.gs.Lists.condition;
     this.jawak_types = this.gs.Lists.jawak_type;
     // this.subitems = this.gs.Lists.subitem;
-    this.items = this.gs.Lists.item;
+    this.items = this.gs.Lists.itemmix;
     this.categories = this.gs.Lists.category;
     this.units = this.gs.Lists.unit;
     this.pbks = this.gs.Lists.pbk;
@@ -107,7 +108,7 @@ export class JawakEntryComponent implements OnInit {
         nimmit: changes.getData.currentValue.nimmit,
         dept_id: changes.getData.currentValue.dept_id,
       });
-      if(changes.getData.currentValue.aawak_ref_id && !this.remaining_qty){
+      if (changes.getData.currentValue.aawak_ref_id && !this.remaining_qty) {
         // this.http.get(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id).subscribe((data: any) => {
         //   if (data['result'] && data['success']) {
         //     this.productsAll = data['result'];
@@ -161,35 +162,48 @@ export class JawakEntryComponent implements OnInit {
 
   catSelected(ev: any) {
     if (ev) {
-      this.items = this.gs.Lists.item.filter((i: { category_id: any; }) => i.category_id == ev);
-      // this.subitems = this.gs.Lists.subitem.filter((s: { category_id: any; }) => s.category_id == ev);
+      this.cat = ev;
+      this.items = this.gs.Lists.itemmix.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
     }
     else {
+      this.cat = null;
       this.items = this.gs.Lists.item;
-      // this.subitems = this.gs.Lists.subitem;
     }
+    this.unit_short = null;
+    this.jawakForm.patchValue({
+      item_id: null,
+      subitem_id: null,
+      unit_id: null,
+      product_id: null
+    })
   }
 
   itemSelected(ev: any) {
     if (ev) {
       let item = this.items.find((i: { _id: any; }) => i._id == ev);
-      this.subitems = this.gs.Lists.subitem.filter((s: { item_id: any; }) => s.item_id == ev);
-      this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
+      if (this.cat) {
+        this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
+      }
+      else {
+        this.subitems = item.subitems;
+      }
+
+      if (this.cat && this.cat != item.category_id) {
+        this.jawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
+      } else {
+        this.jawakForm.setControl('subitem_id', this.fb.control(null));
+      }
+      this.unit_short = item.unit_short;
       this.jawakForm.patchValue({
         unit_id: item.unit_id
       });
-      let unit = this.units.find((u: { _id: any; })=>u._id == item.unit_id);
-      if(unit){
-        this.unit_short = unit.unit_short;
-      }
-        
     }
     else {
       this.subitems = [];
+      this.unit_short = null;
       this.jawakForm.patchValue({
         unit_id: null
       });
-      this.unit_short = "";
     }
   }
 
@@ -198,12 +212,10 @@ export class JawakEntryComponent implements OnInit {
       let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
       this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
       this.jawakForm.patchValue({
-        unit_id: subitem.unit_id
+        unit_id: subitem.unit_id,
       });
-      let unit = this.units.find((u: { _id: any; })=>u._id == subitem.unit_id);
-      if(unit){
-        this.unit_short = unit.unit_short;
-      }
+      this.unit_short = subitem.unit_short;
+
     }
     else {
       this.products = this.productsAll;

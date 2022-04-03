@@ -11,25 +11,30 @@
 
             <!-- First Row -->
             <!-- Add Button, Search Field, Filter button, Total Count -->
-            <div class="row">
+            <div class="row border-bottom border-secondary">
                <div class="card-body">
                   <div class="row d-flex justify-content-between">
-                     <div class="col-2">
-                        <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
+                     <div class="col-3">
+                        <button class="btn btn-primary" onclick="$('#showModal').modal('show')"
                            (click)="showModal = 'Add Item'">
                            <i class="dripicons-plus" style="font-size: large;"> </i>Add Item
                         </button>
+
+                        <button class="btn btn-success ml-1" onclick="$('#showModal').modal('show')"
+                           (click)="showModal = 'Add Subitem'">
+                           <i class="dripicons-plus" style="font-size: large;"> </i>Add Subitem
+                        </button>
                      </div>
-                     <div class="col-5">
+                     <div class="col-3">
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
                         </div>
-                     </div>
+                     </div>                     
                      <div class="col-2">
                         <div class="form-group">
-                           <ng-select *ngIf="categories && categories.length" class="custom" style="width: 100%;"
-                              placeholder="Select Category" [clearable]="false" [virtualScroll]="true"
+                           <ng-select class="custom" style="width: 100%;"
+                              placeholder="Select Category" [clearable]="true" [virtualScroll]="true"
                               (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
                               <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
                                  {{item.category_eng}}</ng-option>
@@ -37,8 +42,19 @@
                         </div>
                      </div>
                      <div class="col-2">
-                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total
-                           Count : {{itemData.length}}
+                        <div class="form-group">
+                           <ng-select class="custom" style="width: 100%;"
+                              placeholder="Select Subitem List" [clearable]="true" [virtualScroll]="true"
+                              (change)="SubitemListSelected($event)" [ngModelOptions]="{standalone: true}">
+                              <ng-option *ngFor="let item of subitem_lists" [value]="item._id">{{item.subitem_hin}} :
+                                 {{item.subitem_eng}}</ng-option>
+                           </ng-select>
+                        </div>
+                     </div>
+                     <div class="col-2">
+                        <button type="button" class="btn-sm btn-light py-0">
+                           <span class="float-start">Items : </span> <span class="float-end">{{itemData.length}}</span><br/>
+                           <span class="float-start">Subitems : </span><span class="float-end"> {{si_total_count}}</span>
                         </button>
                      </div>
                   </div>
@@ -53,11 +69,11 @@
                         <tr>
                            <th style="width: 50px;">No.</th>
                            <th style="width: 160px;">Manage</th>
-                           <th style="min-width: 250px;">Item Name (Hin-Eng)</th>
+                           <th style="width: 250px;">Item Name (Hin-Eng)</th>
                            <th style="width: 180px;">Item Code</th>
                            <th style="width: 180px;">Default Unit</th>
                            <th style="width: 180px;">Category</th>
-                           <th style="min-width: 250px;">Extra Note</th>
+                           <th style="width: 250px;">Extra Note</th>
                         </tr>
                      </thead>
                      <tbody class="accordion" id="accordionExample">
@@ -66,6 +82,8 @@
                               [attr.aria-controls]="'#collapse-' + i" style="background-color:#00000099">
                               <td>{{i+1}}</td>
                               <td>
+                                 <button class="btn btn-sm btn-outline-success" type="button" (click)="addSubitem(data)"><i
+                                    class="uil uil-plus"></i></button>
                                  <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
                                        class="uil uil-pen"></i></button>
                                  <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
@@ -87,80 +105,49 @@
                               <th>Default Unit</th>
                               <th>Extra Note</th>
                            </tr> -->
-                           <!-- <ng-container *ngFor="let si of subitemData ;let j=index">
-                              <ng-container *ngIf="data._id == si.item_id">
-                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show" -->
-                           <tr [attr.id]="'collapse-' + i" class="table-active accordion-collapse collapse show"
-                              *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
-                              <td colspan="7">
-                                 <table class="table mb-0">
-
-                                    <tr *ngFor="let si of data.subitems; let j = index" class="pt-0">
-                                       <td style="width: 50px;">
-                                          <i class="uil-corner-down-right pl-4"></i>{{j+1}}
-                                       </td>
-                                       <td style="width: 160px;">
-                                          <button class="btn btn-sm btn-primary mx-1" type="button"
-                                             (click)="edit(si)"><i class="uil uil-pen"></i></button>
-                                          <button class="btn btn-sm btn-danger" type="button"
-                                             (click)="delete(j,si._id)"><i class="uil-trash"></i></button>
-                                       </td>
-                                       <td style="min-width: 250px;" class="nav-item">
-                                          {{si.subitem_hin +' : '+ si.subitem_eng}}
-                                       </td>
-                                       <td style="width: 180px;" class="nav-item">
-                                          <!-- <b>Item = </b> -->
-                                          <!-- {{si.item_id?si.item_hin + ' : ' + si.item_eng:'-'}} -->
-                                       </td>
-                                       <td style="width: 180px;" class="nav-item">
-                                          <!-- <b>Unit = </b> -->
-                                          {{si.unit_id?si.unit_short + ' : ' + si.unit_full:'-'}}
-                                       </td>
-                                       <td style="width: 180px;" class="nav-item">
-                                          <!-- <b>Category = </b> -->
-                                          {{si.category_id?si.category_hin + ' : ' + si.category_eng:'-'}}
-                                       </td>
-                                       <td style="min-width: 250px;" class="nav-item">
-                                          <!-- <b>Extra Note = </b> -->
-                                          {{si.extra_note?si.extra_note:'N/A'}}
-                                       </td>
-                                    </tr>
-
-                                 </table>
-                              </td>
-
-                              <!-- <td colspan="7">
-                                       <div class="d-flex justify-content-evenly">
-                                          <div class="m-auto"><i class="uil-corner-down-right pl-4"></i></div>
-                                          <div class="m-auto">
-                                             <button class="btn btn-sm btn-primary mx-1" type="button"
-                                                (click)="edit(si)"><i class="uil uil-pen"></i></button>
-                                             <button class="btn btn-sm btn-danger" type="button"
-                                                (click)="delete(j,si._id)"><i class="uil-trash"></i></button>
-                                          </div>
-                                          <div class="nav-item">
-                                             <b>Subitem = </b>
-                                             {{si.subitem_list_id?si.subitem_hin +' : '+ si.subitem_eng:'-'}}
-                                          </div>
-                                          <div class="nav-item">
-                                             <b>Item = </b>
-                                             {{si.item_id?si.item_hin + ' : ' + si.item_eng:'-'}}
-                                          </div>
-                                          <div class="nav-item">
-                                             <b>Category = </b>
-                                             {{si.category_id?si.category_hin + ' : ' + si.category_eng:'-'}}
-                                          </div>
-                                          <div class="nav-item">
-                                             <b>Unit = </b>
-                                             {{si.unit_id?si.unit_short + ' : ' + si.unit_full:'-'}}
-                                          </div>
-                                          <div class="nav-item">
-                                             <b>Extra Note = </b>
-                                             {{si.extra_note?si.extra_note:'N/A'}}
-                                          </div>
-                                       </div>
-                                    </td> -->
-                           </tr>
+                           <ng-container *ngFor="let si of data.subitems ;let j=index">
+                              <ng-container>
+                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show"
+                                    *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
+                                    <td colspan="7" style="padding-left: 3rem !important;background-color: #0acf974d;"
+                                       class="text-white">
+                                       <table class="" style="width: 99.7%;table-layout: fixed;">
+                                          <tr>
+                                             <td style="width: 50px;">
+                                                <i class="uil-corner-down-right pl-4"></i> &nbsp;&nbsp;&nbsp;{{j+1}}
+                                             </td>
+                                             <td style="width: 160px;">
+                                                <button class="btn btn-sm btn-primary mx-1" type="button"
+                                                   (click)="edit(si, 'subitem')"><i class="uil uil-pen"></i></button>
+                                                <button class="btn btn-sm btn-danger" type="button"
+                                                   (click)="deleteSubitem(i, j,si._id)"><i class="uil-trash"></i></button>
+                                             </td>
+                                             <td style="width: 250px;" class="nav-item">
+                                                {{si.subitem_hin +' : '+ si.subitem_eng}}
+                                             </td>
+                                             <td style="width: 180px;" class="nav-item">
+                                                <!-- <b>Item = </b> -->
+                                                {{si.subitem_code?si.subitem_code_hin + ' : ' +
+                                                si.subitem_code_eng:'-'}}
+                                             </td>
+                                             <td style="width: 180px;" class="nav-item">
+                                                <!-- <b>Unit = </b> -->
+                                                {{si.unit_id?si.unit_short + ' : ' + si.unit_full:'-'}}
+                                             </td>
+                                             <td style="width: 180px;" class="nav-item">
+                                                <!-- <b>Category = </b> -->
+                                                {{si.category_id?si.category_hin + ' : ' + si.category_eng:'-'}}
+                                             </td>
+                                             <td style="width: 250px;" class="nav-item">
+                                                <!-- <b>Extra Note = </b> -->
+                                                {{si.extra_note?si.extra_note:'N/A'}}
+                                             </td>
+                                          </tr>
+                                       </table>
+                                    </td>
+                                 </tr>
+                              </ng-container>
+                           </ng-container>
                         </ng-container>
                      </tbody>
                   </table>
@@ -186,7 +173,11 @@
          <div class="modal-body">
             <app-item-entry *ngIf="showModal == 'Add Item'" (response)='addItemResponse($event)'></app-item-entry>
             <app-item-entry *ngIf="showModal == 'Edit Item'" (response)='editItemResponse($event)' [getData]="editData"
-               [isEdit]="true"></app-item-entry>
+            [isEdit]="true"></app-item-entry>
+
+            <app-subitem-entry *ngIf="showModal == 'Add Subitem'" (response)='addSubitemResponse($event)'></app-subitem-entry>
+            <app-subitem-entry *ngIf="showModal == 'Add Subitem From Item'" (response)='addSubitemResponse($event)' [getData]="editData"></app-subitem-entry>
+            <app-subitem-entry *ngIf="showModal == 'Edit Subitem'" (response)='editSubitemResponse($event)' [getData]="editData" [isEdit]="true"></app-subitem-entry>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"

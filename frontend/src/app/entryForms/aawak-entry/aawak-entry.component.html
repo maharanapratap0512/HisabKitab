@@ -106,7 +106,7 @@
                         {{item.dept_eng}}{{item.dept_code?' : '+item.dept_code:''}}</ng-option>
                   </ng-select>
                   <ng-select *ngIf="categories && categories.length" class="custom mt-1" style="width: 100%;"
-                     placeholder="Select Category" [clearable]="false" [virtualScroll]="true"
+                     placeholder="Select Category" [clearable]="false" [virtualScroll]="true" [(ngModal)]="cat"
                      (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
                      <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
                         {{item.category_eng}}</ng-option>
@@ -177,7 +177,7 @@
                   </ng-select>
                </div>
             </div>
-
+<!-- 
             <div class="col-md-2 mb-3">
                <div class="form-group">
                   <label class="form-label">Unit</label>
@@ -200,18 +200,18 @@
                         {{item.unit_full}}</ng-option>
                   </ng-select>
                </div>
-            </div>
+            </div> -->
 
-            <div class="col-md-1 mb-3">
+            <div class="col-md-2 mb-3">
                <div class="form-group">
-                  <label class="form-label">Quantity</label>
-                  <input type="text" class="form-control" placeholder="Quantity" formControlName="qty" [(ngModel)]="qty"
+                  <label class="form-label">Quantity (in {{unit}})</label>
+                  <input type="text" class="form-control" placeholder="Quantity in {{unit}}" formControlName="qty" [(ngModel)]="qty"
                      (keyup)="qtyclick()"
                      [ngClass]="{'validation':aawakForm.get('qty')?.errors && (aawakForm.get('qty')?.touched || aawakForm.get ('qty')?.dirty)}">
                </div>
             </div>
 
-            <div class="col-md-1 mb-3">
+            <div class="col-md-2 mb-3">
                <div class="form-group">
                   <label class="form-label">Rate</label>
                   <input type="text" class="form-control" placeholder="Rate" formControlName="rate" [(ngModel)]="rate"
@@ -229,29 +229,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id < 3 ">
-               <div class="form-group">
-                  <label class="form-label">Department</label>
-                  <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
-                        class="btn btn-sm btn-outline-primary" (click)="setView('Department')"><i
-                           class=" dripicons-view-list"></i></button>
-                     <!-- <button type="button" style="padding: 1px 6px !important;"
-                        class="btn btn-outline-primary float-end"
-                        onclick="$('#aawakEntryComponent > #showModal').modal('show')"
-                        (click)="showModal='Add Department'">+
-                        Add</button> -->
-                  </div>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Select Department" [clearable]="true"
-                     [virtualScroll]="true">
-                     <ng-option selected="selected" disabled value="">Select Department</ng-option>
-                     <ng-option *ngFor="let item of departments" [value]="item._id">
-                        {{item.dept_hin}}:{{item.dept_eng}}</ng-option>
-                  </ng-select>
-               </div>
-            </div>
-
-            <div class="col-md-2 mb-3">
+            <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Aawak Type</label>
                   <ng-select class="custom" style="width: 100%;" placeholder="Aawak Type" [clearable]="false"

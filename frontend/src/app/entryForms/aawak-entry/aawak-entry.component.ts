@@ -36,6 +36,8 @@ export class AawakEntryComponent implements OnInit {
   pbks: any = [];
   qty: any;
   oldQty: any;
+  unit:any;
+  cat: any;
   rate: any;
   amnt: any;
   aawak_types: any = [];
@@ -77,7 +79,7 @@ export class AawakEntryComponent implements OnInit {
 
   ngOnInit(): void {
     // this.aawaks = this.gs.Lists.aawak;
-    this.items = this.gs.Lists.item;
+    this.items = this.gs.Lists.itemmix;
     this.units = this.gs.Lists.unit;
     this.states = this.gs.Lists.state;
     this.mms = this.gs.Lists.mm;
@@ -129,7 +131,7 @@ export class AawakEntryComponent implements OnInit {
       this.rate = changes.getData.currentValue.rate;
       this.amnt = changes.getData.currentValue.actual_amt;
       this.oldQty = changes.getData.currentValue.qty
-      console.log(" this.aawakForm.value", this.aawakForm.value);
+      this.unit = changes.getData.currentValue.unit_id;
 
     }
   }
@@ -479,26 +481,46 @@ export class AawakEntryComponent implements OnInit {
 
   catSelected(ev: any) {
     if (ev) {
-      this.items = this.gs.Lists.item.filter((i: { category_id: any; }) => i.category_id == ev);
-      // this.subitems = this.gs.Lists.subitem.filter((s: { category_id: any; }) => s.category_id == ev);
+      this.cat = ev;
+      this.items = this.gs.Lists.itemmix.filter((i: { category_id: any, categories:any }) => i.category_id == ev || i.categories.includes(ev));      
     }
     else {
-      this.items = this.gs.Lists.item;
-      // this.subitems = this.gs.Lists.subitem;
+      this.cat = null;
+      this.items = this.gs.Lists.itemmix;      
     }
+    this.unit = null;
+    this.aawakForm.patchValue({
+      item_id:null,
+      subitem_id:null,
+      unit_id:null,
+      product_id: null
+    })
   }
 
   itemSelected(ev: any) {
     if (ev) {
-      let item = this.items.find((i: { _id: any; }) => i._id == ev);
-      this.subitems = this.gs.Lists.subitem.filter((s: { item_id: any; }) => s.item_id == ev);
+      let item = this.items.find((i: { _id: any; }) => i._id == ev);            
       this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
+      if(this.cat){        
+        this.subitems = item.subitems.filter((s: { category_id: any; })=>s.category_id == this.cat);
+      }
+      else{
+        this.subitems = item.subitems;
+      }
+      
+      if(this.cat && this.cat != item.category_id){
+        this.aawakForm.setControl('subitem_id', this.fb.control(null,[Validators.required]));
+      }else{
+        this.aawakForm.setControl('subitem_id', this.fb.control(null));
+      }
+      this.unit = item.unit_short;
       this.aawakForm.patchValue({
         unit_id: item.unit_id
       });
     }
     else {
       this.subitems = [];
+      this.unit = null;
       this.aawakForm.patchValue({
         unit_id: null
       });
@@ -512,6 +534,7 @@ export class AawakEntryComponent implements OnInit {
       this.aawakForm.patchValue({
         unit_id: subitem.unit_id
       });
+      this.unit = subitem.unit_short;
     }
     else {
       this.products = this.productsAll;
