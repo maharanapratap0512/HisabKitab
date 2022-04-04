@@ -47,62 +47,62 @@
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
-                           <th>No.</th>
-                           <th>Manage</th>
-                           <th *ngIf="auth.webUser.dept_id != 2" >MM</th>
-                           <th>Pkt No</th>
-                           <th>Date</th>
-                           <th>Jawak MM</th>
-                           <th *ngIf="auth.webUser.dept_id != 3">PBK</th>
-                           <th>Item - Subitem</th>
-                           <th *ngIf="auth.webUser.dept_id != 3">Product</th>
-                           <th>Quantity</th>
-                           <th>Item Detail</th>
-                           <th>Jawak Type</th>
-                           <th>Description</th>
-                           <th>Nimmit</th>
+                           <th style="width: 40px;">No.</th>
+                           <th style="width: 80px;">Manage</th>
+                           <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">MM</th>
+                           <th style="width: 70px;">Pkt No</th>
+                           <th style="width: 101px;">Date</th>
+                           <th style="width: 150px;">Jawak MM</th>
+                           <th style="width: 200px;" *ngIf="auth.webUser.dept_id != 3">PBK</th>
+                           <th style="width: 150px;">Item - Subitem</th>
+                           <th style="width: 200px;" *ngIf="auth.webUser.dept_id != 3">Product</th>
+                           <th style="width: 100px;">Quantity</th>
+                           <th style="width: 120px;">Jawak Type</th>
+                           <th style="width: 200px;">Item Detail</th>
+                           <th style="width: 200px;">Description</th>
+                           <th style="width: 100px;">Nimmit</th>
                         </tr>
                      </thead>
                      <tbody>
                         <tr *ngFor="let data of jawakData | filter:term; let i=index">
                            <td>{{i+1}}</td>
                            <td>
-                              <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                              <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button>
                               <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                     class="uil-trash"></i></button>
                            </td>
                            <td *ngIf="auth.webUser.dept_id != 2">
-                              {{data.mm_hin}} {{data.mm_code ? '('+data.mm_code+')': ''}}<br/>
+                              {{data.mm_hin}} {{data.mm_code ? '('+data.mm_code+')': ''}}<br />
                               {{data.mm_eng}}
                            </td>
                            <td>{{data.pkt_num}}</td>
-                           <td>{{data.date}}</td>
+                           <td>{{data.date | date:'yyyy-MM-dd'}}</td>
                            <td>
-                              {{data.jawak_mm_hin}}<br/>
+                              {{data.jawak_mm_hin}}<br />
                               {{data.jawak_mm_eng}}
                            </td>
                            <td *ngIf="auth.webUser.dept_id != 3">
-                              {{data.pbk_hin}} <br/>
+                              {{data.pbk_hin}} <br />
                               {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
                            </td>
                            <td>
-                              {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br/>
+                              {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
                               {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
                            </td>
                            <td *ngIf="auth.webUser.dept_id != 3">
-                              {{data.sr_num ? data.sr_num : ''}} <br/>
+                              {{data.sr_num ? data.sr_num : ''}} <br />
                               {{data.product_code ? data.product_code : ''}}
                               {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
                            </td>
                            <td>
                               {{data.qty}} {{data.unit_short}}
                            </td>
+                           <td>{{data.jawak_type_hin}}<br />
+                              {{data.jawak_type_eng}}</td>
                            <td>{{data.item_detail}}</td>
-                           <td>{{data.jawak_type_hin}}<br/>
-                               {{data.jawak_type_eng}}</td>
                            <td>{{data.description}}</td>
-                           <td>{{data.nimmit}}</td>                        
+                           <td>{{data.nimmit}}</td>
                         </tr>
                      </tbody>
                   </table>
@@ -127,7 +127,8 @@
          <div class="modal-body">
             <app-jawak-entry (response)='addJawakResponse($event)' *ngIf="showModal == 'Add Jawak'"></app-jawak-entry>
 
-            <app-jawak-entry (response)='editJawakResponse($event)' *ngIf="showModal == 'Edit Jawak'" [getData]="editData" isEdit="true">
+            <app-jawak-entry (response)='editJawakResponse($event)' *ngIf="showModal == 'Edit Jawak'"
+               [getData]="editData" isEdit="true">
             </app-jawak-entry>
          </div>
          <div class="modal-footer">

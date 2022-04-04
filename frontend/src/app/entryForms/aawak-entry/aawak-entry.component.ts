@@ -17,7 +17,7 @@ declare var $: any;
 export class AawakEntryComponent implements OnInit {
 
   @Input() getData: any;
-  @Input() isEdit: any;
+  @Input() isEdit: any = false;
   @Output() response = new EventEmitter();
   aawakForm: FormGroup;
   states: any = [];

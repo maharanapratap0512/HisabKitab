@@ -6,6 +6,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
+import { FilterpipePipe } from '../pipe/filterpipe.pipe';
 import { AuthService } from '../services/auth.service';
 declare var $: any;
 
@@ -23,7 +24,10 @@ export class AawakComponent implements OnInit {
   aawakData: any = [];
   aawakAll: any = [];
   total_count: any;
-
+  conditionObj: any = {
+    mm_id: null
+  };
+  mms: any = [];
 
   constructor(
     private fb: FormBuilder,
@@ -32,15 +36,32 @@ export class AawakComponent implements OnInit {
     public gs: GlobalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    public auth: AuthService
+    public auth: AuthService,
   ) { }
 
   ngOnInit(): void {
     this.spinner.show();
     this.getaawakData();
-    console.log("aawak component", this.gs.Lists);
+    this.mms = this.gs.Lists.mm;
     // this.states = this.gs.Lists.state ? this.gs.Lists.state : [];
     // this.departments = this.gs.Lists.department ? this.gs.Lists.department : [];
+  }
+
+  mmSelected(ev: any) {
+    console.log("ccc",this.conditionObj);
+    
+    if (ev) {
+      this.conditionObj.mm_id = ev
+      // const filterPipe = new FilterpipePipe();
+      // this.aawakData = filterPipe.transform(this.aawakAll, this.conditionObj);
+      // console.log("q",this.aawakData );
+
+    } else {
+      this.conditionObj.mm_id = null
+      // const filterPipe = new FilterpipePipe();
+      // this.aawakData = filterPipe.transform(this.aawakAll, this.conditionObj);
+      // console.log("q",this.aawakData );
+    }
   }
 
   getaawakData() {
@@ -74,8 +95,6 @@ export class AawakComponent implements OnInit {
   }
 
   addAawakResponse(ev: any) {
-    console.log("res", ev);
-
     if (ev._id) {
       console.log("if res", ev);
 
@@ -137,6 +156,14 @@ export class AawakComponent implements OnInit {
         });
       }
     })
+  }
+
+  filter() {
+    this.aawakData = this.aawakAll;
+    for (let [key, value] of Object.entries(this.conditionObj)) {
+      if (value)
+        this.aawakData = this.aawakData.filter((b: any) => b[key] == value);
+    }
   }
 
 }

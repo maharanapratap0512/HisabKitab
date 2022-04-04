@@ -40,6 +40,7 @@ export class JawakEntryComponent implements OnInit {
   categories: any = [];
   isCondition: any = false;
   remaining_qty: any;
+  ref_id:any = null;
   cat: any;
 
   constructor(private fb: FormBuilder,
@@ -108,13 +109,8 @@ export class JawakEntryComponent implements OnInit {
         nimmit: changes.getData.currentValue.nimmit,
         dept_id: changes.getData.currentValue.dept_id,
       });
-      if (changes.getData.currentValue.aawak_ref_id && !this.remaining_qty) {
-        // this.http.get(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id).subscribe((data: any) => {
-        //   if (data['result'] && data['success']) {
-        //     this.productsAll = data['result'];
-        //     this.products = data['result'];
-        //   }
-        // });
+      if (changes.getData.currentValue.aawak_ref_id) {
+        this.ref_id = changes.getData.currentValue.aawak_ref_id;
       }
     }
   }
@@ -231,7 +227,11 @@ export class JawakEntryComponent implements OnInit {
   }
 
   jawakFormSubmit() {
+    console.log("clicked");
+    
     if (this.jawakForm.valid) {
+      console.log("form valid");
+      
       this.isLoader = true;
       this.http.post(this.api.getUrl('JAWAK') + this.auth.webUser.dept_id, this.jawakForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
@@ -250,6 +250,8 @@ export class JawakEntryComponent implements OnInit {
       });
     }
     else {
+      console.log("form invalid", this.jawakForm);
+      
       this.gs.validationFireOnSubmit(this.jawakForm);
     }
   }

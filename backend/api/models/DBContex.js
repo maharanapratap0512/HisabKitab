@@ -1064,13 +1064,13 @@ class DBContex {
         left join department dept on dept._id = jawak.dept_id ?`,
         jawaksort: `date, jawak_mm_hin, jawak_mm_eng, pkt_num`,
 
-        bachat: `select bachat.*,
-        mm.mm_hin,mm.mm_eng,mm.mm_code,        
-        it.item_hin, it.item_eng, it.item_code,
-        sil.subitem_hin, sil.subitem_eng,
-        sl.list_name_hin as bachat_type_hin, sl.list_name_eng as bachat_type_eng,
-        dept.dept_eng, dept.dept_hin, dept.dept_code,
-        unit.unit_short, unit.unit_full
+        bachat: `select bachat.mm_id, bachat.item_id, bachat.subitem_id, bachat.dept_id, bachat.active, bachat.created_at, bachat.updated_at,
+        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng,      
+        it.item_hin, it.item_eng, it.item_code, it.category_id as icat_id, cti.category_hin as icat_hin, cti.category_eng as icat_eng, 
+        sil.subitem_hin, sil.subitem_eng, si.category_id as scat_id, cts.category_hin as scat_hin, cts.category_eng as scat_eng, 
+        bachat.unit_id,unit.unit_short, unit.unit_full,
+        json_group_array(JSON('{ "bachat_type_id": ' || bachat.bachat_type_id || ', "bachat_type_hin": "' || sl.list_name_hin || '", "bachat_type_eng": "' || sl.list_name_eng || '", "qty": ' || bachat.qty || ', "unit": "' || unit.unit_short || '"}')) as bachat_qty,         
+        dept.dept_eng, dept.dept_hin, dept.dept_code
         from bachat
         left join mm on mm._id = bachat.mm_id
         left join support_list sl on sl._id = bachat.bachat_type_id
@@ -1078,7 +1078,10 @@ class DBContex {
         left join subitem si on si._id = bachat.subitem_id
         left join subitem_list sil on sil._id = si.subitem_list_id
         left join unit on unit._id = bachat.unit_id
-        left join department dept on dept._id = bachat.dept_id ?`,
+        left join category cti on cti._id = it.category_id
+        left join category cts on cts._id = si.category_id
+        left join state st on st._id = mm.state_id
+        left join department dept on dept._id = bachat.dept_id ? group by bachat.mm_id, bachat.item_id, bachat.subitem_id, bachat.dept_id`,
         bachatsort: `mm_hin, mm_eng, item_hin, subitem_hin, item_eng, subitem_eng`,
 
         bachatHome: `select bachat.mm_id, bachat.item_id, bachat.subitem_id, bachat.dept_id, bachat.active, bachat.created_at, bachat.updated_at,

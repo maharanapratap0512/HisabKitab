@@ -26,6 +26,13 @@
                               name="search">
                         </div>
                      </div>
+                     <div class="col-3">
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="true"
+                           [virtualScroll]="true"  [(ngModel)]="conditionObj.mm_id" (change)="mmSelected($event)">
+                           <ng-option *ngFor="let item of mms" [value]="item._id">
+                              {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
+                        </ng-select>
+                     </div>
                      <div class="col-2">
                         <button type="button" class="btn btn-outline-light w-100">Advance Filter
                            <i style="font-weight: 700;" class="dripicons-chevron-down"> </i>
@@ -54,7 +61,7 @@
                            <th style="width: 150px;">Aawak Mm</th>
                            <th style="width: 200px;" *ngIf="auth.webUser.dept_id != 3">Pbk</th>
                            <th style="width: 120px;">Aawak Type</th>
-                           <th style="width: 150px;" >Item - Subitem</th>
+                           <th style="width: 150px;">Item - Subitem</th>
                            <th style="width: 200px;" *ngIf="auth.webUser.dept_id != 3">Product</th>
                            <th style="width: 100px;">Qty</th>
                            <th style="width: 100px;">Actual Amt</th>
@@ -64,7 +71,7 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <tr *ngFor="let data of aawakData | filter:term; let i=index">
+                        <tr *ngFor="let data of aawakData | filterpipe:conditionObj; let i=index">
                            <td>{{i+1}}</td>
                            <td>
                               <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
@@ -74,7 +81,7 @@
                            </td>
 
                            <td>{{data.pkt_num?data.pkt_num:'-'}}</td>
-                           <td>{{data.date?data.date:'-'}}</td>
+                           <td>{{data.date?data.date:'-' | date:'yyyy-MM-dd'}}</td>
                            <td *ngIf="auth.webUser.dept_id != 2">
                               {{data.mm_hin}} - {{data.mm_code}}<br />
                               {{data.mm_eng}}
@@ -96,11 +103,11 @@
                               {{data.product_code ? data.product_code : ''}}
                               {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
                            </td>
-                           <td> 
+                           <td>
                               {{data.qty}} {{data.unit_short}} <br />
                               <span style="font-weight:bold; color: red;" *ngIf="data.remaining_qty != 0">
                                  बचत: {{data.remaining_qty}}
-                              </span>                              
+                              </span>
                            </td>
                            <td>@ {{data.rate?data.rate:'-'}} <br>
                               = {{data.actual_amt?data.actual_amt:'-'}}</td>

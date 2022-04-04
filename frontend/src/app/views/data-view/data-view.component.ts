@@ -81,6 +81,9 @@ export class DataViewComponent implements OnInit {
         case 'dept_id': this.setDepartmentFields();
           this.apiName = 'DEPARTMENT';
           break;
+        case 'jawak': this.setJawakFields();
+          this.apiName = 'JAWAK';
+          break;
       }
     }
     if (changes.getData.currentValue) {
@@ -237,6 +240,40 @@ export class DataViewComponent implements OnInit {
       }, {
         title: "Subitem(Eng)",
         field: ["subitem_eng"]
+      }
+    ]
+  }
+
+
+  setJawakFields() {
+    this.fields = [
+      {
+        title: "Date",
+        field: ["date"]
+      }, {
+        title: "Pkt No.",
+        field: ["pkt_num","jawak_mm_eng"]
+      }, {
+        title: "Jawak MM",
+        field: ["jawak_mm_hin","jawak_mm_eng"]
+      }, {
+        title: "Item",
+        field: ["item_hin", "subitem_hin","item_eng", "subitem_eng"]
+      }, {
+        title: "Qty",
+        field: ["qty"]
+      }, {
+        title: "Item Detail",
+        field: ["item_detail"]
+      }, {
+        title: "Jawak Type",
+        field: ["jawak_type_hin", "jawak_type_eng"]
+      }, {
+        title: "Description",
+        field: ["description"]
+      }, {
+        title: "Nimmit",
+        field: ["nimmit"]
       }
     ]
   }

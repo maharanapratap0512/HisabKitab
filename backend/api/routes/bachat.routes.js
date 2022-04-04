@@ -34,7 +34,7 @@ router.get('/', async (req, res, next) => {
 });
 
 //  category get
-router.get('/:dept_id', async (req, res, next) => {
+router.get('/home/:dept_id', async (req, res, next) => {
     await DB.getFullListByDept('bachatHome', req.params.dept_id).then((data) => {
         for(let i in data){
             data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
@@ -49,6 +49,22 @@ router.get('/:dept_id', async (req, res, next) => {
     }, (err) => { return next(err) });
 });
 
+
+router.get('/:dept_id', async (req, res, next) => {
+    let conditionString = ` bachat.qty <> 0`;
+    await DB.getFullListByDept('bachat', req.params.dept_id, conditionString).then((data) => {
+        for(let i in data){
+            data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
+            for(let bcht of data[i].bachat_qty){
+                data[i][bcht.bachat_type_eng] = bcht.qty;
+            }
+        }
+        res.json({
+            success: true,
+            result: data || []
+        });
+    }, (err) => { return next(err) });
+});
 
 // category update
 // router.put('/', async (req, res, next) => {

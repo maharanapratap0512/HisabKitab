@@ -37,6 +37,7 @@ import { ProductComponent } from './product/product.component';
 
 import { AuthGuard } from './services/auth.guard';
 import { JawakComponent } from './jawak/jawak.component';
+import { BachatComponent } from './bachat/bachat.component';
 
 const routes: Routes = [
    {
@@ -56,6 +57,7 @@ const routes: Routes = [
 
          { path: "aawak", component: AawakComponent },
          { path: "jawak", component: JawakComponent },
+         { path: "bachat", component: BachatComponent },
          { path: "pbk", component: PbkComponent },
          { path: "mm", component: MmComponent },
          { path: "unit", component: UnitComponent },
