@@ -236,12 +236,15 @@ class DBContex {
         });
     }
 
-    getDeptConfig = async (dept_id = null) => {
+    getDeptConfig = async (dept_id = null, configKey = null) => {
         return new Promise(async (resolve, reject) => {
             try {
                 let sql = this.fullListConfig['department_config'];
                 if (dept_id && dept_id != '') {
                     sql += ` where dept_id = ${dept_id}`;
+                }
+                if(configKey && configKey != ''){
+                    sql +=  (dept_id && dept_id != '' ? ` AND `: ` where`) + ` config_key = '${configKey}'`;
                 }
                 this.localDB.all(sql, (err, data) => {
                     if (err) {
@@ -279,20 +282,30 @@ class DBContex {
     }
 
     //get full list by department ALL or specified Id.
-    getFullListForDeptConfig = async (list_name, dept_id) => {
+    getFullListForDeptConfig = async (list_name, dept_id, conditionString = null) => {
         return new Promise(async (resolve, reject) => {
-            try {
-                let sql1 = this.fullListForConfig[list_name];
-                let sql2 = this.fullListForConfig[list_name];
-
-                if (sql1 && sql1 != '' && sql2 && sql2 != '') {
-                    // sql1 += ` where (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||'%' OR (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%'||${list_name}._id||',%'`;
-                    // sql2 += ` where NOT ((select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||'%' OR (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%'||${list_name}._id||',%')`;
-                    sql1 += ` where (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
-                    sql2 += ` where NOT ((select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%')`;
+            try {                
+                let params = [];
+                let sql = this.fullListForConfig[list_name];
+                if (sql && sql != '') {
+                    if (list_name == 'itemMix') {       
+                        let condition = ``;    
+                        if(conditionString && conditionString != ''){
+                            condition += ` where ${conditionString}`;
+                        }   
+                              
+                        var Lindex1 = sql.lastIndexOf("?");
+                        sql = sql.substring(0, Lindex1) + condition + sql.substring(Lindex1 + 1);
+                    } else {
+                        let sql2 = this.fullListForConfig[list_name];
+                        sql += ` where (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
+                        sql2 += ` where NOT ((select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%')`;
+                        sql += ` UNION ${sql2} order by chk`;
+                        params = [true, false];
+                    }
                 }
 
-                await this.localDB.all(`${sql1} UNION ${sql2} order by chk`, [true, false], (err, data) => {
+                await this.localDB.all(sql, params, (err, data) => {
                     if (err) {
                         reject(err)
                     }
@@ -307,60 +320,12 @@ class DBContex {
         })
     }
 
-    //get full list by department ALL or specified Id.
-    // getFullListByDept = async (list_name, dept_id, listId = null) => {
-    //     return new Promise(async (resolve, reject) => {
-    //         try {
-    //             let sql = this.fullListConfig[list_name];
-
-    //             if (this.dept_config_list.includes(list_name)) {
-    //                 let exclude_dept = ['1', '2'];
-    //                 if (!exclude_dept.includes(dept_id)) {
-    //                     sql += ` where (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
-    //                     if (listId && listId != '') {
-    //                         sql += ` AND ${list_name}._id = ${listId}`;
-    //                     }
-    //                 }
-    //                 else {
-    //                     if (listId && listId != '') {
-    //                         sql += ` where ${list_name}._id = ${listId}`;
-    //                     }
-    //                 }
-
-    //             }
-    //             else if (this.entry_list.includes(list_name)) {
-    //                 sql += ` where ${list_name}.dept_id = ${dept_id}`;
-    //                 if (listId && listId != '') {
-    //                     sql += ` AND ${list_name}._id = ${listId}`;
-    //                 }
-    //             }
-    //             else if (listId && listId != '') {
-    //                 sql += ` where _id = ${listId}`;
-    //             }
-
-    //             let sort = this.fullListConfig[list_name + 'sort'];
-    //             sql += ` ${sort ? 'order by ' + sort : ''} `;
-    //             await this.localDB.all(sql, (err, data) => {
-    //                 if (err) {
-    //                     console.log({sql: sql, err:err});
-    //                     reject(err)
-    //                 }
-    //                 else {
-    //                     resolve(data)
-    //                 }
-    //             })
-    //         }
-    //         catch (ex) {
-    //             reject(ex);
-    //         }
-    //     })
-    // }
     getFullListByDept = async (list_name, dept_id, conditionString = null) => {
         return new Promise(async (resolve, reject) => {
             try {
                 // let sql = this.fullListQuery[list_name];
                 let condition = ``;
-                if(list_name == 'itemMix'){
+                if (list_name == 'itemMix') {
                     if (!['1', '2'].includes(dept_id)) {
                         condition += ` where ((select config_value from department_config where dept_id = ${dept_id} AND config_key = 'item') LIKE '%,'||item._id||',%' OR (select config_value from department_config where dept_id = ${dept_id} AND config_key = 'subitem') LIKE '%,'||si._id||',%')`;
                     }
@@ -378,9 +343,6 @@ class DBContex {
                     condition += (condition == `` ? ` where` : ` AND `) + conditionString;
                 }
 
-                if (!condition || conditionString == ``) {
-                    condition = ``;
-                }
 
                 let sort = this.fullListQuery[list_name + 'sort'];
                 let sql = `${this.fullListQuery[list_name]} ${sort ? 'order by ' + sort : ''} `;
@@ -884,7 +846,7 @@ class DBContex {
         left join subitem_list sil on sil._id = si.subitem_list_id
         left join unit on unit._id = bachat.unit_id
         left join department dept on dept._id = bachat.dept_id`,
-        bachatsort: `mm_hin, mm_eng, item_hin, subitem_hin, item_eng, subitem_eng`,        
+        bachatsort: `mm_hin, mm_eng, item_hin, subitem_hin, item_eng, subitem_eng`,
 
         bachat_history: ``,
 
@@ -1139,6 +1101,18 @@ class DBContex {
         left join state st on st._id = mm.state_id
         left join mm pm on pm._id = mm.parent_mm_id
         left join department dept on dept._id = mm.dept_id`,
+
+        itemMix: `select item.*,
+        cat.category_hin, cat.category_eng, 
+        unit.unit_full, unit.unit_short ,
+        json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || '}')) as subitems, json_group_array(si.category_id) as categories
+        from item
+        left join category cat on cat._id = item.category_id
+        left join unit on unit._id = item.unit_id
+        left join subitem si on si.item_id = item._id
+        left join category ct on ct._id = si.category_id
+        left join unit ut on ut._id = si.unit_id
+        left join subitem_list sl on  sl._id = si.subitem_list_id ? group by item._id`,
 
         item: `select item.*, ? as chk, 
         cat.category_hin, cat.category_eng, 
