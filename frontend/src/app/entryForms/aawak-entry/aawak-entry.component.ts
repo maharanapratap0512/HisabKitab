@@ -131,7 +131,7 @@ export class AawakEntryComponent implements OnInit {
       this.rate = changes.getData.currentValue.rate;
       this.amnt = changes.getData.currentValue.actual_amt;
       this.oldQty = changes.getData.currentValue.qty
-      this.unit = changes.getData.currentValue.unit_id;
+      this.unit = changes.getData.currentValue.unit_short;
 
     }
   }

@@ -5,6 +5,6 @@
 <ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="small" color="#fff" type="ball-scale"
    [fullScreen]="true">
       <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
-      <button class="btn btn-light" *ngIf="isBtn" (click)="aa()">सेवा जारी रखे</button>
-      <button class="btn btn-dark" *ngIf="!isBtn">{{sec}}</button>
+      <button class="btn btn-light" *ngIf="isBtn" (click)="skipBtn()">सेवा जारी रखे</button>
+      <button class="btn btn-link px-3" *ngIf="!isBtn">{{sec}} Sec</button>
 </ngx-spinner>

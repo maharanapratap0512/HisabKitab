@@ -51,10 +51,16 @@
                         <tr *ngFor="let data of categoryData | filter:term; let i=index">
                            <td>{{i+1}}</td>
                            <td>
-                              <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
-                                    class="uil uil-pen"></i></button>
-                              <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
-                                    class="uil-trash"></i></button>
+                              <div *ngIf="auth.webUser.dept_id == 1 || !data.active">
+                                 <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                                       class="uil uil-pen"></i></button>
+                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                       class="uil-trash"></i></button>
+                              </div>
+                              <div *ngIf="auth.webUser.dept_id != 1 && data.active">
+                                 <i class="uil-shield-check"> Protected </i>
+                              </div>
+
                            </td>
                            <td>{{data.category_eng}}</td>
                            <td>{{data.category_hin}}</td>

@@ -134,14 +134,16 @@
                             </button>
                         </div>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
-                            [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)" [readonly]="isEdit || ref_id"
+                            [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)"
+                            [readonly]="isEdit || ref_id"
                             [ngClass]="{'validation':jawakForm.get('item_id')?.errors && (jawakForm.get('item_id')?.touched || jawakForm.get ('item_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Item</ng-option>
                             <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
                                 {{item.item_eng}} : {{item.item_code}}</ng-option>
                         </ng-select>
                         <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
-                            [clearable]="false" [virtualScroll]="true" formControlName="subitem_id" [readonly]="isEdit || ref_id"
+                            [clearable]="false" [virtualScroll]="true" formControlName="subitem_id"
+                            [readonly]="isEdit || ref_id"
                             [ngClass]="{'validation':jawakForm.get('subitem_id')?.errors && (jawakForm.get('subitem_id')?.touched || jawakForm.get ('subitem_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
                             <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}} :
@@ -164,8 +166,9 @@
                             </button> -->
                         </div>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Product" [clearable]="true"
-                            [virtualScroll]="true" formControlName="product_id" (change)="productSelected($event)" 
-                            [ngClass]="{'validation':jawakForm.get('product_id')?.errors && (jawakForm.get('product_id')?.touched || jawakForm.get ('product_id')?.dirty)}" [readonly]="isEdit || ref_id">
+                            [virtualScroll]="true" formControlName="product_id" (change)="productSelected($event)"
+                            [ngClass]="{'validation':jawakForm.get('product_id')?.errors && (jawakForm.get('product_id')?.touched || jawakForm.get ('product_id')?.dirty)}"
+                            [readonly]="isEdit || ref_id">
                             <ng-option selected="selected" disabled value="">Select Product</ng-option>
                             <ng-option *ngFor="let item of products" [value]="item._id">{{item.item_hin}} :
                                 {{item.subitem_hin}}
@@ -185,10 +188,13 @@
 
                 <div class="col-md-2 mb-3">
                     <div class="form-group">
-                        <label class="form-label">Quantity (in {{unit_short}})</label>
-                        <input type="number" class="form-control" placeholder="{{'i.e. 10 '+ unit_short }}" formControlName="qty"
+                        <label class="form-label">Quantity</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" placeholder="{{'i.e. 10 '+ unit_short }}"
+                            formControlName="qty"
                             [ngClass]="{'validation':jawakForm.get('qty')?.errors && (jawakForm.get('qty')?.touched || jawakForm.get ('qty')?.dirty)}">
-
+                            <span class="input-group-text">{{unit_short}}</span>
+                        </div>
                     </div>
                 </div>
 

@@ -44,6 +44,11 @@
                             <i class="dripicons-check" style="font-size: large;"> </i>Cancel
                         </button>
                     </div>
+                    <div class="col-2 mt-3 mb-2" *ngIf="dept_id">
+                        <button class="btn btn-success w-100" (click)="downloadDB()">
+                            <i class="dripicons-download" style="font-size: large;"> </i> Download
+                        </button>
+                    </div>
                 </div>
 
 

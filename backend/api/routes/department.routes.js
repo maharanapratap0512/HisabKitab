@@ -92,36 +92,6 @@ router.put('/login', async (req, res, next) => {
     }
 });
 
-//add new list in depatment
-// router.put('/add', async (req, res, next) => {
-//     if (req.body.dept_eng && req.body.list_type && req.body.new_id) {
-
-
-//         let condition = `dept_eng = '${req.body.dept_eng}' AND list_type = '${req.body.list_type}'`;
-//         // let set = `list = json_remove(list, json_find(list,'$[?]'))`;
-//         let set = `list = json_set(list, '$[#]', json(?))`;
-//         let query = `update department set ${set} where ${condition}`;
-//         console.log('query',query);
-//         await DB.localDB.run(query,[req.body.new_id], async (err, data) => {
-//             if (err) {
-//                 return next(err);
-//             }
-//             console.log(data);
-//             // await DB.updateToCache('department', req.body.set, condition, (err) => { })
-//             await DB.select('department', ['*'], condition).then((resolve) => {
-//                 res.json({
-//                     success: true,
-//                     result: resolve || []
-//                 });
-//             });
-//         });
-//     }
-//     else {
-//         return next(new Error('Id not found.'))
-//     }
-// });
-
-// department delete
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
         let condition = '_id = ' + req.params.id;

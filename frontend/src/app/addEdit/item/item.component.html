@@ -30,12 +30,12 @@
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
                         </div>
-                     </div>                     
+                     </div>
                      <div class="col-2">
                         <div class="form-group">
-                           <ng-select class="custom" style="width: 100%;"
-                              placeholder="Select Category" [clearable]="true" [virtualScroll]="true"
-                              (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
+                           <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
+                              [clearable]="true" [virtualScroll]="true" (change)="catSelected($event)"
+                              [ngModelOptions]="{standalone: true}">
                               <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
                                  {{item.category_eng}}</ng-option>
                            </ng-select>
@@ -43,9 +43,9 @@
                      </div>
                      <div class="col-2">
                         <div class="form-group">
-                           <ng-select class="custom" style="width: 100%;"
-                              placeholder="Select Subitem List" [clearable]="true" [virtualScroll]="true"
-                              (change)="SubitemListSelected($event)" [ngModelOptions]="{standalone: true}">
+                           <ng-select class="custom" style="width: 100%;" placeholder="Select Subitem List"
+                              [clearable]="true" [virtualScroll]="true" (change)="SubitemListSelected($event)"
+                              [ngModelOptions]="{standalone: true}">
                               <ng-option *ngFor="let item of subitem_lists" [value]="item._id">{{item.subitem_hin}} :
                                  {{item.subitem_eng}}</ng-option>
                            </ng-select>
@@ -53,8 +53,10 @@
                      </div>
                      <div class="col-2">
                         <button type="button" class="btn-sm btn-light float-end py-0" style="width: 60%;">
-                           <span class="float-start">Items : </span> <span class="float-end">{{itemData.length}}</span><br/>
-                           <span class="float-start">Subitems : </span><span class="float-end"> {{si_total_count}}</span>
+                           <span class="float-start">Items : </span> <span
+                              class="float-end">{{itemData.length}}</span><br />
+                           <span class="float-start">Subitems : </span><span class="float-end">
+                              {{si_total_count}}</span>
                         </button>
                      </div>
                   </div>
@@ -82,12 +84,19 @@
                               [attr.aria-controls]="'#collapse-' + i" style="background-color:#00000099">
                               <td>{{i+1}}</td>
                               <td>
-                                 <button class="btn btn-sm btn-outline-success" type="button" (click)="addSubitem(data)"><i
-                                    class="uil uil-plus"></i></button>
-                                 <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
-                                       class="uil uil-pen"></i></button>
-                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
-                                       class="uil-trash"></i></button>
+                                 <button class="btn btn-sm btn-outline-success" type="button"
+                                    (click)="addSubitem(data)"><i class="uil uil-plus"></i></button>
+                                 <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"
+                                    *ngIf="auth.webUser.dept_id == 1 || !data.active">
+                                    <i class="uil uil-pen"></i>
+                                 </button>
+                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"
+                                    *ngIf="auth.webUser.dept_id == 1 || !data.active">
+                                    <i class="uil-trash"></i>
+                                 </button>
+                                 <i *ngIf="auth.webUser.dept_id != 1 && data.active" class="uil-shield-check mx-1">
+                                    Protected
+                                 </i>
                               </td>
                               <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
                               <td>{{data.item_code?data.item_code:'-'}}</td>
@@ -117,10 +126,17 @@
                                                 <i class="uil-corner-down-right pl-4"></i> &nbsp;&nbsp;&nbsp;{{j+1}}
                                              </td>
                                              <td style="width: 160px;">
-                                                <button class="btn btn-sm btn-primary mx-1" type="button"
-                                                   (click)="edit(si, 'subitem')"><i class="uil uil-pen"></i></button>
-                                                <button class="btn btn-sm btn-danger" type="button"
-                                                   (click)="deleteSubitem(i, j,si._id)"><i class="uil-trash"></i></button>
+                                                <button *ngIf="auth.webUser.dept_id == 1 || !data.active"
+                                                   class="btn btn-sm btn-primary mx-1" type="button"
+                                                   (click)="edit(si, 'subitem')">
+                                                   <i class="uil uil-pen"></i></button>
+                                                <button *ngIf="auth.webUser.dept_id == 1 || !data.active"
+                                                   class="btn btn-sm btn-danger" type="button"
+                                                   (click)="deleteSubitem(i, j,si._id)">
+                                                   <i class="uil-trash"></i></button>
+                                                <i *ngIf="auth.webUser.dept_id != 1 && data.active"
+                                                   class="uil-shield-check mx-1"> Protected
+                                                </i>
                                              </td>
                                              <td style="width: 250px;" class="nav-item">
                                                 {{si.subitem_hin +' : '+ si.subitem_eng}}
@@ -173,11 +189,14 @@
          <div class="modal-body">
             <app-item-entry *ngIf="showModal == 'Add Item'" (response)='addItemResponse($event)'></app-item-entry>
             <app-item-entry *ngIf="showModal == 'Edit Item'" (response)='editItemResponse($event)' [getData]="editData"
-            [isEdit]="true"></app-item-entry>
+               [isEdit]="true"></app-item-entry>
 
-            <app-subitem-entry *ngIf="showModal == 'Add Subitem'" (response)='addSubitemResponse($event)'></app-subitem-entry>
-            <app-subitem-entry *ngIf="showModal == 'Add Subitem From Item'" (response)='addSubitemResponse($event)' [getData]="editData"></app-subitem-entry>
-            <app-subitem-entry *ngIf="showModal == 'Edit Subitem'" (response)='editSubitemResponse($event)' [getData]="editData" [isEdit]="true"></app-subitem-entry>
+            <app-subitem-entry *ngIf="showModal == 'Add Subitem'" (response)='addSubitemResponse($event)'>
+            </app-subitem-entry>
+            <app-subitem-entry *ngIf="showModal == 'Add Subitem From Item'" (response)='addSubitemResponse($event)'
+               [getData]="editData"></app-subitem-entry>
+            <app-subitem-entry *ngIf="showModal == 'Edit Subitem'" (response)='editSubitemResponse($event)'
+               [getData]="editData" [isEdit]="true"></app-subitem-entry>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"

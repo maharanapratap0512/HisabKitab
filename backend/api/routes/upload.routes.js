@@ -43,6 +43,22 @@ const imageMulterConfig = {
    }
 };
 
+const pbkImageMulterConfig = {
+   storage: multer.diskStorage({
+      destination: (req, file, next) => { next(null, __dirname + "/../../../../Data/Documents/pbk"); },
+
+      filename: (req, file, next) => { next(null, file.fieldname + '_' + Date.now() + path.extname(file.originalname)); }
+   }),
+   limits: { fileSize: 5000000 }, // 1 MB = 1000000 Bytes 
+   fileFilter: (req, file, next) => {
+      if (file.mimetype != "application/pdf") {
+         file.mimetype.startsWith('image/') ? next(null, true) : next(null, false);
+      } else {
+         file.mimetype.startsWith('application/') ? next(null, true) : next(null, false);
+      }
+   }
+};
+
 
 // drive document
 router.post('/doc', multer(driveMulterConfig).single('document'), async (req, res) => {
