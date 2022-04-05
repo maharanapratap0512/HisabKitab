@@ -47,12 +47,24 @@ router.get('/:dept_id', async (req, res, next) => {
             });
         }, (err) => { return next(err) });
     }
-    else{
+    else {
         res.json({
-            success:true,
-            result:[]
+            success: true,
+            result: []
         })
     }
+});
+
+//  department get
+router.get('/DB/:dept_id', async (req, res, next) => {
+    await DB.getFullList('department').then(async (resolve) => {
+        let count = await DB.getCount('department');
+        res.json({
+            success: true,
+            result: resolve || [],
+            total_count: (count ? count.total_count : 0),
+        });
+    }, (err) => { return next(err) });
 });
 
 // department update
