@@ -419,7 +419,7 @@ class DBContex {
                 if (sort) {
                     sql += ` order by ${sort}`;
                 }
-
+                
                 this.localDB.all(sql, (err, data) => {
                     if (err) {
                         reject(err)
