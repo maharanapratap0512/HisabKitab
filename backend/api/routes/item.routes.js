@@ -97,6 +97,51 @@ router.get('/forConfig/:dept_id', async (req, res, next) => {
     }, (err) => { return next(err) });
 });
 
+//  item get by dept
+router.put('/forConfig/:dept_id', async (req, res, next) => {
+    let conditionString = ``;
+    if(req.body._id){
+        conditionString += (conditionString != `` ? ` AND` : ``) + ` item._id = ${req.body._id}`;
+    }
+    if(req.body.category_id){
+        conditionString += (conditionString != `` ? ` AND` : ``) + ` (item.category_id = ${req.body.category_id} OR si.category_id = ${req.body.category_id})`;
+    }
+    if(req.body.subitem_list_id){
+        conditionString += (conditionString != `` ? ` AND` : ``) + ` (si.subitem_list_id = ${req.body.subitem_list_id})`;
+    }
+
+    await DB.getFullListForDeptConfig('itemMix', req.params.dept_id, conditionString).then(async (resolve) => {
+        let items = await DB.getDeptConfig(req.params.dept_id, 'item');
+        let subitems = await DB.getDeptConfig(req.params.dept_id, 'subitem');
+        if(items && items[0]){
+            items = items[0].config_value.split(',');            
+        }
+        if(subitems && subitems[0]){
+            subitems = subitems[0].config_value.split(',');
+        }
+        let subitem_count = 0;
+        for(let i = 0; i < resolve.length; i++){
+            
+            resolve[i].subitems = (resolve[i].subitems != "[null]" ? JSON.parse(resolve[i].subitems) : []);
+            resolve[i].categories = (resolve[i].categories != "[null]" ? JSON.parse(resolve[i].categories) : []);
+            subitem_count += resolve[i].subitems.length;
+            if(items.includes(resolve[i]._id.toString())){
+                resolve[i].chk = true;
+            }
+            for(let j in resolve[i].subitems){
+                if(subitems.includes(resolve[i].subitems[j]._id.toString())){
+                    resolve[i].subitems[j].chk = true;
+                }
+            }
+        }
+        res.json({
+            success: true,
+            result: resolve || [],
+            subitem_count:subitem_count
+        });
+    }, (err) => { return next(err) });
+});
+
 //  item get
 router.get('/', async (req, res, next) => {
     await DB.getFullList('item').then((resolve) => {

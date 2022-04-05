@@ -3,6 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
+import { LoginComponent } from '../login/login.component';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
 import { GlobalService } from '../services/global.service';
@@ -21,12 +22,14 @@ export class DepartmentComponent implements OnInit {
   termPbk: any = null;
   termCat: any = null;
   termItem: any = null;
+  termItemmix: any = null;
   termSubitem: any = null;
   termAJType: any = null;
   selMM: any = true;
   selPbk: any = true;
   selCat: any = true;
   selItem: any = true;
+  selItemmix: any = true;
   selSubitem: any = true;
   selAJType: any = true;
   showModal: string = '';
@@ -39,6 +42,7 @@ export class DepartmentComponent implements OnInit {
   pbksAll: any = [];
   categories: any = [];
   items: any = [];
+  itemmix: any = [];
   itemsAll: any = [];
   subitems: any = [];
   subitemsAll: any = [];
@@ -47,6 +51,7 @@ export class DepartmentComponent implements OnInit {
   states: any = [];
   genders: any = [];
   statuses: any = [];
+  itemMixCondition: any = {};
 
 
   constructor(
@@ -88,11 +93,15 @@ export class DepartmentComponent implements OnInit {
             this.loadMM();
             this.loadCategory();
             this.loadItems();
+            this.loadItemMix();
             this.loadSubitems();
             this.loadAJTypes();
           }
           for (let i of data['result']) {
-            this.deptConf[i.config_key] = { count: (i.config_value != '' ? i.config_value.split(',').length - 2 : 0), ...i };
+            this.deptConf[i.config_key] = { idArr: (i.config_value != '' ? i.config_value.split(',') : ['']), ...i };
+            if(this.deptConf[i.config_key].idArr.length > 1){
+              this.deptConf[i.config_key].idArr.pop();
+            }
           }
           console.log(this.deptConf);
 
@@ -210,6 +219,15 @@ export class DepartmentComponent implements OnInit {
     }
   }
 
+  catItemSelected(ev: any) {
+    if (ev) {
+      this.itemMixCondition.category_id = ev;
+    } else {
+      this.itemMixCondition.category_id = null;
+    }
+    this.loadItemMix();
+  }
+
   subitemCatSelected(ev: any) {
     if (ev) {
       this.subitems = this.subitemsAll.filter((i: { category_id: any; }) => i.category_id == ev);
@@ -236,6 +254,7 @@ export class DepartmentComponent implements OnInit {
     }
   }
 
+
   loadPBK() {
     this.http.get(this.api.getUrl('PBK') + "forConfig/" + this.dept_id).subscribe((data) => {
       if (data['result'] && data['success']) {
@@ -248,6 +267,16 @@ export class DepartmentComponent implements OnInit {
     this.http.get(this.api.getUrl('CATEGORY') + "forConfig/" + this.dept_id).subscribe((data) => {
       if (data['result'] && data['success']) {
         this.categories = data['result'];
+      }
+    });
+  }
+  loadItemMix() {
+    console.log("condition", this.itemMixCondition);
+
+    this.http.put(this.api.getUrl('ITEM') + "forConfig/" + this.dept_id, this.itemMixCondition).subscribe((data: any) => {
+      if (data['result'] && data['success']) {
+        this.itemmix = data['result'];
+        // this.itemsAll = data['result'];
       }
     });
   }
@@ -277,179 +306,169 @@ export class DepartmentComponent implements OnInit {
 
   async mmRowClicked(i: any, chk: boolean, id: any) {
     if (this.termMM) {
-      console.log("hello");
-
-      if (chk) {
-        this.deptConf.mm.count--;
-        this.mms[this.mms.findIndex((i: { _id: any; }) => i._id == id)].chk = false;
-      }
-      else {
-        this.deptConf.mm.count++;
-        this.mms[this.mms.findIndex((i: { _id: any; }) => i._id == id)].chk = true;
-      }
-
-    } else {
-      if (chk) {
-        this.deptConf.mm.count--;
-        this.mms[i].chk = false;
-      }
-      else {
-        this.deptConf.mm.count++;
-        this.mms[i].chk = true;
-      }
+      i = this.mms.findIndex((i: { _id: any; }) => i._id == id);
     }
+    if (chk) {      
+      this.deptConf.mm.idArr.splice(this.deptConf.mm.idArr.indexOf(this.mms[i]._id.toString()), 1);
+      this.mms[i].chk = false;
+    }
+    else {
+      this.deptConf.mm.idArr.push(this.mms[i]._id.toString());
+      this.mms[i].chk = true;
+    }
+
   }
 
   pbkRowClicked(i: any, chk: boolean, id: any) {
     if (this.termPbk) {
-      if (chk) {
-        this.deptConf.pbk.count--;
-        this.pbks[this.pbks.findIndex((i: { _id: any; }) => i._id == id)].chk = false;
-      }
-      else {
-        this.deptConf.pbk.count++;
-        this.pbks[this.pbks.findIndex((i: { _id: any; }) => i._id == id)].chk = true;
-      }
-
-    } else {
-      if (chk) {
-        this.deptConf.pbk.count--;
-        this.pbks[i].chk = false;
-      }
-      else {
-        this.deptConf.pbk.count++;
-        this.pbks[i].chk = true;
-      }
+      i = this.pbks.findIndex((i: { _id: any; }) => i._id == id);
+    }
+    if (chk) {      
+      this.deptConf.pbk.idArr.splice(this.deptConf.pbk.idArr.indexOf(this.pbks[i]._id.toString()), 1);
+      this.pbks[i].chk = false;
+    }
+    else {
+      this.deptConf.pbk.idArr.push(this.pbks[i]._id.toString());
+      this.pbks[i].chk = true;
     }
   }
   categoryRowClicked(i: any, chk: boolean, id: any) {
     if (this.termCat) {
-      if (chk) {
-        this.deptConf.category.count--;
-        this.categories[this.categories.findIndex((i: { _id: any; }) => i._id == id)].chk = false;
-      }
-      else {
-        this.deptConf.category.count++;
-        this.categories[this.categories.findIndex((i: { _id: any; }) => i._id == id)].chk = true;
-      }
-
-    } else {
-      if (chk) {
-        this.deptConf.category.count--;
-        this.categories[i].chk = false;
-      }
-      else {
-        this.deptConf.category.count++;
-        this.categories[i].chk = true;
-      }
+      i = this.categories.findIndex((i: { _id: any; }) => i._id == id);
+    }
+    if (chk) {      
+      this.deptConf.category.idArr.splice(this.deptConf.category.idArr.indexOf(this.categories[i]._id.toString()), 1);
+      this.categories[i].chk = false;
+    }
+    else {
+      this.deptConf.category.idArr.push(this.categories[i]._id.toString());
+      this.categories[i].chk = true;
     }
   }
   itemRowClicked(i: any, chk: boolean, id: any) {
 
     if (this.termItem) {
-      if (chk) {
-        this.deptConf.item.count--;
-        this.items[this.items.findIndex((i: { _id: any; }) => i._id == id)].chk = false;
-      }
-      else {
-        this.deptConf.item.count++;
-        this.items[this.items.findIndex((i: { _id: any; }) => i._id == id)].chk = true;
-      }
-
-    } else {
-      if (chk) {
-        this.deptConf.item.count--;
-        this.items[i].chk = false;
-      }
-      else {
-        this.deptConf.item.count++;
-        this.items[i].chk = true;
-      }
+      i = this.items.findIndex((i: { _id: any; }) => i._id == id);
+    }
+    if (chk) {      
+      this.deptConf.item.idArr.splice(this.deptConf.item.idArr.indexOf(this.items[i]._id.toString()), 1);
+      this.items[i].chk = false;
+    }
+    else {
+      this.deptConf.item.idArr.push(this.items[i]._id.toString());
+      this.items[i].chk = true;
     }
   }
-  subitemRowClicked(i: any, chk: boolean, id: any) {
-    if (this.termSubitem) {
-      if (chk) {
-        this.deptConf.subitem.count--;
-        this.subitems[this.subitems.findIndex((i: { _id: any; }) => i._id == id)].chk = false;
+
+  itemmixRowClicked(i: any, chk: boolean, id: any) {
+
+    if (this.termItemmix) {
+      i = this.itemmix.findIndex((i: { _id: any; }) => i._id == id);
+    }
+    if (chk) {      
+      this.deptConf.item.idArr.splice(this.deptConf.item.idArr.indexOf(this.itemmix[i]._id.toString()), 1);
+      this.itemmix[i].chk = false;
+      for(let j in this.itemmix[i].subitems){
+        if(this.itemmix[i].subitems[j].chk){
+          this.itemmix[i].subitems[j].chk = false;
+          this.deptConf.subitem.idArr.splice(this.deptConf.subitem.idArr.indexOf(this.itemmix[i].subitems[j]._id.toString()), 1)
+        }
       }
-      else {
-        this.deptConf.subitem.count++;
-        this.subitems[this.subitems.findIndex((i: { _id: any; }) => i._id == id)].chk = true;
+    }
+    else {
+      this.deptConf.item.idArr.push(this.itemmix[i]._id.toString());
+      this.itemmix[i].chk = true;
+    }
+  }
+
+  subitemmixRowClicked(itemIndex: any, subitemIndex: any, chk: boolean, itemId: any, subitemId: any,) {
+
+    if (this.termItemmix) {
+      itemIndex = this.itemmix.findIndex((i: { _id: any; }) => i._id == itemId);
+      subitemIndex = this.itemmix[itemIndex].subitems.findIndex((s: { _id: any; }) => s._id == subitemId);
+
+    }
+    if (chk) {
+      this.deptConf.subitem.idArr.splice(this.deptConf.subitem.idArr.indexOf(this.itemmix[itemIndex].subitems[subitemIndex]._id.toString()), 1);
+      this.itemmix[itemIndex].subitems[subitemIndex].chk = false;
+    }
+    else {
+      this.deptConf.subitem.idArr.push(this.itemmix[itemIndex].subitems[subitemIndex]._id.toString())
+      this.itemmix[itemIndex].subitems[subitemIndex].chk = true;
+      if (!this.itemmix[itemIndex].chk) {
+        this.itemmix[itemIndex].chk = true;
+        this.deptConf.item.idArr.push(this.itemmix[itemIndex]._id.toString())
       }
 
-    } else {
-      if (chk) {
-        this.deptConf.subitem.count--;
-        this.subitems[i].chk = false;
-      }
-      else {
-        this.deptConf.subitem.count++;
-        this.subitems[i].chk = true;
-      }
+    }
+  }
+
+  subitemRowClicked(i: any, chk: boolean, id: any) {
+    if (this.termSubitem) {
+      i = this.subitems.findIndex((i: { _id: any; }) => i._id == id);
+    }
+    if (chk) {      
+      this.deptConf.subitem.idArr.splice(this.deptConf.subitem.idArr.indexOf(this.subitems[i]._id.toString()), 1);
+      this.subitems[i].chk = false;
+    }
+    else {
+      this.deptConf.subitem.idArr.push(this.subitems[i]._id.toString());
+      this.subitems[i].chk = true;
     }
   }
 
   ajtypeRowClicked(i: any, chk: boolean, id: any) {
     if (this.termAJType) {
-      if (chk) {
-        this.deptConf.aj_type.count--;
-        this.ajtypes[this.ajtypes.findIndex((i: { _id: any; }) => i._id == id)].chk = false;
-      }
-      else {
-        this.deptConf.aj_type.count++;
-        this.ajtypes[this.ajtypes.findIndex((i: { _id: any; }) => i._id == id)].chk = true;
-      }
-
-    } else {
-      if (chk) {
-        this.deptConf.aj_type.count--;
-        this.ajtypes[i].chk = false;
-      }
-      else {
-        this.deptConf.aj_type.count++;
-        this.ajtypes[i].chk = true;
-      }
+      i = this.ajtypes.findIndex((i: { _id: any; }) => i._id == id);
+    }
+    if (chk) {      
+      this.deptConf.aj_type.idArr.splice(this.deptConf.aj_type.idArr.indexOf(this.ajtypes[i]._id.toString()), 1);
+      this.ajtypes[i].chk = false;
+    }
+    else {
+      this.deptConf.aj_type.idArr.push(this.ajtypes[i]._id.toString());
+      this.ajtypes[i].chk = true;
     }
   }
 
   saveDeptSettings() {
-    this.deptConf.mm.config_value = ',';
-    this.deptConf.pbk.config_value = ',';
-    this.deptConf.category.config_value = ',';
-    this.deptConf.item.config_value = ',';
-    this.deptConf.subitem.config_value = ',';
-    this.deptConf.aj_type.config_value = ',';
-    for (let i = 0; i < this.mmsAll.length; i++) {
-      if (this.mmsAll[i].chk == true) {
-        this.deptConf.mm.config_value += this.mmsAll[i]._id + ',';
-      }
-    }
-    for (let i = 0; i < this.pbks.length; i++) {
-      if (this.pbks[i].chk == true) {
-        this.deptConf.pbk.config_value += this.pbks[i]._id + ',';
-      }
-    }
-    for (let i = 0; i < this.categories.length; i++) {
-      if (this.categories[i].chk == true) {
-        this.deptConf.category.config_value += this.categories[i]._id + ',';
-      }
-    }
-    for (let i = 0; i < this.items.length; i++) {
-      if (this.items[i].chk == true) {
-        this.deptConf.item.config_value += this.items[i]._id + ',';
-      }
-    }
-    for (let i = 0; i < this.subitems.length; i++) {
-      if (this.subitems[i].chk == true) {
-        this.deptConf.subitem.config_value += this.subitems[i]._id + ',';
-      }
-    }
-    for (let i = 0; i < this.ajtypes.length; i++) {
-      if (this.ajtypes[i].chk == true) {
-        this.deptConf.aj_type.config_value += this.ajtypes[i]._id + ',';
-      }
-    }
+    this.deptConf.mm.config_value = this.deptConf.mm.idArr.join(',') + ',';
+    this.deptConf.pbk.config_value = this.deptConf.pbk.idArr.join(',') + ',';
+    this.deptConf.category.config_value = this.deptConf.category.idArr.join(',') + ',';
+    this.deptConf.item.config_value = this.deptConf.item.idArr.join(',') + ',';
+    this.deptConf.subitem.config_value = this.deptConf.subitem.idArr.join(',') + ','; 
+    this.deptConf.aj_type.config_value = this.deptConf.aj_type.idArr.join(',') + ',';
+    // for (let i = 0; i < this.mmsAll.length; i++) {
+    //   if (this.mmsAll[i].chk == true) {
+        
+    //   }
+    // }
+    // this.deptConf.mm.config_value = this.deptConf.mm.idArr.join(',');
+    // for (let i = 0; i < this.pbks.length; i++) {
+    //   if (this.pbks[i].chk == true) {
+    //     this.deptConf.pbk.config_value += this.pbks[i]._id + ',';
+    //   }
+    // }
+    // for (let i = 0; i < this.categories.length; i++) {
+    //   if (this.categories[i].chk == true) {
+    //     this.deptConf.category.config_value += this.categories[i]._id + ',';
+    //   }
+    // }
+    // for (let i = 0; i < this.items.length; i++) {
+    //   if (this.items[i].chk == true) {
+    //     this.deptConf.item.config_value += this.items[i]._id + ',';
+    //   }
+    // }
+    // for (let i = 0; i < this.subitems.length; i++) {
+    //   if (this.subitems[i].chk == true) {
+    //     this.deptConf.subitem.config_value += this.subitems[i]._id + ',';
+    //   }
+    // }
+    // for (let i = 0; i < this.ajtypes.length; i++) {
+    //   if (this.ajtypes[i].chk == true) {
+    //     this.deptConf.aj_type.config_value += this.ajtypes[i]._id + ',';
+    //   }
+    // }
 
     this.http.put(this.api.getUrl('DEPTCONFSAVE'), this.deptConf).subscribe((data: any) => {
       if (data && data['success']) {
@@ -457,6 +476,7 @@ export class DepartmentComponent implements OnInit {
         // this.deptSelected(this.dept_id);
         this.isLoader = false;
         this.toastr.success('Department Updated Successfully.');
+        this.deptSelected(this.dept_id);
       }
     }, err => {
       this.toastr.error(err['error'].message);

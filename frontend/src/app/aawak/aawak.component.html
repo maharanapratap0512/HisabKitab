@@ -26,13 +26,13 @@
                               name="search">
                         </div>
                      </div>
-                     <div class="col-3">
+                     <!-- <div class="col-3">
                         <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="true"
                            [virtualScroll]="true"  [(ngModel)]="conditionObj.mm_id" (change)="mmSelected($event)">
                            <ng-option *ngFor="let item of mms" [value]="item._id">
                               {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
                         </ng-select>
-                     </div>
+                     </div> -->
                      <div class="col-2">
                         <button type="button" class="btn btn-outline-light w-100">Advance Filter
                            <i style="font-weight: 700;" class="dripicons-chevron-down"> </i>
@@ -71,7 +71,7 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <tr *ngFor="let data of aawakData | filterpipe:conditionObj; let i=index">
+                        <tr *ngFor="let data of aawakData | filter: term; let i=index">
                            <td>{{i+1}}</td>
                            <td>
                               <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i

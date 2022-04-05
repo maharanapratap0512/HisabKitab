@@ -51,57 +51,60 @@
                     <div class="col-md-2 mb-2 mb-sm-0 card card-body">
                         <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
                             aria-orientation="vertical">
-                            <a class="nav-link" [ngClass]="{'active show': dept_id > 2}" id="v-pills-mm-tab" data-bs-toggle="pill" href="#v-pills-mm"
-                                role="tab" aria-controls="v-pills-mm" aria-selected="true"
-                                *ngIf="dept_id>2">
+                            <a class="nav-link" [ngClass]="{'active show': dept_id > 2}" id="v-pills-mm-tab"
+                                data-bs-toggle="pill" href="#v-pills-mm" role="tab" aria-controls="v-pills-mm"
+                                aria-selected="true" *ngIf="dept_id>2">
                                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                                 <span class="d-none d-md-block">MM
-                                    <span class="badge bg-primary rounded-pill float-end">{{deptConf.mm ?
-                                        deptConf.mm.count: ''}}</span>
+                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.mm && deptConf.mm.idArr) ?
+                                        deptConf.mm.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
-                            <a class="nav-link" [ngClass]="{'active show': dept_id == 2}" id="v-pills-pbk-tab" data-bs-toggle="pill" href="#v-pills-pbk"
-                                role="tab" aria-controls="v-pills-pbk" aria-selected="false" >
+                            <a class="nav-link" [ngClass]="{'active show': dept_id == 2}" id="v-pills-pbk-tab"
+                                data-bs-toggle="pill" href="#v-pills-pbk" role="tab" aria-controls="v-pills-pbk"
+                                aria-selected="false">
                                 <i class="mdi mdi-account-circle d-md-none d-block"></i>
                                 <span class="d-none d-md-block">PBK / Sewadhari
-                                    <span class="badge bg-primary rounded-pill float-end">{{deptConf.pbk ?
-                                        deptConf.pbk.count: ''}}</span>
+                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.pbk && deptConf.pbk.idArr) ?
+                                        deptConf.pbk.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
                             <a class="nav-link" id="v-pills-category-tab" data-bs-toggle="pill" href="#v-pills-category"
-                                role="tab" aria-controls="v-pills-category" aria-selected="false"
-                                *ngIf="dept_id>2">
+                                role="tab" aria-controls="v-pills-category" aria-selected="false" *ngIf="dept_id>2">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Category
-                                    <span class="badge bg-primary rounded-pill float-end">{{deptConf.category ?
-                                        deptConf.category.count: ''}}</span>
+                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.category && deptConf.category.idArr) ?
+                                        deptConf.category.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
                             <a class="nav-link" id="v-pills-item-tab" data-bs-toggle="pill" href="#v-pills-item"
-                                role="tab" aria-controls="v-pills-item" aria-selected="false"
-                                *ngIf="dept_id>2">
+                                role="tab" aria-controls="v-pills-item" aria-selected="false" *ngIf="dept_id>2">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Items
-                                    <span class="badge bg-primary rounded-pill float-end">{{deptConf.item ?
-                                        deptConf.item.count: ''}}</span>
+                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.item && deptConf.item.idArr) ? deptConf.item.idArr.length - 1: ''}}</span>
+                                </span>
+                            </a>
+                            <a class="nav-link" id="v-pills-itemmix-tab" data-bs-toggle="pill" href="#v-pills-itemmix"
+                                role="tab" aria-controls="v-pills-itemmix" aria-selected="false" *ngIf="dept_id>2">
+                                <i class="mdi mdi-settings-outline d-md-none d-block"></i>
+                                <span class="d-none d-md-block">Items(New)
+                                    <span class="badge bg-primary rounded-pill float-end">
+                                        {{((deptConf.item && deptConf.item.idArr) ? deptConf.item.idArr.length - 1: 0) + ((deptConf.subitem && deptConf.subitem.idArr) ? deptConf.subitem.idArr.length - 1: 0) }}
+                                    </span>
                                 </span>
                             </a>
                             <a class="nav-link" id="v-pills-subitem-tab" data-bs-toggle="pill" href="#v-pills-subitem"
-                                role="tab" aria-controls="v-pills-subitem" aria-selected="false"
-                                *ngIf="dept_id>2">
+                                role="tab" aria-controls="v-pills-subitem" aria-selected="false" *ngIf="dept_id>2">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Subitem
-                                    <span class="badge bg-primary rounded-pill float-end">{{deptConf.subitem ?
-                                        deptConf.subitem.count: ''}}</span>
+                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.subitem && deptConf.subitem.idArr) ? deptConf.subitem.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
                             <a class="nav-link" id="v-pills-ajtypes-tab" data-bs-toggle="pill" href="#v-pills-ajtypes"
-                                role="tab" aria-controls="v-pills-ajtypes" aria-selected="false"
-                                *ngIf="dept_id>2">
+                                role="tab" aria-controls="v-pills-ajtypes" aria-selected="false" *ngIf="dept_id>2">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Aawak/Jawak Types
-                                    <span class="badge bg-primary rounded-pill float-end">{{deptConf.aj_type ?
-                                        deptConf.aj_type.count: ''}}</span>
+                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.aj_type && deptConf.aj_type.idArr) ? deptConf.aj_type.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
                         </div>
@@ -111,8 +114,8 @@
                     <div class="col-md-10">
                         <div class="tab-content card card-body" id="v-pills-tabContent">
                             <!-- MM Tab -->
-                            <div class="tab-pane fade" [ngClass]="{'active show': dept_id > 2}" id="v-pills-mm" role="tabpanel"
-                                aria-labelledby="v-pills-home-tab" *ngIf="dept_id>2"
+                            <div class="tab-pane fade" [ngClass]="{'active show': dept_id > 2}" id="v-pills-mm"
+                                role="tabpanel" aria-labelledby="v-pills-home-tab" *ngIf="dept_id>2"
                                 style="max-height: 600px; overflow-y: scroll; font-size: small !important; font-weight: normal !important;">
                                 <div class="row">
 
@@ -175,7 +178,8 @@
                             </div>
 
                             <!-- Pbk Tab -->
-                            <div class="tab-pane fade" [ngClass]="{'active show': dept_id == 2}" id="v-pills-pbk" role="tabpanel"
+                            <div class="tab-pane fade" [ngClass]="{'active show': dept_id == 2}" id="v-pills-pbk"
+                                role="tabpanel"
                                 style="max-height: 600px; overflow-y: scroll; font-size: small !important; font-weight: normal !important;"
                                 aria-labelledby="v-pills-profile-tab">
                                 <div class="row">
@@ -289,6 +293,123 @@
                                 </table>
                             </div>
 
+                            <!-- New Item Tab -->
+                            <div class="tab-pane fade" id="v-pills-itemmix" role="tabpanel"
+                                style="max-height: 600px; overflow-y: scroll; font-size: small !important; font-weight: normal !important;"
+                                aria-labelledby="v-pills-settings-tab" *ngIf="dept_id>2">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Here"
+                                                [(ngModel)]="termItemmix" name="search">
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
+                                            [clearable]="true" [virtualScroll]="true" (change)="catItemSelected($event)">
+                                            <ng-option *ngFor="let item of categories" [value]="item._id">
+                                                {{item.category_hin}} :
+                                                {{item.category_eng}}</ng-option>
+                                        </ng-select>
+                                    </div>
+                                    <div class="col-2" *ngIf="!termItemmix && selItemmix">
+                                        <button type="button" class="btn btn-outline-success"
+                                            (click)="selectAll('item')">+
+                                            Select All</button>
+                                    </div>
+                                </div>
+                                <table id="datatable-buttons" class="table table-hover dt-responsive">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">No.</th>
+                                            <th style="width: 250px;">Item Name (Hin-Eng)</th>
+                                            <th style="width: 180px;">Item Code</th>
+                                            <th style="width: 180px;">Default Unit</th>
+                                            <th style="width: 180px;">Category</th>
+                                            <th style="width: 250px;">Extra Note</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="accordion" id="accordionExample">
+                                        <ng-container class="accordion-item"
+                                            *ngFor="let data of itemmix | filter:termItemmix; let i=index">
+                                            <tr data-bs-toggle="collapse" aria-expanded="true"
+                                                [ngClass]="{'highlight': data.chk, 'item': !data.chk}"
+                                                (click)="itemmixRowClicked(i, data.chk, data._id)">
+                                                <td>{{i+1}}</td>
+                                                <!-- <td>
+                                                    <button class="btn btn-sm btn-outline-success" type="button"
+                                                        (click)="addSubitem(data)"><i class="uil uil-plus"></i></button>
+                                                    <button class="btn btn-sm btn-primary mx-1" type="button"
+                                                        (click)="edit(data)"><i class="uil uil-pen"></i></button>
+                                                    <button class="btn btn-sm btn-danger" type="button"
+                                                        (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
+                                                </td> -->
+                                                <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
+                                                <td>{{data.item_code?data.item_code:'-'}}</td>
+                                                <td>{{data.unit_id?data.unit_short + ' : ' + data.unit_full:'-'}}</td>
+                                                <td>{{data.category_id?data.category_hin + ' : ' +
+                                                    data.category_eng:'-'}}</td>
+                                                <td>{{data.extra_note?data.extra_note:'-'}}</td>
+                                            </tr>
+                                            <ng-container *ngFor="let si of data.subitems | filter:termItemmix;let j=index">
+                                                <ng-container>
+                                                    <tr [attr.id]="'collapse-' + i"
+                                                        class="accordion-collapse collapse show"
+                                                        *ngIf="data.subitems.length > 0" aria-labelledby="headingOne"
+                                                        (click)="subitemmixRowClicked(i, j, si.chk, data._id, si._id)">
+                                                        <td style="border: none;"></td>
+                                                        <td colspan="5" [ngClass]="{'subitem_hl': si.chk}"
+                                                            class="text-white">
+                                                            <!-- style="background-color: #0acf974d;" -->
+                                                            <table class="" style="width: 99.7%;table-layout: fixed;">
+                                                                <tr>
+                                                                    <td style="width: 50px;">
+                                                                        <i class="uil-corner-down-right pl-4"></i>
+                                                                        &nbsp;&nbsp;&nbsp;{{j+1}}
+                                                                    </td>
+                                                                    <!-- <td style="width: 160px;">
+                                                                        <button class="btn btn-sm btn-primary mx-1"
+                                                                            type="button"
+                                                                            (click)="edit(si, 'subitem')"><i
+                                                                                class="uil uil-pen"></i></button>
+                                                                        <button class="btn btn-sm btn-danger"
+                                                                            type="button"
+                                                                            (click)="deleteSubitem(i, j,si._id)"><i
+                                                                                class="uil-trash"></i></button>
+                                                                    </td> -->
+                                                                    <td style="width: 250px;" class="nav-item">
+                                                                        {{si.subitem_hin +' : '+ si.subitem_eng}}
+                                                                    </td>
+                                                                    <td style="width: 180px;" class="nav-item">
+                                                                        <!-- <b>Item = </b> -->
+                                                                        {{si.subitem_code?si.subitem_code_hin + ' : ' +
+                                                                        si.subitem_code_eng:'-'}}
+                                                                    </td>
+                                                                    <td style="width: 180px;" class="nav-item">
+                                                                        <!-- <b>Unit = </b> -->
+                                                                        {{si.unit_id?si.unit_short + ' : ' +
+                                                                        si.unit_full:'-'}}
+                                                                    </td>
+                                                                    <td style="width: 180px;" class="nav-item">
+                                                                        <!-- <b>Category = </b> -->
+                                                                        {{si.category_id?si.category_hin + ' : ' +
+                                                                        si.category_eng:'-'}}
+                                                                    </td>
+                                                                    <td style="width: 250px;" class="nav-item">
+                                                                        <!-- <b>Extra Note = </b> -->
+                                                                        {{si.extra_note?si.extra_note:'N/A'}}
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </ng-container>
+                                            </ng-container>
+                                        </ng-container>
+                                    </tbody>
+                                </table>
+                            </div>
+
                             <!-- Item Tab -->
                             <div class="tab-pane fade" id="v-pills-item" role="tabpanel"
                                 style="max-height: 600px; overflow-y: scroll; font-size: small !important; font-weight: normal !important;"
@@ -355,7 +476,8 @@
                                     </div>
                                     <div class="col-3">
                                         <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
-                                            [clearable]="true" [virtualScroll]="true" (change)="subitemCatSelected($event)">
+                                            [clearable]="true" [virtualScroll]="true"
+                                            (change)="subitemCatSelected($event)">
                                             <ng-option *ngFor="let item of categories" [value]="item._id">
                                                 {{item.category_hin}} :
                                                 {{item.category_eng}}</ng-option>

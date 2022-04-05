@@ -2,6 +2,9 @@
 
 <router-outlet></router-outlet>
 
-<!-- <ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="small" color="#fff" type="ball-scale"
    [fullScreen]="true">
-</ngx-spinner> -->
+      <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
+      <button class="btn btn-light" *ngIf="isBtn" (click)="aa()">सेवा जारी रखे</button>
+      <button class="btn btn-dark" *ngIf="!isBtn">{{sec}}</button>
+</ngx-spinner>
