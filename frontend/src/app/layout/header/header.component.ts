@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import * as FileSaver from 'file-saver';
 import * as JSZip from 'jszip';
@@ -17,36 +17,50 @@ declare var $: any;
 export class HeaderComponent implements OnInit {
   title!: string;
   dataZip: any;
-  // dept_eng: any;
-  // dept_code: any;
-  // isDept: any;
+  isShow: boolean = false;
+  topPosToStartShowing = 100;
   isLoader: boolean = false;
   webUser: any;
 
-  constructor(private http: HttpService,
+  constructor(
+    private http: HttpService,
     private api: ApiService,
     private gs: GlobalService,
     private router: Router,
     private toastr: ToastrService,
-    public auth: AuthService
-  ) {
+    public auth: AuthService,) {
+  }
+  @HostListener('window:scroll')
+
+
+  checkScroll() {
+    // window의 scroll top
+    // Both window.pageYOffset and document.documentElement.scrollTop returns the same result in all the cases. window.pageYOffset is not supported below IE 9.
+    const scrollPosition = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
+    console.log('[scroll]', scrollPosition);
+
+    if (scrollPosition >= this.topPosToStartShowing) {
+      this.isShow = true;
+    } else {
+      this.isShow = false;
+    }
+  }
+
+  gotoTop() {
+    window.scroll({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
   }
 
   ngOnInit(): void {
-    // var url = window.location.href.substr(window.location.href.lastIndexOf('/') + 1);
-    // console.log(url);
-    // $('[data-toggle="tooltip"]').tooltip();
-    // this.dept_code = window.localStorage.getItem('dept_code');
-    // this.dept_eng = window.localStorage.getItem('dept_eng');
-    // console.log("dept",this.dept_code, this.dept_eng);
-    // this.isDept = (this.gs.Lists.department ? this.gs.Lists.department.length : 0);
+    
   }
 
   logout() {
     this.auth.removewebUser()
-    // window.localStorage.removeItem('dept_id');
-    // window.localStorage.removeItem('dept_eng');
-    // window.localStorage.removeItem('dept_code');
     this.router.navigate(['login']);
   }
 
