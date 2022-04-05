@@ -52,7 +52,6 @@
                               <tr>
                                  <td style="width: 50px;">No.</td>
                                  <td style="width: 101px;">Date</td>
-                                 <td style="width: 80px;">Pkt No</td>
                                  <td style="width: 115px;">Aawak MM</td>
                                  <td style="width: 150px;">Item</td>
                                  <td style="width: 80px;">Remaining Qty</td>
@@ -64,14 +63,16 @@
                            <tbody>
                               <tr *ngFor="let data of pendingAawakData | filter:termAawak; let i=index">
                                  <td>{{i+1}}</td>
-                                 <td>{{data.date}}</td>
-                                 <td>{{data.pkt_num}}</td>
+                                 <td>
+                                    {{data.date | date:'yyyy-MM-dd'}}<br />
+                                    {{data.pkt_num ? data.pkt_num : ''}}
+                                 </td>
                                  <td>
                                     {{data.aawak_mm_hin}}<br />
                                     {{data.aawak_mm_eng}}
                                  </td>
-                                 <td>{{data.item_hin}} : {{data.subitem_hin}}pata<br />
-                                    {{data.item_eng}} : {{data.subitem_eng}}leaf gfj</td>
+                                 <td>{{data.item_hin}} {{data.subitem_hin ? ' : ' + data.subitem_hin : ''}}<br />
+                                    {{data.item_eng}} {{data.subitem_eng ? ' : ' + data.subitem_eng : ''}}</td>
                                  <td>
                                     <span style="font-weight:bold; color: red;">
                                        {{data.remaining_qty}} {{data.unit_short}}
@@ -140,7 +141,7 @@
                         <table id="datatable-buttons" class="table table-hover dt-responsive">
                            <thead>
                               <tr>
-                                 <td>No.</td>
+                                 <td style="width: 50px;">No.</td>
                                  <td>MM</td>
                                  <td>Item</td>
                                  <td>Used</td>
@@ -161,7 +162,7 @@
                                        {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
                                     </td>
                                     <td>
-                                          {{data.Used ? data.Used + " " + data.unit_short : "-"}}
+                                       {{data.Used ? data.Used + " " + data.unit_short : "-"}}
                                     </td>
                                     <td>
                                        <span class="px-1" [ngClass]="{'error': data.Stock < 0}">
@@ -200,6 +201,8 @@
 
             <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
                [getData]="editData"></app-jawak-entry>
+
+            <app-data-view *ngIf="showModal == 'Show Jawak'" [getData]="viewData" Type="jawak"></app-data-view>
             <!-- <app-jawak-entry *ngIf="showModal == 'Edit Aawak'" (response)='editAawakResponse($event)'
                [getData]="editData" [isEdit]="true"></app-jawak-entry> -->
          </div>

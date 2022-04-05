@@ -59,6 +59,8 @@ import { SupportListEntryComponent } from './entryForms/support-list-entry/suppo
 import { SubitemListEntryComponent } from './entryForms/subitem-list-entry/subitem-list-entry.component';
 import { DepartmentComponent } from './department/department.component';
 import { DepartmentEntryComponent } from './entryForms/department-entry/department-entry.component';
+import { BachatComponent } from './bachat/bachat.component';
+import { FilterpipePipe } from './pipe/filterpipe.pipe';
 
 
 
@@ -106,6 +108,8 @@ import { DepartmentEntryComponent } from './entryForms/department-entry/departme
     SubitemListEntryComponent,
     DepartmentComponent,
     DepartmentEntryComponent,
+    BachatComponent,
+    FilterpipePipe,
   ],
   imports: [
     BrowserModule,

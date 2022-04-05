@@ -52,6 +52,7 @@
                                 <span *ngIf="z == row.field.length-1">
                                     {{(data[col] ? data[col]: '')}}
                                 </span>
+                                <br *ngIf="z != 0 && z%2==0"/>
                             </ng-container>
                         </td>
                     </tr>

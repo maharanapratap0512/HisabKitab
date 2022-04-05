@@ -105,6 +105,7 @@ export class ItemComponent implements OnInit {
     this.showModal = 'Add Subitem From Item';
     $('#showModal').modal('show');
   }
+
   addItemResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
@@ -138,7 +139,9 @@ export class ItemComponent implements OnInit {
       $('#showModal').modal('hide');
       this.showModal = '';
       let i = this.itemData.findIndex((i: { _id: any; }) => i._id == ev.item_id);
-      this.itemData[i].subitems.unshift(ev);
+      this.itemData[i].subitems.push(ev);
+      this.itemData[i].categories.push(ev.category_id);
+      this.si_total_count++;
       this.isLoader = false;
     }
     else {
@@ -217,7 +220,7 @@ export class ItemComponent implements OnInit {
             this.isLoader = false;
             this.itemData[i].subitems.splice(j, 1);
             // this.gs.Lists.item.splice(this.gs.Lists.mm.indexOf((i: { _id: any; }) => i._id == id), 1);
-            this.total_count -= 1;
+            this.si_total_count--;
             this.toastr.success('Deleted Successfully');
           }
           else {
