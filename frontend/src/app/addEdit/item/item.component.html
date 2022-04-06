@@ -81,7 +81,7 @@
                      <tbody class="accordion" id="accordionExample">
                         <ng-container class="accordion-item" *ngFor="let data of itemData | filter:term; let i=index">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
-                              [attr.aria-controls]="'#collapse-' + i" style="background-color:#00000099">
+                              [attr.aria-controls]="'#collapse-' + i" class="item-row">
                               <td>{{i+1}}</td>
                               <td>
                                  <button class="btn btn-sm btn-outline-success" type="button"
@@ -118,8 +118,8 @@
                               <ng-container>
                                  <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show"
                                     *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
-                                    <td colspan="7" style="padding-left: 3rem !important;background-color: #0acf974d;"
-                                       class="text-white">
+                                    <td  style="border: none;"></td>
+                                    <td colspan="6" class="subitem-row">
                                        <table class="" style="width: 99.7%;table-layout: fixed;">
                                           <tr>
                                              <td style="width: 50px;">
