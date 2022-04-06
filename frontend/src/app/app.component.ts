@@ -13,9 +13,12 @@ export class AppComponent {
   title = 'sewa2021';
   isLoader: boolean = false;
   isBtn: boolean = false;
+  // timeout: any = 9000;
+  // btnShowTimer: any = 4000;
   timeout:any = 1800000;
-  waiting: any = 30000;
-  sec: any ;
+  btnShowTimer: any = 30000;
+  sec: any = this.btnShowTimer / 1000;
+  mainTimer: any;
 
   constructor(
     private toastr: ToastrService,
@@ -32,6 +35,7 @@ export class AppComponent {
 
   ngOnInit(): void {
     this.spinner.show();
+    this.timer()
     // setInterval(() => {
     //   this.toastr.show("में आत्मा शांत स्वरूप हूँ ।", 'Om Shanti', {
     //     timeOut: 10000,
@@ -52,24 +56,25 @@ export class AppComponent {
 
   }
 
-  aa() {
-    this.isLoader = false;
-    this.Timer = this.Timer;
+  timer() {
+    this.sec = this.btnShowTimer / 1000;
+    this.isBtn = false;
+    this.mainTimer = setTimeout(() => {
+      this.isLoader = true;
+      let counter = setInterval(() => {
+        this.sec -= 1;
+        if (this.sec == 0) {
+          this.isBtn = true
+          clearInterval(counter);
+        }
+      }, 1000);
+    }, this.timeout)
   }
 
-  Timer = setInterval(() => {
-    this.sec = this.waiting;
-    this.isLoader = true;
-    let counter = setInterval(()=>{
-      this.sec = (this.sec / 1000) - 1;
-    },1000);
-
-    setTimeout(() => {
-      this.isBtn = true;
-      clearInterval(counter);
-    }, this.waiting);
+  skipBtn() {
+    this.isLoader = false;
+    this.timer();
+  }
 
 
-  }, this.timeout);
-  
 }

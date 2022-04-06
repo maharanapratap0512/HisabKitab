@@ -65,7 +65,7 @@
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
-                           <td>No.</td>
+                           <td style="width: 70px;">No.</td>
                            <td>Department</td>
                            <td>State</td>
                            <td>MM</td>
@@ -113,9 +113,10 @@
                                     {{data.Stock ? data.Stock + " " + data.unit_short : "-"}}
                                  </span>
                               </td>
-                              <td> 
-                                 <button class="btn btn-sm btn-warning mx-1" (click)="addJawak(data)" *ngIf="data.Stock">
-                                    <i class="mdi mdi-plus noti-icon">जावक</i>
+                              <td>
+                                 <button class="btn btn-sm btn-warning mx-1" (click)="addJawak(data)"
+                                    *ngIf="data.Stock">
+                                    <i class="mdi mdi-plus noti-icon"></i> जावक
                                  </button>
                                  <!-- <button class="btn btn-sm btn-primary" (click)="showJawak(data._id)">
                                     <i class="dripicons-view-list noti-icon"></i>

@@ -119,6 +119,10 @@ export class DepartmentComponent implements OnInit {
     this.deptSelected(this.dept_id);
   }
 
+  downloadDB(){
+
+  }
+  
   setView(type: string) {
     this.showModal = type;
     switch (type) {

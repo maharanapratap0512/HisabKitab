@@ -100,7 +100,8 @@ export class DashboardComponent implements OnInit {
       qty: data.remaining_qty,
       unit_id: data.unit_id,
       aawak_ref_id: data._id,
-      dept_id: data.dept_id
+      dept_id: data.dept_id,
+      unit_short:data.unit_short
     }
     this.showModal = "Add Jawak";
     $('#showModal').modal('show');

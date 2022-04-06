@@ -68,17 +68,23 @@
                         <tr *ngFor="let data of pbkData | filter:term; let i=index">
                            <td>{{i+1}}</td>
                            <td>
-                              <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
+                              <button *ngIf="auth.webUser.dept_id == 1 || !data.active"
+                                 class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button><br>
-                              <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
-                                    class="uil-trash"></i></button>
+                              <button *ngIf="auth.webUser.dept_id == 1 || !data.active" class="btn btn-sm btn-danger"
+                                 type="button" (click)="delete(i,data._id)">
+                                 <i class="uil-trash"></i></button>
+                              <i *ngIf="auth.webUser.dept_id != 1 && data.active" class="uil-shield-check mx-1">
+                                 Protected
+                              </i>
                            </td>
                            <td>{{data.roll_no ? data.roll_no : '______'}} </td>
                            <td>{{data.pbk_hin}} :<br> {{data.pbk_eng}}</td>
                            <td>{{data.relation}}:<br>{{data.relative_name}}</td>
                            <td>{{data.gender}}</td>
                            <td>{{data.birth_date | date:'dd-MM-yyyy'}}
-                           <br>{{data.age?'Age : '+data.age:'-'}}</td>
+                              <br>{{data.age?'Age : '+data.age:'-'}}
+                           </td>
                            <td>{{data.status}}</td>
                            <td>{{data.address?data.address:'-'}}</td>
                            <td>{{data.townarea?data.townarea:'-'}}</td>
@@ -120,7 +126,8 @@
             <app-pbk-entry *ngIf="showModal == 'Add PBK'" (response)='addPbkResponse($event)'></app-pbk-entry>
 
             <!-- Edit PBK -->
-            <app-pbk-entry *ngIf="showModal == 'Edit PBK'" (response)='editPbkResponse($event)' [getData]="editData" [isEdit]="true"></app-pbk-entry>
+            <app-pbk-entry *ngIf="showModal == 'Edit PBK'" (response)='editPbkResponse($event)' [getData]="editData"
+               [isEdit]="true"></app-pbk-entry>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"

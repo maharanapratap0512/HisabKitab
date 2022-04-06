@@ -23,13 +23,9 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AawakComponent } from './aawak/aawak.component';
 import { PbkComponent } from './addEdit/pbk/pbk.component';
 import { MmComponent } from './addEdit/mm/mm.component';
-import { UnitComponent } from './addEdit/unit/unit.component';
 import { CategoryComponent } from './addEdit/category/category.component';
 import { ItemComponent } from './addEdit/item/item.component';
 import { CityComponent } from './addEdit/city/city.component';
-import { StateComponent } from './addEdit/state/state.component';
-import { CountryComponent } from './addEdit/country/country.component';
-import { AjTypeComponent } from './addEdit/aj-type/aj-type.component';
 import { SupportListEntryComponent } from './entryForms/support-list-entry/support-list-entry.component';
 import { SubitemComponent } from './addEdit/subitem/subitem.component';
 import { DepartmentComponent } from './department/department.component';
@@ -60,14 +56,10 @@ const routes: Routes = [
          { path: "bachat", component: BachatComponent },
          { path: "pbk", component: PbkComponent },
          { path: "mm", component: MmComponent },
-         { path: "unit", component: UnitComponent },
          { path: "category", component: CategoryComponent },
          { path: "item", component: ItemComponent },
          { path: "subitem", component: SubitemComponent },
-         { path: "ajtype", component: AjTypeComponent },
          { path: "city", component: CityComponent },
-         { path: "state", component: StateComponent },
-         { path: "country", component: CountryComponent },
          { path: "product", component: ProductComponent },
          { path: "department", component: DepartmentComponent },
 

@@ -102,7 +102,8 @@ export class BachatComponent implements OnInit {
       subitem_id: data.subitem_id,
       qty: data.Stock,
       unit_id: data.unit_id,
-      dept_id: data.dept_id
+      dept_id: data.dept_id,
+      unit_short: data.unit_short
     }
     this.showModal = "Add Jawak";
     $('#showModal').modal('show');

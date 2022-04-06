@@ -44,6 +44,11 @@
                             <i class="dripicons-check" style="font-size: large;"> </i>Cancel
                         </button>
                     </div>
+                    <div class="col-2 mt-3 mb-2" *ngIf="dept_id">
+                        <button class="btn btn-success w-100" (click)="downloadDB()">
+                            <i class="dripicons-download" style="font-size: large;"> </i> Download
+                        </button>
+                    </div>
                 </div>
 
 
@@ -56,7 +61,8 @@
                                 aria-selected="true" *ngIf="dept_id>2">
                                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                                 <span class="d-none d-md-block">MM
-                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.mm && deptConf.mm.idArr) ?
+                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.mm &&
+                                        deptConf.mm.idArr) ?
                                         deptConf.mm.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
@@ -65,7 +71,8 @@
                                 aria-selected="false">
                                 <i class="mdi mdi-account-circle d-md-none d-block"></i>
                                 <span class="d-none d-md-block">PBK / Sewadhari
-                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.pbk && deptConf.pbk.idArr) ?
+                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.pbk &&
+                                        deptConf.pbk.idArr) ?
                                         deptConf.pbk.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
@@ -73,7 +80,8 @@
                                 role="tab" aria-controls="v-pills-category" aria-selected="false" *ngIf="dept_id>2">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Category
-                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.category && deptConf.category.idArr) ?
+                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.category &&
+                                        deptConf.category.idArr) ?
                                         deptConf.category.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
@@ -81,7 +89,8 @@
                                 role="tab" aria-controls="v-pills-item" aria-selected="false" *ngIf="dept_id>2">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Items
-                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.item && deptConf.item.idArr) ? deptConf.item.idArr.length - 1: ''}}</span>
+                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.item &&
+                                        deptConf.item.idArr) ? deptConf.item.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
                             <a class="nav-link" id="v-pills-itemmix-tab" data-bs-toggle="pill" href="#v-pills-itemmix"
@@ -89,7 +98,9 @@
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Items(New)
                                     <span class="badge bg-primary rounded-pill float-end">
-                                        {{((deptConf.item && deptConf.item.idArr) ? deptConf.item.idArr.length - 1: 0) + ((deptConf.subitem && deptConf.subitem.idArr) ? deptConf.subitem.idArr.length - 1: 0) }}
+                                        {{((deptConf.item && deptConf.item.idArr) ? deptConf.item.idArr.length - 1: 0) +
+                                        ((deptConf.subitem && deptConf.subitem.idArr) ? deptConf.subitem.idArr.length -
+                                        1: 0) }}
                                     </span>
                                 </span>
                             </a>
@@ -97,14 +108,16 @@
                                 role="tab" aria-controls="v-pills-subitem" aria-selected="false" *ngIf="dept_id>2">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Subitem
-                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.subitem && deptConf.subitem.idArr) ? deptConf.subitem.idArr.length - 1: ''}}</span>
+                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.subitem &&
+                                        deptConf.subitem.idArr) ? deptConf.subitem.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
                             <a class="nav-link" id="v-pills-ajtypes-tab" data-bs-toggle="pill" href="#v-pills-ajtypes"
                                 role="tab" aria-controls="v-pills-ajtypes" aria-selected="false" *ngIf="dept_id>2">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Aawak/Jawak Types
-                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.aj_type && deptConf.aj_type.idArr) ? deptConf.aj_type.idArr.length - 1: ''}}</span>
+                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.aj_type &&
+                                        deptConf.aj_type.idArr) ? deptConf.aj_type.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
                         </div>
@@ -141,40 +154,43 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <table id="datatable-buttons" class="table table-hover dt-responsive">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 40px;">No.</th>
-                                            <th style="width: 150px;">MM(Hin)</th>
-                                            <th style="width: 150px;">MM(Eng)</th>
-                                            <th style="width: 100px;">MM Code</th>
-                                            <th style="width: 100px;">MM Type</th>
-                                            <th style="width: 150px;">Parent MM</th>
-                                            <th style="width: 150px;">MM State</th>
-                                            <!-- <th style="width: 130px;">Opening Date</th> -->
-                                            <th style="width: 200px;">Nimit Name</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody style="max-height: 500px; min-height: 400px; overflow-y: scroll;">
-                                        <tr *ngFor="let data of mms | filter:termMM; let i=index"
-                                            [ngClass]="{'highlight': data.chk == true}"
-                                            (click)="mmRowClicked(i, data.chk, data._id)">
-                                            <td>{{i+1}}</td>
-                                            <td>{{data.mm_hin}}</td>
-                                            <td>{{data.mm_eng}}</td>
-                                            <td>{{data.mm_code}}</td>
-                                            <td>{{data.dept_id?data.dept_eng :'-'}}</td>
-                                            <td>
-                                                {{data.parent_mm_id ? data.parent_mm_hin + ' : ' + data.parent_mm_eng +
-                                                ' : ' +
-                                                data.parent_mm_code:'-'}}
-                                            </td>
-                                            <td>{{data.state_hin}} : {{data.state_eng}}</td>
-                                            <!-- <td>{{data.opening_date | date: 'dd-MM-yyyy'}}</td> -->
-                                            <td>{{data.nimmit ? data.nimmit:'-'}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="row mt-2">
+                                    <table id="datatable-buttons" class="table table-hover dt-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 40px;">No.</th>
+                                                <th style="width: 150px;">MM(Hin)</th>
+                                                <th style="width: 150px;">MM(Eng)</th>
+                                                <th style="width: 100px;">MM Code</th>
+                                                <th style="width: 100px;">MM Type</th>
+                                                <th style="width: 150px;">Parent MM</th>
+                                                <th style="width: 150px;">MM State</th>
+                                                <!-- <th style="width: 130px;">Opening Date</th> -->
+                                                <th style="width: 200px;">Nimit Name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="max-height: 500px; min-height: 400px; overflow-y: scroll;">
+                                            <tr *ngFor="let data of mms | filter:termMM; let i=index"
+                                                [ngClass]="{'highlight': data.chk == true}"
+                                                (click)="mmRowClicked(i, data.chk, data._id)">
+                                                <td>{{i+1}}</td>
+                                                <td>{{data.mm_hin}}</td>
+                                                <td>{{data.mm_eng}}</td>
+                                                <td>{{data.mm_code}}</td>
+                                                <td>{{data.dept_id?data.dept_eng :'-'}}</td>
+                                                <td>
+                                                    {{data.parent_mm_id ? data.parent_mm_hin + ' : ' +
+                                                    data.parent_mm_eng +
+                                                    ' : ' +
+                                                    data.parent_mm_code:'-'}}
+                                                </td>
+                                                <td>{{data.state_hin}} : {{data.state_eng}}</td>
+                                                <!-- <td>{{data.opening_date | date: 'dd-MM-yyyy'}}</td> -->
+                                                <td>{{data.nimmit ? data.nimmit:'-'}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                             <!-- Pbk Tab -->
@@ -221,39 +237,41 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <table id="datatable-buttons" class="table table-hover dt-responsive">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 40px;">No.</th>
-                                            <th style="width: 250px;">PBK Detail</th>
-                                            <th style="width: 150px;">PBK (Eng)</th>
-                                            <th style="width: 100px;">Gender</th>
-                                            <th style="width: 100px;">DOB/Age</th>
-                                            <th style="width: 150px;">Status</th>
-                                            <th style="width: 150px;">State</th>
-                                            <th style="width: 150px;">City</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody style="max-height: 500px; overflow-y: scroll;">
-                                        <tr *ngFor="let data of pbks | filter:termPbk; let i=index"
-                                            [ngClass]="{'highlight': data.chk == true}"
-                                            (click)="pbkRowClicked(i, data.chk, data._id)">
-                                            <td>{{i+1}}</td>
-                                            <td>
-                                                ({{data.roll_no ? data.roll_no : '___'}})<br />
-                                                {{data.pbk_hin}} : {{data.pbk_eng}} <br />
-                                                {{data.relation}} {{data.relative_name}}
-                                            </td>
-                                            <td>{{data.gender}}</td>
-                                            <td>{{data.birth_date}} <br /> AGE : {{data.age}}</td>
-                                            <td>
-                                                {{data.status}}
-                                            </td>
-                                            <td>{{data.state_hin}} : {{data.state_eng}}</td>
-                                            <td>{{data.city_hin}} : {{data.city_eng}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="row mt-2">
+                                    <table id="datatable-buttons" class="table table-hover dt-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 40px;">No.</th>
+                                                <th style="width: 250px;">PBK Detail</th>
+                                                <th style="width: 150px;">PBK (Eng)</th>
+                                                <th style="width: 100px;">Gender</th>
+                                                <th style="width: 100px;">DOB/Age</th>
+                                                <th style="width: 150px;">Status</th>
+                                                <th style="width: 150px;">State</th>
+                                                <th style="width: 150px;">City</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="max-height: 500px; overflow-y: scroll;">
+                                            <tr *ngFor="let data of pbks | filter:termPbk; let i=index"
+                                                [ngClass]="{'highlight': data.chk == true}"
+                                                (click)="pbkRowClicked(i, data.chk, data._id)">
+                                                <td>{{i+1}}</td>
+                                                <td>
+                                                    ({{data.roll_no ? data.roll_no : '___'}})<br />
+                                                    {{data.pbk_hin}} : {{data.pbk_eng}} <br />
+                                                    {{data.relation}} {{data.relative_name}}
+                                                </td>
+                                                <td>{{data.gender}}</td>
+                                                <td>{{data.birth_date}} <br /> AGE : {{data.age}}</td>
+                                                <td>
+                                                    {{data.status}}
+                                                </td>
+                                                <td>{{data.state_hin}} : {{data.state_eng}}</td>
+                                                <td>{{data.city_hin}} : {{data.city_eng}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                             <!-- Category Tab -->
@@ -273,24 +291,26 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <table id="datatable-buttons" class="table table-hover dt-responsive">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 40px;">No.</th>
-                                            <th style="width: 150px;">Category (Hin)</th>
-                                            <th style="width: 150px;">Category (Eng)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody style="max-height: 500px; overflow-y: scroll;">
-                                        <tr *ngFor="let data of categories | filter:termCat; let i=index"
-                                            [ngClass]="{'highlight': data.chk == true}"
-                                            (click)="categoryRowClicked(i, data.chk, data._id)">
-                                            <td>{{i+1}}</td>
-                                            <td>{{data.category_hin}}</td>
-                                            <td>{{data.category_eng}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="row mt-2">
+                                    <table id="datatable-buttons" class="table table-hover dt-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 40px;">No.</th>
+                                                <th style="width: 150px;">Category (Hin)</th>
+                                                <th style="width: 150px;">Category (Eng)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="max-height: 500px; overflow-y: scroll;">
+                                            <tr *ngFor="let data of categories | filter:termCat; let i=index"
+                                                [ngClass]="{'highlight': data.chk == true}"
+                                                (click)="categoryRowClicked(i, data.chk, data._id)">
+                                                <td>{{i+1}}</td>
+                                                <td>{{data.category_hin}}</td>
+                                                <td>{{data.category_eng}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                             <!-- New Item Tab -->
@@ -306,7 +326,8 @@
                                     </div>
                                     <div class="col-3">
                                         <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
-                                            [clearable]="true" [virtualScroll]="true" (change)="catItemSelected($event)">
+                                            [clearable]="true" [virtualScroll]="true"
+                                            (change)="catItemSelected($event)">
                                             <ng-option *ngFor="let item of categories" [value]="item._id">
                                                 {{item.category_hin}} :
                                                 {{item.category_eng}}</ng-option>
@@ -318,96 +339,102 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <table id="datatable-buttons" class="table table-hover dt-responsive">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 50px;">No.</th>
-                                            <th style="width: 250px;">Item Name (Hin-Eng)</th>
-                                            <th style="width: 180px;">Item Code</th>
-                                            <th style="width: 180px;">Default Unit</th>
-                                            <th style="width: 180px;">Category</th>
-                                            <th style="width: 250px;">Extra Note</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="accordion" id="accordionExample">
-                                        <ng-container class="accordion-item"
-                                            *ngFor="let data of itemmix | filter:termItemmix; let i=index">
-                                            <tr data-bs-toggle="collapse" aria-expanded="true"
-                                                [ngClass]="{'highlight': data.chk, 'item': !data.chk}"
-                                                (click)="itemmixRowClicked(i, data.chk, data._id)">
-                                                <td>{{i+1}}</td>
-                                                <!-- <td>
-                                                    <button class="btn btn-sm btn-outline-success" type="button"
-                                                        (click)="addSubitem(data)"><i class="uil uil-plus"></i></button>
-                                                    <button class="btn btn-sm btn-primary mx-1" type="button"
-                                                        (click)="edit(data)"><i class="uil uil-pen"></i></button>
-                                                    <button class="btn btn-sm btn-danger" type="button"
-                                                        (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
-                                                </td> -->
-                                                <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
-                                                <td>{{data.item_code?data.item_code:'-'}}</td>
-                                                <td>{{data.unit_id?data.unit_short + ' : ' + data.unit_full:'-'}}</td>
-                                                <td>{{data.category_id?data.category_hin + ' : ' +
-                                                    data.category_eng:'-'}}</td>
-                                                <td>{{data.extra_note?data.extra_note:'-'}}</td>
+                                <div class="row mt-2">
+                                    <table id="datatable-buttons" class="table table-hover dt-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px;">No.</th>
+                                                <th style="width: 250px;">Item Name (Hin-Eng)</th>
+                                                <th style="width: 180px;">Item Code</th>
+                                                <th style="width: 180px;">Default Unit</th>
+                                                <th style="width: 180px;">Category</th>
+                                                <th style="width: 250px;">Extra Note</th>
                                             </tr>
-                                            <ng-container *ngFor="let si of data.subitems | filter:termItemmix;let j=index">
-                                                <ng-container>
-                                                    <tr [attr.id]="'collapse-' + i"
-                                                        class="accordion-collapse collapse show"
-                                                        *ngIf="data.subitems.length > 0" aria-labelledby="headingOne"
-                                                        (click)="subitemmixRowClicked(i, j, si.chk, data._id, si._id)">
-                                                        <td style="border: none;"></td>
-                                                        <td colspan="5" [ngClass]="{'subitem_hl': si.chk}"
-                                                            class="text-white">
-                                                            <!-- style="background-color: #0acf974d;" -->
-                                                            <table class="" style="width: 99.7%;table-layout: fixed;">
-                                                                <tr>
-                                                                    <td style="width: 50px;">
-                                                                        <i class="uil-corner-down-right pl-4"></i>
-                                                                        &nbsp;&nbsp;&nbsp;{{j+1}}
-                                                                    </td>
-                                                                    <!-- <td style="width: 160px;">
-                                                                        <button class="btn btn-sm btn-primary mx-1"
-                                                                            type="button"
-                                                                            (click)="edit(si, 'subitem')"><i
-                                                                                class="uil uil-pen"></i></button>
-                                                                        <button class="btn btn-sm btn-danger"
-                                                                            type="button"
-                                                                            (click)="deleteSubitem(i, j,si._id)"><i
-                                                                                class="uil-trash"></i></button>
-                                                                    </td> -->
-                                                                    <td style="width: 250px;" class="nav-item">
-                                                                        {{si.subitem_hin +' : '+ si.subitem_eng}}
-                                                                    </td>
-                                                                    <td style="width: 180px;" class="nav-item">
-                                                                        <!-- <b>Item = </b> -->
-                                                                        {{si.subitem_code?si.subitem_code_hin + ' : ' +
-                                                                        si.subitem_code_eng:'-'}}
-                                                                    </td>
-                                                                    <td style="width: 180px;" class="nav-item">
-                                                                        <!-- <b>Unit = </b> -->
-                                                                        {{si.unit_id?si.unit_short + ' : ' +
-                                                                        si.unit_full:'-'}}
-                                                                    </td>
-                                                                    <td style="width: 180px;" class="nav-item">
-                                                                        <!-- <b>Category = </b> -->
-                                                                        {{si.category_id?si.category_hin + ' : ' +
-                                                                        si.category_eng:'-'}}
-                                                                    </td>
-                                                                    <td style="width: 250px;" class="nav-item">
-                                                                        <!-- <b>Extra Note = </b> -->
-                                                                        {{si.extra_note?si.extra_note:'N/A'}}
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </td>
-                                                    </tr>
+                                        </thead>
+                                        <tbody class="accordion" id="accordionExample">
+                                            <ng-container class="accordion-item"
+                                                *ngFor="let data of itemmix | filter:termItemmix; let i=index">
+                                                <tr data-bs-toggle="collapse" aria-expanded="true"
+                                                    [ngClass]="{'highlight': data.chk, 'item': !data.chk}"
+                                                    (click)="itemmixRowClicked(i, data.chk, data._id)">
+                                                    <td>{{i+1}}</td>
+                                                    <!-- <td>
+                                                        <button class="btn btn-sm btn-outline-success" type="button"
+                                                            (click)="addSubitem(data)"><i class="uil uil-plus"></i></button>
+                                                        <button class="btn btn-sm btn-primary mx-1" type="button"
+                                                            (click)="edit(data)"><i class="uil uil-pen"></i></button>
+                                                        <button class="btn btn-sm btn-danger" type="button"
+                                                            (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
+                                                    </td> -->
+                                                    <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
+                                                    <td>{{data.item_code?data.item_code:'-'}}</td>
+                                                    <td>{{data.unit_id?data.unit_short + ' : ' + data.unit_full:'-'}}
+                                                    </td>
+                                                    <td>{{data.category_id?data.category_hin + ' : ' +
+                                                        data.category_eng:'-'}}</td>
+                                                    <td>{{data.extra_note?data.extra_note:'-'}}</td>
+                                                </tr>
+                                                <ng-container
+                                                    *ngFor="let si of data.subitems | filter:termItemmix;let j=index">
+                                                    <ng-container>
+                                                        <tr [attr.id]="'collapse-' + i"
+                                                            class="accordion-collapse collapse show"
+                                                            *ngIf="data.subitems.length > 0"
+                                                            aria-labelledby="headingOne"
+                                                            (click)="subitemmixRowClicked(i, j, si.chk, data._id, si._id)">
+                                                            <td style="border: none;"></td>
+                                                            <td colspan="5" [ngClass]="{'subitem_hl': si.chk}">
+                                                                <!-- style="background-color: #0acf974d;" -->
+                                                                <table class=""
+                                                                    style="width: 99.7%;table-layout: fixed;">
+                                                                    <tr>
+                                                                        <td style="width: 50px;">
+                                                                            <i class="uil-corner-down-right pl-4"></i>
+                                                                            &nbsp;&nbsp;&nbsp;{{j+1}}
+                                                                        </td>
+                                                                        <!-- <td style="width: 160px;">
+                                                                            <button class="btn btn-sm btn-primary mx-1"
+                                                                                type="button"
+                                                                                (click)="edit(si, 'subitem')"><i
+                                                                                    class="uil uil-pen"></i></button>
+                                                                            <button class="btn btn-sm btn-danger"
+                                                                                type="button"
+                                                                                (click)="deleteSubitem(i, j,si._id)"><i
+                                                                                    class="uil-trash"></i></button>
+                                                                        </td> -->
+                                                                        <td style="width: 250px;" class="nav-item">
+                                                                            {{si.subitem_hin +' : '+ si.subitem_eng}}
+                                                                        </td>
+                                                                        <td style="width: 180px;" class="nav-item">
+                                                                            <!-- <b>Item = </b> -->
+                                                                            {{si.subitem_code?si.subitem_code_hin + ' :
+                                                                            ' +
+                                                                            si.subitem_code_eng:'-'}}
+                                                                        </td>
+                                                                        <td style="width: 180px;" class="nav-item">
+                                                                            <!-- <b>Unit = </b> -->
+                                                                            {{si.unit_id?si.unit_short + ' : ' +
+                                                                            si.unit_full:'-'}}
+                                                                        </td>
+                                                                        <td style="width: 180px;" class="nav-item">
+                                                                            <!-- <b>Category = </b> -->
+                                                                            {{si.category_id?si.category_hin + ' : ' +
+                                                                            si.category_eng:'-'}}
+                                                                        </td>
+                                                                        <td style="width: 250px;" class="nav-item">
+                                                                            <!-- <b>Extra Note = </b> -->
+                                                                            {{si.extra_note?si.extra_note:'N/A'}}
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </ng-container>
                                                 </ng-container>
                                             </ng-container>
-                                        </ng-container>
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                             <!-- Item Tab -->
@@ -435,32 +462,34 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <table id="datatable-buttons" class="table table-hover dt-responsive">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 40px;">No.</th>
-                                            <th style="width: 150px;">Item (Hin)</th>
-                                            <th style="width: 150px;">Item (Eng)</th>
-                                            <th style="width: 100px;">Item Code</th>
-                                            <th style="width: 100px;">Category</th>
-                                            <th style="width: 150px;">Unit</th>
-                                            <th style="width: 250px;">Extra Note</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody style="max-height: 500px; overflow-y: scroll;">
-                                        <tr *ngFor="let data of items | filter:termItem; let i=index"
-                                            [ngClass]="{'highlight': data.chk == true}"
-                                            (click)="itemRowClicked(i, data.chk, data._id)">
-                                            <td>{{i+1}}</td>
-                                            <td>{{data.item_hin}}</td>
-                                            <td>{{data.item_eng}}</td>
-                                            <td>{{data.item_code}}</td>
-                                            <td>{{data.category_hin}} : {{data.category_eng}}</td>
-                                            <td>{{data.unit_short}} : {{data.unit_full}}</td>
-                                            <td>{{data.extra_note}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="row mt-2">
+                                    <table id="datatable-buttons" class="table table-hover dt-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 40px;">No.</th>
+                                                <th style="width: 150px;">Item (Hin)</th>
+                                                <th style="width: 150px;">Item (Eng)</th>
+                                                <th style="width: 100px;">Item Code</th>
+                                                <th style="width: 100px;">Category</th>
+                                                <th style="width: 150px;">Unit</th>
+                                                <th style="width: 250px;">Extra Note</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="max-height: 500px; overflow-y: scroll;">
+                                            <tr *ngFor="let data of items | filter:termItem; let i=index"
+                                                [ngClass]="{'highlight': data.chk == true}"
+                                                (click)="itemRowClicked(i, data.chk, data._id)">
+                                                <td>{{i+1}}</td>
+                                                <td>{{data.item_hin}}</td>
+                                                <td>{{data.item_eng}}</td>
+                                                <td>{{data.item_code}}</td>
+                                                <td>{{data.category_hin}} : {{data.category_eng}}</td>
+                                                <td>{{data.unit_short}} : {{data.unit_full}}</td>
+                                                <td>{{data.extra_note}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                             <!-- Subitem Tab -->
@@ -497,34 +526,36 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <table id="datatable-buttons" class="table table-hover dt-responsive">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 40px;">No.</th>
-                                            <th style="width: 150px;">Item Name</th>
-                                            <th style="width: 150px;">Subitem (Hin)</th>
-                                            <th style="width: 150px;">Subitem (Eng)</th>
-                                            <th style="width: 100px;">Subitem Code</th>
-                                            <th style="width: 100px;">Category</th>
-                                            <th style="width: 150px;">Unit</th>
-                                            <th style="width: 250px;">Extra Note</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody style="max-height: 500px; overflow-y: scroll;">
-                                        <tr *ngFor="let data of subitems | filter:termSubitem; let i=index"
-                                            [ngClass]="{'highlight': data.chk == true}"
-                                            (click)="subitemRowClicked(i, data.chk, data._id)">
-                                            <td>{{i+1}}</td>
-                                            <td>{{data.item_hin}} : {{data.item_eng}}</td>
-                                            <td>{{data.subitem_hin}}</td>
-                                            <td>{{data.subitem_eng}}</td>
-                                            <td>{{data.item_code}}</td>
-                                            <td>{{data.category_hin}} : {{data.category_eng}}</td>
-                                            <td>{{data.unit_short}} : {{data.unit_full}}</td>
-                                            <td>{{data.extra_note}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="row mt-2">
+                                    <table id="datatable-buttons" class="table table-hover dt-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 40px;">No.</th>
+                                                <th style="width: 150px;">Item Name</th>
+                                                <th style="width: 150px;">Subitem (Hin)</th>
+                                                <th style="width: 150px;">Subitem (Eng)</th>
+                                                <th style="width: 100px;">Subitem Code</th>
+                                                <th style="width: 100px;">Category</th>
+                                                <th style="width: 150px;">Unit</th>
+                                                <th style="width: 250px;">Extra Note</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="max-height: 500px; overflow-y: scroll;">
+                                            <tr *ngFor="let data of subitems | filter:termSubitem; let i=index"
+                                                [ngClass]="{'highlight': data.chk == true}"
+                                                (click)="subitemRowClicked(i, data.chk, data._id)">
+                                                <td>{{i+1}}</td>
+                                                <td>{{data.item_hin}} : {{data.item_eng}}</td>
+                                                <td>{{data.subitem_hin}}</td>
+                                                <td>{{data.subitem_eng}}</td>
+                                                <td>{{data.item_code}}</td>
+                                                <td>{{data.category_hin}} : {{data.category_eng}}</td>
+                                                <td>{{data.unit_short}} : {{data.unit_full}}</td>
+                                                <td>{{data.extra_note}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                             <!-- AJtype tab -->
@@ -544,26 +575,28 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <table id="datatable-buttons" class="table table-hover dt-responsive">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 40px;">No.</th>
-                                            <th style="width: 100px;">Type</th>
-                                            <th style="width: 150px;">Name (Hin)</th>
-                                            <th style="width: 150px;">Name (Eng)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody style="max-height: 500px; overflow-y: scroll;">
-                                        <tr *ngFor="let data of ajtypes | filter:termAJType; let i=index"
-                                            [ngClass]="{'highlight': data.chk == true}"
-                                            (click)="ajtypeRowClicked(i, data.chk, data._id)">
-                                            <td>{{i+1}}</td>
-                                            <td>{{data.list_type}}</td>
-                                            <td>{{data.list_name_hin}}</td>
-                                            <td>{{data.list_name_eng}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="row mt-2">
+                                    <table id="datatable-buttons" class="table table-hover dt-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 40px;">No.</th>
+                                                <th style="width: 100px;">Type</th>
+                                                <th style="width: 150px;">Name (Hin)</th>
+                                                <th style="width: 150px;">Name (Eng)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="max-height: 500px; overflow-y: scroll;">
+                                            <tr *ngFor="let data of ajtypes | filter:termAJType; let i=index"
+                                                [ngClass]="{'highlight': data.chk == true}"
+                                                (click)="ajtypeRowClicked(i, data.chk, data._id)">
+                                                <td>{{i+1}}</td>
+                                                <td>{{data.list_type}}</td>
+                                                <td>{{data.list_name_hin}}</td>
+                                                <td>{{data.list_name_eng}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div> <!-- end tab-content-->
                     </div> <!-- end col-->

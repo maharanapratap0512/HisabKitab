@@ -129,8 +129,9 @@
                      </button>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
-                     [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)" [readonly]="isEdit"
-                     [ngClass]="{'validation':aawakForm.get('item_id')?.errors && (aawakForm.get('item_id')?.touched || aawakForm.get ('item_id')?.dirty)}"> 
+                     [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)"
+                     [readonly]="isEdit"
+                     [ngClass]="{'validation':aawakForm.get('item_id')?.errors && (aawakForm.get('item_id')?.touched || aawakForm.get ('item_id')?.dirty)}">
                      <ng-option selected="selected" disabled value="">Select Item</ng-option>
                      <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
                         {{item.item_eng}} : {{item.item_code}}</ng-option>
@@ -150,7 +151,7 @@
                   <label class="form-label">Product & Condition</label>
                   <div class="float-end">
                      <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
-                        onclick="$('#aawakEntryComponent > #showModal').modal('show')" 
+                        onclick="$('#aawakEntryComponent > #showModal').modal('show')"
                         (click)="showModal = 'Add Product'">
                         + Product
                      </button>
@@ -160,7 +161,8 @@
                      </button> -->
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Product" [clearable]="true"
-                     [virtualScroll]="true" formControlName="product_id" (change)="productSelected($event)" [readonly]="isEdit"
+                     [virtualScroll]="true" formControlName="product_id" (change)="productSelected($event)"
+                     [readonly]="isEdit"
                      [ngClass]="{'validation':aawakForm.get('product_id')?.errors && (aawakForm.get('product_id')?.touched || aawakForm.get ('product_id')?.dirty)}">
                      <ng-option selected="selected" disabled value="">Select Product</ng-option>
                      <ng-option *ngFor="let item of products" [value]="item._id">{{item.item_hin}} :
@@ -177,7 +179,7 @@
                   </ng-select>
                </div>
             </div>
-<!-- 
+            <!-- 
             <div class="col-md-2 mb-3">
                <div class="form-group">
                   <label class="form-label">Unit</label>
@@ -204,10 +206,13 @@
 
             <div class="col-md-2 mb-3">
                <div class="form-group">
-                  <label class="form-label">Quantity (in {{unit}})</label>
-                  <input type="text" class="form-control" placeholder="Quantity in {{unit}}" formControlName="qty" [(ngModel)]="qty"
-                     (keyup)="qtyclick()"
-                     [ngClass]="{'validation':aawakForm.get('qty')?.errors && (aawakForm.get('qty')?.touched || aawakForm.get ('qty')?.dirty)}">
+                  <label class="form-label">Quantity</label>
+                  <div class="input-group">
+                     <input type="text" class="form-control" placeholder="Quantity in {{unit}}" formControlName="qty"
+                        [(ngModel)]="qty" (keyup)="qtyclick()"
+                        [ngClass]="{'validation':aawakForm.get('qty')?.errors && (aawakForm.get('qty')?.touched || aawakForm.get ('qty')?.dirty)}">
+                     <span class="input-group-text">{{unit}}</span>
+                  </div>
                </div>
             </div>
 

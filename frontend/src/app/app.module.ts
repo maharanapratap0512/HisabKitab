@@ -47,13 +47,9 @@ import { PbkComponent } from './addEdit/pbk/pbk.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CategoryComponent } from './addEdit/category/category.component';
 import { CityComponent } from './addEdit/city/city.component';
-import { CountryComponent } from './addEdit/country/country.component';
 import { ItemComponent } from './addEdit/item/item.component';
-import { AjTypeComponent } from './addEdit/aj-type/aj-type.component';
 import { MmComponent } from './addEdit/mm/mm.component';
-import { StateComponent } from './addEdit/state/state.component';
 import { SubitemComponent } from './addEdit/subitem/subitem.component';
-import { UnitComponent } from './addEdit/unit/unit.component';
 import { GlobalService } from './services/global.service';
 import { SupportListEntryComponent } from './entryForms/support-list-entry/support-list-entry.component';
 import { SubitemListEntryComponent } from './entryForms/subitem-list-entry/subitem-list-entry.component';
@@ -97,13 +93,9 @@ import { FilterpipePipe } from './pipe/filterpipe.pipe';
     DashboardComponent,
     CategoryComponent,
     CityComponent,
-    CountryComponent,
     ItemComponent,
-    AjTypeComponent,
     MmComponent,
-    StateComponent,
     SubitemComponent,
-    UnitComponent,
     SupportListEntryComponent,
     SubitemListEntryComponent,
     DepartmentComponent,
