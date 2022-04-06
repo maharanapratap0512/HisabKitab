@@ -1,6 +1,3 @@
-# software zip
-/HisabKitab.7z
-
 # dependencies
 /node_modules
 /package-lock.json
