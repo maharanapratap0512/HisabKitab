@@ -167,7 +167,7 @@
                [getData]="editData" [isEdit]="true"></app-aawak-entry>
 
             <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
-               [getData]="editData"></app-jawak-entry>
+               [aawakRef]="editData"></app-jawak-entry>
 
             <app-data-view *ngIf="showModal == 'Show Jawak'" [getData]="viewData" Type="jawak"></app-data-view>
          </div>
