@@ -13,26 +13,26 @@ const localDB = new Sqlite.Database(dbPath, (err) => {
 
 //Migration Functions
 const Migrations = [
-  () => {
+  (DB) => {
     //creating all table .
     console.log('creating tables...');
     for (let keys of Object.keys(createTables)) {
-      localDB.serialize(() => {
-        localDB.run(createTables[keys], (err) => {
+      DB.serialize(() => {
+        DB.run(createTables[keys], (err) => {
           if (err) console.log(keys, 'error: ', err);
         });
       });
     }
   },
 
-  () => {
+  (DB) => {
 
     //creating triggers
     console.log('creating triggers...');
     for (let keys of Object.keys(triggers)) {
-      localDB.run(triggers[keys], (err) => {
+      DB.run(triggers[keys], (err) => {
         if (err) {
-          // localDB.run(`ROLLBACK TRANSACTION`, (err)=>{
+          // DB.run(`ROLLBACK TRANSACTION`, (err)=>{
           //   console.log('ROLLBACK', 'error: ', err);  
           // });
           console.log(keys, 'error: ', err);
@@ -41,14 +41,14 @@ const Migrations = [
     }
   },
 
-  () => {
+  (DB) => {
     //insering row data.
 
     console.log('inserting default data...');
     for (let keys of Object.keys(insertData)) {
 
-      localDB.serialize(() => {
-        localDB.run(insertData[keys], (err) => {
+      DB.serialize(() => {
+        DB.run(insertData[keys], (err) => {
           if (err) console.log(keys, 'error: ', err);
         });
       });
@@ -75,7 +75,7 @@ localDB.serialize(() => {
       localDB.run(`BEGIN TRANSACTION;`);
 
       for (const migration of Migrations.splice(migrationCount)) {
-        migration();
+        migration(localDB);
       }
 
       localDB.run(`PRAGMA user_version = ${migrationLength}`, (err) => {
@@ -626,4 +626,4 @@ const insertData = {
 }
 
 
-module.exports = localDB;
+module.exports = {localDB, Migrations};

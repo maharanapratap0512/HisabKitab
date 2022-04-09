@@ -1,6 +1,8 @@
-
 class DBContex {
+    DBFolder;
     localDB;
+    Sqlite;
+    Migrations;
     fs;
     path;
     dept_config_list = [
@@ -21,9 +23,13 @@ class DBContex {
 
     constructor() {
         // this.DBCollection = require('../models/db.model');
-        this.localDB = require('../models/db.model');
+        let dbModel = require('../models/db.model')
+        this.Sqlite = require('sqlite3');
+        this.localDB = dbModel.localDB;
+        this.Migrations = dbModel.Migrations;
         this.fs = require('fs');
         this.path = require('path');
+        this.DBFolder = this.path.resolve(__dirname, '../../../../Data');
     }
 
     //run any query here
@@ -86,6 +92,67 @@ class DBContex {
         catch (ex) {
             callback(ex);
         }
+    }
+
+
+    generateDB = async (dept_id) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let dept = await this.getFullById("department", dept_id);
+                if (dept) {
+                    let exPath = this.path.resolve(this.DBFolder, dept.dept_eng);
+                    let exFilePath = this.path.resolve(exPath, 'Database.db')
+                    if (!this.fs.existsSync(exPath)) {
+                        this.fs.mkdirSync(exPath, { recursive: true });
+                    }
+                    if (this.fs.existsSync(exFilePath)) {
+                        this.fs.unlinkSync(exFilePath)
+                    }
+                    const exportDB = new this.Sqlite.Database(exFilePath, (err) => {
+                        if (err) {
+                            console.log("DB path : ", this.path.resolve(this.DBFolder, dept.dept_eng, 'Database.db'));
+                            console.log({ path: this.DBFolder, Error: err.message });
+                        }
+                        console.log("connected with New Database");
+                    });
+
+                    exportDB.serialize(() => {
+                        exportDB.run(`PRAGMA foreign_keys = off`);
+                        exportDB.run(`BEGIN TRANSACTION`);
+                        for (let i = 0; i < 2; i++) {
+                            this.Migrations[i](exportDB);
+                        }
+                        exportDB.run(`attach '${this.path.resolve(this.DBFolder, 'Database.db')}' as mainDB;`, (err) => {
+                            // exportDB.run('ROLLBACK TRANSACTION');
+                            console.log("atach", err)
+                            return reject(err);
+                        });
+
+                        for (let keys of Object.keys(this.genDeptDB)) {
+                            console.log(keys);
+                            let sql = this.genDeptDB[keys].replace('?', dept_id);
+                            exportDB.run(sql, (err) => {
+                                if (err) { console.log({ key: keys, sql: sql, error: err }); }
+                            });
+                        }
+
+                        let migrationCount = this.Migrations.length;
+                        exportDB.run(`PRAGMA user_version = ${migrationCount}`, (err) => {
+                            if (err) console.log("pragma error : ", err);
+                        });
+
+                        exportDB.run(`COMMIT`);
+                    });
+                    resolve(this.path.resolve(this.DBFolder, dept.dept_eng, 'Database.db'));
+                }
+                else {
+                    reject(new Error('cannot found department.'))
+                }
+            }
+            catch (ex) {
+                reject(ex);
+            }
+        });
     }
 
     // mm_type|gender|relation
@@ -243,8 +310,8 @@ class DBContex {
                 if (dept_id && dept_id != '') {
                     sql += ` where dept_id = ${dept_id}`;
                 }
-                if(configKey && configKey != ''){
-                    sql +=  (dept_id && dept_id != '' ? ` AND `: ` where`) + ` config_key = '${configKey}'`;
+                if (configKey && configKey != '') {
+                    sql += (dept_id && dept_id != '' ? ` AND ` : ` where`) + ` config_key = '${configKey}'`;
                 }
                 this.localDB.all(sql, (err, data) => {
                     if (err) {
@@ -284,16 +351,16 @@ class DBContex {
     //get full list by department ALL or specified Id.
     getFullListForDeptConfig = async (list_name, dept_id, conditionString = null) => {
         return new Promise(async (resolve, reject) => {
-            try {                
+            try {
                 let params = [];
                 let sql = this.fullListForConfig[list_name];
                 if (sql && sql != '') {
-                    if (list_name == 'itemMix') {       
-                        let condition = ``;    
-                        if(conditionString && conditionString != ''){
+                    if (list_name == 'itemMix') {
+                        let condition = ``;
+                        if (conditionString && conditionString != '') {
                             condition += ` where ${conditionString}`;
-                        }   
-                              
+                        }
+
                         var Lindex1 = sql.lastIndexOf("?");
                         sql = sql.substring(0, Lindex1) + condition + sql.substring(Lindex1 + 1);
                     } else {
@@ -381,7 +448,7 @@ class DBContex {
                 if (sort) {
                     sql += ` order by ${sort}`;
                 }
-                
+
                 this.localDB.all(sql, (err, data) => {
                     if (err) {
                         reject(err)
@@ -529,6 +596,9 @@ class DBContex {
             try {
                 if (dataObj) {
                     let cols = "", val = "", params = [];
+                    if(dept_id == 1){
+                        dataObj.active = 1;
+                    }
                     for (let [field, value] of Object.entries(dataObj)) {
                         cols += `${field},`;
                         val += `?,`
@@ -730,7 +800,7 @@ class DBContex {
         itemMix: `select item.*, 
         cat.category_hin, cat.category_eng, 
         unit.unit_full, unit.unit_short ,
-        json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || '}')) as subitems, json_group_array(si.category_id) as categories
+        json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || ', "active": ' || si.active || '}')) as subitems, json_group_array(si.category_id) as categories
         from item
         left join category cat on cat._id = item.category_id
         left join unit on unit._id = item.unit_id
@@ -925,7 +995,7 @@ class DBContex {
         itemMix: `select item.*, 
         cat.category_hin, cat.category_eng, 
         unit.unit_full, unit.unit_short ,
-        json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || '}')) as subitems, json_group_array(si.category_id) as categories
+        json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || ', "active": ' || si.active || '}')) as subitems, json_group_array(si.category_id) as categories
         from item
         left join category cat on cat._id = item.category_id
         left join unit on unit._id = item.unit_id
@@ -1105,7 +1175,7 @@ class DBContex {
         itemMix: `select item.*,
         cat.category_hin, cat.category_eng, 
         unit.unit_full, unit.unit_short ,
-        json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || '}')) as subitems, json_group_array(si.category_id) as categories
+        json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || ', "active": ' || si.active || '}')) as subitems, json_group_array(si.category_id) as categories
         from item
         left join category cat on cat._id = item.category_id
         left join unit on unit._id = item.unit_id
@@ -1145,5 +1215,39 @@ class DBContex {
         left join mm on mm._id = pbk.class_mm_id`,
 
     };
+
+    genDeptDB = {
+
+        insertDept: `insert into department select * from mainDB.department`,
+        // insertDeptConfig: `insert into department_config select * from mainDB.department_config`,
+
+        // insertDept: `insert into department select * from mainDB.department dept where (select dpc.config_value from mainDB.department_config dpc where dpc.dept_id = ? AND dpc.config_key = 'department') LIKE '%,'|| dept._id||',%'`,
+
+        updateDeptConfig: `update department_config set config_value = (select config_value from mainDB.department_config dpc where dpc.dept_id = department_config.dept_id and dpc.config_key = department_config.config_key) where department_config.dept_id = ? OR (select depc.config_value from mainDB.department_config depc where depc.dept_id = ? AND depc.config_key = 'department') LIKE '%,'|| department_config.dept_id||',%'`,
+
+        country: `insert into country select * from mainDB.country`,
+        state: `insert into state select * from mainDB.state`,
+        support_list: `insert into support_list select * from mainDB.support_list`,
+        city: `insert into city select * from mainDB.city`,
+        unit: `insert into unit select * from mainDB.unit`,
+
+        category: `insert into category select * from mainDB.category`,
+
+        mm: `insert into mm select * from mainDB.mm`,
+
+        item: `insert into item select * from mainDB.item`,
+
+        subitem_list: `insert into subitem_list select * from mainDB.subitem_list`,
+
+        subitem: `insert into subitem select * from mainDB.subitem`,
+
+        pbk: `insert into pbk select * from mainDB.pbk where (select config_value from department_config where dept_id = ? AND config_key = 'pbk') LIKE '%,'|| pbk._id||',%'`,
+
+        product: `insert into product select * from mainDB.product where dept_id = ?`,
+        aawak: `insert into aawak select * from mainDB.aawak where dept_id = ?`,
+        jawak: `insert into jawak select * from mainDB.jawak where dept_id = ?`,
+
+        // bachat: `insert into bachat select * from mainDB.bachat where dept_id = ?`,
+    }
 }
 module.exports = new DBContex(); 

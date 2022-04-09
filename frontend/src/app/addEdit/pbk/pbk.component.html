@@ -66,7 +66,11 @@
                      </thead>
                      <tbody>
                         <tr *ngFor="let data of pbkData | filter:term; let i=index">
-                           <td>{{i+1}}</td>
+                           <td style="font-size: large; cursor:pointer;" (click)="protectionToggle(data._id, data.active)">
+                              {{i+1}}
+                              <i *ngIf="auth.webUser.dept_id == 1 && data.active" class="uil-shield-check" style="color: yellow;"></i>
+                              <i *ngIf="auth.webUser.dept_id == 1 && !data.active" class="uil-shield-slash" style="color: red;"></i>
+                           </td>
                            <td>
                               <button *ngIf="auth.webUser.dept_id == 1 || !data.active"
                                  class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i

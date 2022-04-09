@@ -232,5 +232,56 @@ export class ItemComponent implements OnInit {
     })
   }
 
+  protectionToggle(id: any, active: any) {
+    let body = { query: {}, set: {} };
+    body.query = {
+      _id: id
+    }
+    body.set = {
+      active: !active
+    };
+    this.http.put(this.api.getUrl('ITEM'), body).subscribe((data: any) => {
+      let i = this.itemData.findIndex((i: { _id: any; }) => i._id == id);
+      if (i) {
+        this.itemData[i].active = data['result'].active;
+      }
+      this.isLoader = false;
+      if (data['result'].active) {
+        this.toastr.success("Protetion Shield Activated");
+      }
+      else {
+        this.toastr.success("Protetion Shield Deactivated");
+      }
+    }, err => {
+      this.toastr.error(err['message']);
+      this.isLoader = false;
+    });
+  }
+
+  protectionToggleSubitem(id: any, active: any) {
+    let body = { query: {}, set: {} };
+    body.query = {
+      _id: id
+    }
+    body.set = {
+      active: !active
+    };
+    this.http.put(this.api.getUrl('SUBITEM'), body).subscribe((data: any) => {
+      let i = this.itemData.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
+      let j = this.itemData[i].subitems.findIndex((s: { _id: any; })=>s._id == data['result']._id);
+      
+      this.itemData[i].subitems[j].active = data['result'].active;
+      this.isLoader = false;
+      if (data['result'].active) {
+        this.toastr.success("Protetion Shield Activated");
+      }
+      else {
+        this.toastr.success("Protetion Shield Deactivated");
+      }
+    }, err => {
+      this.toastr.error(err['message']);
+      this.isLoader = false;
+    });
+  }
 
 }

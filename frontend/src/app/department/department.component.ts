@@ -121,8 +121,23 @@ export class DepartmentComponent implements OnInit {
     this.deptSelected(this.dept_id);
   }
 
-  downloadDB() {
-
+  downloadDB(){
+    this.http.get(this.api.getUrl('EXPORTFULL') + this.dept_id).subscribe((data) => {      
+      Swal.fire({
+        title: 'Database Generated',
+        text: "FullPath : " + data['result'].path,
+        icon: 'success',
+        // showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        // cancelButtonColor: '#d33',
+        confirmButtonText: 'Ok, Got it.'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          
+        }
+      })
+      
+    });
   }
 
   setView(type: string) {

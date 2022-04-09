@@ -112,6 +112,7 @@ export class JawakEntryComponent implements OnInit {
       if (changes.getData.currentValue.aawak_ref_id) {
         this.ref_id = changes.getData.currentValue.aawak_ref_id;
       }
+      // this.unit_short = changes.getData.currentValue.unit_id
       this.unit_short = changes.getData.currentValue.unit_short;
     }
   }
