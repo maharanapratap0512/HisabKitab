@@ -55,16 +55,18 @@ router.get('/:dept_id', async (req, res, next) => {
     }
 });
 
-//  department get
-router.get('/DB/:dept_id', async (req, res, next) => {
-    await DB.getFullList('department').then(async (resolve) => {
-        let count = await DB.getCount('department');
+//  department DB download
+router.get('/dbfull/:dept_id', async (req, res, next) => {
+    DB.generateDB(req.params.dept_id).then((result) => {
+
         res.json({
             success: true,
-            result: resolve || [],
-            total_count: (count ? count.total_count : 0),
-        });
-    }, (err) => { return next(err) });
+            result: {path:result}
+        })
+
+    }, (reject)=>{
+        next(reject);
+    });
 });
 
 // department update

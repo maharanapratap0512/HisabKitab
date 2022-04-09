@@ -96,8 +96,13 @@ export class GlobalService {
   async initialiseListByDept() {
     // this.Config.dept_id = window.localStorage.getItem('dept_id');
     return new Promise(async (resolve) => {
-      await this.getList().then((resolve) => { });
-      resolve(1);
+      if(this.auth.webUser.dept_id){
+        await this.getList().then((res) => { });
+        resolve(1);
+      }
+      else{
+        resolve(1);
+      }
     });
 
   }

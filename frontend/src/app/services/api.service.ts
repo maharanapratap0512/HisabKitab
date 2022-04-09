@@ -39,6 +39,7 @@ export class ApiService {
     SUPPORTLIST: base_url + 'supportlists/',
     AJTYPE: base_url + 'supportlists/ajtypes/',
     DEPT: base_url + 'departments/',
+    EXPORTFULL: base_url + 'departments/dbfull/',
     DEPTCONFIG: base_url + 'department_config/',
     DEPTCONFSAVE: base_url + 'department_config/save',
     LOGIN: base_url + 'departments/login'
