@@ -67,9 +67,11 @@ export class DepartmentComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getDepartments();
-    this.states = this.gs.Lists.state;
-    this.genders = this.gs.Lists.gender;
-    this.statuses = this.gs.Lists.status;
+    this.gs.observeList().subscribe(result => {
+      this.states = result.state ? result.state : [];
+      this.genders = result.gender ? result.gender : [];
+      this.statuses = result.status ? result.status : [];
+    });
   }
 
   getDepartments() {
@@ -99,7 +101,7 @@ export class DepartmentComponent implements OnInit {
           }
           for (let i of data['result']) {
             this.deptConf[i.config_key] = { idArr: (i.config_value != '' ? i.config_value.split(',') : ['']), ...i };
-            if(this.deptConf[i.config_key].idArr.length > 1){
+            if (this.deptConf[i.config_key].idArr.length > 1) {
               this.deptConf[i.config_key].idArr.pop();
             }
           }
@@ -119,10 +121,10 @@ export class DepartmentComponent implements OnInit {
     this.deptSelected(this.dept_id);
   }
 
-  downloadDB(){
+  downloadDB() {
 
   }
-  
+
   setView(type: string) {
     this.showModal = type;
     switch (type) {
@@ -312,7 +314,7 @@ export class DepartmentComponent implements OnInit {
     if (this.termMM) {
       i = this.mms.findIndex((i: { _id: any; }) => i._id == id);
     }
-    if (chk) {      
+    if (chk) {
       this.deptConf.mm.idArr.splice(this.deptConf.mm.idArr.indexOf(this.mms[i]._id.toString()), 1);
       this.mms[i].chk = false;
     }
@@ -327,7 +329,7 @@ export class DepartmentComponent implements OnInit {
     if (this.termPbk) {
       i = this.pbks.findIndex((i: { _id: any; }) => i._id == id);
     }
-    if (chk) {      
+    if (chk) {
       this.deptConf.pbk.idArr.splice(this.deptConf.pbk.idArr.indexOf(this.pbks[i]._id.toString()), 1);
       this.pbks[i].chk = false;
     }
@@ -340,7 +342,7 @@ export class DepartmentComponent implements OnInit {
     if (this.termCat) {
       i = this.categories.findIndex((i: { _id: any; }) => i._id == id);
     }
-    if (chk) {      
+    if (chk) {
       this.deptConf.category.idArr.splice(this.deptConf.category.idArr.indexOf(this.categories[i]._id.toString()), 1);
       this.categories[i].chk = false;
     }
@@ -354,7 +356,7 @@ export class DepartmentComponent implements OnInit {
     if (this.termItem) {
       i = this.items.findIndex((i: { _id: any; }) => i._id == id);
     }
-    if (chk) {      
+    if (chk) {
       this.deptConf.item.idArr.splice(this.deptConf.item.idArr.indexOf(this.items[i]._id.toString()), 1);
       this.items[i].chk = false;
     }
@@ -369,11 +371,11 @@ export class DepartmentComponent implements OnInit {
     if (this.termItemmix) {
       i = this.itemmix.findIndex((i: { _id: any; }) => i._id == id);
     }
-    if (chk) {      
+    if (chk) {
       this.deptConf.item.idArr.splice(this.deptConf.item.idArr.indexOf(this.itemmix[i]._id.toString()), 1);
       this.itemmix[i].chk = false;
-      for(let j in this.itemmix[i].subitems){
-        if(this.itemmix[i].subitems[j].chk){
+      for (let j in this.itemmix[i].subitems) {
+        if (this.itemmix[i].subitems[j].chk) {
           this.itemmix[i].subitems[j].chk = false;
           this.deptConf.subitem.idArr.splice(this.deptConf.subitem.idArr.indexOf(this.itemmix[i].subitems[j]._id.toString()), 1)
         }
@@ -411,7 +413,7 @@ export class DepartmentComponent implements OnInit {
     if (this.termSubitem) {
       i = this.subitems.findIndex((i: { _id: any; }) => i._id == id);
     }
-    if (chk) {      
+    if (chk) {
       this.deptConf.subitem.idArr.splice(this.deptConf.subitem.idArr.indexOf(this.subitems[i]._id.toString()), 1);
       this.subitems[i].chk = false;
     }
@@ -425,7 +427,7 @@ export class DepartmentComponent implements OnInit {
     if (this.termAJType) {
       i = this.ajtypes.findIndex((i: { _id: any; }) => i._id == id);
     }
-    if (chk) {      
+    if (chk) {
       this.deptConf.aj_type.idArr.splice(this.deptConf.aj_type.idArr.indexOf(this.ajtypes[i]._id.toString()), 1);
       this.ajtypes[i].chk = false;
     }
@@ -440,11 +442,11 @@ export class DepartmentComponent implements OnInit {
     this.deptConf.pbk.config_value = this.deptConf.pbk.idArr.join(',') + ',';
     this.deptConf.category.config_value = this.deptConf.category.idArr.join(',') + ',';
     this.deptConf.item.config_value = this.deptConf.item.idArr.join(',') + ',';
-    this.deptConf.subitem.config_value = this.deptConf.subitem.idArr.join(',') + ','; 
+    this.deptConf.subitem.config_value = this.deptConf.subitem.idArr.join(',') + ',';
     this.deptConf.aj_type.config_value = this.deptConf.aj_type.idArr.join(',') + ',';
     // for (let i = 0; i < this.mmsAll.length; i++) {
     //   if (this.mmsAll[i].chk == true) {
-        
+
     //   }
     // }
     // this.deptConf.mm.config_value = this.deptConf.mm.idArr.join(',');

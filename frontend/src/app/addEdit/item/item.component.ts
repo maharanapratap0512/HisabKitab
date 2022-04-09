@@ -42,9 +42,10 @@ export class ItemComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getItemData();
-    // this.getSubitemData();
-    this.categories = this.gs.Lists.category;
-    this.subitem_lists = this.gs.Lists.subitem_list;
+    this.gs.observeList().subscribe(result => {
+      this.categories = result.category ? result.category : [];
+      this.subitem_lists = result.subitem_list ? result.subitem_list : [];
+    });
   }
 
   getItemData() {
@@ -95,10 +96,10 @@ export class ItemComponent implements OnInit {
     }
   }
 
-  addSubitem(item:any){
+  addSubitem(item: any) {
 
     this.editData = {
-      item_id:item._id,
+      item_id: item._id,
       category_id: item.category_id,
       unit_id: item.unit_id
     }
@@ -219,7 +220,6 @@ export class ItemComponent implements OnInit {
           if (data['success']) {
             this.isLoader = false;
             this.itemData[i].subitems.splice(j, 1);
-            // this.gs.Lists.item.splice(this.gs.Lists.mm.indexOf((i: { _id: any; }) => i._id == id), 1);
             this.si_total_count--;
             this.toastr.success('Deleted Successfully');
           }

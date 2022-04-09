@@ -11,7 +11,7 @@
 
                 <!-- First Row -->
                 <!-- Add Button, Search Field, Filter button, Total Count -->
-                <div class="row mt-2">
+                <div class="row my-2">
                     <div class="col-3 mb-2">
 
                         <label class="form-label">Select Department</label>
@@ -124,12 +124,19 @@
                     </div> <!-- end col-->
 
 
+
+
+
+
                     <div class="col-md-10">
                         <div class="tab-content card card-body" id="v-pills-tabContent">
+
+
+
                             <!-- MM Tab -->
                             <div class="tab-pane fade" [ngClass]="{'active show': dept_id > 2}" id="v-pills-mm"
                                 role="tabpanel" aria-labelledby="v-pills-home-tab" *ngIf="dept_id>2"
-                                style="max-height: 600px; overflow-y: scroll; font-size: small !important; font-weight: normal !important;">
+                                style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
                                 <div class="row">
 
                                     <div class="col-4">
@@ -154,11 +161,11 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <div class="row mt-2">
+                                <div class="row mt-3 px-3">
                                     <table id="datatable-buttons" class="table table-hover dt-responsive">
                                         <thead>
                                             <tr>
-                                                <th style="width: 40px;">No.</th>
+                                                <th style="width: 45px;">No.</th>
                                                 <th style="width: 150px;">MM(Hin)</th>
                                                 <th style="width: 150px;">MM(Eng)</th>
                                                 <th style="width: 100px;">MM Code</th>
@@ -169,7 +176,7 @@
                                                 <th style="width: 200px;">Nimit Name</th>
                                             </tr>
                                         </thead>
-                                        <tbody style="max-height: 500px; min-height: 400px; overflow-y: scroll;">
+                                        <tbody style="max-height: 500px; min-height: 400px; overflow-y: auto;">
                                             <tr *ngFor="let data of mms | filter:termMM; let i=index"
                                                 [ngClass]="{'highlight': data.chk == true}"
                                                 (click)="mmRowClicked(i, data.chk, data._id)">
@@ -193,10 +200,12 @@
                                 </div>
                             </div>
 
+
+
                             <!-- Pbk Tab -->
                             <div class="tab-pane fade" [ngClass]="{'active show': dept_id == 2}" id="v-pills-pbk"
                                 role="tabpanel"
-                                style="max-height: 600px; overflow-y: scroll; font-size: small !important; font-weight: normal !important;"
+                                style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                                 aria-labelledby="v-pills-profile-tab">
                                 <div class="row">
                                     <div class="col-3">
@@ -237,13 +246,12 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <div class="row mt-2">
+                                <div class="row mt-3 px-3">
                                     <table id="datatable-buttons" class="table table-hover dt-responsive">
                                         <thead>
                                             <tr>
-                                                <th style="width: 40px;">No.</th>
+                                                <th style="width: 45px;">No.</th>
                                                 <th style="width: 250px;">PBK Detail</th>
-                                                <th style="width: 150px;">PBK (Eng)</th>
                                                 <th style="width: 100px;">Gender</th>
                                                 <th style="width: 100px;">DOB/Age</th>
                                                 <th style="width: 150px;">Status</th>
@@ -251,7 +259,7 @@
                                                 <th style="width: 150px;">City</th>
                                             </tr>
                                         </thead>
-                                        <tbody style="max-height: 500px; overflow-y: scroll;">
+                                        <tbody style="max-height: 500px; overflow-y: auto;">
                                             <tr *ngFor="let data of pbks | filter:termPbk; let i=index"
                                                 [ngClass]="{'highlight': data.chk == true}"
                                                 (click)="pbkRowClicked(i, data.chk, data._id)">
@@ -274,9 +282,11 @@
                                 </div>
                             </div>
 
+
+
                             <!-- Category Tab -->
                             <div class="tab-pane fade" id="v-pills-category" role="tabpanel"
-                                style="max-height: 600px; overflow-y: scroll; font-size: small !important; font-weight: normal !important;"
+                                style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                                 aria-labelledby="v-pills-settings-tab" *ngIf="dept_id>2">
                                 <div class="row">
                                     <div class="col-4">
@@ -291,16 +301,16 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <div class="row mt-2">
+                                <div class="row mt-3 px-3">
                                     <table id="datatable-buttons" class="table table-hover dt-responsive">
                                         <thead>
                                             <tr>
-                                                <th style="width: 40px;">No.</th>
+                                                <th style="width: 45px;">No.</th>
                                                 <th style="width: 150px;">Category (Hin)</th>
                                                 <th style="width: 150px;">Category (Eng)</th>
                                             </tr>
                                         </thead>
-                                        <tbody style="max-height: 500px; overflow-y: scroll;">
+                                        <tbody style="max-height: 500px; overflow-y: auto;">
                                             <tr *ngFor="let data of categories | filter:termCat; let i=index"
                                                 [ngClass]="{'highlight': data.chk == true}"
                                                 (click)="categoryRowClicked(i, data.chk, data._id)">
@@ -313,9 +323,11 @@
                                 </div>
                             </div>
 
+
+
                             <!-- New Item Tab -->
                             <div class="tab-pane fade" id="v-pills-itemmix" role="tabpanel"
-                                style="max-height: 600px; overflow-y: scroll; font-size: small !important; font-weight: normal !important;"
+                                style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                                 aria-labelledby="v-pills-settings-tab" *ngIf="dept_id>2">
                                 <div class="row">
                                     <div class="col-4">
@@ -339,7 +351,7 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <div class="row mt-2">
+                                <div class="row mt-3 px-3">
                                     <table id="datatable-buttons" class="table table-hover dt-responsive">
                                         <thead>
                                             <tr>
@@ -437,9 +449,11 @@
                                 </div>
                             </div>
 
+
+
                             <!-- Item Tab -->
                             <div class="tab-pane fade" id="v-pills-item" role="tabpanel"
-                                style="max-height: 600px; overflow-y: scroll; font-size: small !important; font-weight: normal !important;"
+                                style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                                 aria-labelledby="v-pills-settings-tab" *ngIf="dept_id>2">
                                 <div class="row">
                                     <div class="col-4">
@@ -462,11 +476,11 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <div class="row mt-2">
+                                <div class="row mt-3 px-3">
                                     <table id="datatable-buttons" class="table table-hover dt-responsive">
                                         <thead>
                                             <tr>
-                                                <th style="width: 40px;">No.</th>
+                                                <th style="width: 45px;">No.</th>
                                                 <th style="width: 150px;">Item (Hin)</th>
                                                 <th style="width: 150px;">Item (Eng)</th>
                                                 <th style="width: 100px;">Item Code</th>
@@ -475,7 +489,7 @@
                                                 <th style="width: 250px;">Extra Note</th>
                                             </tr>
                                         </thead>
-                                        <tbody style="max-height: 500px; overflow-y: scroll;">
+                                        <tbody style="max-height: 500px; overflow-y: auto;">
                                             <tr *ngFor="let data of items | filter:termItem; let i=index"
                                                 [ngClass]="{'highlight': data.chk == true}"
                                                 (click)="itemRowClicked(i, data.chk, data._id)">
@@ -492,9 +506,11 @@
                                 </div>
                             </div>
 
+
+
                             <!-- Subitem Tab -->
                             <div class="tab-pane fade" id="v-pills-subitem" role="tabpanel"
-                                style="max-height: 600px; overflow-y: scroll; font-size: small !important; font-weight: normal !important;"
+                                style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                                 aria-labelledby="v-pills-settings-tab" *ngIf="dept_id>2">
                                 <div class="row">
                                     <div class="col-4">
@@ -526,11 +542,11 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <div class="row mt-2">
+                                <div class="row mt-3 px-3">
                                     <table id="datatable-buttons" class="table table-hover dt-responsive">
                                         <thead>
                                             <tr>
-                                                <th style="width: 40px;">No.</th>
+                                                <th style="width: 45px;">No.</th>
                                                 <th style="width: 150px;">Item Name</th>
                                                 <th style="width: 150px;">Subitem (Hin)</th>
                                                 <th style="width: 150px;">Subitem (Eng)</th>
@@ -540,7 +556,7 @@
                                                 <th style="width: 250px;">Extra Note</th>
                                             </tr>
                                         </thead>
-                                        <tbody style="max-height: 500px; overflow-y: scroll;">
+                                        <tbody style="max-height: 500px; overflow-y: auto;">
                                             <tr *ngFor="let data of subitems | filter:termSubitem; let i=index"
                                                 [ngClass]="{'highlight': data.chk == true}"
                                                 (click)="subitemRowClicked(i, data.chk, data._id)">
@@ -558,9 +574,11 @@
                                 </div>
                             </div>
 
+
+
                             <!-- AJtype tab -->
                             <div class="tab-pane fade" id="v-pills-ajtypes" role="tabpanel"
-                                style="max-height: 600px; overflow-y: scroll; font-size: small !important; font-weight: normal !important;"
+                                style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                                 aria-labelledby="v-pills-settings-tab" *ngIf="dept_id>2">
                                 <div class="row">
                                     <div class="col-4">
@@ -575,17 +593,17 @@
                                             Select All</button>
                                     </div>
                                 </div>
-                                <div class="row mt-2">
+                                <div class="row mt-3 px-3">
                                     <table id="datatable-buttons" class="table table-hover dt-responsive">
                                         <thead>
                                             <tr>
-                                                <th style="width: 40px;">No.</th>
+                                                <th style="width: 45px;">No.</th>
                                                 <th style="width: 100px;">Type</th>
                                                 <th style="width: 150px;">Name (Hin)</th>
                                                 <th style="width: 150px;">Name (Eng)</th>
                                             </tr>
                                         </thead>
-                                        <tbody style="max-height: 500px; overflow-y: scroll;">
+                                        <tbody style="max-height: 500px; overflow-y: auto;">
                                             <tr *ngFor="let data of ajtypes | filter:termAJType; let i=index"
                                                 [ngClass]="{'highlight': data.chk == true}"
                                                 (click)="ajtypeRowClicked(i, data.chk, data._id)">
@@ -598,17 +616,21 @@
                                     </table>
                                 </div>
                             </div>
+
+
                         </div> <!-- end tab-content-->
                     </div> <!-- end col-->
                 </div>
                 <!-- end row-->
+
+
 
                 <!-- <div class="row" *ngIf="deptData.length">
                <div class="card-body" style="overflow: auto;">
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
-                           <th style="width: 40px;">No.</th>
+                           <th style="width: 45px;">No.</th>
                            <th style="width: 120px;">Manage</th>
                            <th style="width: 150px;">Department (Eng)</th>
                            <th style="width: 150px;">Department (Hin)</th>
@@ -636,6 +658,15 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+
+
+
+
 
 
 

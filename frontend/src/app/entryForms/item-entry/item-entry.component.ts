@@ -45,8 +45,10 @@ export class ItemEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.units = this.gs.Lists.unit;
-    this.categories = this.gs.Lists.category;
+    this.gs.observeList().subscribe(result => {
+      this.units = result.unit ? result.unit : [];
+      this.categories = result.category ? result.category : [];
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {

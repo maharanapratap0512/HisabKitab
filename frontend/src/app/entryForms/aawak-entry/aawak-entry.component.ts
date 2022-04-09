@@ -36,7 +36,7 @@ export class AawakEntryComponent implements OnInit {
   pbks: any = [];
   qty: any;
   oldQty: any;
-  unit:any;
+  unit: any;
   cat: any;
   rate: any;
   amnt: any;
@@ -78,18 +78,18 @@ export class AawakEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // this.aawaks = this.gs.Lists.aawak;
-    this.items = this.gs.Lists.itemmix;
-    this.units = this.gs.Lists.unit;
-    this.states = this.gs.Lists.state;
-    this.mms = this.gs.Lists.mm;
-    this.conditions = this.gs.Lists.condition;
-    // this.subitems = this.gs.Lists.subitem;
-    this.departments = this.gs.Lists.department;
-    this.pbks = this.gs.Lists.pbk;
-    this.aawak_types = this.gs.Lists.aawak_type;
-    this.products = this.gs.Lists.product;
-    this.categories = this.gs.Lists.category;
+    this.gs.observeList().subscribe(result => {
+      this.items = result.itemmix ? result.itemmix : [];
+      this.units = result.unit ? result.unit : [];
+      this.states = result.state ? result.state : [];
+      this.mms = result.mm ? result.mm : [];
+      this.conditions = result.condition ? result.condition : [];
+      this.departments = result.department ? result.department : [];
+      this.pbks = result.pbk ? result.pbk : [];
+      this.aawak_types = result.aawak_type ? result.aawak_type : [];
+      this.products = result.product ? result.product : [];
+      this.categories = result.category ? result.category : [];
+    });
   }
 
   openModal(name: any) {
@@ -482,35 +482,35 @@ export class AawakEntryComponent implements OnInit {
   catSelected(ev: any) {
     if (ev) {
       this.cat = ev;
-      this.items = this.gs.Lists.itemmix.filter((i: { category_id: any, categories:any }) => i.category_id == ev || i.categories.includes(ev));      
+      this.items = this.gs.Lists.itemmix.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
     }
     else {
       this.cat = null;
-      this.items = this.gs.Lists.itemmix;      
+      this.items = this.gs.Lists.itemmix;
     }
     this.unit = null;
     this.aawakForm.patchValue({
-      item_id:null,
-      subitem_id:null,
-      unit_id:null,
+      item_id: null,
+      subitem_id: null,
+      unit_id: null,
       product_id: null
     })
   }
 
   itemSelected(ev: any) {
     if (ev) {
-      let item = this.items.find((i: { _id: any; }) => i._id == ev);            
+      let item = this.items.find((i: { _id: any; }) => i._id == ev);
       this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
-      if(this.cat){        
-        this.subitems = item.subitems.filter((s: { category_id: any; })=>s.category_id == this.cat);
+      if (this.cat) {
+        this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
       }
-      else{
+      else {
         this.subitems = item.subitems;
       }
-      
-      if(this.cat && this.cat != item.category_id){
-        this.aawakForm.setControl('subitem_id', this.fb.control(null,[Validators.required]));
-      }else{
+
+      if (this.cat && this.cat != item.category_id) {
+        this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
+      } else {
         this.aawakForm.setControl('subitem_id', this.fb.control(null));
       }
       this.unit = item.unit_short;

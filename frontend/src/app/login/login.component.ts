@@ -88,10 +88,6 @@ export class LoginComponent implements OnInit {
             if (data['total_count'] == 1) {
                let dept = this.departments.find((i: { _id: any; }) => i._id == this.loginForm.value.dept_id);
                await this.auth.setWebUser({ 'dept_eng': dept.dept_eng, 'dept_code': dept.dept_code, 'dept_id': dept._id });
-               // window.localStorage.setItem('dept_id', this.loginForm.value.dept_id);
-               // window.localStorage.setItem('dept_eng',dept.dept_eng);
-               // window.localStorage.setItem('dept_code',dept.dept_code);
-               await this.gs.initialiseListByDept();
                this.router.navigate(['dashboard']);
             }
             else {

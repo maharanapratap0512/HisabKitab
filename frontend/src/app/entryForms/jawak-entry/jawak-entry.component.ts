@@ -40,7 +40,7 @@ export class JawakEntryComponent implements OnInit {
   categories: any = [];
   isCondition: any = false;
   remaining_qty: any;
-  ref_id:any = null;
+  ref_id: any = null;
   cat: any;
 
   constructor(private fb: FormBuilder,
@@ -74,16 +74,16 @@ export class JawakEntryComponent implements OnInit {
 
   ngOnInit(): void {
     console.log("jawak-ngOnInit");
-    this.mms = this.gs.Lists.mm;
-    // this.departments = this.gs.Lists.department;
-    this.conditions = this.gs.Lists.condition;
-    this.jawak_types = this.gs.Lists.jawak_type;
-    // this.subitems = this.gs.Lists.subitem;
-    this.items = this.gs.Lists.itemmix;
-    this.categories = this.gs.Lists.category;
-    this.units = this.gs.Lists.unit;
-    this.pbks = this.gs.Lists.pbk;
-    this.states = this.gs.Lists.state;
+    this.gs.observeList().subscribe(result => {
+      this.mms = result.mm ? result.mm : [];
+      this.conditions = result.condition ? result.condition : [];
+      this.jawak_types = result.jawak_type ? result.jawak_type : [];
+      this.items = result.itemmix ? result.itemmix : [];
+      this.categories = result.category ? result.category : [];
+      this.units = result.unit ? result.unit : [];
+      this.pbks = result.pbk ? result.pbk : [];
+      this.states = result.state ? result.state : [];
+    });
     this.loadProduct();
   }
 
@@ -229,10 +229,10 @@ export class JawakEntryComponent implements OnInit {
 
   jawakFormSubmit() {
     console.log("clicked");
-    
+
     if (this.jawakForm.valid) {
       console.log("form valid");
-      
+
       this.isLoader = true;
       this.http.post(this.api.getUrl('JAWAK') + this.auth.webUser.dept_id, this.jawakForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
@@ -252,7 +252,7 @@ export class JawakEntryComponent implements OnInit {
     }
     else {
       console.log("form invalid", this.jawakForm);
-      
+
       this.gs.validationFireOnSubmit(this.jawakForm);
     }
   }

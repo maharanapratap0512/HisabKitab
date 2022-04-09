@@ -44,6 +44,14 @@
                            <!-- {{productData? productData.length:''}} -->
                         </button>
                      </div>
+                     <!-- <div class="col-2">
+                        <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
+                           aria-expanded="false"> Button 3 </button>
+                        <div class="dropdown-menu">
+                           <a class="dropdown-item" href="#">Dropdown link</a>
+                           <a class="dropdown-item" href="#">Dropdown link</a>
+                        </div>
+                     </div> -->
                   </div>
                </div>
             </div>
@@ -53,8 +61,8 @@
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
-                           <th style="width: 30px;">No.</th>
-                           <th style="width: 80px;">Manage</th>
+                           <th style="width: 40px;">No.</th>
+                           <th style="width: 110px;">Manage</th>
                            <th style="width: 70px;">Pkt No.</th>
                            <th style="width: 101px;">Date</th>
                            <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
@@ -74,10 +82,23 @@
                         <tr *ngFor="let data of aawakData | filter: term; let i=index">
                            <td>{{i+1}}</td>
                            <td>
-                              <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
-                                    class="uil uil-pen"></i></button><br>
-                              <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
-                                    class="uil-trash"></i></button>
+                              <div class="d-flex justify-content-between mb-1">
+                                 <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
+                                       class="uil uil-pen"></i></button><br>
+                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                       class="uil-trash"></i></button>
+                              </div>
+                              <div class="d-flex justify-content-between mb-1">
+                                 <!-- <button class="btn btn-sm btn-warning w-100" type="button"
+                                    (click)="jawak(data)">Jawak</button> -->
+                                 <button *ngIf="data.remaining_qty > 0" class="btn btn-sm btn-warning"
+                                    (click)="addJawak(data)">
+                                    <i class="mdi mdi-plus noti-icon"></i>
+                                 </button>
+                                 <button class="btn btn-sm btn-outline-warning" (click)="showJawak(data._id)">
+                                    <i class="dripicons-view-list noti-icon"></i>
+                                 </button>
+                              </div>
                            </td>
 
                            <td>{{data.pkt_num?data.pkt_num:'-'}}</td>
@@ -100,7 +121,7 @@
                               {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
                            </td>
                            <td *ngIf="auth.webUser.dept_id != 3">
-                              {{data.product_code ? data.product_code : ''}}
+                              {{data.product_code ? data.product_code : '-'}}
                               {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
                            </td>
                            <td>
@@ -141,8 +162,14 @@
          </div>
          <div class="modal-body">
             <app-aawak-entry *ngIf="showModal == 'Add Aawak'" (response)='addAawakResponse($event)'></app-aawak-entry>
+
             <app-aawak-entry *ngIf="showModal == 'Edit Aawak'" (response)='editAawakResponse($event)'
                [getData]="editData" [isEdit]="true"></app-aawak-entry>
+
+            <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
+               [getData]="editData"></app-jawak-entry>
+
+            <app-data-view *ngIf="showModal == 'Show Jawak'" [getData]="viewData" Type="jawak"></app-data-view>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"

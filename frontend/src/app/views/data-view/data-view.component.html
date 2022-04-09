@@ -17,11 +17,11 @@
                 </div>
             </div>
         </div>
-        <div class="row" style="overflow-y: auto; max-height: 26vw;">
+        <div class="row p-2" style="overflow-y: auto; max-height: 26vw;">
             <table id="datatable-buttons" class="table table-hover dt-responsive" style="width:98%;">
                 <thead>
                     <tr>
-                        <th style="width: 80px;">No.</th>
+                        <th style="width: 60px;">No.</th>
                         <th style="width: 100px;">Manage</th>
                         <th *ngFor="let row of fields">
                             {{row.title}}
@@ -52,7 +52,7 @@
                                 <span *ngIf="z == row.field.length-1">
                                     {{(data[col] ? data[col]: '')}}
                                 </span>
-                                <br *ngIf="z != 0 && z%2==0"/>
+                                <br *ngIf="z != 0 && z%2==0" />
                             </ng-container>
                         </td>
                     </tr>

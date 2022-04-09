@@ -66,14 +66,15 @@ export class ProductEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log("product-ngOnInit");
-    this.mms = this.gs.Lists.mm;
-    this.departments = this.gs.Lists.department;
-    this.conditions = this.gs.Lists.condition;
-    this.subitems = this.gs.Lists.subitem;
-    this.items = this.gs.Lists.item;
-    this.categories = this.gs.Lists.category;
-    this.units = this.gs.Lists.unit;
+    this.gs.observeList().subscribe(result => {
+      this.mms = result.mm ? result.mm : [];
+      this.departments = result.department ? result.department : [];
+      this.conditions = result.condition ? result.condition : [];
+      this.subitems = result.subitem ? result.subitem : [];
+      this.items = result.item ? result.item : [];
+      this.categories = result.category ? result.category : [];
+      this.units = result.unit ? result.unit : [];
+    });
 
     // this.getStates();
     // this.getMMs();

@@ -93,7 +93,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3" *ngIf="departments.length || categories.length">
+                <div class="col-md-3 mb-3">
                     <div class="form-group">
                         <label class="form-label">Filter Items By</label>
                         <!-- <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -107,9 +107,9 @@
                             <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :
                                 {{item.dept_eng}}{{item.dept_code?' : '+item.dept_code:''}}</ng-option>
                         </ng-select>
-                        <ng-select *ngIf="categories && categories.length" class="custom mt-1" style="width: 100%;"
-                            placeholder="Select Category" [clearable]="false" [virtualScroll]="true"
-                            (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
+                        <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Category"
+                            [clearable]="false" [virtualScroll]="true" (change)="catSelected($event)"
+                            [ngModelOptions]="{standalone: true}">
                             <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
                                 {{item.category_eng}}</ng-option>
                         </ng-select>
@@ -191,8 +191,8 @@
                         <label class="form-label">Quantity</label>
                         <div class="input-group">
                             <input type="number" class="form-control" placeholder="{{'i.e. 10 '+ unit_short }}"
-                            formControlName="qty"
-                            [ngClass]="{'validation':jawakForm.get('qty')?.errors && (jawakForm.get('qty')?.touched || jawakForm.get ('qty')?.dirty)}">
+                                formControlName="qty"
+                                [ngClass]="{'validation':jawakForm.get('qty')?.errors && (jawakForm.get('qty')?.touched || jawakForm.get ('qty')?.dirty)}">
                             <span class="input-group-text">{{unit_short}}</span>
                         </div>
                     </div>

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { resourceLimits } from 'worker_threads';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
 import { GlobalService } from '../services/global.service';
@@ -38,10 +39,12 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
-    this.mms = this.gs.Lists.mm;
-    this.sitems = this.gs.Lists.sitem;
     this.getBachat();
     this.getPendingAawak();
+    this.gs.observeList().subscribe(result => {
+      this.mms = result.mm ? result.mm : [];
+      this.sitems = result.sitem ? result.sitem : [];
+    });
   }
 
 
@@ -88,29 +91,8 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  addJawak(data: any) {
-    this.editData = {
-      date: data.date,
-      mm_id: data.mm_id,
-      item_id: data.item_id,
-      subitem_id: data.subitem_id,
-      product_id: data.product_id,
-      item_detail: data.item_detail,
-      condition_id: data.condition_id,
-      qty: data.remaining_qty,
-      unit_id: data.unit_id,
-      aawak_ref_id: data._id,
-      dept_id: data.dept_id,
-      unit_short:data.unit_short
-    }
-    this.showModal = "Add Jawak";
-    $('#showModal').modal('show');
-  }
-  
   addAawakResponse(ev: any) {
-
     if (ev._id) {
-
       // this.isLoader = true;
       $('#showModal').modal('hide');
       this.showModal = '';
@@ -124,10 +106,29 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  addJawak(data: any) {
+    this.editData = {
+      date: data.date,
+      mm_id: data.mm_id,
+      item_id: data.item_id,
+      subitem_id: data.subitem_id,
+      product_id: data.product_id,
+      item_detail: data.item_detail,
+      condition_id: data.condition_id,
+      qty: data.remaining_qty,
+      unit_id: data.unit_id,
+      aawak_ref_id: data._id,
+      dept_id: data.dept_id,
+      unit_short: data.unit_short
+    }
+    this.showModal = "Add Jawak";
+    $('#showModal').modal('show');
+  }
+
   showJawak(id: any) {
     if (id) {
       this.http.get(this.api.getUrl('JAWAKBYAWK') + id).subscribe((data: any) => {
-        if (data['result'] && data['success']) {          
+        if (data['result'] && data['success']) {
           this.viewData = data['result'];
           this.openModal('Show Jawak');
         }

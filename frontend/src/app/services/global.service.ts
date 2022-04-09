@@ -13,7 +13,6 @@ import { AuthService } from './auth.service';
 })
 export class GlobalService {
 
-
   Lists: any = {};
   Config: any = {};
 
@@ -23,8 +22,7 @@ export class GlobalService {
     private toastr: ToastrService,
     public auth: AuthService
   ) {
-    // this.initialiseLists();
-    // this.Config.dept_id = window.localStorage.getItem('dept_id');
+    this.getList();
   }
 
   // validationFireOnSubmit(fg: FormGroup) {
@@ -51,56 +49,71 @@ export class GlobalService {
     });
   }
 
-  getList() {
-    return new Promise((resolve) => {
+  observeList(): Observable<any> {
+    let data = new Observable<any>(observer => {
+      setTimeout(() => {
+        observer.next(this.Lists);
+      }, 100);
+    });
+    return data;
+  }
 
-      this.http.get(this.api.URLS['LISTALL'] + '/' + this.auth.webUser.dept_id).subscribe((data) => {
 
-        if (data['success'] && data['result']) {
-          this.Lists.country = data['result'].country;
-          this.Lists.city = data['result'].city;
-          this.Lists.mm = data['result'].mm;
-          this.Lists.state = data['result'].state;
-          this.Lists.pbk = data['result'].pbk;
-          this.Lists.gender = data['result'].gender;
-          this.Lists.relation = data['result'].relation;
-          this.Lists.status = data['result'].status;
-          this.Lists.condition = data['result'].condition;
-          this.Lists.aawak_type = data['result'].aj_type.filter((aj: { list_type: string; })=>aj.list_type == 'aawak_type');
-          this.Lists.jawak_type = data['result'].aj_type.filter((aj: { list_type: string; })=>aj.list_type == 'jawak_type');
-          this.Lists.category = data['result'].category;
-          this.Lists.unit = data['result'].unit;
-          this.Lists.item = data['result'].item;
-          this.Lists.itemmix = data['result'].itemmix;
-          this.Lists.subitem_list = data['result'].subitem_list;
-          this.Lists.subitem = data['result'].subitem;
-          this.Lists.department = data['result'].department;
-          this.Lists.sitem = data['result'].sitem;
-
-        }
-        return resolve(1);
-      });
+  async getList() {
+    this.http.get(this.api.URLS['LISTALL'] + '/' + this.auth.webUser.dept_id).subscribe((data) => {
+      if (data['success'] && data['result']) {
+        this.Lists.country = data['result'].country;
+        this.Lists.city = data['result'].city;
+        this.Lists.mm = data['result'].mm;
+        this.Lists.state = data['result'].state;
+        this.Lists.pbk = data['result'].pbk;
+        this.Lists.gender = data['result'].gender;
+        this.Lists.relation = data['result'].relation;
+        this.Lists.status = data['result'].status;
+        this.Lists.condition = data['result'].condition;
+        this.Lists.aawak_type = data['result'].aj_type.filter((aj: { list_type: string; }) => aj.list_type == 'aawak_type');
+        this.Lists.jawak_type = data['result'].aj_type.filter((aj: { list_type: string; }) => aj.list_type == 'jawak_type');
+        this.Lists.category = data['result'].category;
+        this.Lists.unit = data['result'].unit;
+        this.Lists.item = data['result'].item;
+        this.Lists.itemmix = data['result'].itemmix;
+        this.Lists.subitem_list = data['result'].subitem_list;
+        this.Lists.subitem = data['result'].subitem;
+        this.Lists.department = data['result'].department;
+        this.Lists.sitem = data['result'].sitem;
+      }
     });
   }
 
-  initialiseLists = async () => {
-    // console.log("Config",this.Config);
+  // getList() {
+  //   return new Promise((resolve) => {
+  //     this.http.get(this.api.URLS['LISTALL'] + '/' + this.auth.webUser.dept_id).subscribe((data) => {
+  //       if (data['success'] && data['result']) {
+  //         this.Lists.country = data['result'].country;
+  //         this.Lists.city = data['result'].city;
+  //         this.Lists.mm = data['result'].mm;
+  //         this.Lists.state = data['result'].state;
+  //         this.Lists.pbk = data['result'].pbk;
+  //         this.Lists.gender = data['result'].gender;
+  //         this.Lists.relation = data['result'].relation;
+  //         this.Lists.status = data['result'].status;
+  //         this.Lists.condition = data['result'].condition;
+  //         this.Lists.aawak_type = data['result'].aj_type.filter((aj: { list_type: string; })=>aj.list_type == 'aawak_type');
+  //         this.Lists.jawak_type = data['result'].aj_type.filter((aj: { list_type: string; })=>aj.list_type == 'jawak_type');
+  //         this.Lists.category = data['result'].category;
+  //         this.Lists.unit = data['result'].unit;
+  //         this.Lists.item = data['result'].item;
+  //         this.Lists.itemmix = data['result'].itemmix;
+  //         this.Lists.subitem_list = data['result'].subitem_list;
+  //         this.Lists.subitem = data['result'].subitem;
+  //         this.Lists.department = data['result'].department;
+  //         this.Lists.sitem = data['result'].sitem;
+  //       }
+  //       return resolve(1);
+  //     });
+  //   });
+  // }
 
-    // if (!this.Lists) {
-    //   await this.getList().then((res) => {
-    //     this.Lists = res;
-    //   });
-    // }
-  }
-
-  async initialiseListByDept() {
-    // this.Config.dept_id = window.localStorage.getItem('dept_id');
-    return new Promise(async (resolve) => {
-      await this.getList().then((resolve) => { });
-      resolve(1);
-    });
-
-  }
 
   async getDeptConfig() {
     return new Promise((resolve) => {
@@ -115,45 +128,5 @@ export class GlobalService {
     });
   }
 
-
-
-  // // Create an Observable that will start listening to geolocation updates
-  // // when a consumer subscribes.
-  // const locations = new Observable((observer) => {
-  //   let watchId: number;
-
-  //   // Simple geolocation API check provides values to publish
-  //   if ('geolocation' in navigator) {
-  //     watchId = navigator.geolocation.watchPosition((position: GeolocationPosition) => {
-  //       observer.next(position);
-  //     }, (error: GeolocationPositionError) => {
-  //       observer.error(error);
-  //     });
-  //   } else {
-  //     observer.error('Geolocation not available');
-  //   }
-
-  //   // When the consumer unsubscribes, clean up data ready for next subscription.
-  //   return {
-  //     unsubscribe() {
-  //       navigator.geolocation.clearWatch(watchId);
-  //     }
-  //   };
-  // });
-
-  // // Call subscribe() to start listening for updates.
-  // const locationsSubscription = locations.subscribe({
-  //   next(position) {
-  //     console.log('Current Position: ', position);
-  //   },
-  //   error(msg) {
-  //     console.log('Error Getting Location: ', msg);
-  //   }
-  // });
-
-  // // Stop listening for location after 10 seconds
-  // setTimeout(() => {
-  //   locationsSubscription.unsubscribe();
-  // }, 10000);onst Lists1 = new observable((observe) => { })
 
 }

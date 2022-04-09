@@ -28,6 +28,7 @@ export class AawakComponent implements OnInit {
     mm_id: null
   };
   mms: any = [];
+  viewData: any = [];
 
   constructor(
     private fb: FormBuilder,
@@ -42,14 +43,12 @@ export class AawakComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getaawakData();
-    this.mms = this.gs.Lists.mm;
-    // this.states = this.gs.Lists.state ? this.gs.Lists.state : [];
-    // this.departments = this.gs.Lists.department ? this.gs.Lists.department : [];
+    this.gs.observeList().subscribe(result => {
+      this.mms = result.mm ? result.mm : [];
+    });
   }
 
   mmSelected(ev: any) {
-    console.log("ccc",this.conditionObj);
-    
     if (ev) {
       this.conditionObj.mm_id = ev
       // const filterPipe = new FilterpipePipe();
@@ -164,6 +163,52 @@ export class AawakComponent implements OnInit {
       if (value)
         this.aawakData = this.aawakData.filter((b: any) => b[key] == value);
     }
+  }
+
+  addJawak(data: any) {
+    this.editData = {
+      date: data.date,
+      mm_id: data.mm_id,
+      item_id: data.item_id,
+      subitem_id: data.subitem_id,
+      product_id: data.product_id,
+      item_detail: data.item_detail,
+      condition_id: data.condition_id,
+      qty: data.remaining_qty,
+      unit_id: data.unit_id,
+      aawak_ref_id: data._id,
+      dept_id: data.dept_id,
+      unit_short: data.unit_short
+    }
+    this.showModal = "Add Jawak";
+    $('#showModal').modal('show');
+  }
+
+  showJawak(id: any) {
+    if (id) {
+      this.http.get(this.api.getUrl('JAWAKBYAWK') + id).subscribe((data: any) => {
+        if (data['result'] && data['success']) {
+          this.viewData = data['result'];
+          this.openModal('Show Jawak');
+        }
+      });
+    }
+  }
+
+  addJawakResponse(ev: any) {
+    // this.isLoader = true;
+    if (ev.aawak_ref_id) {
+      let i = this.aawakData.findIndex((b: any) => b._id == ev.aawak_ref_id);
+      this.aawakData[i].remaining_qty = (this.aawakData[i].remaining_qty ? this.aawakData[i].remaining_qty : 0) - ev.qty;
+      $('#showModal').modal('hide');
+      this.showModal = '';
+      // this.isLoader = false;
+    }
+  }
+
+  openModal(type: any) {
+    this.showModal = type;
+    $('#showModal').modal('show');
   }
 
 }

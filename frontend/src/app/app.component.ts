@@ -15,7 +15,7 @@ export class AppComponent {
   isBtn: boolean = false;
   // timeout: any = 9000;
   // btnShowTimer: any = 4000;
-  timeout:any = 1800000;
+  timeout: any = 1800000;
   btnShowTimer: any = 30000;
   sec: any = this.btnShowTimer / 1000;
   mainTimer: any;
@@ -26,11 +26,6 @@ export class AppComponent {
     private api: ApiService,
     public gs: GlobalService
   ) {
-    this.Initialise();
-  }
-
-  Initialise = async () => {
-    await this.gs.initialiseListByDept();
   }
 
   ngOnInit(): void {

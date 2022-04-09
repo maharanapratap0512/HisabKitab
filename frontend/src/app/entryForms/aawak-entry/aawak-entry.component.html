@@ -84,8 +84,8 @@
                      <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
                      </ng-option>
                      <ng-option *ngFor="let item of pbks" [value]="item._id">
-                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.sdw_of}} :
-                        {{item.sdw_of_name}}
+                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :
+                        {{item.relative_name}}
                      </ng-option>
                   </ng-select>
                </div>
@@ -208,10 +208,10 @@
                <div class="form-group">
                   <label class="form-label">Quantity</label>
                   <div class="input-group">
-                     <input type="text" class="form-control" placeholder="Quantity in {{unit}}" formControlName="qty"
+                     <input type="text" class="form-control" placeholder="Quantity" formControlName="qty"
                         [(ngModel)]="qty" (keyup)="qtyclick()"
                         [ngClass]="{'validation':aawakForm.get('qty')?.errors && (aawakForm.get('qty')?.touched || aawakForm.get ('qty')?.dirty)}">
-                     <span class="input-group-text">{{unit}}</span>
+                     <span *ngIf="unit" class="input-group-text">{{unit}}</span>
                   </div>
                </div>
             </div>

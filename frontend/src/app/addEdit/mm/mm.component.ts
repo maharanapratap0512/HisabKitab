@@ -25,6 +25,7 @@ export class MmComponent implements OnInit {
   total_count: any;
   departments: any = [];
   states: any = [];
+  temp: any = {};
 
   constructor(
     private fb: FormBuilder,
@@ -39,9 +40,10 @@ export class MmComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getmmData();
-    console.log("mm component", this.gs.Lists);
-    this.states = this.gs.Lists.state ? this.gs.Lists.state : [];
-    this.departments = this.gs.Lists.department ? this.gs.Lists.department : [];
+    this.gs.observeList().subscribe(result => {
+      this.states = result.state ? result.state : [];
+      this.departments = result.department ? result.department : [];
+    });
   }
 
   getmmData() {

@@ -63,13 +63,14 @@ export class PbkEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log("pbk-ngOnInit");
-    this.states = this.gs.Lists.state;
-    this.cities = this.gs.Lists.cities
-    this.mms = this.gs.Lists.mm;
-    this.genders = this.gs.Lists.gender;
-    this.relations = this.gs.Lists.relation;
-    this.statuses = this.gs.Lists.status;
+    this.gs.observeList().subscribe(result => {
+      this.states = result.state ? result.state : [];
+      this.cities = result.cities ? result.cities : []
+      this.mms = result.mm ? result.mm : [];
+      this.genders = result.gender ? result.gender : [];
+      this.relations = result.relation ? result.relation : [];
+      this.statuses = result.status ? result.status : [];
+    });
     // this.getStates();
     // this.getMMs();
     // this.getCities();

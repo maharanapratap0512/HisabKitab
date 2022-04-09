@@ -61,8 +61,6 @@ export class SupportListEntryComponent implements OnInit {
     if (this.supportListForm.valid) {
       this.isLoader = true;
       this.http.post(this.api.getUrl('SUPPORTLIST'), this.supportListForm.value).subscribe((data: any) => {
-        console.log(data);
-
         if (data['result'] && data['success']) {
           this.gs.Lists[this.list_type].unshift(data['result']);
           this.supportListForm.reset();

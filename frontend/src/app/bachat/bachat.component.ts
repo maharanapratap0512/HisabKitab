@@ -27,7 +27,7 @@ export class BachatComponent implements OnInit {
   mms: any = [];
   categories: any = [];
   items: any = [];
-  conditionObj:any = {};
+  conditionObj: any = {};
 
 
   constructor(
@@ -43,10 +43,12 @@ export class BachatComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getbachatData();
-    this.states = this.gs.Lists.state;
-    this.mms = this.gs.Lists.mm;
-    this.categories = this.gs.Lists.category;
-    this.items = this.gs.Lists.item;
+    this.gs.observeList().subscribe(result => {
+      this.states = result.state ? result.state : [];
+      this.mms = result.mm ? result.mm : [];
+      this.categories = result.category ? result.category : [];
+      this.items = result.item ? result.item : [];
+    });
   }
 
   getbachatData() {
@@ -65,7 +67,7 @@ export class BachatComponent implements OnInit {
   stateSelected(ev: any) {
     // this.bachatData = this.bachatAll.filter((b: { state_id: any; }) => b.state_id == ev);
     if (ev)
-     this.conditionObj.state_id = ev;
+      this.conditionObj.state_id = ev;
     else
       this.conditionObj.state_id = null;
     this.filter();
@@ -73,7 +75,7 @@ export class BachatComponent implements OnInit {
 
   mmSelected(ev: any) {
     if (ev)
-     this.conditionObj.mm_id = ev;
+      this.conditionObj.mm_id = ev;
     else
       this.conditionObj.mm_id = null;
     this.filter();
@@ -81,15 +83,15 @@ export class BachatComponent implements OnInit {
 
   catSelected(ev: any) {
     if (ev)
-     this.conditionObj.category_id = ev;
+      this.conditionObj.category_id = ev;
     else
       this.conditionObj.category_id = null;
     this.filter();
   }
-  
+
   itemSelected(ev: any) {
     if (ev)
-     this.conditionObj.item_id = ev;
+      this.conditionObj.item_id = ev;
     else
       this.conditionObj.item_id = null;
     this.filter();
@@ -111,17 +113,17 @@ export class BachatComponent implements OnInit {
 
   addJawakResponse(ev: any) {
     // this.isLoader = true;
-    let i = this.bachatData.findIndex((b:any)=>b.dept_id == ev.dept_id && b.item_id ==  ev.item_id && b.subitem_id == ev.subitem_id && b.mm_id == ev.mm_id);
-    if(i && ev.jawak_type_eng == "Used"){
+    let i = this.bachatData.findIndex((b: any) => b.dept_id == ev.dept_id && b.item_id == ev.item_id && b.subitem_id == ev.subitem_id && b.mm_id == ev.mm_id);
+    if (i && ev.jawak_type_eng == "Used") {
       this.bachatData[i].Used = (this.bachatData[i].Used ? this.bachatData[i].Used : 0) + ev.qty;
       this.bachatData[i].Stock = (this.bachatData[i].Stock ? this.bachatData[i].Stock : 0) - ev.qty;
     }
-    else if(i){
+    else if (i) {
       this.bachatData[i].Stock = (this.bachatData[i].Stock ? this.bachatData[i].Stock : 0) - ev.qty;
     }
 
-    if(!this.bachatData[i].Used && !this.bachatData.Stock){
-      this.bachatData.splice(i,1);
+    if (!this.bachatData[i].Used && !this.bachatData.Stock) {
+      this.bachatData.splice(i, 1);
     }
     $('#showModal').modal('hide');
     this.showModal = '';
@@ -129,18 +131,18 @@ export class BachatComponent implements OnInit {
     // this.isLoader = false;
   }
 
-  filter(){
+  filter() {
     this.bachatData = this.bachatAll;
-    for(let [key, value] of Object.entries(this.conditionObj)){
-      if(value)
-        this.bachatData = this.bachatData.filter((b: any)=>{
-          if(key == "category_id"){
-            return (b.scat_id == value) || (!b.scat_id && b.icat_id == value) 
+    for (let [key, value] of Object.entries(this.conditionObj)) {
+      if (value)
+        this.bachatData = this.bachatData.filter((b: any) => {
+          if (key == "category_id") {
+            return (b.scat_id == value) || (!b.scat_id && b.icat_id == value)
           }
-          else{
+          else {
             return b[key] == value;
           }
         });
-    }    
-  }  
+    }
+  }
 }

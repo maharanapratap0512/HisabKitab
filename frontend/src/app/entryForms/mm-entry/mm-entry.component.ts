@@ -49,9 +49,11 @@ export class MmEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.mms = this.gs.Lists.mm;
-    this.states = this.gs.Lists.state;
-    this.departments = this.gs.Lists.department;
+    this.gs.observeList().subscribe(result => {
+      this.mms = result.mm ? result.mm : [];
+      this.states = result.state ? result.state : [];
+      this.departments = result.department ? result.department : [];
+    });
   }
 
   openModal(name: any) {

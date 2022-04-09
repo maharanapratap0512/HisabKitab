@@ -41,7 +41,9 @@ export class CityEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.states = this.gs.Lists.state;
+    this.gs.observeList().subscribe(result => {
+      this.states = result.state ? result.state : [];
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {

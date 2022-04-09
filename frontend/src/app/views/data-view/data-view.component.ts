@@ -252,13 +252,13 @@ export class DataViewComponent implements OnInit {
         field: ["date"]
       }, {
         title: "Pkt No.",
-        field: ["pkt_num","jawak_mm_eng"]
+        field: ["pkt_num"]
       }, {
         title: "Jawak MM",
-        field: ["jawak_mm_hin","jawak_mm_eng"]
+        field: ["jawak_mm_hin", "jawak_mm_eng"]
       }, {
         title: "Item",
-        field: ["item_hin", "subitem_hin","item_eng", "subitem_eng"]
+        field: ["item_hin", "subitem_hin", "item_eng", "subitem_eng"]
       }, {
         title: "Qty",
         field: ["qty"]

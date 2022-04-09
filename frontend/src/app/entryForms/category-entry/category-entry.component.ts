@@ -53,8 +53,6 @@ export class CategoryEntryComponent implements OnInit {
       this.http.post(this.api.getUrl('CATEGORY') + this.auth.webUser.dept_id, this.categoryForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.gs.Lists.category.unshift(data['result']);
-          console.log("llists", this.gs.Lists);
-
           this.categoryForm.reset({ active: true });
           this.isLoader = false;
           this.toastr.success('Category Added Successfully.');
