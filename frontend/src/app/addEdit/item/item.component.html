@@ -82,7 +82,13 @@
                         <ng-container class="accordion-item" *ngFor="let data of itemData | filter:term; let i=index">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
                               [attr.aria-controls]="'#collapse-' + i" class="item-row">
-                              <td>{{i+1}}</td>
+                              <td style="font-size: large; cursor:pointer;" (click)="protectionToggle(data._id, data.active)">
+                                 {{i+1}}
+                                 <i *ngIf="auth.webUser.dept_id == 1 && data.active" class="uil-shield-check"
+                                    style="color: yellow;"></i>
+                                 <i *ngIf="auth.webUser.dept_id == 1 && !data.active" class="uil-shield-slash"
+                                    style="color: red;"></i>
+                              </td>
                               <td>
                                  <button class="btn btn-sm btn-outline-success" type="button"
                                     (click)="addSubitem(data)"><i class="uil uil-plus"></i></button>
@@ -118,12 +124,17 @@
                               <ng-container>
                                  <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show"
                                     *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
-                                    <td  style="border: none;"></td>
+                                    <td style="border: none;"></td>
                                     <td colspan="6" class="subitem-row">
                                        <table class="" style="width: 99.7%;table-layout: fixed;">
                                           <tr>
-                                             <td style="width: 50px;">
-                                                <i class="uil-corner-down-right pl-4"></i> &nbsp;&nbsp;&nbsp;{{j+1}}
+                                             <td style="width: 50px; font-size: large; cursor: pointer;" (click)="protectionToggleSubitem(si._id, si.active)">
+                                                <!-- <i class="uil-corner-down-right pl-4"></i>  -->
+                                                {{j+1}}
+                                                <i *ngIf="auth.webUser.dept_id == 1 && si.active"
+                                                   class="uil-shield-check" style="color: yellow;"></i>
+                                                <i *ngIf="auth.webUser.dept_id == 1 && !si.active"
+                                                   class="uil-shield-slash" style="color: red;"></i>
                                              </td>
                                              <td style="width: 160px;">
                                                 <button *ngIf="auth.webUser.dept_id == 1 || !data.active"

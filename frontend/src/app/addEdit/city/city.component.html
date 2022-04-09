@@ -50,7 +50,11 @@
                      <!-- <div style="height: 25px; box-shadow: none; border: none;"></div> -->
                      <tbody>
                         <tr *ngFor="let data of cityData | filter:term; let i=index">
-                           <td>{{i+1}}</td>
+                           <td style="font-size: large; cursor:pointer;" (click)="protectionToggle(data._id, data.active)">
+                              {{i+1}}
+                              <i *ngIf="auth.webUser.dept_id == 1 && data.active" class="uil-shield-check" style="color: yellow;"></i>
+                              <i *ngIf="auth.webUser.dept_id == 1 && !data.active" class="uil-shield-slash" style="color: red;"></i>
+                           </td>
                            <td>
                               <div *ngIf="auth.webUser.dept_id == 1 || !data.active">
                                  <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
