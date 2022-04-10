@@ -36,12 +36,12 @@ router.get('/', async (req, res, next) => {
 //  category get
 router.get('/home/:dept_id', async (req, res, next) => {
     await DB.getFullListByDept('bachatHome', req.params.dept_id).then((data) => {
-        for(let i in data){
-            data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
-            for(let bcht of data[i].bachat_qty){
-                data[i][bcht.bachat_type_eng] = bcht.qty;
-            }
-        }
+        // for(let i in data){
+        //     data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
+        //     for(let bcht of data[i].bachat_qty){
+        //         data[i][bcht.bachat_type_eng] = bcht.qty;
+        //     }
+        // }
         res.json({
             success: true,
             result: data || []
@@ -51,14 +51,15 @@ router.get('/home/:dept_id', async (req, res, next) => {
 
 
 router.get('/:dept_id', async (req, res, next) => {
-    let conditionString = ` bachat.qty <> 0`;
+    let conditionString = ``;
+    // let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0 OR bachat.Stock <> 0 OR bachat.Stock <> 0`;
     await DB.getFullListByDept('bachat', req.params.dept_id, conditionString).then((data) => {
-        for(let i in data){
-            data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
-            for(let bcht of data[i].bachat_qty){
-                data[i][bcht.bachat_type_eng] = bcht.qty;
-            }
-        }
+        // for(let i in data){
+        //     data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
+        //     for(let bcht of data[i].bachat_qty){
+        //         data[i][bcht.bachat_type_eng] = bcht.qty;
+        //     }
+        // }
         res.json({
             success: true,
             result: data || []

@@ -211,7 +211,14 @@
                      <input type="text" class="form-control" placeholder="Quantity" formControlName="qty"
                         [(ngModel)]="qty" (keyup)="qtyclick()"
                         [ngClass]="{'validation':aawakForm.get('qty')?.errors && (aawakForm.get('qty')?.touched || aawakForm.get ('qty')?.dirty)}">
-                     <span *ngIf="unit" class="input-group-text">{{unit}}</span>
+                        <span class="input-group-text" style="padding: 0px; min-width: 40%;">
+                           <ng-select class="custom" style="width: 100%;" placeholder="--Unit--" [clearable]="false"
+                           [virtualScroll]="true" formControlName="unit_id"
+                           [ngClass]="{'validation':aawakForm.get('unit_id')?.errors && (aawakForm.get('unit_id')?.touched || aawakForm.get ('unit_id')?.dirty)}">
+                           <ng-option selected="selected" disabled value="">Unit</ng-option>
+                           <ng-option *ngFor="let item of units" [value]="item._id">{{item.unit_short}}</ng-option>
+                        </ng-select>
+                     </span>
                   </div>
                </div>
             </div>

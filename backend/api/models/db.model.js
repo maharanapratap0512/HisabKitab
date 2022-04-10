@@ -59,11 +59,26 @@ const Migrations = [
   (DB) => {
     //import temp 
 
-    console.log('updating import functions...');
+    console.log('updating import functions...',);
     for (let keys of Object.keys(migrationImportTemp)) {
 
       DB.serialize(() => {
         DB.run(migrationImportTemp[keys], (err) => {
+          if (err) console.log(keys, 'error: ', err);
+        });
+      });
+
+    }
+  },
+
+  (DB) => {
+    //triggers recreation 
+
+    console.log('updating import functions...',);
+    for (let keys of Object.keys(triggers)) {
+
+      DB.serialize(() => {
+        DB.run(triggers[keys], (err) => {
           if (err) console.log(keys, 'error: ', err);
         });
       });
@@ -354,16 +369,20 @@ const createTables = {
   bachat: `create table bachat(
   _id integer primary key AUTOINCREMENT,
   mm_id integer not null references mm(_id),
-  bachat_type_id integer not null references support_list(_id),
   item_id integer not null references item(_id),
   subitem_id integer null references subitem(_id),
-  qty decimal(10,2) default 0,
+  Stock decimal(10,2) default 0,
+  Used decimal(10,2) default 0,
+  New decimal(10,2) default 0,
+  Old decimal(10,2) default 0,
+  Defective decimal(10,2) default 0,
+  Scrap decimal(10,2) default 0,  
   unit_id integer not null references unit(_id),
   dept_id integer references department(_id),
   active tinyint default 0,
   created_at timestamp default (datetime('now', 'localtime')),
   updated_at timestamp default (datetime('now', 'localtime')),
-  unique(mm_id,bachat_type_id,item_id,subitem_id,dept_id)
+  unique(mm_id,bachat_type_id,item_id,subitem_id,unit_id,dept_id)
 );`,
   bachat_history: `create table bachat_monthly(
   _id integer UNIQUE primary key AUTOINCREMENT,
@@ -386,6 +405,16 @@ const createTables = {
 
 
 const triggers = {
+  drop_jwk_ins_used_bcht_updt: `drop trigger if exists "jwk_ins_used_bcht_updt"`,
+  drop_jwk_ins_used_bcht_updt: `drop trigger if exists "jwk_ins_used_bcht_updt"`,
+  drop_jwk_del_bcht_updt: `drop trigger if exists "jwk_del_bcht_updt"`,
+  drop_jwk_ins_used_bcht_ins: `drop trigger if exists "jwk_ins_used_bcht_ins"`,
+  drop_jwk_updt_used_bcht_updt: `drop trigger if exists "jwk_updt_used_bcht_updt"`,  
+  drop_jwk_del_used_bcht_updt: `drop trigger if exists "jwk_del_used_bcht_updt"`,  
+  drop_awk_ins_bcht_ins: `drop trigger if exists "awk_ins_bcht_ins"`,  
+  drop_prdct_ins_bcht_ins: `drop trigger if exists "prdct_ins_bcht_ins"`,  
+
+  drop_dept_ins_config_ins: `drop trigger if exists "dept_ins_config_ins"`,
   dept_ins_config_ins:
     `CREATE TRIGGER IF NOT EXISTS "dept_ins_config_ins"
       AFTER INSERT ON "department"
@@ -393,75 +422,102 @@ const triggers = {
       BEGIN
         insert into department_config(dept_id, config_key, config_value, active) values(NEW._id, 'mm', '', NEW.active),(NEW._id, 'item', '', NEW.active),(NEW._id, 'category', '', NEW.active), (NEW._id, 'subitem', '', NEW.active), (NEW._id, 'subitem_list', '', NEW.active),(NEW._id, 'pbk', '', NEW.active),(NEW._id, 'department', '', NEW.active),(NEW._id, 'aj_type', '', NEW.active), (NEW._id, 'dept', '', NEW.active), (NEW._id, 'pbk_fields', '', NEW.active), (NEW._id, 'product_fields', '', NEW.active),(NEW._id, 'aawak_fields', '', NEW.active), (NEW._id, 'jawak_fields', '', NEW.active);
       END;`,
+  drop_awk_ins_bcht_updt: `drop trigger if exists "awk_ins_bcht_updt"`,
   awk_ins_bcht_updt:
     `CREATE TRIGGER IF not exists "awk_ins_bcht_updt" 
         AFTER INSERT ON "aawak" 
-        FOR EACH ROW
-        WHEN EXISTS(select _id from bachat where created_at != NEW.created_at AND dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND 
-                  item_id = NEW.item_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id)  )
+        FOR EACH ROW       
         BEGIN
-            update bachat set qty = qty + NEW.qty 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);     
+            update bachat set 
+            Stock = Stock + NEW.qty,
+            New = New + (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END),
+            Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
+            Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
+            Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id; 
+
+            insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, unit_id, dept_id) 
+            values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, NEW.unit_id, NEW.dept_id);                          
         END;`,
-  awk_ins_bcht_ins:
-    `CREATE TRIGGER "awk_ins_bcht_ins" 
-        AFTER INSERT ON "aawak" 
+  drop_awk_updt_bcht_updt: `drop trigger if exists "awk_updt_bcht_updt"`,
+  awk_updt_bcht_updt:
+    `CREATE TRIGGER IF NOT EXISTS "awk_updt_bcht_updt"
+        AFTER UPDATE ON "aawak"
         FOR EACH ROW
-        WHEN NOT EXISTS(select _id from bachat where dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND 
-          item_id = NEW.item_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
-        BEGIN        
-              insert into bachat(mm_id,bachat_type_id,item_id,subitem_id, qty, unit_id, dept_id) 
-              values(NEW.mm_id, 28, NEW.item_id, NEW.subitem_id, NEW.qty, NEW.unit_id, NEW.dept_id);                    
+        WHEN NEW.qty != OLD.qty
+        BEGIN
+            update bachat set 
+            Stock = Stock + (NEW.qty - OLD.qty),
+            New = New + (CASE WHEN NEW.condition_id = 33 THEN (NEW.qty - OLD.qty) ELSE 0 END),
+            Old = Old + (CASE WHEN NEW.condition_id = 34 THEN (NEW.qty - OLD.qty) ELSE 0 END),
+            Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN (NEW.qty - OLD.qty) ELSE 0 END),
+            Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN (NEW.qty - OLD.qty) ELSE 0 END)
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id;  
+            
         END;`,
+  drop_awk_del_bcht_updt: `drop trigger if exists "awk_del_bcht_updt"`,
   awk_del_bcht_updt:
-    `CREATE TRIGGER "awk_del_bcht_updt" 
+    `CREATE TRIGGER IF NOT EXISTS "awk_del_bcht_updt" 
         AFTER DELETE ON "aawak" 
         FOR EACH ROW
         BEGIN
-          update bachat set qty = qty - OLD.qty 
-          where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND bachat_type_id = 28 AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id);                        
+          update bachat set 
+          Stock = Stock - OLD.qty,
+          New = New - (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+          Old = Old - (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+          Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+          Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
+          where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;                       
         END;`,
 
+  drop_jwk_ins_bcht_updt: `drop trigger if exists "jwk_ins_bcht_updt"`,
   jwk_ins_bcht_updt:
     `CREATE TRIGGER IF not exists "jwk_ins_bcht_updt" 
         AFTER INSERT ON "jawak" 
-        FOR EACH ROW
-        When NEW.jawak_type_id != 27
+        FOR EACH ROW        
         BEGIN
-            update bachat set qty = qty - NEW.qty 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);     
+          update bachat set 
+          Stock = Stock - NEW.qty,
+          Used = Used + (CASE WHEN NEW.jawak_type_id = 27 THEN NEW.qty ELSE 0 END),
+          New = New - (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END),
+          Old = Old - (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
+          Defective = Defective - (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
+          Scrap = Scrap - (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
+          where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id; 
+
         END;`,
-  used_jwk_ins_bcht_updt:
-    `CREATE TRIGGER IF not exists "jwk_ins_used_bcht_updt" 
-        AFTER INSERT ON "jawak" 
-        FOR EACH ROW
-        When NEW.jawak_type_id = 27 AND EXISTS(select _id from bachat where created_at != NEW.created_at AND dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 27 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
+  drop_jwk_updt_bcht_updt: `drop trigger if exists "jwk_updt_bcht_updt"`,
+  jwk_updt_bcht_updt:
+    `CREATE TRIGGER IF not exists "jwk_updt_bcht_updt" 
+        AFTER UPDATE ON "jawak" 
+        FOR EACH ROW        
         BEGIN
-            update bachat set qty = qty + NEW.qty 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND bachat_type_id = 27 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);     
-             update bachat set qty = qty - NEW.qty 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);  
+          update bachat set 
+          Stock = Stock - (NEW.qty - OLD.qty),
+          Used = Used + (CASE WHEN NEW.jawak_type_id = 27 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.jawak_type_id = 27 THEN OLD.qty ELSE 0 END),
+          New = New - (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+          Old = Old - (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+          Defective = Defective - (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+          Scrap = Scrap - (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
+          where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id; 
+
         END;`,
+  drop_jwk_del_bcht_updt: `drop trigger if exists "jwk_del_bcht_updt"`,
   jwk_del_bcht_updt:
     `CREATE TRIGGER IF not exists "jwk_del_bcht_updt" 
         AFTER DELETE ON "jawak" 
         FOR EACH ROW
-        When OLD.jawak_type_id != 27
         BEGIN
-            update bachat set qty = qty + OLD.qty 
-            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND bachat_type_id = 28 AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id);     
+          update bachat set 
+          Stock = Stock + OLD.qty,
+          Used = Used - (CASE WHEN OLD.jawak_type_id = 27 THEN OLD.qty ELSE 0 END),
+          New = New + (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+          Old = Old + (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+          Defective = Defective + (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+          Scrap = Scrap + (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
+          where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;  
         END;`,
-  used_jwk_del_bcht_updt:
-    `CREATE TRIGGER IF not exists "jwk_del_used_bcht_updt" 
-        AFTER DELETE ON "jawak" 
-        FOR EACH ROW
-        When OLD.jawak_type_id = 27
-        BEGIN
-            update bachat set qty = qty - OLD.qty 
-            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND bachat_type_id = 27 AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id); 
-             update bachat set qty = qty + OLD.qty 
-            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND bachat_type_id = 28 AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id);      
-        END;`,
+  drop_jwk_del_updt_ref_awk: `drop trigger if exists "jwk_del_updt_ref_awk"`,
   jwk_del_updt_ref_awk:
     `CREATE TRIGGER IF not exists "jwk_del_updt_ref_awk" 
         AFTER DELETE ON "jawak" 
@@ -470,18 +526,7 @@ const triggers = {
         BEGIN
           update aawak set remaining_qty = remaining_qty + OLD.qty where _id = OLD.aawak_ref_id;     
         END;`,
-  used_jwk_ins_bcht_ins:
-    `CREATE TRIGGER IF not exists "jwk_ins_used_bcht_ins" 
-        AFTER INSERT ON "jawak" 
-        FOR EACH ROW
-        When NEW.jawak_type_id = 27 AND NOT EXISTS(select _id from bachat where dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND 
-          item_id = NEW.item_id AND bachat_type_id = 27 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
-        BEGIN
-          insert into bachat(mm_id,bachat_type_id,item_id,subitem_id, qty, unit_id, dept_id) 
-          values(NEW.mm_id, 27, NEW.item_id, NEW.subitem_id, NEW.qty, NEW.unit_id, NEW.dept_id);    
-          update bachat set qty = qty - NEW.qty 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id); 
-        END;`,
+  drop_jwk_ins_avk_ref_updt: `drop trigger if exists "jwk_ins_avk_ref_updt"`,
   jwk_ins_avk_ref_updt:
     `CREATE TRIGGER if not EXISTS "jwk_ins_avk_ref_updt"
         AFTER INSERT ON "jawak"
@@ -490,6 +535,7 @@ const triggers = {
         BEGIN
             update aawak set remaining_qty = remaining_qty - NEW.qty where _id = NEW.aawak_ref_id;
         END;`,
+  drop_jwk_updt_avk_ref_updt: `drop trigger if exists "jwk_updt_avk_ref_updt"`,
   jwk_updt_avk_ref_updt:
     `CREATE TRIGGER if not EXISTS "jwk_updt_avk_ref_updt"
         AFTER UPDATE ON "jawak"
@@ -498,76 +544,51 @@ const triggers = {
         BEGIN
             update aawak set remaining_qty = remaining_qty - (NEW.qty - OLD.qty) where _id = OLD.aawak_ref_id;
         END;`,
+  drop_prdct_ins_bcht_updt: `drop trigger if exists "prdct_ins_bcht_updt"`,
   prdct_ins_bcht_updt:
     `CREATE TRIGGER IF NOT EXISTS "prdct_ins_bcht_updt"
         AFTER INSERT ON "product"
         FOR EACH ROW
-        when EXISTS(select _id from bachat where  created_at != NEW.created_at AND dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
         BEGIN 
-            update bachat set qty = qty + 1 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
+          update bachat set 
+          Stock = Stock + 1,
+          New = New + (CASE WHEN NEW.condition_id = 33 THEN 1 ELSE 0 END),
+          Old = Old + (CASE WHEN NEW.condition_id = 34 THEN 1 ELSE 0 END),
+          Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN 1 ELSE 0 END),
+          Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN 1 ELSE 0 END)
+          where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = 1; 
+
+          insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, unit_id, dept_id) 
+          values(NEW.mm_id, NEW.item_id, NEW.subitem_id, 1, 1, NEW.dept_id);            
         END;`,
-  prdct_ins_bcht_ins:
-    `CREATE TRIGGER IF NOT EXISTS "prdct_ins_bcht_ins"
-        AFTER INSERT ON "product"
+  drop_prdct_updt_bcht_updt: `drop trigger if exists "prdct_updt_bcht_updt"`,
+  prdct_updt_bcht_updt:
+    `CREATE TRIGGER IF NOT EXISTS "prdct_updt_bcht_updt"
+        AFTER UPDATE ON "product"
         FOR EACH ROW
-        when NOT EXISTS(select _id from bachat where dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
+        WHEN OLD.condition_id != NEW.condition_id
         BEGIN 
-          insert into bachat(mm_id,bachat_type_id,item_id,subitem_id, qty, unit_id, dept_id) 
-          values(NEW.mm_id, 28, NEW.item_id, NEW.subitem_id, 1, 1, NEW.dept_id);  
+          update bachat set 
+          New = New + (CASE WHEN NEW.condition_id = 33 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
+          Old = Old + (CASE WHEN NEW.condition_id = 34 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
+          Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
+          Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END)
+          where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = 1;           
         END;`,
+  drop_prdct_del_bcht_updt: `drop trigger if exists "prdct_del_bcht_updt"`,
   prdct_del_bcht_updt:
     `CREATE TRIGGER IF NOT EXISTS "prdct_del_bcht_updt"
         AFTER DELETE ON "product"
         FOR EACH ROW        
         BEGIN 
-          update bachat set qty = qty - 1 
-          where mm_id = OLD.mm_id AND item_id = OLD.item_id AND bachat_type_id = 28 AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id);
-        END;`,
-  awk_updt_bcht_updt:
-    `CREATE TRIGGER IF NOT EXISTS "awk_updt_bcht_updt"
-        AFTER UPDATE ON "aawak"
-        FOR EACH ROW
-        WHEN OLD.qty != NEW.qty
-        BEGIN
-            update bachat SET qty = qty + (NEW.qty - OLD.qty) 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
-            
-        END;`,
-  jwk_updt_bcht_updt:
-    `CREATE TRIGGER IF NOT EXISTS "jwk_updt_bcht_updt"
-        AFTER UPDATE ON "jawak"
-        FOR EACH ROW
-        WHEN NEW.jawak_type_id != 27
-        BEGIN
-            update bachat SET qty = qty - (NEW.qty - OLD.qty) 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
-            update bachat SET qty = qty - (NEW.qty - OLD.qty) 
-            where OLD.jawak_type_id = 27 AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 27 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
-        END;`,
-  jwk_updt_used_bcht_updt:
-    `CREATE TRIGGER IF NOT EXISTS "jwk_updt_used_bcht_updt"
-        AFTER UPDATE ON "jawak"
-        FOR EACH ROW
-        WHEN NEW.jawak_type_id = 27 AND EXISTS(select _id from bachat where created_at != NEW.created_at AND dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 27 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
-        BEGIN
-            update bachat SET qty = qty + (NEW.qty - OLD.qty) 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 27 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
-            update bachat SET qty = qty - (NEW.qty - OLD.qty) 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
-        END;`,
-  used_jwk_updt_bcht_ins:
-    `CREATE TRIGGER IF not exists "used_jwk_updt_bcht_ins" 
-        AFTER INSERT ON "jawak" 
-        FOR EACH ROW
-        When NEW.jawak_type_id = 27 AND NOT EXISTS(select _id from bachat where dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND 
-          item_id = NEW.item_id AND bachat_type_id = 27 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
-        BEGIN
-          insert into bachat(mm_id,bachat_type_id,item_id,subitem_id, qty, unit_id, dept_id) 
-          values(NEW.mm_id, 27, NEW.item_id, NEW.subitem_id, NEW.qty, NEW.unit_id, NEW.dept_id);    
-          update bachat set qty = qty - NEW.qty 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND bachat_type_id = 28 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id); 
-        END;`,
+          update bachat set 
+          Stock = Stock - 1,
+          New = New - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
+          Old = Old - (CASE WHEN OLD.condition_id = 34 THEN 1 ELSE 0 END),
+          Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN 1 ELSE 0 END),
+          Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN 1 ELSE 0 END)
+          where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = 1;  
+        END;`
 }
 
 
@@ -627,44 +648,7 @@ const migrationImportTemp = {
           aj_type_id = IFNULL((select _id from support_list sl where NEW.aj_type IS NOT NULL AND ((sl.list_type='aawak_type' AND NEW.entry_type = 'aawak') OR (sl.list_type='jawak_type' AND NEW.entry_type = 'jawak')) AND NEW.entry_type IN (sl.list_name_hin, sl.list_name_eng)),null)
           where _id = NEW._id;          
 
-        END;`,
-
-  drop_jwk_updt_bcht_updt: `drop trigger if exists "jwk_updt_bcht_updt"`,
-  jwk_updt_bcht_updt: `CREATE TRIGGER IF NOT EXISTS "jwk_updt_bcht_updt"
-        AFTER UPDATE ON "jawak"
-        FOR EACH ROW
-        WHEN NEW.jawak_type_id != 27
-        BEGIN
-            update bachat SET qty = qty - (NEW.qty - OLD.qty) 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
-            update bachat SET qty = qty - OLD.qty 
-            where OLD.jawak_type_id = 27 AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 27 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
-        END`,
-  drop: `drop trigger if exists "jwk_updt_used_bcht_updt"`,
-  jwk_updt_used_bcht_updt: `CREATE TRIGGER IF NOT EXISTS "jwk_updt_used_bcht_updt"
-        AFTER UPDATE ON "jawak"
-        FOR EACH ROW
-        WHEN NEW.jawak_type_id = 27 AND EXISTS(select _id from bachat where created_at != NEW.created_at AND dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 27 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
-        BEGIN
-            update bachat SET qty = qty + NEW.qty 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 27 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
-            update bachat SET qty = qty - OLD.qty 
-            where OLD.jawak_type_id = 27 AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 27 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
-            update bachat SET qty = qty - (NEW.qty - OLD.qty) 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
-        END`,
-  drop: `drop trigger if exists "jwk_updt_used_bcht_ins"`,
-  jwk_updt_used_bcht_updt: `CREATE TRIGGER IF NOT EXISTS "jwk_updt_used_bcht_ins"
-        AFTER UPDATE ON "jawak"
-        FOR EACH ROW
-        WHEN NEW.jawak_type_id = 27 AND NOT EXISTS(select _id from bachat where dept_id = NEW.dept_id AND mm_id = NEW.mm_id AND 
-          item_id = NEW.item_id AND bachat_type_id = 27 AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id))
-        BEGIN
-            insert into bachat(mm_id,bachat_type_id,item_id,subitem_id, qty, unit_id, dept_id) 
-            values(NEW.mm_id, 27, NEW.item_id, NEW.subitem_id, NEW.qty, NEW.unit_id, NEW.dept_id);   
-            update bachat SET qty = qty - (NEW.qty - OLD.qty) 
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND bachat_type_id = 28 AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id);
-        END`
+        END;`
 }
 
 
