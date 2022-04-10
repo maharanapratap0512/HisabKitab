@@ -31,10 +31,11 @@ export class PbkEntryComponent implements OnInit {
   relations: any = [];
   showModal: string = '';
   isLoader: boolean = false;
+  imagepath:any;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
-    private api: ApiService,
+    public api: ApiService,
     private toastr: ToastrService,
     public gs: GlobalService,
     private spinner: NgxSpinnerService,
@@ -58,7 +59,8 @@ export class PbkEntryComponent implements OnInit {
       mo_no: [null],
       alt_mo_no: [null],
       class_mm_id: [null],
-      bhatti_date: [null]
+      bhatti_date: [null],
+      document:[null]
     });
   }
 
@@ -76,39 +78,6 @@ export class PbkEntryComponent implements OnInit {
     // this.getCities();
   }
 
-  // getStates() {
-  //   this.isLoader = true;
-  //   this.http.get(this.api.getUrl('STATE')).subscribe((data) => {
-  //     if (data['result'] && data['success']) {
-  //       this.states = data['result'];
-  //       this.isLoader = false;
-  //     }
-  //     this.isLoader = false;
-  //   })
-  // }
-
-  // getCities() {
-  //   this.isLoader = true;
-  //   this.http.get(this.api.getUrl('CITY')).subscribe((data) => {
-  //     if (data['result'] && data['success']) {
-  //       this.cities = data['result'];
-  //       this.allList.cities = data['result'];
-  //       this.isLoader = false;
-  //     }
-  //     this.isLoader = false;
-  //   })
-  // }
-
-  // getMMs() {
-  //   this.isLoader = true;
-  //   this.http.get(this.api.getUrl('MM')).subscribe((data) => {
-  //     if (data['result'] && data['success']) {
-  //       this.mms = data['result'];
-  //       this.isLoader = false;
-  //     }
-  //     this.isLoader = false;
-  //   })
-  // }
 
   ngOnChanges(changes: SimpleChanges) {
     console.log("pbk-changes", changes);
@@ -131,8 +100,10 @@ export class PbkEntryComponent implements OnInit {
         mo_no: changes.getData.currentValue.mo_no,
         alt_mo_no: changes.getData.currentValue.alt_mo_no,
         class_mm_id: changes.getData.currentValue.class_mm_id,
-        bhatti_date: changes.getData.currentValue.bhatti_date
+        bhatti_date: changes.getData.currentValue.bhatti_date,
+        document: changes.getData.currentValue.document
       });
+      this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0]: null;
     }
   }
 
@@ -153,6 +124,22 @@ export class PbkEntryComponent implements OnInit {
         $('#pbkEntryComponent > #dataView').modal('show');
         break;
 
+    }
+  }
+
+  imagesSelectResponse(ev: any) {
+    if (ev.path) {
+      this.isLoader = true;
+      $('#pbkEntryComponent > #showModal').modal('hide');
+      this.showModal = '';
+      this.imagepath = ev.path;
+      this.pbkForm.patchValue({
+        document: { images: [ev.path] }
+      });
+      this.isLoader = false;
+    }
+    else {
+      this.isLoader = false;
     }
   }
 
@@ -206,7 +193,8 @@ export class PbkEntryComponent implements OnInit {
         mo_no: this.pbkForm.value.mo_no,
         alt_mo_no: this.pbkForm.value.alt_mo_no,
         class_mm_id: this.pbkForm.value.class_mm_id,
-        bhatti_date: this.pbkForm.value.bhatti_date
+        bhatti_date: this.pbkForm.value.bhatti_date,
+        document: this.pbkForm.value.document,
       };
       this.http.put(this.api.getUrl('PBK'), body).subscribe((data: any) => {
         if (data && data['success']) {

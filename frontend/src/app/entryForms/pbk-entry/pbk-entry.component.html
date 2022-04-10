@@ -1,5 +1,5 @@
 <ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
-   [fullScreen]="true">
+   [fullScreen]="false">
    <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
 </ngx-spinner>
 
@@ -202,7 +202,7 @@
                   </ng-select>
                </div>
             </div>
-            <div class="col-md-3 mb-3">
+            <div class="col-md-2 mb-3">
                <div class="form-group">
                   <label class="form-label">भट्टी कब की? </label>
                   <input type="date" class="form-control" placeholder="भट्टी कब की?	" formControlName="bhatti_date"
@@ -218,8 +218,7 @@
                            class=" dripicons-view-list"></i></button>
                      <button type="button" style="padding: 1px 6px !important;"
                         class="btn btn-outline-primary float-end"
-                        onclick="$('#pbkEntryComponent > #showModal').modal('show')"
-                        (click)="showModal='Add Status'">+
+                        onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal='Add Status'">+
                         Add</button>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Status" [clearable]="false"
@@ -232,7 +231,19 @@
 
                </div>
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Image</label>
+                  <a onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
+                     class="form-control" style="cursor: pointer;">
+                     <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
+                     <img src="{{this.api.getUrl('BASE')+imagepath}}" alt="image" class="rounded m-1" height="48"
+                        *ngIf="imagepath">
+                     <i *ngIf="!imagepath">Click To Change</i>
+                  </a>
+               </div>
+            </div>
+            <div class="col-md-2 mb-3">
                <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!this.isEdit"
                   (click)="pbkFormSubmit()">Submit</button>
                <button class="btn btn-warning submit mx-3" type="submit" *ngIf="this.isEdit"
@@ -275,6 +286,10 @@
                <!-- Add Status -->
                <app-support-list-entry *ngIf="showModal == 'Add Status'" (response)='statusAddResponse($event)'
                   list_type="status"> </app-support-list-entry>
+
+               <!-- Add Image -->
+               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)" type="pbk">
+               </app-files-view>
 
             </div>
             <div class="modal-footer">

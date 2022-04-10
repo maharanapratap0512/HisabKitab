@@ -11,6 +11,7 @@ router.post('/', async (req, res, next) => {
             if (err) {
                 return next(err);
             }
+            data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
             res.json({
                 success: true,
                 result: data || []
@@ -27,6 +28,7 @@ router.post('/', async (req, res, next) => {
 router.post('/:dept_id', async (req, res, next) => {
     if (req.body && req.body.pbk_hin) {
         await DB.insertFromDept('pbk', req.body, req.params.dept_id).then((data) => {
+            data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
             res.json({
                 success: true,
                 result: data || []
@@ -55,6 +57,11 @@ router.get('/', async (req, res, next) => {
 //pbk get by dept
 router.get('/:dept_id', async (req, res, next) => {
     await DB.getFullListByDept('pbk', req.params.dept_id).then((resolve) => {
+        for (let i in resolve) {
+            resolve[i].document = (resolve[i].document != "[null]" ? JSON.parse(resolve[i].document) : {});
+            resolve[i].relative_ref = (resolve[i].relative_ref != "[null]" ? JSON.parse(resolve[i].relative_ref) : []);
+            resolve[i].alt_mo_no = (resolve[i].alt_mo_no != "[null]" ? JSON.parse(resolve[i].alt_mo_no) : []);
+        }
         res.json({
             success: true,
             result: resolve || []
@@ -65,6 +72,11 @@ router.get('/:dept_id', async (req, res, next) => {
 //pbk get by dept
 router.get('/forConfig/:dept_id', async (req, res, next) => {
     await DB.getFullListForDeptConfig('pbk', req.params.dept_id).then((resolve) => {
+        for (let i in resolve) {
+            resolve[i].document = (resolve[i].document != "[null]" ? JSON.parse(resolve[i].document) : {});
+            resolve[i].relative_ref = (resolve[i].relative_ref != "[null]" ? JSON.parse(resolve[i].relative_ref) : []);
+            resolve[i].alt_mo_no = (resolve[i].alt_mo_no != "[null]" ? JSON.parse(resolve[i].alt_mo_no) : []);
+        }
         res.json({
             success: true,
             result: resolve || []
@@ -81,6 +93,9 @@ router.put('/', async (req, res, next) => {
             if (err) {
                 return next(err);
             }
+            data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
+            data.relative_ref = (data.relative_ref != "[null]" ? JSON.parse(data.relative_ref) : []);
+            data.alt_mo_no = (data.alt_mo_no != "[null]" ? JSON.parse(data.alt_mo_no) : []);
             res.json({
                 success: true,
                 result: data || []

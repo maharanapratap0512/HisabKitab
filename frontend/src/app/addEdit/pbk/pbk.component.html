@@ -49,6 +49,7 @@
                         <tr>
                            <th style="width: 80px;">No.</th>
                            <th style="width: 70px;">Manage</th>
+                           <th style="width: 100px;">Image</th>                        
                            <th style="width: 85px;">Roll No.</th>
                            <th style="width: 200px;">Name (Hin-Eng)</th>
                            <th style="width: 200px;">Relative Names</th>
@@ -82,9 +83,12 @@
                                  Protected
                               </i>
                            </td>
+                           <td>
+                              <img *ngIf="data.document && data.document.images" [src]="baseurl + data.document.images[0]" height="60px" style="padding: 5px; border-radius: 15px;">
+                           </td>
                            <td>{{data.roll_no ? data.roll_no : '______'}} </td>
-                           <td>{{data.pbk_hin}} :<br> {{data.pbk_eng}}</td>
-                           <td>{{data.relation}}:<br>{{data.relative_name}}</td>
+                           <td>{{data.pbk_hin}} <br> {{data.pbk_eng}}</td>
+                           <td>{{data.relation}}<br>{{data.relative_name}}</td>
                            <td>{{data.gender}}</td>
                            <td>{{data.birth_date | date:'dd-MM-yyyy'}}
                               <br>{{data.age?'Age : '+data.age:'-'}}
@@ -92,14 +96,14 @@
                            <td>{{data.status}}</td>
                            <td>{{data.address?data.address:'-'}}</td>
                            <td>{{data.townarea?data.townarea:'-'}}</td>
-                           <td>{{data.state_hin}} :<br> {{data.state_eng}}</td>
-                           <td>{{data.city_hin}} :<br> {{data.city_eng}}</td>
+                           <td>{{data.state_hin}} <br> {{data.state_eng}}</td>
+                           <td>{{data.city_hin}} <br> {{data.city_eng}}</td>
                            <!-- <td>{{data.tempaddress}}</td> -->
                            <!-- <td>{{data.district}}</td>
                               <td>{{data.country}}</td> -->
                            <td>{{data.mo_no?data.mo_no:'-'}}</td>
                            <td>
-                              {{data.mm_hin?data.mm_hin + ' :' :'-'}} <br> {{data.mm_eng?data.mm_eng + ' :' :''}} <br>
+                              {{data.mm_hin?data.mm_hin :'-'}} <br> {{data.mm_eng?data.mm_eng :''}} <br>
                               {{data.mm_code?data.mm_code:''}}
                            </td>
                            <td>{{data.bhatti_date | date:'dd-MM-yyyy'}}</td>

@@ -72,17 +72,19 @@ export class JawakEntryComponent implements OnInit {
       nimmit: [null],
       dept_id: [this.auth.webUser.dept_id],
     });
+    setTimeout(()=>{
 
-    this.gs.observeList().subscribe(result => {
-      this.mms = result.mm ? result.mm : [];
-      this.conditions = result.condition ? result.condition : [];
-      this.jawak_types = result.jawak_type ? result.jawak_type : [];
-      this.items = result.itemmix ? result.itemmix : [];
-      this.categories = result.category ? result.category : [];
-      this.units = result.unit ? result.unit : [];
-      this.pbks = result.pbk ? result.pbk : [];
-      this.states = result.state ? result.state : [];
-    });
+      this.gs.observeList().subscribe(result => {
+        this.mms = result.mm ? result.mm : [];
+        this.conditions = result.condition ? result.condition : [];
+        this.jawak_types = result.jawak_type ? result.jawak_type : [];
+        this.items = result.itemmix ? result.itemmix : [];
+        this.categories = result.category ? result.category : [];
+        this.units = result.unit ? result.unit : [];
+        this.pbks = result.pbk ? result.pbk : [];
+        this.states = result.state ? result.state : [];
+      });
+    }, 100);
   }
 
   async ngOnInit(): Promise<void> {
@@ -136,7 +138,7 @@ export class JawakEntryComponent implements OnInit {
         item_detail: this.aawakRef.item_detail,
         product_id: this.aawakRef.product_id,
         condition_id: this.aawakRef.condition_id,
-        qty: this.aawakRef.qty,
+        qty: this.aawakRef.remaining_qty ? this.aawakRef.remaining_qty: this.aawakRef.Stock,
         unit_id: this.aawakRef.unit_id,
         description: this.aawakRef.description,
         aawak_ref_id: this.aawakRef._id,

@@ -53,8 +53,9 @@ export class GlobalService {
     let data = new Observable<any>(observer => {
       setTimeout(() => {
         observer.next(this.Lists);
-      }, 1);
+      }, 100);
     });
+    console.log("global", data);
     return data;
   }
 

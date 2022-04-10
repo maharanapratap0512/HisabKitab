@@ -25,6 +25,7 @@ export class PbkComponent implements OnInit {
   pbkData: any = [];
   total_count: any;
   showAge: any;
+  baseurl:any;
 
 
   constructor(
@@ -40,6 +41,7 @@ export class PbkComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getPbkData();
+    this.baseurl = this.api.getUrl('BASE');
   }
 
   getPbkData() {
@@ -63,6 +65,7 @@ export class PbkComponent implements OnInit {
     });
   }
 
+  
   addPbkResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;

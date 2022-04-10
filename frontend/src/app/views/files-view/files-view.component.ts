@@ -17,10 +17,12 @@ export class FilesViewComponent implements OnInit {
 
   imageName: any = [];
   imageFolder: any = [];
+  apiName: any = "IMAGE";
   baseUrl: any;
   isLoader: any;
   renameFileName: any;
   @Input() getData: any;
+  @Input() type: any;
   @Input() isEdit: any;
   @Output() response = new EventEmitter();
 
@@ -35,7 +37,20 @@ export class FilesViewComponent implements OnInit {
 
   }
 
-  ngOnChanges(changes: SimpleChanges) { }
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.type) {
+      switch (changes.type.currentValue) {
+        case 'pbk': this.apiName = "PBKIMAGE";
+          break;
+        case 'product': this.apiName = "PRODUCTIMAGE";
+          break;
+        case 'aawak': this.apiName = "AAWAKIMAGE";
+          break;
+        case 'jawak': this.apiName = "JAWAKIMAGE";
+          break;
+      }
+    }
+  }
 
   ngOnInit(): void {
     this.getImages();
@@ -44,7 +59,7 @@ export class FilesViewComponent implements OnInit {
 
   getImages() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('IMAGE')).subscribe((data) => {
+    this.http.get(this.api.getUrl(this.apiName)).subscribe((data) => {
       if (data['result'] && data['success']) {
         this.imageName = data['result'];
         this.imageFolder = data['dirpath'];
@@ -58,7 +73,7 @@ export class FilesViewComponent implements OnInit {
     // this.doctfile = event.target.files[0];
     const formData = new FormData();
     formData.append('image', event.target.files[0]);
-    this.http.postFormData(this.api.getUrl('IMAGE'), formData).subscribe((data: any) => {
+    this.http.postFormData(this.api.getUrl(this.apiName), formData).subscribe((data: any) => {
       if (data) {
         this.toastr.success("IMAGE added successully.")
         this.imageName.unshift(data['file'].split('\\').at(-1));
@@ -91,7 +106,7 @@ export class FilesViewComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.isLoader = true
-        this.http.delete(this.api.getUrl('IMAGE'), body).subscribe((data: any) => {
+        this.http.delete(this.api.getUrl(this.apiName), body).subscribe((data: any) => {
           if (data['success'] && data['result']) {
             this.toastr.success("IMAGE deleted Successfully.")
             this.imageName.splice(this.imageName.indexOf(name), 1);

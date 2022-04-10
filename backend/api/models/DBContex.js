@@ -140,6 +140,7 @@ class DBContex {
                         exportDB.run(`PRAGMA user_version = ${migrationCount}`, (err) => {
                             if (err) console.log("pragma error : ", err);
                         });
+                        exportDB.run(`PRAGMA foreign_keys = on`);
 
                         exportDB.run(`COMMIT`);
                     });
@@ -562,14 +563,14 @@ class DBContex {
                 for (let [field, value] of Object.entries(dataObj)) {
                     cols += `${field},`;
                     val += `?,`
-                    if (field == 'document') {
+                    if (['document', 'relative_ref', 'alt_mo_no'].includes(field)) {
                         value = JSON.stringify(value);
                     }
                     params.push(value);
                 }
                 cols = cols.slice(0, -1);
-                val = val.slice(0, -1);
-                let sql = `insert into ${table_name}(${cols}) values(${val})`;
+                val = val.slice(0, -1);                
+                let sql = `insert into ${table_name}(${cols}) values(${val})`;                
                 this.run(sql, params).then((resolve) => {
                     let selectSql = this.fullListConfig[table_name];
                     selectSql += ` where ${table_name}._id = ${resolve.lastID}`;
@@ -602,14 +603,14 @@ class DBContex {
                     for (let [field, value] of Object.entries(dataObj)) {
                         cols += `${field},`;
                         val += `?,`
-                        if (field == 'document') {
+                        if (['document', 'relative_ref', 'alt_mo_no'].includes(field)) {
                             value = JSON.stringify(value);
                         }
                         params.push(value);
                     }
                     cols = cols.slice(0, -1);
                     val = val.slice(0, -1);
-                    let sql = `insert into ${table_name}(${cols}) values(${val})`;
+                    let sql = `insert into ${table_name}(${cols}) values(${val})`;                    
                     this.run(sql, params).then((res) => {
                         let selectSql = this.fullListConfig[table_name];
                         selectSql += ` where ${table_name}._id = ${res.lastID}`;
@@ -639,12 +640,15 @@ class DBContex {
         try {
             let params = [];
             let sql = `UPDATE ${tableName} SET `;
-            for (const [field, value] of Object.entries(dataObj)) {
+            for (let [field, value] of Object.entries(dataObj)) {
                 sql += `${field} = ?,`;
+                if (['document', 'relative_ref', 'alt_mo_no'].includes(field)) {
+                    value = JSON.stringify(value);
+                }
                 params.push(value);
             }
             // sql = sql.slice(0, -1);
-            sql += `updated_at = current_timestamp`;
+            sql += `updated_at = datetime('now', 'localtime')`;
             sql += ` where ${conditionString}`;
             await this.localDB.run(sql, params, async (err) => {
                 if (err) {
@@ -655,6 +659,44 @@ class DBContex {
                     sql = this.fullListConfig[tableName];
                     sql += (conditionString ? ` where ${conditionString}` : ``);
                     await this.localDB.get(sql, async (err, rows) => {
+                        if (err) {
+                            console.log(sql, err);
+                            return callback(err);
+                        }
+                        return callback(null, rows);
+                    });
+                }
+            });
+        }
+        catch (ex) {
+            return callback(ex)
+        }
+
+    }
+
+    updateMany = async (tableName, dataObj, conditionString, callback) => {
+        try {
+            let params = [];
+            let sql = `UPDATE ${tableName} SET `;
+            for (let [field, value] of Object.entries(dataObj)) {
+                sql += `${field} = ?,`;
+                if (['document', 'relative_ref', 'alt_mo_no'].includes(field)) {
+                    value = JSON.stringify(value);
+                }
+                params.push(value);
+            }
+            // sql = sql.slice(0, -1);
+            sql += `updated_at = datetime('now', 'localtime')`;
+            sql += ` where ${conditionString}`;
+            await this.localDB.run(sql, params, async (err) => {
+                if (err) {
+                    console.log({ sql: sql, params: params, err: err });
+                    return callback(err)
+                }
+                else {
+                    sql = this.fullListConfig[tableName];
+                    sql += (conditionString ? ` where ${conditionString}` : ``);
+                    await this.localDB.all(sql, async (err, rows) => {
                         if (err) {
                             console.log(sql, err);
                             return callback(err);

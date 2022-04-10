@@ -98,33 +98,27 @@ export class BachatComponent implements OnInit {
   }
 
   addJawak(data: any) {
-    this.editData = {
-      mm_id: data.mm_id,
-      item_id: data.item_id,
-      subitem_id: data.subitem_id,
-      qty: data.Stock,
-      unit_id: data.unit_id,
-      dept_id: data.dept_id,
-      unit_short: data.unit_short
-    }
+    this.editData = data;
     this.showModal = "Add Jawak";
     $('#showModal').modal('show');
   }
 
   addJawakResponse(ev: any) {
     // this.isLoader = true;
-    let i = this.bachatData.findIndex((b: any) => b.dept_id == ev.dept_id && b.item_id == ev.item_id && b.subitem_id == ev.subitem_id && b.mm_id == ev.mm_id);
-    if (i && ev.jawak_type_eng == "Used") {
-      this.bachatData[i].Used = (this.bachatData[i].Used ? this.bachatData[i].Used : 0) + ev.qty;
+    
+    let i = this.bachatData.findIndex((b: any) => b.dept_id == ev.dept_id && b.item_id == ev.item_id && (b.subitem_id == ev.subitem_id || !ev.subitem_id) && b.mm_id == ev.mm_id);
+    
+    if(i>=0){
+      if (ev.jawak_type_eng == "Used") {
+        this.bachatData[i].Used = (this.bachatData[i].Used ? this.bachatData[i].Used : 0) + ev.qty;
+      }
       this.bachatData[i].Stock = (this.bachatData[i].Stock ? this.bachatData[i].Stock : 0) - ev.qty;
-    }
-    else if (i) {
-      this.bachatData[i].Stock = (this.bachatData[i].Stock ? this.bachatData[i].Stock : 0) - ev.qty;
+      
+      if (this.bachatData[i].Used == 0 && this.bachatData.Stock == 0) {
+        this.bachatData.splice(i, 1);
+      }
     }
 
-    if (!this.bachatData[i].Used && !this.bachatData.Stock) {
-      this.bachatData.splice(i, 1);
-    }
     $('#showModal').modal('hide');
     this.showModal = '';
 

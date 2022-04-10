@@ -28,6 +28,7 @@ router.post('/:dept_id', async (req, res, next) => {
     if (req.body) {
         await DB.insertFromDept('product', req.body, req.params.dept_id).then((data) => {
             // await DB.insertToCache('product', data, (err, data) => { })
+            data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
             res.json({
                 success: true,
                 result: data || []
@@ -44,6 +45,9 @@ router.post('/:dept_id', async (req, res, next) => {
 //  product get by dept_id
 router.get('/:dept_id', async (req, res, next) => {
     await DB.getFullListByDept('product', req.params.dept_id).then((data) => {
+        for (let i in data) {
+            data[i].document = (data[i].document != "[null]" ? JSON.parse(data[i].document) : {});
+        }
         res.json({
             success: true,
             result: data || []
@@ -54,6 +58,9 @@ router.get('/:dept_id', async (req, res, next) => {
 //  product get
 router.get('/', async (req, res, next) => {
     await DB.getList('product').then((data) => {
+        for (let i in data) {
+            data[i].document = (data[i].document != "[null]" ? JSON.parse(data[i].document) : {});
+        }
         res.json({
             success: true,
             result: data || []
@@ -69,6 +76,7 @@ router.put('/', async (req, res, next) => {
             if (err) {
                 return next(err);
             }
+            data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
             res.json({
                 success: true,
                 result: data || []
