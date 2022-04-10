@@ -7,7 +7,7 @@ import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
 import { GlobalService } from '../services/global.service';
 import { HttpService } from '../services/http.service';
-declare var $:any;
+declare var $: any;
 
 @Component({
   selector: 'app-jawak',
@@ -15,12 +15,37 @@ declare var $:any;
   styleUrls: ['./jawak.component.scss']
 })
 export class JawakComponent implements OnInit {
-  isLoader:boolean = false;
-  term:any;
-  showModal:String = '';
-  total_count: any;
-  jawakData:any = [];
+  isLoader: boolean = false;
+  term: any;
+  showModal: String = '';
+  total_count: any = 0;
+  jawakData: any = [];
   editData: any = {};
+  mms: any = [];
+  viewData: any = [];
+  items: any = [];
+  units: any = [];
+  conditions: any = [];
+  subitems: any = [];
+  pbks: any = [];
+  jawak_types: any = [];
+  products: any = [];
+  categories: any = [];
+  isCondition: any = false;
+  productsAll: any = [];
+  states: any = [];
+  departments: any = [];
+  filterBody: any = {
+    pbk_id: [],
+    mm_id: [],
+    jawak_mm_id: [],
+    jawak_type_id: [],
+    product_id: [],
+    item_id: [],
+    subitem_id: [],
+    condition_id: [],
+  };
+  cat: any;
 
 
 
@@ -36,9 +61,19 @@ export class JawakComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAawakData();
+    this.gs.observeList().subscribe(result => {
+      this.mms = result.mm ? result.mm : [];
+      this.conditions = result.condition ? result.condition : [];
+      this.jawak_types = result.jawak_type ? result.jawak_type : [];
+      this.items = result.itemmix ? result.itemmix : [];
+      this.categories = result.category ? result.category : [];
+      this.units = result.unit ? result.unit : [];
+      this.pbks = result.pbk ? result.pbk : [];
+      this.states = result.state ? result.state : [];
+    });
   }
 
-  openModal(type:String){
+  openModal(type: String) {
     this.showModal = type;
     $('#showModal').modal('show');
   }
@@ -118,4 +153,63 @@ export class JawakComponent implements OnInit {
       }
     })
   }
+
+  filterFormSubmit(formdata: any) {
+    if (formdata) {
+      console.log("formdata", formdata);
+    }
+    else {
+      this.toastr.error('All Fields are Empty.');
+    }
+  }
+
+  stateSelected(ev: any) {
+    // if (ev)
+    //   this.aawakData = this.aawakAll.filter((aawak: { state_id: any; }) => aawak.state_id == ev);
+    // else
+    //   this.aawakData = this.aawakAll;
+  }
+
+  catSelected(ev: any) {
+    if (ev) {
+      this.cat = ev;
+      this.items = this.gs.Lists.itemmix.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
+    }
+    else {
+      this.cat = null;
+      this.items = this.gs.Lists.itemmix;
+    }
+  }
+
+  itemSelected(ev: any) {
+    if (ev) {
+      let item = this.items.find((i: { _id: any; }) => i._id == ev);
+      this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
+      if (this.cat) {
+        this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
+      }
+      else {
+        this.subitems = item.subitems;
+      }
+    }
+    else {
+      this.subitems = [];
+    }
+  }
+
+  subitemSelected(ev: any) {
+    if (ev) {
+      let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
+      this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
+    }
+    else {
+      this.products = this.productsAll;
+    }
+  }
+
+  productSelected(ev: any) {
+    this.isCondition = true;
+    let product = this.products.find((p: { _id: any; }) => p._id == ev);
+  }
+
 }

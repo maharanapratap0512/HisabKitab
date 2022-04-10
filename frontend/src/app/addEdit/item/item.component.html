@@ -52,7 +52,7 @@
                         </div>
                      </div>
                      <div class="col-2">
-                        <button type="button" class="btn-sm btn-light float-end py-0" style="width: 60%;">
+                        <button class="btn btn-light float-end py-0" style="width: 60%;">
                            <span class="float-start">Items : </span> <span
                               class="float-end">{{itemData.length}}</span><br />
                            <span class="float-start">Subitems : </span><span class="float-end">
@@ -82,12 +82,16 @@
                         <ng-container class="accordion-item" *ngFor="let data of itemData | filter:term; let i=index">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
                               [attr.aria-controls]="'#collapse-' + i" class="item-row">
-                              <td style="font-size: large; cursor:pointer;" (click)="protectionToggle(data._id, data.active)">
+                              <td style="font-size: large;">
                                  {{i+1}}
-                                 <i *ngIf="auth.webUser.dept_id == 1 && data.active" class="uil-shield-check"
-                                    style="color: yellow;"></i>
-                                 <i *ngIf="auth.webUser.dept_id == 1 && !data.active" class="uil-shield-slash"
-                                    style="color: red;"></i>
+                                 <span class="mx-1"
+                                    style="font-size: x-large;position: absolute;line-height: 28px;cursor: pointer"
+                                    (click)="protectionToggle(data._id, data.active)">
+                                    <i *ngIf="auth.webUser.dept_id == 1 && data.active" data-toggle="tooltip"
+                                       title="Protected" class="uil-shield-check text-warning"></i>
+                                    <i *ngIf="auth.webUser.dept_id == 1 && !data.active" data-toggle="tooltip"
+                                       title="Unprotected" class="uil-shield-slash text-danger"></i>
+                                 </span>
                               </td>
                               <td>
                                  <button class="btn btn-sm btn-outline-success" type="button"
@@ -100,9 +104,11 @@
                                     *ngIf="auth.webUser.dept_id == 1 || !data.active">
                                     <i class="uil-trash"></i>
                                  </button>
-                                 <i *ngIf="auth.webUser.dept_id != 1 && data.active" class="uil-shield-check mx-1">
-                                    Protected
-                                 </i>
+                                 <span *ngIf="auth.webUser.dept_id != 1 && data.active" data-toggle="tooltip"
+                                    title="Protected" class="text-warning mx-1"
+                                    style="font-size: xx-large;cursor: pointer;position: absolute;line-height: 0px;">
+                                    <i class="uil-shield-check"></i>
+                                 </span>
                               </td>
                               <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
                               <td>{{data.item_code?data.item_code:'-'}}</td>
@@ -128,13 +134,19 @@
                                     <td colspan="6" class="subitem-row">
                                        <table class="" style="width: 99.7%;table-layout: fixed;">
                                           <tr>
-                                             <td style="width: 50px; font-size: large; cursor: pointer;" (click)="protectionToggleSubitem(si._id, si.active)">
-                                                <!-- <i class="uil-corner-down-right pl-4"></i>  -->
-                                                {{j+1}}
-                                                <i *ngIf="auth.webUser.dept_id == 1 && si.active"
-                                                   class="uil-shield-check" style="color: yellow;"></i>
-                                                <i *ngIf="auth.webUser.dept_id == 1 && !si.active"
-                                                   class="uil-shield-slash" style="color: red;"></i>
+                                             <td style="width: 75px;">
+                                                <i class="uil-corner-down-right"></i>
+                                                <span class="mx-1">{{j+1}}</span>
+                                                <span class="mx-1"
+                                                   style="font-size: x-large;position: absolute;line-height: 0px;cursor: pointer"
+                                                   (click)="protectionToggleSubitem(si._id, si.active)">
+                                                   <i *ngIf="auth.webUser.dept_id == 1 && si.active"
+                                                      data-toggle="tooltip" title="Protected"
+                                                      class="uil-shield-check text-warning"></i>
+                                                   <i *ngIf="auth.webUser.dept_id == 1 && !si.active"
+                                                      data-toggle="tooltip" title="Unprotected"
+                                                      class="uil-shield-slash text-danger"></i>
+                                                </span>
                                              </td>
                                              <td style="width: 160px;">
                                                 <button *ngIf="auth.webUser.dept_id == 1 || !si.active"
@@ -145,28 +157,26 @@
                                                    class="btn btn-sm btn-danger" type="button"
                                                    (click)="deleteSubitem(i, j,si._id)">
                                                    <i class="uil-trash"></i></button>
-                                                <i *ngIf="auth.webUser.dept_id != 1 && si.active"
-                                                   class="uil-shield-check mx-1"> Protected
-                                                </i>
+                                                <span *ngIf="auth.webUser.dept_id != 1 && data.active"
+                                                   data-toggle="tooltip" title="Protected" class="text-warning mx-1"
+                                                   style="font-size: xx-large;cursor: pointer;line-height: 0px;">
+                                                   <i class="uil-shield-check"></i>
+                                                </span>
                                              </td>
                                              <td style="width: 250px;" class="nav-item">
                                                 {{si.subitem_hin +' : '+ si.subitem_eng}}
                                              </td>
                                              <td style="width: 180px;" class="nav-item">
-                                                <!-- <b>Item = </b> -->
                                                 {{si.subitem_code?si.subitem_code_hin + ' : ' +
                                                 si.subitem_code_eng:'-'}}
                                              </td>
                                              <td style="width: 180px;" class="nav-item">
-                                                <!-- <b>Unit = </b> -->
                                                 {{si.unit_id?si.unit_short + ' : ' + si.unit_full:'-'}}
                                              </td>
                                              <td style="width: 180px;" class="nav-item">
-                                                <!-- <b>Category = </b> -->
                                                 {{si.category_id?si.category_hin + ' : ' + si.category_eng:'-'}}
                                              </td>
                                              <td style="width: 250px;" class="nav-item">
-                                                <!-- <b>Extra Note = </b> -->
                                                 {{si.extra_note?si.extra_note:'N/A'}}
                                              </td>
                                           </tr>
