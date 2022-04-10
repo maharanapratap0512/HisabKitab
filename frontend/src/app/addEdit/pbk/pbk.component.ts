@@ -25,6 +25,19 @@ export class PbkComponent implements OnInit {
   pbkData: any = [];
   total_count: any;
   showAge: any;
+  showFilter: boolean = false
+  filterBody: any = {
+    state: [],
+    city: [],
+    gender: [],
+    class_mm: [],
+  };
+  states: any = [];
+  cities: any = [];
+  mms: any = [];
+  genders: any = [];
+  statuses: any = [];
+  relations: any = [];
 
 
   constructor(
@@ -39,6 +52,14 @@ export class PbkComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
+    this.gs.observeList().subscribe(result => {
+      this.states = result.state ? result.state : [];
+      this.cities = result.cities ? result.cities : []
+      this.mms = result.mm ? result.mm : [];
+      this.genders = result.gender ? result.gender : [];
+      this.relations = result.relation ? result.relation : [];
+      this.statuses = result.status ? result.status : [];
+    });
     this.getPbkData();
   }
 
@@ -129,21 +150,30 @@ export class PbkComponent implements OnInit {
     body.query = {
       _id: id
     }
-    body.set = {      
+    body.set = {
       active: !active
     };
-    this.http.put(this.api.getUrl('PBK'), body).subscribe((data: any) => {     
-        this.pbkData.splice(this.pbkData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);    
-        this.isLoader = false;  
-        if(data['result'].active){
-          this.toastr.success("Protetion Shield Activated");
-        }      
-        else{          
-          this.toastr.success("Protetion Shield Deactivated");
-        }
+    this.http.put(this.api.getUrl('PBK'), body).subscribe((data: any) => {
+      this.pbkData.splice(this.pbkData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);
+      this.isLoader = false;
+      if (data['result'].active) {
+        this.toastr.success("Protetion Shield Activated");
+      }
+      else {
+        this.toastr.success("Protetion Shield Deactivated");
+      }
     }, err => {
       this.toastr.error(err['message']);
       this.isLoader = false;
     });
+  }
+
+  filterFormSubmit(formdata: any) {
+    if (formdata.city || formdata.class_mm || formdata.gender || formdata.bhatti_year || formdata.state || formdata.roll_no) {
+      console.log("formdata", formdata);
+    }
+    else {
+      this.toastr.error('All Fields are Empty.');
+    }
   }
 }

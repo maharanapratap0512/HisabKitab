@@ -29,6 +29,29 @@ export class AawakComponent implements OnInit {
   };
   mms: any = [];
   viewData: any = [];
+  items: any = [];
+  units: any = [];
+  conditions: any = [];
+  subitems: any = [];
+  pbks: any = [];
+  aawak_types: any = [];
+  products: any = [];
+  categories: any = [];
+  isCondition: any = false;
+  productsAll: any = [];
+  states: any = [];
+  departments: any = [];
+  filterBody: any = {
+    pbk_id: [],
+    mm_id: [],
+    aawak_mm_id: [],
+    aawak_type_id: [],
+    product_id: [],
+    item_id: [],
+    subitem_id: [],
+    condition_id: [],
+  };
+  cat: any;
 
   constructor(
     private fb: FormBuilder,
@@ -45,6 +68,15 @@ export class AawakComponent implements OnInit {
     this.getaawakData();
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
+      this.items = result.itemmix ? result.itemmix : [];
+      this.units = result.unit ? result.unit : [];
+      this.states = result.state ? result.state : [];
+      this.conditions = result.condition ? result.condition : [];
+      this.departments = result.department ? result.department : [];
+      this.pbks = result.pbk ? result.pbk : [];
+      this.aawak_types = result.aawak_type ? result.aawak_type : [];
+      this.products = result.product ? result.product : [];
+      this.categories = result.category ? result.category : [];
     });
   }
 
@@ -76,15 +108,7 @@ export class AawakComponent implements OnInit {
     });
   }
 
-  stateSelected(ev: any) {
-    if (ev)
-      this.aawakData = this.aawakAll.filter((aawak: { state_id: any; }) => aawak.state_id == ev);
-    else
-      this.aawakData = this.aawakAll;
-  }
-
   aawakDeptSelected(ev: any) {
-
     if (ev) {
       this.aawakData = this.aawakAll.filter((aawak: { dept_id: any; }) => aawak.dept_id == ev);
     }
@@ -95,8 +119,6 @@ export class AawakComponent implements OnInit {
 
   addAawakResponse(ev: any) {
     if (ev._id) {
-      console.log("if res", ev);
-
       this.isLoader = true;
       $('#showModal').modal('hide');
       this.showModal = '';
@@ -209,6 +231,64 @@ export class AawakComponent implements OnInit {
   openModal(type: any) {
     this.showModal = type;
     $('#showModal').modal('show');
+  }
+
+  filterFormSubmit(formdata: any) {
+    if (formdata) {
+      console.log("formdata", formdata);
+    }
+    else {
+      this.toastr.error('All Fields are Empty.');
+    }
+  }
+
+  stateSelected(ev: any) {
+    if (ev)
+      this.aawakData = this.aawakAll.filter((aawak: { state_id: any; }) => aawak.state_id == ev);
+    else
+      this.aawakData = this.aawakAll;
+  }
+
+  catSelected(ev: any) {
+    if (ev) {
+      this.cat = ev;
+      this.items = this.gs.Lists.itemmix.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
+    }
+    else {
+      this.cat = null;
+      this.items = this.gs.Lists.itemmix;
+    }
+  }
+
+  itemSelected(ev: any) {
+    if (ev) {
+      let item = this.items.find((i: { _id: any; }) => i._id == ev);
+      this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
+      if (this.cat) {
+        this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
+      }
+      else {
+        this.subitems = item.subitems;
+      }
+    }
+    else {
+      this.subitems = [];
+    }
+  }
+
+  subitemSelected(ev: any) {
+    if (ev) {
+      let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
+      this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
+    }
+    else {
+      this.products = this.productsAll;
+    }
+  }
+
+  productSelected(ev: any) {
+    this.isCondition = true;
+    let product = this.products.find((p: { _id: any; }) => p._id == ev);
   }
 
 }

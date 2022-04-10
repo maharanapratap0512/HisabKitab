@@ -80,9 +80,9 @@
                               <input [type]="passType" id="password" class="form-control"
                                  placeholder="Enter your password" formControlName="password"
                                  [ngClass]="{'validation':loginForm.get('password')?.errors && (loginForm.get('password')?.touched || loginForm.get ('password')?.dirty)}">
-                              <!-- <div class="input-group-text" data-password="false">
+                              <div class="input-group-text" data-password="false" (click)="passHideShow()">
                                  <span class="password-eye"></span>
-                              </div> -->
+                              </div>
                            </div>
                         </div>
 

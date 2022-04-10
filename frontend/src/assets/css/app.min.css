@@ -2267,7 +2267,7 @@ progress {
 }
 
 .table>tbody {
-   vertical-align: inherit
+   vertical-align: middle
 }
 
 .table>thead {
@@ -22380,4 +22380,4 @@ Not supports in Firefox and IE */
    -webkit-box-shadow: 0px -15px 20px 15px rgb(38 39 40);
    -moz-box-shadow: 0px -15px 20px 15px rgb(38 39 40);
    box-shadow: 0px -15px 20px 15px rgb(38 39 40);
- }
+}

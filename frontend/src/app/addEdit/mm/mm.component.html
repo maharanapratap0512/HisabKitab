@@ -56,7 +56,7 @@
                   <table class="table table-hover dt-responsive">
                      <thead>
                         <tr>
-                           <th style="width: 40px;">No.</th>
+                           <th style="width: 50px;">No.</th>
                            <th style="width: 120px;">Manage</th>
                            <th style="width: 150px;">MM(Hin)</th>
                            <th style="width: 150px;">MM(Eng)</th>
@@ -70,16 +70,22 @@
                      </thead>
                      <tbody>
                         <tr *ngFor="let data of mmData | filter:term; let i=index">
-                           <td style="font-size: large; cursor:pointer;" (click)="protectionToggle(data._id, data.active)">
+                           <td style="font-size: large;">
                               {{i+1}}
-                              <i *ngIf="auth.webUser.dept_id == 1 && data.active" class="uil-shield-check" style="color: yellow;"></i>
-                              <i *ngIf="auth.webUser.dept_id == 1 && !data.active" class="uil-shield-slash" style="color: red;"></i>
+                              <span class="mx-1" style="font-size: x-large;position: absolute;line-height: 28px;"
+                                 (click)="protectionToggle(data._id, data.active)">
+                                 <i *ngIf="auth.webUser.dept_id == 1 && data.active" data-toggle="tooltip"
+                                    title="Protected" class="uil-shield-check text-warning"></i>
+                                 <i *ngIf="auth.webUser.dept_id == 1 && !data.active" data-toggle="tooltip"
+                                    title="Unprotected" class="uil-shield-slash text-danger"></i>
+                              </span>
                            </td>
                            <td>
-                              <button *ngIf="auth.webUser.dept_id == 1 || !data.active" class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                              <button *ngIf="auth.webUser.dept_id == 1 || !data.active"
+                                 class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button>
-                              <button *ngIf="auth.webUser.dept_id == 1 || !data.active" class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
-                                    class="uil-trash"></i></button>
+                              <button *ngIf="auth.webUser.dept_id == 1 || !data.active" class="btn btn-sm btn-danger"
+                                 type="button" (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
                               <i *ngIf="auth.webUser.dept_id != 1 && data.active" class="uil-shield-check mx-1">
                                  Protected
                               </i>

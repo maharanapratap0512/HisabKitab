@@ -49,10 +49,16 @@
                      </thead>
                      <tbody>
                         <tr *ngFor="let data of categoryData | filter:term; let i=index">
-                           <td style="font-size: large; cursor:pointer;" (click)="protectionToggle(data._id, data.active)">
+                           <td style="font-size: large;">
                               {{i+1}}
-                              <i *ngIf="auth.webUser.dept_id == 1 && data.active" class="uil-shield-check" style="color: yellow;"></i>
-                              <i *ngIf="auth.webUser.dept_id == 1 && !data.active" class="uil-shield-slash" style="color: red;"></i>
+                              <span class="mx-1"
+                                 style="font-size: x-large;position: absolute;line-height: 28px;cursor: pointer;"
+                                 (click)="protectionToggle(data._id, data.active)">
+                                 <i *ngIf="auth.webUser.dept_id == 1 && data.active" data-toggle="tooltip"
+                                    title="Protected" class="uil-shield-check text-warning"></i>
+                                 <i *ngIf="auth.webUser.dept_id == 1 && !data.active" data-toggle="tooltip"
+                                    title="Unprotected" class="uil-shield-slash text-danger"></i>
+                              </span>
                            </td>
                            <td>
                               <div *ngIf="auth.webUser.dept_id == 1 || !data.active">

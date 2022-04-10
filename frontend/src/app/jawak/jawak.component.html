@@ -13,28 +13,181 @@
             <!-- Add Button, Search Field, Filter button, Total Count -->
             <div class="row">
                <div class="card-body" style="overflow: auto;">
-                  <div class="col-12 px-2">
-                     <div class="float-start col-3">
+                  <div class="row d-flex justify-content-between">
+                     <div class="col-2">
                         <!-- <button class="btn btn-primary" (click)="openModal('Add Jawak')">
                            <i class="dripicons-plus" style="font-size: large;"> </i>Add Jawak
                         </button> -->
                      </div>
-                     <div class="float-start col-4">
+                     <div class="col-5">
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
                         </div>
                      </div>
-                     <div class="float-start col-2 mx-3">
-                        <button type="button" class="btn btn-outline-light">Advance Filter
-                           <i style="font-weight: 700;" class="dripicons-chevron-down"> </i>
+                     <div class="col-2">
+                        <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse"
+                           data-bs-target="#collapseExample" aria-expanded="false"
+                           aria-controls="collapseExample">Advance Filter <i class="dripicons-chevron-down"> </i>
                         </button>
                      </div>
-                     <div class="float-end" *ngIf="total_count">
-                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total
+                     <div class="col-2">
+                        <button type="button" style="font-weight: 700 !important;"
+                           class="btn btn-light  float-end">Total
                            Count : {{total_count}}
                            <!-- {{productData? productData.length:''}} -->
                         </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <!-- fliter collapse -->
+            <div class="collapse" id="collapseExample">
+               <div class="card card-body">
+                  <div class="row">
+                     <div class="card-body">
+                        <form #filterForm="ngForm">
+                           <div class="row">
+                              <div class="col-md-3 mb-3">
+                                 <div class="form-group">
+                                    <label class="form-label">Pkt No.</label>
+                                    <input type="text" class="form-control" placeholder="Pkt No."
+                                       [(ngModel)]="filterBody.pkt_num" name="pkt_num">
+                                 </div>
+                              </div>
+
+                              <div class="col-md-3 mb-3">
+                                 <div class="form-group">
+                                    <label class="form-label">Sewadhari</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Filter PBK by State"
+                                       [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)">
+                                       <ng-option selected="selected" disabled value="">Select State to Filter Pbk
+                                       </ng-option>
+                                       <ng-option *ngFor="let item of states" [value]="item._id">
+                                          {{item.state_hin}} : {{item.state_eng}}
+                                       </ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;"
+                                       placeholder="Select Roll no. or Pbk name" [clearable]="false"
+                                       [virtualScroll]="true" [multiple]="true" [(ngModel)]="filterBody.pbk_id"
+                                       name="pbk_id" [closeOnSelect]="false">
+                                       <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
+                                       </ng-option>
+                                       <ng-option *ngFor="let item of pbks" [value]="item._id">
+                                          {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} :
+                                          {{item.relation}} :
+                                          {{item.relative_name}}
+                                       </ng-option>
+                                    </ng-select>
+                                 </div>
+                              </div>
+
+                              <div class="col-md-3 mb-3">
+                                 <div class="form-group">
+                                    <label class="form-label">Item & Subitem</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                       [clearable]="false" [virtualScroll]="true" [(ngModel)]="filterBody.item_id"
+                                       (change)="itemSelected($event)" [multiple]="true" name="item_id"
+                                       [closeOnSelect]="false">
+                                       <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                                       <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                                          {{item.item_eng}} : {{item.item_code}}</ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
+                                       [clearable]="false" [virtualScroll]="true" [multiple]="true"
+                                       [(ngModel)]="filterBody.subitem_id" name="subitem_id">
+                                       <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
+                                       <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}}
+                                          :
+                                          {{item.subitem_eng}}</ng-option>
+                                    </ng-select>
+                                 </div>
+                              </div>
+
+                              <div class="col-md-3 mb-3">
+                                 <div class="form-group">
+                                    <label class="form-label">Product & Condition</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Product"
+                                       [clearable]="true" [virtualScroll]="true" [multiple]="true"
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.product_id" name="product_id"
+                                       (change)="productSelected($event)">
+                                       <ng-option selected="selected" disabled value="">Select Product</ng-option>
+                                       <ng-option *ngFor="let item of products" [value]="item._id">{{item.item_hin}} :
+                                          {{item.subitem_hin}}
+                                          : {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num
+                                          : ''}}
+                                       </ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition"
+                                       [clearable]="false" [virtualScroll]="true" [multiple]="true"
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.condition_id"
+                                       name="condition_id">
+                                       <ng-option selected="selected" disabled value="">Select Condition</ng-option>
+                                       <ng-option *ngFor="let item of conditions" [value]="item._id">
+                                          {{item.list_name_hin}} :
+                                          {{item.list_name_eng}} </ng-option>
+                                    </ng-select>
+                                 </div>
+                              </div>
+
+                              <div class="col-md-3 mb-3">
+                                 <div class="form-group">
+                                    <label class="form-label">MM</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
+                                       [virtualScroll]="true" name="mm_id" [multiple]="true" [closeOnSelect]="false"
+                                       [(ngModel)]="filterBody.mm_id" #mm_id="ngModel">
+                                       <ng-option *ngFor="let item of mms" [value]="item._id">
+                                          {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                    </ng-select>
+                                 </div>
+                              </div>
+
+                              <div class="col-md-3 mb-3">
+                                 <div class="form-group">
+                                    <label class="form-label">Jawak MM</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Jawak MM"
+                                       [clearable]="true" [virtualScroll]="true" name="jawak_mm_id" [multiple]="true"
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.jawak_mm_id"
+                                       #jawak_mm_id="ngModel">
+                                       <ng-option *ngFor="let item of mms" [value]="item._id">
+                                          {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                    </ng-select>
+                                 </div>
+                              </div>
+
+                              <div class="col-md-3 mb-3">
+                                 <div class="form-group">
+                                    <label class="form-label">Jawak Type</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Jawak Type"
+                                       [clearable]="false" [virtualScroll]="true" [multiple]="true"
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.jawak_type_id"
+                                       name="jawak_type_id">
+                                       <ng-option selected="selected" disabled value="">Jawak Type
+                                       </ng-option>
+                                       <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                          {{item.list_name_hin}} : {{item.list_name_eng}}
+                                       </ng-option>
+                                    </ng-select>
+                                 </div>
+                              </div>
+
+                              <div class="col-md-3 mb-3">
+                                 <div class="form-group">
+                                    <label class="form-label">Nimmit</label>
+                                    <input type="text" class="form-control" placeholder="Nimmit"
+                                       [(ngModel)]="filterBody.nimmit" name="nimmit">
+                                 </div>
+                              </div>
+                              <div class="col-md-3 mb-3 text-center">
+                                 <button class="btn btn-primary submit mx-2" type="submit"
+                                    (click)="filterFormSubmit(filterForm.value)">Submit</button>
+
+                                 <button class="btn btn-outline-secondary submit mx-2" type="reset"
+                                    (click)="filterForm.reset()">Clear All</button>
+                              </div>
+                           </div>
+                        </form>
                      </div>
                   </div>
                </div>
