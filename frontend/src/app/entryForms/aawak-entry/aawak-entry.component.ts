@@ -132,7 +132,17 @@ export class AawakEntryComponent implements OnInit {
       this.amnt = changes.getData.currentValue.actual_amt;
       this.oldQty = changes.getData.currentValue.qty
       this.unit = changes.getData.currentValue.unit_short;
-
+      setTimeout(() => {
+        this.itemSelected(changes.getData.currentValue.item_id);
+        if (changes.getData.currentValue.subitem_id) {
+          this.subitemSelected(changes.getData.currentValue.subitem_id);
+          setTimeout(() => {
+            this.aawakForm.patchValue({
+              subitem_id: changes.getData.currentValue.subitem_id
+            })
+          }, 50);
+        }
+      }, 100);
     }
   }
 

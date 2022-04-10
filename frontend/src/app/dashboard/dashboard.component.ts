@@ -28,6 +28,7 @@ export class DashboardComponent implements OnInit {
   sitems: any = [];
   fields: any;
   viewData: any = [];
+  mmAwk:any;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -76,8 +77,19 @@ export class DashboardComponent implements OnInit {
     this.http.get(this.api.getUrl('PENDING_AWK') + this.auth.webUser.dept_id).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.pendingAawakData = data['result'];
-        // this.bachatDataAll = data['result'];
-        console.log("aawak", this.pendingAawakData);
+      }
+    });
+  }
+
+  mmForAwkSelected(ev:any){
+    let body:any = {};
+    body.dept_id = this.auth.webUser.dept_id;
+    if(ev){
+      body.mm_id = ev ;
+    }
+    this.http.put(this.api.getUrl('PENDING_AWK'), body).subscribe((data: any) => {
+      if (data['result'] && data['success']) {
+        this.pendingAawakData = data['result'];
       }
     });
   }
@@ -107,20 +119,7 @@ export class DashboardComponent implements OnInit {
   }
 
   addJawak(data: any) {
-    this.editData = {
-      date: data.date,
-      mm_id: data.mm_id,
-      item_id: data.item_id,
-      subitem_id: data.subitem_id,
-      product_id: data.product_id,
-      item_detail: data.item_detail,
-      condition_id: data.condition_id,
-      qty: data.remaining_qty,
-      unit_id: data.unit_id,
-      aawak_ref_id: data._id,
-      dept_id: data.dept_id,
-      unit_short: data.unit_short
-    }
+    this.editData = data;
     this.showModal = "Add Jawak";
     $('#showModal').modal('show');
   }

@@ -1,6 +1,141 @@
 <div class="row" id="jawakEntryComponent">
     <div class="card-body">
         <form [formGroup]="jawakForm">
+            <div class="row" *ngIf="aawakRef && aawakRef._id">
+                <div class="card card-body">
+                    <div class="row">
+                        <div class="col-2">
+                            <div>
+                                <h5>
+                                    <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Date </span>
+                                    <span class="font-12">
+                                        {{aawakRef.date}}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div>
+                                <h5>
+                                    <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Pkt No
+                                    </span>
+                                    <span class="font-12">
+                                        {{aawakRef.pkt_num}}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div>
+                                <h5>
+                                    <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Item </span>
+                                    <span class="font-12">
+                                        {{aawakRef.item_hin}} {{aawakRef.subitem_hin ? ' : ' + aawakRef.subitem_hin :
+                                        ''}}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div>
+                                <h5>
+                                    <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Type </span>
+                                    <span class="font-12">
+                                        {{aawakRef.aawak_type_hin}}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div>
+                                <h5>
+                                    <span class="font-14 badge badge-secondary-lighten" style="width: 30%;">Item Detail
+                                    </span>
+                                    <span class="font-12">
+                                        {{aawakRef.item_detail}}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <div>
+                                <h5>
+                                    <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">To </span>
+                                    <span class="font-12">
+                                        {{aawakRef.mm_hin}}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div>
+                                <h5>
+                                    <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">From </span>
+                                    <span class="font-12">
+                                        {{aawakRef.aawak_mm_hin}}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div>
+                                <h5>
+                                    <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Qty </span>
+                                    <span class="font-12">
+                                        {{aawakRef.qty}} {{aawakRef.unit_short}} {{aawakRef.rate ? ' @ ' + aawakRef.rate
+                                        : ''}} {{aawakRef.actual_amt ? ' = ' + aawakRef.actual_amt : ''}}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <div>
+                                <h5>
+                                    <span class="font-14 badge badge-danger-lighten" style="width: 25%;">बचत </span>
+                                    <span class="font-12 text-danger">
+                                        {{aawakRef.remaining_qty}} {{aawakRef.unit_short}}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div>
+                                <h5>
+                                    <span class="font-14 badge badge-secondary-lighten" style="width: 30%;">Description
+                                    </span>
+                                    <span class="font-12">
+                                        {{aawakRef.description}}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" *ngIf="auth.webUser.dept_id != 3">
+                        <div class="col-4">
+                            <div>
+                                <h5>
+                                    <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Pbk</span>
+                                    <span class="font-12">
+                                        {{aawakRef.roll_no ? aawakRef.roll_no : '___'}} - {{aawakRef.pbk_hin}} {{aawakRef.relation}} {{aawakRef.relative_name}}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div>
+                                <h5>
+                                    <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Product</span>
+                                    <span class="font-12">
+                                        {{aawakRef.product_code}} {{aawakRef.condition_hin}}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row">
 
                 <div class="col-md-2 mb-3">
@@ -19,7 +154,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="!aawakRef || !aawakRef._id">
                     <div class="form-group">
                         <label class="form-label">MM</label>
                         <button type="button" style="padding: 1px 6px !important;"
@@ -57,7 +192,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-2 mb-3">
+                <div class="col-md-2 mb-3" *ngIf="!aawakRef || !aawakRef._id">
                     <div class="form-group">
                         <label class="form-label">Nimmit</label>
                         <input type="text" class="form-control" placeholder="Nimmit" formControlName="nimmit"
@@ -93,7 +228,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="!aawakRef || !aawakRef._id">
                     <div class="form-group">
                         <label class="form-label">Filter Items By</label>
                         <!-- <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -117,7 +252,7 @@
                 </div>
 
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="!aawakRef || !aawakRef._id">
                     <div class="form-group">
                         <label class="form-label">Item & Subitem</label>
                         <div class="float-end">
@@ -152,7 +287,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id != 3">
+                <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id != 3 && (!aawakRef || !aawakRef._id)">
                     <div class="form-group">
                         <label class="form-label">Product & Condition</label>
                         <div class="float-end">

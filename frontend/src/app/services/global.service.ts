@@ -53,7 +53,7 @@ export class GlobalService {
     let data = new Observable<any>(observer => {
       setTimeout(() => {
         observer.next(this.Lists);
-      }, 100);
+      }, 1);
     });
     return data;
   }

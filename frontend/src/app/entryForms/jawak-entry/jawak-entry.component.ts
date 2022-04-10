@@ -15,6 +15,7 @@ declare var $: any;
 export class JawakEntryComponent implements OnInit {
 
   @Input() getData: any;
+  @Input() aawakRef: any;
   @Input() isEdit: any;
   @Output() response = new EventEmitter();
   jawakForm: FormGroup;
@@ -43,7 +44,8 @@ export class JawakEntryComponent implements OnInit {
   ref_id: any = null;
   cat: any;
 
-  constructor(private fb: FormBuilder,
+  constructor(
+    private fb: FormBuilder,
     private http: HttpService,
     public api: ApiService,
     private toastr: ToastrService,
@@ -70,10 +72,7 @@ export class JawakEntryComponent implements OnInit {
       nimmit: [null],
       dept_id: [this.auth.webUser.dept_id],
     });
-  }
 
-  ngOnInit(): void {
-    console.log("jawak-ngOnInit");
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];
@@ -84,12 +83,16 @@ export class JawakEntryComponent implements OnInit {
       this.pbks = result.pbk ? result.pbk : [];
       this.states = result.state ? result.state : [];
     });
+  }
+
+  async ngOnInit(): Promise<void> {
+    console.log("jawak-ngOnInit");
     this.loadProduct();
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log("pbk-changes", changes);
-    if (changes.getData.currentValue) {
+    console.log("jawak-changes", changes);
+    if (changes.getData && changes.getData.currentValue) {
       this.jawakForm.patchValue({
         date: changes.getData.currentValue.date,
         mm_id: changes.getData.currentValue.mm_id,
@@ -109,12 +112,39 @@ export class JawakEntryComponent implements OnInit {
         nimmit: changes.getData.currentValue.nimmit,
         dept_id: changes.getData.currentValue.dept_id,
       });
-      if (changes.getData.currentValue.aawak_ref_id) {
-        this.ref_id = changes.getData.currentValue.aawak_ref_id;
-      }
-      // this.unit_short = changes.getData.currentValue.unit_id
       this.unit_short = changes.getData.currentValue.unit_short;
+      setTimeout(() => {
+        this.itemSelected(changes.getData.currentValue.item_id);
+        if (changes.getData.currentValue.subitem_id) {
+          this.subitemSelected(changes.getData.currentValue.subitem_id);
+          setTimeout(() => {
+            this.jawakForm.patchValue({
+              subitem_id: changes.getData.currentValue.subitem_id
+            })
+          }, 50);
+        }
+      }, 100);
     }
+    if (changes.aawakRef && changes.aawakRef.currentValue) {
+      this.aawakRef = changes.aawakRef.currentValue;
+      this.unit_short = this.aawakRef.unit_short;
+      this.jawakForm.patchValue({
+        date: this.aawakRef.date,
+        mm_id: this.aawakRef.mm_id,
+        item_id: this.aawakRef.item_id,
+        subitem_id: this.aawakRef.subitem_id,
+        item_detail: this.aawakRef.item_detail,
+        product_id: this.aawakRef.product_id,
+        condition_id: this.aawakRef.condition_id,
+        qty: this.aawakRef.qty,
+        unit_id: this.aawakRef.unit_id,
+        description: this.aawakRef.description,
+        aawak_ref_id: this.aawakRef._id,
+        nimmit: this.aawakRef.nimmit,
+        dept_id: this.aawakRef.dept_id,
+      });
+    }
+
   }
 
   loadProduct() {
@@ -178,23 +208,25 @@ export class JawakEntryComponent implements OnInit {
 
   itemSelected(ev: any) {
     if (ev) {
+      console.log("ev", ev);
       let item = this.items.find((i: { _id: any; }) => i._id == ev);
-      if (this.cat) {
-        this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
+      if (item) {
+        if (this.cat) {
+          this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
+        }
+        else {
+          this.subitems = item.subitems;
+        }
+        if (this.cat && this.cat != item.category_id) {
+          this.jawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
+        } else {
+          this.jawakForm.setControl('subitem_id', this.fb.control(null));
+        }
+        this.unit_short = item.unit_short;
+        this.jawakForm.patchValue({
+          unit_id: item.unit_id
+        });
       }
-      else {
-        this.subitems = item.subitems;
-      }
-
-      if (this.cat && this.cat != item.category_id) {
-        this.jawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
-      } else {
-        this.jawakForm.setControl('subitem_id', this.fb.control(null));
-      }
-      this.unit_short = item.unit_short;
-      this.jawakForm.patchValue({
-        unit_id: item.unit_id
-      });
     }
     else {
       this.subitems = [];
@@ -208,11 +240,13 @@ export class JawakEntryComponent implements OnInit {
   subitemSelected(ev: any) {
     if (ev) {
       let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
-      this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
-      this.jawakForm.patchValue({
-        unit_id: subitem.unit_id,
-      });
-      this.unit_short = subitem.unit_short;
+      if(subitem){
+        this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
+        this.jawakForm.patchValue({
+          unit_id: subitem.unit_id,
+        });
+        this.unit_short = subitem.unit_short ? subitem.unit_short : null;
+      }
 
     }
     else {

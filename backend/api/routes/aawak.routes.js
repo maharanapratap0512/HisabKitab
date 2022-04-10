@@ -63,7 +63,8 @@ router.get('/:dept_id', async (req, res, next) => {
 
 //pending aawak get dept
 router.get('/pending/:dept_id', async (req, res, next) => {
-    await DB.getPendingAawak(req.params.dept_id).then(async (resolve) => {
+    let conditionString = ` where aawak.dept_id = ${req.params.dept_id} AND remaining_qty <> 0`;
+    await DB.getPendingAawak(conditionString).then(async (resolve) => {
         res.json({
             success: true,
             result: resolve || [],
@@ -71,7 +72,24 @@ router.get('/pending/:dept_id', async (req, res, next) => {
     }, (err) => { return next(err) });
 });
 
-
+//pending aawak get dept
+router.put('/pending', async (req, res, next) => {
+    if(req.body){
+        let conditionString = ` where remaining_qty <> 0`;
+        if(req.body.dept_id){
+            conditionString += (conditionString ? ` AND ` : ` where `) + `aawak.dept_id = ${req.body.dept_id}`;
+        }
+        if(req.body.mm_id){
+            conditionString += (conditionString ? ` AND ` : ` where `) + `aawak.mm_id = ${req.body.mm_id}`;
+        }
+        await DB.getPendingAawak(conditionString).then(async (resolve) => {
+            res.json({
+                success: true,
+                result: resolve || [],
+            });
+        }, (err) => { return next(err) });
+    }
+});
 
 //  aawak get 
 router.get('/', async (req, res, next) => {

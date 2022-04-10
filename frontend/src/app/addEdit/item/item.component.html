@@ -1,6 +1,6 @@
 <ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
    [fullScreen]="true">
-   <p style="color: white"> Loading... </p>
+   <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
 </ngx-spinner>
 
 <!-- Begin page -->
@@ -149,11 +149,11 @@
                                                 </span>
                                              </td>
                                              <td style="width: 160px;">
-                                                <button *ngIf="auth.webUser.dept_id == 1 || !data.active"
+                                                <button *ngIf="auth.webUser.dept_id == 1 || !si.active"
                                                    class="btn btn-sm btn-primary mx-1" type="button"
                                                    (click)="edit(si, 'subitem')">
                                                    <i class="uil uil-pen"></i></button>
-                                                <button *ngIf="auth.webUser.dept_id == 1 || !data.active"
+                                                <button *ngIf="auth.webUser.dept_id == 1 || !si.active"
                                                    class="btn btn-sm btn-danger" type="button"
                                                    (click)="deleteSubitem(i, j,si._id)">
                                                    <i class="uil-trash"></i></button>

@@ -241,10 +241,9 @@ export class ItemComponent implements OnInit {
       active: !active
     };
     this.http.put(this.api.getUrl('ITEM'), body).subscribe((data: any) => {
-      let i = this.itemData.findIndex((i: { _id: any; }) => i._id == id);
-      if (i) {
-        this.itemData[i].active = data['result'].active;
-      }
+      let i = this.itemData.findIndex((i: { _id: any; }) => i._id == data['result']._id);
+      
+      this.itemData[i].active = data['result'].active;
       this.isLoader = false;
       if (data['result'].active) {
         this.toastr.success("Protetion Shield Activated");
@@ -268,8 +267,8 @@ export class ItemComponent implements OnInit {
     };
     this.http.put(this.api.getUrl('SUBITEM'), body).subscribe((data: any) => {
       let i = this.itemData.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
-      let j = this.itemData[i].subitems.findIndex((s: { _id: any; })=>s._id == data['result']._id);
-      
+      let j = this.itemData[i].subitems.findIndex((s: { _id: any; }) => s._id == data['result']._id);
+
       this.itemData[i].subitems[j].active = data['result'].active;
       this.isLoader = false;
       if (data['result'].active) {

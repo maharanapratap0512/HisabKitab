@@ -188,20 +188,7 @@ export class AawakComponent implements OnInit {
   }
 
   addJawak(data: any) {
-    this.editData = {
-      date: data.date,
-      mm_id: data.mm_id,
-      item_id: data.item_id,
-      subitem_id: data.subitem_id,
-      product_id: data.product_id,
-      item_detail: data.item_detail,
-      condition_id: data.condition_id,
-      qty: data.remaining_qty,
-      unit_id: data.unit_id,
-      aawak_ref_id: data._id,
-      dept_id: data.dept_id,
-      unit_short: data.unit_short
-    }
+    this.editData = data;
     this.showModal = "Add Jawak";
     $('#showModal').modal('show');
   }

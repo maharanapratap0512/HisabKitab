@@ -328,11 +328,11 @@ class DBContex {
         });
     }
 
-    getPendingAawak = async (dept_id) => {
+    getPendingAawak = async (conditionString = null) => {
         return new Promise(async (resolve, reject) => {
             try {
                 let sql = this.fullListConfig['aawak'];
-                sql += ` where aawak.dept_id = ${dept_id} AND remaining_qty > 0`;
+                sql +=  conditionString ? ` ` + conditionString : ``;
                 this.localDB.all(sql, (err, data) => {
                     if (err) {
                         reject(err);
