@@ -229,13 +229,15 @@
                               {{data.mm_hin}} {{data.mm_code ? '('+data.mm_code+')': ''}}<br />
                               {{data.mm_eng}}
                            </td>
-                           <td>{{data.pkt_num}}</td>
+                           <td>{{data.pkt_num?data.pkt_num:'-'}}</td>
                            <td>{{data.date | date:'yyyy-MM-dd'}}</td>
                            <td>
+                              <span *ngIf="!data.jawak_mm_id">-</span>
                               {{data.jawak_mm_hin}}<br />
                               {{data.jawak_mm_eng}}
                            </td>
                            <td *ngIf="auth.webUser.dept_id != 3">
+                              <span *ngIf="!data.pbk_id">-</span>
                               {{data.pbk_hin}} <br />
                               {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
                            </td>
@@ -244,6 +246,7 @@
                               {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
                            </td>
                            <td *ngIf="auth.webUser.dept_id != 3">
+                              <span *ngIf="!data.product_id">-</span>
                               {{data.sr_num ? data.sr_num : ''}} <br />
                               {{data.product_code ? data.product_code : ''}}
                               {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
@@ -253,9 +256,9 @@
                            </td>
                            <td>{{data.jawak_type_hin}}<br />
                               {{data.jawak_type_eng}}</td>
-                           <td>{{data.item_detail}}</td>
-                           <td>{{data.description}}</td>
-                           <td>{{data.nimmit}}</td>
+                           <td>{{data.item_detail?data.item_detail:'-'}}</td>
+                           <td>{{data.description?data.description:'-'}}</td>
+                           <td>{{data.nimmit?data.nimmit:'-'}}</td>
                         </tr>
                      </tbody>
                   </table>

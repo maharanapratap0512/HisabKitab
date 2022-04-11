@@ -37,7 +37,7 @@
                               [virtualScroll]="true" (change)="mmForAwkSelected($event)" [(ngModel)]="mmAwk">
                               <ng-option *ngFor="let item of mms" [value]="item._id">
                                  {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
-                           </ng-select>   
+                           </ng-select>
                         </div>
 
                         <!-- <div class="col-6"> -->
@@ -55,7 +55,8 @@
                         </div>
                      </div>
 
-                     <div class="row px-1 py-1" style="overflow-y: auto; max-height: 500px;">
+                     <div class="row px-1 py-1" style="overflow-y: auto; max-height: 500px;"
+                        *ngIf="pendingAawakData.length">
                         <table id="datatable-buttons" class="table table-hover dt-responsive">
                            <thead>
                               <tr>
@@ -106,6 +107,10 @@
                            </tbody>
                         </table>
                      </div>
+
+                     <h3 class="text-success text-center mt-4" *ngIf="!pendingAawakData.length">
+                        No Pending Aawak Data
+                     </h3>
 
                   </div>
                </div>

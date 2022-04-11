@@ -28,6 +28,16 @@ export class BachatComponent implements OnInit {
   categories: any = [];
   items: any = [];
   conditionObj: any = {};
+  filterBody: any = {
+    pbk_id: [],
+    mm_id: [],
+    aawak_mm_id: [],
+    aawak_type_id: [],
+    product_id: [],
+    item_id: [],
+    subitem_id: [],
+    condition_id: [],
+  };
 
 
   constructor(
@@ -105,15 +115,15 @@ export class BachatComponent implements OnInit {
 
   addJawakResponse(ev: any) {
     // this.isLoader = true;
-    
+
     let i = this.bachatData.findIndex((b: any) => b.dept_id == ev.dept_id && b.item_id == ev.item_id && (b.subitem_id == ev.subitem_id || !ev.subitem_id) && b.mm_id == ev.mm_id);
-    
-    if(i>=0){
+
+    if (i >= 0) {
       if (ev.jawak_type_eng == "Used") {
         this.bachatData[i].Used = (this.bachatData[i].Used ? this.bachatData[i].Used : 0) + ev.qty;
       }
       this.bachatData[i].Stock = (this.bachatData[i].Stock ? this.bachatData[i].Stock : 0) - ev.qty;
-      
+
       if (this.bachatData[i].Used == 0 && this.bachatData.Stock == 0) {
         this.bachatData.splice(i, 1);
       }
@@ -139,4 +149,14 @@ export class BachatComponent implements OnInit {
         });
     }
   }
+
+  filterFormSubmit(formdata: any) {
+    if (formdata) {
+      console.log("formdata", formdata);
+    }
+    else {
+      this.toastr.error('All Fields are Empty.');
+    }
+  }
+  
 }

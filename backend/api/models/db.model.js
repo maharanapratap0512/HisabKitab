@@ -409,10 +409,10 @@ const triggers = {
   drop_jwk_ins_used_bcht_updt: `drop trigger if exists "jwk_ins_used_bcht_updt"`,
   drop_jwk_del_bcht_updt: `drop trigger if exists "jwk_del_bcht_updt"`,
   drop_jwk_ins_used_bcht_ins: `drop trigger if exists "jwk_ins_used_bcht_ins"`,
-  drop_jwk_updt_used_bcht_updt: `drop trigger if exists "jwk_updt_used_bcht_updt"`,  
-  drop_jwk_del_used_bcht_updt: `drop trigger if exists "jwk_del_used_bcht_updt"`,  
-  drop_awk_ins_bcht_ins: `drop trigger if exists "awk_ins_bcht_ins"`,  
-  drop_prdct_ins_bcht_ins: `drop trigger if exists "prdct_ins_bcht_ins"`,  
+  drop_jwk_updt_used_bcht_updt: `drop trigger if exists "jwk_updt_used_bcht_updt"`,
+  drop_jwk_del_used_bcht_updt: `drop trigger if exists "jwk_del_used_bcht_updt"`,
+  drop_awk_ins_bcht_ins: `drop trigger if exists "awk_ins_bcht_ins"`,
+  drop_prdct_ins_bcht_ins: `drop trigger if exists "prdct_ins_bcht_ins"`,
 
   drop_dept_ins_config_ins: `drop trigger if exists "dept_ins_config_ins"`,
   dept_ins_config_ins:
@@ -595,7 +595,7 @@ const triggers = {
 
 const migrationImportTemp = {
   drop_table: `drop table if exists "import_temp"`,
-  importTemp: `create table import_temp(
+  importTemp: `create table if not exists import_temp(
     _id integer UNIQUE primary key AUTOINCREMENT,
     date date null,
     mm varchar(100) null,
@@ -632,6 +632,27 @@ const migrationImportTemp = {
     dept_id integer,
     dept varchar(100) null
   );`,
+
+  drop_table: `drop table if exists "bachat"`,
+  bachat: `create table bachat(
+    _id integer primary key AUTOINCREMENT,
+    mm_id integer not null references mm(_id),
+    item_id integer not null references item(_id),
+    subitem_id integer null references subitem(_id),
+    Stock decimal(10,2) default 0,
+    Used decimal(10,2) default 0,
+    New decimal(10,2) default 0,
+    Old decimal(10,2) default 0,
+    Defective decimal(10,2) default 0,
+    Scrap decimal(10,2) default 0,  
+    unit_id integer not null references unit(_id),
+    dept_id integer references department(_id),
+    active tinyint default 0,
+    created_at timestamp default (datetime('now', 'localtime')),
+    updated_at timestamp default (datetime('now', 'localtime')),
+    unique(mm_id,item_id,subitem_id,unit_id,dept_id)
+  );`,
+
   drop_trigger: `Drop trigger if exists "ins_temp_updt_id"`,
   ins_temp_updt_ids: `CREATE TRIGGER "ins_temp_updt_id"
         AFTER INSERT ON "import_temp"

@@ -259,10 +259,11 @@
                               {{data.mm_eng}}
                            </td>
                            <td>
-                              {{data.aawak_mm_hin}} - {{data.aawak_mm_code}}<br />
-                              {{data.aawak_mm_eng}}
+                              {{data.aawak_mm_id ? data.aawak_mm_hin+' - '+data.aawak_mm_code:'-'}}<br />
+                              {{data.aawak_mm_eng?data.aawak_mm_eng:''}}
                            </td>
                            <td *ngIf="auth.webUser.dept_id != 3">
+                              <span *ngIf="!data.pbk_id">-</span>
                               {{data.pbk_hin}} <br />
                               {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
                            </td>

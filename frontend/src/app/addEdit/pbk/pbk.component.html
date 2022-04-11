@@ -157,7 +157,7 @@
                            <td style="font-size: large;">
                               {{i+1}}
                               <span class="mx-1"
-                                 style="font-size: x-large;position: absolute;line-height: 28px; cursor:pointer;"
+                                 style="font-size: x-large;position: relative;line-height: 28px; cursor:pointer;"
                                  (click)="protectionToggle(data._id, data.active)">
                                  <i *ngIf="auth.webUser.dept_id == 1 && data.active" data-toggle="tooltip"
                                     title="Protected" class="uil-shield-check text-warning"></i>
