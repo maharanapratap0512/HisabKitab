@@ -35,7 +35,8 @@ router.get('/', async (req, res, next) => {
 
 //  category get
 router.get('/home/:dept_id', async (req, res, next) => {
-    await DB.getFullListByDept('bachatHome', req.params.dept_id).then((data) => {
+    let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
+    await DB.getFullListByDept('bachatHome', req.params.dept_id, conditionString).then((data) => {
         // for(let i in data){
         //     data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
         //     for(let bcht of data[i].bachat_qty){

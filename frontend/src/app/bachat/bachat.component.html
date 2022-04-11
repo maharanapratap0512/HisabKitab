@@ -90,6 +90,10 @@
                            <td>Category</td>
                            <td>Item</td>
                            <td>Used</td>
+                           <td *ngIf="auth.webUser.dept_id != 3">New</td>
+                           <td *ngIf="auth.webUser.dept_id != 3">Old</td>
+                           <td *ngIf="auth.webUser.dept_id != 3">Defective</td>
+                           <td *ngIf="auth.webUser.dept_id != 3">Scrap</td>
                            <td>Stock</td>
                            <td>Jawak</td>
                         </tr>
@@ -125,6 +129,26 @@
                               </td>
                               <td>
                                  {{data.Used ? data.Used + " " + data.unit_short : "-"}}
+                              </td>
+                              <td *ngIf="auth.webUser.dept_id != 3">
+                                 <span class="px-1" [ngClass]="{'error': data.New < 0}">
+                                    {{data.New ? data.New + " " + data.unit_short : "-"}}
+                                 </span>
+                              </td>
+                              <td *ngIf="auth.webUser.dept_id != 3">
+                                 <span class="px-1" [ngClass]="{'error': data.Old < 0}">
+                                    {{data.Old ? data.Old + " " + data.unit_short : "-"}}
+                                 </span>
+                              </td>
+                              <td *ngIf="auth.webUser.dept_id != 3">
+                                 <span class="px-1" [ngClass]="{'error': data.Defective < 0}">
+                                    {{data.Defective ? data.Defective + " " + data.unit_short : "-"}}
+                                 </span>
+                              </td>
+                              <td *ngIf="auth.webUser.dept_id != 3">
+                                 <span class="px-1" [ngClass]="{'error': data.Scrap < 0}">
+                                    {{data.Scrap ? data.Scrap + " " + data.unit_short : "-"}}
+                                 </span>
                               </td>
                               <td>
                                  <span class="px-1" [ngClass]="{'error': data.Stock < 0, 'stock':data.Stock > 0}">

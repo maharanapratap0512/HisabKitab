@@ -414,6 +414,26 @@ const triggers = {
   drop_awk_ins_bcht_ins: `drop trigger if exists "awk_ins_bcht_ins"`,
   drop_prdct_ins_bcht_ins: `drop trigger if exists "prdct_ins_bcht_ins"`,
 
+  drop_table: `drop table if exists "bachat"`,
+  bachat: `create table bachat(
+    _id integer primary key AUTOINCREMENT,
+    mm_id integer not null references mm(_id),
+    item_id integer not null references item(_id),
+    subitem_id integer null references subitem(_id),
+    Stock decimal(10,2) default 0,
+    Used decimal(10,2) default 0,
+    New decimal(10,2) default 0,
+    Old decimal(10,2) default 0,
+    Defective decimal(10,2) default 0,
+    Scrap decimal(10,2) default 0,  
+    unit_id integer not null references unit(_id),
+    dept_id integer not null references department(_id),
+    active tinyint default 0,
+    created_at timestamp default (datetime('now', 'localtime')),
+    updated_at timestamp default (datetime('now', 'localtime')),
+    unique(mm_id,item_id,unit_id,dept_id,subitem_id)
+  );`,
+
   drop_dept_ins_config_ins: `drop trigger if exists "dept_ins_config_ins"`,
   dept_ins_config_ins:
     `CREATE TRIGGER IF NOT EXISTS "dept_ins_config_ins"
@@ -426,7 +446,8 @@ const triggers = {
   awk_ins_bcht_updt:
     `CREATE TRIGGER IF not exists "awk_ins_bcht_updt" 
         AFTER INSERT ON "aawak" 
-        FOR EACH ROW       
+        FOR EACH ROW     
+        WHEN EXISTS(select _id from bachat where created_at != NEW.created_at AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
         BEGIN
             update bachat set 
             Stock = Stock + NEW.qty,
@@ -434,24 +455,31 @@ const triggers = {
             Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
             Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
             Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
-            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id; 
-
-            insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, unit_id, dept_id) 
-            values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, NEW.unit_id, NEW.dept_id);                          
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id;                                      
         END;`,
+        drop_awk_ins_bcht_ins: `drop trigger if exists "awk_ins_bcht_updt"`,
+  awk_ins_bcht_ins:
+    `CREATE TRIGGER IF not exists "awk_ins_bcht_ins" 
+        AFTER INSERT ON "aawak" 
+        FOR EACH ROW   
+        WHEN NOT EXISTS(select _id from bachat where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
+        BEGIN
+          insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, New, Old, Defective, Scrap, unit_id, dept_id) 
+          values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);             
+        END;`,
+        
   drop_awk_updt_bcht_updt: `drop trigger if exists "awk_updt_bcht_updt"`,
   awk_updt_bcht_updt:
     `CREATE TRIGGER IF NOT EXISTS "awk_updt_bcht_updt"
         AFTER UPDATE ON "aawak"
         FOR EACH ROW
-        WHEN NEW.qty != OLD.qty
         BEGIN
             update bachat set 
             Stock = Stock + (NEW.qty - OLD.qty),
-            New = New + (CASE WHEN NEW.condition_id = 33 THEN (NEW.qty - OLD.qty) ELSE 0 END),
-            Old = Old + (CASE WHEN NEW.condition_id = 34 THEN (NEW.qty - OLD.qty) ELSE 0 END),
-            Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN (NEW.qty - OLD.qty) ELSE 0 END),
-            Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN (NEW.qty - OLD.qty) ELSE 0 END)
+            New = New + (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+            Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+            Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+            Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
             where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id;  
             
         END;`,
@@ -631,27 +659,7 @@ const migrationImportTemp = {
     active tinyint default 0,
     dept_id integer,
     dept varchar(100) null
-  );`,
-
-  drop_table: `drop table if exists "bachat"`,
-  bachat: `create table bachat(
-    _id integer primary key AUTOINCREMENT,
-    mm_id integer not null references mm(_id),
-    item_id integer not null references item(_id),
-    subitem_id integer null references subitem(_id),
-    Stock decimal(10,2) default 0,
-    Used decimal(10,2) default 0,
-    New decimal(10,2) default 0,
-    Old decimal(10,2) default 0,
-    Defective decimal(10,2) default 0,
-    Scrap decimal(10,2) default 0,  
-    unit_id integer not null references unit(_id),
-    dept_id integer references department(_id),
-    active tinyint default 0,
-    created_at timestamp default (datetime('now', 'localtime')),
-    updated_at timestamp default (datetime('now', 'localtime')),
-    unique(mm_id,item_id,subitem_id,unit_id,dept_id)
-  );`,
+  );`,  
 
   drop_trigger: `Drop trigger if exists "ins_temp_updt_id"`,
   ins_temp_updt_ids: `CREATE TRIGGER "ins_temp_updt_id"
