@@ -17,12 +17,12 @@ router.post('/', async (req, res, next) => {
         });
 
         let bachat = [];
-        await DB.getList('bachat').then((resolve)=>{
+        await DB.getList('bachat').then((resolve) => {
             bachat = resolve;
         });
 
         res.json({
-            success:true,
+            success: true,
             aawak: aawak || {},
             bachat: bachat || {}
         })
@@ -74,12 +74,12 @@ router.get('/pending/:dept_id', async (req, res, next) => {
 
 //pending aawak get dept
 router.put('/pending', async (req, res, next) => {
-    if(req.body){
+    if (req.body) {
         let conditionString = ` where remaining_qty <> 0`;
-        if(req.body.dept_id){
+        if (req.body.dept_id) {
             conditionString += (conditionString ? ` AND ` : ` where `) + `aawak.dept_id = ${req.body.dept_id}`;
         }
-        if(req.body.mm_id){
+        if (req.body.mm_id) {
             conditionString += (conditionString ? ` AND ` : ` where `) + `aawak.mm_id = ${req.body.mm_id}`;
         }
         await DB.getPendingAawak(conditionString).then(async (resolve) => {
@@ -89,6 +89,18 @@ router.put('/pending', async (req, res, next) => {
             });
         }, (err) => { return next(err) });
     }
+});
+
+//aawak get dept and filter
+router.put('/:dept_id', async (req, res, next) => {
+    let conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.mm_id.length > 0 ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${req.body.aawak_mm_id.length > 0 ? ` AND aawak.aawak_mm_id in (${req.body.aawak_mm_id.join(',')})` : ``} ${req.body.pbk_id.length > 0 ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${req.body.item_id.length > 0 ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${req.body.subitem_id.length > 0 ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${req.body.aawak_type_id.length > 0 ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${req.body.product_id.length > 0 ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${req.body.condition_id.length > 0 ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = ${req.body.pkt_num}` : ``} ${req.body.nimmit ? ` AND aawak.nimmit = ${req.body.nimmit}` : ``}`;
+
+    await DB.getFullListByDept('aawak', req.params.dept_id, conditionString).then(async (resolve) => {
+        res.json({
+            success: true,
+            result: resolve || [],
+        });
+    }, (err) => { return next(err) });
 });
 
 //  aawak get 

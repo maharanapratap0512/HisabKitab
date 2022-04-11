@@ -86,9 +86,11 @@
                                     class="uil uil-pen"></i></button>
                               <button *ngIf="auth.webUser.dept_id == 1 || !data.active" class="btn btn-sm btn-danger"
                                  type="button" (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
-                              <i *ngIf="auth.webUser.dept_id != 1 && data.active" class="uil-shield-check mx-1">
-                                 Protected
-                              </i>
+                              <span *ngIf="auth.webUser.dept_id != 1 && data.active" data-toggle="tooltip"
+                                 title="Protected" class="text-warning mx-1"
+                                 style="font-size: xx-large;cursor: pointer;line-height: 0px;">
+                                 <i class="uil-shield-check"></i>
+                              </span>
                            </td>
                            <td>{{data.mm_hin}}</td>
                            <td>{{data.mm_eng}}</td>

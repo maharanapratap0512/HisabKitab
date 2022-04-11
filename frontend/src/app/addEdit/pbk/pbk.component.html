@@ -136,7 +136,7 @@
                         <tr>
                            <th style="width: 80px;">No.</th>
                            <th style="width: 70px;">Manage</th>
-                           <th style="width: 100px;">Image</th>                        
+                           <th style="width: 100px;">Image</th>
                            <th style="width: 85px;">Roll No.</th>
                            <th style="width: 200px;">Name (Hin-Eng)</th>
                            <th style="width: 200px;">Relative Names</th>
@@ -172,12 +172,16 @@
                               <button *ngIf="auth.webUser.dept_id == 1 || !data.active" class="btn btn-sm btn-danger"
                                  type="button" (click)="delete(i,data._id)">
                                  <i class="uil-trash"></i></button>
-                              <i *ngIf="auth.webUser.dept_id != 1 && data.active" class="uil-shield-check mx-1">
-                                 Protected
-                              </i>
+                              <span *ngIf="auth.webUser.dept_id != 1 && data.active" data-toggle="tooltip"
+                                 title="Protected" class="text-warning mx-1"
+                                 style="font-size: xx-large;cursor: pointer;line-height: 0px;">
+                                 <i class="uil-shield-check"></i>
+                              </span>
                            </td>
                            <td>
-                              <img *ngIf="data.document && data.document.images" [src]="baseurl + data.document.images[0]" height="60px" style="padding: 5px; border-radius: 15px;">
+                              <img *ngIf="data.document && data.document.images"
+                                 [src]="baseurl + data.document.images[0]" height="60px"
+                                 style="padding: 5px; border-radius: 15px;">
                            </td>
                            <td>{{data.roll_no ? data.roll_no : '______'}} </td>
                            <td>{{data.pbk_hin}} <br> {{data.pbk_eng}}</td>

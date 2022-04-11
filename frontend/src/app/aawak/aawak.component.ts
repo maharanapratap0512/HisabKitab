@@ -23,10 +23,7 @@ export class AawakComponent implements OnInit {
   editData: any = {};
   aawakData: any = [];
   aawakAll: any = [];
-  total_count: any;
-  conditionObj: any = {
-    mm_id: null
-  };
+  total_count: any; 
   mms: any = [];
   viewData: any = [];
   items: any = [];
@@ -50,6 +47,8 @@ export class AawakComponent implements OnInit {
     item_id: [],
     subitem_id: [],
     condition_id: [],
+    pkt_num:null,
+    nimmit:null
   };
   cat: any;
 
@@ -81,23 +80,12 @@ export class AawakComponent implements OnInit {
   }
 
   mmSelected(ev: any) {
-    if (ev) {
-      this.conditionObj.mm_id = ev
-      // const filterPipe = new FilterpipePipe();
-      // this.aawakData = filterPipe.transform(this.aawakAll, this.conditionObj);
-      // console.log("q",this.aawakData );
-
-    } else {
-      this.conditionObj.mm_id = null
-      // const filterPipe = new FilterpipePipe();
-      // this.aawakData = filterPipe.transform(this.aawakAll, this.conditionObj);
-      // console.log("q",this.aawakData );
-    }
+    
   }
 
   getaawakData() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id).subscribe((data) => {
+    this.http.put(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.aawakData = data['result'];
         this.aawakAll = data['result'];
@@ -179,13 +167,13 @@ export class AawakComponent implements OnInit {
     })
   }
 
-  filter() {
-    this.aawakData = this.aawakAll;
-    for (let [key, value] of Object.entries(this.conditionObj)) {
-      if (value)
-        this.aawakData = this.aawakData.filter((b: any) => b[key] == value);
-    }
-  }
+  // filter() {
+  //   this.aawakData = this.aawakAll;
+  //   for (let [key, value] of Object.entries(this.conditionObj)) {
+  //     if (value)
+  //       this.aawakData = this.aawakData.filter((b: any) => b[key] == value);
+  //   }
+  // }
 
   addJawak(data: any) {
     this.editData = data;
@@ -218,15 +206,6 @@ export class AawakComponent implements OnInit {
   openModal(type: any) {
     this.showModal = type;
     $('#showModal').modal('show');
-  }
-
-  filterFormSubmit(formdata: any) {
-    if (formdata) {
-      console.log("formdata", formdata);
-    }
-    else {
-      this.toastr.error('All Fields are Empty.');
-    }
   }
 
   stateSelected(ev: any) {

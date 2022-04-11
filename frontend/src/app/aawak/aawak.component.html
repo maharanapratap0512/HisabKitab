@@ -195,10 +195,22 @@
                               </div>
                               <div class="col-md-3 mb-3 text-center">
                                  <button class="btn btn-primary submit mx-2" type="submit"
-                                    (click)="filterFormSubmit(filterForm.value)">Submit</button>
+                                    (click)="getaawakData()">Submit</button>
+                                    <!-- (click)="filterFormSubmit(filterForm.value)">Submit</button> -->
 
-                                 <button class="btn btn-outline-secondary submit mx-2" type="reset"
-                                    (click)="filterForm.reset()">Clear All</button>
+                                 <button class="btn btn-outline-secondary submit mx-2" type="button" (click)="filterBody= {
+                                    pbk_id: [],
+                                    mm_id: [],
+                                    aawak_mm_id: [],
+                                    aawak_type_id: [],
+                                    product_id: [],
+                                    item_id: [],
+                                    subitem_id: [],
+                                    condition_id: [],
+                                    pkt_num:null,
+                                    nimmit:null
+                                  };"
+                                    >Clear All</button>
                               </div>
                            </div>
                         </form>
