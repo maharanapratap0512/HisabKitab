@@ -25,13 +25,15 @@ export class PbkComponent implements OnInit {
   pbkData: any = [];
   total_count: any;
   showAge: any;
-  baseurl:any;
+  baseurl: any;
   showFilter: boolean = false
   filterBody: any = {
-    state: [],
-    city: [],
+    bhatti_year: null,
+    city_id: [],
+    class_mm_id: [],
     gender: [],
-    class_mm: [],
+    roll_no: null,
+    state_id: [],
   };
   states: any = [];
   cities: any = [];
@@ -67,7 +69,7 @@ export class PbkComponent implements OnInit {
 
   getPbkData() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('PBK') + this.auth.webUser.dept_id).subscribe((data) => {
+    this.http.put(this.api.getUrl('PBK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.pbkData = data['result'];
         this.total_count = data['result'].length;
@@ -86,7 +88,7 @@ export class PbkComponent implements OnInit {
     });
   }
 
-  
+
   addPbkResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;

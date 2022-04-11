@@ -62,14 +62,8 @@
                                     <ng-select class="custom" style="width: 100%;" placeholder="Select Gender"
                                        [clearable]="true" [virtualScroll]="true" name="gender" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.gender" #gender="ngModel">
-                                       <ng-option selected="selected" value="Kanya">कन्या : Sister
-                                       </ng-option>
-                                       <ng-option selected="selected" value="Mata">माता : Mother</ng-option>
-                                       <ng-option selected="selected" value="Kumar">कुमार : Kumar
-                                       </ng-option>
-                                       <ng-option selected="selected" value="Other Kumar">अधरकुमार :
-                                          AdharKumar
-                                       </ng-option>
+                                       <ng-option *ngFor="let item of genders" [value]="item.list_name_eng">
+                                          {{item.list_name_hin}} : {{item.list_name_eng}}</ng-option>
                                     </ng-select>
                                  </div>
                               </div>
@@ -78,7 +72,7 @@
                                     <label class="form-label">State</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Select State"
                                        [clearable]="true" [virtualScroll]="true" name="state" [multiple]="true"
-                                       [closeOnSelect]="false" [(ngModel)]="filterBody.state" #state="ngModel">
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.state_id" #state="ngModel">
                                        <ng-option *ngFor="let item of states" [value]="item._id">
                                           {{item.state_hin}} :
                                           {{item.state_eng}}</ng-option>
@@ -90,7 +84,7 @@
                                     <label class="form-label">City</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Select City"
                                        [clearable]="true" [virtualScroll]="true" name="city" [multiple]="true"
-                                       [closeOnSelect]="false" [(ngModel)]="filterBody.city" #city="ngModel">
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.city_id" #city="ngModel">
                                        <ng-option *ngFor="let item of cities" [value]="item._id">
                                           {{item.city_hin}} :
                                           {{item.city_eng}}</ng-option>
@@ -102,7 +96,7 @@
                                     <label class="form-label">Daily Class MM</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Daily Class MM"
                                        [clearable]="true" [virtualScroll]="true" name="class_mm" [multiple]="true"
-                                       [closeOnSelect]="false" [(ngModel)]="filterBody.class_mm" #class_mm="ngModel">
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.class_mm_id" #class_mm="ngModel">
                                        <ng-option *ngFor="let item of mms" [value]="item._id">
                                           {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
                                     </ng-select>
@@ -117,10 +111,17 @@
                               </div>
                               <div class="col-md-3 mb-3 text-center">
                                  <button class="btn btn-primary submit mx-2" type="submit"
-                                    (click)="filterFormSubmit(filterForm.value)">Submit</button>
+                                    (click)="getPbkData()">Submit</button>
 
-                                 <button class="btn btn-outline-secondary submit mx-2" type="reset"
-                                    (click)="filterForm.reset()">Clear All</button>
+                                 <button class="btn btn-outline-secondary submit mx-2" type="button"
+                                    (click)="filterBody = {
+                                       bhatti_year: null,
+                                       city: [],
+                                       class_mm: [],
+                                       gender: [],
+                                       roll_no: null,
+                                       state: []
+                                     };">Clear All</button>
                               </div>
                            </div>
                         </form>
@@ -155,9 +156,8 @@
                      <tbody>
                         <tr *ngFor="let data of pbkData | filter:term; let i=index">
                            <td style="font-size: large;">
-                              {{i+1}}
-                              <span class="mx-1"
-                                 style="font-size: x-large;position: relative;line-height: 28px; cursor:pointer;"
+                              {{i+1}}<br>
+                              <span style="font-size: x-large;position: relative;line-height: 28px; cursor:pointer;"
                                  (click)="protectionToggle(data._id, data.active)">
                                  <i *ngIf="auth.webUser.dept_id == 1 && data.active" data-toggle="tooltip"
                                     title="Protected" class="uil-shield-check text-warning"></i>
