@@ -44,6 +44,8 @@ export class JawakComponent implements OnInit {
     item_id: [],
     subitem_id: [],
     condition_id: [],
+    nimmit: null,
+    pkt_num: null
   };
   cat: any;
 
@@ -60,7 +62,7 @@ export class JawakComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getAawakData();
+    this.getJawakData();
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];
@@ -79,9 +81,9 @@ export class JawakComponent implements OnInit {
   }
 
 
-  getAawakData() {
+  getJawakData() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('JAWAK') + this.auth.webUser.dept_id).subscribe((data) => {
+    this.http.put(this.api.getUrl('JAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.jawakData = data['result'];
         this.total_count = data['result'].length;
@@ -152,15 +154,6 @@ export class JawakComponent implements OnInit {
         });
       }
     })
-  }
-
-  filterFormSubmit(formdata: any) {
-    if (formdata) {
-      console.log("formdata", formdata);
-    }
-    else {
-      this.toastr.error('All Fields are Empty.');
-    }
   }
 
   stateSelected(ev: any) {
