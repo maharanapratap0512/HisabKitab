@@ -19,7 +19,7 @@ const Migrations = [
     for (let keys of Object.keys(createTables)) {
       DB.serialize(() => {
         DB.run(createTables[keys], (err) => {
-          if (err) console.log(keys, 'error: ', err);
+          if (err) console.log(keys, 'create error: ', err);
         });
       });
     }
@@ -35,7 +35,7 @@ const Migrations = [
           // DB.run(`ROLLBACK TRANSACTION`, (err)=>{
           //   console.log('ROLLBACK', 'error: ', err);  
           // });
-          console.log(keys, 'error: ', err);
+          console.log(keys, 'old trigger error: ', err);
         };
       });
     }
@@ -49,7 +49,7 @@ const Migrations = [
 
       DB.serialize(() => {
         DB.run(insertData[keys], (err) => {
-          if (err) console.log(keys, 'error: ', err);
+          if (err) console.log(keys, 'insert error: ', err);
         });
       });
 
@@ -64,7 +64,7 @@ const Migrations = [
 
       DB.serialize(() => {
         DB.run(migrationImportTemp[keys], (err) => {
-          if (err) console.log(keys, 'error: ', err);
+          if (err) console.log(keys, ' import temp error: ', err);
         });
       });
 
@@ -79,7 +79,7 @@ const Migrations = [
 
       DB.serialize(() => {
         DB.run(triggers[keys], (err) => {
-          if (err) console.log(keys, 'error: ', err);
+          if (err) console.log(keys, 'trigger error: ', err);
         });
       });
 
@@ -382,7 +382,7 @@ const createTables = {
   active tinyint default 0,
   created_at timestamp default (datetime('now', 'localtime')),
   updated_at timestamp default (datetime('now', 'localtime')),
-  unique(mm_id,bachat_type_id,item_id,subitem_id,unit_id,dept_id)
+  unique(mm_id,item_id,subitem_id,unit_id,dept_id)
 );`,
   bachat_history: `create table bachat_monthly(
   _id integer UNIQUE primary key AUTOINCREMENT,

@@ -119,8 +119,11 @@ class DBContex {
                     exportDB.serialize(() => {
                         exportDB.run(`PRAGMA foreign_keys = off`);
                         exportDB.run(`BEGIN TRANSACTION`);
-                        for (let i = 0; i < 2; i++) {
-                            this.Migrations[i](exportDB);
+                        let migrationCount = this.Migrations.length;
+                        for (let i = 0; i < migrationCount; i++) {
+                            if(i != 2){
+                                this.Migrations[i](exportDB);
+                            }
                         }
                         exportDB.run(`attach '${this.path.resolve(this.DBFolder, 'Database.db')}' as mainDB;`, (err) => {
                             // exportDB.run('ROLLBACK TRANSACTION');
@@ -136,7 +139,7 @@ class DBContex {
                             });
                         }
 
-                        let migrationCount = this.Migrations.length;
+                        
                         exportDB.run(`PRAGMA user_version = ${migrationCount}`, (err) => {
                             if (err) console.log("pragma error : ", err);
                         });
