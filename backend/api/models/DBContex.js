@@ -391,7 +391,7 @@ class DBContex {
         })
     }
 
-    getFullListByDept = async (list_name, dept_id, conditionString = null) => {
+    getFullListByDept = async (list_name, dept_id, conditionString= null, orderBy = null, limit = null, offset = null) => {
         return new Promise(async (resolve, reject) => {
             try {
                 // let sql = this.fullListQuery[list_name];
@@ -415,8 +415,8 @@ class DBContex {
                 }
 
 
-                let sort = this.fullListQuery[list_name + 'sort'];
-                let sql = `${this.fullListQuery[list_name]} ${sort ? 'order by ' + sort : ''} `;
+                let sort = orderBy ? orderBy : this.fullListQuery[list_name + 'sort'];
+                let sql = `${this.fullListQuery[list_name]} ${sort ? 'ORDER BY ' + sort : ''} ${limit ? 'LIMIT ' + limit : ''} ${offset ? 'OFFSET ' + offset : ''}`;
 
                 var lIndex = sql.lastIndexOf("?");
                 sql = sql.substring(0, lIndex) + condition + sql.substring(lIndex + 1);

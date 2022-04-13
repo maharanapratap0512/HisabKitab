@@ -42,7 +42,7 @@ router.post('/:dept_id', async (req, res, next) => {
 
 //  item get by dept
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getFullListByDept('itemMix', req.params.dept_id).then((resolve) => {
+    await DB.getFullListByDept('itemMix', req.params.dept_id, null, null, 100).then((resolve) => {
         let subitem_count = 0;
         for(let i = 0; i < resolve.length; i++){
             

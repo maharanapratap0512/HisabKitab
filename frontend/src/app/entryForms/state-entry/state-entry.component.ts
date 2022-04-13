@@ -40,7 +40,7 @@ export class StateEntryComponent implements OnInit {
 
   ngOnInit() {
     this.spinner.show();
-    this.gs.observeList().subscribe(result => {
+    this.gs.this.gs.getList$.subscribe((result: any) => {().subscribe(result => {
       this.countries = result.country ? result.country : [];
     });
   }

@@ -65,7 +65,7 @@ export class PbkEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.gs.observeList().subscribe(result => {
+    this.gs.this.gs.getList$.subscribe((result: any) => {().subscribe(result => {
       this.states = result.state ? result.state : [];
       this.cities = result.cities ? result.cities : []
       this.mms = result.mm ? result.mm : [];

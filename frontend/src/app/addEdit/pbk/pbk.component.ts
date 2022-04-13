@@ -55,14 +55,22 @@ export class PbkComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
-    this.gs.observeList().subscribe(result => {
-      this.states = result.state ? result.state : [];
-      this.cities = result.cities ? result.cities : []
-      this.mms = result.mm ? result.mm : [];
-      this.genders = result.gender ? result.gender : [];
-      this.relations = result.relation ? result.relation : [];
-      this.statuses = result.status ? result.status : [];
-    });
+    // this.gs.this.gs.getList$.subscribe((result: any) => {().subscribe(result => {
+    //   this.states = result.state ? result.state : [];
+    //   this.cities = result.cities ? result.cities : []
+    //   this.mms = result.mm ? result.mm : [];
+    //   this.genders = result.gender ? result.gender : [];
+    //   this.relations = result.relation ? result.relation : [];
+    //   this.statuses = result.status ? result.status : [];
+    // });
+    this.gs.getList$.subscribe((Lists:any)=>{
+      this.states = Lists.state ? Lists.state : [];
+      this.cities = Lists.city ? Lists.city : []
+      this.mms = Lists.mm ? Lists.mm : [];
+      this.genders = Lists.gender ? Lists.gender : [];
+      this.relations = Lists.relation ? Lists.relation : [];
+      this.statuses = Lists.status ? Lists.status : [];
+    })
     this.getPbkData();
     this.baseurl = this.api.getUrl('BASE');
   }

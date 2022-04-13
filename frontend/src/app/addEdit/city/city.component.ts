@@ -39,7 +39,7 @@ export class CityComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getcityData();
-    this.gs.observeList().subscribe(result => {
+    this.gs.getList$.subscribe((result: any) => {
       this.states = result.state ? result.state : [];
     });
   }

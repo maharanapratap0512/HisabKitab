@@ -74,7 +74,7 @@ export class JawakEntryComponent implements OnInit {
     });
     setTimeout(()=>{
 
-      this.gs.observeList().subscribe(result => {
+      this.gs.this.gs.getList$.subscribe((result: any) => {().subscribe(result => {
         this.mms = result.mm ? result.mm : [];
         this.conditions = result.condition ? result.condition : [];
         this.jawak_types = result.jawak_type ? result.jawak_type : [];
@@ -141,7 +141,7 @@ export class JawakEntryComponent implements OnInit {
         qty: this.aawakRef.remaining_qty ? this.aawakRef.remaining_qty: this.aawakRef.Stock,
         unit_id: this.aawakRef.unit_id,
         description: this.aawakRef.description,
-        aawak_ref_id: this.aawakRef._id,
+        aawak_ref_id: (this.aawakRef._id ? this.aawakRef._id: null),
         nimmit: this.aawakRef.nimmit,
         dept_id: this.aawakRef.dept_id,
       });

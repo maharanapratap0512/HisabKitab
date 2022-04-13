@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { FormControl, FormGroup, ValidationErrors } from '@angular/forms';
 import { HttpService } from 'src/app/services/http.service';
 import { ApiService } from 'src/app/services/api.service';
-import { Observable, observable } from 'rxjs';
+import { Observable, observable, Subject } from 'rxjs';
 import { async } from '@angular/core/testing';
 import { getLocaleMonthNames } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
@@ -15,6 +15,7 @@ export class GlobalService {
 
   Lists: any = {};
   Config: any = {};
+  getList$ = new Subject();
 
   constructor(
     private http: HttpService,
@@ -24,7 +25,7 @@ export class GlobalService {
   ) {
     this.getList();
   }
-
+  
   // validationFireOnSubmit(fg: FormGroup) {
   // Object.keys(fg.controls).forEach(key => {
   //   const control = fg.get(key);
@@ -83,6 +84,7 @@ export class GlobalService {
         this.Lists.department = data['result'].department;
         this.Lists.sitem = data['result'].sitem;
       }
+      this.getList$.next(this.Lists);
     });
   }
 

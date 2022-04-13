@@ -47,7 +47,7 @@ export class SubitemEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.gs.observeList().subscribe(result => {
+    this.gs.this.gs.getList$.subscribe((result: any) => {().subscribe(result => {
       this.items = result.item ? result.item : []
       this.units = result.unit ? result.unit : []
       this.categories = result.category ? result.category : []

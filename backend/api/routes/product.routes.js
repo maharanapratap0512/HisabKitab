@@ -44,7 +44,7 @@ router.post('/:dept_id', async (req, res, next) => {
 
 //  product get by dept_id
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getFullListByDept('product', req.params.dept_id).then((data) => {
+    await DB.getFullListByDept('product', req.params.dept_id, null, 100).then((data) => {
         for (let i in data) {
             data[i].document = (data[i].document != "[null]" ? JSON.parse(data[i].document) : {});
         }
