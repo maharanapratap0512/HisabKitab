@@ -65,18 +65,18 @@ export class AawakComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getaawakData();
-    // this.gs.getList$.subscribe((result: any) => {
-    //   this.mms = result.mm ? result.mm : [];
-    //   this.items = result.itemmix ? result.itemmix : [];
-    //   this.units = result.unit ? result.unit : [];
-    //   this.states = result.state ? result.state : [];
-    //   this.conditions = result.condition ? result.condition : [];
-    //   this.departments = result.department ? result.department : [];
-    //   this.pbks = result.pbk ? result.pbk : [];
-    //   this.aawak_types = result.aawak_type ? result.aawak_type : [];
-    //   this.products = result.product ? result.product : [];
-    //   this.categories = result.category ? result.category : [];
-    // });
+    this.gs.getList$.subscribe((result: any) => {
+      this.mms = result.mm ? result.mm : [];
+      this.items = result.itemmix ? result.itemmix : [];
+      this.units = result.unit ? result.unit : [];
+      this.states = result.state ? result.state : [];
+      this.conditions = result.condition ? result.condition : [];
+      this.departments = result.department ? result.department : [];
+      this.pbks = result.pbk ? result.pbk : [];
+      this.aawak_types = result.aawak_type ? result.aawak_type : [];
+      this.products = result.product ? result.product : [];
+      this.categories = result.category ? result.category : [];
+    });
   }
 
   mmSelected(ev: any) {

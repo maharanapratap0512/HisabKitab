@@ -42,7 +42,7 @@ export class DashboardComponent implements OnInit {
     this.spinner.show();
     this.getBachat();
     this.getPendingAawak();
-    this.gs.observeList().subscribe(result => {
+    this.gs.getList$.subscribe((result: any) => {
       console.log("dashboard", result);
       
       this.mms = result.mm ? result.mm : [];

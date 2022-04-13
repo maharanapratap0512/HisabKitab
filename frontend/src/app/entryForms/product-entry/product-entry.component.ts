@@ -66,7 +66,7 @@ export class ProductEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.gs.this.gs.getList$.subscribe((result: any) => {().subscribe(result => {
+    this.gs.getList$.subscribe((result: any) => {
       this.mms = result.mm ? result.mm : [];
       this.departments = result.department ? result.department : [];
       this.conditions = result.condition ? result.condition : [];

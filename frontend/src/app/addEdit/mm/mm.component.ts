@@ -40,7 +40,7 @@ export class MmComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getmmData();
-    this.gs.observeList().subscribe(result => {
+    this.gs.getList$.subscribe((result: any) => {
       this.states = result.state ? result.state : [];
       this.departments = result.department ? result.department : [];
     });

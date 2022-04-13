@@ -42,10 +42,10 @@ export class ItemComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getItemData();
-    // this.gs.getList$.subscribe((result: any) => {
-    //   this.categories = result.category ? result.category : [];
-    //   this.subitem_lists = result.subitem_list ? result.subitem_list : [];
-    // });
+    this.gs.getList$.subscribe((result: any) => {
+      this.categories = result.category ? result.category : [];
+      this.subitem_lists = result.subitem_list ? result.subitem_list : [];
+    });
   }
 
   getItemData() {

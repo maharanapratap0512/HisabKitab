@@ -41,7 +41,7 @@ export class CityEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.gs.this.gs.getList$.subscribe((result: any) => {().subscribe(result => {
+    this.gs.getList$.subscribe((result: any) => {
       this.states = result.state ? result.state : [];
     });
   }

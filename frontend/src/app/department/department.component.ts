@@ -67,7 +67,7 @@ export class DepartmentComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getDepartments();
-    this.gs.this.gs.getList$.subscribe((result: any) => {().subscribe(result => {
+    this.gs.getList$.subscribe((result: any) => {
       this.states = result.state ? result.state : [];
       this.genders = result.gender ? result.gender : [];
       this.statuses = result.status ? result.status : [];

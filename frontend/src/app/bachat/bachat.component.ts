@@ -53,7 +53,7 @@ export class BachatComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getbachatData();
-    this.gs.this.gs.getList$.subscribe((result: any) => {().subscribe(result => {
+    this.gs.getList$.subscribe((result: any) => {
       this.states = result.state ? result.state : [];
       this.mms = result.mm ? result.mm : [];
       this.categories = result.category ? result.category : [];

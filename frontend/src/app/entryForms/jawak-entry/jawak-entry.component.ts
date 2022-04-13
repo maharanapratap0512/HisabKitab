@@ -74,7 +74,7 @@ export class JawakEntryComponent implements OnInit {
     });
     setTimeout(()=>{
 
-      this.gs.this.gs.getList$.subscribe((result: any) => {().subscribe(result => {
+      this.gs.getList$.subscribe((result: any) => {
         this.mms = result.mm ? result.mm : [];
         this.conditions = result.condition ? result.condition : [];
         this.jawak_types = result.jawak_type ? result.jawak_type : [];

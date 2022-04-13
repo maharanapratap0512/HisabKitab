@@ -78,7 +78,7 @@ export class AawakEntryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.gs.this.gs.getList$.subscribe((result: any) => {().subscribe(result => {
+    this.gs.getList$.subscribe((result: any) => {
       this.items = result.itemmix ? result.itemmix : [];
       this.units = result.unit ? result.unit : [];
       this.states = result.state ? result.state : [];
