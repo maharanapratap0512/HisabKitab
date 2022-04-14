@@ -108,6 +108,7 @@ export class BachatComponent implements OnInit {
   }
 
   addJawak(data: any) {
+    data._id = null;
     this.editData = data;
     this.showModal = "Add Jawak";
     $('#showModal').modal('show');

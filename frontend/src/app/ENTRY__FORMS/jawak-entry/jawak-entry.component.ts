@@ -141,7 +141,7 @@ export class JawakEntryComponent implements OnInit {
         qty: this.aawakRef.remaining_qty ? this.aawakRef.remaining_qty: this.aawakRef.Stock,
         unit_id: this.aawakRef.unit_id,
         description: this.aawakRef.description,
-        aawak_ref_id: this.aawakRef._id,
+        aawak_ref_id: (this.aawakRef._id ? this.aawakRef._id: null),
         nimmit: this.aawakRef.nimmit,
         dept_id: this.aawakRef.dept_id,
       });

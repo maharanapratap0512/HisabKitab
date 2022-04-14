@@ -23,7 +23,7 @@ export class AawakComponent implements OnInit {
   editData: any = {};
   aawakData: any = [];
   aawakAll: any = [];
-  total_count: any; 
+  total_count: any;
   mms: any = [];
   viewData: any = [];
   items: any = [];
@@ -47,8 +47,8 @@ export class AawakComponent implements OnInit {
     item_id: [],
     subitem_id: [],
     condition_id: [],
-    pkt_num:null,
-    nimmit:null
+    pkt_num: null,
+    nimmit: null
   };
   cat: any;
 
@@ -80,7 +80,7 @@ export class AawakComponent implements OnInit {
   }
 
   mmSelected(ev: any) {
-    
+
   }
 
   getaawakData() {

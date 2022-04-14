@@ -85,14 +85,14 @@
                                         deptConf.category.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
-                            <a class="nav-link" id="v-pills-item-tab" data-bs-toggle="pill" href="#v-pills-item"
+                            <!-- <a class="nav-link" id="v-pills-item-tab" data-bs-toggle="pill" href="#v-pills-item"
                                 role="tab" aria-controls="v-pills-item" aria-selected="false" *ngIf="dept_id>2">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Items
                                     <span class="badge bg-primary rounded-pill float-end">{{(deptConf.item &&
                                         deptConf.item.idArr) ? deptConf.item.idArr.length - 1: ''}}</span>
                                 </span>
-                            </a>
+                            </a> -->
                             <a class="nav-link" id="v-pills-itemmix-tab" data-bs-toggle="pill" href="#v-pills-itemmix"
                                 role="tab" aria-controls="v-pills-itemmix" aria-selected="false" *ngIf="dept_id>2">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
@@ -104,14 +104,14 @@
                                     </span>
                                 </span>
                             </a>
-                            <a class="nav-link" id="v-pills-subitem-tab" data-bs-toggle="pill" href="#v-pills-subitem"
+                            <!-- <a class="nav-link" id="v-pills-subitem-tab" data-bs-toggle="pill" href="#v-pills-subitem"
                                 role="tab" aria-controls="v-pills-subitem" aria-selected="false" *ngIf="dept_id>2">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Subitem
                                     <span class="badge bg-primary rounded-pill float-end">{{(deptConf.subitem &&
                                         deptConf.subitem.idArr) ? deptConf.subitem.idArr.length - 1: ''}}</span>
                                 </span>
-                            </a>
+                            </a> -->
                             <a class="nav-link" id="v-pills-ajtypes-tab" data-bs-toggle="pill" href="#v-pills-ajtypes"
                                 role="tab" aria-controls="v-pills-ajtypes" aria-selected="false" *ngIf="dept_id>2">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
@@ -155,7 +155,7 @@
                                                 {{item.state_eng}}</ng-option>
                                         </ng-select>
                                     </div>
-                                    <div class="col-2" *ngIf="!termMM && selMM">
+                                    <div class="col-2" *ngIf="!termMM">
                                         <button type="button" class="btn btn-outline-success"
                                             (click)="selectAll('mm')">+
                                             Select All</button>
@@ -240,7 +240,7 @@
                                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
                                         </ng-select>
                                     </div>
-                                    <div class="col-2" *ngIf="!termPbk && selPbk">
+                                    <div class="col-2" *ngIf="!termPbk">
                                         <button type="button" class="btn btn-outline-success"
                                             (click)="selectAll('pbk')">+
                                             Select All</button>
@@ -345,9 +345,9 @@
                                                 {{item.category_eng}}</ng-option>
                                         </ng-select>
                                     </div>
-                                    <div class="col-2" *ngIf="!termItemmix && selItemmix">
+                                    <div class="col-2" *ngIf="!termItemmix ">
                                         <button type="button" class="btn btn-outline-success"
-                                            (click)="selectAll('item')">+
+                                            (click)="selectAll('itemmix')">+
                                             Select All</button>
                                     </div>
                                 </div>
@@ -470,7 +470,7 @@
                                                 {{item.category_eng}}</ng-option>
                                         </ng-select>
                                     </div>
-                                    <div class="col-2" *ngIf="!termItem && selItem">
+                                    <div class="col-2" *ngIf="!termItem ">
                                         <button type="button" class="btn btn-outline-success"
                                             (click)="selectAll('item')">+
                                             Select All</button>
@@ -536,7 +536,7 @@
                                                 {{item.item_eng}} ({{item.item_code}} )</ng-option>
                                         </ng-select>
                                     </div>
-                                    <div class="col-2" *ngIf="!termSubitem && selSubitem">
+                                    <div class="col-2" *ngIf="!termSubitem ">
                                         <button type="button" class="btn btn-outline-success"
                                             (click)="selectAll('subitem')">+
                                             Select All</button>

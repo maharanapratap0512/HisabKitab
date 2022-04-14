@@ -128,10 +128,19 @@ router.delete('/:id', async (req, res, next) => {
 
 //jawak get by filter
 router.put('/:dept_id', async (req, res, next) => {
+    let orderBy = null, limit = null, offset = null;
     let conditionString = `1=1 ${req.body.mm_id.length > 0 ? ` AND jawak.mm_id in (${req.body.mm_id.join(',')})` : ''} ${req.body.condition_id.length > 0 ? ` AND jawak.condition_id in (${req.body.condition_id.join(',')})` : ''} ${req.body.item_id.length > 0 ? ` AND jawak.item_id in (${req.body.item_id.join(',')})` : ''} ${req.body.jawak_mm_id.length > 0 ? ` AND jawak.jawak_mm_id in (${req.body.jawak_mm_id.join(',')})` : ''} ${req.body.jawak_type_id.length > 0 ? ` AND jawak.jawak_type_id in (${req.body.jawak_type_id.join(',')})` : ''} ${req.body.pbk_id.length > 0 ? ` AND jawak.pbk_id in (${req.body.pbk_id.join(',')})` : ''} ${req.body.subitem_id.length > 0 ? ` AND jawak.subitem_id in (${req.body.subitem_id.join(',')})` : ''} ${req.body.product_id.length > 0 ? ` AND jawak.product_id in (${req.body.product_id.join(',')})` : ''} ${req.body.nimmit ? ` AND jawak.nimmit = ${req.body.nimmit}` : ''} ${req.body.pkt_num ? ` AND jawak.pkt_num = ${req.body.pkt_num}` : ''}`
 
+    if(conditionString.trim() == `1=1`){
+        limit = 100;
+        orderBy = "pbk._id desc";
+    }
+    if(req.body.pageNo && req.body.pageNo > 0){
+        offset = (req.body.pageNo - 1) * 100;
+        limit = 100;
+    }
 
-    await DB.getFullListByDept('jawak', req.params.dept_id, conditionString).then((data) => {
+    await DB.getFullListByDept('jawak', req.params.dept_id, conditionString, orderBy, limit, offset).then((data) => {
         res.json({
             success: true,
             result: data || []
