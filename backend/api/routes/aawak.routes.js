@@ -36,20 +36,21 @@ router.post('/', async (req, res, next) => {
 router.post('/:dept_id', async (req, res, next) => {
     if (req.body) {
         let jawaks = [];
-        if(req.body.jawakArr){
+        if (req.body.jawakArr) {
             jawaks = req.body.jawakArr;
             delete req.body.jawakArr;
         }
         await DB.insertFromDept('aawak', req.body, req.params.dept_id).then(async (data) => {
             // console.log("data", data);
-                data.jawakArr = [];
-                for(let i = 0; i < jawaks.length; i++){
-                    await DB.insertFromDept('jawak', jawaks[i], req.params.dept_id).then((jwkdata) => {
-                        data.jawakArr.push(jwkdata);
-                    },(err)=>{
-                        console.log("jawak err", err, "jawak",jawaks[i]);
-                    });
-                }
+            data.jawakArr = [];
+            for (let i = 0; i < jawaks.length; i++) {
+                jawaks[i].aawak_ref_id = data._id;
+                await DB.insertFromDept('jawak', jawaks[i], req.params.dept_id).then((jwkdata) => {
+                    data.jawakArr.push(jwkdata);
+                }, (err) => {
+                    console.log("jawak err", err, "jawak", jawaks[i]);
+                });
+            }
             res.json({
                 success: true,
                 result: data || {}

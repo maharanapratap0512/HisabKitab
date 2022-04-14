@@ -55,7 +55,6 @@ export class GlobalService {
         observer.next(this.Lists);
       }, 100);
     });
-    console.log("global", data);
     return data;
   }
 
