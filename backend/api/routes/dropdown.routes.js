@@ -61,9 +61,8 @@ router.get('/all/:dept_id', async (req, res, next) => {
         }, (err) => { return [] });
         lists.mm= await DB.getListByDept('mm', req.params.dept_id) || [],
         lists.pbk= await DB.getListByDept('pbk', req.params.dept_id) || [],
-        await DB.getFullList('pbk', ` pbk.status = "nimmit"`).then((resolve)=>{
-            lists.nimmit= resolve.data || []
-        });
+        lists.nimmit= await DB.getListByDept('nimmit', req.params.dept_id) || [],
+        
         lists.state= await DB.getListByDept('state', req.params.dept_id) || [],
         // lists.item= await DB.getFullListByDept('item', req.params.dept_id) || [],
         lists.subitem= await DB.getFullListByDept('subitem', req.params.dept_id) || [],

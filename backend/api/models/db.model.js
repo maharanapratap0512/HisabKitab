@@ -148,6 +148,9 @@ localDB.serialize(() => {
   => adding company_name column to aawak.
 */
 const ver6 = {
+  delete_awk: `delete from aawak`,
+  delete_jwk: `delete from jawak`,
+  delete_bcht: `delete from bachat`,
   drop_trigger:`drop trigger if exists "ins_temp_updt_id"`,
   points: `CREATE TABLE IF NOT EXISTS "point"(
     _id integer PRIMARY KEY AUTOINCREMENT,
@@ -167,7 +170,37 @@ const ver6 = {
   add_company_aawak: `ALTER TABLE "aawak" ADD COLUMN company_name varchar(100)`,
   add_nimmit_jawak: `ALTER TABLE "jawak" ADD COLUMN nimmit_id integer REFERENCES pbk(_id)`,
   add_company_jawak: `ALTER TABLE "jawak" ADD COLUMN company_name varchar(100)`,
-  add_company_mm: `ALTER TABLE "mm" ADD COLUMN nimmit_id integer REFERENCES pbk(_id)`
+  add_company_mm: `ALTER TABLE "mm" ADD COLUMN nimmit_id integer REFERENCES pbk(_id)`,
+  drop_jwk_del_updt_ref_awk: `drop trigger if exists "jwk_del_updt_ref_awk"`,
+  drop_jwk_ins_avk_ref_updt: `drop trigger if exists "jwk_ins_avk_ref_updt"`,
+  drop_jwk_updt_avk_ref_updt: `drop trigger if exists "jwk_updt_avk_ref_updt"`,
+  drop_awk_ref_id: `ALTER TABLE "jawak" DROP COLUMN aawak_ref_id`,
+  add_awk_ref_id: `ALTER TABLE "jawak" ADD COLUMN aawak_ref_id integer REFERENCES aawak(_id) ON DELETE CASCADE`,
+  jwk_del_updt_ref_awk:
+    `CREATE TRIGGER IF not exists "jwk_del_updt_ref_awk" 
+        AFTER DELETE ON "jawak" 
+        FOR EACH ROW
+        When OLD.aawak_ref_id IS NOT NULL
+        BEGIN
+          update aawak set remaining_qty = remaining_qty + OLD.qty where _id = OLD.aawak_ref_id;     
+        END;`,
+  jwk_ins_avk_ref_updt:
+    `CREATE TRIGGER if not EXISTS "jwk_ins_avk_ref_updt"
+        AFTER INSERT ON "jawak"
+        FOR EACH ROW
+        when NEW.aawak_ref_id is not NULL
+        BEGIN
+            update aawak set remaining_qty = remaining_qty - NEW.qty where _id = NEW.aawak_ref_id;
+        END;`,
+  jwk_updt_avk_ref_updt:
+    `CREATE TRIGGER if not EXISTS "jwk_updt_avk_ref_updt"
+        AFTER UPDATE ON "jawak"
+        FOR EACH ROW
+        when OLD.aawak_ref_id is not NULL
+        BEGIN
+            update aawak set remaining_qty = remaining_qty - (NEW.qty - OLD.qty) where _id = OLD.aawak_ref_id;
+        END;`,
+
 
 }
 
@@ -649,33 +682,33 @@ const triggers = {
           Scrap = Scrap + (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
           where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;  
         END;`,
-  drop_jwk_del_updt_ref_awk: `drop trigger if exists "jwk_del_updt_ref_awk"`,
-  jwk_del_updt_ref_awk:
-    `CREATE TRIGGER IF not exists "jwk_del_updt_ref_awk" 
-        AFTER DELETE ON "jawak" 
-        FOR EACH ROW
-        When OLD.aawak_ref_id IS NOT NULL
-        BEGIN
-          update aawak set remaining_qty = remaining_qty + OLD.qty where _id = OLD.aawak_ref_id;     
-        END;`,
-  drop_jwk_ins_avk_ref_updt: `drop trigger if exists "jwk_ins_avk_ref_updt"`,
-  jwk_ins_avk_ref_updt:
-    `CREATE TRIGGER if not EXISTS "jwk_ins_avk_ref_updt"
-        AFTER INSERT ON "jawak"
-        FOR EACH ROW
-        when NEW.aawak_ref_id is not NULL
-        BEGIN
-            update aawak set remaining_qty = remaining_qty - NEW.qty where _id = NEW.aawak_ref_id;
-        END;`,
-  drop_jwk_updt_avk_ref_updt: `drop trigger if exists "jwk_updt_avk_ref_updt"`,
-  jwk_updt_avk_ref_updt:
-    `CREATE TRIGGER if not EXISTS "jwk_updt_avk_ref_updt"
-        AFTER UPDATE ON "jawak"
-        FOR EACH ROW
-        when OLD.aawak_ref_id is not NULL
-        BEGIN
-            update aawak set remaining_qty = remaining_qty - (NEW.qty - OLD.qty) where _id = OLD.aawak_ref_id;
-        END;`,
+  // drop_jwk_del_updt_ref_awk: `drop trigger if exists "jwk_del_updt_ref_awk"`,
+  // jwk_del_updt_ref_awk:
+  //   `CREATE TRIGGER IF not exists "jwk_del_updt_ref_awk" 
+  //       AFTER DELETE ON "jawak" 
+  //       FOR EACH ROW
+  //       When OLD.aawak_ref_id IS NOT NULL
+  //       BEGIN
+  //         update aawak set remaining_qty = remaining_qty + OLD.qty where _id = OLD.aawak_ref_id;     
+  //       END;`,
+  // drop_jwk_ins_avk_ref_updt: `drop trigger if exists "jwk_ins_avk_ref_updt"`,
+  // jwk_ins_avk_ref_updt:
+  //   `CREATE TRIGGER if not EXISTS "jwk_ins_avk_ref_updt"
+  //       AFTER INSERT ON "jawak"
+  //       FOR EACH ROW
+  //       when NEW.aawak_ref_id is not NULL
+  //       BEGIN
+  //           update aawak set remaining_qty = remaining_qty - NEW.qty where _id = NEW.aawak_ref_id;
+  //       END;`,
+  // drop_jwk_updt_avk_ref_updt: `drop trigger if exists "jwk_updt_avk_ref_updt"`,
+  // jwk_updt_avk_ref_updt:
+  //   `CREATE TRIGGER if not EXISTS "jwk_updt_avk_ref_updt"
+  //       AFTER UPDATE ON "jawak"
+  //       FOR EACH ROW
+  //       when OLD.aawak_ref_id is not NULL
+  //       BEGIN
+  //           update aawak set remaining_qty = remaining_qty - (NEW.qty - OLD.qty) where _id = OLD.aawak_ref_id;
+  //       END;`,
   drop_prdct_ins_bcht_updt: `drop trigger if exists "prdct_ins_bcht_updt"`,
   prdct_ins_bcht_updt:
     `CREATE TRIGGER IF NOT EXISTS "prdct_ins_bcht_updt"

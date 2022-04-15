@@ -37,6 +37,7 @@ export class JawakEntryComponent implements OnInit {
   items: any = [];
   jawak_types: any = [];
   units: any = [];
+  nimmits: any = [];
   states: any = [];
   categories: any = [];
   isCondition: any = false;
@@ -69,7 +70,7 @@ export class JawakEntryComponent implements OnInit {
       unit_id: [null, Validators.required],
       description: [null],
       aawak_ref_id: [null],
-      nimmit: [null],
+      nimmit_id: [null],
       dept_id: [this.auth.webUser.dept_id],
     });
     setTimeout(()=>{
@@ -83,6 +84,7 @@ export class JawakEntryComponent implements OnInit {
         this.units = result.unit ? result.unit : [];
         this.pbks = result.pbk ? result.pbk : [];
         this.states = result.state ? result.state : [];
+        this.nimmits = result.nimmit ? result.nimmit : [];
       });
     }, 100);
   }
@@ -111,7 +113,7 @@ export class JawakEntryComponent implements OnInit {
         unit_id: changes.getData.currentValue.unit_id,
         description: changes.getData.currentValue.description,
         aawak_ref_id: changes.getData.currentValue.aawak_ref_id,
-        nimmit: changes.getData.currentValue.nimmit,
+        nimmit_id: changes.getData.currentValue.nimmit_id,
         dept_id: changes.getData.currentValue.dept_id,
       });
       this.unit_short = changes.getData.currentValue.unit_short;
@@ -142,7 +144,7 @@ export class JawakEntryComponent implements OnInit {
         unit_id: this.aawakRef.unit_id,
         description: this.aawakRef.description,
         aawak_ref_id: (this.aawakRef._id ? this.aawakRef._id: null),
-        nimmit: this.aawakRef.nimmit,
+        nimmit_id: this.aawakRef.nimmit_id,
         dept_id: this.aawakRef.dept_id,
       });
     }
@@ -317,7 +319,7 @@ export class JawakEntryComponent implements OnInit {
         unit_id: this.jawakForm.value.unit_id,
         description: this.jawakForm.value.description,
         aawak_ref_id: this.jawakForm.value.aawak_ref_id,
-        nimmit: this.jawakForm.value.nimmit,
+        nimmit_id: this.jawakForm.value.nimmit_id,
         dept_id: this.jawakForm.value.dept_id,
       };
       this.http.put(this.api.getUrl('JAWAK'), body).subscribe((data: any) => {
@@ -350,6 +352,24 @@ export class JawakEntryComponent implements OnInit {
       this.jawakForm.patchValue(
         {
           mm_id: ev._id
+        });
+      this.isLoader = false;
+    }
+    else {
+      this.isLoader = false;
+      console.log("err", ev);
+    }
+  }
+
+  nimmitAddResponse(ev: any) {
+    this.isLoader = true;
+    if (ev._id) {
+      $('#jawakEntryComponent > #showModal').modal('hide');
+      this.showModal = '';
+      // this.states.unshift(ev);
+      this.jawakForm.patchValue(
+        {
+          nimmit_id: ev._id
         });
       this.isLoader = false;
     }

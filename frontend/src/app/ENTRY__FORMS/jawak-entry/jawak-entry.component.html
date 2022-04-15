@@ -192,11 +192,30 @@
                     </div>
                 </div>
 
-                <div class="col-md-2 mb-3" *ngIf="!aawakRef || !aawakRef.Nimmit">
+                <!-- <div class="col-md-2 mb-3" *ngIf="!aawakRef || !aawakRef.Nimmit">
                     <div class="form-group">
                         <label class="form-label">Nimmit</label>
                         <input type="text" class="form-control" placeholder="Nimmit" formControlName="nimmit"
                             [ngClass]="{'validation':jawakForm.get('nimmit')?.errors && (jawakForm.get('nimmit')?.touched || jawakForm.get ('nimmit')?.dirty)}">
+                    </div>
+                </div> -->
+
+                <div class="col-md-2 mb-3" *ngIf="!aawakRef || !aawakRef.Nimmit">
+                    <div class="form-group">
+                        <label class="form-label">Nimmit</label>
+                        <button type="button" style="padding: 1px 6px !important;"
+                            class="btn btn-outline-primary float-end"
+                            onclick="$('#mmEntryComponent > #showModal').modal('show')"
+                            (click)="showModal='Add Nimmit'">+
+                            Add</button>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Nimmit" [clearable]="true"
+                            [virtualScroll]="true" formControlName="nimmit_id"
+                            [ngClass]="{'validation':jawakForm.get('nimmit_id')?.errors && (jawakForm.get('nimmit_id')?.touched || jawakForm.get ('nimmit_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Nimmit</ng-option>
+                            <ng-option *ngFor="let item of nimmits" [value]="item._id">
+                                {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
+                                item.nimmit_state_hin + ')'}}</ng-option>
+                        </ng-select>
                     </div>
                 </div>
 
@@ -456,6 +475,10 @@
                     <!-- Add JMM -->
                     <app-mm-entry *ngIf="showModal == 'Add JMM'" (response)='jmmAddResponse($event)'>
                     </app-mm-entry>
+
+                    <!-- Add Nimmit  -->
+                    <app-pbk-entry *ngIf="showModal == 'Add Nimmit'" (response)="nimmitAddResponse($event)" [isNimmit]="true">
+                    </app-pbk-entry>
 
                 </div>
                 <div class="modal-footer">

@@ -489,6 +489,8 @@ export class AawakEntryComponent implements OnInit {
       $('#aawakEntryComponent > #showModal').modal('hide');
       this.showModal = '';
       // this.mms.unshift(ev);
+      // console.log("aawak", this.mms);
+      
       this.aawakForm.patchValue(
         {
           mm_id: ev._id

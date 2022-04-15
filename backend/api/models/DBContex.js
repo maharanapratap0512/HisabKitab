@@ -212,7 +212,14 @@ class DBContex {
                         'jawak_type'
                     ]
 
-                    if (this.dept_config_list.includes(list_name)) {
+                    
+                    if(list_name == "pbk"){
+                        sql = `select * from pbk where (status is null OR status <> "nimmit") `;
+                        if (!exclude_dept.includes(dept_id)) {                            
+                            sql += ` AND (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
+                        }                
+                    }
+                    else if (this.dept_config_list.includes(list_name)) {
 
                         if (!exclude_dept.includes(dept_id)) {
                             if (list_name_arr.includes(list_name)) {
@@ -235,6 +242,10 @@ class DBContex {
                     }
                     else if (list_name_arr.includes(list_name)) {
                         sql = `select * from support_list where list_type = '${list_name}'`;
+                    }
+                    else if(list_name == "nimmit"){
+                        sql = `select pbk.*, st.state_hin as nimmit_state_hin from pbk
+                                left join state st on st._id = pbk.state_id where status = "nimmit"`;
                     }
                     else {
                         sql = `select * from ${list_name}`;
@@ -1033,7 +1044,7 @@ class DBContex {
         st.state_hin, st.state_eng, 
         pm.mm_hin as parent_mm_hin, pm.mm_eng as parent_mm_eng, pm.mm_code as parent_mm_code, 
         dept.dept_hin, dept.dept_eng, dept.dept_code, 
-        nmt.pbk_hin as nimmit_hin, nmt.pbk_eng as nimmit_eng, nmt.relative_name, nmt.state_id, pst.state_hin as nimmit_state_hin, pst.state_eng as nimmit_state_eng
+        nmt.pbk_hin as nimmit_hin, nmt.pbk_eng as nimmit_eng, nmt.relative_name, nmt.state_id as nimmit_state_id, pst.state_hin as nimmit_state_hin, pst.state_eng as nimmit_state_eng
         from mm
         left join state st on st._id = mm.state_id
         left join mm pm on pm._id = mm.parent_mm_id

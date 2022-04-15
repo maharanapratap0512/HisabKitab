@@ -20,6 +20,7 @@ export class MmEntryComponent implements OnInit {
   @Output() response = new EventEmitter();
   mmForm: FormGroup;
   states: any = [];
+  nimmits: any = [];
   mms: any = [];
   departments: any = [];
   showModal: string = ''
@@ -44,7 +45,7 @@ export class MmEntryComponent implements OnInit {
       dept_id: [2, Validators.required],
       state_id: [null, Validators.required],
       opening_date: [null],
-      nimmit: [null]
+      nimmit_id:[null]
     });
   }
 
@@ -53,6 +54,7 @@ export class MmEntryComponent implements OnInit {
       this.mms = result.mm ? result.mm : [];
       this.states = result.state ? result.state : [];
       this.departments = result.department ? result.department : [];
+      this.nimmits = result.nimmit ? result.nimmit : [];
     });
   }
 
@@ -68,6 +70,8 @@ export class MmEntryComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    console.log(changes);
+    
     if (changes.getData.currentValue) {
       this.mmForm.patchValue({
         mm_eng: changes.getData.currentValue.mm_eng,
@@ -77,7 +81,7 @@ export class MmEntryComponent implements OnInit {
         dept_id: changes.getData.currentValue.dept_id,
         state_id: changes.getData.currentValue.state_id,
         opening_date: changes.getData.currentValue.opening_date,
-        nimmit: changes.getData.currentValue.nimmit,
+        nimmit_id: changes.getData.currentValue.nimmit_id,
       });
     }
   }
@@ -89,7 +93,7 @@ export class MmEntryComponent implements OnInit {
       this.http.post(this.api.getUrl('MM') + this.auth.webUser.dept_id, this.mmForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.gs.Lists.mm.unshift(data['result']);
-          this.mms.unshift(data['result']);
+          // this.mms.unshift(data['result']);
           this.mmForm.reset();
           this.isLoader = false;
           this.toastr.success('MM Added Successfully.');
@@ -123,7 +127,7 @@ export class MmEntryComponent implements OnInit {
         dept_id: this.mmForm.value.dept_id,
         state_id: this.mmForm.value.state_id,
         opening_date: this.mmForm.value.opening_date,
-        nimmit: this.mmForm.value.nimmit
+        nimmit_id: this.mmForm.value.nimmit_id
       };
       this.http.put(this.api.getUrl('MM'), body).subscribe((data: any) => {
         if (data && data['success']) {
@@ -156,6 +160,24 @@ export class MmEntryComponent implements OnInit {
       this.mmForm.patchValue(
         {
           state_id: ev._id
+        });
+      this.isLoader = false;
+    }
+    else {
+      this.isLoader = false;
+      console.log("err", ev);
+    }
+  }
+
+  nimmitAddResponse(ev: any) {
+    this.isLoader = true;
+    if (ev._id) {
+      $('#mmEntryComponent > #showModal').modal('hide');
+      this.showModal = '';
+      // this.states.unshift(ev);
+      this.mmForm.patchValue(
+        {
+          nimmit_id: ev._id
         });
       this.isLoader = false;
     }
