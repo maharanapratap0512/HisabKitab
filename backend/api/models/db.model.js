@@ -2,6 +2,9 @@ const Sqlite = require('sqlite3');
 const path = require('path');
 
 const dbPath = path.resolve(__dirname, '../../../../Data/Database.db');
+const BdbPath = path.resolve(__dirname, '../../../../Data/BetterDatabase.db');
+
+// const DB = require('better-sqlite3')(BdbPath);
 
 const localDB = new Sqlite.Database(dbPath, (err) => {
   if (err) {
@@ -84,6 +87,21 @@ const Migrations = [
       });
 
     }
+  },
+
+  (DB) => {
+    //updating to version 6 
+
+    console.log('updating...',);
+    for (let keys of Object.keys(ver6)) {
+
+      DB.serialize(() => {
+        DB.run(ver6[keys], (err) => {
+          if (err) console.log(keys, 'trigger error: ', err);
+        });
+      });
+
+    }
   }
 ];
 let migrationLength = Migrations.length;
@@ -124,6 +142,93 @@ localDB.serialize(() => {
 });
 
 
+/*version 6 changes
+  => creating new table - points
+  => adding new column "nimmit_id" in aawak, jawak, mm.
+  => adding company_name column to aawak.
+*/
+const ver6 = {
+  drop_trigger:`drop trigger if exists "ins_temp_updt_id"`,
+  points: `CREATE TABLE IF NOT EXISTS "point"(
+    _id integer PRIMARY KEY AUTOINCREMENT,
+    type varchar(100),
+    no int,
+    mrl_date date,
+    clrf_date date,
+    time_from varchar(15),
+    time_to varchar(15),
+    point_hin text not null,
+    point_eng text,
+    created_at timestamp default (datetime('now', 'localtime')),
+    updated_at timestamp default (datetime('now', 'localtime')),
+    active tinyint default 0
+  )`,
+  add_nimmit_aawak: `ALTER TABLE "aawak" ADD COLUMN nimmit_id integer REFERENCES pbk(_id)`,
+  add_company_aawak: `ALTER TABLE "aawak" ADD COLUMN company_name varchar(100)`,
+  add_nimmit_jawak: `ALTER TABLE "jawak" ADD COLUMN nimmit_id integer REFERENCES pbk(_id)`,
+  add_company_jawak: `ALTER TABLE "jawak" ADD COLUMN company_name varchar(100)`,
+  add_company_mm: `ALTER TABLE "mm" ADD COLUMN nimmit_id integer REFERENCES pbk(_id)`
+
+}
+
+const migrationImportTemp = {
+  drop_table: `drop table if exists "import_temp"`,
+  importTemp: `create table if not exists import_temp(
+    _id integer UNIQUE primary key AUTOINCREMENT,
+    date date null,
+    mm varchar(100) null,
+    mm_id integer null,
+    pkt_num varchar(50) null,
+    pbk_id integer null,
+    aj_mm varchar(100) null,
+    aj_mm_id integer null,
+    aj_type varchar(100) null,
+    aj_type_id integer null,
+    item_id integer not null,
+    item varchar(100) null,
+    subitem_id integer null,
+    subitem varchar(100) null,
+    product_id integer null,
+    product varchar(100) null,
+    company_name varchar(100) null,
+    item_detail text null,
+    condition_id integer null,
+    condition varchar(100) null,
+    qty DECIMAL(10,2) not null,
+    rate DECIMAL(10,2) null,
+    actual_amt DECIMAL(10,2) null,
+    entry_type varchar(100) null,
+    unit_id integer not null,
+    unit varchar(100) null,
+    description text null,
+    nimmit varchar(150) null,
+    jawak_ref_ids text null,
+    ref_id int null,
+    remaining_qty decimal(10,2) null,
+    hl tinyint default 0,
+    active tinyint default 0,
+    dept_id integer,
+    dept varchar(100) null
+  );`,  
+
+  drop_trigger: `Drop trigger if exists "ins_temp_updt_id"`,
+  ins_temp_updt_ids: `CREATE TRIGGER "ins_temp_updt_id"
+        AFTER INSERT ON "import_temp"
+        FOR EACH ROW
+        BEGIN
+          update import_temp set mm_id = IFNULL((select _id from mm where NEW.mm IS NOT NULL AND NEW.mm IN (mm.mm_hin, mm.mm_eng, mm.mm_code)),null),
+          aj_mm_id = IFNULL((select _id from mm where NEW.aj_mm IS NOT NULL AND NEW.aj_mm IN (mm.mm_hin, mm.mm_eng, mm.mm_code)),null),
+          item_id = IFNULL((select _id from item it where NEW.item IS NOT NULL AND NEW.item IN (it.item_hin, it.item_eng, it.item_code)),null),
+          subitem_id = IFNULL((select _id from subitem sit where NEW.subitem IS NOT NULL AND NEW.subitem IN (sit.subitem_hin, sit.subitem_eng, sit.subitem_code)),null),
+          product_id = IFNULL((select _id from product pd where NEW.product IS NOT NULL AND NEW.product IN (pd.sr_num, pd.product_code)),null),
+          unit_id = IFNULL((select _id from unit where NEW.unit IS NOT NULL AND NEW.unit IN (unit.unit_short, unit.unit_full)),null),
+          dept_id = IFNULL((select _id from department dt where NEW.dept IS NOT NULL AND NEW.dept IN (dt.dept_hin, dt.dept_eng, dt.dept_code)),null),
+          condition_id = IFNULL((select _id from support_list sl where NEW.condition IS NOT NULL AND sl.list_type='condition' AND NEW.condition IN (sl.list_name_hin, sl.list_name_eng)),null),
+          aj_type_id = IFNULL((select _id from support_list sl where NEW.aj_type IS NOT NULL AND ((sl.list_type='aawak_type' AND NEW.entry_type = 'aawak') OR (sl.list_type='jawak_type' AND NEW.entry_type = 'jawak')) AND NEW.entry_type IN (sl.list_name_hin, sl.list_name_eng)),null)
+          where _id = NEW._id;          
+
+        END;`
+}
 
 //base table which not have references.
 
@@ -366,24 +471,24 @@ const createTables = {
   updated_at timestamp default (datetime('now', 'localtime')),
   unique(date,pkt_num,pbk_id,mm_id,item_id,subitem_id,product_id,condition_id,jawak_type_id,dept_id)
 );`,
-  bachat: `create table bachat(
-  _id integer primary key AUTOINCREMENT,
-  mm_id integer not null references mm(_id),
-  item_id integer not null references item(_id),
-  subitem_id integer null references subitem(_id),
-  Stock decimal(10,2) default 0,
-  Used decimal(10,2) default 0,
-  New decimal(10,2) default 0,
-  Old decimal(10,2) default 0,
-  Defective decimal(10,2) default 0,
-  Scrap decimal(10,2) default 0,  
-  unit_id integer not null references unit(_id),
-  dept_id integer references department(_id),
-  active tinyint default 0,
-  created_at timestamp default (datetime('now', 'localtime')),
-  updated_at timestamp default (datetime('now', 'localtime')),
-  unique(mm_id,item_id,subitem_id,unit_id,dept_id)
-);`,
+//   bachat: `create table bachat(
+//   _id integer primary key AUTOINCREMENT,
+//   mm_id integer not null references mm(_id),
+//   item_id integer not null references item(_id),
+//   subitem_id integer null references subitem(_id),
+//   Stock decimal(10,2) default 0,
+//   Used decimal(10,2) default 0,
+//   New decimal(10,2) default 0,
+//   Old decimal(10,2) default 0,
+//   Defective decimal(10,2) default 0,
+//   Scrap decimal(10,2) default 0,  
+//   unit_id integer not null references unit(_id),
+//   dept_id integer references department(_id),
+//   active tinyint default 0,
+//   created_at timestamp default (datetime('now', 'localtime')),
+//   updated_at timestamp default (datetime('now', 'localtime')),
+//   unique(mm_id,item_id,subitem_id,unit_id,dept_id)
+// );`,
   bachat_history: `create table bachat_monthly(
   _id integer UNIQUE primary key AUTOINCREMENT,
   year int not null,
@@ -401,7 +506,6 @@ const createTables = {
 );`
 
 }
-
 
 
 const triggers = {
@@ -618,69 +722,6 @@ const triggers = {
           where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = 1;  
         END;`
 }
-
-
-
-const migrationImportTemp = {
-  drop_table: `drop table if exists "import_temp"`,
-  importTemp: `create table if not exists import_temp(
-    _id integer UNIQUE primary key AUTOINCREMENT,
-    date date null,
-    mm varchar(100) null,
-    mm_id integer null,
-    pkt_num varchar(50) null,
-    pbk_id integer null,
-    aj_mm varchar(100) null,
-    aj_mm_id integer null,
-    aj_type varchar(100) null,
-    aj_type_id integer null,
-    item_id integer not null,
-    item varchar(100) null,
-    subitem_id integer null,
-    subitem varchar(100) null,
-    product_id integer null,
-    product varchar(100) null,
-    company_name varchar(100) null,
-    item_detail text null,
-    condition_id integer null,
-    condition varchar(100) null,
-    qty DECIMAL(10,2) not null,
-    rate DECIMAL(10,2) null,
-    actual_amt DECIMAL(10,2) null,
-    entry_type varchar(100) null,
-    unit_id integer not null,
-    unit varchar(100) null,
-    description text null,
-    nimmit varchar(150) null,
-    jawak_ref_ids text null,
-    ref_id int null,
-    remaining_qty decimal(10,2) null,
-    hl tinyint default 0,
-    active tinyint default 0,
-    dept_id integer,
-    dept varchar(100) null
-  );`,  
-
-  drop_trigger: `Drop trigger if exists "ins_temp_updt_id"`,
-  ins_temp_updt_ids: `CREATE TRIGGER "ins_temp_updt_id"
-        AFTER INSERT ON "import_temp"
-        FOR EACH ROW
-        BEGIN
-          update import_temp set mm_id = IFNULL((select _id from mm where NEW.mm IS NOT NULL AND NEW.mm IN (mm.mm_hin, mm.mm_eng, mm.mm_code)),null),
-          aj_mm_id = IFNULL((select _id from mm where NEW.aj_mm IS NOT NULL AND NEW.aj_mm IN (mm.mm_hin, mm.mm_eng, mm.mm_code)),null),
-          item_id = IFNULL((select _id from item it where NEW.item IS NOT NULL AND NEW.item IN (it.item_hin, it.item_eng, it.item_code)),null),
-          subitem_id = IFNULL((select _id from subitem sit where NEW.subitem IS NOT NULL AND NEW.subitem IN (sit.subitem_hin, sit.subitem_eng, sit.subitem_code)),null),
-          product_id = IFNULL((select _id from product pd where NEW.product IS NOT NULL AND NEW.product IN (pd.sr_num, pd.product_code)),null),
-          unit_id = IFNULL((select _id from unit where NEW.unit IS NOT NULL AND NEW.unit IN (unit.unit_short, unit.unit_full)),null),
-          dept_id = IFNULL((select _id from department dt where NEW.dept IS NOT NULL AND NEW.dept IN (dt.dept_hin, dt.dept_eng, dt.dept_code)),null),
-          condition_id = IFNULL((select _id from support_list sl where NEW.condition IS NOT NULL AND sl.list_type='condition' AND NEW.condition IN (sl.list_name_hin, sl.list_name_eng)),null),
-          aj_type_id = IFNULL((select _id from support_list sl where NEW.aj_type IS NOT NULL AND ((sl.list_type='aawak_type' AND NEW.entry_type = 'aawak') OR (sl.list_type='jawak_type' AND NEW.entry_type = 'jawak')) AND NEW.entry_type IN (sl.list_name_hin, sl.list_name_eng)),null)
-          where _id = NEW._id;          
-
-        END;`
-}
-
-
 
 
 const insertData = {

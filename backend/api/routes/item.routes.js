@@ -44,8 +44,8 @@ router.post('/:dept_id', async (req, res, next) => {
 router.get('/:dept_id', async (req, res, next) => {
     await DB.getFullListByDept('itemMix', req.params.dept_id, null, null, 100).then((resolve) => {
         let subitem_count = 0;
-        for(let i = 0; i < resolve.length; i++){
-            
+        for (let i = 0; i < resolve.length; i++) {
+
             resolve[i].subitems = (resolve[i].subitems != "[null]" ? JSON.parse(resolve[i].subitems) : []);
             resolve[i].categories = (resolve[i].categories != "[null]" ? JSON.parse(resolve[i].categories) : []);
             subitem_count += resolve[i].subitems.length;
@@ -53,7 +53,7 @@ router.get('/:dept_id', async (req, res, next) => {
         res.json({
             success: true,
             result: resolve || [],
-            subitem_count:subitem_count
+            subitem_count: subitem_count
         });
     }, (err) => { return next(err) });
 });
@@ -61,19 +61,19 @@ router.get('/:dept_id', async (req, res, next) => {
 //  item get by full filter
 router.put('/itemmix/:dept_id', async (req, res, next) => {
     let conditionString = ``;
-    if(req.body._id){
+    if (req.body._id) {
         conditionString += (conditionString != `` ? ` AND` : ``) + ` item._id = ${req.body._id}`;
     }
-    if(req.body.category_id){
+    if (req.body.category_id) {
         conditionString += (conditionString != `` ? ` AND` : ``) + ` (item.category_id = ${req.body.category_id} OR si.category_id = ${req.body.category_id})`;
     }
-    if(req.body.subitem_list_id){
+    if (req.body.subitem_list_id) {
         conditionString += (conditionString != `` ? ` AND` : ``) + ` (si.subitem_list_id = ${req.body.subitem_list_id})`;
     }
     await DB.getFullListByDept('itemMix', req.params.dept_id, conditionString).then((resolve) => {
         let subitem_count = 0;
-        for(let i = 0; i < resolve.length; i++){
-            
+        for (let i = 0; i < resolve.length; i++) {
+
             resolve[i].subitems = (resolve[i].subitems != "[null]" ? JSON.parse(resolve[i].subitems) : []);
             resolve[i].categories = (resolve[i].categories != "[null]" ? JSON.parse(resolve[i].categories) : []);
             subitem_count += resolve[i].subitems.length;
@@ -81,7 +81,7 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
         res.json({
             success: true,
             result: resolve || [],
-            subitem_count:subitem_count
+            subitem_count: subitem_count
         });
     }, (err) => { return next(err) });
 });
@@ -100,36 +100,36 @@ router.get('/forConfig/:dept_id', async (req, res, next) => {
 //  item get by dept
 router.put('/forConfig/:dept_id', async (req, res, next) => {
     let conditionString = ``;
-    if(req.body._id){
+    if (req.body._id) {
         conditionString += (conditionString != `` ? ` AND` : ``) + ` item._id = ${req.body._id}`;
     }
-    if(req.body.category_id){
+    if (req.body.category_id) {
         conditionString += (conditionString != `` ? ` AND` : ``) + ` (item.category_id = ${req.body.category_id} OR si.category_id = ${req.body.category_id})`;
     }
-    if(req.body.subitem_list_id){
+    if (req.body.subitem_list_id) {
         conditionString += (conditionString != `` ? ` AND` : ``) + ` (si.subitem_list_id = ${req.body.subitem_list_id})`;
     }
 
     await DB.getFullListForDeptConfig('itemMix', req.params.dept_id, conditionString).then(async (resolve) => {
         let items = await DB.getDeptConfig(req.params.dept_id, 'item');
         let subitems = await DB.getDeptConfig(req.params.dept_id, 'subitem');
-        if(items && items[0]){
-            items = items[0].config_value.split(',');            
+        if (items && items[0]) {
+            items = items[0].config_value.split(',');
         }
-        if(subitems && subitems[0]){
+        if (subitems && subitems[0]) {
             subitems = subitems[0].config_value.split(',');
         }
         let subitem_count = 0;
-        for(let i = 0; i < resolve.length; i++){
-            
+        for (let i = 0; i < resolve.length; i++) {
+
             resolve[i].subitems = (resolve[i].subitems != "[null]" ? JSON.parse(resolve[i].subitems) : []);
             resolve[i].categories = (resolve[i].categories != "[null]" ? JSON.parse(resolve[i].categories) : []);
             subitem_count += resolve[i].subitems.length;
-            if(items.includes(resolve[i]._id.toString())){
+            if (items.includes(resolve[i]._id.toString())) {
                 resolve[i].chk = true;
             }
-            for(let j in resolve[i].subitems){
-                if(subitems.includes(resolve[i].subitems[j]._id.toString())){
+            for (let j in resolve[i].subitems) {
+                if (subitems.includes(resolve[i].subitems[j]._id.toString())) {
                     resolve[i].subitems[j].chk = true;
                 }
             }
@@ -137,7 +137,7 @@ router.put('/forConfig/:dept_id', async (req, res, next) => {
         res.json({
             success: true,
             result: resolve || [],
-            subitem_count:subitem_count
+            subitem_count: subitem_count
         });
     }, (err) => { return next(err) });
 });
@@ -147,7 +147,8 @@ router.get('/', async (req, res, next) => {
     await DB.getFullList('item').then((resolve) => {
         res.json({
             success: true,
-            result: resolve || []
+            result: resolve.data || [],
+            total_count: (resolve.total_count ? resolve.total_count : 0),
         });
     }, (err) => { return next(err) });
 });
@@ -167,8 +168,8 @@ router.put('/', async (req, res, next) => {
         });
     }
     else {
-    return next(new Error('Id not found.'))
-}
+        return next(new Error('Id not found.'))
+    }
 });
 
 

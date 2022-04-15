@@ -121,7 +121,7 @@ class DBContex {
                         exportDB.run(`BEGIN TRANSACTION`);
                         let migrationCount = this.Migrations.length;
                         for (let i = 0; i < migrationCount; i++) {
-                            if(i != 2){
+                            if (i != 2) {
                                 this.Migrations[i](exportDB);
                             }
                         }
@@ -139,7 +139,7 @@ class DBContex {
                             });
                         }
 
-                        
+
                         exportDB.run(`PRAGMA user_version = ${migrationCount}`, (err) => {
                             if (err) console.log("pragma error : ", err);
                         });
@@ -336,7 +336,7 @@ class DBContex {
         return new Promise(async (resolve, reject) => {
             try {
                 let sql = this.fullListConfig['aawak'];
-                sql +=  conditionString ? ` ` + conditionString : ``;
+                sql += conditionString ? ` ` + conditionString : ``;
                 this.localDB.all(sql, (err, data) => {
                     if (err) {
                         reject(err);
@@ -391,7 +391,7 @@ class DBContex {
         })
     }
 
-    getFullListByDept = async (list_name, dept_id, conditionString= null, orderBy = null, limit = null, offset = null) => {
+    getFullListByDept = async (list_name, dept_id, conditionString = null, orderBy = null, limit = null, offset = null) => {
         return new Promise(async (resolve, reject) => {
             try {
                 // let sql = this.fullListQuery[list_name];
@@ -438,27 +438,37 @@ class DBContex {
         })
     }
 
-    //get full list All or specific Id.
-    getFullList = async (list_name, conditionString = null) => {
+    //get full list All or specific condition.
+    /* return result in form of:
+        {
+            data: resulting rows,
+            total_count: Total number of rows count
+        }
+    */
+    getFullList = async (list_name, conditionString = null, orderBy = null, limit = null, offset = null) => {
         return new Promise(async (resolve, reject) => {
             try {
-                let sql = this.fullListConfig[list_name];
-                let sort = this.fullListConfig[list_name + 'sort'];
+                let sort = orderBy ? orderBy : this.fullListQuery[list_name + 'sort'];
+                let sql = `${this.fullListQuery[list_name]} ${sort ? 'ORDER BY ' + sort : ''} ${limit ? 'LIMIT ' + limit : ''} ${offset ? 'OFFSET ' + offset : ''}`;
+                let condition = conditionString ? `where ${conditionString}` : ``;
+                
+                var lIndex = sql.lastIndexOf("?");
+                sql = sql.substring(0, lIndex) + condition + sql.substring(lIndex + 1);
 
-                if (conditionString && conditionString != '') {
-                    sql += ` where ${conditionString} `;
-                }
-
-                if (sort) {
-                    sql += ` order by ${sort}`;
-                }
-
+                let total_count = 0;
+                await this.getCount(list_name, conditionString).then((resolve)=>{
+                    total_count = resolve.total_count;
+                });
                 this.localDB.all(sql, (err, data) => {
                     if (err) {
                         reject(err)
                     }
                     else {
-                        resolve(data)
+                        let result = {
+                            data:data,
+                            total_count: total_count
+                        }
+                        resolve(result)
                     }
                 })
             }
@@ -572,8 +582,8 @@ class DBContex {
                     params.push(value);
                 }
                 cols = cols.slice(0, -1);
-                val = val.slice(0, -1);                
-                let sql = `insert into ${table_name}(${cols}) values(${val})`;                
+                val = val.slice(0, -1);
+                let sql = `insert into ${table_name}(${cols}) values(${val})`;
                 this.run(sql, params).then((resolve) => {
                     let selectSql = this.fullListConfig[table_name];
                     selectSql += ` where ${table_name}._id = ${resolve.lastID}`;
@@ -600,7 +610,7 @@ class DBContex {
             try {
                 if (dataObj) {
                     let cols = "", val = "", params = [];
-                    if(dept_id == 1){
+                    if (dept_id == 1) {
                         dataObj.active = 1;
                     }
                     for (let [field, value] of Object.entries(dataObj)) {
@@ -613,7 +623,7 @@ class DBContex {
                     }
                     cols = cols.slice(0, -1);
                     val = val.slice(0, -1);
-                    let sql = `insert into ${table_name}(${cols}) values(${val})`;                    
+                    let sql = `insert into ${table_name}(${cols}) values(${val})`;
                     this.run(sql, params).then((res) => {
                         let selectSql = this.fullListConfig[table_name];
                         selectSql += ` where ${table_name}._id = ${res.lastID}`;
@@ -969,6 +979,8 @@ class DBContex {
 
     fullListQuery = {
 
+        point: `select * from point ?`,
+
         country: `select * from country ?`,
         countrysort: `country_hin, country_eng`,
 
@@ -1020,11 +1032,14 @@ class DBContex {
         mm: `select mm.*, 
         st.state_hin, st.state_eng, 
         pm.mm_hin as parent_mm_hin, pm.mm_eng as parent_mm_eng, pm.mm_code as parent_mm_code, 
-        dept.dept_hin, dept.dept_eng, dept.dept_code 
+        dept.dept_hin, dept.dept_eng, dept.dept_code, 
+        nmt.pbk_hin as nimmit_hin, nmt.pbk_eng as nimmit_eng, nmt.relative_name, nmt.state_id, pst.state_hin as nimmit_state_hin, pst.state_eng as nimmit_state_eng
         from mm
         left join state st on st._id = mm.state_id
         left join mm pm on pm._id = mm.parent_mm_id
-        left join department dept on dept._id = mm.dept_id ?`,
+        left join department dept on dept._id = mm.dept_id
+        left join pbk nmt on nmt._id = mm.nimmit_id
+        left join state pst on pst._id = nmt.state_id ?`,
         mmsort: `mm_hin, mm_eng`,
 
         item: `select item.*, 
@@ -1100,7 +1115,8 @@ class DBContex {
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         unit.unit_short, unit.unit_full,
-        slat.list_name_hin as aawak_type_hin, slat.list_name_eng as aawak_type_eng
+        slat.list_name_hin as aawak_type_hin, slat.list_name_eng as aawak_type_eng,
+        nmt.pbk_hin as nimmit_hin, nmt.pbk_eng as nimmit_eng, nmt.relative_name, nmt.state_id, pst.state_hin as nimmit_state_hin, pst.state_eng as nimmit_state_eng
         from aawak 
         left join mm on mm._id = aawak.mm_id
         left join pbk on pbk._id = aawak.pbk_id
@@ -1112,7 +1128,9 @@ class DBContex {
         left join support_list sl on sl._id = aawak.condition_id
         left join unit on unit._id = aawak.unit_id
         left join department dept on dept._id = aawak.dept_id
-        left join support_list slat on slat._id = aawak.aawak_type_id ?`,
+        left join support_list slat on slat._id = aawak.aawak_type_id
+        left join pbk nmt on nmt._id = mm.nimmit_id
+        left join state pst on pst._id = nmt.state_id ?`,
         aawaksort: `date, aawak_mm_hin, aawak_mm_eng, pkt_num`,
 
         jawak: `select jawak.*,

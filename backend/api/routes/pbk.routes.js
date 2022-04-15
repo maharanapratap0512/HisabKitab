@@ -69,10 +69,26 @@ router.get('/:dept_id', async (req, res, next) => {
     }, (err) => { return next(err) });
 });
 
+//get all nimmit list
+router.get('/nimmit/', async (req, res, next) => {
+    await DB.getFullList('pbk',` pbk.status = "nimmit"`,` order by pbk._id desc`, 100).then((resolve) => {
+        // for (let i in resolve) {
+        //     resolve[i].document = (resolve[i].document != "[null]" ? JSON.parse(resolve[i].document) : {});
+        //     resolve[i].relative_ref = (resolve[i].relative_ref != "[null]" ? JSON.parse(resolve[i].relative_ref) : []);
+        //     resolve[i].alt_mo_no = (resolve[i].alt_mo_no != "[null]" ? JSON.parse(resolve[i].alt_mo_no) : []);
+        // }
+        res.json({
+            success: true,
+            result: resolve.data || [],
+            total_count: resolve.total_count || 0
+        });
+    }, (err) => { return next(err) });
+});
+
 //pbk get by dept and filter
 router.put('/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = null, offset = null;
-    let conditionString = ` 1=1 ${req.body.roll_no ? ` AND pbk.roll_no = ${req.body.roll_no}` : ``} ${req.body.gender.length > 0 ? ` AND pbk.gender in (${req.body.gender.join(',')})` : ``} ${req.body.state_id.length > 0 ? ` AND pbk.state_id in (${req.body.state_id.join(',')})` : ``} ${req.body.city_id.length > 0 ? ` AND pbk.city_id in (${req.body.city_id.join(',')})` : ``} ${req.body.class_mm_id.length > 0 ? ` AND pbk.class_mm_id in (${req.body.class_mm_id.join(',')})` : ``} ${req.body.bhatti_year ? ` AND strftime('%Y',pbk.bhatti_date) = '${req.body.bhatti_year}'` : ``}`;
+    let conditionString = ` 1=1 ${req.body.status ? ` AND pbk.status = ${req.body.status}` : ``} ${req.body.roll_no ? ` AND pbk.roll_no = ${req.body.roll_no}` : ``} ${req.body.gender.length > 0 ? ` AND pbk.gender in (${req.body.gender.join(',')})` : ``} ${req.body.state_id.length > 0 ? ` AND pbk.state_id in (${req.body.state_id.join(',')})` : ``} ${req.body.city_id.length > 0 ? ` AND pbk.city_id in (${req.body.city_id.join(',')})` : ``} ${req.body.class_mm_id.length > 0 ? ` AND pbk.class_mm_id in (${req.body.class_mm_id.join(',')})` : ``} ${req.body.bhatti_year ? ` AND strftime('%Y',pbk.bhatti_date) = '${req.body.bhatti_year}'` : ``}`;
     if(conditionString.trim() == `1=1`){
         limit = 100;
         orderBy = "pbk._id desc";
