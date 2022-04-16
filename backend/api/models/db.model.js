@@ -148,10 +148,10 @@ localDB.serialize(() => {
   => adding company_name column to aawak.
 */
 const ver6 = {
-  // delete_awk: `delete from aawak`,
-  // delete_jwk: `delete from jawak`,
-  // delete_bcht: `delete from bachat`,
-  drop_trigger:`drop trigger if exists "ins_temp_updt_id"`,
+  delete_awk: `delete from aawak`,
+  delete_jwk: `delete from jawak`,
+  delete_bcht: `delete from bachat`,
+  drop_trigger: `drop trigger if exists "ins_temp_updt_id"`,
   points: `CREATE TABLE IF NOT EXISTS "point"(
     _id integer PRIMARY KEY AUTOINCREMENT,
     type varchar(100),
@@ -172,6 +172,7 @@ const ver6 = {
   add_company_jawak: `ALTER TABLE "jawak" ADD COLUMN company_name varchar(100)`,
   add_company_mm: `ALTER TABLE "mm" ADD COLUMN nimmit_id integer REFERENCES pbk(_id)`,
   drop_jwk_del_updt_ref_awk: `drop trigger if exists "jwk_del_updt_ref_awk"`,
+  awk_ins_bcht_ins: `drop trigger if exists "awk_ins_bcht_ins"`,
   drop_jwk_ins_avk_ref_updt: `drop trigger if exists "jwk_ins_avk_ref_updt"`,
   drop_jwk_updt_avk_ref_updt: `drop trigger if exists "jwk_updt_avk_ref_updt"`,
   drop_awk_ref_id: `ALTER TABLE "jawak" DROP COLUMN aawak_ref_id`,
@@ -200,7 +201,15 @@ const ver6 = {
         BEGIN
             update aawak set remaining_qty = remaining_qty - (NEW.qty - OLD.qty) where _id = OLD.aawak_ref_id;
         END;`,
-
+  awk_ins_bcht_ins:
+    `CREATE TRIGGER IF not exists "awk_ins_bcht_ins" 
+      AFTER INSERT ON "aawak" 
+      FOR EACH ROW   
+      WHEN NOT EXISTS(select _id from bachat where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
+      BEGIN
+        insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, New, Old, Defective, Scrap, unit_id, dept_id) 
+        values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);             
+      END;`,
 
 }
 
@@ -242,7 +251,7 @@ const migrationImportTemp = {
     active tinyint default 0,
     dept_id integer,
     dept varchar(100) null
-  );`,  
+  );`,
 
   drop_trigger: `Drop trigger if exists "ins_temp_updt_id"`,
   ins_temp_updt_ids: `CREATE TRIGGER "ins_temp_updt_id"
@@ -504,24 +513,24 @@ const createTables = {
   updated_at timestamp default (datetime('now', 'localtime')),
   unique(date,pkt_num,pbk_id,mm_id,item_id,subitem_id,product_id,condition_id,jawak_type_id,dept_id)
 );`,
-//   bachat: `create table bachat(
-//   _id integer primary key AUTOINCREMENT,
-//   mm_id integer not null references mm(_id),
-//   item_id integer not null references item(_id),
-//   subitem_id integer null references subitem(_id),
-//   Stock decimal(10,2) default 0,
-//   Used decimal(10,2) default 0,
-//   New decimal(10,2) default 0,
-//   Old decimal(10,2) default 0,
-//   Defective decimal(10,2) default 0,
-//   Scrap decimal(10,2) default 0,  
-//   unit_id integer not null references unit(_id),
-//   dept_id integer references department(_id),
-//   active tinyint default 0,
-//   created_at timestamp default (datetime('now', 'localtime')),
-//   updated_at timestamp default (datetime('now', 'localtime')),
-//   unique(mm_id,item_id,subitem_id,unit_id,dept_id)
-// );`,
+  //   bachat: `create table bachat(
+  //   _id integer primary key AUTOINCREMENT,
+  //   mm_id integer not null references mm(_id),
+  //   item_id integer not null references item(_id),
+  //   subitem_id integer null references subitem(_id),
+  //   Stock decimal(10,2) default 0,
+  //   Used decimal(10,2) default 0,
+  //   New decimal(10,2) default 0,
+  //   Old decimal(10,2) default 0,
+  //   Defective decimal(10,2) default 0,
+  //   Scrap decimal(10,2) default 0,  
+  //   unit_id integer not null references unit(_id),
+  //   dept_id integer references department(_id),
+  //   active tinyint default 0,
+  //   created_at timestamp default (datetime('now', 'localtime')),
+  //   updated_at timestamp default (datetime('now', 'localtime')),
+  //   unique(mm_id,item_id,subitem_id,unit_id,dept_id)
+  // );`,
   bachat_history: `create table bachat_monthly(
   _id integer UNIQUE primary key AUTOINCREMENT,
   year int not null,
@@ -594,7 +603,7 @@ const triggers = {
             Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
             where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id;                                      
         END;`,
-        drop_awk_ins_bcht_ins: `drop trigger if exists "awk_ins_bcht_updt"`,
+  drop_awk_ins_bcht_ins: `drop trigger if exists "awk_ins_bcht_updt"`,
   awk_ins_bcht_ins:
     `CREATE TRIGGER IF not exists "awk_ins_bcht_ins" 
         AFTER INSERT ON "aawak" 
@@ -604,7 +613,7 @@ const triggers = {
           insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, New, Old, Defective, Scrap, unit_id, dept_id) 
           values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);             
         END;`,
-        
+
   drop_awk_updt_bcht_updt: `drop trigger if exists "awk_updt_bcht_updt"`,
   awk_updt_bcht_updt:
     `CREATE TRIGGER IF NOT EXISTS "awk_updt_bcht_updt"

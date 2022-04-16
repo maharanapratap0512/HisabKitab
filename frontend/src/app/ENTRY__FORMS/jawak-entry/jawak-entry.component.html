@@ -163,7 +163,7 @@
                             (click)="showModal = 'Add MM'">
                             + Add
                         </button>
-                        <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="false"
+                        <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
                             [virtualScroll]="true" formControlName="mm_id" [readonly]="isEdit"
                             [ngClass]="{'validation':jawakForm.get('mm_id')?.errors && (jawakForm.get('mm_id')?.touched || jawakForm.get ('mm_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">MM</ng-option>
@@ -182,7 +182,7 @@
                             (click)="showModal = 'Add MM'">
                             + Add
                         </button>
-                        <ng-select class="custom" style="width: 100%;" placeholder="Jawak MM" [clearable]="false"
+                        <ng-select class="custom" style="width: 100%;" placeholder="Jawak MM" [clearable]="true"
                             [virtualScroll]="true" formControlName="jawak_mm_id"
                             [ngClass]="{'validation':jawakForm.get('jawak_mm_id')?.errors && (jawakForm.get('jawak_mm_id')?.touched || jawakForm.get ('jawak_mm_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Jawak MM</ng-option>
@@ -235,7 +235,7 @@
                             </ng-option>
                         </ng-select>
                         <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Roll no. or Pbk name"
-                            [clearable]="false" [virtualScroll]="true" formControlName="pbk_id"
+                            [clearable]="true" [virtualScroll]="true" formControlName="pbk_id"
                             [ngClass]="{'validation':jawakForm.get('pbk_id')?.errors && (jawakForm.get('pbk_id')?.touched || jawakForm.get ('pbk_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
                             </ng-option>
@@ -256,13 +256,13 @@
                       + Add
                    </button> -->
                         <ng-select *ngIf="departments && departments.length" class="custom" style="width: 100%;"
-                            placeholder="Select Department" [clearable]="false" [virtualScroll]="true"
+                            placeholder="Select Department" [clearable]="true" [virtualScroll]="true"
                             (change)="deptSelected($event)" [ngModelOptions]="{standalone: true}">
                             <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :
                                 {{item.dept_eng}}{{item.dept_code?' : '+item.dept_code:''}}</ng-option>
                         </ng-select>
                         <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Category"
-                            [clearable]="false" [virtualScroll]="true" (change)="catSelected($event)"
+                            [clearable]="true" [virtualScroll]="true" (change)="catSelected($event)"
                             [ngModelOptions]="{standalone: true}">
                             <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
                                 {{item.category_eng}}</ng-option>
@@ -287,7 +287,7 @@
                                 + Subitem
                             </button>
                         </div>
-                        <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="true"
                             [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)"
                             [readonly]="isEdit || ref_id"
                             [ngClass]="{'validation':jawakForm.get('item_id')?.errors && (jawakForm.get('item_id')?.touched || jawakForm.get ('item_id')?.dirty)}">
@@ -296,7 +296,7 @@
                                 {{item.item_eng}} : {{item.item_code}}</ng-option>
                         </ng-select>
                         <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
-                            [clearable]="false" [virtualScroll]="true" formControlName="subitem_id"
+                            [clearable]="true" [virtualScroll]="true" formControlName="subitem_id"
                             [readonly]="isEdit || ref_id"
                             [ngClass]="{'validation':jawakForm.get('subitem_id')?.errors && (jawakForm.get('subitem_id')?.touched || jawakForm.get ('subitem_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
@@ -330,7 +330,7 @@
                             </ng-option>
                         </ng-select>
                         <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition"
-                            [clearable]="false" [virtualScroll]="true" formControlName="condition_id"
+                            [clearable]="true" [virtualScroll]="true" formControlName="condition_id"
                             *ngIf="isCondition"
                             [ngClass]="{'validation':jawakForm.get('condition_id')?.errors && (jawakForm.get('condition_id')?.touched || jawakForm.get ('condition_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Condition</ng-option>
@@ -369,7 +369,7 @@
                     <div class="form-group">
                         <label class="form-label">Jawak Type</label>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Jawak Type"
-                            [clearable]="false" [virtualScroll]="true" formControlName="jawak_type_id"
+                            [clearable]="true" [virtualScroll]="true" formControlName="jawak_type_id"
                             [ngClass]="{'validation':jawakForm.get('jawak_type_id')?.errors && (jawakForm.get('jawak_type_id')?.touched || jawakForm.get ('jawak_type_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Jawak Type</ng-option>
                             <ng-option *ngFor="let item of jawak_types" [value]="item._id">{{item.list_name_hin}} :

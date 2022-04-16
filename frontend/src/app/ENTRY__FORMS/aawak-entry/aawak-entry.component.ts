@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormArray } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -42,6 +43,7 @@ export class AawakEntryComponent implements OnInit {
   pbks: any = [];
   aawak_types: any = [];
   products: any = [];
+  selDept_id:any;
   categories: any = [];
   isCondition: any = false;
   productsAll: any = [];
@@ -59,6 +61,8 @@ export class AawakEntryComponent implements OnInit {
     nimmit: '',
     dept_id: this.auth.webUser.dept_id
   }
+  itemAll: any;
+  categoryAll: any;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -69,17 +73,17 @@ export class AawakEntryComponent implements OnInit {
     public auth: AuthService
   ) {
     this.gs.observeList().subscribe(result => {
-      this.items = result.itemmix ? result.itemmix : [];
+      // this.items = result.itemmix ? result.itemmix : [];
       this.units = result.unit ? result.unit : [];
       this.states = result.state ? result.state : [];
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];
       this.departments = result.department ? result.department : [];
-      this.pbks = result.pbk ? result.pbk : [];
+      // this.pbks = result.pbk ? result.pbk : [];
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
-      this.products = result.product ? result.product : [];
-      this.categories = result.category ? result.category : [];
-    });
+      // this.products = result.product ? result.product : [];
+      // this.categories = result.category ? result.category : [];
+    });    
 
     this.aawakForm = this.fb.group({
       pkt_num: [''],
@@ -716,11 +720,11 @@ export class AawakEntryComponent implements OnInit {
   catSelected(ev: any) {
     if (ev) {
       this.cat = ev;
-      this.items = this.gs.Lists.itemmix.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
+      this.items = this.itemAll.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
     }
     else {
       this.cat = null;
-      this.items = this.gs.Lists.itemmix;
+      this.items = this.itemAll;
     }
     this.unit = null;
     this.aawakForm.patchValue({
@@ -734,7 +738,8 @@ export class AawakEntryComponent implements OnInit {
   itemSelected(ev: any) {
     if (ev) {
       let item = this.items.find((i: { _id: any; }) => i._id == ev);
-      this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
+      // this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
+      this.getProductData(item._id);
       if (this.cat) {
         this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
       }
@@ -744,6 +749,9 @@ export class AawakEntryComponent implements OnInit {
 
       if (this.cat && this.cat != item.category_id) {
         this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
+        this.aawakForm.patchValue({
+          subitem_id: this.subitems[0]._id
+        });
       } else {
         this.aawakForm.setControl('subitem_id', this.fb.control(null));
       }
@@ -756,7 +764,8 @@ export class AawakEntryComponent implements OnInit {
       this.subitems = [];
       this.unit = null;
       this.aawakForm.patchValue({
-        unit_id: null
+        unit_id: null,
+        subitem_id:null,
       });
     }
   }
@@ -784,8 +793,47 @@ export class AawakEntryComponent implements OnInit {
   }
 
   deptSelected(ev: any) {
-    console.log("ev", ev);
+    if(ev){
+      this.getItemData(ev);
+      this.getCategoryData(ev);
+    }else{
+      this.itemAll = [];
+      this.items = [];
+      this.categoryAll=[];
+      this.categories=[];
+      this.productsAll=[];
+      this.products=[];
+    }
   }
 
+  getItemData(ev:any){
+    this.http.put(this.api.getUrl('ITEMMIX') + ev, {}).subscribe((data:any)=>{
+      if(data['result']){
+        this.itemAll = data['result'];
+        this.items = this.itemAll;
+      }
+    });
+  }
+
+  getCategoryData(ev:any){
+    this.http.get(this.api.getUrl('CATEGORY') + ev).subscribe((data)=>{
+      if(data['result']){
+        this.categoryAll = data['result'];
+        this.categories = this.categoryAll;
+      }
+    });
+  }
+
+  getProductData(item_id:any){
+    let body = {
+      item_id: item_id
+    }
+    this.http.put(this.api.getUrl('PRODUCT') + this.selDept_id, body).subscribe((data:any)=>{
+      if(data['result']){
+        this.productsAll = data['result'];
+        this.products = this.productsAll;
+      }
+    });
+  }
 
 }

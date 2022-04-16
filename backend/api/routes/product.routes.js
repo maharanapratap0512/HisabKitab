@@ -55,6 +55,20 @@ router.get('/:dept_id', async (req, res, next) => {
     }, (err) => { return next(err) });
 });
 
+// Filter product get by dept_id
+router.put('/:dept_id', async (req, res, next) => {
+    let conditionString = ` 1=1 ${typeof req.body.item_id == "string" || typeof req.body.item_id == "number" ? ` AND product.item_id = (${req.body.item_id})` : ``} ${req.body.item_id.length > 0 ? ` AND product.item_id IN (${req.body.item_id})` : ``}`;
+    await DB.getFullListByDept('product', req.params.dept_id, conditionString,null, 100).then((data) => {
+        for (let i in data) {
+            data[i].document = (data[i].document != "[null]" ? JSON.parse(data[i].document) : {});
+        }
+        res.json({
+            success: true,
+            result: data || []
+        });
+    }, (err) => { return next(err) });
+});
+
 //  product get
 router.get('/', async (req, res, next) => {
     await DB.getList('product').then((data) => {
