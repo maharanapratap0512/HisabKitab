@@ -7,6 +7,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
+import Swal from 'sweetalert2';
 declare var $: any;
 
 @Component({
@@ -59,6 +60,30 @@ export class HeaderComponent implements OnInit {
   logout() {
     this.auth.removewebUser()
     this.router.navigate(['login']);
+  }
+
+  exportUpdate(){
+    this.isLoader = true;
+    this.http.get(this.api.getUrl('IMPORTUPDATES') + this.auth.webUser.dept_id).subscribe((data)=>{
+      if(data['result']){
+        // this.router.navigate(data['result'])
+        // window.open("file:///D:/MD Softwares/AIVV/HisabKitab-2022/Data/Sabji/Sabji_update_3_2022.db", "_blank")
+        Swal.fire({
+          title: 'Updates of Database Generated',
+          text: "FullPath : " + data['result'],
+          icon: 'success',
+          // showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          // cancelButtonColor: '#d33',
+          confirmButtonText: 'Ok, Got it.'
+        }).then((result) => {
+          if (result.isConfirmed) {
+  
+          }
+        })
+      }
+    });
+    this.isLoader = false;
   }
 
   importAll = async (ev: any) => {

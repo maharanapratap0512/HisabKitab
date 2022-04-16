@@ -1,0 +1,97 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
+</ngx-spinner>
+<div class="row" id="stateComponent">
+   <div class="card-body">
+      <form [formGroup]="pointForm">
+         <div class="row">
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Type</label>
+                  <ng-select class="custom" style="width: 100%;" placeholder="--TYPE--" [clearable]="true"
+                     [virtualScroll]="true" formControlName="type"
+                     [ngClass]="{'validation':pointForm.get('type')?.errors && (pointForm.get('type')?.touched || pointForm.get ('type')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Type</ng-option>                     
+                     <ng-option value="vcd">VCD</ng-option>                     
+                     <ng-option value="varta">Varta</ng-option>                     
+                     <ng-option value="s_point">Selected Point</ng-option>                     
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Number</label>
+                  <input type="number" class="form-control" placeholder="Number" formControlName="no"
+                     [ngClass]="{'validation':pointForm.get('no')?.errors && (pointForm.get('no')?.touched || pointForm.get ('no')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Murali Date </label>
+                  <input type="date" class="form-control" placeholder="मुरली तारीख" formControlName="mrl_date"
+                     [ngClass]="{'validation':pointForm.get('mrl_date')?.errors && (pointForm.get('mrl_date')?.touched || pointForm.get ('mrl_date')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-6 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Point (Hin)</label>
+                  <textarea class="form-control" placeholder="पॉइन्ट (Hin)" formControlName="point_hin"
+                     [ngClass]="{'validation':pointForm.get('point_hin')?.errors && (pointForm.get('point_hin')?.touched || pointForm.get ('point_hin')?.dirty)}"></textarea>
+               </div>
+            </div>
+            <div class="col-md-6 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Point (Eng)</label>
+                  <textarea class="form-control" placeholder="पॉइन्ट (Eng)" formControlName="point_eng"
+                     [ngClass]="{'validation':pointForm.get('point_eng')?.errors && (pointForm.get('point_eng')?.touched || pointForm.get ('point_eng')?.dirty)}"></textarea>
+               </div>
+            </div>
+            <!-- <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Country</label>
+                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                     onclick="$('#stateComponent > #addCountry').modal('show')" (click)="showModal = 'addCountry'">+
+                     Add</button>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Country" [clearable]="false"
+                     [virtualScroll]="true" formControlName="country_id"
+                     [ngClass]="{'validation':pointForm.get('country_id')?.errors && (pointForm.get('country_id')?.touched || pointForm.get ('country_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Country</ng-option>
+                     <ng-option *ngFor="let item of countries" [value]="item._id">
+                        {{item.country_hin}} : {{item.country_eng}}
+                     </ng-option>
+                  </ng-select>
+               </div>
+            </div> -->
+            <div class="col-md-3 mb-3">
+               <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                  (click)="pointFormSubmit()">Submit</button>
+               <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                  (click)="pointFormUpdate()">Update</button>
+               <!-- <button class="btn btn-light submit mx-3" type="button" (click)="pointForm.reset()">Clear</button> -->
+            </div>
+         </div>
+      </form>
+   </div>
+
+   <!-- AddCountry Modal
+    <div class="modal fade" id="addCountry" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add Country</h5>
+                    <button type="button" class="btn-close" onclick="$('#stateComponent > #addCountry').modal('hide')"
+                        (click)="showModal = ''" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" *ngIf="showModal == 'addCountry'">
+                    <app-country-entry (response)="countryAddResponse($event)"></app-country-entry>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div> -->
+</div>

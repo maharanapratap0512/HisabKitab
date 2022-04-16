@@ -21,6 +21,7 @@ export class ApiService {
     PBKIMAGE: base_url + 'upload/image/pbk',
     PRODUCTIMAGE: base_url + 'upload/image/product',
 
+    POINT: base_url + 'points/',
     MM: base_url + 'mms/',
     AAWAK: base_url + 'aawak/',
     PENDING_AWK: base_url + 'aawak/pending/',
@@ -42,6 +43,8 @@ export class ApiService {
     AJTYPE: base_url + 'supportlists/ajtypes/',
     DEPT: base_url + 'departments/',
     EXPORTFULL: base_url + 'departments/dbfull/',
+    IMPORTEXPORT: base_url + 'importexport/',
+    IMPORTUPDATES: base_url + 'importexport/updates/',
     DEPTCONFIG: base_url + 'department_config/',
     DEPTCONFSAVE: base_url + 'department_config/save',
     LOGIN: base_url + 'departments/login'

@@ -196,7 +196,7 @@
                               <div class="col-md-3 mb-3 text-center">
                                  <button class="btn btn-primary submit mx-2" type="submit"
                                     (click)="getaawakData()">Submit</button>
-                                    <!-- (click)="filterFormSubmit(filterForm.value)">Submit</button> -->
+                                 <!-- (click)="filterFormSubmit(filterForm.value)">Submit</button> -->
 
                                  <button class="btn btn-outline-secondary submit mx-2" type="button" (click)="filterBody= {
                                     pbk_id: [],
@@ -209,8 +209,7 @@
                                     condition_id: [],
                                     pkt_num:null,
                                     nimmit:null
-                                  };"
-                                    >Clear All</button>
+                                  };">Clear All</button>
                               </div>
                            </div>
                         </form>
@@ -242,65 +241,94 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <tr *ngFor="let data of aawakData | filter: term; let i=index">
-                           <td>{{i+1}}</td>
-                           <td>
-                              <div class="d-flex justify-content-between mb-1">
-                                 <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
-                                       class="uil uil-pen"></i></button><br>
-                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
-                                       class="uil-trash"></i></button>
-                              </div>
-                              <div class="d-flex justify-content-between mb-1">
-                                 <!-- <button class="btn btn-sm btn-warning w-100" type="button"
+                        <ng-container *ngFor="let data of aawakData | filter: term; let i=index">
+                           <tr>
+                              <td>{{i+1}}</td>
+                              <td>
+                                 <div class="d-flex justify-content-between mb-1">
+                                    <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
+                                          class="uil uil-pen"></i></button><br>
+                                    <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                          class="uil-trash"></i></button>
+                                 </div>
+                                 <div class="d-flex justify-content-between mb-1">
+                                    <!-- <button class="btn btn-sm btn-warning w-100" type="button"
                                     (click)="jawak(data)">Jawak</button> -->
-                                 <button *ngIf="data.remaining_qty > 0" class="btn btn-sm btn-warning"
-                                    (click)="addJawak(data)">
-                                    <i class="mdi mdi-plus noti-icon"></i>
-                                 </button>
-                                 <button class="btn btn-sm btn-outline-warning" (click)="showJawak(data._id)">
-                                    <i class="dripicons-view-list noti-icon"></i>
-                                 </button>
-                              </div>
-                           </td>
+                                    <button *ngIf="data.remaining_qty > 0" class="btn btn-sm btn-warning"
+                                       (click)="addJawak(data)">
+                                       <i class="mdi mdi-plus noti-icon"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning" (click)="showJawak(data._id)">
+                                       <i class="dripicons-view-list noti-icon"></i>
+                                    </button>
+                                 </div>
+                              </td>
 
-                           <td>{{data.pkt_num?data.pkt_num:'-'}}</td>
-                           <td>{{data.date?data.date:'-' | date:'yyyy-MM-dd'}}</td>
-                           <td *ngIf="auth.webUser.dept_id != 2">
-                              {{data.mm_hin}} - {{data.mm_code}}<br />
-                              {{data.mm_eng}}
-                           </td>
-                           <td>
-                              {{data.aawak_mm_id ? data.aawak_mm_hin+' - '+data.aawak_mm_code:'-'}}<br />
-                              {{data.aawak_mm_eng?data.aawak_mm_eng:''}}
-                           </td>
-                           <td *ngIf="auth.webUser.dept_id != 3">
-                              <span *ngIf="!data.pbk_id">-</span>
-                              {{data.pbk_hin}} <br />
-                              {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
-                           </td>
-                           <td>{{data.aawak_type_id?data.aawak_type_hin +' : '+ data.aawak_type_eng:'-'}}</td>
-                           <td>
-                              {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
-                              {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
-                           </td>
-                           <td *ngIf="auth.webUser.dept_id != 3">
-                              {{data.product_code ? data.product_code : '-'}}
-                              {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
-                           </td>
-                           <td>
-                              {{data.qty}} {{data.unit_short}} <br />
-                              <span style="font-weight:bold; color: red;" *ngIf="data.remaining_qty != 0">
-                                 बचत: {{data.remaining_qty}}
-                              </span>
-                           </td>
-                           <td>@ {{data.rate?data.rate:'-'}} <br>
-                              = {{data.actual_amt?data.actual_amt:'-'}}</td>
-                           <td>{{data.nimmit?data.nimmit:'-'}}</td>
-                           <td>{{data.item_detail?data.item_detail:'-'}}</td>
-                           <td>{{data.description?data.description:'-'}}</td>
+                              <td>{{data.pkt_num?data.pkt_num:'-'}}</td>
+                              <td>{{data.date?data.date:'-' | date:'yyyy-MM-dd'}}</td>
+                              <td *ngIf="auth.webUser.dept_id != 2">
+                                 {{data.mm_hin}} - {{data.mm_code}}<br />
+                                 {{data.mm_eng}}
+                              </td>
+                              <td>
+                                 {{data.aawak_mm_id ? data.aawak_mm_hin+' - '+data.aawak_mm_code:'-'}}<br />
+                                 {{data.aawak_mm_eng?data.aawak_mm_eng:''}}
+                              </td>
+                              <td *ngIf="auth.webUser.dept_id != 3">
+                                 <span *ngIf="!data.pbk_id">-</span>
+                                 {{data.pbk_hin}} <br />
+                                 {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
+                              </td>
+                              <td>{{data.aawak_type_id?data.aawak_type_hin +' : '+ data.aawak_type_eng:'-'}}</td>
+                              <td>
+                                 {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
+                                 {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
+                              </td>
+                              <td *ngIf="auth.webUser.dept_id != 3">
+                                 {{data.product_code ? data.product_code : '-'}}
+                                 {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
+                              </td>
+                              <td>
+                                 {{data.qty}} {{data.unit_short}} <br />
+                                 <span style="font-weight:bold; color: red;" *ngIf="data.remaining_qty != 0">
+                                    बचत: {{data.remaining_qty}}
+                                 </span>
+                              </td>
+                              <td>@ {{data.rate?data.rate:'-'}} <br>
+                                 = {{data.actual_amt?data.actual_amt:'-'}}</td>
+                              <td>{{data.nimmit?data.nimmit:'-'}}</td>
+                              <td>{{data.item_detail?data.item_detail:'-'}}</td>
+                              <td>{{data.description?data.description:'-'}}</td>
+                           </tr>
+                           <tr>
 
-                        </tr>
+                              <ng-container *ngIf="data.jawak_detail.length > 0">
+                                 <td></td>
+                                 <td colspan="10">
+                                    <table class="table table-bordered">
+                                       <thead>
+                                          <tr>
+                                             <th>No</th>
+                                             <th>jawak MM</th>
+                                             <th>Jwk Person</th>
+                                             <th>Jwk Type</th>
+                                             <th>Quantity</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          <tr *ngFor="let jwk of data.jawak_detail; let i = index;">
+                                             <td>{{i+1}}</td>
+                                             <td>{{jwk.jawak_mm_hin}}</td>
+                                             <td>{{jwk.nimmit_hin}}</td>
+                                             <td>{{jwk.jawak_type_hin}}</td>
+                                             <td>{{jwk.qty}} {{jwk.unit_short}}</td>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </td>
+                              </ng-container>
+                           </tr>
+                        </ng-container>
                      </tbody>
                   </table>
                </div>
