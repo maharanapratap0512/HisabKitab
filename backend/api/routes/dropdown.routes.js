@@ -61,12 +61,16 @@ router.get('/all/:dept_id', async (req, res, next) => {
         }, (err) => { return [] });
         lists.mm= await DB.getListByDept('mm', req.params.dept_id) || [],
         lists.pbk= await DB.getListByDept('pbk', req.params.dept_id) || [],
+        lists.nimmit= await DB.getListByDept('nimmit', req.params.dept_id) || [],
+        
         lists.state= await DB.getListByDept('state', req.params.dept_id) || [],
         // lists.item= await DB.getFullListByDept('item', req.params.dept_id) || [],
         lists.subitem= await DB.getFullListByDept('subitem', req.params.dept_id) || [],
         lists.subitem_list= await DB.getListByDept('subitem_list', req.params.dept_id) || [],
         lists.departmen_config= await DB.getListByDept('department_config', req.params.dept_id) || [],
-        lists.department= await DB.getFullList('department') || [],
+        await DB.getFullList('department').then((resolve)=>{
+            lists.department= resolve.data || []
+        });
         lists.unit= await DB.getListByDept('unit', req.params.dept_id) || [],
         lists.mm_type= await DB.getListByDept('mm_type', req.params.dept_id) || [],
         lists.relation= await DB.getListByDept('relation', req.params.dept_id) || [],

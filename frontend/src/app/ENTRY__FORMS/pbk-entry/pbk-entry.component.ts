@@ -17,6 +17,7 @@ export class PbkEntryComponent implements OnInit {
 
   @Input() getData: any;
   @Input() isEdit: any;
+  @Input() isNimmit: any;
   @Output() response = new EventEmitter();
   pbkForm: FormGroup;
   allList: any = {};
@@ -81,7 +82,7 @@ export class PbkEntryComponent implements OnInit {
 
   ngOnChanges(changes: SimpleChanges) {
     console.log("pbk-changes", changes);
-    if (this.isEdit && changes.getData.currentValue) {
+    if (changes.getData && changes.getData.currentValue) {
       this.pbkForm.patchValue({
         roll_no: changes.getData.currentValue.roll_no,
         pbk_eng: changes.getData.currentValue.pbk_eng,
@@ -104,6 +105,11 @@ export class PbkEntryComponent implements OnInit {
         document: changes.getData.currentValue.document
       });
       this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0]: null;
+    }
+    if(changes.isNimmit && changes.isNimmit.currentValue){
+      this.pbkForm.patchValue({
+        status: "nimmit"
+      });
     }
   }
 
@@ -149,7 +155,11 @@ export class PbkEntryComponent implements OnInit {
       this.isLoader = true;
       this.http.post(this.api.getUrl('PBK') + this.auth.webUser.dept_id, this.pbkForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
-          this.gs.Lists.pbk.unshift(data['result'])
+          if(data['result'].status == "nimmit"){
+            this.gs.Lists.nimmit.unshift(data['result'])
+          }else{
+            this.gs.Lists.pbk.unshift(data['result'])
+          }
           this.pbkForm.reset({ active: true });
           this.isLoader = false;
           this.toastr.success("PBK Added Successfully.")
@@ -198,7 +208,11 @@ export class PbkEntryComponent implements OnInit {
       };
       this.http.put(this.api.getUrl('PBK'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          this.gs.Lists.pbk.splice(this.gs.Lists.pbk.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result'])
+          if(data['result'].status == "nimmit"){
+            this.gs.Lists.nimmit.splice(this.gs.Lists.nimmit.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
+          }else{
+            this.gs.Lists.pbk.splice(this.gs.Lists.pbk.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
+          }
           this.pbkForm.reset();
           this.isLoader = false;
           this.toastr.success("PBK Updated Successfully");

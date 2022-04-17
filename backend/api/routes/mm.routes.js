@@ -63,11 +63,10 @@ router.get('/forConfig/:dept_id', async (req, res, next) => {
 //  mm get
 router.get('/', async (req, res, next) => {
     await DB.getFullList('mm').then(async (resolve) => {
-        let count = await DB.getCount('mm');
         res.json({
             success: true,
-            result: resolve || [],
-            total_count: count.total_count,
+            result: resolve.data || [],
+            total_count: (resolve.total_count ? resolve.total_count : 0),
         });
     }, (err) => { return next(err) });
 });

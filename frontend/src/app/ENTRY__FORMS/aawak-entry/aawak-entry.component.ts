@@ -45,20 +45,10 @@ export class AawakEntryComponent implements OnInit {
 	categories: any = [];
 	isCondition: any = false;
 	productsAll: any = [];
-	jawak_detail: FormArray;
-	jawakArr: any = {
-		jawak_mm_id: '',
-		date: '',
-		mm_id: '',
-		item_id: '',
-		subitem_id: '',
-		product_id: '',
-		condition_id: '',
-		jawak_type_id: '',
-		unit_id: '',
-		nimmit: '',
-		dept_id: this.auth.webUser.dept_id
-	}
+	jmm: any;
+	jqty: any;
+	jnimmit: any;
+	nimmits: any = [];
 
 	constructor(private fb: FormBuilder,
 		private http: HttpService,
@@ -79,6 +69,7 @@ export class AawakEntryComponent implements OnInit {
 			this.aawak_types = result.aawak_type ? result.aawak_type : [];
 			this.products = result.product ? result.product : [];
 			this.categories = result.category ? result.category : [];
+			this.nimmits = result.nimmit ? result.nimmit : [];
 		});
 
 		this.aawakForm = this.fb.group({
@@ -97,26 +88,26 @@ export class AawakEntryComponent implements OnInit {
 			qty: [null, Validators.required],
 			rate: [null],
 			actual_amt: [null],
-			nimmit: [null],
+			nimmit_id: [null],
 			item_detail: [null],
 			description: [null],
 			remaining_qty: [null],
-			jawak_detail: this.fb.array([this.fb.group({
-				jawak_mm_id: [null, Validators.required],
-				date: [this.jawakArr.date, Validators.required],
-				mm_id: [this.jawakArr.mm_id, Validators.required],
-				item_id: [this.jawakArr.item_id, Validators.required],
-				subitem_id: [this.jawakArr.subitem_id],
-				product_id: [this.jawakArr.product_id],
-				condition_id: [this.jawakArr.condition_id],
-				jawak_type_id: [this.jawakArr.jawak_type_id, Validators.required],
-				unit_id: [this.jawakArr.unit_id, Validators.required],
-				nimmit: [this.jawakArr.nimmit],
-				dept_id: [this.auth.webUser.dept_id],
-				qty: [null, Validators.pattern("^[0-9]+(\.[0-9]{1,2})?$")],
-			})]),
+			jawak_detail: [[]]
 		});
-		this.jawak_detail = this.aawakForm.get('jawak_detail') as FormArray;
+	}
+
+	add_jwk() {
+		let jwk = this.aawakForm.value.jawak_detail;
+		jwk.push({ jwk_mm: this.jmm, jwk_nimmit: this.jnimmit, jwk_qty: this.jqty });
+		this.jmm = null;
+		this.jqty = null;
+		this.jnimmit = null;
+	}
+
+	remove(i: any) {
+		let jwk = this.aawakForm.value.jawak_detail;
+		jwk.splice(i, 1);
+		// console.log("after this.aawakForm.value.jawak_detail", i, this.aawakForm.value.jawak_detail);
 	}
 
 	ngOnInit(): void {
@@ -142,29 +133,16 @@ export class AawakEntryComponent implements OnInit {
 				qty: changes.getData.currentValue.qty,
 				rate: changes.getData.currentValue.rate,
 				actual_amt: changes.getData.currentValue.actual_amt,
-				nimmit: changes.getData.currentValue.nimmit,
+				nimmit_id: changes.getData.currentValue.nimmit_id,
 				item_detail: changes.getData.currentValue.item_detail,
 				description: changes.getData.currentValue.description,
 				remaining_qty: changes.getData.currentValue.remaining_qty
 			});
-			this.aawakForm.setControl('jawak_detail', this.setJawakDetails(changes.getData.currentValue.jawak_detail));
 			this.qty = changes.getData.currentValue.qty;
 			this.rate = changes.getData.currentValue.rate;
 			this.amnt = changes.getData.currentValue.actual_amt;
 			this.oldQty = changes.getData.currentValue.qty
 			this.unit = changes.getData.currentValue.unit_short;
-
-			this.jawakArr.jawak_mm_id = changes.getData.currentValue.jawak_mm_id;
-			this.jawakArr.date = changes.getData.currentValue.date;
-			this.jawakArr.mm_id = changes.getData.currentValue.mm_id;
-			this.jawakArr.item_id = changes.getData.currentValue.item_id;
-			this.jawakArr.subitem_id = changes.getData.currentValue.subitem_id;
-			this.jawakArr.product_id = changes.getData.currentValue.product_id;
-			this.jawakArr.condition_id = changes.getData.currentValue.condition_id;
-			this.jawakArr.jawak_type_id = changes.getData.currentValue.jawak_type_id;
-			this.jawakArr.unit_id = changes.getData.currentValue.unit_id;
-			this.jawakArr.nimmit = changes.getData.currentValue.nimmit;
-			this.jawakArr.dept_id = changes.getData.currentValue.dept_id;
 			setTimeout(() => {
 				this.itemSelected(changes.getData.currentValue.item_id);
 				if (changes.getData.currentValue.subitem_id) {
@@ -179,161 +157,6 @@ export class AawakEntryComponent implements OnInit {
 		}
 	}
 
-	setJawakDetails(jawakdetailset: any): FormArray {
-		const formArray = new FormArray([]);
-		jawakdetailset.forEach((s: any, i: any) => {
-			formArray.push(this.fb.group({
-				jawak_mm_id: s.jawak_mm_id,
-				date: s.date,
-				mm_id: s.mm_id,
-				item_id: s.item_id,
-				subitem_id: s.subitem_id,
-				product_id: s.product_id,
-				condition_id: s.condition_id,
-				qty: s.qty,
-				jawak_type_id: s.jawak_type_id,
-				unit_id: s.unit_id,
-				nimmit: s.nimmit,
-				dept_id: s.dept_id,
-			}));
-		});
-		return formArray;
-	}
-
-	createJawakDetails(): FormGroup {
-		return this.fb.group({
-			jawak_mm_id: [null, Validators.required],
-			date: [this.jawakArr.date, Validators.required],
-			mm_id: [this.jawakArr.mm_id, Validators.required],
-			item_id: [this.jawakArr.item_id, Validators.required],
-			subitem_id: [this.jawakArr.subitem_id],
-			product_id: [this.jawakArr.product_id],
-			condition_id: [this.jawakArr.condition_id],
-			jawak_type_id: [this.jawakArr.jawak_type_id, Validators.required],
-			unit_id: [this.jawakArr.unit_id, Validators.required],
-			nimmit: [this.jawakArr.nimmit],
-			dept_id: [this.auth.webUser.dept_id],
-			qty: [null, Validators.pattern("^[0-9]+(\.[0-9]{1,2})?$")],
-		});
-	}
-
-	addJawakDetails(): void {
-		this.jawak_detail = this.aawakForm.get('jawak_detail') as FormArray;
-		this.jawak_detail.push(this.createJawakDetails());
-		console.log("this.jawak_detail.length", this.jawak_detail.length);
-
-		this.jawak_detail = this.aawakForm.get('jawak_detail') as FormArray;
-		this.jawak_detail.controls[this.jawak_detail.length].patchValue({
-			date: this.jawakArr.date,
-			mm_id: this.jawakArr.mm_id,
-			item_id: this.jawakArr.item_id,
-			subitem_id: this.jawakArr.subitem_id,
-			product_id: this.jawakArr.product_id,
-			condition_id: this.jawakArr.condition_id,
-			jawak_type_id: this.jawakArr.jawak_type_id,
-			unit_id: this.jawakArr.unit_id,
-			nimmit: this.jawakArr.nimmit
-		})
-	}
-
-	get formJawakDetails() { return <FormArray>this.aawakForm.get('jawak_detail'); }
-
-	removeJawakDetails(index: any) {
-		this.jawak_detail = this.aawakForm.get('jawak_detail') as FormArray;
-		this.jawak_detail.removeAt(index);
-	}
-
-	// softclear() {
-	//   this.aawakForm.reset(
-	//     {
-	//       active: true,
-	//       parchi_no: this.aawakForm.value.parchi_no,
-	//       pbk_id: this.aawakForm.value.pbk_id,
-	//       date: this.aawakForm.value.date,
-	//       aawak_mm_id: this.aawakForm.value.aawak_mm_id
-	//     }
-	//   );
-	//   this.jawak_detail = this.aawakForm.get('jawak_detail') as FormArray;
-	//   this.jawak_detail.clear();
-	//   this.forminit();
-	//   // this.jawak_detail.push(this.fb.array([this.fb.group({
-	//   //    jawak_mm_id: [null],
-	//   //    jawak_quantity: [null]
-	//   // })]));
-	//   // this.aawakForm = this.fb.group({
-	//   //    jawak_detail: this.fb.array([this.fb.group({
-	//   //       jawak_mm_id: [null],
-	//   //       jawak_quantity: [null]
-	//   //    })]),
-	//   // })
-	//   // this.jawakqnt = null;
-	// }
-
-	clearall() {
-		this.aawakForm.reset({ active: true });
-		this.jawak_detail = this.aawakForm.get('jawak_detail') as FormArray;
-		this.jawak_detail.clear();
-		this.forminit();
-	}
-
-	jawakmmclick() {
-		this.jawak_detail = this.aawakForm.get('jawak_detail') as FormArray;
-		this.jawak_detail.controls[0].patchValue({
-			qty: this.qty,
-			date: this.jawakArr.date,
-			mm_id: this.jawakArr.mm_id,
-			item_id: this.jawakArr.item_id,
-			subitem_id: this.jawakArr.subitem_id,
-			product_id: this.jawakArr.product_id,
-			condition_id: this.jawakArr.condition_id,
-			jawak_type_id: this.jawakArr.jawak_type_id,
-			unit_id: this.jawakArr.unit_id,
-			nimmit: this.jawakArr.nimmit
-		})
-		// console.log("fiii00", this.jawak_detail.controls[0]);
-		// for (let i in this.jawak_detail.controls) { }
-	}
-
-
-	forminit() {
-		this.aawakForm = this.fb.group({
-			pkt_num: [null],
-			date: [null, Validators.required],
-			mm_id: [null, Validators.required],
-			aawak_mm_id: [null],
-			dept_id: [this.auth.webUser.dept_id],
-			pbk_id: [null],
-			aawak_type_id: [null, Validators.required],
-			item_id: [null, Validators.required],
-			subitem_id: [null],
-			product_id: [null],
-			unit_id: [null, Validators.required],
-			condition_id: [null],
-			qty: [null, Validators.required],
-			rate: [null],
-			actual_amt: [null],
-			nimmit: [null],
-			item_detail: [null],
-			description: [null],
-			remaining_qty: [null],
-			jawak_detail: this.fb.array([this.fb.group({
-				jawak_mm_id: [null],
-				date: [null, Validators.required],
-				mm_id: [null, Validators.required],
-				item_id: [null, Validators.required],
-				subitem_id: [null],
-				product_id: [null],
-				condition_id: [null],
-				qty: [null, Validators.pattern("^[0-9]+(\.[0-9]{1,2})?$")],
-				jawak_type_id: [null, Validators.required],
-				unit_id: [null, Validators.required],
-				nimmit: [null],
-				dept_id: [this.auth.webUser.dept_id],
-			})]),
-		});
-		this.jawak_detail = this.aawakForm.get('jawak_detail') as FormArray;
-	}
-
 	openModal(name: any) {
 		this.showModal = name;
 		$('#aawakEntryComponent > #' + name).modal('show')
@@ -345,21 +168,6 @@ export class AawakEntryComponent implements OnInit {
 	}
 
 	aawakFormSubmit() {
-		// const formArray = new FormArray([]);
-		// formArray.push(this.fb.group({
-		//   date: this.jawakArr.date,
-		//   mm_id: this.jawakArr.mm_id,
-		//   item_id: this.jawakArr.item_id,
-		//   subitem_id: this.jawakArr.subitem_id,
-		//   product_id: this.jawakArr.product_id,
-		//   condition_id: this.jawakArr.condition_id,
-		//   jawak_type_id: this.jawakArr.jawak_type_id,
-		//   unit_id: this.jawakArr.unit_id,
-		//   nimmit: this.jawakArr.nimmit,
-		// }));
-
-		// this.aawakForm.setControl('jawak_detail', formArray);
-
 		if (this.aawakForm.valid) {
 			this.isLoader = true;
 			this.aawakForm.patchValue({
@@ -367,35 +175,38 @@ export class AawakEntryComponent implements OnInit {
 			})
 			console.log("this.aawakForm.value", this.aawakForm.value);
 
-			// this.http.post(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.aawakForm.value).subscribe((data: any) => {
-			//   if (data['result'] && data['success']) {
-			//     this.qty = null;
-			//     this.rate = null;
-			//     this.amnt = null;
-			//     this.aawakForm.reset();
-			//     this.isLoader = false;
-			//     this.toastr.success('Aawak Added Successfully.');
-			//     console.log("sub");
-			//     this.response.emit(data['result']);
-			//   } else {
-			//     this.toastr.error(data['message']);
-			//     this.isLoader = false;
-			//   }
-			// }, err => {
-			//   this.toastr.error(err['error']);
-			//   this.isLoader = false;
-			// });
+			this.http.post(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.aawakForm.value).subscribe((data: any) => {
+				if (data['result'] && data['success']) {
+					this.qty = null;
+					this.rate = null;
+					this.amnt = null;
+					this.jmm = null;
+					this.jqty = null;
+					this.jnimmit = null;
+					this.aawakForm.reset();
+					this.isLoader = false;
+					this.toastr.success('Aawak Added Successfully.');
+					console.log("sub");
+					this.response.emit(data['result']);
+				} else {
+					this.toastr.error(data['message']);
+					this.isLoader = false;
+				}
+			}, err => {
+				this.toastr.error(err['error']);
+				this.isLoader = false;
+			});
 		}
 		else {
 			console.log("this.aawakForm", this.aawakForm);
 			this.gs.validationFireOnSubmit(this.aawakForm);
-			if (this.aawakForm.controls.jawak_detail.invalid) {
-				this.jawak_detail = this.aawakForm.get('jawak_detail') as FormArray;
-				for (let i in this.jawak_detail.controls) {
-					this.jawak_detail.controls[i].markAsTouched();
-					this.gs.validationFireOnSubmit(<FormGroup>this.jawak_detail.controls[i]);
-				}
-			}
+			// if (this.aawakForm.controls.jawak_detail.invalid) {
+			// 	this.jawak_detail = this.aawakForm.get('jawak_detail') as FormArray;
+			// 	for (let i in this.jawak_detail.controls) {
+			// 		this.jawak_detail.controls[i].markAsTouched();
+			// 		this.gs.validationFireOnSubmit(<FormGroup>this.jawak_detail.controls[i]);
+			// 	}
+			// }
 		}
 	}
 
@@ -422,7 +233,7 @@ export class AawakEntryComponent implements OnInit {
 				qty: this.aawakForm.value.qty,
 				rate: this.aawakForm.value.rate,
 				actual_amt: this.aawakForm.value.actual_amt,
-				nimmit: this.aawakForm.value.nimmit,
+				nimmit_id: this.aawakForm.value.nimmit_id,
 				item_detail: this.aawakForm.value.item_detail,
 				description: this.aawakForm.value.description,
 				remaining_qty: this.aawakForm.value.remaining_qty + (this.aawakForm.value.qty - this.oldQty),
@@ -432,6 +243,9 @@ export class AawakEntryComponent implements OnInit {
 					this.qty = null;
 					this.rate = null;
 					this.amnt = null;
+					this.jmm = null;
+					this.jqty = null;
+					this.jnimmit = null;
 					this.aawakForm.reset();
 					this.isLoader = false;
 					this.toastr.success('Aawak Updated Successfully.');
@@ -565,6 +379,21 @@ export class AawakEntryComponent implements OnInit {
 				{
 					unit_id: ev._id
 				});
+			this.isLoader = false;
+		}
+		else {
+			this.isLoader = false;
+			console.log("err", ev);
+		}
+	}
+
+	nimmitAddResponse(ev: any) {
+		this.isLoader = true;
+		if (ev._id) {
+			$('#aawakEntryComponent > #showModal').modal('hide');
+			this.showModal = '';
+			// this.states.unshift(ev);
+			this.aawakForm.patchValue({ nimmit_id: ev._id });
 			this.isLoader = false;
 		}
 		else {

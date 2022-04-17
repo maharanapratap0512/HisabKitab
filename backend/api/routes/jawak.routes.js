@@ -57,10 +57,11 @@ router.get('/', async (req, res, next) => {
 //  jawak get by aawak id
 router.get('/byaawak/:aawak_ref_id', async (req, res, next) => {
     let conditionString = ` aawak_ref_id = ${req.params.aawak_ref_id}`;
-    await DB.getFullList('jawak', conditionString).then((data) => {
+    await DB.getFullList('jawak', conditionString).then((resolve) => {
         res.json({
             success: true,
-            result: data || []
+            result: resolve.data || [],
+            total_count: (resolve.total_count ? resolve.total_count : 0),
         });
     }, (err) => { return next(err) });
 });

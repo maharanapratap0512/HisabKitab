@@ -25,11 +25,10 @@ router.post('/', async (req, res, next) => {
 //  dept_config get
 router.get('/', async (req, res, next) => {
     await DB.getFullList('department_config').then(async (resolve) => {
-        let count = await DB.getCount('department_config');
         res.json({
             success: true,
-            result: resolve || [],
-            total_count: (count ? count.total_count : 0),
+            result: resolve.data || [],
+            total_count: (resolve.total_count ? resolve.total_count : 0),
         });
     }, (err) => { return next(err) });
 });
@@ -45,11 +44,11 @@ router.get('/:dept_id', async (req, res, next) => {
 });
 
 // dept_config update
-router.put('/save', async (req, res, next) => {    
+router.put('/save', async (req, res, next) => {
     if (req.body) {
         for (let [key, value] of Object.entries(req.body)) {
             let newObj = {
-                config_value:value.config_value
+                config_value: value.config_value
             };
             let condition = '';
             if (value._id) {
@@ -61,9 +60,9 @@ router.put('/save', async (req, res, next) => {
             else {
                 req.body[key] = { success: false, err: 'required fields are missing' };
             }
-            if (condition != '') {                
-                await DB.update('department_config',newObj, condition, (err, data) => {
-                    if(err){
+            if (condition != '') {
+                await DB.update('department_config', newObj, condition, (err, data) => {
+                    if (err) {
                         req.body[key].success = false;
                     }
                     req.body[key].success = true;

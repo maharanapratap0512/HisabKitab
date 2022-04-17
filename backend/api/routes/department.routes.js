@@ -26,11 +26,10 @@ router.post('/', async (req, res, next) => {
 //  department get
 router.get('/', async (req, res, next) => {
     await DB.getFullList('department').then(async (resolve) => {
-        let count = await DB.getCount('department');
         res.json({
             success: true,
-            result: resolve || [],
-            total_count: (count ? count.total_count : 0),
+            result: resolve.data || [],
+            total_count: (resolve.total_count ? resolve.total_count : 0),
         });
     }, (err) => { return next(err) });
 });
@@ -39,11 +38,10 @@ router.get('/', async (req, res, next) => {
 router.get('/:dept_id', async (req, res, next) => {
     if (['1', '2'].includes(req.params.dept_id)) {
         await DB.getFullList('department').then(async (resolve) => {
-            let count = await DB.getCount('department');
             res.json({
                 success: true,
-                result: resolve || [],
-                total_count: (count ? count.total_count : 0),
+                result: resolve.data || [],
+                total_count: (resolve.total_count ? resolve.total_count : 0),
             });
         }, (err) => { return next(err) });
     }
@@ -61,10 +59,10 @@ router.get('/dbfull/:dept_id', async (req, res, next) => {
 
         res.json({
             success: true,
-            result: {path:result}
+            result: { path: result }
         })
 
-    }, (reject)=>{
+    }, (reject) => {
         next(reject);
     });
 });

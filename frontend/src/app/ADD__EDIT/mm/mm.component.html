@@ -102,7 +102,9 @@
                            </td>
                            <td>{{data.state_hin}} : {{data.state_eng}}</td>
                            <td>{{data.opening_date | date: 'dd-MM-yyyy'}}</td>
-                           <td>{{data.nimmit ? data.nimmit:'-'}}</td>
+                           <td>
+                              {{data.nimmit_id ? data.nimmit_hin + ' ('+ data.nimmit_state_hin + ')':'-'}}
+                           </td>
                         </tr>
                      </tbody>
                   </table>

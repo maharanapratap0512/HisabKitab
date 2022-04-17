@@ -51,11 +51,10 @@ router.get('/:dept_id', async (req, res, next) => {
 //  city get
 router.get('/', async (req, res, next) => {
     await DB.getFullList('city').then(async (resolve) => {
-        let count = await DB.getCount('city');
         res.json({
             success: true,
-            result: resolve || [],
-            total_count: (count ? count.total_count : 0),
+            result: resolve.data || [],
+            total_count: (resolve.total_count ? resolve.total_count : 0),
         });
     }, (err) => { return next(err) });
 });
