@@ -35,5 +35,25 @@ router.get('/updates/:dept_id', async (req, res, next) => {
     });
 });
 
+//  department DB download
+router.put('/import/:dept_id', async (req, res, next) => {
+
+    console.log("request", req.body);
+    res.json({
+        success: true,
+        result: req.body
+    });
+    // DB.generateUpdateDB(req.params.dept_id).then(async (result) => {
+    //     res.json({
+    //         success: true,
+    //         result: result
+    //     });
+
+
+    // }, (reject) => {
+    //     next(reject);
+    // });
+});
+
 
 module.exports = router;

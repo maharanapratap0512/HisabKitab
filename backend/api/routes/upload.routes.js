@@ -27,6 +27,22 @@ const driveMulterConfig = {
    }
 };
 
+const dbMulterConfig = {
+   storage: multer.diskStorage({
+      destination: (req, file, next) => { next(null, __dirname + "/../../../../Data/"+file.originalname+"/"); },
+
+      filename: (req, file, next) => { next(null, file.originalname + '_update_' + Date.now() + '.db') }
+   }),
+   limits: { fileSize: 5000000 }, // 1 MB = 1000000 Bytes    
+   fileFilter: (req, file, next) => {
+      if (file.mimetype == 'application/octet-stream') {
+        next(null, true)
+      } else {
+         next(null, false);
+      }
+   }
+};
+
 const imageMulterConfig = {
    storage: multer.diskStorage({
       destination: (req, file, next) => { next(null, __dirname + "/../../../../Data/Documents/Images"); },
@@ -96,6 +112,25 @@ router.post('/doc', multer(driveMulterConfig).single('document'), async (req, re
    }
 });
 
+//upload DB for monthly updates
+router.post('/db', multer(dbMulterConfig).single('updateDB'), async (req, res) => {
+   try {
+      if (!req.file) {
+         res.json({
+            success: false,
+            message: 'Invalid or No file provided'
+         });
+      } else {
+         // const path = '/api' + req.file.destination.split('.')[1] + '/' + req.file.filename;
+         res.json({
+            success: true,
+            filePath: path
+         });
+      }
+   } catch (err) {
+      res.status(500).json(errorHandler(err));
+   }
+});
 
 // Single Image
 router.post('/image', multer(imageMulterConfig).single('image'), async (req, res) => {

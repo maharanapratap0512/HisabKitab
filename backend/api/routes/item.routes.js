@@ -44,15 +44,16 @@ router.post('/:dept_id', async (req, res, next) => {
 router.get('/:dept_id', async (req, res, next) => {
     await DB.getFullListByDept('itemMix', req.params.dept_id, null, null, 100).then((resolve) => {
         let subitem_count = 0;
-        for (let i = 0; i < resolve.length; i++) {
+        for (let i = 0; i < resolve.data.length; i++) {
 
-            resolve[i].subitems = (resolve[i].subitems != "[null]" ? JSON.parse(resolve[i].subitems) : []);
-            resolve[i].categories = (resolve[i].categories != "[null]" ? JSON.parse(resolve[i].categories) : []);
-            subitem_count += resolve[i].subitems.length;
+            resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
+            resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
+            subitem_count += resolve.data[i].subitems.length;
         }
         res.json({
             success: true,
-            result: resolve || [],
+            result: resolve.data || [],
+            total_count: resolve.total_count,
             subitem_count: subitem_count
         });
     }, (err) => { return next(err) });
@@ -72,15 +73,16 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
     }
     await DB.getFullListByDept('itemMix', req.params.dept_id, conditionString).then((resolve) => {
         let subitem_count = 0;
-        for (let i = 0; i < resolve.length; i++) {
+        for (let i = 0; i < resolve.data.length; i++) {
 
-            resolve[i].subitems = (resolve[i].subitems != "[null]" ? JSON.parse(resolve[i].subitems) : []);
-            resolve[i].categories = (resolve[i].categories != "[null]" ? JSON.parse(resolve[i].categories) : []);
-            subitem_count += resolve[i].subitems.length;
+            resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
+            resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
+            subitem_count += resolve.data[i].subitems.length;
         }
         res.json({
             success: true,
-            result: resolve || [],
+            result: resolve.data || [],
+            total_count: resolve.total_count,
             subitem_count: subitem_count
         });
     }, (err) => { return next(err) });

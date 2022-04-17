@@ -20,6 +20,7 @@ export class ApiService {
     IMAGE: base_url + 'upload/image',
     PBKIMAGE: base_url + 'upload/image/pbk',
     PRODUCTIMAGE: base_url + 'upload/image/product',
+    DBUPLOAD: base_url + 'upload/db',
 
     POINT: base_url + 'points/',
     MM: base_url + 'mms/',
@@ -45,6 +46,7 @@ export class ApiService {
     EXPORTFULL: base_url + 'departments/dbfull/',
     IMPORTEXPORT: base_url + 'importexport/',
     IMPORTUPDATES: base_url + 'importexport/updates/',
+    IMPORTUPDATE: base_url + 'importexport/import/',
     DEPTCONFIG: base_url + 'department_config/',
     DEPTCONFSAVE: base_url + 'department_config/save',
     LOGIN: base_url + 'departments/login'

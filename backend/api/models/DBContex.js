@@ -164,9 +164,9 @@ class DBContex {
             try {
                 let dept = await this.getFullById("department", dept_id);
                 if (dept) {
-                    let date = new Date();                        
+                    let date = new Date();
                     let exPath = this.path.resolve(this.DBFolder, dept.dept_eng);
-                    let exFilePath = this.path.resolve(exPath, dept.dept_eng + '_update_'+date.getMonth()+'_'+date.getFullYear()+ '.db');
+                    let exFilePath = this.path.resolve(exPath, dept.dept_eng + '_update_' + date.getMonth() + '_' + date.getFullYear() + '.db');
                     if (!this.fs.existsSync(exPath)) {
                         this.fs.mkdirSync(exPath, { recursive: true });
                     }
@@ -280,12 +280,12 @@ class DBContex {
                         'jawak_type'
                     ]
 
-                    
-                    if(list_name == "pbk"){
+
+                    if (list_name == "pbk") {
                         sql = `select * from pbk where (status is null OR status <> "nimmit") `;
-                        if (!exclude_dept.includes(dept_id)) {                            
+                        if (!exclude_dept.includes(dept_id)) {
                             sql += ` AND (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
-                        }                
+                        }
                     }
                     else if (this.dept_config_list.includes(list_name)) {
 
@@ -311,7 +311,7 @@ class DBContex {
                     else if (list_name_arr.includes(list_name)) {
                         sql = `select * from support_list where list_type = '${list_name}'`;
                     }
-                    else if(list_name == "nimmit"){
+                    else if (list_name == "nimmit") {
                         sql = `select pbk.*, st.state_hin from pbk
                                 left join state st on st._id = pbk.state_id where status = "nimmit"`;
                     }
@@ -493,7 +493,6 @@ class DBContex {
                     condition += (condition == `` ? ` where` : ` AND `) + conditionString;
                 }
 
-
                 let sort = orderBy ? orderBy : this.fullListQuery[list_name + 'sort'];
                 let sql = `${this.fullListQuery[list_name]} ${sort ? 'ORDER BY ' + sort : ''} ${limit ? 'LIMIT ' + limit : ''} ${offset ? 'OFFSET ' + offset : ''}`;
 
@@ -501,13 +500,24 @@ class DBContex {
                 sql = sql.substring(0, lIndex) + condition + sql.substring(lIndex + 1);
                 // console.log(str);
                 console.log(sql);
+
+                let total_count = 0;
+                await this.getCount(list_name, conditionString).then((resolve) => {
+                    total_count = resolve.total_count;
+                }, (err) => {
+                    total_count = 0;
+                });
+
                 await this.localDB.all(sql, (err, data) => {
                     if (err) {
                         console.log({ type: 'new', sql: sql, err: err, params: [condition] });
                         reject(err)
                     }
                     else {
-                        resolve(data)
+                        resolve({
+                            data: data,
+                            total_count: total_count
+                        });
                     }
                 })
             }
@@ -530,21 +540,22 @@ class DBContex {
                 let sort = orderBy ? orderBy : this.fullListQuery[list_name + 'sort'];
                 let sql = `${this.fullListQuery[list_name]} ${sort ? 'ORDER BY ' + sort : ''} ${limit ? 'LIMIT ' + limit : ''} ${offset ? 'OFFSET ' + offset : ''}`;
                 let condition = conditionString ? `where ${conditionString}` : ``;
-                
+
                 var lIndex = sql.lastIndexOf("?");
                 sql = sql.substring(0, lIndex) + condition + sql.substring(lIndex + 1);
 
                 let total_count = 0;
-                await this.getCount(list_name, conditionString).then((resolve)=>{
+                await this.getCount(list_name, conditionString).then((resolve) => {
                     total_count = resolve.total_count;
                 });
                 this.localDB.all(sql, (err, data) => {
                     if (err) {
+                        console.log({ type: 'new', sql: sql, err: err, params: [condition] });
                         reject(err)
                     }
                     else {
                         let result = {
-                            data:data,
+                            data: data,
                             total_count: total_count
                         }
                         resolve(result)
@@ -668,7 +679,7 @@ class DBContex {
                     selectSql += ` where ${table_name}._id = ${resolve.lastID}`;
                     this.localDB.get(selectSql, async (err, rows) => {
                         if (err) {
-                            console.log({ sql: sql, params:params, err: err });
+                            console.log({ sql: sql, params: params, err: err });
                             return callback(err);
                         }
                         return callback(null, rows);
@@ -865,7 +876,7 @@ class DBContex {
 
     fullListConfig = {
 
-        point:`select * from point`,
+        point: `select * from point`,
 
         country: `select * from country`,
         countrysort: `country_hin, country_eng`,

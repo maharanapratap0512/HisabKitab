@@ -198,9 +198,7 @@
                         <input type="text" class="form-control" placeholder="Nimmit" formControlName="nimmit"
                             [ngClass]="{'validation':jawakForm.get('nimmit')?.errors && (jawakForm.get('nimmit')?.touched || jawakForm.get ('nimmit')?.dirty)}">
                     </div>
-                </div> -->
-
-                <div class="col-md-2 mb-3" *ngIf="!aawakRef || !aawakRef.Nimmit">
+                </div> --><div class="col-md-2 mb-3" *ngIf="!aawakRef || !aawakRef.Nimmit">
                     <div class="form-group">
                         <label class="form-label">Nimmit</label>
                         <button type="button" style="padding: 1px 6px !important;"
@@ -217,7 +215,7 @@
                                 item.nimmit_state_hin + ')'}}</ng-option>
                         </ng-select>
                     </div>
-                </div>
+                </div>                
 
                 <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id != 3">
                     <div class="form-group">

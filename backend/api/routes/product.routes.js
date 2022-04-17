@@ -44,13 +44,14 @@ router.post('/:dept_id', async (req, res, next) => {
 
 //  product get by dept_id
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getFullListByDept('product', req.params.dept_id, null,null, 100).then((data) => {
-        for (let i in data) {
-            data[i].document = (data[i].document != "[null]" ? JSON.parse(data[i].document) : {});
+    await DB.getFullListByDept('product', req.params.dept_id, null,null, 100).then((resolve) => {
+        for (let i in resolve.data) {
+            resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
         }
         res.json({
             success: true,
-            result: data || []
+            result: resolve.data || [],
+            total_count: resolve.total_count
         });
     }, (err) => { return next(err) });
 });
@@ -58,13 +59,14 @@ router.get('/:dept_id', async (req, res, next) => {
 // Filter product get by dept_id
 router.put('/:dept_id', async (req, res, next) => {
     let conditionString = ` 1=1 ${typeof req.body.item_id == "string" || typeof req.body.item_id == "number" ? ` AND product.item_id = (${req.body.item_id})` : ``} ${req.body.item_id.length > 0 ? ` AND product.item_id IN (${req.body.item_id})` : ``}`;
-    await DB.getFullListByDept('product', req.params.dept_id, conditionString,null, 100).then((data) => {
-        for (let i in data) {
-            data[i].document = (data[i].document != "[null]" ? JSON.parse(data[i].document) : {});
+    await DB.getFullListByDept('product', req.params.dept_id, conditionString,null, 100).then((resolve) => {
+        for (let i in resolve.data) {
+            resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
         }
         res.json({
             success: true,
-            result: data || []
+            result: resolve.data || [],
+            total_count: resolve.total_count
         });
     }, (err) => { return next(err) });
 });
