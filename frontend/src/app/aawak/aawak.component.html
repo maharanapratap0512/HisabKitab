@@ -242,7 +242,8 @@
                      </thead>
                      <tbody>
                         <ng-container *ngFor="let data of aawakData | filter: term; let i=index">
-                           <tr>
+                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
+                              aria-expanded="true" [attr.aria-controls]="'collapseExample-'+i" class="main-row">
                               <td>{{i+1}}</td>
                               <td>
                                  <div class="d-flex justify-content-between mb-1">
@@ -300,34 +301,38 @@
                               <td>{{data.item_detail?data.item_detail:'-'}}</td>
                               <td>{{data.description?data.description:'-'}}</td>
                            </tr>
-                           <tr>
-
-                              <ng-container *ngIf="data.jawak_detail.length > 0">
-                                 <td></td>
-                                 <td colspan="10">
-                                    <table class="table table-bordered">
-                                       <thead>
-                                          <tr>
-                                             <th>No</th>
-                                             <th>jawak MM</th>
-                                             <th>Jwk Person</th>
-                                             <th>Jwk Type</th>
-                                             <th>Quantity</th>
-                                          </tr>
-                                       </thead>
-                                       <tbody>
-                                          <tr *ngFor="let jwk of data.jawak_detail; let i = index;">
-                                             <td>{{i+1}}</td>
-                                             <td>{{jwk.jawak_mm_hin}}</td>
-                                             <td>{{jwk.nimmit_hin}}</td>
-                                             <td>{{jwk.jawak_type_hin}}</td>
-                                             <td>{{jwk.qty}} {{jwk.unit_short}}</td>
-                                          </tr>
-                                       </tbody>
+                           <ng-container *ngIf="data.jawak_detail.length > 0">
+                              <tr class="collapse show ribbon-box" [attr.id]="'collapseExample-'+i">
+                                 <td style="border: none;"></td>
+                                 <td colspan="10" class="sub-row">
+                                    <table class="card-body" style="width: 99.7%;table-layout: fixed;">
+                                       <tr>
+                                          <th>No.</th>
+                                          <th>कहा भेजा</th>
+                                          <th>किसको दिया</th>
+                                          <th>जवाक प्रकार</th>
+                                          <th>परिमाण</th>
+                                          <th style="width:0px;">
+                                             <div class="ribbon ribbon-secondary text-dark float-end"> Destribution</div>
+                                          </th>
+                                       </tr>
+                                       <tr *ngFor="let jwk of data.jawak_detail; let j = index;">
+                                          <td style="width: 80px;">
+                                             <i class="uil-corner-down-right"></i>
+                                             <span class="mx-1">{{j+1}}</span>
+                                          </td>
+                                          <td>{{jwk.jawak_mm_hin}} {{jwk.jawak_mm_code ? "("+jwk.jawak_mm_code+")" :
+                                             ''}}</td>
+                                          <td>{{jwk.nimmit_hin}} {{jwk.nimmit_state_hin ?
+                                             "("+jwk.nimmit_state_hin+")":''}}</td>
+                                          <td>{{jwk.jawak_type_hin}}{{jwk.jawak_type_eng ? " : "+jwk.jawak_type_eng :
+                                             ''}}</td>
+                                          <td>{{jwk.qty}} {{jwk.unit_short}}</td>
+                                       </tr>
                                     </table>
                                  </td>
-                              </ng-container>
-                           </tr>
+                              </tr>
+                           </ng-container>
                         </ng-container>
                      </tbody>
                   </table>

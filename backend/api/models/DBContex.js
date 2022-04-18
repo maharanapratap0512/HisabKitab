@@ -21,11 +21,11 @@ class DBContex {
         'bachat'
     ]
 
-    constructor() {
+    constructor(DB = null) {
         // this.DBCollection = require('../models/db.model');
         let dbModel = require('../models/db.model')
         this.Sqlite = require('sqlite3');
-        this.localDB = dbModel.localDB;
+        this.localDB = (DB ? DB : dbModel.localDB);
         this.Migrations = dbModel.Migrations;
         this.fs = require('fs');
         this.path = require('path');
@@ -715,8 +715,9 @@ class DBContex {
                     val = val.slice(0, -1);
                     let sql = `insert into ${table_name}(${cols}) values(${val})`;
                     this.run(sql, params).then((res) => {
-                        let selectSql = this.fullListConfig[table_name];
-                        selectSql += ` where ${table_name}._id = ${res.lastID}`;
+                        let selectSql = this.fullListQuery[table_name];
+                        var lIndex = selectSql.lastIndexOf("?");
+                        selectSql = selectSql.substring(0, lIndex) + ` where ${table_name}._id = ${res.lastID}` + selectSql.substring(lIndex + 1);
                         if (this.dept_config_list.includes(table_name)) {
                             this.addToDeptConfig(table_name, res.lastID, dept_id);
                         }
@@ -1221,7 +1222,7 @@ class DBContex {
         left join unit on unit._id = aawak.unit_id
         left join department dept on dept._id = aawak.dept_id
         left join support_list slat on slat._id = aawak.aawak_type_id
-        left join pbk nmt on nmt._id = mm.nimmit_id
+        left join pbk nmt on nmt._id = aawak.nimmit_id
         left join state pst on pst._id = nmt.state_id ?`,
         aawaksort: `date, aawak_mm_hin, aawak_mm_eng, pkt_num`,
 
@@ -1234,7 +1235,8 @@ class DBContex {
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         unit.unit_short, unit.unit_full,
-        jsl.list_name_hin as jawak_type_hin, jsl.list_name_eng as jawak_type_eng 
+        jsl.list_name_hin as jawak_type_hin, jsl.list_name_eng as jawak_type_eng ,
+        nmt.pbk_hin as nimmit_hin, nmt.pbk_eng as nimmit_eng, nmt.relative_name, nmt.state_id, pst.state_hin as nimmit_state_hin, pst.state_eng as nimmit_state_eng
         from jawak
         left join mm amm on amm._id = jawak.mm_id 
         left join pbk on pbk._id = jawak.pbk_id
@@ -1246,7 +1248,9 @@ class DBContex {
         left join support_list sl on sl._id = jawak.condition_id 
         left join support_list jsl on jsl._id = jawak.jawak_type_id
         left join unit on unit._id = jawak.unit_id
-        left join department dept on dept._id = jawak.dept_id ?`,
+        left join department dept on dept._id = jawak.dept_id
+        left join pbk nmt on nmt._id = jawak.nimmit_id
+        left join state pst on pst._id = nmt.state_id ?`,
         jawaksort: `date, jawak_mm_hin, jawak_mm_eng, pkt_num`,
         // json_group_array(JSON('{ "bachat_type_id": ' || bachat.bachat_type_id || ', "bachat_type_hin": "' || sl.list_name_hin || '", "bachat_type_eng": "' || sl.list_name_eng || '", "qty": ' || bachat.qty || ', "unit": "' || unit.unit_short || '"}')) as bachat_qty,    
         bachat: `select bachat.*,
@@ -1446,4 +1450,4 @@ class DBContex {
         // bachat: `insert into bachat select * from mainDB.bachat where dept_id = ?`,
     }
 }
-module.exports = new DBContex(); 
+module.exports = DBContex; 

@@ -82,7 +82,7 @@
                         <ng-container class="accordion-item" *ngFor="let data of itemData | filter:term; let i=index">
                            <!-- <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
                               [attr.aria-controls]="'#collapse-' + i" class="item-row"> -->
-                           <tr data-bs-toggle="collapse" aria-expanded="true" class="item-row">
+                           <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
                               <td style="font-size: large;">
                                  {{i+1}}
                                  <span class="mx-1"
@@ -132,7 +132,7 @@
                                  <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show"
                                     *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
                                     <td style="border: none;"></td>
-                                    <td colspan="6" class="subitem-row">
+                                    <td colspan="6" class="sub-row">
                                        <table class="" style="width: 99.7%;table-layout: fixed;">
                                           <tr>
                                              <td style="width: 75px;">

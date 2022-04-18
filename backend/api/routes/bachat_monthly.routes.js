@@ -1,7 +1,8 @@
 //@ts-check
 const router = require('express').Router();
 const { json } = require('body-parser');
-const DB = require('../models/DBContex');
+const DBContex = require('../models/DBContex');
+const DB = new DBContex();
 
 
 //  category add
@@ -31,30 +32,6 @@ router.get('/', async (req, res, next) => {
             result: res || []
         });
     }, (err) => { return next(err) });
-});
-
-// category update
-router.put('/', async (req, res, next) => {
-    if (req.body.set && req.body.query) {
-        let condition = '_id = ' + req.body.query._id;
-        await DB.update('bachat_monthly', req.body.set, condition, async (err, data) => {
-            if (err) {
-                return next(err);
-            }
-            // await DB.updateToCache('bachat_monthly', req.body.set, condition, (err) => { })
-            await DB.select('bachat_monthly', ['*'], condition).then((resolve) => {
-                res.json({
-                    success: true,
-                    result: resolve || []
-                });
-            }, (err)=>{
-                return next(err);
-            });
-        });
-    }
-    else {
-        return next(new Error('Id not found.'))
-    }
 });
 
 

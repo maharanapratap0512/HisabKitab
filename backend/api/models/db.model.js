@@ -2,7 +2,7 @@ const Sqlite = require('sqlite3');
 const path = require('path');
 
 const dbPath = path.resolve(__dirname, '../../../../Data/Database.db');
-const BdbPath = path.resolve(__dirname, '../../../../Data/BetterDatabase.db');
+// const BdbPath = path.resolve(__dirname, '../../../../Data/BetterDatabase.db');
 
 // const DB = require('better-sqlite3')(BdbPath);
 

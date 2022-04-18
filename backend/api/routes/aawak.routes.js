@@ -1,7 +1,8 @@
 //@ts-check
 const router = require('express').Router();
 const { json } = require('body-parser');
-const DB = require('../models/DBContex');
+const DBContex = require('../models/DBContex');
+const DB = new DBContex();
 
 
 //  aawak add
@@ -190,13 +191,18 @@ router.put('/', async (req, res, next) => {
             }
             data.jawak_detail = [];
             for (let i = 0; i < jawaks.length; i++) {
-                let jwkconditionString = `jawak._id = ${jawaks[i]._id}`;
-                await DB.update('jawak', jawaks[i], jwkconditionString, (err, jwkdata) => {
-                    if (err) {
-                        console.log("jawak err", err, "jawak", jawaks[i]);
-                    }
-                    data.jawak_detail.push(jwkdata);
-                });
+                if(!jawaks[i]._id){
+                    let jwkconditionString = `jawak._id = ${jawaks[i]._id}`;
+                    await DB.update('jawak', jawaks[i], jwkconditionString, (err, jwkdata) => {
+                        if (err) {
+                            console.log("jawak err", err, "jawak", jawaks[i]);
+                        }
+                        data.jawak_detail.push(jwkdata);
+                    });
+                }
+                else{
+                    data.jawak_detail.push(jawaks[i]);
+                }
             }
             res.json({
                 success: true,

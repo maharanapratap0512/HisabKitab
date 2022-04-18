@@ -1,7 +1,8 @@
 //@ts-check
 const router = require('express').Router();
 const { json } = require('body-parser');
-const DB = require('../models/DBContex');
+const DBContex = require('../models/DBContex');
+const DB = new DBContex();
 
 
 //  mm add

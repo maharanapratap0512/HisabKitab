@@ -1,7 +1,19 @@
 //@ts-check
 const router = require('express').Router();
 const { json } = require('body-parser');
-const DB = require('../models/DBContex');
+const DBContex = require('../models/DBContex');
+// const Sqlite = require('sqlite3');
+// const path = require('path');
+
+// const dbPath = path.resolve(__dirname, '../../../../Data/Sabji/Sabji_update_3_2022.db');
+// const localDB = new Sqlite.Database(dbPath, (err) => {
+//     if (err) {
+//       console.log("DB path : ", dbPath);
+//       return console.log("error : ", err.message);
+//     }
+//     console.log("connected with Database");
+//   });
+const DB = new DBContex();
 
 
 //  item add
