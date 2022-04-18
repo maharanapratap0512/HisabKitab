@@ -45,7 +45,7 @@ export class MmEntryComponent implements OnInit {
       dept_id: [2, Validators.required],
       state_id: [null, Validators.required],
       opening_date: [null],
-      nimmit_id:[null]
+      nimmit_id: [null]
     });
   }
 
@@ -71,7 +71,7 @@ export class MmEntryComponent implements OnInit {
 
   ngOnChanges(changes: SimpleChanges) {
     console.log(changes);
-    
+
     if (changes.getData.currentValue) {
       this.mmForm.patchValue({
         mm_eng: changes.getData.currentValue.mm_eng,
@@ -175,10 +175,7 @@ export class MmEntryComponent implements OnInit {
       $('#mmEntryComponent > #showModal').modal('hide');
       this.showModal = '';
       // this.states.unshift(ev);
-      this.mmForm.patchValue(
-        {
-          nimmit_id: ev._id
-        });
+      this.mmForm.patchValue({ nimmit_id: ev._id });
       this.isLoader = false;
     }
     else {
@@ -193,10 +190,7 @@ export class MmEntryComponent implements OnInit {
       $('#mmEntryComponent > #showModal').modal('hide');
       this.showModal = '';
       // this.departments.unshift(ev);
-      this.mmForm.patchValue(
-        {
-          dept_id: ev._id
-        });
+      this.mmForm.patchValue({ dept_id: ev._id });
       this.isLoader = false;
     }
     else {

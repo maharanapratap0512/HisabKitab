@@ -71,7 +71,7 @@ export class JawakEntryComponent implements OnInit {
       description: [null],
       aawak_ref_id: [null],
       nimmit_id: [null],
-      dept_id: [this.auth.webUser.dept_id],
+      dept_id: [this.auth.webUser.dept_id]
     });
     setTimeout(()=>{
 

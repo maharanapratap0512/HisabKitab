@@ -119,7 +119,7 @@
                             <ng-option selected="selected" disabled value="">Select Nimmit</ng-option>
                             <ng-option *ngFor="let item of nimmits" [value]="item._id">
                                 {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
-                                item.nimmit_state_hin + ')'}}</ng-option>
+                                item.state_hin + ')'}}</ng-option>
                         </ng-select>
                         <!-- <input type="text" class="form-control" placeholder="Default NIMMIT name"
                             formControlName="nimmit"
