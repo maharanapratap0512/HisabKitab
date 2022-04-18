@@ -148,8 +148,8 @@ localDB.serialize(() => {
   => adding company_name column to aawak.
 */
 const ver6 = {
-  delete_awk: `delete from aawak`,
   delete_jwk: `delete from jawak`,
+  delete_awk: `delete from aawak`,
   delete_bcht: `delete from bachat`,
   drop_trigger: `drop trigger if exists "ins_temp_updt_id"`,
   points: `CREATE TABLE IF NOT EXISTS "point"(

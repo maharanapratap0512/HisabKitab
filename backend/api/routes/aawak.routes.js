@@ -47,6 +47,7 @@ router.post('/:dept_id', async (req, res, next) => {
             for (let i = 0; i < jawaks.length; i++) {
                 jawaks[i].aawak_ref_id = data._id;
                 await DB.insertFromDept('jawak', jawaks[i], req.params.dept_id).then((jwkdata) => {
+                    data.remaining_qty = data.remaining_qty - jwkdata.qty; 
                     data.jawak_detail.push(jwkdata);
                 }, (err) => {
                     console.log("jawak err", err, "jawak", jawaks[i]);
@@ -185,19 +186,24 @@ router.put('/', async (req, res, next) => {
             jawaks = req.body.set.jawak_detail;
             delete req.body.set.jawak_detail;
         }
+        if(req.body.set.remaining_qty){
+            delete req.body.set.remaining_qty;
+        }
         await DB.update('aawak', req.body.set, condition, async (err, data) => {
             if (err) {
                 return next(err);
             }
             data.jawak_detail = [];
             for (let i = 0; i < jawaks.length; i++) {
+                // console.log(jawaks[i]);
                 if(!jawaks[i]._id){
                     let jwkconditionString = `jawak._id = ${jawaks[i]._id}`;
-                    await DB.update('jawak', jawaks[i], jwkconditionString, (err, jwkdata) => {
-                        if (err) {
-                            console.log("jawak err", err, "jawak", jawaks[i]);
-                        }
+                    jawaks[i].aawak_ref_id = data._id;
+                    await DB.insertFromDept('jawak', jawaks[i], data.dept_id).then((jwkdata) => {
+                        data.remaining_qty = data.remaining_qty - jwkdata.qty; 
                         data.jawak_detail.push(jwkdata);
+                    }, (err) => {
+                        console.log("jawak err", err, "jawak", jawaks[i]);
                     });
                 }
                 else{

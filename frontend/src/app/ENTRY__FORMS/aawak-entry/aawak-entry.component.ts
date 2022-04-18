@@ -81,7 +81,9 @@ export class AawakEntryComponent implements OnInit {
 		public auth: AuthService
 	) {
 		this.gs.observeList().subscribe(result => {
-			this.items = result.itemmix ? result.itemmix : [];
+			if (this.auth.webUser.dept_id > 2) {
+				this.items = result.itemmix ? result.itemmix : [];
+			}
 			this.units = result.unit ? result.unit : [];
 			this.states = result.state ? result.state : [];
 			this.mms = result.mm ? result.mm : [];
@@ -89,8 +91,10 @@ export class AawakEntryComponent implements OnInit {
 			this.departments = result.department ? result.department : [];
 			this.pbks = result.pbk ? result.pbk : [];
 			this.aawak_types = result.aawak_type ? result.aawak_type : [];
-			this.products = result.product ? result.product : [];
-			this.categories = result.category ? result.category : [];
+			// this.products = result.product ? result.product : [];
+			if (this.auth.webUser.dept_id > 2) {
+				this.categories = result.category ? result.category : [];
+			}
 			this.nimmits = result.nimmit ? result.nimmit : [];
 		});
 
@@ -502,7 +506,7 @@ export class AawakEntryComponent implements OnInit {
 		if (ev) {
 			let item = this.items.find((i: { _id: any; }) => i._id == ev);
 			// this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
-			this.getProductData(item._id);
+			this.getProductData(ev);
 			if (this.cat) {
 				this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
 			}
