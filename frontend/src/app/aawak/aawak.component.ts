@@ -91,8 +91,6 @@ export class AawakComponent implements OnInit {
         this.aawakAll = data['result'];
         this.total_count = data['total_count'];
         this.isLoader = false;
-        console.log(this.aawakData);
-        
       }
       this.isLoader = false;
     });

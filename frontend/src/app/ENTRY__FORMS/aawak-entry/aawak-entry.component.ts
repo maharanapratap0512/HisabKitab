@@ -83,9 +83,8 @@ export class AawakEntryComponent implements OnInit {
 		public auth: AuthService
 	) {
 		this.gs.observeList().subscribe(result => {
-			if (this.auth.webUser.dept_id > 2) {
-				this.items = result.itemmix ? result.itemmix : [];
-			}
+			this.items = result.itemmix && this.auth.webUser.dept_id > 2 ? result.itemmix : [];
+			this.categories = result.category && this.auth.webUser.dept_id > 2 ? result.category : [];
 			this.units = result.unit ? result.unit : [];
 			this.states = result.state ? result.state : [];
 			this.mms = result.mm ? result.mm : [];
@@ -93,13 +92,49 @@ export class AawakEntryComponent implements OnInit {
 			this.departments = result.department ? result.department : [];
 			this.pbks = result.pbk ? result.pbk : [];
 			this.aawak_types = result.aawak_type ? result.aawak_type : [];
-			// this.products = result.product ? result.product : [];
-			if (this.auth.webUser.dept_id > 2) {
-				this.categories = result.category ? result.category : [];
-			}
 			this.nimmits = result.nimmit ? result.nimmit : [];
 		});
 
+	}
+
+	ngOnInit(): void { }
+
+	ngOnChanges(changes: SimpleChanges) {
+		console.log("changes.getData.currentValue", changes.getData.currentValue);
+		if (changes.isEdit && changes.isEdit.currentValue) {
+			this.gs.observeList().subscribe(result => {
+				this.items = result.itemmix ? result.itemmix : [];
+				this.categories = result.category ? result.category : [];
+			});
+		}
+		if (changes.getData.currentValue) {
+			this.awkfg = {
+				pkt_num: changes.getData.currentValue.pkt_num,
+				date: changes.getData.currentValue.date,
+				mm_id: changes.getData.currentValue.mm_id,
+				aawak_mm_id: changes.getData.currentValue.aawak_mm_id,
+				dept_id: changes.getData.currentValue.dept_id,
+				pbk_id: changes.getData.currentValue.pbk_id,
+				aawak_type_id: changes.getData.currentValue.aawak_type_id,
+				item_id: changes.getData.currentValue.item_id,
+				subitem_id: changes.getData.currentValue.subitem_id,
+				product_id: changes.getData.currentValue.product_id,
+				unit_id: changes.getData.currentValue.unit_id,
+				condition_id: changes.getData.currentValue.condition_id,
+				qty: changes.getData.currentValue.qty,
+				rate: changes.getData.currentValue.rate,
+				actual_amt: changes.getData.currentValue.actual_amt,
+				nimmit_id: changes.getData.currentValue.nimmit_id,
+				item_detail: changes.getData.currentValue.item_detail,
+				description: changes.getData.currentValue.description,
+				remaining_qty: changes.getData.currentValue.remaining_qty,
+				jawak_detail: changes.getData.currentValue.jawak_detail
+			};
+			this.selDept_id = changes.getData.currentValue.dept_id;
+			this.jwkArr = changes.getData.currentValue.jawak_detail;
+			this.oldQty = changes.getData.currentValue.qty;
+			this.itemSelected(changes.getData.currentValue.item_id);
+		}
 	}
 
 	add_jwk() {
@@ -161,41 +196,6 @@ export class AawakEntryComponent implements OnInit {
 		else {
 			this.awkfg.jawak_detail.splice(i, 1);
 			this.jwkArr.splice(i, 1);
-		}
-	}
-
-	ngOnInit(): void {
-
-	}
-
-	ngOnChanges(changes: SimpleChanges) {
-		console.log("changes.getData.currentValue", changes.getData.currentValue);
-		if (changes.getData.currentValue) {
-			this.awkfg = {
-				pkt_num: changes.getData.currentValue.pkt_num,
-				date: changes.getData.currentValue.date,
-				mm_id: changes.getData.currentValue.mm_id,
-				aawak_mm_id: changes.getData.currentValue.aawak_mm_id,
-				dept_id: changes.getData.currentValue.dept_id,
-				pbk_id: changes.getData.currentValue.pbk_id,
-				aawak_type_id: changes.getData.currentValue.aawak_type_id,
-				item_id: changes.getData.currentValue.item_id,
-				subitem_id: changes.getData.currentValue.subitem_id,
-				product_id: changes.getData.currentValue.product_id,
-				unit_id: changes.getData.currentValue.unit_id,
-				condition_id: changes.getData.currentValue.condition_id,
-				qty: changes.getData.currentValue.qty,
-				rate: changes.getData.currentValue.rate,
-				actual_amt: changes.getData.currentValue.actual_amt,
-				nimmit_id: changes.getData.currentValue.nimmit_id,
-				item_detail: changes.getData.currentValue.item_detail,
-				description: changes.getData.currentValue.description,
-				remaining_qty: changes.getData.currentValue.remaining_qty,
-				jawak_detail: changes.getData.currentValue.jawak_detail
-			};
-			this.jwkArr = changes.getData.currentValue.jawak_detail;
-			this.oldQty = changes.getData.currentValue.qty;
-			this.itemSelected(changes.getData.currentValue.item_id);
 		}
 	}
 
