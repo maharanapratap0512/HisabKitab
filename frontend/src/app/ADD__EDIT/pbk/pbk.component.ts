@@ -8,6 +8,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import Swal from 'sweetalert2'
 import * as XLSX from 'xlsx';
 import { AuthService } from 'src/app/services/auth.service';
+import { observable, Observable, Subject } from 'rxjs';
 declare var $: any;
 
 @Component({
@@ -35,13 +36,14 @@ export class PbkComponent implements OnInit {
     roll_no: null,
     state_id: [],
   };
+  pageNo: any = 1;
   states: any = [];
   cities: any = [];
   mms: any = [];
   genders: any = [];
   statuses: any = [];
   relations: any = [];
-
+  getPbk$ = new Subject();
 
   constructor(
     private fb: FormBuilder,
@@ -55,7 +57,7 @@ export class PbkComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
-    this.gs.observeList().subscribe((Lists:any)=>{
+    this.gs.observeList().subscribe((Lists: any) => {
       this.states = Lists.state ? Lists.state : [];
       this.cities = Lists.city ? Lists.city : []
       this.mms = Lists.mm ? Lists.mm : [];
@@ -72,8 +74,8 @@ export class PbkComponent implements OnInit {
     this.http.put(this.api.getUrl('PBK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.pbkData = data['result'];
-        this.total_count = data['result'].length;
-        // this.total_count = data['total_count'];
+        // this.total_count = data['total'];
+        this.total_count = data['total_count'];
         for (let i in this.pbkData) {
           if (this.pbkData[i].birth_date) {
             let bdate = new Date(this.pbkData[i].birth_date);
@@ -82,12 +84,47 @@ export class PbkComponent implements OnInit {
             this.pbkData[i].age = this.showAge;
           }
         }
+        if (data["result"].length < data["total_count"]) {
+          this.getMorePbk();
+        }
         this.isLoader = false;
       }
       this.isLoader = false;
     });
+
+    this.getPbk$.subscribe((result: any) => {
+      
+      for (let i in result) {
+        if (result[i].birth_date) {
+          let bdate = new Date(result[i].birth_date);
+          const timeDiff = Math.abs(Date.now() - bdate.getTime());
+          this.showAge = Math.floor((timeDiff / (1000 * 3600 * 24)) / 365);
+          result[i].age = this.showAge;
+        }
+        this.pbkData.push(result[i]);
+      }
+      console.log("result", result.length);
+      console.log("this.pbkData", this.pbkData.length);
+      if(this.total_count > this.pbkData.length){
+        this.getMorePbk();
+      }
+    });
   }
 
+
+  getMorePbk() {
+    this.filterBody.pageNo = this.pageNo + 1;
+    this.http.put(this.api.getUrl('PBK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+      if (data['result'] && data["result"].length > 0) {
+        if (data["pageNo"]) {
+          this.pageNo = data["pageNo"];
+        }
+        this.getPbk$.next(data['result']);
+        // this.isLoader = false;
+      }
+      // this.isLoader = false;
+    });
+  }
 
   addPbkResponse(ev: any) {
     if (ev._id) {

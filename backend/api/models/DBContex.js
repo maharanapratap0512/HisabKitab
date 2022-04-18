@@ -159,6 +159,74 @@ class DBContex {
         });
     }
 
+    generateUpdateDB = async (dept_id) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let dept = await this.getFullById("department", dept_id);
+                if (dept) {
+                    let date = new Date();
+                    let exPath = this.path.resolve(this.DBFolder, dept.dept_eng);
+                    let exFilePath = this.path.resolve(exPath, dept.dept_eng + '_update_' + date.getMonth() + '_' + date.getFullYear() + '.db');
+                    if (!this.fs.existsSync(exPath)) {
+                        this.fs.mkdirSync(exPath, { recursive: true });
+                    }
+                    if (this.fs.existsSync(exFilePath)) {
+                        this.fs.unlinkSync(exFilePath)
+                    }
+                    const exportDB = new this.Sqlite.Database(exFilePath, (err) => {
+                        if (err) {
+                            console.log("DB path : ", exFilePath);
+                            console.log({ path: exFilePath, Error: err.message });
+                        }
+                        console.log("connected with New Database");
+                    });
+
+                    exportDB.serialize(() => {
+                        exportDB.run(`PRAGMA foreign_keys = off`);
+                        exportDB.run(`BEGIN TRANSACTION`);
+                        let migrationCount = this.Migrations.length;
+                        for (let i = 0; i < migrationCount; i++) {
+                            if (i != 2) {
+                                this.Migrations[i](exportDB);
+                            }
+                        }
+                        exportDB.run(`attach '${this.path.resolve(this.DBFolder, 'Database.db')}' as mainDB;`, (err) => {
+                            // exportDB.run('ROLLBACK TRANSACTION');
+                            console.log("atach", err)
+                            return reject(err);
+                        });
+
+                        for (let keys of Object.keys(this.genUpdtDB)) {
+                            console.log(keys);
+                            let sql = this.genUpdtDB[keys].replace('?', dept_id);
+                            exportDB.run(sql, (err) => {
+                                if (err) { console.log({ key: keys, sql: sql, error: err }); }
+
+                                console.log(sql);
+                            });
+                        }
+
+
+                        exportDB.run(`PRAGMA user_version = ${migrationCount}`, (err) => {
+                            if (err) console.log("pragma error : ", err);
+                        });
+                        exportDB.run(`PRAGMA foreign_keys = on`);
+
+                        exportDB.run(`COMMIT`);
+                    });
+                    exportDB.close();
+                    resolve(exFilePath);
+                }
+                else {
+                    reject(new Error('cannot found department.'))
+                }
+            }
+            catch (ex) {
+                reject(ex);
+            }
+        });
+    }
+
     // mm_type|gender|relation
     getList = async (list_name) => {
         return new Promise(async (resolve, reject) => {
@@ -212,12 +280,12 @@ class DBContex {
                         'jawak_type'
                     ]
 
-                    
-                    if(list_name == "pbk"){
+
+                    if (list_name == "pbk") {
                         sql = `select * from pbk where (status is null OR status <> "nimmit") `;
-                        if (!exclude_dept.includes(dept_id)) {                            
+                        if (!exclude_dept.includes(dept_id)) {
                             sql += ` AND (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
-                        }                
+                        }
                     }
                     else if (this.dept_config_list.includes(list_name)) {
 
@@ -243,7 +311,7 @@ class DBContex {
                     else if (list_name_arr.includes(list_name)) {
                         sql = `select * from support_list where list_type = '${list_name}'`;
                     }
-                    else if(list_name == "nimmit"){
+                    else if (list_name == "nimmit") {
                         sql = `select pbk.*, st.state_hin from pbk
                                 left join state st on st._id = pbk.state_id where status = "nimmit"`;
                     }
@@ -425,7 +493,6 @@ class DBContex {
                     condition += (condition == `` ? ` where` : ` AND `) + conditionString;
                 }
 
-
                 let sort = orderBy ? orderBy : this.fullListQuery[list_name + 'sort'];
                 let sql = `${this.fullListQuery[list_name]} ${sort ? 'ORDER BY ' + sort : ''} ${limit ? 'LIMIT ' + limit : ''} ${offset ? 'OFFSET ' + offset : ''}`;
 
@@ -433,13 +500,24 @@ class DBContex {
                 sql = sql.substring(0, lIndex) + condition + sql.substring(lIndex + 1);
                 // console.log(str);
                 console.log(sql);
+
+                let total_count = 0;
+                await this.getCount(list_name, conditionString).then((resolve) => {
+                    total_count = resolve.total_count;
+                }, (err) => {
+                    total_count = 0;
+                });
+
                 await this.localDB.all(sql, (err, data) => {
                     if (err) {
                         console.log({ type: 'new', sql: sql, err: err, params: [condition] });
                         reject(err)
                     }
                     else {
-                        resolve(data)
+                        resolve({
+                            data: data,
+                            total_count: total_count
+                        });
                     }
                 })
             }
@@ -462,21 +540,22 @@ class DBContex {
                 let sort = orderBy ? orderBy : this.fullListQuery[list_name + 'sort'];
                 let sql = `${this.fullListQuery[list_name]} ${sort ? 'ORDER BY ' + sort : ''} ${limit ? 'LIMIT ' + limit : ''} ${offset ? 'OFFSET ' + offset : ''}`;
                 let condition = conditionString ? `where ${conditionString}` : ``;
-                
+
                 var lIndex = sql.lastIndexOf("?");
                 sql = sql.substring(0, lIndex) + condition + sql.substring(lIndex + 1);
 
                 let total_count = 0;
-                await this.getCount(list_name, conditionString).then((resolve)=>{
+                await this.getCount(list_name, conditionString).then((resolve) => {
                     total_count = resolve.total_count;
                 });
                 this.localDB.all(sql, (err, data) => {
                     if (err) {
+                        console.log({ type: 'new', sql: sql, err: err, params: [condition] });
                         reject(err)
                     }
                     else {
                         let result = {
-                            data:data,
+                            data: data,
                             total_count: total_count
                         }
                         resolve(result)
@@ -600,7 +679,7 @@ class DBContex {
                     selectSql += ` where ${table_name}._id = ${resolve.lastID}`;
                     this.localDB.get(selectSql, async (err, rows) => {
                         if (err) {
-                            console.log({ sql: sql, err: err });
+                            console.log({ sql: sql, params: params, err: err });
                             return callback(err);
                         }
                         return callback(null, rows);
@@ -636,8 +715,9 @@ class DBContex {
                     val = val.slice(0, -1);
                     let sql = `insert into ${table_name}(${cols}) values(${val})`;
                     this.run(sql, params).then((res) => {
-                        let selectSql = this.fullListConfig[table_name];
-                        selectSql += ` where ${table_name}._id = ${res.lastID}`;
+                        let selectSql = this.fullListQuery[table_name];
+                        var lIndex = selectSql.lastIndexOf("?");
+                        selectSql = selectSql.substring(0, lIndex) + ` where ${table_name}._id = ${res.lastID}` + selectSql.substring(lIndex + 1);
                         if (this.dept_config_list.includes(table_name)) {
                             this.addToDeptConfig(table_name, res.lastID, dept_id);
                         }
@@ -796,6 +876,8 @@ class DBContex {
 
 
     fullListConfig = {
+
+        point: `select * from point`,
 
         country: `select * from country`,
         countrysort: `country_hin, country_eng`,
@@ -1286,6 +1368,7 @@ class DBContex {
 
     genDeptDB = {
 
+        point: `insert into point select * from mainDB.point`,
         insertDept: `insert into department select * from mainDB.department`,
         // insertDeptConfig: `insert into department_config select * from mainDB.department_config`,
 
@@ -1295,19 +1378,19 @@ class DBContex {
 
         country: `insert into country select * from mainDB.country`,
         state: `insert into state select * from mainDB.state`,
-        support_list: `insert into support_list select * from mainDB.support_list`,
+        support_list: `insert into support_list select * from mainDB.support_list where list_type NOT IN ('aawak_type', 'jawak_type') OR (select config_value from department_config where dept_id = ? AND config_key = 'aj_type') LIKE '%,'||_id||',%'`,
         city: `insert into city select * from mainDB.city`,
         unit: `insert into unit select * from mainDB.unit`,
 
-        category: `insert into category select * from mainDB.category`,
+        category: `insert into category select * from mainDB.category where (select config_value from department_config where dept_id = ? AND config_key = 'category') LIKE '%,'||_id||',%'`,
 
-        mm: `insert into mm select * from mainDB.mm`,
+        mm: `insert into mm select * from mainDB.mm where (select config_value from department_config where dept_id = ? AND config_key = 'mm') LIKE '%,'||_id||',%'`,
 
-        item: `insert into item select * from mainDB.item`,
+        item: `insert into item select * from mainDB.item where (select config_value from department_config where dept_id = ? AND config_key = 'item') LIKE '%,'||_id||',%'`,
 
-        subitem_list: `insert into subitem_list select * from mainDB.subitem_list`,
+        subitem_list: `insert into subitem_list select * from mainDB.subitem_list `,
 
-        subitem: `insert into subitem select * from mainDB.subitem`,
+        subitem: `insert into subitem select * from mainDB.subitem where (select config_value from department_config where dept_id = ? AND config_key = 'subitem') LIKE '%,'||_id||',%'`,
 
         pbk: `insert into pbk select * from mainDB.pbk where (select config_value from department_config where dept_id = ? AND config_key = 'pbk') LIKE '%,'|| pbk._id||',%'`,
 
@@ -1315,6 +1398,52 @@ class DBContex {
         aawak: `insert into aawak select * from mainDB.aawak where dept_id = ?`,
         jawak: `insert into jawak select * from mainDB.jawak where dept_id = ?`,
 
+        // bachat: `insert into bachat select * from mainDB.bachat where dept_id = ?`,
+    }
+
+    genUpdtDB = {
+
+        point: `insert into point select * from mainDB.point where active = 0`,
+        insertDept: `insert into department select * from mainDB.department where active = 0 OR _id = ?`,
+        // insertDeptConfig: `insert into department_config select * from mainDB.department_config`,
+
+        // insertDept: `insert into department select * from mainDB.department dept where (select dpc.config_value from mainDB.department_config dpc where dpc.dept_id = ? AND dpc.config_key = 'department') LIKE '%,'|| dept._id||',%'`,
+
+        updateDeptConfig: `update department_config set config_value = (select config_value from mainDB.department_config dpc where dpc.dept_id = department_config.dept_id and dpc.config_key = department_config.config_key) where department_config.dept_id = ? OR (select depc.config_value from mainDB.department_config depc where depc.dept_id = ? AND depc.config_key = 'department') LIKE '%,'|| department_config.dept_id||',%'`,
+
+        country: `insert into country select * from mainDB.country where active = 0`,
+        state: `insert into state select * from mainDB.state where active = 0`,
+        support_list: `insert into support_list select * from mainDB.support_list where active = 0 AND (list_type NOT IN ('aawak_type', 'jawak_type') OR (select config_value from department_config where dept_id = ? AND config_key = 'aj_type') LIKE '%,'||_id||',%')`,
+        city: `insert into city select * from mainDB.city where active = 0`,
+        unit: `insert into unit select * from mainDB.unit where active = 0`,
+
+        category: `insert into category select * from mainDB.category where active = 0 AND (select config_value from department_config where dept_id = ? AND config_key = 'category') LIKE '%,'||_id||',%' `,
+
+        mm: `insert into mm select * from mainDB.mm where active = 0 AND (select config_value from department_config where dept_id = ? AND config_key = 'mm') LIKE '%,'||_id||',%'`,
+
+        item: `insert into item select * from mainDB.item where active = 0 AND (select config_value from department_config where dept_id = ? AND config_key = 'item') LIKE '%,'||_id||',%'`,
+
+        subitem_list: `insert into subitem_list select * from mainDB.subitem_list `,
+
+        subitem: `insert into subitem select * from mainDB.subitem where active = 0 AND (select config_value from department_config where dept_id = ? AND config_key = 'subitem') LIKE '%,'||_id||',%'`,
+
+        pbk: `insert into pbk select * from mainDB.pbk where active = 0 AND (select config_value from department_config where dept_id = ? AND config_key = 'pbk') LIKE '%,'|| pbk._id||',%'`,
+
+        product: `insert into product select * from mainDB.product where dept_id = ? AND active = 0`,
+        aawak: `insert into aawak select * from mainDB.aawak where dept_id = ? AND active = 0`,
+        jawak: `insert into jawak select * from mainDB.jawak where dept_id = ? AND active = 0`,
+
+        newid_country: `alter table country add column new_id integer`,
+        newid_state: `alter table state add column new_id integer`,
+        newid_support_list: `alter table support_list add column new_id integer`,
+        newid_city: `alter table city add column new_id integer`,
+        newid_unit: `alter table unit add column new_id integer`,
+        newid_category: `alter table category add column new_id integer`,
+        newid_mm: `alter table mm add column new_id integer`,
+        newid_item: `alter table item add column new_id integer`,
+        newid_subitem_list: `alter table subitem_list add column new_id integer`,
+        newid_subitem: `alter table subitem add column new_id integer`,
+        newid_pbk: `alter table pbk add column new_id integer`,
         // bachat: `insert into bachat select * from mainDB.bachat where dept_id = ?`,
     }
 }

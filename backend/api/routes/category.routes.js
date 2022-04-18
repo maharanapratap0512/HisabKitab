@@ -45,7 +45,8 @@ router.get('/:dept_id', async (req, res, next) => {
     await DB.getFullListByDept('category',req.params.dept_id).then(async (resolve) => {
         res.json({
             success: true,
-            result: resolve || [],
+            result: resolve.data || [],
+            total_count: resolve.total_count
         });
     }, (err) => { return next(err) });
 });

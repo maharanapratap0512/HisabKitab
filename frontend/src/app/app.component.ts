@@ -3,6 +3,7 @@ import { ToastrService } from 'ngx-toastr';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ApiService } from './services/api.service';
 import { GlobalService } from './services/global.service';
+import { HttpService } from './services/http.service';
 
 @Component({
   selector: 'app-root',
@@ -19,12 +20,14 @@ export class AppComponent {
   btnShowTimer: any = 30000;
   sec: any = this.btnShowTimer / 1000;
   mainTimer: any;
+  point_hin:any;
 
   constructor(
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     private api: ApiService,
-    public gs: GlobalService
+    public gs: GlobalService,
+    private http:HttpService
   ) {
   }
 
@@ -55,6 +58,7 @@ export class AppComponent {
     this.sec = this.btnShowTimer / 1000;
     this.isBtn = false;
     this.mainTimer = setTimeout(() => {
+      this.getPoint();
       this.isLoader = true;
       let counter = setInterval(() => {
         this.sec -= 1;
@@ -69,6 +73,18 @@ export class AppComponent {
   skipBtn() {
     this.isLoader = false;
     this.timer();
+  }
+
+
+  getPoint(){
+    this.http.get(this.api.getUrl('POINT') + "random/").subscribe((data: any) => {
+      if (data['result'] && data['result'].length > 0) {   
+        this.point_hin = data['result'][0].point_hin + (data['result'][0].mrl_date ? "(" + data['result'][0].mrl_date + ")" : '');    
+      }
+      else {
+        this.point_hin = "मैं आत्मा शांत स्वरूप हूँ ।";
+      }
+    });
   }
 
 

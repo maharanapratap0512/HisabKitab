@@ -80,8 +80,9 @@
                      </thead>
                      <tbody class="accordion" id="accordionExample">
                         <ng-container class="accordion-item" *ngFor="let data of itemData | filter:term; let i=index">
-                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
-                              [attr.aria-controls]="'#collapse-' + i" class="item-row">
+                           <!-- <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
+                              [attr.aria-controls]="'#collapse-' + i" class="item-row"> -->
+                           <tr data-bs-toggle="collapse" aria-expanded="true" class="item-row">
                               <td style="font-size: large;">
                                  {{i+1}}
                                  <span class="mx-1"
@@ -157,7 +158,7 @@
                                                    class="btn btn-sm btn-danger" type="button"
                                                    (click)="deleteSubitem(i, j,si._id)">
                                                    <i class="uil-trash"></i></button>
-                                                <span *ngIf="auth.webUser.dept_id != 1 && data.active"
+                                                <span *ngIf="auth.webUser.dept_id != 1 && si.active"
                                                    data-toggle="tooltip" title="Protected" class="text-warning mx-1"
                                                    style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                                    <i class="uil-shield-check"></i>

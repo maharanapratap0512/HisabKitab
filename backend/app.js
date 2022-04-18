@@ -43,6 +43,7 @@ const jawakEntryRoutes = require('./api/routes/jawak.routes');
 const bachatMonthlyRoutes = require('./api/routes/bachat_monthly.routes');
 const bachatRoutes = require('./api/routes/bachat.routes');
 const pointRoutes = require('./api/routes/point.routes');
+const importExportRoutes = require('./api/routes/import-export.routes');
 
 
 // // Routes - Binding
@@ -68,6 +69,7 @@ app.use('/api/jawak', jawakEntryRoutes);
 app.use('/api/bachat_monthly', bachatMonthlyRoutes);
 app.use('/api/bachat', bachatRoutes);
 app.use('/api/points', pointRoutes);
+app.use('/api/importexport', importExportRoutes);
 
 
 

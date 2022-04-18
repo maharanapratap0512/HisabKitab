@@ -197,6 +197,7 @@ export class AawakComponent implements OnInit {
     if (ev.aawak_ref_id) {
       let i = this.aawakData.findIndex((b: any) => b._id == ev.aawak_ref_id);
       this.aawakData[i].remaining_qty = (this.aawakData[i].remaining_qty ? this.aawakData[i].remaining_qty : 0) - ev.qty;
+      this.aawakData[i].jawak_detail.push(ev);
       $('#showModal').modal('hide');
       this.showModal = '';
       // this.isLoader = false;

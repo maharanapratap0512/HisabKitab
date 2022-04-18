@@ -4,20 +4,21 @@
 </ngx-spinner>
 <div class="row" id="aawakEntryComponent">
    <div class="card-body">
-      <form [formGroup]="aawakForm">
+      <form #f="ngForm">
          <div class="row">
             <div class="col-md-2 mb-3">
                <div class="form-group">
                   <label class="form-label">Pkt No.</label>
-                  <input type="text" class="form-control" placeholder="पर्ची न." formControlName="pkt_num"
-                     [ngClass]="{'validation':aawakForm.get('pkt_num')?.errors && (aawakForm.get('pkt_num')?.touched || aawakForm.get ('pkt_num')?.dirty)}">
+                  <input type="text" class="form-control" placeholder="पर्ची न." [(ngModel)]="awkfg.pkt_num"
+                     name="pkt_num" #pkt_num="ngModel">
                </div>
             </div>
 
             <div class="col-md-2 mb-3">
                <label for="example-date" class="form-label">Date</label>
-               <input class="form-control" id="example-date" type="date" formControlName="date"
-                  [ngClass]="{'validation':aawakForm.get('date')?.errors && (aawakForm.get('date')?.touched || aawakForm.get ('date')?.dirty)}">
+               <input class="form-control" id="example-date" type="date" [(ngModel)]="awkfg.date" name="date"
+                  #date="ngModel"
+                  [ngClass]="{'validation' : (date?.touched || f.submitted) && date.errors?.['required']}" required>
             </div>
 
             <div class="col-md-3 mb-3">
@@ -27,9 +28,10 @@
                      onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add MM'">
                      + Add
                   </button>
-                  <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="false"
-                     [virtualScroll]="true" formControlName="mm_id" [readonly]="isEdit"
-                     [ngClass]="{'validation':aawakForm.get('mm_id')?.errors && (aawakForm.get('mm_id')?.touched || aawakForm.get ('mm_id')?.dirty)}">
+                  <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.mm_id" name="mm_id" #mm_id="ngModel" [readonly]="isEdit"
+                     [ngClass]="{ 'validation': (mm_id?.touched || f.submitted) && mm_id.errors?.['required']}"
+                     required>
                      <ng-option selected="selected" disabled value="">MM</ng-option>
                      <ng-option *ngFor="let item of mms" [value]="item._id">
                         {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
@@ -44,10 +46,11 @@
                      onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add AMM'">
                      + Add
                   </button>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Incoming(Aawak) MM" [clearable]="false"
-                     [virtualScroll]="true" formControlName="aawak_mm_id"
-                     [ngClass]="{'validation':aawakForm.get('aawak_mm_id')?.errors && (aawakForm.get('aawak_mm_id')?.touched || aawakForm.get ('aawak_mm_id')?.dirty)}">
-                     <ng-option selected="selected" disabled value="">Incoming(Aawak) MM</ng-option>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Incoming(Aawak) MM" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.aawak_mm_id" name="aawak_mm_id" #aawak_mm_id="ngModel"
+                     [ngClass]="{ 'validation': (aawak_mm_id?.touched || f.submitted) && aawak_mm_id.errors?.['required']}"
+                     [required]="awkfg.pbk_id === null">
+                     <ng-option selected=" selected" disabled value="">Incoming(Aawak) MM</ng-option>
                      <ng-option *ngFor="let item of mms" [value]="item._id">
                         {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
                   </ng-select>
@@ -61,8 +64,7 @@
                      onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Nimmit'">+
                      Add</button>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Nimmit" [clearable]="true"
-                     [virtualScroll]="true" formControlName="nimmit_id"
-                     [ngClass]="{'validation':aawakForm.get('nimmit_id')?.errors && (aawakForm.get('nimmit_id')?.touched || aawakForm.get ('nimmit_id')?.dirty)}">
+                     [virtualScroll]="true" [(ngModel)]="awkfg.nimmit_id" name="nimmit_id" #nimmit_id="ngModel">
                      <ng-option selected="selected" disabled value="">Select Nimmit</ng-option>
                      <ng-option *ngFor="let item of nimmits" [value]="item._id">
                         {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
@@ -87,8 +89,10 @@
                      </ng-option>
                   </ng-select>
                   <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Roll no. or Pbk name"
-                     [clearable]="false" [virtualScroll]="true" formControlName="pbk_id"
-                     [ngClass]="{'validation':aawakForm.get('pbk_id')?.errors && (aawakForm.get('pbk_id')?.touched || aawakForm.get ('pbk_id')?.dirty)}">
+                     [clearable]="true" [virtualScroll]="true" [(ngModel)]="awkfg.pbk_id" name="pbk_id"
+                     #pbk_id="ngModel"
+                     [ngClass]="{ 'validation': (pbk_id?.touched || f.submitted) && pbk_id.errors?.['required']}"
+                     [required]="awkfg.aawak_mm_id === null">
                      <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
                      </ng-option>
                      <ng-option *ngFor="let item of pbks" [value]="item._id">
@@ -99,7 +103,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="departments.length || categories.length">
+            <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label text-success">Filter Items By</label>
                   <!-- <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -108,14 +112,14 @@
               + Add
            </button> -->
                   <ng-select *ngIf="auth.webUser.dept_id != 3" class="custom" style="width: 100%;"
-                     placeholder="Select Department" [clearable]="false" [virtualScroll]="true"
-                     (change)="deptSelected($event)" [ngModelOptions]="{standalone: true}">
+                     placeholder="Select Department" [clearable]="true" [virtualScroll]="true"
+                     (change)="deptSelected($event)" [ngModelOptions]="{standalone: true}" [(ngModel)]="selDept_id">
                      <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :
                         {{item.dept_eng}}{{item.dept_code?' : '+item.dept_code:''}}</ng-option>
                   </ng-select>
-                  <ng-select *ngIf="categories && categories.length" class="custom mt-1" style="width: 100%;"
-                     placeholder="Select Category" [clearable]="false" [virtualScroll]="true" [(ngModal)]="cat"
-                     (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
+                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Category" [clearable]="true"
+                     [virtualScroll]="true" [(ngModal)]="cat" (change)="catSelected($event)"
+                     [ngModelOptions]="{standalone: true}">
                      <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
                         {{item.category_eng}}</ng-option>
                   </ng-select>
@@ -136,17 +140,18 @@
                         + Subitem
                      </button>
                   </div>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
-                     [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)"
-                     [readonly]="isEdit"
-                     [ngClass]="{'validation':aawakForm.get('item_id')?.errors && (aawakForm.get('item_id')?.touched || aawakForm.get ('item_id')?.dirty)}">
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.item_id" name="item_id" #item_id="ngModel"
+                     (change)="itemSelected($event)" [readonly]="isEdit"
+                     [ngClass]="{ 'validation': (item_id?.touched || f.submitted) && item_id.errors?.['required']}"
+                     required>
                      <ng-option selected="selected" disabled value="">Select Item</ng-option>
                      <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
                         {{item.item_eng}} : {{item.item_code}}</ng-option>
                   </ng-select>
                   <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
-                     [clearable]="false" [virtualScroll]="true" formControlName="subitem_id" [readonly]="isEdit"
-                     [ngClass]="{'validation':aawakForm.get('subitem_id')?.errors && (aawakForm.get('subitem_id')?.touched || aawakForm.get ('subitem_id')?.dirty)}">
+                     [clearable]="true" [virtualScroll]="true" [(ngModel)]="awkfg.subitem_id" name="subitem_id"
+                     #subitem_id="ngModel" [readonly]="isEdit">
                      <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
                      <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}} :
                         {{item.subitem_eng}}</ng-option>
@@ -169,18 +174,17 @@
                      </button> -->
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Product" [clearable]="true"
-                     [virtualScroll]="true" formControlName="product_id" (change)="productSelected($event)"
-                     [readonly]="isEdit"
-                     [ngClass]="{'validation':aawakForm.get('product_id')?.errors && (aawakForm.get('product_id')?.touched || aawakForm.get ('product_id')?.dirty)}">
+                     [virtualScroll]="true" [(ngModel)]="awkfg.product_id" name="product_id" #product_id="ngModel"
+                     (change)="productSelected($event)" [readonly]="isEdit">
                      <ng-option selected="selected" disabled value="">Select Product</ng-option>
                      <ng-option *ngFor="let item of products" [value]="item._id">{{item.item_hin}} :
                         {{item.subitem_hin}}
                         : {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num : ''}}
                      </ng-option>
                   </ng-select>
-                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition" [clearable]="false"
-                     [virtualScroll]="true" formControlName="condition_id"
-                     [ngClass]="{'validation':aawakForm.get('condition_id')?.errors && (aawakForm.get('condition_id')?.touched || aawakForm.get ('condition_id')?.dirty)}">
+                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.condition_id" name="condition_id"
+                     #condition_id="ngModel">
                      <ng-option selected="selected" disabled value="">Select Condition</ng-option>
                      <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
                         {{item.list_name_eng}} </ng-option>
@@ -192,14 +196,14 @@
                <div class="form-group">
                   <label class="form-label">Quantity</label>
                   <div class="input-group">
-                     <input type="text" class="form-control" placeholder="Quantity" formControlName="qty"
-                        [(ngModel)]="qty" ngModelOptions="{standalone: true}" (keyup)="qtyclick()"
-                        [ngClass]="{'validation':aawakForm.get('qty')?.errors && (aawakForm.get('qty')?.touched || aawakForm.get ('qty')?.dirty)}">
+                     <input type="text" class="form-control" placeholder="Quantity" [(ngModel)]="awkfg.qty" name="qty"
+                        #qty="ngModel" (keyup)="qtyclick()"
+                        [ngClass]="{ 'validation': (qty?.touched || f.submitted) && qty.errors?.['required']}" required>
                      <span class="input-group-text ml-1 border border-secondary"
                         style="padding: 0px; min-width: 40%;background: #252932;">
-                        <ng-select class="custom" style="width: 100%;" placeholder="--Unit--" [clearable]="false"
-                           [virtualScroll]="true" formControlName="unit_id"
-                           [ngClass]="{'validation':aawakForm.get('unit_id')?.errors && (aawakForm.get('unit_id')?.touched || aawakForm.get ('unit_id')?.dirty)}">
+                        <ng-select class="custom" style="width: 100%;" placeholder="Unit" [clearable]="true"
+                           [virtualScroll]="true" [(ngModel)]="awkfg.unit_id" name="unit_id" #unit_id="ngModel"
+                           [readonly]="isEdit">
                            <ng-option selected="selected" disabled value="">Unit</ng-option>
                            <ng-option *ngFor="let item of units" [value]="item._id">{{item.unit_short}}</ng-option>
                         </ng-select>
@@ -211,27 +215,27 @@
             <div class="col-md-2 mb-3">
                <div class="form-group">
                   <label class="form-label">Rate</label>
-                  <input type="text" class="form-control" placeholder="Rate" formControlName="rate" [(ngModel)]="rate"
-                     (keyup)="rateclick()"
-                     [ngClass]="{'validation':aawakForm.get('rate')?.errors && (aawakForm.get('rate')?.touched || aawakForm.get ('rate')?.dirty)}">
+                  <input type="text" class="form-control" placeholder="Rate" [(ngModel)]="awkfg.rate" name="rate"
+                     #rate="ngModel" (keyup)="rateclick()">
                </div>
             </div>
 
             <div class="col-md-2 mb-3">
                <div class="form-group">
                   <label class="form-label">Amount</label>
-                  <input type="text" class="form-control" placeholder="Amount" formControlName="actual_amt"
-                     [(ngModel)]="amnt" (keyup)="amntclick()"
-                     [ngClass]="{'validation':aawakForm.get('actual_amt')?.errors && (aawakForm.get('actual_amt')?.touched || aawakForm.get ('actual_amt')?.dirty)}">
+                  <input type="text" class="form-control" placeholder="Amount" [(ngModel)]="awkfg.actual_amt"
+                     name="actual_amt" #actual_amt="ngModel" (keyup)="amntclick()">
                </div>
             </div>
 
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Aawak Type</label>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Aawak Type" [clearable]="false"
-                     [virtualScroll]="true" formControlName="aawak_type_id"
-                     [ngClass]="{'validation':aawakForm.get('aawak_type_id')?.errors && (aawakForm.get('aawak_type_id')?.touched || aawakForm.get ('aawak_type_id')?.dirty)}">
+                  <ng-select class="custom" style="width: 100%;" placeholder="Aawak Type" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.aawak_type_id" name="aawak_type_id"
+                     #aawak_type_id="ngModel"
+                     [ngClass]="{ 'validation': (aawak_type_id?.touched || f.submitted) && aawak_type_id.errors?.['required']}"
+                     required>
                      <ng-option selected="selected" disabled value="">Aawak Type
                      </ng-option>
                      <ng-option *ngFor="let item of aawak_types" [value]="item._id">
@@ -244,72 +248,20 @@
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Item Details</label>
-                  <textarea class="form-control" placeholder="Item Details" formControlName="item_detail"
-                     [ngClass]="{'validation':aawakForm.get('item_detail')?.errors && (aawakForm.get('item_detail')?.touched || aawakForm.get ('item_detail')?.dirty)}"></textarea>
+                  <textarea class="form-control" placeholder="Item Details" [(ngModel)]="awkfg.item_detail"
+                     name="item_detail" #item_detail="ngModel"></textarea>
                </div>
             </div>
 
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Description</label>
-                  <textarea class="form-control" placeholder="विवरण" formControlName="description"
-                     [ngClass]="{'validation':aawakForm.get('description')?.errors && (aawakForm.get('description')?.touched || aawakForm.get ('description')?.dirty)}"></textarea>
+                  <textarea class="form-control" placeholder="विवरण" [(ngModel)]="awkfg.description" name="description"
+                     #description="ngModel"></textarea>
                </div>
             </div>
 
-            <!-- <div class="col-md-8 mb-3">
-               <div class=" card card-body">
-                  <h5 class="card-title">Jawak Details</h5>
-                  <div class="" formArrayName="jawak_detail" *ngFor="let a of formJawakDetails.controls; let i = index">
-                     <div [formGroupName]="i">
-                        <div class="row">
-                           <div class="col-md-7 mb-1">
-                              <div class="form-group">
-                                 <label class="form-label" *ngIf="i == 0">Jawak MM</label>
-                                 <ng-select class="custom" *ngIf="i == 0" style="width: 100%;"
-                                    placeholder="कहा यूज़ हुआ ?" [clearable]="false" [virtualScroll]="true"
-                                    formControlName="jawak_mm_id" (change)="jawakmmclick()"
-                                    [ngClass]="{'validation':a.get('jawak_mm_id')?.errors && (a.get('jawak_mm_id')?.touched || a.get ('jawak_mm_id')?.dirty)}">
-                                    <ng-option selected="selected" disabled value="">कहा यूज़ हुआ ?
-                                    </ng-option>
-                                    <ng-option *ngFor="let item of mms" [value]="item._id">
-                                       {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
-                                 </ng-select>
-                                 <ng-select class="custom" *ngIf="i != 0" style="width: 100%;"
-                                    placeholder="कहा यूज़ हुआ ?" [clearable]="false" [virtualScroll]="true"
-                                    formControlName="jawak_mm_id"
-                                    [ngClass]="{'validation':a.get('jawak_mm_id')?.errors && (a.get('jawak_mm_id')?.touched || a.get ('jawak_mm_id')?.dirty)}">
-                                    <ng-option selected="selected" disabled value="">कहा यूज़ हुआ ?
-                                    </ng-option>
-                                    <ng-option *ngFor="let item of mms" [value]="item._id">
-                                       {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
-                                 </ng-select>
-                              </div>
-                           </div>
-                           <div class="col-md-4 mb-1">
-                              <div class="form-group">
-                                 <label class="form-label" *ngIf="i == 0">Quantity</label>
-                                 <input type="text" *ngIf="i == 0" class="form-control" placeholder="Quantity"
-                                    formControlName="qty"
-                                    [ngClass]="{'validation':a.get('qty')?.errors && (a.get('qty')?.touched || a.get ('qty')?.dirty)}">
-                                 <input type="text" *ngIf="i != 0" class="form-control" placeholder="Quantity"
-                                    formControlName="qty"
-                                    [ngClass]="{'validation':a.get('qty')?.errors && (a.get('qty')?.touched || a.get ('qty')?.dirty)}">
-                              </div>
-                           </div>
-
-                           <div class="col-1 mb-1">
-                              <label class="form-label" *ngIf="i == 0">Clear</label>
-                              <button class="btn btn-light" type="button" (click)="removeJawakDetails(i)">X</button>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-                  <button type="button" class="btn btn-primary mt-3" [disabled]="!jawak_detail.valid"
-                     (click)="addJawakDetails()">+ Add</button>
-               </div>
-            </div> -->
-
+            <!-- Jawak Details array -->
             <div class="col-md-8 mb-3">
                <div class=" card card-body">
                   <h5 class="card-title">Jawak Details</h5>
@@ -317,7 +269,7 @@
                      <div class="col-md-5 mb-1">
                         <div class="form-group">
                            <label class="form-label">Jawak MM</label>
-                           <ng-select class="custom" style="width: 100%;" placeholder="Jawak MM" [clearable]="false"
+                           <ng-select class="custom" style="width: 100%;" placeholder="Jawak MM" [clearable]="true"
                               [virtualScroll]="true" [(ngModel)]="jmm" [ngModelOptions]="{standalone: true}">
                               <ng-option selected="selected" disabled value="">Jawak MM</ng-option>
                               <ng-option *ngFor="let item of mms" [value]="item._id">
@@ -350,15 +302,15 @@
                         <label class="form-label">Clear</label>
                      </div>
                   </div>
-                  <button type="button" class="btn btn-primary mt-3" (click)="add_jwk()">+ Add</button>
-
+                  <button type="button" [disabled]="(jmm === null && jnimmit === null) || jqty === null"
+                     class="btn btn-primary mt-3" (click)="add_jwk()">+ Add</button>
                   <div class="mt-3 p-2" style="max-height: 200px;;overflow-y: auto;">
                      <div class="row mb-2 border-secondary border-bottom"
-                        *ngFor="let f of aawakForm.value.jawak_detail;let i=index">
+                        *ngFor="let f of awkfg.jawak_detail;let i=index">
                         <div class="col-md-1">{{i+1}}</div>
-                        <div class="col-md-4">{{f.jwk_mm}}</div>
-                        <div class="col-md-4">{{f.jwk_nimmit}}</div>
-                        <div class="col-md-2">{{f.jwk_qty}}</div>
+                        <div class="col-md-4">{{f.jawak_mm_id}}</div>
+                        <div class="col-md-4">{{f.nimmit_id}}</div>
+                        <div class="col-md-2">{{f.qty}}</div>
                         <div class="col-md-1">
                            <button class="btn btn-sm btn-light mb-1" style="font-size: small;line-height: 8px;"
                               type="button" (click)="remove(i)">X</button>
@@ -370,9 +322,9 @@
 
             <div class="col-md-2 mb-3">
                <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
-                  (click)="aawakFormSubmit()">Submit</button>
+                  (click)="aawakFormSubmit(f)">Submit</button>
                <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
-                  (click)="aawakFormUpdate()">Update</button>
+                  (click)="aawakFormUpdate(f)">Update</button>
                <!-- <button class="btn btn-light submit mx-3" type="button" (click)="mmForm.reset()">clear</button> -->
             </div>
 
@@ -424,8 +376,9 @@
                <app-pbk-entry *ngIf="showModal == 'Add PBK'" (response)='pbkAddResponse($event)'>
                </app-pbk-entry>
 
-                 <!-- Add Nimmit  -->
-                 <app-pbk-entry *ngIf="showModal == 'Add Nimmit'" (response)="nimmitAddResponse($event)" [isNimmit]="true">
+               <!-- Add Nimmit  -->
+               <app-pbk-entry *ngIf="showModal == 'Add Nimmit'" (response)="nimmitAddResponse($event)"
+                  [isNimmit]="true">
                </app-pbk-entry>
 
                <!-- Add AMM -->

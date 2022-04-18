@@ -1,5 +1,6 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormArray } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, FormArray, Form, NgForm } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
@@ -19,7 +20,7 @@ export class AawakEntryComponent implements OnInit {
 	@Input() getData: any;
 	@Input() isEdit: any = false;
 	@Output() response = new EventEmitter();
-	aawakForm: FormGroup;
+	// aawakForm: FormGroup;
 	states: any = [];
 	aawaks: any = [];
 	departments: any = [];
@@ -28,12 +29,8 @@ export class AawakEntryComponent implements OnInit {
 	viewType: any;
 	parentAawak: any;
 	viewData: any = [];
-	qty: any;
 	oldQty: any;
-	unit: any;
 	cat: any;
-	rate: any;
-	amnt: any;
 	items: any = [];
 	units: any = [];
 	mms: any = [];
@@ -45,10 +42,35 @@ export class AawakEntryComponent implements OnInit {
 	categories: any = [];
 	isCondition: any = false;
 	productsAll: any = [];
-	jmm: any;
-	jqty: any;
-	jnimmit: any;
+	jmm: any = null;
+	jqty: any = null;
+	jnimmit: any = null;
 	nimmits: any = [];
+	categoryAll: any;
+	itemAll: any;
+	selDept_id: any;
+	awkfg: any = {
+		pkt_num: null,
+		date: null,
+		mm_id: null,
+		aawak_mm_id: null,
+		dept_id: this.auth.webUser.dept_id,
+		pbk_id: null,
+		aawak_type_id: null,
+		item_id: null,
+		subitem_id: null,
+		product_id: null,
+		unit_id: null,
+		condition_id: null,
+		qty: null,
+		rate: null,
+		actual_amt: null,
+		nimmit_id: null,
+		item_detail: null,
+		description: null,
+		remaining_qty: null,
+		jawak_detail: []
+	}
 
 	constructor(private fb: FormBuilder,
 		private http: HttpService,
@@ -72,41 +94,53 @@ export class AawakEntryComponent implements OnInit {
 			this.nimmits = result.nimmit ? result.nimmit : [];
 		});
 
-		this.aawakForm = this.fb.group({
-			pkt_num: [null],
-			date: [null, Validators.required],
-			mm_id: [null, Validators.required],
-			aawak_mm_id: [null],
-			dept_id: [this.auth.webUser.dept_id],
-			pbk_id: [null],
-			aawak_type_id: [null, Validators.required],
-			item_id: [null, Validators.required],
-			subitem_id: [null],
-			product_id: [null],
-			unit_id: [null, Validators.required],
-			condition_id: [null],
-			qty: [null, Validators.required],
-			rate: [null],
-			actual_amt: [null],
-			nimmit_id: [null],
-			item_detail: [null],
-			description: [null],
-			remaining_qty: [null],
-			jawak_detail: [[]]
-		});
+		// this.aawakForm = this.fb.group({
+		// 	pkt_num: [null],
+		// 	date: [null, Validators.required],
+		// 	mm_id: [null, Validators.required],
+		// 	aawak_mm_id: [null],
+		// 	dept_id: [this.auth.webUser.dept_id],
+		// 	pbk_id: [null],
+		// 	aawak_type_id: [null, Validators.required],
+		// 	item_id: [null, Validators.required],
+		// 	subitem_id: [null],
+		// 	product_id: [null],
+		// 	unit_id: [null, Validators.required],
+		// 	condition_id: [null],
+		// 	qty: [null, Validators.required],
+		// 	rate: [null],
+		// 	actual_amt: [null],
+		// 	nimmit_id: [null],
+		// 	item_detail: [null],
+		// 	description: [null],
+		// 	remaining_qty: [null],
+		// 	jawak_detail: [[]]
+		// });
 	}
 
 	add_jwk() {
-		let jwk = this.aawakForm.value.jawak_detail;
-		jwk.push({ jwk_mm: this.jmm, jwk_nimmit: this.jnimmit, jwk_qty: this.jqty });
+		let jwkfg: any = {
+			jawak_mm_id: this.jmm,
+			nimmit_id: this.jnimmit,
+			qty: this.jqty,
+			date: this.awkfg.date,
+			mm_id: this.awkfg.mm_id,
+			item_id: this.awkfg.item_id,
+			subitem_id: this.awkfg.subitem_id,
+			product_id: this.awkfg.product_id,
+			condition_id: this.awkfg.condition_id,
+			jawak_type_id: (this.jmm == this.awkfg.mm_id) ? 27 : 28,
+			unit_id: this.awkfg.unit_id,
+			dept_id: this.awkfg.dept_id,
+		}
+		this.awkfg.jawak_detail.push(jwkfg);
 		this.jmm = null;
 		this.jqty = null;
 		this.jnimmit = null;
 	}
 
 	remove(i: any) {
-		let jwk = this.aawakForm.value.jawak_detail;
-		jwk.splice(i, 1);
+		this.awkfg.jawak_detail.splice(i, 1);
 		// console.log("after this.aawakForm.value.jawak_detail", i, this.aawakForm.value.jawak_detail);
 	}
 
@@ -117,7 +151,7 @@ export class AawakEntryComponent implements OnInit {
 	ngOnChanges(changes: SimpleChanges) {
 		console.log("changes.getData.currentValue", changes.getData.currentValue);
 		if (changes.getData.currentValue) {
-			this.aawakForm.patchValue({
+			this.awkfg = {
 				pkt_num: changes.getData.currentValue.pkt_num,
 				date: changes.getData.currentValue.date,
 				mm_id: changes.getData.currentValue.mm_id,
@@ -136,24 +170,11 @@ export class AawakEntryComponent implements OnInit {
 				nimmit_id: changes.getData.currentValue.nimmit_id,
 				item_detail: changes.getData.currentValue.item_detail,
 				description: changes.getData.currentValue.description,
-				remaining_qty: changes.getData.currentValue.remaining_qty
-			});
-			this.qty = changes.getData.currentValue.qty;
-			this.rate = changes.getData.currentValue.rate;
-			this.amnt = changes.getData.currentValue.actual_amt;
+				remaining_qty: changes.getData.currentValue.remaining_qty,
+				jawak_detail: changes.getData.currentValue.jawak_detail
+			};
 			this.oldQty = changes.getData.currentValue.qty
-			this.unit = changes.getData.currentValue.unit_short;
-			setTimeout(() => {
-				this.itemSelected(changes.getData.currentValue.item_id);
-				if (changes.getData.currentValue.subitem_id) {
-					this.subitemSelected(changes.getData.currentValue.subitem_id);
-					setTimeout(() => {
-						this.aawakForm.patchValue({
-							subitem_id: changes.getData.currentValue.subitem_id
-						})
-					}, 50);
-				}
-			}, 100);
+			this.itemSelected(changes.getData.currentValue.item_id);
 		}
 	}
 
@@ -167,26 +188,19 @@ export class AawakEntryComponent implements OnInit {
 		$('#aawakEntryComponent > #' + this.showModal).modal('hide')
 	}
 
-	aawakFormSubmit() {
-		if (this.aawakForm.valid) {
+	aawakFormSubmit(awkform: NgForm) {
+		console.log("awkform", awkform);
+		if (awkform.valid) {
 			this.isLoader = true;
-			this.aawakForm.patchValue({
-				remaining_qty: this.qty
-			})
-			console.log("this.aawakForm.value", this.aawakForm.value);
-
-			this.http.post(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.aawakForm.value).subscribe((data: any) => {
+			this.awkfg.remaining_qty = this.awkfg.qty;
+			this.http.post(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.awkfg).subscribe((data: any) => {
 				if (data['result'] && data['success']) {
-					this.qty = null;
-					this.rate = null;
-					this.amnt = null;
 					this.jmm = null;
 					this.jqty = null;
 					this.jnimmit = null;
-					this.aawakForm.reset();
 					this.isLoader = false;
 					this.toastr.success('Aawak Added Successfully.');
-					console.log("sub");
+					awkform.resetForm();
 					this.response.emit(data['result']);
 				} else {
 					this.toastr.error(data['message']);
@@ -198,57 +212,25 @@ export class AawakEntryComponent implements OnInit {
 			});
 		}
 		else {
-			console.log("this.aawakForm", this.aawakForm);
-			this.gs.validationFireOnSubmit(this.aawakForm);
-			// if (this.aawakForm.controls.jawak_detail.invalid) {
-			// 	this.jawak_detail = this.aawakForm.get('jawak_detail') as FormArray;
-			// 	for (let i in this.jawak_detail.controls) {
-			// 		this.jawak_detail.controls[i].markAsTouched();
-			// 		this.gs.validationFireOnSubmit(<FormGroup>this.jawak_detail.controls[i]);
-			// 	}
-			// }
+			this.toastr.error("Form is Invalid.")
 		}
 	}
 
-	aawakFormUpdate() {
-		if (this.aawakForm.valid) {
+	aawakFormUpdate(updtawkform: NgForm) {
+		console.log("out of if updtawkform", updtawkform);
+		if (updtawkform.valid) {
 			this.isLoader = true;
 			let body = { query: {}, set: {} };
-			body.query = {
-				_id: this.getData._id
-			}
-			body.set = {
-				pkt_num: this.aawakForm.value.pkt_num,
-				date: this.aawakForm.value.date,
-				mm_id: this.aawakForm.value.mm_id,
-				aawak_mm_id: this.aawakForm.value.aawak_mm_id,
-				dept_id: this.aawakForm.value.dept_id,
-				pbk_id: this.aawakForm.value.pbk_id,
-				aawak_type_id: this.aawakForm.value.aawak_type_id,
-				item_id: this.aawakForm.value.item_id,
-				subitem_id: this.aawakForm.value.subitem_id,
-				product_id: this.aawakForm.value.product_id,
-				unit_id: this.aawakForm.value.unit_id,
-				condition_id: this.aawakForm.value.condition_id,
-				qty: this.aawakForm.value.qty,
-				rate: this.aawakForm.value.rate,
-				actual_amt: this.aawakForm.value.actual_amt,
-				nimmit_id: this.aawakForm.value.nimmit_id,
-				item_detail: this.aawakForm.value.item_detail,
-				description: this.aawakForm.value.description,
-				remaining_qty: this.aawakForm.value.remaining_qty + (this.aawakForm.value.qty - this.oldQty),
-			};
+			body.query = { _id: this.getData._id };
+			body.set = this.awkfg;
 			this.http.put(this.api.getUrl('AAWAK'), body).subscribe((data: any) => {
 				if (data && data['success']) {
-					this.qty = null;
-					this.rate = null;
-					this.amnt = null;
 					this.jmm = null;
 					this.jqty = null;
 					this.jnimmit = null;
-					this.aawakForm.reset();
 					this.isLoader = false;
 					this.toastr.success('Aawak Updated Successfully.');
+					updtawkform.resetForm();
 					this.response.emit(data['result']);
 				} else {
 					this.toastr.error(data['message']);
@@ -260,7 +242,7 @@ export class AawakEntryComponent implements OnInit {
 			});
 		}
 		else {
-			this.gs.validationFireOnSubmit(this.aawakForm);
+			this.toastr.error("Form is Invalid.")
 		}
 	}
 
@@ -270,7 +252,7 @@ export class AawakEntryComponent implements OnInit {
 			$('#aawakEntryComponent > #showModal').modal('hide');
 			this.showModal = '';
 			// this.states.unshift(ev);
-			this.aawakForm.patchValue({ state_id: ev._id });
+			this.awkfg.state_id = ev._id;
 			this.isLoader = false;
 		}
 		else {
@@ -285,10 +267,7 @@ export class AawakEntryComponent implements OnInit {
 			$('#aawakEntryComponent > #showModal').modal('hide');
 			this.showModal = '';
 			// this.departments.unshift(ev);
-			this.aawakForm.patchValue(
-				{
-					dept_id: ev._id
-				});
+			this.awkfg.dept_id = ev._id;
 			this.isLoader = false;
 		}
 		else {
@@ -303,10 +282,7 @@ export class AawakEntryComponent implements OnInit {
 			$('#aawakEntryComponent > #showModal').modal('hide');
 			this.showModal = '';
 			// this.mms.unshift(ev);
-			this.aawakForm.patchValue(
-				{
-					mm_id: ev._id
-				});
+			this.awkfg.mm_id = ev._id;
 			this.isLoader = false;
 		}
 		else {
@@ -321,10 +297,21 @@ export class AawakEntryComponent implements OnInit {
 			$('#aawakEntryComponent > #showModal').modal('hide');
 			this.showModal = '';
 			// this.subitems.unshift(ev);
-			this.aawakForm.patchValue(
-				{
-					item_id: ev._id
-				});
+			this.awkfg.item_id = ev._id;
+			this.isLoader = false;
+		}
+		else {
+			this.isLoader = false;
+			console.log("err", ev);
+		}
+	}
+	nimmitAddResponse(ev: any) {
+		this.isLoader = true;
+		if (ev._id) {
+			$('#aawakEntryComponent > #showModal').modal('hide');
+			this.showModal = '';
+			// this.states.unshift(ev);
+			this.awkfg.nimmit_id = ev._id;
 			this.isLoader = false;
 		}
 		else {
@@ -339,10 +326,7 @@ export class AawakEntryComponent implements OnInit {
 			$('#aawakEntryComponent > #showModal').modal('hide');
 			this.showModal = '';
 			// this.subitems.unshift(ev);
-			this.aawakForm.patchValue(
-				{
-					subitem_id: ev._id
-				});
+			this.awkfg.subitem_id = ev._id;
 			this.isLoader = false;
 		}
 		else {
@@ -357,10 +341,7 @@ export class AawakEntryComponent implements OnInit {
 			$('#aawakEntryComponent > #showModal').modal('hide');
 			this.showModal = '';
 			// this.conditions.unshift(ev);
-			this.aawakForm.patchValue(
-				{
-					condition_id: ev._id
-				});
+			this.awkfg.condition_id = ev._id;
 			this.isLoader = false;
 		}
 		else {
@@ -375,25 +356,7 @@ export class AawakEntryComponent implements OnInit {
 			$('#aawakEntryComponent > #showModal').modal('hide');
 			this.showModal = '';
 			// this.units.unshift(ev);
-			this.aawakForm.patchValue(
-				{
-					unit_id: ev._id
-				});
-			this.isLoader = false;
-		}
-		else {
-			this.isLoader = false;
-			console.log("err", ev);
-		}
-	}
-
-	nimmitAddResponse(ev: any) {
-		this.isLoader = true;
-		if (ev._id) {
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
-			// this.states.unshift(ev);
-			this.aawakForm.patchValue({ nimmit_id: ev._id });
+			this.awkfg.unit_i = ev._id;
 			this.isLoader = false;
 		}
 		else {
@@ -407,10 +370,7 @@ export class AawakEntryComponent implements OnInit {
 			this.isLoader = true;
 			$('#aawakEntryComponent > #showModal').modal('hide');
 			this.showModal = '';
-			this.aawakForm.patchValue(
-				{
-					aawak_mm_id: ev._id
-				});
+			this.awkfg.aawak_mm_id = ev._id;
 			this.isLoader = false;
 		}
 		else {
@@ -424,10 +384,7 @@ export class AawakEntryComponent implements OnInit {
 			this.isLoader = true;
 			$('#aawakEntryComponent > #showModal').modal('hide');
 			this.showModal = '';
-			this.aawakForm.patchValue(
-				{
-					pbk_id: ev._id
-				});
+			this.awkfg.pbk_id = ev._id;
 			this.isLoader = false;
 		}
 		else {
@@ -441,10 +398,7 @@ export class AawakEntryComponent implements OnInit {
 			this.isLoader = true;
 			$('#aawakEntryComponent > #showModal').modal('hide');
 			this.showModal = '';
-			this.aawakForm.patchValue(
-				{
-					product_id: ev._id
-				});
+			this.awkfg.product_id = ev._id;
 			this.isLoader = false;
 		}
 		else {
@@ -475,57 +429,44 @@ export class AawakEntryComponent implements OnInit {
 	parentAawakSelected(ev: any) {
 		this.parentAawak = ev ? ev : '';
 		let parentAawak = this.aawaks.find((i: { _id: any; }) => i._id == ev);
-		this.aawakForm.patchValue({
+		this.awkfg = {
 			aawak_hin: parentAawak ? parentAawak.aawak_hin : null,
 			aawak_eng: parentAawak ? parentAawak.aawak_eng : null,
 			aawak_code: parentAawak ? parentAawak.aawak_code : null,
 			state_id: parentAawak ? parentAawak.state_id : null,
-		});
+		};
 	}
 
 	qtyclick() {
-		if (this.qty && this.rate) {
-			let actual_amt = this.qty * this.rate
-			this.aawakForm.patchValue({
-				actual_amt: actual_amt.toFixed(2)
-			});
+		if (this.awkfg.qty && this.awkfg.rate) {
+			let actual_amt = this.awkfg.qty * this.awkfg.rate
+			this.awkfg.actual_amt = actual_amt.toFixed(2);
 		}
-		else if (this.qty && this.amnt) {
-			let rate = this.amnt / this.qty
-			this.aawakForm.patchValue({
-				rate: rate.toFixed(2)
-			});
+		else if (this.awkfg.qty && this.awkfg.amnt) {
+			let rate = this.awkfg.amnt / this.awkfg.qty
+			this.awkfg.rate = rate.toFixed(2);
 		}
 	}
 
 	rateclick() {
-		if (this.qty && this.rate) {
-			let actual_amt = this.qty * this.rate;
-			this.aawakForm.patchValue({
-				actual_amt: actual_amt.toFixed(2)
-			});
+		if (this.awkfg.qty && this.awkfg.rate) {
+			let actual_amt = this.awkfg.qty * this.awkfg.rate;
+			this.awkfg.actual_amt = actual_amt.toFixed(2)
 		}
-		else if (this.rate && this.amnt) {
-			let quantity = this.amnt / this.rate;
-			this.aawakForm.patchValue({
-				quantity: quantity.toFixed(2)
-			});
-			this.qty = quantity;
+		else if (this.awkfg.rate && this.awkfg.amnt) {
+			let quantity = this.awkfg.amnt / this.awkfg.rate;
+			this.awkfg.qty = quantity.toFixed(2)
 		}
 	}
 
 	amntclick() {
-		if (this.qty && this.amnt) {
-			let rate = this.amnt / this.qty
-			this.aawakForm.patchValue({
-				rate: rate.toFixed(2)
-			});
+		if (this.awkfg.qty && this.awkfg.amnt) {
+			let rate = this.awkfg.amnt / this.awkfg.qty
+			this.awkfg.rate = rate.toFixed(2)
 		}
-		else if (this.rate && this.amnt) {
-			let quantity = this.amnt / this.rate
-			this.aawakForm.patchValue({
-				quantity: quantity.toFixed(2)
-			});
+		else if (this.awkfg.rate && this.awkfg.amnt) {
+			let quantity = this.awkfg.amnt / this.awkfg.rate
+			this.awkfg.qty = quantity.toFixed(2)
 		}
 	}
 
@@ -543,25 +484,25 @@ export class AawakEntryComponent implements OnInit {
 	catSelected(ev: any) {
 		if (ev) {
 			this.cat = ev;
-			this.items = this.gs.Lists.itemmix.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
+			this.items = this.itemAll.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
 		}
 		else {
 			this.cat = null;
-			this.items = this.gs.Lists.itemmix;
+			this.items = this.itemAll;
 		}
-		this.unit = null;
-		this.aawakForm.patchValue({
+		this.awkfg = {
 			item_id: null,
 			subitem_id: null,
 			unit_id: null,
 			product_id: null
-		})
+		};
 	}
 
 	itemSelected(ev: any) {
 		if (ev) {
 			let item = this.items.find((i: { _id: any; }) => i._id == ev);
-			this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
+			// this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
+			this.getProductData(item._id);
 			if (this.cat) {
 				this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
 			}
@@ -570,21 +511,19 @@ export class AawakEntryComponent implements OnInit {
 			}
 
 			if (this.cat && this.cat != item.category_id) {
-				this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
+				// this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
+				this.awkfg.subitem_id = this.subitems[0]._id;
 			} else {
-				this.aawakForm.setControl('subitem_id', this.fb.control(null));
+				// this.aawakForm.setControl('subitem_id', this.fb.control(null));
 			}
-			this.unit = item.unit_short;
-			this.aawakForm.patchValue({
-				unit_id: item.unit_id
-			});
+			this.awkfg.unit_id = item.unit_id;
 		}
 		else {
 			this.subitems = [];
-			this.unit = null;
-			this.aawakForm.patchValue({
-				unit_id: null
-			});
+			this.awkfg = {
+				unit_id: null,
+				subitem_id: null
+			};
 		}
 	}
 
@@ -592,10 +531,7 @@ export class AawakEntryComponent implements OnInit {
 		if (ev) {
 			let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
 			this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
-			this.aawakForm.patchValue({
-				unit_id: subitem.unit_id
-			});
-			this.unit = subitem.unit_short;
+			this.awkfg.unit_id = subitem.unit_id;
 		}
 		else {
 			this.products = this.productsAll;
@@ -605,14 +541,51 @@ export class AawakEntryComponent implements OnInit {
 	productSelected(ev: any) {
 		this.isCondition = true;
 		let product = this.products.find((p: { _id: any; }) => p._id == ev);
-		this.aawakForm.patchValue({
-			condition_id: product ? product.condition_id : null
-		});
+		this.awkfg.condition_id = product ? product.condition_id : null;
 	}
 
 	deptSelected(ev: any) {
-		console.log("ev", ev);
+		if (ev) {
+			this.getItemData(ev);
+			this.getCategoryData(ev);
+		} else {
+			this.itemAll = [];
+			this.items = [];
+			this.categoryAll = [];
+			this.categories = [];
+			this.productsAll = [];
+			this.products = [];
+		}
 	}
 
+	getItemData(ev: any) {
+		this.http.put(this.api.getUrl('ITEMMIX') + ev, {}).subscribe((data: any) => {
+			if (data['result']) {
+				this.itemAll = data['result'];
+				this.items = this.itemAll;
+			}
+		});
+	}
+
+	getCategoryData(ev: any) {
+		this.http.get(this.api.getUrl('CATEGORY') + ev).subscribe((data) => {
+			if (data['result']) {
+				this.categoryAll = data['result'];
+				this.categories = this.categoryAll;
+			}
+		});
+	}
+
+	getProductData(item_id: any) {
+		let body = {
+			item_id: item_id
+		}
+		this.http.put(this.api.getUrl('PRODUCT') + this.selDept_id, body).subscribe((data: any) => {
+			if (data['result']) {
+				this.productsAll = data['result'];
+				this.products = this.productsAll;
+			}
+		});
+	}
 
 }

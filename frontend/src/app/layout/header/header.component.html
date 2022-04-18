@@ -220,6 +220,24 @@
                         <i class="uil-layer-group me-1"></i>Department
                      </a>
                   </li>
+                  <li class="nav-item">
+                     <a class="nav-link" routerLinkActive="active" routerLink="point" role="button">
+                        <i class="uil-layer-group me-1"></i>Points
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link" role="button" (click)="exportUpdate()">
+                        <i class="uil-layer-group me-1"></i>Download Update
+                     </a>
+                  </li>
+                  <li class="notification-list">
+                     <a class="btn btn-success " data-toggle="tooltip" title="Import Data (.DB file)"
+                        (click)="import.click()">
+                        <i class="dripicons-upload noti-icon"></i>
+                     </a>
+                     <input #import type="file" class="inputtag" accept=".db" (change)="importAll($event)"
+                        hidden />
+                  </li>
 
                   <!-- <li class="nav-item dropdown">
                      <a class="nav-link dropdown-toggle arrow-none" id="topnav-apps" role="button"

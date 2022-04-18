@@ -70,10 +70,10 @@ export class GlobalService {
             this.Lists.jawak_type = data['result'].aj_type.filter((aj: { list_type: string; }) => aj.list_type == 'jawak_type');
             this.Lists.category = data['result'].category;
             this.Lists.unit = data['result'].unit;
-            this.Lists.item = data['result'].item;
+            // this.Lists.item = data['result'].item;
             this.Lists.itemmix = data['result'].itemmix;
             this.Lists.subitem_list = data['result'].subitem_list;
-            this.Lists.subitem = data['result'].subitem;
+            // this.Lists.subitem = data['result'].subitem;
             this.Lists.department = data['result'].department;
             this.Lists.sitem = data['result'].sitem;
           }

@@ -34,6 +34,7 @@ import { ProductComponent } from './product/product.component';
 import { AuthGuard } from './services/auth.guard';
 import { JawakComponent } from './jawak/jawak.component';
 import { BachatComponent } from './bachat/bachat.component';
+import { PointComponent } from './point/point.component';
 
 const routes: Routes = [
    {
@@ -62,6 +63,7 @@ const routes: Routes = [
          { path: "city", component: CityComponent },
          { path: "product", component: ProductComponent },
          { path: "department", component: DepartmentComponent },
+         { path: "point", component: PointComponent },
 
          { path: "countryEntry", component: CountryEntryComponent },
          { path: "categoryEntry", component: CategoryEntryComponent },

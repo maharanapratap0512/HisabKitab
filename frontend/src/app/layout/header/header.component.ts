@@ -7,6 +7,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
+import Swal from 'sweetalert2';
 declare var $: any;
 
 @Component({
@@ -61,101 +62,47 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['login']);
   }
 
+  exportUpdate(){
+    this.isLoader = true;
+    this.http.get(this.api.getUrl('IMPORTUPDATES') + this.auth.webUser.dept_id).subscribe((data)=>{
+      if(data['result']){
+        // this.router.navigate(data['result'])
+        // window.open("file:///D:/MD Softwares/AIVV/HisabKitab-2022/Data/Sabji/Sabji_update_3_2022.db", "_blank")
+        Swal.fire({
+          title: 'Updates of Database Generated',
+          text: "FullPath : " + data['result'],
+          icon: 'success',
+          // showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          // cancelButtonColor: '#d33',
+          confirmButtonText: 'Ok, Got it.'
+        }).then((result) => {
+          if (result.isConfirmed) {
+  
+          }
+        })
+      }
+    });
+    this.isLoader = false;
+  }
+
   importAll = async (ev: any) => {
     this.isLoader = true;
 
     // checking if file found or not
     if (ev.target.files[0]) {
+      // var tmppath = URL.createObjectURL(ev.target.files[0]);
+      // console.log("path", ev.target.files[0]);
+      
+      let formData = new FormData();
 
-      const fileReader: any = new FileReader();
-      fileReader.readAsArrayBuffer(ev.target.files[0]); //reading 1st file only
+      formData.append("updateDB", ev.target.files[0], this.auth.webUser.dept_eng);
 
-      fileReader.onload = () => {
-
-        this.dataZip = new JSZip();
-        //loading zip file content
-        this.dataZip.loadAsync(fileReader.result).then((zip: any) => {
-
-          //checking zip data found or not
-          if (zip) {
-            // getting name of all exists files in zip in array.
-            let fileNames = Object.keys(zip.files);
-            console.log(fileNames);
-
-            //loop through all files
-            for (let i in fileNames) {
-
-              //accept only files that listed below, other ignore.
-              switch (fileNames[i]) {
-                case 'ItemtypeData.json':
-                  // zip.file(fileNames[i]).async("string").then((data: any) => {
-                  //   this.importFile('ITEMTYPEIMPORT', JSON.parse(data));
-                  // });
-                  break;
-                case 'PbkData.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    this.importFile('PBK', JSON.parse(data));
-                  });
-                  break;
-                case 'MMData.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    this.importFile('MM', JSON.parse(data));
-                  });
-                  break;
-                case 'StateData.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    this.importFile('STATE', JSON.parse(data));
-                  });
-                  break;
-                case 'ItemData.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    this.importFile('ITEM', JSON.parse(data));
-                  });
-                  break;
-                case 'SubitemData.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    this.importFile('SUBITEM', JSON.parse(data));
-                  });
-                  break;
-                case 'CategoryData.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    this.importFile('CATEGORY', JSON.parse(data));
-                  });
-                  break;
-                case 'UnitData.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    this.importFile('UNIT', JSON.parse(data));
-                  });
-                  break;
-                case 'CityData.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    this.importFile('CITY', JSON.parse(data));
-                  });
-                  break;
-                case 'CountryData.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    this.importFile('COUNTRY', JSON.parse(data));
-                  });
-                  break;
-                case 'ProductData.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    this.importFile('PRODUCT', JSON.parse(data));
-                  });
-                  break;
-                case 'EntryData.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data)
-                      this.importFile('ENTRY', JSON.parse(data));
-                  });
-                  break;
-              }
-            }
-          }
-
-        });
-
-      }
-
+      this.http.postFormData(this.api.getUrl("DBUPLOAD"), formData).subscribe((result:any)=>{
+        console.log(result);
+        
+      });
+      
     }
   }
 

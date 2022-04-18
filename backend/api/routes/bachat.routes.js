@@ -36,7 +36,7 @@ router.get('/', async (req, res, next) => {
 //  category get
 router.get('/home/:dept_id', async (req, res, next) => {
     let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
-    await DB.getFullListByDept('bachatHome', req.params.dept_id, conditionString).then((data) => {
+    await DB.getFullListByDept('bachatHome', req.params.dept_id, conditionString).then((resolve) => {
         // for(let i in data){
         //     data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
         //     for(let bcht of data[i].bachat_qty){
@@ -45,7 +45,8 @@ router.get('/home/:dept_id', async (req, res, next) => {
         // }
         res.json({
             success: true,
-            result: data || []
+            result: resolve.data || [],
+            total_count: resolve.total_count
         });
     }, (err) => { return next(err) });
 });
@@ -54,7 +55,7 @@ router.get('/home/:dept_id', async (req, res, next) => {
 router.get('/:dept_id', async (req, res, next) => {
     let conditionString = ``;
     // let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0 OR bachat.Stock <> 0 OR bachat.Stock <> 0`;
-    await DB.getFullListByDept('bachat', req.params.dept_id, conditionString).then((data) => {
+    await DB.getFullListByDept('bachat', req.params.dept_id, conditionString).then((resolve) => {
         // for(let i in data){
         //     data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
         //     for(let bcht of data[i].bachat_qty){
@@ -63,7 +64,8 @@ router.get('/:dept_id', async (req, res, next) => {
         // }
         res.json({
             success: true,
-            result: data || []
+            result: resolve.data || [],
+            total_count: resolve.total_count
         });
     }, (err) => { return next(err) });
 });
