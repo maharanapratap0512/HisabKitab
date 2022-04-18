@@ -7,6 +7,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
+import Swal from 'sweetalert2';
 
 declare var $: any;
 
@@ -71,6 +72,7 @@ export class AawakEntryComponent implements OnInit {
 		remaining_qty: null,
 		jawak_detail: []
 	}
+	jwkArr: any = [];
 
 	constructor(private fb: FormBuilder,
 		private http: HttpService,
@@ -94,34 +96,12 @@ export class AawakEntryComponent implements OnInit {
 			this.nimmits = result.nimmit ? result.nimmit : [];
 		});
 
-		// this.aawakForm = this.fb.group({
-		// 	pkt_num: [null],
-		// 	date: [null, Validators.required],
-		// 	mm_id: [null, Validators.required],
-		// 	aawak_mm_id: [null],
-		// 	dept_id: [this.auth.webUser.dept_id],
-		// 	pbk_id: [null],
-		// 	aawak_type_id: [null, Validators.required],
-		// 	item_id: [null, Validators.required],
-		// 	subitem_id: [null],
-		// 	product_id: [null],
-		// 	unit_id: [null, Validators.required],
-		// 	condition_id: [null],
-		// 	qty: [null, Validators.required],
-		// 	rate: [null],
-		// 	actual_amt: [null],
-		// 	nimmit_id: [null],
-		// 	item_detail: [null],
-		// 	description: [null],
-		// 	remaining_qty: [null],
-		// 	jawak_detail: [[]]
-		// });
 	}
 
 	add_jwk() {
 		let jwkfg: any = {
-			jawak_mm_id: this.jmm,
-			nimmit_id: this.jnimmit,
+			jawak_mm_id: this.jmm.id,
+			nimmit_id: this.jnimmit.id,
 			qty: this.jqty,
 			date: this.awkfg.date,
 			mm_id: this.awkfg.mm_id,
@@ -133,15 +113,51 @@ export class AawakEntryComponent implements OnInit {
 			unit_id: this.awkfg.unit_id,
 			dept_id: this.awkfg.dept_id,
 		}
+		let jwkfg2: any = {
+			jawak_mm_hin: this.jmm.mm_hin,
+			nimmit_hin: this.jnimmit.nimmit_hin,
+			nimmit_state_hin: this.jnimmit.nimmit_state_hin,
+			qty: this.jqty
+		}
 		this.awkfg.jawak_detail.push(jwkfg);
+		this.jwkArr.push(jwkfg2);
 		this.jmm = null;
 		this.jqty = null;
 		this.jnimmit = null;
 	}
 
-	remove(i: any) {
-		this.awkfg.jawak_detail.splice(i, 1);
-		// console.log("after this.aawakForm.value.jawak_detail", i, this.aawakForm.value.jawak_detail);
+	remove(i: any, id: any = null) {
+		if (id) {
+			Swal.fire({
+				title: 'Are you sure?',
+				text: "You won't be able to revert this!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, delete it!'
+			}).then((result) => {
+				if (result.isConfirmed) {
+					this.isLoader = true;
+					this.http.delete(this.api.getUrl('JAWAK') + '/' + id).subscribe((data: any) => {
+						if (data['success']) {
+							this.isLoader = false;
+							this.awkfg.jawak_detail.splice(i, 1);
+							this.jwkArr.splice(i, 1);
+							this.toastr.success('Deleted Successfully');
+						}
+						else {
+							this.toastr.error(data['message']);
+							this.isLoader = false;
+						}
+					});
+				}
+			})
+		}
+		else {
+			this.awkfg.jawak_detail.splice(i, 1);
+			this.jwkArr.splice(i, 1);
+		}
 	}
 
 	ngOnInit(): void {
@@ -173,7 +189,8 @@ export class AawakEntryComponent implements OnInit {
 				remaining_qty: changes.getData.currentValue.remaining_qty,
 				jawak_detail: changes.getData.currentValue.jawak_detail
 			};
-			this.oldQty = changes.getData.currentValue.qty
+			this.jwkArr = changes.getData.currentValue.jawak_detail;
+			this.oldQty = changes.getData.currentValue.qty;
 			this.itemSelected(changes.getData.currentValue.item_id);
 		}
 	}

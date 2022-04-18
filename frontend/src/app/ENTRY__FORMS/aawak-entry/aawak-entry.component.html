@@ -272,7 +272,7 @@
                            <ng-select class="custom" style="width: 100%;" placeholder="Jawak MM" [clearable]="true"
                               [virtualScroll]="true" [(ngModel)]="jmm" [ngModelOptions]="{standalone: true}">
                               <ng-option selected="selected" disabled value="">Jawak MM</ng-option>
-                              <ng-option *ngFor="let item of mms" [value]="item._id">
+                              <ng-option *ngFor="let item of mms" [value]="{ id: item._id, mm_hin: item.mm_hin}">
                                  {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
                            </ng-select>
                         </div>
@@ -284,7 +284,8 @@
                            <ng-select class="custom" style="width: 100%;" placeholder="Select Nimmit" [clearable]="true"
                               [virtualScroll]="true" [(ngModel)]="jnimmit" [ngModelOptions]="{standalone: true}">
                               <ng-option selected="selected" disabled value="">Select Nimmit</ng-option>
-                              <ng-option *ngFor="let item of nimmits" [value]="item._id">
+                              <ng-option *ngFor="let item of nimmits"
+                                 [value]="{id:item._id,nimmit_hin:item.pbk_hin,nimmit_state_hin:item.state_hin}">
                                  {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
                                  item.state_hin + ')'}}</ng-option>
                            </ng-select>
@@ -305,15 +306,14 @@
                   <button type="button" [disabled]="(jmm === null && jnimmit === null) || jqty === null"
                      class="btn btn-primary mt-3" (click)="add_jwk()">+ Add</button>
                   <div class="mt-3 p-2" style="max-height: 200px;;overflow-y: auto;">
-                     <div class="row mb-2 border-secondary border-bottom"
-                        *ngFor="let f of awkfg.jawak_detail;let i=index">
+                     <div class="row mb-2 border-secondary border-bottom" *ngFor="let f of jwkArr;let i=index">
                         <div class="col-md-1">{{i+1}}</div>
-                        <div class="col-md-4">{{f.jawak_mm_id}}</div>
-                        <div class="col-md-4">{{f.nimmit_id}}</div>
+                        <div class="col-md-4">{{f.jawak_mm_hin}}</div>
+                        <div class="col-md-4">{{f.nimmit_hin}} ({{f.nimmit_state_hin}})</div>
                         <div class="col-md-2">{{f.qty}}</div>
                         <div class="col-md-1">
                            <button class="btn btn-sm btn-light mb-1" style="font-size: small;line-height: 8px;"
-                              type="button" (click)="remove(i)">X</button>
+                              type="button" (click)="remove(i,f._id)">X</button>
                         </div>
                      </div>
                   </div>
