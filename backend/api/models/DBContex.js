@@ -313,7 +313,11 @@ class DBContex {
                     }
                     else if (list_name == "nimmit") {
                         sql = `select pbk.*, st.state_hin from pbk
-                                left join state st on st._id = pbk.state_id where status = "nimmit"`;
+                        left join state st on st._id = pbk.state_id where status = "nimmit"`;
+                        if (!exclude_dept.includes(dept_id)) {
+                            sql += ` AND (select config_value from department_config where dept_id = ${dept_id} AND config_key = 'pbk') LIKE '%,'||pbk._id||',%'`;
+                        }
+                        console.log("nimmit", sql);
                     }
                     else {
                         sql = `select * from ${list_name}`;

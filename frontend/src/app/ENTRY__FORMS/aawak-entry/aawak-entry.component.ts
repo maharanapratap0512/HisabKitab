@@ -139,8 +139,8 @@ export class AawakEntryComponent implements OnInit {
 
 	add_jwk() {
 		let jwkfg: any = {
-			jawak_mm_id: this.jmm.id,
-			nimmit_id: this.jnimmit.id,
+			jawak_mm_id: (this.jmm ? this.jmm.id : null),
+			nimmit_id: (this.jnimmit ? this.jnimmit.id : null),
 			qty: this.jqty,
 			date: this.awkfg.date,
 			mm_id: this.awkfg.mm_id,
@@ -153,9 +153,9 @@ export class AawakEntryComponent implements OnInit {
 			dept_id: this.awkfg.dept_id,
 		}
 		let jwkfg2: any = {
-			jawak_mm_hin: this.jmm.mm_hin,
-			nimmit_hin: this.jnimmit.nimmit_hin,
-			nimmit_state_hin: this.jnimmit.nimmit_state_hin,
+			jawak_mm_hin: (this.jmm ? this.jmm.mm_hin : ''),
+			nimmit_hin: (this.jnimmit ? this.jnimmit.nimmit_hin : ''),
+			nimmit_state_hin: (this.jnimmit ? this.jnimmit.nimmit_state_hin : ''),
 			qty: this.jqty
 		}
 		this.awkfg.jawak_detail.push(jwkfg);
@@ -491,8 +491,6 @@ export class AawakEntryComponent implements OnInit {
 		}
 	}
 
-	pbkbystate(ev: any) { }
-
 	stateSelected(ev: any) {
 		if (ev) {
 			this.pbks = this.gs.Lists.pbk.filter((p: { state_id: any; }) => p.state_id == ev);
@@ -528,7 +526,7 @@ export class AawakEntryComponent implements OnInit {
 				this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
 			}
 			else {
-				this.subitems = item.subitems;
+				this.subitems = item.subitems.filter(((s: { category_id: any; })=>this.categories.includes(s.category_id)));
 			}
 
 			if (this.cat && this.cat != item.category_id) {
