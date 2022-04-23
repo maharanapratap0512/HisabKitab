@@ -48,7 +48,7 @@ export class SubitemEntryComponent implements OnInit {
 
   ngOnInit(): void {
     this.gs.observeList().subscribe(result => {
-      this.items = result.item ? result.item : []
+      this.items = result.itemmix ? result.itemmix : []
       this.units = result.unit ? result.unit : []
       this.categories = result.category ? result.category : []
       this.subitem_list = result.subitem_list ? result.subitem_list : []
@@ -73,8 +73,11 @@ export class SubitemEntryComponent implements OnInit {
       this.isLoader = true;
       this.http.post(this.api.getUrl('SUBITEM') + this.auth.webUser.dept_id, this.subitemForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
-          this.gs.Lists.subitem.unshift(data['result'])
-          this.subitemForm.reset({ active: true });
+          // this.gs.Lists.subitem.unshift(data['result'])
+          let i = this.gs.Lists.itemmix.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
+          this.gs.Lists.itemmix[i].subitems.push(data['result']);
+          this.gs.Lists.itemmix[i].categories.push(data['result'].category_id);
+          this.subitemForm.reset();
           this.isLoader = false;
           this.toastr.success('SUBITEM added successfully.')
           this.response.emit(data['result']);

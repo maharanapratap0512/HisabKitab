@@ -6,6 +6,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
 import { FilterpipePipe } from '../pipe/filterpipe.pipe';
 import { AuthService } from '../services/auth.service';
 declare var $: any;
@@ -256,6 +257,28 @@ export class AawakComponent implements OnInit {
   productSelected(ev: any) {
     this.isCondition = true;
     let product = this.products.find((p: { _id: any; }) => p._id == ev);
+  }
+
+  excelImport(ev: any) {
+    let workBooks: any = null;
+    let jsonData = null;
+    const reader = new FileReader();
+    const file = ev.target.files[0];
+    reader.onload = (event) => {
+      const data = reader.result;
+      workBooks = XLSX.read(data, { type: 'binary' });
+      jsonData = workBooks.SheetNames.reduce((initial: any, name: any) => {
+        const sheet = workBooks.Sheets[name];
+        initial[name] = XLSX.utils.sheet_to_json(sheet);
+        return initial;
+      }, {});
+      // const dataString = JSON.stringify(jsonData);
+      let exceldata = jsonData[workBooks.SheetNames[0]];
+      console.log(exceldata);
+      
+    }
+    reader.readAsBinaryString(file);
+      ev = '';
   }
 
 }

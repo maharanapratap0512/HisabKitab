@@ -20,7 +20,7 @@
                            <i class="dripicons-plus" style="font-size: large;"> </i>Add Aawak
                         </button>
                      </div>
-                     <div class="col-5">
+                     <div class="col-4">
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
@@ -33,6 +33,13 @@
                               {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
                         </ng-select>
                      </div> -->
+                     <div class="col-2">
+                        <div class="file btn btn-success mx-2" style="font-weight: 700 !important;">
+                           <i class="uil uil-arrow-to-bottom"></i> Import Entry Excel
+                           <input type="file" class="inputtag"
+                              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" (change)="excelImport($event)" />
+                        </div>
+                     </div>
                      <div class="col-2">
                         <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse"
                            data-bs-target="#collapseExample" aria-expanded="false"
@@ -313,7 +320,8 @@
                                           <th>जवाक प्रकार</th>
                                           <th>परिमाण</th>
                                           <th style="width:0px;">
-                                             <div class="ribbon ribbon-secondary text-light float-end"> Destribution</div>
+                                             <div class="ribbon ribbon-secondary text-light float-end"> Destribution
+                                             </div>
                                           </th>
                                        </tr>
                                        <tr *ngFor="let jwk of data.jawak_detail; let j = index;">

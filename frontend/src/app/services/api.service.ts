@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpService } from 'src/app/services/http.service';
 
 // const base_url = 'http://192.168.43.63:1976/api';
-const base_url = 'http://localhost:1976/api/';
+const base_url = 'http://localhost:2018/api/';
 // const base_url = '/api';
 
 @Injectable({

@@ -62,17 +62,6 @@ export class ItemComponent implements OnInit {
     });
   }
 
-  // getSubitemData() {
-  //   this.isLoader = true;
-  //   this.http.get(this.api.getUrl('SUBITEM') + this.auth.webUser.dept_id).subscribe((data) => {
-  //     if (data['result'] && data['success']) {
-  //       this.subitemData = data['result'];
-  //       this.si_total_count = data['total_count'];
-  //       this.isLoader = false;
-  //     }
-  //     this.isLoader = false;
-  //   });
-  // }
 
   catSelected(ev: any) {
     if (ev) {
@@ -135,6 +124,8 @@ export class ItemComponent implements OnInit {
 
 
   addSubitemResponse(ev: any) {
+    console.log("item",ev);
+    
     if (ev._id) {
       this.isLoader = true;
       $('#showModal').modal('hide');

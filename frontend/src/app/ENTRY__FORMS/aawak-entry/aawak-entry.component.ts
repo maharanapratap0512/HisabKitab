@@ -84,6 +84,7 @@ export class AawakEntryComponent implements OnInit {
 	) {
 		this.gs.observeList().subscribe(result => {
 			this.items = result.itemmix && this.auth.webUser.dept_id > 2 ? result.itemmix : [];
+			this.itemAll = result.itemmix && this.auth.webUser.dept_id > 2 ? result.itemmix : [];
 			this.categories = result.category && this.auth.webUser.dept_id > 2 ? result.category : [];
 			this.units = result.unit ? result.unit : [];
 			this.states = result.state ? result.state : [];
