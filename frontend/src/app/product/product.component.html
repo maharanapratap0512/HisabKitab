@@ -42,21 +42,21 @@
                         <tr>
                            <th>No.</th>
                            <th>Manage</th>
-                           <th>Document</th>
-                           <th>Purchase Date</th>
+                           <th *ngIf="settings.document">Document</th>
+                           <th *ngIf="settings.purchase_date">Purchase Date</th>
                            <th>Mm</th>
                            <th>Item - Subitem</th>
-                           <th>Company Name - Model Name</th>
+                           <th *ngIf="settings.company_name">Company Name - Model Name</th>
                            <th>S/R No. - Product Code</th>
                            <th>Price</th>
-                           <th>Condition</th>
-                           <th>Warranty Period</th>
-                           <th>Warranty From</th>
-                           <th>Purchased By</th>
-                           <th>Purchase From</th>
-                           <th>Product Detail</th>
-                           <th>Accessories</th>
-                           <th>Nimmit</th>
+                           <th >Condition</th>
+                           <th *ngIf="settings.warranty_period">Warranty Period</th>
+                           <th *ngIf="settings.warranty_from">Warranty From</th>
+                           <th *ngIf="settings.purchased_by">Purchased By</th>
+                           <th *ngIf="settings.purchase_from">Purchase From</th>
+                           <th *ngIf="settings.product_detail">Product Detail</th>
+                           <th *ngIf="settings.accessories">Accessories</th>
+                           <th *ngIf="settings.nimmit_id">Nimmit</th>
                         </tr>
                      </thead>
                      <tbody>
@@ -69,24 +69,24 @@
                                     class="uil-trash"></i></button>
                            </td>
                            <ng-container (click)="rowDetail(data)">
-                              <td>
+                              <td *ngIf="settings.document">
                                  <img [src]="getImage1(data.document)" height="60px">
                               </td>
                               <td>{{data.purchase_date}}</td>
                               <td>{{data.mm_id?data.mm_hin + ' : ' + data.mm_eng:'-'}}</td>
                               <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}} -
                                  {{data.subitem_id?data.subitem_hin + ' : ' + data.subitem_eng:'-'}}</td>
-                              <td>{{data.company_name}} - {{data.model_name}}</td>
+                              <td *ngIf="settings.company_name">{{data.company_name}} - {{data.model_name}}</td>
                               <td>{{data.sr_num}} - {{data.product_code}}</td>
                               <td>{{data.price}}</td>
                               <td>{{data.condition_id?data.condition_hin + ' : ' + data.condition_eng:'-'}}</td>
-                              <td>{{data.warranty_period}}</td>
-                              <td>{{data.warranty_from}}</td>
-                              <td>{{data.purchased_by}}</td>
-                              <td>{{data.purchase_from}}</td>
-                              <td>{{data.product_detail}}</td>
-                              <td>{{data.accessories}}</td>
-                              <td>{{data.nimmit}}</td>
+                              <td *ngIf="settings.warranty_period">{{data.warranty_period}}</td>
+                              <td *ngIf="settings.warranty_from">{{data.warranty_from}}</td>
+                              <td *ngIf="settings.purchased_by">{{data.purchased_by}}</td>
+                              <td *ngIf="settings.purchase_from">{{data.purchase_from}}</td>
+                              <td *ngIf="settings.product_detail">{{data.product_detail}}</td>
+                              <td *ngIf="settings.accessories">{{data.accessories}}</td>
+                              <td *ngIf="settings.nimmit_id">{{data.nimmit}}</td>
                            </ng-container>
                         </tr>
                      </tbody>

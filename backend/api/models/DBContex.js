@@ -667,6 +667,9 @@ class DBContex {
         try {
             if (dataObj) {
                 let cols = "", val = "", params = [];
+                if(table_name == "department_config" && dataObj.config_key == "settings"){
+                    dataObj.config_value = JSON.stringify(config_value ? config_value : {});
+                }
                 for (let [field, value] of Object.entries(dataObj)) {
                     cols += `${field},`;
                     val += `?,`
@@ -706,6 +709,9 @@ class DBContex {
                     let cols = "", val = "", params = [];
                     if (dept_id == 1) {
                         dataObj.active = 1;
+                    }
+                    if(table_name == "department_config" && dataObj.config_key == "settings"){
+                        dataObj.config_value = JSON.stringify(config_value ? config_value : {});
                     }
                     for (let [field, value] of Object.entries(dataObj)) {
                         cols += `${field},`;
@@ -748,6 +754,10 @@ class DBContex {
         try {
             let params = [];
             let sql = `UPDATE ${tableName} SET `;
+            if(tableName == "department_config" && dataObj.config_key == "settings"){
+                dataObj.config_value = JSON.stringify(dataObj.config_value);
+                // console.log("settings", dataObj.config_value);
+            }
             for (let [field, value] of Object.entries(dataObj)) {
                 sql += `${field} = ?,`;
                 if (['document', 'relative_ref', 'alt_mo_no'].includes(field)) {
@@ -1213,7 +1223,7 @@ class DBContex {
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         unit.unit_short, unit.unit_full,
         slat.list_name_hin as aawak_type_hin, slat.list_name_eng as aawak_type_eng,
-        nmt.pbk_hin as nimmit_hin, nmt.pbk_eng as nimmit_eng, nmt.relative_name, nmt.state_id, pst.state_hin as nimmit_state_hin, pst.state_eng as nimmit_state_eng
+        nmt.pbk_hin as nimmit_hin, nmt.pbk_eng as nimmit_eng, nmt.relative_name as father_name, nmt.state_id as nimmit_state_id, pst.state_hin as nimmit_state_hin, pst.state_eng as nimmit_state_eng
         from aawak 
         left join mm on mm._id = aawak.mm_id
         left join pbk on pbk._id = aawak.pbk_id

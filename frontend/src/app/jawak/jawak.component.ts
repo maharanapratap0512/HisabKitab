@@ -48,7 +48,7 @@ export class JawakComponent implements OnInit {
     pkt_num: null
   };
   cat: any;
-
+  settings:any = {};
 
 
   constructor(
@@ -59,7 +59,9 @@ export class JawakComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public gs: GlobalService,
     public auth: AuthService,
-  ) { }
+  ) {
+    this.settings = this.auth.webUser.settings.jawak;
+   }
 
   ngOnInit(): void {
     this.getJawakData();

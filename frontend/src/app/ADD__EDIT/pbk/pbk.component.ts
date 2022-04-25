@@ -44,6 +44,7 @@ export class PbkComponent implements OnInit {
   statuses: any = [];
   relations: any = [];
   getPbk$ = new Subject();
+  settings:any = {};
 
   constructor(
     private fb: FormBuilder,
@@ -53,7 +54,9 @@ export class PbkComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService
-  ) { }
+  ) {
+    this.settings = this.auth.webUser.settings.pbk;
+   }
 
   ngOnInit(): void {
     this.spinner.show();

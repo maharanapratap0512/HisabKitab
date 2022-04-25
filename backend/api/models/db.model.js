@@ -102,7 +102,23 @@ const Migrations = [
       });
 
     }
+  },
+
+  (DB) => {
+    //updating to version 7
+
+    console.log('updating...',);
+    for (let keys of Object.keys(ver7)) {
+
+      DB.serialize(() => {
+        DB.run(ver7[keys], (err) => {
+          if (err) console.log(keys, 'version 7 error: ', err);
+        });
+      });
+
+    }
   }
+
 ];
 let migrationLength = Migrations.length;
 
@@ -141,6 +157,24 @@ localDB.serialize(() => {
   });
 });
 
+/* Version 7 changes
+  => deleting pbk_fields, product_fields, aawak_fields, jawak_fields from dept_config table
+  => add new key settings in dept_config
+  => recreating updated trigger after insert in dept.
+ */
+const ver7 = {
+  delete_key : `delete from department_config where config_key in ('pbk_fields', 'product_fields', 'aawak_fields', 'jawak_fields','settings')`,
+  add_key: `insert into department_config(dept_id, config_key, config_value, active) select _id, 'settings', json('{"pbk":{"visible":true,"roll_no":true,"pbk_hin":true,"pbk_eng":true,"gender":true,"state_id":true,"relation":true,"relative_name":true,"birth_date":true,"age":true,"address":true,"townarea":true,"city_id":true,"mo_no":true,"alt_mo_no":true,"class_mm_id":true,"bhatti_date":true,"doccument":true,"document":true},"product":{"visible":true,"purchase_date":true,"mm_id":true,"purchased_by":true,"purchase_from":true,"filter_dept":true,"filter_category":true,"item_id":true,"subitem_id":true,"company_name":true,"model_name":true,"sr_num":true,"product_code":true,"condition_id":true,"warranty_period":true,"warranty_from":true,"accessories":true,"price":true,"nimmit_id":true,"product_detail":true,"document":true},"aawak":{"visible":true,"date":true,"pkt_num":true,"mm_id":true,"filter_by_state":true,"pbk_id":true,"aawak_mm_id":true,"nimmit_id":true,"item_id":true,"subitem_id":true,"filter_by_dept":true,"filter_by_cat":true,"product_id":true,"condition_id":true,"qty":true,"unit_id":true,"rate":true,"actual_amt":true,"aawak_type_id":true,"item_detail":true,"description":true,"jawak":{"visible":true,"jawak_mm_id":true,"nimmit_id":true,"qty":true}},"jawak":{"visible":true,"pkt_num":true,"date":true,"jawak_mm_id":true,"nimmit_id":true,"filter_by_state":true,"pbk_id":true,"product_id":true,"condition_id":true,"qty":true,"jawak_type_id":true,"item_detail":true,"description":true},"bachat":{"visible":true,"used":true,"stock":true,"new":true,"old":true,"defective":true,"scrap":true},"category":{"visible":true},"item":{"visible":true},"mm":{"visible":true},"city":{"visible":true},"department":{"visible":true},"point":{"visible":true}}'), 1 from department`,
+  drop_dept_ins_config_ins: `drop trigger if exists "dept_ins_config_ins"`,
+  dept_ins_config_ins:
+    `CREATE TRIGGER IF NOT EXISTS "dept_ins_config_ins"
+      AFTER INSERT ON "department"
+      FOR EACH ROW 
+      BEGIN
+        insert into department_config(dept_id, config_key, config_value, active) values(NEW._id, 'mm', '', NEW.active),(NEW._id, 'item', '', NEW.active),(NEW._id, 'category', '', NEW.active), (NEW._id, 'subitem', '', NEW.active), (NEW._id, 'subitem_list', '', NEW.active),(NEW._id, 'pbk', '', NEW.active),(NEW._id, 'department', '', NEW.active),(NEW._id, 'aj_type', '', NEW.active), (NEW._id, 'dept', '', NEW.active);
+      END;`,
+
+}
 
 /*version 6 changes
   => creating new table - points

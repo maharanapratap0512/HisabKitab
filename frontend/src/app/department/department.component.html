@@ -51,14 +51,20 @@
                     </div>
                 </div>
 
-                    
+
                 <div class="row" *ngIf="dept_id">
                     <div class="col-md-2 mb-2 mb-sm-0 card card-body">
                         <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
                             aria-orientation="vertical">
-                            <a class="nav-link" [ngClass]="{'active show': dept_id > 2}" id="v-pills-mm-tab"
-                                data-bs-toggle="pill" href="#v-pills-mm" role="tab" aria-controls="v-pills-mm"
-                                aria-selected="true" *ngIf="dept_id>2">
+                            <!-- <a class="nav-link" [ngClass]="{'active show': dept_id > 2}" id="v-pills-setting-tab" -->
+                            <a class="nav-link active show" id="v-pills-setting-tab" data-bs-toggle="pill"
+                                href="#v-pills-setting" role="tab" aria-controls="v-pills-setting" aria-selected="true">
+                                <i class="mdi mdi-home-variant d-md-none d-block"></i>
+                                <span class="d-none d-md-block">Software Settings
+                                </span>
+                            </a>
+                            <a class="nav-link" id="v-pills-mm-tab" data-bs-toggle="pill" href="#v-pills-mm" role="tab"
+                                aria-controls="v-pills-mm" aria-selected="true">
                                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                                 <span class="d-none d-md-block">MM
                                     <span class="badge bg-primary rounded-pill float-end">{{(deptConf.mm &&
@@ -66,9 +72,8 @@
                                         deptConf.mm.idArr.length - 1: ''}}</span>
                                 </span>
                             </a>
-                            <a class="nav-link" [ngClass]="{'active show': dept_id == 2}" id="v-pills-pbk-tab"
-                                data-bs-toggle="pill" href="#v-pills-pbk" role="tab" aria-controls="v-pills-pbk"
-                                aria-selected="false">
+                            <a class="nav-link" id="v-pills-pbk-tab" data-bs-toggle="pill" href="#v-pills-pbk"
+                                role="tab" aria-controls="v-pills-pbk" aria-selected="false">
                                 <i class="mdi mdi-account-circle d-md-none d-block"></i>
                                 <span class="d-none d-md-block">PBK / Sewadhari
                                     <span class="badge bg-primary rounded-pill float-end">{{(deptConf.pbk &&
@@ -77,7 +82,7 @@
                                 </span>
                             </a>
                             <a class="nav-link" id="v-pills-category-tab" data-bs-toggle="pill" href="#v-pills-category"
-                                role="tab" aria-controls="v-pills-category" aria-selected="false" *ngIf="dept_id>2">
+                                role="tab" aria-controls="v-pills-category" aria-selected="false">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Category
                                     <span class="badge bg-primary rounded-pill float-end">{{(deptConf.category &&
@@ -86,7 +91,7 @@
                                 </span>
                             </a>
                             <!-- <a class="nav-link" id="v-pills-item-tab" data-bs-toggle="pill" href="#v-pills-item"
-                                role="tab" aria-controls="v-pills-item" aria-selected="false" *ngIf="dept_id>2">
+                                role="tab" aria-controls="v-pills-item" aria-selected="false" >
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Items
                                     <span class="badge bg-primary rounded-pill float-end">{{(deptConf.item &&
@@ -94,7 +99,7 @@
                                 </span>
                             </a> -->
                             <a class="nav-link" id="v-pills-itemmix-tab" data-bs-toggle="pill" href="#v-pills-itemmix"
-                                role="tab" aria-controls="v-pills-itemmix" aria-selected="false" *ngIf="dept_id>2">
+                                role="tab" aria-controls="v-pills-itemmix" aria-selected="false">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Items(New)
                                     <span class="badge bg-primary rounded-pill float-end">
@@ -105,7 +110,7 @@
                                 </span>
                             </a>
                             <!-- <a class="nav-link" id="v-pills-subitem-tab" data-bs-toggle="pill" href="#v-pills-subitem"
-                                role="tab" aria-controls="v-pills-subitem" aria-selected="false" *ngIf="dept_id>2">
+                                role="tab" aria-controls="v-pills-subitem" aria-selected="false" >
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Subitem
                                     <span class="badge bg-primary rounded-pill float-end">{{(deptConf.subitem &&
@@ -113,7 +118,7 @@
                                 </span>
                             </a> -->
                             <a class="nav-link" id="v-pills-ajtypes-tab" data-bs-toggle="pill" href="#v-pills-ajtypes"
-                                role="tab" aria-controls="v-pills-ajtypes" aria-selected="false" *ngIf="dept_id>2">
+                                role="tab" aria-controls="v-pills-ajtypes" aria-selected="false">
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Aawak/Jawak Types
                                     <span class="badge bg-primary rounded-pill float-end">{{(deptConf.aj_type &&
@@ -132,10 +137,1033 @@
                         <div class="tab-content card card-body" id="v-pills-tabContent">
 
 
+                            <!-- Setting Tab -->
+                            <!-- <div class="tab-pane fade" [ngClass]="{'active show': dept_id > 2}" id="v-pills-setting" -->
+                            <div class="tab-pane fade active show" id="v-pills-setting" role="tabpanel"
+                                aria-labelledby="v-pills-setting-tab"
+                                style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
+                                <div class="row">
+                                    <div class="card-body" style="overflow: auto;">
+                                        <table id="datatable-buttons" class="table table-hover dt-responsive">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 40px;">No.</th>
+                                                    <th style="width: 40px;">?</th>
+                                                    <th style="width: 101px;">Page</th>
+                                                    <th style="width: 150px;">Detail</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- 2 rows for Aawak Configuration -->
+                                                <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                                                    <td>1</td>
+                                                    <td>
+                                                        <div class="form-check form-switch">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                [(ngModel)]="settingsAll.aawak.visible"
+                                                                [ngModelOptions]="{standalone: true}">
+                                                        </div>
+                                                    </td>
+                                                    <td>आवक / Aawak</td>
+                                                    <td>इस पेज से आवक एंट्री कर सकते है। </td>
+
+                                                </tr>
+                                                <ng-container *ngIf="settingsAll.aawak.visible">
+                                                    <tr class="collapse show ribbon-box" [attr.id]="'aawak_row'">
+                                                        <!-- <td style="border: none;"></td> -->
+                                                        <td colspan="4" class="sub-row">
+                                                            <table class="card-body"
+                                                                style="width: 99.7%;table-layout: fixed;">
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.date"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Date</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.pkt_num"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Pkt Num</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.mm_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">MM</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.aawak_mm_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Aawak MM</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.pbk_id"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">PBK/Sewadhari</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.nimmit_id"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Nimmit</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.item_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Item</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.subitem_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Subitem</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.product_id"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Product</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.condition_id"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Product
+                                                                                Condition</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.qty"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Quantity</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.unit_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Unit</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.rate"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Rate</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.actual_amt"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Actual
+                                                                                Amount</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.aawak_type_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Aawak Type</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.item_detail"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Item Detail</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.description"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Description</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check form-switch">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.aawak.jawak.visible"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Jawak
+                                                                                Section</label>
+                                                                        </div>
+                                                                    </td>
+
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </ng-container>
+
+                                                <!-- 2 rows for Jawak Configuration -->
+                                                <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                                                    <td>2</td>
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                [(ngModel)]="settingsAll.jawak.visible"
+                                                                [ngModelOptions]="{standalone: true}">
+                                                        </div>
+                                                    </td>
+                                                    <td>जावक / Jawak</td>
+                                                    <td>इस पेज से जावक एंट्री कर सकते है। </td>
+
+                                                </tr>
+                                                <ng-container *ngIf="settingsAll.jawak.visible">
+                                                    <tr class="collapse show ribbon-box" [attr.id]="'jawak_row'">
+                                                        <!-- <td style="border: none;"></td> -->
+                                                        <td colspan="4" class="sub-row">
+                                                            <table class="card-body"
+                                                                style="width: 99.7%;table-layout: fixed;">
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.jawak.date"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Date</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.jawak.pkt_num"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Pkt Num</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.jawak.jawak_mm_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">jawak MM</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.jawak.pbk_id"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">PBK/Sewadhari</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.jawak.nimmit_id"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Person</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.jawak.product_id"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Product</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.jawak.condition_id"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Product
+                                                                                Condition</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.jawak.qty"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Quantity</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.jawak.jawak_type_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">jawak Type</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.jawak.item_detail"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Item Detail</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.jawak.description"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Description</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </ng-container>
+
+                                                <!-- 2 rows for Product Configuration -->
+                                                <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                                                    <td>3</td>
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                [(ngModel)]="settingsAll.product.visible"
+                                                                [ngModelOptions]="{standalone: true}">
+                                                        </div>
+                                                    </td>
+                                                    <td>प्रोडक्ट / Product</td>
+                                                    <td>इस पेज से नये प्रोडक्ट की एंट्री कर सकते है। </td>
+
+                                                </tr>
+                                                <ng-container *ngIf="settingsAll.product.visible">
+                                                    <tr class="collapse show ribbon-box" [attr.id]="'product_row'">
+                                                        <!-- <td style="border: none;"></td> -->
+                                                        <td colspan="4" class="sub-row">
+                                                            <table class="card-body"
+                                                                style="width: 99.7%;table-layout: fixed;">
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.purchase_date"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Purchase
+                                                                                Date</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.mm_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">MM</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.purchased_by"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Purchase By</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.purchase_from"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Purchase
+                                                                                From</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.nimmit_id"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Nimmit</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.item_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Item</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.subitem_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Subitem</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.company_name"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Company Name</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.model_name"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Model Name</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.accessories"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Accessories</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.sr_num"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Serial
+                                                                                Number</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.product_code"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Product Code</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.condition_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Product
+                                                                                Condition</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.warranty_period"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Warranty
+                                                                                Period</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.warranty_from"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Warranty
+                                                                                From</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+
+                                                                <tr>
+
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.price"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Rate / Price</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.product_detail"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Product
+                                                                                Detail</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.product.document"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Images /
+                                                                                Bill</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </ng-container>
+
+                                                <!-- 2 rows for PBK Configuration -->
+                                                <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                                                    <td>4</td>
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                [(ngModel)]="settingsAll.pbk.visible"
+                                                                [ngModelOptions]="{standalone: true}">
+                                                        </div>
+                                                    </td>
+                                                    <td>सेवाधारी / PBK</td>
+                                                    <td>इस पेज से नये सेवाधारी की एंट्री कर सकते है। </td>
+
+                                                </tr>
+                                                <ng-container *ngIf="settingsAll.pbk.visible">
+                                                    <tr class="collapse show ribbon-box" [attr.id]="'pbk_row'">
+                                                        <!-- <td style="border: none;"></td> -->
+                                                        <td colspan="4" class="sub-row">
+                                                            <table class="card-body"
+                                                                style="width: 99.7%;table-layout: fixed;">
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.roll_no"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Roll No</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.pbk_hin"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Name (Hin)</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.pbk_eng"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Name (Eng)</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.gender"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Gender</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.state_id"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">State</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.relation"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Relation</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.relative_name"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Relative
+                                                                                Name</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.birth_date"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Birth Date</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.age"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Age</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.address"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Address</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.townarea"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Town Area</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.city_id"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">City</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.mo_no"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Mobile No.</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.alt_mo_no"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Alternate
+                                                                                Mo.No.</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.class_mm_id"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Class MM</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+
+                                                                <tr>
+
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.bhatti_date"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Bhatti Date</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.pbk.document"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Image</label>
+                                                                        </div>
+                                                                    </td>
+
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </ng-container>
+
+                                                <!-- bachat -->
+                                                <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                                                    <td>5</td>
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                [(ngModel)]="settingsAll.bachat.visible"
+                                                                [ngModelOptions]="{standalone: true}">
+                                                        </div>
+                                                    </td>
+                                                    <td>बचत / Bachat</td>
+                                                    <td>इस पेज से बचत (स्टॉक / नया / पुराना / खराब / use ) समान की
+                                                        माहिती देख सकते है। </td>
+
+                                                </tr>
+                                                <ng-container *ngIf="settingsAll.bachat.visible">
+                                                    <tr class="collapse show ribbon-box" [attr.id]="'bachat_row'">
+                                                        <!-- <td style="border: none;"></td> -->
+                                                        <td colspan="4" class="sub-row">
+                                                            <table class="card-body"
+                                                                style="width: 99.7%;table-layout: fixed;">
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.bachat.used"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Used</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.bachat.stock"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Stock</label>
+                                                                        </div>
+                                                                    </td>
+
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.bachat.scrap"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Scrap</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.bachat.new"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">New</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.bachat.old"
+                                                                                [ngModelOptions]="{standalone: true}">
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Old</label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox"
+                                                                                class="form-check-input"
+                                                                                [(ngModel)]="settingsAll.bachat.defective"
+                                                                                [ngModelOptions]="{standalone: true}"
+                                                                                disabled>
+                                                                            <label class="form-check-label"
+                                                                                for="customSwitch2">Defective</label>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </ng-container>
+
+                                                <!-- MM -->
+                                                <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                                                    <td>6</td>
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                [(ngModel)]="settingsAll.mm.visible"
+                                                                [ngModelOptions]="{standalone: true}">
+                                                        </div>
+                                                    </td>
+                                                    <td>मि.म. / MM</td>
+                                                    <td>इस पेज से मिनी मधुबन संबंधित काम कर सकते है। </td>
+
+                                                </tr>
+
+                                                <!-- Item / Subitem -->
+                                                <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                                                    <td>7</td>
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                [(ngModel)]="settingsAll.item.visible"
+                                                                [ngModelOptions]="{standalone: true}">
+                                                        </div>
+                                                    </td>
+                                                    <td>Item/Subitem</td>
+                                                    <td>इस पेज से आइटम और सबआइटम संबंधित काम कर सकते है। </td>
+
+                                                </tr>
+
+                                                <!-- Category -->
+                                                <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                                                    <td>8</td>
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                [(ngModel)]="settingsAll.category.visible"
+                                                                [ngModelOptions]="{standalone: true}">
+                                                        </div>
+                                                    </td>
+                                                    <td>केटेगरी / Category</td>
+                                                    <td>इस पेज से केटेगरी संबंधित काम कर सकते है। </td>
+
+                                                </tr>
+
+                                                <!-- City -->
+                                                <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                                                    <td>9</td>
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                [(ngModel)]="settingsAll.city.visible"
+                                                                [ngModelOptions]="{standalone: true}">
+                                                        </div>
+                                                    </td>
+                                                    <td>सिटी / City</td>
+                                                    <td>इस पेज से सिटी संबंधित काम कर सकते है। </td>
+
+                                                </tr>
+
+                                                <!-- Department -->
+                                                <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                                                    <td>10</td>
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                [(ngModel)]="settingsAll.department.visible"
+                                                                [ngModelOptions]="{standalone: true}">
+                                                        </div>
+                                                    </td>
+                                                    <td>डिपार्ट्मन्ट / Department</td>
+                                                    <td>इस पेज से डिपार्ट्मन्ट संबंधित कन्ट्रोलिंग कर सकते है। </td>
+
+                                                </tr>
+
+                                                <!-- Points -->
+                                                <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                                                    <td>11</td>
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input type="checkbox" class="form-check-input"
+                                                                [(ngModel)]="settingsAll.point.visible"
+                                                                [ngModelOptions]="{standalone: true}">
+                                                        </div>
+                                                    </td>
+                                                    <td>पॉइंट / Points</td>
+                                                    <td>इस पेज से पॉइंट डाल कर सकते है जिसमे से बारी बारी कोई भी एक 30
+                                                        मिनिट मे दिखता रहेगा। </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+
 
                             <!-- MM Tab -->
-                            <div class="tab-pane fade" [ngClass]="{'active show': dept_id > 2}" id="v-pills-mm"
-                                role="tabpanel" aria-labelledby="v-pills-home-tab" *ngIf="dept_id>2"
+                            <div class="tab-pane fade" id="v-pills-mm" role="tabpanel"
+                                aria-labelledby="v-pills-home-tab"
                                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
                                 <div class="row">
 
@@ -203,8 +1231,7 @@
 
 
                             <!-- Pbk Tab -->
-                            <div class="tab-pane fade" [ngClass]="{'active show': dept_id == 2}" id="v-pills-pbk"
-                                role="tabpanel"
+                            <div class="tab-pane fade" id="v-pills-pbk" role="tabpanel"
                                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                                 aria-labelledby="v-pills-profile-tab">
                                 <div class="row">
@@ -287,7 +1314,7 @@
                             <!-- Category Tab -->
                             <div class="tab-pane fade" id="v-pills-category" role="tabpanel"
                                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
-                                aria-labelledby="v-pills-settings-tab" *ngIf="dept_id>2">
+                                aria-labelledby="v-pills-settings-tab">
                                 <div class="row">
                                     <div class="col-4">
                                         <div class="form-group">
@@ -328,7 +1355,7 @@
                             <!-- New Item Tab -->
                             <div class="tab-pane fade" id="v-pills-itemmix" role="tabpanel"
                                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
-                                aria-labelledby="v-pills-settings-tab" *ngIf="dept_id>2">
+                                aria-labelledby="v-pills-settings-tab">
                                 <div class="row">
                                     <div class="col-4">
                                         <div class="form-group">
@@ -454,7 +1481,7 @@
                             <!-- Item Tab -->
                             <div class="tab-pane fade" id="v-pills-item" role="tabpanel"
                                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
-                                aria-labelledby="v-pills-settings-tab" *ngIf="dept_id>2">
+                                aria-labelledby="v-pills-settings-tab">
                                 <div class="row">
                                     <div class="col-4">
                                         <div class="form-group">
@@ -511,7 +1538,7 @@
                             <!-- Subitem Tab -->
                             <div class="tab-pane fade" id="v-pills-subitem" role="tabpanel"
                                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
-                                aria-labelledby="v-pills-settings-tab" *ngIf="dept_id>2">
+                                aria-labelledby="v-pills-settings-tab">
                                 <div class="row">
                                     <div class="col-4">
                                         <div class="form-group">
@@ -579,7 +1606,7 @@
                             <!-- AJtype tab -->
                             <div class="tab-pane fade" id="v-pills-ajtypes" role="tabpanel"
                                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
-                                aria-labelledby="v-pills-settings-tab" *ngIf="dept_id>2">
+                                aria-labelledby="v-pills-settings-tab">
                                 <div class="row">
                                     <div class="col-4">
                                         <div class="form-group">

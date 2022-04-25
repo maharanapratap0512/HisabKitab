@@ -40,10 +40,10 @@ export class JawakEntryComponent implements OnInit {
   nimmits: any = [];
   states: any = [];
   categories: any = [];
-  isCondition: any = false;
   remaining_qty: any;
   ref_id: any = null;
   cat: any;
+  settings: any = {};
 
   constructor(
     private fb: FormBuilder,
@@ -73,20 +73,19 @@ export class JawakEntryComponent implements OnInit {
       nimmit_id: [null],
       dept_id: [this.auth.webUser.dept_id]
     });
-    setTimeout(()=>{
 
-      this.gs.observeList().subscribe(result => {
-        this.mms = result.mm ? result.mm : [];
-        this.conditions = result.condition ? result.condition : [];
-        this.jawak_types = result.jawak_type ? result.jawak_type : [];
-        this.items = result.itemmix ? result.itemmix : [];
-        this.categories = result.category ? result.category : [];
-        this.units = result.unit ? result.unit : [];
-        this.pbks = result.pbk ? result.pbk : [];
-        this.states = result.state ? result.state : [];
-        this.nimmits = result.nimmit ? result.nimmit : [];
-      });
-    }, 100);
+    this.gs.observeList().subscribe(result => {
+      this.mms = result.mm ? result.mm : [];
+      this.conditions = result.condition ? result.condition : [];
+      this.jawak_types = result.jawak_type ? result.jawak_type : [];
+      this.items = result.itemmix ? result.itemmix : [];
+      this.categories = result.category ? result.category : [];
+      this.units = result.unit ? result.unit : [];
+      this.pbks = result.pbk ? result.pbk : [];
+      this.states = result.state ? result.state : [];
+      this.nimmits = result.nimmit ? result.nimmit : [];
+    });
+    this.settings = this.auth.webUser.settings;
   }
 
   async ngOnInit(): Promise<void> {
@@ -140,10 +139,10 @@ export class JawakEntryComponent implements OnInit {
         item_detail: this.aawakRef.item_detail,
         product_id: this.aawakRef.product_id,
         condition_id: this.aawakRef.condition_id,
-        qty: this.aawakRef.remaining_qty ? this.aawakRef.remaining_qty: this.aawakRef.Stock,
+        qty: this.aawakRef.remaining_qty ? this.aawakRef.remaining_qty : this.aawakRef.Stock,
         unit_id: this.aawakRef.unit_id,
         description: this.aawakRef.description,
-        aawak_ref_id: (this.aawakRef._id ? this.aawakRef._id: null),
+        aawak_ref_id: (this.aawakRef._id ? this.aawakRef._id : null),
         nimmit_id: this.aawakRef.nimmit_id,
         dept_id: this.aawakRef.dept_id,
       });
@@ -165,6 +164,7 @@ export class JawakEntryComponent implements OnInit {
     $('#jawakEntryComponent > #showModal').modal('show');
   }
 
+
   setView(type: string) {
     this.viewType = type;
     switch (type) {
@@ -178,6 +178,10 @@ export class JawakEntryComponent implements OnInit {
         break;
       case 'Status':
         this.viewData = this.gs.Lists.status;
+        $('#jawakEntryComponent > #dataView').modal('show');
+        break;
+      case 'jawak_type':
+        this.viewData = this.gs.Lists.jawak_type;
         $('#jawakEntryComponent > #dataView').modal('show');
         break;
     }
@@ -244,7 +248,7 @@ export class JawakEntryComponent implements OnInit {
   subitemSelected(ev: any) {
     if (ev) {
       let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
-      if(subitem){
+      if (subitem) {
         this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
         this.jawakForm.patchValue({
           unit_id: subitem.unit_id,
@@ -259,7 +263,7 @@ export class JawakEntryComponent implements OnInit {
   }
 
   productSelected(ev: any) {
-    this.isCondition = true;
+    // this.isCondition = true;
     let product = this.products.find((p: { _id: any; }) => p._id == ev);
     this.jawakForm.patchValue({
       condition_id: product ? product.condition_id : null
@@ -460,6 +464,23 @@ export class JawakEntryComponent implements OnInit {
       this.jawakForm.patchValue(
         {
           pbk_id: ev._id
+        });
+      this.isLoader = false;
+    }
+    else {
+      this.isLoader = false;
+      console.log("err", ev);
+    }
+  }
+
+  jawakTypeAddResponse(ev: any) {
+    if (ev._id) {
+      this.isLoader = true;
+      $('#jawakEntryComponent > #showModal').modal('hide');
+      this.showModal = '';
+      this.jawakForm.patchValue(
+        {
+          jawak_type_id: ev._id
         });
       this.isLoader = false;
     }

@@ -7,7 +7,7 @@
    <div class="card-body">
       <form [formGroup]="pbkForm">
          <div class="row">
-            <div class="col-md-2 mb-3">
+            <div class="col-md-2 mb-3" *ngIf="settings.pbk.roll_no">
                <div class="form-group">
                   <label class="form-label">Roll No.</label>
                   <input type="number" class="form-control" placeholder="Roll No." formControlName="roll_no"
@@ -21,7 +21,7 @@
                      [ngClass]="{'validation':pbkForm.get('pbk_hin')?.errors && (pbkForm.get('pbk_hin')?.touched || pbkForm.get ('pbk_hin')?.dirty)}">
                </div>
             </div>
-            <div class="col-md-2 mb-3">
+            <div class="col-md-2 mb-3" *ngIf="settings.pbk.pbk_eng">
                <div class="form-group">
                   <label class="form-label">Name (Eng)</label>
                   <input type="text" class="form-control" placeholder="Name (Eng)" formControlName="pbk_eng"
@@ -64,7 +64,7 @@
                   </ng-select>
                </div>
             </div>
-            <div class="col-md-2 mb-3" *ngIf="!isNimmit">
+            <div class="col-md-2 mb-3" *ngIf="settings.pbk.relation">
                <div class="form-group">
                   <label class="form-label">Relation</label>
                   <div class="float-end">
@@ -80,17 +80,18 @@
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Relation" [clearable]="false"
                      [virtualScroll]="true" formControlName="relation"
                      [ngClass]="{'validation':pbkForm.get('relation')?.errors && (pbkForm.get('relation')?.touched || pbkForm.get ('relation')?.dirty)}">
-                     <ng-option selected="selected" disabled value="">Gender</ng-option>
+                     <ng-option selected="selected" disabled value="">Relation</ng-option>
                      <ng-option *ngFor="let item of relations" [value]="item.list_name_eng">
                         {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
                   </ng-select>
 
                </div>
             </div>
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.pbk.relative_name">
                <div class="form-group">
                   <label class="form-label">{{(isNimmit ? 'Father Name' : 'Relative Name')}}</label>
-                  <input type="text" class="form-control" placeholder="{{(isNimmit ? 'Father Name' : 'Relative Name')}}" formControlName="relative_name"
+                  <input type="text" class="form-control" placeholder="{{(isNimmit ? 'Father Name' : 'Relative Name')}}"
+                     formControlName="relative_name"
                      [ngClass]="{'validation':pbkForm.get('relative_name')?.errors && (pbkForm.get('relative_name')?.touched || pbkForm.get ('relative_name')?.dirty)}">
                </div>
             </div>
@@ -131,37 +132,34 @@
                   </div>
                </div>
             </div> -->
-            <ng-container *ngIf="!isNimmit">
-               <div class="col-md-2 mb-3">
-                  <label for="dob1" class="form-label">Birth Date</label>
-                  <input class="form-control" id="dob1" type="date" formControlName="birth_date"
-                     (change)="age($any($event.target).value)"
-                     [ngClass]="{'validation':pbkForm.get('birth_date')?.errors && (pbkForm.get('birth_date')?.touched || pbkForm.get ('birth_date')?.dirty)}">
+            <div class="col-md-2 mb-3" *ngIf="settings.pbk.birth_date">
+               <label for="dob1" class="form-label">Birth Date</label>
+               <input class="form-control" id="dob1" type="date" formControlName="birth_date"
+                  (change)="age($any($event.target).value)"
+                  [ngClass]="{'validation':pbkForm.get('birth_date')?.errors && (pbkForm.get('birth_date')?.touched || pbkForm.get ('birth_date')?.dirty)}">
+            </div>
+            <div class="col-md-2 mb-3" *ngIf="settings.pbk.age">
+               <div class="form-group">
+                  <label class="form-label">Age</label>
+                  <input type="number" class="form-control" placeholder="Age" formControlName="age"
+                     [ngClass]="{'validation':pbkForm.get('age')?.errors && (pbkForm.get('age')?.touched || pbkForm.get ('age')?.dirty)}">
                </div>
-               <div class="col-md-2 mb-3">
-                  <div class="form-group">
-                     <label class="form-label">Age</label>
-                     <input type="number" class="form-control" placeholder="Age" formControlName="age"
-                        [ngClass]="{'validation':pbkForm.get('age')?.errors && (pbkForm.get('age')?.touched || pbkForm.get ('age')?.dirty)}">
-                  </div>
+            </div>
+            <div class="col-md-3 mb-3" *ngIf="settings.pbk.address">
+               <div class="form-group">
+                  <label class="form-label">Address</label>
+                  <textarea class="form-control" placeholder="Address" formControlName="address"
+                     [ngClass]="{'validation':pbkForm.get('address')?.errors && (pbkForm.get('address')?.touched || pbkForm.get ('address')?.dirty)}"></textarea>
                </div>
-               <div class="col-md-3 mb-3">
-                  <div class="form-group">
-                     <label class="form-label">Address</label>
-                     <textarea class="form-control" placeholder="Address" formControlName="address"
-                        [ngClass]="{'validation':pbkForm.get('address')?.errors && (pbkForm.get('address')?.touched || pbkForm.get ('address')?.dirty)}"></textarea>
-                  </div>
-               </div>
-            </ng-container>
-            <div class="col-md-3 mb-3">
+            </div>
+            <div class="col-md-3 mb-3" *ngIf="settings.pbk.townarea">
                <div class="form-group">
                   <label class="form-label">Townarea</label>
                   <input type="text" class="form-control" placeholder="Townarea" formControlName="townarea"
                      [ngClass]="{'validation':pbkForm.get('townarea')?.errors && (pbkForm.get('townarea')?.touched || pbkForm.get ('townarea')?.dirty)}">
                </div>
             </div>
-            <ng-container *ngIf="!isNimmit">
-               <div class="col-md-3 mb-3">
+               <div class="col-md-3 mb-3" *ngIf="settings.pbk.city_id">
                   <div class="form-group">
                      <label class="form-label">City</label>
                      <button type="button" style="padding: 1px 6px !important;"
@@ -177,21 +175,21 @@
                      </ng-select>
                   </div>
                </div>
-               <div class="col-md-3 mb-3">
+               <div class="col-md-3 mb-3" *ngIf="settings.pbk.mo_no">
                   <div class="form-group">
                      <label class="form-label">Mobile No.</label>
                      <input type="text" class="form-control" placeholder="Mobile No." formControlName="mo_no"
                         [ngClass]="{'validation':pbkForm.get('mo_no')?.errors && (pbkForm.get('mo_no')?.touched || pbkForm.get ('mo_no')?.dirty)}">
                   </div>
                </div>
-               <div class="col-md-3 mb-3">
+               <div class="col-md-3 mb-3" *ngIf="settings.pbk.alt_mo_no">
                   <div class="form-group">
                      <label class="form-label">Alternative Mobile No.</label>
                      <textarea class="form-control" placeholder="Alternative Mobile No." formControlName="alt_mo_no"
                         [ngClass]="{'validation':pbkForm.get('alt_mo_no')?.errors && (pbkForm.get('alt_mo_no')?.touched || pbkForm.get ('alt_mo_no')?.dirty)}"></textarea>
                   </div>
                </div>
-               <div class="col-md-3 mb-3">
+               <div class="col-md-3 mb-3" *ngIf="settings.pbk.class_mm_id">
                   <div class="form-group">
                      <label class="form-label">Daily Class MM</label>
                      <button type="button" style="padding: 1px 6px !important;"
@@ -207,7 +205,7 @@
                      </ng-select>
                   </div>
                </div>
-               <div class="col-md-2 mb-3">
+               <div class="col-md-2 mb-3" *ngIf="settings.pbk.bhatti_date">
                   <div class="form-group">
                      <label class="form-label">भट्टी कब की? </label>
                      <input type="date" class="form-control" placeholder="भट्टी कब की?	" formControlName="bhatti_date"
@@ -237,7 +235,7 @@
 
                   </div>
                </div> -->
-               <div class="col-md-2 mb-3">
+               <div class="col-md-2 mb-3" *ngIf="settings.pbk.document">
                   <div class="form-group">
                      <label class="form-label">Image</label>
                      <a onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
@@ -249,7 +247,6 @@
                      </a>
                   </div>
                </div>
-            </ng-container>
             <div class="col-md-2 mb-3">
                <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!this.isEdit"
                   (click)="pbkFormSubmit()">Submit</button>

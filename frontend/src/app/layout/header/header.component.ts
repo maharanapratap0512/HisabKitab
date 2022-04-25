@@ -21,7 +21,7 @@ export class HeaderComponent implements OnInit {
   isShow: boolean = false;
   topPosToStartShowing = 100;
   isLoader: boolean = false;
-  webUser: any;
+  settings: any;
 
   constructor(
     private http: HttpService,
@@ -54,7 +54,8 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    
+    // console.log(this.auth.webUser);
+    this.settings = this.auth.webUser.settings;
   }
 
   logout() {

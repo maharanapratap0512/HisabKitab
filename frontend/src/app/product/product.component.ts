@@ -24,6 +24,7 @@ export class ProductComponent implements OnInit {
   total_count: any;
   viewProduct: any;
   baseurl:any;
+  settings:any= {};
 
   constructor(
     private fb: FormBuilder,
@@ -33,7 +34,9 @@ export class ProductComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService
-  ) { }
+  ) {
+    this.settings = this.auth.webUser.settings.product;
+   }
 
   ngOnInit(): void {
     this.spinner.show();

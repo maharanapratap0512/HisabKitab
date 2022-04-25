@@ -37,6 +37,11 @@ router.get('/', async (req, res, next) => {
 //  dept_config get
 router.get('/:dept_id', async (req, res, next) => {
     await DB.getDeptConfig(req.params.dept_id).then(async (resolve) => {
+        for(let i in resolve){
+            if(resolve[i].config_key == "settings"){
+                resolve[i].config_value = JSON.parse(resolve[i].config_value);
+            }
+        }
         res.json({
             success: true,
             result: resolve || []
@@ -49,6 +54,7 @@ router.put('/save', async (req, res, next) => {
     if (req.body) {
         for (let [key, value] of Object.entries(req.body)) {
             let newObj = {
+                config_key: value.config_key,
                 config_value: value.config_value
             };
             let condition = '';

@@ -38,6 +38,7 @@ export class BachatComponent implements OnInit {
     subitem_id: [],
     condition_id: [],
   };
+  settings:any = {};
 
 
   constructor(
@@ -48,7 +49,9 @@ export class BachatComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService
-  ) { }
+  ) {
+    this.settings = this.auth.webUser.settings.bachat;
+   }
 
   ngOnInit(): void {
     this.spinner.show();

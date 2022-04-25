@@ -49,7 +49,7 @@
                      <div class="card-body">
                         <form #filterForm="ngForm">
                            <div class="row">
-                              <div class="col-md-3 mb-3">
+                              <div class="col-md-3 mb-3" *ngIf="settings.pkt_num">
                                  <div class="form-group">
                                     <label class="form-label">Pkt No.</label>
                                     <input type="text" class="form-control" placeholder="Pkt No."
@@ -57,7 +57,7 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-3 mb-3">
+                              <div class="col-md-3 mb-3" *ngIf="settings.pbk_id">
                                  <div class="form-group">
                                     <label class="form-label">Sewadhari</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Filter PBK by State"
@@ -105,14 +105,14 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-3 mb-3">
+                              <div class="col-md-3 mb-3" *ngIf="settings.product_id || settings.condition_id">
                                  <div class="form-group">
                                     <label class="form-label">Product & Condition</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Select Product"
                                        [clearable]="true" [virtualScroll]="true" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.product_id" name="product_id"
-                                       (change)="productSelected($event)">
-                                       <ng-option selected="selected" disabled value="">Select Product</ng-option>
+                                       (change)="productSelected($event)" *ngIf="settings.product_id">
+                                       <ng-option selected=" selected" disabled value="">Select Product</ng-option>
                                        <ng-option *ngFor="let item of products" [value]="item._id">{{item.item_hin}} :
                                           {{item.subitem_hin}}
                                           : {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num
@@ -121,8 +121,8 @@
                                     </ng-select>
                                     <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition"
                                        [clearable]="false" [virtualScroll]="true" [multiple]="true"
-                                       [closeOnSelect]="false" [(ngModel)]="filterBody.condition_id"
-                                       name="condition_id">
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.condition_id" name="condition_id"
+                                       *ngIf="settings.condition_id">
                                        <ng-option selected="selected" disabled value="">Select Condition</ng-option>
                                        <ng-option *ngFor="let item of conditions" [value]="item._id">
                                           {{item.list_name_hin}} :
@@ -172,7 +172,7 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-3 mb-3">
+                              <div class="col-md-3 mb-3" *ngIf="settings.nimmit_id">
                                  <div class="form-group">
                                     <label class="form-label">Nimmit</label>
                                     <input type="text" class="form-control" placeholder="Nimmit"
@@ -213,17 +213,18 @@
                            <th style="width: 40px;">No.</th>
                            <th style="width: 80px;">Manage</th>
                            <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">MM</th>
-                           <th style="width: 70px;">Pkt No</th>
+                           <th style="width: 70px;" *ngIf="settings.pkt_num">Pkt No</th>
                            <th style="width: 101px;">Date</th>
                            <th style="width: 150px;">Jawak MM</th>
-                           <th style="width: 200px;" *ngIf="auth.webUser.dept_id != 3">PBK</th>
+                           <th style="width: 200px;" *ngIf="settings.pbk_id">PBK</th>
                            <th style="width: 150px;">Item - Subitem</th>
-                           <th style="width: 200px;" *ngIf="auth.webUser.dept_id != 3">Product</th>
+                           <th style="width: 200px;" *ngIf="settings.product_id">Product</th>
+                           <th style="width: 150px;" *ngIf="settings.condition_id">Condition</th>
                            <th style="width: 100px;">Quantity</th>
                            <th style="width: 120px;">Jawak Type</th>
-                           <th style="width: 200px;">Item Detail</th>
-                           <th style="width: 200px;">Description</th>
-                           <th style="width: 100px;">Nimmit</th>
+                           <th style="width: 200px;" *ngIf="settings.jawak_detail">Item Detail</th>
+                           <th style="width: 200px;" *ngIf="settings.description">Description</th>
+                           <th style="width: 100px;" *ngIf="settings.nimmit_id">Nimmit</th>
                         </tr>
                      </thead>
                      <tbody>
@@ -239,14 +240,14 @@
                               {{data.mm_hin}} {{data.mm_code ? '('+data.mm_code+')': ''}}<br />
                               {{data.mm_eng}}
                            </td>
-                           <td>{{data.pkt_num?data.pkt_num:'-'}}</td>
+                           <td *ngIf="settings.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
                            <td>{{data.date | date:'yyyy-MM-dd'}}</td>
                            <td>
                               <span *ngIf="!data.jawak_mm_id">-</span>
                               {{data.jawak_mm_hin}}<br />
                               {{data.jawak_mm_eng}}
                            </td>
-                           <td *ngIf="auth.webUser.dept_id != 3">
+                           <td *ngIf="settings.pbk_id">
                               <span *ngIf="!data.pbk_id">-</span>
                               {{data.pbk_hin}} <br />
                               {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
@@ -255,10 +256,12 @@
                               {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
                               {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
                            </td>
-                           <td *ngIf="auth.webUser.dept_id != 3">
+                           <td *ngIf="settings.product_id">
                               <span *ngIf="!data.product_id">-</span>
                               {{data.sr_num ? data.sr_num : ''}} <br />
                               {{data.product_code ? data.product_code : ''}}
+                           </td>
+                           <td *ngIf="settings.condition_id">
                               {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
                            </td>
                            <td>
@@ -266,9 +269,9 @@
                            </td>
                            <td>{{data.jawak_type_hin}}<br />
                               {{data.jawak_type_eng}}</td>
-                           <td>{{data.item_detail?data.item_detail:'-'}}</td>
-                           <td>{{data.description?data.description:'-'}}</td>
-                           <td>{{data.nimmit?data.nimmit:'-'}}</td>
+                           <td *ngIf="settings.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
+                           <td *ngIf="settings.description">{{data.description?data.description:'-'}}</td>
+                           <td *ngIf="settings.nimmit_id">{{data.nimmit?data.nimmit:'-'}}</td>
                         </tr>
                      </tbody>
                   </table>

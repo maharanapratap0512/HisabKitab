@@ -73,6 +73,7 @@ export class AawakEntryComponent implements OnInit {
 		jawak_detail: []
 	}
 	jwkArr: any = [];
+	settings:any = {};
 
 	constructor(private fb: FormBuilder,
 		private http: HttpService,
@@ -95,6 +96,7 @@ export class AawakEntryComponent implements OnInit {
 			this.aawak_types = result.aawak_type ? result.aawak_type : [];
 			this.nimmits = result.nimmit ? result.nimmit : [];
 		});
+		this.settings = this.auth.webUser.settings;
 
 	}
 
@@ -149,7 +151,7 @@ export class AawakEntryComponent implements OnInit {
 			subitem_id: this.awkfg.subitem_id,
 			product_id: this.awkfg.product_id,
 			condition_id: this.awkfg.condition_id,
-			jawak_type_id: (this.jmm == this.awkfg.mm_id) ? 27 : 28,
+			jawak_type_id: (this.jmm.id == this.awkfg.mm_id) ? 27 : 28,
 			unit_id: this.awkfg.unit_id,
 			dept_id: this.awkfg.dept_id,
 		}
@@ -202,12 +204,12 @@ export class AawakEntryComponent implements OnInit {
 
 	openModal(name: any) {
 		this.showModal = name;
-		$('#aawakEntryComponent > #' + name).modal('show')
+		$('#aawakEntryComponent > #showModal').modal('show')
 	}
 
 	closeModal(name: any) {
 		this.showModal = name;
-		$('#aawakEntryComponent > #' + this.showModal).modal('hide')
+		$('#aawakEntryComponent > #showModal').modal('hide')
 	}
 
 	aawakFormSubmit(awkform: NgForm) {
@@ -429,6 +431,20 @@ export class AawakEntryComponent implements OnInit {
 		}
 	}
 
+	aawakTypeAddResponse(ev: any) {
+		if (ev._id) {
+			this.isLoader = true;
+			$('#aawakEntryComponent > #showModal').modal('hide');
+			this.showModal = '';
+			this.awkfg.aawak_type_id = ev._id;
+			this.isLoader = false;
+		}
+		else {
+			this.isLoader = false;
+			console.log("err", ev);
+		}
+	}
+
 
 	setView(type: string) {
 		this.viewType = type;
@@ -443,6 +459,10 @@ export class AawakEntryComponent implements OnInit {
 				break;
 			case 'Unit':
 				this.viewData = this.gs.Lists.unit;
+				$('#aawakEntryComponent > #dataView').modal('show');
+				break;
+			case 'aawak_type':
+				this.viewData = this.gs.Lists.aawak_type;
 				$('#aawakEntryComponent > #dataView').modal('show');
 				break;
 		}
@@ -468,26 +488,27 @@ export class AawakEntryComponent implements OnInit {
 			let rate = this.awkfg.amnt / this.awkfg.qty
 			this.awkfg.rate = rate.toFixed(2);
 		}
+		this.jqty = this.awkfg.qty;
 	}
 
 	rateclick() {
-		if (this.awkfg.qty && this.awkfg.rate) {
+		if (!this.awkfg.actual_amt && this.awkfg.qty && this.awkfg.rate) {
 			let actual_amt = this.awkfg.qty * this.awkfg.rate;
 			this.awkfg.actual_amt = actual_amt.toFixed(2)
 		}
-		else if (this.awkfg.rate && this.awkfg.amnt) {
+		else if (!this.awkfg.actual_amt && this.awkfg.rate && this.awkfg.amnt) {
 			let quantity = this.awkfg.amnt / this.awkfg.rate;
 			this.awkfg.qty = quantity.toFixed(2)
 		}
 	}
 
 	amntclick() {
-		if (this.awkfg.qty && this.awkfg.amnt) {
-			let rate = this.awkfg.amnt / this.awkfg.qty
+		if (!this.awkfg.rate && this.awkfg.qty && this.awkfg.actual_amt) {
+			let rate = this.awkfg.actual_amt / this.awkfg.qty
 			this.awkfg.rate = rate.toFixed(2)
 		}
-		else if (this.awkfg.rate && this.awkfg.amnt) {
-			let quantity = this.awkfg.amnt / this.awkfg.rate
+		else if (!this.awkfg.qty && this.awkfg.rate && this.awkfg.actual_amt) {
+			let quantity = this.awkfg.actual_amt / this.awkfg.rate
 			this.awkfg.qty = quantity.toFixed(2)
 		}
 	}
@@ -510,31 +531,33 @@ export class AawakEntryComponent implements OnInit {
 			this.cat = null;
 			this.items = this.itemAll;
 		}
-		this.awkfg = {
-			item_id: null,
-			subitem_id: null,
-			unit_id: null,
-			product_id: null
-		};
+		this.awkfg.item_id = null;
+		this.awkfg.subitem_id = null;
+		this.awkfg.unit_id = null;
+		this.awkfg.product_id = null;
 	}
 
 	itemSelected(ev: any) {
 		if (ev) {
 			let item = this.items.find((i: { _id: any; }) => i._id == ev);
+			let category_ids = this.categories.map((c: { _id: any; })=>c._id);
+			console.log("item", item);
+			console.log("category_ids", category_ids);
+			
 			// this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
 			this.getProductData(ev);
 			if (this.cat) {
 				this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
 			}
 			else {
-				this.subitems = item.subitems.filter(((s: { category_id: any; })=>this.categories.includes(s.category_id)));
+				this.subitems = item.subitems.filter(((s: { category_id: any; }) => category_ids.includes(s.category_id)));
 			}
 
 			if (this.cat && this.cat != item.category_id) {
 				// this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
 				this.awkfg.subitem_id = this.subitems[0]._id;
-			} else {
-				// this.aawakForm.setControl('subitem_id', this.fb.control(null));
+			} else if(!category_ids.includes(item.category_id) && this.subitems.length > 0){
+				this.awkfg.subitem_id = this.subitems[0]._id;
 			}
 			this.awkfg.unit_id = item.unit_id;
 		}

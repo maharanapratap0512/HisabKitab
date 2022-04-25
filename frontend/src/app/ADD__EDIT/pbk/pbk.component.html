@@ -79,7 +79,7 @@
                                     </ng-select>
                                  </div>
                               </div>
-                              <div class="col-md-3 mb-3">
+                              <div class="col-md-3 mb-3" *ngIf="settings.city_id">
                                  <div class="form-group">
                                     <label class="form-label">City</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Select City"
@@ -91,7 +91,7 @@
                                     </ng-select>
                                  </div>
                               </div>
-                              <div class="col-md-3 mb-3">
+                              <div class="col-md-3 mb-3" *ngIf="settings.class_mm_id">
                                  <div class="form-group">
                                     <label class="form-label">Daily Class MM</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Daily Class MM"
@@ -102,7 +102,7 @@
                                     </ng-select>
                                  </div>
                               </div>
-                              <div class="col-md-3 mb-3">
+                              <div class="col-md-3 mb-3" *ngIf="settings.bhatti_date">
                                  <div class="form-group">
                                     <label class="form-label">भट्टी कब की? (साल)</label>
                                     <input type="number" class="form-control" placeholder="भट्टी कब की? (साल)"
@@ -137,20 +137,20 @@
                         <tr>
                            <th style="width: 80px;">No.</th>
                            <th style="width: 70px;">Manage</th>
-                           <th style="width: 100px;">Image</th>
-                           <th style="width: 85px;">Roll No.</th>
+                           <th style="width: 100px;" *ngIf="settings.document">Image</th>
+                           <th style="width: 85px;" *ngIf="settings.roll_no">Roll No.</th>
                            <th style="width: 200px;">Name (Hin-Eng)</th>
-                           <th style="width: 200px;">Relative Names</th>
+                           <th style="width: 200px;" *ngIf="settings.relation || settings.relative_name">Relative Names</th>
                            <th style="width: 100px;">Gender</th>
-                           <th style="width: 101px;">DOB/Age</th>
-                           <th style="width: 100px;">Status</th>
-                           <th style="width: 215px;">Address</th>
-                           <th style="width: 200px;">Townarea</th>
+                           <th style="width: 101px;" *ngIf="settings.birth_date">DOB/Age</th>
+                           <!-- <th style="width: 100px;">Status</th> -->
+                           <th style="width: 215px;" *ngIf="settings.address">Address</th>
+                           <th style="width: 200px;" *ngIf="settings.townarea">Townarea</th>
                            <th style="width: 125px;">State</th>
-                           <th style="width: 100px;">City</th>
-                           <th style="width: 115px;">Mobile No.</th>
-                           <th style="width: 100px;">Daily Class MM</th>
-                           <th style="width: 101px;">भट्टी कब की?</th>
+                           <th style="width: 100px;" *ngIf="settings.city_id">City</th>
+                           <th style="width: 115px;" *ngIf="settings.mo_no">Mobile No.</th>
+                           <th style="width: 100px;" *ngIf="settings.class_mm_id">Daily Class MM</th>
+                           <th style="width: 101px;" *ngIf="settings.bhatti_date">भट्टी कब की?</th>
                         </tr>
                      </thead>
                      <tbody>
@@ -178,32 +178,32 @@
                                  <i class="uil-shield-check"></i>
                               </span>
                            </td>
-                           <td>
+                           <td *ngIf="settings.document">
                               <img *ngIf="data.document && data.document.images"
                                  [src]="baseurl + data.document.images[0]" height="60px"
                                  style="padding: 5px; border-radius: 15px;">
                            </td>
-                           <td>{{data.roll_no ? data.roll_no : '______'}} </td>
-                           <td>{{data.pbk_hin}} <br> {{data.pbk_eng}}</td>
-                           <td>{{data.relation}}<br>{{data.relative_name}}</td>
+                           <td *ngIf="settings.roll_no">{{data.roll_no ? data.roll_no : '______'}} </td>
+                           <td >{{data.pbk_hin}} <br> {{data.pbk_eng}}</td>
+                           <td *ngIf="settings.relation || settings.relative_name">{{data.relation}}<br>{{data.relative_name}}</td>
                            <td>{{data.gender}}</td>
-                           <td>{{data.birth_date | date:'dd-MM-yyyy'}}
+                           <td *ngIf="settings.birth_date"> {{data.birth_date | date:'dd-MM-yyyy'}}
                               <br>{{data.age?'Age : '+data.age:'-'}}
                            </td>
-                           <td>{{data.status}}</td>
-                           <td>{{data.address?data.address:'-'}}</td>
-                           <td>{{data.townarea?data.townarea:'-'}}</td>
+                           <!-- <td >{{data.status}}</td> -->
+                           <td *ngIf="settings.address">{{data.address?data.address:'-'}}</td>
+                           <td *ngIf="settings.townarea">{{data.townarea?data.townarea:'-'}}</td>
                            <td>{{data.state_hin}} <br> {{data.state_eng}}</td>
-                           <td>{{data.city_hin}} <br> {{data.city_eng}}</td>
+                           <td *ngIf="settings.city_id" >{{data.city_hin}} <br> {{data.city_eng}}</td>
                            <!-- <td>{{data.tempaddress}}</td> -->
                            <!-- <td>{{data.district}}</td>
                               <td>{{data.country}}</td> -->
-                           <td>{{data.mo_no?data.mo_no:'-'}}</td>
-                           <td>
+                           <td *ngIf="settings.mo_no">{{data.mo_no?data.mo_no:'-'}}</td>
+                           <td *ngIf="settings.class_mm_id">
                               {{data.mm_hin?data.mm_hin :'-'}} <br> {{data.mm_eng?data.mm_eng :''}} <br>
                               {{data.mm_code?data.mm_code:''}}
                            </td>
-                           <td>{{data.bhatti_date | date:'dd-MM-yyyy'}}</td>
+                           <td *ngIf="settings.bhatti_date">{{data.bhatti_date | date:'dd-MM-yyyy'}}</td>
                         </tr>
                      </tbody>
                   </table>

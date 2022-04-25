@@ -16,17 +16,17 @@
          </a>
 
          <ul class="list-unstyled topbar-menu float-end mb-0">
-            <li class="notification-list mx-1" style="line-height: 68px;">
+            <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.aawak.visible">
                <a class="btn btn-info btn-info-custom lh-xl" routerLinkActive="active" routerLink="aawak">
                   Aawak
                </a>
             </li>
-            <li class="notification-list mx-1" style="line-height: 68px;">
+            <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.jawak.visible">
                <a class="btn btn-info btn-info-custom lh-xl" routerLinkActive="active" routerLink="jawak">
                   Jawak
                </a>
             </li>
-            <li class="notification-list mx-1" style="line-height: 68px;">
+            <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.bachat.visible">
                <a class="btn btn-info btn-info-custom lh-xl" routerLinkActive="active" routerLink="bachat">
                   Bachat
                </a>
@@ -180,47 +180,47 @@
                         <i class="uil-home-alt me-1"></i>Home
                      </a>
                   </li>
-                  <li class="nav-item" *ngIf="auth.webUser.dept_id !=3">
+                  <li class="nav-item" *ngIf="settings.product.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="product" role="button">
                         <i class="uil-archive me-1"></i>Products
                      </a>
                   </li>
-                  <li class="nav-item" *ngIf="auth.webUser.dept_id !=3">
+                  <li class="nav-item" *ngIf="settings.pbk.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="pbk" role="button">
                         <i class="uil-user me-1"></i>PBK
                      </a>
                   </li>
-                  <li class="nav-item">
+                  <li class="nav-item" *ngIf="settings.item.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="item" role="button">
                         <i class="dripicons-view-list me-1"></i>Item
                      </a>
                   </li>
-                  <li class="nav-item" *ngIf="auth.webUser.dept_id !=3">
+                  <li class="nav-item" *ngIf="settings.item.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="subitem" role="button">
                         <i class="dripicons-list me-1"></i>Subitem
                      </a>
                   </li>
-                  <li class="nav-item">
+                  <li class="nav-item" *ngIf="settings.category.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="category" role="button">
                         <i class="dripicons-view-list-large me-1"></i>Category
                      </a>
                   </li>
-                  <li class="nav-item">
+                  <li class="nav-item" *ngIf="settings.mm.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="mm" role="button">
                         <i class="uil-building me-1"></i>MM
                      </a>
                   </li>
-                  <li class="nav-item" *ngIf="auth.webUser.dept_id !=3">
+                  <li class="nav-item" *ngIf="settings.city.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="city" role="button">
                         <i class="uil-location-point me-1"></i>City
                      </a>
                   </li>
-                  <li class="nav-item" *ngIf="this.auth.webUser.dept_id == 1">
+                  <li class="nav-item" *ngIf="settings.department.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="department" role="button">
                         <i class="uil-layer-group me-1"></i>Department
                      </a>
                   </li>
-                  <li class="nav-item">
+                  <li class="nav-item" *ngIf="settings.point.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="point" role="button">
                         <i class="uil-layer-group me-1"></i>Points
                      </a>

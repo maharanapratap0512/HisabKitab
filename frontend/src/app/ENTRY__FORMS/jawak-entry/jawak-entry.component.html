@@ -112,7 +112,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row" *ngIf="auth.webUser.dept_id != 3">
+                    <div class="row" *ngIf="settings.jawak.pbk_id">
                         <div class="col-4">
                             <div>
                                 <h5>
@@ -123,7 +123,7 @@
                                 </h5>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-3" *ngIf="settings.jawak.product_id || settings.jawak.condition_id">
                             <div>
                                 <h5>
                                     <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Product</span>
@@ -138,7 +138,7 @@
             </div>
             <div class="row">
 
-                <div class="col-md-2 mb-3">
+                <div class="col-md-2 mb-3" *ngIf="settings.jawak.pkt_num">
                     <div class="form-group">
                         <label class="form-label">Pkt No</label>
                         <input type="text" class="form-control" placeholder="Pkt No" formControlName="pkt_num"
@@ -217,7 +217,7 @@
                     </div>
                 </div>                
 
-                <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id != 3">
+                <div class="col-md-3 mb-3" *ngIf="settings.jawak.pbk_id">
                     <div class="form-group">
                         <label class="form-label">Sewadhari</label>
                         <button type="button" style="padding: 1px 6px !important;"
@@ -304,7 +304,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id != 3 && (!aawakRef || !aawakRef.condition_id)">
+                <div class="col-md-3 mb-3" *ngIf="(settings.jawak.product_id || settings.jawak.condition_id) && (!aawakRef || !aawakRef.condition_id)">
                     <div class="form-group">
                         <label class="form-label">Product & Condition</label>
                         <div class="float-end">
@@ -320,7 +320,7 @@
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Product" [clearable]="true"
                             [virtualScroll]="true" formControlName="product_id" (change)="productSelected($event)"
                             [ngClass]="{'validation':jawakForm.get('product_id')?.errors && (jawakForm.get('product_id')?.touched || jawakForm.get ('product_id')?.dirty)}"
-                            [readonly]="isEdit || ref_id">
+                            [readonly]="isEdit || ref_id" *ngIf="settings.jawak.product_id">
                             <ng-option selected="selected" disabled value="">Select Product</ng-option>
                             <ng-option *ngFor="let item of products" [value]="item._id">{{item.item_hin}} :
                                 {{item.subitem_hin}}
@@ -329,7 +329,7 @@
                         </ng-select>
                         <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition"
                             [clearable]="true" [virtualScroll]="true" formControlName="condition_id"
-                            *ngIf="isCondition"
+                            *ngIf="settings.jawak.condition_id"
                             [ngClass]="{'validation':jawakForm.get('condition_id')?.errors && (jawakForm.get('condition_id')?.touched || jawakForm.get ('condition_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Condition</ng-option>
                             <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
@@ -366,6 +366,14 @@
                 <div class="col-md-2 mb-3">
                     <div class="form-group">
                         <label class="form-label">Jawak Type</label>
+                        <div class="float-end">
+                            <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                               class="btn btn-sm btn-outline-primary" (click)="setView('jawak_type')"><i
+                                  class=" dripicons-view-list"></i></button>
+                            <button type="button" style="padding: 1px 6px !important;"
+                               class="btn btn-outline-primary float-end" (click)="openModal('Add Jawak Type')">+
+                               Add</button>
+                         </div>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Jawak Type"
                             [clearable]="true" [virtualScroll]="true" formControlName="jawak_type_id"
                             [ngClass]="{'validation':jawakForm.get('jawak_type_id')?.errors && (jawakForm.get('jawak_type_id')?.touched || jawakForm.get ('jawak_type_id')?.dirty)}">
@@ -376,7 +384,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="settings.jawak.item_detail">
                     <div class="form-group">
                         <label class="form-label">Item Detail</label>
                         <textarea class="form-control" placeholder="Item Detail" formControlName="item_detail"
@@ -384,7 +392,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="settings.jawak.description">
                     <div class="form-group">
                         <label class="form-label">Jawak Description</label>
                         <textarea class="form-control" placeholder="Jawak Description" formControlName="description"
@@ -478,6 +486,10 @@
                     <app-pbk-entry *ngIf="showModal == 'Add Nimmit'" (response)="nimmitAddResponse($event)" [isNimmit]="true">
                     </app-pbk-entry>
 
+                    <!-- Add Jawak Type  -->
+                    <app-support-list-entry *ngIf="showModal == 'Add Jawak Type'" (response)="jawakTypeAddResponse($event)" list_type="jawak_type">
+                    </app-support-list-entry>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" style="width: 120px;"
@@ -509,6 +521,9 @@
 
                     <!-- Status List -->
                     <app-data-view *ngIf="viewType == 'Status'" [getData]="viewData" Type="status"></app-data-view>
+
+                    <!-- Status List -->
+                    <app-data-view *ngIf="viewType == 'jawak_type'" [getData]="viewData" Type="jawak_type"></app-data-view>
 
                 </div>
                 <div class="modal-footer">

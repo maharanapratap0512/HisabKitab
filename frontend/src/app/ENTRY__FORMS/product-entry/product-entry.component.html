@@ -8,7 +8,7 @@
       <form [formGroup]="productForm">
          <div class="row">
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.product.purchase_date">
                <div class="form-group">
                   <label class="form-label">Purchase Date</label>
                   <input type="date" class="form-control" placeholder="Purchase Date" formControlName="purchase_date"
@@ -33,7 +33,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.product.purchased_by">
                <div class="form-group">
                   <label class="form-label">Purchased By</label>
                   <input type="text" class="form-control" placeholder="Purchased By" formControlName="purchased_by"
@@ -42,7 +42,7 @@
             </div>
 
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.product.purchase_from">
                <div class="form-group">
                   <label class="form-label">Purchase From</label>
                   <input type="text" class="form-control" placeholder="Purchase From" formControlName="purchase_from"
@@ -50,7 +50,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="departments.length || categories.length">
+            <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Filter Items By</label>
                   <!-- <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -58,13 +58,13 @@
                      (click)="showModal = 'Add Department'">
                      + Add
                   </button> -->
-                  <ng-select *ngIf="departments && departments.length" class="custom" style="width: 100%;"
+                  <ng-select class="custom" style="width: 100%;"
                      placeholder="Select Department" [clearable]="false" [virtualScroll]="true"
                      (change)="deptSelected($event)" [ngModelOptions]="{standalone: true}">
                      <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :
                         {{item.dept_eng}}{{item.dept_code?' : '+item.dept_code:''}}</ng-option>
                   </ng-select>
-                  <ng-select *ngIf="categories && categories.length" class="custom mt-1" style="width: 100%;"
+                  <ng-select class="custom mt-1" style="width: 100%;"
                      placeholder="Select Category" [clearable]="false" [virtualScroll]="true"
                      (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
                      <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
@@ -106,7 +106,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.product.company_name">
                <div class="form-group">
                   <label class="form-label">Company & Model</label>
                   <input type="text" class="form-control" placeholder="Company Name" formControlName="company_name"
@@ -116,7 +116,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" >
                <div class="form-group">
                   <label class="form-label">Serial No / Product Code</label>
                   <input type="text" class="form-control" placeholder="S/R Number" formControlName="sr_num"
@@ -140,17 +140,17 @@
                         (click)="showModal = 'Add Condition'">+ Add
                      </button>
                   </div>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Select SubitemList" [clearable]="false"
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Condition" [clearable]="false"
                      [virtualScroll]="true" formControlName="condition_id"
                      [ngClass]="{'validation':productForm.get('condition_id')?.errors && (productForm.get('condition_id')?.touched || productForm.get ('condition_id')?.dirty)}">
-                     <ng-option selected="selected" disabled value="">Select Condition List</ng-option>
+                     <ng-option selected="selected" disabled value="">Select Condition </ng-option>
                      <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
                         {{item.list_name_eng}}</ng-option>
                   </ng-select>
                </div>
             </div>
 
-            <div class="col-md-2 mb-3">
+            <div class="col-md-2 mb-3" *ngIf="settings.product.warranty_period">
                <div class="form-group">
                   <label class="form-label">Warranty Period</label>
                   <input type="number" class="form-control" placeholder="ex. 6,12,24 (Month)"
@@ -159,7 +159,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.product.warranty_from">
                <div class="form-group">
                   <label class="form-label">Warranty From / Address</label>
                   <input type="text" class="form-control" placeholder="Warranty From" formControlName="warranty_from"
@@ -167,7 +167,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.product.accessories">
                <div class="form-group">
                   <label class="form-label">Accessories</label>
                   <input type="text" class="form-control" placeholder="Accessories" formControlName="accessories"
@@ -183,7 +183,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.product.nimmit_id">
                <div class="form-group">
                   <label class="form-label">Nimmit</label>
                   <input type="text" class="form-control" placeholder="Nimmit" formControlName="nimmit"
@@ -191,7 +191,7 @@
                </div>
             </div>
 
-            <div class="col-md-4 mb-3">
+            <div class="col-md-4 mb-3" *ngIf="settings.product.product_detail">
                <div class="form-group">
                   <label class="form-label">Product Details</label>
                   <textarea class="form-control" placeholder="Product Details" formControlName="product_detail"
@@ -199,7 +199,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.product.document">
                <div class="form-group">
                   <label class="form-label">Image</label>
                   <a onclick="$('#productEntryComponent > #addImages').modal('show')" (click)="showModal='Add Image'"

@@ -87,7 +87,7 @@ export class LoginComponent implements OnInit {
          this.http.put(this.api.getUrl('LOGIN'), this.loginForm.value).subscribe(async (data: any) => {
             if (data['total_count'] == 1) {
                let dept = this.departments.find((i: { _id: any; }) => i._id == this.loginForm.value.dept_id);
-               await this.auth.setWebUser({ 'dept_eng': dept.dept_eng, 'dept_code': dept.dept_code, 'dept_id': dept._id });
+               await this.auth.setWebUser({ 'dept_eng': dept.dept_eng, 'dept_code': dept.dept_code, 'dept_id': dept._id, 'settings_id': data['settings_id'], 'settings': data['settings'] });
                this.router.navigate(['dashboard']);
             }
             else {

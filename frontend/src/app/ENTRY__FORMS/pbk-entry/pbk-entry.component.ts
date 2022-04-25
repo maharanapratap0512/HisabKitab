@@ -33,6 +33,7 @@ export class PbkEntryComponent implements OnInit {
   showModal: string = '';
   isLoader: boolean = false;
   imagepath:any;
+  settings:any = {};
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -63,6 +64,7 @@ export class PbkEntryComponent implements OnInit {
       bhatti_date: [null],
       document:[null]
     });
+    this.settings = this.auth.webUser.settings;
   }
 
   ngOnInit(): void {
@@ -107,6 +109,25 @@ export class PbkEntryComponent implements OnInit {
       this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0]: null;
     }
     if(changes.isNimmit && changes.isNimmit.currentValue){
+      this.settings.pbk = {
+        roll_no: true,
+        pbk_hin: true,
+        pbk_eng: true,
+        gender: true,
+        state_id: true,
+        // relation: false,
+        relative_name: true,
+        birth_date: false,
+        age: false,
+        address: false,
+        townarea: true,
+        city_id: false,
+        mo_no: false,
+        alt_mo_no: false,
+        class_mm_id: false,
+        bhatti_date: false,
+        doccument: false
+      };
       this.pbkForm.patchValue({
         status: "nimmit"
       });

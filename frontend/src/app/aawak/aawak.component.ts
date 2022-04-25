@@ -52,6 +52,7 @@ export class AawakComponent implements OnInit {
     nimmit: null
   };
   cat: any;
+  settings:any = {};
 
   constructor(
     private fb: FormBuilder,
@@ -61,7 +62,9 @@ export class AawakComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService,
-  ) { }
+  ) {
+    this.settings = this.auth.webUser.settings;
+   }
 
   ngOnInit(): void {
     this.spinner.show();
@@ -274,7 +277,9 @@ export class AawakComponent implements OnInit {
       }, {});
       // const dataString = JSON.stringify(jsonData);
       let exceldata = jsonData[workBooks.SheetNames[0]];
-      console.log(exceldata);
+      for(let i in exceldata){
+        
+      }
       
     }
     reader.readAsBinaryString(file);

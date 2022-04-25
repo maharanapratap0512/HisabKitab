@@ -33,6 +33,7 @@ export class ProductEntryComponent implements OnInit {
   items: any = [];
   units: any = [];
   categories: any = [];
+  settings: any = {};
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -63,6 +64,7 @@ export class ProductEntryComponent implements OnInit {
       accessories: [null],
       nimmit: [null],
     });
+    this.settings = this.auth.webUser.settings;
   }
 
   ngOnInit(): void {

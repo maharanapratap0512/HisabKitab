@@ -6,7 +6,7 @@
    <div class="card-body">
       <form #f="ngForm">
          <div class="row">
-            <div class="col-md-2 mb-3">
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.pkt_num">
                <div class="form-group">
                   <label class="form-label">Pkt No.</label>
                   <input type="text" class="form-control" placeholder="पर्ची न." [(ngModel)]="awkfg.pkt_num"
@@ -14,7 +14,7 @@
                </div>
             </div>
 
-            <div class="col-md-2 mb-3">
+            <div class="col-md-2 mb-3" >
                <label for="example-date" class="form-label">Date</label>
                <input class="form-control" id="example-date" type="date" [(ngModel)]="awkfg.date" name="date"
                   #date="ngModel"
@@ -57,7 +57,7 @@
                </div>
             </div>
 
-            <div class="col-md-2 mb-3">
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.nimmit_id">
                <div class="form-group">
                   <label class="form-label">Nimmit</label>
                   <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -73,7 +73,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id != 3">
+            <div class="col-md-3 mb-3" *ngIf="settings.aawak.pbk_id">
                <div class="form-group">
                   <label class="form-label">Sewadhari</label>
                   <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -111,7 +111,7 @@
               (click)="showModal = 'Add Department'">
               + Add
            </button> -->
-                  <ng-select *ngIf="auth.webUser.dept_id != 3" class="custom" style="width: 100%;"
+                  <ng-select *ngIf="auth.webUser.dept_id < 3" class="custom" style="width: 100%;"
                      placeholder="Select Department" [clearable]="true" [virtualScroll]="true"
                      (change)="deptSelected($event)" [ngModelOptions]="{standalone: true}" [(ngModel)]="selDept_id">
                      <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :
@@ -159,7 +159,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="auth.webUser.dept_id != 3">
+            <div class="col-md-3 mb-3" *ngIf="settings.aawak.product_id || settings.aawak.condition_id">
                <div class="form-group">
                   <label class="form-label">Product & Condition</label>
                   <div class="float-end">
@@ -175,16 +175,15 @@
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Product" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.product_id" name="product_id" #product_id="ngModel"
-                     (change)="productSelected($event)" [readonly]="isEdit">
+                     (change)="productSelected($event)" [readonly]="isEdit" *ngIf="settings.aawak.product_id">
                      <ng-option selected="selected" disabled value="">Select Product</ng-option>
-                     <ng-option *ngFor="let item of products" [value]="item._id">{{item.item_hin}} :
-                        {{item.subitem_hin}}
-                        : {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num : ''}}
+                     <ng-option *ngFor="let item of products" [value]="item._id">
+                      {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num : ''}}
                      </ng-option>
                   </ng-select>
                   <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.condition_id" name="condition_id"
-                     #condition_id="ngModel">
+                     #condition_id="ngModel" *ngIf="settings.aawak.condition_id">
                      <ng-option selected="selected" disabled value="">Select Condition</ng-option>
                      <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
                         {{item.list_name_eng}} </ng-option>
@@ -215,8 +214,12 @@
             <div class="col-md-2 mb-3">
                <div class="form-group">
                   <label class="form-label">Rate</label>
-                  <input type="text" class="form-control" placeholder="Rate" [(ngModel)]="awkfg.rate" name="rate"
-                     #rate="ngModel" (keyup)="rateclick()">
+                  <div class="input-group">
+                     <input type="text" class="form-control" placeholder="Rate" [(ngModel)]="awkfg.rate" name="rate"
+                        #rate="ngModel" (keyup)="rateclick()">
+                     <span class="input-group-text"> = {{(awkfg.qty * awkfg.rate).toFixed(2)}}</span>
+
+                  </div>
                </div>
             </div>
 
@@ -231,6 +234,14 @@
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Aawak Type</label>
+                  <div class="float-end">
+                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-sm btn-outline-primary" (click)="setView('aawak_type')"><i
+                           class=" dripicons-view-list"></i></button>
+                     <button type="button" style="padding: 1px 6px !important;"
+                        class="btn btn-outline-primary float-end" (click)="openModal('Add Aawak Type')">+
+                        Add</button>
+                  </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Aawak Type" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.aawak_type_id" name="aawak_type_id"
                      #aawak_type_id="ngModel"
@@ -245,7 +256,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.aawak.item_detail">
                <div class="form-group">
                   <label class="form-label">Item Details</label>
                   <textarea class="form-control" placeholder="Item Details" [(ngModel)]="awkfg.item_detail"
@@ -253,7 +264,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.aawak.description">
                <div class="form-group">
                   <label class="form-label">Description</label>
                   <textarea class="form-control" placeholder="विवरण" [(ngModel)]="awkfg.description" name="description"
@@ -262,7 +273,7 @@
             </div>
 
             <!-- Jawak Details array -->
-            <div class="col-md-8 mb-3" *ngIf="auth.webUser.dept_id == 1">
+            <div class="col-md-8 mb-3" *ngIf="settings.aawak.jawak.visible">
                <div class=" card card-body">
                   <h5 class="card-title">Jawak Details</h5>
                   <div class="row">
@@ -280,10 +291,10 @@
 
                      <div class="col-md-4 mb-3">
                         <div class="form-group">
-                           <label class="form-label">Nimmit</label>
-                           <ng-select class="custom" style="width: 100%;" placeholder="Select Nimmit" [clearable]="true"
+                           <label class="form-label">किसको दिया</label>
+                           <ng-select class="custom" style="width: 100%;" placeholder="Select Person" [clearable]="true"
                               [virtualScroll]="true" [(ngModel)]="jnimmit" [ngModelOptions]="{standalone: true}">
-                              <ng-option selected="selected" disabled value="">Select Nimmit</ng-option>
+                              <ng-option selected="selected" disabled value="">Select Person</ng-option>
                               <ng-option *ngFor="let item of nimmits"
                                  [value]="{id:item._id,nimmit_hin:item.pbk_hin,nimmit_state_hin:item.state_hin}">
                                  {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
@@ -388,6 +399,10 @@
                <!-- Add Product -->
                <app-product-entry *ngIf="showModal == 'Add Product'" (response)='productAddResponse($event)'>
                </app-product-entry>
+               
+               <!-- Add Aawak Type -->
+               <app-support-list-entry *ngIf="showModal == 'Add Aawak Type'" (response)='aawakTypeAddResponse($event)' list_type="aawak_type">
+               </app-support-list-entry>
 
             </div>
             <div class="modal-footer">
@@ -419,6 +434,9 @@
 
                <!-- Unit List -->
                <app-data-view *ngIf="viewType == 'Unit'" [getData]="viewData" Type="unit"></app-data-view>
+               
+               <!-- Aawak Type List -->
+               <app-data-view *ngIf="viewType == 'aawak_type'" [getData]="viewData" Type="aawak_type"></app-data-view>
 
             </div>
             <div class="modal-footer">

@@ -52,6 +52,7 @@ export class DepartmentComponent implements OnInit {
   genders: any = [];
   statuses: any = [];
   itemMixCondition: any = {};
+  settingsAll: any = [];
 
 
   constructor(
@@ -65,6 +66,15 @@ export class DepartmentComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // this.settingsAll.push({
+    //   name: "Aawak",
+    //   detail: "",
+    //   visible: false,
+    //   fields:[{
+    //     name:"date",
+    //     visible:false
+    //   }]
+    // });
     this.spinner.show();
     this.getDepartments();
     this.gs.observeList().subscribe(result => {
@@ -72,13 +82,131 @@ export class DepartmentComponent implements OnInit {
       this.genders = result.gender ? result.gender : [];
       this.statuses = result.status ? result.status : [];
     });
+    this.settingsAll = {
+      pbk: {
+        visible: false,
+        roll_no: false,
+        pbk_hin: true,
+        pbk_eng: false,
+        gender: true,
+        state_id: true,
+        relation: false,
+        relative_name: false,
+        birth_date: false,
+        age: false,
+        address: false,
+        townarea: false,
+        city_id: false,
+        mo_no: false,
+        alt_mo_no: false,
+        class_mm_id: false,
+        bhatti_date: false,
+        doccument: false
+      },
+      product: {
+        visible: false,
+        purchase_date: false,
+        mm_id: true,
+        purchased_by: false,
+        purchase_from: false,
+        filter_dept: false,
+        filter_category: true,
+        item_id: true,
+        subitem_id: true,
+        company_name: false,
+        model_name: false,
+        sr_num: true,
+        product_code: true,
+        condition_id: true,
+        warranty_period: false,
+        warranty_from: false,
+        accessories: false,
+        price: false,
+        nimmit_id: false,
+        product_detail: false,
+        document: false
+      },
+      aawak: {
+        visible: false,
+        date: true,
+        pkt_num: false,
+        mm_id: true,
+        filter_by_state: false,
+        pbk_id: false,
+        aawak_mm_id: true,
+        nimmit_id: false,
+        item_id: true,
+        subitem_id: true,
+        filter_by_dept: false,
+        filter_by_cat: false,
+        product_id: false,
+        condition_id: false,
+        qty: true,
+        unit_id: true,
+        rate: true,
+        actual_amt: true,
+        aawak_type_id: true,
+        item_detail: false,
+        description: false,
+        jawak: {
+          visible: false,
+          jawak_mm_id: true,
+          nimmit_id: true,
+          qty: true
+        }
+      },
+      jawak: {
+        visible: false,
+        pkt_num: false,
+        date: true,
+        jawak_mm_id: true,
+        nimmit_id: false,
+        filter_by_state: false,
+        pbk_id: false,
+        product_id: false,
+        condition_id: false,
+        qty: true,
+        jawak_type_id: true,
+        item_detail: false,
+        description: false
+      },
+      bachat: {
+        visible: false,
+        used:true,
+        stock:true,
+        new:false,
+        old:false,
+        defective:false,
+        scrap:false
+      },
+      category:{
+        visible:false
+      },
+      item:{
+        visible:false
+      },
+      mm:{
+        visible:false
+      },
+      city:{
+        visible:false
+      },
+      department:{
+        visible:false
+      },
+      point:{
+        visible:false
+      }
+    }
+    
   }
 
   getDepartments() {
     this.isLoader = true;
     this.http.get(this.api.getUrl('DEPT') + this.auth.webUser.dept_id).subscribe((data) => {
       if (data['result'] && data['success']) {
-        this.departments = data['result'].filter((i: { _id: number; }) => i._id > 1);
+        // this.departments = data['result'].filter((i: { _id: number; }) => i._id > 1);
+        this.departments = data['result'];
         this.isLoader = false;
       }
       this.isLoader = false;
@@ -100,12 +228,18 @@ export class DepartmentComponent implements OnInit {
             this.loadAJTypes();
           }
           for (let i of data['result']) {
-            this.deptConf[i.config_key] = { idArr: (i.config_value != '' ? i.config_value.split(',') : ['']), ...i };
-            if (this.deptConf[i.config_key].idArr.length > 1) {
-              this.deptConf[i.config_key].idArr.pop();
+            if (i.config_key == "settings") {
+              this.deptConf[i.config_key] = i;
+              this.applySettings(i.config_value);
+            }
+            else {
+              this.deptConf[i.config_key] = { idArr: (i.config_value && i.config_value != '' ? i.config_value.split(',') : ['']), ...i };
+              if (this.deptConf[i.config_key].idArr.length > 1) {
+                this.deptConf[i.config_key].idArr.pop();
+              }
             }
           }
-          console.log(this.deptConf);
+          // console.log(this.deptConf);
 
           this.isLoader = false;
         }
@@ -115,6 +249,15 @@ export class DepartmentComponent implements OnInit {
     else {
       this.deptConf = {};
     }
+  }
+
+  applySettings(configValue: any) {
+
+    for (let key of Object.keys(configValue)) {
+      this.settingsAll[key] = configValue[key];
+    }
+    
+
   }
 
   cancel() {
@@ -170,7 +313,7 @@ export class DepartmentComponent implements OnInit {
       if (data['result'] && data['success']) {
         this.mms = data['result'];
         this.mmsAll = data['result'];
-        console.log("dept", this.dept_id, "conf", this.mms);
+        // console.log("dept", this.dept_id, "conf", this.mms);
       }
     });
   }
@@ -292,7 +435,7 @@ export class DepartmentComponent implements OnInit {
     });
   }
   loadItemMix() {
-    console.log("condition", this.itemMixCondition);
+    // console.log("condition", this.itemMixCondition);
 
     this.http.put(this.api.getUrl('ITEM') + "forConfig/" + this.dept_id, this.itemMixCondition).subscribe((data: any) => {
       if (data['result'] && data['success']) {
@@ -459,6 +602,7 @@ export class DepartmentComponent implements OnInit {
     this.deptConf.item.config_value = this.deptConf.item.idArr.join(',') + ',';
     this.deptConf.subitem.config_value = this.deptConf.subitem.idArr.join(',') + ',';
     this.deptConf.aj_type.config_value = this.deptConf.aj_type.idArr.join(',') + ',';
+    this.deptConf.settings.config_value = this.settingsAll;
     // for (let i = 0; i < this.mmsAll.length; i++) {
     //   if (this.mmsAll[i].chk == true) {
 
@@ -493,10 +637,13 @@ export class DepartmentComponent implements OnInit {
 
     this.http.put(this.api.getUrl('DEPTCONFSAVE'), this.deptConf).subscribe((data: any) => {
       if (data && data['success']) {
-        console.log("data", data);
+        // console.log("data", data);
         // this.deptSelected(this.dept_id);
         this.isLoader = false;
         this.toastr.success('Department Updated Successfully.');
+        if(this.dept_id == this.auth.webUser.dept_id){
+          this.auth.webUser.settings = this.settingsAll;
+        }
         this.deptSelected(this.dept_id);
       }
     }, err => {
@@ -542,13 +689,13 @@ export class DepartmentComponent implements OnInit {
         });
         break;
       case 'itemmix':
-        this.itemmix.map((i: { _id: any, chk: boolean, subitems:any; }) => {
+        this.itemmix.map((i: { _id: any, chk: boolean, subitems: any; }) => {
           if (!i.chk) {
             this.deptConf.item.idArr.push(i._id.toString());
             i.chk = true;
           }
           i.subitems.map((j: { _id: any, chk: boolean }) => {
-            if(!j.chk){
+            if (!j.chk) {
               this.deptConf.subitem.idArr.push(j._id.toString());
               j.chk = true;
             }

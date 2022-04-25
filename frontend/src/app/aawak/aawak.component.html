@@ -232,19 +232,19 @@
                         <tr>
                            <th style="width: 40px;">No.</th>
                            <th style="width: 110px;">Manage</th>
-                           <th style="width: 70px;">Pkt No.</th>
+                           <th style="width: 70px;" *ngIf="settings.aawak.pkt_num">Pkt No.</th>
                            <th style="width: 101px;">Date</th>
                            <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
                            <th style="width: 150px;">Aawak Mm</th>
-                           <th style="width: 200px;" *ngIf="auth.webUser.dept_id != 3">Pbk</th>
+                           <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
                            <th style="width: 120px;">Aawak Type</th>
                            <th style="width: 150px;">Item - Subitem</th>
-                           <th style="width: 200px;" *ngIf="auth.webUser.dept_id != 3">Product</th>
+                           <th style="width: 200px;" *ngIf="settings.aawak.product_id || settings.aawak.condition_id">Product</th>
                            <th style="width: 100px;">Qty</th>
-                           <th style="width: 100px;">Actual Amt</th>
-                           <th style="width: 100px;">Nimmit</th>
-                           <th style="width: 200px;">Item Detail</th>
-                           <th style="width: 200px;">Description</th>
+                           <th style="width: 100px;" *ngIf="settings.aawak.actual_amt">Actual Amt</th>
+                           <th style="width: 100px;" *ngIf="settings.aawak.nimmit_id">Nimmit</th>
+                           <th style="width: 200px;" *ngIf="settings.aawak.item_detail">Item Detail</th>
+                           <th style="width: 200px;" *ngIf="settings.aawak.description">Description</th>
                         </tr>
                      </thead>
                      <tbody>
@@ -272,7 +272,7 @@
                                  </div>
                               </td>
 
-                              <td>{{data.pkt_num?data.pkt_num:'-'}}</td>
+                              <td *ngIf="settings.aawak.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
                               <td>{{data.date?data.date:'-' | date:'yyyy-MM-dd'}}</td>
                               <td *ngIf="auth.webUser.dept_id != 2">
                                  {{data.mm_hin}} - {{data.mm_code}}<br />
@@ -282,9 +282,9 @@
                                  {{data.aawak_mm_id ? data.aawak_mm_hin+' - '+data.aawak_mm_code:'-'}}<br />
                                  {{data.aawak_mm_eng?data.aawak_mm_eng:''}}
                               </td>
-                              <td *ngIf="auth.webUser.dept_id != 3">
+                              <td *ngIf="settings.aawak.pbk_id">
                                  <span *ngIf="!data.pbk_id">-</span>
-                                 {{data.pbk_hin}} <br />
+                                 {{data.roll_no ? data.roll_no : '___'}} - {{data.pbk_hin}} <br />
                                  {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
                               </td>
                               <td>{{data.aawak_type_id?data.aawak_type_hin +' : '+ data.aawak_type_eng:'-'}}</td>
@@ -292,7 +292,7 @@
                                  {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
                                  {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
                               </td>
-                              <td *ngIf="auth.webUser.dept_id != 3">
+                              <td *ngIf="settings.aawak.product_id || settings.aawak.condition_id">
                                  {{data.product_code ? data.product_code : '-'}}
                                  {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
                               </td>
@@ -304,9 +304,9 @@
                               </td>
                               <td>@ {{data.rate?data.rate:'-'}} <br>
                                  = {{data.actual_amt?data.actual_amt:'-'}}</td>
-                              <td>{{data.nimmit?data.nimmit:'-'}}</td>
-                              <td>{{data.item_detail?data.item_detail:'-'}}</td>
-                              <td>{{data.description?data.description:'-'}}</td>
+                              <td *ngIf="settings.aawak.nimmit_id">{{data.nimmit?data.nimmit:'-'}}</td>
+                              <td *ngIf="settings.aawak.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
+                              <td *ngIf="settings.aawak.description">{{data.description?data.description:'-'}}</td>
                            </tr>
                            <ng-container *ngIf="data.jawak_detail.length > 0">
                               <tr class="collapse show ribbon-box" [attr.id]="'collapseExample-'+i">
