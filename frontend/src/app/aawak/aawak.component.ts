@@ -112,8 +112,8 @@ export class AawakComponent implements OnInit {
   addAawakResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      $('#showModal').modal('hide');
-      this.showModal = '';
+      // $('#showModal').modal('hide');
+      // this.showModal = '';
       this.aawakData.unshift(ev);
       this.isLoader = false;
     }

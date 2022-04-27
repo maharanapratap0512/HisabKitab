@@ -73,7 +73,7 @@ export class AawakEntryComponent implements OnInit {
 		jawak_detail: []
 	}
 	jwkArr: any = [];
-	settings:any = {};
+	settings: any = {};
 
 	constructor(private fb: FormBuilder,
 		private http: HttpService,
@@ -224,7 +224,13 @@ export class AawakEntryComponent implements OnInit {
 					this.jnimmit = null;
 					this.isLoader = false;
 					this.toastr.success('Aawak Added Successfully.');
-					awkform.resetForm();
+					awkform.resetForm({
+						parchi_no: this.awkfg.parchi_no,
+						pbk_id: this.awkfg.pbk_id,
+						date: this.awkfg.date,
+						aawak_mm_id: this.awkfg.aawak_mm_id
+					});
+					this.jwkArr = [];
 					this.response.emit(data['result']);
 				} else {
 					this.toastr.error(data['message']);
@@ -540,10 +546,10 @@ export class AawakEntryComponent implements OnInit {
 	itemSelected(ev: any) {
 		if (ev) {
 			let item = this.items.find((i: { _id: any; }) => i._id == ev);
-			let category_ids = this.categories.map((c: { _id: any; })=>c._id);
+			let category_ids = this.categories.map((c: { _id: any; }) => c._id);
 			console.log("item", item);
 			console.log("category_ids", category_ids);
-			
+
 			// this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
 			this.getProductData(ev);
 			if (this.cat) {
@@ -556,7 +562,7 @@ export class AawakEntryComponent implements OnInit {
 			if (this.cat && this.cat != item.category_id) {
 				// this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
 				this.awkfg.subitem_id = this.subitems[0]._id;
-			} else if(!category_ids.includes(item.category_id) && this.subitems.length > 0){
+			} else if (!category_ids.includes(item.category_id) && this.subitems.length > 0) {
 				this.awkfg.subitem_id = this.subitems[0]._id;
 			}
 			this.awkfg.unit_id = item.unit_id;
