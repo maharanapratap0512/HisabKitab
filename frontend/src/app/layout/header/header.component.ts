@@ -63,10 +63,10 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['login']);
   }
 
-  exportUpdate(){
+  exportUpdate() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('IMPORTUPDATES') + this.auth.webUser.dept_id).subscribe((data)=>{
-      if(data['result']){
+    this.http.get(this.api.getUrl('IMPORTUPDATES') + this.auth.webUser.dept_id).subscribe((data) => {
+      if (data['result']) {
         // this.router.navigate(data['result'])
         // window.open("file:///D:/MD Softwares/AIVV/HisabKitab-2022/Data/Sabji/Sabji_update_3_2022.db", "_blank")
         Swal.fire({
@@ -79,7 +79,7 @@ export class HeaderComponent implements OnInit {
           confirmButtonText: 'Ok, Got it.'
         }).then((result) => {
           if (result.isConfirmed) {
-  
+
           }
         })
       }
@@ -87,50 +87,150 @@ export class HeaderComponent implements OnInit {
     this.isLoader = false;
   }
 
-  importAll = async (ev: any) => {
+  exportLatestUpdate = async () => {
+    this.isLoader = true;
+    this.dataZip = new JSZip();
+    this.http.get(this.api.getUrl('EXPORTUPDATES') + this.auth.webUser.dept_id).subscribe((data: any) => {
+      console.log("data", data);
+      this.dataZip.file("aawak.json", JSON.stringify(data['result']['aawak']));
+      this.dataZip.file("category.json", JSON.stringify(data['result']['category']));
+      this.dataZip.file("city.json", JSON.stringify(data['result']['city']));
+      this.dataZip.file("country.json", JSON.stringify(data['result']['country']));
+      this.dataZip.file("department.json", JSON.stringify(data['result']['department']));
+      this.dataZip.file("department_config.json", JSON.stringify(data['result']['department_config']));
+      this.dataZip.file("item.json", JSON.stringify(data['result']['item']));
+      this.dataZip.file("jawak.json", JSON.stringify(data['result']['jawak']));
+      this.dataZip.file("mm.json", JSON.stringify(data['result']['mm']));
+      this.dataZip.file("pbk.json", JSON.stringify(data['result']['pbk']));
+      this.dataZip.file("point.json", JSON.stringify(data['result']['point']));
+      this.dataZip.file("product.json", JSON.stringify(data['result']['product']));
+      this.dataZip.file("state.json", JSON.stringify(data['result']['state']));
+      this.dataZip.file("subitem.json", JSON.stringify(data['result']['subitem']));
+      this.dataZip.file("subitem_list.json", JSON.stringify(data['result']['subitem_list']));
+      this.dataZip.file("support_list.json", JSON.stringify(data['result']['support_list']));
+      this.dataZip.file("unit.json", JSON.stringify(data['result']['unit']));
+
+      // setTimeout(() => {
+      let dept = this.auth.webUser;
+      let date = new Date();
+      this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
+        FileSaver.saveAs(content, dept.dept_eng + "_update_" + date.getDate() + "-" +date.getMonth() + "-" + date.getFullYear() + ".zip");
+      });
+      this.isLoader = false;
+      // }, 3000);
+      this.toastr.success("Updated Settings downloaded for '" + dept.dept_eng + "'");
+    });
+
+    // this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
+    //   FileSaver.saveAs(content, dept.dept_eng + "_update_" + date.getDate() + "-" +date.getMonth() + "-" + date.getFullYear() + ".zip");
+    // });
+    this.isLoader = false;
+  }
+
+  importZip = async (ev: any) => {
     this.isLoader = true;
 
-    // checking if file found or not
     if (ev.target.files[0]) {
-      // var tmppath = URL.createObjectURL(ev.target.files[0]);
-      // console.log("path", ev.target.files[0]);
-      
-      let formData = new FormData();
 
-      formData.append("updateDB", ev.target.files[0], this.auth.webUser.dept_eng);
+      const fileReader: any = new FileReader();
+      fileReader.readAsArrayBuffer(ev.target.files[0]); //reading 1st file only
 
-      this.http.postFormData(this.api.getUrl("DBUPLOAD"), formData).subscribe((result:any)=>{
-        console.log(result);
-        
-      });
-      
+      fileReader.onload = () => {
+
+        this.dataZip = new JSZip();
+        //loading zip file content
+        this.dataZip.loadAsync(fileReader.result).then((zip: any) => {
+
+          //checking zip data found or not
+          if (zip) {
+            // getting name of all exists files in zip in array.
+            let fileNames = Object.keys(zip.files);
+            // console.log("fileNames", fileNames);
+            // console.log("zip", zip);
+
+            // loop through all files
+            for (let i in fileNames) {
+
+              //accept only files that listed below, other ignore.
+              switch (fileNames[i]) {
+                case 'settings.json':
+                  console.log("settings file found");
+
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+
+                    if (data) {
+                      let setting = JSON.parse(data);
+                      let body = {
+                        query: {
+                          _id: (setting._id ? setting._id : null),
+                          dept_id: setting.dept_id,
+                          config_key: setting.config_key,
+                        },
+                        set: {
+                          config_key: setting.config_key,
+                          config_value: setting.config_value,
+                          active: setting.active,
+                          created_at: setting.created_at,
+                          updated_at: setting.updated_at,
+                        }
+                      }
+
+                      this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((result: any) => {
+                        let setting = JSON.parse(result.config_value);
+                        if (result.dept_id == this.auth.webUser.dept_id) {
+                          this.auth.updateSettings(setting);
+                        }
+                        this.toastr.success("settings import successfully");
+                      });
+                    }
+                    else {
+                      this.toastr.error('can not read settings file from zip')
+                    }
+                    // this.importFile('ITEMTYPEIMPORT', JSON.parse(data));
+                  });
+                  break;
+
+              }
+            }
+          }
+
+        });
+
+      }
+
     }
+    ev = null;
   }
 
   exportAll = async () => {
     this.isLoader = true;
     this.dataZip = new JSZip();
     this.http.get(this.api.getUrl('EXPORTALL')).subscribe((data: any) => {
-      // this.dataZip.file("ItemtypeData.json", JSON.stringify(data['result']['itemtype']));
-      this.dataZip.file("PbkData.json", JSON.stringify(data['result']['Pbks']));
-      this.dataZip.file("MMData.json", JSON.stringify(data['result']['MMs']));
-      this.dataZip.file("StateData.json", JSON.stringify(data['result']['States']));
-      this.dataZip.file("ItemData.json", JSON.stringify(data['result']['Items']));
-      this.dataZip.file("SubitemData.json", JSON.stringify(data['result']['Subitems']));
-      this.dataZip.file("CategoryData.json", JSON.stringify(data['result']['Categories']));
-      this.dataZip.file("UnitData.json", JSON.stringify(data['result']['Units']));
-      this.dataZip.file("CityData.json", JSON.stringify(data['result']['Cities']));
-      this.dataZip.file("CountryData.json", JSON.stringify(data['result']['Countries']));
-      this.dataZip.file("ProductData.json", JSON.stringify(data['result']['Products']));
-      // this.dataZip.file("EntryData.json", JSON.stringify(data['result']['entry']));
+      this.dataZip.file("aawak.json", JSON.stringify(data['result']['aawak']));
+      this.dataZip.file("category.json", JSON.stringify(data['result']['category']));
+      this.dataZip.file("city.json", JSON.stringify(data['result']['city']));
+      this.dataZip.file("country.json", JSON.stringify(data['result']['country']));
+      this.dataZip.file("department.json", JSON.stringify(data['result']['department']));
+      this.dataZip.file("department_config.json", JSON.stringify(data['result']['department_config']));
+      this.dataZip.file("item.json", JSON.stringify(data['result']['item']));
+      this.dataZip.file("jawak.json", JSON.stringify(data['result']['jawak']));
+      this.dataZip.file("mm.json", JSON.stringify(data['result']['mm']));
+      this.dataZip.file("pbk.json", JSON.stringify(data['result']['pbk']));
+      this.dataZip.file("point.json", JSON.stringify(data['result']['point']));
+      this.dataZip.file("product.json", JSON.stringify(data['result']['product']));
+      this.dataZip.file("state.json", JSON.stringify(data['result']['state']));
+      this.dataZip.file("subitem.json", JSON.stringify(data['result']['subitem']));
+      this.dataZip.file("subitem_list.json", JSON.stringify(data['result']['subitem_list']));
+      this.dataZip.file("support_list.json", JSON.stringify(data['result']['support_list']));
+      this.dataZip.file("unit.json", JSON.stringify(data['result']['unit']));
 
-      setTimeout(() => {
-        this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
-          FileSaver.saveAs(content, "Data.zip");
-        });
-        this.toastr.success(data['message']);
-        this.isLoader = false;
-      }, 3000);
+      this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
+        FileSaver.saveAs(content, "Data.zip");
+      });
+      console.log("datazip", this.dataZip);
+
+      this.toastr.success(data['message']);
+      this.isLoader = false;
     });
   }
 

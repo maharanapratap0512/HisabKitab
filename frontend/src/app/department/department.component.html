@@ -143,6 +143,13 @@
                                 aria-labelledby="v-pills-setting-tab"
                                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
                                 <div class="row">
+                                    <div class="col-3">
+                                        <button class="btn btn-info w-100" (click)="exportDeptSettings()">
+                                            <i class="dripicons-export" style=" font-size: large;"> </i> Export Settings Only
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row">
                                     <div class="card-body" style="overflow: auto;">
                                         <table id="datatable-buttons" class="table table-hover dt-responsive">
                                             <thead>

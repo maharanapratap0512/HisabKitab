@@ -117,6 +117,22 @@ const Migrations = [
       });
 
     }
+  },
+
+  (DB) => {
+    //updating to version 8
+    //reupdating version 7 with some changes.
+
+    console.log('updating...',);
+    for (let keys of Object.keys(ver7)) {
+
+      DB.serialize(() => {
+        DB.run(ver7[keys], (err) => {
+          if (err) console.log(keys, 'version 8 error: ', err);
+        });
+      });
+
+    }
   }
 
 ];
@@ -171,7 +187,7 @@ const ver7 = {
       AFTER INSERT ON "department"
       FOR EACH ROW 
       BEGIN
-        insert into department_config(dept_id, config_key, config_value, active) values(NEW._id, 'mm', '', NEW.active),(NEW._id, 'item', '', NEW.active),(NEW._id, 'category', '', NEW.active), (NEW._id, 'subitem', '', NEW.active), (NEW._id, 'subitem_list', '', NEW.active),(NEW._id, 'pbk', '', NEW.active),(NEW._id, 'department', '', NEW.active),(NEW._id, 'aj_type', '', NEW.active), (NEW._id, 'dept', '', NEW.active);
+        insert into department_config(dept_id, config_key, config_value, active) values(NEW._id, 'mm', '', NEW.active),(NEW._id, 'item', '', NEW.active),(NEW._id, 'category', '', NEW.active), (NEW._id, 'subitem', '', NEW.active), (NEW._id, 'subitem_list', '', NEW.active),(NEW._id, 'pbk', '', NEW.active),(NEW._id, 'department', '', NEW.active),(NEW._id, 'aj_type', '', NEW.active), (NEW._id, 'settings', json('{}'), NEW.active);
       END;`,
 
 }

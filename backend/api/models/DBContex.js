@@ -228,7 +228,7 @@ class DBContex {
     }
 
     // mm_type|gender|relation
-    getList = async (list_name) => {
+    getList = async (list_name, conditionString = null) => {
         return new Promise(async (resolve, reject) => {
             try {
                 let sql = "";
@@ -241,11 +241,18 @@ class DBContex {
                     'aawak_type',
                     'jawak_type'
                 ]
+                
                 if (list_name_arr.includes(list_name)) {
-                    sql = `select * from support_list where list_type = '${list_name}'`;
+                    sql = `select * from support_list where list_type = '${list_name}' `;
+                    if(conditionString && conditionString != ``){
+                        sql += ` where ` + conditionString;
+                    }
                 }
                 else {
                     sql = `select * from ${list_name}`;
+                    if(conditionString && conditionString != ``){
+                        sql += ` where ` + conditionString;
+                    }
                 }
                 await this.localDB.all(sql, (err, data) => {
                     if (err) {
@@ -264,11 +271,11 @@ class DBContex {
     }
 
     //get table data by department
-    getListByDept = async (list_name, dept_id) => {
+    getListByDept = async (list_name, dept_id, conditionString = null) => {
         return new Promise(async (resolve, reject) => {
             try {
                 if (list_name && dept_id) {
-                    let sql = "";
+                    let sql = "", condition = ``;
                     let exclude_dept = ['1', '2'];
                     let list_name_arr = [
                         'mm_type',
@@ -278,50 +285,50 @@ class DBContex {
                         'status',
                         'aawak_type',
                         'jawak_type'
-                    ]
-
+                    ];
 
                     if (list_name == "pbk") {
-                        sql = `select * from pbk where (status is null OR status <> "nimmit") `;
+                        sql = `select * from pbk`
+                        condition += (condition != `` ? ' AND ' : ' ') + ` (status is null OR status <> "nimmit") `;
                         if (!exclude_dept.includes(dept_id)) {
-                            sql += ` AND (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
+                            condition += (condition != `` ? ' AND ' : ' ') + ` AND (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
                         }
                     }
                     else if (this.dept_config_list.includes(list_name)) {
-
-                        if (!exclude_dept.includes(dept_id)) {
-                            if (list_name_arr.includes(list_name)) {
-                                sql = `select * from support_list where list_type = '${list_name}' AND `;
-                            }
-                            else {
-                                sql = `select * from ${list_name} where `;
-                            }
-                            sql += `(select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
-                        }
-                        else {
-                            if (list_name_arr.includes(list_name)) {
-                                sql = `select * from support_list where list_type = '${list_name}'`;
-                            }
-                            else {
-                                sql = `select * from ${list_name}`;
-                            }
+                        sql = `select * from ${list_name} `;
+                        if (!exclude_dept.includes(dept_id)) {                            
+                            condition += (condition != `` ? ' AND ' : ' ') + `(select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
                         }
 
                     }
+                    else if (this.entry_list.includes(list_name)) {
+                        sql = `select * from ${list_name} `;
+                        condition += (condition != `` ? ' AND ' : ' ') + ` ${list_name}.dept_id = ${dept_id}`;
+                    }
                     else if (list_name_arr.includes(list_name)) {
-                        sql = `select * from support_list where list_type = '${list_name}'`;
+                        sql = `select * from support_list`
+                        condition += (condition != `` ? ' AND ' : ' ') + ` list_type = '${list_name}'`;
                     }
                     else if (list_name == "nimmit") {
                         sql = `select pbk.*, st.state_hin from pbk
-                        left join state st on st._id = pbk.state_id where status = "nimmit"`;
+                        left join state st on st._id = pbk.state_id`
+                        condition += (condition != `` ? ' AND ' : ' ') + ` status = "nimmit"`;
                         if (!exclude_dept.includes(dept_id)) {
-                            sql += ` AND (select config_value from department_config where dept_id = ${dept_id} AND config_key = 'pbk') LIKE '%,'||pbk._id||',%'`;
+                            condition += (condition != `` ? ' AND ' : ' ') + ` (select config_value from department_config where dept_id = ${dept_id} AND config_key = 'pbk') LIKE '%,'||pbk._id||',%'`;
                         }
                         console.log("nimmit", sql);
                     }
                     else {
                         sql = `select * from ${list_name}`;
                     }
+                    if(conditionString && conditionString.trim() != ``){
+                        condition += (condition != `` ? ' AND ' : ' ') + conditionString;
+                    }
+
+                    // console.log("sql", sql);
+                    // console.log("condition ", condition);
+                    sql += (condition != `` ? ' where ' + condition : ``);
+
                     await this.localDB.all(sql, (err, data) => {
                         if (err) {
                             console.log({ sql: sql, err: err });
@@ -342,13 +349,16 @@ class DBContex {
         })
     }
 
-    getAJtypeByDept = (dept_id) => {
+    getAJtypeByDept = (dept_id, conditionString = null) => {
         return new Promise(async (resolve, reject) => {
             try {
 
                 let sql = `select * from support_list where list_type IN ('aawak_type', 'jawak_type')`;
                 if (!['1', '2'].includes(dept_id)) {
                     sql += ` AND (select config_value from department_config where dept_id = ${dept_id} AND config_key = 'aj_type') LIKE '%,'||_id||',%'`;
+                }
+                if(conditionString && conditionString != ``){
+                    sql += ` AND `+ conditionString;
                 }
                 this.localDB.all(sql, (err, data) => {
                     if (err) {
@@ -514,7 +524,7 @@ class DBContex {
 
                 await this.localDB.all(sql, (err, data) => {
                     if (err) {
-                        console.log({ type: 'new', sql: sql, err: err, params: [condition] });
+                        console.log({ type: 'new', sql: sql, err: err, condition: [condition] });
                         reject(err)
                     }
                     else {
@@ -765,8 +775,12 @@ class DBContex {
                 }
                 params.push(value);
             }
-            // sql = sql.slice(0, -1);
-            sql += `updated_at = datetime('now', 'localtime')`;
+            if(!dataObj.updated_at){
+                sql += `updated_at = datetime('now', 'localtime')`;
+            }
+            else{
+                sql = sql.slice(0, -1);
+            }
             sql += ` where ${conditionString}`;
             await this.localDB.run(sql, params, async (err) => {
                 if (err) {

@@ -86,7 +86,6 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
     await DB.getFullListByDept('itemMix', req.params.dept_id, conditionString).then((resolve) => {
         let subitem_count = 0;
         for (let i = 0; i < resolve.data.length; i++) {
-
             resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
             resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
             subitem_count += resolve.data[i].subitems.length;

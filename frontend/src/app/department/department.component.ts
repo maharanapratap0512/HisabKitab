@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
+import * as FileSaver from 'file-saver';
+import * as JSZip from 'jszip';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
@@ -53,6 +55,7 @@ export class DepartmentComponent implements OnInit {
   statuses: any = [];
   itemMixCondition: any = {};
   settingsAll: any = [];
+  dataZip: JSZip = new JSZip();
 
 
   constructor(
@@ -172,33 +175,33 @@ export class DepartmentComponent implements OnInit {
       },
       bachat: {
         visible: false,
-        used:true,
-        stock:true,
-        new:false,
-        old:false,
-        defective:false,
-        scrap:false
+        used: true,
+        stock: true,
+        new: false,
+        old: false,
+        defective: false,
+        scrap: false
       },
-      category:{
-        visible:false
+      category: {
+        visible: false
       },
-      item:{
-        visible:false
+      item: {
+        visible: false
       },
-      mm:{
-        visible:false
+      mm: {
+        visible: false
       },
-      city:{
-        visible:false
+      city: {
+        visible: false
       },
-      department:{
-        visible:false
+      department: {
+        visible: false
       },
-      point:{
-        visible:false
+      point: {
+        visible: false
       }
     }
-    
+
   }
 
   getDepartments() {
@@ -256,9 +259,8 @@ export class DepartmentComponent implements OnInit {
     for (let key of Object.keys(configValue)) {
       this.settingsAll[key] = configValue[key];
     }
-    
-
   }
+  
 
   cancel() {
     this.deptSelected(this.dept_id);
@@ -595,6 +597,20 @@ export class DepartmentComponent implements OnInit {
     }
   }
 
+  exportDeptSettings = async () => {
+    this.isLoader = true;
+    this.dataZip = new JSZip();
+    this.dataZip.file("settings.json", JSON.stringify(this.deptConf.settings));
+    let date = new Date();
+    let dept = this.departments.find((d: { _id: any; }) => d._id == this.dept_id);
+    
+    this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
+      FileSaver.saveAs(content, dept.dept_eng + "_update_" + date.getDate() + "-" +date.getMonth() + "-" + date.getFullYear() + ".zip");
+    });
+    this.toastr.success("Updated Settings downloaded for '" + dept.dept_eng + "'");
+    this.isLoader = false;
+  }  
+
   saveDeptSettings() {
     this.deptConf.mm.config_value = this.deptConf.mm.idArr.join(',') + ',';
     this.deptConf.pbk.config_value = this.deptConf.pbk.idArr.join(',') + ',';
@@ -602,38 +618,7 @@ export class DepartmentComponent implements OnInit {
     this.deptConf.item.config_value = this.deptConf.item.idArr.join(',') + ',';
     this.deptConf.subitem.config_value = this.deptConf.subitem.idArr.join(',') + ',';
     this.deptConf.aj_type.config_value = this.deptConf.aj_type.idArr.join(',') + ',';
-    this.deptConf.settings.config_value = this.settingsAll;
-    // for (let i = 0; i < this.mmsAll.length; i++) {
-    //   if (this.mmsAll[i].chk == true) {
-
-    //   }
-    // }
-    // this.deptConf.mm.config_value = this.deptConf.mm.idArr.join(',');
-    // for (let i = 0; i < this.pbks.length; i++) {
-    //   if (this.pbks[i].chk == true) {
-    //     this.deptConf.pbk.config_value += this.pbks[i]._id + ',';
-    //   }
-    // }
-    // for (let i = 0; i < this.categories.length; i++) {
-    //   if (this.categories[i].chk == true) {
-    //     this.deptConf.category.config_value += this.categories[i]._id + ',';
-    //   }
-    // }
-    // for (let i = 0; i < this.items.length; i++) {
-    //   if (this.items[i].chk == true) {
-    //     this.deptConf.item.config_value += this.items[i]._id + ',';
-    //   }
-    // }
-    // for (let i = 0; i < this.subitems.length; i++) {
-    //   if (this.subitems[i].chk == true) {
-    //     this.deptConf.subitem.config_value += this.subitems[i]._id + ',';
-    //   }
-    // }
-    // for (let i = 0; i < this.ajtypes.length; i++) {
-    //   if (this.ajtypes[i].chk == true) {
-    //     this.deptConf.aj_type.config_value += this.ajtypes[i]._id + ',';
-    //   }
-    // }
+    this.deptConf.settings.config_value = this.settingsAll;    
 
     this.http.put(this.api.getUrl('DEPTCONFSAVE'), this.deptConf).subscribe((data: any) => {
       if (data && data['success']) {
@@ -641,8 +626,8 @@ export class DepartmentComponent implements OnInit {
         // this.deptSelected(this.dept_id);
         this.isLoader = false;
         this.toastr.success('Department Updated Successfully.');
-        if(this.dept_id == this.auth.webUser.dept_id){
-          this.auth.webUser.settings = this.settingsAll;
+        if (this.dept_id == this.auth.webUser.dept_id) {
+          this.auth.updateSettings(this.settingsAll);
         }
         this.deptSelected(this.dept_id);
       }

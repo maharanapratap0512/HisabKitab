@@ -38,6 +38,11 @@ export class AuthService {
     this.webUser = user;
   }
 
+  async updateSettings(setting:any ){
+    this.webUser.settings = setting;
+    this.Window.sessionStorage.setItem('WebUser', JSON.stringify(this.webUser));
+  }
+
   getWebUser() {
     // return JSON.parse(this.localStorage.getItem('WebUser') || '{}');
     return JSON.parse(this.Window.sessionStorage.getItem('WebUser') || '{}');
