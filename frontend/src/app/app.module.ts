@@ -59,6 +59,7 @@ import { BachatComponent } from './bachat/bachat.component';
 import { FilterpipePipe } from './pipe/filterpipe.pipe';
 import { PointEntryComponent } from './ENTRY__FORMS/point-entry/point-entry.component';
 import { PointComponent } from './point/point.component';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 
 
@@ -127,7 +128,8 @@ import { PointComponent } from './point/point.component';
     Ng2SearchPipeModule,
     FileSaverModule,
     NgxSpinnerModule,
-    NgtUniversalModule
+    NgtUniversalModule,
+    NgxPaginationModule
 
   ],
   providers: [GlobalService],

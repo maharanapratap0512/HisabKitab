@@ -111,10 +111,9 @@
                               </div>
                               <div class="col-md-3 mb-3 text-center">
                                  <button class="btn btn-primary submit mx-2" type="submit"
-                                    (click)="getPbkData()">Submit</button>
+                                    (click)="getPbkData(1)">Submit</button>
 
-                                 <button class="btn btn-outline-secondary submit mx-2" type="button"
-                                    (click)="filterBody = {
+                                 <button class="btn btn-outline-secondary submit mx-2" type="button" (click)="filterBody = {
                                        bhatti_year: null,
                                        city: [],
                                        class_mm: [],
@@ -131,6 +130,8 @@
             </div>
 
             <div class="row" *ngIf="pbkData.length">
+               <pagination-controls class="pagi text-end" (pageChange)="getPbkData(page = $event)">
+               </pagination-controls>
                <div class="card-body" style="overflow: auto;">
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
@@ -140,7 +141,8 @@
                            <th style="width: 100px;" *ngIf="settings.document">Image</th>
                            <th style="width: 85px;" *ngIf="settings.roll_no">Roll No.</th>
                            <th style="width: 200px;">Name (Hin-Eng)</th>
-                           <th style="width: 200px;" *ngIf="settings.relation || settings.relative_name">Relative Names</th>
+                           <th style="width: 200px;" *ngIf="settings.relation || settings.relative_name">Relative Names
+                           </th>
                            <th style="width: 100px;">Gender</th>
                            <th style="width: 101px;" *ngIf="settings.birth_date">DOB/Age</th>
                            <!-- <th style="width: 100px;">Status</th> -->
@@ -154,9 +156,10 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <tr *ngFor="let data of pbkData | filter:term; let i=index">
+                        <tr
+                           *ngFor="let data of pbkData | filter:term | paginate: {itemsPerPage: itemsPerPage,currentPage: page,totalItems: total_count}; let i=index; ">
                            <td style="font-size: large;">
-                              {{i+1}}<br>
+                              {{itemsPerPage * (page - 1) + (i+1)}}<br>
                               <span style="font-size: x-large;position: relative;line-height: 28px; cursor:pointer;"
                                  (click)="protectionToggle(data._id, data.active)">
                                  <i *ngIf="auth.webUser.dept_id == 1 && data.active" data-toggle="tooltip"
@@ -184,8 +187,9 @@
                                  style="padding: 5px; border-radius: 15px;">
                            </td>
                            <td *ngIf="settings.roll_no">{{data.roll_no ? data.roll_no : '______'}} </td>
-                           <td >{{data.pbk_hin}} <br> {{data.pbk_eng}}</td>
-                           <td *ngIf="settings.relation || settings.relative_name">{{data.relation}}<br>{{data.relative_name}}</td>
+                           <td>{{data.pbk_hin}} <br> {{data.pbk_eng}}</td>
+                           <td *ngIf="settings.relation || settings.relative_name">
+                              {{data.relation}}<br>{{data.relative_name}}</td>
                            <td>{{data.gender}}</td>
                            <td *ngIf="settings.birth_date"> {{data.birth_date | date:'dd-MM-yyyy'}}
                               <br>{{data.age?'Age : '+data.age:'-'}}
@@ -194,7 +198,7 @@
                            <td *ngIf="settings.address">{{data.address?data.address:'-'}}</td>
                            <td *ngIf="settings.townarea">{{data.townarea?data.townarea:'-'}}</td>
                            <td>{{data.state_hin}} <br> {{data.state_eng}}</td>
-                           <td *ngIf="settings.city_id" >{{data.city_hin}} <br> {{data.city_eng}}</td>
+                           <td *ngIf="settings.city_id">{{data.city_hin}} <br> {{data.city_eng}}</td>
                            <!-- <td>{{data.tempaddress}}</td> -->
                            <!-- <td>{{data.district}}</td>
                               <td>{{data.country}}</td> -->
@@ -208,6 +212,8 @@
                      </tbody>
                   </table>
                </div>
+               <pagination-controls class="pagi text-center" (pageChange)="getPbkData(page = $event)">
+               </pagination-controls>
             </div>
          </div>
       </div>

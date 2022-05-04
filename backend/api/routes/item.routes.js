@@ -74,6 +74,9 @@ router.get('/:dept_id', async (req, res, next) => {
 //  item get by full filter
 router.put('/itemmix/:dept_id', async (req, res, next) => {
     let conditionString = ``;
+
+    let orderBy = null, limit = 100, offset = null, page = 1;
+
     if (req.body._id) {
         conditionString += (conditionString != `` ? ` AND` : ``) + ` item._id = ${req.body._id}`;
     }
@@ -83,7 +86,14 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
     if (req.body.subitem_list_id) {
         conditionString += (conditionString != `` ? ` AND` : ``) + ` (si.subitem_list_id = ${req.body.subitem_list_id})`;
     }
-    await DB.getFullListByDept('itemMix', req.params.dept_id, conditionString).then((resolve) => {
+    if (conditionString.trim() == ``) {
+        orderBy = "item._id desc";
+    }
+    if (req.body.pageNo && req.body.pageNo > 0) {
+        offset = (req.body.pageNo - 1) * 100;
+        page = req.body.pageNo;
+    }
+    await DB.getFullListByDept('itemMix', req.params.dept_id, conditionString, orderBy, limit, offset).then((resolve) => {
         let subitem_count = 0;
         for (let i = 0; i < resolve.data.length; i++) {
             resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
@@ -93,6 +103,7 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
         res.json({
             success: true,
             result: resolve.data || [],
+            pageNo: page,
             total_count: resolve.total_count,
             subitem_count: subitem_count
         });

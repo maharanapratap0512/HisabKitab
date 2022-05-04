@@ -18,6 +18,11 @@ declare var $: any;
 })
 export class PbkComponent implements OnInit {
 
+  page = 1;
+  itemsPerPage = 100;
+  currentPage: any;
+  totalItems: any;
+
   isLoader: boolean = false;
   term: any;
   showModal: string = '';
@@ -44,7 +49,7 @@ export class PbkComponent implements OnInit {
   statuses: any = [];
   relations: any = [];
   getPbk$ = new Subject();
-  settings:any = {};
+  settings: any = {};
 
   constructor(
     private fb: FormBuilder,
@@ -56,7 +61,7 @@ export class PbkComponent implements OnInit {
     public auth: AuthService
   ) {
     this.settings = this.auth.webUser.settings.pbk;
-   }
+  }
 
   ngOnInit(): void {
     this.spinner.show();
@@ -68,16 +73,16 @@ export class PbkComponent implements OnInit {
       this.relations = Lists.relation ? Lists.relation : [];
       this.statuses = Lists.status ? Lists.status : [];
     })
-    this.getPbkData();
+    this.getPbkData(1);
     this.baseurl = this.api.getUrl('BASE');
   }
 
-  getPbkData() {
+  getPbkData(pageNo: any) {
     this.isLoader = true;
+    this.filterBody.pageNo = pageNo;
     this.http.put(this.api.getUrl('PBK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.pbkData = data['result'];
-        // this.total_count = data['total'];
         this.total_count = data['total_count'];
         for (let i in this.pbkData) {
           if (this.pbkData[i].birth_date) {
@@ -87,45 +92,9 @@ export class PbkComponent implements OnInit {
             this.pbkData[i].age = this.showAge;
           }
         }
-        if (data["result"].length < data["total_count"]) {
-          this.getMorePbk();
-        }
         this.isLoader = false;
       }
       this.isLoader = false;
-    });
-
-    this.getPbk$.subscribe((result: any) => {
-      
-      for (let i in result) {
-        if (result[i].birth_date) {
-          let bdate = new Date(result[i].birth_date);
-          const timeDiff = Math.abs(Date.now() - bdate.getTime());
-          this.showAge = Math.floor((timeDiff / (1000 * 3600 * 24)) / 365);
-          result[i].age = this.showAge;
-        }
-        this.pbkData.push(result[i]);
-      }
-      console.log("result", result.length);
-      console.log("this.pbkData", this.pbkData.length);
-      if(this.total_count > this.pbkData.length){
-        this.getMorePbk();
-      }
-    });
-  }
-
-
-  getMorePbk() {
-    this.filterBody.pageNo = this.pageNo + 1;
-    this.http.put(this.api.getUrl('PBK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
-      if (data['result'] && data["result"].length > 0) {
-        if (data["pageNo"]) {
-          this.pageNo = data["pageNo"];
-        }
-        this.getPbk$.next(data['result']);
-        // this.isLoader = false;
-      }
-      // this.isLoader = false;
     });
   }
 
