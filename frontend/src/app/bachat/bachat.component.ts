@@ -22,7 +22,7 @@ export class BachatComponent implements OnInit {
   editData: any = {};
   bachatData: any = [];
   bachatAll: any = [];
-  total_count: any;
+  total_count: any = 0;;
   states: any = [];
   mms: any = [];
   categories: any = [];

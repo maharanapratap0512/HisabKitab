@@ -71,7 +71,7 @@ router.get('/:dept_id', async (req, res, next) => {
     }, (err) => { return next(err) });
 });
 
-//  item get by full filter
+//  item get by dept + filter + pageNo
 router.put('/itemmix/:dept_id', async (req, res, next) => {
     let conditionString = ``;
 
@@ -90,7 +90,7 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
         orderBy = "item._id desc";
     }
     if (req.body.pageNo && req.body.pageNo > 0) {
-        offset = (req.body.pageNo - 1) * 100;
+        offset = (req.body.pageNo - 1) * limit;
         page = req.body.pageNo;
     }
     await DB.getFullListByDept('itemMix', req.params.dept_id, conditionString, orderBy, limit, offset).then((resolve) => {

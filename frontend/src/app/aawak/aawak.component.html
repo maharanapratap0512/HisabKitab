@@ -37,7 +37,8 @@
                         <div class="file btn btn-success mx-2" style="font-weight: 700 !important;">
                            <i class="uil uil-arrow-to-bottom"></i> Import Entry Excel
                            <input type="file" class="inputtag"
-                              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" (change)="excelImport($event)" />
+                              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                              (change)="excelImport($event)" />
                         </div>
                      </div>
                      <div class="col-2">
@@ -48,7 +49,7 @@
                      </div>
                      <div class="col-2">
                         <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
-                           Count : {{aawakData.length}}
+                           Count : {{total_count}}
                         </button>
                      </div>
                      <!-- <div class="col-2">
@@ -202,7 +203,7 @@
                               </div>
                               <div class="col-md-3 mb-3 text-center">
                                  <button class="btn btn-primary submit mx-2" type="submit"
-                                    (click)="getaawakData()">Submit</button>
+                                    (click)="getaawakData(1)">Submit</button>
                                  <!-- (click)="filterFormSubmit(filterForm.value)">Submit</button> -->
 
                                  <button class="btn btn-outline-secondary submit mx-2" type="button" (click)="filterBody= {
@@ -226,6 +227,8 @@
             </div>
 
             <div class="row" *ngIf="aawakData.length">
+               <pagination-controls class="pagi text-end" (pageChange)="getaawakData(page = $event)" [autoHide]="true">
+               </pagination-controls>
                <div class="card-body" style="overflow: auto;">
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
@@ -239,7 +242,8 @@
                            <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
                            <th style="width: 120px;">Aawak Type</th>
                            <th style="width: 150px;">Item - Subitem</th>
-                           <th style="width: 200px;" *ngIf="settings.aawak.product_id || settings.aawak.condition_id">Product</th>
+                           <th style="width: 200px;" *ngIf="settings.aawak.product_id || settings.aawak.condition_id">
+                              Product</th>
                            <th style="width: 100px;">Qty</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.actual_amt">Actual Amt</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.nimmit_id">Nimmit</th>
@@ -248,10 +252,11 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <ng-container *ngFor="let data of aawakData | filter: term; let i=index">
+                        <ng-container
+                           *ngFor="let data of aawakData | filter: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
                               aria-expanded="true" [attr.aria-controls]="'collapseExample-'+i" class="main-row">
-                              <td>{{i+1}}</td>
+                              <td>{{itemsPerPage * (page-1) + i+1}}</td>
                               <td>
                                  <div class="d-flex justify-content-between mb-1">
                                     <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
@@ -345,8 +350,12 @@
                      </tbody>
                   </table>
                </div>
+               <pagination-controls class="pagi text-center" (pageChange)="getaawakData(page = $event)"
+                  [autoHide]="true">
+               </pagination-controls>
             </div>
 
+            <h2 class="text-center m-5" *ngIf="!aawakData.length">No Data!</h2>
          </div>
       </div>
    </div>

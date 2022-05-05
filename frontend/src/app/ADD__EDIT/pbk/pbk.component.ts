@@ -29,7 +29,7 @@ export class PbkComponent implements OnInit {
   editData: any;
   modalName: any = "Add";
   pbkData: any = [];
-  total_count: any;
+  total_count: any = 0;;
   showAge: any;
   baseurl: any;
   showFilter: boolean = false

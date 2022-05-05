@@ -130,7 +130,7 @@
             </div>
 
             <div class="row" *ngIf="pbkData.length">
-               <pagination-controls class="pagi text-end" (pageChange)="getPbkData(page = $event)">
+               <pagination-controls class="pagi text-end" (pageChange)="getPbkData(page = $event)" [autoHide]="true">
                </pagination-controls>
                <div class="card-body" style="overflow: auto;">
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
@@ -212,7 +212,7 @@
                      </tbody>
                   </table>
                </div>
-               <pagination-controls class="pagi text-center" (pageChange)="getPbkData(page = $event)">
+               <pagination-controls class="pagi text-center" (pageChange)="getPbkData(page = $event)" [autoHide]="true">
                </pagination-controls>
             </div>
          </div>

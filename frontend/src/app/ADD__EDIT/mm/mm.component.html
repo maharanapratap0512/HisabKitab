@@ -44,7 +44,7 @@
                      </div>
                      <div class="col-2">
                         <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
-                           Count : {{mmData.length?mmData.length:'-'}}
+                           Count : {{total_count}}
                         </button>
                      </div>
                   </div>
@@ -52,11 +52,13 @@
             </div>
 
             <div class="row" *ngIf="mmData.length">
+               <pagination-controls class="pagi text-end" (pageChange)="page = $event" [autoHide]="true">
+               </pagination-controls>
                <div class="card-body">
                   <table class="table table-hover dt-responsive">
                      <thead>
                         <tr>
-                           <th style="width: 50px;">No.</th>
+                           <th style="width: 60px;">No.</th>
                            <th style="width: 120px;">Manage</th>
                            <th style="width: 150px;">MM(Hin)</th>
                            <th style="width: 150px;">MM(Eng)</th>
@@ -69,9 +71,10 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <tr *ngFor="let data of mmData | filter:term; let i=index">
+                        <tr
+                           *ngFor="let data of mmData | filter:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index">
                            <td style="font-size: large;">
-                              {{i+1}}
+                              {{itemsPerPage * (page-1) + i+1}}
                               <span class="mx-1" style="font-size: x-large;position: absolute;line-height: 28px;"
                                  (click)="protectionToggle(data._id, data.active)">
                                  <i *ngIf="auth.webUser.dept_id == 1 && data.active" data-toggle="tooltip"
@@ -109,7 +112,11 @@
                      </tbody>
                   </table>
                </div>
+               <pagination-controls class="pagi text-center" (pageChange)="page = $event" [autoHide]="true">
+               </pagination-controls>
             </div>
+
+            <h2 class="text-center m-5" *ngIf="!mmData.length">No Data!</h2>
          </div>
       </div>
    </div>

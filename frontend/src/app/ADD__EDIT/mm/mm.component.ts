@@ -16,13 +16,18 @@ declare var $: any;
 })
 export class MmComponent implements OnInit {
 
+  page = 1;
+  itemsPerPage = 50;
+  // currentPage: any;
+  // totalItems: any;
+
   isLoader: boolean = false;
   term: any;
   showModal: string = '';
   editData: any = {};
   mmData: any = [];
   mmAll: any = [];
-  total_count: any;
+  total_count: any = 0;;
   departments: any = [];
   states: any = [];
   temp: any = {};

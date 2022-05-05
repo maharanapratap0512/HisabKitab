@@ -64,7 +64,7 @@
             </div>
 
             <div class="row" *ngIf="itemData.length">
-               <pagination-controls class="pagi text-end" (pageChange)="getItemData(page = $event)">
+               <pagination-controls class="pagi text-end" (pageChange)="getItemData(page = $event)" [autoHide]="true">
                </pagination-controls>
                <div class="card-body" style="overflow: auto;">
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
@@ -86,7 +86,7 @@
                               [attr.aria-controls]="'#collapse-' + i" class="item-row"> -->
                            <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
                               <td style="font-size: large;">
-                                 {{i+1}}
+                                 {{itemsPerPage * (page - 1) + (i+1)}}
                                  <span class="mx-1"
                                     style="font-size: x-large;position: absolute;line-height: 28px;cursor: pointer"
                                     (click)="protectionToggle(data._id, data.active)">
@@ -192,9 +192,13 @@
                      </tbody>
                   </table>
                </div>
-               <pagination-controls class="pagi text-center" (pageChange)="getItemData(page = $event)">
+               <pagination-controls class="pagi text-center" (pageChange)="getItemData(page = $event)"
+                  [autoHide]="true">
                </pagination-controls>
             </div>
+
+            <h2 class="text-center m-5" *ngIf="!itemData.length">No Data!</h2>
+
          </div>
       </div>
    </div>

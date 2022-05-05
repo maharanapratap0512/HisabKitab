@@ -18,13 +18,18 @@ declare var $: any;
 })
 export class AawakComponent implements OnInit {
 
+  page = 1;
+  itemsPerPage = 100;
+  currentPage: any;
+  totalItems: any;
+
   isLoader: boolean = false;
   term: any;
   showModal: string = '';
   editData: any = {};
   aawakData: any = [];
   aawakAll: any = [];
-  total_count: any;
+  total_count: any = 0;;
   mms: any = [];
   viewData: any = [];
   items: any = [];
@@ -52,7 +57,7 @@ export class AawakComponent implements OnInit {
     nimmit: null
   };
   cat: any;
-  settings:any = {};
+  settings: any = {};
 
   constructor(
     private fb: FormBuilder,
@@ -64,11 +69,11 @@ export class AawakComponent implements OnInit {
     public auth: AuthService,
   ) {
     this.settings = this.auth.webUser.settings;
-   }
+  }
 
   ngOnInit(): void {
     this.spinner.show();
-    this.getaawakData();
+    this.getaawakData(1);
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.items = result.itemmix ? result.itemmix : [];
@@ -87,8 +92,9 @@ export class AawakComponent implements OnInit {
 
   }
 
-  getaawakData() {
+  getaawakData(pageNo: any) {
     this.isLoader = true;
+    this.filterBody.pageNo = pageNo;
     this.http.put(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.aawakData = data['result'];
@@ -277,13 +283,13 @@ export class AawakComponent implements OnInit {
       }, {});
       // const dataString = JSON.stringify(jsonData);
       let exceldata = jsonData[workBooks.SheetNames[0]];
-      for(let i in exceldata){
-        
+      for (let i in exceldata) {
+
       }
-      
+
     }
     reader.readAsBinaryString(file);
-      ev = '';
+    ev = '';
   }
 
 }

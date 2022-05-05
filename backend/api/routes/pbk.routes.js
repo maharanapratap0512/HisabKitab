@@ -88,7 +88,7 @@ router.get('/nimmit/', async (req, res, next) => {
     }, (err) => { return next(err) });
 });
 
-//pbk get by dept and filter and pageNo
+//pbk get by dept + filter + pageNo
 router.put('/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = 100, offset = null, page = 1;
 
@@ -100,7 +100,7 @@ router.put('/:dept_id', async (req, res, next) => {
         orderBy = "pbk._id desc";
     }
     if (req.body.pageNo && req.body.pageNo > 0) {
-        offset = (req.body.pageNo - 1) * 100;
+        offset = (req.body.pageNo - 1) * limit;
         page = req.body.pageNo;
     }
     await DB.getFullListByDept('pbk', req.params.dept_id, pbkCondition + conditionString, orderBy, limit, offset).then((resolve) => {

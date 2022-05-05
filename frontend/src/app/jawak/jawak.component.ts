@@ -15,6 +15,12 @@ declare var $: any;
   styleUrls: ['./jawak.component.scss']
 })
 export class JawakComponent implements OnInit {
+
+  page = 1;
+  itemsPerPage = 100;
+  currentPage: any;
+  totalItems: any;
+  
   isLoader: boolean = false;
   term: any;
   showModal: String = '';
@@ -48,7 +54,7 @@ export class JawakComponent implements OnInit {
     pkt_num: null
   };
   cat: any;
-  settings:any = {};
+  settings: any = {};
 
 
   constructor(
@@ -61,10 +67,10 @@ export class JawakComponent implements OnInit {
     public auth: AuthService,
   ) {
     this.settings = this.auth.webUser.settings.jawak;
-   }
+  }
 
   ngOnInit(): void {
-    this.getJawakData();
+    this.getJawakData(1);
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];
@@ -83,8 +89,9 @@ export class JawakComponent implements OnInit {
   }
 
 
-  getJawakData() {
+  getJawakData(pageNo: any) {
     this.isLoader = true;
+    this.filterBody.pageNo = pageNo;
     this.http.put(this.api.getUrl('JAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.jawakData = data['result'];

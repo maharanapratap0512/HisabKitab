@@ -29,8 +29,8 @@ export class ItemComponent implements OnInit {
   itemData: any = [];
   categories: any = [];
   subitem_lists: any = [];
-  total_count: any;
-  si_total_count: any;
+  total_count: any = 0;;
+  si_total_count: any = 0;;
   subitemData: any = [];
   conditionObj: any = {};
 
