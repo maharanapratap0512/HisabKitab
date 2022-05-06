@@ -14,8 +14,6 @@ router.get('/full/:dept_id', async (req, res, next) => {
             success: true,
             result: result
         });
-
-
     }, (reject) => {
         next(reject);
     });

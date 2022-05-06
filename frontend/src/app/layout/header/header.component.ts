@@ -202,6 +202,51 @@ export class HeaderComponent implements OnInit {
     ev = null;
   }
 
+  importOldData = async (ev: any) => {
+    this.isLoader = true;
+
+    if (ev.target.files[0]) {
+
+      const fileReader: any = new FileReader();
+      fileReader.readAsText(ev.target.files[0], 'UTF-8'); //reading 1st file only
+
+      fileReader.onload = () => {
+
+        let aawakEntry = JSON.parse(fileReader.result);        
+        let newAawak:any = [];
+        for(let i in aawakEntry){
+
+          newAawak[i] = {
+            pkt_num: aawakEntry[i].parchi_num,
+            pbk_id: null,
+            date: aawakEntry[i].date,
+            item_id:null,
+            subitem_id:null,
+            unit_id:null,
+            item_detail:aawakEntry[i].item_detail,
+            qty:aawakEntry[i].quantity,
+            rate:aawakEntry[i].rate,
+            actual_amt:aawakEntry[i].amount,
+            aawak_type_id: null,
+            mm_id: null,
+            description: aawakEntry[i].desc,
+            active:1,
+
+          }
+
+          //finding aawak_mm_id
+          this.gs.Lists.mm.find((m: { mm_hin: string; mm_eng: string; mm_code: string; parent_mm_id: null; _id: string; })=>{
+            if(aawakEntry[i].aawak_mm_id && !m.parent_mm_id && (m.mm_hin == aawakEntry[i].aawak_mm_hin  || m.mm_eng == aawakEntry[i].aawak_mm_eng || m.mm_code == aawakEntry[i].aawak_mm_code)){
+              aawakEntry[i].mm_id = m._id;
+            }
+          });
+        }
+      }
+
+    }
+    ev = null;
+  }
+
   exportAll = async () => {
     this.isLoader = true;
     this.dataZip = new JSZip();
