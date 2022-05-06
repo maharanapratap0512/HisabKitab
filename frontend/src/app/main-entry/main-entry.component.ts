@@ -23,7 +23,7 @@ export class MainEntryComponent implements OnInit {
    entryForm: FormGroup;
    entryFormData: any = [];
    isLoader: boolean = false;
-   total_count: any;
+   total_count: any = 0;;
    editId: any;
    qnt: any;
    rate: any;

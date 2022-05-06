@@ -16,13 +16,18 @@ declare var $: any;
 })
 export class CityComponent implements OnInit {
 
+  page = 1;
+  itemsPerPage = 50;
+  // currentPage: any;
+  // totalItems: any;
+
   isLoader: boolean = false;
   term: any;
   showModal: string = '';
   editData: any = {};
   cityData: any = [];
   cityAll: any = [];
-  total_count: any;
+  total_count: any = 0; 
   citytypes: any = [];
   states: any = [];
 
@@ -124,18 +129,18 @@ export class CityComponent implements OnInit {
     body.query = {
       _id: id
     }
-    body.set = {      
+    body.set = {
       active: !active
     };
-    this.http.put(this.api.getUrl('CITY'), body).subscribe((data: any) => {     
-        this.cityData.splice(this.cityData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);    
-        this.isLoader = false;  
-        if(data['result'].active){
-          this.toastr.success("Protetion Shield Activated");
-        }      
-        else{          
-          this.toastr.success("Protetion Shield Deactivated");
-        }
+    this.http.put(this.api.getUrl('CITY'), body).subscribe((data: any) => {
+      this.cityData.splice(this.cityData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);
+      this.isLoader = false;
+      if (data['result'].active) {
+        this.toastr.success("Protetion Shield Activated");
+      }
+      else {
+        this.toastr.success("Protetion Shield Deactivated");
+      }
     }, err => {
       this.toastr.error(err['message']);
       this.isLoader = false;

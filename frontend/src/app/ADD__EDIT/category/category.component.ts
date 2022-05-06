@@ -21,7 +21,7 @@ export class CategoryComponent implements OnInit {
   showModal: string = '';
   editData: any = {};
   categoryData: any = [];
-  total_count: any;
+  total_count: any = 0;;
 
   constructor(
     private fb: FormBuilder,

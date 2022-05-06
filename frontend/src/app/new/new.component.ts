@@ -22,7 +22,7 @@ export class NewComponent implements OnInit {
   editEntry: any;
   isLoader: boolean = false;
   // formData = new FormData();
-  total_count: any;
+  total_count: any = 0;;
   productData: any = [];
   // doctfile: any = [];
   imagebase: any = [];

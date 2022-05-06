@@ -21,7 +21,7 @@ export class ProductComponent implements OnInit {
   showModal: string = '';
   editData: any = {};
   productData: any = [];
-  total_count: any;
+  total_count: any = 0;;
   viewProduct: any;
   baseurl:any;
   settings:any= {};

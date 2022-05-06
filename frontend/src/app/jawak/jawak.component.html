@@ -11,7 +11,7 @@
 
             <!-- First Row -->
             <!-- Add Button, Search Field, Filter button, Total Count -->
-            <div class="row">
+            <div class="row" *ngIf="jawakData.length">
                <div class="card-body" style="overflow: auto;">
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
@@ -33,8 +33,7 @@
                      </div>
                      <div class="col-2">
                         <button type="button" style="font-weight: 700 !important;"
-                           class="btn btn-light  float-end">Total
-                           Count : {{total_count}}
+                           class="btn btn-light  float-end">Total Count : {{total_count}}
                            <!-- {{productData? productData.length:''}} -->
                         </button>
                      </div>
@@ -181,7 +180,7 @@
                               </div>
                               <div class="col-md-3 mb-3 text-center">
                                  <button class="btn btn-primary submit mx-2" type="submit"
-                                    (click)="getJawakData()">Submit</button>
+                                    (click)="getJawakData(1)">Submit</button>
 
                                  <button class="btn btn-outline-secondary submit mx-2" type="button" (click)="filterBody = {
                                        pbk_id: [],
@@ -206,6 +205,8 @@
 
             <!-- Jawak Table -->
             <div class="row" *ngIf="jawakData.length">
+               <pagination-controls class="pagi text-end" (pageChange)="getJawakData(page=$event)" [autoHide]="true">
+               </pagination-controls>
                <div class="card-body" style="overflow: auto;">
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
@@ -228,8 +229,9 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <tr *ngFor="let data of jawakData | filter:term; let i=index">
-                           <td>{{i+1}}</td>
+                        <tr
+                           *ngFor="let data of jawakData | filter:term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
+                           <td>{{itemsPerPage * (page-1) + i+1}}</td>
                            <td>
                               <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button>
@@ -276,7 +278,11 @@
                      </tbody>
                   </table>
                </div>
+               <pagination-controls class="pagi text-center" (pageChange)="getJawakData(page=$event)" [autoHide]="true">
+               </pagination-controls>
             </div>
+
+            <h2 class="text-center m-5" *ngIf="!jawakData.length">No Data!</h2>
          </div>
       </div>
    </div>

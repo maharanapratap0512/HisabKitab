@@ -16,6 +16,11 @@ declare var $: any;
 })
 export class ItemComponent implements OnInit {
 
+  page = 1;
+  itemsPerPage = 100;
+  currentPage: any;
+  totalItems: any;
+
   isLoader: boolean = false;
   term: any;
   showModal: string = '';
@@ -24,8 +29,8 @@ export class ItemComponent implements OnInit {
   itemData: any = [];
   categories: any = [];
   subitem_lists: any = [];
-  total_count: any;
-  si_total_count: any;
+  total_count: any = 0;;
+  si_total_count: any = 0;;
   subitemData: any = [];
   conditionObj: any = {};
 
@@ -41,15 +46,16 @@ export class ItemComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
-    this.getItemData();
+    this.getItemData(1);
     this.gs.observeList().subscribe(result => {
       this.categories = result.category ? result.category : [];
       this.subitem_lists = result.subitem_list ? result.subitem_list : [];
     });
   }
 
-  getItemData() {
+  getItemData(pageNo:any) {
     this.isLoader = true;
+    this.conditionObj.pageNo = pageNo;
     this.http.put(this.api.getUrl('ITEMMIX') + this.auth.webUser.dept_id, this.conditionObj).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         // this.itemDataAll = data['result'];
@@ -66,27 +72,26 @@ export class ItemComponent implements OnInit {
   catSelected(ev: any) {
     if (ev) {
       this.conditionObj.category_id = ev;
-      this.getItemData();
+      this.getItemData(1);
     }
     else {
       this.conditionObj.category_id = null;
-      this.getItemData();
+      this.getItemData(1);
     }
   }
 
   SubitemListSelected(ev: any) {
     if (ev) {
       this.conditionObj.subitem_list_id = ev;
-      this.getItemData();
+      this.getItemData(1);
     }
     else {
       this.conditionObj.subitem_list_id = null;
-      this.getItemData();
+      this.getItemData(1);
     }
   }
 
   addSubitem(item: any) {
-
     this.editData = {
       item_id: item._id,
       category_id: item.category_id,

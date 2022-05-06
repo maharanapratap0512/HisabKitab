@@ -74,7 +74,7 @@ router.get('/:dept_id', async (req, res, next) => {
 
 //get all nimmit list
 router.get('/nimmit/', async (req, res, next) => {
-    await DB.getFullList('pbk',` pbk.status = "nimmit"`,` order by pbk._id desc`, 100).then((resolve) => {
+    await DB.getFullList('pbk', ` pbk.status = "nimmit"`, ` order by pbk._id desc`, 100).then((resolve) => {
         // for (let i in resolve) {
         //     resolve[i].document = (resolve[i].document != "[null]" ? JSON.parse(resolve[i].document) : {});
         //     resolve[i].relative_ref = (resolve[i].relative_ref != "[null]" ? JSON.parse(resolve[i].relative_ref) : []);
@@ -88,18 +88,19 @@ router.get('/nimmit/', async (req, res, next) => {
     }, (err) => { return next(err) });
 });
 
-//pbk get by dept and filter
+//pbk get by dept + filter + pageNo
 router.put('/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = 100, offset = null, page = 1;
+
     let pbkCondition = ` 1=1 ${req.body.status ? ` AND pbk.status = ${req.body.status}` : ` AND ( pbk.status is null OR pbk.status NOT LIKE "%nimmit%")`}`;
+
     let conditionString = ` ${req.body.roll_no ? ` AND pbk.roll_no = ${req.body.roll_no}` : ``} ${req.body.gender.length > 0 ? ` AND pbk.gender in (${req.body.gender.join(',')})` : ``} ${req.body.state_id.length > 0 ? ` AND pbk.state_id in (${req.body.state_id.join(',')})` : ``} ${req.body.city_id.length > 0 ? ` AND pbk.city_id in (${req.body.city_id.join(',')})` : ``} ${req.body.class_mm_id.length > 0 ? ` AND pbk.class_mm_id in (${req.body.class_mm_id.join(',')})` : ``} ${req.body.bhatti_year ? ` AND strftime('%Y',pbk.bhatti_date) = '${req.body.bhatti_year}'` : ``}`;
-    if(conditionString.trim() == ``){
-        limit = 100;
+
+    if (conditionString.trim() == ``) {
         orderBy = "pbk._id desc";
     }
-    if(req.body.pageNo && req.body.pageNo > 0){
-        offset = (req.body.pageNo - 1) * 100;
-        limit = 100;
+    if (req.body.pageNo && req.body.pageNo > 0) {
+        offset = (req.body.pageNo - 1) * limit;
         page = req.body.pageNo;
     }
     await DB.getFullListByDept('pbk', req.params.dept_id, pbkCondition + conditionString, orderBy, limit, offset).then((resolve) => {
@@ -107,7 +108,7 @@ router.put('/:dept_id', async (req, res, next) => {
             resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
             resolve.data[i].relative_ref = (resolve.data[i].relative_ref != "[null]" ? JSON.parse(resolve.data[i].relative_ref) : []);
             resolve.data[i].alt_mo_no = (resolve.data[i].alt_mo_no != "[null]" ? JSON.parse(resolve.data[i].alt_mo_no) : []);
-        }        
+        }
         res.json({
             success: true,
             result: resolve.data || [],

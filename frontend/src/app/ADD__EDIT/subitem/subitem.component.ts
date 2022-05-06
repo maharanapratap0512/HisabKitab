@@ -22,7 +22,7 @@ export class SubitemComponent implements OnInit {
   showModal: string = '';
   editData: any = {};
   subitemData: any = [];
-  total_count: any;
+  total_count: any = 0;;
 
   constructor(
     private fb: FormBuilder,

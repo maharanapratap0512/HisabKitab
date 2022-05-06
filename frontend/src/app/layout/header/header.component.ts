@@ -114,7 +114,7 @@ export class HeaderComponent implements OnInit {
       let dept = this.auth.webUser;
       let date = new Date();
       this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
-        FileSaver.saveAs(content, dept.dept_eng + "_update_" + date.getDate() + "-" +date.getMonth() + "-" + date.getFullYear() + ".zip");
+        FileSaver.saveAs(content, dept.dept_eng + "_update_" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + ".zip");
       });
       this.isLoader = false;
       // }, 3000);
@@ -212,34 +212,71 @@ export class HeaderComponent implements OnInit {
 
       fileReader.onload = () => {
 
-        let aawakEntry = JSON.parse(fileReader.result);        
-        let newAawak:any = [];
-        for(let i in aawakEntry){
+        let aawakEntry = JSON.parse(fileReader.result);
+        let newAawak: any = [];
+        for (let i in aawakEntry) {
 
           newAawak[i] = {
             pkt_num: aawakEntry[i].parchi_num,
             pbk_id: null,
             date: aawakEntry[i].date,
-            item_id:null,
-            subitem_id:null,
-            unit_id:null,
-            item_detail:aawakEntry[i].item_detail,
-            qty:aawakEntry[i].quantity,
-            rate:aawakEntry[i].rate,
-            actual_amt:aawakEntry[i].amount,
+            item_id: null,
+            subitem_id: null,
+            unit_id: null,
+            item_detail: aawakEntry[i].item_detail,
+            qty: aawakEntry[i].quantity,
+            rate: aawakEntry[i].rate,
+            actual_amt: aawakEntry[i].amount,
             aawak_type_id: null,
             mm_id: null,
             description: aawakEntry[i].desc,
-            active:1,
-
+            active: 1,
+            mm_hin: aawakEntry[i].aawak_mm_hin,
+            mm_eng: aawakEntry[i].aawak_mm_eng,
+            mm_code: aawakEntry[i].aawak_mm_code,
+            roll_no: aawakEntry[i].aawak_roll_no,
+            pbk_hin: aawakEntry[i].pbk_hin,
+            pbk_eng: aawakEntry[i].pbk_eng,
+            relative_name: aawakEntry[i].sdw_of,
+            aawak_type_hin: aawakEntry[i].itemtype_hin,
+            aawak_type_eng: aawakEntry[i].itemtype_eng,
+            unit_full: aawakEntry[i].unit_full,
+            unit_short: aawakEntry[i].unit_short,
+            item_hin: aawakEntry[i].item_hin,
+            item_eng: aawakEntry[i].item_eng,
+            item_code: aawakEntry[i].item_code,
+            nimmit: aawakEntry[i].nimmit,
+            jawak_detail: []
           }
 
           //finding aawak_mm_id
-          this.gs.Lists.mm.find((m: { mm_hin: string; mm_eng: string; mm_code: string; parent_mm_id: null; _id: string; })=>{
-            if(aawakEntry[i].aawak_mm_id && !m.parent_mm_id && (m.mm_hin == aawakEntry[i].aawak_mm_hin  || m.mm_eng == aawakEntry[i].aawak_mm_eng || m.mm_code == aawakEntry[i].aawak_mm_code)){
-              aawakEntry[i].mm_id = m._id;
+          this.gs.Lists.mm.find((m: { mm_hin: string; mm_eng: string; mm_code: string; parent_mm_id: null; _id: string; }) => {
+            if (aawakEntry[i].aawak_mm_id && !m.parent_mm_id && (m.mm_hin == aawakEntry[i].aawak_mm_hin || m.mm_eng == aawakEntry[i].aawak_mm_eng || m.mm_code == aawakEntry[i].aawak_mm_code)) {
+              newAawak[i].mm_id = m._id;
             }
           });
+
+          for (let jwk of aawakEntry[i].jawak_detail) {
+            if (jwk.jawak_mm_id && jwk.jawak_quantity) {
+              let newjwk: any = {};
+
+              newjwk.jawak_mm_hin = jwk.jawak_mm_hin;
+              newjwk.jawak_mm_eng = jwk.jawak_mm_eng;
+              newjwk.jawak_mm_code = jwk.jawak_mm_code;
+              newjwk.qty = jwk.quantity;
+              newjwk.jawak_mm_id = null;
+
+              this.gs.Lists.mm.find((m: { mm_hin: string; mm_eng: string; mm_code: string; parent_mm_id: null; _id: string; }) => {
+                if (jwk.jawak_mm_id && !m.parent_mm_id && (m.mm_hin == jwk.jawak_mm_hin || m.mm_eng == jwk.jawak_mm_eng || m.mm_code == jwk.jawak_mm_code)) {
+                  newjwk.jawak_mm_id = m._id;
+                }
+              });
+
+              newAawak[i].jawak_detail.push()
+            }
+          }
+
+
         }
       }
 

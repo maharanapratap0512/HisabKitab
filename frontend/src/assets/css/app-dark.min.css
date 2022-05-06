@@ -22473,3 +22473,29 @@ Not supports in Firefox and IE */
    -moz-box-shadow: 0px -5px 20px 5px rgba(85, 0, 170, 1);
    box-shadow: 0px -5px 20px 5px rgba(85, 0, 170, 1);
 }
+
+
+/* Pagination css */
+.pagi .ngx-pagination .current {
+   background: #727cf5;
+}
+
+.pagi .ngx-pagination .disabled {
+   color: #525252;
+}
+
+.pagi .ngx-pagination a, .ngx-pagination button {
+   color: #92a1ad;
+}
+
+.pagi .ngx-pagination a:hover, .ngx-pagination button:hover {
+   background: #5d68cc99;
+   color: #fff;
+   transition: transform 0.2s ease;
+   transform: scale(115%);
+}
+
+.pagi .ngx-pagination {
+   margin-top: 1rem;
+   margin-bottom: 0;
+}

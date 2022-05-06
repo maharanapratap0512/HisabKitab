@@ -13,7 +13,7 @@
             <!-- Add Button, Search Field, Filter button, Total Count -->
             <div class="row">
                <div class="card-body" style="overflow: auto;">
-                  <div class="row justify-content-between" style="margin-bottom: 65px;">
+                  <div class="row justify-content-between">
                      <div class="col-2">
                         <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
                            (click)="showModal = 'Add Product'">
@@ -49,7 +49,7 @@
                            <th *ngIf="settings.company_name">Company Name - Model Name</th>
                            <th>S/R No. - Product Code</th>
                            <th>Price</th>
-                           <th >Condition</th>
+                           <th>Condition</th>
                            <th *ngIf="settings.warranty_period">Warranty Period</th>
                            <th *ngIf="settings.warranty_from">Warranty From</th>
                            <th *ngIf="settings.purchased_by">Purchased By</th>
@@ -93,6 +93,8 @@
                   </table>
                </div>
             </div>
+
+            <h2 class="text-center m-5" *ngIf="!productData.length">No Data!</h2>
          </div>
       </div>
    </div>
