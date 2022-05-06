@@ -9,6 +9,7 @@ import Swal from 'sweetalert2'
 import * as XLSX from 'xlsx';
 import { AuthService } from 'src/app/services/auth.service';
 import { observable, Observable, Subject } from 'rxjs';
+import { ExcelExportService } from 'src/app/services/excel-export.service';
 declare var $: any;
 
 @Component({
@@ -58,7 +59,8 @@ export class PbkComponent implements OnInit {
     public gs: GlobalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    public auth: AuthService
+    public auth: AuthService,
+    private excelExportService: ExcelExportService
   ) {
     this.settings = this.auth.webUser.settings.pbk;
   }
@@ -96,6 +98,10 @@ export class PbkComponent implements OnInit {
       }
       this.isLoader = false;
     });
+  }
+
+  export() {
+    this.excelExportService.exportAsExcelFile(this.pbkData, 'PBKs');
   }
 
   addPbkResponse(ev: any) {
