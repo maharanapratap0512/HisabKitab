@@ -139,7 +139,7 @@
                <pagination-controls class="pagi text-end" (pageChange)="getPbkData(page = $event)" [autoHide]="true">
                </pagination-controls>
                <div class="card-body" style="overflow: auto;">
-                  <table id="datatable-buttons" class="table table-hover dt-responsive">
+                  <table id="datatable-buttons" #TABLE class="table table-hover dt-responsive">
                      <thead>
                         <tr>
                            <th style="width: 80px;">No.</th>

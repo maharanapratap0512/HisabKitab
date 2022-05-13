@@ -20,7 +20,7 @@
                            <i class="dripicons-plus" style="font-size: large;"> </i>Add Aawak
                         </button>
                      </div>
-                     <div class="col-4">
+                     <div class="col-3">
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
@@ -45,6 +45,11 @@
                         <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse"
                            data-bs-target="#collapseExample" aria-expanded="false"
                            aria-controls="collapseExample">Advance Filter <i class="dripicons-chevron-down"> </i>
+                        </button>
+                     </div>
+                     <div class="col-1">
+                        <button class="btn btn-success w-100" (click)="exportAJdataData()">
+                           Export
                         </button>
                      </div>
                      <div class="col-2">
@@ -230,7 +235,7 @@
                <pagination-controls class="pagi text-end" (pageChange)="getaawakData(page = $event)" [autoHide]="true">
                </pagination-controls>
                <div class="card-body" style="overflow: auto;">
-                  <table id="datatable-buttons" class="table table-hover dt-responsive">
+                  <table id="datatable-buttons" class="table table-hover dt-responsive" #TABLE >
                      <thead>
                         <tr>
                            <th style="width: 40px;">No.</th>
