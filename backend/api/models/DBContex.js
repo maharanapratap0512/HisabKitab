@@ -516,7 +516,7 @@ class DBContex {
                 console.log(sql);
 
                 let total_count = 0;
-                await this.getCount(list_name, conditionString).then((resolve) => {
+                await this.getCount(list_name, condition).then((resolve) => {
                     total_count = resolve.total_count;
                 }, (err) => {
                     total_count = 0;
@@ -610,9 +610,9 @@ class DBContex {
                 let sql = `select count(*) as total_count from ${list_name}`;
 
                 if (condition) {
-                    sql += ` where ${condition}`;
+                    sql += ` ${condition}`;
                 }
-
+                console.log('sql', sql);
                 await this.localDB.get(sql, (err, data) => {
                     if (err) {
                         console.log({ sql: sql, err: err });

@@ -98,7 +98,7 @@ export class AawakComponent implements OnInit {
   getaawakData(pageNo: any) {
     this.isLoader = true;
     this.filterBody.pageNo = pageNo;
-    this.http.put(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+    this.http.get(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.aawakData = data['result'];
         this.aawakAll = data['result'];
