@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
@@ -9,6 +9,8 @@ import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import { FilterpipePipe } from '../pipe/filterpipe.pipe';
 import { AuthService } from '../services/auth.service';
+import { ExcelExportService } from '../services/excel-export.service';
+import { observable, Observable, Subject } from 'rxjs';
 declare var $: any;
 
 @Component({
@@ -18,7 +20,9 @@ declare var $: any;
 })
 export class AawakComponent implements OnInit {
 
+  @ViewChild('TABLE') el!: ElementRef<HTMLInputElement>;
   page = 1;
+  pageNo: any = 0;
   itemsPerPage = 100;
   currentPage: any;
   totalItems: any;
@@ -29,7 +33,8 @@ export class AawakComponent implements OnInit {
   editData: any = {};
   aawakData: any = [];
   aawakAll: any = [];
-  total_count: any = 0;;
+  total_count: any = 0;
+  allAJData: any = [];
   mms: any = [];
   viewData: any = [];
   items: any = [];
@@ -58,6 +63,7 @@ export class AawakComponent implements OnInit {
   };
   cat: any;
   settings: any = {};
+  exportAJdata$ = new Subject();
 
   constructor(
     private fb: FormBuilder,
@@ -67,6 +73,7 @@ export class AawakComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService,
+    private excelExportService: ExcelExportService,
   ) {
     this.settings = this.auth.webUser.settings;
   }
@@ -88,10 +95,6 @@ export class AawakComponent implements OnInit {
     });
   }
 
-  mmSelected(ev: any) {
-
-  }
-
   getaawakData(pageNo: any) {
     this.isLoader = true;
     this.filterBody.pageNo = pageNo;
@@ -104,6 +107,80 @@ export class AawakComponent implements OnInit {
       }
       this.isLoader = false;
     });
+  }
+
+  exportAJdataData() {
+    this.isLoader = true;
+    this.filterBody.pageNo = this.pageNo;
+    this.http.put(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+      if (data['result'] && data['success']) {
+        this.aawakData = data['result'];
+        this.aawakAll = data['result'];
+        this.total_count = data['total_count'];
+        // this.isLoader = false;
+        if (data["result"].length < data["total_count"]) {
+          this.getMoreAJ();
+        }
+      }
+      this.isLoader = false;
+    });
+
+    this.exportAJdata$.subscribe((result: any) => {
+      for (let i in result) {
+        let newJson = result.map((res: any) => {
+          let jawakArray: any[] = []
+          res.jawak_detail.forEach((jres: any) => {
+            jawakArray.push({
+              'Date': jres.date ? jres.date : '-',
+              'Item': jres.item_id ? jres.item_hin : '-',
+              'Qty': jres.qty ? jres.qty : '-',
+              'Unit': jres.unit_id ? jres.unit_short : '-',
+              'Jawak MM': jres.jawak_mm_id ? jres.jawak_mm_hin : '-'
+            })
+          });
+          return {
+            'Date': res.date ? res.date : '-',
+            'Item': res.item_id ? res.item_hin : '-',
+            'Aawak MM': res.aawak_mm_id ? res.aawak_mm_hin : '-',
+            'Aawak Type': res.aawak_type_id ? res.aawak_type_hin : '-',
+            'Qty': res.qty ? res.qty : '-',
+            'Unit': res.unit_id ? res.unit_short : '-',
+            'Jawak Detail': jawakArray,
+          }
+        })
+        this.allAJData.push(newJson[0]);
+      }
+      if (this.allAJData.length < 3) {
+        this.getMoreAJ();
+      }
+      else {
+        this.export(this.allAJData);
+        this.isLoader = false;
+      }
+    });
+  }
+
+
+  getMoreAJ() {
+    this.isLoader = true;
+    this.filterBody.pageNo = this.pageNo + 1;
+    this.http.put(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+      if (data['result'] && data["result"].length > 0) {
+        if (data["pageNo"]) {
+          this.pageNo = data["pageNo"];
+        }
+        this.exportAJdata$.next(data['result']);
+        // this.isLoader = false;
+      }
+      // this.isLoader = false;
+    });
+  }
+
+
+  export(json: any) {
+    this.excelExportService.generateExcel(json, 'AawakJawak');
+    // this.excelExportService.exportAsExcelFile(json, 'AawakJawak');
+    // this.excelExportService.exportAsExcelFile(this.el.nativeElement, 'AawakJawak');
   }
 
   aawakDeptSelected(ev: any) {

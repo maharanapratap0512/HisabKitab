@@ -21,6 +21,7 @@
     "@ng-select/ng-select": "^7.3.0",
     "@ng-toolkit/universal": "^8.1.0",
     "@syncfusion/ej2-angular-dropdowns": "^19.4.56",
+    "exceljs": "^4.3.0",
     "file-saver": "^2.0.5",
     "jquery": "^3.6.0",
     "multer": "^1.4.4",

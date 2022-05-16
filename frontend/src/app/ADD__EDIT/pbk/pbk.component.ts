@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from 'src/app/services/api.service';
 import { GlobalService } from 'src/app/services/global.service';
@@ -19,6 +19,7 @@ declare var $: any;
   styleUrls: ['./pbk.component.scss']
 })
 export class PbkComponent implements OnInit {
+  @ViewChild('TABLE') el!: ElementRef<HTMLInputElement>;
 
   page = 1;
   itemsPerPage = 100;
@@ -101,6 +102,62 @@ export class PbkComponent implements OnInit {
       this.isLoader = false;
     });
   }
+
+  // getPbkData() {
+  //   this.isLoader = true;
+  //   this.http.put(this.api.getUrl('PBK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+  //     if (data['result'] && data['success']) {
+  //       this.pbkData = data['result'];
+  //       // this.total_count = data['total'];
+  //       this.total_count = data['total_count'];
+  //       for (let i in this.pbkData) {
+  //         if (this.pbkData[i].birth_date) {
+  //           let bdate = new Date(this.pbkData[i].birth_date);
+  //           const timeDiff = Math.abs(Date.now() - bdate.getTime());
+  //           this.showAge = Math.floor((timeDiff / (1000 * 3600 * 24)) / 365);
+  //           this.pbkData[i].age = this.showAge;
+  //         }
+  //       }
+  //       if (data["result"].length < data["total_count"]) {
+  //         this.getMorePbk();
+  //       }
+  //       this.isLoader = false;
+  //     }
+  //     this.isLoader = false;
+  //   });
+
+  //   this.getPbk$.subscribe((result: any) => {    
+  //     for (let i in result) {
+  //       if (result[i].birth_date) {
+  //         let bdate = new Date(result[i].birth_date);
+  //         const timeDiff = Math.abs(Date.now() - bdate.getTime());
+  //         this.showAge = Math.floor((timeDiff / (1000 * 3600 * 24)) / 365);
+  //         result[i].age = this.showAge;
+  //       }
+  //       this.pbkData.push(result[i]);
+  //     }
+  //     console.log("result", result.length);
+  //     console.log("this.pbkData", this.pbkData.length);
+  //     if(this.total_count > this.pbkData.length){
+  //       this.getMorePbk();
+  //     }
+  //   });
+  // }
+
+  // getMorePbk() {
+  //   this.filterBody.pageNo = this.pageNo + 1;
+  //   this.http.put(this.api.getUrl('PBK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+  //     if (data['result'] && data["result"].length > 0) {
+  //       if (data["pageNo"]) {
+  //         this.pageNo = data["pageNo"];
+  //       }
+  //       this.getPbk$.next(data['result']);
+  //       // this.isLoader = false;
+  //     }
+  //     // this.isLoader = false;
+  //   });
+  // }
+
 
   export() {
     // this.excelExportService.exportAsExcelFile(this.pbkData, 'PBKs');
