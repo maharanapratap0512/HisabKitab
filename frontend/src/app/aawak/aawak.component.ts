@@ -80,7 +80,7 @@ export class AawakComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
-    this.getaawakData(1);
+    this.getaawakData();
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.items = result.itemmix ? result.itemmix : [];
@@ -95,9 +95,22 @@ export class AawakComponent implements OnInit {
     });
   }
 
-  getaawakData(pageNo: any) {
+  getaawakData(pageNo: any = null) {
     this.isLoader = true;
-    this.filterBody.pageNo = pageNo;
+    this.http.get(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id).subscribe((data: any) => {
+      if (data['result'] && data['success']) {
+        this.aawakData = data['result'];
+        this.aawakAll = data['result'];
+        this.total_count = data['total_count'];
+        this.isLoader = false;
+      }
+      this.isLoader = false;
+    });
+  }
+
+  getFilteredAawakData() {
+    this.isLoader = true;
+    this.filterBody.pageNo = this.pageNo;
     this.http.get(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.aawakData = data['result'];
@@ -111,46 +124,35 @@ export class AawakComponent implements OnInit {
 
   exportAJdataData() {
     this.isLoader = true;
-    this.filterBody.pageNo = this.pageNo;
-    this.http.put(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
-      if (data['result'] && data['success']) {
-        this.aawakData = data['result'];
-        this.aawakAll = data['result'];
-        this.total_count = data['total_count'];
-        // this.isLoader = false;
-        if (data["result"].length < data["total_count"]) {
-          this.getMoreAJ();
-        }
-      }
-      this.isLoader = false;
-    });
+    this.pageNo = 0;
+    this.getMoreAJ();
 
     this.exportAJdata$.subscribe((result: any) => {
-      for (let i in result) {
-        let newJson = result.map((res: any) => {
-          let jawakArray: any[] = []
-          res.jawak_detail.forEach((jres: any) => {
-            jawakArray.push({
-              'Date': jres.date ? jres.date : '-',
-              'Item': jres.item_id ? jres.item_hin : '-',
-              'Qty': jres.qty ? jres.qty : '-',
-              'Unit': jres.unit_id ? jres.unit_short : '-',
-              'Jawak MM': jres.jawak_mm_id ? jres.jawak_mm_hin : '-'
-            })
-          });
-          return {
-            'Date': res.date ? res.date : '-',
-            'Item': res.item_id ? res.item_hin : '-',
-            'Aawak MM': res.aawak_mm_id ? res.aawak_mm_hin : '-',
-            'Aawak Type': res.aawak_type_id ? res.aawak_type_hin : '-',
-            'Qty': res.qty ? res.qty : '-',
-            'Unit': res.unit_id ? res.unit_short : '-',
-            'Jawak Detail': jawakArray,
-          }
-        })
-        this.allAJData.push(newJson[0]);
-      }
-      if (this.allAJData.length < 3) {
+      result.map((res: any, index:any) => {
+        let jawakArray: any[] = []
+        res.jawak_detail.forEach((jres: any) => {
+          jawakArray.push({
+            'Date': jres.date ? jres.date : '-',
+            'Item': jres.item_id ? jres.item_hin : '-',
+            'Qty': jres.qty ? jres.qty : '-',
+            'Unit': jres.unit_id ? jres.unit_short : '-',
+            'Jawak MM': jres.jawak_mm_id ? jres.jawak_mm_hin : '-'
+          })
+        });
+
+        this.allAJData.push({
+          'No':index,
+          'Date': res.date ? res.date : '-',
+          'Item': res.item_id ? res.item_hin : '-',
+          'Aawak MM': res.aawak_mm_id ? res.aawak_mm_hin : '-',
+          'Aawak Type': res.aawak_type_id ? res.aawak_type_hin : '-',
+          'Qty': res.qty ? res.qty : '-',
+          'Unit': res.unit_id ? res.unit_short : '-',
+          'Jawak Detail': jawakArray,
+        });
+      });
+
+      if (this.allAJData.length < this.total_count) {
         this.getMoreAJ();
       }
       else {

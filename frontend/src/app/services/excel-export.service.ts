@@ -106,11 +106,12 @@ export class ExcelExportService {
 
 
     /*Column headers*/
-    worksheet.getRow(3).values = ['Date', 'Item', 'Qty', 'Unit', 'Aawak MM', 'Aawak Type', 'Date', 'Item', 'Qty', 'Unit', 'Jawak MM'];
+    worksheet.getRow(3).values = ['No','Date', 'Item', 'Qty', 'Unit', 'Aawak MM', 'Aawak Type', 'Date', 'Item', 'Qty', 'Unit', 'Jawak MM'];
 
     /*Define your column keys because this is what you use to insert your data according to your columns, they're column A, B, C, D respectively being idClient, Name, Tel, and Adresse.
     So, it's pretty straight forward */
     worksheet.columns = [
+      { key: 'No'},
       { key: 'Date' },
       { key: 'Item' },
       { key: 'Qty' },
