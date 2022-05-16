@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from 'src/app/services/api.service';
 import { GlobalService } from 'src/app/services/global.service';
@@ -10,6 +10,7 @@ import * as XLSX from 'xlsx';
 import { AuthService } from 'src/app/services/auth.service';
 import { observable, Observable, Subject } from 'rxjs';
 import { ExcelExportService } from 'src/app/services/excel-export.service';
+import { DOCUMENT } from '@angular/common'; 
 declare var $: any;
 
 @Component({
@@ -60,7 +61,8 @@ export class PbkComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService,
-    private excelExportService: ExcelExportService
+    private excelExportService: ExcelExportService,
+    @Inject(DOCUMENT) document: Document
   ) {
     this.settings = this.auth.webUser.settings.pbk;
   }
@@ -101,7 +103,11 @@ export class PbkComponent implements OnInit {
   }
 
   export() {
-    this.excelExportService.exportAsExcelFile(this.pbkData, 'PBKs');
+    // this.excelExportService.exportAsExcelFile(this.pbkData, 'PBKs');
+    let tbl = document.getElementById('tblPbk');
+    console.log("tbl", tbl);
+    
+    this.excelExportService.exportTblToExcelFile(tbl, 'PBKs');
   }
 
   addPbkResponse(ev: any) {

@@ -1,0 +1,145 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
+</ngx-spinner>
+
+
+<div class="row">
+
+   <div class="row" style="padding: 10px 50px;">
+      <ul class="nav nav-pills bg-nav-pills">
+         <li class="nav-item">
+            <a href="#exceldata" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0 active">
+               Excel Data
+               <span class="translate-middle bell badge rounded-pill bg-danger">
+                  <!-- {{tempdata.length}} -->
+               </span>
+            </a>
+
+         </li>
+         <li class="nav-item mx-2">
+            <div style="width: 15vw;margin-top: 1.5px;">
+               <!-- <ng-select class="custom" style="width: 100%;" placeholder="Select Aawak MM" [clearable]="false"
+                  [virtualScroll]="true" (change)="setAawakMM($event)" [ngModel]="excel_aawak_mm"
+                  [ngModelOptions]="{standalone: true}">
+                  <ng-option selected="selected" disabled value="">Select Aawak MM</ng-option>
+                  <ng-option *ngFor="let item of mms" [value]="" value="{{item.mm_hin}}:{{item._id}}">
+                     {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+               </ng-select> -->
+            </div>
+         </li>
+         <li class="nav-item">
+            <a href="#correction" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+               Make Correction
+               <!-- <span class="translate-middle bell badge rounded-pill bg-danger">
+                  {{tempdata.length}}
+               </span> -->
+            </a>
+         </li>
+         <li class="nav-item">
+            <a href="#tobeimport" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+               Data To Be Imported
+               <!-- <span class="translate-middle bell badge rounded-pill bg-danger">
+               {{tempdata.length}}
+            </span> -->
+            </a>
+         </li>
+         <li class="nav-item">
+            <a href="#duplicate" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+               Duplicate Data
+               <span class="translate-middle bell badge rounded-pill" style="background-color: #bf7d40;">
+                  <!-- {{this.duplicatedata.length}} -->
+               </span>
+            </a>
+         </li>
+         <li class="nav-item">
+            <a href="#skipped" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+               Skipped Data
+               <span class="translate-middle bell badge rounded-pill" style="background-color: #da2534;">
+                  <!-- {{skippeddata.length}} -->
+               </span>
+            </a>
+         </li>
+
+         <li class="nav-item" style="margin-left: auto;">
+            <a class="nav-link rounded-0">
+               Successfully Imported
+               <span class="translate-middle bell badge rounded-pill bg-success">
+                  <!-- {{finaldata.length}} -->
+               </span>
+            </a>
+         </li>
+
+      </ul>
+   </div>
+
+   <div class="tab-content">
+      <!-- exceldata -->
+      <div class="tab-pane show active" id="exceldata" style="overflow: auto;">
+         <table id="datatable-buttons" class="table table-hover dt-responsive" style="width:max-content;">
+            <thead>
+               <tr>
+                  <th>No.</th>
+                  <th>Pkt No.</th>
+                  <th>Date</th>
+                  <th>MM</th>
+                  <th>Sewadhari</th>
+                  <!-- <th>Category</th> -->
+                  <th>Item</th>
+                  <th>Subitem</th>
+                  <th style="width: 250px;">Item Details</th>
+                  <th>Quantity</th>
+                  <th>Rate</th>
+                  <th>Total</th>
+                  <th>Aawak Type</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let data of importData | filter:term; let i=index">
+                  <td>{{i+1}}</td>
+                  <td>{{data.pkt_num ? data.pkt_num : '-'}} </td>
+                  <td [ngClass]="{'marked': !data.date}">{{data.date?(data.date | date:'dd-MM-yyyy'):'-'}}
+                  </td>
+                  <td [ngClass]="{'marked': !data.mm_id}">
+                     {{data.mm_hin?data.mm_hin:'-'}} {{data.mm_code?' : ' + data.mm_code:'-'}} <br />
+                     {{data.mm_eng?data.mm_eng:'-'}}
+                  </td>
+                  <td [ngClass]="{'marked': !data.pbk_id}">
+                     {{data.Roll_no?data.Roll_no:'____'}} {{data.pbk_hin?data.pbk_hin:'-'}}
+                     {{data.pbk_hin?data.pbk_eng:'-'}} <br />
+                     {{data.relative_name?data.relative_name:'-'}}
+                  </td>
+                  <!-- <td [ngClass]="{'warned': !data.category_id}">{{data.Category?data.Category:'-'}}</td> -->
+                  <td [ngClass]="{'marked': !data.item_id}">{{data.item_hin?data.item_hin:'-'}} <br />
+                     {{data.item_eng?data.item_eng:'-'}}</td>
+                  <!-- <td [ngClass]="{'marked': !data.subitem_id && data.Subitem && !data.itemverified, -->
+                  <!-- 'warned':  !data.subitem_id && data.Subitem && data.itemverified}"> -->
+                  <td [ngClass]="{'marked': !data.subitem_id && (data.subitem_hin || data.subitem_eng)}">
+                     {{data.subitem_hin?data.subitem_hin:'-'}} <br />
+                     {{data.subitem_eng?data.subitem_eng:'-'}} 
+                  </td>
+                  <td>{{data.item_detail?data.item_detail:'-'}}</td>
+                  <td [ngClass]="{'marked': !data.qty || !data.unit_id}">{{data.qty?data.qty:'-'}}
+                     {{data.unit_short?data.unit_short:'-'}}</td>
+                  <td>{{data.rate?data.rate:'-'}}</td>
+                  <td>{{data.amount?data.amount:'-'}}</td>                  
+                  <td [ngClass]="{'marked': !data.aawak_type_id}">
+                     {{data.aawak_type_hin?data.aawak_type_hin:'-'}} <br />
+                     {{data.aawak_type_eng?data.aawak_type_eng:'-'}}
+                  </td>
+                  <!-- <td>
+                     <span class="px-1" *ngFor="let subdata of data.jawak_detail"
+                        [ngClass]="{'marked': !subdata.jawak_mm_id}">
+                        {{subdata.uses}}-{{subdata.jawak_quantity}}
+                        <br>
+                     </span>
+                  </td> -->
+                  <!-- <ng-container *ngFor="let subdata of data.jawak_detail"> -->
+                  <!-- </ng-container> -->
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+
+</div>

@@ -68,7 +68,7 @@
                                     <ng-select class="custom" style="width: 100%;" placeholder="Select Gender"
                                        [clearable]="true" [virtualScroll]="true" name="gender" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.gender" #gender="ngModel">
-                                       <ng-option *ngFor="let item of genders" [value]="item.list_name_eng">
+                                       <ng-option *ngFor="let item of genders" value='"{{item.list_name_eng}}"'>
                                           {{item.list_name_hin}} : {{item.list_name_eng}}</ng-option>
                                     </ng-select>
                                  </div>
@@ -139,7 +139,7 @@
                <pagination-controls class="pagi text-end" (pageChange)="getPbkData(page = $event)" [autoHide]="true">
                </pagination-controls>
                <div class="card-body" style="overflow: auto;">
-                  <table id="datatable-buttons" class="table table-hover dt-responsive">
+                  <table id="tblPbk" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
                            <th style="width: 80px;">No.</th>
@@ -192,7 +192,7 @@
                                  [src]="baseurl + data.document.images[0]" height="60px"
                                  style="padding: 5px; border-radius: 15px;">
                            </td>
-                           <td *ngIf="settings.roll_no">{{data.roll_no ? data.roll_no : '______'}} </td>
+                           <td *ngIf="settings.roll_no" style="color:red">{{data.roll_no ? data.roll_no : '______'}} </td>
                            <td>{{data.pbk_hin}} <br> {{data.pbk_eng}}</td>
                            <td *ngIf="settings.relation || settings.relative_name">
                               {{data.relation}}<br>{{data.relative_name}}</td>

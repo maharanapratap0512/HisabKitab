@@ -291,7 +291,7 @@ class DBContex {
                         sql = `select * from pbk`
                         condition += (condition != `` ? ' AND ' : ' ') + ` (status is null OR status <> "nimmit") `;
                         if (!exclude_dept.includes(dept_id)) {
-                            condition += (condition != `` ? ' AND ' : ' ') + ` AND (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
+                            condition += (condition != `` ? ' AND ' : ' ') + ` (select config_value from department_config where dept_id = ${dept_id} AND config_key = '${list_name}') LIKE '%,'||${list_name}._id||',%'`;
                         }
                     }
                     else if (this.dept_config_list.includes(list_name)) {

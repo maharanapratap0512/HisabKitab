@@ -60,6 +60,7 @@ import { FilterpipePipe } from './pipe/filterpipe.pipe';
 import { PointEntryComponent } from './ENTRY__FORMS/point-entry/point-entry.component';
 import { PointComponent } from './point/point.component';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { ImportComponent } from './import/import.component';
 
 
 
@@ -107,6 +108,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
     FilterpipePipe,
     PointEntryComponent,
     PointComponent,
+    ImportComponent,
   ],
   imports: [
     BrowserModule,

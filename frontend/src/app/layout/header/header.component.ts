@@ -22,6 +22,8 @@ export class HeaderComponent implements OnInit {
   topPosToStartShowing = 100;
   isLoader: boolean = false;
   settings: any;
+  showModal:any = ''; 
+  importData: any = [];
 
   constructor(
     private http: HttpService,
@@ -44,6 +46,11 @@ export class HeaderComponent implements OnInit {
       this.isShow = false;
     }
   }
+
+  openModal(type: String) {
+    this.showModal = type;
+    $('#showModal').modal('show');
+  } 
 
   gotoTop() {
     window.scroll({
@@ -244,22 +251,72 @@ export class HeaderComponent implements OnInit {
             unit_short: aawakEntry[i].unit_short,
             item_hin: aawakEntry[i].item_hin,
             item_eng: aawakEntry[i].item_eng,
+            subitem_hin: aawakEntry[i].subitem_hin,
+            subitem_eng: aawakEntry[i].subitem_eng,
             item_code: aawakEntry[i].item_code,
             nimmit: aawakEntry[i].nimmit,
+            nimmit_id:null,
             jawak_detail: []
           }
 
           //finding aawak_mm_id
-          this.gs.Lists.mm.find((m: { mm_hin: string; mm_eng: string; mm_code: string; parent_mm_id: null; _id: string; }) => {
-            if (aawakEntry[i].aawak_mm_id && !m.parent_mm_id && (m.mm_hin == aawakEntry[i].aawak_mm_hin || m.mm_eng == aawakEntry[i].aawak_mm_eng || m.mm_code == aawakEntry[i].aawak_mm_code)) {
-              newAawak[i].mm_id = m._id;
-            }
-          });
+          if (aawakEntry[i].aawak_mm_id){
+            this.gs.Lists.mm.find((m: { mm_hin: string; mm_eng: string; mm_code: string; parent_mm_id: null; _id: any; }) => {
+              if (!m.parent_mm_id && (m.mm_hin == aawakEntry[i].aawak_mm_hin || m.mm_eng == aawakEntry[i].aawak_mm_eng || m.mm_code == aawakEntry[i].aawak_mm_code)) {
+                newAawak[i].mm_id = m._id;
+              }
+            });
+          }
 
+          //finding pbk_id
+          if (aawakEntry[i].pbk_id) {
+            this.gs.Lists.pbk.find((p: { _id: any; roll_no: any; }) => {
+              if (p.roll_no == aawakEntry[i].roll_no) {
+                newAawak[i].pbk_id = p._id;
+              }
+            });
+          }
+
+          //finding item_id and subitem_id
+          if(aawakEntry[i].item_id){
+            this.gs.Lists.itemmix.find((it: { _id: any; item_hin: any; item_eng: any; subitems:any[] })=>{
+              if(it.item_hin == aawakEntry[i].item_hin || it.item_eng == aawakEntry[i].item_eng){
+                newAawak[i].item_id = it._id;
+                if(aawakEntry[i].subitem_id){
+                  it.subitems.find(si=>{
+                    if(si.subitem_hin == aawakEntry[i].subitem_hin || si.subitem_eng == aawakEntry[i].subitem_eng){
+                      newAawak[i].subitem_id = si._id;
+                    }
+                  });
+                }
+              }
+            });
+          }
+
+          //findig nimmit
+          if(aawakEntry[i].nimmit && aawakEntry[i].nimmit.trim() != '' ){
+            this.gs.Lists.nimmit.find((n: { nimmit_hin: any; nimmit_eng: any; _id: any; })=>
+            {
+              if(n.nimmit_hin == aawakEntry[i].nimmit || n.nimmit_eng == aawakEntry[i].nimmit){
+                newAawak[i].nimmit_id = n._id;
+              }
+            });
+            
+          }
+
+          // finding unit
+          if(aawakEntry[i].unit_id){
+            this.gs.Lists.unit.find((u: { unit_full: any; unit_short: any; _id: any; })=>{
+              if(u.unit_full == aawakEntry[i].unit_full || u.unit_short == aawakEntry[i].unit_short){
+                newAawak[i].unit_id = u._id;
+              }
+            });
+          }
+
+          // finding and setting jawak
           for (let jwk of aawakEntry[i].jawak_detail) {
             if (jwk.jawak_mm_id && jwk.jawak_quantity) {
               let newjwk: any = {};
-
               newjwk.jawak_mm_hin = jwk.jawak_mm_hin;
               newjwk.jawak_mm_eng = jwk.jawak_mm_eng;
               newjwk.jawak_mm_code = jwk.jawak_mm_code;
@@ -272,12 +329,14 @@ export class HeaderComponent implements OnInit {
                 }
               });
 
-              newAawak[i].jawak_detail.push()
+              newAawak[i].jawak_detail.push(newjwk);
             }
           }
 
-
+          this.openModal('import');          
+          this.importData = newAawak;
         }
+        
       }
 
     }
