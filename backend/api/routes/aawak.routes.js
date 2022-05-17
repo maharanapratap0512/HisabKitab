@@ -134,8 +134,7 @@ router.put('/pending', async (req, res, next) => {
 
 //aawak get by dept + filter + pageNo
 router.put('/:dept_id', async (req, res, next) => {
-
-    let orderBy = null, limit = 10, offset = null, page = 1;
+    let orderBy = null, limit = 100, offset = null, page = 1;
     let conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.mm_id.length > 0 ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${req.body.aawak_mm_id.length > 0 ? ` AND aawak.aawak_mm_id in (${req.body.aawak_mm_id.join(',')})` : ``} ${req.body.pbk_id.length > 0 ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${req.body.item_id.length > 0 ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${req.body.subitem_id.length > 0 ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${req.body.aawak_type_id.length > 0 ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${req.body.product_id.length > 0 ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${req.body.condition_id.length > 0 ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = ${req.body.pkt_num}` : ``} ${req.body.nimmit ? ` AND aawak.nimmit = ${req.body.nimmit}` : ``}`;
     if (conditionString.trim() == `1=1`) {
         orderBy = "aawak._id desc";

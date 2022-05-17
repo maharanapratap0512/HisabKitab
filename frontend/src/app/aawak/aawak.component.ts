@@ -125,10 +125,15 @@ export class AawakComponent implements OnInit {
   exportAJdataData() {
     this.isLoader = true;
     this.pageNo = 0;
+    this.allAJData = [];
+    this.exportAJdata$ = new Subject();
+    console.log("allAJData", this.allAJData);
+
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe((result: any) => {
-      result.map((res: any, index:any) => {
+      console.log("exportAJdata", result);
+      result.map((res: any, index: any) => {
         let jawakArray: any[] = []
         res.jawak_detail.forEach((jres: any) => {
           jawakArray.push({
@@ -141,7 +146,7 @@ export class AawakComponent implements OnInit {
         });
 
         this.allAJData.push({
-          'No':index,
+          'No': index + 1,
           'Date': res.date ? res.date : '-',
           'Item': res.item_id ? res.item_hin : '-',
           'Aawak MM': res.aawak_mm_id ? res.aawak_mm_hin : '-',
@@ -167,7 +172,7 @@ export class AawakComponent implements OnInit {
     this.isLoader = true;
     this.filterBody.pageNo = this.pageNo + 1;
     this.http.put(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
-      if (data['result'] && data["result"].length > 0) {
+      if (data['result'] && data["result"].length) {
         if (data["pageNo"]) {
           this.pageNo = data["pageNo"];
         }

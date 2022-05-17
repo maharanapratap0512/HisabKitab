@@ -83,22 +83,22 @@ export class ExcelExportService {
 
 
     /*TITLE*/
-    worksheet.mergeCells('A1', 'K1');
+    worksheet.mergeCells('A1', 'L1');
     worksheet.getCell('C1').value = 'आवक जावक बुक'
     worksheet.getRow(1).font = { name: 'Corbel', family: 4, size: 20, };
     worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-    ['A2', 'B2', 'C2', 'D2', 'E2', 'F2', 'G2', 'H2', 'I2', 'J2', 'K2'].map(key => {
+    ['A2', 'B2', 'C2', 'D2', 'E2', 'F2', 'G2', 'H2', 'I2', 'J2', 'K2', 'L2'].map(key => {
       worksheet.getCell(key).fill = {
         type: 'pattern', pattern: 'solid', fgColor: { argb: '96C8FB' }, bgColor: { argb: '96C8FB' }
       };
     });
 
     /*SUBTITLE*/
-    worksheet.mergeCells('A2', 'F2');
+    worksheet.mergeCells('A2', 'G2');
     worksheet.getCell('A2').value = 'आवक';
-    worksheet.mergeCells('G2', 'K2');
-    worksheet.getCell('G2').value = 'जावक';
-    ['A3', 'B3', 'C3', 'D3', 'E3', 'F3', 'G3', 'H3', 'I3', 'J3', 'K3'].map(key => {
+    worksheet.mergeCells('H2', 'L2');
+    worksheet.getCell('H2').value = 'जावक';
+    ['A3', 'B3', 'C3', 'D3', 'E3', 'F3', 'G3', 'H3', 'I3', 'J3', 'K3', 'L3'].map(key => {
       worksheet.getCell(key).fill = {
         type: 'pattern', pattern: 'solid', fgColor: { argb: '23423' }, bgColor: { argb: '98754' }
       };
@@ -125,11 +125,14 @@ export class ExcelExportService {
       { key: 'J_Jawak MM' }
     ]
 
-    worksheet.getColumn(1).width = 11;
-    worksheet.getColumn(5).width = 12;
+    worksheet.getColumn(1).width = 6;
+    worksheet.getColumn(2).width = 11;
+    worksheet.getColumn(3).width = 11;
     worksheet.getColumn(6).width = 12;
-    worksheet.getColumn(7).width = 11;
-    worksheet.getColumn(11).width = 15;
+    worksheet.getColumn(7).width = 12;
+    worksheet.getColumn(8).width = 11;
+    worksheet.getColumn(9).width = 11;
+    worksheet.getColumn(12).width = 15;
 
 
     /* Now we use the keys we defined earlier to insert your data by iterating through arrData and calling worksheet.addRow()*/
