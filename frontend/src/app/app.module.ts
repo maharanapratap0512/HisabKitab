@@ -11,7 +11,9 @@ import { Ng2SearchPipeModule } from 'ng2-search-filter';
 import { FileSaverModule } from 'ngx-filesaver';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgtUniversalModule } from '@ng-toolkit/universal';
-import { DropDownTreeModule } from '@syncfusion/ej2-angular-dropdowns';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { FilterpipePipe } from './pipe/filterpipe.pipe';
+// import { DropDownTreeModule } from '@syncfusion/ej2-angular-dropdowns';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -50,17 +52,15 @@ import { CityComponent } from './ADD__EDIT/city/city.component';
 import { ItemComponent } from './ADD__EDIT/item/item.component';
 import { MmComponent } from './ADD__EDIT/mm/mm.component';
 import { SubitemComponent } from './ADD__EDIT/subitem/subitem.component';
-import { GlobalService } from './services/global.service';
 import { SupportListEntryComponent } from './ENTRY__FORMS/support-list-entry/support-list-entry.component';
 import { SubitemListEntryComponent } from './ENTRY__FORMS/subitem-list-entry/subitem-list-entry.component';
 import { DepartmentComponent } from './department/department.component';
 import { DepartmentEntryComponent } from './ENTRY__FORMS/department-entry/department-entry.component';
 import { BachatComponent } from './bachat/bachat.component';
-import { FilterpipePipe } from './pipe/filterpipe.pipe';
 import { PointEntryComponent } from './ENTRY__FORMS/point-entry/point-entry.component';
 import { PointComponent } from './point/point.component';
-import { NgxPaginationModule } from 'ngx-pagination';
 import { ImportComponent } from './import/import.component';
+import { GlobalService } from './services/global.service';
 
 
 
@@ -112,7 +112,7 @@ import { ImportComponent } from './import/import.component';
   ],
   imports: [
     BrowserModule,
-    DropDownTreeModule,
+    // DropDownTreeModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,

@@ -301,6 +301,7 @@ export class AawakComponent implements OnInit {
   openModal(type: any) {
     this.showModal = type;
     $('#showModal').modal('show');
+    console.log(this.showModal);
   }
 
   stateSelected(ev: any) {

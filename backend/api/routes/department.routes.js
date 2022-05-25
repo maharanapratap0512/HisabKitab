@@ -92,7 +92,7 @@ router.put('/', async (req, res, next) => {
 //login to department
 router.put('/login', async (req, res, next) => {
     if (req.body.dept_id && req.body.dept_id != 4 && req.body.password) {
-        let condition = `_id = ${req.body.dept_id} AND password = '${req.body.password}' `;
+        let condition = ` where _id = ${req.body.dept_id} AND password = '${req.body.password}' `;
         await DB.getCount('department', condition).then(async (response) => {
             if(response.total_count == 1){                
                 await DB.getDeptConfig(req.body.dept_id, "settings").then(setting=>{
