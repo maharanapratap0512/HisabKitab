@@ -164,7 +164,7 @@ export class PbkComponent implements OnInit {
     let tbl = document.getElementById('tblPbk');
     console.log("tbl", tbl);
     
-    this.excelExportService.exportTblToExcelFile(tbl, 'PBKs');
+    // this.excelExportService.exportTblToExcelFile(tbl, 'PBKs');
   }
 
   addPbkResponse(ev: any) {

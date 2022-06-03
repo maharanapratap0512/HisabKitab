@@ -559,7 +559,7 @@ class DBContex {
                 sql = sql.substring(0, lIndex) + condition + sql.substring(lIndex + 1);
 
                 let total_count = 0;
-                await this.getCount(list_name, conditionString).then((resolve) => {
+                await this.getCount(list_name, condition).then((resolve) => {
                     total_count = resolve.total_count;
                 });
                 this.localDB.all(sql, (err, data) => {

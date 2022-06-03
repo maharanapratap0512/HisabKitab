@@ -15,8 +15,7 @@
                <div class="card-body">
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
-                        <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
-                           (click)="showModal = 'Add Aawak'">
+                        <button class="btn btn-primary w-100" (click)="openModal('Add Aawak')">
                            <i class="dripicons-plus" style="font-size: large;"> </i>Add Aawak
                         </button>
                      </div>
@@ -368,6 +367,18 @@
 
 
 
+<!-- <ng-template #showModal class="modal" let-c="close" let-d="dismiss">
+   <div class="modal-header">
+     <h4 class="modal-title" id="modal-basic-title">Hi there!</h4>
+     <button type="button" class="btn-close" aria-label="Close" (click)="d('Cross click')"></button>
+   </div>
+   <div class="modal-body">
+     <p>Hello, World!</p>
+   </div>
+   <div class="modal-footer">
+     <button type="button" class="btn btn-outline-dark" (click)="c('Save click')">Save</button>
+   </div>
+ </ng-template> -->
 
 <!-- Modal -->
 <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -375,12 +386,13 @@
    <div class="modal-dialog" style="width: 90%;">
       <div class="modal-content">
          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <h5 class="modal-title" id="exampleModalLabel">Add Aawak</h5>
             <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
                aria-label="Close"></button>
          </div>
          <div class="modal-body">
-            <app-aawak-entry *ngIf="showModal == 'Add Aawak'" (response)='addAawakResponse($event)'></app-aawak-entry>
+            <!-- <p>Hello Modal</p> -->
+            <app-aawak-entry *ngIf='showModal == "Add Aawak"' (response)='addAawakResponse($event)'></app-aawak-entry>
 
             <app-aawak-entry *ngIf="showModal == 'Edit Aawak'" (response)='editAawakResponse($event)'
                [getData]="editData" [isEdit]="true"></app-aawak-entry>

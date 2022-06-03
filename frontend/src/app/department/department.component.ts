@@ -254,13 +254,240 @@ export class DepartmentComponent implements OnInit {
     }
   }
 
+  importZip = async (ev: any) => {
+    this.isLoader = true;
+
+    if (ev.target.files[0]) {
+
+      const fileReader: any = new FileReader();
+      fileReader.readAsArrayBuffer(ev.target.files[0]); //reading 1st file only
+
+      fileReader.onload = () => {
+
+        this.dataZip = new JSZip();
+        //loading zip file content
+        this.dataZip.loadAsync(fileReader.result).then((zip: any) => {
+
+          //checking zip data found or not
+          if (zip) {
+            // getting name of all exists files in zip in array.
+            let fileNames = Object.keys(zip.files);
+
+            // loop through all files
+            for (let i in fileNames) {
+
+              //accept only files that listed below, other ignore.
+              switch (fileNames[i]) {
+                case 'settings.json':
+
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+
+                    if (data) {
+                      let setting = JSON.parse(data);
+                      let body = {
+                        query: {
+                          _id: (setting._id ? setting._id : null),
+                          dept_id: setting.dept_id,
+                          config_key: setting.config_key,
+                        },
+                        set: {
+                          config_key: setting.config_key,
+                          config_value: setting.config_value,
+                          active: setting.active,
+                          created_at: setting.created_at,
+                          updated_at: setting.updated_at,
+                        }
+                      }
+
+                      this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((result: any) => {
+                        let setting = JSON.parse(result.config_value);
+                        if (result.dept_id == this.auth.webUser.dept_id) {
+                          this.auth.updateSettings(setting);
+                        }
+                        this.toastr.success("settings import successfully");
+                      });
+                    }
+                    else {
+                      this.toastr.error('can not read settings file from zip')
+                    }
+                  });
+                  break;
+
+                case 'category.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) { 
+                      let category = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
+                      console.log("category",category);
+                      
+                    }
+                    else{
+                      this.toastr.error('can not read category file from zip');
+                    }
+                  });
+                  break;
+
+                case 'city.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) { 
+                      let city = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
+                      console.log("city",city);
+                      
+                    }
+                    else{
+                      this.toastr.error('can not read city file from zip');
+                    }
+                  });
+                  break;
+
+                  case 'country.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) { 
+                      let country = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
+                      console.log("country",country);
+                      
+                    }
+                    else{
+                      this.toastr.error('can not read country file from zip');
+                    }
+                  });
+                  break;
+
+                  case 'item.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) { 
+                      let item = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
+                      console.log("item",item);
+                      
+                    }
+                    else{
+                      this.toastr.error('can not read item file from zip');
+                    }
+                  });
+                  break;
+
+                  case 'mm.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) { 
+                      let mm = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
+                      console.log("mm",mm);
+                      
+                    }
+                    else{
+                      this.toastr.error('can not read mm file from zip');
+                    }
+                  });
+                  break;
+
+                  case 'pbk.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) { 
+                      let pbk = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
+                      console.log("pbk",pbk);
+                      
+                    }
+                    else{
+                      this.toastr.error('can not read pbk file from zip');
+                    }
+                  });
+                  break; 
+                  
+                  case 'product.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) { 
+                      let product = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
+                      console.log("product",product);
+                      
+                    }
+                    else{
+                      this.toastr.error('can not read product file from zip');
+                    }
+                  });
+                  break; 
+
+                  case 'state.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) { 
+                      let state = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
+                      console.log("state",state);
+                      
+                    }
+                    else{
+                      this.toastr.error('can not read state file from zip');
+                    }
+                  });
+                  break;
+
+                  case 'subitem.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) { 
+                      let subitem = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
+                      console.log("subitem",subitem);
+                      
+                    }
+                    else{
+                      this.toastr.error('can not read subitem file from zip');
+                    }
+                  });
+                  break;
+
+                  case 'subitem_list.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) { 
+                      let subitem_list = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
+                      console.log("subitem_list",subitem_list);
+                      
+                    }
+                    else{
+                      this.toastr.error('can not read subitem_list file from zip');
+                    }
+                  });
+                  break;
+
+                  case 'support_list.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) { 
+                      let support_list = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
+                      console.log("support_list",support_list);
+                      
+                    }
+                    else{
+                      this.toastr.error('can not read support_list file from zip');
+                    }
+                  });
+                  break;
+
+                  case 'unit.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) { 
+                      let unit = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
+                      console.log("unit",unit);
+                      
+                    }
+                    else{
+                      this.toastr.error('can not read unit file from zip');
+                    }
+                  });
+                  break;
+              }
+            }
+          }
+
+        });
+
+      }
+
+    }
+    this.isLoader = false;
+    ev = null;
+  }
+
   applySettings(configValue: any) {
 
     for (let key of Object.keys(configValue)) {
       this.settingsAll[key] = configValue[key];
     }
   }
-  
+
 
   cancel() {
     this.deptSelected(this.dept_id);
@@ -603,13 +830,13 @@ export class DepartmentComponent implements OnInit {
     this.dataZip.file("settings.json", JSON.stringify(this.deptConf.settings));
     let date = new Date();
     let dept = this.departments.find((d: { _id: any; }) => d._id == this.dept_id);
-    
+
     this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
-      FileSaver.saveAs(content, dept.dept_eng + "_update_" + date.getDate() + "-" +date.getMonth() + "-" + date.getFullYear() + ".zip");
+      FileSaver.saveAs(content, dept.dept_eng + "_update_" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + ".zip");
     });
     this.toastr.success("Updated Settings downloaded for '" + dept.dept_eng + "'");
     this.isLoader = false;
-  }  
+  }
 
   saveDeptSettings() {
     this.deptConf.mm.config_value = this.deptConf.mm.idArr.join(',') + ',';
@@ -618,7 +845,7 @@ export class DepartmentComponent implements OnInit {
     this.deptConf.item.config_value = this.deptConf.item.idArr.join(',') + ',';
     this.deptConf.subitem.config_value = this.deptConf.subitem.idArr.join(',') + ',';
     this.deptConf.aj_type.config_value = this.deptConf.aj_type.idArr.join(',') + ',';
-    this.deptConf.settings.config_value = this.settingsAll;    
+    this.deptConf.settings.config_value = this.settingsAll;
 
     this.http.put(this.api.getUrl('DEPTCONFSAVE'), this.deptConf).subscribe((data: any) => {
       if (data && data['success']) {

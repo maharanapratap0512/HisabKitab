@@ -15,9 +15,9 @@ import { HttpService } from 'src/app/services/http.service';
 export class CategoryEntryComponent implements OnInit {
 
   @Input() getData: any;
+  @Output() response = new EventEmitter();
   @Input() isEdit: any;
   @Input() isVisible: any;
-  @Output() response = new EventEmitter();
   categoryForm: FormGroup;
   isLoader: boolean = false;
 

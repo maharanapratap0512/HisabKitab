@@ -49,6 +49,12 @@
                             <i class="dripicons-download" style="font-size: large;"> </i> Generate DB
                         </button>
                     </div>
+                    <div class="col-2 mt-3 mb-2" *ngIf="dept_id">
+                        <button class="btn btn-outline-info w-100 mt-1" (click)="import.click()" data-toggle="tooltip"
+                            title="Import Data (.Zip file)"> Import Data (.Zip)</button>
+                        <input #import type="file" class="inputtag" accept="*.zip, application/ZIP"
+                            (change)="importZip($event)" hidden />
+                    </div>
                 </div>
 
 
@@ -145,7 +151,8 @@
                                 <div class="row">
                                     <div class="col-3">
                                         <button class="btn btn-info w-100" (click)="exportDeptSettings()">
-                                            <i class="dripicons-export" style=" font-size: large;"> </i> Export Settings Only
+                                            <i class="dripicons-export" style=" font-size: large;"> </i> Export Settings
+                                            Only
                                         </button>
                                     </div>
                                 </div>
