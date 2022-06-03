@@ -22,7 +22,7 @@ export class HeaderComponent implements OnInit {
   topPosToStartShowing = 100;
   isLoader: boolean = false;
   settings: any;
-  modal:any = ''; 
+  showModal:any = ''; 
   importData: any = [];
 
   constructor(
@@ -48,8 +48,8 @@ export class HeaderComponent implements OnInit {
   }
 
   openModal(type: String) {
-    this.modal = type;
-    $('#modal').modal('show');
+    this.showModal = type;
+    $('#showModal').modal('show');
   } 
 
   gotoTop() {
