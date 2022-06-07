@@ -391,8 +391,8 @@
                aria-label="Close"></button>
          </div>
          <div class="modal-body">
-            <p>Hello Modal</p>
-            <!-- <app-aawak-entry *ngIf='showModal == "Add Aawak"' (response)='addAawakResponse($event)'></app-aawak-entry>
+            <!-- <p>Hello Modal</p> -->
+            <app-aawak-entry *ngIf='showModal == "Add Aawak"' (response)='addAawakResponse($event)'></app-aawak-entry>
 
             <app-aawak-entry *ngIf="showModal == 'Edit Aawak'" (response)='editAawakResponse($event)'
                [getData]="editData" [isEdit]="true"></app-aawak-entry>
@@ -400,12 +400,12 @@
             <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
                [aawakRef]="editData"></app-jawak-entry>
 
-            <app-data-view *ngIf="showModal == 'Show Jawak'" [getData]="viewData" Type="jawak"></app-data-view> -->
+            <app-data-view *ngIf="showModal == 'Show Jawak'" [getData]="viewData" Type="jawak"></app-data-view>
          </div>
-         <!-- <div class="modal-footer">
+         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"
                onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
-         </div> -->
+         </div>
       </div>
    </div>
 </div>

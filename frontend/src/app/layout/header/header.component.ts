@@ -22,7 +22,7 @@ export class HeaderComponent implements OnInit {
   topPosToStartShowing = 100;
   isLoader: boolean = false;
   settings: any;
-  showModal:any = ''; 
+  modal:any = ''; 
   importData: any = [];
 
   constructor(
@@ -48,8 +48,8 @@ export class HeaderComponent implements OnInit {
   }
 
   openModal(type: String) {
-    this.showModal = type;
-    $('#showModal').modal('show');
+    this.modal = type;
+    $('#modal').modal('show');
   } 
 
   gotoTop() {
@@ -169,7 +169,7 @@ export class HeaderComponent implements OnInit {
                       let setting = JSON.parse(data);
                       let body = {
                         query: {
-                          _id: (setting._id ? setting._id : null),
+                          // _id: (setting._id ? setting._id : null),
                           dept_id: setting.dept_id,
                           config_key: setting.config_key,
                         },
@@ -183,8 +183,11 @@ export class HeaderComponent implements OnInit {
                       }
 
                       this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((result: any) => {
-                        let setting = JSON.parse(result.config_value);
-                        if (result.dept_id == this.auth.webUser.dept_id) {
+                        // console.log(result);
+                        // console.log(result.result);
+                        
+                        let setting = JSON.parse(result.result.config_value);
+                        if (result.result.dept_id == this.auth.webUser.dept_id) {
                           this.auth.updateSettings(setting);
                         }
                         this.toastr.success("settings import successfully");

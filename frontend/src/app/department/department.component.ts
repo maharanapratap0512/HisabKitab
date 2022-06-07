@@ -42,6 +42,9 @@ export class DepartmentComponent implements OnInit {
   mms: any = [];
   pbks: any = [];
   pbksAll: any = [];
+  department: any = [];
+  departmentAll: any = [];
+  termDept: any;
   categories: any = [];
   items: any = [];
   itemmix: any = [];
@@ -229,6 +232,8 @@ export class DepartmentComponent implements OnInit {
             this.loadItemMix();
             // this.loadSubitems();
             this.loadAJTypes();
+            this.loadDepartment();
+
           }
           for (let i of data['result']) {
             if (i.config_key == "settings") {
@@ -315,12 +320,12 @@ export class DepartmentComponent implements OnInit {
 
                 case 'category.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) { 
-                      let category = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
-                      console.log("category",category);
-                      
+                    if (data) {
+                      let category = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
+                      console.log("category", category);
+
                     }
-                    else{
+                    else {
                       this.toastr.error('can not read category file from zip');
                     }
                   });
@@ -328,142 +333,142 @@ export class DepartmentComponent implements OnInit {
 
                 case 'city.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) { 
-                      let city = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
-                      console.log("city",city);
-                      
+                    if (data) {
+                      let city = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
+                      console.log("city", city);
+
                     }
-                    else{
+                    else {
                       this.toastr.error('can not read city file from zip');
                     }
                   });
                   break;
 
-                  case 'country.json':
+                case 'country.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) { 
-                      let country = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
-                      console.log("country",country);
-                      
+                    if (data) {
+                      let country = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
+                      console.log("country", country);
+
                     }
-                    else{
+                    else {
                       this.toastr.error('can not read country file from zip');
                     }
                   });
                   break;
 
-                  case 'item.json':
+                case 'item.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) { 
-                      let item = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
-                      console.log("item",item);
-                      
+                    if (data) {
+                      let item = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
+                      console.log("item", item);
+
                     }
-                    else{
+                    else {
                       this.toastr.error('can not read item file from zip');
                     }
                   });
                   break;
 
-                  case 'mm.json':
+                case 'mm.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) { 
-                      let mm = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
-                      console.log("mm",mm);
-                      
+                    if (data) {
+                      let mm = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
+                      console.log("mm", mm);
+
                     }
-                    else{
+                    else {
                       this.toastr.error('can not read mm file from zip');
                     }
                   });
                   break;
 
-                  case 'pbk.json':
+                case 'pbk.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) { 
-                      let pbk = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
-                      console.log("pbk",pbk);
-                      
+                    if (data) {
+                      let pbk = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
+                      console.log("pbk", pbk);
+
                     }
-                    else{
+                    else {
                       this.toastr.error('can not read pbk file from zip');
                     }
                   });
-                  break; 
-                  
-                  case 'product.json':
+                  break;
+
+                case 'product.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) { 
-                      let product = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
-                      console.log("product",product);
-                      
+                    if (data) {
+                      let product = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
+                      console.log("product", product);
+
                     }
-                    else{
+                    else {
                       this.toastr.error('can not read product file from zip');
                     }
                   });
-                  break; 
+                  break;
 
-                  case 'state.json':
+                case 'state.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) { 
-                      let state = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
-                      console.log("state",state);
-                      
+                    if (data) {
+                      let state = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
+                      console.log("state", state);
+
                     }
-                    else{
+                    else {
                       this.toastr.error('can not read state file from zip');
                     }
                   });
                   break;
 
-                  case 'subitem.json':
+                case 'subitem.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) { 
-                      let subitem = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
-                      console.log("subitem",subitem);
-                      
+                    if (data) {
+                      let subitem = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
+                      console.log("subitem", subitem);
+
                     }
-                    else{
+                    else {
                       this.toastr.error('can not read subitem file from zip');
                     }
                   });
                   break;
 
-                  case 'subitem_list.json':
+                case 'subitem_list.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) { 
-                      let subitem_list = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
-                      console.log("subitem_list",subitem_list);
-                      
+                    if (data) {
+                      let subitem_list = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
+                      console.log("subitem_list", subitem_list);
+
                     }
-                    else{
+                    else {
                       this.toastr.error('can not read subitem_list file from zip');
                     }
                   });
                   break;
 
-                  case 'support_list.json':
+                case 'support_list.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) { 
-                      let support_list = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
-                      console.log("support_list",support_list);
-                      
+                    if (data) {
+                      let support_list = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
+                      console.log("support_list", support_list);
+
                     }
-                    else{
+                    else {
                       this.toastr.error('can not read support_list file from zip');
                     }
                   });
                   break;
 
-                  case 'unit.json':
+                case 'unit.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) { 
-                      let unit = JSON.parse(data).filter((c: { active: number; })=>c.active == 0);
-                      console.log("unit",unit);
-                      
+                    if (data) {
+                      let unit = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
+                      console.log("unit", unit);
+
                     }
-                    else{
+                    else {
                       this.toastr.error('can not read unit file from zip');
                     }
                   });
@@ -607,7 +612,7 @@ export class DepartmentComponent implements OnInit {
       // console.log("mm",this.items);
 
     } else {
-      this.items = this.pbksAll;
+      this.items = this.itemsAll;
       this.selItem = true;
     }
   }
@@ -629,7 +634,7 @@ export class DepartmentComponent implements OnInit {
       // console.log("mm",this.subitems);
 
     } else {
-      this.subitems = this.pbksAll;
+      this.subitems = this.subitemsAll;
       this.selSubitem = true;
     }
   }
@@ -642,7 +647,7 @@ export class DepartmentComponent implements OnInit {
       // console.log("mm",this.subitems);
 
     } else {
-      this.subitems = this.pbksAll;
+      this.subitems = this.subitemsAll;
       this.selSubitem = true;
     }
   }
@@ -653,6 +658,14 @@ export class DepartmentComponent implements OnInit {
       if (data['result'] && data['success']) {
         this.pbks = data['result'];
         this.pbksAll = data['result'];
+      }
+    });
+  }
+  loadDepartment() {
+    this.http.get(this.api.getUrl('DEPT') + "forConfig/" + this.dept_id).subscribe((data) => {
+      if (data['result'] && data['success']) {
+        this.department = data['result'];
+        this.departmentAll = data['result'];
       }
     });
   }
@@ -723,6 +736,19 @@ export class DepartmentComponent implements OnInit {
     else {
       this.deptConf.pbk.idArr.push(this.pbks[i]._id.toString());
       this.pbks[i].chk = true;
+    }
+  }
+  departmentRowClicked(i: any, chk: boolean, id: any) {
+    if (this.termDept) {
+      i = this.department.findIndex((i: { _id: any; }) => i._id == id);
+    }
+    if (chk) {
+      this.deptConf.department.idArr.splice(this.deptConf.department.idArr.indexOf(this.department[i]._id.toString()), 1);
+      this.department[i].chk = false;
+    }
+    else {
+      this.deptConf.department.idArr.push(this.department[i]._id.toString());
+      this.department[i].chk = true;
     }
   }
   categoryRowClicked(i: any, chk: boolean, id: any) {
@@ -841,6 +867,7 @@ export class DepartmentComponent implements OnInit {
   saveDeptSettings() {
     this.deptConf.mm.config_value = this.deptConf.mm.idArr.join(',') + ',';
     this.deptConf.pbk.config_value = this.deptConf.pbk.idArr.join(',') + ',';
+    this.deptConf.department.config_value = this.deptConf.department.idArr.join(',') + ',';
     this.deptConf.category.config_value = this.deptConf.category.idArr.join(',') + ',';
     this.deptConf.item.config_value = this.deptConf.item.idArr.join(',') + ',';
     this.deptConf.subitem.config_value = this.deptConf.subitem.idArr.join(',') + ',';
@@ -926,6 +953,14 @@ export class DepartmentComponent implements OnInit {
         this.ajtypes.map((i: { _id: any, chk: boolean; }) => {
           if (!i.chk) {
             this.deptConf.aj_type.idArr.push(i._id.toString());
+            i.chk = true;
+          }
+        });
+        break;
+      case 'department':
+        this.department.map((i: { _id: any, chk: boolean; }) => {
+          if (!i.chk) {
+            this.deptConf.department.idArr.push(i._id.toString());
             i.chk = true;
           }
         });

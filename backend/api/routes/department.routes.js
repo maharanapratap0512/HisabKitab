@@ -37,7 +37,7 @@ router.get('/', async (req, res, next) => {
 
 //  department get
 router.get('/:dept_id', async (req, res, next) => {
-    if (['1', '2'].includes(req.params.dept_id)) {
+    if (['1', '2', '6'].includes(req.params.dept_id)) {
         await DB.getFullList('department').then(async (resolve) => {
             res.json({
                 success: true,
@@ -53,6 +53,17 @@ router.get('/:dept_id', async (req, res, next) => {
         })
     }
 });
+
+//  dept get by dept
+router.get('/forConfig/:dept_id', async (req, res, next) => {
+    await DB.getFullListForDeptConfig('department', req.params.dept_id).then((resolve) => {
+        res.json({
+            success: true,
+            result: resolve || []
+        });
+    }, (err) => { return next(err) });
+});
+
 
 //  department DB download
 router.get('/dbfull/:dept_id', async (req, res, next) => {

@@ -564,25 +564,25 @@
 
 
 <!-- Add Aawak Entry Model -->
-<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+<div class="modal fade" id="modal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
    aria-hidden="true">
    <div class="modal-dialog" style="width: 90%;">
       <div class="modal-content">
          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
-            <button type="button" onclick="$('#showModal').modal('hide')" class="btn-close" aria-label="Close"></button>
+            <h5 class="modal-title" id="exampleModalLabel">{{modal}}</h5>
+            <button type="button" onclick="$('#modal').modal('hide')" class="btn-close" aria-label="Close"></button>
          </div>
          <div class="modal-body">
-            <app-import *ngIf="showModal == 'import'" [importData]="importData"></app-import>
-            <!-- <app-jawak-entry (response)='addJawakResponse($ev+ent)' *ngIf="showModal == 'Add Jawak'"></app-jawak-entry> -->
+            <app-import *ngIf="modal == 'import'" [importData]="importData"></app-import>
+            <!-- <app-jawak-entry (response)='addJawakResponse($ev+ent)' *ngIf="modal == 'Add Jawak'"></app-jawak-entry> -->
 
-            <!-- <app-jawak-entry (response)='editJawakResponse($event)' *ngIf="showModal == 'Edit Jawak'"
+            <!-- <app-jawak-entry (response)='editJawakResponse($event)' *ngIf="modal == 'Edit Jawak'"
                [getData]="editData" isEdit="true">
             </app-jawak-entry> -->
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"
-               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+               onclick="$('#modal').modal('hide')" (click)="modal= ''">Close</button>
          </div>
       </div>
    </div>

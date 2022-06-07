@@ -300,10 +300,10 @@ export class AawakComponent implements OnInit {
 
   openModal(type: any) {
     this.showModal = type;
-    let modal = $('#showModal');
-    console.log("modal", modal);
+    let modal = $('#showModal').modal('show');
+    // console.log("modal", modal);
     
-    console.log("this.showModal",this.showModal);
+    // console.log("this.showModal",this.showModal);
     
   }
 
