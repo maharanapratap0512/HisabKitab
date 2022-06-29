@@ -474,6 +474,8 @@ let Migrations = [
 
     )`,
 
+    add_nimitt_dept_conf:` insert into department_config(dept_id, config_key, config_value, active) select _id, 'nimmit', ',', 1 from department `,
+
     add_col_repairing: `ALTER TABLE "bachat" ADD COLUMN Repairing decimal(10,2) default 0`,
     add_col_isbill: `ALTER TABLE "aawak" ADD COLUMN isbill tinyint(1) default 0`,
     add_col_doc_to_aawak: `ALTER TABLE "aawak" ADD COLUMN document json`,
