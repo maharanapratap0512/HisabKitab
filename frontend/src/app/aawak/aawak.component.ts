@@ -10,7 +10,7 @@ import * as XLSX from 'xlsx';
 import { FilterpipePipe } from '../pipe/filterpipe.pipe';
 import { AuthService } from '../services/auth.service';
 import { ExcelExportService } from '../services/excel-export.service';
-import { observable, Observable, Subject } from 'rxjs';
+import { observable, Observable, of, Subject } from 'rxjs';
 declare var $: any;
 
 @Component({
@@ -135,20 +135,33 @@ export class AawakComponent implements OnInit {
       console.log("exportAJdata", result);
       result.map((res: any, index: any) => {
         let jawakArray: any[] = []
+        let bachat = res.qty;
         res.jawak_detail.forEach((jres: any) => {
+          bachat -= jres.qty ? jres.qty : 0;
           jawakArray.push({
             'Date': jres.date ? jres.date : '-',
-            'Item': jres.item_id ? jres.item_hin : '-',
+            'Jawak MM': jres.jawak_mm_id ? jres.jawak_mm_hin : '-',
+            'Kisko Diya': jres.nimmit_id ? jres.nimmit_hin + '(' + jres.nimmit_state_hin + ')' : '-',
+            'Jawak Type': jres.jawak_type_id ? jres.jawak_type_hin : '-',
             'Qty': jres.qty ? jres.qty : '-',
             'Unit': jres.unit_id ? jres.unit_short : '-',
-            'Jawak MM': jres.jawak_mm_id ? jres.jawak_mm_hin : '-'
+            'Bachat': bachat
           })
         });
 
         this.allAJData.push({
           'No': index + 1,
+          'MM': res.mm_hin,
           'Date': res.date ? res.date : '-',
+          'Pkt No': res.pkt_num ? res.pkt_num : '-',
+          'Roll No': res.roll_no ? res.roll_no : '-',
+          'Pbk': res.pbk_hin ? res.pbk_hin : '-',
+          'Relation': res.relation ? res.relation : '-',
+          'Relative': res.relative_name ? res.relative_name : '-',
           'Item': res.item_id ? res.item_hin : '-',
+          'Subitem': res.subitem_id ? res.subitem_hin : '-',
+          'Company': res.company_name ? res.company_name : '-',
+          'Condition': res.condition_id ? res.condition_hin : '-',
           'Aawak MM': res.aawak_mm_id ? res.aawak_mm_hin : '-',
           'Aawak Type': res.aawak_type_id ? res.aawak_type_hin : '-',
           'Qty': res.qty ? res.qty : '-',
@@ -185,7 +198,10 @@ export class AawakComponent implements OnInit {
 
 
   export(json: any) {
-    this.excelExportService.generateExcel(json, 'AawakJawak');
+    console.log("json", json);
+
+    let date = new Date();
+    this.excelExportService.generateExcel(json, './AawakJawak_' + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
     // this.excelExportService.exportAsExcelFile(json, 'AawakJawak');
     // this.excelExportService.exportAsExcelFile(this.el.nativeElement, 'AawakJawak');
   }
@@ -302,9 +318,9 @@ export class AawakComponent implements OnInit {
     this.showModal = type;
     let modal = $('#showModal').modal('show');
     // console.log("modal", modal);
-    
+
     // console.log("this.showModal",this.showModal);
-    
+
   }
 
   stateSelected(ev: any) {
@@ -357,6 +373,8 @@ export class AawakComponent implements OnInit {
   }
 
   excelImport(ev: any) {
+    console.log(ev);
+
     let workBooks: any = null;
     let jsonData = null;
     const reader = new FileReader();
@@ -366,18 +384,53 @@ export class AawakComponent implements OnInit {
       workBooks = XLSX.read(data, { type: 'binary' });
       jsonData = workBooks.SheetNames.reduce((initial: any, name: any) => {
         const sheet = workBooks.Sheets[name];
-        initial[name] = XLSX.utils.sheet_to_json(sheet);
+        initial[name] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
         return initial;
       }, {});
+      let awakStart:any = 0, jawakStart:any = 0, startRow:any = 0;
       // const dataString = JSON.stringify(jsonData);
       let exceldata = jsonData[workBooks.SheetNames[0]];
-      for (let i in exceldata) {
-
+      console.log(exceldata);
+      for (let i =0; i < exceldata.length; i++) {
+        if (exceldata[i][0] && ['awk detail', 'awak detail', 'aawak detail', 'aawak', 'आवक'].includes(exceldata[i][0].toString().toLowerCase().trim())) {
+          startRow = i;
+          awakStart = 0;
+          for (let k of Object.keys(exceldata[i][0])) {
+            if (exceldata[i][k] && ['jwk detail', 'jawak detail', 'jawak', 'जावक'].includes(exceldata[i][k].toString().toLowerCase().trim())) {
+              jawakStart = k;
+              break;
+            }
+          }
+          break;
+        }
       }
-
+      console.log("startRow", startRow);
+      console.log("awakStart", awakStart);
+      console.log("jawakStart", jawakStart);
+      let finalJson = [];
+      let columns:string[] = Object.values(exceldata[startRow+1])
+      console.log("columns", columns);
+      
+      for(let i = startRow + 2; i < exceldata.length; i++){
+        let aawak:any = {};
+        let jawak: any = {};
+        for(let j:number = awakStart; j < columns.length; j++ ){
+          if(j < jawakStart){
+            aawak[columns[j]] = exceldata[i][j];
+          }
+          else{
+            jawak[columns[j]] = exceldata[i][j];
+          }
+        }
+        console.log("aawak",aawak);
+        console.log("jawak",jawak);
+        
+      }
     }
+
+
     reader.readAsBinaryString(file);
     ev = '';
-  }
 
+  }
 }

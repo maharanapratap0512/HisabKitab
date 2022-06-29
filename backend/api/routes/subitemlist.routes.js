@@ -1,4 +1,3 @@
-//@ts-check
 const router = require('express').Router();
 const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
@@ -53,7 +52,7 @@ router.post('/:dept_id', async (req, res, next) => {
 
 
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getFullListByDept('subitem_list', req.params.dept_id).then((resolve) => {
+    await DB.getList('subitem_list', { dept_id: req.params.dept_id }).then((resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],

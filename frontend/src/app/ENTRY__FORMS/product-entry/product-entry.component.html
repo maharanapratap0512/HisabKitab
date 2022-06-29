@@ -50,7 +50,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="!isEdit">
                <div class="form-group">
                   <label class="form-label">Filter Items By</label>
                   <!-- <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -58,7 +58,7 @@
                      (click)="showModal = 'Add Department'">
                      + Add
                   </button> -->
-                  <ng-select class="custom" style="width: 100%;"
+                  <ng-select *ngIf="auth.webUser.dept_id < 3" class="custom" style="width: 100%;"
                      placeholder="Select Department" [clearable]="false" [virtualScroll]="true"
                      (change)="deptSelected($event)" [ngModelOptions]="{standalone: true}">
                      <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :
@@ -90,15 +90,15 @@
                      </button>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
-                     [virtualScroll]="true" formControlName="item_id"
-                     [ngClass]="{'validation':productForm.get('item_id')?.errors && (productForm.get('item_id')?.touched || productForm.get ('item_id')?.dirty)}">
+                     [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)"
+                     [ngClass]="{'validation':productForm.get('item_id')?.errors && (productForm.get('item_id')?.touched || productForm.get ('item_id')?.dirty)}" [readonly]="isEdit">
                      <ng-option selected="selected" disabled value="">Select Item</ng-option>
                      <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
                         {{item.item_eng}} : {{item.item_code}}</ng-option>
                   </ng-select>
-                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
-                     [clearable]="false" [virtualScroll]="true" formControlName="subitem_id"
-                     [ngClass]="{'validation':productForm.get('subitem_id')?.errors && (productForm.get('subitem_id')?.touched || productForm.get ('subitem_id')?.dirty)}">
+                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList" [clearable]="false"
+                     [virtualScroll]="true" formControlName="subitem_id" (change)="itemSelected($event)"
+                     [ngClass]="{'validation':productForm.get('subitem_id')?.errors && (productForm.get('subitem_id')?.touched || productForm.get ('subitem_id')?.dirty)}" [readonly]="isEdit">
                      <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
                      <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}} :
                         {{item.subitem_eng}}</ng-option>

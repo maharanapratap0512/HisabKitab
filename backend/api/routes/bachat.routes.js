@@ -1,6 +1,4 @@
-//@ts-check
 const router = require('express').Router();
-const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
 const DB = new DBContex();
 
@@ -37,7 +35,8 @@ router.get('/', async (req, res, next) => {
 //  category get
 router.get('/home/:dept_id', async (req, res, next) => {
     let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
-    await DB.getFullListByDept('bachatHome', req.params.dept_id, conditionString).then((resolve) => {
+    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+    await DB.getList('bachatHome', { dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
         // for(let i in data){
         //     data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
         //     for(let bcht of data[i].bachat_qty){
@@ -54,9 +53,10 @@ router.get('/home/:dept_id', async (req, res, next) => {
 
 
 router.get('/:dept_id', async (req, res, next) => {
-    let conditionString = ``;
+    // let conditionString = ``;
     // let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0 OR bachat.Stock <> 0 OR bachat.Stock <> 0`;
-    await DB.getFullListByDept('bachat', req.params.dept_id, conditionString).then((resolve) => {
+    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+    await DB.getList('bachat', {dept_id:req.params.dept_id}).then((resolve) => {
         // for(let i in data){
         //     data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
         //     for(let bcht of data[i].bachat_qty){

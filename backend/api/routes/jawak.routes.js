@@ -1,4 +1,3 @@
-//@ts-check
 const router = require('express').Router();
 const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
@@ -58,7 +57,8 @@ router.get('/', async (req, res, next) => {
 //  jawak get by aawak id
 router.get('/byaawak/:aawak_ref_id', async (req, res, next) => {
     let conditionString = ` aawak_ref_id = ${req.params.aawak_ref_id}`;
-    await DB.getFullList('jawak', conditionString).then((resolve) => {
+    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+    await DB.getList('jawak', { conditionString: conditionString }).then((resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],
@@ -70,7 +70,7 @@ router.get('/byaawak/:aawak_ref_id', async (req, res, next) => {
 
 //  jawak get from department
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getFullListByDept('jawak', req.params.dept_id).then((resolve) => {
+    await DB.getList('jawak', { dept_id: req.params.dept_id }).then((resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],
@@ -141,8 +141,8 @@ router.put('/:dept_id', async (req, res, next) => {
         offset = (req.body.pageNo - 1) * limit;
         page = req.body.pageNo
     }
-
-    await DB.getFullListByDept('jawak', req.params.dept_id, conditionString, orderBy, limit, offset).then((resolve) => {
+    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+    await DB.getList('jawak', { dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then((resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],

@@ -1,4 +1,3 @@
-//@ts-check
 const router = require('express').Router();
 const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');

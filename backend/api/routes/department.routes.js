@@ -1,4 +1,4 @@
-//@ts-check
+//@ts-checkZ
 const router = require('express').Router();
 const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
@@ -26,7 +26,7 @@ router.post('/', async (req, res, next) => {
 
 //  department get
 router.get('/', async (req, res, next) => {
-    await DB.getFullList('department').then(async (resolve) => {
+    await DB.getList('department').then(async (resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],
@@ -37,8 +37,8 @@ router.get('/', async (req, res, next) => {
 
 //  department get
 router.get('/:dept_id', async (req, res, next) => {
-    if (['1', '2', '6'].includes(req.params.dept_id)) {
-        await DB.getFullList('department').then(async (resolve) => {
+    if (['1', '2'].includes(req.params.dept_id)) {
+        await DB.getList('department').then(async (resolve) => {
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -103,12 +103,12 @@ router.put('/', async (req, res, next) => {
 //login to department
 router.put('/login', async (req, res, next) => {
     if (req.body.dept_id && req.body.dept_id != 4 && req.body.password) {
-        let condition = ` where _id = ${req.body.dept_id} AND password = '${req.body.password}' `;
+        let condition = ` _id = ${req.body.dept_id} AND password = '${req.body.password}' `;
         await DB.getCount('department', condition).then(async (response) => {
-            if(response.total_count == 1){                
-                await DB.getDeptConfig(req.body.dept_id, "settings").then(setting=>{
-                    response.settings = JSON.parse(setting[0].config_value);
-                    response.settings_id = setting[0]._id;
+            if (response.total_count == 1) {
+                await DB.getList('department_config', { conditionString: `dept_id = ${req.body.dept_id} and config_key = 'settings'` }).then(setting => {
+                    response.settings = JSON.parse(setting.data[0].config_value);
+                    response.settings_id = setting.data[0]._id;
                 });
             }
             res.json(response || {});

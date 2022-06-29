@@ -1,4 +1,3 @@
-//@ts-check
 const router = require('express').Router();
 const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
@@ -27,7 +26,7 @@ router.post('/', async (req, res, next) => {
 //  category add
 router.post('/:dept_id', async (req, res, next) => {
     if (req.body && req.body.category_hin) {
-        await DB.insertFromDept('category', req.body, req.params.dept_id).then((data) => {
+        await DB.insert('category', req.body, req.params.dept_id).then((data) => {
             res.json({
                 success: true,
                 result: data || {}
@@ -43,7 +42,8 @@ router.post('/:dept_id', async (req, res, next) => {
 
 //  category get
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getFullListByDept('category',req.params.dept_id).then(async (resolve) => {
+    let options = { dept_id: req.params.dept_id, conditionString: null }
+    await DB.getList('category', options).then(async (resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],
@@ -54,7 +54,7 @@ router.get('/:dept_id', async (req, res, next) => {
 
 //  category get
 router.get('/forConfig/:dept_id', async (req, res, next) => {
-    await DB.getFullListForDeptConfig('category',req.params.dept_id).then(async (resolve) => {
+    await DB.getFullListForDeptConfig('category', req.params.dept_id).then(async (resolve) => {
         res.json({
             success: true,
             result: resolve || [],
@@ -64,7 +64,7 @@ router.get('/forConfig/:dept_id', async (req, res, next) => {
 
 //  category get
 router.get('/', async (req, res, next) => {
-    await DB.getFullList('category').then(async (resolve) => {
+    await DB.getList('category').then(async (resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],
@@ -98,10 +98,7 @@ router.put('/', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
         let condition = '_id = ' + req.params.id;
-        await DB.delete('category', condition, (err, data) => {
-            if (err) {
-                return next(err);
-            }
+        await DB.delete('category', condition).then((data) => {
             res.json({
                 success: true,
                 result: data

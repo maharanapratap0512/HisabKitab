@@ -1,4 +1,3 @@
-//@ts-check
 const router = require('express').Router();
 const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
@@ -54,7 +53,8 @@ router.post('/:dept_id', async (req, res, next) => {
 
 //  item get by dept
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getFullListByDept('itemMix', req.params.dept_id, null, null, 100).then((resolve) => {
+    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+    await DB.getList('itemMix', { dept_id: req.params.dept_id, limit: 100 }).then((resolve) => {
         let subitem_count = 0;
         for (let i = 0; i < resolve.data.length; i++) {
 
@@ -93,7 +93,7 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
         offset = (req.body.pageNo - 1) * limit;
         page = req.body.pageNo;
     }
-    await DB.getFullListByDept('itemMix', req.params.dept_id, conditionString, orderBy, limit, offset).then((resolve) => {
+    await DB.getList('itemMix', { dept_id: req.params.dept_id, conditonString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then((resolve) => {
         let subitem_count = 0;
         for (let i = 0; i < resolve.data.length; i++) {
             resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
@@ -168,7 +168,7 @@ router.put('/forConfig/:dept_id', async (req, res, next) => {
 
 //  item get
 router.get('/', async (req, res, next) => {
-    await DB.getFullList('item').then((resolve) => {
+    await DB.getList('item').then((resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],

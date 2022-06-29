@@ -42,16 +42,15 @@
                         <tr>
                            <th>No.</th>
                            <th>Manage</th>
-                           <th *ngIf="settings.document">Document</th>
+                           <th *ngIf="settings.document" style="width: 120px;">Document</th>
                            <th *ngIf="settings.purchase_date">Purchase Date</th>
                            <th>Mm</th>
                            <th>Item - Subitem</th>
-                           <th *ngIf="settings.company_name">Company Name - Model Name</th>
-                           <th>S/R No. - Product Code</th>
+                           <th *ngIf="settings.company_name">Company - Model</th>
+                           <th>S/R - P. Code</th>
                            <th>Price</th>
                            <th>Condition</th>
-                           <th *ngIf="settings.warranty_period">Warranty Period</th>
-                           <th *ngIf="settings.warranty_from">Warranty From</th>
+                           <th *ngIf="settings.warranty_period || settings.warranty_from">Warranty</th>
                            <th *ngIf="settings.purchased_by">Purchased By</th>
                            <th *ngIf="settings.purchase_from">Purchase From</th>
                            <th *ngIf="settings.product_detail">Product Detail</th>
@@ -63,7 +62,7 @@
                         <tr *ngFor="let data of productData | filter:term; let i=index">
                            <td>{{i+1}}</td>
                            <td>
-                              <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                              <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button>
                               <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                     class="uil-trash"></i></button>
@@ -74,14 +73,16 @@
                               </td>
                               <td>{{data.purchase_date}}</td>
                               <td>{{data.mm_id?data.mm_hin + ' : ' + data.mm_eng:'-'}}</td>
-                              <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}} -
+                              <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}} <br/>
                                  {{data.subitem_id?data.subitem_hin + ' : ' + data.subitem_eng:'-'}}</td>
-                              <td *ngIf="settings.company_name">{{data.company_name}} - {{data.model_name}}</td>
-                              <td>{{data.sr_num}} - {{data.product_code}}</td>
+                              <td *ngIf="settings.company_name">{{data.company_name}} <br/> {{data.model_name}}</td>
+                              <td>{{data.sr_num}} <br /> {{data.product_code}}</td>
                               <td>{{data.price}}</td>
                               <td>{{data.condition_id?data.condition_hin + ' : ' + data.condition_eng:'-'}}</td>
-                              <td *ngIf="settings.warranty_period">{{data.warranty_period}}</td>
-                              <td *ngIf="settings.warranty_from">{{data.warranty_from}}</td>
+                              <td *ngIf="settings.warranty_period || settings.warranty_from">
+                                 {{data.warranty_period}} <br />
+                                 {{data.warranty_from}}
+                              </td>                           
                               <td *ngIf="settings.purchased_by">{{data.purchased_by}}</td>
                               <td *ngIf="settings.purchase_from">{{data.purchase_from}}</td>
                               <td *ngIf="settings.product_detail">{{data.product_detail}}</td>

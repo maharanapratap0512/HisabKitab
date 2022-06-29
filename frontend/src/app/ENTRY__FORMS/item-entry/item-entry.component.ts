@@ -69,7 +69,7 @@ export class ItemEntryComponent implements OnInit {
       this.isLoader = true;
       this.http.post(this.api.getUrl('ITEM') + this.auth.webUser.dept_id, this.itemForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
-          this.gs.Lists.item.unshift(data['result']);
+          this.gs.Lists.itemmix.unshift(data['result']);
           this.itemForm.reset();
           this.isLoader = false;
           this.toastr.success("Item Added Successfully.");

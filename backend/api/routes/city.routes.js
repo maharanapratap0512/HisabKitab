@@ -1,4 +1,4 @@
-//@ts-check
+
 const router = require('express').Router();
 const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
@@ -41,7 +41,9 @@ router.post('/:dept_id', async (req, res, next) => {
 
 // get city with dept_id
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getFullListByDept('city', req.params.dept_id, null, ` city._id desc`).then(async (resolve) => {
+    let options = { dept_id: req.params.dept_id, conditionString: null, orderBy: ` city._id desc` }
+
+    await DB.getList('city', options).then(async (resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],
@@ -52,7 +54,7 @@ router.get('/:dept_id', async (req, res, next) => {
 
 //  city get
 router.get('/', async (req, res, next) => {
-    await DB.getFullList('city').then(async (resolve) => {
+    await DB.getList('city').then(async (resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],

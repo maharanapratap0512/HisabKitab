@@ -1,4 +1,3 @@
-//@ts-check
 const router = require('express').Router();
 const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
@@ -57,7 +56,8 @@ router.get('/', async (req, res, next) => {
 
 //pbk get by dept
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getFullListByDept('pbk', req.params.dept_id, ` (pbk.status is null OR pbk.status NOT LIKE "%nimmit%") `, ` order by pbk._id desc`, 100).then((resolve) => {
+    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+    await DB.getList('pbk', { dept_id: req.params.dept_id, conditionString: ` (pbk.status is null OR pbk.status NOT LIKE "%nimmit%") `, orderBy: ` order by pbk._id desc`, limit: 100 }).then((resolve) => {
         console.log(resolve.data);
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
@@ -74,7 +74,8 @@ router.get('/:dept_id', async (req, res, next) => {
 
 //get all nimmit list
 router.get('/nimmit/', async (req, res, next) => {
-    await DB.getFullList('pbk', ` pbk.status = "nimmit"`, ` order by pbk._id desc`, 100).then((resolve) => {
+    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+    await DB.getList('pbk', { conditionString: ` pbk.status = "nimmit"`, orderBy: ` order by pbk._id desc`, limit: 100 }).then((resolve) => {
         // for (let i in resolve) {
         //     resolve[i].document = (resolve[i].document != "[null]" ? JSON.parse(resolve[i].document) : {});
         //     resolve[i].relative_ref = (resolve[i].relative_ref != "[null]" ? JSON.parse(resolve[i].relative_ref) : []);
@@ -103,7 +104,8 @@ router.put('/:dept_id', async (req, res, next) => {
         offset = (req.body.pageNo - 1) * limit;
         page = req.body.pageNo;
     }
-    await DB.getFullListByDept('pbk', req.params.dept_id, pbkCondition + conditionString, orderBy, limit, offset).then((resolve) => {
+    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+    await DB.getList('pbk', { dept_id: req.params.dept_id, conditionString: pbkCondition + conditionString, orderBy: orderBy, limit: limit, offset: offset }).then((resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
             resolve.data[i].relative_ref = (resolve.data[i].relative_ref != "[null]" ? JSON.parse(resolve.data[i].relative_ref) : []);

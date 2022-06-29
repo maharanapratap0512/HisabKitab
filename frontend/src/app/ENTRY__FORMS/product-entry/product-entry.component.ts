@@ -31,8 +31,11 @@ export class ProductEntryComponent implements OnInit {
   conditions: any = [];
   subitems: any = [];
   items: any = [];
+  itemAll: any = [];
   units: any = [];
+  cat: any = null;
   categories: any = [];
+  categoryAll: any = [];
   settings: any = {};
 
   constructor(private fb: FormBuilder,
@@ -70,55 +73,18 @@ export class ProductEntryComponent implements OnInit {
   ngOnInit(): void {
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
+      this.items = result.itemmix && this.auth.webUser.dept_id > 2 ? result.itemmix : [];
+      this.itemAll = result.itemmix && this.auth.webUser.dept_id > 2 ? result.itemmix : [];
+      this.categories = result.category && this.auth.webUser.dept_id > 2 ? result.category : [];
       this.departments = result.department ? result.department : [];
       this.conditions = result.condition ? result.condition : [];
       this.subitems = result.subitem ? result.subitem : [];
-      this.items = result.item ? result.item : [];
-      this.categories = result.category ? result.category : [];
       this.units = result.unit ? result.unit : [];
     });
-
-    // this.getStates();
-    // this.getMMs();
-    // this.getCities();
   }
 
-  // getStates() {
-  //   this.isLoader = true;
-  //   this.http.get(this.api.getUrl('STATE')).subscribe((data) => {
-  //     if (data['result'] && data['success']) {
-  //       this.states = data['result'];
-  //       this.isLoader = false;
-  //     }
-  //     this.isLoader = false;
-  //   })
-  // }
-
-  // getCities() {
-  //   this.isLoader = true;
-  //   this.http.get(this.api.getUrl('CITY')).subscribe((data) => {
-  //     if (data['result'] && data['success']) {
-  //       this.cities = data['result'];
-  //       this.allList.cities = data['result'];
-  //       this.isLoader = false;
-  //     }
-  //     this.isLoader = false;
-  //   })
-  // }
-
-  // getMMs() {
-  //   this.isLoader = true;
-  //   this.http.get(this.api.getUrl('MM')).subscribe((data) => {
-  //     if (data['result'] && data['success']) {
-  //       this.mms = data['result'];
-  //       this.isLoader = false;
-  //     }
-  //     this.isLoader = false;
-  //   })
-  // }
-
   ngOnChanges(changes: SimpleChanges) {
-    console.log("pbk-changes", changes);
+    console.log("product-changes", changes);
     if (this.isEdit && changes.getData.currentValue) {
       this.productForm.patchValue({
         mm_id: changes.getData.currentValue.mm_id,
@@ -183,10 +149,9 @@ export class ProductEntryComponent implements OnInit {
       this.isLoader = true;
       this.http.post(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, this.productForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
-          this.gs.Lists.pbk.unshift(data['result'])
           this.productForm.reset({ active: true });
           this.isLoader = false;
-          this.toastr.success("PBK Added Successfully.")
+          this.toastr.success("Product Added Successfully.")
           this.response.emit(data['result']);
         } else {
           this.toastr.error(data['message']);
@@ -229,12 +194,11 @@ export class ProductEntryComponent implements OnInit {
         warranty_from: this.productForm.value.warranty_from,
         nimmit: this.productForm.value.nimmit
       };
-      this.http.put(this.api.getUrl('PBK'), body).subscribe((data: any) => {
+      this.http.put(this.api.getUrl('PRODUCT'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          this.gs.Lists.pbk.splice(this.gs.Lists.pbk.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result'])
           this.productForm.reset();
           this.isLoader = false;
-          this.toastr.success("PBK Updated Successfully");
+          this.toastr.success("Product Updated Successfully");
           this.response.emit(data['result']);
         } else {
           this.toastr.error(data['message']);
@@ -270,6 +234,8 @@ export class ProductEntryComponent implements OnInit {
 
   itemAddResponse(ev: any) {
     this.isLoader = true;
+    console.log("ev", ev);
+
     if (ev._id) {
       $('#productEntryComponent > #showModal').modal('hide');
       this.showModal = '';
@@ -278,6 +244,7 @@ export class ProductEntryComponent implements OnInit {
         {
           item_id: ev._id
         });
+      this.itemSelected(ev._id);
       this.isLoader = false;
     }
     else {
@@ -292,10 +259,13 @@ export class ProductEntryComponent implements OnInit {
       $('#productEntryComponent > #showModal').modal('hide');
       this.showModal = '';
       // this.subitems.unshift(ev);
+      this.itemSelected(ev.item_id);
       this.productForm.patchValue(
         {
+          item_id: ev.item_id,
           subitem_id: ev._id
         });
+      this.subitemSelected(ev._id);
       this.isLoader = false;
     }
     else {
@@ -323,10 +293,96 @@ export class ProductEntryComponent implements OnInit {
   }
 
   deptSelected(ev: any) {
-    console.log("ev", ev);
+    if (ev) {
+      this.getItemData(ev);
+      this.getCategoryData(ev);
+    } else {
+      this.itemAll = [];
+      this.items = [];
+      this.categoryAll = [];
+      this.categories = [];
+    }
   }
+
   catSelected(ev: any) {
-    console.log("ev", ev);
+    if (ev) {
+      this.cat = ev;
+      this.items = this.itemAll.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
+    }
+    else {
+      this.cat = null;
+      this.items = this.itemAll;
+    }
+    this.productForm.patchValue({
+      item_id: null,
+      subitem_id: null,
+      unit_id:null
+
+    });
+  }
+
+  itemSelected(ev: any) {
+    if (ev) {
+      let item = this.items.find((i: { _id: any; }) => i._id == ev);      
+      let category_ids = this.categories.map((c: { _id: any; }) => c._id);
+
+      this.productForm.patchValue({
+        unit_id: item.unit_id,
+        subitem_id: null
+      });
+
+      if (this.cat) {
+        this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
+      }
+      else {
+        this.subitems = item.subitems.filter(((s: { category_id: any; }) => category_ids.includes(s.category_id)));
+      }
+
+      if (this.subitems.length > 0 && (!category_ids.includes(item.category_id) || (this.cat && this.cat != item.category_id))) {
+        this.productForm.patchValue({
+          subitem_id: this.subitems[0]._id
+        });
+        this.subitemSelected(this.subitems[0]._id);
+      }
+      
+    }
+    else {
+      this.subitems = [];
+      this.productForm.patchValue({
+        unit_id: null,
+        subitem_id: null
+      });
+    }
+  }
+
+  subitemSelected(ev: any) {
+    if (ev) {
+      let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
+      this.productForm.patchValue({
+        unit_id: subitem.unit_id
+      });
+    }
+    else {
+      
+    }
+  }
+
+  getItemData(ev: any) {
+    this.http.put(this.api.getUrl('ITEMMIX') + ev, {}).subscribe((data: any) => {
+      if (data['result']) {
+        this.itemAll = data['result'];
+        this.items = this.itemAll;
+      }
+    });
+  }
+
+  getCategoryData(ev: any) {
+    this.http.get(this.api.getUrl('CATEGORY') + ev).subscribe((data) => {
+      if (data['result']) {
+        this.categoryAll = data['result'];
+        this.categories = this.categoryAll;
+      }
+    });
   }
 
 }

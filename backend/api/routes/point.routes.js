@@ -1,6 +1,4 @@
-//@ts-check
 const router = require('express').Router();
-const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
 const DB = new DBContex();
 
@@ -26,7 +24,7 @@ router.post('/', async (req, res, next) => {
 
 //  point get
 router.get('/', async (req, res, next) => {
-    await DB.getFullList('point').then(async (resolve) => {
+    await DB.getList('point').then(async (resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],
@@ -38,7 +36,8 @@ router.get('/', async (req, res, next) => {
 
 //  point get
 router.get('/random/', async (req, res, next) => {
-    await DB.getFullList('point', null, ` random()`, 1).then(async (resolve) => {
+    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+    await DB.getList('point', null, ` random()`, 1).then(async (resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],

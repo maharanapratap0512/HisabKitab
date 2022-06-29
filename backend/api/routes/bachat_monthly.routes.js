@@ -1,11 +1,10 @@
-//@ts-check
 const router = require('express').Router();
 const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
 const DB = new DBContex();
 
 
-//  category add
+//  bachat add
 router.post('/', async (req, res, next) => {
     if (req.body) {
         await DB.insert('bachat_monthly', req.body, async (err, data) => {
@@ -24,7 +23,7 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-//  category get
+//  bachat get
 router.get('/', async (req, res, next) => {
     await DB.getList('bachat_monthly').then((res) => {
         res.json({

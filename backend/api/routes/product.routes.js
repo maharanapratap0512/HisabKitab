@@ -1,4 +1,3 @@
-//@ts-check
 const router = require('express').Router();
 const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
@@ -45,7 +44,8 @@ router.post('/:dept_id', async (req, res, next) => {
 
 //  product get by dept_id
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getFullListByDept('product', req.params.dept_id, null,null, 100).then((resolve) => {
+    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+    await DB.getList('product', { dept_id: req.params.dept_id, limit: 100 }).then((resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
         }
@@ -60,7 +60,8 @@ router.get('/:dept_id', async (req, res, next) => {
 // Filter product get by dept_id
 router.put('/:dept_id', async (req, res, next) => {
     let conditionString = ` 1=1 ${typeof req.body.item_id == "string" || typeof req.body.item_id == "number" ? ` AND product.item_id = (${req.body.item_id})` : ``} ${req.body.item_id.length > 0 ? ` AND product.item_id IN (${req.body.item_id})` : ``}`;
-    await DB.getFullListByDept('product', req.params.dept_id, conditionString,null, 100).then((resolve) => {
+    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+    await DB.getList('product', { dept_id: req.params.dept_id, conditionString: conditionString, limit: 100 }).then((resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
         }

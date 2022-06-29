@@ -4,10 +4,10 @@ const DBContex = require('../models/DBContex');
 const DB = new DBContex();
 
 
-//  country add
+//  dictionary add
 router.post('/', async (req, res, next) => {
-    if (req.body && req.body.country_hin) {
-        await DB.insert('country', req.body).then(async (data) => {
+    if (req.body && req.body.type && req.body.name && req.body.real_id) {
+        await DB.insert('dictionary', req.body).then(async (data) => {
             res.json({
                 success: true,
                 result: data || {}
@@ -21,9 +21,9 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-//  country get
+//  dictionary get
 router.get('/', async (req, res, next) => {
-    await DB.getList('country').then(async (data) => {
+    await DB.getList('dictionary').then(async (data) => {
         res.json({
             success: true,
             result: data.data || [],
@@ -32,10 +32,10 @@ router.get('/', async (req, res, next) => {
     }, (err) => { return next(err) });
 });
 
-// country update
+// dictionary update
 router.put('/', async (req, res, next) => {
     if (req.body.set && req.body.query) {
-        await DB.update('country', req.body.set, req.body.query._id).then(async (data) => {
+        await DB.update('dictionary', req.body.set, req.body.query._id).then(async (data) => {
             res.json({
                 success: true,
                 result: data || {}
@@ -48,10 +48,10 @@ router.put('/', async (req, res, next) => {
 });
 
 
-// country delete
+// dictionary delete
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
-        await DB.delete('country', req.params.id).then((data) => {
+        await DB.delete('dictionary', req.params.id).then((data) => {
             res.json({
                 success: true,
                 result: data
