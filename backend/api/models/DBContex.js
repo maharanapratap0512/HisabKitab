@@ -40,21 +40,23 @@ class DBContex {
     async getList(tblname, options = {}) {
         return new Promise(async (resolve, reject) => {
             try {
-                let sql = options.full ? (this.query[tblname].select_full ? this.query[tblname].select_full : '') : (this.query[tblname].select ? this.query[tblname].select : '');
+                let sql = options.full ? (this.query[tblname] ? this.query[tblname].select_full : '') : (this.query[tblname] ? this.query[tblname].select : '');
                 // console.log("dept_id == (1 || null) ====", dept_id == ('1' || null));
                 // console.log("[1, null].includes(dept_id) ====", ['1', null].includes(dept_id));
                 let conditionQuery = null
+                let params = { limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 };
 
 
                 if (this.tbl_from_supp_list.includes(tblname)) {
                     conditionQuery = (!options.dept_id || options.dept_id == 1) ? null : `(select config_value from department_config where dept_id = ${options.dept_id} AND config_key = 'aj_type') LIKE '%,'||support_list._id||',%'`;
                 }
                 else if (this.tbl_with_dept_id.includes(tblname)) {
-                    conditionQuery = (options.dept_id ? `(${tblname}.dept_id from ${options.dept_id})` : null)
+                    conditionQuery = (options.dept_id ? `(${tblname}.dept_id = ${options.dept_id})` : null)
                 }
                 else if (this.supp_list.includes(tblname)) {
                     sql = `select * from support_list ?`;
-                    conditionQuery = `list_type='${tblname}'`
+                    conditionQuery = `list_type = '"gender"'`
+                    params.type = tblname;
                     if (this.tbl_need_dept_config.includes(tblname)) {
                         conditionQuery += (!options.dept_id || options.dept_id == 1) ? '' : ` AND (select config_value from department_config where dept_id = ${options.dept_id} AND config_key = '${tblname}') LIKE '%,'||${tblname}._id||',%'`;
                     }
@@ -62,14 +64,16 @@ class DBContex {
 
                 conditionQuery = options.conditionString ? (conditionQuery ? `${conditionQuery} AND ` : '') + options.conditionString : conditionQuery
 
-                let order = options.orderBy ? options.orderBy : (this.query[tblname].order ? this.query[tblname].order : null);
+                let order = options.orderBy ? options.orderBy : (this.query[tblname] ? this.query[tblname].order : null);
 
                 sql =
                     sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order} ` : ''));
 
                 console.log("sql", sql);
+                
 
-                const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
+
+                const result = await this.db.prepare(sql).all(params);
                 this.getCount(tblname, conditionQuery).then((res) => {
                     resolve({ data: result, total_count: res.total_count });
                 });

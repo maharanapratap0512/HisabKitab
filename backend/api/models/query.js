@@ -303,7 +303,7 @@ const aawak = {
         left join department dept on dept._id = aawak.dept_id
         left join support_list slat on slat._id = aawak.aawak_type_id
         left join pbk nmt on nmt._id = aawak.nimitt_id
-        left join state pst on pst._id = nmt.state_id ? ? limit @limit offset @offset`
+        left join state pst on pst._id = nmt.state_id ? limit @limit offset @offset`
     , order:
         `date, aawak_mm_hin, aawak_mm_eng, pkt_num`
 }
@@ -374,7 +374,7 @@ const bachat = {
         active=@active,
         updated_at=datetime('now','localtime')`
     , order:
-        `mm_hin, mm_eng, item_hin, subitem_hin, item_eng, subitem_eng, unit.unit_short`
+        `mm.mm_hin, mm.mm_eng, item_hin, subitem_hin, item_eng, subitem_eng, unit.unit_short`
 }
 
 const mm = {
@@ -934,7 +934,7 @@ const unit = {
         active=@active,
         updated_at=datetime('now','localtime')`
     , order:
-        `unit_sort, unit_full`
+        `unit_short, unit_full`
 }
 
 
