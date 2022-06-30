@@ -272,8 +272,8 @@ export class DataViewComponent implements OnInit {
         title: "Description",
         field: ["description"]
       }, {
-        title: "Nimmit",
-        field: ["nimmit"]
+        title: "Nimitt",
+        field: ["nimitt_hin"]
       }
     ]
   }

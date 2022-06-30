@@ -128,7 +128,7 @@ export class DepartmentComponent implements OnInit {
         warranty_from: false,
         accessories: false,
         price: false,
-        nimmit_id: false,
+        nimitt_id: false,
         product_detail: false,
         document: false
       },
@@ -140,7 +140,7 @@ export class DepartmentComponent implements OnInit {
         filter_by_state: false,
         pbk_id: false,
         aawak_mm_id: true,
-        nimmit_id: false,
+        nimitt_id: false,
         item_id: true,
         subitem_id: true,
         filter_by_dept: false,
@@ -157,7 +157,7 @@ export class DepartmentComponent implements OnInit {
         jawak: {
           visible: false,
           jawak_mm_id: true,
-          nimmit_id: true,
+          nimitt_id: true,
           qty: true
         }
       },
@@ -166,7 +166,7 @@ export class DepartmentComponent implements OnInit {
         pkt_num: false,
         date: true,
         jawak_mm_id: true,
-        nimmit_id: false,
+        nimitt_id: false,
         filter_by_state: false,
         pbk_id: false,
         product_id: false,

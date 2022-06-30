@@ -9,12 +9,19 @@ try {
   //connecting with database
   db = new Database(dbPath);
   console.log("connected with Database");
-  let sql = 'SELECT * FROM category WHERE category_eng = @category_eng'
-  const stmt = db.prepare(sql).get({ category_eng: 'Fruits'});
-  console.log("stmt", stmt);
+  let sql = `select pbk.*, 
+  state.state_hin,state.state_eng,
+  city.city_hin,city.city_eng,
+  mm.mm_hin, mm.mm_eng, mm.mm_code
+  from pbk
+  left join state on state._id = pbk.state_id
+  left join city on city._id = pbk.city_id
+  left join mm on mm._id = pbk.class_mm_id  where 1=1   AND pbk.gender in ('Kumar','Adhar Kumar')     order by roll_no  limit 100 offset -1`
+  // const stmt = db.prepare(sql).all();
+  // console.log("stmt", stmt);
 }
-catch (err) {
-
+catch (err) { 
+  console.log("error db model", err);
 }
 
 // transactions for updating database changes called migration.
@@ -426,7 +433,8 @@ let Migrations = [
       Used decimal(10,2) default 0,
       New decimal(10,2) default 0,
       Old decimal(10,2) default 0,
-      Defective decimal(10,2) default 0,      
+      Defective decimal(10,2) default 0,    
+      Repairing decimal(10, 2) default 0,  
       Scrap decimal(10,2) default 0,  
       unit_id integer not null references unit(_id) ON DELETE CASCADE,
       dept_id integer not null references department(_id) ON DELETE CASCADE,
@@ -435,7 +443,7 @@ let Migrations = [
       updated_at timestamp default (datetime('now', 'localtime')),
       unique(mm_id,item_id,unit_id,dept_id,subitem_id)
     );`,
-    bachat_insert: `insert into bachat select * from bachat_backup`,
+    bachat_insert: `insert into bachat(_id, mm_id, item_id, subitem_id, Stock, Used, New, Old, Defective, Scrap, unit_id, dept_id, active, created_at, updated_at) select _id, mm_id, item_id, subitem_id, Stock, Used, New, Old, Defective, Scrap, unit_id, dept_id, active, created_at, updated_at from bachat_backup`,
     drop_bachat_backup: `drop table "bachat_backup"`,
 
     temp_import: `create table IF NOT EXISTS temp_import(
@@ -479,7 +487,7 @@ let Migrations = [
 
     add_nimitt_dept_conf:` insert into department_config(dept_id, config_key, config_value, active) select _id, 'nimmit', ',', 1 from department `,
 
-    add_col_repairing: `ALTER TABLE "bachat" ADD COLUMN Repairing decimal(10,2) default 0`,
+    // add_col_repairing: `ALTER TABLE "bachat" ADD COLUMN Repairing decimal(10,2) default 0`,
     add_col_isbill: `ALTER TABLE "aawak" ADD COLUMN isbill tinyint(1) default 0`,
     add_col_doc_to_aawak: `ALTER TABLE "aawak" ADD COLUMN document json`,
     add_col_isbill_prdct: `ALTER TABLE "product" ADD COLUMN isbill tinyint(1) default 0`,    
@@ -506,7 +514,7 @@ let Migrations = [
             New = New + (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END),
             Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
             Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
-            Repairing = Repairing + (CASE WHEN (select list_type_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN NEW.qty ELSE 0 END),
+            Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN NEW.qty ELSE 0 END),
             Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
             where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id;                                      
         END;`,
@@ -517,7 +525,7 @@ let Migrations = [
       WHEN NOT EXISTS(select _id from bachat where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
       BEGIN
         insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, New, Old, Defective, Repairing, Scrap, unit_id, dept_id) 
-        values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN (select list_type_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);             
+        values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);             
       END;`,
 
     awk_updt_bcht_updt:
@@ -530,7 +538,7 @@ let Migrations = [
             New = New + (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
             Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
             Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
-            Repairing = Repairing + (CASE WHEN (select list_type_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN NEW.qty ELSE 0 END) - (CASE WHEN (select list_type_eng from support_list where _id = OLD.condition_id) = "Repairing" THEN OLD.qty ELSE 0 END),
+            Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN NEW.qty ELSE 0 END) - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) = "Repairing" THEN OLD.qty ELSE 0 END),
             Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
             where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id;  
             
@@ -546,7 +554,7 @@ let Migrations = [
           New = New - (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
           Old = Old - (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
           Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
-          Repairing = Repairing - (CASE WHEN (select list_type_eng from support_list where _id = OLD.condition_id) = "Repairing" THEN OLD.qty ELSE 0 END),
+          Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) = "Repairing" THEN OLD.qty ELSE 0 END),
           Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
           where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;                       
         END;`,
@@ -562,7 +570,7 @@ let Migrations = [
           New = New - (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END),
           Old = Old - (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
           Defective = Defective - (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
-          Repairing = Repairing - (CASE WHEN (select list_type_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN NEW.qty ELSE 0 END),
+          Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN NEW.qty ELSE 0 END),
           Scrap = Scrap - (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
           where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id; 
 
@@ -579,7 +587,7 @@ let Migrations = [
           New = New - (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
           Old = Old - (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
           Defective = Defective - (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
-          Repairing = Repairing - (CASE WHEN (select list_type_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN NEW.qty ELSE 0 END) + (CASE WHEN (select list_type_eng from support_list where _id = OLD.condition_id) = "Repairing" THEN OLD.qty ELSE 0 END),
+          Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN NEW.qty ELSE 0 END) + (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) = "Repairing" THEN OLD.qty ELSE 0 END),
           Scrap = Scrap - (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
           where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id; 
 
@@ -596,7 +604,7 @@ let Migrations = [
           New = New + (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
           Old = Old + (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
           Defective = Defective + (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
-          Repairing = Repairing + (CASE WHEN (select list_type_eng from support_list where _id = OLD.condition_id) = "Repairing" THEN OLD.qty ELSE 0 END),
+          Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) = "Repairing" THEN OLD.qty ELSE 0 END),
           Scrap = Scrap + (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
           where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;  
         END;`,
@@ -611,7 +619,7 @@ let Migrations = [
           New = New + (CASE WHEN NEW.condition_id = 33 THEN 1 ELSE 0 END),
           Old = Old + (CASE WHEN NEW.condition_id = 34 THEN 1 ELSE 0 END),
           Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN 1 ELSE 0 END),
-          Repairing = Repairing + (CASE WHEN (select list_type_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN 1 ELSE 0 END),
+          Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN 1 ELSE 0 END),
           Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN 1 ELSE 0 END)
           where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = 1; 
 
@@ -629,7 +637,7 @@ let Migrations = [
           New = New + (CASE WHEN NEW.condition_id = 33 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
           Old = Old + (CASE WHEN NEW.condition_id = 34 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
           Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
-          Repairing = Repairing + (CASE WHEN (select list_type_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN 1 ELSE 0 END) - (CASE WHEN (select list_type_eng from support_list where _id = OLD.condition_id) = "Repairing" THEN 1 ELSE 0 END),
+          Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN 1 ELSE 0 END) - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) = "Repairing" THEN 1 ELSE 0 END),
           Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END)
           where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = 1;           
         END;`,
@@ -644,7 +652,7 @@ let Migrations = [
           New = New - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
           Old = Old - (CASE WHEN OLD.condition_id = 34 THEN 1 ELSE 0 END),
           Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN 1 ELSE 0 END),
-          Repairing = Repairing - (CASE WHEN (select list_type_eng from support_list where _id = OLD.condition_id) = "Repairing" THEN 1 ELSE 0 END),
+          Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) = "Repairing" THEN 1 ELSE 0 END),
           Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN 1 ELSE 0 END)
           where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = 1;  
         END;`,
@@ -683,7 +691,7 @@ let Migrations = [
         WHEN NOT EXISTS(select _id from bachat where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
         BEGIN
           insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, New, Old, Defective, Repairing, Scrap, unit_id, dept_id) 
-          values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN (select list_type_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);             
+          values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) = "Repairing" THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);             
         END;`
   }
 ];

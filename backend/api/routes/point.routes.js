@@ -6,7 +6,7 @@ const DB = new DBContex();
 //  point add
 router.post('/', async (req, res, next) => {
     if (req.body && req.body.point_hin) {
-        await DB.insert('point', req.body, async (err, data) => {
+        await DB.insert('point', req.body).then((data) => {
             if (err) {
                 return next(err);
             }
@@ -28,7 +28,7 @@ router.get('/', async (req, res, next) => {
         res.json({
             success: true,
             result: resolve.data || [],
-            total_count: (resolve.total_count ? resolve.total_count : 0),
+            total_count: resolve.total_count,
         });
     }, (err) => { return next(err) });
 });
@@ -37,11 +37,11 @@ router.get('/', async (req, res, next) => {
 //  point get
 router.get('/random/', async (req, res, next) => {
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('point', null, ` random()`, 1).then(async (resolve) => {
+    await DB.getList('point',{conditionString: ` random()`, limit:1} ).then(async (resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],
-            total_count: (resolve.total_count ? resolve.total_count : 0),
+            total_count: resolve.total_count,
         });
     }, (err) => { return next(err) });
 });

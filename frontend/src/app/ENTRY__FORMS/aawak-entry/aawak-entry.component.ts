@@ -45,8 +45,8 @@ export class AawakEntryComponent implements OnInit {
 	productsAll: any = [];
 	jmm: any = null;
 	jqty: any = null;
-	jnimmit: any = null;
-	nimmits: any = [];
+	jnimitt: any = null;
+	nimitts: any = [];
 	categoryAll: any;
 	itemAll: any;
 	selDept_id: any;
@@ -66,7 +66,7 @@ export class AawakEntryComponent implements OnInit {
 		qty: null,
 		rate: null,
 		actual_amt: null,
-		nimmit_id: null,
+		nimitt_id: null,
 		item_detail: null,
 		description: null,
 		remaining_qty: null,
@@ -94,7 +94,7 @@ export class AawakEntryComponent implements OnInit {
 			this.departments = result.department ? result.department : [];
 			this.pbks = result.pbk ? result.pbk : [];
 			this.aawak_types = result.aawak_type ? result.aawak_type : [];
-			this.nimmits = result.nimmit ? result.nimmit : [];
+			this.nimitts = result.nimitt ? result.nimitt : [];
 		});
 		this.settings = this.auth.webUser.settings;
 
@@ -127,7 +127,7 @@ export class AawakEntryComponent implements OnInit {
 				qty: changes.getData.currentValue.qty,
 				rate: changes.getData.currentValue.rate,
 				actual_amt: changes.getData.currentValue.actual_amt,
-				nimmit_id: changes.getData.currentValue.nimmit_id,
+				nimitt_id: changes.getData.currentValue.nimitt_id,
 				item_detail: changes.getData.currentValue.item_detail,
 				description: changes.getData.currentValue.description,
 				remaining_qty: changes.getData.currentValue.remaining_qty,
@@ -143,7 +143,7 @@ export class AawakEntryComponent implements OnInit {
 	add_jwk() {
 		let jwkfg: any = {
 			jawak_mm_id: (this.jmm ? this.jmm.id : null),
-			nimmit_id: (this.jnimmit ? this.jnimmit.id : null),
+			nimitt_id: (this.jnimitt ? this.jnimitt.id : null),
 			qty: this.jqty,
 			date: this.awkfg.date,
 			mm_id: this.awkfg.mm_id,
@@ -157,15 +157,15 @@ export class AawakEntryComponent implements OnInit {
 		}
 		let jwkfg2: any = {
 			jawak_mm_hin: (this.jmm ? this.jmm.mm_hin : ''),
-			nimmit_hin: (this.jnimmit ? this.jnimmit.nimmit_hin : ''),
-			nimmit_state_hin: (this.jnimmit ? this.jnimmit.nimmit_state_hin : ''),
+			nimitt_hin: (this.jnimitt ? this.jnimitt.nimitt_hin : ''),
+			state_hin: (this.jnimitt ? this.jnimitt.state_hin : ''),
 			qty: this.jqty
 		}
 		this.awkfg.jawak_detail.push(jwkfg);
 		this.jwkArr.push(jwkfg2);
 		this.jmm = null;
 		this.jqty = null;
-		this.jnimmit = null;
+		this.jnimitt = null;
 	}
 
 	remove(i: any, id: any = null) {
@@ -221,7 +221,7 @@ export class AawakEntryComponent implements OnInit {
 				if (data['result'] && data['success']) {
 					this.jmm = null;
 					this.jqty = null;
-					this.jnimmit = null;
+					this.jnimitt = null;
 					this.isLoader = false;
 					this.toastr.success('Aawak Added Successfully.');
 					awkform.resetForm({
@@ -257,7 +257,7 @@ export class AawakEntryComponent implements OnInit {
 				if (data && data['success']) {
 					this.jmm = null;
 					this.jqty = null;
-					this.jnimmit = null;
+					this.jnimitt = null;
 					this.isLoader = false;
 					this.toastr.success('Aawak Updated Successfully.');
 					updtawkform.resetForm();
@@ -335,13 +335,13 @@ export class AawakEntryComponent implements OnInit {
 			console.log("err", ev);
 		}
 	}
-	nimmitAddResponse(ev: any) {
+	nimittAddResponse(ev: any) {
 		this.isLoader = true;
 		if (ev._id) {
 			$('#aawakEntryComponent > #showModal').modal('hide');
 			this.showModal = '';
 			// this.states.unshift(ev);
-			this.awkfg.nimmit_id = ev._id;
+			this.awkfg.nimitt_id = ev._id;
 			this.isLoader = false;
 		}
 		else {

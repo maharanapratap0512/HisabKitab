@@ -72,23 +72,6 @@ router.get('/:dept_id', async (req, res, next) => {
     }, (err) => { return next(err) });
 });
 
-//get all nimmit list
-router.get('/nimmit/', async (req, res, next) => {
-    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('pbk', { conditionString: ` pbk.status = "nimmit"`, orderBy: ` order by pbk._id desc`, limit: 100 }).then((resolve) => {
-        // for (let i in resolve) {
-        //     resolve[i].document = (resolve[i].document != "[null]" ? JSON.parse(resolve[i].document) : {});
-        //     resolve[i].relative_ref = (resolve[i].relative_ref != "[null]" ? JSON.parse(resolve[i].relative_ref) : []);
-        //     resolve[i].alt_mo_no = (resolve[i].alt_mo_no != "[null]" ? JSON.parse(resolve[i].alt_mo_no) : []);
-        // }
-        res.json({
-            success: true,
-            result: resolve.data || [],
-            total_count: resolve.total_count || 0
-        });
-    }, (err) => { return next(err) });
-});
-
 //pbk get by dept + filter + pageNo
 router.put('/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = 100, offset = null, page = 1;    

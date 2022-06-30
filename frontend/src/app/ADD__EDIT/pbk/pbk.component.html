@@ -68,7 +68,7 @@
                                     <ng-select class="custom" style="width: 100%;" placeholder="Select Gender"
                                        [clearable]="true" [virtualScroll]="true" name="gender" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.gender" #gender="ngModel">
-                                       <ng-option *ngFor="let item of genders" value='"{{item.list_name_eng}}"'>
+                                       <ng-option *ngFor="let item of genders" value="'{{item.list_name_eng}}'">
                                           {{item.list_name_hin}} : {{item.list_name_eng}}</ng-option>
                                     </ng-select>
                                  </div>

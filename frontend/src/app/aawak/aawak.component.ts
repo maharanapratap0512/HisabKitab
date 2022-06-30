@@ -38,6 +38,7 @@ export class AawakComponent implements OnInit {
   mms: any = [];
   viewData: any = [];
   items: any = [];
+  nimitts:any = [];
   units: any = [];
   conditions: any = [];
   subitems: any = [];
@@ -59,7 +60,7 @@ export class AawakComponent implements OnInit {
     subitem_id: [],
     condition_id: [],
     pkt_num: null,
-    nimmit: null
+    nimitt_id: null
   };
   cat: any;
   settings: any = {};
@@ -92,6 +93,7 @@ export class AawakComponent implements OnInit {
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
       this.products = result.product ? result.product : [];
       this.categories = result.category ? result.category : [];
+      this.nimitts = result.nimitt ? result.nimitt : [];
     });
   }
 
@@ -141,7 +143,7 @@ export class AawakComponent implements OnInit {
           jawakArray.push({
             'Date': jres.date ? jres.date : '-',
             'Jawak MM': jres.jawak_mm_id ? jres.jawak_mm_hin : '-',
-            'Kisko Diya': jres.nimmit_id ? jres.nimmit_hin + '(' + jres.nimmit_state_hin + ')' : '-',
+            'Kisko Diya': jres.nimitt_id ? jres.nimitt_hin + '(' + jres.state_hin + ')' : '-',
             'Jawak Type': jres.jawak_type_id ? jres.jawak_type_hin : '-',
             'Qty': jres.qty ? jres.qty : '-',
             'Unit': jres.unit_id ? jres.unit_short : '-',

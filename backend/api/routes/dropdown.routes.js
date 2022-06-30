@@ -15,15 +15,24 @@ router.get('/:list_name', async (req, res, next) => {
 
 //get as per department Done.
 router.get('/all/:dept_id', async (req, res, next) => {
-    try{
-    let lists = {
-    }
+    try {
+        let lists = {
+        }
 
-    if (req.params.dept_id) {
-        lists.country = await DB.getList('country', { dept_id: req.params.dept_id }) || [],
-            lists.category = await DB.getList('category', { dept_id: req.params.dept_id }) || [],
-            lists.city = await DB.getList('city', { dept_id: req.params.dept_id }) || [],
-            lists.item = await DB.getList('item', { dept_id: req.params.dept_id }) || [],
+        if (req.params.dept_id) {
+            lists.country = await DB.getList('country', { dept_id: req.params.dept_id }) || []
+            lists.category = await DB.getList('category', { dept_id: req.params.dept_id }) || []
+            lists.city = await DB.getList('city', { dept_id: req.params.dept_id }) || []
+            lists.itemMix = await DB.getList('item', { full: true, dept_id: req.params.dept_id }).then((result) => {
+                for (let i in result.data) {
+                    DB.getList('subitem', { full: true, dept_id: req.params.dept_id, conditionString: `item_id = ${result.data[i]._id}` }).then((sResult) => {
+                        result.data[i].subitems = sResult.data;
+                        result.data[i].categories = sResult.data.map(s => s.category_id);
+                        result.total_count += sResult.total_count;
+                    });
+                }
+                return result;
+            });
             // lists.itemmix = await DB.getList('itemMix', { dept_id: req.params.dept_id }).then((resolve) => {
             //     for (let i = 0; i < resolve["data"].length; i++) {
             //         resolve["data"][i].subitems = (resolve["data"][i].subitems != "[null]" ? JSON.parse(resolve["data"][i].subitems) : []);
@@ -31,27 +40,25 @@ router.get('/all/:dept_id', async (req, res, next) => {
             //     }
             //     return resolve.data;
             // }, (err) => { return [] }),
-            await DB.getList('department').then((resolve) => {
-                lists.department = resolve.data || []
-            }),
-            lists.mm = await DB.getList('mm', { dept_id: req.params.dept_id }) || [],
-            lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id }) || [],
-            lists.nimitt = await DB.getList('nimitt', { dept_id: req.params.dept_id }) || [],
-            lists.state = await DB.getList('state', { dept_id: req.params.dept_id }) || [],
-            // lists.item= await DB.getList('item', {dept_id:req.params.dept_id}) || [],
-            // lists.subitem= await DB.getList('subitem', {dept_id:req.params.dept_id}) || [],
-            lists.subitem_list = await DB.getList('subitem_list', { dept_id: req.params.dept_id }) || [],
-            lists.departmen_config = await DB.getList('department_config', { dept_id: req.params.dept_id }) || [],
-            lists.unit = await DB.getList('unit', { dept_id: req.params.dept_id }) || [],
-            // lists.mm_type= await DB.getList('mm_type', {dept_id:req.params.dept_id}) || [],
-            lists.gender = await DB.getList('gender', { dept_id: req.params.dept_id }) || [],
-            // lists.relation = await DB.getList('relation', { dept_id: req.params.dept_id }) || [],
-            // lists.status = await DB.getList('status', { dept_id: req.params.dept_id }) || [],
-            // lists.aawak_type= await DB.getList('aawak_type', {dept_id:req.params.dept_id}) || [],
-            // lists.jawak_type= await DB.getList('jawak_type', {dept_id:req.params.dept_id}) || [],
-            // lists.condition = await DB.getList('condition', { dept_id: req.params.dept_id }) || [],
+            lists.department = await DB.getList('department') || []
+            lists.mm = await DB.getList('mm', { dept_id: req.params.dept_id }) || []
+            lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id }) || []
+            lists.nimitt = await DB.getList('nimitt', { dept_id: req.params.dept_id }) || []
+            lists.state = await DB.getList('state', { dept_id: req.params.dept_id }) || []
+            // lists.item= await DB.getList('item', {dept_id:req.params.dept_id}) || []
+            // lists.subitem= await DB.getList('subitem', {dept_id:req.params.dept_id}) || []
+            lists.subitem_list = await DB.getList('subitem_list', { dept_id: req.params.dept_id }) || []
+            lists.departmen_config = await DB.getList('department_config', { dept_id: req.params.dept_id }) || []
+            lists.unit = await DB.getList('unit', { dept_id: req.params.dept_id }) || []
+            // lists.mm_type= await DB.getList('mm_type', {dept_id:req.params.dept_id}) || []
+            lists.gender = await DB.getList('gender', { dept_id: req.params.dept_id }) || []
+            lists.relation = await DB.getList('relation', { dept_id: req.params.dept_id }) || []
+            // lists.status = await DB.getList('status', { dept_id: req.params.dept_id }) || []
+            lists.aawak_type = await DB.getList('aawak_type', { dept_id: req.params.dept_id }) || []
+            lists.jawak_type = await DB.getList('jawak_type', { dept_id: req.params.dept_id }) || []
+            lists.condition = await DB.getList('condition', { dept_id: req.params.dept_id }) || []
             // lists.sitem=  [],
-            // lists.sitem= await DB.getList('sitem', {dept_id:req.params.dept_id}) || [],
+            // lists.sitem= await DB.getList('sitem', {dept_id:req.params.dept_id}) || []
             res.json({
                 success: true,
                 result: lists
@@ -64,7 +71,7 @@ router.get('/all/:dept_id', async (req, res, next) => {
             })
         }
     }
-    catch(err){
+    catch (err) {
         return next(err)
     }
 });

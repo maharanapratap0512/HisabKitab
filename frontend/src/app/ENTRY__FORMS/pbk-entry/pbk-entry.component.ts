@@ -17,7 +17,7 @@ export class PbkEntryComponent implements OnInit {
 
   @Input() getData: any;
   @Input() isEdit: any;
-  @Input() isNimmit: any;
+  @Input() isNimitt: any;
   @Output() response = new EventEmitter();
   pbkForm: FormGroup;
   allList: any = {};
@@ -108,7 +108,7 @@ export class PbkEntryComponent implements OnInit {
       });
       this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0]: null;
     }
-    if(changes.isNimmit && changes.isNimmit.currentValue){
+    if(changes.isNimitt && changes.isNimitt.currentValue){
       this.settings.pbk = {
         roll_no: true,
         pbk_hin: true,
@@ -129,7 +129,7 @@ export class PbkEntryComponent implements OnInit {
         doccument: false
       };
       this.pbkForm.patchValue({
-        status: "nimmit"
+        status: "nimitt"
       });
     }
   }
@@ -176,8 +176,8 @@ export class PbkEntryComponent implements OnInit {
       this.isLoader = true;
       this.http.post(this.api.getUrl('PBK') + this.auth.webUser.dept_id, this.pbkForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
-          if(data['result'].status == "nimmit"){
-            this.gs.Lists.nimmit.unshift(data['result'])
+          if(data['result'].status == "nimitt"){
+            this.gs.Lists.nimitt.unshift(data['result'])
           }else{
             this.gs.Lists.pbk.unshift(data['result'])
           }
@@ -229,8 +229,8 @@ export class PbkEntryComponent implements OnInit {
       };
       this.http.put(this.api.getUrl('PBK'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          if(data['result'].status == "nimmit"){
-            this.gs.Lists.nimmit.splice(this.gs.Lists.nimmit.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
+          if(data['result'].status == "nimitt"){
+            this.gs.Lists.nimitt.splice(this.gs.Lists.nimitt.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
           }else{
             this.gs.Lists.pbk.splice(this.gs.Lists.pbk.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
           }

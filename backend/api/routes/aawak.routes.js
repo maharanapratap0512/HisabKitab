@@ -40,12 +40,12 @@ router.post('/:dept_id', async (req, res, next) => {
             jawaks = req.body.jawak_detail;
             delete req.body.jawak_detail;
         }
-        await DB.insertFromDept('aawak', req.body, req.params.dept_id).then(async (data) => {
+        await DB.insert('aawak', req.body, req.params.dept_id).then(async (data) => {
             // console.log("data", data);
             data.jawak_detail = [];
             for (let i = 0; i < jawaks.length; i++) {
                 jawaks[i].aawak_ref_id = data._id;
-                await DB.insertFromDept('jawak', jawaks[i], req.params.dept_id).then((jwkdata) => {
+                await DB.insert('jawak', jawaks[i], req.params.dept_id).then((jwkdata) => {
                     data.remaining_qty = data.remaining_qty - jwkdata.qty;
                     data.jawak_detail.push(jwkdata);
                 }, (err) => {
@@ -69,11 +69,11 @@ router.post('/:dept_id', async (req, res, next) => {
 //aawak get dept
 router.get('/:dept_id', async (req, res, next) => {
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('aawak', { dept_id: req.params.dept_id, conditionString: null, orderBy: `aawak._id desc`, limit: 100 }).then(async (resolve) => {
+    await DB.getList('aawak', {full:true, dept_id: req.params.dept_id, conditionString: null, orderBy: `aawak._id desc`, limit: 100 }).then(async (resolve) => {
         for (let i = 0; i < resolve.data.length; i++) {
             let jwkconditionString = ` jawak.aawak_ref_id = ${resolve.data[i]._id}`;
 
-            await DB.getList('jawak', { dept_id: req.params.dept_id, conditionString: jwkconditionString }).then(async (jwkdata) => {
+            await DB.getList('jawak', {full:true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then(async (jwkdata) => {
                 resolve.data[i].jawak_detail = jwkdata.data;
             }, (err) => {
                 console.log("jawak", err);
@@ -114,7 +114,7 @@ router.get('/pending/:dept_id', async (req, res, next) => {
 //aawak get by dept + filter + pageNo
 router.put('/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = 100, offset = null, page = 1;
-    let conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.mm_id.length > 0 ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${req.body.aawak_mm_id.length > 0 ? ` AND aawak.aawak_mm_id in (${req.body.aawak_mm_id.join(',')})` : ``} ${req.body.pbk_id.length > 0 ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${req.body.item_id.length > 0 ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${req.body.subitem_id.length > 0 ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${req.body.aawak_type_id.length > 0 ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${req.body.product_id.length > 0 ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${req.body.condition_id.length > 0 ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = ${req.body.pkt_num}` : ``} ${req.body.nimmit ? ` AND aawak.nimmit = ${req.body.nimmit}` : ``}`;
+    let conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.mm_id.length > 0 ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${req.body.aawak_mm_id.length > 0 ? ` AND aawak.aawak_mm_id in (${req.body.aawak_mm_id.join(',')})` : ``} ${req.body.pbk_id.length > 0 ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${req.body.item_id.length > 0 ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${req.body.subitem_id.length > 0 ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${req.body.aawak_type_id.length > 0 ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${req.body.product_id.length > 0 ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${req.body.condition_id.length > 0 ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = ${req.body.pkt_num}` : ``} ${req.body.nimitt_id ? ` AND aawak.nimitt_id = ${req.body.nimitt_id}` : ``}`;
     if (conditionString.trim() == `1=1`) {
         orderBy = "aawak._id desc";
     }
@@ -123,11 +123,11 @@ router.put('/:dept_id', async (req, res, next) => {
         page = req.body.pageNo;
     }
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('aawak', { dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then(async (resolve) => {
+    await DB.getList('aawak', { full:true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then(async (resolve) => {
         for (let i in resolve.data) {
             let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
 
-            await DB.getList('jawak', { dept_id: req.params.dept_id, conditionString: jwkconditionString }).then((jwkdata) => {
+            await DB.getList('jawak', {full:true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then((jwkdata) => {
                 resolve.data[i].jawak_detail = jwkdata.data;
             }, (err) => {
                 console.log('jawak', err);
@@ -177,7 +177,7 @@ router.put('/', async (req, res, next) => {
 
                     let jwkconditionString = `jawak._id = ${jawaks[i]._id}`;
                     jawaks[i].aawak_ref_id = data._id;
-                    await DB.insertFromDept('jawak', jawaks[i], data.dept_id).then((jwkdata) => {
+                    await DB.insert('jawak', jawaks[i], data.dept_id).then((jwkdata) => {
                         data.remaining_qty = data.remaining_qty - jwkdata.qty;
                         data.jawak_detail.push(jwkdata);
                     }, (err) => {
@@ -204,10 +204,7 @@ router.put('/', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
         let condition = '_id = ' + req.params.id;
-        await DB.delete('aawak', condition, (err, data) => {
-            if (err) {
-                return next(err);
-            }
+        await DB.delete('aawak', condition).then((data)=>{
             res.json({
                 success: true,
                 result: data

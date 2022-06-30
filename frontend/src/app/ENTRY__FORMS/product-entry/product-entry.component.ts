@@ -65,7 +65,7 @@ export class ProductEntryComponent implements OnInit {
       document: [null],
       dept_id: [this.auth.webUser.dept_id],
       accessories: [null],
-      nimmit: [null],
+      nimitt: [null],
     });
     this.settings = this.auth.webUser.settings;
   }
@@ -105,7 +105,7 @@ export class ProductEntryComponent implements OnInit {
         dept_id: changes.getData.currentValue.dept_id,
         document: changes.getData.currentValue.document,
         warranty_from: changes.getData.currentValue.warranty_from,
-        nimmit: changes.getData.currentValue.nimmit
+        nimitt: changes.getData.currentValue.nimitt
       });
     }
   }
@@ -192,7 +192,7 @@ export class ProductEntryComponent implements OnInit {
         warranty_period: this.productForm.value.warranty_period,
         dept_id: this.productForm.value.dept_id,
         warranty_from: this.productForm.value.warranty_from,
-        nimmit: this.productForm.value.nimmit
+        nimitt: this.productForm.value.nimitt
       };
       this.http.put(this.api.getUrl('PRODUCT'), body).subscribe((data: any) => {
         if (data && data['success']) {

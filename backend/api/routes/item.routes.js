@@ -54,21 +54,38 @@ router.post('/:dept_id', async (req, res, next) => {
 //  item get by dept
 router.get('/:dept_id', async (req, res, next) => {
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('itemMix', { dept_id: req.params.dept_id, limit: 100 }).then((resolve) => {
+    await DB.getList('item', { full: true, dept_id: req.params.dept_id }).then((result) => {
         let subitem_count = 0;
-        for (let i = 0; i < resolve.data.length; i++) {
-
-            resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
-            resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
-            subitem_count += resolve.data[i].subitems.length;
+        for (let i in result.data) {
+            DB.getList('subitem', { full: true, dept_id: req.params.dept_id, conditionString: `item_id = ${result.data[i]._id}` }).then((sResult) => {
+                result.data[i].subitems = sResult.data;
+                result.data[i].categories = sResult.data.map(s => s.category_id);
+                // result.total_count += sResult.total_count;
+                result.subitem_count += sResult.total_count;
+            });
         }
         res.json({
             success: true,
-            result: resolve.data || [],
-            total_count: resolve.total_count,
+            result: result.data || [],
+            total_count: result.total_count + subitem_count,
             subitem_count: subitem_count
         });
     }, (err) => { return next(err) });
+    // await DB.getList('itemMix', { dept_id: req.params.dept_id, limit: 100 }).then((resolve) => {
+    //     let subitem_count = 0;
+    //     for (let i = 0; i < resolve.data.length; i++) {
+
+    //         resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
+    //         resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
+    //         subitem_count += resolve.data[i].subitems.length;
+    //     }
+    //     res.json({
+    //         success: true,
+    //         result: resolve.data || [],
+    //         total_count: resolve.total_count,
+    //         subitem_count: subitem_count
+    //     });
+    // }, (err) => { return next(err) });
 });
 
 //  item get by dept + filter + pageNo
@@ -93,18 +110,20 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
         offset = (req.body.pageNo - 1) * limit;
         page = req.body.pageNo;
     }
-    await DB.getList('itemMix', { dept_id: req.params.dept_id, conditonString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then((resolve) => {
+    await DB.getList('item', { full: true, dept_id: req.params.dept_id, conditonString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then(async (result) => {
         let subitem_count = 0;
-        for (let i = 0; i < resolve.data.length; i++) {
-            resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
-            resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
-            subitem_count += resolve.data[i].subitems.length;
+        for (let i in result.data) {
+            await DB.getList('subitem', { full: true, dept_id: req.params.dept_id, conditionString: `item_id = ${result.data[i]._id}` }).then((sResult) => {
+                result.data[i].subitems = sResult.data;
+                result.data[i].categories = sResult.data.map(s => s.category_id);
+                // result.total_count += sResult.total_count;
+                subitem_count += sResult.total_count;
+            });
         }
         res.json({
             success: true,
-            result: resolve.data || [],
-            pageNo: page,
-            total_count: resolve.total_count,
+            result: result.data || [],
+            total_count: result.total_count + subitem_count,
             subitem_count: subitem_count
         });
     }, (err) => { return next(err) });

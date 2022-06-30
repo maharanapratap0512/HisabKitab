@@ -68,7 +68,7 @@ export class GlobalService {
             // this.Lists.mm = data['result'].mm;
             // this.Lists.state = data['result'].state;
             // this.Lists.pbk = data['result'].pbk;
-            // this.Lists.nimmit = data['result'].nimmit;
+            // this.Lists.nimitt = data['result'].nimitt;
             // this.Lists.gender = data['result'].gender;
             // this.Lists.relation = data['result'].relation;
             // this.Lists.status = data['result'].status;

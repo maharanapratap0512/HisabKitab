@@ -57,16 +57,16 @@
                </div>
             </div>
 
-            <div class="col-md-2 mb-3" *ngIf="settings.aawak.nimmit_id">
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.nimitt_id">
                <div class="form-group">
-                  <label class="form-label">Nimmit</label>
+                  <label class="form-label">Nimitt</label>
                   <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
-                     onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Nimmit'">+
+                     onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Nimitt'">+
                      Add</button>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Select Nimmit" [clearable]="true"
-                     [virtualScroll]="true" [(ngModel)]="awkfg.nimmit_id" name="nimmit_id" #nimmit_id="ngModel">
-                     <ng-option selected="selected" disabled value="">Select Nimmit</ng-option>
-                     <ng-option *ngFor="let item of nimmits" [value]="item._id">
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Nimitt" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.nimitt_id" name="nimitt_id" #nimitt_id="ngModel">
+                     <ng-option selected="selected" disabled value="">Select Nimitt</ng-option>
+                     <ng-option *ngFor="let item of nimitts" [value]="item._id">
                         {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
                         item.state_hin + ')'}}</ng-option>
                   </ng-select>
@@ -293,10 +293,10 @@
                         <div class="form-group">
                            <label class="form-label">किसको दिया</label>
                            <ng-select class="custom" style="width: 100%;" placeholder="Select Person" [clearable]="true"
-                              [virtualScroll]="true" [(ngModel)]="jnimmit" [ngModelOptions]="{standalone: true}">
+                              [virtualScroll]="true" [(ngModel)]="jnimitt" [ngModelOptions]="{standalone: true}">
                               <ng-option selected="selected" disabled value="">Select Person</ng-option>
-                              <ng-option *ngFor="let item of nimmits"
-                                 [value]="{id:item._id,nimmit_hin:item.pbk_hin,nimmit_state_hin:item.state_hin}">
+                              <ng-option *ngFor="let item of nimitts"
+                                 [value]="{id:item._id,nimitt_hin:item.nimitt_hin,state_hin:item.state_hin}">
                                  {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
                                  item.state_hin + ')'}}</ng-option>
                            </ng-select>
@@ -314,13 +314,13 @@
                         <label class="form-label">Clear</label>
                      </div>
                   </div>
-                  <button type="button" [disabled]="(jmm === null && jnimmit === null) || jqty === null"
+                  <button type="button" [disabled]="(jmm === null && jnimitt === null) || jqty === null"
                      class="btn btn-primary mt-3" (click)="add_jwk()">+ Add</button>
                   <div class="mt-3 p-2" style="max-height: 200px;;overflow-y: auto;">
                      <div class="row mb-2 border-secondary border-bottom" *ngFor="let f of jwkArr;let i=index">
                         <div class="col-md-1">{{i+1}}</div>
                         <div class="col-md-4">{{f.jawak_mm_hin}}</div>
-                        <div class="col-md-4">{{f.nimmit_hin}} ({{f.nimmit_state_hin}})</div>
+                        <div class="col-md-4">{{f.nimitt_hin}} ({{f.state_hin}})</div>
                         <div class="col-md-2">{{f.qty}}</div>
                         <div class="col-md-1">
                            <button class="btn btn-sm btn-light mb-1" style="font-size: small;line-height: 8px;"
@@ -387,9 +387,9 @@
                <app-pbk-entry *ngIf="showModal == 'Add PBK'" (response)='pbkAddResponse($event)'>
                </app-pbk-entry>
 
-               <!-- Add Nimmit  -->
-               <app-pbk-entry *ngIf="showModal == 'Add Nimmit'" (response)="nimmitAddResponse($event)"
-                  [isNimmit]="true">
+               <!-- Add Nimitt  -->
+               <app-pbk-entry *ngIf="showModal == 'Add Nimitt'" (response)="nimittAddResponse($event)"
+                  [isNimitt]="true">
                </app-pbk-entry>
 
                <!-- Add AMM -->

@@ -8,7 +8,6 @@ class DBContex {
         'mm',
         'subitem',
         'category',
-        'department'
     ];
     tbl_with_dept_id = [
         'aawak',
@@ -46,7 +45,7 @@ class DBContex {
                 let conditionQuery = null
 
 
-                if (this.tbl_from_supp_list.includes(tblname)) {
+                if (this.tbl_need_dept_config.includes(tblname)) {
                     conditionQuery = (!options.dept_id || options.dept_id == 1) ? null : `(select config_value from department_config where dept_id = ${options.dept_id} AND config_key = 'aj_type') LIKE '%,'||support_list._id||',%'`;
                 }
                 else if (this.tbl_with_dept_id.includes(tblname)) {
@@ -55,31 +54,32 @@ class DBContex {
                 else if (this.supp_list.includes(tblname)) {
                     sql = `select * from support_list ?`;
                     conditionQuery = `list_type = '${tblname}'`
-                    if (this.tbl_need_dept_config.includes(tblname)) {
+                    if (this.tbl_from_supp_list.includes(tblname)) {
                         conditionQuery += (!options.dept_id || options.dept_id == 1) ? '' : ` AND (select config_value from department_config where dept_id = ${options.dept_id} AND config_key = 'aj_type') LIKE '%,'||support_list._id||',%'`;
                     }
                 }
 
                 conditionQuery = options.conditionString ? (conditionQuery ? `${conditionQuery} AND ` : '') + options.conditionString : conditionQuery
 
-                let order = options.orderBy ? options.orderBy : (this.query[tblname] ? this.query[tblname].order : null);
+                let order = options.orderBy ? options.orderBy : (this.query[tblname] && options.full ? this.query[tblname].order : null);
                 
                 sql =
                 sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order} ` : ''));
-                if (tblname == "pbk") {
+               
+                // if(tblname == "item"){
+                //     console.log("sql", sql);
+                //     console.log("options", options);
+                //     console.log("order", order);
+                //     console.log("conditionQuery", conditionQuery);
+                // }
 
-                    console.log('result', result);
-                    console.log('sql', sql);
-                    console.log('options', options);
-                    console.log('params', { limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
-                    console.log('result.length', result.length);
-                }
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {
                     resolve({ data: result, total_count: res.total_count });
                 });
             }
             catch (err) {
+                console.log(err);
                 reject(err)
             }
         })
@@ -133,6 +133,7 @@ class DBContex {
     async delete(tblname, conditionString) {
         return new Promise(async (resolve, reject) => {
             try {
+                console.log("condition", conditionString);
                 const result = await this.db.prepare(`delete from ${tblname} where ${conditionString} `).run();
                 return resolve(result);
             }
@@ -145,10 +146,14 @@ class DBContex {
             try {
                 if (this.supp_list.includes(tblname)) {
                     tblname = `support_list`;
-                }
+                }                
                 const sql =
-                    `select count(*) as total_count from ${tblname} ` + (conditionString?.trim() != '' ? ` where ${conditionString} ` : ``)
+                    `select count(*) as total_count from ${tblname} ` + (conditionString && conditionString?.trim() != '' ? ` where ${conditionString} ` : ``)
                 const stmt = this.db.prepare(sql).get();
+                // if(tblname == 'item'){
+                //     console.log("sql", sql);
+                //     console.log("stmt", stmt);
+                // }
                 resolve(stmt);
             }
             catch (err) { reject(err) }

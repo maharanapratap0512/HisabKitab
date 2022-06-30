@@ -34,6 +34,7 @@ export class JawakComponent implements OnInit {
   conditions: any = [];
   subitems: any = [];
   pbks: any = [];
+  nimitts: any = [];
   jawak_types: any = [];
   products: any = [];
   categories: any = [];
@@ -50,7 +51,7 @@ export class JawakComponent implements OnInit {
     item_id: [],
     subitem_id: [],
     condition_id: [],
-    nimmit: null,
+    nimitt_id: null,
     pkt_num: null
   };
   cat: any;

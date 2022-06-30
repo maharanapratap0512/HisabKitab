@@ -258,7 +258,7 @@ export class HeaderComponent implements OnInit {
             subitem_eng: aawakEntry[i].subitem_eng,
             item_code: aawakEntry[i].item_code,
             nimmit: aawakEntry[i].nimmit,
-            nimmit_id:null,
+            nimitt_id:null,
             jawak_detail: []
           }
 
@@ -301,7 +301,7 @@ export class HeaderComponent implements OnInit {
             this.gs.Lists.nimmit.find((n: { nimmit_hin: any; nimmit_eng: any; _id: any; })=>
             {
               if(n.nimmit_hin == aawakEntry[i].nimmit || n.nimmit_eng == aawakEntry[i].nimmit){
-                newAawak[i].nimmit_id = n._id;
+                newAawak[i].nimitt_id = n._id;
               }
             });
             

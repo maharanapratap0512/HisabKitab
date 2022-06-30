@@ -192,27 +192,27 @@
                     </div>
                 </div>
 
-                <!-- <div class="col-md-2 mb-3" *ngIf="!aawakRef || !aawakRef.Nimmit">
+                <!-- <div class="col-md-2 mb-3" *ngIf="!aawakRef || !aawakRef.Nimitt">
                     <div class="form-group">
-                        <label class="form-label">Nimmit</label>
-                        <input type="text" class="form-control" placeholder="Nimmit" formControlName="nimmit"
-                            [ngClass]="{'validation':jawakForm.get('nimmit')?.errors && (jawakForm.get('nimmit')?.touched || jawakForm.get ('nimmit')?.dirty)}">
+                        <label class="form-label">Nimitt</label>
+                        <input type="text" class="form-control" placeholder="Nimitt" formControlName="nimitt"
+                            [ngClass]="{'validation':jawakForm.get('nimitt')?.errors && (jawakForm.get('nimitt')?.touched || jawakForm.get ('nimitt')?.dirty)}">
                     </div>
-                </div> --><div class="col-md-2 mb-3" *ngIf="!aawakRef || !aawakRef.Nimmit">
+                </div> --><div class="col-md-2 mb-3" *ngIf="!aawakRef || !aawakRef.Nimitt">
                     <div class="form-group">
-                        <label class="form-label">Nimmit</label>
+                        <label class="form-label">Nimitt</label>
                         <button type="button" style="padding: 1px 6px !important;"
                             class="btn btn-outline-primary float-end"
                             onclick="$('#jawakEntryComponent > #showModal').modal('show')"
-                            (click)="showModal='Add Nimmit'">+
+                            (click)="showModal='Add Nimitt'">+
                             Add</button>
-                        <ng-select class="custom" style="width: 100%;" placeholder="Select Nimmit" [clearable]="true"
-                            [virtualScroll]="true" formControlName="nimmit_id"
-                            [ngClass]="{'validation':jawakForm.get('nimmit_id')?.errors && (jawakForm.get('nimmit_id')?.touched || jawakForm.get ('nimmit_id')?.dirty)}">
-                            <ng-option selected="selected" disabled value="">Select Nimmit</ng-option>
-                            <ng-option *ngFor="let item of nimmits" [value]="item._id">
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Nimitt" [clearable]="true"
+                            [virtualScroll]="true" formControlName="nimitt_id"
+                            [ngClass]="{'validation':jawakForm.get('nimitt_id')?.errors && (jawakForm.get('nimitt_id')?.touched || jawakForm.get ('nimitt_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Nimitt</ng-option>
+                            <ng-option *ngFor="let item of nimitts" [value]="item._id">
                                 {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
-                                item.nimmit_state_hin + ')'}}</ng-option>
+                                item.nimitt_state_hin + ')'}}</ng-option>
                         </ng-select>
                     </div>
                 </div>                
@@ -482,8 +482,8 @@
                     <app-mm-entry *ngIf="showModal == 'Add JMM'" (response)='jmmAddResponse($event)'>
                     </app-mm-entry>
 
-                    <!-- Add Nimmit  -->
-                    <app-pbk-entry *ngIf="showModal == 'Add Nimmit'" (response)="nimmitAddResponse($event)" [isNimmit]="true">
+                    <!-- Add Nimitt  -->
+                    <app-pbk-entry *ngIf="showModal == 'Add Nimitt'" (response)="nimittAddResponse($event)" [isNimitt]="true">
                     </app-pbk-entry>
 
                     <!-- Add Jawak Type  -->

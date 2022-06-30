@@ -20,7 +20,7 @@ export class MmEntryComponent implements OnInit {
   @Output() response = new EventEmitter();
   mmForm: FormGroup;
   states: any = [];
-  nimmits: any = [];
+  nimitts: any = [];
   mms: any = [];
   departments: any = [];
   showModal: string = ''
@@ -45,7 +45,7 @@ export class MmEntryComponent implements OnInit {
       dept_id: [2, Validators.required],
       state_id: [null, Validators.required],
       opening_date: [null],
-      nimmit_id: [null]
+      nimitt_id: [null]
     });
   }
 
@@ -54,7 +54,7 @@ export class MmEntryComponent implements OnInit {
       this.mms = result.mm ? result.mm : [];
       this.states = result.state ? result.state : [];
       this.departments = result.department ? result.department : [];
-      this.nimmits = result.nimmit ? result.nimmit : [];
+      this.nimitts = result.nimitt ? result.nimitt : [];
     });
   }
 
@@ -81,7 +81,7 @@ export class MmEntryComponent implements OnInit {
         dept_id: changes.getData.currentValue.dept_id,
         state_id: changes.getData.currentValue.state_id,
         opening_date: changes.getData.currentValue.opening_date,
-        nimmit_id: changes.getData.currentValue.nimmit_id,
+        nimitt_id: changes.getData.currentValue.nimitt_id,
       });
     }
   }
@@ -127,7 +127,7 @@ export class MmEntryComponent implements OnInit {
         dept_id: this.mmForm.value.dept_id,
         state_id: this.mmForm.value.state_id,
         opening_date: this.mmForm.value.opening_date,
-        nimmit_id: this.mmForm.value.nimmit_id
+        nimitt_id: this.mmForm.value.nimitt_id
       };
       this.http.put(this.api.getUrl('MM'), body).subscribe((data: any) => {
         if (data && data['success']) {
@@ -169,13 +169,13 @@ export class MmEntryComponent implements OnInit {
     }
   }
 
-  nimmitAddResponse(ev: any) {
+  nimittAddResponse(ev: any) {
     this.isLoader = true;
     if (ev._id) {
       $('#mmEntryComponent > #showModal').modal('hide');
       this.showModal = '';
       // this.states.unshift(ev);
-      this.mmForm.patchValue({ nimmit_id: ev._id });
+      this.mmForm.patchValue({ nimitt_id: ev._id });
       this.isLoader = false;
     }
     else {

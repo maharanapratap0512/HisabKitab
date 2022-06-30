@@ -171,11 +171,18 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-3 mb-3" *ngIf="settings.nimmit_id">
+                              <div class="col-md-3 mb-3" *ngIf="settings.nimitt_id">
                                  <div class="form-group">
-                                    <label class="form-label">Nimmit</label>
-                                    <input type="text" class="form-control" placeholder="Nimmit"
-                                       [(ngModel)]="filterBody.nimmit" name="nimmit">
+                                    <label class="form-label">Nimitt</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Nimitt"
+                                       [clearable]="false" [virtualScroll]="true" [multiple]="true"
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.nimitt_id" name="nimitt_id">
+                                       <ng-option selected="selected" disabled value="">Nimitt
+                                       </ng-option>
+                                       <ng-option *ngFor="let item of nimitts" [value]="item._id">
+                                          {{item.nimitt_hin}} : {{item.nimitt_eng}}
+                                       </ng-option>
+                                    </ng-select>
                                  </div>
                               </div>
                               <div class="col-md-3 mb-3 text-center">
@@ -191,7 +198,7 @@
                                        item_id: [],
                                        subitem_id: [],
                                        condition_id: [],
-                                       nimmit: null,
+                                       nimitt_id: [],
                                        pkt_num: null
                                      };">Clear All</button>
                               </div>
@@ -225,7 +232,7 @@
                            <th style="width: 120px;">Jawak Type</th>
                            <th style="width: 200px;" *ngIf="settings.jawak_detail">Item Detail</th>
                            <th style="width: 200px;" *ngIf="settings.description">Description</th>
-                           <th style="width: 100px;" *ngIf="settings.nimmit_id">Nimmit</th>
+                           <th style="width: 100px;" *ngIf="settings.nimitt_id">Nimitt</th>
                         </tr>
                      </thead>
                      <tbody>
@@ -273,7 +280,7 @@
                               {{data.jawak_type_eng}}</td>
                            <td *ngIf="settings.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
                            <td *ngIf="settings.description">{{data.description?data.description:'-'}}</td>
-                           <td *ngIf="settings.nimmit_id">{{data.nimmit?data.nimmit:'-'}}</td>
+                           <td *ngIf="settings.nimitt_id">{{data.nimitt_id?data.nimitt_hin:'-'}}</td>
                         </tr>
                      </tbody>
                   </table>

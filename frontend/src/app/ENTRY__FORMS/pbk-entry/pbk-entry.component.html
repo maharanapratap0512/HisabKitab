@@ -89,8 +89,8 @@
             </div>
             <div class="col-md-3 mb-3" *ngIf="settings.pbk.relative_name">
                <div class="form-group">
-                  <label class="form-label">{{(isNimmit ? 'Father Name' : 'Relative Name')}}</label>
-                  <input type="text" class="form-control" placeholder="{{(isNimmit ? 'Father Name' : 'Relative Name')}}"
+                  <label class="form-label">{{(isNimitt ? 'Father Name' : 'Relative Name')}}</label>
+                  <input type="text" class="form-control" placeholder="{{(isNimitt ? 'Father Name' : 'Relative Name')}}"
                      formControlName="relative_name"
                      [ngClass]="{'validation':pbkForm.get('relative_name')?.errors && (pbkForm.get('relative_name')?.touched || pbkForm.get ('relative_name')?.dirty)}">
                </div>
