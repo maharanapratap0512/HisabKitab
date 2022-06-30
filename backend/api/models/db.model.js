@@ -9,6 +9,9 @@ try {
   //connecting with database
   db = new Database(dbPath);
   console.log("connected with Database");
+  let sql = 'SELECT * FROM category WHERE category_eng = @category_eng'
+  const stmt = db.prepare(sql).get({ category_eng: 'Fruits'});
+  console.log("stmt", stmt);
 }
 catch (err) {
 

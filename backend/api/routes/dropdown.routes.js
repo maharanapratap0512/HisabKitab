@@ -15,6 +15,7 @@ router.get('/:list_name', async (req, res, next) => {
 
 //get as per department Done.
 router.get('/all/:dept_id', async (req, res, next) => {
+    try{
     let lists = {
     }
 
@@ -55,12 +56,16 @@ router.get('/all/:dept_id', async (req, res, next) => {
                 success: true,
                 result: lists
             })
+        }
+        else {
+            res.json({
+                success: true,
+                result: lists
+            })
+        }
     }
-    else {
-        res.json({
-            success: true,
-            result: lists
-        })
+    catch(err){
+        return next(err)
     }
 });
 

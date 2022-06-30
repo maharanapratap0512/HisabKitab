@@ -384,24 +384,23 @@ const mm = {
         `select * from mm ? limit @limit offset @offset`
     , insert:
         `insert in to mm (
-            mm_hin, mm_eng, mm_roman, mm_code, dept_id, state_id,
+            mm_hin, mm_eng, mm_code, dept_id, state_id,
             parent_mm_id, opening_date, nimitt_id, active)
         values (
-            @mm_hin, @mm_eng, @mm_roman, @mm_code, @dept_id, @state_id,
+            @mm_hin, @mm_eng,  @mm_code, @dept_id, @state_id,
             @parent_mm_id, @opening_date, @nimitt_id, @active)`
     , update:
         `update mm set 
         mm_hin=@mm_hin,
         mm_eng=@mm_eng,
-        mm_roman=@mm_roman,
         mm_code=@mm_code,
         dept_id=@dept_id,
         state_id=@state_id,
         parent_mm_id=@parent_mm_id,
         opening_date=@opening_date,
         nimitt_id=@nimitt_id,
-        active=@active
-        updated_atdatetime('now','localtime')`
+        active=@active,
+        updated_at=datetime('now','localtime')`
     , order:
         `mm_hin, mm_eng`
 }
@@ -433,7 +432,7 @@ const nimitt = {
             @document,
             @active)`
     , update:
-        `update mm set 
+        `update nimitt set 
         roll_no=@roll_no,
         nimitt_eng=@nimitt_eng,
         nimitt_hin=@nimitt_hin,
@@ -443,7 +442,7 @@ const nimitt = {
         townarea=@townarea,
         document=@document,
         active=@active
-        updated_atdatetime('now','localtime')`
+        updated_at=datetime('now','localtime')`
     , order:
         `nimitt_hin, nimitt_eng`
 }
@@ -465,7 +464,6 @@ const pbk = {
             roll_no,
             pbk_hin,	
             pbk_eng,
-            pbk_roman,
             gender,
             relation,
             relative_name,
@@ -487,7 +485,6 @@ const pbk = {
             @roll_no,
             @pbk_hin,
             @pbk_eng,
-            @pbk_roman,
             @gender,
             @relation,
             @relative_name,
@@ -510,7 +507,6 @@ const pbk = {
         roll_no=@roll_no,
         pbk_hin=@pbk_hin,
         pbk_eng=@pbk_eng,
-        pbk_roman=@pbk_roman,
         gender=@gender,
         relation=@relation,
         relative_name=@relative_name,
@@ -528,7 +524,7 @@ const pbk = {
         bhatti_date=@bhatti_date,
         document=@document,
         active=@active,
-        updated_atdatetime('now','localtime')`
+        updated_at=datetime('now','localtime')`
     , order:
         `roll_no`
 }
@@ -567,7 +563,7 @@ const point = {
         point_hin=@point_hin,
         point_eng=@point_eng,
         active=active,
-        updated_atdatetime('now','localtime')`
+        updated_at=datetime('now','localtime')`
     , order:
         `point_hin,point_eng`
 }
@@ -653,9 +649,9 @@ const product = {
         document=@document,
         isbill=@isbill,
         active=@active,
-        updated_atdatetime('now','localtime')`
+        updated_at=datetime('now','localtime')`
     , order:
-        `purchase_date, mm_hin, mm_eng, item_hin, item_eng, subitem_hin, subitem_eng`
+        `purchase_date, mm.mm_hin, mm.mm_eng, item_hin, item_eng, subitem_hin, subitem_eng`
 }
 
 const state = {
@@ -683,7 +679,7 @@ const state = {
         state_eng=@state_eng,
         country_id=@country_id,
         active=@active,
-        updated_atdatetime('now','localtime')`
+        updated_at=datetime('now','localtime')`
     , order:
         `state_hin, state_eng`
 }
@@ -728,7 +724,7 @@ const subitem = {
         extra_note=@extra_note,
         document=@document,
         active=@active,
-        updated_atdatetime('now','localtime')`
+        updated_at=datetime('now','localtime')`
     , order:
         `subitem_hin, subitem_eng`
 }
@@ -742,23 +738,20 @@ const subitem_list = {
         `insert into subitem_list (
         subitem_hin,
         subitem_eng,
-        subitem_roman,
         extra_note,
         active)
     values (
         @subitem_hin,
         @subitem_eng,
-        @subitem_roman,
         @extra_note,
         @active)`
     , update:
         `update subitem_list set 
         subitem_hin=@subitem_hin,
         subitem_eng=@subitem_eng,
-        subitem_roman=@subitem_roman,
         extra_note=@extra_note,
         active=@active,
-        updated_atdatetime('now','localtime')`
+        updated_at=datetime('now','localtime')`
     , order:
         `subitem_hin, subitem_eng`
 }
@@ -773,22 +766,19 @@ const support_list = {
         list_type,
         list_name_hin,
         list_name_eng,
-        list_name_roman,
         active)
     values (
         @list_type,
         @list_name_hin,
         @list_name_eng,
-        @list_name_roman,
         @active)`
     , update:
         `update support_list set 
         list_type=@list_type,
         list_name_hin=@list_name_hin,
         list_name_eng=@list_name_eng,
-        list_name_roman=@list_name_roman,
         active=@active,
-        updated_atdatetime('now','localtime')`
+        updated_at=datetime('now','localtime')`
     , order:
         ``
 }
@@ -908,7 +898,7 @@ const temp_import = {
         dept_id=@dept_id,
         ref_id=@ref_id,
         active=@active,
-        updated_atdatetime('now','localtime')`
+        updated_at=datetime('now','localtime')`
     , order:
         ``
 }

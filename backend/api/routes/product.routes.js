@@ -45,7 +45,7 @@ router.post('/:dept_id', async (req, res, next) => {
 //  product get by dept_id
 router.get('/:dept_id', async (req, res, next) => {
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('product', { dept_id: req.params.dept_id, limit: 100 }).then((resolve) => {
+    await DB.getList('product', {full:true, dept_id: req.params.dept_id, limit: 100 }).then((resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
         }

@@ -56,26 +56,33 @@ export class GlobalService {
         this.Lists = {}
         this.http.get(this.api.URLS['LISTALL'] + '/' + this.auth.webUser.dept_id).subscribe((data) => {
           if (data['success'] && data['result']) {
-            this.Lists.country = data['result'].country;
-            this.Lists.city = data['result'].city;
-            this.Lists.mm = data['result'].mm;
-            this.Lists.state = data['result'].state;
-            this.Lists.pbk = data['result'].pbk;
-            this.Lists.nimmit = data['result'].nimmit;
-            this.Lists.gender = data['result'].gender;
-            this.Lists.relation = data['result'].relation;
-            this.Lists.status = data['result'].status;
-            this.Lists.condition = data['result'].condition;
-            this.Lists.aawak_type = data['result'].aj_type.filter((aj: { list_type: string; }) => aj.list_type == 'aawak_type');
-            this.Lists.jawak_type = data['result'].aj_type.filter((aj: { list_type: string; }) => aj.list_type == 'jawak_type');
-            this.Lists.category = data['result'].category;
-            this.Lists.unit = data['result'].unit;
-            // this.Lists.item = data['result'].item;
-            this.Lists.itemmix = data['result'].itemmix;
-            this.Lists.subitem_list = data['result'].subitem_list;
-            // this.Lists.subitem = data['result'].subitem;
-            this.Lists.department = data['result'].department;
-            this.Lists.sitem = data['result'].sitem;
+            for(let key of Object.keys(data['result'])){
+              // console.log('key',data['result'][]);
+              
+              this.Lists[key] = data['result'][key].data;
+            }
+            console.log(this.Lists);
+            
+            // this.Lists.country = data['result'].country;
+            // this.Lists.city = data['result'].city;
+            // this.Lists.mm = data['result'].mm;
+            // this.Lists.state = data['result'].state;
+            // this.Lists.pbk = data['result'].pbk;
+            // this.Lists.nimmit = data['result'].nimmit;
+            // this.Lists.gender = data['result'].gender;
+            // this.Lists.relation = data['result'].relation;
+            // this.Lists.status = data['result'].status;
+            // this.Lists.condition = data['result'].condition;
+            // this.Lists.aawak_type = data['result'].aj_type.filter((aj: { list_type: string; }) => aj.list_type == 'aawak_type');
+            // this.Lists.jawak_type = data['result'].aj_type.filter((aj: { list_type: string; }) => aj.list_type == 'jawak_type');
+            // this.Lists.category = data['result'].category;
+            // this.Lists.unit = data['result'].unit;
+            // // this.Lists.item = data['result'].item;
+            // this.Lists.itemmix = data['result'].itemmix;
+            // this.Lists.subitem_list = data['result'].subitem_list;
+            // // this.Lists.subitem = data['result'].subitem;
+            // this.Lists.department = data['result'].department;
+            // this.Lists.sitem = data['result'].sitem;
           }
           observer.next(this.Lists);
         });

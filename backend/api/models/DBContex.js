@@ -44,7 +44,6 @@ class DBContex {
                 // console.log("dept_id == (1 || null) ====", dept_id == ('1' || null));
                 // console.log("[1, null].includes(dept_id) ====", ['1', null].includes(dept_id));
                 let conditionQuery = null
-                let params = { limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 };
 
 
                 if (this.tbl_from_supp_list.includes(tblname)) {
@@ -55,25 +54,27 @@ class DBContex {
                 }
                 else if (this.supp_list.includes(tblname)) {
                     sql = `select * from support_list ?`;
-                    conditionQuery = `list_type = '"gender"'`
-                    params.type = tblname;
+                    conditionQuery = `list_type = '${tblname}'`
                     if (this.tbl_need_dept_config.includes(tblname)) {
-                        conditionQuery += (!options.dept_id || options.dept_id == 1) ? '' : ` AND (select config_value from department_config where dept_id = ${options.dept_id} AND config_key = '${tblname}') LIKE '%,'||${tblname}._id||',%'`;
+                        conditionQuery += (!options.dept_id || options.dept_id == 1) ? '' : ` AND (select config_value from department_config where dept_id = ${options.dept_id} AND config_key = 'aj_type') LIKE '%,'||support_list._id||',%'`;
                     }
                 }
 
                 conditionQuery = options.conditionString ? (conditionQuery ? `${conditionQuery} AND ` : '') + options.conditionString : conditionQuery
 
                 let order = options.orderBy ? options.orderBy : (this.query[tblname] ? this.query[tblname].order : null);
-
-                sql =
-                    sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order} ` : ''));
-
-                console.log("sql", sql);
                 
+                sql =
+                sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order} ` : ''));
+                if (tblname == "pbk") {
 
-
-                const result = await this.db.prepare(sql).all(params);
+                    console.log('result', result);
+                    console.log('sql', sql);
+                    console.log('options', options);
+                    console.log('params', { limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
+                    console.log('result.length', result.length);
+                }
+                const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {
                     resolve({ data: result, total_count: res.total_count });
                 });
@@ -142,6 +143,9 @@ class DBContex {
     async getCount(tblname, conditionString = null) {
         return new Promise(async (resolve, reject) => {
             try {
+                if (this.supp_list.includes(tblname)) {
+                    tblname = `support_list`;
+                }
                 const sql =
                     `select count(*) as total_count from ${tblname} ` + (conditionString?.trim() != '' ? ` where ${conditionString} ` : ``)
                 const stmt = this.db.prepare(sql).get();
