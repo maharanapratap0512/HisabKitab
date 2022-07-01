@@ -23,7 +23,7 @@ router.get('/all/:dept_id', async (req, res, next) => {
             lists.country = await DB.getList('country', { dept_id: req.params.dept_id }) || []
             lists.category = await DB.getList('category', { dept_id: req.params.dept_id }) || []
             lists.city = await DB.getList('city', { dept_id: req.params.dept_id }) || []
-            lists.itemMix = await DB.getList('item', { full: true, dept_id: req.params.dept_id }).then((result) => {
+            lists.itemmix = await DB.getList('item', { full: true, dept_id: req.params.dept_id }).then((result) => {
                 for (let i in result.data) {
                     DB.getList('subitem', { full: true, dept_id: req.params.dept_id, conditionString: `item_id = ${result.data[i]._id}` }).then((sResult) => {
                         result.data[i].subitems = sResult.data;

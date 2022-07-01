@@ -46,7 +46,7 @@ class DBContex {
 
 
                 if (this.tbl_need_dept_config.includes(tblname)) {
-                    conditionQuery = (!options.dept_id || options.dept_id == 1) ? null : `(select config_value from department_config where dept_id = ${options.dept_id} AND config_key = 'aj_type') LIKE '%,'||support_list._id||',%'`;
+                    conditionQuery = (!options.dept_id || options.dept_id == 1) ? null : `(select config_value from department_config where dept_id = ${options.dept_id} AND config_key = '${tblname}') LIKE '%,'||${tblname}._id||',%'`;
                 }
                 else if (this.tbl_with_dept_id.includes(tblname)) {
                     conditionQuery = (options.dept_id ? `(${tblname}.dept_id = ${options.dept_id})` : null)
@@ -66,12 +66,12 @@ class DBContex {
                 sql =
                 sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order} ` : ''));
                
-                // if(tblname == "item"){
-                //     console.log("sql", sql);
-                //     console.log("options", options);
-                //     console.log("order", order);
-                //     console.log("conditionQuery", conditionQuery);
-                // }
+                if(tblname == "item" || tblname == "subitem" || tblname == "category"){
+                    console.log("sql", sql);
+                    console.log("options", options);
+                    console.log("order", order);
+                    console.log("conditionQuery", conditionQuery);
+                }
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {

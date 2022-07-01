@@ -345,13 +345,26 @@ export class AawakComponent implements OnInit {
 
   itemSelected(ev: any) {
     if (ev) {
-      let item = this.items.find((i: { _id: any; }) => i._id == ev);
-      this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
+      
+      let items= this.items.filter((i: { _id: any; }) => ev.includes(i._id));
+      this.products = this.productsAll.filter((p: { item_id: any; }) => ev.includes(p.item_id));
+      this.subitems = [];
+      console.log(items);
+      
       if (this.cat) {
-        this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
+
+        this.subitems = items.map((item:any)=>{
+          return item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
+        })
       }
       else {
-        this.subitems = item.subitems;
+        items.map((item:any)=>{
+          console.log("subitems", item.subitems);
+          
+          this.subitems.concat(item.subitems);
+        })
+        console.log("subitems", this.subitems);
+        
       }
     }
     else {
