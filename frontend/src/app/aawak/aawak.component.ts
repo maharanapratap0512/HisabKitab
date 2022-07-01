@@ -353,17 +353,14 @@ export class AawakComponent implements OnInit {
       
       if (this.cat) {
 
-        this.subitems = items.map((item:any)=>{
-          return item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
-        })
+        for(let i in items){
+          this.subitems.push(...items[i].subitems.filter((s: { category_id: any; }) => s.category_id == this.cat));
+        }
       }
       else {
-        items.map((item:any)=>{
-          console.log("subitems", item.subitems);
-          
-          this.subitems.concat(item.subitems);
-        })
-        console.log("subitems", this.subitems);
+        for(let i in items){          
+          this.subitems.push(...items[i].subitems);
+        }
         
       }
     }
