@@ -2,29 +2,26 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
-import { ApiService } from 'src/app/services/api.service';
-import { GlobalService } from 'src/app/services/global.service';
-import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
-import { AuthService } from '../services/auth.service';
-declare var $: any;
+import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
+import { GlobalService } from '../../services/global.service';
+import { HttpService } from '../../services/http.service';
+declare var $:any;
 
 @Component({
-  selector: 'app-product',
-  templateUrl: './product.component.html',
-  styleUrls: ['./product.component.scss']
+  selector: 'app-point',
+  templateUrl: './point.component.html',
+  styleUrls: ['./point.component.scss']
 })
-export class ProductComponent implements OnInit {
+export class PointComponent implements OnInit {
 
   isLoader: boolean = false;
   term: any;
   showModal: string = '';
   editData: any = {};
-  productData: any = [];
+  pointData: any = [];
   total_count: any = 0;;
-  viewProduct: any;
-  baseurl:any;
-  settings:any= {};
 
   constructor(
     private fb: FormBuilder,
@@ -34,21 +31,18 @@ export class ProductComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService
-  ) {
-    this.settings = this.auth.webUser.settings.product;
-   }
+  ) { }
 
   ngOnInit(): void {
     this.spinner.show();
-    this.getProductData();
-    this.baseurl = this.api.getUrl('BASE');
+    this.getPointData();
   }
 
-  getProductData() {
+  getPointData() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id).subscribe((data) => {
+    this.http.get(this.api.getUrl('POINT')).subscribe((data) => {
       if (data['result'] && data['success']) {
-        this.productData = data['result'];
+        this.pointData = data['result'];
         this.total_count = data['total_count'];
         this.isLoader = false;
       }
@@ -56,37 +50,36 @@ export class ProductComponent implements OnInit {
     });
   }
 
-  addProductResponse(ev: any) {
-    this.isLoader = true;
-    if (ev._id) {
+  addPointResponse(ev: any) {
+    if (ev) {
+      this.isLoader = true;
       $('#showModal').modal('hide');
       this.showModal = '';
-      this.productData.unshift(ev);
+      this.pointData.unshift(ev);
+      this.total_count++;
       this.isLoader = false;
     }
     else {
-      console.log("err", ev)
-      this.isLoader = false;
+      console.log("message", ev)
     }
   }
 
-  editProductResponse(ev: any) {
-    this.isLoader = true;
+  editPointResponse(ev: any) {
     if (ev._id) {
+      this.isLoader = true;
       $('#showModal').modal('hide');
       this.showModal = '';
-      this.productData.splice(this.productData.indexOf(this.editData), 1, ev);
+      this.pointData.splice(this.pointData.indexOf(this.editData), 1, ev);
       this.isLoader = false;
     }
     else {
-      console.log("err", ev);
-      this.isLoader = false;
+      console.log("message", ev);
     }
   }
 
   edit(data: any) {
     this.editData = data;
-    this.showModal = 'Edit Product'
+    this.showModal = 'Edit Point'
     $('#showModal').modal('show');
   }
 
@@ -101,13 +94,12 @@ export class ProductComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.isLoader = true;
-        this.http.delete(this.api.getUrl('PRODUCT') + '/' + id).subscribe((data: any) => {
+        this.http.delete(this.api.getUrl('POINT') + '/' + id).subscribe((data: any) => {
           if (data['success']) {
             this.isLoader = false;
-            this.productData.splice(i, 1);
-            this.gs.Lists.mm.splice(this.gs.Lists.mm.indexOf((i: { _id: any; }) => i._id == id), 1);
-            this.total_count -= 1;
+            this.pointData.splice(i, 1);
+            // this.gs.Lists.mm.splice(this.gs.Lists.mm.indexOf((i: { _id: any; }) => i._id == id), 1);
+            this.total_count--;
             this.toastr.success('Deleted Successfully');
           }
           else {
@@ -117,17 +109,6 @@ export class ProductComponent implements OnInit {
         });
       }
     })
-  }
-
-  rowDetail(data: any) {
-    this.viewProduct = data;
-    this.showModal = 'View Product'
-    $('#showModal').modal('show');
-  }
-
-  getImage1(doc:any){
-    let imgs = doc;
-    return this.baseurl + (imgs.images ? imgs.images[0].toString() : '');
   }
 
 }

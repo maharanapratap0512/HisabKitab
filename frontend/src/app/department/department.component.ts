@@ -4,6 +4,7 @@ import * as FileSaver from 'file-saver';
 import * as JSZip from 'jszip';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs/internal/Subject';
 import Swal from 'sweetalert2';
 import { LoginComponent } from '../login/login.component';
 import { ApiService } from '../services/api.service';
@@ -59,7 +60,11 @@ export class DepartmentComponent implements OnInit {
   itemMixCondition: any = {};
   settingsAll: any = [];
   dataZip: JSZip = new JSZip();
-
+  pbkPageNo: any = 2;
+  getPbk$ = new Subject();
+  pbkTotal: any;
+  getItem$ = new Subject();
+  itemTotal: any;
 
   constructor(
     private fb: FormBuilder,
@@ -180,6 +185,7 @@ export class DepartmentComponent implements OnInit {
         visible: false,
         used: true,
         stock: true,
+        repairing: false,
         new: false,
         old: false,
         defective: false,
@@ -224,17 +230,6 @@ export class DepartmentComponent implements OnInit {
       this.isLoader = true;
       this.http.get(this.api.getUrl('DEPTCONFIG') + ev).subscribe((data) => {
         if (data['result'] && data['success']) {
-          this.loadPBK();
-          if (this.dept_id > 2) {
-            this.loadMM();
-            this.loadCategory();
-            // this.loadItems();
-            this.loadItemMix();
-            // this.loadSubitems();
-            this.loadAJTypes();
-            this.loadDepartment();
-
-          }
           for (let i of data['result']) {
             if (i.config_key == "settings") {
               this.deptConf[i.config_key] = i;
@@ -247,6 +242,18 @@ export class DepartmentComponent implements OnInit {
               }
             }
           }
+          this.loadPBK();
+          if (this.dept_id > 2) {
+            this.loadMM();
+            this.loadCategory();
+            // this.loadItems();
+            this.loadItemMix();
+            // this.loadSubitems();
+            this.loadAJTypes();
+            this.loadDepartment();
+
+          }
+
           // console.log(this.deptConf);
 
           this.isLoader = false;
@@ -487,6 +494,10 @@ export class DepartmentComponent implements OnInit {
   }
 
   applySettings(configValue: any) {
+    configValue.aawak && configValue.aawak.nimmit_id ? delete configValue.aawak.nimmit_id : console.log('');
+    configValue.jawak && configValue.jawak.nimmit_id ? delete configValue.jawak.nimmit_id : console.log('');
+    configValue.product && configValue.product.nimmit_id ? delete configValue.product.nimmit_id : console.log('');
+    configValue.aawak && configValue.aawak.jawak && configValue.aawak.jawak.nimmit_id ? delete configValue.aawak.jawak.nimmit_id : console.log('');
 
     for (let key of Object.keys(configValue)) {
       this.settingsAll[key] = configValue[key];
@@ -540,16 +551,6 @@ export class DepartmentComponent implements OnInit {
       this.toastr.error("Something went Wrong.")
       console.log("message", ev)
     }
-  }
-
-  loadMM() {
-    this.http.get(this.api.getUrl('MM') + "forConfig/" + this.dept_id).subscribe((data) => {
-      if (data['result'] && data['success']) {
-        this.mms = data['result'];
-        this.mmsAll = data['result'];
-        // console.log("dept", this.dept_id, "conf", this.mms);
-      }
-    });
   }
 
   stateSelected(ev: any) {
@@ -652,59 +653,191 @@ export class DepartmentComponent implements OnInit {
     }
   }
 
-
-  loadPBK() {
-    this.http.get(this.api.getUrl('PBK') + "forConfig/" + this.dept_id).subscribe((data) => {
+  loadMM() {
+    this.http.get(this.api.getUrl('MM') + 1).subscribe((data) => {
       if (data['result'] && data['success']) {
-        this.pbks = data['result'];
-        this.pbksAll = data['result'];
+        console.log('get result', data['result']);
+
+        if (this.deptConf.mm && this.deptConf.mm.idArr) {
+          console.log("arrr in if", this.deptConf.mm.idArr);
+
+          for (let i in data['result']) {
+            if (this.deptConf.mm.idArr.includes(data['result'][i]._id.toString())) {
+              data['result'][i].chk = true;
+            }
+          }
+        }
+        this.mms = data['result'];
+        this.mmsAll = data['result'];
+        // console.log("dept", this.dept_id, "conf", this.mms);
       }
     });
   }
-  loadDepartment() {
-    this.http.get(this.api.getUrl('DEPT') + "forConfig/" + this.dept_id).subscribe((data) => {
+
+  loadPBK() {
+    // this.http.get(this.api.getUrl('PBK') + "forConfig/" + this.dept_id).subscribe((data) => {
+    //   if (data['result'] && data['success']) {
+    //     this.pbks = data['result'];
+    //     this.pbksAll = data['result'];
+    //   }
+    // });
+    this.http.put(this.api.getUrl('PBK') + 1, {}).subscribe((data: any) => {
       if (data['result'] && data['success']) {
+        this.pbkTotal = data['total_count']
+        if (this.deptConf.pbk && this.deptConf.pbk.idArr) {
+          for (let i in data['result']) {
+            if (this.deptConf.pbk.idArr.includes(data['result'][i]._id.toString())) {
+              data['result'][i].chk = true;
+            }
+          }
+        }
+        this.pbks = data['result'];
+        this.pbksAll = data['result'];
+
+        if (this.pbkTotal > this.pbksAll.length) {
+          this.getMorePbk();
+        }
+      }
+    });
+
+    this.getPbk$.subscribe((result: any) => {
+      for (let i in result) {
+        if (this.deptConf.pbk.idArr.includes(result[i]._id.toString())) {
+          result[i].chk = true;
+        }
+      }
+      this.pbksAll.push(...result);
+      if (this.pbkTotal > this.pbksAll.length) {
+        this.getMorePbk();
+      }
+    });
+  }
+  getMorePbk() {
+    this.http.put(this.api.getUrl('PBK') + 1, { pageNo: this.pbkPageNo }).subscribe((data: any) => {
+      if (data['result'] && data["result"].length > 0) {
+        if (data["pageNo"]) {
+          this.pbkPageNo = data["pageNo"] + 1;
+        }
+        this.getPbk$.next(data['result']);
+        // this.isLoader = false;
+      }
+      // this.isLoader = false;
+    });
+  }
+  loadDepartment() {
+    this.http.get(this.api.getUrl('DEPT') + 1).subscribe((data) => {
+      if (data['result'] && data['success']) {
+        if (this.deptConf.department && this.deptConf.department.idArr) {
+          for (let i in data['result']) {
+            if (this.deptConf.department.idArr.includes(data['result'][i]._id.toString())) {
+              data['result'][i].chk = true;
+            }
+          }
+        }
         this.department = data['result'];
         this.departmentAll = data['result'];
       }
     });
   }
   loadCategory() {
-    this.http.get(this.api.getUrl('CATEGORY') + "forConfig/" + this.dept_id).subscribe((data) => {
+    this.http.get(this.api.getUrl('CATEGORY') + 1).subscribe((data) => {
       if (data['result'] && data['success']) {
+        if (this.deptConf.category && this.deptConf.category.idArr) {
+          for (let i in data['result']) {
+            if (this.deptConf.category.idArr.includes(data['result'][i]._id.toString())) {
+              data['result'][i].chk = true;
+            }
+          }
+        }
         this.categories = data['result'];
       }
     });
   }
   loadItemMix() {
     // console.log("condition", this.itemMixCondition);
-
-    this.http.put(this.api.getUrl('ITEM') + "forConfig/" + this.dept_id, this.itemMixCondition).subscribe((data: any) => {
+    this.itemMixCondition.pageNo = 1;
+    this.http.put(this.api.getUrl('ITEMMIX') + 1, this.itemMixCondition).subscribe((data: any) => {
       if (data['result'] && data['success']) {
+        this.itemTotal = data['item_count']
+        this.itemMixCondition.pageNo = (data["pageNo"] ? data["pageNo"] : 0) + 1;
+        if (this.deptConf.item && this.deptConf.item.idArr) {
+          for (let i in data['result']) {
+            if (this.deptConf.item.idArr.includes(data['result'][i]._id.toString())) {
+              data['result'][i].chk = true;
+              for (let j in data['result'][i].subitems) {
+                if (this.deptConf.subitem.idArr.includes(data['result'][i].subitems[j]._id.toString())) {
+                  data['result'][i].subitems[j].chk = true;
+                }
+              }
+            }
+          }
+        }
         this.itemmix = data['result'];
-        // this.itemsAll = data['result'];
+        if (this.itemTotal > this.itemmix.length) {
+          this.getMoreItemMix();
+        }
+
+        this.getItem$.subscribe((result: any) => {
+          if (this.deptConf.item && this.deptConf.item.idArr) {
+            for (let i in result) {
+              if (this.deptConf.item.idArr.includes(result[i]._id.toString())) {
+                result[i].chk = true;
+                for (let j in result[i].subitems) {
+                  if (this.deptConf.subitem.idArr.includes(result[i].subitems[j]._id.toString())) {
+                    result[i].subitems[j].chk = true;
+                  }
+                }
+              }
+            }
+          }
+          this.itemmix.push(...result);
+          if (this.itemTotal > this.itemmix.length) {
+            this.getMoreItemMix();
+          }
+        });
       }
     });
   }
-  loadItems() {
-    this.http.get(this.api.getUrl('ITEM') + "forConfig/" + this.dept_id).subscribe((data) => {
-      if (data['result'] && data['success']) {
-        this.items = data['result'];
-        this.itemsAll = data['result'];
+
+  getMoreItemMix() {
+
+    this.http.put(this.api.getUrl('ITEMMIX') + 1, this.itemMixCondition).subscribe((data: any) => {
+      if (data['result'] && data["result"].length > 0) {
+        if (data["pageNo"]) {
+          this.itemMixCondition.pageNo = data["pageNo"] + 1;
+        }
+        this.getItem$.next(data['result']);
       }
     });
   }
-  loadSubitems() {
-    this.http.get(this.api.getUrl('SUBITEM') + "forConfig/" + this.dept_id).subscribe((data) => {
-      if (data['result'] && data['success']) {
-        this.subitems = data['result'];
-        this.subitemsAll = data['result'];
-      }
-    });
-  }
+  // loadItems() {
+  //   this.http.get(this.api.getUrl('ITEM') + 1).subscribe((data) => {
+  //     if (data['result'] && data['success']) {
+
+  //       this.items = data['result'];
+  //       this.itemsAll = data['result'];
+  //     }
+  //   });
+  // }
+  // loadSubitems() {
+  //   this.http.get(this.api.getUrl('SUBITEM') + 1).subscribe((data) => {
+  //     if (data['result'] && data['success']) {
+
+  //       this.subitems = data['result'];
+  //       this.subitemsAll = data['result'];
+  //     }
+  //   });
+  // }
   loadAJTypes() {
-    this.http.get(this.api.getUrl('AJTYPE') + "forConfig/" + this.dept_id).subscribe((data) => {
+    this.http.get(this.api.getUrl('AJTYPE') + 1).subscribe((data) => {
       if (data['result'] && data['success']) {
+        if (this.deptConf.aj_type && this.deptConf.aj_type.idArr) {
+          for (let i in data['result']) {
+            if (this.deptConf.aj_type.idArr.includes(data['result'][i]._id.toString())) {
+              data['result'][i].chk = true;
+            }
+          }
+        }
         this.ajtypes = data['result'];
       }
     });

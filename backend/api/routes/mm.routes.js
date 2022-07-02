@@ -43,7 +43,7 @@ router.post('/:dept_id', async (req, res, next) => {
 //mm get dept
 router.get('/:dept_id', async (req, res, next) => {
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('mm', { dept_id: req.params.dept_id }).then(async (resolve) => {
+    await DB.getList('mm', { full:true, dept_id: req.params.dept_id }).then(async (resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],

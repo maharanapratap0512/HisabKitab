@@ -120,10 +120,8 @@ const department_config = {
             @active)`
     , update:
         `update department_config set
-        dept_id=@dept_id,
         config_key=@config_key,
         config_value=@config_value,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , update_config_value:
         `update department_config set config_value = CASE WHEN(config_value = '') THEN ',' ELSE config_value END  || @new_id || ',' where dept_id = @dept_id AND config_key = '@tblname'`
@@ -138,6 +136,7 @@ const item = {
         unit.unit_full, unit.unit_short 
         from item
         left join category cat on cat._id = item.category_id
+        left join subitem si  on st.item_id = item._id
         left join unit on unit._id = item.unit_id ? limit @limit offset @offset`
     , insert:
         `insert into item (
@@ -184,7 +183,7 @@ const jawak = {
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         unit.unit_short, unit.unit_full,
         jsl.list_name_hin as jawak_type_hin, jsl.list_name_eng as jawak_type_eng ,
-        nmt.pbk_hin as nimitt_hin, nmt.pbk_eng as nimitt_eng, nmt.relative_name, nmt.state_id, pst.state_hin as nimitt_state_hin, pst.state_eng as nimitt_state_eng
+        nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, pst.state_hin as nimitt_state_hin, pst.state_eng as nimitt_state_eng
         from jawak
         left join mm amm on amm._id = jawak.mm_id 
         left join pbk on pbk._id = jawak.pbk_id
@@ -197,7 +196,7 @@ const jawak = {
         left join support_list jsl on jsl._id = jawak.jawak_type_id
         left join unit on unit._id = jawak.unit_id
         left join department dept on dept._id = jawak.dept_id
-        left join pbk nmt on nmt._id = jawak.nimitt_id
+        left join nimitt nmt on nmt._id = jawak.nimitt_id
         left join state pst on pst._id = nmt.state_id ? limit @limit offset @offset`
     , insert:
         `insert into jawak(
@@ -230,7 +229,6 @@ const jawak = {
         company_name=@compant_name,
         aawak_ref_id=@aawak_ref_id,
         dept_id=@dept_id,
-        hl=@hl,
         active=@active,
         updated_at=datetime('now','localtime')`
     , order:
@@ -257,12 +255,11 @@ const aawak = {
         unit_id=@unit_id,
         description=@description,
         nimitt_id=@nimitt_id,
-        jawak_ref_ids=@jawak_ref_ids,
         remaining_qty=@remaining_qty,
-        hl=@hl,
         dept_id=@dept_id,
         company_name=@company_name,
         isbill=@isbill,
+        document=@document,
         active=@active,
         updated_at=datetime('now','localtime')`
     , insert:
@@ -270,12 +267,12 @@ const aawak = {
             mm_id, pkt_num, pbk_id, aawak_mm_id, item_id, subitem_id, 
             product_id, item_detail, condition_id, qty, rate, actual_amt, 
             aawak_type_id, unit_id, description, nimitt_id, dept_id, company_name, 
-            isbill, active)
+            isbill, document, active)
         values (
             @mm_id, @pkt_num, @pbk_id, @aawak_mm_id, @item_id, @subitem_id, 
             @product_id, @item_detail, @condition_id, @qty, @rate, @actual_amt, 
             @aawak_type_id, @unit_id, @description, @nimitt_id, @dept_id, @company_name, 
-            @isbill, @active)`
+            @isbill, @document, @active)`
     , select:
         `select * from aawak ?`
     , select_full:
@@ -289,7 +286,7 @@ const aawak = {
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         unit.unit_short, unit.unit_full,
         slat.list_name_hin as aawak_type_hin, slat.list_name_eng as aawak_type_eng,
-        nmt.pbk_hin as nimitt_hin, nmt.pbk_eng as nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, pst.state_hin as nimitt_state_hin, pst.state_eng as nimitt_state_eng
+        nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, pst.state_hin as nimitt_state_hin, pst.state_eng as nimitt_state_eng
         from aawak 
         left join mm on mm._id = aawak.mm_id
         left join pbk on pbk._id = aawak.pbk_id
@@ -302,7 +299,7 @@ const aawak = {
         left join unit on unit._id = aawak.unit_id
         left join department dept on dept._id = aawak.dept_id
         left join support_list slat on slat._id = aawak.aawak_type_id
-        left join pbk nmt on nmt._id = aawak.nimitt_id
+        left join nimitt nmt on nmt._id = aawak.nimitt_id
         left join state pst on pst._id = nmt.state_id ? limit @limit offset @offset`
     , order:
         `date, aawak_mm_hin, aawak_mm_eng, pkt_num`

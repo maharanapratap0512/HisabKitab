@@ -27,7 +27,7 @@ export class CityComponent implements OnInit {
   editData: any = {};
   cityData: any = [];
   cityAll: any = [];
-  total_count: any = 0; 
+  total_count: any = 0;
   citytypes: any = [];
   states: any = [];
 
@@ -125,6 +125,7 @@ export class CityComponent implements OnInit {
   }
 
   protectionToggle(id: any, active: any) {
+    this.isLoader = true
     let body = { query: {}, set: {} };
     body.query = {
       _id: id
@@ -142,8 +143,8 @@ export class CityComponent implements OnInit {
         this.toastr.success("Protetion Shield Deactivated");
       }
     }, err => {
-      this.toastr.error(err['message']);
       this.isLoader = false;
+      this.toastr.error(err['message']);
     });
   }
 }

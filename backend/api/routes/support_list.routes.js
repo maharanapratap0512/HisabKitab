@@ -1,6 +1,4 @@
-//@ts-check
 const router = require('express').Router();
-const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
 const DB = new DBContex();
 
@@ -36,36 +34,43 @@ router.get('/', async (req, res, next) => {
 
 //  support_list get
 router.get('/ajtypes/:dept_id', async (req, res, next) => {
-    await DB.getAJtypeByDept(req.params.dept_id).then((response) => {
-        res.json({
-            success: true,
-            result: response || []
-        });
-    }, (err) => { return next(err) });
+    let aj = [];
+    await DB.getList('aawak_type', { dept_id: req.params.dept_id }).then((response) => {
+        aj.push(...response.data);
+    }, (err) => {
+        console.log(err)    
+    });
+    await DB.getList('jawak_type', { dept_id: req.params.dept_id }).then((response) => {
+        aj.push(...response.data);
+    }, (err) => {
+        console.log(err)    
+    });
+    
+    res.json({
+        success: true,
+        result: aj 
+    });
 });
 
 //  support_list get
-router.get('/ajtypes/forConfig/:dept_id', async (req, res, next) => {
-    await DB.getAJtypeForConfig(req.params.dept_id).then((response) => {
-        res.json({
-            success: true,
-            result: response || []
-        });
-    }, (err) => { return next(err) });
-});
+// router.get('/ajtypes/forConfig/:dept_id', async (req, res, next) => {
+//     await DB.getAJtypeForConfig(req.params.dept_id).then((response) => {
+//         res.json({
+//             success: true,
+//             result: response || []
+//         });
+//     }, (err) => { return next(err) });
+// });
 
 // support_list update
 router.put('/', async (req, res, next) => {
     if (req.body.set && req.body.query) {
         let condition = 'support_list._id = ' + req.body.query._id;
-        await DB.update('support_list', req.body.set, condition, async (err, data) => {
-            if (err) {
-                return next(err);
-            }
+        await DB.update('support_list', req.body.set, condition).then((data) => {
             res.json({
                 success: true,
                 result: data || []
-            });            
+            });
         });
     }
     else {
@@ -78,10 +83,7 @@ router.put('/', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
         let condition = '_id = ' + req.params.id;
-        await DB.delete('support_list', condition, (err, data) => {
-            if (err) {
-                return next(err);
-            }
+        await DB.delete('support_list', condition).then((data) => {
             res.json({
                 success: true,
                 result: data

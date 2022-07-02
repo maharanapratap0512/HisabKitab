@@ -57,8 +57,7 @@ router.get('/', async (req, res, next) => {
 //pbk get by dept
 router.get('/:dept_id', async (req, res, next) => {
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('pbk', { full:true, dept_id: req.params.dept_id, orderBy: ` order by pbk._id desc`, limit: 100 }).then((resolve) => {
-        console.log(resolve.data);
+    await DB.getList('pbk', { full:true, dept_id: req.params.dept_id, orderBy: `pbk._id desc`, limit: 100 }).then((resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
             resolve.data[i].relative_ref = (resolve.data[i].relative_ref != "[null]" ? JSON.parse(resolve.data[i].relative_ref) : []);
@@ -76,7 +75,7 @@ router.get('/:dept_id', async (req, res, next) => {
 router.put('/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = 100, offset = null, page = 1;    
 
-    let conditionString = `1=1 ${req.body.roll_no ? ` AND pbk.roll_no = ${req.body.roll_no}` : ``} ${req.body.gender.length > 0 ? ` AND pbk.gender in (${req.body.gender.join(',')})` : ``} ${req.body.state_id.length > 0 ? ` AND pbk.state_id in (${req.body.state_id.join(',')})` : ``} ${req.body.city_id.length > 0 ? ` AND pbk.city_id in (${req.body.city_id.join(',')})` : ``} ${req.body.class_mm_id.length > 0 ? ` AND pbk.class_mm_id in (${req.body.class_mm_id.join(',')})` : ``} ${req.body.bhatti_year ? ` AND strftime('%Y',pbk.bhatti_date) = '${req.body.bhatti_year}'` : ``}`;
+    let conditionString = `1=1 ${req.body.roll_no ? ` AND pbk.roll_no = ${req.body.roll_no}` : ``} ${(req.body.gender && req.body.gender.length) > 0 ? ` AND pbk.gender in (${req.body.gender.join(',')})` : ``} ${(req.body.state_id && req.body.state_id.length) > 0 ? ` AND pbk.state_id in (${req.body.state_id.join(',')})` : ``} ${(req.body.city_id && req.body.city_id.length) > 0 ? ` AND pbk.city_id in (${req.body.city_id.join(',')})` : ``} ${(req.body.class_mm_id && req.body.class_mm_id.length) > 0 ? ` AND pbk.class_mm_id in (${req.body.class_mm_id.join(',')})` : ``} ${req.body.bhatti_year ? ` AND strftime('%Y',pbk.bhatti_date) = '${req.body.bhatti_year}'` : ``}`;
 
     if (conditionString.trim() == ``) {
         orderBy = "pbk._id desc";

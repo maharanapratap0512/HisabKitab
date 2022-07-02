@@ -14,7 +14,7 @@
                </div>
             </div>
 
-            <div class="col-md-2 mb-3" >
+            <div class="col-md-2 mb-3">
                <label for="example-date" class="form-label">Date</label>
                <input class="form-control" id="example-date" type="date" [(ngModel)]="awkfg.date" name="date"
                   #date="ngModel"
@@ -67,8 +67,8 @@
                      [virtualScroll]="true" [(ngModel)]="awkfg.nimitt_id" name="nimitt_id" #nimitt_id="ngModel">
                      <ng-option selected="selected" disabled value="">Select Nimitt</ng-option>
                      <ng-option *ngFor="let item of nimitts" [value]="item._id">
-                        {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
-                        item.state_hin + ')'}}</ng-option>
+                        {{item.nimitt_hin}} : {{item.nimitt_eng}} ({{item.state_hin}})
+                     </ng-option>
                   </ng-select>
                </div>
             </div>
@@ -178,12 +178,12 @@
                      (change)="productSelected($event)" [readonly]="isEdit" *ngIf="settings.aawak.product_id">
                      <ng-option selected="selected" disabled value="">Select Product</ng-option>
                      <ng-option *ngFor="let item of products" [value]="item._id">
-                      {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num : ''}}
+                        {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num : ''}}
                      </ng-option>
                   </ng-select>
                   <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition" [clearable]="true"
-                     [virtualScroll]="true" [(ngModel)]="awkfg.condition_id" name="condition_id"
-                     #condition_id="ngModel" *ngIf="settings.aawak.condition_id">
+                     [virtualScroll]="true" [(ngModel)]="awkfg.condition_id" name="condition_id" #condition_id="ngModel"
+                     *ngIf="settings.aawak.condition_id">
                      <ng-option selected="selected" disabled value="">Select Condition</ng-option>
                      <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
                         {{item.list_name_eng}} </ng-option>
@@ -399,9 +399,10 @@
                <!-- Add Product -->
                <app-product-entry *ngIf="showModal == 'Add Product'" (response)='productAddResponse($event)'>
                </app-product-entry>
-               
+
                <!-- Add Aawak Type -->
-               <app-support-list-entry *ngIf="showModal == 'Add Aawak Type'" (response)='aawakTypeAddResponse($event)' list_type="aawak_type">
+               <app-support-list-entry *ngIf="showModal == 'Add Aawak Type'" (response)='aawakTypeAddResponse($event)'
+                  list_type="aawak_type">
                </app-support-list-entry>
 
             </div>
@@ -434,7 +435,7 @@
 
                <!-- Unit List -->
                <app-data-view *ngIf="viewType == 'Unit'" [getData]="viewData" Type="unit"></app-data-view>
-               
+
                <!-- Aawak Type List -->
                <app-data-view *ngIf="viewType == 'aawak_type'" [getData]="viewData" Type="aawak_type"></app-data-view>
 

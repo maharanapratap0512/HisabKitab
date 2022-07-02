@@ -34,15 +34,15 @@ router.get('/', async (req, res, next) => {
 
 //  dept_config get
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getDeptConfig(req.params.dept_id).then(async (resolve) => {
-        for(let i in resolve){
-            if(resolve[i].config_key == "settings"){
-                resolve[i].config_value = JSON.parse(resolve[i].config_value);
+    await DB.getList("department_config", { dept_id: req.params.dept_id }).then(async (resolve) => {
+        for (let i in resolve.data) {
+            if (resolve.data[i].config_key == "settings") {
+                resolve.data[i].config_value = JSON.parse(resolve.data[i].config_value);
             }
         }
         res.json({
             success: true,
-            result: resolve || []
+            result: resolve.data || []
         });
     }, (err) => { return next(err) });
 });
@@ -53,27 +53,27 @@ router.put('/save', async (req, res, next) => {
         for (let [key, value] of Object.entries(req.body)) {
             let newObj = {
                 config_key: value.config_key,
-                config_value: value.config_value
+                config_value: (key == "settings" ? JSON.stringify(value.config_value) : value.config_value)
             };
-            let condition = '';
-            if (value._id) {
-                condition = ` department_config._id = ${value._id}`;
-            }
-            else if (value.dept_id && value.config_key) {
-                condition = ` dept_id = ${value.dept_id} AND config_key = ${value.config_key}`;
-            }
-            else {
-                req.body[key] = { success: false, err: 'required fields are missing' };
-            }
-            if (condition != '') {
-                await DB.update('department_config', newObj, condition, (err, data) => {
-                    if (err) {
-                        req.body[key].success = false;
-                    }
-                    req.body[key].success = true;
-                    req.body[key] = data;
-                });
-            }
+            // let id = null;
+            // if (value._id) {
+            //     id = value._id;
+            // }
+            // // else if (value.dept_id && value.config_key) {
+            // //     condition = ` dept_id = ${value.dept_id} AND config_key = ${value.config_key}`;
+            // // }
+            // else {
+            //     req.body[key] = { success: false, err: '_id is required' };
+            // }
+            // if (condition != '') {
+            await DB.update('department_config', newObj, value._id || null).then((data) => {
+                if (!data) {
+                    req.body[key].success = false;
+                }
+                req.body[key].success = true;
+                req.body[key] = data;
+            });
+            // }
         }
         res.json({
             success: true,

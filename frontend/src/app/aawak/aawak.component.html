@@ -208,14 +208,14 @@
                                        <ng-option selected="selected" disabled value="">Nimitt
                                        </ng-option>
                                        <ng-option *ngFor="let item of nimitts" [value]="item._id">
-                                          {{item.nimitt_hin}} : {{item.nimitt_eng}}
+                                          {{item.nimitt_hin}} : {{item.nimitt_eng}} ({{item.state_hin}})
                                        </ng-option>
                                     </ng-select>
                                  </div>
                               </div>
                               <div class="col-md-3 mb-3 text-center">
                                  <button class="btn btn-primary submit mx-2" type="submit"
-                                    (click)="getaawakData(1)">Submit</button>
+                                    (click)="getFilteredAawakData()">Submit</button>
                                  <!-- (click)="filterFormSubmit(filterForm.value)">Submit</button> -->
 
                                  <button class="btn btn-outline-secondary submit mx-2" type="button" (click)="filterBody= {
@@ -321,12 +321,15 @@
                               </td>
                               <td>@ {{data.rate?data.rate:'-'}} <br>
                                  = {{data.actual_amt?data.actual_amt:'-'}}</td>
-                              <td *ngIf="settings.aawak.nimitt_id">{{data.nimitt_id?data.nimitt_hin:'-'}}</td>
+                              <td *ngIf="settings.aawak.nimitt_id">
+                                 {{data.nimitt_id?data.nimitt_hin:'-'}}<br />
+                                 ({{data.nimitt_state_id? data.nimitt_state_hin: '-'}})
+                              </td>
                               <td *ngIf="settings.aawak.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
                               <td *ngIf="settings.aawak.description">{{data.description?data.description:'-'}}</td>
                            </tr>
                            <ng-container *ngIf="data.jawak_detail.length > 0">
-                              <tr class="collapse show ribbon-box" [attr.id]="'collapseExample-'+i">
+                              <tr class="collapse show ribbon-box">
                                  <td style="border: none;"></td>
                                  <td colspan="10" class="sub-row">
                                     <table class="card-body" style="width: 99.7%;table-layout: fixed;">

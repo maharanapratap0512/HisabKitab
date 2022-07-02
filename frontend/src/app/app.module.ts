@@ -20,12 +20,11 @@ import { MainEntryComponent } from './main-entry/main-entry.component';
 import { HeaderComponent } from './layout/header/header.component';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { FooterComponent } from './layout/footer/footer.component';
-import { NewComponent } from './new/new.component';
 
 import { MmEntryComponent } from './ENTRY__FORMS/mm-entry/mm-entry.component';
 import { ItemEntryComponent } from './ENTRY__FORMS/item-entry/item-entry.component';
 import { PbkEntryComponent } from './ENTRY__FORMS/pbk-entry/pbk-entry.component';
-import { ProductComponent } from './product/product.component';
+import { ProductComponent } from './CHILD_TABLES/product/product.component';
 import { ProductEntryComponent } from './ENTRY__FORMS/product-entry/product-entry.component';
 import { ProductViewComponent } from './views/product-view/product-view.component';
 import { CountryEntryComponent } from './ENTRY__FORMS/country-entry/country-entry.component';
@@ -43,22 +42,21 @@ import { DataViewComponent } from './views/data-view/data-view.component';
 
 import { AawakComponent } from './aawak/aawak.component';
 import { JawakComponent } from './jawak/jawak.component';
-import { PbkComponent } from './ADD__EDIT/pbk/pbk.component';
+import { PbkComponent } from './CHILD_TABLES/pbk/pbk.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { CategoryComponent } from './ADD__EDIT/category/category.component';
-import { CityComponent } from './ADD__EDIT/city/city.component';
-import { ItemComponent } from './ADD__EDIT/item/item.component';
-import { MmComponent } from './ADD__EDIT/mm/mm.component';
-import { SubitemComponent } from './ADD__EDIT/subitem/subitem.component';
+import { CategoryComponent } from './CHILD_TABLES/category/category.component';
+import { CityComponent } from './CHILD_TABLES/city/city.component';
+import { ItemComponent } from './CHILD_TABLES/item/item.component';
+import { MmComponent } from './CHILD_TABLES/mm/mm.component';
+import { SubitemComponent } from './CHILD_TABLES/subitem/subitem.component';
 import { GlobalService } from './services/global.service';
 import { SupportListEntryComponent } from './ENTRY__FORMS/support-list-entry/support-list-entry.component';
 import { SubitemListEntryComponent } from './ENTRY__FORMS/subitem-list-entry/subitem-list-entry.component';
 import { DepartmentComponent } from './department/department.component';
 import { DepartmentEntryComponent } from './ENTRY__FORMS/department-entry/department-entry.component';
 import { BachatComponent } from './bachat/bachat.component';
-import { FilterpipePipe } from './pipe/filterpipe.pipe';
 import { PointEntryComponent } from './ENTRY__FORMS/point-entry/point-entry.component';
-import { PointComponent } from './point/point.component';
+import { PointComponent } from './CHILD_TABLES/point/point.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { ImportComponent } from './import/import.component';
 
@@ -73,7 +71,6 @@ import { ImportComponent } from './import/import.component';
     HeaderComponent,
     SidebarComponent,
     FooterComponent,
-    NewComponent,
     ProductComponent,
     MmEntryComponent,
     ItemEntryComponent,
@@ -105,7 +102,6 @@ import { ImportComponent } from './import/import.component';
     DepartmentComponent,
     DepartmentEntryComponent,
     BachatComponent,
-    FilterpipePipe,
     PointEntryComponent,
     PointComponent,
     ImportComponent,

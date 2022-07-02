@@ -13,7 +13,8 @@ class DBContex {
         'aawak',
         'jawak',
         'bachat',
-        'product'
+        'product',
+        'department_config'
     ];
     tbl_from_supp_list = [
         'jawak_type',
@@ -61,16 +62,16 @@ class DBContex {
 
                 conditionQuery = options.conditionString ? (conditionQuery ? `${conditionQuery} AND ` : '') + options.conditionString : conditionQuery
 
-                let order = options.orderBy ? options.orderBy : (this.query[tblname] && options.full ? this.query[tblname].order : null);
-                
+                let order = options.orderBy ? options.orderBy : ((options.full && this.query[tblname]) ? this.query[tblname].order : null);
+
                 sql =
-                sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order} ` : ''));
-               
-                if(tblname == "item" || tblname == "subitem" || tblname == "category"){
-                    console.log("sql", sql);
-                    console.log("options", options);
-                    console.log("order", order);
-                    console.log("conditionQuery", conditionQuery);
+                    sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order} ` : ''));
+
+                if (tblname == "city") {
+                    console.log("get sql_______", sql);
+                    console.log("get options______", options);
+                    console.log("get order______", order);
+                    console.log("get conditionQuery______", conditionQuery);
                 }
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
@@ -105,8 +106,12 @@ class DBContex {
                     let sql =
                         this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${result.lastInsertRowid} `);
 
-                    getres = await this.db.prepare(sql).get();
+                    if (tblname == "city" || tblname == "aawak") {
+                        console.log("insert sql_______", sql);
+                    }
+                    getres = await this.db.prepare(sql).get({ limit: 1, offset: -1 });
                 }
+
 
                 resolve(getres);
             }
@@ -117,12 +122,17 @@ class DBContex {
     async update(tblname, obj, id) {
         return new Promise(async (resolve, reject) => {
             try {
+                obj.active = !obj.active ? (dept_id == 1 ? 1 : 0) : obj.active;
+
                 let sql = this.query[tblname].update + ` where _id=${id} `;
+
+                console.log("updt obj_____", obj);
+                console.log("updt sql_____", sql);
                 const result = await this.db.prepare(sql).run(obj);
 
                 let getres = {};
                 if (result.changes) {
-                    getres = await this.db.prepare(this.query[tblname].select_full.replace('?', ` where _id = ${id} `)).get();
+                    getres = await this.db.prepare(this.query[tblname].select_full.replace('?', ` where _id = ${id} `)).get({ limit: 1, offset: -1 });
                 }
                 resolve(getres)
             }
@@ -146,7 +156,7 @@ class DBContex {
             try {
                 if (this.supp_list.includes(tblname)) {
                     tblname = `support_list`;
-                }                
+                }
                 const sql =
                     `select count(*) as total_count from ${tblname} ` + (conditionString && conditionString?.trim() != '' ? ` where ${conditionString} ` : ``)
                 const stmt = this.db.prepare(sql).get();

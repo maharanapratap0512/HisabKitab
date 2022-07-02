@@ -7,7 +7,6 @@ import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
-import { FilterpipePipe } from '../pipe/filterpipe.pipe';
 import { AuthService } from '../services/auth.service';
 import { ExcelExportService } from '../services/excel-export.service';
 import { observable, Observable, of, Subject } from 'rxjs';
@@ -38,7 +37,7 @@ export class AawakComponent implements OnInit {
   mms: any = [];
   viewData: any = [];
   items: any = [];
-  nimitts:any = [];
+  nimitts: any = [];
   units: any = [];
   conditions: any = [];
   subitems: any = [];
@@ -60,7 +59,7 @@ export class AawakComponent implements OnInit {
     subitem_id: [],
     condition_id: [],
     pkt_num: null,
-    nimitt_id: null
+    nimitt_id: []
   };
   cat: any;
   settings: any = {};
@@ -110,10 +109,10 @@ export class AawakComponent implements OnInit {
     });
   }
 
-  getFilteredAawakData() {
+  getFilteredAawakData(pageNo: any = null) {
     this.isLoader = true;
     this.filterBody.pageNo = this.pageNo;
-    this.http.get(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.aawakData = data['result'];
         this.aawakAll = data['result'];
@@ -345,23 +344,21 @@ export class AawakComponent implements OnInit {
 
   itemSelected(ev: any) {
     if (ev) {
-      
-      let items= this.items.filter((i: { _id: any; }) => ev.includes(i._id));
+
+      let items = this.items.filter((i: { _id: any; }) => ev.includes(i._id));
       this.products = this.productsAll.filter((p: { item_id: any; }) => ev.includes(p.item_id));
       this.subitems = [];
       console.log(items);
-      
-      if (this.cat) {
 
-        for(let i in items){
+      if (this.cat) {
+        for (let i in items) {
           this.subitems.push(...items[i].subitems.filter((s: { category_id: any; }) => s.category_id == this.cat));
         }
       }
       else {
-        for(let i in items){          
+        for (let i in items) {
           this.subitems.push(...items[i].subitems);
         }
-        
       }
     }
     else {
@@ -399,11 +396,11 @@ export class AawakComponent implements OnInit {
         initial[name] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
         return initial;
       }, {});
-      let awakStart:any = 0, jawakStart:any = 0, startRow:any = 0;
+      let awakStart: any = 0, jawakStart: any = 0, startRow: any = 0;
       // const dataString = JSON.stringify(jsonData);
       let exceldata = jsonData[workBooks.SheetNames[0]];
       console.log(exceldata);
-      for (let i =0; i < exceldata.length; i++) {
+      for (let i = 0; i < exceldata.length; i++) {
         if (exceldata[i][0] && ['awk detail', 'awak detail', 'aawak detail', 'aawak', 'आवक'].includes(exceldata[i][0].toString().toLowerCase().trim())) {
           startRow = i;
           awakStart = 0;
@@ -420,23 +417,23 @@ export class AawakComponent implements OnInit {
       console.log("awakStart", awakStart);
       console.log("jawakStart", jawakStart);
       let finalJson = [];
-      let columns:string[] = Object.values(exceldata[startRow+1])
+      let columns: string[] = Object.values(exceldata[startRow + 1])
       console.log("columns", columns);
-      
-      for(let i = startRow + 2; i < exceldata.length; i++){
-        let aawak:any = {};
+
+      for (let i = startRow + 2; i < exceldata.length; i++) {
+        let aawak: any = {};
         let jawak: any = {};
-        for(let j:number = awakStart; j < columns.length; j++ ){
-          if(j < jawakStart){
+        for (let j: number = awakStart; j < columns.length; j++) {
+          if (j < jawakStart) {
             aawak[columns[j]] = exceldata[i][j];
           }
-          else{
+          else {
             jawak[columns[j]] = exceldata[i][j];
           }
         }
-        console.log("aawak",aawak);
-        console.log("jawak",jawak);
-        
+        console.log("aawak", aawak);
+        console.log("jawak", jawak);
+
       }
     }
 

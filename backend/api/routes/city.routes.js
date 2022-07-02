@@ -1,6 +1,5 @@
 
 const router = require('express').Router();
-const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
 const DB = new DBContex();
 
@@ -41,7 +40,7 @@ router.post('/:dept_id', async (req, res, next) => {
 
 // get city with dept_id
 router.get('/:dept_id', async (req, res, next) => {
-    let options = { dept_id: req.params.dept_id, conditionString: null, orderBy: ` city._id desc` }
+    let options = { full: true, dept_id: req.params.dept_id, conditionString: null, orderBy: ` city._id desc` }
 
     await DB.getList('city', options).then(async (resolve) => {
         res.json({
@@ -66,6 +65,7 @@ router.get('/', async (req, res, next) => {
 // city update
 router.put('/', async (req, res, next) => {
     if (req.body.set && req.body.query) {
+        console.log("req.body.set",req.body.set);
         let condition = 'city._id = ' + req.body.query._id;
         await DB.update('city', req.body.set, condition, async (err, data) => {
             if (err) {

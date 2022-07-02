@@ -58,7 +58,7 @@ router.get('/', async (req, res, next) => {
 router.get('/byaawak/:aawak_ref_id', async (req, res, next) => {
     let conditionString = ` aawak_ref_id = ${req.params.aawak_ref_id}`;
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('jawak', { conditionString: conditionString }).then((resolve) => {
+    await DB.getList('jawak', {full:true, conditionString: conditionString }).then((resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],
@@ -142,7 +142,7 @@ router.put('/:dept_id', async (req, res, next) => {
         page = req.body.pageNo
     }
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('jawak', { dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then((resolve) => {
+    await DB.getList('jawak', {full:true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then((resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],
