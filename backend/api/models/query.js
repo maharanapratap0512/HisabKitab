@@ -183,7 +183,10 @@ const itemmix = {
     left join category ct on ct._id = si.category_id
     left join unit ut on ut._id = si.unit_id
     left join subitem_list sl on  sl._id = si.subitem_list_id ? group by item._id order by @order limit @limit offset @offset`,
-    order: `item_hin, item_eng`
+    order: `item_hin, item_eng`,
+    count: `select count(*) as total_count from item 
+        left join subitem si on si.item_id = item._id ?
+        group by item._id `
 }
 
 const jawak = {
@@ -279,15 +282,15 @@ const aawak = {
         updated_at=datetime('now','localtime')`
     , insert:
         `insert into aawak (
-            mm_id, pkt_num, pbk_id, aawak_mm_id, item_id, subitem_id, 
+            date, mm_id, pkt_num, pbk_id, aawak_mm_id, item_id, subitem_id, 
             product_id, item_detail, condition_id, qty, rate, actual_amt, 
             aawak_type_id, unit_id, description, nimitt_id, dept_id, company_name, 
-            isbill, document, active)
+            isbill, remaining_qty, document, active)
         values (
-            @mm_id, @pkt_num, @pbk_id, @aawak_mm_id, @item_id, @subitem_id, 
+            @date, @mm_id, @pkt_num, @pbk_id, @aawak_mm_id, @item_id, @subitem_id, 
             @product_id, @item_detail, @condition_id, @qty, @rate, @actual_amt, 
             @aawak_type_id, @unit_id, @description, @nimitt_id, @dept_id, @company_name, 
-            @isbill, @document, @active)`
+            @isbill, @qty, @document, @active)`
     , select:
         `select * from aawak ?`
     , select_full:

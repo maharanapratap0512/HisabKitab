@@ -70,6 +70,9 @@ export class AawakEntryComponent implements OnInit {
 		item_detail: null,
 		description: null,
 		remaining_qty: null,
+		company_name: null,
+		isbill:null,
+		document:null,
 		jawak_detail: []
 	}
 	jwkArr: any = [];

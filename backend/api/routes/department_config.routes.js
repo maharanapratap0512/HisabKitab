@@ -66,7 +66,7 @@ router.put('/save', async (req, res, next) => {
             //     req.body[key] = { success: false, err: '_id is required' };
             // }
             // if (condition != '') {
-            await DB.update('department_config', newObj, value._id || null).then((data) => {
+            await DB.update('department_config', newObj, `_id = ${value._id  || null}`).then((data) => {
                 if (!data) {
                     req.body[key].success = false;
                 }
