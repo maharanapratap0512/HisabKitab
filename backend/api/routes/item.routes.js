@@ -91,26 +91,19 @@ router.get('/:dept_id', async (req, res, next) => {
 
 //  item get by dept + filter + pageNo
 router.put('/itemmix/:dept_id', async (req, res, next) => {
-    let itemCondition = ``;
-    let subitemCondition = ``;
+    let itemCondition = req.params.dept_id == 1 ? `` : `((select config_value from department_config where dept_id = ${req.params.dept_id} AND config_key = 'item') LIKE '%,'||item._id||',%' OR (select config_value from department_config where dept_id = ${req.params.dept_id} AND config_key = 'subitem') LIKE '%,'||si._id||',%')`;
+    // let subitemCondition = ``;
 
     let orderBy = null, limit = 100, offset = null, page = 1;
 
     if (req.body._id) {
-        itemCondition += (itemCondition != `` ? ` AND` : ``) + ` item._id = ${req.body._id}`;
-    }
-    if (req.body.subitem_id) {
-        subitemCondition += (subitemCondition != `` ? ` AND` : ``) + ` subitem._id = ${req.body.subitem_id}`;
-    }
-    if (req.body.item_id) {
-        subitemCondition += (subitemCondition != `` ? ` AND` : ``) + ` subitem.item_id = ${req.body.item_id}`;
+        itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` item._id = ${req.body._id}`;
     }
     if (req.body.category_id) {
-        itemCondition += (itemCondition != `` ? ` AND` : ``) + ` item.category_id = ${req.body.category_id}`;
-        subitemCondition += (subitemCondition != `` ? ` AND` : ``) + ` subitem.category_id = ${req.body.category_id}`;
+        itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` ${req.body.category_id} in (item.category_id, si.category_id)`;
     }
     if (req.body.subitem_list_id) {
-        subitemCondition += (subitemCondition != `` ? ` AND` : ``) + ` (subitem.subitem_list_id = ${req.body.subitem_list_id})`;
+        itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` si.subitem_list_id = ${req.body.subitem_list_id}`;
     }
     if (itemCondition.trim() == ``) {
         orderBy = "item._id desc";
@@ -119,25 +112,40 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
         offset = (req.body.pageNo - 1) * limit;
         page = req.body.pageNo;
     }
-    await DB.getList('item', { full: true, dept_id: req.params.dept_id, conditionString: itemCondition, orderBy: orderBy, limit: limit, offset: offset }).then(async (result) => {
+    await DB.getList('itemmix', {full:true, dept_id: req.params.dept_id, conditionString: itemCondition, limit: limit , offset:offset}).then((resolve) => {
         let subitem_count = 0;
-        for (let i in result.data) {
-            await DB.getList('subitem', { full: true, dept_id: req.params.dept_id, conditionString: ` (item_id = ${result.data[i]._id}) ${(subitemCondition.trim() == ``?``: ` AND ${subitemCondition}`)}` }).then((sResult) => {
-                result.data[i].subitems = sResult.data;
-                result.data[i].categories = sResult.data.map(s => s.category_id);
-                // result.total_count += sResult.total_count;
-                subitem_count += sResult.total_count;
-            });
+        for (let i = 0; i < resolve.data.length; i++) {
+
+            resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
+            resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
+            subitem_count += resolve.data[i].subitems.length;
         }
         res.json({
             success: true,
-            result: result.data || [],
-            total_count: result.total_count + subitem_count,
-            item_count:result.total_count,
-            subitem_count: subitem_count,
-            pageNo: page
+            result: resolve.data || [],
+            total_count: resolve.total_count,
+            subitem_count: subitem_count
         });
     }, (err) => { return next(err) });
+    // await DB.getList('item', { full: true, dept_id: req.params.dept_id, conditionString: itemCondition, orderBy: orderBy, limit: limit, offset: offset }).then(async (result) => {
+    //     let subitem_count = 0;
+    //     for (let i in result.data) {
+    //         await DB.getList('subitem', { full: true, dept_id: req.params.dept_id, conditionString: ` (item_id = ${result.data[i]._id}) ${(subitemCondition.trim() == ``?``: ` AND ${subitemCondition}`)}` }).then((sResult) => {
+    //             result.data[i].subitems = sResult.data;
+    //             result.data[i].categories = sResult.data.map(s => s.category_id);
+    //             // result.total_count += sResult.total_count;
+    //             subitem_count += sResult.total_count;
+    //         });
+    //     }
+    //     res.json({
+    //         success: true,
+    //         result: result.data || [],
+    //         total_count: result.total_count + subitem_count,
+    //         item_count:result.total_count,
+    //         subitem_count: subitem_count,
+    //         pageNo: page
+    //     });
+    // }, (err) => { return next(err) });
 });
 
 

@@ -65,16 +65,15 @@ router.get('/', async (req, res, next) => {
 // city update
 router.put('/', async (req, res, next) => {
     if (req.body.set && req.body.query) {
-        console.log("req.body.set",req.body.set);
+        console.log("req.body.set", req.body.set);
         let condition = 'city._id = ' + req.body.query._id;
-        await DB.update('city', req.body.set, condition, async (err, data) => {
-            if (err) {
-                return next(err);
-            }
+        await DB.update('city', req.body.set, condition).then((data) => {
             res.json({
                 success: true,
                 result: data || {}
             });
+        }, (err) => {
+            next(err)
         });
     }
     else {

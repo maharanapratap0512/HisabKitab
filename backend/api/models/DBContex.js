@@ -3,7 +3,6 @@ class DBContex {
     db;
     tbl_need_dept_config = [
         'item',
-        'itemMix',
         'pbk',
         'mm',
         'subitem',
@@ -62,19 +61,19 @@ class DBContex {
 
                 conditionQuery = options.conditionString ? (conditionQuery ? `${conditionQuery} AND ` : '') + options.conditionString : conditionQuery
 
-                let order = options.orderBy ? options.orderBy : ((options.full && this.query[tblname]) ? this.query[tblname].order : null);
+                let order = options.orderBy ? options.orderBy : ((options.full && this.query[tblname]) ? this.query[tblname].order : ` ${tblname}._id desc`);
 
                 sql =
-                    sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order} ` : ''));
+                    sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : ''));
 
-                if (tblname == "city") {
+                if (tblname == "itemmix") {
                     console.log("get sql_______", sql);
                     console.log("get options______", options);
                     console.log("get order______", order);
                     console.log("get conditionQuery______", conditionQuery);
                 }
 
-                const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
+                const result = await this.db.prepare(sql).all({ order: order, limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {
                     resolve({ data: result, total_count: res.total_count });
                 });
@@ -122,18 +121,19 @@ class DBContex {
     async update(tblname, obj, id) {
         return new Promise(async (resolve, reject) => {
             try {
-                obj.active = !obj.active ? (dept_id == 1 ? 1 : 0) : obj.active;
 
-                let sql = this.query[tblname].update + ` where _id=${id} `;
+                let sql = this.query[tblname].update + ` where ${id} `;
 
-                console.log("updt obj_____", obj);
-                console.log("updt sql_____", sql);
+                // console.log("updt obj_____", obj);
+                // console.log("updt sql_____", sql);
                 const result = await this.db.prepare(sql).run(obj);
+                // console.log("updt result_____", result);
 
                 let getres = {};
                 if (result.changes) {
-                    getres = await this.db.prepare(this.query[tblname].select_full.replace('?', ` where _id = ${id} `)).get({ limit: 1, offset: -1 });
+                    getres = await this.db.prepare(this.query[tblname].select_full.replace('?', ` where ${id} `)).get({ limit: 1, offset: -1, order: `${tblname}._id` });
                 }
+                // console.log("updt getres_____", getres);
                 resolve(getres)
             }
             catch (err) { reject(err) }

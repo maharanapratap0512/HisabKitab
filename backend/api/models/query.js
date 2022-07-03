@@ -4,7 +4,7 @@ const country = {
     select:
         `select * from country ?`
     , select_full:
-        `select * from country ? limit @limit offset @offset`
+        `select * from country ? order by @order limit @limit offset @offset`
     , insert:
         `insert into country (
             country_hin,
@@ -18,7 +18,6 @@ const country = {
         `update country set 
         country_hin=@country_hin,
         country_eng=@country_eng,
-        active=@active,
         updated_at=datetime('now', 'localtime')`
     , order:
         `country_hin, country_eng`
@@ -28,7 +27,7 @@ const city = {
     select_full:
         `select city.*, st.state_hin, st.state_eng from city 
         left join state st on city.state_id=st._id ? 
-        limit @limit offset @offset`
+        order by @order limit @limit offset @offset`
     , select:
         `select * from city ?`
     , insert:
@@ -47,7 +46,12 @@ const city = {
         city_hin=@city_hin,
         city_eng=@city_eng,
         state_id=@state_id,
-        active=@active,
+        updated_at=datetime('now','localtime')`
+    , update_active:
+        `update city set
+        city_hin=@city_hin,
+        city_eng=@city_eng,
+        state_id=@state_id,
         updated_at=datetime('now','localtime')`
     , order: ` city_hin,city_eng`
 }
@@ -56,7 +60,7 @@ const category = {
     select:
         `select * from category ?`
     , select_full:
-        `select * from category ? limit @limit offset @offset`
+        `select * from category ? order by @order limit @limit offset @offset`
     , insert:
         `insert into category (
             category_hin,
@@ -78,7 +82,7 @@ const department = {
     select:
         `select * from department ?`
     , select_full:
-        `select * from department ? limit @limit offset @offset`
+        `select * from department ? order by @order limit @limit offset @offset`
     , insert:
         `insert into department (
             dept_eng,
@@ -98,7 +102,6 @@ const department = {
         dept_hin=@dept_hin,
         dept_code=@dept_code,
         password=@password,
-        active=@active,
         updated_at=datetime('now','localtime')`
 }
 
@@ -106,7 +109,7 @@ const department_config = {
     select:
         `select * from department_config ?`
     , select_full:
-        `select * from department_config ? limit @limit offset @offset`
+        `select * from department_config ? order by @order limit @limit offset @offset`
     , insert:
         `insert into department_config (
             dept_id,
@@ -131,13 +134,13 @@ const item = {
     select:
         `select * from item ?`
     , select_full:
-        `select item.*, 
+        `select item.*,  si.category_id,
         cat.category_hin, cat.category_eng, 
         unit.unit_full, unit.unit_short 
         from item
         left join category cat on cat._id = item.category_id
-        left join subitem si  on st.item_id = item._id
-        left join unit on unit._id = item.unit_id ? limit @limit offset @offset`
+        left join subitem si  on si.item_id = item._id
+        left join unit on unit._id = item.unit_id ? order by @order limit @limit offset @offset`
     , insert:
         `insert into item (
             item_hin,
@@ -163,10 +166,24 @@ const item = {
         category_id=@category_id,
         unit_id=@unit_id,
         extra_note=@extra_note,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         ` item_hin, item_eng`
+}
+
+const itemmix = {
+    select_full: `select item.*, 
+    cat.category_hin, cat.category_eng, 
+    unit.unit_full, unit.unit_short ,
+    json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || ', "active": ' || si.active || '}')) as subitems, json_group_array(si.category_id) as categories
+    from item
+    left join category cat on cat._id = item.category_id
+    left join unit on unit._id = item.unit_id
+    left join subitem si on si.item_id = item._id
+    left join category ct on ct._id = si.category_id
+    left join unit ut on ut._id = si.unit_id
+    left join subitem_list sl on  sl._id = si.subitem_list_id ? group by item._id order by @order limit @limit offset @offset`,
+    order: `item_hin, item_eng`
 }
 
 const jawak = {
@@ -197,7 +214,7 @@ const jawak = {
         left join unit on unit._id = jawak.unit_id
         left join department dept on dept._id = jawak.dept_id
         left join nimitt nmt on nmt._id = jawak.nimitt_id
-        left join state pst on pst._id = nmt.state_id ? limit @limit offset @offset`
+        left join state pst on pst._id = nmt.state_id ? order by @order limit @limit offset @offset`
     , insert:
         `insert into jawak(
         date, mm_id, pkt_num, pbk_id, jawak_mm_id, item_id,
@@ -229,7 +246,6 @@ const jawak = {
         company_name=@compant_name,
         aawak_ref_id=@aawak_ref_id,
         dept_id=@dept_id,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         `date, jawak_mm_hin, jawak_mm_eng, pkt_num`
@@ -260,7 +276,6 @@ const aawak = {
         company_name=@company_name,
         isbill=@isbill,
         document=@document,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , insert:
         `insert into aawak (
@@ -300,7 +315,7 @@ const aawak = {
         left join department dept on dept._id = aawak.dept_id
         left join support_list slat on slat._id = aawak.aawak_type_id
         left join nimitt nmt on nmt._id = aawak.nimitt_id
-        left join state pst on pst._id = nmt.state_id ? limit @limit offset @offset`
+        left join state pst on pst._id = nmt.state_id ? order by @order limit @limit offset @offset`
     , order:
         `date, aawak_mm_hin, aawak_mm_eng, pkt_num`
 }
@@ -324,7 +339,7 @@ const bachat = {
         left join category cti on cti._id = it.category_id
         left join category cts on cts._id = si.category_id
         left join state st on st._id = mm.state_id
-        left join department dept on dept._id = bachat.dept_id ? limit @limit offset @offset`
+        left join department dept on dept._id = bachat.dept_id ? order by @order limit @limit offset @offset`
     , insert:
         `insert into bachat (
             mm_id,
@@ -368,7 +383,6 @@ const bachat = {
         unit_id=@unit_id,
         dept_id=@dept_id,
         Repairing=@Repairing,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         `mm.mm_hin, mm.mm_eng, item_hin, subitem_hin, item_eng, subitem_eng, unit.unit_short`
@@ -378,7 +392,7 @@ const mm = {
     select:
         `select * from mm ?`
     , select_full:
-        `select * from mm ? limit @limit offset @offset`
+        `select * from mm ? order by @order limit @limit offset @offset`
     , insert:
         `insert in to mm (
             mm_hin, mm_eng, mm_code, dept_id, state_id,
@@ -396,7 +410,6 @@ const mm = {
         parent_mm_id=@parent_mm_id,
         opening_date=@opening_date,
         nimitt_id=@nimitt_id,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         `mm_hin, mm_eng`
@@ -406,7 +419,7 @@ const nimitt = {
     select:
         `select * from nimitt ?`
     , select_full:
-        `select * from nimitt ? limit @limit offset @offset`
+        `select * from nimitt ? order by @order limit @limit offset @offset`
     , insert:
         `insert in to nimitt (
             roll_no,
@@ -455,7 +468,7 @@ const pbk = {
         from pbk 
         left join state on state._id = pbk.state_id
         left join city on city._id = pbk.city_id
-        left join mm on mm._id = pbk.class_mm_id ? limit @limit offset @offset`
+        left join mm on mm._id = pbk.class_mm_id ? order by @order limit @limit offset @offset`
     , insert:
         `insert into pbk (
             roll_no,
@@ -520,7 +533,6 @@ const pbk = {
         class_mm_id=@class_mm_id,
         bhatti_date=@bhatti_date,
         document=@document,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         `roll_no`
@@ -530,7 +542,7 @@ const point = {
     select:
         `select * from point ?`
     , select_full:
-        `select * from point ? limit @limit offset @offset`
+        `select * from point ? order by @order limit @limit offset @offset`
     , insert:
         `insert into point (
         type,
@@ -580,7 +592,7 @@ const product = {
         left join subitem on subitem._id = product.subitem_id
         left join subitem_list on subitem_list._id = subitem.subitem_list_id
         left join support_list on support_list._id = product.condition_id ?
-        limit @limit offset @offset`
+        order by @order limit @limit offset @offset`
     , insert:
         `insert into product (
         mm_id,
@@ -645,7 +657,6 @@ const product = {
         warranty_from=@warranty_from,
         document=@document,
         isbill=@isbill,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         `purchase_date, mm.mm_hin, mm.mm_eng, item_hin, item_eng, subitem_hin, subitem_eng`
@@ -658,7 +669,7 @@ const state = {
         `select state.*, 
         cnt.country_hin, cnt.country_eng 
         from state 
-        left join country cnt on cnt._id = state.country_id  ? limit @limit offset @offset`
+        left join country cnt on cnt._id = state.country_id  ? order by @order limit @limit offset @offset`
     , insert:
         `insert into state (
         state_hin,
@@ -675,7 +686,6 @@ const state = {
         state_hin=@state_hin,
         state_eng=@state_eng,
         country_id=@country_id,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         `state_hin, state_eng`
@@ -694,7 +704,7 @@ const subitem = {
         left join category cat on cat._id = subitem.category_id
         left join unit on unit._id = subitem.unit_id
         left join item on  item._id = subitem.item_id
-        left join subitem_list on  subitem_list._id = subitem.subitem_list_id ? limit @limit offset @offset`
+        left join subitem_list on  subitem_list._id = subitem.subitem_list_id ? order by @order limit @limit offset @offset`
     , insert:
         `insert into subitem (
         item_id,
@@ -720,7 +730,6 @@ const subitem = {
         unit_id=@unit_id,
         extra_note=@extra_note,
         document=@document,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         `subitem_hin, subitem_eng`
@@ -730,7 +739,7 @@ const subitem_list = {
     select:
         `select * from subitem_list ?`
     , select_full:
-        `select * from subitem_list ? limit @limit offset @offset`
+        `select * from subitem_list ? order by @order limit @limit offset @offset`
     , insert:
         `insert into subitem_list (
         subitem_hin,
@@ -747,7 +756,6 @@ const subitem_list = {
         subitem_hin=@subitem_hin,
         subitem_eng=@subitem_eng,
         extra_note=@extra_note,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         `subitem_hin, subitem_eng`
@@ -757,7 +765,7 @@ const support_list = {
     select:
         `select * from support_list ?`
     , select_full:
-        `select * from support_list ? limit @limit offset @offset`
+        `select * from support_list ? order by @order limit @limit offset @offset`
     , insert:
         `insert into support_list (
         list_type,
@@ -774,7 +782,6 @@ const support_list = {
         list_type=@list_type,
         list_name_hin=@list_name_hin,
         list_name_eng=@list_name_eng,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         ``
@@ -784,7 +791,7 @@ const temp_import = {
     select:
         `select * from temp_import ?`
     , select_full:
-        `select * from temp_import ? limit @limit offset @offset`
+        `select * from temp_import ? order by @order limit @limit offset @offset`
     , insert:
         `insert into temp_import (
         type,
@@ -894,7 +901,6 @@ const temp_import = {
         dept=@dept,
         dept_id=@dept_id,
         ref_id=@ref_id,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         ``
@@ -904,7 +910,7 @@ const unit = {
     select:
         `select * from unit ?`
     , select_full:
-        `select * from unit ? limit @limit offset @offset`
+        `select * from unit ? order by @order limit @limit offset @offset`
     , insert:
         `insert into unit (
             unit_short,
@@ -918,7 +924,6 @@ const unit = {
         `update unit set
         unit_short=@unit_short,
         unit_full=@unit_full,
-        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         `unit_short, unit_full`
@@ -930,5 +935,5 @@ const unit = {
 
 
 module.exports = {
-    country, city, category, department, department_config, item, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit
 };
