@@ -49,9 +49,7 @@ const city = {
         updated_at=datetime('now','localtime')`
     , update_active:
         `update city set
-        city_hin=@city_hin,
-        city_eng=@city_eng,
-        state_id=@state_id,
+        active=@active,
         updated_at=datetime('now','localtime')`
     , order: ` city_hin,city_eng`
 }

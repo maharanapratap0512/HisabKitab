@@ -130,8 +130,9 @@ export class CityComponent implements OnInit {
     body.query = {
       _id: id
     }
+    active = !active;
     body.set = {
-      active: !active
+      active: active ? 1 : 0
     };
     this.http.put(this.api.getUrl('CITY'), body).subscribe((data: any) => {
       this.cityData.splice(this.cityData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);

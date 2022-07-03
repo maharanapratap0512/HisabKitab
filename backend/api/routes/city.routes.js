@@ -77,7 +77,7 @@ router.put('/', async (req, res, next) => {
         });
     }
     else {
-        return next(new Error('Id not found.'))
+        return next(new Error('Id not found.'));
     }
 });
 

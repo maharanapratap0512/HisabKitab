@@ -121,8 +121,9 @@ class DBContex {
     async update(tblname, obj, id) {
         return new Promise(async (resolve, reject) => {
             try {
-
-                let sql = this.query[tblname].update + ` where ${id} `;
+                let key = Object.keys(obj);
+                // console.log("key___", key);
+                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update + ` where ${id} `;
 
                 // console.log("updt obj_____", obj);
                 // console.log("updt sql_____", sql);
@@ -136,7 +137,10 @@ class DBContex {
                 // console.log("updt getres_____", getres);
                 resolve(getres)
             }
-            catch (err) { reject(err) }
+            catch (err) {
+                console.log("err", err);
+                reject(err)
+            }
         })
     }
 
