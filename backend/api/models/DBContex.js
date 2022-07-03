@@ -92,10 +92,12 @@ class DBContex {
             try {
                 obj.active = dept_id == 1 ? 1 : 0;
 
+                // console.log("insert",result);
+                console.log("sql",this.query[tblname].insert);
+                console.log("insert sql_______", obj);
                 const result = await this.db.prepare(this.query[tblname].insert).run(obj);
 
                 let getres = [];
-
                 // if inserted success
                 if (result.changes == 1 && result.lastInsertRowid) {
                     if (this.tbl_need_dept_config.includes(tblname)) {
@@ -107,14 +109,17 @@ class DBContex {
 
                     if (tblname == "city" || tblname == "aawak") {
                         console.log("insert sql_______", sql);
+                        console.log("insert sql_______", obj);
                     }
-                    getres = await this.db.prepare(sql).get({ limit: 1, offset: -1 });
+                    getres = await this.db.prepare(sql).get({ order:`${tblname}._id`, limit: 1, offset: -1 });
                 }
 
 
                 resolve(getres);
             }
-            catch (err) { reject(err) }
+            catch (err) { 
+                console.log("insert errr", err);
+                reject(err) }
         })
     }
 
@@ -158,11 +163,18 @@ class DBContex {
     async getCount(tblname, conditionString = null) {
         return new Promise(async (resolve, reject) => {
             try {
+                let sql = '';
                 if (this.supp_list.includes(tblname)) {
                     tblname = `support_list`;
                 }
-                const sql =
-                    `select count(*) as total_count from ${tblname} ` + (conditionString && conditionString?.trim() != '' ? ` where ${conditionString} ` : ``)
+                if(tblname == "itemmix"){
+                    sql = this.query[tblname].count.replace('?', (conditionString && conditionString?.trim() != '' ? ` where ${conditionString} ` : ``));
+                }
+                else{
+                    sql =
+                        `select count(*) as total_count from ${tblname} ` + (conditionString && conditionString?.trim() != '' ? ` where ${conditionString} ` : ``)
+                }
+                console.log("sql count", sql);
                 const stmt = this.db.prepare(sql).get();
                 // if(tblname == 'item'){
                 //     console.log("sql", sql);
