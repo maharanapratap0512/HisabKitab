@@ -24,7 +24,6 @@ export class CategoryComponent implements OnInit {
   total_count: any = 0;;
 
   constructor(
-    private fb: FormBuilder,
     private http: HttpService,
     private api: ApiService,
     public gs: GlobalService,

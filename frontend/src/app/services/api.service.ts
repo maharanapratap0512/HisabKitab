@@ -50,7 +50,8 @@ export class ApiService {
     IMPORTUPDATE: base_url + 'importexport/import/',
     DEPTCONFIG: base_url + 'department_config/',
     DEPTCONFSAVE: base_url + 'department_config/save',
-    LOGIN: base_url + 'departments/login'
+    LOGIN: base_url + 'departments/login',
+    NIMITT: base_url + 'nimitt/'
   };
 
   getUrl(key: string): string {

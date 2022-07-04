@@ -59,7 +59,6 @@ export class MmEntryComponent implements OnInit {
   }
 
   openModal(name: any) {
-    console.log(" name", this.showModal);
     this.showModal = name;
     $('#mmEntryComponent > #' + name).modal('show')
   }
@@ -70,8 +69,6 @@ export class MmEntryComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log(changes);
-
     if (changes.getData.currentValue) {
       this.mmForm.patchValue({
         mm_eng: changes.getData.currentValue.mm_eng,
@@ -156,16 +153,11 @@ export class MmEntryComponent implements OnInit {
     if (ev._id) {
       $('#mmEntryComponent > #showModal').modal('hide');
       this.showModal = '';
-      // this.states.unshift(ev);
-      this.mmForm.patchValue(
-        {
-          state_id: ev._id
-        });
+      this.mmForm.patchValue({ state_id: ev._id });
       this.isLoader = false;
     }
     else {
       this.isLoader = false;
-      console.log("err", ev);
     }
   }
 
@@ -174,13 +166,11 @@ export class MmEntryComponent implements OnInit {
     if (ev._id) {
       $('#mmEntryComponent > #showModal').modal('hide');
       this.showModal = '';
-      // this.states.unshift(ev);
       this.mmForm.patchValue({ nimitt_id: ev._id });
       this.isLoader = false;
     }
     else {
       this.isLoader = false;
-      console.log("err", ev);
     }
   }
 
@@ -189,12 +179,10 @@ export class MmEntryComponent implements OnInit {
     if (ev._id) {
       $('#mmEntryComponent > #showModal').modal('hide');
       this.showModal = '';
-      // this.departments.unshift(ev);
       this.mmForm.patchValue({ dept_id: ev._id });
       this.isLoader = false;
     }
     else {
-      console.log("err", ev);
       this.isLoader = false;
     }
   }

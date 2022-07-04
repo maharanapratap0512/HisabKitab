@@ -53,7 +53,7 @@
                         <ng-select class="custom" style="width: 100%;" placeholder="Select MM State" [clearable]="false"
                             [virtualScroll]="true" formControlName="state_id"
                             [ngClass]="{'validation':mmForm.get('state_id')?.errors && (mmForm.get('state_id')?.touched || mmForm.get ('state_id')?.dirty)}">
-                            <ng-option selected="selected" disabled value="">Select MM Statessss</ng-option>
+                            <ng-option selected="selected" disabled value="">Select MM State</ng-option>
                             <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}} :
                                 {{item.state_eng}}</ng-option>
                         </ng-select>
@@ -136,63 +136,62 @@
             </div>
         </form>
     </div>
+</div>
 
 
 
-    <!-- Modal -->
-    <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" style="width: 90%;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
-                    <button type="button" class="btn-close" onclick="$('#mmEntryComponent > #showModal').modal('hide')"
-                        (click)="showModal = ''" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Add State  -->
-                    <app-state-entry *ngIf="showModal == 'Add State'" (response)="stateAddResponse($event)">
-                    </app-state-entry>
-                    
-                    <!-- Add Nimitt  -->
-                    <app-pbk-entry *ngIf="showModal == 'Add Nimitt'" (response)="nimittAddResponse($event)" [isNimitt]="true">
-                    </app-pbk-entry>
+<!-- Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" style="width: 90%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+                <button type="button" class="btn-close" onclick="$('#mmEntryComponent > #showModal').modal('hide')"
+                    (click)="showModal = ''" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Add State  -->
+                <app-state-entry *ngIf="showModal == 'Add State'" (response)="stateAddResponse($event)">
+                </app-state-entry>
 
-                    <!-- Add Department -->
-                    <app-support-list-entry *ngIf="showModal == 'Add Department'"
-                        (response)='departmentAddResponse($event)' list_type="dept_id"> </app-support-list-entry>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" style="width: 120px;"
-                        onclick="$('#mmEntryComponent > #showModal').modal('hide')"
-                        (click)="showModal = ''">Close</button>
-                </div>
+                <!-- Add Nimitt  -->
+                <app-pbk-entry *ngIf="showModal == 'Add Nimitt'" (response)="nimittAddResponse($event)"
+                    [isNimitt]="true">
+                </app-pbk-entry>
+
+                <!-- Add Department -->
+                <app-support-list-entry *ngIf="showModal == 'Add Department'" (response)='departmentAddResponse($event)'
+                    list_type="dept_id"> </app-support-list-entry>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" style="width: 120px;"
+                    onclick="$('#mmEntryComponent > #showModal').modal('hide')" (click)="showModal = ''">Close</button>
             </div>
         </div>
     </div>
+</div>
 
 
 
-    <!-- Data View For Small List -->
-    <div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" style="width: 90%;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
-                    <button type="button" class="btn-close" onclick="$('#mmEntryComponent > #dataView').modal('hide')"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Department List -->
-                    <app-data-view *ngIf="viewType == 'Department'" [getData]="viewData" Type="dept_id"></app-data-view>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" style="width: 120px;"
-                        onclick="$('#mmEntryComponent > #dataView').modal('hide')">Close</button>
-                </div>
+<!-- Data View For Small List -->
+<div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" style="width: 90%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
+                <button type="button" class="btn-close" onclick="$('#mmEntryComponent > #dataView').modal('hide')"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Department List -->
+                <app-data-view *ngIf="viewType == 'Department'" [getData]="viewData" Type="dept_id"></app-data-view>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" style="width: 120px;"
+                    onclick="$('#mmEntryComponent > #dataView').modal('hide')">Close</button>
             </div>
         </div>
     </div>
-
 </div>

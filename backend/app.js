@@ -44,6 +44,7 @@ const bachatMonthlyRoutes = require('./api/routes/bachat_monthly.routes');
 const bachatRoutes = require('./api/routes/bachat.routes');
 const pointRoutes = require('./api/routes/point.routes');
 const importExportRoutes = require('./api/routes/import-export.routes');
+const nimittRoutes = require('./api/routes/nimitt.routes');
 
 
 // // Routes - Binding
@@ -70,6 +71,7 @@ app.use('/api/bachat_monthly', bachatMonthlyRoutes);
 app.use('/api/bachat', bachatRoutes);
 app.use('/api/points', pointRoutes);
 app.use('/api/importexport', importExportRoutes);
+app.use('/api/nimitt', nimittRoutes);
 
 
 

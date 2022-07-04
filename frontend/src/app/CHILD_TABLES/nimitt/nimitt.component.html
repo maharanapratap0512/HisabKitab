@@ -1,1 +1,123 @@
-<p>nimitt works!</p>
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="small" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
+</ngx-spinner>
+
+<!-- Begin page -->
+<div class="wrapper">
+   <div class="content-page">
+      <div class="content">
+         <div class="container-fluid">
+
+            <!-- First Row -->
+            <!-- Add Button, Search Field, Filter button, Total Count -->
+            <div class="row border-bottom border-secondary">
+               <div class="card-body" style="overflow: auto;">
+                  <div class="row justify-content-between">
+                     <div class="col-2">
+                        <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
+                           (click)="showModal = 'Add Nimitt'">
+                           <i class="dripicons-plus" style="font-size: large;"> </i>Add Nimitt
+                        </button>
+                     </div>
+                     <div class="col-5">
+                        <div class="form-group">
+
+                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                              name="search">
+                        </div>
+                     </div>
+                     <div class="col-2">
+                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total
+                           Count : {{nimittData.length?nimittData.length:'-'}}
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div class="row" *ngIf="nimittData.length">
+               <div class="card-body" style="overflow: auto;">
+                  <table id="datatable-buttons" class="table table-hover dt-responsive">
+                     <thead>
+                        <tr>
+                           <th style="width: 80px;">No.</th>
+                           <th>Manage</th>
+                           <th>Roll No.</th>
+                           <th>Nimitt (Eng)</th>
+                           <th>Nimitt (Hin)</th>
+                           <th>Gender</th>
+                           <th>Relative Name</th>
+                           <th>Townarea</th>
+                           <th>State</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let data of nimittData | filter:term; let i=index">
+                           <td style="font-size: large;">
+                              {{i+1}}
+                              <span class="mx-1"
+                                 style="font-size: x-large;position: relative;line-height: 28px;cursor: pointer;"
+                                 (click)="protectionToggle(data._id, data.active)">
+                                 <i *ngIf="auth.webUser.dept_id == 1 && data.active" data-toggle="tooltip"
+                                    title="Protected" class="uil-shield-check text-warning"></i>
+                                 <i *ngIf="auth.webUser.dept_id == 1 && !data.active" data-toggle="tooltip"
+                                    title="Unprotected" class="uil-shield-slash text-danger"></i>
+                              </span>
+                           </td>
+                           <td>
+                              <div *ngIf="auth.webUser.dept_id == 1 || !data.active">
+                                 <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                                       class="uil uil-pen"></i></button>
+                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                       class="uil-trash"></i></button>
+                              </div>
+                              <span *ngIf="auth.webUser.dept_id != 1 && data.active" data-toggle="tooltip"
+                                 title="Protected" class="text-warning mx-1"
+                                 style="font-size: xx-large;cursor: pointer;line-height: 0px;">
+                                 <i class="uil-shield-check"></i>
+                              </span>
+
+                           </td>
+                           <td>{{data.roll_no}}</td>
+                           <td>{{data.nimitt_eng}}</td>
+                           <td>{{data.nimitt_hin}}</td>
+                           <td>{{data.gender}}</td>
+                           <td>{{data.relative_name}}</td>
+                           <td>{{data.townarea}}</td>
+                           <td>{{data.state_eng +' : '+ data.state_hin}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+
+
+<!-- add Nimitt Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
+               aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <app-nimitt-entry *ngIf="showModal == 'Add Nimitt'" (response)='addNimittResponse($event)'>
+            </app-nimitt-entry>
+            <app-nimitt-entry *ngIf="showModal == 'Edit Nimitt'" (response)='editNimittResponse($event)'
+               [getData]="editData" [isEdit]="true"></app-nimitt-entry>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+         </div>
+      </div>
+   </div>
+</div>

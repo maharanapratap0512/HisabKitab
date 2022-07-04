@@ -1,1 +1,127 @@
-<p>nimitt-entry works!</p>
+<div class="row">
+   <div class="card-body">
+      <form [formGroup]="nimittForm">
+         <div class="row">
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Nimitt Name (Hin)</label>
+                  <input type="text" class="form-control" placeholder="Nimitt Name (Hin)" formControlName="nimitt_hin"
+                     [ngClass]="{'validation':nimittForm.get('nimitt_hin')?.errors && (nimittForm.get('nimitt_hin')?.touched || nimittForm.get ('nimitt_hin')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Nimitt Name (Eng)</label>
+                  <input type="text" class="form-control" placeholder="Nimitt Name (Eng)" formControlName="nimitt_eng"
+                     [ngClass]="{'validation':nimittForm.get('nimitt_eng')?.errors && (nimittForm.get('nimitt_eng')?.touched || nimittForm.get ('nimitt_eng')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Gender</label>
+                  <div class="float-end">
+                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-sm btn-outline-primary" (click)="setView('Gender')"><i
+                           class=" dripicons-view-list"></i></button>
+                     <button type="button" style="padding: 1px 6px !important;"
+                        class="btn btn-outline-primary float-end"
+                        onclick="$('#nimittEntryComponent > #showModal').modal('show')"
+                        (click)="showModal='Add Gender'">+
+                        Add</button>
+                  </div>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Gender" [clearable]="false"
+                     [virtualScroll]="true" formControlName="gender"
+                     [ngClass]="{'validation':nimittForm.get('gender')?.errors && (nimittForm.get('gender')?.touched || nimittForm.get ('gender')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Gender</ng-option>
+                     <ng-option *ngFor="let item of genders" [value]="item.list_name_eng">
+                        {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Father Name</label>
+                  <input type="text" class="form-control" placeholder="Father Name" formControlName="relative_name"
+                     [ngClass]="{'validation':nimittForm.get('relative_name')?.errors && (nimittForm.get('relative_name')?.touched || nimittForm.get ('relative_name')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Townarea</label>
+                  <input type="text" class="form-control" placeholder="Townarea" formControlName="townarea"
+                     [ngClass]="{'validation':nimittForm.get('townarea')?.errors && (nimittForm.get('townarea')?.touched || nimittForm.get ('townarea')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">State</label>
+                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                     onclick="$('#nimittEntryComponent > #showModal').modal('show')" (click)="showModal='Add State'">+
+                     Add</button>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select State" [clearable]="false"
+                     [virtualScroll]="true" formControlName="state_id"
+                     [ngClass]="{'validation':nimittForm.get('state_id')?.errors && (nimittForm.get('state_id')?.touched || nimittForm.get ('state_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select State</ng-option>
+                     <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}} :
+                        {{item.state_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                  (click)="nimittFormSubmit()">Submit</button>
+               <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                  (click)="nimittFormUpdate()">Update</button>
+               <!-- <button class="btn btn-light submit mx-3" type="button" (click)="nimittForm.reset()">Clear</button> -->
+            </div>
+         </div>
+      </form>
+   </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <button type="button" class="btn-close" onclick="$('#nimittEntryComponent > #showModal').modal('hide')"
+               (click)="showModal = ''" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <!-- Add State  -->
+            <app-state-entry *ngIf="showModal == 'Add State'" (response)="stateAddResponse($event)">
+            </app-state-entry>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#nimittEntryComponent > #showModal').modal('hide')" (click)="showModal = ''">Close</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Data View For Small List -->
+<div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
+            <button type="button" class="btn-close" onclick="$('#nimittEntryComponent > #dataView').modal('hide')"
+               aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <!-- Gender List -->
+            <app-data-view *ngIf="viewType == 'Gender'" [getData]="viewData" Type="gender"></app-data-view>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#nimittEntryComponent > #dataView').modal('hide')">Close</button>
+         </div>
+      </div>
+   </div>
+</div>

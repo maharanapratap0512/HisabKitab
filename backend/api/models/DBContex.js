@@ -174,7 +174,7 @@ class DBContex {
                     sql =
                         `select count(*) as total_count from ${tblname} ` + (conditionString && conditionString?.trim() != '' ? ` where ${conditionString} ` : ``)
                 }
-                console.log("sql count", sql);
+                // console.log("sql count", sql);
                 const stmt = this.db.prepare(sql).get();
                 // if(tblname == 'item'){
                 //     console.log("sql", sql);

@@ -22,6 +22,7 @@ import { AuthGuard } from './services/auth.guard';
 import { JawakComponent } from './jawak/jawak.component';
 import { BachatComponent } from './bachat/bachat.component';
 import { PointComponent } from './CHILD_TABLES/point/point.component';
+import { NimittComponent } from './CHILD_TABLES/nimitt/nimitt.component';
 
 const routes: Routes = [
    {
@@ -49,6 +50,7 @@ const routes: Routes = [
          { path: "product", component: ProductComponent },
          { path: "department", component: DepartmentComponent },
          { path: "point", component: PointComponent },
+         { path: "nimitt", component: NimittComponent },
 
          { path: "files", component: FilesViewComponent },
          { path: "import_export", component: ImportExportComponent },

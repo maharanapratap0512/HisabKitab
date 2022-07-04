@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -40,7 +39,6 @@ export class PbkEntryComponent implements OnInit {
     public api: ApiService,
     private toastr: ToastrService,
     public gs: GlobalService,
-    private spinner: NgxSpinnerService,
     public auth: AuthService
   ) {
     this.pbkForm = this.fb.group({
@@ -76,9 +74,6 @@ export class PbkEntryComponent implements OnInit {
       this.relations = result.relation ? result.relation : [];
       this.statuses = result.status ? result.status : [];
     });
-    // this.getStates();
-    // this.getMMs();
-    // this.getCities();
   }
 
 
@@ -150,7 +145,6 @@ export class PbkEntryComponent implements OnInit {
         this.viewData = this.gs.Lists.status;
         $('#pbkEntryComponent > #dataView').modal('show');
         break;
-
     }
   }
 
