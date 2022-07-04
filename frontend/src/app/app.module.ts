@@ -16,7 +16,6 @@ import { DropDownTreeModule } from '@syncfusion/ej2-angular-dropdowns';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
-import { MainEntryComponent } from './main-entry/main-entry.component';
 import { HeaderComponent } from './layout/header/header.component';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { FooterComponent } from './layout/footer/footer.component';
@@ -69,7 +68,6 @@ import { NimittEntryComponent } from './ENTRY__FORMS/nimitt-entry/nimitt-entry.c
     AppComponent,
     HomeComponent,
     LoginComponent,
-    MainEntryComponent,
     HeaderComponent,
     SidebarComponent,
     FooterComponent,
