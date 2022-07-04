@@ -256,18 +256,18 @@
                </div>
             </div>
 
-            <div class="col-md-1 mb-3">
+            <div class="col-md-1 mb-3" *ngIf="settings.aawak.isbill">
                <div class="form-group">
                   <label class="form-label">बिल है?</label>
                   <div class="form-check form-switch">
                      <input type="checkbox" class="form-check-input"
-                         [(ngModel)]="awkfg.isbill"
+                         [(ngModel)]="awkfg.isbill" (change)="isbillchanged($event)"
                          [ngModelOptions]="{standalone: true}">
                  </div>
                </div>
             </div>
 
-            <div class="col-md-2 mb-3">
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.isbill">
                <div class="form-group">                  
                   <a onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
                      class="form-control" style="cursor: pointer;">
@@ -324,7 +324,7 @@
                               <ng-option selected="selected" disabled value="">Select Person</ng-option>
                               <ng-option *ngFor="let item of nimitts"
                                  [value]="{id:item._id,nimitt_hin:item.nimitt_hin,state_hin:item.state_hin}">
-                                 {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
+                                 {{item.nimitt_hin}}{{item.nimitt_eng ? ' : '+ item.nimitt_eng : ''}}{{' ('+
                                  item.state_hin + ')'}}</ng-option>
                            </ng-select>
                         </div>

@@ -408,8 +408,16 @@ const mm = {
     select:
         `select * from mm ?`
     , select_full:
-        `select * from mm ? order by @order limit @limit offset @offset`
-    , insert:
+        `select mm.*,
+        st.state_hin, st.state_eng, 
+        pm.mm_hin as parent_mm_hin, pm.mm_eng as parent_mm_eng, pm.mm_code as parent_mm_code, 
+        dept.dept_hin, dept.dept_eng, dept.dept_code 
+        from mm
+        left join state st on st._id = mm.state_id
+        left join mm pm on pm._id = mm.parent_mm_id
+        left join department dept on dept._id = mm.dept_id ? 
+        order by @order limit @limit offset @offset`
+        , insert:
         `insert in to mm (
             mm_hin, mm_eng, mm_code, dept_id, state_id,
             parent_mm_id, opening_date, nimitt_id, active)
@@ -439,7 +447,11 @@ const nimitt = {
     select:
         `select * from nimitt ?`
     , select_full:
-        `select * from nimitt ? order by @order limit @limit offset @offset`
+        `select nimitt.*, 
+        st.state_hin, st.state_eng
+         from nimitt
+         left join state st on st._id = nimitt.state_id ? 
+         order by @order limit @limit offset @offset`
     , insert:
         `insert in to nimitt (
             roll_no,

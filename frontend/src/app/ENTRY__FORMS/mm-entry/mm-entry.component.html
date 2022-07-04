@@ -118,7 +118,7 @@
                             [ngClass]="{'validation':mmForm.get('nimitt_id')?.errors && (mmForm.get('nimitt_id')?.touched || mmForm.get ('nimitt_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Nimitt</ng-option>
                             <ng-option *ngFor="let item of nimitts" [value]="item._id">
-                                {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
+                                {{item.nimitt_hin}}{{item.nimitt_eng ? ' : '+ item.nimitt_eng : ''}}{{' ('+
                                 item.state_hin + ')'}}</ng-option>
                         </ng-select>
                         <!-- <input type="text" class="form-control" placeholder="Default nimitt name"

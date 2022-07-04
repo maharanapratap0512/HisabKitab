@@ -1,4 +1,4 @@
-//@ts-check
+
 const router = require('express').Router();
 const multer = require('multer');
 const path = require('path');
@@ -8,12 +8,15 @@ const errorHandler = (err) => {
    console.error('Error at upload route: ' + err.message);
    return { success: false, message: err.message };
 }
-
+const rootPath = path.resolve(__dirname + "/../../../../Data/Documents/");
+const imagePath = path.resolve(__dirname + "/../../../../Data/Documents/Images");
 const upload = multer({ dest: __dirname + "/../../../../Data/Documents/" })
 
 const driveMulterConfig = {
    storage: multer.diskStorage({
-      destination: (req, file, next) => { next(null, __dirname + "/../../../../Data/Documents/"); },
+      destination: (req, file, next) => {
+         next(null, __dirname + "/../../../../Data/Documents/");
+      },
 
       filename: (req, file, next) => { next(null, file.fieldname + '_' + Date.now() + path.extname(file.originalname)); }
    }),
@@ -29,14 +32,14 @@ const driveMulterConfig = {
 
 const dbMulterConfig = {
    storage: multer.diskStorage({
-      destination: (req, file, next) => { next(null, __dirname + "/../../../../Data/"+file.originalname+"/"); },
+      destination: (req, file, next) => { next(null, __dirname + "/../../../../Data/" + file.originalname + "/"); },
 
       filename: (req, file, next) => { next(null, file.originalname + '_update_' + Date.now() + '.db') }
    }),
    limits: { fileSize: 5000000 }, // 1 MB = 1000000 Bytes    
    fileFilter: (req, file, next) => {
       if (file.mimetype == 'application/octet-stream') {
-        next(null, true)
+         next(null, true)
       } else {
          next(null, false);
       }
@@ -45,7 +48,11 @@ const dbMulterConfig = {
 
 const imageMulterConfig = {
    storage: multer.diskStorage({
-      destination: (req, file, next) => { next(null, __dirname + "/../../../../Data/Documents/Images"); },
+      destination: (req, file, next) => {
+         if (!fs.existsSync(imagePath)) {
+            fs.mkdirSync(imagePath, { recursive: true });
+         }
+          next(null, imagePath); },
 
       filename: (req, file, next) => { next(null, file.fieldname + '_' + Date.now() + path.extname(file.originalname)); }
    }),
