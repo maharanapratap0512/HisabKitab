@@ -7,15 +7,13 @@ const DB = new DBContex();
 //  jawak add
 router.post('/', async (req, res, next) => {
     if (req.body) {
-        await DB.insert('jawak', req.body, async (err, data) => {
-            if (err) {
-                return next(err);
-            }
-            // await DB.insertToCache('jawak', data, (err, data) => { })
+        await DB.insert('jawak', req.body).then((data) => {
             res.json({
                 success: true,
-                result: data || []
+                result: data || {}
             });
+        },(err)=>{
+            return next(err);
         })
     }
     else {
@@ -27,7 +25,7 @@ router.post('/', async (req, res, next) => {
 //  jawak add by dept_id
 router.post('/:dept_id', async (req, res, next) => {
     if (req.body) {
-        await DB.insertFromDept('jawak', req.body, req.params.dept_id).then((data) => {
+        await DB.insert('jawak', req.body, req.params.dept_id).then((data) => {
             // console.log("data", data);
             res.json({
                 success: true,
@@ -70,7 +68,7 @@ router.get('/byaawak/:aawak_ref_id', async (req, res, next) => {
 
 //  jawak get from department
 router.get('/:dept_id', async (req, res, next) => {
-    await DB.getList('jawak', { dept_id: req.params.dept_id }).then((resolve) => {
+    await DB.getList('jawak', {full:true, dept_id: req.params.dept_id }).then((resolve) => {
         res.json({
             success: true,
             result: resolve.data || [],
@@ -84,14 +82,14 @@ router.get('/:dept_id', async (req, res, next) => {
 router.put('/', async (req, res, next) => {
     if (req.body.set && req.body.query) {
         let condition = 'jawak._id = ' + req.body.query._id;
-        await DB.update('jawak', req.body.set, condition, async (err, data) => {
-            if (err) {
-                return next(err);
-            }
+        await DB.update('jawak', req.body.set, condition).then((data) => {
+
             res.json({
                 success: true,
                 result: data || []
             });
+        },(err)=>{
+            return next(err);
         });
     }
     else {
@@ -104,14 +102,13 @@ router.put('/', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
         let condition = '_id = ' + req.params.id;
-        await DB.delete('jawak', condition, (err, data) => {
-            if (err) {
-                return next(err);
-            }
+        await DB.delete('jawak', condition).then((data)=>{
             res.json({
                 success: true,
                 result: data
             });
+        },(err)=>{
+            return next(err);
         })
     }
     else {
@@ -132,7 +129,7 @@ router.delete('/:id', async (req, res, next) => {
 //jawak get by dept + filter + pageNo
 router.put('/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = 100, offset = null, page = 1;
-    let conditionString = `1=1 ${req.body.mm_id.length > 0 ? ` AND jawak.mm_id in (${req.body.mm_id.join(',')})` : ''} ${req.body.condition_id.length > 0 ? ` AND jawak.condition_id in (${req.body.condition_id.join(',')})` : ''} ${req.body.item_id.length > 0 ? ` AND jawak.item_id in (${req.body.item_id.join(',')})` : ''} ${req.body.jawak_mm_id.length > 0 ? ` AND jawak.jawak_mm_id in (${req.body.jawak_mm_id.join(',')})` : ''} ${req.body.jawak_type_id.length > 0 ? ` AND jawak.jawak_type_id in (${req.body.jawak_type_id.join(',')})` : ''} ${req.body.pbk_id.length > 0 ? ` AND jawak.pbk_id in (${req.body.pbk_id.join(',')})` : ''} ${req.body.subitem_id.length > 0 ? ` AND jawak.subitem_id in (${req.body.subitem_id.join(',')})` : ''} ${req.body.product_id.length > 0 ? ` AND jawak.product_id in (${req.body.product_id.join(',')})` : ''} ${req.body.nimitt_id ? ` AND jawak.nimitt_id = ${req.body.nimitt_id}` : ''} ${req.body.pkt_num ? ` AND jawak.pkt_num = ${req.body.pkt_num}` : ''}`
+    let conditionString = `1=1 ${req.body.mm_id.length > 0 ? ` AND jawak.mm_id in (${req.body.mm_id.join(',')})` : ''} ${req.body.condition_id.length > 0 ? ` AND jawak.condition_id in (${req.body.condition_id.join(',')})` : ''} ${req.body.item_id.length > 0 ? ` AND jawak.item_id in (${req.body.item_id.join(',')})` : ''} ${req.body.jawak_mm_id.length > 0 ? ` AND jawak.jawak_mm_id in (${req.body.jawak_mm_id.join(',')})` : ''} ${req.body.jawak_type_id.length > 0 ? ` AND jawak.jawak_type_id in (${req.body.jawak_type_id.join(',')})` : ''} ${req.body.pbk_id.length > 0 ? ` AND jawak.pbk_id in (${req.body.pbk_id.join(',')})` : ''} ${req.body.subitem_id.length > 0 ? ` AND jawak.subitem_id in (${req.body.subitem_id.join(',')})` : ''} ${req.body.product_id.length > 0 ? ` AND jawak.product_id in (${req.body.product_id.join(',')})` : ''} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND jawak.nimitt_id in ${req.body.nimitt_id.join(',')}` : ''} ${req.body.pkt_num ? ` AND jawak.pkt_num = ${req.body.pkt_num}` : ''}`
 
     if (conditionString.trim() == `1=1`) {
         orderBy = "pbk._id desc";

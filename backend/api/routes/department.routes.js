@@ -8,10 +8,7 @@ const DB = new DBContex();
 //  department add
 router.post('/', async (req, res, next) => {
     if (req.body && req.body.dept_eng && req.body.dept_hin) {
-        await DB.insert('department', req.body, async (err, data) => {
-            if (err) {
-                return next(err);
-            }
+        await DB.insert('department', req.body).then((data) => {    
             // await DB.insertToCache('department', data, (err, data) => { })
             res.json({
                 success: true,

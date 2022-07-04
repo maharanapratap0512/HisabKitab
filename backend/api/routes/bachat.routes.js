@@ -36,7 +36,7 @@ router.get('/', async (req, res, next) => {
 router.get('/home/:dept_id', async (req, res, next) => {
     let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('bachatHome', { dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
+    await DB.getList('bachat', {full:true, dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
         // for(let i in data){
         //     data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
         //     for(let bcht of data[i].bachat_qty){
@@ -54,9 +54,9 @@ router.get('/home/:dept_id', async (req, res, next) => {
 
 router.get('/:dept_id', async (req, res, next) => {
     // let conditionString = ``;
-    // let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0 OR bachat.Stock <> 0 OR bachat.Stock <> 0`;
+    let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('bachat', {full:true, dept_id:req.params.dept_id}).then((resolve) => {
+    await DB.getList('bachat', {full:true, dept_id:req.params.dept_id, conditionString:conditionString}).then((resolve) => {
         // for(let i in data){
         //     data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
         //     for(let bcht of data[i].bachat_qty){

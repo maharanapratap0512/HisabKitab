@@ -58,11 +58,11 @@ export class DashboardComponent implements OnInit {
 
   getBachat() {
     // this.isLoader = true;
-    this.http.get(this.api.getUrl('BACHAT') + this.auth.webUser.dept_id).subscribe((data: any) => {
+    this.http.get(this.api.getUrl('BACHATHOME') + this.auth.webUser.dept_id).subscribe((data: any) => {
       if (data['result'] && data['success']) {
-        this.bachatDataAll = data['result'].filter((b: { qty: number; }) => b.qty != 0);
+        this.bachatDataAll = data['result'];
         this.bachatData = this.bachatDataAll;
-        console.log("bachat", this.bachatData);
+        // console.log("bachat", this.bachatData);
 
         // this.isLoader = false;
       }
@@ -89,7 +89,7 @@ export class DashboardComponent implements OnInit {
     if(ev){
       body.mm_id = ev ;
     }
-    this.http.put(this.api.getUrl('PENDING_AWK'), body).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('PENDING_AWK') + this.auth.webUser.dept_id, body).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.pendingAawakData = data['result'];
       }

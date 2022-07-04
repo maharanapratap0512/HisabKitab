@@ -92,6 +92,7 @@
                            <td>Used</td>
                            <td *ngIf="settings.new">New</td>
                            <td *ngIf="settings.old">Old</td>
+                           <td *ngIf="settings.repairing">IN Repairing</td>
                            <td *ngIf="settings.defective">Defective</td>
                            <td *ngIf="settings.scrap">Scrap</td>
                            <td>Stock</td>
@@ -138,6 +139,11 @@
                               <td *ngIf="settings.old">
                                  <span class="px-1" [ngClass]="{'error': data.Old < 0}">
                                     {{data.Old ? data.Old + " " + data.unit_short : "-"}}
+                                 </span>
+                              </td>
+                              <td *ngIf="settings.repairing">
+                                 <span class="px-1" [ngClass]="{'error': data.Repairing < 0}">
+                                    {{data.Repairing ? data.Repairing + " " + data.unit_short : "-"}}
                                  </span>
                               </td>
                               <td *ngIf="settings.defective">

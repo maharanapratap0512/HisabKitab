@@ -71,16 +71,17 @@ export class AawakEntryComponent implements OnInit {
 		description: null,
 		remaining_qty: null,
 		company_name: null,
-		isbill:null,
-		document:null,
+		isbill: null,
+		document: null,
 		jawak_detail: []
 	}
-	jwkArr: any = [];
+	// jwkArr: any = [];
 	settings: any = {};
+	imagepath:any;
 
 	constructor(private fb: FormBuilder,
 		private http: HttpService,
-		private api: ApiService,
+		public api: ApiService,
 		private gs: GlobalService,
 		private toastr: ToastrService,
 		private spinner: NgxSpinnerService,
@@ -125,6 +126,7 @@ export class AawakEntryComponent implements OnInit {
 				item_id: changes.getData.currentValue.item_id,
 				subitem_id: changes.getData.currentValue.subitem_id,
 				product_id: changes.getData.currentValue.product_id,
+				company_name: changes.getData.currentValue.company_name,
 				unit_id: changes.getData.currentValue.unit_id,
 				condition_id: changes.getData.currentValue.condition_id,
 				qty: changes.getData.currentValue.qty,
@@ -133,11 +135,13 @@ export class AawakEntryComponent implements OnInit {
 				nimitt_id: changes.getData.currentValue.nimitt_id,
 				item_detail: changes.getData.currentValue.item_detail,
 				description: changes.getData.currentValue.description,
-				remaining_qty: changes.getData.currentValue.remaining_qty,
-				jawak_detail: changes.getData.currentValue.jawak_detail
+				// remaining_qty: changes.getData.currentValue.remaining_qty,
+				jawak_detail: changes.getData.currentValue.jawak_detail,
+				isbill: changes.getData.currentValue.isbill,
+				document: changes.getData.currentValue.document,
 			};
 			this.selDept_id = changes.getData.currentValue.dept_id;
-			this.jwkArr = changes.getData.currentValue.jawak_detail;
+			// this.jwkArr = changes.getData.currentValue.jawak_detail;
 			this.oldQty = changes.getData.currentValue.qty;
 			this.itemSelected(changes.getData.currentValue.item_id);
 		}
@@ -149,23 +153,31 @@ export class AawakEntryComponent implements OnInit {
 			nimitt_id: (this.jnimitt ? this.jnimitt.id : null),
 			qty: this.jqty,
 			date: this.awkfg.date,
+			pkt_num: null,
 			mm_id: this.awkfg.mm_id,
+			pbk_id: null,
 			item_id: this.awkfg.item_id,
 			subitem_id: this.awkfg.subitem_id,
+			item_detail: null,
+			description: null,
+			company_name: null,
 			product_id: this.awkfg.product_id,
 			condition_id: this.awkfg.condition_id,
 			jawak_type_id: (this.jmm.id == this.awkfg.mm_id) ? 27 : 28,
 			unit_id: this.awkfg.unit_id,
 			dept_id: this.awkfg.dept_id,
-		}
-		let jwkfg2: any = {
 			jawak_mm_hin: (this.jmm ? this.jmm.mm_hin : ''),
 			nimitt_hin: (this.jnimitt ? this.jnimitt.nimitt_hin : ''),
-			state_hin: (this.jnimitt ? this.jnimitt.state_hin : ''),
-			qty: this.jqty
+			nimitt_state_hin: (this.jnimitt ? this.jnimitt.state_hin : ''),
 		}
+		// let jwkfg2: any = {
+
+		// 	qty: this.jqty
+		// }
 		this.awkfg.jawak_detail.push(jwkfg);
-		this.jwkArr.push(jwkfg2);
+		console.log(this.awkfg);
+
+		// this.jwkArr.push(jwkfg2);
 		this.jmm = null;
 		this.jqty = null;
 		this.jnimitt = null;
@@ -188,7 +200,7 @@ export class AawakEntryComponent implements OnInit {
 						if (data['success']) {
 							this.isLoader = false;
 							this.awkfg.jawak_detail.splice(i, 1);
-							this.jwkArr.splice(i, 1);
+							// this.jwkArr.splice(i, 1);
 							this.toastr.success('Deleted Successfully');
 						}
 						else {
@@ -201,7 +213,7 @@ export class AawakEntryComponent implements OnInit {
 		}
 		else {
 			this.awkfg.jawak_detail.splice(i, 1);
-			this.jwkArr.splice(i, 1);
+			// this.jwkArr.splice(i, 1);
 		}
 	}
 
@@ -214,6 +226,20 @@ export class AawakEntryComponent implements OnInit {
 		this.showModal = name;
 		$('#aawakEntryComponent > #showModal').modal('hide')
 	}
+
+	imagesSelectResponse(ev: any) {
+		if (ev.path) {
+		  this.isLoader = true;
+		  $('#aawakEntryComponent > #showModal').modal('hide');
+		  this.showModal = '';
+		  this.imagepath = ev.path;
+		  this.awkfg. document = { images: [ev.path] }
+		  this.isLoader = false;
+		}
+		else {
+		  this.isLoader = false;
+		}
+	 }
 
 	aawakFormSubmit(awkform: NgForm) {
 		console.log("awkform", awkform);
@@ -233,7 +259,7 @@ export class AawakEntryComponent implements OnInit {
 						date: this.awkfg.date,
 						aawak_mm_id: this.awkfg.aawak_mm_id
 					});
-					this.jwkArr = [];
+					// this.jwkArr = [];
 					this.response.emit(data['result']);
 				} else {
 					this.toastr.error(data['message']);

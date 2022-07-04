@@ -8,17 +8,17 @@ const DB = new DBContex();
 router.post('/', async (req, res, next) => {
     if (req.body) {
         let aawak = {};
-        await DB.insert('aawak', req.body, async (err, data) => {
-            if (err) {
-                console.log("aawwk entry", err);
-                return next(err);
-            }
+        await DB.insert('aawak', req.body).then((data) => {
             aawak = data;
+        },(err)=>{
+            return next(err);
         });
 
         let bachat = [];
         await DB.getList('bachat').then((resolve) => {
             bachat = resolve;
+        },(err)=>{
+            return next(err);
         });
 
         res.json({
@@ -108,13 +108,35 @@ router.get('/pending/:dept_id', async (req, res, next) => {
         });
     }, (err) => { return next(err) });
 });
+router.put('/pending/:dept_id', async (req, res, next) => {
+    let conditionString = `remaining_qty <> 0 ${req.body.mm_id ? ` AND aawak.mm_id = ${req.body.mm_id}` : ``}`;
+
+    
+
+    await DB.getList("aawak", { full: true, dept_id: req.params.dept_id, conditionString: conditionString }).then(async (resolve) => {
+        for (let i in resolve.data) {
+            let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
+
+            await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then((jwkdata) => {
+                resolve.data[i].jawak_detail = jwkdata.data;
+            }, (err) => {
+                resolve.data[i].jawak_detail = []; 
+                console.log('jawak', err);
+            });
+        }
+        res.json({
+            success: true,
+            result: resolve.data || [],
+        });
+    }, (err) => { return next(err) });
+});
 
 
 
 //aawak get by dept + filter + pageNo
 router.put('/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = 100, offset = null, page = 1;
-    let conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.mm_id.length > 0 ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${req.body.aawak_mm_id.length > 0 ? ` AND aawak.aawak_mm_id in (${req.body.aawak_mm_id.join(',')})` : ``} ${req.body.pbk_id.length > 0 ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${req.body.item_id.length > 0 ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${req.body.subitem_id.length > 0 ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${req.body.aawak_type_id.length > 0 ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${req.body.product_id.length > 0 ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${req.body.condition_id.length > 0 ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = ${req.body.pkt_num}` : ``} ${req.body.nimitt_id.length > 0 ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``}`;
+    let conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.aawak_mm_id && req.body.aawak_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aawak_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = ${req.body.pkt_num}` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``}`;
     if (conditionString.trim() == `1=1`) {
         orderBy = "aawak._id desc";
     }
@@ -131,7 +153,7 @@ router.put('/:dept_id', async (req, res, next) => {
                 resolve.data[i].jawak_detail = jwkdata.data;
             }, (err) => {
                 console.log('jawak', err);
-                return next(err)
+                // return next(err)
             });
         }
         res.json({
@@ -168,10 +190,7 @@ router.put('/', async (req, res, next) => {
         if (req.body.set.remaining_qty) {
             delete req.body.set.remaining_qty;
         }
-        await DB.update('aawak', req.body.set, condition, async (err, data) => {
-            if (err) {
-                return next(err);
-            }
+        await DB.update('aawak', req.body.set, condition).then(async (data) => {
             data.jawak_detail = [];
             for (let i = 0; i < jawaks.length; i++) {
                 if (!jawaks[i]._id) {
@@ -193,6 +212,8 @@ router.put('/', async (req, res, next) => {
                 success: true,
                 result: data || {}
             });
+        },(err)=>{
+            return next(err);
         });
     }
     else {

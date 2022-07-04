@@ -74,6 +74,10 @@ const category = {
         category_eng=@category_eng,
         active=@ative,
         updated_at=datetime('now','localtime')`
+    , update_active:
+        `update category set
+        active=@active,
+        updated_at=datetime('now','localtime')`
 }
 
 const department = {
@@ -100,6 +104,10 @@ const department = {
         dept_hin=@dept_hin,
         dept_code=@dept_code,
         password=@password,
+        updated_at=datetime('now','localtime')`
+    , update_active:
+        `update department set
+        active=@active,
         updated_at=datetime('now','localtime')`
 }
 
@@ -164,6 +172,10 @@ const item = {
         category_id=@category_id,
         unit_id=@unit_id,
         extra_note=@extra_note,
+        updated_at=datetime('now','localtime')`
+    , update_active:
+        `update item set
+        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         ` item_hin, item_eng`
@@ -248,6 +260,10 @@ const jawak = {
         aawak_ref_id=@aawak_ref_id,
         dept_id=@dept_id,
         updated_at=datetime('now','localtime')`
+    , update_active:
+        `update jawak set
+        active=@active,
+        updated_at=datetime('now','localtime')`
     , order:
         `date, jawak_mm_hin, jawak_mm_eng, pkt_num`
 }
@@ -272,7 +288,6 @@ const aawak = {
         unit_id=@unit_id,
         description=@description,
         nimitt_id=@nimitt_id,
-        remaining_qty=@remaining_qty,
         dept_id=@dept_id,
         company_name=@company_name,
         isbill=@isbill,
@@ -412,6 +427,10 @@ const mm = {
         opening_date=@opening_date,
         nimitt_id=@nimitt_id,
         updated_at=datetime('now','localtime')`
+    , update_active:
+        `update mm set
+        active=@active,
+        updated_at=datetime('now','localtime')`
     , order:
         `mm_hin, mm_eng`
 }
@@ -454,6 +473,10 @@ const nimitt = {
         document=@document,
         active=@active
         updated_at=datetime('now','localtime')`
+    , update_active:
+        `update nimitt set
+        active=@active,
+        updated_at=datetime('now','localtime')`
     , order:
         `nimitt_hin, nimitt_eng`
 }
@@ -472,47 +495,13 @@ const pbk = {
         left join mm on mm._id = pbk.class_mm_id ? order by @order limit @limit offset @offset`
     , insert:
         `insert into pbk (
-            roll_no,
-            pbk_hin,	
-            pbk_eng,
-            gender,
-            relation,
-            relative_name,
-            relative_ref,
-            birth_date,
-            age,
-            status,
-            address,
-            townarea,
-            state_id,
-            city_id,
-            mo_no,
-            alt_mo_no,
-            class_mm_id,
-            bhatti_date,
-            document,
-            active)
+            roll_no, pbk_hin, pbk_eng, gender, relation, relative_name, relative_ref,
+            birth_date, age, status, address, townarea, state_id, city_id,
+            mo_no, alt_mo_no, class_mm_id, bhatti_date, document, active)
         values (
-            @roll_no,
-            @pbk_hin,
-            @pbk_eng,
-            @gender,
-            @relation,
-            @relative_name,
-            @relative_ref,
-            @birth_date,
-            @age,
-            @status,
-            @address,
-            @townarea,
-            @state_id,
-            @city_id,
-            @mo_no,
-            @alt_mo_no,
-            @class_mm_id,
-            @bhatti_date,
-            @document,
-            @active)`
+            @roll_no, @pbk_hin, @pbk_eng, @gender, @relation, @relative_name, @relative_ref,
+            @birth_date, @age, @status, @address, @townarea, @state_id, @city_id,
+            @mo_no, @alt_mo_no, @class_mm_id, @bhatti_date, @document, @active)`
     , update:
         `update pbk set 
         roll_no=@roll_no,
@@ -534,6 +523,10 @@ const pbk = {
         class_mm_id=@class_mm_id,
         bhatti_date=@bhatti_date,
         document=@document,
+        updated_at=datetime('now','localtime')`
+    , update_active:
+        `update pbk set
+        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         `roll_no`
@@ -596,47 +589,13 @@ const product = {
         order by @order limit @limit offset @offset`
     , insert:
         `insert into product (
-        mm_id,
-        purchased_by,
-        purchase_date,
-        item_id,
-        subitem_id,
-        product_code,
-        company_name,
-        model_name,
-        sr_num,
-        condition_id,
-        price,
-        product_detail,
-        accessories,
-        purchase_from,
-        warranty_period,
-        dept_id,
-        warranty_from,
-        document,
-        isbill,
-        active)
+        mm_id, purchased_by, purchase_date, item_id, subitem_id, product_code, company_name,
+        model_name, sr_num, condition_id, price, product_detail, accessories, purchase_from,
+        warranty_period, dept_id, warranty_from, document, isbill, active)
     values (
-        @mm_id,
-        @purchased_by,
-        @purchase_date,
-        @item_id,
-        @subitem_id,
-        @product_code,
-        @company_name,
-        @model_name,
-        @sr_num,
-        @condition_id,
-        @price,
-        @product_detail,
-        @accessories,
-        @purchase_from,
-        @warranty_period,
-        @dept_id,
-        @warranty_from,
-        @document,
-        @isbill,
-        @active)`
+        @mm_id, @purchased_by, @purchase_date, @item_id, @subitem_id, @product_code, @company_name,
+        @model_name, @sr_num, @condition_id, @price, @product_detail, @accessories, @purchase_from,
+        @warranty_period, @dept_id, @warranty_from, @document, @isbill, @active)`
     , update:
         `update product set 
         mm_id=@mm_id,
@@ -688,6 +647,10 @@ const state = {
         state_eng=@state_eng,
         country_id=@country_id,
         updated_at=datetime('now','localtime')`
+    , update_active:
+        `update state set
+        active=@active,
+        updated_at=datetime('now','localtime')`
     , order:
         `state_hin, state_eng`
 }
@@ -731,6 +694,10 @@ const subitem = {
         unit_id=@unit_id,
         extra_note=@extra_note,
         document=@document,
+        updated_at=datetime('now','localtime')`
+    , update_active:
+        `update subitem set
+        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
         `subitem_hin, subitem_eng`
@@ -784,6 +751,10 @@ const support_list = {
         list_name_hin=@list_name_hin,
         list_name_eng=@list_name_eng,
         updated_at=datetime('now','localtime')`
+    , update_active:
+        `update support_list set
+        active=@active,
+        updated_at=datetime('now','localtime')`
     , order:
         ``
 }
@@ -795,77 +766,17 @@ const temp_import = {
         `select * from temp_import ? order by @order limit @limit offset @offset`
     , insert:
         `insert into temp_import (
-        type,
-        date,
-        pkt_num,
-        item_detail,
-        qty,
-        rate,
-        actula_amt,
-        company_name,
-        description,
-        isbill,
-        document,
-        mm,
-        mm_id,
-        pbk,
-        pbk_id,
-        aj_mm,
-        aj_mm_id,
-        item,
-        item_id,
-        subitem,
-        subitem_id,
-        product,
-        product_id,
-        condition,
-        condition_id,
-        unit,
-        unit_id,
-        aj_type,
-        aj_type_id,
-        nimitt,
-        nimitt_id,
-        dept,
-        dept_id,
-        ref_id,
-        active)
+        type, date, pkt_num, item_detail, qty, rate, actula_amt,
+        company_name, description, isbill, document, mm, mm_id, pbk,
+        pbk_id, aj_mm, aj_mm_id, item, item_id, subitem, subitem_id,
+        product, product_id, condition, condition_id, unit, unit_id, aj_type,
+        aj_type_id, nimitt, nimitt_id, dept, dept_id, ref_id, active)
     values (
-        @type,
-        @date,
-        @pkt_num,
-        @item_detail,
-        @qty,
-        @rate,
-        @actula_amt,
-        @company_name,
-        @description,
-        @isbill,
-        @document,
-        @mm,
-        @mm_id,
-        @pbk,
-        @pbk_id,
-        @aj_mm,
-        @aj_mm_id,
-        @item,
-        @item_id,
-        @subitem,
-        @subitem_id,
-        @product,
-        @product_id,
-        @condition,
-        @condition_id,
-        @unit,
-        @unit_id,
-        @aj_type,
-        @aj_type_id,
-        @nimitt,
-        @nimitt_id,
-        @dept,
-        @dept_id,
-        @ref_id,
-        @active)`
+        @type, @date, @pkt_num, @item_detail, @qty, @rate, @actula_amt,
+        @company_name, @description, @isbill, @document, @mm, @mm_id, @pbk,
+        @pbk_id, @aj_mm, @aj_mm_id, @item, @item_id, @subitem, @subitem_id,
+        @product, @product_id, @condition, @condition_id, @unit, @unit_id, @aj_type,
+        @aj_type_id, @nimitt, @nimitt_id, @dept, @dept_id, @ref_id, @active)`
     , update:
         `update temp_import set 
         type=@type,

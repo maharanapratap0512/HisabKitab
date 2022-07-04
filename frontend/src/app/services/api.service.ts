@@ -29,6 +29,7 @@ export class ApiService {
     JAWAK: base_url + 'jawak/',
     JAWAKBYAWK: base_url + 'jawak/byaawak/',
     BACHAT: base_url + 'bachat/',
+    BACHATHOME: base_url + 'bachat/home/',
     PBK: base_url + 'pbks/',
     COUNTRY: base_url + 'countries/',
     STATE: base_url + 'states/',

@@ -59,6 +59,8 @@ import { PointEntryComponent } from './ENTRY__FORMS/point-entry/point-entry.comp
 import { PointComponent } from './CHILD_TABLES/point/point.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { ImportComponent } from './import/import.component';
+import { NimittComponent } from './CHILD_TABLES/nimitt/nimitt.component';
+import { NimittEntryComponent } from './ENTRY__FORMS/nimitt-entry/nimitt-entry.component';
 
 
 
@@ -105,6 +107,8 @@ import { ImportComponent } from './import/import.component';
     PointEntryComponent,
     PointComponent,
     ImportComponent,
+    NimittComponent,
+    NimittEntryComponent,
   ],
   imports: [
     BrowserModule,
