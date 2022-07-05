@@ -417,7 +417,7 @@ const mm = {
         left join mm pm on pm._id = mm.parent_mm_id
         left join department dept on dept._id = mm.dept_id ? 
         order by @order limit @limit offset @offset`
-        , insert:
+    , insert:
         `insert in to mm (
             mm_hin, mm_eng, mm_code, dept_id, state_id,
             parent_mm_id, opening_date, nimitt_id, active)
@@ -453,7 +453,7 @@ const nimitt = {
          left join state st on st._id = nimitt.state_id ? 
          order by @order limit @limit offset @offset`
     , insert:
-        `insert in to nimitt (
+        `insert into nimitt (
             roll_no,
             nimitt_eng, 
             nimitt_hin, 
@@ -483,7 +483,6 @@ const nimitt = {
         relative_name=@relative_name,
         townarea=@townarea,
         document=@document,
-        active=@active
         updated_at=datetime('now','localtime')`
     , update_active:
         `update nimitt set
@@ -688,7 +687,6 @@ const subitem = {
         category_id,
         unit_id,
         extra_note,
-        document,
         active)
     values (
         @item_id,
@@ -696,7 +694,6 @@ const subitem = {
         @category_id,
         @unit_id,
         @extra_note,
-        @document,
         @active)`
     , update:
         `update subitem set 
@@ -705,7 +702,6 @@ const subitem = {
         category_id=@category_id,
         unit_id=@unit_id,
         extra_note=@extra_note,
-        document=@document,
         updated_at=datetime('now','localtime')`
     , update_active:
         `update subitem set

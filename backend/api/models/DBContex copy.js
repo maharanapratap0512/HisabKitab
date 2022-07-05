@@ -614,7 +614,7 @@ class DBContex {
         }
     }
 
-    insertFromDept = async (table_name, dataObj, dept_id) => {
+    insert = async (table_name, dataObj, dept_id) => {
         return new Promise((resolve, reject) => {
             try {
                 if (dataObj) {

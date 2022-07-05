@@ -4,24 +4,7 @@ const DBContex = require('../models/DBContex');
 const DB = new DBContex();
 
 
-//  country add
-router.post('/', async (req, res, next) => {
-    if (req.body && req.body.country_hin) {
-        await DB.insert('country', req.body).then(async (data) => {
-            res.json({
-                success: true,
-                result: data || {}
-            });
-        }, (err) => {
-            return next(err)
-        })
-    }
-    else {
-        return next(new Error('Please fill required fields.'))
-    }
-});
-
-//  country get
+// get country all
 router.get('/', async (req, res, next) => {
     await DB.getList('country').then(async (data) => {
         res.json({
@@ -29,26 +12,45 @@ router.get('/', async (req, res, next) => {
             result: data.data || [],
             total_count: (data.total_count ? data.total_count : 0),
         });
-    }, (err) => { return next(err) });
+    });
 });
 
-// country update
-router.put('/', async (req, res, next) => {
-    if (req.body.set && req.body.query) {
-        await DB.update('country', req.body.set, req.body.query._id).then(async (data) => {
-            res.json({
-                success: true,
-                result: data || {}
+// post country 
+router.post('/', async (req, res, next) => {
+    try {
+        if (req.body && req.body.country_hin) {
+            await DB.insert('country', req.body).then(async (data) => {
+                res.json({
+                    success: true,
+                    result: data || {}
+                });
             });
-        }, (err) => { return next(err) });
-    }
-    else {
-        return next(new Error('Id or Data not found.'))
-    }
+        }
+        else {
+            return next(new Error('Please fill required fields.'))
+        }
+    } catch (err) { next(err) };
+});
+
+// update country 
+router.put('/', async (req, res, next) => {
+    try {
+        if (req.body.set && req.body.query) {
+            await DB.update('country', req.body.set, req.body.query._id).then(async (data) => {
+                res.json({
+                    success: true,
+                    result: data || {}
+                });
+            });
+        }
+        else {
+            return next(new Error('Id or Data not found.'))
+        }
+    } catch (err) { next(err) };
 });
 
 
-// country delete
+// delete country 
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
         await DB.delete('country', req.params.id).then((data) => {
@@ -56,12 +58,11 @@ router.delete('/:id', async (req, res, next) => {
                 success: true,
                 result: data
             });
-        }, (err) => { return next(err) });
+        });
     }
     else {
         return next(new Error('Id not found.'))
     }
-
 });
 
 

@@ -6,10 +6,12 @@ const DB = new DBContex();
 
 // get
 router.get('/:list_name', async (req, res, next) => {
-    res.json({
-        success: true,
-        result: await DB.getList(req.params.list_name) || []
-    });
+    try {
+        res.json({
+            success: true,
+            result: await DB.getList(req.params.list_name) || []
+        });
+    } catch (err) { next(err) };
 });
 
 
@@ -43,7 +45,7 @@ router.get('/all/:dept_id', async (req, res, next) => {
             lists.department = await DB.getList('department') || []
             lists.mm = await DB.getList('mm', { dept_id: req.params.dept_id }) || []
             lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id }) || []
-            lists.nimitt = await DB.getList('nimitt', {full:true, dept_id: req.params.dept_id }) || []
+            lists.nimitt = await DB.getList('nimitt', { full: true, dept_id: req.params.dept_id }) || []
             lists.state = await DB.getList('state', { dept_id: req.params.dept_id }) || []
             // lists.item= await DB.getList('item', {dept_id:req.params.dept_id}) || []
             // lists.subitem= await DB.getList('subitem', {dept_id:req.params.dept_id}) || []
@@ -70,10 +72,7 @@ router.get('/all/:dept_id', async (req, res, next) => {
                 result: lists
             })
         }
-    }
-    catch (err) {
-        return next(err)
-    }
+    } catch (err) { next(err) };
 });
 
 module.exports = router;

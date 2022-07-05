@@ -3,88 +3,87 @@ const DBContex = require('../models/DBContex');
 const DB = new DBContex();
 
 
-//  point add
-router.post('/', async (req, res, next) => {
-    if (req.body && req.body.point_hin) {
-        await DB.insert('point', req.body).then((data) => {
-            if (err) {
-                return next(err);
-            }
-            // await DB.insertToCache('point', data, (err, data) => { })
-            res.json({
-                success: true,
-                result: data || {}
-            });
-        })
-    }
-    else {
-        return next(new Error('Please fill required fields.'))
-    }
-});
 
-//  point get
+// get point 
 router.get('/', async (req, res, next) => {
-    await DB.getList('point').then(async (resolve) => {
-        res.json({
-            success: true,
-            result: resolve.data || [],
-            total_count: resolve.total_count,
+    try {
+        await DB.getList('point').then(async (resolve) => {
+            res.json({
+                success: true,
+                result: resolve.data || [],
+                total_count: resolve.total_count,
+            });
         });
-    }, (err) => { return next(err) });
+    } catch (err) { next(err) };
 });
 
 
-//  point get
+// get point random 
 router.get('/random/', async (req, res, next) => {
-    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('point',{conditionString: ` random()`, limit:1} ).then(async (resolve) => {
-        res.json({
-            success: true,
-            result: resolve.data || [],
-            total_count: resolve.total_count,
+    try {
+        // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+        await DB.getList('point', { conditionString: ` random()`, limit: 1 }).then(async (resolve) => {
+            res.json({
+                success: true,
+                result: resolve.data || [],
+                total_count: resolve.total_count,
+            });
         });
-    }, (err) => { return next(err) });
+    } catch (err) { next(err) };
 });
 
-// point update
+
+// post point 
+router.post('/', async (req, res, next) => {
+    try {
+        if (req.body && req.body.point_hin) {
+            await DB.insert('point', req.body).then((data) => {
+                res.json({
+                    success: true,
+                    result: data || {}
+                });
+            })
+        }
+        else {
+            return next(new Error('Please fill required fields.'))
+        }
+    } catch (err) { next(err) };
+});
+
+
+// update point 
 router.put('/', async (req, res, next) => {
-    if (req.body.set && req.body.query) {
-        let condition = '_id = ' + req.body.query._id;
-        await DB.update('point', req.body.set, condition, async (err, data) => {
-            if (err) {
-                return next(err);
-            }
-            // await DB.updateToCache('point', req.body.set, condition, (err) => { })
-            res.json({
-                success: true,
-                result: data || {}
+    try {
+        if (req.body.set && req.body.query) {
+            await DB.update('point', req.body.set, req.body.query._id).then(async (data) => {
+                res.json({
+                    success: true,
+                    result: data || {}
+                });
             });
-        });
-    }
-    else {
-        return next(new Error('Id not found.'))
-    }
+        }
+        else {
+            return next(new Error('Id not found.'))
+        }
+    } catch (err) { next(err) };
 });
 
 
-// point delete
+// delete point 
 router.delete('/:id', async (req, res, next) => {
-    if (req.params.id) {
-        let condition = '_id = ' + req.params.id;
-        await DB.delete('point', condition, (err, data) => {
-            if (err) {
-                return next(err);
-            }
-            res.json({
-                success: true,
-                result: data
-            });
-        })
-    }
-    else {
-        return next(new Error('Id not found.'))
-    }
-
+    try {
+        if (req.params.id) {
+            await DB.delete('point', req.params.id).then((data) => {
+                res.json({
+                    success: true,
+                    result: data
+                });
+            })
+        }
+        else {
+            return next(new Error('Id not found.'))
+        }
+    } catch (err) { next(err) };
 });
 
 

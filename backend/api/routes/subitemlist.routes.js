@@ -36,7 +36,7 @@ router.get('/', async (req, res, next) => {
 //  subitem_list add
 router.post('/:dept_id', async (req, res, next) => {
     if (req.body) {
-        await DB.insertFromDept('subitem_list', req.body, req.params.dept_id).then((data) => {
+        await DB.insert('subitem_list', req.body, req.params.dept_id).then((data) => {
             res.json({
                 success: true,
                 result: data || []

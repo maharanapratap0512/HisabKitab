@@ -41,7 +41,8 @@ export class NimittEntryComponent implements OnInit {
       relative_name: [null, Validators.required],
       gender: [null, Validators.required],
       townarea: [null, Validators.required],
-      state_id: [null, Validators.required]
+      state_id: [null, Validators.required],
+      document: [null],
     });
   }
 
@@ -61,7 +62,8 @@ export class NimittEntryComponent implements OnInit {
         relative_name: changes.getData.currentValue.relative_name,
         gender: changes.getData.currentValue.gender,
         townarea: changes.getData.currentValue.townarea,
-        state_id: changes.getData.currentValue.state_id
+        state_id: changes.getData.currentValue.state_id,
+        document: changes.getData.currentValue.document
       });
     }
   }
@@ -84,7 +86,7 @@ export class NimittEntryComponent implements OnInit {
           this.gs.Lists.nimitt.unshift(data['result']);
           this.nimittForm.reset({ active: true });
           this.isLoader = false;
-          this.toastr.success('Category Added Successfully.');
+          this.toastr.success('Nimitt Added Successfully.');
           this.response.emit(data['result']);
         } else {
           this.toastr.error(data['message']);
@@ -107,18 +109,13 @@ export class NimittEntryComponent implements OnInit {
       body.query = {
         _id: this.getData._id
       }
-      body.set = {
-        nimitt_eng: this.nimittForm.value.nimitt_eng,
-        nimitt_hin: this.nimittForm.value.nimitt_hin,
-        isverify: this.nimittForm.value.isverify,
-        active: this.nimittForm.value.active
-      };
+      body.set = this.nimittForm.value;
       this.http.put(this.api.getUrl('NIMITT'), body).subscribe((data: any) => {
         if (data && data['success']) {
           this.gs.Lists.nimitt.splice(this.gs.Lists.nimitt.indexOf((i: { _id: any }) => i._id == this.getData._id), 1, data['result']);
           this.nimittForm.reset();
           this.isLoader = false;
-          this.toastr.success("Category Updated Successfuly")
+          this.toastr.success("Nimitt Updated Successfuly")
           this.response.emit(data['result']);
         } else {
           this.toastr.error(data['error'].message);
@@ -155,6 +152,19 @@ export class NimittEntryComponent implements OnInit {
     else {
       this.isLoader = false;
     }
+  }
+
+  genderAddResponse(ev: any) {
+    if (ev._id) {
+      this.isLoader = true;
+      $('#nimittEntryComponent > #showModal').modal('hide');
+      this.showModal = '';
+      this.nimittForm.patchValue({ gender: ev.list_name_eng });
+    }
+    else {
+
+    }
+    this.isLoader = false;
   }
 
 

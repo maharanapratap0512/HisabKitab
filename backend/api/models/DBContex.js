@@ -66,12 +66,12 @@ class DBContex {
                 sql =
                     sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : ''));
 
-                if (tblname == "aawak") {
-                    console.log("get sql_______", sql);
-                    console.log("get options______", options);
-                    console.log("get order______", order);
-                    console.log("get conditionQuery______", conditionQuery);
-                }
+                // if (tblname == "nimitt") {
+                //     console.log("get sql_______", sql);
+                //     console.log("get options______", options);
+                //     console.log("get order______", order);
+                //     console.log("get conditionQuery______", conditionQuery);
+                // }
 
                 const result = await this.db.prepare(sql).all({ order: order, limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {
@@ -93,7 +93,7 @@ class DBContex {
                 obj.active = dept_id == 1 ? 1 : 0;
 
                 // console.log("insert",result);
-                console.log("sql",this.query[tblname].insert);
+                console.log("sql", this.query[tblname].insert);
                 console.log("insert sql_______", obj);
                 const result = await this.db.prepare(this.query[tblname].insert).run(obj);
 
@@ -111,15 +111,16 @@ class DBContex {
                         console.log("insert sql_______", sql);
                         console.log("insert sql_______", obj);
                     }
-                    getres = await this.db.prepare(sql).get({ order:`${tblname}._id`, limit: 1, offset: -1 });
+                    getres = await this.db.prepare(sql).get({ order: `${tblname}._id`, limit: 1, offset: -1 });
                 }
 
 
                 resolve(getres);
             }
-            catch (err) { 
+            catch (err) {
                 console.log("insert errr", err);
-                reject(err) }
+                reject(err)
+            }
         })
     }
 
@@ -127,18 +128,18 @@ class DBContex {
         return new Promise(async (resolve, reject) => {
             try {
                 let key = Object.keys(obj);
-                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update + ` where ${id} `;                
+                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update + ` where ${tblname}._id = ${id} `;
 
-                // console.log("updt obj_____", obj);
-                // console.log("updt sql_____", sql);
+                console.log("updt obj_____", obj);
+                console.log("updt sql_____", sql);
                 const result = await this.db.prepare(sql).run(obj);
-                // console.log("updt result_____", result);
+                console.log("updt result_____", result);
 
                 let getres = {};
                 if (result.changes) {
-                    getres = await this.db.prepare(this.query[tblname].select_full.replace('?', ` where ${id} `)).get({ limit: 1, offset: -1, order: `${tblname}._id` });
+                    getres = await this.db.prepare(this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${id} `)).get({ limit: 1, offset: -1, order: `${tblname}._id` });
                 }
-                // console.log("updt getres_____", getres);
+                console.log("updt getres_____", getres);
                 resolve(getres)
             }
             catch (err) {
@@ -148,11 +149,10 @@ class DBContex {
         })
     }
 
-    async delete(tblname, conditionString) {
+    async delete(tblname, id) {
         return new Promise(async (resolve, reject) => {
             try {
-                console.log("condition", conditionString);
-                const result = await this.db.prepare(`delete from ${tblname} where ${conditionString} `).run();
+                const result = await this.db.prepare(`delete from ${tblname} where _id = ${id} `).run();
                 return resolve(result);
             }
             catch (err) { reject(err) }
@@ -166,10 +166,10 @@ class DBContex {
                 if (this.supp_list.includes(tblname)) {
                     tblname = `support_list`;
                 }
-                if(tblname == "itemmix"){
+                if (tblname == "itemmix") {
                     sql = this.query[tblname].count.replace('?', (conditionString && conditionString?.trim() != '' ? ` where ${conditionString} ` : ``));
                 }
-                else{
+                else {
                     sql =
                         `select count(*) as total_count from ${tblname} ` + (conditionString && conditionString?.trim() != '' ? ` where ${conditionString} ` : ``)
                 }

@@ -3,75 +3,72 @@ const DBContex = require('../models/DBContex');
 const DB = new DBContex();
 
 
-//  state add
-router.post('/', async (req, res, next) => {
-    if (req.body && req.body.state_hin) {
-        await DB.insert('state', req.body, async (err, data) => {
-            if (err) {
-                return next(err);
-            }
-            // await DB.insertToCache('state', data, (err, data) => { })
-            res.json({
-                success: true,
-                result: data || []
-            });
-        })
-    }
-    else {
-        return next(new Error('Please fill required fields.'))
-    }
-});
 
-//  state get
+// get state
 router.get('/', async (req, res, next) => {
-    await DB.getList('state').then((resolve) => {
-        res.json({
-            success: true,
-            result: resolve.data || [],
-            total_count: (resolve.total_count ? resolve.total_count : 0),
+    try {
+        await DB.getList('state').then((resolve) => {
+            res.json({
+                success: true,
+                result: resolve.data || [],
+                total_count: (resolve.total_count ? resolve.total_count : 0),
+            });
         });
-    }, (err) => { return next(err) });
+    } catch (err) { next(err) };
 });
 
-// state update
+
+// post state 
+router.post('/', async (req, res, next) => {
+    try {
+        if (req.body && req.body.state_hin) {
+            await DB.insert('state', req.body).then(async (data) => {
+                res.json({
+                    success: true,
+                    result: data || []
+                });
+            })
+        }
+        else {
+            return next(new Error('Please fill required fields.'))
+        }
+    } catch (err) { next(err) };
+});
+
+
+// update state 
 router.put('/', async (req, res, next) => {
-    if (req.body.set && req.body.query) {
-        let condition = 'state._id = ' + req.body.query._id;
-        await DB.update('state', req.body.set, condition, async (err, data) => {
-            if (err) {
-                return next(err);
-            }
-            res.json({
-                success: true,
-                result: data || []
+    try {
+        if (req.body.set && req.body.query) {
+            await DB.update('state', req.body.set, req.body.query._id).then(async (data) => {
+                res.json({
+                    success: true,
+                    result: data || []
+                });
             });
-            
-        });
-    }
-    else {
-        return next(new Error('Id not found.'))
-    }
+        }
+        else {
+            return next(new Error('Id not found.'))
+        }
+    } catch (err) { next(err) };
 });
 
 
-// state delete
+// delete state 
 router.delete('/:id', async (req, res, next) => {
-    if (req.params.id) {
-        let condition = '_id = ' + req.params.id;
-        await DB.delete('state', condition, (err, data) => {
-            if (err) {
-                return next(err);
-            }
-            res.json({
-                success: true,
-                result: data
-            });
-        })
-    }
-    else {
-        return next(new Error('Id not found.'))
-    }
-
+    try {
+        if (req.params.id) {
+            await DB.delete('state', req.params.id).then((data) => {
+                res.json({
+                    success: true,
+                    result: data
+                });
+            })
+        }
+        else {
+            return next(new Error('Id not found.'))
+        }
+    } catch (err) { next(err) };
 });
 
 

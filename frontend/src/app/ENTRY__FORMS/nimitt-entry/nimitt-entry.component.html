@@ -1,7 +1,14 @@
-<div class="row">
+<div class="row" id="nimittEntryComponent">
    <div class="card-body">
       <form [formGroup]="nimittForm">
          <div class="row">
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Roll No.</label>
+                  <input type="number" class="form-control" placeholder="Roll No." formControlName="roll_no"
+                     [ngClass]="{'validation':nimittForm.get('roll_no')?.errors && (nimittForm.get('roll_no')?.touched || nimittForm.get ('roll_no')?.dirty)}">
+               </div>
+            </div>
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Nimitt Name (Hin)</label>
@@ -78,49 +85,55 @@
          </div>
       </form>
    </div>
-</div>
 
 
-<!-- Modal -->
-<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
-   aria-hidden="true">
-   <div class="modal-dialog" style="width: 90%;">
-      <div class="modal-content">
-         <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
-            <button type="button" class="btn-close" onclick="$('#nimittEntryComponent > #showModal').modal('hide')"
-               (click)="showModal = ''" aria-label="Close"></button>
-         </div>
-         <div class="modal-body">
-            <!-- Add State  -->
-            <app-state-entry *ngIf="showModal == 'Add State'" (response)="stateAddResponse($event)">
-            </app-state-entry>
-         </div>
-         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" style="width: 120px;"
-               onclick="$('#nimittEntryComponent > #showModal').modal('hide')" (click)="showModal = ''">Close</button>
+
+   <!-- Modal -->
+   <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" style="width: 90%;">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+               <button type="button" class="btn-close" onclick="$('#nimittEntryComponent > #showModal').modal('hide')"
+                  (click)="showModal = ''" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <!-- Add State  -->
+               <app-state-entry *ngIf="showModal == 'Add State'" (response)="stateAddResponse($event)">
+               </app-state-entry>
+
+               <!-- Add Gender -->
+               <app-support-list-entry *ngIf="showModal == 'Add Gender'" (response)='genderAddResponse($event)'
+                  list_type="gender"> </app-support-list-entry>
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" style="width: 120px;"
+                  onclick="$('#nimittEntryComponent > #showModal').modal('hide')"
+                  (click)="showModal = ''">Close</button>
+            </div>
          </div>
       </div>
    </div>
-</div>
 
-<!-- Data View For Small List -->
-<div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
-   aria-hidden="true">
-   <div class="modal-dialog" style="width: 90%;">
-      <div class="modal-content">
-         <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
-            <button type="button" class="btn-close" onclick="$('#nimittEntryComponent > #dataView').modal('hide')"
-               aria-label="Close"></button>
-         </div>
-         <div class="modal-body">
-            <!-- Gender List -->
-            <app-data-view *ngIf="viewType == 'Gender'" [getData]="viewData" Type="gender"></app-data-view>
-         </div>
-         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" style="width: 120px;"
-               onclick="$('#nimittEntryComponent > #dataView').modal('hide')">Close</button>
+   <!-- Data View For Small List -->
+   <div class="modal fade" id="dataView" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" style="width: 90%;">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">{{viewType}} DATA-VIEW</h5>
+               <button type="button" class="btn-close" onclick="$('#nimittEntryComponent > #dataView').modal('hide')"
+                  aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <!-- Gender List -->
+               <app-data-view *ngIf="viewType == 'Gender'" [getData]="viewData" Type="gender"></app-data-view>
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" style="width: 120px;"
+                  onclick="$('#nimittEntryComponent > #dataView').modal('hide')">Close</button>
+            </div>
          </div>
       </div>
    </div>
