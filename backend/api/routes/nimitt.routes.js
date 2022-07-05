@@ -41,7 +41,7 @@ router.post('/:dept_id', async (req, res, next) => {
 
 //  nimitt get
 router.get('/:dept_id', async (req, res, next) => {
-    let options = { dept_id: req.params.dept_id, conditionString: null }
+    let options = {full:true, dept_id: req.params.dept_id, conditionString: null }
     await DB.getList('nimitt', options).then(async (resolve) => {
         res.json({
             success: true,

@@ -320,6 +320,14 @@
                                   <td>
                                     <div class="form-check form-switch">
                                       <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.aawak.isbill"
+                                        [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Is Bill</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
                                         [(ngModel)]="settingsAll.aawak.item_detail"
                                         [ngModelOptions]="{standalone: true}">
                                       <label class="form-check-label" for="customSwitch2">Item Detail</label>

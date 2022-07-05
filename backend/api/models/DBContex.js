@@ -66,7 +66,7 @@ class DBContex {
                 sql =
                     sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : ''));
 
-                if (tblname == "itemmix") {
+                if (tblname == "aawak") {
                     console.log("get sql_______", sql);
                     console.log("get options______", options);
                     console.log("get order______", order);
@@ -127,8 +127,7 @@ class DBContex {
         return new Promise(async (resolve, reject) => {
             try {
                 let key = Object.keys(obj);
-                // console.log("key___", key);
-                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update + ` where ${id} `;
+                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update + ` where ${id} `;                
 
                 // console.log("updt obj_____", obj);
                 // console.log("updt sql_____", sql);

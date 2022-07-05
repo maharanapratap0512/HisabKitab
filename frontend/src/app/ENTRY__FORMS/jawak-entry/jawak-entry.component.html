@@ -211,7 +211,7 @@
                             [ngClass]="{'validation':jawakForm.get('nimitt_id')?.errors && (jawakForm.get('nimitt_id')?.touched || jawakForm.get ('nimitt_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Nimitt</ng-option>
                             <ng-option *ngFor="let item of nimitts" [value]="item._id">
-                                {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
+                                {{item.nimitt_hin}}{{item.nimitt_eng ? ' : '+ item.nimitt_eng : ''}}{{' ('+
                                 item.nimitt_state_hin + ')'}}</ng-option>
                         </ng-select>
                     </div>

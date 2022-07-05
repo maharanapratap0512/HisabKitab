@@ -248,7 +248,7 @@
                   aria-label="Close"></button>
             </div>
             <div class="modal-body">
-               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)">
+               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)" type="product">
                </app-files-view>
             </div>
             <div class="modal-footer">

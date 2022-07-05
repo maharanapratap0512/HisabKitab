@@ -39,16 +39,18 @@ export class FilesViewComponent implements OnInit {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.type) {
-      switch (changes.type.currentValue) {
-        case 'pbk': this.apiName = "PBKIMAGE";
-          break;
-        case 'product': this.apiName = "PRODUCTIMAGE";
-          break;
-        case 'aawak': this.apiName = "AAWAKIMAGE";
-          break;
-        case 'jawak': this.apiName = "JAWAKIMAGE";
-          break;
-      }
+      this.type = changes.type.currentValue;
+      this.baseUrl = this.api.getUrl('BASE');
+      // switch (changes.type.currentValue) {
+      //   case 'pbk': this.apiName = "PBKIMAGE";
+      //     break;
+      //   case 'product': this.apiName = "PRODUCTIMAGE";
+      //     break;
+      //   case 'aawak': this.apiName = "AAWAKIMAGE";
+      //     break;
+      //   case 'jawak': this.apiName = "JAWAKIMAGE";
+      //     break;
+      // }
     }
   }
 
@@ -59,7 +61,7 @@ export class FilesViewComponent implements OnInit {
 
   getImages() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl(this.apiName)).subscribe((data) => {
+    this.http.put(this.api.getUrl('IMAGE'), {type:this.type}).subscribe((data:any) => {
       if (data['result'] && data['success']) {
         this.imageName = data['result'];
         this.imageFolder = data['dirpath'];
@@ -72,6 +74,10 @@ export class FilesViewComponent implements OnInit {
   changeDocument(event: any): void {
     // this.doctfile = event.target.files[0];
     const formData = new FormData();
+    console.log("base",this.baseUrl);
+    console.log("image",this.imageFolder);
+    
+    formData.append('type', this.type);
     formData.append('image', event.target.files[0]);
     this.http.postFormData(this.api.getUrl(this.apiName), formData).subscribe((data: any) => {
       if (data) {
@@ -93,7 +99,8 @@ export class FilesViewComponent implements OnInit {
 
   imageDelete(name: any) {
     let body = {
-      filename: name
+      filename: name,
+      type:this.type
     }
     Swal.fire({
       title: 'Are you sure?',

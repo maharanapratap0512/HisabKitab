@@ -18,9 +18,6 @@ export class ApiService {
     LISTALL: base_url + 'dropdown/all',
     LIST: base_url + 'dropdown/',
     IMAGE: base_url + 'upload/image',
-    PBKIMAGE: base_url + 'upload/image/pbk',
-    PRODUCTIMAGE: base_url + 'upload/image/product',
-    DBUPLOAD: base_url + 'upload/db',
 
     POINT: base_url + 'points/',
     MM: base_url + 'mms/',

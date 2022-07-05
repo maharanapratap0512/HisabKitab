@@ -48,6 +48,7 @@ export class AawakComponent implements OnInit {
   isCondition: any = false;
   productsAll: any = [];
   states: any = [];
+  baseurl:any;
   departments: any = [];
   filterBody: any = {
     pbk_id: [],
@@ -94,6 +95,7 @@ export class AawakComponent implements OnInit {
       this.categories = result.category ? result.category : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
+    this.baseurl = this.api.getUrl('BASE');
   }
 
   getaawakData(pageNo: any = null) {

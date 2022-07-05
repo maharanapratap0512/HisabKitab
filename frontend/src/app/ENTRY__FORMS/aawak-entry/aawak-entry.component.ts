@@ -234,10 +234,17 @@ export class AawakEntryComponent implements OnInit {
 		  this.showModal = '';
 		  this.imagepath = ev.path;
 		  this.awkfg. document = { images: [ev.path] }
+		  this.awkfg. isbill = true;
 		  this.isLoader = false;
 		}
 		else {
-		  this.isLoader = false;
+		  this.isLoader = false;		}
+	 }
+
+	 isbillchanged(ev:any){
+		if(!ev.target.checked){
+			this.awkfg.document = null;		
+			this.imagepath = null	
 		}
 	 }
 

@@ -203,8 +203,7 @@
                                     <label class="form-label">Nimitt</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Nimitt"
                                        [clearable]="false" [virtualScroll]="true" [multiple]="true"
-                                       [closeOnSelect]="false" [(ngModel)]="filterBody.nimitt_id"
-                                       name="nimitt_id">
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.nimitt_id" name="nimitt_id">
                                        <ng-option selected="selected" disabled value="">Nimitt
                                        </ng-option>
                                        <ng-option *ngFor="let item of nimitts" [value]="item._id">
@@ -260,6 +259,7 @@
                            <th style="width: 100px;" *ngIf="settings.aawak.actual_amt">Actual Amt</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.nimitt_id">Nimitt</th>
                            <th style="width: 200px;" *ngIf="settings.aawak.item_detail">Item Detail</th>
+                           <th style="width: 100px;" *ngIf="settings.aawak.isbill">IsBill</th>
                            <th style="width: 200px;" *ngIf="settings.aawak.description">Description</th>
                         </tr>
                      </thead>
@@ -323,9 +323,17 @@
                                  = {{data.actual_amt?data.actual_amt:'-'}}</td>
                               <td *ngIf="settings.aawak.nimitt_id">
                                  {{data.nimitt_id?data.nimitt_hin:'-'}}<br />
-                                 ({{data.nimitt_state_id? data.nimitt_state_hin: '-'}})
+                                 {{data.nimitt_state_id? '(' + data.nimitt_state_hin + ')': ''}}
                               </td>
                               <td *ngIf="settings.aawak.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
+                              <td *ngIf="settings.aawak.isbill">
+                                 <label *ngIf="!(data.document && data.document.images)">
+                                    {{data.isbill}}
+                                 </label>
+                                 <img *ngIf="data.document && data.document.images"
+                                    [src]="baseurl + data.document.images[0]" height="50px"
+                                    style="border-radius: 10px;">
+                              </td>
                               <td *ngIf="settings.aawak.description">{{data.description?data.description:'-'}}</td>
                            </tr>
                            <ng-container *ngIf="data.jawak_detail.length > 0">

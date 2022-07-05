@@ -40,6 +40,10 @@ router.post('/:dept_id', async (req, res, next) => {
             jawaks = req.body.jawak_detail;
             delete req.body.jawak_detail;
         }
+        if(req.body.document){
+            req.body.document = JSON.stringify(req.body.document);
+        }
+        req.body.isbill = req.body.isbill ? 1 : 0;  
         await DB.insert('aawak', req.body, req.params.dept_id).then(async (data) => {
             // console.log("data", data);
             data.jawak_detail = [];
@@ -52,6 +56,10 @@ router.post('/:dept_id', async (req, res, next) => {
                     console.log("jawak err", err, "jawak", jawaks[i]);
                 });
             }
+
+            data.document = (data.document ? JSON.parse(data.document) : {});
+            data.isbill = data.isbill ? true : false;
+
             res.json({
                 success: true,
                 result: data || {}
@@ -71,6 +79,8 @@ router.get('/:dept_id', async (req, res, next) => {
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
     await DB.getList('aawak', {full:true, dept_id: req.params.dept_id, conditionString: null, orderBy: `aawak._id desc`, limit: 100 }).then(async (resolve) => {
         for (let i = 0; i < resolve.data.length; i++) {
+            resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
+            resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` jawak.aawak_ref_id = ${resolve.data[i]._id}`;
 
             await DB.getList('jawak', {full:true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then(async (jwkdata) => {
@@ -93,6 +103,8 @@ router.get('/pending/:dept_id', async (req, res, next) => {
 
     await DB.getList("aawak", { full: true, dept_id: req.params.dept_id, conditionString: conditionString }).then(async (resolve) => {
         for (let i in resolve.data) {
+            resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
+            resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
 
             await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then((jwkdata) => {
@@ -115,6 +127,8 @@ router.put('/pending/:dept_id', async (req, res, next) => {
 
     await DB.getList("aawak", { full: true, dept_id: req.params.dept_id, conditionString: conditionString }).then(async (resolve) => {
         for (let i in resolve.data) {
+            resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
+            resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
 
             await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then((jwkdata) => {
@@ -147,6 +161,8 @@ router.put('/:dept_id', async (req, res, next) => {
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
     await DB.getList('aawak', { full:true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then(async (resolve) => {
         for (let i in resolve.data) {
+            resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
+            resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
 
             await DB.getList('jawak', {full:true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then((jwkdata) => {
