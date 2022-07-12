@@ -111,7 +111,9 @@ export class SubitemEntryComponent implements OnInit {
       };
       this.http.put(this.api.getUrl('SUBITEM'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          this.gs.Lists.subitem.splice(this.gs.Lists.subitem.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
+          let i = this.gs.Lists.itemmix.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
+          this.gs.Lists.itemmix[i].subitems.splice(this.gs.Lists.itemmix[i].subitems.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
+          this.gs.Lists.itemmix[i].categories.push(data['result'].category_id);
           this.subitemForm.reset();
           this.isLoader = false;
           this.toastr.success('SUBITEM added successfully.')

@@ -44,7 +44,7 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
         let itemCondition = req.params.dept_id == 1 ? `` : `((select config_value from department_config where dept_id = ${req.params.dept_id} AND config_key = 'item') LIKE '%,'||item._id||',%' OR (select config_value from department_config where dept_id = ${req.params.dept_id} AND config_key = 'subitem') LIKE '%,'||si._id||',%')`;
         // let subitemCondition = ``;
 
-        let orderBy = null, limit = 100, offset = null, page = 1;
+        let orderBy = null, limit = null, offset = null, page = 1;
 
         if (req.body._id) {
             itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` item._id = ${req.body._id}`;
@@ -64,6 +64,8 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
         }
         await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id, conditionString: itemCondition, limit: limit, offset: offset }).then((resolve) => {
             let subitem_count = 0;
+            console.log("resolve",resolve);
+            console.log("resolve.length",resolve.length);
             for (let i = 0; i < resolve.data.length; i++) {
 
                 resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);

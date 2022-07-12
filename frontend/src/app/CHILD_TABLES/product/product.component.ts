@@ -127,7 +127,9 @@ export class ProductComponent implements OnInit {
 
   getImage1(doc:any){
     let imgs = doc;
-    return this.baseurl + (imgs.images ? imgs.images[0].toString() : '');
+    // console.log(doc);
+    
+    return this.baseurl + ((imgs && imgs.images && imgs.images.length > 0) ? imgs.images[0].toString() : '');
   }
 
 }

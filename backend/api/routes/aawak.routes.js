@@ -206,8 +206,14 @@ router.put('/', async (req, res, next) => {
         if (req.body.set.remaining_qty) {
             delete req.body.set.remaining_qty;
         }
+        if(req.body.set.document){
+            req.body.set.document = JSON.stringify(req.body.set.document);
+        }
+        req.body.set.isbill = req.body.set.isbill ? 1 : 0;  
         await DB.update('aawak', req.body.set, condition).then(async (data) => {
             data.jawak_detail = [];
+            data.document = (data.document ? JSON.parse(data.document) : {});
+            data.isbill = data.isbill ? true : false;
             for (let i = 0; i < jawaks.length; i++) {
                 if (!jawaks[i]._id) {
 

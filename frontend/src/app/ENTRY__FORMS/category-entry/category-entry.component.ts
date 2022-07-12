@@ -85,7 +85,7 @@ export class CategoryEntryComponent implements OnInit {
       };
       this.http.put(this.api.getUrl('CATEGORY'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          this.gs.Lists.category.splice(this.gs.Lists.category.indexOf((i: { _id: any }) => i._id == this.getData._id), 1, data['result']);
+          this.gs.Lists.category.splice(this.gs.Lists.category.indexOf((i: { _id: any }) => i._id = this.getData._id), 1, data['result']);
           this.categoryForm.reset();
           this.isLoader = false;
           this.toastr.success("Category Updated Successfuly")

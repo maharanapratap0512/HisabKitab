@@ -20,7 +20,7 @@ router.get('/', async (req, res, next) => {
 // get category 
 router.get('/:dept_id', async (req, res, next) => {
     try {
-        await DB.getList('category', { dept_id: req.params.dept_id }).then(async (resolve) => {
+        await DB.getList('category', { dept_id: req.params.dept_id, order:`category_eng desc` }).then(async (resolve) => {
             res.json({
                 success: true,
                 result: resolve.data || [],

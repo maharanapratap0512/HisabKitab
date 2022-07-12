@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -31,7 +30,6 @@ export class ItemEntryComponent implements OnInit {
     private api: ApiService,
     private gs: GlobalService,
     private toastr: ToastrService,
-    private spinner: NgxSpinnerService,
     public auth: AuthService
   ) {
     this.itemForm = this.fb.group({

@@ -77,7 +77,7 @@ export class AawakEntryComponent implements OnInit {
 	}
 	// jwkArr: any = [];
 	settings: any = {};
-	imagepath:any;
+	imagepath: any;
 
 	constructor(private fb: FormBuilder,
 		private http: HttpService,
@@ -115,34 +115,34 @@ export class AawakEntryComponent implements OnInit {
 			});
 		}
 		if (changes.getData.currentValue) {
-			this.awkfg = {
-				pkt_num: changes.getData.currentValue.pkt_num,
-				date: changes.getData.currentValue.date,
-				mm_id: changes.getData.currentValue.mm_id,
-				aawak_mm_id: changes.getData.currentValue.aawak_mm_id,
-				dept_id: changes.getData.currentValue.dept_id,
-				pbk_id: changes.getData.currentValue.pbk_id,
-				aawak_type_id: changes.getData.currentValue.aawak_type_id,
-				item_id: changes.getData.currentValue.item_id,
-				subitem_id: changes.getData.currentValue.subitem_id,
-				product_id: changes.getData.currentValue.product_id,
-				company_name: changes.getData.currentValue.company_name,
-				unit_id: changes.getData.currentValue.unit_id,
-				condition_id: changes.getData.currentValue.condition_id,
-				qty: changes.getData.currentValue.qty,
-				rate: changes.getData.currentValue.rate,
-				actual_amt: changes.getData.currentValue.actual_amt,
-				nimitt_id: changes.getData.currentValue.nimitt_id,
-				item_detail: changes.getData.currentValue.item_detail,
-				description: changes.getData.currentValue.description,
-				// remaining_qty: changes.getData.currentValue.remaining_qty,
-				jawak_detail: changes.getData.currentValue.jawak_detail,
-				isbill: changes.getData.currentValue.isbill,
-				document: changes.getData.currentValue.document,
-			};
+			this.getData = changes.getData.currentValue;
+			this.awkfg.pkt_num = changes.getData.currentValue.pkt_num
+			this.awkfg.date = changes.getData.currentValue.date
+			this.awkfg.mm_id = changes.getData.currentValue.mm_id
+			this.awkfg.aawak_mm_id = changes.getData.currentValue.aawak_mm_id
+			this.awkfg.dept_id = this.auth.webUser.dept_id
+			this.awkfg.pbk_id = changes.getData.currentValue.pbk_id
+			this.awkfg.aawak_type_id = changes.getData.currentValue.aawak_type_id
+			this.awkfg.item_id = changes.getData.currentValue.item_id
+			this.awkfg.subitem_id = changes.getData.currentValue.subitem_id
+			this.awkfg.product_id = changes.getData.currentValue.product_id
+			this.awkfg.unit_id = changes.getData.currentValue.unit_id
+			this.awkfg.condition_id = changes.getData.currentValue.condition_id
+			this.awkfg.qty = changes.getData.currentValue.qty
+			this.awkfg.rate = changes.getData.currentValue.rate
+			this.awkfg.actual_amt = changes.getData.currentValue.actual_amt
+			this.awkfg.nimitt_id = changes.getData.currentValue.nimitt_id
+			this.awkfg.item_detail = changes.getData.currentValue.item_detail
+			this.awkfg.description = changes.getData.currentValue.description
+			this.awkfg.remaining_qty = changes.getData.currentValue.remaining_qty
+			this.awkfg.company_name = changes.getData.currentValue.company_name
+			this.awkfg.isbill = changes.getData.currentValue.isbill
+			this.awkfg.document = changes.getData.currentValue.document
+			this.awkfg.jawak_detail = changes.getData.currentValue.jawak_detail
+
 			this.selDept_id = changes.getData.currentValue.dept_id;
-			// this.jwkArr = changes.getData.currentValue.jawak_detail;
 			this.oldQty = changes.getData.currentValue.qty;
+			this.imagepath = ((this.awkfg.document.images && this.awkfg.document.images.length > 0) ? this.awkfg.document.images[0] : null);
 			this.itemSelected(changes.getData.currentValue.item_id);
 		}
 	}
@@ -175,7 +175,6 @@ export class AawakEntryComponent implements OnInit {
 		// 	qty: this.jqty
 		// }
 		this.awkfg.jawak_detail.push(jwkfg);
-		console.log(this.awkfg);
 
 		// this.jwkArr.push(jwkfg2);
 		this.jmm = null;
@@ -229,43 +228,48 @@ export class AawakEntryComponent implements OnInit {
 
 	imagesSelectResponse(ev: any) {
 		if (ev.path) {
-		  this.isLoader = true;
-		  $('#aawakEntryComponent > #showModal').modal('hide');
-		  this.showModal = '';
-		  this.imagepath = ev.path;
-		  this.awkfg. document = { images: [ev.path] }
-		  this.awkfg. isbill = true;
-		  this.isLoader = false;
+			this.isLoader = true;
+			$('#aawakEntryComponent > #showModal').modal('hide');
+			this.showModal = '';
+			this.imagepath = ev.path;
+			this.awkfg.document = { images: [ev.path] }
+			this.awkfg.isbill = true;
+			this.isLoader = false;
 		}
 		else {
-		  this.isLoader = false;		}
-	 }
-
-	 isbillchanged(ev:any){
-		if(!ev.target.checked){
-			this.awkfg.document = null;		
-			this.imagepath = null	
+			this.isLoader = false;
 		}
-	 }
+	}
+
+	isbillchanged(ev: any) {
+		if (!ev.target.checked) {
+			this.awkfg.document = null;
+			this.imagepath = null
+		}
+	}
 
 	aawakFormSubmit(awkform: NgForm) {
 		console.log("awkform", awkform);
 		if (awkform.valid) {
 			this.isLoader = true;
-			this.awkfg.remaining_qty = this.awkfg.qty;
+			// this.awkfg.remaining_qty = this.awkfg.qty;
 			this.http.post(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.awkfg).subscribe((data: any) => {
 				if (data['result'] && data['success']) {
 					this.jmm = null;
 					this.jqty = null;
 					this.jnimitt = null;
+					this.imagepath = null;
 					this.isLoader = false;
 					this.toastr.success('Aawak Added Successfully.');
 					awkform.resetForm({
 						parchi_no: this.awkfg.parchi_no,
 						pbk_id: this.awkfg.pbk_id,
 						date: this.awkfg.date,
-						aawak_mm_id: this.awkfg.aawak_mm_id
+						mm_id: this.awkfg.mm_id,
+						aawak_mm_id: this.awkfg.aawak_mm_id,
+						nimitt_id: this.awkfg.nimitt_id
 					});
+
 					// this.jwkArr = [];
 					this.response.emit(data['result']);
 				} else {
@@ -294,6 +298,7 @@ export class AawakEntryComponent implements OnInit {
 					this.jmm = null;
 					this.jqty = null;
 					this.jnimitt = null;
+					this.imagepath = null;
 					this.isLoader = false;
 					this.toastr.success('Aawak Updated Successfully.');
 					updtawkform.resetForm();
@@ -508,17 +513,6 @@ export class AawakEntryComponent implements OnInit {
 				$('#aawakEntryComponent > #dataView').modal('show');
 				break;
 		}
-	}
-
-	parentAawakSelected(ev: any) {
-		this.parentAawak = ev ? ev : '';
-		let parentAawak = this.aawaks.find((i: { _id: any; }) => i._id == ev);
-		this.awkfg = {
-			aawak_hin: parentAawak ? parentAawak.aawak_hin : null,
-			aawak_eng: parentAawak ? parentAawak.aawak_eng : null,
-			aawak_code: parentAawak ? parentAawak.aawak_code : null,
-			state_id: parentAawak ? parentAawak.state_id : null,
-		};
 	}
 
 	qtyclick() {

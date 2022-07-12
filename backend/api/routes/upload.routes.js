@@ -33,23 +33,6 @@ const driveMulterConfig = {
 };
 
 
-const dbMulterConfig = {
-   storage: multer.diskStorage({
-      destination: (req, file, next) => { next(null, __dirname + "/../../../../Data/" + file.originalname + "/"); },
-
-      filename: (req, file, next) => { next(null, file.originalname + '_update_' + Date.now() + '.db') }
-   }),
-   limits: { fileSize: 5000000 }, // 1 MB = 1000000 Bytes    
-   fileFilter: (req, file, next) => {
-      if (file.mimetype == 'application/octet-stream') {
-         next(null, true)
-      } else {
-         next(null, false);
-      }
-   }
-};
-
-
 const imageMulterConfig = {
    storage: multer.diskStorage({
       destination: (req, file, next) => {
@@ -88,21 +71,6 @@ const imageMulterConfig = {
    }
 };
 
-const pbkImageMulterConfig = {
-   storage: multer.diskStorage({
-      destination: (req, file, next) => { next(null, __dirname + "/../../../../Data/Documents/Pbk"); },
-
-      filename: (req, file, next) => { next(null, file.fieldname + '_' + Date.now() + path.extname(file.originalname)); }
-   }),
-   limits: { fileSize: 5000000 }, // 1 MB = 1000000 Bytes 
-   fileFilter: (req, file, next) => {
-      if (file.mimetype != "application/pdf") {
-         file.mimetype.startsWith('image/') ? next(null, true) : next(null, false);
-      } else {
-         file.mimetype.startsWith('application/') ? next(null, true) : next(null, false);
-      }
-   }
-};
 
 
 
@@ -116,28 +84,6 @@ router.post('/doc', multer(driveMulterConfig).single('document'), async (req, re
          });
       } else {
          const path = '/api' + req.file.destination.split('.')[1] + '/' + req.file.filename;
-         res.json({
-            success: true,
-            filePath: path
-         });
-      }
-   } catch (err) {
-      res.status(500).json(errorHandler(err));
-   }
-});
-
-
-
-//upload DB for monthly updates
-router.post('/db', multer(dbMulterConfig).single('updateDB'), async (req, res) => {
-   try {
-      if (!req.file) {
-         res.json({
-            success: false,
-            message: 'Invalid or No file provided'
-         });
-      } else {
-         // const path = '/api' + req.file.destination.split('.')[1] + '/' + req.file.filename;
          res.json({
             success: true,
             filePath: path
@@ -214,46 +160,6 @@ router.delete('/image/', async (req, res, next) => {
             }
          }
          fs.rm(folderPath + '/' + req.body.filename, (err) => {
-            res.json({
-               success: true,
-               result: 'file delete succesfully.'
-            })
-
-         });
-      }
-   }
-   catch (err) {
-      res.status(500).json(errorHandler(err));
-   }
-});
-
-
-
-//delete pbk image.
-router.delete('/image/pbk', async (req, res, next) => {
-   try {
-      if (req.body.filename) {
-         fs.rm(__dirname + "/../../../../Data/Documents/Pbk/" + req.body.filename, (err) => {
-            res.json({
-               success: true,
-               result: 'file delete succesfully.'
-            })
-
-         });
-      }
-   }
-   catch (err) {
-      res.status(500).json(errorHandler(err));
-   }
-});
-
-
-
-//return list of all available images.
-router.delete('/image/product', async (req, res, next) => {
-   try {
-      if (req.body.filename) {
-         fs.rm(__dirname + "/../../../../Data/Documents/Product/" + req.body.filename, (err) => {
             res.json({
                success: true,
                result: 'file delete succesfully.'

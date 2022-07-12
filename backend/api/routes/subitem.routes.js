@@ -21,7 +21,7 @@ router.get('/', async (req, res, next) => {
 // get subitem 
 router.get('/:dept_id', async (req, res, next) => {
     try {
-        await DB.getList('subitem', { dept_id: req.params.dept_id }).then((resolve) => {
+        await DB.getList('subitem', { full: true, dept_id: req.params.dept_id }).then((resolve) => {
             res.json({
                 success: true,
                 result: resolve.data || [],

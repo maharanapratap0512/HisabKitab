@@ -51,8 +51,8 @@
                            <th>Price</th>
                            <th>Condition</th>
                            <th *ngIf="settings.warranty_period || settings.warranty_from">Warranty</th>
-                           <th *ngIf="settings.purchased_by">Purchased By</th>
-                           <th *ngIf="settings.purchase_from">Purchase From</th>
+                           <th *ngIf="settings.purchased_by || settings.purchase_from">Purchased Detail</th>
+                           <!-- <th *ngIf="settings.purchase_from">Purchase From</th> -->
                            <th *ngIf="settings.product_detail">Product Detail</th>
                            <th *ngIf="settings.accessories">Accessories</th>
                            <th *ngIf="settings.nimitt_id">Nimitt</th>
@@ -74,17 +74,20 @@
                               <td>{{data.purchase_date}}</td>
                               <td>{{data.mm_id?data.mm_hin + ' : ' + data.mm_eng:'-'}}</td>
                               <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}} <br/>
-                                 {{data.subitem_id?data.subitem_hin + ' : ' + data.subitem_eng:'-'}}</td>
+                                 {{data.subitem_id? data.subitem_hin + ' : ' + data.subitem_eng:''}}</td>
                               <td *ngIf="settings.company_name">{{data.company_name}} <br/> {{data.model_name}}</td>
                               <td>{{data.sr_num}} <br /> {{data.product_code}}</td>
                               <td>{{data.price}}</td>
-                              <td>{{data.condition_id?data.condition_hin + ' : ' + data.condition_eng:'-'}}</td>
+                              <td>{{data.condition_id ? data.condition_hin: ''}}<br />
+                                 {{data.condition_id ? data.condition_eng:''}}</td>
                               <td *ngIf="settings.warranty_period || settings.warranty_from">
-                                 {{data.warranty_period}} <br />
-                                 {{data.warranty_from}}
+                                 {{data.warranty_period ? data.warranty_period + 'M' : ''}} <br />
+                                 {{data.warranty_from ? 'From : ' + data.warranty_from : ""}}
                               </td>                           
-                              <td *ngIf="settings.purchased_by">{{data.purchased_by}}</td>
-                              <td *ngIf="settings.purchase_from">{{data.purchase_from}}</td>
+                              <td *ngIf="settings.purchased_by || settings.purchase_from">
+                                 {{data.purchased_by ? 'By : ' + data.purchased_by : ""}}<br />
+                                 {{data.purchase_from ? 'From : ' + data.purchase_from : ""}}
+                              </td>
                               <td *ngIf="settings.product_detail">{{data.product_detail}}</td>
                               <td *ngIf="settings.accessories">{{data.accessories}}</td>
                               <td *ngIf="settings.nimitt_id">{{data.nimitt_hin}}</td>

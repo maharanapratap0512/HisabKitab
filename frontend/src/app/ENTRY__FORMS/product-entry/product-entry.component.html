@@ -6,9 +6,39 @@
 <div class="row" id="productEntryComponent">
    <div class="card-body">
       <form [formGroup]="productForm">
+
+         <!-- Product Readonly Fields while editing -->
+         <div class="row" *ngIf="isEdit">
+            <div class="card card-body">
+               <div class="row">
+                  <div class="col-4">
+                     <div>
+                        <h5>
+                           <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Item </span>
+                           <span class="font-12">
+                              {{getData.item_hin}} {{getData.subitem_hin ? ' : ' + getData.subitem_hin :
+                              ''}}
+                           </span>
+                        </h5>
+                     </div>
+                  </div>
+                  <div class="col-4">
+                     <div>
+                        <h5>
+                           <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">MM </span>
+                           <span class="font-12">
+                              {{getData.mm_hin}} - {{getData.mm_eng}}
+                           </span>
+                        </h5>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+
          <div class="row">
 
-            <div class="col-md-3 mb-3" *ngIf="settings.product.purchase_date">
+            <div class="col-md-2 mb-3" *ngIf="settings.product.purchase_date">
                <div class="form-group">
                   <label class="form-label">Purchase Date</label>
                   <input type="date" class="form-control" placeholder="Purchase Date" formControlName="purchase_date"
@@ -16,7 +46,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="!isEdit">
                <div class="form-group">
                   <label class="form-label">MM</label>
                   <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -33,7 +63,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="settings.product.purchased_by">
+            <div class="col-md-2 mb-3" *ngIf="settings.product.purchased_by">
                <div class="form-group">
                   <label class="form-label">Purchased By</label>
                   <input type="text" class="form-control" placeholder="Purchased By" formControlName="purchased_by"
@@ -47,6 +77,22 @@
                   <label class="form-label">Purchase From</label>
                   <input type="text" class="form-control" placeholder="Purchase From" formControlName="purchase_from"
                      [ngClass]="{'validation':productForm.get('purchase_from')?.errors && (productForm.get('purchase_from')?.touched || productForm.get ('purchase_from')?.dirty)}">
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.nimitt_id">
+               <div class="form-group">
+                  <label class="form-label">Nimitt</label>
+                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                     onclick="$('#productEntryComponent > #showModal').modal('show')" (click)="showModal='Add Nimitt'">+
+                     Add</button>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Nimitt" [clearable]="false"
+                     [virtualScroll]="true" formControlName="nimitt_id"
+                     [ngClass]="{'validation':productForm.get('nimitt_id')?.errors && (productForm.get('nimitt_id')?.touched || productForm.get ('nimitt_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Nimitt</ng-option>
+                     <ng-option *ngFor="let item of nimitts" [value]="item._id">
+                        {{item.nimitt_hin}} : {{item.nimitt_eng}} ({{item.state_hin}})</ng-option>
+                  </ng-select>
                </div>
             </div>
 
@@ -64,9 +110,8 @@
                      <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :
                         {{item.dept_eng}}{{item.dept_code?' : '+item.dept_code:''}}</ng-option>
                   </ng-select>
-                  <ng-select class="custom mt-1" style="width: 100%;"
-                     placeholder="Select Category" [clearable]="false" [virtualScroll]="true"
-                     (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
+                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Category" [clearable]="false"
+                     [virtualScroll]="true" (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
                      <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
                         {{item.category_eng}}</ng-option>
                   </ng-select>
@@ -74,7 +119,7 @@
             </div>
 
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="!isEdit">
                <div class="form-group">
                   <label class="form-label">Item & Subitem</label>
                   <div class="float-end">
@@ -91,14 +136,17 @@
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
                      [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)"
-                     [ngClass]="{'validation':productForm.get('item_id')?.errors && (productForm.get('item_id')?.touched || productForm.get ('item_id')?.dirty)}" [readonly]="isEdit">
+                     [ngClass]="{'validation':productForm.get('item_id')?.errors && (productForm.get('item_id')?.touched || productForm.get ('item_id')?.dirty)}"
+                     [readonly]="isEdit">
                      <ng-option selected="selected" disabled value="">Select Item</ng-option>
                      <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
                         {{item.item_eng}} : {{item.item_code}}</ng-option>
                   </ng-select>
-                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList" [clearable]="false"
-                     [virtualScroll]="true" formControlName="subitem_id" (change)="itemSelected($event)"
-                     [ngClass]="{'validation':productForm.get('subitem_id')?.errors && (productForm.get('subitem_id')?.touched || productForm.get ('subitem_id')?.dirty)}" [readonly]="isEdit">
+                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
+                     [clearable]="false" [virtualScroll]="true" formControlName="subitem_id"
+                     (change)="subitemSelected($event)"
+                     [ngClass]="{'validation':productForm.get('subitem_id')?.errors && (productForm.get('subitem_id')?.touched || productForm.get ('subitem_id')?.dirty)}"
+                     [readonly]="isEdit">
                      <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
                      <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}} :
                         {{item.subitem_eng}}</ng-option>
@@ -116,7 +164,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" >
+            <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Serial No / Product Code</label>
                   <input type="text" class="form-control" placeholder="S/R Number" formControlName="sr_num"
@@ -134,11 +182,11 @@
                         class="btn btn-sm btn-outline-primary" (click)="setView('Condition')">
                         <i class=" dripicons-view-list"></i>
                      </button>
-                     <button type="button" style="padding: 1px 6px !important;"
+                     <!-- <button type="button" style="padding: 1px 6px !important;"
                         class="btn btn-outline-primary float-end"
                         onclick="$('#productEntryComponent > #showModal').modal('show')"
                         (click)="showModal = 'Add Condition'">+ Add
-                     </button>
+                     </button> -->
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Condition" [clearable]="false"
                      [virtualScroll]="true" formControlName="condition_id"
@@ -180,14 +228,6 @@
                   <label class="form-label">Price</label>
                   <input type="number" class="form-control" placeholder="Price" formControlName="price"
                      [ngClass]="{'validation':productForm.get('price')?.errors && (productForm.get('price')?.touched || productForm.get ('price')?.dirty)}">
-               </div>
-            </div>
-
-            <div class="col-md-3 mb-3" *ngIf="settings.product.nimitt_id">
-               <div class="form-group">
-                  <label class="form-label">Nimitt</label>
-                  <input type="text" class="form-control" placeholder="Nimitt" formControlName="nimitt"
-                     [ngClass]="{'validation':productForm.get('nimitt')?.errors && (productForm.get('nimitt')?.touched || productForm.get ('nimitt')?.dirty)}">
                </div>
             </div>
 
@@ -248,7 +288,8 @@
                   aria-label="Close"></button>
             </div>
             <div class="modal-body">
-               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)" type="product">
+               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)"
+                  type="product">
                </app-files-view>
             </div>
             <div class="modal-footer">

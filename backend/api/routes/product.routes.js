@@ -62,6 +62,8 @@ router.put('/:dept_id', async (req, res, next) => {
 router.post('/:dept_id', async (req, res, next) => {
     try {
         if (req.body) {
+            req.body.document = req.body.document ? JSON.stringify(req.body.document) : null;
+            req.body.isbill = req.body.isbill ? 1 : 0;
             await DB.insert('product', req.body, req.params.dept_id).then((data) => {
                 data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
                 res.json({
@@ -81,6 +83,8 @@ router.post('/:dept_id', async (req, res, next) => {
 router.put('/', async (req, res, next) => {
     try {
         if (req.body.set && req.body.query) {
+            req.body.set.document = req.body.set.document ? JSON.stringify(req.body.set.document) : null;
+            req.body.set.isbill = req.body.set.isbill ? 1 : 0;
             await DB.update('product', req.body.set, req.body.query._id).then(async (data) => {
                 data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
                 res.json({

@@ -25,23 +25,16 @@ router.get('/all/:dept_id', async (req, res, next) => {
             lists.country = await DB.getList('country', { dept_id: req.params.dept_id }) || []
             lists.category = await DB.getList('category', { dept_id: req.params.dept_id }) || []
             lists.city = await DB.getList('city', { dept_id: req.params.dept_id }) || []
-            lists.itemmix = await DB.getList('item', { full: true, dept_id: req.params.dept_id }).then((result) => {
-                for (let i in result.data) {
-                    DB.getList('subitem', { full: true, dept_id: req.params.dept_id, conditionString: `item_id = ${result.data[i]._id}` }).then((sResult) => {
-                        result.data[i].subitems = sResult.data;
-                        result.data[i].categories = sResult.data.map(s => s.category_id);
-                        result.total_count += sResult.total_count;
-                    });
+            await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id}).then((resolve) => {
+                let subitem_count = 0;
+                for (let i = 0; i < resolve.data.length; i++) {
+
+                    resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
+                    resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
+                    subitem_count += resolve.data[i].subitems.length;
                 }
-                return result;
+                lists.itemmix = { data: resolve.data, total_count:resolve.total_count}
             });
-            // lists.itemmix = await DB.getList('itemMix', { dept_id: req.params.dept_id }).then((resolve) => {
-            //     for (let i = 0; i < resolve["data"].length; i++) {
-            //         resolve["data"][i].subitems = (resolve["data"][i].subitems != "[null]" ? JSON.parse(resolve["data"][i].subitems) : []);
-            //         resolve["data"][i].categories = (resolve["data"][i].categories != "[null]" ? JSON.parse(resolve["data"][i].categories) : []);
-            //     }
-            //     return resolve.data;
-            // }, (err) => { return [] }),
             lists.department = await DB.getList('department') || []
             lists.mm = await DB.getList('mm', { dept_id: req.params.dept_id }) || []
             lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id }) || []
@@ -52,15 +45,11 @@ router.get('/all/:dept_id', async (req, res, next) => {
             lists.subitem_list = await DB.getList('subitem_list', { dept_id: req.params.dept_id }) || []
             lists.departmen_config = await DB.getList('department_config', { dept_id: req.params.dept_id }) || []
             lists.unit = await DB.getList('unit', { dept_id: req.params.dept_id }) || []
-            // lists.mm_type= await DB.getList('mm_type', {dept_id:req.params.dept_id}) || []
             lists.gender = await DB.getList('gender', { dept_id: req.params.dept_id }) || []
             lists.relation = await DB.getList('relation', { dept_id: req.params.dept_id }) || []
-            // lists.status = await DB.getList('status', { dept_id: req.params.dept_id }) || []
             lists.aawak_type = await DB.getList('aawak_type', { dept_id: req.params.dept_id }) || []
             lists.jawak_type = await DB.getList('jawak_type', { dept_id: req.params.dept_id }) || []
             lists.condition = await DB.getList('condition', { dept_id: req.params.dept_id }) || []
-            // lists.sitem=  [],
-            // lists.sitem= await DB.getList('sitem', {dept_id:req.params.dept_id}) || []
             res.json({
                 success: true,
                 result: lists

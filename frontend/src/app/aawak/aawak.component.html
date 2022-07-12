@@ -304,7 +304,8 @@
                                  {{data.roll_no ? data.roll_no : '___'}} - {{data.pbk_hin}} <br />
                                  {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
                               </td>
-                              <td>{{data.aawak_type_id?data.aawak_type_hin +' : '+ data.aawak_type_eng:'-'}}</td>
+                              <td>{{data.aawak_type_id?data.aawak_type_hin:''}} <br />
+                                 {{data.aawak_type_eng ? data.aawak_type_eng:''}}</td>
                               <td>
                                  {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
                                  {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}

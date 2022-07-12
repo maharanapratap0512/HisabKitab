@@ -33,6 +33,7 @@ export class ProductEntryComponent implements OnInit {
   items: any = [];
   itemAll: any = [];
   units: any = [];
+  nimitts:any = [];
   cat: any = null;
   categories: any = [];
   categoryAll: any = [];
@@ -65,7 +66,8 @@ export class ProductEntryComponent implements OnInit {
       document: [null],
       dept_id: [this.auth.webUser.dept_id],
       accessories: [null],
-      nimitt: [null],
+      nimitt_id: [null],
+      isbill:false
     });
     this.settings = this.auth.webUser.settings;
   }
@@ -80,12 +82,22 @@ export class ProductEntryComponent implements OnInit {
       this.conditions = result.condition ? result.condition : [];
       this.subitems = result.subitem ? result.subitem : [];
       this.units = result.unit ? result.unit : [];
+      this.nimitts = result.nimitt ? result.nimitt : [];
     });
   }
 
   ngOnChanges(changes: SimpleChanges) {
     console.log("product-changes", changes);
-    if (this.isEdit && changes.getData.currentValue) {
+    if (changes.isEdit && changes.isEdit.currentValue) {
+			this.gs.observeList().subscribe(result => {
+				this.items = result.itemmix ? result.itemmix : [];
+				this.nimitts = result.nimitt ? result.nimitt : [];
+				this.conditions = result.condition ? result.condition : [];
+				this.categories = result.category ? result.category : [];
+			});
+		}
+    if (changes.getData && changes.getData.currentValue) {
+      this.getData = changes.getData.currentValue;
       this.productForm.patchValue({
         mm_id: changes.getData.currentValue.mm_id,
         purchased_by: changes.getData.currentValue.purchased_by,
@@ -105,8 +117,10 @@ export class ProductEntryComponent implements OnInit {
         dept_id: changes.getData.currentValue.dept_id,
         document: changes.getData.currentValue.document,
         warranty_from: changes.getData.currentValue.warranty_from,
-        nimitt: changes.getData.currentValue.nimitt
+        isbill: changes.getData.currentValue.isbill,
+        nimitt_id: changes.getData.currentValue.nimitt_id
       });
+      this.imagepath = ((changes.getData.currentValue.document.images && changes.getData.currentValue.document.images.length > 0) ? changes.getData.currentValue.document.images[0] : null)
     }
   }
 
@@ -118,7 +132,7 @@ export class ProductEntryComponent implements OnInit {
       this.imagepath = ev.path;
       this.productForm.patchValue({
         document: { images: [ev.path] }
-      });
+      });      
       this.isLoader = false;
     }
     else {
@@ -192,8 +206,12 @@ export class ProductEntryComponent implements OnInit {
         warranty_period: this.productForm.value.warranty_period,
         dept_id: this.productForm.value.dept_id,
         warranty_from: this.productForm.value.warranty_from,
-        nimitt: this.productForm.value.nimitt
+        nimitt_id: this.productForm.value.nimitt_id,
+        document: this.productForm.value.document,
+        isbill: this.productForm.value.isbill
       };
+      // console.log("body", body);
+      
       this.http.put(this.api.getUrl('PRODUCT'), body).subscribe((data: any) => {
         if (data && data['success']) {
           this.productForm.reset();
