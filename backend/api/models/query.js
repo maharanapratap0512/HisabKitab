@@ -407,12 +407,17 @@ const mm = {
         `select * from mm ?`
     , select_full:
         `select mm.*,
+        
         st.state_hin, st.state_eng, 
         pm.mm_hin as parent_mm_hin, pm.mm_eng as parent_mm_eng, pm.mm_code as parent_mm_code, 
+        nm.nimitt_hin, nm.nimitt_eng, 
+        nst.state_hin as nimitt_state_hin, nst.state_eng as nimitt_state_eng,
         dept.dept_hin, dept.dept_eng, dept.dept_code 
         from mm
         left join state st on st._id = mm.state_id
         left join mm pm on pm._id = mm.parent_mm_id
+        left join nimitt nm on nm._id = mm.nimitt_id
+        left join state nst on nst._id = nm.state_id
         left join department dept on dept._id = mm.dept_id ? 
      limit @limit offset @offset`
     , insert:

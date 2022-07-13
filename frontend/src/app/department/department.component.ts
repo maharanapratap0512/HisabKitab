@@ -114,6 +114,9 @@ export class DepartmentComponent implements OnInit {
         bhatti_date: false,
         doccument: false
       },
+      nimitt:{
+        visible:false,
+      },
       product: {
         visible: false,
         purchase_date: false,

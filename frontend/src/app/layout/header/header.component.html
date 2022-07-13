@@ -190,6 +190,11 @@
                         <i class="uil-user me-1"></i>PBK
                      </a>
                   </li>
+                  <li class="nav-item" *ngIf="settings.nimitt && settings.nimitt.visible">
+                     <a class="nav-link" routerLinkActive="active" routerLink="nimitt" role="button">
+                        <i class="uil-user-square me-1"></i>Nimitt
+                     </a>
+                  </li>
                   <li class="nav-item" *ngIf="settings.item.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="item" role="button">
                         <i class="dripicons-view-list me-1"></i>Item
@@ -225,11 +230,7 @@
                         <i class="uil-layer-group me-1"></i>Points
                      </a>
                   </li>
-                  <li class="nav-item" >
-                     <a class="nav-link" routerLinkActive="active" routerLink="nimitt" role="button">
-                        <i class="uil-user-square me-1"></i>Nimitt
-                     </a>
-                  </li>
+                  
                   <!-- <li class="nav-item">
                      <a class="nav-link" role="button" (click)="exportUpdate()">
                         <i class="uil-layer-group me-1"></i>Download Update

@@ -144,7 +144,7 @@ export class AawakComponent implements OnInit {
           jawakArray.push({
             'Date': jres.date ? jres.date : '-',
             'Jawak MM': jres.jawak_mm_id ? jres.jawak_mm_hin : '-',
-            'Kisko Diya': jres.nimitt_id ? jres.nimitt_hin + '(' + jres.state_hin + ')' : '-',
+            'Kisko Diya': jres.nimitt_id ? jres.nimitt_hin + '(' + jres.nimitt_state_hin + ')' : '-',
             'Jawak Type': jres.jawak_type_id ? jres.jawak_type_hin : '-',
             'Qty': jres.qty ? jres.qty : '-',
             'Unit': jres.unit_id ? jres.unit_short : '-',
@@ -169,7 +169,9 @@ export class AawakComponent implements OnInit {
           'Aawak Type': res.aawak_type_id ? res.aawak_type_hin : '-',
           'Qty': res.qty ? res.qty : '-',
           'Unit': res.unit_id ? res.unit_short : '-',
+          'Bill':res.isbill ? 'है' : '-',
           'Jawak Detail': jawakArray,
+      
         });
       });
 

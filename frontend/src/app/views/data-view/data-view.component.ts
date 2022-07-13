@@ -78,7 +78,7 @@ export class DataViewComponent implements OnInit {
         case 'condition': this.setSupportListFields();
           this.apiName = 'SUPPORTLIST';
           break;
-        case 'dept_id': this.setDepartmentFields();
+        case 'department': this.setDepartmentFields();
           this.apiName = 'DEPARTMENT';
           break;
         case 'jawak': this.setJawakFields();

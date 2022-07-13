@@ -52,8 +52,7 @@ router.put('/', async (req, res, next) => {
     try {
         if (req.body.set && req.body.query) {
             console.log("req.body.set", req.body.set);
-            let condition = 'city._id = ' + req.body.query._id;
-            await DB.update('city', req.body.set, condition).then((data) => {
+            await DB.update('city', req.body.set, req.body.query._id).then((data) => {
                 res.json({
                     success: true,
                     result: data || {}

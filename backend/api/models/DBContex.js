@@ -140,6 +140,7 @@ class DBContex {
             try {
                 let key = Object.keys(obj);
                 let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update + ` where ${tblname}._id = ${id} `;
+                obj.active = obj.active ? 1 : 0;
 
                 console.log("updt obj_____", obj);
                 console.log("updt sql_____", sql);
