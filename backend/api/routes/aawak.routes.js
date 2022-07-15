@@ -131,7 +131,7 @@ router.put('/pending/:dept_id', async (req, res, next) => {
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
 
-            await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then((jwkdata) => {
+            await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString, orderBy: `jawak._id` }).then((jwkdata) => {
                 resolve.data[i].jawak_detail = jwkdata.data;
             }, (err) => {
                 resolve.data[i].jawak_detail = []; 
