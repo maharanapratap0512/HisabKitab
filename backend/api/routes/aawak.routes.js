@@ -150,7 +150,7 @@ router.put('/pending/:dept_id', async (req, res, next) => {
 //aawak get by dept + filter + pageNo
 router.put('/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = 100, offset = null, page = 1;
-    let conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.aawak_mm_id && req.body.aawak_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aawak_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = ${req.body.pkt_num}` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``}`;
+    let conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month}'`: ``} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'`: ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.aawak_mm_id && req.body.aawak_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aawak_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = ${req.body.pkt_num}` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``}`;
     if (conditionString.trim() == `1=1`) {
         orderBy = "aawak._id desc";
     }
@@ -165,7 +165,7 @@ router.put('/:dept_id', async (req, res, next) => {
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
 
-            await DB.getList('jawak', {full:true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then((jwkdata) => {
+            await DB.getList('jawak', {full:true, dept_id: req.params.dept_id, conditionString: jwkconditionString , orderBy: `jawak._id`}).then((jwkdata) => {
                 resolve.data[i].jawak_detail = jwkdata.data;
             }, (err) => {
                 console.log('jawak', err);
@@ -246,8 +246,8 @@ router.put('/', async (req, res, next) => {
 // aawak delete
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
-        let condition = '_id = ' + req.params.id;
-        await DB.delete('aawak', condition).then((data)=>{
+        // let condition = '_id = ' + req.params.id;
+        await DB.delete('aawak', req.params.id).then((data)=>{
             res.json({
                 success: true,
                 result: data

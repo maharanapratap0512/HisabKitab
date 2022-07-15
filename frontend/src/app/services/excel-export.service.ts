@@ -231,7 +231,8 @@ export class ExcelExportService {
     let Subtitle = ['Aawak Detail'];
     let Header = [];
     for (let key of Object.keys(json[0])) {
-      if (typeof json[0][key] == "object") {
+      if (typeof json[0][key] == "object" && json[0][key].length > 0) {
+        
         colCount += Object.keys(json[0][key][0]).length;
         Subtitle.push(key);
       }
@@ -282,6 +283,21 @@ export class ExcelExportService {
 
     /* Now we use the keys we defined earlier to insert your data by iterating through arrData and calling worksheet.addRow()*/
     json.forEach(function (item, i) {
+      // for (let j = 0; j < Subtitle.length; j++) {
+      //   if(j>0 && json[i][Subtitle[j]].length > 0){          
+      //     for (let key of Object.keys(json[i][Subtitle[j]][0])) {
+      //       json[i][Subtitle[j].substring(0,1) + '_' + key] = json[i][Subtitle[j]][0][key];
+      //     } 
+      //     json[i][Subtitle[j]].shift();
+      //   }
+      // }
+      worksheet.addRow({}).font = {
+        name: 'Arial Black',
+        color: { argb: 'FF00FF00' },
+        family: 2,
+        size: 14,
+        italic: true
+    };
       worksheet.addRow(json[i]);
       for (let j = 0; j < Subtitle.length; j++) {
         
