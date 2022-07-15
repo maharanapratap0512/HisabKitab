@@ -99,11 +99,8 @@ router.get('/:dept_id', async (req, res, next) => {
 // category delete
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
-        let condition = '_id = ' + req.params.id;
-        await DB.delete('bachat', condition, (err, data) => {
-            if (err) {
-                return next(err);
-            }
+        // let condition = '_id = ' + req.params.id;
+        await DB.delete('bachat', req.params.id,).then((data) => {
             res.json({
                 success: true,
                 result: data

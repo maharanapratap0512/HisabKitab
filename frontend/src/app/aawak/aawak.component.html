@@ -77,9 +77,35 @@
                            <div class="row">
                               <div class="col-md-3 mb-3">
                                  <div class="form-group">
-                                    <label class="form-label">Pkt No.</label>
-                                    <input type="text" class="form-control" placeholder="Pkt No."
-                                       [(ngModel)]="filterBody.pkt_num" name="pkt_num">
+                                    <label class="form-label">Month</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Month" [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month" name="month">
+                                       <ng-option selected="selected" disabled value="">Select Month
+                                       </ng-option>                                       
+                                       <ng-option value="01">1 : January</ng-option>
+                                       <ng-option value="02">2 : February</ng-option>
+                                       <ng-option value="03">3 : March</ng-option>
+                                       <ng-option value="04">4 : April</ng-option>
+                                       <ng-option value="05">5 : May</ng-option>
+                                       <ng-option value="06">6 : June</ng-option>
+                                       <ng-option value="07">7 : July</ng-option>
+                                       <ng-option value="08">8 : August</ng-option>
+                                       <ng-option value="09">9 : September</ng-option>
+                                       <ng-option value="10">10 : October</ng-option>
+                                       <ng-option value="11">11 : November</ng-option>
+                                       <ng-option value="12">12 : December</ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;"
+                                       placeholder="Select Year" [clearable]="true"
+                                       [virtualScroll]="true" [(ngModel)]="filterBody.year"
+                                       name="year">
+                                       <ng-option selected="selected" disabled value="">Select Year
+                                       </ng-option>
+                                       <ng-option [value]="currentYear">{{currentYear}}</ng-option>
+                                       <ng-option [value]="currentYear-1">{{currentYear-1}}</ng-option>
+                                       <ng-option [value]="currentYear-2">{{currentYear-2}}</ng-option>
+                                       <!-- <ng-option [value]="currentYear-3">{{currentYear-3}}</ng-option> -->
+                                       <!-- <ng-option [value]="currentYear-4">{{currentYear-4}}</ng-option> -->
+                                    </ng-select>
                                  </div>
                               </div>
 
@@ -157,6 +183,14 @@
                                  </div>
                               </div>
 
+                              <div class="col-md-2 mb-3">
+                                 <div class="form-group">
+                                    <label class="form-label">Pkt No.</label>
+                                    <input type="text" class="form-control" placeholder="Pkt No."
+                                       [(ngModel)]="filterBody.pkt_num" name="pkt_num">
+                                 </div>
+                              </div>
+
                               <div class="col-md-3 mb-3">
                                  <div class="form-group">
                                     <label class="form-label">MM</label>
@@ -182,7 +216,7 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-3 mb-3">
+                              <div class="col-md-2 mb-3">
                                  <div class="form-group">
                                     <label class="form-label">Aawak Type</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Aawak Type"
@@ -198,7 +232,7 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-3 mb-3">
+                              <div class="col-md-2 mb-3">
                                  <div class="form-group">
                                     <label class="form-label">Nimitt</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Nimitt"

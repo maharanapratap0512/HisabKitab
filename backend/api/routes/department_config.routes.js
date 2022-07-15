@@ -77,11 +77,12 @@ router.put('/save', async (req, res, next) => {
 // update dept_config 
 router.put('/', async (req, res, next) => {
     try {
-        if (req.body.query && (req.body.query._id || (req.body.query.dept_id && req.body.query.config_key)) && req.body.set) {
+        // if (req.body.query && (req.body.query._id || (req.body.query.dept_id && req.body.query.config_key)) && req.body.set) {
+        if (req.body.query && req.body.query._id && req.body.set) {
 
             let condition = `1=1 ${req.body.query._id ? ` AND department_config._id = ${req.body.query._id}` : ``} ${req.body.query.dept_id ? ` AND department_config.dept_id = ${req.body.query.dept_id}` : ``} ${req.body.query.config_key ? ` AND department_config.config_key = '${req.body.query.config_key}'` : ``} `;
 
-            await DB.update('department_config', req.body.set, condition).then(async (data) => {
+            await DB.update('department_config', req.body.set, req.body.query._id).then(async (data) => {
                 res.json({
                     success: true,
                     result: data || {}

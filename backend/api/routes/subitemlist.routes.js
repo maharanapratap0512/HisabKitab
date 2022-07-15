@@ -88,11 +88,8 @@ router.put('/', async (req, res, next) => {
 // subitem_list delete
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
-        let condition = '_id = ' + req.params.id;
-        await DB.delete('subitem_list', condition, (err, data) => {
-            if (err) {
-                return next(err);
-            }
+        // let condition = '_id = ' + req.params.id;
+        await DB.delete('subitem_list', req.params.id).then((data) => {
             res.json({
                 success: true,
                 result: data

@@ -65,7 +65,8 @@ export class AawakComponent implements OnInit {
   cat: any;
   settings: any = {};
   exportAJdata$ = new Subject();
-
+  currentYear: any;
+  // months: any = [{no:1, name:'January'}]
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
@@ -77,11 +78,13 @@ export class AawakComponent implements OnInit {
     private excelExportService: ExcelExportService,
   ) {
     this.settings = this.auth.webUser.settings;
+    this.currentYear = new Date().getFullYear();
   }
 
   ngOnInit(): void {
     this.spinner.show();
-    this.getaawakData();
+    this.getaawakData();    
+    
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.items = result.itemmix ? result.itemmix : [];
@@ -137,7 +140,7 @@ export class AawakComponent implements OnInit {
     this.exportAJdata$.subscribe((result: any) => {
       console.log("exportAJdata", result);
       result.map((res: any, index: any) => {
-        let jawakArray: any[] = []
+        let jawakArray: any = []
         let bachat = res.qty;
         res.jawak_detail.forEach((jres: any) => {
           bachat -= jres.qty ? jres.qty : 0;
@@ -148,10 +151,18 @@ export class AawakComponent implements OnInit {
             'Jawak Type': jres.jawak_type_id ? jres.jawak_type_hin : '-',
             'Qty': jres.qty ? jres.qty : '-',
             'Unit': jres.unit_id ? jres.unit_short : '-',
-            'Bachat': bachat
+            // 'Bachat': bachat
           })
         });
-
+        jawakArray.push({
+          'Jawak Type': 'बचत',
+          'Qty': res.remaining_qty ? res.remaining_qty : 0,
+          'Unit': res.unit_id ? res.unit_short : '',
+          // 'Bachat': bachat
+        })
+        // console.log("res", res);
+        // console.log("jawakArray", jawakArray);
+        
         this.allAJData.push({
           'No': index + 1,
           'MM': res.mm_hin,
@@ -169,9 +180,9 @@ export class AawakComponent implements OnInit {
           'Aawak Type': res.aawak_type_id ? res.aawak_type_hin : '-',
           'Qty': res.qty ? res.qty : '-',
           'Unit': res.unit_id ? res.unit_short : '-',
-          'Bill':res.isbill ? 'है' : '-',
+          'Bill':res.isbill ? 'है' : '-',   
+          // 'बचत':res.remaining_qty ? res.remaining_qty : 0,       
           'Jawak Detail': jawakArray,
-      
         });
       });
 
@@ -206,7 +217,16 @@ export class AawakComponent implements OnInit {
     console.log("json", json);
 
     let date = new Date();
-    this.excelExportService.generateExcel(json, './AawakJawak_' + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+    let filename = "AJ_";
+    if(this.filterBody.mm_id){
+      let mm = this.mms.find((m: { _id: any; })=>m._id == this.filterBody.mm_id);
+      if(mm && mm.mm_hin){
+        filename+=mm.mm_hin + "_";
+      }
+    }
+    console.log(filename);
+    
+    this.excelExportService.generateExcel(json, filename + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
     // this.excelExportService.exportAsExcelFile(json, 'AawakJawak');
     // this.excelExportService.exportAsExcelFile(this.el.nativeElement, 'AawakJawak');
   }

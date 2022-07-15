@@ -70,8 +70,8 @@ router.put('/', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     try {
         if (req.params.id) {
-            let condition = '_id = ' + req.params.id;
-            await DB.delete('nimitt', condition).then((data) => {
+            // let condition = '_id = ' + req.params.id;
+            await DB.delete('nimitt', req.params.id).then((data) => {
                 res.json({
                     success: true,
                     result: data
