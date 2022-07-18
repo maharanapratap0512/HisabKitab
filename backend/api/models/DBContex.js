@@ -1,6 +1,11 @@
 class DBContex {
     query;
+    dbModal;
+    DBFolder;
+    dbmodal;
     db;
+    fs;
+    path;
     tbl_need_dept_config = [
         'item',
         'pbk',
@@ -31,7 +36,13 @@ class DBContex {
 
     constructor() {
         this.query = require('../models/query');
-        this.db = require('../models/db.model').db;
+        this.dbModal = require('../models/db.model');
+        this.path = require('path');
+        this.fs = require('fs');
+        this.DBFolder = this.path.resolve(__dirname, '../../../../Data');
+        const dbPath = this.path.resolve(__dirname, '../../../../Data/Database.db');
+        this.dbmodal = new this.dbModal(dbPath);
+        this.db = this.dbmodal.db;
     }
 
 
@@ -63,19 +74,19 @@ class DBContex {
 
                 conditionQuery = options.conditionString ? (conditionQuery ? `${conditionQuery} AND ` : '') + options.conditionString : conditionQuery
 
-                let order = options.orderBy ? options.orderBy : ((options.full && this.query[tblname]) ? this.query[tblname].order :null);
+                let order = options.orderBy ? options.orderBy : ((options.full && this.query[tblname]) ? this.query[tblname].order : null);
 
 
                 if (tblname == "itemmix") {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : ''));
-                    sql = sql.replace('#',  (order ? ` order by ${order}`:``));
+                    sql = sql.replace('#', (order ? ` order by ${order}` : ``));
                 }
                 else {
-                    sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}`:'') + (order ? ` order by ${order}`:``));
+                    sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
 
 
-                if (tblname == "itemmix" ) {
+                if (tblname == "itemmix") {
                     console.log("get sql_______", sql);
                     console.log("get options______", options);
                     console.log("get order______", order);
@@ -191,19 +202,64 @@ class DBContex {
                         `select count(*) as total_count from ${tblname} ` + (conditionString && conditionString.trim() != '' ? ` where ${conditionString} ` : ``)
                 }
                 // console.log("sql count", sql);
-                if(tblname == 'itemmix'){
+                if (tblname == 'itemmix') {
                     console.log("sql", sql);
                     // console.log("stmt", stmt);
                 }
                 const stmt = await this.db.prepare(sql).get();
-                if(tblname == 'itemmix'){
-                    
+                if (tblname == 'itemmix') {
+
                     console.log("stmt", stmt);
                 }
                 resolve(stmt);
             }
             catch (err) { reject(err) }
         })
+    }
+
+    async generateDB(dept_id) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let dept = await this.getList("department", { conditionString: `_id = ${dept_id}` });
+                if (dept && dept.data && dept.data.length > 0) {
+                    let exPath = this.path.resolve(this.DBFolder, dept.data[0].dept_eng ? dept.data[0].dept_eng : dept.data[0].dept_hin);
+                    
+                    let exFilePath = this.path.resolve(exPath, 'Database.db')
+                    console.log(exFilePath);
+                    if (!this.fs.existsSync(exPath)) {
+                        this.fs.mkdirSync(exPath, { recursive: true });
+                    }
+                    if (this.fs.existsSync(exFilePath)) {
+                        this.fs.unlinkSync(exFilePath)
+                    }
+
+                    const exDBModal = new this.dbModal(exFilePath);
+                    let exportDB = exDBModal.db;                    
+
+                    let exporting = exportDB.transaction(() => {
+                        exportDB.prepare(`PRAGMA foreign_keys = off`).run();                        
+                        exportDB.prepare(`attach '${this.path.resolve(this.DBFolder, 'Database.db')}' as mainDB;`).run();
+
+                        for (let key of Object.keys(this.query.genDeptDB)) {
+                            console.log(key);
+                            let result = exportDB.prepare(this.query.genDeptDB[key]).run({dept_id: dept_id});
+                        }
+
+
+                        exportDB.prepare(`PRAGMA user_version = ${migrationCount}`).run();
+                        exportDB.prepare(`PRAGMA foreign_keys = on`).run();
+                    });
+                    exporting();
+                    resolve(this.path.resolve(this.DBFolder, dept.dept_eng, 'Database.db'));
+                }
+                else {
+                    reject(new Error('cannot found department.'))
+                }
+            }
+            catch (ex) {
+                reject(ex);
+            }
+        });
     }
 }
 
