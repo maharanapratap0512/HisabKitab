@@ -17,7 +17,7 @@
                      <div class="col-2">
                         <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
                            (click)="showModal = 'Add PBK'">
-                           <i class="dripicons-plus" style="font-size: large;"> </i>Add PBK
+                           <i class="dripicons-plus h4 icon-mx-2"> </i>Add PBK
                         </button>
                      </div>
                      <div class="col-4">
@@ -29,7 +29,7 @@
                      <div class="col-2">
                         <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse"
                            data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                           Advance Filter <i class="dripicons-chevron-down"> </i>
+                           <i class="uil-search-plus h4 icon-mx-2"></i> Advance Search
                         </button>
                      </div>
 
@@ -192,7 +192,8 @@
                                  [src]="baseurl + data.document.images[0]" height="60px"
                                  style="padding: 5px; border-radius: 15px;">
                            </td>
-                           <td *ngIf="settings.roll_no" style="color:red">{{data.roll_no ? data.roll_no : '______'}} </td>
+                           <td *ngIf="settings.roll_no" style="color:red">{{data.roll_no ? data.roll_no : '______'}}
+                           </td>
                            <td>{{data.pbk_hin}} <br> {{data.pbk_eng}}</td>
                            <td *ngIf="settings.relation || settings.relative_name">
                               {{data.relation}}<br>{{data.relative_name}}</td>

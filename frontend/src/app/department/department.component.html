@@ -33,13 +33,8 @@
           </div>
 
           <div class="col-2 mt-3 mb-2" *ngIf="dept_id">
-            <button class="btn btn-warning w-100" (click)="saveDeptSettings()">
+            <button class="btn btn-success w-100" (click)="saveDeptSettings()">
               <i class="dripicons-check" style="font-size: large;"> </i>Save
-            </button>
-          </div>
-          <div class="col-2 mt-3 mb-2" *ngIf="dept_id">
-            <button class="btn btn-secondary w-100" (click)="cancel()">
-              <i class="dripicons-check" style="font-size: large;"> </i>Cancel
             </button>
           </div>
           <div class="col-2 mt-3 mb-2" *ngIf="dept_id">
@@ -48,13 +43,17 @@
             </button>
           </div>
           <div class="col-2 mt-3 mb-2" *ngIf="dept_id">
-            <button class="btn btn-outline-info w-100 mt-1" (click)="import.click()" data-toggle="tooltip"
+            <button class="btn btn-outline-info w-100 " (click)="import.click()" data-toggle="tooltip"
               title="Import Data (.Zip file)"> Import Data (.Zip)</button>
             <input #import type="file" class="inputtag" accept="*.zip, application/ZIP" (change)="importZip($event)"
               hidden />
           </div>
+          <div class="col-2 mt-3 mb-2" *ngIf="dept_id">
+            <button class="btn btn-secondary w-100" (click)="cancel()">
+              <i class="dripicons-check" style="font-size: large;"> </i>Cancel
+            </button>
+          </div>
         </div>
-
 
         <div class="row" *ngIf="dept_id">
           <div class="col-md-2 mb-2 mb-sm-0 card card-body">
@@ -320,8 +319,7 @@
                                   <td>
                                     <div class="form-check form-switch">
                                       <input type="checkbox" class="form-check-input"
-                                        [(ngModel)]="settingsAll.aawak.isbill"
-                                        [ngModelOptions]="{standalone: true}">
+                                        [(ngModel)]="settingsAll.aawak.isbill" [ngModelOptions]="{standalone: true}">
                                       <label class="form-check-label" for="customSwitch2">Is Bill</label>
                                     </div>
                                   </td>

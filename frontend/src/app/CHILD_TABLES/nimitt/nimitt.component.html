@@ -17,18 +17,17 @@
                      <div class="col-2">
                         <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
                            (click)="showModal = 'Add Nimitt'">
-                           <i class="dripicons-plus" style="font-size: large;"> </i>Add Nimitt
+                           <i class="dripicons-plus h4 icon-mx-2"> </i>Add Nimitt
                         </button>
                      </div>
                      <div class="col-5">
                         <div class="form-group">
-
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
                         </div>
                      </div>
                      <div class="col-2">
-                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total
+                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
                            Count : {{nimittData.length?nimittData.length:'-'}}
                         </button>
                      </div>

@@ -41,8 +41,8 @@ class DBContex {
         this.fs = require('fs');
         this.DBFolder = this.path.resolve(__dirname, '../../../../Data');
         const dbPath = this.path.resolve(__dirname, '../../../../Data/Database.db');
-        this.dbmodal = new this.dbModal(dbPath);
-        this.db = this.dbmodal.db;
+        // this.dbmodal = new this.dbModal(dbPath);
+        this.db = this.dbModal.dbmodal.db;
     }
 
 
@@ -217,42 +217,66 @@ class DBContex {
         })
     }
 
+    deleteExists(filepath) {
+        return new Promise((resolve, reject) => {
+            try {
+                console.log("delete out", filepath);
+                this.fs.unlink(filepath, (err) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                    console.log("delete in", filepath);
+                    resolve();
+                });
+
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+        })
+    }
+
     async generateDB(dept_id) {
         return new Promise(async (resolve, reject) => {
             try {
                 let dept = await this.getList("department", { conditionString: `_id = ${dept_id}` });
                 if (dept && dept.data && dept.data.length > 0) {
                     let exPath = this.path.resolve(this.DBFolder, dept.data[0].dept_eng ? dept.data[0].dept_eng : dept.data[0].dept_hin);
-                    
+
                     let exFilePath = this.path.resolve(exPath, 'Database.db')
-                    console.log(exFilePath);
                     if (!this.fs.existsSync(exPath)) {
                         this.fs.mkdirSync(exPath, { recursive: true });
                     }
                     if (this.fs.existsSync(exFilePath)) {
-                        this.fs.unlinkSync(exFilePath)
+                        this.fs.unlinkSync(exFilePath);
                     }
+                    const exDBModal = new this.dbModal.dbModal(exFilePath);
+                    let exportDB = exDBModal.db;
 
-                    const exDBModal = new this.dbModal(exFilePath);
-                    let exportDB = exDBModal.db;                    
-
+                    // 
                     let exporting = exportDB.transaction(() => {
-                        exportDB.prepare(`PRAGMA foreign_keys = off`).run();                        
                         exportDB.prepare(`attach '${this.path.resolve(this.DBFolder, 'Database.db')}' as mainDB;`).run();
-
+                        
                         for (let key of Object.keys(this.query.genDeptDB)) {
                             console.log(key);
-                            let result = exportDB.prepare(this.query.genDeptDB[key]).run({dept_id: dept_id});
+                            if (key == "point") {
+                                console.log("point", exportDB.prepare(`select * from point`).all());
+                                console.log("this.query.genDeptDB[key]", this.query.genDeptDB[key]);
+                            }
+                            
+                            let result = exportDB.prepare(this.query.genDeptDB[key]).run({ dept_id: dept_id });
                         }
-
-
-                        exportDB.prepare(`PRAGMA user_version = ${migrationCount}`).run();
-                        exportDB.prepare(`PRAGMA foreign_keys = on`).run();
                     });
+                    
+                    exportDB.pragma(`foreign_keys = off`);
                     exporting();
-                    resolve(this.path.resolve(this.DBFolder, dept.dept_eng, 'Database.db'));
+                    exportDB.pragma(`foreign_keys = on`);
+                    exportDB.close();
+
+                    resolve(exFilePath);
                 }
                 else {
+
                     reject(new Error('cannot found department.'))
                 }
             }

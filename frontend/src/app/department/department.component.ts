@@ -523,11 +523,7 @@ export class DepartmentComponent implements OnInit {
         confirmButtonColor: '#3085d6',
         // cancelButtonColor: '#d33',
         confirmButtonText: 'Ok, Got it.'
-      }).then((result) => {
-        if (result.isConfirmed) {
-
-        }
-      })
+      });
 
     });
   }

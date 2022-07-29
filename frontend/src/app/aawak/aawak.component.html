@@ -16,7 +16,7 @@
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
                         <button class="btn btn-primary w-100" (click)="openModal('Add Aawak')">
-                           <i class="dripicons-plus" style="font-size: large;"> </i>Add Aawak
+                           <i class="dripicons-plus h4 icon-mx-2"> </i>Add Aawak
                         </button>
                      </div>
                      <div class="col-3">
@@ -25,6 +25,12 @@
                               name="search">
                         </div>
                      </div>
+                     <div class="col-2">
+                        <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse"
+                           data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i
+                              class="uil-search-plus h4 icon-mx-2"></i> Advance Search
+                        </button>
+                     </div>
                      <!-- <div class="col-3">
                         <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="true"
                            [virtualScroll]="true"  [(ngModel)]="conditionObj.mm_id" (change)="mmSelected($event)">
@@ -32,25 +38,18 @@
                               {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
                         </ng-select>
                      </div> -->
-                     <div class="col-2">
-                        <div class="file btn btn-success mx-2" style="font-weight: 700 !important;">
-                           <i class="uil uil-arrow-to-bottom"></i> Import Entry Excel
+                     <div class="col-3 d-flex">
+                        <button class="file btn btn-success" style="font-weight: 700 !important;">
+                           <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                            <input type="file" class="inputtag"
                               accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                               (change)="excelImport($event)" />
-                        </div>
-                     </div>
-                     <div class="col-2">
-                        <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse"
-                           data-bs-target="#collapseExample" aria-expanded="false"
-                           aria-controls="collapseExample">Advance Filter <i class="dripicons-chevron-down"> </i>
+                        </button>
+                        <button class="btn btn-success mx-3" style="font-weight: 700 !important;" (click)="exportAJdataData()">
+                           <i class=" uil-top-arrow-from-top"></i> Export Aawak
                         </button>
                      </div>
-                     <div class="col-1">
-                        <button class="btn btn-success w-100" (click)="exportAJdataData()">
-                           Export
-                        </button>
-                     </div>
+
                      <div class="col-2">
                         <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
                            Count : {{total_count}}
@@ -78,9 +77,11 @@
                               <div class="col-md-3 mb-3">
                                  <div class="form-group">
                                     <label class="form-label">Month</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Month" [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month" name="month">
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Month"
+                                       [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month"
+                                       name="month">
                                        <ng-option selected="selected" disabled value="">Select Month
-                                       </ng-option>                                       
+                                       </ng-option>
                                        <ng-option value="01">1 : January</ng-option>
                                        <ng-option value="02">2 : February</ng-option>
                                        <ng-option value="03">3 : March</ng-option>
@@ -94,9 +95,8 @@
                                        <ng-option value="11">11 : November</ng-option>
                                        <ng-option value="12">12 : December</ng-option>
                                     </ng-select>
-                                    <ng-select class="custom mt-1" style="width: 100%;"
-                                       placeholder="Select Year" [clearable]="true"
-                                       [virtualScroll]="true" [(ngModel)]="filterBody.year"
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Year"
+                                       [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.year"
                                        name="year">
                                        <ng-option selected="selected" disabled value="">Select Year
                                        </ng-option>
