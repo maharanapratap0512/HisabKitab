@@ -43,6 +43,7 @@ export class AawakComponent implements OnInit {
   subitems: any = [];
   pbks: any = [];
   aawak_types: any = [];
+  jawak_types: any = [];
   products: any = [];
   categories: any = [];
   isCondition: any = false;
@@ -66,6 +67,45 @@ export class AawakComponent implements OnInit {
   settings: any = {};
   exportAJdata$ = new Subject();
   currentYear: any;
+  importForm: any = {
+    type: null,
+    date: null,
+    pkt_num: null,
+    item_detail: null,
+    qty: null,
+    rate: null,
+    actual_amt: null,
+    company_name: null,
+    description: null,
+    isbill: null,
+    document: null,
+    mm: null,
+    mm_id: null,
+    pbk: {},
+    pbk_id: null,
+    aj_mm: null,
+    aj_mm_id: null,
+    item: null,
+    item_id: null,
+    subitem: null,
+    subitem_id: null,
+    product: null,
+    product_id: null,
+    condition: null,
+    condition_id: null,
+    unit: null,
+    unit_id: null,
+    aj_type: null,
+    aj_type_id: null,
+    nimmit: null,
+    nimmit_id: null,
+    dept: null,
+    dept_id: null,
+    ref_id: null,
+    jawak_detail: []
+  }
+  importPending: any = false;
+  loadingStatus:any = "मैं आत्मा शांत स्वरूप हूँ ।";
   // months: any = [{no:1, name:'January'}]
   constructor(
     private fb: FormBuilder,
@@ -84,6 +124,7 @@ export class AawakComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getaawakData();
+    this.checkTempImport();
 
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
@@ -94,11 +135,20 @@ export class AawakComponent implements OnInit {
       this.departments = result.department ? result.department : [];
       this.pbks = result.pbk ? result.pbk : [];
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
+      this.jawak_types = result.jawak_type ? result.jawak_type : [];
       this.products = result.product ? result.product : [];
       this.categories = result.category ? result.category : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
     this.baseurl = this.api.getUrl('BASE');
+  }
+
+  checkTempImport() {
+    this.http.get(this.api.getUrl('IMPORTEXPORT')).subscribe((data: any) => {
+      if (data.total_count > 0) {
+        this.importPending = true;
+      }
+    })
   }
 
   getaawakData(pageNo: any = null) {
@@ -341,11 +391,16 @@ export class AawakComponent implements OnInit {
 
   openModal(type: any) {
     this.showModal = type;
-    let modal = $('#showModal').modal('show');
+    $('#showModal').modal('show');
     // console.log("modal", modal);
 
     // console.log("this.showModal",this.showModal);
 
+  }
+
+  closeModal() {
+    this.showModal = "";
+    $('#showModal').modal('hide');
   }
 
   stateSelected(ev: any) {
@@ -413,6 +468,8 @@ export class AawakComponent implements OnInit {
     const reader = new FileReader();
     const file = ev.target.files[0];
     reader.onload = (event) => {
+      this.isLoader = true;
+      this.loadingStatus = "फाइल लोड की जा रही है ।";
       const data = reader.result;
       workBooks = XLSX.read(data, { type: 'binary' });
       jsonData = workBooks.SheetNames.reduce((initial: any, name: any) => {
@@ -421,13 +478,14 @@ export class AawakComponent implements OnInit {
         return initial;
       }, {});
 
-      // const dataString = JSON.stringify(jsonData);
+      this.loadingStatus = "फाइल का अध्ययन किया जा रहा है।";
+      // const dataString = JSON.stringify(jsonData);      
       let sheetdata = jsonData[workBooks.SheetNames[0]];
       let filterdata = sheetdata.filter((i: any) => (!i.includes("बचत")));
       let exceldata = filterdata.filter((i: any) => (i.length));
       let awakStart: any = 0, jawakStart: any = 0, startRow: any = 0;
 
-      console.log("exceldata", exceldata);
+      // console.log("exceldata", exceldata);
 
       for (let i = 0; i < exceldata.length; i++) {
         if (exceldata[i][0] && ['awk detail', 'awak detail', 'aawak detail', 'aawak', 'आवक'].includes(exceldata[i][0].toString().toLowerCase().trim())) {
@@ -446,15 +504,15 @@ export class AawakComponent implements OnInit {
       console.log("jawakStart", jawakStart);
       let finalJson = [];
       let columns = exceldata[startRow + 1]
-      console.log("columns", columns);
+      // console.log("columns", columns);
 
       let awk_keys = columns.splice(0, jawakStart);
       let jwk_keys = columns.splice(-jawakStart);
 
-      console.log("awk_keys", awk_keys);
-      console.log("jwk_keys", jwk_keys);
+      // console.log("awk_keys", awk_keys);
+      // console.log("jwk_keys", jwk_keys);
 
-      let jawak_detail = []
+      this.loadingStatus = "डाटा पढ़ा एवं सॉफ्टवेयर के डाटा से जोड़ा जा रहा है।";
       for (let i = startRow + 2; i < exceldata.length; i++) {
         let aawak_values = [];
         let jawak_values = [];
@@ -472,27 +530,247 @@ export class AawakComponent implements OnInit {
 
 
         if (aawak_values.length) {
-          var obj: any = {};
+          var obj: any = {
+            type: null,
+            date: null,
+            pkt_num: null,
+            item_detail: null,
+            qty: null,
+            rate: null,
+            actual_amt: null,
+            company_name: null,
+            description: null,
+            isbill: null,
+            document: null,
+            mm: null,
+            mm_id: null,
+            pbk: {},
+            pbk_id: null,
+            aj_mm: null,
+            aj_mm_id: null,
+            item: null,
+            item_id: null,
+            subitem: null,
+            subitem_id: null,
+            product: null,
+            product_id: null,
+            condition: null,
+            condition_id: null,
+            unit: null,
+            unit_id: null,
+            aj_type: null,
+            aj_type_id: null,
+            nimitt: null,
+            nimitt_id: null,
+            dept: this.auth.webUser.dept_eng,
+            dept_id: this.auth.webUser.dept_id,
+            ref_id: null,
+            jawak_detail: []
+          };
           for (let i = 0; i < awk_keys.length && i < aawak_values.length; i++) {
-            obj[awk_keys[i]] = aawak_values[i];
+            if (['', '-'].includes((typeof aawak_values[i] == "string" ? aawak_values[i].trim() : aawak_values[i]))) {
+              aawak_values[i] = null;
+            }
+            switch (awk_keys[i].toLowerCase()) {
+              case "mm": obj.mm = aawak_values[i];
+                let getmm = this.mms.find((m: any) => [m.mm_hin, m.mm_eng, m.mm_code].includes(obj.mm));
+                obj.mm_id = getmm ? getmm._id : null;
+                break;
+              case "date": obj.date = aawak_values[i];
+                break;
+              case "pkt no":
+              case "pkt num":
+              case "pkt_num":
+              case "pkt": obj.pkt_num = aawak_values[i];
+                break;
+              case "roll no":
+              case "roll_no": obj.pbk.roll_no = aawak_values[i];
+                let getpbk = this.pbks.find((p: any) => p.roll_no == obj.pbk.roll_no);
+                obj.pbk_id = getpbk ? getpbk._id : null;
+                break;
+              case "pbk":
+              case "sewadhari": obj.pbk.name = aawak_values[i];
+                break;
+              case "relation": obj.pbk.relation = aawak_values[i];
+                break;
+              case "relative":
+              case "relative_name":
+              case "relative name": obj.pbk.relative = aawak_values[i];
+                break;
+              case "item": obj.item = aawak_values[i];
+                let getitem = this.items.find((i: any) => [i.item_hin, i.item_eng, i.item_code].includes(obj.item));
+                obj.item_id = getitem ? getitem._id : null;
+                break;
+              case "subitem": obj.subitem = aawak_values[i];
+                if (obj.item_id) {
+                  let getitem = this.items.find((i: any) => i._id == obj.item_id);
+                  let getsubitem = getitem.subitems.find((m: any) => [m.subitem_hin, m.subitem_eng, m.subitem_code].includes(obj.subitem));
+                  obj.subitem_id = getsubitem ? getsubitem._id : null;
+                }
+                break;
+              case "product":
+              case "product_code":
+              case "product code":
+              case "serial no":
+                obj.product = aawak_values[i];
+                let getproduct = this.products.find((p: any) => [p.sr_no, p.product_code].includes(obj.product));
+                obj.product_id = getproduct ? getproduct._id : null;
+                break;
+              case "company":
+              case "company name":
+              case "company_name": obj.company_name = aawak_values[i];
+                break;
+              case "condition": obj.condition = aawak_values[i];
+                let getcondition = this.conditions.find((c: any) => [c.list_name_hin, c.list_name_eng].includes(obj.condition));
+                obj.condition_id = getcondition ? getcondition._id : null;
+                break;
+              case "aawak mm":
+              case "aawak_mm":
+              case "awk_mm":
+              case "awk mm": obj.aj_mm = aawak_values[i];
+                let getawkmm = this.mms.find((m: any) => [m.mm_hin, m.mm_eng, m.mm_code].includes(obj.aj_mm));
+                obj.aj_mm_id = getawkmm ? getawkmm._id : null;
+                break;
+              case "aawak type":
+              case "awk type":
+              case "awk_type":
+              case "aawak_type": obj.aj_type = aawak_values[i];
+                let getaawak_type = this.aawak_types.find((c: any) => [c.list_name_hin, c.list_name_eng].includes(obj.aj_type));
+                obj.aj_type_id = getaawak_type ? getaawak_type._id : null;
+                break;
+              case "qty":
+              case "quantity": obj.qty = aawak_values[i];
+                break;
+              case "price":
+              case "rate": obj.rate = aawak_values[i];
+                break;
+              case "amt":
+              case "amount":
+              case "actual amt":
+              case "actual_amt": obj.actual_amt = aawak_values[i];
+                break;
+              case "unit": obj.unit = aawak_values[i];
+                let getunit = this.units.find((u: any) => [u.unit_short, u.unit_full].includes(obj.unit));
+                obj.unit_id = getunit ? getunit._id : null;
+                break;
+              case "bill": obj.isbill = aawak_values[i];
+                break;
+              case "nimitt":
+                obj.nimitt = aawak_values[i];
+                let getnimitt = this.nimitts.find((n: any) => [n.nimitt_hin, n.nimitt_eng, n.roll_no].includes(obj.nimitt));
+                obj.nimitt_id = getnimitt ? getnimitt._id : null;
+                break;
+              case "dept":
+              // case "department": obj.dept = aawak_values[i];
+              //   let getdept = this.departments.find((d: any) => [d.dept_hin, d.dept_eng, d.dept_code].includes(obj.dept));                
+                break;
+              default: obj[awk_keys[i]] = aawak_values[i];
+            }
           }
-          finalJson.push(obj)
-          jawak_detail = [];
+          if (!obj.roll_no && obj.pbk && obj.relation && obj.relative) {
+            let getpbk = this.pbks.filter((p: any) => [p.pbk_hin, p.pbk_eng].includes(obj.pbk) && p.relation == obj.relation && p.relative_name == obj.relative);
+            if (getpbk && getpbk.length == 1) {
+              obj.pbk_id = getpbk[0]._id;
+            }
+          }
+          finalJson.push(obj);
         }
 
         if (jawak_values.length) {
-          let jwkobj: any = {};
-          for (let i = 0; i < jwk_keys.length && i < jawak_values.length; i++) {
-            jwkobj[jwk_keys[i]] = jawak_values[i];
+          let jwkobj: any = {
+            type: null,
+            date: null,
+            pkt_num: null,
+            item_detail: null,
+            qty: null,
+            rate: null,
+            actual_amt: null,
+            company_name: null,
+            description: null,
+            isbill: null,
+            document: null,
+            mm: null,
+            mm_id: null,
+            pbk: {},
+            pbk_id: null,
+            aj_mm: null,
+            aj_mm_id: null,
+            item: null,
+            item_id: null,
+            subitem: null,
+            subitem_id: null,
+            product: null,
+            product_id: null,
+            condition: null,
+            condition_id: null,
+            unit: null,
+            unit_id: null,
+            aj_type: null,
+            aj_type_id: null,
+            nimitt: null,
+            nimitt_id: null,
+            dept: this.auth.webUser.dept_eng,
+            dept_id: this.auth.webUser.dept_id,
+            ref_id: null,
+          };
+          jwkobj.mm_id = obj.mm_id;
+          jwkobj.item_id = obj.item_id;
+          jwkobj.subitem_id = obj.subitem_id;
+          jwkobj.unit_id = obj.unit_id;
+          jwkobj.unit = obj.unit;
+          jwkobj.dept_id = obj.dept_id;
+          jwkobj.product_id = obj.product_id;
+          if (['', '-'].includes((typeof jawak_values[i] == "string" ? jawak_values[i].trim() : jawak_values[i]))) {
+            jawak_values[i] = null;
           }
-          jawak_detail.push(jwkobj)
+          for (let i = 0; i < jwk_keys.length && i < jawak_values.length; i++) {
+            switch (jwk_keys[i].toLowerCase()) {
+              case "date": jwkobj.date = jawak_values[i];
+                break;
+              case "jwk mm":
+              case "jwk_mm":
+              case "jawak_mm":
+              case "jawak mm": jwkobj.aj_mm = jawak_values[i];
+                let getmm = this.mms.find((m: any) => [m.mm_hin, m.mm_eng, m.mm_code].includes(jwkobj.aj_mm));
+                jwkobj.aj_mm_id = getmm ? getmm._id : null;
+                break;
+              case "kisko diya":
+              case "person":
+              case "kisko_diya": jwkobj.nimitt = jawak_values[i];
+                let getnimitt = this.nimitts.find((n: any) => [n.nimitt_hin, n.nimitt_eng, n.roll_no].includes(jwkobj.nimitt));
+                jwkobj.nimitt_id = getnimitt ? getnimitt._id : null;
+                break;
+              case "jwk_type":
+              case "jwk type":
+              case "jawak_type":
+              case "jawak type": jwkobj.aj_type = jawak_values[i];
+                let getjawak_type = this.jawak_types.find((c: any) => [c.list_name_hin, c.list_name_eng].includes(jwkobj.aj_type));
+                jwkobj.aj_type_id = getjawak_type ? getjawak_type._id : null;
+                break;
+              case "qty":
+              case "quantity": jwkobj.qty = jawak_values[i];
+                break;
+              default:
+                jwkobj[jwk_keys[i]] = jawak_values[i];
+            }
+          }
+          finalJson[finalJson.length - 1].jawak_detail.push(jwkobj);
         }
-        console.log("jawak_detail", jawak_detail);
+        // console.log("jawak_detail", jawak_detail);
 
-        finalJson[finalJson.length-1].jawak_detail = jawak_detail
+
       }
       console.log("finalJson", finalJson);
 
+
+      this.loadingStatus = "डाटा को अपलोड किया जा रहा है।";
+      this.http.post(this.api.getUrl('IMPORTEXPORT'), finalJson).subscribe((data: any) => {
+        if (data.total_count) {
+          this.openModal("import");
+          this.importPending = true;
+        }
+        this.isLoader = false;
+      });
     }
 
 
@@ -500,4 +778,15 @@ export class AawakComponent implements OnInit {
     ev = '';
 
   }
+
+  importResponse(ev: any) {
+    console.log("respose", ev);
+
+    switch (ev) {
+      case "deleted": this.closeModal();
+        this.importPending = false;
+        break;
+    }
+  }
 }
+

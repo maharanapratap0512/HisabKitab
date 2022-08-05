@@ -281,7 +281,7 @@ class dbModal {
         )`
       },
       /* changes
-        => drop all procedures
+        => drop all triggers
         => new table : dictionary
         => new table : nimmit
         => tranfering nimmit from pbk
@@ -293,8 +293,9 @@ class dbModal {
         => insert new condition : Repairing
       */
       {
+
           drop_bachat_monthly: `DROP TABLE IF EXISTS bachat_monthly`,
-          drop_import_temp: `DROP TABLE IF EXISTS import_temp`,
+          drop_import_temp: `DROP TABLE IF EXISTS import_temp`,          
           drop_dept_ins_config_ins: `DROP TRIGGER IF EXISTS "dept_ins_config_ins"`,
           drop_awk_ins_bcht_updt: `DROP TRIGGER IF EXISTS "awk_ins_bcht_updt"`,
           drop_awk_ins_bcht_ins: `DROP TRIGGER IF EXISTS "awk_ins_bcht_ins"`,
@@ -309,7 +310,7 @@ class dbModal {
           drop_jwk_del_updt_ref_awk: `DROP TRIGGER IF EXISTS "jwk_del_updt_ref_awk"`,
           drop_jwk_ins_avk_ref_updt: `DROP TRIGGER IF EXISTS "jwk_ins_avk_ref_updt"`,
           drop_jwk_updt_avk_ref_updt: `DROP TRIGGER IF EXISTS "jwk_updt_avk_ref_updt"`,
-  
+
           dictionary: `create table IF NOT EXISTS dictionary(
           _id integer primary key AUTOINCREMENT,
           type varchar(50) not null,
@@ -434,206 +435,6 @@ class dbModal {
   
           insert_repairing_condition: `Insert or ignore into support_list(list_type, list_name_hin, list_name_eng, active) values('condition', 'रिपेरींग', 'Repairing', 1)`,
       },
-      //creating all triggers
-      {
-          dept_ins_config_ins:
-              `CREATE TRIGGER IF NOT EXISTS "dept_ins_config_ins"
-            AFTER INSERT ON "department"
-            FOR EACH ROW 
-            BEGIN
-              insert into department_config(dept_id, config_key, config_value, active) values(NEW._id, 'mm', '', NEW.active),(NEW._id, 'item', '', NEW.active),(NEW._id, 'category', '', NEW.active), (NEW._id, 'subitem', '', NEW.active), (NEW._id, 'subitem_list', '', NEW.active),(NEW._id, 'pbk', '', NEW.active),(NEW._id, 'department', '', NEW.active),(NEW._id, 'aj_type', '', NEW.active), (NEW._id, 'settings', json('{}'), NEW.active);
-            END;`,
-          awk_ins_bcht_updt:
-              `CREATE TRIGGER IF not exists "awk_ins_bcht_updt" 
-            AFTER INSERT ON "aawak" 
-            FOR EACH ROW     
-            WHEN EXISTS(select _id from bachat where created_at != NEW.created_at AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
-            BEGIN
-                update bachat set 
-                Stock = Stock + NEW.qty,
-                New = New + (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END),
-                Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
-                Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
-                Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END),
-                Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
-                where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id;                                      
-            END;`,
-          awk_ins_bcht_ins:
-              `CREATE TRIGGER IF not exists "awk_ins_bcht_ins" 
-          AFTER INSERT ON "aawak" 
-          FOR EACH ROW   
-          WHEN NOT EXISTS(select _id from bachat where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
-          BEGIN
-            insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, New, Old, Defective, Repairing, Scrap, unit_id, dept_id) 
-            values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);             
-          END;`,
-  
-          awk_updt_bcht_updt:
-              `CREATE TRIGGER IF NOT EXISTS "awk_updt_bcht_updt"
-            AFTER UPDATE ON "aawak"
-            FOR EACH ROW
-            BEGIN
-                update bachat set 
-                Stock = Stock + (NEW.qty - OLD.qty),
-                New = New + (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
-                Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
-                Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
-                Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END) - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
-                Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
-                where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id;  
-                
-            END;`,
-  
-          awk_del_bcht_updt:
-              `CREATE TRIGGER IF NOT EXISTS "awk_del_bcht_updt" 
-            AFTER DELETE ON "aawak" 
-            FOR EACH ROW
-            BEGIN
-              update bachat set 
-              Stock = Stock - OLD.qty,
-              New = New - (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
-              Old = Old - (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
-              Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
-              Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
-              Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
-              where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;                       
-            END;`,
-  
-          jwk_ins_bcht_updt:
-              `CREATE TRIGGER IF not exists "jwk_ins_bcht_updt" 
-            AFTER INSERT ON "jawak" 
-            FOR EACH ROW        
-            BEGIN
-              update bachat set 
-              Stock = Stock - NEW.qty,
-              Used = Used + (CASE WHEN NEW.jawak_type_id = 27 THEN NEW.qty ELSE 0 END),
-              New = New - (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END),
-              Old = Old - (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
-              Defective = Defective - (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
-              Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END),
-              Scrap = Scrap - (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
-              where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id; 
-    
-            END;`,
-  
-          jwk_updt_bcht_updt:
-              `CREATE TRIGGER IF not exists "jwk_updt_bcht_updt" 
-            AFTER UPDATE ON "jawak" 
-            FOR EACH ROW        
-            BEGIN
-              update bachat set 
-              Stock = Stock - (NEW.qty - OLD.qty),
-              Used = Used + (CASE WHEN NEW.jawak_type_id = 27 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.jawak_type_id = 27 THEN OLD.qty ELSE 0 END),
-              New = New - (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
-              Old = Old - (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
-              Defective = Defective - (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
-              Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END) + (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
-              Scrap = Scrap - (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
-              where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id; 
-    
-            END;`,
-  
-          jwk_del_bcht_updt:
-              `CREATE TRIGGER IF not exists "jwk_del_bcht_updt" 
-            AFTER DELETE ON "jawak" 
-            FOR EACH ROW
-            BEGIN
-              update bachat set 
-              Stock = Stock + OLD.qty,
-              Used = Used - (CASE WHEN OLD.jawak_type_id = 27 THEN OLD.qty ELSE 0 END),
-              New = New + (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
-              Old = Old + (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
-              Defective = Defective + (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
-              Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
-              Scrap = Scrap + (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
-              where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;  
-            END;`,
-  
-          prdct_ins_bcht_updt:
-              `CREATE TRIGGER IF NOT EXISTS "prdct_ins_bcht_updt"
-            AFTER INSERT ON "product"
-            FOR EACH ROW
-            BEGIN 
-              update bachat set 
-              Stock = Stock + 1,
-              New = New + (CASE WHEN NEW.condition_id = 33 THEN 1 ELSE 0 END),
-              Old = Old + (CASE WHEN NEW.condition_id = 34 THEN 1 ELSE 0 END),
-              Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN 1 ELSE 0 END),
-              Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END),
-              Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN 1 ELSE 0 END)
-              where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = 1; 
-    
-              insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, unit_id, dept_id) 
-              values(NEW.mm_id, NEW.item_id, NEW.subitem_id, 1, 1, NEW.dept_id);            
-            END;`,
-  
-          prdct_updt_bcht_updt:
-              `CREATE TRIGGER IF NOT EXISTS "prdct_updt_bcht_updt"
-            AFTER UPDATE ON "product"
-            FOR EACH ROW
-            WHEN OLD.condition_id != NEW.condition_id
-            BEGIN 
-              update bachat set 
-              New = New + (CASE WHEN NEW.condition_id = 33 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
-              Old = Old + (CASE WHEN NEW.condition_id = 34 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
-              Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
-              Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END) - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END),
-              Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END)
-              where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = 1;           
-            END;`,
-  
-          prdct_del_bcht_updt:
-              `CREATE TRIGGER IF NOT EXISTS "prdct_del_bcht_updt"
-            AFTER DELETE ON "product"
-            FOR EACH ROW        
-            BEGIN 
-              update bachat set 
-              Stock = Stock - 1,
-              New = New - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
-              Old = Old - (CASE WHEN OLD.condition_id = 34 THEN 1 ELSE 0 END),
-              Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN 1 ELSE 0 END),
-              Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END),
-              Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN 1 ELSE 0 END)
-              where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = 1;  
-            END;`,
-  
-          jwk_del_updt_ref_awk:
-              `CREATE TRIGGER IF not exists "jwk_del_updt_ref_awk" 
-            AFTER DELETE ON "jawak" 
-            FOR EACH ROW
-            When OLD.aawak_ref_id IS NOT NULL
-            BEGIN
-              update aawak set remaining_qty = remaining_qty + OLD.qty where _id = OLD.aawak_ref_id;     
-            END;`,
-  
-          jwk_ins_avk_ref_updt:
-              `CREATE TRIGGER if not EXISTS "jwk_ins_avk_ref_updt"
-            AFTER INSERT ON "jawak"
-            FOR EACH ROW
-            when NEW.aawak_ref_id is not NULL
-            BEGIN
-                update aawak set remaining_qty = remaining_qty - NEW.qty where _id = NEW.aawak_ref_id;
-            END;`,
-  
-          jwk_updt_avk_ref_updt:
-              `CREATE TRIGGER if not EXISTS "jwk_updt_avk_ref_updt"
-            AFTER UPDATE ON "jawak"
-            FOR EACH ROW
-            when OLD.aawak_ref_id is not NULL
-            BEGIN
-                update aawak set remaining_qty = remaining_qty - (NEW.qty - OLD.qty) where _id = OLD.aawak_ref_id;
-            END;`,
-  
-          awk_ins_bcht_ins:
-              `CREATE TRIGGER IF not exists "awk_ins_bcht_ins" 
-            AFTER INSERT ON "aawak" 
-            FOR EACH ROW   
-            WHEN NOT EXISTS(select _id from bachat where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
-            BEGIN
-              insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, New, Old, Defective, Repairing, Scrap, unit_id, dept_id) 
-              values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);             
-            END;`
-      },
       //recreating aawak, jawak, mm table to drop unneccesory column
       {
           drop_dept_ins_config_ins:`DROP TRIGGER IF EXISTS "dept_ins_config_ins"`,
@@ -730,6 +531,249 @@ class dbModal {
           drop_jawak: `drop table if exists jawak_backup`,
           drop_aawak: `drop table if exists aawak_backup`,
           drop_mm: `drop table if exists mm_backup`,    
+      },
+      //creating all triggers
+      {
+        
+        dept_ins_config_ins:
+            `CREATE TRIGGER IF NOT EXISTS "dept_ins_config_ins"
+          AFTER INSERT ON "department"
+          FOR EACH ROW 
+          BEGIN
+            insert into department_config(dept_id, config_key, config_value, active) values(NEW._id, 'mm', '', NEW.active),(NEW._id, 'item', '', NEW.active),(NEW._id, 'category', '', NEW.active), (NEW._id, 'subitem', '', NEW.active), (NEW._id, 'subitem_list', '', NEW.active),(NEW._id, 'pbk', '', NEW.active),(NEW._id, 'department', '', NEW.active),(NEW._id, 'aj_type', '', NEW.active), (NEW._id, 'settings', json('{}'), NEW.active);
+          END;`,
+        awk_ins_bcht_updt:
+            `CREATE TRIGGER IF not exists "awk_ins_bcht_updt" 
+          AFTER INSERT ON "aawak" 
+          FOR EACH ROW     
+          WHEN EXISTS(select _id from bachat where created_at != NEW.created_at AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
+          BEGIN
+              update bachat set 
+              Stock = Stock + NEW.qty,
+              New = New + (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END),
+              Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
+              Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
+              Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END),
+              Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
+              where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id;                                      
+          END;`,
+        awk_ins_bcht_ins:
+            `CREATE TRIGGER IF not exists "awk_ins_bcht_ins" 
+        AFTER INSERT ON "aawak" 
+        FOR EACH ROW   
+        WHEN NOT EXISTS(select _id from bachat where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
+        BEGIN
+          insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, New, Old, Defective, Repairing, Scrap, unit_id, dept_id) 
+          values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);             
+        END;`,
+
+        awk_updt_bcht_updt:
+            `CREATE TRIGGER IF NOT EXISTS "awk_updt_bcht_updt"
+          AFTER UPDATE ON "aawak"
+          FOR EACH ROW
+          BEGIN
+              update bachat set 
+              Stock = Stock + (NEW.qty - OLD.qty),
+              New = New + (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+              Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+              Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+              Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END) - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
+              Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
+              where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id;  
+              
+          END;`,
+
+        awk_del_bcht_updt:
+            `CREATE TRIGGER IF NOT EXISTS "awk_del_bcht_updt" 
+          AFTER DELETE ON "aawak" 
+          FOR EACH ROW
+          BEGIN
+            update bachat set 
+            Stock = Stock - OLD.qty,
+            New = New - (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+            Old = Old - (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+            Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+            Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
+            Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
+            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;                       
+          END;`,
+
+        jwk_ins_bcht_updt:
+            `CREATE TRIGGER IF not exists "jwk_ins_bcht_updt" 
+          AFTER INSERT ON "jawak" 
+          FOR EACH ROW        
+          BEGIN
+            update bachat set 
+            Stock = Stock - NEW.qty,
+            Used = Used + (CASE WHEN NEW.jawak_type_id = 27 THEN NEW.qty ELSE 0 END),
+            New = New - (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END),
+            Old = Old - (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
+            Defective = Defective - (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
+            Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END),
+            Scrap = Scrap - (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id; 
+  
+          END;`,
+
+        jwk_updt_bcht_updt:
+            `CREATE TRIGGER IF not exists "jwk_updt_bcht_updt" 
+          AFTER UPDATE ON "jawak" 
+          FOR EACH ROW        
+          BEGIN
+            update bachat set 
+            Stock = Stock - (NEW.qty - OLD.qty),
+            Used = Used + (CASE WHEN NEW.jawak_type_id = 27 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.jawak_type_id = 27 THEN OLD.qty ELSE 0 END),
+            New = New - (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+            Old = Old - (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+            Defective = Defective - (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+            Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END) + (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
+            Scrap = Scrap - (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id; 
+  
+          END;`,
+
+        jwk_del_bcht_updt:
+            `CREATE TRIGGER IF not exists "jwk_del_bcht_updt" 
+          AFTER DELETE ON "jawak" 
+          FOR EACH ROW
+          BEGIN
+            update bachat set 
+            Stock = Stock + OLD.qty,
+            Used = Used - (CASE WHEN OLD.jawak_type_id = 27 THEN OLD.qty ELSE 0 END),
+            New = New + (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+            Old = Old + (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+            Defective = Defective + (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+            Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
+            Scrap = Scrap + (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
+            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;  
+          END;`,
+
+        prdct_ins_bcht_updt:
+            `CREATE TRIGGER IF NOT EXISTS "prdct_ins_bcht_updt"
+          AFTER INSERT ON "product"
+          FOR EACH ROW
+          BEGIN 
+            update bachat set 
+            Stock = Stock + 1,
+            New = New + (CASE WHEN NEW.condition_id = 33 THEN 1 ELSE 0 END),
+            Old = Old + (CASE WHEN NEW.condition_id = 34 THEN 1 ELSE 0 END),
+            Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN 1 ELSE 0 END),
+            Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END),
+            Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN 1 ELSE 0 END)
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = 1; 
+  
+            insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, unit_id, dept_id) 
+            values(NEW.mm_id, NEW.item_id, NEW.subitem_id, 1, 1, NEW.dept_id);            
+          END;`,
+
+        prdct_updt_bcht_updt:
+            `CREATE TRIGGER IF NOT EXISTS "prdct_updt_bcht_updt"
+          AFTER UPDATE ON "product"
+          FOR EACH ROW
+          WHEN OLD.condition_id != NEW.condition_id
+          BEGIN 
+            update bachat set 
+            New = New + (CASE WHEN NEW.condition_id = 33 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
+            Old = Old + (CASE WHEN NEW.condition_id = 34 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
+            Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
+            Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END) - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END),
+            Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END)
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = 1;           
+          END;`,
+
+        prdct_del_bcht_updt:
+            `CREATE TRIGGER IF NOT EXISTS "prdct_del_bcht_updt"
+          AFTER DELETE ON "product"
+          FOR EACH ROW        
+          BEGIN 
+            update bachat set 
+            Stock = Stock - 1,
+            New = New - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
+            Old = Old - (CASE WHEN OLD.condition_id = 34 THEN 1 ELSE 0 END),
+            Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN 1 ELSE 0 END),
+            Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END),
+            Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN 1 ELSE 0 END)
+            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = 1;  
+          END;`,
+
+        jwk_del_updt_ref_awk:
+            `CREATE TRIGGER IF not exists "jwk_del_updt_ref_awk" 
+          AFTER DELETE ON "jawak" 
+          FOR EACH ROW
+          When OLD.aawak_ref_id IS NOT NULL
+          BEGIN
+            update aawak set remaining_qty = remaining_qty + OLD.qty where _id = OLD.aawak_ref_id;     
+          END;`,
+
+        jwk_ins_avk_ref_updt:
+            `CREATE TRIGGER if not EXISTS "jwk_ins_avk_ref_updt"
+          AFTER INSERT ON "jawak"
+          FOR EACH ROW
+          when NEW.aawak_ref_id is not NULL
+          BEGIN
+              update aawak set remaining_qty = remaining_qty - NEW.qty where _id = NEW.aawak_ref_id;
+          END;`,
+
+        jwk_updt_avk_ref_updt:
+            `CREATE TRIGGER if not EXISTS "jwk_updt_avk_ref_updt"
+          AFTER UPDATE ON "jawak"
+          FOR EACH ROW
+          when OLD.aawak_ref_id is not NULL
+          BEGIN
+              update aawak set remaining_qty = remaining_qty - (NEW.qty - OLD.qty) where _id = OLD.aawak_ref_id;
+          END;`,
+
+        awk_ins_bcht_ins:
+            `CREATE TRIGGER IF not exists "awk_ins_bcht_ins" 
+          AFTER INSERT ON "aawak" 
+          FOR EACH ROW   
+          WHEN NOT EXISTS(select _id from bachat where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
+          BEGIN
+            insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, New, Old, Defective, Repairing, Scrap, unit_id, dept_id) 
+            values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);             
+          END;`
+      },
+      //recreating temp import table
+      {
+        drop_temp_import: `drop table IF EXISTS temp_import`,
+        temp_import: `create table IF NOT EXISTS temp_import(
+          _id integer primary key AUTOINCREMENT,
+          type varchar(50),      
+          date date,
+          pkt_num varchar(50),
+          item_detail text,
+          qty decimal(10,2),
+          rate decimal(10,2),
+          actual_amt decimal(10,2),
+          company_name varchar(150),
+          description text,
+          isbill tinyint(1),
+          document json,
+          mm varchar(100),
+          mm_id integer,
+          pbk varchar(150),
+          pbk_id integer,
+          aj_mm varchar(100),
+          aj_mm_id integer,
+          item varchar(100),
+          item_id integer,
+          subitem varchar(100),
+          subitem_id integer,
+          product varchar(150),
+          product_id integer,
+          condition varchar(100),
+          condition_id integer,
+          unit varchar(50),
+          unit_id integer,
+          aj_type varchar(50),
+          aj_type_id integer,
+          nimitt varchar(150),
+          nimitt_id integer,
+          dept varchar(100),
+          dept_id integer,
+          ref_id integer
+    
+        )`,
       }
     ];
   migrationLength;
@@ -751,7 +795,7 @@ class dbModal {
           let userVersion = this.db.pragma('user_version', { simple: true });
           console.log("current user version : ", userVersion);
           //set old userversion 8 to 1
-          if (userVersion > 4) {
+          if (userVersion == 8) {
             userVersion = 1;
           }
           //comparing userversion with total migrations
@@ -765,12 +809,17 @@ class dbModal {
                 this.db.prepare(migrationQueries[query]).run();
               }
               console.log("updating database ... ");
-            }
+            }            
 
             this.db.pragma(`user_version = ${this.migrationLength}`);
 
             console.log("database updated to version ", this.migrationLength);
           }
+          // for (let query of Object.keys(this.Migrations[2])) {
+          //   console.log(query, this.Migrations[2][query]);
+          //   //executing individual query.
+          //   this.db.prepare(this.Migrations[2][query]).run();
+          // }
         }
         catch (err) {
           console.log(err);
@@ -779,7 +828,9 @@ class dbModal {
       });
   
       this.db.pragma('foreign_keys=OFF');
+      this.db.pragma('legacy_alter_table=ON');
       runMigration();
+      this.db.pragma('legacy_alter_table=OFF');
       this.db.pragma('foreign_keys=ON');
     }
     catch (ex) {

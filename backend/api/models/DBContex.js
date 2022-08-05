@@ -46,7 +46,18 @@ class DBContex {
     }
 
 
-
+    runQuery(object, key, options = {}){
+        return new Promise(async (resolve, reject) => {
+            try {
+                let sql = this.query[object][key];
+                const result = this.db.prepare(sql).run(options.obj ? options.obj : {});
+                resolve(result);
+            }
+            catch(err){
+                reject(err);
+            }
+        });
+    }
 
     // options = { full:boolean, dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
     async getList(tblname, options = {}) {
@@ -107,7 +118,7 @@ class DBContex {
 
 
 
-    async insert(tblname, obj, dept_id = null) {
+    async insert(tblname, obj, dept_id = null, get = true) {
         return new Promise(async (resolve, reject) => {
             try {
                 obj.active = dept_id == 1 ? 1 : 0;
@@ -124,14 +135,19 @@ class DBContex {
                         await this.db.prepare(this.query.department_config.update_config_value).run(
                             { tblname: tblname, dept_id: dept_id, new_id: result.lastInsertRowid })
                     }
-                    let sql =
-                        this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${result.lastInsertRowid} `);
-
-                    if (tblname == "mm") {
-                        console.log("get sql_______", sql);
+                    if(get){
+                        let sql =
+                            this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${result.lastInsertRowid} `);
+    
+                        if (tblname == "mm") {
+                            console.log("get sql_______", sql);
+                        }
+                        getres = await this.db.prepare(sql).get({ order: `${tblname}._id`, limit: 1, offset: -1 });
+                        console.log("getres_______", getres);
                     }
-                    getres = await this.db.prepare(sql).get({ order: `${tblname}._id`, limit: 1, offset: -1 });
-                    console.log("getres_______", getres);
+                    else{
+                        getres = result.lastInsertRowid;
+                    }
                 }
 
 
@@ -144,7 +160,22 @@ class DBContex {
         })
     }
 
-
+    //under construction
+    // insertMany = this.db.transaction((data) => {
+    //     return new Promise(async (resolve, reject) => {
+    //         try {
+    //             let fid, lid;
+    //             obj.active = dept_id == 1 ? 1 : 0;
+    //             const stmt = this.db.prepare(this.query[tblname].insert);
+    //             for(let row of data){
+    //                 let result = stmt.run(row);                    
+    //             }
+    //         }
+    //         catch (ex) {
+    //             reject(ex);
+    //         }
+    //     })
+    // });
 
     async update(tblname, obj, id) {
         return new Promise(async (resolve, reject) => {
@@ -184,6 +215,16 @@ class DBContex {
         })
     }
 
+    async deleteMany(tblname, conditionString=null) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const result = this.db.prepare(`delete from ${tblname} ${conditionString ? `where ${conditionString}` : ``} `).run();
+                return resolve(result);
+            }
+            catch (err) { reject(err) }
+        })
+    }
+
 
 
     async getCount(tblname, conditionString = null) {
@@ -194,7 +235,7 @@ class DBContex {
                     tblname = `support_list`;
                 }
                 if (tblname == "itemmix") {
-                    sql = this.query[tblname].count.replace('?', (conditionString && conditionString?.trim() != '' ? ` where ${conditionString} ` : ``));
+                    sql = this.query[tblname].count.replace('?', (conditionString && conditionString.trim() != '' ? ` where ${conditionString} ` : ``));
                     sql = sql.replace('#', '');
                 }
                 else {
@@ -256,18 +297,18 @@ class DBContex {
                     // 
                     let exporting = exportDB.transaction(() => {
                         exportDB.prepare(`attach '${this.path.resolve(this.DBFolder, 'Database.db')}' as mainDB;`).run();
-                        
+
                         for (let key of Object.keys(this.query.genDeptDB)) {
                             console.log(key);
                             if (key == "point") {
                                 console.log("point", exportDB.prepare(`select * from point`).all());
                                 console.log("this.query.genDeptDB[key]", this.query.genDeptDB[key]);
                             }
-                            
+
                             let result = exportDB.prepare(this.query.genDeptDB[key]).run({ dept_id: dept_id });
                         }
                     });
-                    
+
                     exportDB.pragma(`foreign_keys = off`);
                     exporting();
                     exportDB.pragma(`foreign_keys = on`);

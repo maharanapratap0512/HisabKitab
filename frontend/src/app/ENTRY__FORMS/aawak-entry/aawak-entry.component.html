@@ -239,7 +239,7 @@
                   <label class="form-label">Quantity</label>
                   <div class="input-group">
                      <input type="text" class="form-control" placeholder="Quantity" [(ngModel)]="awkfg.qty" name="qty"
-                        #qty="ngModel" (keyup)="qtyclick()"
+                        #qty="ngModel" (focusout)="qtyclick()"
                         [ngClass]="{ 'validation': (qty?.touched || f.submitted) && qty.errors?.['required']}" required>
                      <span class="input-group-text ml-1 border border-secondary"
                         style="padding: 0px; min-width: 40%;background: #252932;">
@@ -259,7 +259,7 @@
                   <label class="form-label">Rate</label>
                   <div class="input-group">
                      <input type="text" class="form-control" placeholder="Rate" [(ngModel)]="awkfg.rate" name="rate"
-                        #rate="ngModel" (keyup)="rateclick()">
+                        #rate="ngModel" (focusout)="rateclick()">
                      <span class="input-group-text"> = {{(awkfg.qty * awkfg.rate).toFixed(2)}}</span>
 
                   </div>
@@ -270,7 +270,7 @@
                <div class="form-group">
                   <label class="form-label">Amount</label>
                   <input type="text" class="form-control" placeholder="Amount" [(ngModel)]="awkfg.actual_amt"
-                     name="actual_amt" #actual_amt="ngModel" (keyup)="amntclick()">
+                     name="actual_amt" #actual_amt="ngModel" (focusout)="amntclick()">
                </div>
             </div>
 

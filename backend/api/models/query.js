@@ -774,20 +774,44 @@ const temp_import = {
     select:
         `select * from temp_import ?`
     , select_full:
-        `select * from temp_import ? limit @limit offset @offset`
+        `select temp_import.*,
+        mm.mm_hin,mm.mm_eng,mm.mm_code,
+        amm.mm_hin as aj_mm_hin, amm.mm_eng as aj_mm_eng, amm.mm_code as aj_mm_code, 
+        pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
+        item.item_hin, item.item_eng, item.item_code,
+        sil.subitem_hin, sil.subitem_eng,
+        sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
+        dept.dept_eng, dept.dept_hin, dept.dept_code,
+        unit.unit_short, unit.unit_full,
+        slat.list_name_hin as aj_type_hin, slat.list_name_eng as aj_type_eng,
+        nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, pst.state_hin as nimitt_state_hin, pst.state_eng as nimitt_state_eng
+        from temp_import 
+        left join mm on mm._id = temp_import.mm_id
+        left join pbk on pbk._id = temp_import.pbk_id
+        left join mm amm on amm._id = temp_import.aj_mm_id
+        left join item on item._id = temp_import.item_id
+        left join subitem si on si._id = temp_import.subitem_id
+        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join product on product._id = temp_import.product_id
+        left join support_list sl on sl._id = temp_import.condition_id
+        left join unit on unit._id = temp_import.unit_id
+        left join department dept on dept._id = temp_import.dept_id
+        left join support_list slat on slat._id = temp_import.aj_type_id
+        left join nimitt nmt on nmt._id = temp_import.nimitt_id
+        left join state pst on pst._id = nmt.state_id ? limit @limit offset @offset`
     , insert:
         `insert into temp_import (
-        type, date, pkt_num, item_detail, qty, rate, actula_amt,
+        type, date, pkt_num, item_detail, qty, rate, actual_amt,
         company_name, description, isbill, document, mm, mm_id, pbk,
         pbk_id, aj_mm, aj_mm_id, item, item_id, subitem, subitem_id,
         product, product_id, condition, condition_id, unit, unit_id, aj_type,
-        aj_type_id, nimitt, nimitt_id, dept, dept_id, ref_id, active)
+        aj_type_id, nimitt, nimitt_id, dept, dept_id, ref_id)
     values (
-        @type, @date, @pkt_num, @item_detail, @qty, @rate, @actula_amt,
+        @type, @date, @pkt_num, @item_detail, @qty, @rate, @actual_amt,
         @company_name, @description, @isbill, @document, @mm, @mm_id, @pbk,
         @pbk_id, @aj_mm, @aj_mm_id, @item, @item_id, @subitem, @subitem_id,
         @product, @product_id, @condition, @condition_id, @unit, @unit_id, @aj_type,
-        @aj_type_id, @nimitt, @nimitt_id, @dept, @dept_id, @ref_id, @active)`
+        @aj_type_id, @nimitt, @nimitt_id, @dept, @dept_id, @ref_id)`
     , update:
         `update temp_import set 
         type=@type,
@@ -823,10 +847,21 @@ const temp_import = {
         nimitt_id=@nimitt_id,
         dept=@dept,
         dept_id=@dept_id,
-        ref_id=@ref_id,
-        updated_at=datetime('now','localtime')`
+        ref_id=@ref_id`
     , order:
         ``
+}
+
+const excel_correction = {
+    update_mm: `update temp_import set mm_id = @mm_id where mm = @name`,
+    update_item: `update temp_import set item_id = @item_id, subitem_id = @subitem_id where item = @item AND subitem =@subitem `,
+    update_aj_mm: `update temp_import set aj_mm_id = @aj_mm_id where aj_mm = @name`,
+    update_awk_type: `update temp_import set aj_type_id = @aj_type_id where type = 'awk' AND aj_type = @name`,
+    update_jwk_type: `update temp_import set aj_type_id = @aj_type_id where type = 'jwk' AND aj_type = @name`,
+    update_condition: `update temp_import set condition_id = @condition_id where condition = @name`,
+    update_product: `update temp_import set product_id = @product_id where product = @name`,
+    update_nimitt: `update temp_import set nimitt_id = @nimitt_id where nimitt = @name`,
+    update_pbk: `update temp_import set pbk_id = @pbk_id where pbk = @pbk`,
 }
 
 const unit = {
@@ -897,5 +932,5 @@ genDeptDB = {
 
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction
 };
