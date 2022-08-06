@@ -207,7 +207,7 @@
                   <td>
                      <div class="row">
                         <!-- mm dropdown -->
-                        <ng-select *ngIf="data.type == 'mm' || data.type == 'aj_mm'" class="custom"
+                        <ng-select *ngIf="data.type == 'mm' || data.type == 'aj_mm'" class="custom custom-import"
                            placeholder="Select MM" [virtualScroll]="true" [(ngModel)]="data.id"
                            [ngModelOptions]="{standalone: true}">
                            <ng-option selected="selected" disabled value="">-- Select MM --</ng-option>
@@ -217,7 +217,7 @@
 
                         <!-- item dropdown -->
                         <div class="col-4">
-                           <ng-select *ngIf="data.type == 'item'" class="custom" placeholder="Select Category"
+                           <ng-select *ngIf="data.type == 'item'" class="custom custom-import" placeholder="Select Category"
                               [virtualScroll]="true" (click)="catSelected($event)">
                               <ng-option selected="selected" disabled value="">-- Select Category --</ng-option>
                               <ng-option *ngFor="let item of categories" [value]="item._id">
@@ -226,7 +226,7 @@
                         </div>
                         <!-- item dropdown -->
                         <div class="col-4">
-                           <ng-select *ngIf="data.type == 'item'" class="custom" placeholder="Select Item"
+                           <ng-select *ngIf="data.type == 'item'" class="custom custom-import" placeholder="Select Item"
                               [virtualScroll]="true" (click)="itemSelected($event)" [(ngModel)]="data.id"
                               [ngModelOptions]="{standalone: true}">
                               <ng-option selected="selected" disabled value="">-- Select Item --</ng-option>
@@ -236,7 +236,7 @@
                         </div>
                         <!-- subitem dropdown -->
                         <div class="col-4">
-                           <ng-select *ngIf="data.type == 'item'" class="custom" placeholder="Select Subitem"
+                           <ng-select *ngIf="data.type == 'item'" class="custom custom-import" placeholder="Select Subitem"
                               [virtualScroll]="true" [(ngModel)]="data.id2"
                               [ngModelOptions]="{standalone: true}">
                               <ng-option selected="selected" disabled value="">-- Select Subitem --</ng-option>
@@ -246,7 +246,7 @@
                         </div>
 
                         <!-- pbk dropdown -->
-                        <ng-select *ngIf="data.type == 'pbk'" class="custom" placeholder="Select Pbk"
+                        <ng-select *ngIf="data.type == 'pbk'" class="custom custom-import" placeholder="Select Pbk"
                            [virtualScroll]="true" [(ngModel)]="data.pbk_id" [ngModelOptions]="{standalone: true}">
                            <ng-option selected="selected" disabled value="">-- Select Pbk --</ng-option>
                            <ng-option *ngFor="let item of pbks" [value]="item._id">
@@ -255,7 +255,7 @@
                         </ng-select>
 
                         <!-- aawak type dropdown -->
-                        <ng-select *ngIf="data.type == 'awk_type'" class="custom" placeholder="Select Aawak Type"
+                        <ng-select *ngIf="data.type == 'awk_type'" class="custom custom-import" placeholder="Select Aawak Type"
                            [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
                            <ng-option selected="selected" disabled value="">-- Select Aawak Type --</ng-option>
                            <ng-option *ngFor="let item of aawak_types" [value]="item._id">
@@ -263,7 +263,7 @@
                         </ng-select>
 
                         <!-- jawak type dropdown -->
-                        <ng-select *ngIf="data.type == 'jwk_type'" class="custom" placeholder="Select Jawak Type"
+                        <ng-select *ngIf="data.type == 'jwk_type'" class="custom custom-import" placeholder="Select Jawak Type"
                            [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
                            <ng-option selected="selected" disabled value="">-- Select Jawak Type --</ng-option>
                            <ng-option *ngFor="let item of jawak_types" [value]="item._id">
@@ -271,7 +271,7 @@
                         </ng-select>
 
                         <!-- Condition dropdown -->
-                        <ng-select *ngIf="data.type == 'condition'" class="custom" placeholder="Select Condition"
+                        <ng-select *ngIf="data.type == 'condition'" class="custom custom-import" placeholder="Select Condition"
                            [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
                            <ng-option selected="selected" disabled value="">-- Select Condition --</ng-option>
                            <ng-option *ngFor="let item of jawak_types" [value]="item._id">
@@ -279,7 +279,7 @@
                         </ng-select>
 
                         <!-- Nimitt dropdown -->
-                        <ng-select *ngIf="data.type == 'nimitt'" class="custom" placeholder="Select Nimitt"
+                        <ng-select *ngIf="data.type == 'nimitt'" class="custom custom-import" placeholder="Select Nimitt"
                            [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
                            <ng-option selected="selected" disabled value="">-- Select Nimitt --</ng-option>
                            <ng-option *ngFor="let item of nimitts" [value]="item._id">
