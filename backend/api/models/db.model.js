@@ -774,6 +774,7 @@ class dbModal {
           ref_id integer
     
         )`,
+        add_other_id_dictionary: `alter table dictionary add column id2 int`
       }
     ];
   migrationLength;

@@ -168,10 +168,10 @@
                                     <i class="uil-corner-down-right"></i>
                                     <span class="mx-1">{{j+1}}</span>
                                  </td>
-                                 <td [ngClass]="{'marked': !data.nimitt && !data.aj_mm_id}">{{jwk.aj_mm}}</td>
-                                 <td [ngClass]="{'marked': data.nimitt && !data.nimitt_id}">{{jwk.nimitt}} </td>
-                                 <td [ngClass]="{'marked': !data.aj_type_id}">{{jwk.aj_type}}</td>
-                                 <td [ngClass]="{'marked': !data.qty || !data.unit_id}">{{jwk.qty}} {{jwk.unit}}</td>
+                                 <td [ngClass]="{'marked': !jwk.aj_mm_id}">{{jwk.aj_mm}}</td>
+                                 <td [ngClass]="{'marked': jwk.nimitt && !jwk.nimitt_id}">{{jwk.nimitt}} </td>
+                                 <td [ngClass]="{'marked': !jwk.aj_type_id}">{{jwk.aj_type}}</td>
+                                 <td [ngClass]="{'marked': !jwk.qty || !jwk.unit_id}">{{jwk.qty}} {{jwk.unit}}</td>
                               </tr>
                            </table>
                         </td>
@@ -198,17 +198,17 @@
                <tr *ngFor="let data of unmatchedData | filter:term; let i=index">
                   <td>{{i+1}}</td>
                   <td>{{data.type}} </td>
-                  <td *ngIf="data.type == 'item'">{{data.item}} - {{data.subitem}} </td>
+                  <!-- <td *ngIf="data.type == 'item'">{{data.name}} - {{data.subitem}} </td> -->
                   <td *ngIf="data.type == 'pbk'">
                      {{data.pbk.roll_no ? data.pbk.roll_no : '____'}} {{data.pbk.pbk ? data.pbk.pbk : ''}} <br />
                      {{data.pbk.relation ? data.pbk.relation : ''}} {{data.pbk.relative ? data.pbk.relative : ''}}
                   </td>
-                  <td *ngIf="data.type != 'item' && data.type != 'pbk'">{{data.name}} </td>
+                  <td *ngIf="data.type != 'pbk'">{{data.name}} - {{data.extra_note ? data.extra_note : ''}} </td>
                   <td>
                      <div class="row">
                         <!-- mm dropdown -->
                         <ng-select *ngIf="data.type == 'mm' || data.type == 'aj_mm'" class="custom"
-                           placeholder="Select MM" [virtualScroll]="true" [(ngModel)]="data.mm_id"
+                           placeholder="Select MM" [virtualScroll]="true" [(ngModel)]="data.id"
                            [ngModelOptions]="{standalone: true}">
                            <ng-option selected="selected" disabled value="">-- Select MM --</ng-option>
                            <ng-option *ngFor="let item of mms" [value]="item._id">{{item.mm_hin}}:{{item.mm_eng}} :
@@ -227,7 +227,7 @@
                         <!-- item dropdown -->
                         <div class="col-4">
                            <ng-select *ngIf="data.type == 'item'" class="custom" placeholder="Select Item"
-                              [virtualScroll]="true" (click)="itemSelected($event)" [(ngModel)]="data.item_id"
+                              [virtualScroll]="true" (click)="itemSelected($event)" [(ngModel)]="data.id"
                               [ngModelOptions]="{standalone: true}">
                               <ng-option selected="selected" disabled value="">-- Select Item --</ng-option>
                               <ng-option *ngFor="let item of items" [value]="item._id">
@@ -237,7 +237,7 @@
                         <!-- subitem dropdown -->
                         <div class="col-4">
                            <ng-select *ngIf="data.type == 'item'" class="custom" placeholder="Select Subitem"
-                              [virtualScroll]="true" [(ngModel)]="data.subitem_id"
+                              [virtualScroll]="true" [(ngModel)]="data.id2"
                               [ngModelOptions]="{standalone: true}">
                               <ng-option selected="selected" disabled value="">-- Select Subitem --</ng-option>
                               <ng-option *ngFor="let item of subitems" [value]="item._id">
@@ -256,7 +256,7 @@
 
                         <!-- aawak type dropdown -->
                         <ng-select *ngIf="data.type == 'awk_type'" class="custom" placeholder="Select Aawak Type"
-                           [virtualScroll]="true" [(ngModel)]="data.aj_type_id" [ngModelOptions]="{standalone: true}">
+                           [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
                            <ng-option selected="selected" disabled value="">-- Select Aawak Type --</ng-option>
                            <ng-option *ngFor="let item of aawak_types" [value]="item._id">
                               {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
@@ -264,7 +264,7 @@
 
                         <!-- jawak type dropdown -->
                         <ng-select *ngIf="data.type == 'jwk_type'" class="custom" placeholder="Select Jawak Type"
-                           [virtualScroll]="true" [(ngModel)]="data.aj_type_id" [ngModelOptions]="{standalone: true}">
+                           [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
                            <ng-option selected="selected" disabled value="">-- Select Jawak Type --</ng-option>
                            <ng-option *ngFor="let item of jawak_types" [value]="item._id">
                               {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
@@ -272,7 +272,7 @@
 
                         <!-- Condition dropdown -->
                         <ng-select *ngIf="data.type == 'condition'" class="custom" placeholder="Select Condition"
-                           [virtualScroll]="true" [(ngModel)]="data.condition_id" [ngModelOptions]="{standalone: true}">
+                           [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
                            <ng-option selected="selected" disabled value="">-- Select Condition --</ng-option>
                            <ng-option *ngFor="let item of jawak_types" [value]="item._id">
                               {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
@@ -280,7 +280,7 @@
 
                         <!-- Nimitt dropdown -->
                         <ng-select *ngIf="data.type == 'nimitt'" class="custom" placeholder="Select Nimitt"
-                           [virtualScroll]="true" [(ngModel)]="data.nimitt_id" [ngModelOptions]="{standalone: true}">
+                           [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
                            <ng-option selected="selected" disabled value="">-- Select Nimitt --</ng-option>
                            <ng-option *ngFor="let item of nimitts" [value]="item._id">
                               {{item.nimitt_hin}}:{{item.nimitt_eng}}</ng-option>

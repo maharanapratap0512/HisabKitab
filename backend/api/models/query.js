@@ -852,16 +852,20 @@ const temp_import = {
         ``
 }
 
+const dictionary = {
+    insert: `insert into dictionary(type, name, extra_note, real_id, id2) values(@type, @name, @extra_note, @id, @id2)`
+}
+
 const excel_correction = {
-    update_mm: `update temp_import set mm_id = @mm_id where mm = @name`,
-    update_item: `update temp_import set item_id = @item_id, subitem_id = @subitem_id where item = @item AND subitem =@subitem `,
-    update_aj_mm: `update temp_import set aj_mm_id = @aj_mm_id where aj_mm = @name`,
-    update_awk_type: `update temp_import set aj_type_id = @aj_type_id where type = 'awk' AND aj_type = @name`,
-    update_jwk_type: `update temp_import set aj_type_id = @aj_type_id where type = 'jwk' AND aj_type = @name`,
-    update_condition: `update temp_import set condition_id = @condition_id where condition = @name`,
-    update_product: `update temp_import set product_id = @product_id where product = @name`,
-    update_nimitt: `update temp_import set nimitt_id = @nimitt_id where nimitt = @name`,
-    update_pbk: `update temp_import set pbk_id = @pbk_id where pbk = @pbk`,
+    update_mm: `update temp_import set mm_id = @id where mm = @name`,
+    update_item: `update temp_import set item_id = @id, subitem_id = @id2 where item = @name AND subitem =@extra_note `,
+    update_aj_mm: `update temp_import set aj_mm_id = @id where aj_mm = @name`,
+    update_awk_type: `update temp_import set aj_type_id = @id where type = 'awk' AND aj_type = @name`,
+    update_jwk_type: `update temp_import set aj_type_id = @id where type = 'jwk' AND aj_type = @name`,
+    update_condition: `update temp_import set condition_id = @id where condition = @name`,
+    update_product: `update temp_import set product_id = @id where product = @name`,
+    update_nimitt: `update temp_import set nimitt_id = @id where nimitt = @name`,
+    update_pbk: `update temp_import set pbk_id = @id where pbk = @pbk`,
 }
 
 const unit = {
@@ -932,5 +936,5 @@ genDeptDB = {
 
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary
 };

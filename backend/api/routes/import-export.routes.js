@@ -47,15 +47,15 @@ router.get('/', async (req, res, next) => {
 router.get('/correction', async (req, res, next) => {
     try {
         let correctionList = [];
-        correctionList.push(...DB.db.prepare(`select item, subitem, 'item' as type, null as item_id, null as subitem_id, false as dictionary from temp_import where (item IS NOT NULL AND item_id IS NULL) OR (subitem IS NOT NULL AND subitem_id IS NULL) group by item, subitem`).all());
-        correctionList.push(...DB.db.prepare(`select DISTINCT mm as name, 'mm' as type, null as mm_id, false as dictionary from temp_import where mm IS NOT NULL AND mm_id IS NULL`).all());
-        correctionList.push(...DB.db.prepare(`select DISTINCT pbk, 'pbk' as type, null as pbk_id, false as dictionary from temp_import where pbk IS NOT NULL AND pbk_id IS NULL`).all());
-        correctionList.push(...DB.db.prepare(`select DISTINCT aj_mm as name, 'aj_mm' as type, null as aj_mm_id, false as dictionary from temp_import where aj_mm IS NOT NULL AND aj_mm_id IS NULL`).all());
-        correctionList.push(...DB.db.prepare(`select DISTINCT aj_type as name, 'awk_type' as type, null as aj_type_id, false as dictionary from temp_import where aj_type IS NOT NULL AND aj_type_id IS NULL AND temp_import.type='awk'`).all());
-        correctionList.push(...DB.db.prepare(`select DISTINCT aj_type as name, 'jwk_type' as type, null as aj_type_id, false as dictionary from temp_import where aj_type IS NOT NULL AND aj_type_id IS NULL AND temp_import.type='jwk'`).all());
-        correctionList.push(...DB.db.prepare(`select DISTINCT condition as name, 'condition' as type, null as condition_id, false as dictionary from temp_import where condition IS NOT NULL AND condition_id IS NULL`).all());
-        correctionList.push(...DB.db.prepare(`select DISTINCT product as name, 'product' as type, null as product_id, false as dictionary from temp_import where product IS NOT NULL AND product_id IS NULL`).all());
-        correctionList.push(...DB.db.prepare(`select DISTINCT nimitt as name, 'nimitt' as type, null as nimitt_id, false as dictionary from temp_import where nimitt IS NOT NULL AND nimitt_id IS NULL`).all());
+        correctionList.push(...DB.db.prepare(`select item as name, subitem as extra_note, 'item' as type, null as id, null as id2, false as dictionary from temp_import where (item IS NOT NULL AND item_id IS NULL) OR (subitem IS NOT NULL AND subitem_id IS NULL) group by item, subitem`).all());
+        correctionList.push(...DB.db.prepare(`select DISTINCT mm as name, 'mm' as type, null as id, false as dictionary from temp_import where mm IS NOT NULL AND mm_id IS NULL`).all());
+        correctionList.push(...DB.db.prepare(`select DISTINCT pbk, 'pbk' as type, null as id, false as dictionary from temp_import where pbk IS NOT NULL AND pbk_id IS NULL`).all());
+        correctionList.push(...DB.db.prepare(`select DISTINCT aj_mm as name, 'aj_mm' as type, null as id, false as dictionary from temp_import where aj_mm IS NOT NULL AND aj_mm_id IS NULL`).all());
+        correctionList.push(...DB.db.prepare(`select DISTINCT aj_type as name, 'awk_type' as type, null as id, false as dictionary from temp_import where aj_type IS NOT NULL AND aj_type_id IS NULL AND temp_import.type='awk'`).all());
+        correctionList.push(...DB.db.prepare(`select DISTINCT aj_type as name, 'jwk_type' as type, null as id, false as dictionary from temp_import where aj_type IS NOT NULL AND aj_type_id IS NULL AND temp_import.type='jwk'`).all());
+        correctionList.push(...DB.db.prepare(`select DISTINCT condition as name, 'condition' as type, null as id, false as dictionary from temp_import where condition IS NOT NULL AND condition_id IS NULL`).all());
+        correctionList.push(...DB.db.prepare(`select DISTINCT product as name, 'product' as type, null as id, false as dictionary from temp_import where product IS NOT NULL AND product_id IS NULL`).all());
+        correctionList.push(...DB.db.prepare(`select DISTINCT nimitt as name, 'nimitt' as type, null as id, false as dictionary from temp_import where nimitt IS NOT NULL AND nimitt_id IS NULL`).all());
 
         res.json({
             success: true,
@@ -125,47 +125,27 @@ router.put('/correct', async (req, res, next) => {
     try {
         if (req.body && req.body.length > 0) {
             for (let i in req.body) {
-                if(req.body[i].type )
-                DB.runQuery('excel_correction', req.body[i].type, {obj:req.body[i]});
-                // switch (req.body[i].type) {
-                //     case "mm":
-                //         break;
-                //     case "aj_mm":
-                //         break;
-                //     case "item":
-                //         break;
-                //     case "pbk":
-                //         break;
-                //     case "awk_type":
-                //         break;
-                //     case "jwk_type":
-                //         break;
-                //     case "condition":
-                //         break;
-                //     case "product":
-                //         break;
-                //     case "nimitt":
-                //         break;
-                // }
-                if(req.body[i].dictionary){
-
+                if (req.body[i].type == 'pbk') {
+                    req.body[i].pbk = req.body[i].pbk ? JSON.stringify(req.body[i].pbk) : null;
+                }
+                DB.runQuery('excel_correction', 'update_'+req.body[i].type, { obj: req.body[i] });                
+                if (req.body[i].dictionary) {
+                    let obj = req.body[i];
+                    if (obj.type == 'pbk') {
+                        obj.name = obj.pbk ? JSON.stringify(obj.pbk) : null;
+                    }
+                    if (obj.type != 'item') {
+                        obj.extra_note = null;
+                        obj.id2 = null;
+                    }
+                    DB.insert('dictionary', req.body[i], null, false);
                 }
             }
         }
         res.json({
             success: true,
-            result: req.body
+            // result: req.body
         });
-        // DB.generateUpdateDB(req.params.dept_id).then(async (result) => {
-        //     res.json({
-        //         success: true,
-        //         result: result
-        //     });
-
-
-        // }, (reject) => {
-        //     next(reject);
-        // });
     } catch (err) { next(err) };
 });
 

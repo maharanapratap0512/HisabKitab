@@ -105,7 +105,7 @@ export class AawakComponent implements OnInit {
     jawak_detail: []
   }
   importPending: any = false;
-  loadingStatus:any = "मैं आत्मा शांत स्वरूप हूँ ।";
+  loadingStatus: any = "मैं आत्मा शांत स्वरूप हूँ ।";
   // months: any = [{no:1, name:'January'}]
   constructor(
     private fb: FormBuilder,
@@ -509,17 +509,26 @@ export class AawakComponent implements OnInit {
       let awk_keys = columns.splice(0, jawakStart);
       let jwk_keys = columns.splice(-jawakStart);
 
-      // console.log("awk_keys", awk_keys);
+      // console.log("exceldata", exceldata);
       // console.log("jwk_keys", jwk_keys);
 
       this.loadingStatus = "डाटा पढ़ा एवं सॉफ्टवेयर के डाटा से जोड़ा जा रहा है।";
       for (let i = startRow + 2; i < exceldata.length; i++) {
         let aawak_values = [];
         let jawak_values = [];
-        for (let j = 0; j < (awk_keys.length + jwk_keys.length); j++) {
-          j < jawakStart ? (exceldata[i][j] != undefined ? aawak_values.push(exceldata[i][j]) : false) :
-            (exceldata[i][j] != undefined ? jawak_values.push(exceldata[i][j]) : false);
+
+        if (exceldata[i].length == awk_keys.length) {
+          aawak_values = exceldata[i].splice(0, jawakStart);
         }
+        else if (exceldata[i].length == (awk_keys.length + jwk_keys.length)) {
+          jawak_values = exceldata[i].splice(jawakStart, (awk_keys.length + jwk_keys.length));
+        }
+
+        //old code
+        // for (let j = 0; j < (awk_keys.length + jwk_keys.length); j++) {                  
+        //   j < jawakStart ? (exceldata[i][j] != undefined ? aawak_values.push(exceldata[i][j]) : aawak_values.push(null)) :
+        //     (exceldata[i][j] != undefined ? jawak_values.push(exceldata[i][j]) : jawak_values.push(null));
+        // }
 
 
         // aawak[i] = aawak_values;
@@ -661,11 +670,13 @@ export class AawakComponent implements OnInit {
                 obj.nimitt_id = getnimitt ? getnimitt._id : null;
                 break;
               case "dept":
-              // case "department": obj.dept = aawak_values[i];
-              //   let getdept = this.departments.find((d: any) => [d.dept_hin, d.dept_eng, d.dept_code].includes(obj.dept));                
+                // case "department": obj.dept = aawak_values[i];
+                //   let getdept = this.departments.find((d: any) => [d.dept_hin, d.dept_eng, d.dept_code].includes(obj.dept));                
                 break;
               default: obj[awk_keys[i]] = aawak_values[i];
             }
+
+
           }
           if (!obj.roll_no && obj.pbk && obj.relation && obj.relative) {
             let getpbk = this.pbks.filter((p: any) => [p.pbk_hin, p.pbk_eng].includes(obj.pbk) && p.relation == obj.relation && p.relative_name == obj.relative);
@@ -674,6 +685,9 @@ export class AawakComponent implements OnInit {
             }
           }
           finalJson.push(obj);
+          // console.log("awk_keys", awk_keys);
+          // console.log("aawak_values", aawak_values);
+          // console.log("obj", obj);
         }
 
         if (jawak_values.length) {
@@ -720,10 +734,11 @@ export class AawakComponent implements OnInit {
           jwkobj.unit = obj.unit;
           jwkobj.dept_id = obj.dept_id;
           jwkobj.product_id = obj.product_id;
-          if (['', '-'].includes((typeof jawak_values[i] == "string" ? jawak_values[i].trim() : jawak_values[i]))) {
-            jawak_values[i] = null;
-          }
+
           for (let i = 0; i < jwk_keys.length && i < jawak_values.length; i++) {
+            if (['', '-'].includes((typeof jawak_values[i] == "string" ? jawak_values[i].trim() : jawak_values[i]))) {
+              jawak_values[i] = null;
+            }
             switch (jwk_keys[i].toLowerCase()) {
               case "date": jwkobj.date = jawak_values[i];
                 break;
@@ -754,6 +769,10 @@ export class AawakComponent implements OnInit {
                 jwkobj[jwk_keys[i]] = jawak_values[i];
             }
           }
+          console.log("awk_keys", jwk_keys);
+          console.log("aawak_values", jawak_values);
+          console.log("jwkobj", jwkobj);
+
           finalJson[finalJson.length - 1].jawak_detail.push(jwkobj);
         }
         // console.log("jawak_detail", jawak_detail);

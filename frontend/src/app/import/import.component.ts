@@ -59,7 +59,7 @@ export class ImportComponent implements OnInit {
       // this.departments = result.department ? result.department : [];
       this.pbks = result.pbk ? result.pbk : [];
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
-      this.jawak_types = result.aawak_type ? result.aawak_type : [];
+      this.jawak_types = result.jawak_type ? result.jawak_type : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
     this.settings = this.auth.webUser.settings;
@@ -123,7 +123,9 @@ export class ImportComponent implements OnInit {
   applyCorrection() {
 
     this.http.put(this.api.getUrl('IMPORTEXPORT') + 'correct', this.unmatchedData).subscribe((data:any)=>{
-      this.unmatchedData = data;
+      // this.unmatchedData = data;
+      this.getUnmatchedList();
+      this.getImportData();
     });
 
   }
