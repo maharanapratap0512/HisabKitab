@@ -1,37 +1,39 @@
 const router = require('express').Router();
 const fs = require('fs');
 const DBContex = require('../models/DBContex');
+const { product } = require('../models/query');
 const DB = new DBContex();
 
 
 
 //  get tempimport data
-router.get('/', async (req, res, next) => {
-    DB.getList('temp_import', { conditionString: `type = 'awk'` }).then(async (result) => {
-        for (let i in result.data) {
-            result.data[i].pbk = result.data[i].pbk ? JSON.parse(result.data[i].pbk) : {};
-            await DB.getList('temp_import', { conditionString: `ref_id=${result.data[i]._id}` }).then(async (jwk) => {
-                result.data[i].jawak_detail = jwk.data;
-            });
-        }
-        res.json({
-            success: true,
-            result: result.data,
-            total_count: result.total_count
-        });
-    }, (reject) => {
-        next(reject);
-    });
-});
+// router.get('/', async (req, res, next) => {
+//     DB.getList('temp_import', { conditionString: `type = 'awk'` }).then(async (result) => {
+//         for (let i in result.data) {
+//             result.data[i].pbk = result.data[i].pbk ? JSON.parse(result.data[i].pbk) : {};
+//             await DB.getList('temp_import', { conditionString: `ref_id=${result.data[i]._id}` }).then(async (jwk) => {
+//                 result.data[i].jawak_detail = jwk.data;
+//             });
+//         }
+//         res.json({
+//             success: true,
+//             result: result.data,
+//             total_count: result.total_count
+//         });
+//     }, (reject) => {
+//         next(reject);
+//     });
+// });
 
 //  get full temp import data
 router.get('/', async (req, res, next) => {
     DB.getList('temp_import', { full: true, conditionString: `type = 'awk'` }).then(async (result) => {
         for (let i in result.data) {
             result.data[i].pbk = result.data[i].pbk ? JSON.parse(result.data[i].pbk) : {};
-            await DB.getList('temp_import', { full: true, conditionString: `ref_id=${result.data[i]._id}` }).then(async (jwk) => {
-                result.data[i].jawak_detail = jwk.data;
-            });
+            result.data[i].jawak_detail = JSON.parse(result.data[i].jawak_detail);
+            // await DB.getList('temp_import', { full: true, conditionString: `ref_id=${result.data[i]._id}` }).then(async (jwk) => {
+            //     result.data[i].jawak_detail = jwk.data;
+            // });
         }
         res.json({
             success: true,
@@ -43,19 +45,35 @@ router.get('/', async (req, res, next) => {
     });
 });
 
-//get all updated list
+//get all unmatched or correction list
 router.get('/correction', async (req, res, next) => {
     try {
         let correctionList = [];
+        // item
         correctionList.push(...DB.db.prepare(`select item as name, subitem as extra_note, 'item' as type, null as id, null as id2, false as dictionary from temp_import where (item IS NOT NULL AND item_id IS NULL) OR (subitem IS NOT NULL AND subitem_id IS NULL) group by item, subitem`).all());
+        // mm
         correctionList.push(...DB.db.prepare(`select DISTINCT mm as name, 'mm' as type, null as id, false as dictionary from temp_import where mm IS NOT NULL AND mm_id IS NULL`).all());
+        // pbk
         correctionList.push(...DB.db.prepare(`select DISTINCT pbk, 'pbk' as type, null as id, false as dictionary from temp_import where pbk IS NOT NULL AND pbk_id IS NULL`).all());
-        correctionList.push(...DB.db.prepare(`select DISTINCT aj_mm as name, 'aj_mm' as type, null as id, false as dictionary from temp_import where aj_mm IS NOT NULL AND aj_mm_id IS NULL`).all());
+        // awk_type
         correctionList.push(...DB.db.prepare(`select DISTINCT aj_type as name, 'awk_type' as type, null as id, false as dictionary from temp_import where aj_type IS NOT NULL AND aj_type_id IS NULL AND temp_import.type='awk'`).all());
-        correctionList.push(...DB.db.prepare(`select DISTINCT aj_type as name, 'jwk_type' as type, null as id, false as dictionary from temp_import where aj_type IS NOT NULL AND aj_type_id IS NULL AND temp_import.type='jwk'`).all());
+        // condition
         correctionList.push(...DB.db.prepare(`select DISTINCT condition as name, 'condition' as type, null as id, false as dictionary from temp_import where condition IS NOT NULL AND condition_id IS NULL`).all());
+        // product
         correctionList.push(...DB.db.prepare(`select DISTINCT product as name, 'product' as type, null as id, false as dictionary from temp_import where product IS NOT NULL AND product_id IS NULL`).all());
+        // awk_nimitt
         correctionList.push(...DB.db.prepare(`select DISTINCT nimitt as name, 'nimitt' as type, null as id, false as dictionary from temp_import where nimitt IS NOT NULL AND nimitt_id IS NULL`).all());
+        // unit
+        correctionList.push(...DB.db.prepare(`select DISTINCT unit as name, 'unit' as type, null as id, false as dictionary from temp_import where unit IS NOT NULL AND unit_id IS NULL`).all());
+        //awk_mm
+        correctionList.push(...DB.db.prepare(`select DISTINCT aj_mm as name, 'aj_mm' as type, null as id, false as dictionary from temp_import where aj_mm IS NOT NULL AND aj_mm_id IS NULL`).all());
+
+        //jwk_mm        
+        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_mm') as name, 'aj_mm' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_mm_id') IS NULL`).all());
+        // jwk_type
+        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_type') as name, 'jwk_type' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_type_id') IS NULL`).all());
+        // jwk_nimitt
+        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.nimitt') as name, 'nimitt' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.nimitt_id') IS NULL`).all());
 
         res.json({
             success: true,
@@ -68,6 +86,102 @@ router.get('/correction', async (req, res, next) => {
     }
 });
 
+//  apply correction on unmatched or correction list
+router.put('/correction', async (req, res, next) => {
+    try {
+        if (req.body && req.body.length > 0) {
+            for (let i in req.body) {
+                let type = null;
+                let stmt = null;
+                switch (req.body[i].type) {
+                    case 'pbk': req.body[i].pbk = req.body[i].pbk ? JSON.stringify(req.body[i].pbk) : null;
+                        break;
+                    case 'aj_mm': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.aj_mm_id') IS NULL AND json_extract(json_each.value, '$.aj_mm') IS NOT NULL ;`);
+                        type = 'aj_mm';
+                        break;
+                    case 'jwk_type': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.aj_type_id') IS NULL AND json_extract(json_each.value, '$.aj_type') IS NOT NULL ;`);
+                        type = 'aj_type';
+                        break;
+                    case 'nimitt': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.nimitt_id') IS NULL AND json_extract(json_each.value, '$.nimitt') IS NOT NULL ;`);
+                        type = 'nimitt';
+                        break;
+                }
+
+                if (type && stmt) {
+                    for (const row of stmt.all()) {
+                        let obj = { _id: row._id, jawak_detail: [] }
+                        obj.jawak_detail = JSON.parse(row.jawak_detail);
+                        for (let j in obj.jawak_detail) {
+                            if (obj.jawak_detail[j][type] == req.body[i].name) {
+                                obj.jawak_detail[j][type + '_id'] = req.body[i].id;
+                            }
+                        }
+                        obj.jawak_detail = JSON.stringify(obj.jawak_detail);
+                        await DB.runQuery('excel_correction', 'update_jawak', { obj: obj });
+                    }
+                }
+                if (req.body[i].type == 'item' && req.body[i].subitem) {
+                    await DB.runQuery('excel_correction', 'update_subitem', { obj: req.body[i] });
+                } else {
+                    console.log("req.body[i].type",req.body[i].type);
+                    await DB.runQuery('excel_correction', 'update_' + req.body[i].type, { obj: req.body[i] });
+                }
+                if (req.body[i].dictionary) {
+                    let obj = req.body[i];
+                    if (obj.type != 'product') {
+                        if (obj.type == 'pbk') {
+                            obj.name = obj.pbk ? JSON.stringify(obj.pbk) : null;
+                        }
+                        if (obj.type != 'item') {
+                            obj.extra_note = null;
+                            obj.id2 = null;
+                        }
+                        await DB.insert('dictionary', req.body[i], null, false);
+                    }
+                }
+            }
+        }
+        res.json({
+            success: true,
+            // result: req.body
+        });
+    } catch (err) {
+        console.log(err); next(err)
+    };
+});
+
+
+//  final import
+router.put('/final', async (req, res, next) => {
+    try {
+        for (let row of req.body) {
+            DB.insert('aawak', {
+                date: row.date, mm_id: row.mm_id, pkt_num: row.pkt_num, pbk_id: row.pbk_id, aawak_mm_id: row.aj_mm_id,
+                item_id: row.item_id, subitem_id: row.subitem_id, product_id: row.product_id, item_detail: null,
+                condition_id: row.condition_id, qty: row.qty, rate: row.rate, actual_amt: row.actual_amt,
+                aawak_type_id: row.aj_type_id, unit_id: row.unit_id, description: null, nimitt_id: row.nimitt_id,
+                dept_id: row.dept_id, company_name: row.company_name, isbill: row.isbill, document: null
+            }, null, false).then((data) => {
+                if (data) {
+                    for (let jwk of row.jawak_detail) {
+                        DB.insert('jawak', {
+                            date: jwk.date ? jwk.date : row.date, mm_id: row.mm_id, pkt_num: jwk.pkt_num,
+                            pbk_id: jwk.pbk_id ? jwk.pbk_id : null, jawak_mm_id: jwk.aj_mm_id, item_id: row.item_id,
+                            subitem_id: row.subitem_id, product_id: row.product_id, item_detail: null,
+                            condition_id: jwk.condition_id, qty: jwk.qty, jawak_type_id: jwk.aj_type_id,
+                            unit_id: row.unit_id, description: null, nimitt_id: jwk.nimitt_id, company_name: row.company_name, aawak_ref_id: data, dept_id: row.dept_id
+                        }, null, false);
+                    }
+                }
+            });
+        }
+        await DB.runQuery('temp_import','delete');
+        res.json({
+            success: true
+        });
+
+    } catch (err) { next(err) };
+});
 
 //get all updated list
 router.get('/updates/:dept_id', async (req, res, next) => {
@@ -106,6 +220,8 @@ router.get('/updates/:dept_id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+
+
 //  department DB download
 // router.get('/updates/:dept_id', async (req, res, next) => {
 //     DB.generateUpdateDB(req.params.dept_id).then(async (result) => {
@@ -120,34 +236,6 @@ router.get('/updates/:dept_id', async (req, res, next) => {
 //     });
 // });
 
-//  department DB download
-router.put('/correct', async (req, res, next) => {
-    try {
-        if (req.body && req.body.length > 0) {
-            for (let i in req.body) {
-                if (req.body[i].type == 'pbk') {
-                    req.body[i].pbk = req.body[i].pbk ? JSON.stringify(req.body[i].pbk) : null;
-                }
-                DB.runQuery('excel_correction', 'update_'+req.body[i].type, { obj: req.body[i] });                
-                if (req.body[i].dictionary) {
-                    let obj = req.body[i];
-                    if (obj.type == 'pbk') {
-                        obj.name = obj.pbk ? JSON.stringify(obj.pbk) : null;
-                    }
-                    if (obj.type != 'item') {
-                        obj.extra_note = null;
-                        obj.id2 = null;
-                    }
-                    DB.insert('dictionary', req.body[i], null, false);
-                }
-            }
-        }
-        res.json({
-            success: true,
-            // result: req.body
-        });
-    } catch (err) { next(err) };
-});
 
 router.post('/', async (req, res, next) => {
     if (req.body) {
@@ -155,15 +243,8 @@ router.post('/', async (req, res, next) => {
             for (let i in req.body) {
                 req.body[i].type = 'awk';
                 req.body[i].pbk = ((req.body[i].pbk && (req.body[i].pbk.roll_no || req.body[i].pbk.pbk || req.body[i].pbk.relation || req.body[i].pbk.relative)) ? JSON.stringify(req.body[i].pbk) : null);
+                req.body[i].jawak_detail = (req.body[i].jawak_detail ? JSON.stringify(req.body[i].jawak_detail) : JSON.stringify([]))
                 let result = await DB.insert('temp_import', req.body[i], null, false);
-                if (result && req.body[i].jawak_detail && req.body[i].jawak_detail.length > 0) {
-                    for (let j in req.body[i].jawak_detail) {
-                        req.body[i].jawak_detail[j].ref_id = result;
-                        req.body[i].jawak_detail[j].type = 'jwk';
-                        req.body[i].jawak_detail[j].pbk = ((req.body[i].jawak_detail[j].pbk && (req.body[i].jawak_detail[j].pbk.roll_no || req.body[i].jawak_detail[j].pbk.pbk || req.body[i].jawak_detail[j].pbk.relation || req.body[i].jawak_detail[j].pbk.relative)) ? JSON.stringify(req.body[i].jawak_detail[j].pbk) : null);
-                        await DB.insert('temp_import', req.body[i].jawak_detail[j], null, false);
-                    }
-                }
             }
             await DB.getCount('temp_import').then(async (resolve) => {
                 res.json({

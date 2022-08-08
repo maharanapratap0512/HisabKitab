@@ -770,11 +770,33 @@ class dbModal {
           nimitt varchar(150),
           nimitt_id integer,
           dept varchar(100),
-          dept_id integer,
-          ref_id integer
+          dept_id integer,          
+          jawak_detail json
     
         )`,
-        add_other_id_dictionary: `alter table dictionary add column id2 int`
+        drop_dictionary: `DROP table IF EXISTS dictionary`,
+        dictionary: `create table IF NOT EXISTS dictionary(
+          _id integer primary key AUTOINCREMENT,
+          type varchar(50) not null,
+          name text not null,
+          extra_note text,	
+          id integer not null,
+          id2 int
+          created_at timestamp default (datetime('now', 'localtime')),
+          unique(type,name)
+        )`, 
+        drop_merge_history: `DROP table IF EXISTS merge_history`,
+        merge_history: `create table IF NOT EXISTS merge_history(
+          _id integer primary key AUTOINCREMENT,
+          type varchar(50) not null,
+          dept_id int not null,
+          old_id int not null,          	
+          new_id integer not null,
+          note text,
+          created_at timestamp default (datetime('now', 'localtime')),
+          unique(type, dept_id, old_id, new_id)
+        )`, 
+
       }
     ];
   migrationLength;

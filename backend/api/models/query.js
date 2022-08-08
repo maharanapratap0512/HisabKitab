@@ -331,7 +331,8 @@ const aawak = {
         left join nimitt nmt on nmt._id = aawak.nimitt_id
         left join state pst on pst._id = nmt.state_id ? limit @limit offset @offset`
     , order:
-        `date, aawak_mm_hin, aawak_mm_eng, pkt_num`
+        `date, aawak_mm_hin, aawak_mm_eng, pkt_num`,
+    delete: `delete from aawak where @condition`,
 }
 
 const bachat = {
@@ -780,6 +781,7 @@ const temp_import = {
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
         item.item_hin, item.item_eng, item.item_code,
         sil.subitem_hin, sil.subitem_eng,
+        product.sr_num, product.product_code,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         unit.unit_short, unit.unit_full,
@@ -805,13 +807,13 @@ const temp_import = {
         company_name, description, isbill, document, mm, mm_id, pbk,
         pbk_id, aj_mm, aj_mm_id, item, item_id, subitem, subitem_id,
         product, product_id, condition, condition_id, unit, unit_id, aj_type,
-        aj_type_id, nimitt, nimitt_id, dept, dept_id, ref_id)
+        aj_type_id, nimitt, nimitt_id, dept, dept_id, jawak_detail)
     values (
         @type, @date, @pkt_num, @item_detail, @qty, @rate, @actual_amt,
         @company_name, @description, @isbill, @document, @mm, @mm_id, @pbk,
         @pbk_id, @aj_mm, @aj_mm_id, @item, @item_id, @subitem, @subitem_id,
         @product, @product_id, @condition, @condition_id, @unit, @unit_id, @aj_type,
-        @aj_type_id, @nimitt, @nimitt_id, @dept, @dept_id, @ref_id)`
+        @aj_type_id, @nimitt, @nimitt_id, @dept, @dept_id, @jawak_detail)`
     , update:
         `update temp_import set 
         type=@type,
@@ -847,18 +849,39 @@ const temp_import = {
         nimitt_id=@nimitt_id,
         dept=@dept,
         dept_id=@dept_id,
-        ref_id=@ref_id`
+        jawak_detail=@jawak_detail`
     , order:
-        ``
+        ``,
+    delete: `delete from temp_import`,
 }
 
 const dictionary = {
-    insert: `insert into dictionary(type, name, extra_note, real_id, id2) values(@type, @name, @extra_note, @id, @id2)`
+    insert: `insert or ignore into dictionary(type, name, extra_note, id, id2) values(@type, @name, @extra_note, @id, @id2)`,
+    select: `select * from dictionary`,
+    select_full: `select * from dictionary`,
+    update: `update dictionary set 
+        type = @type, 
+        name = @name,
+        extra_note = @extra_note,
+        id = @id,
+        id2 = @id2`
 }
 
 const excel_correction = {
+    get_mm: `select DISTINCT mm as name, 'mm' as type, null as id, false as dictionary from temp_import where mm IS NOT NULL AND mm_id IS NULL`,
+    get_aj_mm: `select DISTINCT aj_mm as name, 'aj_mm' as type, null as id, false as dictionary from temp_import where aj_mm IS NOT NULL AND aj_mm_id IS NULL`,
+    get_item: `select item as name, subitem as extra_note, 'item' as type, null as id, null as id2, false as dictionary from temp_import where (item IS NOT NULL AND item_id IS NULL) OR (subitem IS NOT NULL AND subitem_id IS NULL) group by item, subitem`,
+    get_pbk: `select DISTINCT pbk, 'pbk' as type, null as id, false as dictionary from temp_import where pbk IS NOT NULL AND pbk_id IS NULL`,
+    get_awk_type: `select DISTINCT aj_type as name, 'awk_type' as type, null as id, false as dictionary from temp_import where aj_type IS NOT NULL AND aj_type_id IS NULL AND temp_import.type='awk'`,
+    get_jwk_type: `select DISTINCT aj_type as name, 'jwk_type' as type, null as id, false as dictionary from temp_import where aj_type IS NOT NULL AND aj_type_id IS NULL AND temp_import.type='jwk'`,
+    get_condition: `select DISTINCT condition as name, 'condition' as type, null as id, false as dictionary from temp_import where condition IS NOT NULL AND condition_id IS NULL`,
+    get_product: `select DISTINCT product as name, 'product' as type, null as id, false as dictionary from temp_import where product IS NOT NULL AND product_id IS NULL`,
+    get_nimitt: `select DISTINCT nimitt as name, 'nimitt' as type, null as id, false as dictionary from temp_import where nimitt IS NOT NULL AND nimitt_id IS NULL`,
+    get_unit: `select DISTINCT unit as name, 'unit' as type, null as id, false as dictionary from temp_import where unit IS NOT NULL AND unit_id IS NULL`,
+
     update_mm: `update temp_import set mm_id = @id where mm = @name`,
-    update_item: `update temp_import set item_id = @id, subitem_id = @id2 where item = @name AND subitem =@extra_note `,
+    update_item: `update temp_import set item_id = @id, subitem_id = @id2 where item = @name`,
+    update_subitem: `update temp_import set item_id = @id, subitem_id = @id2 where item = @name AND subitem = @extra_note`,
     update_aj_mm: `update temp_import set aj_mm_id = @id where aj_mm = @name`,
     update_awk_type: `update temp_import set aj_type_id = @id where type = 'awk' AND aj_type = @name`,
     update_jwk_type: `update temp_import set aj_type_id = @id where type = 'jwk' AND aj_type = @name`,
@@ -866,6 +889,8 @@ const excel_correction = {
     update_product: `update temp_import set product_id = @id where product = @name`,
     update_nimitt: `update temp_import set nimitt_id = @id where nimitt = @name`,
     update_pbk: `update temp_import set pbk_id = @id where pbk = @pbk`,
+    update_unit: `update temp_import set unit_id = @id where unit = @name`,
+    update_jawak: `update temp_import set jawak_detail = @jawak_detail where _id = @_id`,
 }
 
 const unit = {

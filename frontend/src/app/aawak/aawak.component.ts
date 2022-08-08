@@ -105,6 +105,7 @@ export class AawakComponent implements OnInit {
     jawak_detail: []
   }
   importPending: any = false;
+  dictionary: any = [];
   loadingStatus: any = "मैं आत्मा शांत स्वरूप हूँ ।";
   // months: any = [{no:1, name:'January'}]
   constructor(
@@ -125,6 +126,7 @@ export class AawakComponent implements OnInit {
     this.spinner.show();
     this.getaawakData();
     this.checkTempImport();
+    this.getDictionary();
 
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
@@ -161,6 +163,12 @@ export class AawakComponent implements OnInit {
         this.isLoader = false;
       }
       this.isLoader = false;
+    });
+  }
+
+  getDictionary() {
+    this.http.get(this.api.getUrl('DICT')).subscribe((data: any) => {
+      this.dictionary = data['result'] || [];
     });
   }
 
@@ -461,8 +469,6 @@ export class AawakComponent implements OnInit {
   }
 
   excelImport(ev: any) {
-    console.log(ev);
-
     let workBooks: any = null;
     let jsonData = null;
     const reader = new FileReader();
@@ -508,7 +514,6 @@ export class AawakComponent implements OnInit {
 
       let awk_keys = columns.splice(0, jawakStart);
       let jwk_keys = columns.splice(-jawakStart);
-
       // console.log("exceldata", exceldata);
       // console.log("jwk_keys", jwk_keys);
 
@@ -573,7 +578,6 @@ export class AawakComponent implements OnInit {
             nimitt_id: null,
             dept: this.auth.webUser.dept_eng,
             dept_id: this.auth.webUser.dept_id,
-            ref_id: null,
             jawak_detail: []
           };
           for (let i = 0; i < awk_keys.length && i < aawak_values.length; i++) {
@@ -583,7 +587,12 @@ export class AawakComponent implements OnInit {
             switch (awk_keys[i].toLowerCase()) {
               case "mm": obj.mm = aawak_values[i];
                 let getmm = this.mms.find((m: any) => [m.mm_hin, m.mm_eng, m.mm_code].includes(obj.mm));
-                obj.mm_id = getmm ? getmm._id : null;
+                if (getmm) {
+                  obj.mm_id = getmm._id;
+                } else {
+                  let dictmm = this.dictionary.find((d: any) => d.type == "mm" && d.name == obj.mm);
+                  obj.mm_id = dictmm ? dictmm.id : null;
+                }
                 break;
               case "date": obj.date = aawak_values[i];
                 break;
@@ -608,7 +617,12 @@ export class AawakComponent implements OnInit {
                 break;
               case "item": obj.item = aawak_values[i];
                 let getitem = this.items.find((i: any) => [i.item_hin, i.item_eng, i.item_code].includes(obj.item));
-                obj.item_id = getitem ? getitem._id : null;
+                if (getitem) {
+                  obj.item_id = getitem._id;
+                } else {
+                  let dictitem = this.dictionary.find((d: any) => d.type == "item" && d.name == obj.item && !d.extra_note)
+                  obj.item_id = dictitem ? dictitem.id : null;
+                }
                 break;
               case "subitem": obj.subitem = aawak_values[i];
                 if (obj.item_id) {
@@ -631,21 +645,36 @@ export class AawakComponent implements OnInit {
                 break;
               case "condition": obj.condition = aawak_values[i];
                 let getcondition = this.conditions.find((c: any) => [c.list_name_hin, c.list_name_eng].includes(obj.condition));
-                obj.condition_id = getcondition ? getcondition._id : null;
+                if (getcondition) {
+                  obj.condition_id = getcondition._id;
+                } else {
+                  let dictcondition = this.dictionary.find((d: any) => d.type == "condition" && d.name == obj.condition)
+                  obj.condition_id = dictcondition ? dictcondition.id : null;
+                }
                 break;
               case "aawak mm":
               case "aawak_mm":
               case "awk_mm":
               case "awk mm": obj.aj_mm = aawak_values[i];
                 let getawkmm = this.mms.find((m: any) => [m.mm_hin, m.mm_eng, m.mm_code].includes(obj.aj_mm));
-                obj.aj_mm_id = getawkmm ? getawkmm._id : null;
+                if (getawkmm) {
+                  obj.aj_mm_id = getawkmm._id;
+                } else {
+                  let dictaj_mm = this.dictionary.find((d: any) => d.type == "aj_mm" && d.name == obj.aj_mm)
+                  obj.aj_mm_id = dictaj_mm ? dictaj_mm.id : null;
+                }
                 break;
               case "aawak type":
               case "awk type":
               case "awk_type":
               case "aawak_type": obj.aj_type = aawak_values[i];
                 let getaawak_type = this.aawak_types.find((c: any) => [c.list_name_hin, c.list_name_eng].includes(obj.aj_type));
-                obj.aj_type_id = getaawak_type ? getaawak_type._id : null;
+                if (getaawak_type) {
+                  obj.aj_type_id = getaawak_type._id;
+                } else {
+                  let dictaj_type = this.dictionary.find((d: any) => d.type == "awk_type" && d.name == obj.aj_type)
+                  obj.aj_type_id = dictaj_type ? dictaj_type.id : null;
+                }
                 break;
               case "qty":
               case "quantity": obj.qty = aawak_values[i];
@@ -660,14 +689,30 @@ export class AawakComponent implements OnInit {
                 break;
               case "unit": obj.unit = aawak_values[i];
                 let getunit = this.units.find((u: any) => [u.unit_short, u.unit_full].includes(obj.unit));
-                obj.unit_id = getunit ? getunit._id : null;
+                if (getunit) {
+                  obj.unit_id = getunit._id;
+                } else {
+                  let dictunit = this.dictionary.find((d: any) => d.type == "unit" && d.name == obj.unit)
+                  obj.unit_id = dictunit ? dictunit.id : null;
+                }
                 break;
-              case "bill": obj.isbill = aawak_values[i];
+              case "bill":
+                if ([true, 'true', 'yes', 1].includes((typeof aawak_values[i] == "string" ? aawak_values[i].trim().toLowerCase() : aawak_values[i]))) {
+                  obj.isbill = 1;
+                }
+                else {
+                  obj.isbill = 0;
+                }
                 break;
               case "nimitt":
                 obj.nimitt = aawak_values[i];
                 let getnimitt = this.nimitts.find((n: any) => [n.nimitt_hin, n.nimitt_eng, n.roll_no].includes(obj.nimitt));
-                obj.nimitt_id = getnimitt ? getnimitt._id : null;
+                if (getnimitt) {
+                  obj.nimitt_id = getnimitt._id;
+                } else {
+                  let dictnimitt = this.dictionary.find((d: any) => d.type == "nimitt" && d.name == obj.nimitt)
+                  obj.nimitt_id = dictnimitt ? dictnimitt.id : null;
+                }
                 break;
               case "dept":
                 // case "department": obj.dept = aawak_values[i];
@@ -682,12 +727,18 @@ export class AawakComponent implements OnInit {
             let getpbk = this.pbks.filter((p: any) => [p.pbk_hin, p.pbk_eng].includes(obj.pbk) && p.relation == obj.relation && p.relative_name == obj.relative);
             if (getpbk && getpbk.length == 1) {
               obj.pbk_id = getpbk[0]._id;
+            } else {
+              let dictpbk = this.dictionary.find((d: any) => d.type == "pbk" && d.name == JSON.stringify(obj.pbk))
+              obj.pbk_id = dictpbk ? dictpbk.id : null;
             }
           }
+          if (obj.subitem && !obj.subitem_id) {
+            let dictitem = this.dictionary.find((d: any) => d.type == "item" && d.name == obj.item && d.extra_note == obj.subitem)
+            obj.item_id = dictitem ? dictitem.id : null;
+            obj.subitem_id = dictitem ? dictitem.id2 : null;
+          }
+
           finalJson.push(obj);
-          // console.log("awk_keys", awk_keys);
-          // console.log("aawak_values", aawak_values);
-          // console.log("obj", obj);
         }
 
         if (jawak_values.length) {
@@ -725,7 +776,6 @@ export class AawakComponent implements OnInit {
             nimitt_id: null,
             dept: this.auth.webUser.dept_eng,
             dept_id: this.auth.webUser.dept_id,
-            ref_id: null,
           };
           jwkobj.mm_id = obj.mm_id;
           jwkobj.item_id = obj.item_id;
@@ -747,20 +797,41 @@ export class AawakComponent implements OnInit {
               case "jawak_mm":
               case "jawak mm": jwkobj.aj_mm = jawak_values[i];
                 let getmm = this.mms.find((m: any) => [m.mm_hin, m.mm_eng, m.mm_code].includes(jwkobj.aj_mm));
-                jwkobj.aj_mm_id = getmm ? getmm._id : null;
+                if (getmm) {
+                  jwkobj.aj_mm_id = getmm._id;
+                  jwkobj.aj_mm_hin = getmm.mm_hin;
+                  jwkobj.aj_mm_code = getmm.mm_code;
+                } else {
+                  let dictaj_mm = this.dictionary.find((d: any) => d.type == "aj_mm" && d.name == jwkobj.aj_mm)
+                  jwkobj.aj_mm_id = dictaj_mm ? dictaj_mm.id : null;
+                }
+
                 break;
               case "kisko diya":
               case "person":
               case "kisko_diya": jwkobj.nimitt = jawak_values[i];
                 let getnimitt = this.nimitts.find((n: any) => [n.nimitt_hin, n.nimitt_eng, n.roll_no].includes(jwkobj.nimitt));
-                jwkobj.nimitt_id = getnimitt ? getnimitt._id : null;
+                if (getnimitt) {
+                  jwkobj.nimitt_id = getnimitt._id;
+                  jwkobj.nimitt_hin = getnimitt.nimitt_hin;
+                  jwkobj.nimitt_state_hin = getnimitt.state_hin;
+                } else {
+                  let dictnimitt = this.dictionary.find((d: any) => d.type == "nimitt" && d.name == jwkobj.nimitt)
+                  jwkobj.nimitt_id = dictnimitt ? dictnimitt.id : null;
+                }
                 break;
               case "jwk_type":
               case "jwk type":
               case "jawak_type":
               case "jawak type": jwkobj.aj_type = jawak_values[i];
                 let getjawak_type = this.jawak_types.find((c: any) => [c.list_name_hin, c.list_name_eng].includes(jwkobj.aj_type));
-                jwkobj.aj_type_id = getjawak_type ? getjawak_type._id : null;
+                if (getjawak_type) {
+                  jwkobj.aj_type_id = getjawak_type._id;
+                  jwkobj.aj_type_hin = getjawak_type.list_name_hin;
+                } else {
+                  let dictaj_type = this.dictionary.find((d: any) => d.type == "jwk_type" && d.name == jwkobj.aj_type)
+                  jwkobj.aj_type_id = dictaj_type ? dictaj_type.id : null;
+                }
                 break;
               case "qty":
               case "quantity": jwkobj.qty = jawak_values[i];
@@ -769,9 +840,6 @@ export class AawakComponent implements OnInit {
                 jwkobj[jwk_keys[i]] = jawak_values[i];
             }
           }
-          console.log("awk_keys", jwk_keys);
-          console.log("aawak_values", jawak_values);
-          console.log("jwkobj", jwkobj);
 
           finalJson[finalJson.length - 1].jawak_detail.push(jwkobj);
         }
@@ -801,10 +869,10 @@ export class AawakComponent implements OnInit {
   importResponse(ev: any) {
     console.log("respose", ev);
 
-    switch (ev) {
-      case "deleted": this.closeModal();
-        this.importPending = false;
-        break;
+    if (ev) {
+      this.closeModal();
+      this.checkTempImport();
+      this.getaawakData();
     }
   }
 }

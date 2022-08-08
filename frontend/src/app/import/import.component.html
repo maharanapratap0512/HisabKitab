@@ -31,7 +31,7 @@
                </ng-select>
             </div>
          </li> -->
-         <li class="nav-item">
+         <li class="nav-item" *ngIf="unmatchedData.length > 0">
             <a href="#correction" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
                Make Correction
                <!-- <span class="translate-middle bell badge rounded-pill bg-danger">
@@ -55,23 +55,21 @@
                </span>
             </a>
          </li> -->
-         <li class="nav-item">
+         <!-- <li class="nav-item">
             <a href="#skipped" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
                Skipped Data
                <span class="translate-middle bell badge rounded-pill" style="background-color: #da2534;">
-                  <!-- {{skippeddata.length}} -->
                </span>
             </a>
-         </li>
+         </li> -->
 
-         <li class="nav-item" style="margin-left: auto;">
+         <!-- <li class="nav-item" style="margin-left: auto;">
             <a class="nav-link rounded-0">
                Successfully Imported
                <span class="translate-middle bell badge rounded-pill bg-success">
-                  <!-- {{finaldata.length}} -->
                </span>
             </a>
-         </li>
+         </li> -->
 
       </ul>
    </div>
@@ -98,6 +96,7 @@
                   <th style="width: 70px;">Rate</th>
                   <th style="width: 70px;">Amount</th>
                   <th style="width: 80px;">Aawak Type</th>
+                  <th style="width: 70px;">Bill</th>
                   <th style="width: 80px;">Nimitt</th>
                   <th style="width: 80px;">Dept</th>
                </tr>
@@ -127,7 +126,7 @@
                         {{data.product?data.product:'-'}}
                      </td>
                      <td>
-                        {{data.company?data.company:'-'}}
+                        {{data.company_name?data.company_name:'-'}}
                      </td>
                      <td [ngClass]="{'marked': data.condition && !data.condition_id}">
                         {{data.condition?data.condition:'-'}}
@@ -140,6 +139,7 @@
                      <td [ngClass]="{'marked': !data.aj_type_id}">
                         {{data.aj_type?data.aj_type:'-'}}
                      </td>
+                     <td>{{data.isbill?'true':'false'}}</td>
                      <td [ngClass]="{'marked': data.nimitt && !data.nimitt_id}">
                         {{data.nimitt?data.nimitt:'-'}}
                      </td>
@@ -184,123 +184,249 @@
 
       <!-- correction -->
       <div class="tab-pane p-4" id="correction" style="overflow: auto;">
-         <table id="datatable-buttons" class="table table-hover dt-responsive">
-            <thead>
-               <tr>
-                  <th style="width: 50px;">No.</th>
-                  <th style="width: 100px;">Type</th>
-                  <th style="width: 200px;">Name</th>
-                  <th style="width: 500px;">Select Proper Value</th>
-                  <th style="width: 100px;">Dictionary</th>
-               </tr>
-            </thead>
-            <tbody>
-               <tr *ngFor="let data of unmatchedData | filter:term; let i=index">
-                  <td>{{i+1}}</td>
-                  <td>{{data.type}} </td>
-                  <!-- <td *ngIf="data.type == 'item'">{{data.name}} - {{data.subitem}} </td> -->
-                  <td *ngIf="data.type == 'pbk'">
-                     {{data.pbk.roll_no ? data.pbk.roll_no : '____'}} {{data.pbk.pbk ? data.pbk.pbk : ''}} <br />
-                     {{data.pbk.relation ? data.pbk.relation : ''}} {{data.pbk.relative ? data.pbk.relative : ''}}
-                  </td>
-                  <td *ngIf="data.type != 'pbk'">{{data.name}} - {{data.extra_note ? data.extra_note : ''}} </td>
-                  <td>
-                     <div class="row">
-                        <!-- mm dropdown -->
-                        <ng-select *ngIf="data.type == 'mm' || data.type == 'aj_mm'" class="custom custom-import"
-                           placeholder="Select MM" [virtualScroll]="true" [(ngModel)]="data.id"
-                           [ngModelOptions]="{standalone: true}">
-                           <ng-option selected="selected" disabled value="">-- Select MM --</ng-option>
-                           <ng-option *ngFor="let item of mms" [value]="item._id">{{item.mm_hin}}:{{item.mm_eng}} :
-                              {{item.mm_code}}</ng-option>
-                        </ng-select>
-
-                        <!-- item dropdown -->
-                        <div class="col-4">
-                           <ng-select *ngIf="data.type == 'item'" class="custom custom-import" placeholder="Select Category"
-                              [virtualScroll]="true" (click)="catSelected($event)">
-                              <ng-option selected="selected" disabled value="">-- Select Category --</ng-option>
-                              <ng-option *ngFor="let item of categories" [value]="item._id">
-                                 {{item.category_hin}}:{{item.category_eng}}</ng-option>
-                           </ng-select>
-                        </div>
-                        <!-- item dropdown -->
-                        <div class="col-4">
-                           <ng-select *ngIf="data.type == 'item'" class="custom custom-import" placeholder="Select Item"
-                              [virtualScroll]="true" (click)="itemSelected($event)" [(ngModel)]="data.id"
+         <div class="row" *ngIf="unmatchedData.length > 0">
+            <table id="datatable-buttons" class="table table-hover dt-responsive" *ngIf="unmatchedData.length > 0">
+               <thead>
+                  <tr>
+                     <th style="width: 50px;">No.</th>
+                     <th style="width: 100px;">Type</th>
+                     <th style="width: 200px;">Name</th>
+                     <th style="width: 500px;">Select Proper Value</th>
+                     <th style="width: 100px;">Dictionary</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr *ngFor="let data of unmatchedData | filter:term; let i=index">
+                     <td>{{i+1}}</td>
+                     <td>{{data.type}} </td>
+                     <!-- <td *ngIf="data.type == 'item'">{{data.name}} - {{data.subitem}} </td> -->
+                     <td *ngIf="data.type == 'pbk'">
+                        {{data.pbk.roll_no ? data.pbk.roll_no : '____'}} {{data.pbk.pbk ? data.pbk.pbk : ''}} <br />
+                        {{data.pbk.relation ? data.pbk.relation : ''}} {{data.pbk.relative ? data.pbk.relative : ''}}
+                     </td>
+                     <td *ngIf="data.type != 'pbk'">{{data.name}} - {{data.extra_note ? data.extra_note : ''}} </td>
+                     <td>
+                        <div class="row">
+                           <!-- mm dropdown -->
+                           <ng-select *ngIf="data.type == 'mm' || data.type == 'aj_mm'" class="custom custom-import"
+                              placeholder="Select MM" [virtualScroll]="true" [(ngModel)]="data.id"
                               [ngModelOptions]="{standalone: true}">
-                              <ng-option selected="selected" disabled value="">-- Select Item --</ng-option>
-                              <ng-option *ngFor="let item of items" [value]="item._id">
-                                 {{item.item_hin}}:{{item.item_eng}}</ng-option>
+                              <ng-option selected="selected" disabled value="">-- Select MM --</ng-option>
+                              <ng-option *ngFor="let item of mms" [value]="item._id">{{item.mm_hin}}:{{item.mm_eng}} :
+                                 {{item.mm_code}}</ng-option>
                            </ng-select>
-                        </div>
-                        <!-- subitem dropdown -->
-                        <div class="col-4">
-                           <ng-select *ngIf="data.type == 'item'" class="custom custom-import" placeholder="Select Subitem"
-                              [virtualScroll]="true" [(ngModel)]="data.id2"
+
+                           <!-- item dropdown -->
+                           <div class="col-4">
+                              <ng-select *ngIf="data.type == 'item'" class="custom custom-import"
+                                 placeholder="Select Category" [virtualScroll]="true" (change)="catSelected($event)">
+                                 <ng-option selected="selected" disabled value="">-- Select Category --</ng-option>
+                                 <ng-option *ngFor="let item of categories" [value]="item._id">
+                                    {{item.category_hin}}:{{item.category_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                           <!-- item dropdown -->
+                           <div class="col-4">
+                              <ng-select *ngIf="data.type == 'item'" class="custom custom-import"
+                                 placeholder="Select Item" [virtualScroll]="true" [(ngModel)]="data.id"
+                                 [ngModelOptions]="{standalone: true}" (change)="itemSelected($event)">
+                                 <ng-option selected="selected" disabled value="">-- Select Item --</ng-option>
+                                 <ng-option *ngFor="let item of items" [value]="item._id">
+                                    {{item.item_hin}}:{{item.item_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                           <!-- subitem dropdown -->
+                           <div class="col-4">
+                              <ng-select *ngIf="data.type == 'item'" class="custom custom-import"
+                                 placeholder="Select Subitem" [virtualScroll]="true" [(ngModel)]="data.id2"
+                                 [ngModelOptions]="{standalone: true}">
+                                 <ng-option selected="selected" disabled value="">-- Select Subitem --</ng-option>
+                                 <ng-option *ngFor="let item of subitems" [value]="item._id">
+                                    {{item.subitem_hin}}:{{item.subitem_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+
+                           <!-- pbk dropdown -->
+                           <ng-select *ngIf="data.type == 'pbk'" class="custom custom-import" placeholder="Select Pbk"
+                              [virtualScroll]="true" [(ngModel)]="data.pbk_id" [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Pbk --</ng-option>
+                              <ng-option *ngFor="let item of pbks" [value]="item._id">
+                                 {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :
+                                 {{item.relative_name}}</ng-option>
+                           </ng-select>
+
+                           <!-- aawak type dropdown -->
+                           <ng-select *ngIf="data.type == 'awk_type'" class="custom custom-import"
+                              placeholder="Select Aawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
                               [ngModelOptions]="{standalone: true}">
-                              <ng-option selected="selected" disabled value="">-- Select Subitem --</ng-option>
-                              <ng-option *ngFor="let item of subitems" [value]="item._id">
-                                 {{item.subitem_hin}}:{{item.subitem_eng}}</ng-option>
+                              <ng-option selected="selected" disabled value="">-- Select Aawak Type --</ng-option>
+                              <ng-option *ngFor="let item of aawak_types" [value]="item._id">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
                            </ng-select>
+
+                           <!-- jawak type dropdown -->
+                           <ng-select *ngIf="data.type == 'jwk_type'" class="custom custom-import"
+                              placeholder="Select Jawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Jawak Type --</ng-option>
+                              <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                           </ng-select>
+
+                           <!-- Condition dropdown -->
+                           <ng-select *ngIf="data.type == 'condition'" class="custom custom-import"
+                              placeholder="Select Condition" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Condition --</ng-option>
+                              <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                           </ng-select>
+
+                           <!-- Nimitt dropdown -->
+                           <ng-select *ngIf="data.type == 'nimitt'" class="custom custom-import"
+                              placeholder="Select Nimitt" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Nimitt --</ng-option>
+                              <ng-option *ngFor="let item of nimitts" [value]="item._id">
+                                 {{item.nimitt_hin}}:{{item.nimitt_eng}} ({{item.state_hin}})</ng-option>
+                           </ng-select>
+
+                           <!-- Unit dropdown -->
+                           <ng-select *ngIf="data.type == 'unit'" class="custom custom-import" placeholder="Select Unit"
+                              [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Unit --</ng-option>
+                              <ng-option *ngFor="let item of units" [value]="item._id">
+                                 {{item.unit_short}}:{{item.unit_full}}</ng-option>
+                           </ng-select>
+
                         </div>
-
-                        <!-- pbk dropdown -->
-                        <ng-select *ngIf="data.type == 'pbk'" class="custom custom-import" placeholder="Select Pbk"
-                           [virtualScroll]="true" [(ngModel)]="data.pbk_id" [ngModelOptions]="{standalone: true}">
-                           <ng-option selected="selected" disabled value="">-- Select Pbk --</ng-option>
-                           <ng-option *ngFor="let item of pbks" [value]="item._id">
-                              {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :
-                              {{item.relative_name}}</ng-option>
-                        </ng-select>
-
-                        <!-- aawak type dropdown -->
-                        <ng-select *ngIf="data.type == 'awk_type'" class="custom custom-import" placeholder="Select Aawak Type"
-                           [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
-                           <ng-option selected="selected" disabled value="">-- Select Aawak Type --</ng-option>
-                           <ng-option *ngFor="let item of aawak_types" [value]="item._id">
-                              {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
-                        </ng-select>
-
-                        <!-- jawak type dropdown -->
-                        <ng-select *ngIf="data.type == 'jwk_type'" class="custom custom-import" placeholder="Select Jawak Type"
-                           [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
-                           <ng-option selected="selected" disabled value="">-- Select Jawak Type --</ng-option>
-                           <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                              {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
-                        </ng-select>
-
-                        <!-- Condition dropdown -->
-                        <ng-select *ngIf="data.type == 'condition'" class="custom custom-import" placeholder="Select Condition"
-                           [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
-                           <ng-option selected="selected" disabled value="">-- Select Condition --</ng-option>
-                           <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                              {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
-                        </ng-select>
-
-                        <!-- Nimitt dropdown -->
-                        <ng-select *ngIf="data.type == 'nimitt'" class="custom custom-import" placeholder="Select Nimitt"
-                           [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
-                           <ng-option selected="selected" disabled value="">-- Select Nimitt --</ng-option>
-                           <ng-option *ngFor="let item of nimitts" [value]="item._id">
-                              {{item.nimitt_hin}}:{{item.nimitt_eng}}</ng-option>
-                        </ng-select>
-
-                     </div>
-                  </td>
-                  <td><input type="checkbox" class="form-check-input" [(ngModel)]="data.dictionary"
-                        [ngModelOptions]="{standalone: true}"> </td>
-               </tr>
-            </tbody>
-         </table>
-         <div class="row">
+                     </td>
+                     <td><input type="checkbox" class="form-check-input" [(ngModel)]="data.dictionary"
+                           [ngModelOptions]="{standalone: true}"> </td>
+                  </tr>
+               </tbody>
+            </table>
             <div class="col-10"></div>
             <div class="col-2">
                <button class="w-100 btn btn-warning" (click)="applyCorrection()">Apply</button>
             </div>
          </div>
+         
       </div>
 
+      <!-- tobeimport -->
+      <div class="tab-pane p-4" id="tobeimport" style="overflow: auto;">
+         <div class="row" *ngIf="unmatchedData.length < 1">
+            <div class="col-10">
+               कोई भी करेक्शन की जरूरत नहीं है, आगे डाटा वेरीफाई करके इम्पोर्ट करे ।
+            </div>
+            <div class="col-2">
+               <button class="w-100 btn btn-primary" (click)="importFinal()">Import Data</button>
+            </div>
+         </div>
+         <table id="datatable-buttons" class="table table-hover dt-responsive">
+            <thead>
+               <tr>
+                  <th style="width: 50px;">No.</th>
+                  <th style="width: 80px;">Pkt No.</th>
+                  <th style="width: 80px;">Date</th>
+                  <th style="width: 100px;">MM</th>
+                  <th style="width: 100px;">Aawak MM</th>
+                  <th style="width: 200px;">Sewadhari</th>
+                  <th style="width: 100px;">Item</th>
+                  <th style="width: 100px;">Product</th>
+                  <th style="width: 100px;">Company</th>
+                  <th style="width: 100px;">Condition</th>
+                  <th style="width: 250px;">Item Details</th>
+                  <th style="width: 70px;">Quantity</th>
+                  <th style="width: 80px;">Aawak Type</th>
+                  <th style="width: 70px;">Bill</th>
+                  <th style="width: 80px;">Nimitt</th>
+                  <th style="width: 80px;">Dept</th>
+               </tr>
+            </thead>
+            <tbody>
+               <ng-container *ngFor="let data of importData | filter:term; let i=index">
+                  <tr class="main-row" [ngClass]="{'marked': !data.valid}">
+                     <td>{{i+1}}</td>
+                     <td>{{data.pkt_num ? data.pkt_num : '-'}} </td>
+                     <td [ngClass]="{'marked': !data.date}">{{data.date?(data.date | date:'dd-MM-yyyy'):'-'}}
+                     </td>
+                     <td [ngClass]="{'marked': !data.mm_id}">
+                        {{data.mm_hin}} <br /> {{data.mm_code}}
+                     </td>
+                     <td [ngClass]="{'marked': data.aj_mm && !data.aj_mm_id}">
+                        {{data.aj_mm_hin}} <br /> {{data.aj_mm_code}}
+                     </td>
+                     <td [ngClass]="{'marked': data.pbk && !data.pbk_id}">
+                        {{data.roll_no?data.roll_no:'____'}} {{data.pbk_hin?data.pbk_hin:'-'}} <br />
+                        {{data.relation?data.relation:'-'}} - {{data.relative_name?data.relative_name:'-'}}
+                     </td>
+                     <td [ngClass]="{'marked': !data.item_id || (!data.subitem_id && data.subitem)}">
+                        {{data.item_hin}} - {{data.subitem_hin}}
+                     </td>
+                     <td [ngClass]="{'marked': data.product && !data.product_id}">
+                        {{data.product_code?data.product_code:'-'}} <br />
+                        {{data.sr_num?data.sr_num:'-'}}
+                     </td>
+                     <td>
+                        {{data.company_name?data.company_name:'-'}}
+                     </td>
+                     <td [ngClass]="{'marked': data.condition && !data.condition_id}">
+                        {{data.condition_hin?data.condition_hin:'-'}}
+                     </td>
+                     <td>{{data.item_detail?data.item_detail:'-'}}</td>
+                     <td [ngClass]="{'marked': !data.qty || !data.unit_id}">{{data.qty?data.qty:'-'}}
+                        {{data.unit_short?data.unit_short:'-'}} <br />
+                        @{{data.rate?data.rate:0}} ={{data.actual_amt?data.actual_amt:0}}
+                     </td>
+                     <td [ngClass]="{'marked': !data.aj_type_id}">
+                        {{data.aj_type_hin}}
+                     </td>
+                     <td>{{data.isbill?'true':'false'}}</td>
+                     <td [ngClass]="{'marked': data.nimitt && !data.nimitt_id}">
+                        {{data.nimitt_hin}} ({{data.nimitt_state_hin}})
+                     </td>
+                     <td [ngClass]="{'marked': !data.dept_id}">
+                        {{data.dept?data.dept:'-'}}
+                     </td>
+                  </tr>
+                  <ng-container *ngIf="data.jawak_detail.length > 0">
+                     <tr class="ribbon-box">
+                        <td style="border: none;"></td>
+                        <td colspan="11" class="sub-row">
+                           <table class="card-body" style="width: 99.7%;table-layout: fixed;">
+                              <tr>
+                                 <th>No.</th>
+                                 <th>कहा भेजा</th>
+                                 <th>किसको दिया</th>
+                                 <th>जवाक प्रकार</th>
+                                 <th>परिमाण</th>
+                                 <th style="width:0px;">
+                                    <div class="ribbon ribbon-secondary text-light float-end"> Destribution
+                                    </div>
+                                 </th>
+                              </tr>
+                              <tr *ngFor="let jwk of data.jawak_detail; let j = index;" [ngClass]="{'marked': !jwk.valid}">
+                                 <td style="width: 80px;">
+                                    <i class="uil-corner-down-right"></i>
+                                    <span class="mx-1">{{j+1}}</span>
+                                 </td>
+                                 <td [ngClass]="{'marked': !jwk.aj_mm_id}">{{jwk.aj_mm_hin}}</td>
+                                 <td [ngClass]="{'marked': jwk.nimitt && !jwk.nimitt_id}">{{data.nimitt_hin}}
+                                    ({{data.nimitt_state_hin}}) </td>
+                                 <td [ngClass]="{'marked': !jwk.aj_type_id}">{{jwk.aj_type_hin}}</td>
+                                 <td [ngClass]="{'marked': !jwk.qty || !jwk.unit_id}">{{jwk.qty}} {{jwk.unit_short}}
+                                 </td>
+                              </tr>
+                           </table>
+                        </td>
+                     </tr>
+                  </ng-container>
+               </ng-container>
+            </tbody>
+         </table>
+      </div>
 
    </div>
 

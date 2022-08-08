@@ -75,6 +75,48 @@ export class ImportComponent implements OnInit {
     this.http.get(this.api.getUrl('IMPORTEXPORT')).subscribe((data: any) => {
       if (data.success) {
         this.importData = data.result;
+        for (let i in this.importData) {
+          console.log("this.importData[i]", this.importData[i]);
+
+          if (this.importData[i].date && this.importData[i].mm_id && (this.importData[i].aj_mm_id || this.importData[i].pbk_id) && this.importData[i].item_id && this.importData[i].qty && this.importData[i].unit_id && this.importData[i].aj_type_id) {
+            this.importData[i].valid = true;
+          } else {
+            this.importData[i].valid = false;
+          }
+          for (let j in this.importData[i].jawak_detail) {
+            if (this.importData[i].jawak_detail[j].aj_mm_id && this.importData[i].jawak_detail[j].qty && this.importData[i].jawak_detail[j].aj_type_id) {
+              this.importData[i].jawak_detail[j].valid = true;
+            } else {
+              this.importData[i].jawak_detail[j].valid = false;
+            }
+            if (this.importData[i].jawak_detail[j].aj_mm_id && !this.importData[i].jawak_detail[j].aj_mm_hin) {
+              let getmm = this.mms.find((m: { _id: any; }) => m._id == this.importData[i].jawak_detail[j].aj_mm_id);
+              if (getmm) {
+                this.importData[i].jawak_detail[j].aj_mm_hin = getmm.mm_hin;
+                this.importData[i].jawak_detail[j].aj_mm_code = getmm.mm_code;
+              }
+            }
+            if (this.importData[i].jawak_detail[j].nimitt_id && !this.importData[i].jawak_detail[j].nimmit_hin) {
+              let getnimitt = this.nimitts.find((m: { _id: any; }) => m._id == this.importData[i].jawak_detail[j].nimitt_id);
+              if (getnimitt) {
+                this.importData[i].jawak_detail[j].nimitt_hin = getnimitt.nimitt_hin;
+                this.importData[i].jawak_detail[j].nimitt_state_hin = getnimitt.state_hin;
+              }
+            }
+            if (this.importData[i].jawak_detail[j].aj_type_id && !this.importData[i].jawak_detail[j].aj_type_hin) {
+              let getaj_type = this.jawak_types.find((m: { _id: any; }) => m._id == this.importData[i].jawak_detail[j].aj_type_id);
+              if (getaj_type) {
+                this.importData[i].jawak_detail[j].aj_type_hin = getaj_type.list_name_hin;
+              }
+            }
+            if (this.importData[i].jawak_detail[j].unit_id && !this.importData[i].jawak_detail[j].unit_short) {
+              let getunit = this.units.find((m: { _id: any; }) => m._id == this.importData[i].jawak_detail[j].unit_id);
+              if (getunit) {
+                this.importData[i].jawak_detail[j].unit_short = getunit.unit_short;
+              }
+            }
+          }
+        }
       }
     });
   }
@@ -122,11 +164,34 @@ export class ImportComponent implements OnInit {
 
   applyCorrection() {
 
-    this.http.put(this.api.getUrl('IMPORTEXPORT') + 'correct', this.unmatchedData).subscribe((data:any)=>{
+    this.http.put(this.api.getUrl('IMPORTEXPORT') + 'correction', this.unmatchedData).subscribe((data: any) => {
       // this.unmatchedData = data;
       this.getUnmatchedList();
       this.getImportData();
     });
+
+  }
+
+  importFinal() {
+    let valid = this.importData.filter((i: { valid: boolean, jawak_detail: any[]; }) => i.valid == false && i.jawak_detail.filter((j: { valid: Boolean; }) => j.valid == false).length == 0);
+
+    if (valid == 0) {
+      this.http.put(this.api.getUrl('IMPORTEXPORT') + 'final', this.importData).subscribe((data: any) => {
+        this.response.emit(1);
+      });
+    } else {
+      Swal.fire({
+        title: 'Error!',
+        text: "Some invalid row exists",
+        icon: 'error',
+        showCancelButton: false,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'OK'
+      });
+    }
+
+
 
   }
 

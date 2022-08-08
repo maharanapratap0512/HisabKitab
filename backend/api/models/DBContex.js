@@ -49,9 +49,7 @@ class DBContex {
     runQuery(object, key, options = {}){
         return new Promise(async (resolve, reject) => {
             try {
-                let sql = this.query[object][key];
-                console.log('sql',sql);
-                console.log('options.obj ? options.obj : {}',options.obj ? options.obj : {});
+                let sql = this.query[object][key];                
                 const result = this.db.prepare(sql).run(options.obj ? options.obj : {});
                 resolve(result);
             }
