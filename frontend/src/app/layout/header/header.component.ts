@@ -182,15 +182,14 @@ export class HeaderComponent implements OnInit {
                         }
                       }
 
-                      this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((result: any) => {
-                        // console.log(result);
-                        // console.log(result.result);
-                        
-                        let setting = JSON.parse(result.result.config_value);
-                        if (result.result.dept_id == this.auth.webUser.dept_id) {
-                          this.auth.updateSettings(setting);
+                      this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((data: any) => {
+                        if(data.result.length > 0){
+                          let setting = JSON.parse(data.result[0].config_value);
+                          if (data.result[0].dept_id == this.auth.webUser.dept_id) {
+                            this.auth.updateSettings(setting);
+                          }
+                          this.toastr.success("settings import successfully");
                         }
-                        this.toastr.success("settings import successfully");
                       });
                     }
                     else {

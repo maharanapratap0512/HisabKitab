@@ -60,14 +60,14 @@ router.get('/:dept_id', async (req, res, next) => {
         });
     }, (err) => { return next(err) });
 });
-router.get('/forConfig/:dept_id', async (req, res, next) => {
-    await DB.getFullListForDeptConfig('subitem_list', req.params.dept_id).then((resolve) => {
-        res.json({
-            success: true,
-            result: resolve || []
-        });
-    }, (err) => { return next(err) });
-});
+// router.get('/forConfig/:dept_id', async (req, res, next) => {
+//     await DB.getFullListForDeptConfig('subitem_list', req.params.dept_id).then((resolve) => {
+//         res.json({
+//             success: true,
+//             result: resolve || []
+//         });
+//     }, (err) => { return next(err) });
+// });
 
 // subitem_list update
 router.put('/', async (req, res, next) => {

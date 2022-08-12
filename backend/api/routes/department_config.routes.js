@@ -42,17 +42,6 @@ router.put('/save', async (req, res, next) => {
                     config_key: value.config_key,
                     config_value: (key == "settings" ? JSON.stringify(value.config_value) : value.config_value)
                 };
-                // let id = null;
-                // if (value._id) {
-                //     id = value._id;
-                // }
-                // // else if (value.dept_id && value.config_key) {
-                // //     condition = ` dept_id = ${value.dept_id} AND config_key = ${value.config_key}`;
-                // // }
-                // else {
-                //     req.body[key] = { success: false, err: '_id is required' };
-                // }
-                // if (condition != '') {
                 await DB.update('department_config', newObj, value._id).then((data) => {
                     if (!data) {
                         req.body[key].success = false;
@@ -60,7 +49,6 @@ router.put('/save', async (req, res, next) => {
                     req.body[key].success = true;
                     req.body[key] = data;
                 });
-                // }
             }
             res.json({
                 success: true,
@@ -77,15 +65,18 @@ router.put('/save', async (req, res, next) => {
 // update dept_config 
 router.put('/', async (req, res, next) => {
     try {
-        // if (req.body.query && (req.body.query._id || (req.body.query.dept_id && req.body.query.config_key)) && req.body.set) {
-        if (req.body.query && req.body.query._id && req.body.set) {
+        if (req.body.query && (req.body.query._id || (req.body.query.dept_id && req.body.query.config_key)) && req.body.set) {
+            // if (req.body.query && req.body.query._id && req.body.set) {
 
             let condition = `1=1 ${req.body.query._id ? ` AND department_config._id = ${req.body.query._id}` : ``} ${req.body.query.dept_id ? ` AND department_config.dept_id = ${req.body.query.dept_id}` : ``} ${req.body.query.config_key ? ` AND department_config.config_key = '${req.body.query.config_key}'` : ``} `;
+            if (req.body.query.config_key && req.body.query.config_key == "settings" && req.body.set.config_value) {
+                req.body.set.config_value = JSON.stringify(req.body.set.config_value);
+            }
 
-            await DB.update('department_config', req.body.set, req.body.query._id).then(async (data) => {
+            await DB.updateMany('department_config', req.body.set, condition).then(async (data) => {
                 res.json({
                     success: true,
-                    result: data || {}
+                    result: data || []
                 });
             });
         }

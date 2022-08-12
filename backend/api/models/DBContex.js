@@ -46,14 +46,14 @@ class DBContex {
     }
 
 
-    runQuery(object, key, options = {}){
+    runQuery(object, key, options = {}) {
         return new Promise(async (resolve, reject) => {
             try {
-                let sql = this.query[object][key];                
+                let sql = this.query[object][key];
                 const result = this.db.prepare(sql).run(options.obj ? options.obj : {});
                 resolve(result);
             }
-            catch(err){
+            catch (err) {
                 reject(err);
             }
         });
@@ -135,17 +135,17 @@ class DBContex {
                         await this.db.prepare(this.query.department_config.update_config_value).run(
                             { tblname: tblname, dept_id: dept_id, new_id: result.lastInsertRowid })
                     }
-                    if(get){
+                    if (get) {
                         let sql =
                             this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${result.lastInsertRowid} `);
-    
+
                         if (tblname == "mm") {
                             console.log("get sql_______", sql);
                         }
                         getres = await this.db.prepare(sql).get({ order: `${tblname}._id`, limit: 1, offset: -1 });
                         console.log("getres_______", getres);
                     }
-                    else{
+                    else {
                         getres = result.lastInsertRowid;
                     }
                 }
@@ -181,11 +181,10 @@ class DBContex {
         return new Promise(async (resolve, reject) => {
             try {
                 let key = Object.keys(obj);
-                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update + ` where ${tblname}._id = ${id} `;
+                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update;
+                sql += ` where ${tblname}._id = ${id} `
                 obj.active = obj.active ? 1 : 0;
 
-                console.log("updt obj_____", obj);
-                console.log("updt sql_____", sql);
                 const result = await this.db.prepare(sql).run(obj);
                 console.log("updt result_____", result);
 
@@ -203,6 +202,34 @@ class DBContex {
         })
     }
 
+    async updateMany(tblname, obj, conditionString = null, get=true) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let key = Object.keys(obj);
+                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update;
+                sql += (conditionString ? ` where ${conditionString}`: '');
+                obj.active = obj.active ? 1 : 0;
+
+                const result = await this.db.prepare(sql).run(obj);
+                console.log("updt result_____", result);
+
+                let getres = {};
+                if (result.changes && get) {
+                    getres = await this.db.prepare(this.query[tblname].select_full.replace('?', conditionString ? ` where ${conditionString}`: '')).all({ limit: 1, offset: -1, order: `${tblname}._id` });
+                }
+                else{
+                    getres = result;
+                }
+                console.log("updt getres_____", getres);
+                resolve(getres)
+            }
+            catch (err) {
+                console.log("err", err);
+                reject(err)
+            }
+        });
+    }
+
 
 
     async delete(tblname, id) {
@@ -215,7 +242,7 @@ class DBContex {
         })
     }
 
-    async deleteMany(tblname, conditionString=null) {
+    async deleteMany(tblname, conditionString = null) {
         return new Promise(async (resolve, reject) => {
             try {
                 const result = this.db.prepare(`delete from ${tblname} ${conditionString ? `where ${conditionString}` : ``} `).run();

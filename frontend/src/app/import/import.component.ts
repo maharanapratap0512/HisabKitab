@@ -208,7 +208,7 @@ export class ImportComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.http.delete(this.api.getUrl('IMPORTEXPORT') + 'all').subscribe((data: any) => {
-          this.response.emit("deleted");
+          this.response.emit(1);
         });
       }
     });

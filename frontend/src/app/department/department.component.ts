@@ -315,12 +315,14 @@ export class DepartmentComponent implements OnInit {
                         }
                       }
 
-                      this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((result: any) => {
-                        let setting = JSON.parse(result.config_value);
-                        if (result.dept_id == this.auth.webUser.dept_id) {
-                          this.auth.updateSettings(setting);
+                      this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((resdata: any) => {
+                        if(resdata.result.length > 0){
+                          let setting = JSON.parse(resdata.result[0].config_value);
+                          if (resdata.result[0].dept_id == this.auth.webUser.dept_id) {
+                            this.auth.updateSettings(setting);
+                          }
+                          this.toastr.success("settings import successfully");
                         }
-                        this.toastr.success("settings import successfully");
                       });
                     }
                     else {

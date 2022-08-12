@@ -867,6 +867,18 @@ const dictionary = {
         id2 = @id2`
 }
 
+const merge_history = {
+    insert: `insert or ignore into merge_history(type, dept_id, old_id, new_id, note) values(@type, @dept_id, @old_id, @new_id, @note)`,
+    select: `select * from merge_history`,
+    select_full: `select * from merge_history`,
+    update: `update merge_history set 
+        type = @type, 
+        dept_id = @dept_id,
+        old_id = @old_id,
+        new_id = @new_id,
+        note = @note`
+}
+
 const excel_correction = {
     get_mm: `select DISTINCT mm as name, 'mm' as type, null as id, false as dictionary from temp_import where mm IS NOT NULL AND mm_id IS NULL`,
     get_aj_mm: `select DISTINCT aj_mm as name, 'aj_mm' as type, null as id, false as dictionary from temp_import where aj_mm IS NOT NULL AND aj_mm_id IS NULL`,
@@ -961,5 +973,5 @@ genDeptDB = {
 
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history
 };
