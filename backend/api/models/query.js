@@ -280,6 +280,7 @@ const aawak = {
         product_id=@product_id,
         item_detail=@item_detail,
         condition_id=@condition_id,
+        remaining_qty=remaining_qty + (@qty - qty),
         qty=@qty,
         rate=@rate,
         actual_amt=@actual_amt,
