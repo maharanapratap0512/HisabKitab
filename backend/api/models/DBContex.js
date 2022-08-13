@@ -18,7 +18,8 @@ class DBContex {
         'jawak',
         'bachat',
         'product',
-        'department_config'
+        'department_config',
+        'merge_history'
     ];
     tbl_from_supp_list = [
         'jawak_type',
@@ -96,12 +97,8 @@ class DBContex {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
 
-
-                if (tblname == "itemmix") {
-                    console.log("get sql_______", sql);
-                    console.log("get options______", options);
-                    console.log("get order______", order);
-                    console.log("get conditionQuery______", conditionQuery);
+                if(tblname == "aawak"){
+                    console.log(sql);
                 }
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
@@ -285,7 +282,7 @@ class DBContex {
         })
     }
 
-    deleteExists(filepath) {
+    async deleteExists(filepath) {
         return new Promise((resolve, reject) => {
             try {
                 console.log("delete out", filepath);
@@ -299,6 +296,7 @@ class DBContex {
 
             }
             catch (ex) {
+                reject(ex);
                 console.log(ex);
             }
         })

@@ -42,7 +42,8 @@ export class SubitemEntryComponent implements OnInit {
       unit_id: [null],
       item_id: [null, Validators.required],
       category_id: [null, Validators.required],
-      extra_note: [null]
+      extra_note: [null],
+      document: [null]
     });
   }
 
@@ -63,9 +64,10 @@ export class SubitemEntryComponent implements OnInit {
         unit_id: changes.getData.currentValue.unit_id,
         item_id: changes.getData.currentValue.item_id,
         category_id: changes.getData.currentValue.category_id,
-        extra_note: changes.getData.currentValue.extra_note,
+        extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
+        document: changes.getData.currentValue.document ? changes.getData.currentValue.document : null
       });
-    }
+    } 
   }
 
   subitemFormSubmit() {
@@ -108,6 +110,7 @@ export class SubitemEntryComponent implements OnInit {
         item_id: this.subitemForm.value.item_id,
         category_id: this.subitemForm.value.category_id,
         extra_note: this.subitemForm.value.extra_note,
+        document: this.subitemForm.value.document,
       };
       this.http.put(this.api.getUrl('SUBITEM'), body).subscribe((data: any) => {
         if (data && data['success']) {
@@ -198,7 +201,9 @@ export class SubitemEntryComponent implements OnInit {
 
   subitemListAddResponse(ev: any) {
     this.isLoader = true;
+    console.log(ev);
     if (ev._id) {
+      
       $('#subitemComponent > #showModal').modal('hide');
       this.showModal = '';
       // this.subitem_list.unshift(ev);

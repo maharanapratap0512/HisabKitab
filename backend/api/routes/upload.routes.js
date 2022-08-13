@@ -43,6 +43,8 @@ const imageMulterConfig = {
                break;
             case "product": imagePath = path.resolve(__dirname + "/../../../../Data/Documents/product");
                break;
+            case "item": imagePath = path.resolve(__dirname + "/../../../../Data/Documents/item");
+               break;
          }
 
          if (!fs.existsSync(imagePath)) {
@@ -129,6 +131,8 @@ router.put('/image', async (req, res) => {
             break;
          case "product": folderPath = path.resolve(__dirname + "/../../../../Data/Documents/product");
             break;
+         case "item": folderPath = path.resolve(__dirname + "/../../../../Data/Documents/item");
+            break;
       }
       //  console.log("WElcome");
       fs.readdir(folderPath, (err, files) => {
@@ -156,6 +160,8 @@ router.delete('/image/', async (req, res, next) => {
                case "aawak": folderPath = path.resolve(__dirname + "/../../../../Data/Documents/aawak");
                   break;
                case "product": folderPath = path.resolve(__dirname + "/../../../../Data/Documents/product");
+                  break;
+               case "item": folderPath = path.resolve(__dirname + "/../../../../Data/Documents/item");
                   break;
             }
          }

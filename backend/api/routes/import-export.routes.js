@@ -184,7 +184,7 @@ router.put('/final', async (req, res, next) => {
 });
 
 //get all updated list
-router.get('/updates/:dept_id', async (req, res, next) => {
+router.put('/updates/:dept_id', async (req, res, next) => {
     try {
         let lists = {}
 
@@ -200,14 +200,15 @@ router.get('/updates/:dept_id', async (req, res, next) => {
             lists.subitem = await DB.getList('subitem', { dept_id: req.params.dept_id, conditionString:`subitem.active = 0` }) || []
             lists.subitem_list = await DB.getList('subitem_list', { dept_id: req.params.dept_id, conditionString:`subitem_list.active = 0` }) || []
             lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id, conditionString:`pbk.active = 0` }) || []
+            lists.pbk = await DB.getList('nimitt', { dept_id: req.params.dept_id, conditionString:`nimitt.active = 0` }) || []
             lists.product = await DB.getList('product', { dept_id: req.params.dept_id, conditionString:`product.active = 0` }) || []
             lists.aawak = await DB.getList('aawak', { dept_id: req.params.dept_id, conditionString:`aawak.active = 0` }) || []
             lists.jawak = await DB.getList('jawak', { dept_id: req.params.dept_id, conditionString:`jawak.active = 0` }) || []
             lists.point = await DB.getList('point', { dept_id: req.params.dept_id, conditionString:`point.active = 0` }) || []
             lists.department = await DB.getList('department', { conditionString: ` department._id = ${req.params.dept_id}` }) || []
             lists.department_config = await DB.getList('department_config', { conditionString: ` department_config.dept_id = ${req.params.dept_id}` }) || []
-            lists.point = await DB.getList('dictionary', { dept_id: req.params.dept_id }) || []
-            lists.point = await DB.getList('merge_history', { dept_id: req.params.dept_id }) || []
+            lists.dictionary = await DB.getList('dictionary', { dept_id: req.params.dept_id, conditionString:`dictionary.active = 0` }) || []
+            lists.merge_history = await DB.getList('merge_history', { dept_id: req.params.dept_id, conditionString:`merge_history.active = 0` }) || []
             res.json({
                 success: true,
                 result: lists

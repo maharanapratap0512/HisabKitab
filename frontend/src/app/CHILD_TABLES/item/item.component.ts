@@ -33,7 +33,7 @@ export class ItemComponent implements OnInit {
   si_total_count: any = 0;;
   subitemData: any = [];
   conditionObj: any = {};
-
+  baseurl:any;
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
@@ -51,6 +51,7 @@ export class ItemComponent implements OnInit {
       this.categories = result.category ? result.category : [];
       this.subitem_lists = result.subitem_list ? result.subitem_list : [];
     });
+    this.baseurl = this.api.getUrl('BASE');
   }
 
   getItemData(pageNo:any) {

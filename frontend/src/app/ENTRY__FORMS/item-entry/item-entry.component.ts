@@ -24,10 +24,11 @@ export class ItemEntryComponent implements OnInit {
   showModal: string = '';
   viewType: any;
   viewData: any = [];
+  imagepath: any;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
-    private api: ApiService,
+    public api: ApiService,
     private gs: GlobalService,
     private toastr: ToastrService,
     public auth: AuthService
@@ -38,7 +39,8 @@ export class ItemEntryComponent implements OnInit {
       item_code: [null],
       unit_id: [null],
       category_id: [null, Validators.required],
-      extra_note: [null]
+      extra_note: [null],
+      document: [null]
     });
   }
 
@@ -57,8 +59,10 @@ export class ItemEntryComponent implements OnInit {
         item_code: changes.getData.currentValue.item_code,
         unit_id: changes.getData.currentValue.unit_id,
         category_id: changes.getData.currentValue.category_id,
-        extra_note: changes.getData.currentValue.extra_note
+        extra_note: changes.getData.currentValue.extra_note,
+        document: changes.getData.currentValue.document
       });
+      this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0]: null;
     }
   }
 
@@ -99,11 +103,12 @@ export class ItemEntryComponent implements OnInit {
         item_code: this.itemForm.value.item_code,
         unit_id: this.itemForm.value.unit_id,
         category_id: this.itemForm.value.category_id,
-        extra_note: this.itemForm.value.extra_note
+        extra_note: this.itemForm.value.extra_note,
+        document: this.itemForm.value.document,
       };
       this.http.put(this.api.getUrl('ITEM'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          this.gs.Lists.item.splice(this.gs.Lists.item.indexOf((i: { _id: any }) => i._id == this.getData._id), 1, data['result'])
+          this.gs.Lists.itemmix.splice(this.gs.Lists.itemmix.indexOf((i: { _id: any }) => i._id == this.getData._id), 1, data['result'])
           this.itemForm.reset();
           this.isLoader = false;
           this.toastr.success("Item Updated successfully.");
@@ -157,6 +162,22 @@ export class ItemEntryComponent implements OnInit {
     else {
       this.isLoader = false;
       console.log("message", ev);
+    }
+  }
+
+  imagesSelectResponse(ev: any) {
+    if (ev.path) {
+      this.isLoader = true;
+      $('#itemComponent > #showModal').modal('hide');
+      this.showModal = '';
+      this.imagepath = ev.path;
+      this.itemForm.patchValue({
+        document: { images: [ev.path] }
+      });
+      this.isLoader = false;
+    }
+    else {
+      this.isLoader = false;
     }
   }
 

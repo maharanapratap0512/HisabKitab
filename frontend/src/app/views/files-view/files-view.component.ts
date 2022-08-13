@@ -74,8 +74,6 @@ export class FilesViewComponent implements OnInit {
   changeDocument(event: any): void {
     // this.doctfile = event.target.files[0];
     const formData = new FormData();
-    console.log("base",this.baseUrl);
-    console.log("image",this.imageFolder);
     
     formData.append('type', this.type);
     formData.append('image', event.target.files[0]);

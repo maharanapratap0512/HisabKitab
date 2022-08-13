@@ -72,6 +72,7 @@
                         <tr>
                            <th style="width: 50px;">No.</th>
                            <th style="width: 160px;">Manage</th>
+                           <th style="width: 100px;">Image</th>
                            <th style="width: 250px;">Item Name (Hin-Eng)</th>
                            <th style="width: 180px;">Item Code</th>
                            <th style="width: 180px;">Default Unit</th>
@@ -112,6 +113,11 @@
                                     style="font-size: xx-large;cursor: pointer;position: absolute;line-height: 0px;">
                                     <i class="uil-shield-check"></i>
                                  </span>
+                              </td>
+                              <td>
+                                 <img *ngIf="data.document && data.document.images"
+                                    [src]="baseurl + data.document.images[0]" height="60px"
+                                    style="padding: 5px; border-radius: 15px;">
                               </td>
                               <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
                               <td>{{data.item_code?data.item_code:'-'}}</td>

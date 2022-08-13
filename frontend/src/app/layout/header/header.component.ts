@@ -22,7 +22,7 @@ export class HeaderComponent implements OnInit {
   topPosToStartShowing = 100;
   isLoader: boolean = false;
   settings: any;
-  modal:any = ''; 
+  modal: any = '';
   importData: any = [];
 
   constructor(
@@ -50,7 +50,7 @@ export class HeaderComponent implements OnInit {
   openModal(type: String) {
     this.modal = type;
     $('#modal').modal('show');
-  } 
+  }
 
   gotoTop() {
     window.scroll({
@@ -95,43 +95,46 @@ export class HeaderComponent implements OnInit {
   }
 
   exportLatestUpdate = async () => {
-    this.isLoader = true;
-    this.dataZip = new JSZip();
-    this.http.get(this.api.getUrl('EXPORTUPDATES') + this.auth.webUser.dept_id).subscribe((data: any) => {
-      console.log("data", data);
-      this.dataZip.file("aawak.json", JSON.stringify(data['result']['aawak']));
-      this.dataZip.file("category.json", JSON.stringify(data['result']['category']));
-      this.dataZip.file("city.json", JSON.stringify(data['result']['city']));
-      this.dataZip.file("country.json", JSON.stringify(data['result']['country']));
-      this.dataZip.file("department.json", JSON.stringify(data['result']['department']));
-      this.dataZip.file("department_config.json", JSON.stringify(data['result']['department_config']));
-      this.dataZip.file("item.json", JSON.stringify(data['result']['item']));
-      this.dataZip.file("jawak.json", JSON.stringify(data['result']['jawak']));
-      this.dataZip.file("mm.json", JSON.stringify(data['result']['mm']));
-      this.dataZip.file("pbk.json", JSON.stringify(data['result']['pbk']));
-      this.dataZip.file("point.json", JSON.stringify(data['result']['point']));
-      this.dataZip.file("product.json", JSON.stringify(data['result']['product']));
-      this.dataZip.file("state.json", JSON.stringify(data['result']['state']));
-      this.dataZip.file("subitem.json", JSON.stringify(data['result']['subitem']));
-      this.dataZip.file("subitem_list.json", JSON.stringify(data['result']['subitem_list']));
-      this.dataZip.file("support_list.json", JSON.stringify(data['result']['support_list']));
-      this.dataZip.file("unit.json", JSON.stringify(data['result']['unit']));
+    Swal.fire({
+      title: 'Start Date',    
+      html:
+        '<span>Date filter functionality currently not working, but still download update is working.</span>'+
+        '<input id="exportDate" type="date" class="swal2-input">',
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Download Update',
+      preConfirm: function () {
+        const date = $('#exportDate').val();
+        if (!date) {
+          Swal.showValidationMessage('Please Enter date');
+        }
+        return date;
+      }
+    }).then((result) => {
+      console.log("result", result);
+      if (result.value && result.isConfirmed) {
+        this.isLoader = true;
+        this.dataZip = new JSZip();
+        this.http.put(this.api.getUrl('EXPORTUPDATES') + this.auth.webUser.dept_id, { startDate: result.value }).subscribe((data: any) => {
+          if (data['success'] && data['result']) {
+            for (let key of Object.keys(data['result'])) {
+              this.dataZip.file(key + ".json", JSON.stringify(data['result'][key]));
+            }
+          }
 
-      // setTimeout(() => {
-      let dept = this.auth.webUser;
-      let date = new Date();
-      this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
-        FileSaver.saveAs(content, dept.dept_eng + "_update_" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + ".zip");
-      });
-      this.isLoader = false;
-      // }, 3000);
-      this.toastr.success("Updated Settings downloaded for '" + dept.dept_eng + "'");
+          let dept = this.auth.webUser;
+          let date = new Date();
+          this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
+            FileSaver.saveAs(content, dept.dept_eng + "_update_" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + ".zip");
+          });
+          this.isLoader = false;
+          this.toastr.success("Updated Settings downloaded for '" + dept.dept_eng + "'");
+        });
+
+        this.isLoader = false;
+      }
     });
 
-    // this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
-    //   FileSaver.saveAs(content, dept.dept_eng + "_update_" + date.getDate() + "-" +date.getMonth() + "-" + date.getFullYear() + ".zip");
-    // });
-    this.isLoader = false;
   }
 
   importZip = async (ev: any) => {
@@ -152,8 +155,6 @@ export class HeaderComponent implements OnInit {
           if (zip) {
             // getting name of all exists files in zip in array.
             let fileNames = Object.keys(zip.files);
-            // console.log("fileNames", fileNames);
-            // console.log("zip", zip);
 
             // loop through all files
             for (let i in fileNames) {
@@ -183,7 +184,7 @@ export class HeaderComponent implements OnInit {
                       }
 
                       this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((data: any) => {
-                        if(data.result.length > 0){
+                        if (data.result.length > 0) {
                           let setting = JSON.parse(data.result[0].config_value);
                           if (data.result[0].dept_id == this.auth.webUser.dept_id) {
                             this.auth.updateSettings(setting);
@@ -257,12 +258,12 @@ export class HeaderComponent implements OnInit {
             subitem_eng: aawakEntry[i].subitem_eng,
             item_code: aawakEntry[i].item_code,
             nimmit: aawakEntry[i].nimmit,
-            nimitt_id:null,
+            nimitt_id: null,
             jawak_detail: []
           }
 
           //finding aawak_mm_id
-          if (aawakEntry[i].aawak_mm_id){
+          if (aawakEntry[i].aawak_mm_id) {
             this.gs.Lists.mm.find((m: { mm_hin: string; mm_eng: string; mm_code: string; parent_mm_id: null; _id: any; }) => {
               if (!m.parent_mm_id && (m.mm_hin == aawakEntry[i].aawak_mm_hin || m.mm_eng == aawakEntry[i].aawak_mm_eng || m.mm_code == aawakEntry[i].aawak_mm_code)) {
                 newAawak[i].mm_id = m._id;
@@ -280,13 +281,13 @@ export class HeaderComponent implements OnInit {
           }
 
           //finding item_id and subitem_id
-          if(aawakEntry[i].item_id){
-            this.gs.Lists.itemmix.find((it: { _id: any; item_hin: any; item_eng: any; subitems:any[] })=>{
-              if(it.item_hin == aawakEntry[i].item_hin || it.item_eng == aawakEntry[i].item_eng){
+          if (aawakEntry[i].item_id) {
+            this.gs.Lists.itemmix.find((it: { _id: any; item_hin: any; item_eng: any; subitems: any[] }) => {
+              if (it.item_hin == aawakEntry[i].item_hin || it.item_eng == aawakEntry[i].item_eng) {
                 newAawak[i].item_id = it._id;
-                if(aawakEntry[i].subitem_id){
-                  it.subitems.find(si=>{
-                    if(si.subitem_hin == aawakEntry[i].subitem_hin || si.subitem_eng == aawakEntry[i].subitem_eng){
+                if (aawakEntry[i].subitem_id) {
+                  it.subitems.find(si => {
+                    if (si.subitem_hin == aawakEntry[i].subitem_hin || si.subitem_eng == aawakEntry[i].subitem_eng) {
                       newAawak[i].subitem_id = si._id;
                     }
                   });
@@ -296,20 +297,19 @@ export class HeaderComponent implements OnInit {
           }
 
           //findig nimmit
-          if(aawakEntry[i].nimmit && aawakEntry[i].nimmit.trim() != '' ){
-            this.gs.Lists.nimmit.find((n: { nimmit_hin: any; nimmit_eng: any; _id: any; })=>
-            {
-              if(n.nimmit_hin == aawakEntry[i].nimmit || n.nimmit_eng == aawakEntry[i].nimmit){
+          if (aawakEntry[i].nimmit && aawakEntry[i].nimmit.trim() != '') {
+            this.gs.Lists.nimmit.find((n: { nimmit_hin: any; nimmit_eng: any; _id: any; }) => {
+              if (n.nimmit_hin == aawakEntry[i].nimmit || n.nimmit_eng == aawakEntry[i].nimmit) {
                 newAawak[i].nimitt_id = n._id;
               }
             });
-            
+
           }
 
           // finding unit
-          if(aawakEntry[i].unit_id){
-            this.gs.Lists.unit.find((u: { unit_full: any; unit_short: any; _id: any; })=>{
-              if(u.unit_full == aawakEntry[i].unit_full || u.unit_short == aawakEntry[i].unit_short){
+          if (aawakEntry[i].unit_id) {
+            this.gs.Lists.unit.find((u: { unit_full: any; unit_short: any; _id: any; }) => {
+              if (u.unit_full == aawakEntry[i].unit_full || u.unit_short == aawakEntry[i].unit_short) {
                 newAawak[i].unit_id = u._id;
               }
             });
@@ -335,10 +335,10 @@ export class HeaderComponent implements OnInit {
             }
           }
 
-          this.openModal('import');          
+          this.openModal('import');
           this.importData = newAawak;
         }
-        
+
       }
 
     }

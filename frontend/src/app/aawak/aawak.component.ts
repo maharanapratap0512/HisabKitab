@@ -227,6 +227,16 @@ export class AawakComponent implements OnInit {
         // console.log("res", res);
         // console.log("jawakArray", jawakArray);
 
+        let awkobj:any = {};
+        for (let key in Object.keys(this.settings.aawak)) {
+          if (!['visible', 'jawak_detail'].includes(key)) {
+            if (this.settings.aawak[key]) {
+              awkobj[key] = this.settings.aawak[key];
+            }
+          }
+        }
+        console.log("aawak_obj", awkobj);
+        
         this.allAJData.push({
           'No': index + 1,
           'MM': res.mm_hin,

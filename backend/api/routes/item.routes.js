@@ -20,10 +20,11 @@ router.get('/', async (req, res, next) => {
 router.get('/:dept_id', async (req, res, next) => {
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
     try {
-        await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id }).then((resolve) => {
+        await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id }).then((resolve) => {        
             let subitem_count = 0;
             for (let i = 0; i < resolve.data.length; i++) {
                 resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
+                resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
                 resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
                 subitem_count += resolve.data[i].subitems.length;
             }
@@ -69,6 +70,7 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
             for (let i = 0; i < resolve.data.length; i++) {
 
                 resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
+                resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
                 resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
                 subitem_count += resolve.data[i].subitems.length;
             }
@@ -86,7 +88,9 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
 router.post('/:dept_id', async (req, res, next) => {
     try {
         if (req.body && req.body.item_hin) {
+            req.body.document = req.body.document ? JSON.stringify(req.body.document) : [];
             await DB.insert('item', req.body, req.params.dept_id).then((data) => {
+                data.document = data.document ? JSON.parse(data.document) : [];
                 res.json({
                     success: true,
                     result: data || {}
@@ -104,7 +108,11 @@ router.post('/:dept_id', async (req, res, next) => {
 router.put('/', async (req, res, next) => {
     try {
         if (req.body.set && req.body.query) {
+            if(req.body.set.document){
+                req.body.set.document = JSON.stringify(req.body.set.document);
+            }
             await DB.update('item', req.body.set, req.body.query._id).then(async (data) => {
+                data.document = data.document ? JSON.parse(data.document) : [];
                 res.json({
                     success: true,
                     result: data || {}

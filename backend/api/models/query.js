@@ -154,6 +154,7 @@ const item = {
             category_id,
             unit_id,
             extra_note,
+            document,
             active)
         values (
             @item_hin,
@@ -162,6 +163,7 @@ const item = {
             @category_id,
             @unit_id,
             @extra_note,
+            @document,
             @active)`
     , update:
         `update item set
@@ -170,7 +172,6 @@ const item = {
         item_code=@item_code,
         category_id=@category_id,
         unit_id=@unit_id,
-        extra_note=@extra_note,
         updated_at=datetime('now','localtime')`
     , update_active:
         `update item set
@@ -691,6 +692,7 @@ const subitem = {
         category_id,
         unit_id,
         extra_note,
+        document,
         active)
     values (
         @item_id,
@@ -698,6 +700,7 @@ const subitem = {
         @category_id,
         @unit_id,
         @extra_note,
+        @document,
         @active)`
     , update:
         `update subitem set 
@@ -705,7 +708,7 @@ const subitem = {
         subitem_list_id=@subitem_list_id,
         category_id=@category_id,
         unit_id=@unit_id,
-        extra_note=@extra_note,
+        document=@document,
         updated_at=datetime('now','localtime')`
     , update_active:
         `update subitem set
@@ -724,18 +727,15 @@ const subitem_list = {
         `insert into subitem_list (
         subitem_hin,
         subitem_eng,
-        extra_note,
         active)
     values (
         @subitem_hin,
         @subitem_eng,
-        @extra_note,
         @active)`
     , update:
         `update subitem_list set 
         subitem_hin=@subitem_hin,
         subitem_eng=@subitem_eng,
-        extra_note=@extra_note,
         updated_at=datetime('now','localtime')`
     , order:
         `subitem_hin, subitem_eng`

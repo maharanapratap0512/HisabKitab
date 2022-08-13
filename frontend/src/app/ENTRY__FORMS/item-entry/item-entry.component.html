@@ -69,11 +69,23 @@
                         </ng-select>
                     </div>
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="form-group">
                         <label class="form-label">Extra Note</label>
                         <textarea class="form-control" placeholder="Extra Note" formControlName="extra_note"
                             [ngClass]="{'validation':itemForm.get('extra_note')?.errors && (itemForm.get('extra_note')?.touched || itemForm.get ('extra_note')?.dirty)}"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Image</label>
+                        <a onclick="$('#itemComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
+                            class="form-control" style="cursor: pointer;">
+                            <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
+                            <img src="{{this.api.getUrl('BASE')+imagepath}}" alt="image" class="rounded m-1" height="48"
+                                *ngIf="imagepath">
+                            <i *ngIf="!imagepath">Click To Change</i>
+                        </a>
                     </div>
                 </div>
                 <div class="col-md-2 mb-3">
@@ -106,6 +118,11 @@
 
                     <app-category-entry *ngIf="showModal == 'Add Category'" (response)="categoryAddResponse($event)">
                     </app-category-entry>
+
+                    <!-- Add Image -->
+                    <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)"
+                        type="item">
+                    </app-files-view>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" style="width: 120px;"

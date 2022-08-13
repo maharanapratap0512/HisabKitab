@@ -38,6 +38,7 @@ export class SubitemListEntryComponent implements OnInit {
     this.subitemListForm = this.fb.group({
       subitem_hin: [null, Validators.required],
       subitem_eng: [null],
+      extra_note:[null]
     });
   }
 
@@ -49,7 +50,8 @@ export class SubitemListEntryComponent implements OnInit {
     if (changes.getData.currentValue) {
       this.subitemListForm.patchValue({
         subitem_hin: changes.getData.currentValue.subitem_hin,
-        subitem_eng: changes.getData.currentValue.subitem_eng
+        subitem_eng: changes.getData.currentValue.subitem_eng,
+        extra_note: changes.getData.currentValue.extra_note,
       });
     }
   }
@@ -59,7 +61,7 @@ export class SubitemListEntryComponent implements OnInit {
       this.isLoader = true;
       this.http.post(this.api.getUrl('SUBITEMLIST') + this.auth.webUser.dept_id, this.subitemListForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
-          this.gs.Lists.subitem.unshift(data['result'])
+          this.gs.Lists.subitem_list.unshift(data['result'])
           this.subitemListForm.reset();
           this.isLoader = false;
           this.toastr.success('Subitem List Added Successfully.')
@@ -88,10 +90,11 @@ export class SubitemListEntryComponent implements OnInit {
       body.set = {
         subitem_hin: this.subitemListForm.value.subitem_hin,
         subitem_eng: this.subitemListForm.value.subitem_eng,
+        extra_note: this.subitemListForm.value.extra_note
       };
       this.http.put(this.api.getUrl('SUBITEMLIST'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          this.gs.Lists.subitem.splice(this.gs.Lists.subitem.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
+          this.gs.Lists.subitem_list.splice(this.gs.Lists.subitem.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
           this.subitemListForm.reset();
           this.isLoader = false;
           this.toastr.success('Subitem List Updated Successfully.')

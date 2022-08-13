@@ -43,7 +43,7 @@ export class DashboardComponent implements OnInit {
     this.getBachat();
     this.getPendingAawak();
     this.gs.observeList().subscribe(result => {
-      console.log("dashboard", result);
+      // console.log("dashboard", result);
       
       this.mms = result.mm ? result.mm : [];
       this.sitems = result.sitem ? result.sitem : [];
