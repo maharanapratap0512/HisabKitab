@@ -86,7 +86,7 @@ export class FilesViewComponent implements OnInit {
         this.toastr.error(data['message']);
       }
     }, err => {
-      this.toastr.error(err['error'].message);
+      this.toastr.error(err['error']);
     });
   }
 

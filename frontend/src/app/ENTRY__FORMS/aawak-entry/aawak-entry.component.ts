@@ -95,13 +95,13 @@ export class AawakEntryComponent implements OnInit {
 			this.states = result.state ? result.state : [];
 			this.mms = result.mm ? result.mm : [];
 			this.conditions = result.condition ? result.condition : [];
-			this.departments = result.department ? result.department : [];
+			// this.departments = result.department ? result.department : [];
 			this.pbks = result.pbk ? result.pbk : [];
 			this.aawak_types = result.aawak_type ? result.aawak_type : [];
 			this.nimitts = result.nimitt ? result.nimitt : [];
 		});
 		this.settings = this.auth.webUser.settings;
-
+		this.getDepartments();
 	}
 
 	ngOnInit(): void { }
@@ -147,6 +147,11 @@ export class AawakEntryComponent implements OnInit {
 		}
 	}
 
+	getDepartments(){
+		this.http.get(this.api.getUrl('DEPT')+this.auth.webUser.dept_id).subscribe((data:any)=>{
+			this.departments = data['result'] || [];
+		})
+	}
 	add_jwk() {
 		let jwkfg: any = {
 			jawak_mm_id: (this.jmm ? this.jmm.id : null),
@@ -269,6 +274,7 @@ export class AawakEntryComponent implements OnInit {
 						aawak_mm_id: this.awkfg.aawak_mm_id,
 						nimitt_id: this.awkfg.nimitt_id
 					});
+					this.awkfg.jawak_detail = []
 
 					// this.jwkArr = [];
 					this.response.emit(data['result']);
@@ -302,6 +308,7 @@ export class AawakEntryComponent implements OnInit {
 					this.isLoader = false;
 					this.toastr.success('Aawak Updated Successfully.');
 					updtawkform.resetForm();
+					this.awkfg.jawak_detail = []
 					this.response.emit(data['result']);
 				} else {
 					this.toastr.error(data['message']);

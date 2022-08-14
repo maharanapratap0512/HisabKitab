@@ -93,7 +93,7 @@ export class NimittEntryComponent implements OnInit {
           this.isLoader = false;
         }
       }, err => {
-        this.toastr.error(err['error'].message);
+        this.toastr.error(err['error']);
         this.isLoader = false;
       });
     }
@@ -118,7 +118,7 @@ export class NimittEntryComponent implements OnInit {
           this.toastr.success("Nimitt Updated Successfuly")
           this.response.emit(data['result']);
         } else {
-          this.toastr.error(data['error'].message);
+          this.toastr.error(data['error']);
           this.isLoader = false;
         }
       }, err => {

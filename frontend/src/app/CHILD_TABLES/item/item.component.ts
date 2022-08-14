@@ -120,7 +120,14 @@ export class ItemComponent implements OnInit {
       this.isLoader = true;
       $('#showModal').modal('hide');
       this.showModal = '';
-      this.itemData.splice(this.itemData.indexOf(this.editData), 1, ev);
+      let index = this.itemData.indexOf(this.editData);
+      
+      if(index>=0){
+        console.log("index",index);
+        ev.categories = this.itemData[index].categories;
+        ev.subitems = this.itemData[index].subitems;
+        this.itemData.splice(index, 1, ev);
+      }
       this.isLoader = false;
     }
     else {

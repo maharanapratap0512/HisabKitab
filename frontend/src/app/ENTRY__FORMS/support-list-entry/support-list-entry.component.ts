@@ -60,7 +60,7 @@ export class SupportListEntryComponent implements OnInit {
 
     if (this.supportListForm.valid) {
       this.isLoader = true;
-      this.http.post(this.api.getUrl('SUPPORTLIST'), this.supportListForm.value).subscribe((data: any) => {
+      this.http.post(this.api.getUrl('SUPPORTLIST') + this.auth.webUser.dept_id, this.supportListForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.gs.Lists[this.list_type].unshift(data['result']);
           this.supportListForm.reset();
@@ -68,11 +68,14 @@ export class SupportListEntryComponent implements OnInit {
           this.toastr.success("Added successfully.");
           this.response.emit(data['result']);
         } else {
+
           this.toastr.error(data['message']);
           this.isLoader = false;
         }
-      }, err => {
-        this.toastr.error(err['error'].message);
+      }, (err) => {
+        console.log(err);
+
+        this.toastr.error(err['error']);
         this.isLoader = false;
       });
     }
@@ -106,7 +109,7 @@ export class SupportListEntryComponent implements OnInit {
           this.isLoader = false;
         }
       }, err => {
-        this.toastr.error(err['error'].message);
+        this.toastr.error(err['error']);
         this.isLoader = false;
       });
     }

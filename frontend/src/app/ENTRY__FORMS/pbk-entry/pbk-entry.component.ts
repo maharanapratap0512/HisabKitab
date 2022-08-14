@@ -184,7 +184,7 @@ export class PbkEntryComponent implements OnInit {
           this.isLoader = false;
         }
       }, err => {
-        this.toastr.error(err['error'].message);
+        this.toastr.error(err['error']);
         this.isLoader = false;
       });
     }
@@ -237,7 +237,7 @@ export class PbkEntryComponent implements OnInit {
           this.isLoader = false;
         }
       }, err => {
-        this.toastr.error(err['error'].message);
+        this.toastr.error(err['error']);
         this.isLoader = false;
       });
     }

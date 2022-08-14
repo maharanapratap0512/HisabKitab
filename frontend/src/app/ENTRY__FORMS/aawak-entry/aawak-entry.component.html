@@ -154,7 +154,7 @@
               (click)="showModal = 'Add Department'">
               + Add
            </button> -->
-                  <ng-select *ngIf="auth.webUser.dept_id < 3" class="custom" style="width: 100%;"
+                  <ng-select *ngIf="departments.length > 0" class="custom" style="width: 100%;"
                      placeholder="Select Department" [clearable]="true" [virtualScroll]="true"
                      (change)="deptSelected($event)" [ngModelOptions]="{standalone: true}" [(ngModel)]="selDept_id">
                      <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :

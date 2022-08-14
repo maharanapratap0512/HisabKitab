@@ -132,20 +132,24 @@ const department_config = {
         config_value=@config_value,
         updated_at=datetime('now','localtime')`
     , update_config_value:
-        `update department_config set config_value = CASE WHEN(config_value = '') THEN ',' ELSE config_value END  || @new_id || ',' where dept_id = @dept_id AND config_key = '@tblname'`
+        `update department_config set config_value = CASE WHEN(config_value = '') THEN ',' ELSE config_value END || @new_id || ',' where dept_id = @dept_id AND config_key = @tblname`
 }
 
 const item = {
     select:
         `select * from item ?`
     , select_full:
-        `select item.*,  si.category_id,
+        `select item.*, 
         cat.category_hin, cat.category_eng, 
-        unit.unit_full, unit.unit_short 
+        unit.unit_full, unit.unit_short ,
+        json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || ', "active": ' || si.active || '}')) as subitems, json_group_array(si.category_id) as categories
         from item
         left join category cat on cat._id = item.category_id
-        left join subitem si  on si.item_id = item._id
-        left join unit on unit._id = item.unit_id ? limit @limit offset @offset`
+        left join unit on unit._id = item.unit_id
+        left join subitem si on si.item_id = item._id
+        left join category ct on ct._id = si.category_id
+        left join unit ut on ut._id = si.unit_id
+        left join subitem_list sl on  sl._id = si.subitem_list_id ? group by item._id limit @limit offset @offset`
     , insert:
         `insert into item (
             item_hin,
@@ -171,6 +175,8 @@ const item = {
         item_eng=@item_eng,
         item_code=@item_code,
         category_id=@category_id,
+        extra_note=@extra_note,
+        document=@document,
         unit_id=@unit_id,
         updated_at=datetime('now','localtime')`
     , update_active:

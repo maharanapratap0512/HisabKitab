@@ -61,7 +61,7 @@ export class CategoryEntryComponent implements OnInit {
           this.isLoader = false;
         }
       }, err => {
-        this.toastr.error(err['error'].message);
+        this.toastr.error(err['error']);
         this.isLoader = false;
       });
     }
@@ -91,7 +91,7 @@ export class CategoryEntryComponent implements OnInit {
           this.toastr.success("Category Updated Successfuly")
           this.response.emit(data['result']);
         } else {
-          this.toastr.error(data['error'].message);
+          this.toastr.error(data['error']);
           this.isLoader = false;
         }
       }, err => {

@@ -160,7 +160,7 @@ export class GlobalService {
           resolve(1);
         }
       }, (err) => {
-        this.toastr.error(err['error'].message);
+        this.toastr.error(err['error']);
       });
     });
   }

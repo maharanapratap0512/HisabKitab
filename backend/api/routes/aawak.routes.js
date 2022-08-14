@@ -10,14 +10,14 @@ router.post('/', async (req, res, next) => {
         let aawak = {};
         await DB.insert('aawak', req.body).then((data) => {
             aawak = data;
-        },(err)=>{
+        }, (err) => {
             return next(err);
         });
 
         let bachat = [];
         await DB.getList('bachat').then((resolve) => {
             bachat = resolve;
-        },(err)=>{
+        }, (err) => {
             return next(err);
         });
 
@@ -38,14 +38,12 @@ router.post('/:dept_id', async (req, res, next) => {
         let jawaks = [];
         if (req.body.jawak_detail) {
             jawaks = req.body.jawak_detail;
-            delete req.body.jawak_detail;
+            // delete req.body.jawak_detail;
         }
-        if(req.body.document){
-            req.body.document = JSON.stringify(req.body.document);
-        }
-        req.body.isbill = req.body.isbill ? 1 : 0;  
+        req.body.document = JSON.stringify(req.body.document ? req.body.document : {});
+        req.body.isbill = req.body.isbill ? 1 : 0;
         await DB.insert('aawak', req.body, req.params.dept_id).then(async (data) => {
-            // console.log("data", data);
+            console.log("data", data);
             data.jawak_detail = [];
             for (let i = 0; i < jawaks.length; i++) {
                 jawaks[i].aawak_ref_id = data._id;
@@ -77,15 +75,16 @@ router.post('/:dept_id', async (req, res, next) => {
 //aawak get dept
 router.get('/:dept_id', async (req, res, next) => {
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('aawak', {full:true, dept_id: req.params.dept_id, conditionString: null, orderBy: `aawak._id desc`, limit: 100 }).then(async (resolve) => {
+    await DB.getList('aawak', { full: true, dept_id: req.params.dept_id, conditionString: null, orderBy: `aawak._id desc`, limit: 100 }).then(async (resolve) => {
         for (let i = 0; i < resolve.data.length; i++) {
             resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` jawak.aawak_ref_id = ${resolve.data[i]._id}`;
 
-            await DB.getList('jawak', {full:true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then(async (jwkdata) => {
+            await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then(async (jwkdata) => {
                 resolve.data[i].jawak_detail = jwkdata.data;
             }, (err) => {
+                resolve.data[i].jawak_detail = []
                 console.log("jawak", err);
             });
         }
@@ -110,7 +109,7 @@ router.get('/pending/:dept_id', async (req, res, next) => {
             await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then((jwkdata) => {
                 resolve.data[i].jawak_detail = jwkdata.data;
             }, (err) => {
-                resolve.data[i].jawak_detail = []; 
+                resolve.data[i].jawak_detail = [];
                 console.log('jawak', err);
             });
         }
@@ -120,10 +119,11 @@ router.get('/pending/:dept_id', async (req, res, next) => {
         });
     }, (err) => { return next(err) });
 });
+
 router.put('/pending/:dept_id', async (req, res, next) => {
     let conditionString = `remaining_qty <> 0 ${req.body.mm_id ? ` AND aawak.mm_id = ${req.body.mm_id}` : ``}`;
 
-    
+
 
     await DB.getList("aawak", { full: true, dept_id: req.params.dept_id, conditionString: conditionString }).then(async (resolve) => {
         for (let i in resolve.data) {
@@ -134,7 +134,7 @@ router.put('/pending/:dept_id', async (req, res, next) => {
             await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString, orderBy: `jawak._id` }).then((jwkdata) => {
                 resolve.data[i].jawak_detail = jwkdata.data;
             }, (err) => {
-                resolve.data[i].jawak_detail = []; 
+                resolve.data[i].jawak_detail = [];
                 console.log('jawak', err);
             });
         }
@@ -150,7 +150,7 @@ router.put('/pending/:dept_id', async (req, res, next) => {
 //aawak get by dept + filter + pageNo
 router.put('/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = 100, offset = null, page = 1;
-    let conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month}'`: ``} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'`: ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.aawak_mm_id && req.body.aawak_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aawak_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = ${req.body.pkt_num}` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``}`;
+    let conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month}'` : ``} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.aawak_mm_id && req.body.aawak_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aawak_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = ${req.body.pkt_num}` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``}`;
     if (conditionString.trim() == `1=1`) {
         orderBy = "aawak._id desc";
     }
@@ -159,15 +159,16 @@ router.put('/:dept_id', async (req, res, next) => {
         page = req.body.pageNo;
     }
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('aawak', { full:true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then(async (resolve) => {
+    await DB.getList('aawak', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then(async (resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
 
-            await DB.getList('jawak', {full:true, dept_id: req.params.dept_id, conditionString: jwkconditionString , orderBy: `jawak._id`}).then((jwkdata) => {
+            await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString, orderBy: `jawak._id` }).then((jwkdata) => {
                 resolve.data[i].jawak_detail = jwkdata.data;
             }, (err) => {
+                resolve.data[i].jawak_detail = []
                 console.log('jawak', err);
                 // return next(err)
             });
@@ -200,15 +201,13 @@ router.put('/', async (req, res, next) => {
         let jawaks = [];
         if (req.body.set.jawak_detail) {
             jawaks = req.body.set.jawak_detail;
-            delete req.body.set.jawak_detail;
+            // delete req.body.set.jawak_detail;
         }
-        if (req.body.set.remaining_qty) {
-            delete req.body.set.remaining_qty;
-        }
-        if(req.body.set.document){
-            req.body.set.document = JSON.stringify(req.body.set.document);
-        }
-        req.body.set.isbill = req.body.set.isbill ? 1 : 0;  
+        // if (req.body.set.remaining_qty) {
+        //     delete req.body.set.remaining_qty;
+        // }
+        req.body.set.document = JSON.stringify(req.body.set.document ? req.body.set.document : {});
+        req.body.set.isbill = req.body.set.isbill ? 1 : 0;
         await DB.update('aawak', req.body.set, req.body.query._id).then(async (data) => {
             data.jawak_detail = [];
             data.document = (data.document ? JSON.parse(data.document) : {});
@@ -233,7 +232,7 @@ router.put('/', async (req, res, next) => {
                 success: true,
                 result: data || {}
             });
-        },(err)=>{
+        }, (err) => {
             return next(err);
         });
     }
@@ -247,7 +246,7 @@ router.put('/', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
         // let condition = '_id = ' + req.params.id;
-        await DB.delete('aawak', req.params.id).then((data)=>{
+        await DB.delete('aawak', req.params.id).then((data) => {
             res.json({
                 success: true,
                 result: data

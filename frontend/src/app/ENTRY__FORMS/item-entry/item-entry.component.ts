@@ -40,7 +40,7 @@ export class ItemEntryComponent implements OnInit {
       unit_id: [null],
       category_id: [null, Validators.required],
       extra_note: [null],
-      document: [null]
+      document: [[]]
     });
   }
 
@@ -60,9 +60,9 @@ export class ItemEntryComponent implements OnInit {
         unit_id: changes.getData.currentValue.unit_id,
         category_id: changes.getData.currentValue.category_id,
         extra_note: changes.getData.currentValue.extra_note,
-        document: changes.getData.currentValue.document
+        document: changes.getData.currentValue.document ? changes.getData.currentValue.document : []
       });
-      this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0]: null;
+      this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0] : null;
     }
   }
 
@@ -104,7 +104,7 @@ export class ItemEntryComponent implements OnInit {
         unit_id: this.itemForm.value.unit_id,
         category_id: this.itemForm.value.category_id,
         extra_note: this.itemForm.value.extra_note,
-        document: this.itemForm.value.document,
+        document: this.itemForm.value.document ? this.itemForm.value.document : [],
       };
       this.http.put(this.api.getUrl('ITEM'), body).subscribe((data: any) => {
         if (data && data['success']) {

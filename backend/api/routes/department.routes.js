@@ -20,21 +20,14 @@ router.get('/', async (req, res, next) => {
 // get department 
 router.get('/:dept_id', async (req, res, next) => {
     try {
-        if (['1', '2'].includes(req.params.dept_id)) {
-            await DB.getList('department').then(async (resolve) => {
-                res.json({
-                    success: true,
-                    result: resolve.data || [],
-                    total_count: (resolve.total_count ? resolve.total_count : 0),
-                });
-            });
-        }
-        else {
+        await DB.getList('department', { dept_id: req.params.dept_id }).then(async (resolve) => {
             res.json({
                 success: true,
-                result: []
-            })
-        }
+                result: resolve.data || [],
+                total_count: (resolve.total_count ? resolve.total_count : 0),
+            });
+        });
+
     } catch (err) { next(err) };
 });
 

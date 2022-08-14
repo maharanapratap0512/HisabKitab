@@ -38,18 +38,16 @@ router.get('/ajtypes/:dept_id', async (req, res, next) => {
 
 
 // post support_lis
-router.post('/', async (req, res, next) => {
+router.post('/:dept_id', async (req, res, next) => {
     try {
         if (req.body && req.body.list_type && req.body.list_name_eng) {
-            await DB.insert('support_list', req.body).then(async (err, data) => {
-                if (err) {
-                    return next(err);
-                }
-                // await DB.insertToCache('support_list', data, (err, data) => { })
+            await DB.insert('support_list', req.body, req.params.dept_id).then((data) => {                            
                 res.json({
                     success: true,
                     result: data || {}
                 });
+            },(err)=>{
+                next(err);
             })
         }
         else {

@@ -12,6 +12,7 @@ class DBContex {
         'mm',
         'subitem',
         'category',
+        'department'
     ];
     tbl_with_dept_id = [
         'aawak',
@@ -97,9 +98,9 @@ class DBContex {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
 
-                if(tblname == "aawak"){
-                    console.log(sql);
-                }
+                // if (tblname == "aawak") {
+                //     console.log(sql);
+                // }
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {
@@ -121,26 +122,33 @@ class DBContex {
                 obj.active = dept_id == 1 ? 1 : 0;
 
                 // console.log("insert",result);
-                console.log("insert obj_______", obj);
+                // console.log("insert obj_______", obj);
                 console.log("sql", this.query[tblname].insert);
-                const result = await this.db.prepare(this.query[tblname].insert).run(obj);
+                const result = this.db.prepare(this.query[tblname].insert).run(obj);
 
                 let getres = [];
                 // if inserted success
                 if (result.changes == 1 && result.lastInsertRowid) {
                     if (this.tbl_need_dept_config.includes(tblname)) {
-                        await this.db.prepare(this.query.department_config.update_config_value).run(
-                            { tblname: tblname, dept_id: dept_id, new_id: result.lastInsertRowid })
+                        let q = this.query.department_config.update_config_value;
+                        let p = { tblname: tblname, dept_id: dept_id, new_id: result.lastInsertRowid.toString() }
+                        let t = this.db.prepare(q).run(p);
+                    }
+                    else if (tblname == "support_list") {
+                        console.log("support_list");
+                        if (obj.list_type && this.tbl_from_supp_list.includes(obj.list_type)) {
+                            console.log("aj_type");
+                            let q = this.query.department_config.update_config_value;
+                            let p = { tblname: "aj_type", dept_id: dept_id, new_id: result.lastInsertRowid.toString() }
+                            let t = this.db.prepare(q).run(p);
+                        }
                     }
                     if (get) {
-                        let sql =
-                            this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${result.lastInsertRowid} `);
-
-                        if (tblname == "mm") {
-                            console.log("get sql_______", sql);
-                        }
+                        let sql = this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${result.lastInsertRowid} `);
+                        // if (tblname == "mm") {
+                        //     console.log("get sql_______", sql);
+                        // }
                         getres = await this.db.prepare(sql).get({ order: `${tblname}._id`, limit: 1, offset: -1 });
-                        console.log("getres_______", getres);
                     }
                     else {
                         getres = result.lastInsertRowid;
@@ -183,13 +191,14 @@ class DBContex {
                 obj.active = obj.active ? 1 : 0;
 
                 const result = await this.db.prepare(sql).run(obj);
-                console.log("updt result_____", result);
+                // console.log("updt obj_____", obj);
+                // console.log("updt result_____", result);
 
                 let getres = {};
                 if (result.changes) {
                     getres = await this.db.prepare(this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${id} `)).get({ limit: 1, offset: -1, order: `${tblname}._id` });
                 }
-                console.log("updt getres_____", getres);
+                // console.log("updt getres_____", getres);
                 resolve(getres)
             }
             catch (err) {
@@ -199,12 +208,12 @@ class DBContex {
         })
     }
 
-    async updateMany(tblname, obj, conditionString = null, get=true) {
+    async updateMany(tblname, obj, conditionString = null, get = true) {
         return new Promise(async (resolve, reject) => {
             try {
                 let key = Object.keys(obj);
                 let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update;
-                sql += (conditionString ? ` where ${conditionString}`: '');
+                sql += (conditionString ? ` where ${conditionString}` : '');
                 obj.active = obj.active ? 1 : 0;
 
                 const result = await this.db.prepare(sql).run(obj);
@@ -212,9 +221,9 @@ class DBContex {
 
                 let getres = {};
                 if (result.changes && get) {
-                    getres = await this.db.prepare(this.query[tblname].select_full.replace('?', conditionString ? ` where ${conditionString}`: '')).all({ limit: 1, offset: -1, order: `${tblname}._id` });
+                    getres = await this.db.prepare(this.query[tblname].select_full.replace('?', conditionString ? ` where ${conditionString}` : '')).all({ limit: 1, offset: -1, order: `${tblname}._id` });
                 }
-                else{
+                else {
                     getres = result;
                 }
                 console.log("updt getres_____", getres);

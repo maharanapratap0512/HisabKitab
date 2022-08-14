@@ -1021,7 +1021,7 @@ export class DepartmentComponent implements OnInit {
         this.deptSelected(this.dept_id);
       }
     }, err => {
-      this.toastr.error(err['error'].message);
+      this.toastr.error(err['error']);
       this.isLoader = false;
     });
 
