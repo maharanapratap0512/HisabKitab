@@ -72,11 +72,11 @@ export class ItemComponent implements OnInit {
 
   catSelected(ev: any) {
     if (ev) {
-      this.conditionObj.category_id = ev;
+      this.conditionObj.categories = ev;
       this.getItemData(1);
     }
     else {
-      this.conditionObj.category_id = null;
+      this.conditionObj.categories = null;
       this.getItemData(1);
     }
   }
@@ -95,7 +95,7 @@ export class ItemComponent implements OnInit {
   addSubitem(item: any) {
     this.editData = {
       item_id: item._id,
-      category_id: item.category_id,
+      categories: item.categories,
       unit_id: item.unit_id
     }
     this.showModal = 'Add Subitem From Item';
@@ -124,7 +124,7 @@ export class ItemComponent implements OnInit {
       
       if(index>=0){
         console.log("index",index);
-        ev.categories = this.itemData[index].categories;
+        // ev.categories = this.itemData[index].categories;
         ev.subitems = this.itemData[index].subitems;
         this.itemData.splice(index, 1, ev);
       }
@@ -145,7 +145,7 @@ export class ItemComponent implements OnInit {
       this.showModal = '';
       let i = this.itemData.findIndex((i: { _id: any; }) => i._id == ev.item_id);
       this.itemData[i].subitems.push(ev);
-      this.itemData[i].categories.push(ev.category_id);
+      // this.itemData[i].categories.push(ev.category_id);
       this.si_total_count++;
       this.isLoader = false;
     }

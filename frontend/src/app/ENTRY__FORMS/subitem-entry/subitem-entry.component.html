@@ -53,8 +53,8 @@
                         Add</button>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="false"
-                     [virtualScroll]="true" formControlName="category_id"
-                     [ngClass]="{'validation':subitemForm.get('category_id')?.errors && (subitemForm.get('category_id')?.touched || subitemForm.get ('category_id')?.dirty)}">
+                     [virtualScroll]="true" [multiple]="true" formControlName="categories"
+                     [ngClass]="{'validation':subitemForm.get('categories')?.errors && (subitemForm.get('categories')?.touched || subitemForm.get ('categories')?.dirty)}">
                      <ng-option selected="selected" disabled value="">Select Category</ng-option>
                      <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
                         {{item.category_eng}}</ng-option>

@@ -41,7 +41,7 @@ export class SubitemEntryComponent implements OnInit {
       subitem_list_id: [null, Validators.required],
       unit_id: [null],
       item_id: [null, Validators.required],
-      category_id: [null, Validators.required],
+      categories: [[], Validators.required],
       extra_note: [null],
       document: [null]
     });
@@ -63,7 +63,7 @@ export class SubitemEntryComponent implements OnInit {
         subitem_list_id: changes.getData.currentValue.subitem_list_id,
         unit_id: changes.getData.currentValue.unit_id,
         item_id: changes.getData.currentValue.item_id,
-        category_id: changes.getData.currentValue.category_id,
+        categories: changes.getData.currentValue.categories,
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
         document: changes.getData.currentValue.document ? changes.getData.currentValue.document : null
       });
@@ -78,7 +78,7 @@ export class SubitemEntryComponent implements OnInit {
           // this.gs.Lists.subitem.unshift(data['result'])
           let i = this.gs.Lists.itemmix.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
           this.gs.Lists.itemmix[i].subitems.push(data['result']);
-          this.gs.Lists.itemmix[i].categories.push(data['result'].category_id);
+          // this.gs.Lists.itemmix[i].categories.push(data['result'].categories);
           this.subitemForm.reset();
           this.isLoader = false;
           this.toastr.success('SUBITEM added successfully.')
@@ -108,7 +108,7 @@ export class SubitemEntryComponent implements OnInit {
         subitem_list_id: this.subitemForm.value.subitem_list_id,
         unit_id: this.subitemForm.value.unit_id,
         item_id: this.subitemForm.value.item_id,
-        category_id: this.subitemForm.value.category_id,
+        categories: this.subitemForm.value.categories,
         extra_note: this.subitemForm.value.extra_note,
         document: this.subitemForm.value.document,
       };
@@ -116,7 +116,7 @@ export class SubitemEntryComponent implements OnInit {
         if (data && data['success']) {
           let i = this.gs.Lists.itemmix.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
           this.gs.Lists.itemmix[i].subitems.splice(this.gs.Lists.itemmix[i].subitems.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
-          this.gs.Lists.itemmix[i].categories.push(data['result'].category_id);
+          // this.gs.Lists.itemmix[i].categories.push(data['result'].categories);
           this.subitemForm.reset();
           this.isLoader = false;
           this.toastr.success('SUBITEM added successfully.')
@@ -140,7 +140,7 @@ export class SubitemEntryComponent implements OnInit {
       let item = this.items.find((i: { _id: any; }) => i._id == ev);
       if (item) {
         this.subitemForm.patchValue({
-          category_id: item.category_id,
+          categories: item.categories,
           unit_id: item.unit_id
         });
       }
@@ -154,7 +154,7 @@ export class SubitemEntryComponent implements OnInit {
       this.showModal = '';
       // this.categories.unshift(ev);
       this.subitemForm.patchValue({
-        category_id: ev._id
+        categories: [].concat(this.subitemForm.value.categories, ev._id)
       });
       this.isLoader = false;
     }

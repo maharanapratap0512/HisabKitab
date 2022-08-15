@@ -38,7 +38,7 @@ export class ItemEntryComponent implements OnInit {
       item_eng: [null, Validators.required],
       item_code: [null],
       unit_id: [null],
-      category_id: [null, Validators.required],
+      categories: [[], Validators.required],
       extra_note: [null],
       document: [[]]
     });
@@ -58,7 +58,7 @@ export class ItemEntryComponent implements OnInit {
         item_eng: changes.getData.currentValue.item_eng,
         item_code: changes.getData.currentValue.item_code,
         unit_id: changes.getData.currentValue.unit_id,
-        category_id: changes.getData.currentValue.category_id,
+        categories: changes.getData.currentValue.categories,
         extra_note: changes.getData.currentValue.extra_note,
         document: changes.getData.currentValue.document ? changes.getData.currentValue.document : []
       });
@@ -69,6 +69,8 @@ export class ItemEntryComponent implements OnInit {
   itemFormSubmit() {
     if (this.itemForm.valid) {
       this.isLoader = true;
+      // console.log(this.itemForm.value);
+      
       this.http.post(this.api.getUrl('ITEM') + this.auth.webUser.dept_id, this.itemForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.gs.Lists.itemmix.unshift(data['result']);
@@ -102,7 +104,7 @@ export class ItemEntryComponent implements OnInit {
         item_eng: this.itemForm.value.item_eng,
         item_code: this.itemForm.value.item_code,
         unit_id: this.itemForm.value.unit_id,
-        category_id: this.itemForm.value.category_id,
+        categories: this.itemForm.value.categories,
         extra_note: this.itemForm.value.extra_note,
         document: this.itemForm.value.document ? this.itemForm.value.document : [],
       };
@@ -135,8 +137,9 @@ export class ItemEntryComponent implements OnInit {
       // this.categories.unshift(ev);
       this.itemForm.patchValue(
         {
-          category_id: ev._id
+          categories: [].concat(this.itemForm.value.categories, ev._id)
         });
+        
       this.isLoader = false;
     }
     else {

@@ -122,7 +122,11 @@
                               <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
                               <td>{{data.item_code?data.item_code:'-'}}</td>
                               <td>{{data.unit_id?data.unit_short + ' : ' + data.unit_full:'-'}}</td>
-                              <td>{{data.category_id?data.category_hin + ' : ' + data.category_eng:'-'}}</td>
+                              <td>
+                                 <ng-container *ngFor="let cat of data.categories_hin">
+                                    {{cat}},
+                                 </ng-container>
+                              </td>
                               <td>{{data.extra_note?data.extra_note:'-'}}</td>
                            </tr>
                            <!-- <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse"
@@ -136,7 +140,7 @@
                               <th>Extra Note</th>
                            </tr> -->
                            <ng-container *ngFor="let si of data.subitems ;let j=index">
-                              <ng-container>
+                              <ng-container *ngIf="si">
                                  <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show"
                                     *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
                                     <td style="border: none;"></td>
@@ -183,7 +187,9 @@
                                                 {{si.unit_id?si.unit_short + ' : ' + si.unit_full:'-'}}
                                              </td>
                                              <td style="width: 180px;" class="nav-item">
-                                                {{si.category_id?si.category_hin + ' : ' + si.category_eng:'-'}}
+                                                <ng-container *ngFor="let scat of si.categories_hin">
+                                                   {{scat}},
+                                                </ng-container>
                                              </td>
                                              <td style="width: 250px;" class="nav-item">
                                                 {{si.extra_note?si.extra_note:'N/A'}}

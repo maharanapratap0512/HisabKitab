@@ -70,8 +70,8 @@
                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                 <span class="d-none d-md-block">MM
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.mm &&
-                    deptConf.mm.idArr) ?
-                    deptConf.mm.idArr.length - 1: ''}}</span>
+                    deptConf.mm.config_value) ?
+                    deptConf.mm.config_value.length: ''}}</span>
                 </span>
               </a>
               <a class="nav-link" id="v-pills-pbk-tab" data-bs-toggle="pill" href="#v-pills-pbk" role="tab"
@@ -79,8 +79,8 @@
                 <i class="mdi mdi-account-circle d-md-none d-block"></i>
                 <span class="d-none d-md-block">PBK / Sewadhari
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.pbk &&
-                    deptConf.pbk.idArr) ?
-                    deptConf.pbk.idArr.length - 1: ''}}</span>
+                    deptConf.pbk.config_value) ?
+                    deptConf.pbk.config_value.length: ''}}</span>
                 </span>
               </a>
               <a class="nav-link" id="v-pills-dept-tab" data-bs-toggle="pill" href="#v-pills-dept" role="tab"
@@ -88,8 +88,8 @@
                 <i class="mdi mdi-account-circle d-md-none d-block"></i>
                 <span class="d-none d-md-block">Departments
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.department &&
-                    deptConf.department.idArr) ?
-                    deptConf.department.idArr.length - 1: ''}}</span>
+                    deptConf.department.config_value) ?
+                    deptConf.department.config_value.length: ''}}</span>
                 </span>
               </a>
               <a class="nav-link" id="v-pills-category-tab" data-bs-toggle="pill" href="#v-pills-category" role="tab"
@@ -97,8 +97,8 @@
                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                 <span class="d-none d-md-block">Category
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.category &&
-                    deptConf.category.idArr) ?
-                    deptConf.category.idArr.length - 1: ''}}</span>
+                    deptConf.category.config_value) ?
+                    deptConf.category.config_value.length: ''}}</span>
                 </span>
               </a>
               <!-- <a class="nav-link" id="v-pills-item-tab" data-bs-toggle="pill" href="#v-pills-item"
@@ -106,7 +106,7 @@
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Items
                                     <span class="badge bg-primary rounded-pill float-end">{{(deptConf.item &&
-                                        deptConf.item.idArr) ? deptConf.item.idArr.length - 1: ''}}</span>
+                                        deptConf.item.config_value) ? deptConf.item.config_value.length: ''}}</span>
                                 </span>
                             </a> -->
               <a class="nav-link" id="v-pills-itemmix-tab" data-bs-toggle="pill" href="#v-pills-itemmix" role="tab"
@@ -114,9 +114,8 @@
                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                 <span class="d-none d-md-block">Items(New)
                   <span class="badge bg-primary rounded-pill float-end">
-                    {{((deptConf.item && deptConf.item.idArr) ? deptConf.item.idArr.length - 1: 0) +
-                    ((deptConf.subitem && deptConf.subitem.idArr) ? deptConf.subitem.idArr.length -
-                    1: 0) }}
+                    {{((deptConf.item && deptConf.item.config_value) ? deptConf.item.config_value.length: 0) +
+                    ((deptConf.subitem && deptConf.subitem.config_value) ? deptConf.subitem.config_value.length: 0) }}
                   </span>
                 </span>
               </a>
@@ -125,7 +124,7 @@
                                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                                 <span class="d-none d-md-block">Subitem
                                     <span class="badge bg-primary rounded-pill float-end">{{(deptConf.subitem &&
-                                        deptConf.subitem.idArr) ? deptConf.subitem.idArr.length - 1: ''}}</span>
+                                        deptConf.subitem.config_value) ? deptConf.subitem.config_value.length: ''}}</span>
                                 </span>
                             </a> -->
               <a class="nav-link" id="v-pills-ajtypes-tab" data-bs-toggle="pill" href="#v-pills-ajtypes" role="tab"
@@ -133,7 +132,7 @@
                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                 <span class="d-none d-md-block">Aawak/Jawak Types
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.aj_type &&
-                    deptConf.aj_type.idArr) ? deptConf.aj_type.idArr.length - 1: ''}}</span>
+                    deptConf.aj_type.config_value) ? deptConf.aj_type.config_value.length: ''}}</span>
                 </span>
               </a>
             </div>
@@ -1277,12 +1276,11 @@
                           <td>{{data.item_code?data.item_code:'-'}}</td>
                           <td>{{data.unit_id?data.unit_short + ' : ' + data.unit_full:'-'}}
                           </td>
-                          <td>{{data.category_id?data.category_hin + ' : ' +
-                            data.category_eng:'-'}}</td>
+                          <td>{{data.categories_hin?data.categories_hin:'-'}}</td>
                           <td>{{data.extra_note?data.extra_note:'-'}}</td>
                         </tr>
                         <ng-container *ngFor="let si of data.subitems | filter:termItemmix;let j=index">
-                          <ng-container>
+                          <ng-container *ngIf="si">
                             <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show"
                               *ngIf="data.subitems.length > 0" aria-labelledby="headingOne"
                               (click)="subitemmixRowClicked(i, j, si.chk, data._id, si._id)">
@@ -1321,8 +1319,7 @@
                                     </td>
                                     <td style="width: 180px;" class="nav-item">
                                       <!-- <b>Category = </b> -->
-                                      {{si.category_id?si.category_hin + ' : ' +
-                                      si.category_eng:'-'}}
+                                      {{si.categories_hin?si.categories_hin:'-'}}
                                     </td>
                                     <td style="width: 250px;" class="nav-item">
                                       <!-- <b>Extra Note = </b> -->

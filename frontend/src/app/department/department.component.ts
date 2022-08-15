@@ -114,8 +114,8 @@ export class DepartmentComponent implements OnInit {
         bhatti_date: false,
         doccument: false
       },
-      nimitt:{
-        visible:false,
+      nimitt: {
+        visible: false,
       },
       product: {
         visible: false,
@@ -162,7 +162,7 @@ export class DepartmentComponent implements OnInit {
         aawak_type_id: true,
         item_detail: false,
         description: false,
-        isbill:false,
+        isbill: false,
         jawak: {
           visible: false,
           jawak_mm_id: true,
@@ -235,19 +235,13 @@ export class DepartmentComponent implements OnInit {
       this.http.get(this.api.getUrl('DEPTCONFIG') + ev).subscribe((data) => {
         if (data['result'] && data['success']) {
           for (let i of data['result']) {
+            this.deptConf[i.config_key] = i;
             if (i.config_key == "settings") {
-              this.deptConf[i.config_key] = i;
               this.applySettings(i.config_value);
-            }
-            else {
-              this.deptConf[i.config_key] = { idArr: (i.config_value && i.config_value != '' ? i.config_value.split(',') : ['']), ...i };
-              if (this.deptConf[i.config_key].idArr.length > 1) {
-                this.deptConf[i.config_key].idArr.pop();
-              }
             }
           }
           this.loadPBK();
-          if (this.dept_id > 2) {
+          if (this.dept_id > 1) {
             this.loadMM();
             this.loadCategory();
             // this.loadItems();
@@ -316,7 +310,7 @@ export class DepartmentComponent implements OnInit {
                       }
 
                       this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((resdata: any) => {
-                        if(resdata.result.length > 0){
+                        if (resdata.result.length > 0) {
                           let setting = JSON.parse(resdata.result[0].config_value);
                           if (resdata.result[0].dept_id == this.auth.webUser.dept_id) {
                             this.auth.updateSettings(setting);
@@ -658,19 +652,17 @@ export class DepartmentComponent implements OnInit {
   loadMM() {
     this.http.get(this.api.getUrl('MM') + 1).subscribe((data) => {
       if (data['result'] && data['success']) {
-        console.log('get result', data['result']);
 
-        if (this.deptConf.mm && this.deptConf.mm.idArr) {
-          console.log("arrr in if", this.deptConf.mm.idArr);
-
+        if (this.deptConf.mm && this.deptConf.mm.config_value) {
           for (let i in data['result']) {
-            if (this.deptConf.mm.idArr.includes(data['result'][i]._id.toString())) {
+            // data['result'][i].chk = false;
+            if (this.deptConf.mm.config_value.includes(data['result'][i]._id)) {
               data['result'][i].chk = true;
             }
           }
         }
-        this.mms = data['result'];
         this.mmsAll = data['result'];
+        this.mms = this.mmsAll;
         // console.log("dept", this.dept_id, "conf", this.mms);
       }
     });
@@ -686,9 +678,9 @@ export class DepartmentComponent implements OnInit {
     this.http.put(this.api.getUrl('PBK') + 1, {}).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.pbkTotal = data['total_count']
-        if (this.deptConf.pbk && this.deptConf.pbk.idArr) {
+        if (this.deptConf.pbk && this.deptConf.pbk.config_value) {
           for (let i in data['result']) {
-            if (this.deptConf.pbk.idArr.includes(data['result'][i]._id.toString())) {
+            if (this.deptConf.pbk.config_value.includes(data['result'][i]._id)) {
               data['result'][i].chk = true;
             }
           }
@@ -704,7 +696,7 @@ export class DepartmentComponent implements OnInit {
 
     this.getPbk$.subscribe((result: any) => {
       for (let i in result) {
-        if (this.deptConf.pbk.idArr.includes(result[i]._id.toString())) {
+        if (this.deptConf.pbk.config_value.includes(result[i]._id)) {
           result[i].chk = true;
         }
       }
@@ -729,9 +721,9 @@ export class DepartmentComponent implements OnInit {
   loadDepartment() {
     this.http.get(this.api.getUrl('DEPT') + 1).subscribe((data) => {
       if (data['result'] && data['success']) {
-        if (this.deptConf.department && this.deptConf.department.idArr) {
+        if (this.deptConf.department && this.deptConf.department.config_value) {
           for (let i in data['result']) {
-            if (this.deptConf.department.idArr.includes(data['result'][i]._id.toString())) {
+            if (this.deptConf.department.config_value.includes(data['result'][i]._id)) {
               data['result'][i].chk = true;
             }
           }
@@ -744,9 +736,9 @@ export class DepartmentComponent implements OnInit {
   loadCategory() {
     this.http.get(this.api.getUrl('CATEGORY') + 1).subscribe((data) => {
       if (data['result'] && data['success']) {
-        if (this.deptConf.category && this.deptConf.category.idArr) {
+        if (this.deptConf.category && this.deptConf.category.config_value) {
           for (let i in data['result']) {
-            if (this.deptConf.category.idArr.includes(data['result'][i]._id.toString())) {
+            if (this.deptConf.category.config_value.includes(data['result'][i]._id)) {
               data['result'][i].chk = true;
             }
           }
@@ -762,12 +754,12 @@ export class DepartmentComponent implements OnInit {
       if (data['result'] && data['success']) {
         this.itemTotal = data['item_count']
         this.itemMixCondition.pageNo = (data["pageNo"] ? data["pageNo"] : 0) + 1;
-        if (this.deptConf.item && this.deptConf.item.idArr) {
+        if (this.deptConf.item && this.deptConf.item.config_value) {
           for (let i in data['result']) {
-            if (this.deptConf.item.idArr.includes(data['result'][i]._id.toString())) {
+            if (this.deptConf.item.config_value.includes(data['result'][i]._id)) {
               data['result'][i].chk = true;
               for (let j in data['result'][i].subitems) {
-                if (this.deptConf.subitem.idArr.includes(data['result'][i].subitems[j]._id.toString())) {
+                if (this.deptConf.subitem.config_value.includes(data['result'][i].subitems[j]._id)) {
                   data['result'][i].subitems[j].chk = true;
                 }
               }
@@ -780,12 +772,12 @@ export class DepartmentComponent implements OnInit {
         }
 
         this.getItem$.subscribe((result: any) => {
-          if (this.deptConf.item && this.deptConf.item.idArr) {
+          if (this.deptConf.item && this.deptConf.item.config_value) {
             for (let i in result) {
-              if (this.deptConf.item.idArr.includes(result[i]._id.toString())) {
+              if (this.deptConf.item.config_value.includes(result[i]._id)) {
                 result[i].chk = true;
                 for (let j in result[i].subitems) {
-                  if (this.deptConf.subitem.idArr.includes(result[i].subitems[j]._id.toString())) {
+                  if (this.deptConf.subitem.config_value.includes(result[i].subitems[j]._id)) {
                     result[i].subitems[j].chk = true;
                   }
                 }
@@ -833,9 +825,9 @@ export class DepartmentComponent implements OnInit {
   loadAJTypes() {
     this.http.get(this.api.getUrl('AJTYPE') + 1).subscribe((data) => {
       if (data['result'] && data['success']) {
-        if (this.deptConf.aj_type && this.deptConf.aj_type.idArr) {
+        if (this.deptConf.aj_type && this.deptConf.aj_type.config_value) {
           for (let i in data['result']) {
-            if (this.deptConf.aj_type.idArr.includes(data['result'][i]._id.toString())) {
+            if (this.deptConf.aj_type.config_value.includes(data['result'][i]._id)) {
               data['result'][i].chk = true;
             }
           }
@@ -850,11 +842,11 @@ export class DepartmentComponent implements OnInit {
       i = this.mms.findIndex((i: { _id: any; }) => i._id == id);
     }
     if (chk) {
-      this.deptConf.mm.idArr.splice(this.deptConf.mm.idArr.indexOf(this.mms[i]._id.toString()), 1);
+      this.deptConf.mm.config_value.splice(this.deptConf.mm.config_value.indexOf(this.mms[i]._id), 1);
       this.mms[i].chk = false;
     }
     else {
-      this.deptConf.mm.idArr.push(this.mms[i]._id.toString());
+      this.deptConf.mm.config_value.push(this.mms[i]._id);
       this.mms[i].chk = true;
     }
 
@@ -865,11 +857,11 @@ export class DepartmentComponent implements OnInit {
       i = this.pbks.findIndex((i: { _id: any; }) => i._id == id);
     }
     if (chk) {
-      this.deptConf.pbk.idArr.splice(this.deptConf.pbk.idArr.indexOf(this.pbks[i]._id.toString()), 1);
+      this.deptConf.pbk.config_value.splice(this.deptConf.pbk.config_value.indexOf(this.pbks[i]._id), 1);
       this.pbks[i].chk = false;
     }
     else {
-      this.deptConf.pbk.idArr.push(this.pbks[i]._id.toString());
+      this.deptConf.pbk.config_value.push(this.pbks[i]._id);
       this.pbks[i].chk = true;
     }
   }
@@ -878,11 +870,11 @@ export class DepartmentComponent implements OnInit {
       i = this.department.findIndex((i: { _id: any; }) => i._id == id);
     }
     if (chk) {
-      this.deptConf.department.idArr.splice(this.deptConf.department.idArr.indexOf(this.department[i]._id.toString()), 1);
+      this.deptConf.department.config_value.splice(this.deptConf.department.config_value.indexOf(this.department[i]._id), 1);
       this.department[i].chk = false;
     }
     else {
-      this.deptConf.department.idArr.push(this.department[i]._id.toString());
+      this.deptConf.department.config_value.push(this.department[i]._id);
       this.department[i].chk = true;
     }
   }
@@ -891,11 +883,11 @@ export class DepartmentComponent implements OnInit {
       i = this.categories.findIndex((i: { _id: any; }) => i._id == id);
     }
     if (chk) {
-      this.deptConf.category.idArr.splice(this.deptConf.category.idArr.indexOf(this.categories[i]._id.toString()), 1);
+      this.deptConf.category.config_value.splice(this.deptConf.category.config_value.indexOf(this.categories[i]._id), 1);
       this.categories[i].chk = false;
     }
     else {
-      this.deptConf.category.idArr.push(this.categories[i]._id.toString());
+      this.deptConf.category.config_value.push(this.categories[i]._id);
       this.categories[i].chk = true;
     }
   }
@@ -905,11 +897,11 @@ export class DepartmentComponent implements OnInit {
       i = this.items.findIndex((i: { _id: any; }) => i._id == id);
     }
     if (chk) {
-      this.deptConf.item.idArr.splice(this.deptConf.item.idArr.indexOf(this.items[i]._id.toString()), 1);
+      this.deptConf.item.config_value.splice(this.deptConf.item.config_value.indexOf(this.items[i]._id), 1);
       this.items[i].chk = false;
     }
     else {
-      this.deptConf.item.idArr.push(this.items[i]._id.toString());
+      this.deptConf.item.config_value.push(this.items[i]._id);
       this.items[i].chk = true;
     }
   }
@@ -920,17 +912,17 @@ export class DepartmentComponent implements OnInit {
       i = this.itemmix.findIndex((i: { _id: any; }) => i._id == id);
     }
     if (chk) {
-      this.deptConf.item.idArr.splice(this.deptConf.item.idArr.indexOf(this.itemmix[i]._id.toString()), 1);
+      this.deptConf.item.config_value.splice(this.deptConf.item.config_value.indexOf(this.itemmix[i]._id), 1);
       this.itemmix[i].chk = false;
       for (let j in this.itemmix[i].subitems) {
         if (this.itemmix[i].subitems[j].chk) {
           this.itemmix[i].subitems[j].chk = false;
-          this.deptConf.subitem.idArr.splice(this.deptConf.subitem.idArr.indexOf(this.itemmix[i].subitems[j]._id.toString()), 1)
+          this.deptConf.subitem.config_value.splice(this.deptConf.subitem.config_value.indexOf(this.itemmix[i].subitems[j]._id), 1)
         }
       }
     }
     else {
-      this.deptConf.item.idArr.push(this.itemmix[i]._id.toString());
+      this.deptConf.item.config_value.push(this.itemmix[i]._id);
       this.itemmix[i].chk = true;
     }
   }
@@ -943,15 +935,15 @@ export class DepartmentComponent implements OnInit {
 
     }
     if (chk) {
-      this.deptConf.subitem.idArr.splice(this.deptConf.subitem.idArr.indexOf(this.itemmix[itemIndex].subitems[subitemIndex]._id.toString()), 1);
+      this.deptConf.subitem.config_value.splice(this.deptConf.subitem.config_value.indexOf(this.itemmix[itemIndex].subitems[subitemIndex]._id), 1);
       this.itemmix[itemIndex].subitems[subitemIndex].chk = false;
     }
     else {
-      this.deptConf.subitem.idArr.push(this.itemmix[itemIndex].subitems[subitemIndex]._id.toString())
+      this.deptConf.subitem.config_value.push(this.itemmix[itemIndex].subitems[subitemIndex]._id)
       this.itemmix[itemIndex].subitems[subitemIndex].chk = true;
       if (!this.itemmix[itemIndex].chk) {
         this.itemmix[itemIndex].chk = true;
-        this.deptConf.item.idArr.push(this.itemmix[itemIndex]._id.toString())
+        this.deptConf.item.config_value.push(this.itemmix[itemIndex]._id)
       }
 
     }
@@ -962,11 +954,11 @@ export class DepartmentComponent implements OnInit {
       i = this.subitems.findIndex((i: { _id: any; }) => i._id == id);
     }
     if (chk) {
-      this.deptConf.subitem.idArr.splice(this.deptConf.subitem.idArr.indexOf(this.subitems[i]._id.toString()), 1);
+      this.deptConf.subitem.config_value.splice(this.deptConf.subitem.config_value.indexOf(this.subitems[i]._id), 1);
       this.subitems[i].chk = false;
     }
     else {
-      this.deptConf.subitem.idArr.push(this.subitems[i]._id.toString());
+      this.deptConf.subitem.config_value.push(this.subitems[i]._id);
       this.subitems[i].chk = true;
     }
   }
@@ -976,11 +968,11 @@ export class DepartmentComponent implements OnInit {
       i = this.ajtypes.findIndex((i: { _id: any; }) => i._id == id);
     }
     if (chk) {
-      this.deptConf.aj_type.idArr.splice(this.deptConf.aj_type.idArr.indexOf(this.ajtypes[i]._id.toString()), 1);
+      this.deptConf.aj_type.config_value.splice(this.deptConf.aj_type.config_value.indexOf(this.ajtypes[i]._id), 1);
       this.ajtypes[i].chk = false;
     }
     else {
-      this.deptConf.aj_type.idArr.push(this.ajtypes[i]._id.toString());
+      this.deptConf.aj_type.config_value.push(this.ajtypes[i]._id);
       this.ajtypes[i].chk = true;
     }
   }
@@ -1000,13 +992,13 @@ export class DepartmentComponent implements OnInit {
   }
 
   saveDeptSettings() {
-    this.deptConf.mm.config_value = this.deptConf.mm.idArr.join(',') + ',';
-    this.deptConf.pbk.config_value = this.deptConf.pbk.idArr.join(',') + ',';
-    this.deptConf.department.config_value = this.deptConf.department.idArr.join(',') + ',';
-    this.deptConf.category.config_value = this.deptConf.category.idArr.join(',') + ',';
-    this.deptConf.item.config_value = this.deptConf.item.idArr.join(',') + ',';
-    this.deptConf.subitem.config_value = this.deptConf.subitem.idArr.join(',') + ',';
-    this.deptConf.aj_type.config_value = this.deptConf.aj_type.idArr.join(',') + ',';
+    // this.deptConf.mm.config_value = this.deptConf.mm.config_value.join(',') + ',';
+    // this.deptConf.pbk.config_value = this.deptConf.pbk.config_value.join(',') + ',';
+    // this.deptConf.department.config_value = this.deptConf.department.config_value.join(',') + ',';
+    // this.deptConf.category.config_value = this.deptConf.category.config_value.join(',') + ',';
+    // this.deptConf.item.config_value = this.deptConf.item.config_value.join(',') + ',';
+    // this.deptConf.subitem.config_value = this.deptConf.subitem.config_value.join(',') + ',';
+    // this.deptConf.aj_type.config_value = this.deptConf.aj_type.config_value.join(',') + ',';
     this.deptConf.settings.config_value = this.settingsAll;
 
     this.http.put(this.api.getUrl('DEPTCONFSAVE'), this.deptConf).subscribe((data: any) => {
@@ -1033,7 +1025,7 @@ export class DepartmentComponent implements OnInit {
       case 'mm':
         this.mms.map((i: { _id: any, chk: boolean; }) => {
           if (!i.chk) {
-            this.deptConf.mm.idArr.push(i._id.toString());
+            this.deptConf.mm.config_value.push(i._id);
             i.chk = true;
           }
         });
@@ -1041,7 +1033,7 @@ export class DepartmentComponent implements OnInit {
       case 'pbk':
         this.pbks.map((i: { _id: any, chk: boolean; }) => {
           if (!i.chk) {
-            this.deptConf.pbk.idArr.push(i._id.toString());
+            this.deptConf.pbk.config_value.push(i._id);
             i.chk = true;
           }
         });
@@ -1049,7 +1041,7 @@ export class DepartmentComponent implements OnInit {
       case 'category':
         this.categories.map((i: { _id: any, chk: boolean; }) => {
           if (!i.chk) {
-            this.deptConf.category.idArr.push(i._id.toString());
+            this.deptConf.category.config_value.push(i._id);
             i.chk = true;
           }
         });
@@ -1057,7 +1049,7 @@ export class DepartmentComponent implements OnInit {
       case 'item':
         this.items.map((i: { _id: any, chk: boolean; }) => {
           if (!i.chk) {
-            this.deptConf.item.idArr.push(i._id.toString());
+            this.deptConf.item.config_value.push(i._id);
             i.chk = true;
           }
         });
@@ -1065,12 +1057,12 @@ export class DepartmentComponent implements OnInit {
       case 'itemmix':
         this.itemmix.map((i: { _id: any, chk: boolean, subitems: any; }) => {
           if (!i.chk) {
-            this.deptConf.item.idArr.push(i._id.toString());
+            this.deptConf.item.config_value.push(i._id);
             i.chk = true;
           }
           i.subitems.map((j: { _id: any, chk: boolean }) => {
             if (!j.chk) {
-              this.deptConf.subitem.idArr.push(j._id.toString());
+              this.deptConf.subitem.config_value.push(j._id);
               j.chk = true;
             }
           });
@@ -1079,7 +1071,7 @@ export class DepartmentComponent implements OnInit {
       case 'subitem':
         this.subitems.map((i: { _id: any, chk: boolean; }) => {
           if (!i.chk) {
-            this.deptConf.subitem.idArr.push(i._id.toString());
+            this.deptConf.subitem.config_value.push(i._id);
             i.chk = true;
           }
         });
@@ -1087,7 +1079,7 @@ export class DepartmentComponent implements OnInit {
       case 'ajtype':
         this.ajtypes.map((i: { _id: any, chk: boolean; }) => {
           if (!i.chk) {
-            this.deptConf.aj_type.idArr.push(i._id.toString());
+            this.deptConf.aj_type.config_value.push(i._id);
             i.chk = true;
           }
         });
@@ -1095,7 +1087,7 @@ export class DepartmentComponent implements OnInit {
       case 'department':
         this.department.map((i: { _id: any, chk: boolean; }) => {
           if (!i.chk) {
-            this.deptConf.department.idArr.push(i._id.toString());
+            this.deptConf.department.config_value.push(i._id);
             i.chk = true;
           }
         });

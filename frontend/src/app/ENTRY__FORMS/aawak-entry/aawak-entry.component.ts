@@ -147,8 +147,8 @@ export class AawakEntryComponent implements OnInit {
 		}
 	}
 
-	getDepartments(){
-		this.http.get(this.api.getUrl('DEPT')+this.auth.webUser.dept_id).subscribe((data:any)=>{
+	getDepartments() {
+		this.http.get(this.api.getUrl('DEPT') + this.auth.webUser.dept_id).subscribe((data: any) => {
 			this.departments = data['result'] || [];
 		})
 	}
@@ -568,7 +568,7 @@ export class AawakEntryComponent implements OnInit {
 	catSelected(ev: any) {
 		if (ev) {
 			this.cat = ev;
-			this.items = this.itemAll.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
+			this.items = this.itemAll.filter((i: { categories: any }) => i.categories.includes(ev));
 		}
 		else {
 			this.cat = null;
@@ -590,18 +590,25 @@ export class AawakEntryComponent implements OnInit {
 			// this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
 			this.getProductData(ev);
 			if (this.cat) {
-				this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
+				this.subitems = item.subitems.filter((s: { categories: any; }) => s.categories.includes(this.cat));
 			}
 			else {
-				this.subitems = item.subitems.filter(((s: { category_id: any; }) => category_ids.includes(s.category_id)));
+				this.subitems = item.subitems.filter((s: { categories: any; }) => {
+					for (let i in category_ids) {
+						if (s.categories.includes(category_ids[i])) {
+							return true
+						}
+					}
+					return false;
+				});
 			}
 
-			if (this.cat && this.cat != item.category_id) {
-				// this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
-				this.awkfg.subitem_id = this.subitems[0]._id;
-			} else if (!category_ids.includes(item.category_id) && this.subitems.length > 0) {
-				this.awkfg.subitem_id = this.subitems[0]._id;
-			}
+			// if (this.cat && !item.categories.include(this.cat)) {
+			// 	// this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
+			// 	this.awkfg.subitem_id = this.subitems[0]._id;
+			// } else if (!category_ids.includes(item.category_id) && this.subitems.length > 0) {
+			// 	this.awkfg.subitem_id = this.subitems[0]._id;
+			// }
 			this.awkfg.unit_id = item.unit_id;
 		}
 		else {
