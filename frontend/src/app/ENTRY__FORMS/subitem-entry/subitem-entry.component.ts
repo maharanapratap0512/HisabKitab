@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import * as e from 'express';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { iif } from 'rxjs';
@@ -7,6 +8,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
+
 declare var $: any;
 
 @Component({
@@ -28,6 +30,9 @@ export class SubitemEntryComponent implements OnInit {
   showModal: string = '';
   viewType: any;
   viewData: any = [];
+  // subitem_hin:any;
+  subitem_eng:any=false;
+
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -38,7 +43,9 @@ export class SubitemEntryComponent implements OnInit {
     public auth: AuthService
   ) {
     this.subitemForm = this.fb.group({
-      subitem_list_id: [null, Validators.required],
+      subitem_list_id: [null],
+      subitem_hin: [null, Validators.required],
+      subitem_eng: [null, Validators.required],
       unit_id: [null],
       item_id: [null, Validators.required],
       categories: [[], Validators.required],
@@ -67,7 +74,75 @@ export class SubitemEntryComponent implements OnInit {
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
         document: changes.getData.currentValue.document ? changes.getData.currentValue.document : null
       });
-    } 
+    }
+  }
+
+  selectSubitemHin(item: any) {
+    // do something with selected item
+    console.log(this.subitemForm.value);
+    
+    if (item) {
+      this.subitemForm.patchValue({
+        subitem_list_id: item._id,
+        subitem_hin: item.subitem_hin,
+        subitem_eng: item.subitem_eng,
+      });
+    }
+    else{
+      this.subitemForm.patchValue({
+        subitem_list_id: null,
+        subitem_hin: null,
+        subitem_eng: null,
+      });
+    }
+
+  }
+
+  searchSubitemHin(search: string) {
+    if(search){
+      this.subitemForm.patchValue({
+        subitem_list_id: null,
+        subitem_hin: search
+      });
+    }else{
+      this.subitemForm.patchValue({
+        subitem_list_id: null,
+        subitem_eng: null
+      });
+    }
+  }
+
+  selectSubitemEng(item: any) {
+    // do something with selected item  
+    if (item) {
+      this.subitemForm.patchValue({
+        subitem_list_id: item._id,
+        subitem_hin: item.subitem_hin,
+        subitem_eng: item.subitem_eng,
+      });
+    }
+    else{
+      this.subitemForm.patchValue({
+        subitem_list_id: null,
+        subitem_hin: null,
+        subitem_eng: null,
+      });
+    }
+
+  }
+
+  searchSubitemEng(search: string) {
+    if(search){
+      this.subitemForm.patchValue({
+        subitem_list_id: null,
+        subitem_eng: search
+      });
+    }else{
+      this.subitemForm.patchValue({
+        subitem_list_id: null,
+        subitem_eng: null
+      });
+    }
   }
 
   subitemFormSubmit() {
@@ -203,7 +278,7 @@ export class SubitemEntryComponent implements OnInit {
     this.isLoader = true;
     console.log(ev);
     if (ev._id) {
-      
+
       $('#subitemComponent > #showModal').modal('hide');
       this.showModal = '';
       // this.subitem_list.unshift(ev);

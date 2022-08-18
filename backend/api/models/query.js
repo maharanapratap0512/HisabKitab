@@ -186,6 +186,14 @@ const item = {
 const itemmix = {
     select_full: `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
     unit.unit_full, unit.unit_short ,
+    (select json_group_array(json_object('_id', si._id , 'item_id', si.item_id , 'subitem_list_id', si.subitem_list_id , 'subitem_hin', si.subitem_hin , 'subitem_eng', si.subitem_eng , 'categories_hin', si.categories_hin, 'unit_full', si.unit_full , 'unit_short', si.unit_short , 'categories', json(si.categories) , 'extra_note', si.extra_note, 'unit_id', si.unit_id , 'active', si.active)) as subitems from (select subitem.*, sl.subitem_hin, sl.subitem_eng, json_group_array(cat.category_hin) as categories_hin, ut.unit_short, ut.unit_full from subitem, json_each(subitem.categories)
+        left join category cat on cat._id = json_each.value
+        left join unit ut on ut._id = subitem.unit_id
+        left join subitem_list sl on  sl._id = subitem.subitem_list_id where subitem.item_id = item._id & group by subitem._id) as si) as subitems from item, json_each(item.categories)
+    left join category ct on ct._id = json_each.value
+    left join unit on unit._id = item.unit_id ? group by item._id # limit @limit offset @offset`,    
+    select_full_old: `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
+    unit.unit_full, unit.unit_short ,
     json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||si.subitem_hin || '", "subitem_eng": "' ||si.subitem_eng || '", "categories_hin": ' || si.categories_hin || ', "categories_eng": ' || si.categories_eng || ', "unit_full": "' || si.unit_full || '", "unit_short": "' || si.unit_short || '", "categories": ' || si.categories || ', "extra_note": "' || si.extra_note || '", "unit_id": ' || si.unit_id || ', "active": ' || si.active || '}')) as subitems from item, json_each(item.categories)
     left join category ct on ct._id = json_each.value
     left join unit on unit._id = item.unit_id
@@ -193,18 +201,7 @@ const itemmix = {
         left join category cat on cat._id = json_each.value
         left join unit ut on ut._id = subitem.unit_id
         left join subitem_list sl on  sl._id = subitem.subitem_list_id group by subitem._id
-    ) si on si.item_id = item._id ? group by item._id # limit @limit offset @offset`,
-    select_full_old: `select item.*, 
-    cat.category_hin, cat.category_eng, 
-    unit.unit_full, unit.unit_short ,
-    json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || ', "active": ' || si.active || '}')) as subitems, json_group_array(si.category_id) as categories
-    from item
-    left join category cat on cat._id = item.category_id
-    left join unit on unit._id = item.unit_id
-    left join subitem si on si.item_id = item._id
-    left join category ct on ct._id = si.category_id
-    left join unit ut on ut._id = si.unit_id
-    left join subitem_list sl on  sl._id = si.subitem_list_id ? group by item._id # limit @limit offset @offset`,
+    ) si on si.item_id = item._id ? group by item._id # limit @limit offset @offset`,    
     order: `item_hin, item_eng`,
     count: `select count(*) as total_count from (select count(*) from item, json_each(item.categories)
         left join subitem si on si.item_id = item._id ? group by item._id)`
@@ -323,8 +320,8 @@ const aawak = {
         mm.mm_hin,mm.mm_eng,mm.mm_code,
         amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
-        item.item_hin, item.item_eng, item.item_code,
-        sil.subitem_hin, sil.subitem_eng,
+        item.item_hin, item.item_eng, item.item_code, item.categories as item_categories,
+        sil.subitem_hin, sil.subitem_eng, si.categories as subitem_categories,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         unit.unit_short, unit.unit_full,

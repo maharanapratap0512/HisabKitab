@@ -257,6 +257,14 @@
                                   <td>
                                     <div class="form-check form-switch">
                                       <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.aawak.company_name" [ngModelOptions]="{standalone: true}"
+                                        disabled>
+                                      <label class="form-check-label" for="customSwitch2">Company</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
                                         [(ngModel)]="settingsAll.aawak.product_id"
                                         [ngModelOptions]="{standalone: true}">
                                       <label class="form-check-label" for="customSwitch2">Product</label>

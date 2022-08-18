@@ -250,7 +250,7 @@
                               {{data.mm_eng}}
                            </td>
                            <td *ngIf="settings.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
-                           <td>{{data.date | date:'yyyy-MM-dd'}}</td>
+                           <td>{{data.date | date:'dd-MM-yyyy'}}</td>
                            <td>
                               <span *ngIf="!data.jawak_mm_id">-</span>
                               {{data.jawak_mm_hin}}<br />

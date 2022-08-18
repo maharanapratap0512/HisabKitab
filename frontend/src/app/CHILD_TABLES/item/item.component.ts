@@ -4,6 +4,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { ExcelExportService } from 'src/app/services/excel-export.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
@@ -41,7 +42,8 @@ export class ItemComponent implements OnInit {
     public gs: GlobalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    public auth: AuthService
+    public auth: AuthService,
+    private excelExportService: ExcelExportService,
   ) { }
 
   ngOnInit(): void {
@@ -69,6 +71,31 @@ export class ItemComponent implements OnInit {
     });
   }
 
+  exportItem(){
+    let item = [];
+    for(let it of this.itemData){
+      item.push({
+        item_hin:it.item_hin,
+        item_eng:it.item_eng,
+        subitem_hin:null,
+        subitem_eng:null,
+        unit:it.unit_short,
+        category:it.categories_hin
+      });
+      for(let sit of it.subitems){
+        item.push({
+          item_hin:it.item_hin,
+          item_eng:it.item_eng,
+          subitem_hin:sit.subitem_hin,
+          subitem_eng:sit.subitem_eng,
+          unit:sit.unit_short,
+          category:sit.categories_hin
+        });
+      }
+    }
+
+    this.excelExportService.exportAsExcelFile(item, 'asthai_item_list.xlsx');
+  }
 
   catSelected(ev: any) {
     if (ev) {

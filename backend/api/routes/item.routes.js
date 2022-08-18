@@ -42,7 +42,8 @@ router.get('/:dept_id', async (req, res, next) => {
 // get item by dept + filter + pageNo
 router.put('/itemmix/:dept_id', async (req, res, next) => {
     try {
-        let itemCondition = req.params.dept_id == 1 ? `` : `(item._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${req.params.dept_id} AND config_key='item') OR si._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${req.params.dept_id} AND config_key='subitem'))`;
+        let itemCondition = ``;
+        let sitemCondition = ``;
         // let subitemCondition = ``;
 
         let orderBy = null, limit = null, offset = null, page = 1;
@@ -51,21 +52,22 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
             itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` item._id = ${req.body._id}`;
         }
         if (req.body.categories) {
-            itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` json_each.value = ${req.body.categories}`;
+            itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` (json_each.value = ${req.body.categories} OR subitems <> '[]')`;
+            sitemCondition += (sitemCondition.trim() != `` ? ` AND` : ``) + ` json_each.value = ${req.body.categories}`;
         }
         if (req.body.subitem_list_id) {
-            itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` si.subitem_list_id = ${req.body.subitem_list_id}`;
+            sitemCondition += (sitemCondition.trim() != `` ? ` AND` : ``) + ` subitem.subitem_list_id = ${req.body.subitem_list_id}`;
         }
-        if (itemCondition.trim() == ``) {
+        if (itemCondition.trim() == `` && sitemCondition.trim() == ``) {
             orderBy = "item._id desc";
         }
         if (req.body.pageNo && req.body.pageNo > 0) {
             offset = (req.body.pageNo - 1) * limit;
             page = req.body.pageNo;
         }
-        await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id, conditionString: itemCondition, limit: limit, offset: offset }).then((resolve) => {
+        await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id, conditionString: itemCondition, sconditionString: sitemCondition, limit: limit, offset: offset }).then((resolve) => {
             let subitem_count = 0;
-            console.log("resolve", resolve);
+            // console.log("resolve", resolve);
             // console.log("resolve.length", resolve.length);
             for (let i = 0; i < resolve.data.length; i++) {
 
@@ -80,7 +82,7 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
             res.json({
                 success: true,
                 result: resolve.data || [],
-                total_count: resolve.total_count,
+                total_count: resolve.data.length,
                 subitem_count: subitem_count
             });
         });

@@ -290,6 +290,7 @@
                            <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
                            <th style="width: 120px;">Aawak Type</th>
                            <th style="width: 150px;">Item - Subitem</th>
+                           <th style="width: 120px;" *ngIf="settings.aawak.company_name">Company</th>
                            <th style="width: 200px;" *ngIf="settings.aawak.product_id || settings.aawak.condition_id">
                               Product</th>
                            <th style="width: 100px;">Qty</th>
@@ -327,7 +328,7 @@
                               </td>
 
                               <td *ngIf="settings.aawak.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
-                              <td>{{data.date?data.date:'-' | date:'yyyy-MM-dd'}}</td>
+                              <td>{{data.date | date:'dd-MM-yyyy'}}</td>
                               <td *ngIf="auth.webUser.dept_id != 2">
                                  {{data.mm_hin}} - {{data.mm_code}}<br />
                                  {{data.mm_eng}}
@@ -346,6 +347,9 @@
                               <td>
                                  {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
                                  {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
+                              </td>
+                              <td *ngIf="settings.aawak.company_name">
+                                 {{data.company_name ? data.company_name : ''}}
                               </td>
                               <td *ngIf="settings.aawak.product_id || settings.aawak.condition_id">
                                  {{data.product_code ? data.product_code : '-'}}
@@ -381,6 +385,7 @@
                                     <table class="card-body" style="width: 99.7%;table-layout: fixed;">
                                        <tr>
                                           <th>No.</th>
+                                          <th>Date</th>
                                           <th>कहा भेजा</th>
                                           <th>किसको दिया</th>
                                           <th>जावक प्रकार</th>
@@ -395,6 +400,7 @@
                                              <i class="uil-corner-down-right"></i>
                                              <span class="mx-1">{{j+1}}</span>
                                           </td>
+                                          <td>{{jwk.date}}</td>
                                           <td>{{jwk.jawak_mm_hin}} {{jwk.jawak_mm_code ? "("+jwk.jawak_mm_code+")" :
                                              ''}}</td>
                                           <td>{{jwk.nimitt_hin}} {{jwk.nimitt_state_hin ?

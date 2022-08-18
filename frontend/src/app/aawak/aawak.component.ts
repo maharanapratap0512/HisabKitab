@@ -227,7 +227,7 @@ export class AawakComponent implements OnInit {
         // console.log("res", res);
         // console.log("jawakArray", jawakArray);
 
-        let awkobj:any = {};
+        let awkobj: any = {};
         for (let key in Object.keys(this.settings.aawak)) {
           if (!['visible', 'jawak_detail'].includes(key)) {
             if (this.settings.aawak[key]) {
@@ -236,7 +236,7 @@ export class AawakComponent implements OnInit {
           }
         }
         console.log("aawak_obj", awkobj);
-        
+
         this.allAJData.push({
           'No': index + 1,
           'MM': res.mm_hin,
@@ -599,23 +599,35 @@ export class AawakComponent implements OnInit {
               case "pkt no":
               case "pkt num":
               case "pkt_num":
-              case "pkt": obj.pkt_num = exceldata[i][j];
+              case "pkt": obj.pkt_num = exceldata[i][j].toString();
                 break;
               case "roll no":
-              case "roll_no": obj.pbk.roll_no = exceldata[i][j];
-                if (obj.pbk.roll_no) {
-                  let getpbk = this.pbks.find((p: any) => p.roll_no == obj.pbk.roll_no);
-                  obj.pbk_id = getpbk ? getpbk._id : null;
+              case "roll_no":
+                if (this.settings.aawak.pbk_id && exceldata[i][j]) {
+                  obj.pbk.roll_no = exceldata[i][j];
+                  if (obj.pbk.roll_no) {
+                    let getpbk = this.pbks.find((p: any) => p.roll_no == obj.pbk.roll_no);
+                    obj.pbk_id = getpbk ? getpbk._id : null;
+                  }
                 }
                 break;
               case "pbk":
-              case "sewadhari": obj.pbk.name = exceldata[i][j];
+              case "sewadhari":
+                if (this.settings.aawak.pbk_id && exceldata[i][j]) {
+                  obj.pbk.name = exceldata[i][j];
+                }
                 break;
-              case "relation": obj.pbk.relation = exceldata[i][j];
+              case "relation":
+                if (this.settings.aawak.pbk_id && exceldata[i][j]) {
+                  obj.pbk.relation = exceldata[i][j];
+                }
                 break;
               case "relative":
               case "relative_name":
-              case "relative name": obj.pbk.relative = exceldata[i][j];
+              case "relative name":
+                if (this.settings.aawak.pbk_id && exceldata[i][j]) {
+                  obj.pbk.relative = exceldata[i][j];
+                }
                 break;
               case "item": obj.item = exceldata[i][j];
                 let getitem = this.items.find((i: any) => [i.item_hin, i.item_eng, i.item_code].includes(obj.item));
@@ -637,21 +649,26 @@ export class AawakComponent implements OnInit {
               case "product_code":
               case "product code":
               case "serial no":
-                obj.product = exceldata[i][j];
-                let getproduct = this.products.find((p: any) => [p.sr_no, p.product_code].includes(obj.product));
-                obj.product_id = getproduct ? getproduct._id : null;
+                if (this.settings.aawak.product_id) {
+                  obj.product = exceldata[i][j];
+                  let getproduct = this.products.find((p: any) => [p.sr_no, p.product_code].includes(obj.product));
+                  obj.product_id = getproduct ? getproduct._id : null;
+                }
                 break;
               case "company":
               case "company name":
               case "company_name": obj.company_name = exceldata[i][j];
                 break;
-              case "condition": obj.condition = exceldata[i][j];
-                let getcondition = this.conditions.find((c: any) => [c.list_name_hin, c.list_name_eng].includes(obj.condition));
-                if (getcondition) {
-                  obj.condition_id = getcondition._id;
-                } else {
-                  let dictcondition = this.dictionary.find((d: any) => d.type == "condition" && d.name == obj.condition)
-                  obj.condition_id = dictcondition ? dictcondition.id : null;
+              case "condition":
+                if (this.settings.aawak.condition_id) {
+                  obj.condition = exceldata[i][j];
+                  let getcondition = this.conditions.find((c: any) => [c.list_name_hin, c.list_name_eng].includes(obj.condition));
+                  if (getcondition) {
+                    obj.condition_id = getcondition._id;
+                  } else {
+                    let dictcondition = this.dictionary.find((d: any) => d.type == "condition" && d.name == obj.condition)
+                    obj.condition_id = dictcondition ? dictcondition.id : null;
+                  }
                 }
                 break;
               case "aawak mm":
@@ -699,21 +716,25 @@ export class AawakComponent implements OnInit {
                 }
                 break;
               case "bill":
-                if ([true, 'true', 'yes', 1].includes((typeof exceldata[i][j] == "string" ? exceldata[i][j].trim().toLowerCase() : exceldata[i][j]))) {
-                  obj.isbill = 1;
-                }
-                else {
-                  obj.isbill = 0;
+                if (this.settings.aawak.isbill) {
+                  if ([true, 'true', 'yes', 1].includes((typeof exceldata[i][j] == "string" ? exceldata[i][j].trim().toLowerCase() : exceldata[i][j]))) {
+                    obj.isbill = 1;
+                  }
+                  else {
+                    obj.isbill = 0;
+                  }
                 }
                 break;
               case "nimitt":
-                obj.nimitt = exceldata[i][j];
-                let getnimitt = this.nimitts.find((n: any) => [n.nimitt_hin, n.nimitt_eng, n.roll_no].includes(obj.nimitt));
-                if (getnimitt) {
-                  obj.nimitt_id = getnimitt._id;
-                } else {
-                  let dictnimitt = this.dictionary.find((d: any) => d.type == "nimitt" && d.name == obj.nimitt)
-                  obj.nimitt_id = dictnimitt ? dictnimitt.id : null;
+                if (this.settings.aawak.nimitt_id) {
+                  obj.nimitt = exceldata[i][j];
+                  let getnimitt = this.nimitts.find((n: any) => [n.nimitt_hin, n.nimitt_eng, n.roll_no].includes(obj.nimitt));
+                  if (getnimitt) {
+                    obj.nimitt_id = getnimitt._id;
+                  } else {
+                    let dictnimitt = this.dictionary.find((d: any) => d.type == "nimitt" && d.name == obj.nimitt)
+                    obj.nimitt_id = dictnimitt ? dictnimitt.id : null;
+                  }
                 }
                 break;
               case "dept":

@@ -20,15 +20,17 @@ export class DashboardComponent implements OnInit {
   term: any;
   termBachat: any;
   pendingAawakData: any = [];
+  pendingAawakDataAll: any = [];
   bachatData: any = [];
   bachatDataAll: any = [];
   editData: any = {};
   mms: any = [];
+  categories: any = [];
   showModal: String = '';
   sitems: any = [];
   fields: any;
   viewData: any = [];
-  mmAwk:any;
+  mmAwk: any;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -44,9 +46,10 @@ export class DashboardComponent implements OnInit {
     this.getPendingAawak();
     this.gs.observeList().subscribe(result => {
       // console.log("dashboard", result);
-      
+
       this.mms = result.mm ? result.mm : [];
       this.sitems = result.sitem ? result.sitem : [];
+      this.categories = result.category ? result.category : [];
     });
   }
 
@@ -78,19 +81,30 @@ export class DashboardComponent implements OnInit {
   getPendingAawak() {
     this.http.get(this.api.getUrl('PENDING_AWK') + this.auth.webUser.dept_id).subscribe((data: any) => {
       if (data['result'] && data['success']) {
+        this.pendingAawakDataAll = data['result'];
         this.pendingAawakData = data['result'];
       }
     });
   }
 
-  mmForAwkSelected(ev:any){
-    let body:any = {};
-    body.dept_id = this.auth.webUser.dept_id;
+  catForAwkSelected(ev: any) {
     if(ev){
-      body.mm_id = ev ;
+      this.pendingAawakData = this.pendingAawakDataAll.filter((a:{item_categories:any[], subitem_categories:any[]})=> a.item_categories.includes(ev) || a.subitem_categories.includes(ev))
+    } else{
+      this.pendingAawakData = this.pendingAawakDataAll;
+    } 
+
+  }
+
+  mmForAwkSelected(ev: any) {
+    let body: any = {};
+    body.dept_id = this.auth.webUser.dept_id;
+    if (ev) {
+      body.mm_id = ev;
     }
     this.http.put(this.api.getUrl('PENDING_AWK') + this.auth.webUser.dept_id, body).subscribe((data: any) => {
       if (data['result'] && data['success']) {
+        this.pendingAawakDataAll = data['result'];
         this.pendingAawakData = data['result'];
       }
     });

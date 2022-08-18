@@ -151,6 +151,7 @@ export class DepartmentComponent implements OnInit {
         nimitt_id: false,
         item_id: true,
         subitem_id: true,
+        company_name:false,
         filter_by_dept: false,
         filter_by_cat: false,
         product_id: false,
