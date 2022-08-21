@@ -169,6 +169,7 @@
                           <th style="width: 40px;">Page Visibility</th>
                           <th style="width: 101px;">Page</th>
                           <th style="width: 150px;">Detail</th>
+                          <th style="width: 75px;">New Entry</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -183,7 +184,9 @@
                           </td>
                           <td>आवक / Aawak</td>
                           <td>इस पेज से आवक एंट्री कर सकते है। </td>
+                          <td>
 
+                          </td>
                         </tr>
                         <ng-container *ngIf="settingsAll.aawak.visible">
                           <tr class="collapse show ribbon-box" [attr.id]="'aawak_row'">
@@ -257,8 +260,8 @@
                                   <td>
                                     <div class="form-check form-switch">
                                       <input type="checkbox" class="form-check-input"
-                                        [(ngModel)]="settingsAll.aawak.company_name" [ngModelOptions]="{standalone: true}"
-                                        disabled>
+                                        [(ngModel)]="settingsAll.aawak.company_name"
+                                        [ngModelOptions]="{standalone: true}">
                                       <label class="form-check-label" for="customSwitch2">Company</label>
                                     </div>
                                   </td>
@@ -373,6 +376,7 @@
                           </td>
                           <td>जावक / Jawak</td>
                           <td>इस पेज से जावक एंट्री कर सकते है। </td>
+                          <td></td>
 
                         </tr>
                         <ng-container *ngIf="settingsAll.jawak.visible">
@@ -489,6 +493,7 @@
                           </td>
                           <td>प्रोडक्ट / Product</td>
                           <td>इस पेज से नये प्रोडक्ट की एंट्री कर सकते है। </td>
+                          <td></td>
 
                         </tr>
                         <ng-container *ngIf="settingsAll.product.visible">
@@ -662,6 +667,90 @@
                               </table>
                             </td>
                           </tr>
+                        </ng-container>                    
+
+                        <!-- bachat -->
+                        <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                          <td>5</td>
+                          <td>
+                            <div class="form-check form-switch">
+                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.bachat.visible"
+                                [ngModelOptions]="{standalone: true}">
+                            </div>
+                          </td>
+                          <td>बचत / Bachat</td>
+                          <td>इस पेज से बचत (स्टॉक / नया / पुराना / खराब / use ) समान की
+                            माहिती देख सकते है। </td>
+                          <td></td>
+
+                        </tr>
+                        <ng-container *ngIf="settingsAll.bachat.visible">
+                          <tr class="collapse show ribbon-box" [attr.id]="'bachat_row'">
+                            <!-- <td style="border: none;"></td> -->
+                            <td colspan="4" class="sub-row">
+                              <table class="card-body" style="width: 99.7%;table-layout: fixed;">
+                                <tr>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.bachat.used" [ngModelOptions]="{standalone: true}"
+                                        disabled>
+                                      <label class="form-check-label" for="customSwitch2">Used</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.bachat.stock" [ngModelOptions]="{standalone: true}"
+                                        disabled>
+                                      <label class="form-check-label" for="customSwitch2">Stock</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.bachat.repairing"
+                                        [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Repairing</label>
+                                    </div>
+                                  </td>
+
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.bachat.scrap" [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Scrap</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.bachat.new" [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">New</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.bachat.old" [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Old</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.bachat.defective"
+                                        [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Defective</label>
+                                    </div>
+                                  </td>
+                                </tr>
+
+                              </table>
+                            </td>
+                          </tr>
                         </ng-container>
 
                         <!-- PBK Configuration -->
@@ -675,6 +764,12 @@
                           </td>
                           <td>सेवाधारी / PBK</td>
                           <td>इस पेज से नये सेवाधारी की एंट्री कर सकते है। </td>
+                          <td>
+                            <div class="form-check form-switch">
+                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.pbk.add"
+                                [ngModelOptions]="{standalone: true}">
+                            </div>
+                          </td>
 
                         </tr>
                         <ng-container *ngIf="settingsAll.pbk.visible">
@@ -824,89 +919,6 @@
                           </tr>
                         </ng-container>
 
-                        <!-- bachat -->
-                        <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
-                          <td>5</td>
-                          <td>
-                            <div class="form-check form-switch">
-                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.bachat.visible"
-                                [ngModelOptions]="{standalone: true}">
-                            </div>
-                          </td>
-                          <td>बचत / Bachat</td>
-                          <td>इस पेज से बचत (स्टॉक / नया / पुराना / खराब / use ) समान की
-                            माहिती देख सकते है। </td>
-
-                        </tr>
-                        <ng-container *ngIf="settingsAll.bachat.visible">
-                          <tr class="collapse show ribbon-box" [attr.id]="'bachat_row'">
-                            <!-- <td style="border: none;"></td> -->
-                            <td colspan="4" class="sub-row">
-                              <table class="card-body" style="width: 99.7%;table-layout: fixed;">
-                                <tr>
-                                  <td>
-                                    <div class="form-check form-switch">
-                                      <input type="checkbox" class="form-check-input"
-                                        [(ngModel)]="settingsAll.bachat.used" [ngModelOptions]="{standalone: true}"
-                                        disabled>
-                                      <label class="form-check-label" for="customSwitch2">Used</label>
-                                    </div>
-                                  </td>
-                                  <td>
-                                    <div class="form-check form-switch">
-                                      <input type="checkbox" class="form-check-input"
-                                        [(ngModel)]="settingsAll.bachat.stock" [ngModelOptions]="{standalone: true}"
-                                        disabled>
-                                      <label class="form-check-label" for="customSwitch2">Stock</label>
-                                    </div>
-                                  </td>
-                                  <td>
-                                    <div class="form-check form-switch">
-                                      <input type="checkbox" class="form-check-input"
-                                        [(ngModel)]="settingsAll.bachat.repairing"
-                                        [ngModelOptions]="{standalone: true}">
-                                      <label class="form-check-label" for="customSwitch2">Repairing</label>
-                                    </div>
-                                  </td>
-
-                                </tr>
-                                <tr>
-                                  <td>
-                                    <div class="form-check form-switch">
-                                      <input type="checkbox" class="form-check-input"
-                                        [(ngModel)]="settingsAll.bachat.scrap" [ngModelOptions]="{standalone: true}">
-                                      <label class="form-check-label" for="customSwitch2">Scrap</label>
-                                    </div>
-                                  </td>
-                                  <td>
-                                    <div class="form-check form-switch">
-                                      <input type="checkbox" class="form-check-input"
-                                        [(ngModel)]="settingsAll.bachat.new" [ngModelOptions]="{standalone: true}">
-                                      <label class="form-check-label" for="customSwitch2">New</label>
-                                    </div>
-                                  </td>
-                                  <td>
-                                    <div class="form-check form-switch">
-                                      <input type="checkbox" class="form-check-input"
-                                        [(ngModel)]="settingsAll.bachat.old" [ngModelOptions]="{standalone: true}">
-                                      <label class="form-check-label" for="customSwitch2">Old</label>
-                                    </div>
-                                  </td>
-                                  <td>
-                                    <div class="form-check form-switch">
-                                      <input type="checkbox" class="form-check-input"
-                                        [(ngModel)]="settingsAll.bachat.defective"
-                                        [ngModelOptions]="{standalone: true}">
-                                      <label class="form-check-label" for="customSwitch2">Defective</label>
-                                    </div>
-                                  </td>
-                                </tr>
-
-                              </table>
-                            </td>
-                          </tr>
-                        </ng-container>
-
                         <!-- Nimitt -->
                         <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
                           <td>6</td>
@@ -918,6 +930,12 @@
                           </td>
                           <td>निमित्त / Nimiit</td>
                           <td>इस पेज से निमित्त संबंधित काम कर सकते है। </td>
+                          <td>
+                            <div class="form-check form-switch">
+                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.nimitt.add"
+                                [ngModelOptions]="{standalone: true}">
+                            </div>
+                          </td>
 
                         </tr>
 
@@ -932,6 +950,12 @@
                           </td>
                           <td>मि.म. / MM</td>
                           <td>इस पेज से मिनी मधुबन संबंधित काम कर सकते है। </td>
+                          <td>
+                            <div class="form-check form-switch">
+                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.mm.add"
+                                [ngModelOptions]="{standalone: true}">
+                            </div>
+                          </td>
 
                         </tr>
 
@@ -946,6 +970,12 @@
                           </td>
                           <td>Item/Subitem</td>
                           <td>इस पेज से आइटम और सबआइटम संबंधित काम कर सकते है। </td>
+                          <td>
+                            <div class="form-check form-switch">
+                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.item.add"
+                                [ngModelOptions]="{standalone: true}">
+                            </div>
+                          </td>
 
                         </tr>
 
@@ -960,6 +990,12 @@
                           </td>
                           <td>केटेगरी / Category</td>
                           <td>इस पेज से केटेगरी संबंधित काम कर सकते है। </td>
+                          <td>
+                            <div class="form-check form-switch">
+                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.category.add"
+                                [ngModelOptions]="{standalone: true}">
+                            </div>
+                          </td>
 
                         </tr>
 
@@ -974,6 +1010,12 @@
                           </td>
                           <td>सिटी / City</td>
                           <td>इस पेज से सिटी संबंधित काम कर सकते है। </td>
+                          <td>
+                            <div class="form-check form-switch">
+                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.city.add"
+                                [ngModelOptions]="{standalone: true}">
+                            </div>
+                          </td>
 
                         </tr>
 
@@ -989,6 +1031,12 @@
                           </td>
                           <td>डिपार्ट्मन्ट / Department</td>
                           <td>इस पेज से डिपार्ट्मन्ट संबंधित कन्ट्रोलिंग कर सकते है। </td>
+                          <td>
+                            <div class="form-check form-switch">
+                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.department.add"
+                                [ngModelOptions]="{standalone: true}">
+                            </div>
+                          </td>
 
                         </tr>
 

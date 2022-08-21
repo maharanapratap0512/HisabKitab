@@ -71,7 +71,7 @@
                <div class="form-group">
                   <label class="form-label">Category</label>
                   <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                     <button type="button" *ngIf="settings.category.add" style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-sm btn-outline-primary" (click)="setView('Category')"><i
                            class=" dripicons-view-list"></i></button>
                      <button type="button" style="padding: 1px 6px !important;"

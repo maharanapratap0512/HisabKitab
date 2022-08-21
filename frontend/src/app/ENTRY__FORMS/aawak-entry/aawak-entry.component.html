@@ -67,7 +67,8 @@
             <div class="col-md-3 mb-3" *ngIf="!isEdit">
                <div class="form-group">
                   <label class="form-label"> MM</label>
-                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <button type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
                      onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add MM'">
                      + Add
                   </button>
@@ -85,7 +86,8 @@
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Aawak MM</label>
-                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <button type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
                      onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add AMM'">
                      + Add
                   </button>
@@ -103,7 +105,8 @@
             <div class="col-md-2 mb-3" *ngIf="settings.aawak.nimitt_id">
                <div class="form-group">
                   <label class="form-label">Nimitt</label>
-                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <button type="button" *ngIf="settings.nimitt.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
                      onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Nimitt'">+
                      Add</button>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Nimitt" [clearable]="true"
@@ -119,7 +122,8 @@
             <div class="col-md-3 mb-3" *ngIf="settings.aawak.pbk_id">
                <div class="form-group">
                   <label class="form-label">Sewadhari</label>
-                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <button type="button" *ngIf="settings.pbk.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
                      onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add PBK'">
                      + PBK
                   </button>
@@ -172,7 +176,7 @@
             <div class="col-md-3 mb-3" *ngIf="!isEdit">
                <div class="form-group">
                   <label class="form-label">Item & Subitem</label>
-                  <div class="float-end">
+                  <div class="float-end" *ngIf="settings.item.add">
                      <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
                         onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add Item'">
                         + Item
@@ -368,7 +372,8 @@
 
                      <div class="col-md-2 mb-3">
                         <label for="example-date" class="form-label">Date</label>
-                        <input class="form-control" id="example-date" type="date" [(ngModel)]="jdate" [ngModelOptions]="{standalone: true}" required>
+                        <input class="form-control" id="example-date" type="date" [(ngModel)]="jdate"
+                           [ngModelOptions]="{standalone: true}" required>
                      </div>
 
                      <div class="col-md-3 mb-1">

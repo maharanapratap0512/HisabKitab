@@ -25,6 +25,7 @@ export class ItemEntryComponent implements OnInit {
   viewType: any;
   viewData: any = [];
   imagepath: any;
+  settings:any = {};
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -49,6 +50,7 @@ export class ItemEntryComponent implements OnInit {
       this.units = result.unit ? result.unit : [];
       this.categories = result.category ? result.category : [];
     });
+    this.settings = this.auth.webUser.settings;
   }
 
   ngOnChanges(changes: SimpleChanges) {

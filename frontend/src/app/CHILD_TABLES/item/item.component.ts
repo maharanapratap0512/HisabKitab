@@ -35,6 +35,7 @@ export class ItemComponent implements OnInit {
   subitemData: any = [];
   conditionObj: any = {};
   baseurl:any;
+  settings:any = {};
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
@@ -54,6 +55,7 @@ export class ItemComponent implements OnInit {
       this.subitem_lists = result.subitem_list ? result.subitem_list : [];
     });
     this.baseurl = this.api.getUrl('BASE');
+    this.settings = this.auth.webUser.settings;
   }
 
   getItemData(pageNo:any) {

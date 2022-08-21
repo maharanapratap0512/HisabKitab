@@ -89,8 +89,8 @@
             </div>
             <div class="col-md-3 mb-3" *ngIf="settings.pbk.relative_name">
                <div class="form-group">
-                  <label class="form-label">{{(isNimitt ? 'Father Name' : 'Relative Name')}}</label>
-                  <input type="text" class="form-control" placeholder="{{(isNimitt ? 'Father Name' : 'Relative Name')}}"
+                  <label class="form-label">'Relative Name'</label>
+                  <input type="text" class="form-control" placeholder="Relative Name"
                      formControlName="relative_name"
                      [ngClass]="{'validation':pbkForm.get('relative_name')?.errors && (pbkForm.get('relative_name')?.touched || pbkForm.get ('relative_name')?.dirty)}">
                </div>
@@ -162,7 +162,7 @@
                <div class="col-md-3 mb-3" *ngIf="settings.pbk.city_id">
                   <div class="form-group">
                      <label class="form-label">City</label>
-                     <button type="button" style="padding: 1px 6px !important;"
+                     <button type="button" *ngIf="settings.city.add" style="padding: 1px 6px !important;"
                         class="btn btn-outline-primary float-end"
                         onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add City'">+
                         Add</button>
@@ -192,7 +192,7 @@
                <div class="col-md-3 mb-3" *ngIf="settings.pbk.class_mm_id">
                   <div class="form-group">
                      <label class="form-label">Daily Class MM</label>
-                     <button type="button" style="padding: 1px 6px !important;"
+                     <button type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
                         class="btn btn-outline-primary float-end"
                         onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add MM'">+
                         Add</button>

@@ -6,6 +6,8 @@ import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
+import { AuthService } from 'src/app/services/auth.service';
+declare var $:any;
 
 @Component({
   selector: 'app-data-view',
@@ -23,13 +25,17 @@ export class DataViewComponent implements OnInit {
   records: any;
   apiName: any;
   term: any;
+  editData:any;
+  showModal:string = "";
+
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
     private api: ApiService,
     private toastr: ToastrService,
     private gs: GlobalService,
-    private spinner: NgxSpinnerService) {
+    private spinner: NgxSpinnerService,
+    public auth:AuthService) {
   }
 
   ngOnInit(): void {
@@ -38,6 +44,7 @@ export class DataViewComponent implements OnInit {
   ngOnChanges(changes: SimpleChanges) {
     console.log("changes", changes);
     if (changes.Type.currentValue) {
+      this.Type = changes.Type.currentValue;
       switch (changes.Type.currentValue) {
         case 'mm': this.setMMFields();
           this.apiName = 'MM';
@@ -91,9 +98,15 @@ export class DataViewComponent implements OnInit {
     }
   }
 
+  closeModal() {
+    this.showModal = "";
+    $('#dataViewComponent #showModal').modal('hide');
+  }
 
   edit(data: any) {
-
+    this.editData = data;
+    this.showModal = 'Edit ' + this.Type;
+    $('#dataViewComponent > #showModal').modal('show');
   }
 
 
@@ -277,5 +290,21 @@ export class DataViewComponent implements OnInit {
       }
     ]
   }
+
+
+  editSubitemListResponse(ev:any){
+    console.log(ev);
+    
+    if(ev._id){
+      let index = this.records.indexOf((i: { _id: any }) => { i._id == ev._id });
+      console.log(index);
+      
+      if(index >= 0){
+        this.records.splice(index, 1, ev);
+      }
+      this.closeModal();
+    }
+  }
+
 
 }

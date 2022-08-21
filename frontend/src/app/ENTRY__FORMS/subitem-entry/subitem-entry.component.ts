@@ -32,6 +32,7 @@ export class SubitemEntryComponent implements OnInit {
   viewData: any = [];
   // subitem_hin:any;
   subitem_eng:any=false;
+  settings:any = {};
 
 
   constructor(private fb: FormBuilder,
@@ -61,6 +62,7 @@ export class SubitemEntryComponent implements OnInit {
       this.categories = result.category ? result.category : []
       this.subitem_list = result.subitem_list ? result.subitem_list : []
     });
+    this.settings = this.auth.webUser.settings;
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -78,9 +80,7 @@ export class SubitemEntryComponent implements OnInit {
   }
 
   selectSubitemHin(item: any) {
-    // do something with selected item
-    console.log(this.subitemForm.value);
-    
+    // do something with selected item  
     if (item) {
       this.subitemForm.patchValue({
         subitem_list_id: item._id,

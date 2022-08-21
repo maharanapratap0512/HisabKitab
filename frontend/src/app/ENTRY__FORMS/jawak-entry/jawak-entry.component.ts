@@ -139,14 +139,14 @@ export class JawakEntryComponent implements OnInit {
         item_id: this.aawakRef.item_id,
         subitem_id: this.aawakRef.subitem_id,
         item_detail: this.aawakRef.item_detail,
-        product_id: this.aawakRef.product_id,
+        product_id: this.aawakRef.product_id ? this.aawakRef.product_id : null,
         condition_id: this.aawakRef.condition_id,
         company_name: this.aawakRef.company_name,
         qty: this.aawakRef.remaining_qty ? this.aawakRef.remaining_qty : this.aawakRef.Stock,
         unit_id: this.aawakRef.unit_id,
         description: this.aawakRef.description,
         aawak_ref_id: (this.aawakRef._id ? this.aawakRef._id : null),
-        nimitt_id: this.aawakRef.nimitt_id,
+        nimitt_id: this.aawakRef.nimitt_id ? this.aawakRef.nimitt_id : null,
         dept_id: this.aawakRef.dept_id,
       });
     }

@@ -34,21 +34,27 @@ router.get('/', async (req, res, next) => {
 
 //  category get
 router.get('/home/:dept_id', async (req, res, next) => {
-    let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
-    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('bachat', {full:true, dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
-        // for(let i in data){
-        //     data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
-        //     for(let bcht of data[i].bachat_qty){
-        //         data[i][bcht.bachat_type_eng] = bcht.qty;
-        //     }
-        // }
+    try {
+        let result = [];
+        // let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
+        let sql = DB.query.bachat.with_pending_aawak.replace('?', `where bachat.dept_id = ${req.params.dept_id} AND bachat.Stock <> 0`);
+        sql = sql.replace('#', '');
+        console.log(sql);
+        let stmt = DB.db.prepare(sql);
+        for(let row of stmt.iterate({limit:-1, offset:-1})){
+            row.aawaks = JSON.parse(row.aawaks);
+            row.icategories = JSON.parse(row.icategories);
+            row.scategories = JSON.parse(row.scategories);
+            result.push(row);
+        }
+
         res.json({
             success: true,
-            result: resolve.data || [],
-            total_count: resolve.total_count
+            result: result,
+            total_count: result.length
         });
-    }, (err) => { return next(err) });
+    }
+    catch (err) { return next(err) };
 });
 
 
@@ -56,7 +62,7 @@ router.get('/:dept_id', async (req, res, next) => {
     // let conditionString = ``;
     let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-    await DB.getList('bachat', {full:true, dept_id:req.params.dept_id, conditionString:conditionString}).then((resolve) => {
+    await DB.getList('bachat', { full: true, dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
         // for(let i in data){
         //     data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
         //     for(let bcht of data[i].bachat_qty){

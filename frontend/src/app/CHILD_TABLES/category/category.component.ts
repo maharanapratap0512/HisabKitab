@@ -21,7 +21,8 @@ export class CategoryComponent implements OnInit {
   showModal: string = '';
   editData: any = {};
   categoryData: any = [];
-  total_count: any = 0;;
+  total_count: any = 0;
+  settings:any = {};
 
   constructor(
     private http: HttpService,
@@ -35,6 +36,7 @@ export class CategoryComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getCategoryData();
+    this.settings = this.auth.webUser.settings;
   }
 
   getCategoryData() {

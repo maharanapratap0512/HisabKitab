@@ -31,6 +31,7 @@ export class DashboardComponent implements OnInit {
   fields: any;
   viewData: any = [];
   mmAwk: any;
+  settings: any = {};
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -43,7 +44,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getBachat();
-    this.getPendingAawak();
+    // this.getPendingAawak();
     this.gs.observeList().subscribe(result => {
       // console.log("dashboard", result);
 
@@ -51,6 +52,7 @@ export class DashboardComponent implements OnInit {
       this.sitems = result.sitem ? result.sitem : [];
       this.categories = result.category ? result.category : [];
     });
+    this.settings = this.auth.webUser.settings;
   }
 
 
@@ -88,11 +90,11 @@ export class DashboardComponent implements OnInit {
   }
 
   catForAwkSelected(ev: any) {
-    if(ev){
-      this.pendingAawakData = this.pendingAawakDataAll.filter((a:{item_categories:any[], subitem_categories:any[]})=> a.item_categories.includes(ev) || a.subitem_categories.includes(ev))
-    } else{
+    if (ev) {
+      this.pendingAawakData = this.pendingAawakDataAll.filter((a: { item_categories: any[], subitem_categories: any[] }) => a.item_categories.includes(ev) || a.subitem_categories.includes(ev))
+    } else {
       this.pendingAawakData = this.pendingAawakDataAll;
-    } 
+    }
 
   }
 
@@ -134,8 +136,19 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  addJawak(data: any) {
-    this.editData = data;
+  addJawak(awk: any, bachat: any) {
+
+    this.editData = {
+      mm_id: bachat.mm_id,
+      mm_hin: bachat.mm_hin,
+      item_id: bachat.item_id,
+      item_hin: bachat.item_hin,
+      subitem_id: bachat.subitem_id,
+      subitem_hin: bachat.subitem_hin,
+      unit_id: bachat.unit_id,
+      dept_id: bachat.dept_id,
+      ...awk
+    };
     this.showModal = "Add Jawak";
     $('#showModal').modal('show');
   }
@@ -144,8 +157,13 @@ export class DashboardComponent implements OnInit {
     if (id) {
       this.http.get(this.api.getUrl('JAWAKBYAWK') + id).subscribe((data: any) => {
         if (data['result'] && data['success']) {
-          this.viewData = data['result'];
-          this.openModal('Show Jawak');
+          if (data['result'].length > 0) {
+            this.viewData = data['result'];
+            this.openModal('Show Jawak');
+          }
+          else {
+            this.toastr.warning("No any jawak Found")
+          }
         }
       });
     }
@@ -153,9 +171,9 @@ export class DashboardComponent implements OnInit {
 
   addJawakResponse(ev: any) {
     // this.isLoader = true;
+    console.log(ev);
+
     if (ev.aawak_ref_id) {
-      this.getPendingAawak();
-      this.getBachat();
     }
     $('#showModal').modal('hide');
     this.showModal = '';

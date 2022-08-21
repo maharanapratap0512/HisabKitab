@@ -39,10 +39,14 @@
                             </div>
                         </td>
                         <td>
-                            <!-- <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
-                               class="uil uil-pen"></i></button><br /> -->
-                            <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
-                                    class="uil-trash"></i></button>
+                            <button *ngIf="[1,6].includes(auth.webUser.dept_id)" class="btn btn-sm btn-primary mx-1"
+                                type="button" (click)="edit(data)"><i class="uil uil-pen"></i></button>
+                            <button *ngIf="[1,6].includes(auth.webUser.dept_id)" class="btn btn-sm btn-danger"
+                                type="button" (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
+                            <span *ngIf="![1,6].includes(auth.webUser.dept_id)" data-toggle="tooltip" title="Protected"
+                                class="text-warning mx-1" style="font-size: xx-large;cursor: pointer;line-height: 0px;">
+                                <i class="uil-shield-check"></i>
+                            </span>
                         </td>
                         <td *ngFor="let row of fields">
                             <ng-container *ngFor="let col of row.field;let z = index">
@@ -58,6 +62,29 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+
+    <!-- edit Modal -->
+    <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+                    <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''"
+                        class="btn-close" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">                                        
+                    <app-subitem-list-entry *ngIf="showModal == 'Edit subitem_list'" (response)='editSubitemListResponse($event)'
+                        [getData]="editData" [isEdit]="true"></app-subitem-list-entry>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

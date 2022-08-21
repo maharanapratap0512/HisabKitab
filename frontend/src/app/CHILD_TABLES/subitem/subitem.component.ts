@@ -22,7 +22,8 @@ export class SubitemComponent implements OnInit {
   showModal: string = '';
   editData: any = {};
   subitemData: any = [];
-  total_count: any = 0;;
+  total_count: any = 0;
+  settings:any = {};
 
   constructor(
     private fb: FormBuilder,
@@ -37,6 +38,7 @@ export class SubitemComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getSubitemData();
+    this.settings = this.auth.webUser.settings;
   }
 
   getSubitemData() {

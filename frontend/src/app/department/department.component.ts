@@ -96,6 +96,7 @@ export class DepartmentComponent implements OnInit {
     this.settingsAll = {
       pbk: {
         visible: false,
+        add:false,
         roll_no: false,
         pbk_hin: true,
         pbk_eng: false,
@@ -116,6 +117,7 @@ export class DepartmentComponent implements OnInit {
       },
       nimitt: {
         visible: false,
+        add:false,
       },
       product: {
         visible: false,
@@ -197,19 +199,24 @@ export class DepartmentComponent implements OnInit {
         scrap: false
       },
       category: {
-        visible: false
+        visible: false,
+        add:false,
       },
       item: {
-        visible: false
+        visible: false,
+        add:false,
       },
       mm: {
-        visible: false
+        visible: false,
+        add:false,
       },
       city: {
-        visible: false
+        visible: false,
+        add:false,
       },
       department: {
-        visible: false
+        visible: false,
+        add:false,
       },
       point: {
         visible: false

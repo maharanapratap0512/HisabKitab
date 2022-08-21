@@ -157,7 +157,7 @@
                 <div class="col-md-3 mb-3" *ngIf="!aawakRef || !aawakRef.mm_id">
                     <div class="form-group">
                         <label class="form-label">MM</label>
-                        <button type="button" style="padding: 1px 6px !important;"
+                        <button type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
                             class="btn btn-outline-primary float-end"
                             onclick="$('#jawakEntryComponent > #showModal').modal('show')"
                             (click)="showModal = 'Add MM'">
@@ -176,7 +176,7 @@
                 <div class="col-md-3 mb-3">
                     <div class="form-group">
                         <label class="form-label">Jawak MM</label>
-                        <button type="button" style="padding: 1px 6px !important;"
+                        <button type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
                             class="btn btn-outline-primary float-end"
                             onclick="$('#jawakEntryComponent > #showModal').modal('show')"
                             (click)="showModal = 'Add MM'">
@@ -201,7 +201,7 @@
                 </div> --><div class="col-md-2 mb-3" *ngIf="!aawakRef || !aawakRef.Nimitt">
                     <div class="form-group">
                         <label class="form-label">Nimitt</label>
-                        <button type="button" style="padding: 1px 6px !important;"
+                        <button type="button" *ngIf="settings.nimitt.add" style="padding: 1px 6px !important;"
                             class="btn btn-outline-primary float-end"
                             onclick="$('#jawakEntryComponent > #showModal').modal('show')"
                             (click)="showModal='Add Nimitt'">+
@@ -220,7 +220,7 @@
                 <div class="col-md-3 mb-3" *ngIf="settings.jawak.pbk_id">
                     <div class="form-group">
                         <label class="form-label">Sewadhari</label>
-                        <button type="button" style="padding: 1px 6px !important;"
+                        <button type="button" *ngIf="settings.pbk.add" style="padding: 1px 6px !important;"
                             class="btn btn-outline-primary float-end" (click)="openModal('Add PBK')">
                             + PBK
                         </button>
@@ -272,7 +272,7 @@
                 <div class="col-md-3 mb-3" *ngIf="!aawakRef || !aawakRef.item_id">
                     <div class="form-group">
                         <label class="form-label">Item & Subitem</label>
-                        <div class="float-end">
+                        <div class="float-end" *ngIf="settings.item.add">
                             <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
                                 onclick="$('#jawakEntryComponent > #showModal').modal('show')"
                                 (click)="showModal = 'Add Item'">

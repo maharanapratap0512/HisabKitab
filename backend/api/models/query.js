@@ -131,7 +131,7 @@ const department_config = {
         config_key=@config_key,
         config_value=@config_value,
         updated_at=datetime('now','localtime')`
-    , update_config_value:`update department_config set config_value = json_set(config_value,'$['||json_array_length(config_value)||']',@new_id)where dept_id = @dept_id AND config_key=@tblname`
+    , update_config_value: `update department_config set config_value = json_set(config_value,'$['||json_array_length(config_value)||']',@new_id)where dept_id = @dept_id AND config_key=@tblname`
     , update_config_value_old:
         `update department_config set config_value = CASE WHEN(config_value = '') THEN ',' ELSE config_value END || @new_id || ',' where dept_id = @dept_id AND config_key = @tblname`,
     verify_config_id:
@@ -191,7 +191,7 @@ const itemmix = {
         left join unit ut on ut._id = subitem.unit_id
         left join subitem_list sl on  sl._id = subitem.subitem_list_id where subitem.item_id = item._id & group by subitem._id) as si) as subitems from item, json_each(item.categories)
     left join category ct on ct._id = json_each.value
-    left join unit on unit._id = item.unit_id ? group by item._id # limit @limit offset @offset`,    
+    left join unit on unit._id = item.unit_id ? group by item._id # limit @limit offset @offset`,
     select_full_old: `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
     unit.unit_full, unit.unit_short ,
     json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||si.subitem_hin || '", "subitem_eng": "' ||si.subitem_eng || '", "categories_hin": ' || si.categories_hin || ', "categories_eng": ' || si.categories_eng || ', "unit_full": "' || si.unit_full || '", "unit_short": "' || si.unit_short || '", "categories": ' || si.categories || ', "extra_note": "' || si.extra_note || '", "unit_id": ' || si.unit_id || ', "active": ' || si.active || '}')) as subitems from item, json_each(item.categories)
@@ -201,7 +201,7 @@ const itemmix = {
         left join category cat on cat._id = json_each.value
         left join unit ut on ut._id = subitem.unit_id
         left join subitem_list sl on  sl._id = subitem.subitem_list_id group by subitem._id
-    ) si on si.item_id = item._id ? group by item._id # limit @limit offset @offset`,    
+    ) si on si.item_id = item._id ? group by item._id # limit @limit offset @offset`,
     order: `item_hin, item_eng`,
     count: `select count(*) as total_count from (select count(*) from item, json_each(item.categories)
         left join subitem si on si.item_id = item._id ? group by item._id)`
@@ -366,7 +366,26 @@ const bachat = {
         left join category cts on cts._id = si.categories   
         left join state st on st._id = mm.state_id
         left join department dept on dept._id = bachat.dept_id ? limit @limit offset @offset`
-    , insert:
+    ,
+    with_pending_aawak: `select bachat.*,
+        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id,     
+        it.item_hin, it.item_eng, it.item_code, it.categories as icategories,
+        sil.subitem_hin, sil.subitem_eng, si.categories as scategories,
+        bachat.unit_id,unit.unit_short, unit.unit_full,             
+        dept.dept_eng, dept.dept_hin, dept.dept_code,
+        CASE WHEN aawak._id is not null THEN json_group_array(json_object('_id', aawak._id, 'date', aawak.date, 'aawak_mm_id', aawak.aawak_mm_id, 'aawak_mm_hin', amm.mm_hin, 'pkt_num', aawak.pkt_num, 'pbk_id', aawak.pbk_id, 'roll_no', pbk.roll_no, 'pbk_hin', pbk.pbk_hin, 'relation', pbk.relation, 'relative_name', pbk.relative_name, 'item_detail', aawak.item_detail, 'company_name', aawak.company_name, 'condition_id', aawak.condition_id, 'condition_hin', cnd.list_name_hin, 'qty', aawak.qty, 'rate', aawak.rate, 'actual_amt', aawak.actual_amt, 'aawak_type_id', aawak.aawak_type_id, 'aawak_type_hin', awk_type.list_name_hin, 'description', aawak.description, 'remaining_qty', aawak.remaining_qty )) ELSE json('[]') END as aawaks from bachat 
+        left join aawak on aawak.dept_id = bachat.dept_id AND aawak.mm_id = bachat.mm_id AND aawak.item_id = bachat.item_id AND (aawak.subitem_id = bachat.subitem_id OR bachat.subitem_id IS NULL) AND aawak.unit_id = bachat.unit_id AND aawak.remaining_qty <> 0
+        left join mm amm on amm._id = aawak.aawak_mm_id
+        left join pbk on pbk._id = aawak.pbk_id
+        left join support_list cnd on cnd._id = aawak.condition_id
+        left join support_list awk_type on awk_type._id = aawak.aawak_type_id
+        left join mm on mm._id = bachat.mm_id
+        left join item it on it._id = bachat.item_id
+        left join subitem si on si._id = bachat.subitem_id
+        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join unit on unit._id = bachat.unit_id           
+        left join department dept on dept._id = bachat.dept_id ? group by bachat.mm_id, bachat.item_id, bachat.subitem_id, bachat.unit_id # limit @limit offset @offset`,
+    insert:
         `insert into bachat (
             mm_id,
             item_id,

@@ -20,7 +20,8 @@ export class NimittComponent implements OnInit {
   showModal: string = '';
   editData: any = {};
   nimittData: any = [];
-  total_count: any = 0;;
+  total_count: any = 0;
+  settings:any = {};
 
   constructor(
     private http: HttpService,
@@ -34,6 +35,7 @@ export class NimittComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getNimittData();
+    this.settings = this.auth.webUser.settings;
   }
 
   getNimittData() {
