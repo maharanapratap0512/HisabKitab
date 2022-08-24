@@ -173,7 +173,7 @@
                                  <td [ngClass]="{'marked': !jwk.aj_mm_id}">{{jwk.aj_mm}}</td>
                                  <td [ngClass]="{'marked': jwk.nimitt && !jwk.nimitt_id}">{{jwk.nimitt}} </td>
                                  <td [ngClass]="{'marked': !jwk.aj_type_id}">{{jwk.aj_type}}</td>
-                                 <td [ngClass]="{'marked': !jwk.qty || !jwk.unit_id}">{{jwk.qty}} {{jwk.unit}}</td>
+                                 <td [ngClass]="{'marked': !jwk.qty || !data.unit_id}">{{jwk.qty}} {{data.unit}}</td>
                               </tr>
                            </table>
                         </td>
@@ -420,7 +420,7 @@
                                  <td [ngClass]="{'marked': jwk.nimitt && !jwk.nimitt_id}">{{data.nimitt_hin}}
                                     ({{data.nimitt_state_hin}}) </td>
                                  <td [ngClass]="{'marked': !jwk.aj_type_id}">{{jwk.aj_type_hin}}</td>
-                                 <td [ngClass]="{'marked': !jwk.qty || !jwk.unit_id}">{{jwk.qty}} {{jwk.unit_short}}
+                                 <td [ngClass]="{'marked': !jwk.qty || !data.unit_id}">{{jwk.qty}} {{data.unit_short?data.unit_short:'-'}}
                                  </td>
                               </tr>
                            </table>

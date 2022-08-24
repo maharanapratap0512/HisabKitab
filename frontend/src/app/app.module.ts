@@ -61,6 +61,7 @@ import { ImportComponent } from './import/import.component';
 import { NimittComponent } from './CHILD_TABLES/nimitt/nimitt.component';
 import { NimittEntryComponent } from './ENTRY__FORMS/nimitt-entry/nimitt-entry.component';
 import { AutocompleteLibModule } from 'angular-ng-autocomplete';
+import { UpdateDetailComponent } from './layout/update-detail/update-detail.component';
 
 
 
@@ -108,6 +109,7 @@ import { AutocompleteLibModule } from 'angular-ng-autocomplete';
     ImportComponent,
     NimittComponent,
     NimittEntryComponent,
+    UpdateDetailComponent,
   ],
   imports: [
     BrowserModule,

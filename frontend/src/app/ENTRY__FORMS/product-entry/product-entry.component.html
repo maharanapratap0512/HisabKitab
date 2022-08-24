@@ -49,10 +49,11 @@
             <div class="col-md-3 mb-3" *ngIf="!isEdit">
                <div class="form-group">
                   <label class="form-label">MM</label>
-                  <button type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <a type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
                      onclick="$('#productEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add MM'">
                      + Add
-                  </button>
+                  </a>
                   <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="false"
                      [virtualScroll]="true" formControlName="mm_id"
                      [ngClass]="{'validation':productForm.get('mm_id')?.errors && (productForm.get('mm_id')?.touched || productForm.get ('mm_id')?.dirty)}">
@@ -83,9 +84,10 @@
             <div class="col-md-2 mb-3" *ngIf="settings.aawak.nimitt_id">
                <div class="form-group">
                   <label class="form-label">Nimitt</label>
-                  <button type="button" *ngIf="settings.nimitt.add" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <a type="button" *ngIf="settings.nimitt.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
                      onclick="$('#productEntryComponent > #showModal').modal('show')" (click)="showModal='Add Nimitt'">+
-                     Add</button>
+                     Add</a>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Nimitt" [clearable]="false"
                      [virtualScroll]="true" formControlName="nimitt_id"
                      [ngClass]="{'validation':productForm.get('nimitt_id')?.errors && (productForm.get('nimitt_id')?.touched || productForm.get ('nimitt_id')?.dirty)}">
@@ -123,16 +125,16 @@
                <div class="form-group">
                   <label class="form-label">Item & Subitem</label>
                   <div class="float-end" *ngIf="settings.item.add">
-                     <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
+                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
                         onclick="$('#productEntryComponent > #showModal').modal('show')"
                         (click)="showModal = 'Add Item'">
                         + Item
-                     </button>
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                     </a>
+                     <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-outline-primary" onclick="$('#productEntryComponent > #showModal').modal('show')"
                         (click)="showModal = 'Add Subitem'">
                         + Subitem
-                     </button>
+                     </a>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
                      [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)"
@@ -178,10 +180,10 @@
                <div class="form-group">
                   <label class="form-label">Condition</label>
                   <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                     <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-sm btn-outline-primary" (click)="setView('Condition')">
                         <i class=" dripicons-view-list"></i>
-                     </button>
+                     </a>
                      <!-- <button type="button" style="padding: 1px 6px !important;"
                         class="btn btn-outline-primary float-end"
                         onclick="$('#productEntryComponent > #showModal').modal('show')"

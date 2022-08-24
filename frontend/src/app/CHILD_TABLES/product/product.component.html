@@ -40,31 +40,33 @@
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
-                           <th>No.</th>
-                           <th>Manage</th>
+                           <th style="width:80px;">No.</th>
+                           <th style="width:120px;">Manage</th>
                            <th *ngIf="settings.document" style="width: 120px;">Document</th>
-                           <th *ngIf="settings.purchase_date">Purchase Date</th>
-                           <th>Mm</th>
-                           <th>Item - Subitem</th>
-                           <th *ngIf="settings.company_name">Company - Model</th>
-                           <th>S/R - P. Code</th>
-                           <th>Price</th>
-                           <th>Condition</th>
-                           <th *ngIf="settings.warranty_period || settings.warranty_from">Warranty</th>
-                           <th *ngIf="settings.purchased_by || settings.purchase_from">Purchased Detail</th>
+                           <th *ngIf="settings.purchase_date" style="width:101px;">Purchase Date</th>
+                           <th style="width:150px;">Mm</th>
+                           <th style="width:180px;">Item - Subitem</th>
+                           <th *ngIf="settings.company_name" style="width:110px;">Company - Model</th>
+                           <th style="width:180px;">S/R - P. Code</th>
+                           <th style="width:100px;">Price</th>
+                           <th style="width:100px;">Condition</th>
+                           <th style="width:110px;" *ngIf="settings.warranty_period || settings.warranty_from">Warranty
+                           </th>
+                           <th style="width:180px;" *ngIf="settings.purchased_by || settings.purchase_from">Purchased
+                              Detail</th>
                            <!-- <th *ngIf="settings.purchase_from">Purchase From</th> -->
-                           <th *ngIf="settings.product_detail">Product Detail</th>
-                           <th *ngIf="settings.accessories">Accessories</th>
-                           <th *ngIf="settings.nimitt_id">Nimitt</th>
+                           <th style="width:180px;" *ngIf="settings.product_detail">Product Detail</th>
+                           <th style="width:180px;" *ngIf="settings.accessories">Accessories</th>
+                           <th style="width:110px;" *ngIf="settings.nimitt_id">Nimitt</th>
                         </tr>
                      </thead>
                      <tbody>
                         <tr *ngFor="let data of productData | filter:term; let i=index">
                            <td>{{i+1}}</td>
                            <td>
-                              <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
+                              <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button>
-                              <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                              <button class="btn btn-sm btn-danger mx-1" type="button" (click)="delete(i,data._id)"><i
                                     class="uil-trash"></i></button>
                            </td>
                            <ng-container (click)="rowDetail(data)">
@@ -72,10 +74,10 @@
                                  <img [src]="getImage1(data.document)" height="60px">
                               </td>
                               <td>{{data.purchase_date}}</td>
-                              <td>{{data.mm_id?data.mm_hin + ' : ' + data.mm_eng:'-'}}</td>
-                              <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}} <br/>
+                              <td>{{data.mm_id?data.mm_hin:''}} <br /> {{data.mm_eng ? data.mm_eng:'-'}}</td>
+                              <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}} <br />
                                  {{data.subitem_id? data.subitem_hin + ' : ' + data.subitem_eng:''}}</td>
-                              <td *ngIf="settings.company_name">{{data.company_name}} <br/> {{data.model_name}}</td>
+                              <td *ngIf="settings.company_name">{{data.company_name}} <br /> {{data.model_name}}</td>
                               <td>{{data.sr_num}} <br /> {{data.product_code}}</td>
                               <td>{{data.price}}</td>
                               <td>{{data.condition_id ? data.condition_hin: ''}}<br />
@@ -83,7 +85,7 @@
                               <td *ngIf="settings.warranty_period || settings.warranty_from">
                                  {{data.warranty_period ? data.warranty_period + 'M' : ''}} <br />
                                  {{data.warranty_from ? 'From : ' + data.warranty_from : ""}}
-                              </td>                           
+                              </td>
                               <td *ngIf="settings.purchased_by || settings.purchase_from">
                                  {{data.purchased_by ? 'By : ' + data.purchased_by : ""}}<br />
                                  {{data.purchase_from ? 'From : ' + data.purchase_from : ""}}

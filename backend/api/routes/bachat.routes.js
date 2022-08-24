@@ -35,19 +35,19 @@ router.get('/', async (req, res, next) => {
 //  category get
 router.get('/home/:dept_id', async (req, res, next) => {
     try {
+
         let result = [];
         // let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
         let sql = DB.query.bachat.with_pending_aawak.replace('?', `where bachat.dept_id = ${req.params.dept_id} AND bachat.Stock <> 0`);
         sql = sql.replace('#', '');
         console.log(sql);
         let stmt = DB.db.prepare(sql);
-        for(let row of stmt.iterate({limit:-1, offset:-1})){
+        for (let row of stmt.iterate({ limit: -1, offset: -1 })) {
             row.aawaks = JSON.parse(row.aawaks);
             row.icategories = JSON.parse(row.icategories);
             row.scategories = JSON.parse(row.scategories);
             result.push(row);
         }
-
         res.json({
             success: true,
             result: result,

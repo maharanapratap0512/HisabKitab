@@ -166,6 +166,7 @@ export class DepartmentComponent implements OnInit {
         item_detail: false,
         description: false,
         isbill: false,
+        document:false,
         jawak: {
           visible: false,
           jawak_mm_id: true,

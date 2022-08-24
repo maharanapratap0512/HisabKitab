@@ -253,7 +253,7 @@ router.post('/', async (req, res, next) => {
         try {
             for (let i in req.body) {
                 if (typeof req.body[i].date == "string") {
-                    req.body[i].date = Fn.StringToDate(req.body[i].date).toISOString().split('T')[0];;
+                    req.body[i].date = Fn.StringToDate(req.body[i].date).toISOString().split('T')[0];
                 }
                 else if (typeof req.body[i].date == "number") {
                     req.body[i].date = Fn.ExcelDateToJSDate(req.body[i].date).toISOString().split('T')[0];
@@ -263,11 +263,11 @@ router.post('/', async (req, res, next) => {
                 req.body[i].pbk = ((req.body[i].pbk && (req.body[i].pbk.roll_no || req.body[i].pbk.pbk || req.body[i].pbk.relation || req.body[i].pbk.relative)) ? JSON.stringify(req.body[i].pbk) : null);
                 for(let j in req.body[i].jawak_detail){
                     if (typeof req.body[i].jawak_detail[j].date == "string") {
-                        req.body[i].jawak_detail[j].date = Fn.StringToDate(req.body[i].jawak_detail[j].date);
+                        req.body[i].jawak_detail[j].date = Fn.StringToDate(req.body[i].jawak_detail[j].date).toISOString().split('T')[0];
                     }
                     else if (typeof req.body[i].jawak_detail[j].date == "number") {
-                        req.body[i].jawak_detail[j].date = Fn.ExcelDateToJSDate(req.body[i].jawak_detail[j].date)
-                        console.log("Exceldate", date);
+                        req.body[i].jawak_detail[j].date = Fn.ExcelDateToJSDate(req.body[i].jawak_detail[j].date).toISOString().split('T')[0];
+                        // console.log("Exceldate", date);
                     }
                 }
                 req.body[i].jawak_detail = (req.body[i].jawak_detail ? JSON.stringify(req.body[i].jawak_detail) : JSON.stringify([]))

@@ -1,9 +1,3 @@
-<!-- 
-<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
-[fullScreen]="true">
-<p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
-</ngx-spinner> -->
-
 <!-- Begin page -->
 <div class="wrapper">
    <div class="content-page">
@@ -22,33 +16,53 @@
                      <div class="row mb-3">
                         <div class="col-12 px-2">
                            <div class="row">
-                              <div class="col-6">
+                              <div class="col-2">
+                                 <button class="btn btn-primary w-100" (click)="openModal('Add Aawak')">
+                                    <i class="dripicons-plus h4 icon-mx-2"> </i>Add Aawak
+                                 </button>
+                              </div>
+                              <div class="col-3">
                                  <div class="form-group">
                                     <input type="text" class="form-control" placeholder="Search Here"
                                        [(ngModel)]="termBachat" name="search">
                                  </div>
                               </div>
-                              <!-- <div class="col-6">
-                                 <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
-                                    [clearable]="true" [virtualScroll]="true" (change)="mmSelected($event)"
-                                    groupBy="state_id" [selectableGroup]="true" bindLabel="mm_hin" bindValue="_id">
+                              <!-- <div class="col-2">
+                                 <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Category"
+                                    [clearable]="true" [virtualScroll]="true" [(ngModal)]="cat"
+                                    (change)="catSelected($event)" [ngModelOptions]="{standalone: true}">
+                                    <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}}
+                                       :
+                                       {{item.category_eng}}</ng-option>
                                  </ng-select>
                               </div> -->
-                              <div class="col-6">
+                              <div class="col-3">
+                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                    [clearable]="true" [multiple]="true" [virtualScroll]="true"
+                                    (change)="itemSelected($event)">
+                                    <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                                    <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                                       {{item.item_eng}} {{item.item_code ? ' : '+item.item_code: ''}}</ng-option>
+                                 </ng-select>
+                              </div>
+                              <div class="col-2">
                                  <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
                                     [clearable]="true" [virtualScroll]="true" (change)="mmSelected($event)">
                                     <ng-option *ngFor="let item of mms" [value]="item._id">
                                        {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
                                  </ng-select>
                               </div>
-                              <!-- <div class="float-end">                           
+                              <div class="col-2">
                                  <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total
                                     Count : {{bachatData.length?bachatData.length:'0'}} </button>
-                              </div> -->
+                              </div>
                            </div>
                         </div>
                      </div>
-
+                     <ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff"
+                        type="ball-scale-multiple" [fullScreen]="false">
+                        <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
+                     </ngx-spinner>
                      <!-- main table  -->
                      <div class="row p-1" style="overflow-y: auto; max-height: 500px;">
                         <table id="datatable-buttons" class="table table-hover dt-responsive">
@@ -112,7 +126,7 @@
                                                 <tr *ngFor="let awk of data.aawaks; let j = index;">
                                                    <td style="width: 75px;">
                                                       <i class="uil-corner-down-right"></i>
-                                                      <span class="mx-1">{{j+1}} </span>                                                      
+                                                      <span class="mx-1">{{j+1}} </span>
                                                    </td>
                                                    <td>
                                                       <!-- <div class="d-flex justify-content-between mb-1">
@@ -122,16 +136,18 @@
                                                                class="uil-trash"></i></button>
                                                       </div> -->
                                                       <div class="d-flex justify-content-between mb-1">
-                                                         <button *ngIf="awk.remaining_qty > 0" class="btn btn-sm btn-warning"
+                                                         <button *ngIf="awk.remaining_qty > 0"
+                                                            class="btn btn-sm btn-warning"
                                                             (click)="addJawak(awk, data)">
                                                             <i class="mdi mdi-plus noti-icon"></i>
                                                          </button>
-                                                         <button class="btn btn-sm btn-outline-warning" (click)="showJawak(awk._id)">
+                                                         <button class="btn btn-sm btn-outline-warning"
+                                                            (click)="showJawak(awk._id)">
                                                             <i class="dripicons-view-list noti-icon"></i>
                                                          </button>
                                                       </div>
                                                    </td>
-                     
+
                                                    <td>
                                                       {{awk.date | date:'dd-MM-yyyy'}} <br />
                                                       {{awk.pkt_num ? awk.pkt_num : ''}}
@@ -151,16 +167,18 @@
                                                    </td>
                                                    <td>
                                                       {{awk.qty}} {{awk.unit_short}} <br />
-                                                      <span style="font-weight:bold; color: red;" *ngIf="awk.remaining_qty != 0">
+                                                      <span style="font-weight:bold; color: red;"
+                                                         *ngIf="awk.remaining_qty != 0">
                                                          बचत: {{awk.remaining_qty}}
                                                       </span>
                                                    </td>
                                                    <td>@ {{awk.rate?awk.rate:'-'}} <br>
-                                                      = {{awk.actual_amt?awk.actual_amt:'-'}}</td>                                                  
+                                                      = {{awk.actual_amt?awk.actual_amt:'-'}}</td>
                                                    <td *ngIf="settings.aawak.item_detail">
                                                       {{awk.item_detail?awk.item_detail:'-'}}
                                                    </td>
-                                                   <td *ngIf="settings.aawak.description">{{awk.description?awk.description:'-'}}</td>
+                                                   <td *ngIf="settings.aawak.description">
+                                                      {{awk.description?awk.description:'-'}}</td>
                                                 </tr>
                                              </tbody>
                                           </table>
@@ -192,7 +210,8 @@
                aria-label="Close"></button>
          </div>
          <div class="modal-body">
-            <app-aawak-entry *ngIf="showModal == 'Add Aawak'" (response)='addAawakResponse($event)'></app-aawak-entry>
+            <app-aawak-entry *ngIf="showModal == 'Add Aawak'" [getData]="awkDraft"
+               (response)='addAawakResponse($event)'></app-aawak-entry>
 
             <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
                [aawakRef]="editData"></app-jawak-entry>

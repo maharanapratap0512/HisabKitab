@@ -25,10 +25,9 @@
                 <div class="col-md-3 mb-3">
                     <div class="form-group">
                         <label class="form-label">Country</label>
-                        <button type="button" style="padding: 1px 6px !important;"
-                            class="btn btn-outline-primary float-end"
+                        <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
                             onclick="$('#stateComponent > #addCountry').modal('show')"
-                            (click)="showModal = 'addCountry'">+ Add</button>
+                            (click)="showModal = 'addCountry'">+ Add</a>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Country" [clearable]="false"
                             [virtualScroll]="true" formControlName="country_id"
                             [ngClass]="{'validation':stateForm.get('country_id')?.errors && (stateForm.get('country_id')?.touched || stateForm.get ('country_id')?.dirty)}">

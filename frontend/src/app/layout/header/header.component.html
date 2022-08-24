@@ -180,11 +180,11 @@
                         <i class="uil-home-alt me-1"></i>Home
                      </a>
                   </li>
-                  <li class="nav-item" *ngIf="settings.product.visible">
+                  <!-- <li class="nav-item" *ngIf="settings.product.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="product" role="button">
                         <i class="uil-archive me-1"></i>Products
                      </a>
-                  </li>
+                  </li> -->
                   <li class="nav-item" *ngIf="settings.pbk.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="pbk" role="button">
                         <i class="uil-user me-1"></i>PBK
@@ -200,11 +200,6 @@
                         <i class="dripicons-view-list me-1"></i>Item
                      </a>
                   </li>
-                  <!-- <li class="nav-item" *ngIf="settings.item.visible">
-                     <a class="nav-link" routerLinkActive="active" routerLink="subitem" role="button">
-                        <i class="dripicons-list me-1"></i>Subitem
-                     </a>
-                  </li> -->
                   <li class="nav-item" *ngIf="settings.category.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="category" role="button">
                         <i class="dripicons-view-list-large me-1"></i>Category
@@ -475,6 +470,9 @@
             <strong>Customize </strong> the overall color scheme, sidebar menu, etc.
          </div> -->
 
+         <!-- update details -->
+         <button class="btn btn-sm btn-outline-primary w-100 mt-1" (click)="openModal('Update History')">Update History</button>
+
          <!-- import zip -->
          <button class="btn btn-outline-info w-100 mt-1" (click)="import.click()" data-toggle="tooltip"
             title="Import Data (.DB file)"> Import Update (.Zip)</button>
@@ -580,6 +578,9 @@
          </div>
          <div class="modal-body">
             <app-import *ngIf="modal == 'import'" [importData]="importData"></app-import>
+
+            <!-- update detail -->
+            <app-update-detail *ngIf="modal == 'Update History'"></app-update-detail>
             <!-- <app-jawak-entry (response)='addJawakResponse($ev+ent)' *ngIf="modal == 'Add Jawak'"></app-jawak-entry> -->
 
             <!-- <app-jawak-entry (response)='editJawakResponse($event)' *ngIf="modal == 'Edit Jawak'"

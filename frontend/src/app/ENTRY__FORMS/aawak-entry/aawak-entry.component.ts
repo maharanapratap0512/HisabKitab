@@ -110,15 +110,22 @@ export class AawakEntryComponent implements OnInit {
 
 	ngOnInit(): void { }
 
+	ngOnDestroy(): void {
+		this.response.emit(this.awkfg);
+	}
+
 	ngOnChanges(changes: SimpleChanges) {
 		console.log("changes.getData.currentValue", changes.getData.currentValue);
 		if (changes.isEdit && changes.isEdit.currentValue) {
-			this.gs.observeList().subscribe(result => {
-				this.items = result.itemmix ? result.itemmix : [];
-				this.categories = result.category ? result.category : [];
-			});
 		}
-		if (changes.getData.currentValue) {
+
+		if (changes.getData.currentValue && Object.keys(changes.getData.currentValue).length > 0) {
+			if (changes.getData.currentValue.item_id) {
+				this.gs.observeList().subscribe(result => {
+					this.items = result.itemmix ? result.itemmix : [];
+					this.categories = result.category ? result.category : [];
+				});
+			}
 			this.getData = changes.getData.currentValue;
 			this.awkfg.pkt_num = changes.getData.currentValue.pkt_num
 			this.awkfg.date = changes.getData.currentValue.date
@@ -146,7 +153,9 @@ export class AawakEntryComponent implements OnInit {
 
 			this.selDept_id = changes.getData.currentValue.dept_id;
 			this.oldQty = changes.getData.currentValue.qty;
-			this.imagepath = ((this.awkfg.document.images && this.awkfg.document.images.length > 0) ? this.awkfg.document.images[0] : null);
+			this.imagepath = ((this.awkfg.document && this.awkfg.document.images && this.awkfg.document.images.length > 0) ? this.awkfg.document.images[0] : null);
+			console.log(this.awkfg);
+
 			this.itemSelected(changes.getData.currentValue.item_id);
 		}
 	}
@@ -159,43 +168,43 @@ export class AawakEntryComponent implements OnInit {
 
 	dateChange() {
 		this.jdate = this.awkfg.date;
-	}	
+	}
 
 	jwkmmChanged(ev: any) {
 		if (ev && ev.id == this.awkfg.mm_id) {
 			let jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == 27);
-			if(jwk_type){
-				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin};
+			if (jwk_type) {
+				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin };
 			}
-			
+
 		}
 		else {
-			let jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == this.awkfg.aawak_type_id	);
-			if(jwk_type){
-				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin};
+			let jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == this.awkfg.aawak_type_id);
+			if (jwk_type) {
+				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin };
 			}
 		}
-		
+
 	}
 
 	add_jwk() {
 		let jwk_type
 		if (this.jmm.id == this.awkfg.mm_id) {
 			jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == 27);
-			if(jwk_type){
-				this.jtype = {id: jwk_type._id, list_name_hin: jwk_type.list_name_hin};
+			if (jwk_type) {
+				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin };
 			}
 		}
 		else {
-			jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == this.awkfg.aawak_type_id	);
-			if(jwk_type){
-				this.jtype = {id: jwk_type._id, list_name_hin: jwk_type.list_name_hin};
+			jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == this.awkfg.aawak_type_id);
+			if (jwk_type) {
+				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin };
 			}
-			else{
+			else {
 				this.jtype = null;
 			}
 		}
-		
+
 		let jwkfg: any = {
 			jawak_mm_id: (this.jmm ? this.jmm.id : null),
 			nimitt_id: (this.jnimitt ? this.jnimitt.id : null),
@@ -219,7 +228,7 @@ export class AawakEntryComponent implements OnInit {
 			nimitt_hin: (this.jnimitt ? this.jnimitt.nimitt_hin : ''),
 			nimitt_state_hin: (this.jnimitt ? this.jnimitt.state_hin : ''),
 		}
-		
+
 		this.awkfg.jawak_detail.push(jwkfg);
 
 		// this.jwkArr.push(jwkfg2);
@@ -268,30 +277,21 @@ export class AawakEntryComponent implements OnInit {
 		$('#aawakEntryComponent > #showModal').modal('show')
 	}
 
-	closeModal(name: any) {
-		this.showModal = name;
+	closeModal() {
+		// this.showModal = name;
 		$('#aawakEntryComponent > #showModal').modal('hide')
 	}
 
 	imagesSelectResponse(ev: any) {
 		if (ev.path) {
 			this.isLoader = true;
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			this.imagepath = ev.path;
 			this.awkfg.document = { images: [ev.path] }
-			this.awkfg.isbill = true;
 			this.isLoader = false;
 		}
 		else {
 			this.isLoader = false;
-		}
-	}
-
-	isbillchanged(ev: any) {
-		if (!ev.target.checked) {
-			this.awkfg.document = null;
-			this.imagepath = null
 		}
 	}
 

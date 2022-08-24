@@ -30,6 +30,7 @@ export class AawakComponent implements OnInit {
   term: any;
   showModal: string = '';
   editData: any = {};
+  aawakDraft: any = {};
   aawakData: any = [];
   aawakAll: any = [];
   total_count: any = 0;
@@ -191,79 +192,88 @@ export class AawakComponent implements OnInit {
     });
   }
 
+  async getJawakObj(awk: any) {
+    let jawakArray: any = []
+    // let bachat = res.qty;
+
+    return jawakArray;
+  }
+
   exportAJdataData() {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
     this.pageNo = 0;
     this.allAJData = [];
     this.exportAJdata$ = new Subject();
-    console.log("allAJData", this.allAJData);
 
     this.getMoreAJ();
 
-    this.exportAJdata$.subscribe((result: any) => {
-      console.log("exportAJdata", result);
-      result.map((res: any, index: any) => {
-        let jawakArray: any = []
-        let bachat = res.qty;
-        res.jawak_detail.forEach((jres: any) => {
-          bachat -= jres.qty ? jres.qty : 0;
+    this.exportAJdata$.subscribe(async (result: any) => {
+      // console.log("exportAJdata", result);
+      for (let i = 0; i < result.length; i++) {
+        let jawakArray = [];
+        for (let j in result[i].jawak_detail) {          
           jawakArray.push({
-            'Date': jres.date ? jres.date : '-',
-            'Jawak MM': jres.jawak_mm_id ? jres.jawak_mm_hin : '-',
-            'Kisko Diya': jres.nimitt_id ? jres.nimitt_hin + '(' + jres.nimitt_state_hin + ')' : '-',
-            'Jawak Type': jres.jawak_type_id ? jres.jawak_type_hin : '-',
-            'Qty': jres.qty ? jres.qty : '-',
-            'Unit': jres.unit_id ? jres.unit_short : '-',
+            'Date': result[i].jawak_detail[j].date ? result[i].jawak_detail[j].date : '-',
+            'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
+            'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
+            'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
+            'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
+            'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+            'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
+            'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
             // 'Bachat': bachat
-          })
-        });
-        jawakArray.push({
-          'Jawak Type': 'बचत',
-          'Qty': res.remaining_qty ? res.remaining_qty : 0,
-          'Unit': res.unit_id ? res.unit_short : '',
-          // 'Bachat': bachat
-        })
-        // console.log("res", res);
-        // console.log("jawakArray", jawakArray);
-
-        let awkobj: any = {};
-        for (let key in Object.keys(this.settings.aawak)) {
-          if (!['visible', 'jawak_detail'].includes(key)) {
-            if (this.settings.aawak[key]) {
-              awkobj[key] = this.settings.aawak[key];
-            }
-          }
+          });
         }
-        console.log("aawak_obj", awkobj);
-
-        this.allAJData.push({
-          'No': index + 1,
-          'MM': res.mm_hin,
-          'Date': res.date ? res.date : '-',
-          'Pkt No': res.pkt_num ? res.pkt_num : '-',
-          'Roll No': res.roll_no ? res.roll_no : '-',
-          'Pbk': res.pbk_hin ? res.pbk_hin : '-',
-          'Relation': res.relation ? res.relation : '-',
-          'Relative': res.relative_name ? res.relative_name : '-',
-          'Item': res.item_id ? res.item_hin : '-',
-          'Subitem': res.subitem_id ? res.subitem_hin : '-',
-          'Company': res.company_name ? res.company_name : '-',
-          'Condition': res.condition_id ? res.condition_hin : '-',
-          'Aawak MM': res.aawak_mm_id ? res.aawak_mm_hin : '-',
-          'Aawak Type': res.aawak_type_id ? res.aawak_type_hin : '-',
-          'Qty': res.qty ? res.qty : '-',
-          'Unit': res.unit_id ? res.unit_short : '-',
-          'Bill': res.isbill ? 'है' : '-',
-          // 'बचत':res.remaining_qty ? res.remaining_qty : 0,       
-          'Jawak Detail': jawakArray,
+        jawakArray.push({
+          'Date':'',
+          'Jawak MM': '',
+          'Kisko Diya':'',
+          'Pkt No': 'बचत',
+          'Jawak Type':'',
+          'Qty': result[i].remaining_qty ? result[i].remaining_qty : 0,
+          'Unit': result[i].unit_id ? result[i].unit_short : '',
+          'Jawak Detail':''
         });
-      });
+        let awkObj: any = {
+          'No': i + 1,
+          'Date': result[i].date ? result[i].date : '-',
+          'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
+          'MM': result[i].mm_hin,
+          'Aawak MM': result[i].aawak_mm_id ? result[i].aawak_mm_hin : '-',
+        };
+        if (this.settings.aawak.pbk_id) {
+          awkObj['Roll No'] = result[i].roll_no ? result[i].roll_no : '-';
+          awkObj.Pbk = result[i].pbk_hin ? result[i].pbk_hin : '-';
+          awkObj.Relation = result[i].relation ? result[i].relation : '-';
+          awkObj.Relative = result[i].relative_name ? result[i].relative_name : '-';
+        }
+
+        awkObj = {
+          ...awkObj,
+          'Item': result[i].item_id ? result[i].item_hin : '-',
+          'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
+          'Company': result[i].company_name ? result[i].company_name : '-',
+          'Condition': result[i].condition_id ? result[i].condition_hin : '-',
+          'Bill': result[i].isbill ? 'है' : '-',
+          'Qty': result[i].qty ? result[i].qty : '-',
+          'Unit': result[i].unit_id ? result[i].unit_short : '-',
+          'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
+          'Aawak Type': result[i].aawak_type_id ? result[i].aawak_type_hin : '-',
+          'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
+          'Description': result[i].description ? result[i].description : '-',
+          // 'बचत':result[i].remaining_qty ? result[i].remaining_qty : 0,       
+          'Jawak Detail': jawakArray,
+        };
+        this.allAJData.push(awkObj);
+      }
 
       if (this.allAJData.length < this.total_count) {
         this.getMoreAJ();
       }
       else {
+        console.log(this.allAJData);
+
         this.export(this.allAJData);
         this.isLoader = false;
       }
@@ -323,22 +333,21 @@ export class AawakComponent implements OnInit {
       this.isLoader = false;
     }
     else {
-      this.toastr.error("Something went Wrong.")
-      console.log("message", ev)
+      this.aawakDraft = ev;
+      this.toastr.info("Saved in Draft.");
     }
   }
 
   editAawakResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      $('#showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal();
       this.aawakData.splice(this.aawakData.indexOf(this.editData), 1, ev);
       this.isLoader = false;
     }
     else {
-      this.toastr.error("Something went Wrong.")
-      console.log("message", ev);
+      // this.toastr.error("Something went Wrong.")
+      // console.log("message", ev);
     }
   }
 
@@ -599,7 +608,7 @@ export class AawakComponent implements OnInit {
               case "pkt no":
               case "pkt num":
               case "pkt_num":
-              case "pkt": obj.pkt_num = exceldata[i][j].toString();
+              case "pkt": obj.pkt_num = exceldata[i][j] ? exceldata[i][j].toString() : exceldata[i][j];
                 break;
               case "roll no":
               case "roll_no":
