@@ -17,6 +17,7 @@ export class FilesViewComponent implements OnInit {
 
   imageName: any = [];
   imageFolder: any = [];
+  selectedImges: any = [];
   apiName: any = "IMAGE";
   baseUrl: any;
   isLoader: any;
@@ -61,7 +62,7 @@ export class FilesViewComponent implements OnInit {
 
   getImages() {
     this.isLoader = true;
-    this.http.put(this.api.getUrl('IMAGE'), {type:this.type}).subscribe((data:any) => {
+    this.http.put(this.api.getUrl('IMAGE'), { type: this.type }).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.imageName = data['result'];
         this.imageFolder = data['dirpath'];
@@ -74,7 +75,7 @@ export class FilesViewComponent implements OnInit {
   changeDocument(event: any): void {
     // this.doctfile = event.target.files[0];
     const formData = new FormData();
-    
+
     formData.append('type', this.type);
     formData.append('image', event.target.files[0]);
     this.http.postFormData(this.api.getUrl(this.apiName), formData).subscribe((data: any) => {
@@ -92,13 +93,18 @@ export class FilesViewComponent implements OnInit {
 
 
   imageClicked(path: any) {
-    this.response.emit({ path: this.imageFolder + path, baseUrl: this.baseUrl });
+    this.selectedImges.push({ path: this.imageFolder + path, baseUrl: this.baseUrl })
+    // console.log("this.selectedImges", this.selectedImges);
+  }
+
+  imageSubmit() {
+    this.response.emit(this.selectedImges);
   }
 
   imageDelete(name: any) {
     let body = {
       filename: name,
-      type:this.type
+      type: this.type
     }
     Swal.fire({
       title: 'Are you sure?',

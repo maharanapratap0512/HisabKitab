@@ -28,10 +28,11 @@ export class SubitemEntryComponent implements OnInit {
   showModal: string = '';
   viewType: any;
   viewData: any = [];
+  imagepath: any;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
-    private api: ApiService,
+    public api: ApiService,
     private toastr: ToastrService,
     private gs: GlobalService,
     private spinner: NgxSpinnerService,
@@ -67,7 +68,8 @@ export class SubitemEntryComponent implements OnInit {
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
         document: changes.getData.currentValue.document ? changes.getData.currentValue.document : null
       });
-    } 
+      this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0] : null;
+    }
   }
 
   subitemFormSubmit() {
@@ -203,7 +205,7 @@ export class SubitemEntryComponent implements OnInit {
     this.isLoader = true;
     console.log(ev);
     if (ev._id) {
-      
+
       $('#subitemComponent > #showModal').modal('hide');
       this.showModal = '';
       // this.subitem_list.unshift(ev);
@@ -214,6 +216,23 @@ export class SubitemEntryComponent implements OnInit {
     }
     else {
       console.log("err", ev);
+      this.isLoader = false;
+    }
+  }
+
+  imagesSelectResponse(ev: any) {
+    console.log("evvvv", ev);
+    if (ev.length) {
+      this.isLoader = true;
+      $('#subitemComponent > #showModal').modal('hide');
+      this.showModal = '';
+      this.imagepath = ev[0].path;
+      this.subitemForm.patchValue({
+        document: { images: ev.map((x: { path: any; }) => x.path) }
+      });
+      this.isLoader = false;
+    }
+    else {
       this.isLoader = false;
     }
   }

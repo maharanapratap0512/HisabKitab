@@ -42,6 +42,7 @@
                         <tr>
                            <th style="width:80px">No.</th>
                            <th>Manage</th>
+                           <th style="width: 100px;">Image</th>
                            <th>Item</th>
                            <th>Subitem Name (Hin-Eng)</th>
                            <th>Categoty</th>
@@ -73,6 +74,11 @@
                                  style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                  <i class="uil-shield-check"></i>
                               </span>
+                           </td>
+                           <td>
+                              <img *ngIf="data.document && data.document.images"
+                                 [src]="baseurl + data.document.images[0]" height="60px" alt="x"
+                                 style="padding: 5px; border-radius: 15px;">
                            </td>
                            <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}}</td>
                            <td>{{data.subitem_list_id?data.subitem_hin +' : '+ data.subitem_eng:'-'}}</td>

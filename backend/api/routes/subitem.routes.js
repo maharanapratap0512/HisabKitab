@@ -8,6 +8,9 @@ const DB = new DBContex();
 router.get('/', async (req, res, next) => {
     try {
         await DB.getList('subitem').then((resolve) => {
+            for (let i = 0; i < resolve.data.length; i++) {
+                resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
+            }
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -22,6 +25,9 @@ router.get('/', async (req, res, next) => {
 router.get('/:dept_id', async (req, res, next) => {
     try {
         await DB.getList('subitem', { full: true, dept_id: req.params.dept_id }).then((resolve) => {
+            for (let i = 0; i < resolve.data.length; i++) {
+                resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
+            }
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -37,7 +43,9 @@ router.get('/:dept_id', async (req, res, next) => {
 router.post('/:dept_id', async (req, res, next) => {
     try {
         if (req.body) {
+            req.body.document = JSON.stringify(req.body.document ? req.body.document : []);
             await DB.insert('subitem', req.body, req.params.dept_id).then((data) => {
+                data.document = data.document ? JSON.parse(data.document) : [];
                 res.json({
                     success: true,
                     result: data || {}
@@ -55,7 +63,9 @@ router.post('/:dept_id', async (req, res, next) => {
 router.put('/', async (req, res, next) => {
     try {
         if (req.body.set && req.body.query) {
+            req.body.set.document = JSON.stringify(req.body.set.document ? req.body.set.document : []);
             await DB.update('subitem', req.body.set, req.body.query._id).then(async (data) => {
+                data.document = data.document ? JSON.parse(data.document) : [];
                 res.json({
                     success: true,
                     result: data || {}

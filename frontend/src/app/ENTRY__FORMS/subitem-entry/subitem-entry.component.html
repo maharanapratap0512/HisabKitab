@@ -89,6 +89,18 @@
                      [ngClass]="{'validation':subitemForm.get('extra_note')?.errors && (subitemForm.get('extra_note')?.touched || subitemForm.get ('extra_note')?.dirty)}"></textarea>
                </div>
             </div>
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                   <label class="form-label">Image</label>
+                   <a onclick="$('#subitemComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
+                       class="form-control" style="cursor: pointer;">
+                       <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
+                       <img src="{{this.api.getUrl('BASE')+imagepath}}" alt="image" class="rounded m-1" height="48"
+                           *ngIf="imagepath">
+                       <i *ngIf="!imagepath">Click To Change</i>
+                   </a>
+               </div>
+           </div>
             <div class="col-md-3 mb-3">
                <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
                   (click)="subitemFormSubmit()">Submit</button>
@@ -128,6 +140,11 @@
                <app-subitem-list-entry *ngIf="showModal == 'Add Subitem List'"
                   (response)="subitemListAddResponse($event)">
                </app-subitem-list-entry>
+
+                <!-- Add Image -->
+                <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)"
+                type="item">
+            </app-files-view>
 
             </div>
             <div class="modal-footer">
