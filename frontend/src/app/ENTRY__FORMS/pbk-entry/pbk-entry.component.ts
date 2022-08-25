@@ -16,7 +16,6 @@ export class PbkEntryComponent implements OnInit {
 
   @Input() getData: any;
   @Input() isEdit: any;
-  @Input() isNimitt: any;
   @Output() response = new EventEmitter();
   pbkForm: FormGroup;
   allList: any = {};
@@ -31,8 +30,8 @@ export class PbkEntryComponent implements OnInit {
   relations: any = [];
   showModal: string = '';
   isLoader: boolean = false;
-  imagepath:any;
-  settings:any = {};
+  imagepath: any;
+  settings: any = {};
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -60,7 +59,7 @@ export class PbkEntryComponent implements OnInit {
       alt_mo_no: [null],
       class_mm_id: [null],
       bhatti_date: [null],
-      document:[null]
+      document: [null]
     });
     this.settings = this.auth.webUser.settings;
   }
@@ -101,31 +100,7 @@ export class PbkEntryComponent implements OnInit {
         bhatti_date: changes.getData.currentValue.bhatti_date,
         document: changes.getData.currentValue.document
       });
-      this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0]: null;
-    }
-    if(changes.isNimitt && changes.isNimitt.currentValue){
-      this.settings.pbk = {
-        roll_no: true,
-        pbk_hin: true,
-        pbk_eng: true,
-        gender: true,
-        state_id: true,
-        // relation: false,
-        relative_name: true,
-        birth_date: false,
-        age: false,
-        address: false,
-        townarea: true,
-        city_id: false,
-        mo_no: false,
-        alt_mo_no: false,
-        class_mm_id: false,
-        bhatti_date: false,
-        doccument: false
-      };
-      this.pbkForm.patchValue({
-        status: "nimitt"
-      });
+      this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0] : null;
     }
   }
 
@@ -170,11 +145,7 @@ export class PbkEntryComponent implements OnInit {
       this.isLoader = true;
       this.http.post(this.api.getUrl('PBK') + this.auth.webUser.dept_id, this.pbkForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
-          if(data['result'].status == "nimitt"){
-            this.gs.Lists.nimitt.unshift(data['result'])
-          }else{
-            this.gs.Lists.pbk.unshift(data['result'])
-          }
+          this.gs.Lists.pbk.unshift(data['result'])
           this.pbkForm.reset({ active: true });
           this.isLoader = false;
           this.toastr.success("PBK Added Successfully.")
@@ -223,11 +194,7 @@ export class PbkEntryComponent implements OnInit {
       };
       this.http.put(this.api.getUrl('PBK'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          if(data['result'].status == "nimitt"){
-            this.gs.Lists.nimitt.splice(this.gs.Lists.nimitt.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
-          }else{
-            this.gs.Lists.pbk.splice(this.gs.Lists.pbk.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
-          }
+          this.gs.Lists.pbk.splice(this.gs.Lists.pbk.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
           this.pbkForm.reset();
           this.isLoader = false;
           this.toastr.success("PBK Updated Successfully");

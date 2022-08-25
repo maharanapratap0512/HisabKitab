@@ -121,7 +121,8 @@ router.get('/pending/:dept_id', async (req, res, next) => {
 });
 
 router.put('/pending/:dept_id', async (req, res, next) => {
-    let conditionString = `remaining_qty <> 0 ${req.body.mm_id ? ` AND aawak.mm_id = ${req.body.mm_id}` : ``}`;
+    let conditionString = `remaining_qty <> 0 ${req.body.mm_id ? ` AND aawak.mm_id = ${req.body.mm_id}` : ``} `;
+
 
 
 

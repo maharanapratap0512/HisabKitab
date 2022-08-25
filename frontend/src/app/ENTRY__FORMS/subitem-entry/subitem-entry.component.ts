@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import * as e from 'express';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { iif } from 'rxjs';
@@ -7,6 +8,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
+
 declare var $: any;
 
 @Component({
@@ -29,6 +31,9 @@ export class SubitemEntryComponent implements OnInit {
   viewType: any;
   viewData: any = [];
   imagepath: any;
+  // subitem_hin:any;
+  subitem_eng: any = false;
+  settings: any = {};
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -39,10 +44,12 @@ export class SubitemEntryComponent implements OnInit {
     public auth: AuthService
   ) {
     this.subitemForm = this.fb.group({
-      subitem_list_id: [null, Validators.required],
+      subitem_list_id: [null],
+      subitem_hin: [null, Validators.required],
+      subitem_eng: [null, Validators.required],
       unit_id: [null],
       item_id: [null, Validators.required],
-      category_id: [null, Validators.required],
+      categories: [[], Validators.required],
       extra_note: [null],
       document: [null]
     });
@@ -55,6 +62,7 @@ export class SubitemEntryComponent implements OnInit {
       this.categories = result.category ? result.category : []
       this.subitem_list = result.subitem_list ? result.subitem_list : []
     });
+    this.settings = this.auth.webUser.settings;
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -64,11 +72,77 @@ export class SubitemEntryComponent implements OnInit {
         subitem_list_id: changes.getData.currentValue.subitem_list_id,
         unit_id: changes.getData.currentValue.unit_id,
         item_id: changes.getData.currentValue.item_id,
-        category_id: changes.getData.currentValue.category_id,
+        categories: changes.getData.currentValue.categories,
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
         document: changes.getData.currentValue.document ? changes.getData.currentValue.document : null
       });
       this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0] : null;
+    }
+  }
+
+  selectSubitemHin(item: any) {
+    // do something with selected item  
+    if (item) {
+      this.subitemForm.patchValue({
+        subitem_list_id: item._id,
+        subitem_hin: item.subitem_hin,
+        subitem_eng: item.subitem_eng,
+      });
+    }
+    else {
+      this.subitemForm.patchValue({
+        subitem_list_id: null,
+        subitem_hin: null,
+        subitem_eng: null,
+      });
+    }
+
+  }
+
+  searchSubitemHin(search: string) {
+    if (search) {
+      this.subitemForm.patchValue({
+        subitem_list_id: null,
+        subitem_hin: search
+      });
+    } else {
+      this.subitemForm.patchValue({
+        subitem_list_id: null,
+        subitem_eng: null
+      });
+    }
+  }
+
+  selectSubitemEng(item: any) {
+    // do something with selected item  
+    if (item) {
+      this.subitemForm.patchValue({
+        subitem_list_id: item._id,
+        subitem_hin: item.subitem_hin,
+        subitem_eng: item.subitem_eng,
+      });
+    }
+    else {
+      this.subitemForm.patchValue({
+        subitem_list_id: null,
+        subitem_hin: null,
+        subitem_eng: null,
+      });
+    }
+
+  }
+
+  searchSubitemEng(search: string) {
+    if (search) {
+      this.subitemForm.patchValue({
+        subitem_list_id: null,
+        subitem_eng: search
+      });
+    } else {
+      this.subitemForm.patchValue({
+        subitem_list_id: null,
+        subitem_eng: null
+      });
     }
   }
 
@@ -80,7 +154,7 @@ export class SubitemEntryComponent implements OnInit {
           // this.gs.Lists.subitem.unshift(data['result'])
           let i = this.gs.Lists.itemmix.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
           this.gs.Lists.itemmix[i].subitems.push(data['result']);
-          this.gs.Lists.itemmix[i].categories.push(data['result'].category_id);
+          // this.gs.Lists.itemmix[i].categories.push(data['result'].categories);
           this.subitemForm.reset();
           this.isLoader = false;
           this.toastr.success('SUBITEM added successfully.')
@@ -110,7 +184,7 @@ export class SubitemEntryComponent implements OnInit {
         subitem_list_id: this.subitemForm.value.subitem_list_id,
         unit_id: this.subitemForm.value.unit_id,
         item_id: this.subitemForm.value.item_id,
-        category_id: this.subitemForm.value.category_id,
+        categories: this.subitemForm.value.categories,
         extra_note: this.subitemForm.value.extra_note,
         document: this.subitemForm.value.document,
       };
@@ -118,7 +192,7 @@ export class SubitemEntryComponent implements OnInit {
         if (data && data['success']) {
           let i = this.gs.Lists.itemmix.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
           this.gs.Lists.itemmix[i].subitems.splice(this.gs.Lists.itemmix[i].subitems.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
-          this.gs.Lists.itemmix[i].categories.push(data['result'].category_id);
+          // this.gs.Lists.itemmix[i].categories.push(data['result'].categories);
           this.subitemForm.reset();
           this.isLoader = false;
           this.toastr.success('SUBITEM added successfully.')
@@ -142,7 +216,7 @@ export class SubitemEntryComponent implements OnInit {
       let item = this.items.find((i: { _id: any; }) => i._id == ev);
       if (item) {
         this.subitemForm.patchValue({
-          category_id: item.category_id,
+          categories: item.categories,
           unit_id: item.unit_id
         });
       }
@@ -156,7 +230,7 @@ export class SubitemEntryComponent implements OnInit {
       this.showModal = '';
       // this.categories.unshift(ev);
       this.subitemForm.patchValue({
-        category_id: ev._id
+        categories: [].concat(this.subitemForm.value.categories, ev._id)
       });
       this.isLoader = false;
     }

@@ -145,7 +145,7 @@ export class BachatComponent implements OnInit {
       if (value)
         this.bachatData = this.bachatData.filter((b: any) => {
           if (key == "category_id") {
-            return (b.scat_id == value) || (!b.scat_id && b.icat_id == value)
+            return (b.scategories.includes(value)) || ((!b.scategories.length) && b.icategories.includes(value))
           }
           else {
             return b[key] == value;

@@ -25,16 +25,36 @@ router.get('/all/:dept_id', async (req, res, next) => {
             lists.country = await DB.getList('country', { dept_id: req.params.dept_id }) || []
             lists.category = await DB.getList('category', { dept_id: req.params.dept_id }) || []
             lists.city = await DB.getList('city', { dept_id: req.params.dept_id }) || []
-            await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id}).then((resolve) => {
+            await DB.getList('item', { full: true, dept_id: req.params.dept_id }).then((resolve) => {
+
                 let subitem_count = 0;
                 for (let i = 0; i < resolve.data.length; i++) {
+                    resolve.data[i].categories = JSON.parse(resolve.data[i].categories);
+                    resolve.data[i].categories_hin = JSON.parse(resolve.data[i].categories_hin);
+                    DB.getList('subitem', { full: true, dept_id: req.params.dept_id, conditionString: ` subitem.item_id = ${resolve.data[i]._id}` }).then((subres) => {
 
-                    resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
-                    resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
-                    subitem_count += resolve.data[i].subitems.length;
+                        for (let i = 0; i < subres.data.length; i++) {
+                            subres.data[i].categories = JSON.parse(subres.data[i].categories);
+                            subres.data[i].categories_hin = JSON.parse(subres.data[i].categories_hin);
+
+                        }
+                        subitem_count += subres.total_count;
+                        resolve.data[i].subitems = subres.data;
+                    });
                 }
-                lists.itemmix = { data: resolve.data, total_count:resolve.total_count}
+                lists.itemmix = { data: resolve.data, total_count: resolve.total_count }
             });
+            //old code
+            // await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id}).then((resolve) => {
+            //     let subitem_count = 0;
+            //     for (let i = 0; i < resolve.data.length; i++) {
+
+            //         resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
+            //         resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
+            //         subitem_count += resolve.data[i].subitems.length;
+            //     }
+            //     lists.itemmix = { data: resolve.data, total_count:resolve.total_count}
+            // });
             lists.department = await DB.getList('department') || []
             lists.mm = await DB.getList('mm', { dept_id: req.params.dept_id }) || []
             lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id }) || []

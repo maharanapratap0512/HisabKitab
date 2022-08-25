@@ -18,11 +18,11 @@
                             [ngClass]="{'validation':unitForm.get('unit_short')?.errors && (unitForm.get('unit_short')?.touched || unitForm.get ('unit_short')?.dirty)}">
                     </div>
                 </div>
-                <div class="col-md-3 mb-3 text-center" *ngIf="isEdit">
+                <!-- <div class="col-md-3 mb-3 text-center" *ngIf="isEdit">
                     <label class="form-label">Active</label><br>
                     <input type="checkbox" id="active" checked data-switch="success" formControlName="active" />
                     <label for="active" style="position: relative; top: 6px;"></label>
-                </div>
+                </div> -->
                 <div class="col-md-3 mb-3">
                     <button class="btn btn-primary submit mx-3" type="submit" (click)="unitFormSubmit()"
                         *ngIf="!isEdit">Submit</button>

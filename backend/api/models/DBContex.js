@@ -69,10 +69,11 @@ class DBContex {
                 // console.log("dept_id == (1 || null) ====", dept_id == ('1' || null));
                 // console.log("[1, null].includes(dept_id) ====", ['1', null].includes(dept_id));
                 let conditionQuery = null
+                let sconditionQuery = null
 
 
                 if (this.tbl_need_dept_config.includes(tblname)) {
-                    conditionQuery = (!options.dept_id || options.dept_id == 1) ? null : `(select config_value from department_config where dept_id = ${options.dept_id} AND config_key = '${tblname}') LIKE '%,'||${tblname}._id||',%'`;
+                    conditionQuery = (!options.dept_id || options.dept_id == 1) ? null : ` ${tblname}._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='${tblname}')`;                    
                 }
                 else if (this.tbl_with_dept_id.includes(tblname)) {
                     conditionQuery = (options.dept_id ? `(${tblname}.dept_id = ${options.dept_id})` : null)
@@ -81,26 +82,32 @@ class DBContex {
                     sql = `select * from support_list ?`;
                     conditionQuery = `list_type = '${tblname}'`
                     if (this.tbl_from_supp_list.includes(tblname)) {
-                        conditionQuery += (!options.dept_id || options.dept_id == 1) ? '' : ` AND (select config_value from department_config where dept_id = ${options.dept_id} AND config_key = 'aj_type') LIKE '%,'||support_list._id||',%'`;
+                        conditionQuery += (!options.dept_id || options.dept_id == 1) ? '' : ` AND support_list._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='aj_type')`;
                     }
+                }
+                else if (tblname == "itemmix") {
+                    conditionQuery = (!options.dept_id || options.dept_id == 1) ? null : ` item._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='item')`;
+                    sconditionQuery = (!options.dept_id || options.dept_id == 1) ? null : ` subitem._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='subitem')`;
+                    sconditionQuery = options.sconditionString ? (sconditionQuery ? `${sconditionQuery} AND ` : '') + options.sconditionString : sconditionQuery
                 }
 
                 conditionQuery = options.conditionString ? (conditionQuery ? `${conditionQuery} AND ` : '') + options.conditionString : conditionQuery
 
                 let order = options.orderBy ? options.orderBy : ((options.full && this.query[tblname]) ? this.query[tblname].order : null);
 
-
                 if (tblname == "itemmix") {
+                    sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : ''));
+                    sql = sql.replace('&', (sconditionQuery ? ` AND ${sconditionQuery}` : ''));
+                    sql = sql.replace('#', (order ? ` order by ${order}` : ``));
+                    console.log(sql);
+                }
+                else if (["itemmix", "item", "subitem"].includes(tblname)) {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : ''));
                     sql = sql.replace('#', (order ? ` order by ${order}` : ``));
                 }
                 else {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
-
-                // if (tblname == "aawak") {
-                //     console.log(sql);
-                // }
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {
@@ -191,8 +198,8 @@ class DBContex {
                 obj.active = obj.active ? 1 : 0;
 
                 const result = await this.db.prepare(sql).run(obj);
-                // console.log("updt obj_____", obj);
-                // console.log("updt result_____", result);
+                console.log("updt obj_____", obj);
+                console.log("updt result_____", result);
 
                 let getres = {};
                 if (result.changes) {
@@ -268,7 +275,8 @@ class DBContex {
                     tblname = `support_list`;
                 }
                 if (tblname == "itemmix") {
-                    sql = this.query[tblname].count.replace('?', (conditionString && conditionString.trim() != '' ? ` where ${conditionString} ` : ``));
+                    // sql = this.query[tblname].count.replace('?', (conditionString && conditionString.trim() != '' ? ` where ${conditionString} ` : ``));
+                    sql = this.query[tblname].count.replace('?', '');
                     sql = sql.replace('#', '');
                 }
                 else {

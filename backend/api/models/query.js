@@ -131,31 +131,27 @@ const department_config = {
         config_key=@config_key,
         config_value=@config_value,
         updated_at=datetime('now','localtime')`
-    , update_config_value:
-        `update department_config set config_value = CASE WHEN(config_value = '') THEN ',' ELSE config_value END || @new_id || ',' where dept_id = @dept_id AND config_key = @tblname`
+    , update_config_value: `update department_config set config_value = json_set(config_value,'$['||json_array_length(config_value)||']',@new_id)where dept_id = @dept_id AND config_key=@tblname`
+    , update_config_value_old:
+        `update department_config set config_value = CASE WHEN(config_value = '') THEN ',' ELSE config_value END || @new_id || ',' where dept_id = @dept_id AND config_key = @tblname`,
+    verify_config_id:
+        `select count(json_each.value) from department_config, json_each(config_value) where dept_id = @dept_id AND config_key=@tblname AND json_each.value = @new_id)`,
 }
 
 const item = {
     select:
         `select * from item ?`
     , select_full:
-        `select item.*, 
-        cat.category_hin, cat.category_eng, 
-        unit.unit_full, unit.unit_short ,
-        json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || ', "active": ' || si.active || '}')) as subitems, json_group_array(si.category_id) as categories
-        from item
-        left join category cat on cat._id = item.category_id
-        left join unit on unit._id = item.unit_id
-        left join subitem si on si.item_id = item._id
-        left join category ct on ct._id = si.category_id
-        left join unit ut on ut._id = si.unit_id
-        left join subitem_list sl on  sl._id = si.subitem_list_id ? group by item._id limit @limit offset @offset`
+        `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
+        unit.unit_full, unit.unit_short from item, json_each(item.categories)
+        left join category ct on ct._id = json_each.value
+        left join unit on unit._id = item.unit_id ? group by item._id limit @limit offset @offset`
     , insert:
         `insert into item (
             item_hin,
             item_eng,
             item_code,
-            category_id,
+            categories,
             unit_id,
             extra_note,
             document,
@@ -164,7 +160,7 @@ const item = {
             @item_hin,
             @item_eng,
             @item_code,
-            @category_id,
+            @categories,
             @unit_id,
             @extra_note,
             @document,
@@ -174,7 +170,7 @@ const item = {
         item_hin=@item_hin,
         item_eng=@item_eng,
         item_code=@item_code,
-        category_id=@category_id,
+        categories=@categories,
         extra_note=@extra_note,
         document=@document,
         unit_id=@unit_id,
@@ -188,19 +184,26 @@ const item = {
 }
 
 const itemmix = {
-    select_full: `select item.*, 
-    cat.category_hin, cat.category_eng, 
+    select_full: `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
     unit.unit_full, unit.unit_short ,
-    json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||sl.subitem_hin || '", "subitem_eng": "' ||sl.subitem_eng || '", "category_hin": "' || ct.category_hin || '", "category_eng": "' || ct.category_eng || '", "unit_full": "' || ut.unit_full || '", "unit_short": "' || ut.unit_short || '", "category_id": ' || si.category_id || ', "unit_id": ' || si.unit_id || ', "active": ' || si.active || '}')) as subitems, json_group_array(si.category_id) as categories
-    from item
-    left join category cat on cat._id = item.category_id
+    (select json_group_array(json_object('_id', si._id , 'item_id', si.item_id , 'subitem_list_id', si.subitem_list_id , 'subitem_hin', si.subitem_hin , 'subitem_eng', si.subitem_eng , 'categories_hin', si.categories_hin, 'unit_full', si.unit_full , 'unit_short', si.unit_short , 'categories', json(si.categories) , 'extra_note', si.extra_note, 'unit_id', si.unit_id , 'active', si.active)) as subitems from (select subitem.*, sl.subitem_hin, sl.subitem_eng, json_group_array(cat.category_hin) as categories_hin, ut.unit_short, ut.unit_full from subitem, json_each(subitem.categories)
+        left join category cat on cat._id = json_each.value
+        left join unit ut on ut._id = subitem.unit_id
+        left join subitem_list sl on  sl._id = subitem.subitem_list_id where subitem.item_id = item._id & group by subitem._id) as si) as subitems from item, json_each(item.categories)
+    left join category ct on ct._id = json_each.value
+    left join unit on unit._id = item.unit_id ? group by item._id # limit @limit offset @offset`,
+    select_full_old: `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
+    unit.unit_full, unit.unit_short ,
+    json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||si.subitem_hin || '", "subitem_eng": "' ||si.subitem_eng || '", "categories_hin": ' || si.categories_hin || ', "categories_eng": ' || si.categories_eng || ', "unit_full": "' || si.unit_full || '", "unit_short": "' || si.unit_short || '", "categories": ' || si.categories || ', "extra_note": "' || si.extra_note || '", "unit_id": ' || si.unit_id || ', "active": ' || si.active || '}')) as subitems from item, json_each(item.categories)
+    left join category ct on ct._id = json_each.value
     left join unit on unit._id = item.unit_id
-    left join subitem si on si.item_id = item._id
-    left join category ct on ct._id = si.category_id
-    left join unit ut on ut._id = si.unit_id
-    left join subitem_list sl on  sl._id = si.subitem_list_id ? group by item._id # limit @limit offset @offset`,
+    left join (select subitem.*, json_group_array(cat.category_hin) as categories_hin, json_group_array(cat.category_eng) as categories_eng, sl.subitem_hin, sl.subitem_eng, ut.unit_short, ut.unit_full from subitem, json_each(subitem.categories)
+        left join category cat on cat._id = json_each.value
+        left join unit ut on ut._id = subitem.unit_id
+        left join subitem_list sl on  sl._id = subitem.subitem_list_id group by subitem._id
+    ) si on si.item_id = item._id ? group by item._id # limit @limit offset @offset`,
     order: `item_hin, item_eng`,
-    count: `select count(*) as total_count from (select count(*) from item 
+    count: `select count(*) as total_count from (select count(*) from item, json_each(item.categories)
         left join subitem si on si.item_id = item._id ? group by item._id)`
 }
 
@@ -317,8 +320,8 @@ const aawak = {
         mm.mm_hin,mm.mm_eng,mm.mm_code,
         amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
-        item.item_hin, item.item_eng, item.item_code,
-        sil.subitem_hin, sil.subitem_eng,
+        item.item_hin, item.item_eng, item.item_code, item.categories as item_categories,
+        sil.subitem_hin, sil.subitem_eng, si.categories as subitem_categories,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         unit.unit_short, unit.unit_full,
@@ -349,8 +352,8 @@ const bachat = {
     , select_full:
         `select bachat.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng,      
-        it.item_hin, it.item_eng, it.item_code, it.category_id as icat_id, cti.category_hin as icat_hin, cti.category_eng as icat_eng, 
-        sil.subitem_hin, sil.subitem_eng, si.category_id as scat_id, cts.category_hin as scat_hin, cts.category_eng as scat_eng, 
+        it.item_hin, it.item_eng, it.item_code, it.categories as icategories, cti.category_hin as icat_hin, cti.category_eng as icat_eng, 
+        sil.subitem_hin, sil.subitem_eng, si.categories as scategories, cts.category_hin as scat_hin, cts.category_eng as scat_eng, 
         bachat.unit_id,unit.unit_short, unit.unit_full,             
         dept.dept_eng, dept.dept_hin, dept.dept_code
         from bachat
@@ -359,11 +362,30 @@ const bachat = {
         left join subitem si on si._id = bachat.subitem_id
         left join subitem_list sil on sil._id = si.subitem_list_id
         left join unit on unit._id = bachat.unit_id
-        left join category cti on cti._id = it.category_id
-        left join category cts on cts._id = si.category_id
+        left join category cti on cti._id = it.categories   
+        left join category cts on cts._id = si.categories   
         left join state st on st._id = mm.state_id
         left join department dept on dept._id = bachat.dept_id ? limit @limit offset @offset`
-    , insert:
+    ,
+    with_pending_aawak: `select bachat.*,
+        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id,     
+        it.item_hin, it.item_eng, it.item_code, it.categories as icategories,
+        sil.subitem_hin, sil.subitem_eng, si.categories as scategories,
+        bachat.unit_id,unit.unit_short, unit.unit_full,             
+        dept.dept_eng, dept.dept_hin, dept.dept_code,
+        CASE WHEN aawak._id is not null THEN json_group_array(json_object('_id', aawak._id, 'date', aawak.date, 'aawak_mm_id', aawak.aawak_mm_id, 'aawak_mm_hin', amm.mm_hin, 'pkt_num', aawak.pkt_num, 'pbk_id', aawak.pbk_id, 'roll_no', pbk.roll_no, 'pbk_hin', pbk.pbk_hin, 'relation', pbk.relation, 'relative_name', pbk.relative_name, 'item_detail', aawak.item_detail, 'company_name', aawak.company_name, 'condition_id', aawak.condition_id, 'condition_hin', cnd.list_name_hin, 'qty', aawak.qty, 'rate', aawak.rate, 'actual_amt', aawak.actual_amt, 'aawak_type_id', aawak.aawak_type_id, 'aawak_type_hin', awk_type.list_name_hin, 'description', aawak.description, 'remaining_qty', aawak.remaining_qty )) ELSE json('[]') END as aawaks from bachat 
+        left join aawak on aawak.dept_id = bachat.dept_id AND aawak.mm_id = bachat.mm_id AND aawak.item_id = bachat.item_id AND (aawak.subitem_id = bachat.subitem_id OR bachat.subitem_id IS NULL) AND aawak.unit_id = bachat.unit_id AND aawak.remaining_qty <> 0
+        left join mm amm on amm._id = aawak.aawak_mm_id
+        left join pbk on pbk._id = aawak.pbk_id
+        left join support_list cnd on cnd._id = aawak.condition_id
+        left join support_list awk_type on awk_type._id = aawak.aawak_type_id
+        left join mm on mm._id = bachat.mm_id
+        left join item it on it._id = bachat.item_id
+        left join subitem si on si._id = bachat.subitem_id
+        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join unit on unit._id = bachat.unit_id           
+        left join department dept on dept._id = bachat.dept_id ? group by bachat.mm_id, bachat.item_id, bachat.subitem_id, bachat.unit_id # limit @limit offset @offset`,
+    insert:
         `insert into bachat (
             mm_id,
             item_id,
@@ -682,21 +704,20 @@ const subitem = {
     select:
         `select * from subitem ?`
     , select_full:
-        `select subitem.*, 
-        cat.category_hin, cat.category_eng, 
+        `select subitem.*, json_group_array(cat.category_hin) as categories_hin,
         unit.unit_full, unit.unit_short, 
         item.item_eng, item.item_hin, 
         subitem_list.subitem_eng, subitem_list.subitem_hin 
-        from subitem
-        left join category cat on cat._id = subitem.category_id
+        from subitem, json_each(subitem.categories)
+        left join category cat on cat._id = json_each.value
         left join unit on unit._id = subitem.unit_id
         left join item on  item._id = subitem.item_id
-        left join subitem_list on  subitem_list._id = subitem.subitem_list_id ? limit @limit offset @offset`
+        left join subitem_list on  subitem_list._id = subitem.subitem_list_id ? group by subitem._id limit @limit offset @offset`
     , insert:
         `insert into subitem (
         item_id,
         subitem_list_id,
-        category_id,
+        categories,
         unit_id,
         extra_note,
         document,
@@ -704,7 +725,7 @@ const subitem = {
     values (
         @item_id,
         @subitem_list_id,
-        @category_id,
+        @categories,
         @unit_id,
         @extra_note,
         @document,
@@ -713,8 +734,9 @@ const subitem = {
         `update subitem set 
         item_id=@item_id,
         subitem_list_id=@subitem_list_id,
-        category_id=@category_id,
+        categories=@categories,
         unit_id=@unit_id,
+        extra_note=@extra_note,
         document=@document,
         updated_at=datetime('now','localtime')`
     , update_active:
@@ -943,30 +965,29 @@ genDeptDB = {
 
     // insertDept: `insert into department select * from mainDB.department dept where (select dpc.config_value from mainDB.department_config dpc where dpc.dept_id = ? AND dpc.config_key = 'department') LIKE '%,'|| dept._id||',%'`,
 
-    updateDeptConfig: `update department_config set config_value = (select config_value from mainDB.department_config dpc where dpc.dept_id = department_config.dept_id and dpc.config_key = department_config.config_key) where department_config.dept_id = @dept_id OR (select depc.config_value from mainDB.department_config depc where depc.dept_id = @dept_id AND depc.config_key = 'department') LIKE '%,'|| department_config.dept_id||',%'`,
+    updateDeptConfig: `update department_config set config_value = (select config_value from mainDB.department_config dpc where dpc.dept_id = department_config.dept_id and dpc.config_key = department_config.config_key) where department_config.dept_id = @dept_id OR department_config.dept_id in (select json_each.value from mainDB.department_config, json_each(config_value) where dept_id = @dept_id AND config_key='department')`,
 
     country: `insert into country select * from mainDB.country`,
     state: `insert into state select * from mainDB.state`,
     dictionary: `insert into dictionary select * from dictionary`,
     delete_s_list: `delete from support_list`,
-    support_list: `insert into support_list select * from mainDB.support_list where list_type NOT IN ('aawak_type', 'jawak_type') OR (select config_value from department_config where dept_id = @dept_id AND config_key = 'aj_type') LIKE '%,'||_id||',%'`,
+    support_list: `insert into support_list select * from mainDB.support_list where list_type NOT IN ('aawak_type', 'jawak_type') OR support_list._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='aj_type')`,
     city: `insert into city select * from mainDB.city`,
     unit: `insert into unit select * from mainDB.unit`,
 
-    category: `insert into category select * from mainDB.category where (select config_value from department_config where dept_id = @dept_id AND config_key = 'category') LIKE '%,'||_id||',%'`,
+    category: `insert into category select * from mainDB.category where category._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='category')`,
 
-    mm: `insert into mm select * from mainDB.mm where (select config_value from department_config where dept_id = @dept_id AND config_key = 'mm') LIKE '%,'||_id||',%'`,
+    mm: `insert into mm select * from mainDB.mm where mm._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='mm')`,
 
-    item: `insert into item select * from mainDB.item where (select config_value from department_config where dept_id = @dept_id AND config_key = 'item') LIKE '%,'||_id||',%'`,
+    item: `insert into item select * from mainDB.item where item._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='item')`,
 
     subitem_list: `insert into subitem_list select * from mainDB.subitem_list `,
 
-    subitem: `insert into subitem select * from mainDB.subitem where (select config_value from department_config where dept_id = @dept_id AND config_key = 'subitem') LIKE '%,'||_id||',%'`,
+    subitem: `insert into subitem select * from mainDB.subitem where subitem._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='subitem')`,
 
-    pbk: `insert into pbk select * from mainDB.pbk where (select config_value from department_config where dept_id = @dept_id AND config_key = 'pbk') LIKE '%,'|| pbk._id||',%'`,
+    pbk: `insert into pbk select * from mainDB.pbk where pbk._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='pbk')`,
 
-    nimitt: `insert into nimitt select * from mainDB.nimitt where (select config_value from department_config where dept_id = @dept_id AND config_key = 'nimitt') LIKE '%,'|| nimitt._id||',%'`,
-
+    nimitt: `insert into nimitt select * from mainDB.nimitt where nimitt._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='nimitt')`,
 
     product: `insert into product select * from mainDB.product where dept_id = @dept_id`,
     aawak: `insert into aawak select * from mainDB.aawak where dept_id = @dept_id`,

@@ -31,7 +31,7 @@ export class MmComponent implements OnInit {
   departments: any = [];
   states: any = [];
   temp: any = {};
-
+  settings:any = {};
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
@@ -49,6 +49,7 @@ export class MmComponent implements OnInit {
       this.states = result.state ? result.state : [];
       this.departments = result.department ? result.department : [];
     });
+    this.settings = this.auth.webUser.settings;
   }
 
   getmmData() {

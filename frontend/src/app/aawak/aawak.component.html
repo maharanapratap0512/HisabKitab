@@ -39,16 +39,19 @@
                         </ng-select>
                      </div> -->
                      <div class="col-3 d-flex">
-                        <button *ngIf="!importPending" class="file btn btn-success" style="font-weight: 700 !important;">
+                        <button *ngIf="!importPending" class="file btn btn-success"
+                           style="font-weight: 700 !important;">
                            <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                            <input type="file" class="inputtag"
                               accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                               (change)="excelImport($event)" />
                         </button>
-                        <button *ngIf="importPending" class="file btn btn-success" (click)="openModal('import')" style="font-weight: 700 !important;">
+                        <button *ngIf="importPending" class="file btn btn-success" (click)="openModal('import')"
+                           style="font-weight: 700 !important;">
                            <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                         </button>
-                        <button class="btn btn-success mx-3" style="font-weight: 700 !important;" (click)="exportAJdataData()">
+                        <button class="btn btn-success mx-3" style="font-weight: 700 !important;"
+                           (click)="exportAJdataData()">
                            <i class=" uil-top-arrow-from-top"></i> Export Aawak
                         </button>
                      </div>
@@ -162,8 +165,8 @@
 
                               <div class="col-md-3 mb-3">
                                  <div class="form-group">
-                                    <label class="form-label">Product & Condition</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Product"
+                                    <label class="form-label">Condition</label>
+                                    <!-- <ng-select class="custom" style="width: 100%;" placeholder="Select Product"
                                        [clearable]="true" [virtualScroll]="true" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.product_id" name="product_id"
                                        (change)="productSelected($event)">
@@ -173,7 +176,7 @@
                                           : {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num
                                           : ''}}
                                        </ng-option>
-                                    </ng-select>
+                                    </ng-select> -->
                                     <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition"
                                        [clearable]="false" [virtualScroll]="true" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.condition_id"
@@ -288,15 +291,16 @@
                            <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
                            <th style="width: 150px;">Aawak Mm</th>
                            <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
-                           <th style="width: 120px;">Aawak Type</th>
-                           <th style="width: 150px;">Item - Subitem</th>
-                           <th style="width: 200px;" *ngIf="settings.aawak.product_id || settings.aawak.condition_id">
-                              Product</th>
+                           <th style="width: 150px;">Aawak Type</th>
+                           <th style="width: 180px;">Item - Subitem</th>
+                           <th style="width: 100px;" *ngIf="settings.aawak.company_name">Company</th>
+                           <th style="width: 100px;" *ngIf="settings.aawak.condition_id">Condition</th>
                            <th style="width: 100px;">Qty</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.actual_amt">Actual Amt</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.nimitt_id">Nimitt</th>
                            <th style="width: 200px;" *ngIf="settings.aawak.item_detail">Item Detail</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.isbill">IsBill</th>
+                           <th style="width: 100px;" *ngIf="settings.aawak.document">Images</th>
                            <th style="width: 200px;" *ngIf="settings.aawak.description">Description</th>
                         </tr>
                      </thead>
@@ -327,7 +331,7 @@
                               </td>
 
                               <td *ngIf="settings.aawak.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
-                              <td>{{data.date?data.date:'-' | date:'yyyy-MM-dd'}}</td>
+                              <td>{{data.date | date:'dd-MM-yyyy'}}</td>
                               <td *ngIf="auth.webUser.dept_id != 2">
                                  {{data.mm_hin}} - {{data.mm_code}}<br />
                                  {{data.mm_eng}}
@@ -347,8 +351,10 @@
                                  {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
                                  {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
                               </td>
-                              <td *ngIf="settings.aawak.product_id || settings.aawak.condition_id">
-                                 {{data.product_code ? data.product_code : '-'}}
+                              <td *ngIf="settings.aawak.company_name">
+                                 {{data.company_name ? data.company_name : ''}}
+                              </td>
+                              <td *ngIf="settings.aawak.condition_id">
                                  {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
                               </td>
                               <td>
@@ -364,10 +370,8 @@
                                  {{data.nimitt_id? '(' + data.nimitt_state_hin + ')': ''}}
                               </td>
                               <td *ngIf="settings.aawak.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
-                              <td *ngIf="settings.aawak.isbill">
-                                 <label *ngIf="!(data.document && data.document.images)">
-                                    {{data.isbill}}
-                                 </label>
+                              <td *ngIf="settings.aawak.isbill">{{data.isbill ? 'हाँ' : 'नहीं'}} </td>
+                              <td *ngIf="settings.aawak.document">                                 
                                  <img *ngIf="data.document && data.document.images"
                                     [src]="baseurl + data.document.images[0]" height="50px"
                                     style="border-radius: 10px;">
@@ -381,6 +385,7 @@
                                     <table class="card-body" style="width: 99.7%;table-layout: fixed;">
                                        <tr>
                                           <th>No.</th>
+                                          <th>Date</th>
                                           <th>कहा भेजा</th>
                                           <th>किसको दिया</th>
                                           <th>जावक प्रकार</th>
@@ -395,6 +400,7 @@
                                              <i class="uil-corner-down-right"></i>
                                              <span class="mx-1">{{j+1}}</span>
                                           </td>
+                                          <td>{{jwk.date}}</td>
                                           <td>{{jwk.jawak_mm_hin}} {{jwk.jawak_mm_code ? "("+jwk.jawak_mm_code+")" :
                                              ''}}</td>
                                           <td>{{jwk.nimitt_hin}} {{jwk.nimitt_state_hin ?
@@ -449,7 +455,8 @@
          </div>
          <div class="modal-body">
             <!-- <p>Hello Modal</p> -->
-            <app-aawak-entry *ngIf='showModal == "Add Aawak"' (response)='addAawakResponse($event)'></app-aawak-entry>
+            <app-aawak-entry *ngIf='showModal == "Add Aawak"' [getData]="aawakDraft"
+               (response)='addAawakResponse($event)'></app-aawak-entry>
 
             <app-import *ngIf='showModal == "import"' (response)='importResponse($event)'></app-import>
 

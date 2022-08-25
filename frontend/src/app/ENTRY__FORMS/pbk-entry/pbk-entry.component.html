@@ -32,13 +32,12 @@
                <div class="form-group">
                   <label class="form-label">Gender</label>
                   <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                     <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-sm btn-outline-primary" (click)="setView('Gender')"><i
-                           class=" dripicons-view-list"></i></button>
-                     <button type="button" style="padding: 1px 6px !important;"
-                        class="btn btn-outline-primary float-end"
+                           class=" dripicons-view-list"></i></a>
+                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
                         onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal='Add Gender'">+
-                        Add</button>
+                        Add</a>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Gender" [clearable]="false"
                      [virtualScroll]="true" formControlName="gender"
@@ -52,9 +51,9 @@
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">State</label>
-                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
                      onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add State'">+
-                     Add</button>
+                     Add</a>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select State" [clearable]="false"
                      [virtualScroll]="true" formControlName="state_id" (change)="stateSelected($event)"
                      [ngClass]="{'validation':pbkForm.get('state_id')?.errors && (pbkForm.get('state_id')?.touched || pbkForm.get ('state_id')?.dirty)}">
@@ -68,14 +67,13 @@
                <div class="form-group">
                   <label class="form-label">Relation</label>
                   <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                     <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-sm btn-outline-primary" (click)="setView('Relation')"><i
-                           class=" dripicons-view-list"></i></button>
-                     <button type="button" style="padding: 1px 6px !important;"
-                        class="btn btn-outline-primary float-end"
+                           class=" dripicons-view-list"></i></a>
+                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
                         onclick="$('#pbkEntryComponent > #showModal').modal('show')"
                         (click)="showModal='Add Relation'">+
-                        Add</button>
+                        Add</a>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Relation" [clearable]="false"
                      [virtualScroll]="true" formControlName="relation"
@@ -89,9 +87,8 @@
             </div>
             <div class="col-md-3 mb-3" *ngIf="settings.pbk.relative_name">
                <div class="form-group">
-                  <label class="form-label">{{(isNimitt ? 'Father Name' : 'Relative Name')}}</label>
-                  <input type="text" class="form-control" placeholder="{{(isNimitt ? 'Father Name' : 'Relative Name')}}"
-                     formControlName="relative_name"
+                  <label class="form-label">'Relative Name'</label>
+                  <input type="text" class="form-control" placeholder="Relative Name" formControlName="relative_name"
                      [ngClass]="{'validation':pbkForm.get('relative_name')?.errors && (pbkForm.get('relative_name')?.touched || pbkForm.get ('relative_name')?.dirty)}">
                </div>
             </div>
@@ -159,60 +156,60 @@
                      [ngClass]="{'validation':pbkForm.get('townarea')?.errors && (pbkForm.get('townarea')?.touched || pbkForm.get ('townarea')?.dirty)}">
                </div>
             </div>
-               <div class="col-md-3 mb-3" *ngIf="settings.pbk.city_id">
-                  <div class="form-group">
-                     <label class="form-label">City</label>
-                     <button type="button" style="padding: 1px 6px !important;"
-                        class="btn btn-outline-primary float-end"
-                        onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add City'">+
-                        Add</button>
-                     <ng-select class="custom" style="width: 100%;" placeholder="Select City" [clearable]="false"
-                        [virtualScroll]="true" formControlName="city_id" (change)="citySelected($event)"
-                        [ngClass]="{'validation':pbkForm.get('city_id')?.errors && (pbkForm.get('city_id')?.touched || pbkForm.get ('city_id')?.dirty)}">
-                        <ng-option selected="selected" disabled value="">Select City</ng-option>
-                        <ng-option *ngFor="let item of cities" [value]="item._id">{{item.city_hin}} :
-                           {{item.city_eng}}</ng-option>
-                     </ng-select>
-                  </div>
+            <div class="col-md-3 mb-3" *ngIf="settings.pbk.city_id">
+               <div class="form-group">
+                  <label class="form-label">City</label>
+                  <a type="button" *ngIf="settings.city.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
+                     onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add City'">+
+                     Add</a>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select City" [clearable]="false"
+                     [virtualScroll]="true" formControlName="city_id" (change)="citySelected($event)"
+                     [ngClass]="{'validation':pbkForm.get('city_id')?.errors && (pbkForm.get('city_id')?.touched || pbkForm.get ('city_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select City</ng-option>
+                     <ng-option *ngFor="let item of cities" [value]="item._id">{{item.city_hin}} :
+                        {{item.city_eng}}</ng-option>
+                  </ng-select>
                </div>
-               <div class="col-md-3 mb-3" *ngIf="settings.pbk.mo_no">
-                  <div class="form-group">
-                     <label class="form-label">Mobile No.</label>
-                     <input type="text" class="form-control" placeholder="Mobile No." formControlName="mo_no"
-                        [ngClass]="{'validation':pbkForm.get('mo_no')?.errors && (pbkForm.get('mo_no')?.touched || pbkForm.get ('mo_no')?.dirty)}">
-                  </div>
+            </div>
+            <div class="col-md-3 mb-3" *ngIf="settings.pbk.mo_no">
+               <div class="form-group">
+                  <label class="form-label">Mobile No.</label>
+                  <input type="text" class="form-control" placeholder="Mobile No." formControlName="mo_no"
+                     [ngClass]="{'validation':pbkForm.get('mo_no')?.errors && (pbkForm.get('mo_no')?.touched || pbkForm.get ('mo_no')?.dirty)}">
                </div>
-               <div class="col-md-3 mb-3" *ngIf="settings.pbk.alt_mo_no">
-                  <div class="form-group">
-                     <label class="form-label">Alternative Mobile No.</label>
-                     <textarea class="form-control" placeholder="Alternative Mobile No." formControlName="alt_mo_no"
-                        [ngClass]="{'validation':pbkForm.get('alt_mo_no')?.errors && (pbkForm.get('alt_mo_no')?.touched || pbkForm.get ('alt_mo_no')?.dirty)}"></textarea>
-                  </div>
+            </div>
+            <div class="col-md-3 mb-3" *ngIf="settings.pbk.alt_mo_no">
+               <div class="form-group">
+                  <label class="form-label">Alternative Mobile No.</label>
+                  <textarea class="form-control" placeholder="Alternative Mobile No." formControlName="alt_mo_no"
+                     [ngClass]="{'validation':pbkForm.get('alt_mo_no')?.errors && (pbkForm.get('alt_mo_no')?.touched || pbkForm.get ('alt_mo_no')?.dirty)}"></textarea>
                </div>
-               <div class="col-md-3 mb-3" *ngIf="settings.pbk.class_mm_id">
-                  <div class="form-group">
-                     <label class="form-label">Daily Class MM</label>
-                     <button type="button" style="padding: 1px 6px !important;"
-                        class="btn btn-outline-primary float-end"
-                        onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add MM'">+
-                        Add</button>
-                     <ng-select class="custom" style="width: 100%;" placeholder="Daily Class MM" [clearable]="false"
-                        [virtualScroll]="true" formControlName="class_mm_id"
-                        [ngClass]="{'validation':pbkForm.get('class_mm_id')?.errors && (pbkForm.get('class_mm_id')?.touched || pbkForm.get ('class_mm_id')?.dirty)}">
-                        <ng-option selected="selected" disabled value="">Daily Class MM</ng-option>
-                        <ng-option *ngFor="let item of mms" [value]="item._id">
-                           {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
-                     </ng-select>
-                  </div>
+            </div>
+            <div class="col-md-3 mb-3" *ngIf="settings.pbk.class_mm_id">
+               <div class="form-group">
+                  <label class="form-label">Daily Class MM</label>
+                  <a type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
+                     onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add MM'">+
+                     Add</a>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Daily Class MM" [clearable]="false"
+                     [virtualScroll]="true" formControlName="class_mm_id"
+                     [ngClass]="{'validation':pbkForm.get('class_mm_id')?.errors && (pbkForm.get('class_mm_id')?.touched || pbkForm.get ('class_mm_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Daily Class MM</ng-option>
+                     <ng-option *ngFor="let item of mms" [value]="item._id">
+                        {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                  </ng-select>
                </div>
-               <div class="col-md-2 mb-3" *ngIf="settings.pbk.bhatti_date">
-                  <div class="form-group">
-                     <label class="form-label">भट्टी कब की? </label>
-                     <input type="date" class="form-control" placeholder="भट्टी कब की?	" formControlName="bhatti_date"
-                        [ngClass]="{'validation':pbkForm.get('bhatti_date')?.errors && (pbkForm.get('bhatti_date')?.touched || pbkForm.get ('bhatti_date')?.dirty)}">
-                  </div>
+            </div>
+            <div class="col-md-2 mb-3" *ngIf="settings.pbk.bhatti_date">
+               <div class="form-group">
+                  <label class="form-label">भट्टी कब की? </label>
+                  <input type="date" class="form-control" placeholder="भट्टी कब की?	" formControlName="bhatti_date"
+                     [ngClass]="{'validation':pbkForm.get('bhatti_date')?.errors && (pbkForm.get('bhatti_date')?.touched || pbkForm.get ('bhatti_date')?.dirty)}">
                </div>
-               <!-- <div class="col-md-2 mb-3">
+            </div>
+            <!-- <div class="col-md-2 mb-3">
                   <div class="form-group">
                      <label class="form-label">Status</label>
                      <div class="float-end">
@@ -235,18 +232,18 @@
 
                   </div>
                </div> -->
-               <div class="col-md-2 mb-3" *ngIf="settings.pbk.document">
-                  <div class="form-group">
-                     <label class="form-label">Image</label>
-                     <a onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
-                        class="form-control" style="cursor: pointer;">
-                        <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
-                        <img src="{{this.api.getUrl('BASE')+imagepath}}" alt="image" class="rounded m-1" height="48"
-                           *ngIf="imagepath">
-                        <i *ngIf="!imagepath">Click To Change</i>
-                     </a>
-                  </div>
+            <div class="col-md-2 mb-3" *ngIf="settings.pbk.document">
+               <div class="form-group">
+                  <label class="form-label">Image</label>
+                  <a onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
+                     class="form-control" style="cursor: pointer;">
+                     <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
+                     <img src="{{this.api.getUrl('BASE')+imagepath}}" alt="image" class="rounded m-1" height="48"
+                        *ngIf="imagepath">
+                     <i *ngIf="!imagepath">Click To Change</i>
+                  </a>
                </div>
+            </div>
             <div class="col-md-2 mb-3">
                <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!this.isEdit"
                   (click)="pbkFormSubmit()">Submit</button>

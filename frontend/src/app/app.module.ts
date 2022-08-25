@@ -60,6 +60,8 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { ImportComponent } from './import/import.component';
 import { NimittComponent } from './CHILD_TABLES/nimitt/nimitt.component';
 import { NimittEntryComponent } from './ENTRY__FORMS/nimitt-entry/nimitt-entry.component';
+import { AutocompleteLibModule } from 'angular-ng-autocomplete';
+import { UpdateDetailComponent } from './layout/update-detail/update-detail.component';
 
 
 
@@ -107,6 +109,7 @@ import { NimittEntryComponent } from './ENTRY__FORMS/nimitt-entry/nimitt-entry.c
     ImportComponent,
     NimittComponent,
     NimittEntryComponent,
+    UpdateDetailComponent,
   ],
   imports: [
     BrowserModule,
@@ -129,7 +132,8 @@ import { NimittEntryComponent } from './ENTRY__FORMS/nimitt-entry/nimitt-entry.c
     FileSaverModule,
     NgxSpinnerModule,
     NgtUniversalModule,
-    NgxPaginationModule
+    NgxPaginationModule,
+    AutocompleteLibModule
 
   ],
   providers: [GlobalService],

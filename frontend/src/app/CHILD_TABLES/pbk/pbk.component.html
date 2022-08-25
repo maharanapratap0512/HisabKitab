@@ -15,7 +15,7 @@
                <div class="card-body" style="overflow: auto;">
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
-                        <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
+                        <button class="btn btn-primary w-100" *ngIf="settings.add" onclick="$('#showModal').modal('show')"
                            (click)="showModal = 'Add PBK'">
                            <i class="dripicons-plus h4 icon-mx-2"> </i>Add PBK
                         </button>
@@ -168,20 +168,20 @@
                               {{itemsPerPage * (page - 1) + (i+1)}}<br>
                               <span style="font-size: x-large;position: relative;line-height: 28px; cursor:pointer;"
                                  (click)="protectionToggle(data._id, data.active)">
-                                 <i *ngIf="auth.webUser.dept_id == 1 && data.active" data-toggle="tooltip"
+                                 <i *ngIf="[1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
                                     title="Protected" class="uil-shield-check text-warning"></i>
-                                 <i *ngIf="auth.webUser.dept_id == 1 && !data.active" data-toggle="tooltip"
+                                 <i *ngIf="[1,6].includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
                                     title="Unprotected" class="uil-shield-slash text-danger"></i>
                               </span>
                            </td>
                            <td>
-                              <button *ngIf="auth.webUser.dept_id == 1 || !data.active"
+                              <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active"
                                  class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button><br>
-                              <button *ngIf="auth.webUser.dept_id == 1 || !data.active" class="btn btn-sm btn-danger"
+                              <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active" class="btn btn-sm btn-danger"
                                  type="button" (click)="delete(i,data._id)">
                                  <i class="uil-trash"></i></button>
-                              <span *ngIf="auth.webUser.dept_id != 1 && data.active" data-toggle="tooltip"
+                              <span *ngIf="![1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
                                  title="Protected" class="text-warning mx-1"
                                  style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                  <i class="uil-shield-check"></i>

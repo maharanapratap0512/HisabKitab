@@ -5,9 +5,9 @@
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Item</label>
-                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
                      onclick="$('#subitemComponent > #showModal').modal('show')" (click)="showModal = 'Add Item'">+
-                     Add</button>
+                     Add</a>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="false"
                      [virtualScroll]="true" formControlName="item_id" (change)="itemSelected($event)"
                      [ngClass]="{'validation':subitemForm.get('item_id')?.errors && (subitemForm.get('item_id')?.touched || subitemForm.get ('item_id')?.dirty)}">
@@ -19,16 +19,46 @@
             </div>
             <div class="col-md-3 mb-3">
                <div class="form-group">
+                  <label class="form-label">Subitem Hin</label>
+                  <div class="ng-autocomplete">
+                     <ng-autocomplete [data]="subitem_list" searchKeyword="subitem_hin"
+                        placeholder="Enter Subitem Hindi" (selected)='selectSubitemHin($event)'
+                        [initialValue]="subitemForm.value.subitem_hin" (inputChanged)='searchSubitemHin($event)'
+                        [itemTemplate]="hinItemTemplate">
+                     </ng-autocomplete>
+
+                     <ng-template #hinItemTemplate let-item>
+                        <a [innerHTML]="item.subitem_hin"></a>
+                     </ng-template>
+                  </div>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Subitem Eng</label>
+                  <div class="ng-autocomplete">
+                     <ng-autocomplete [data]="subitem_list" searchKeyword="subitem_eng" placeholder="Enter Subitem Eng"
+                        (selected)='selectSubitemEng($event)' (inputChanged)='searchSubitemEng($event)'
+                        [itemTemplate]="engItemTemplate">
+                     </ng-autocomplete>
+
+                     <ng-template #engItemTemplate let-item>
+                        <a innerHTML="item.subitem_eng"></a>
+                     </ng-template>
+                  </div>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
                   <label class="form-label">Subitem List</label>
                   <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                     <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-sm btn-outline-primary" (click)="setView('Subitem List')"><i
-                           class=" dripicons-view-list"></i></button>
-                     <button type="button" style="padding: 1px 6px !important;"
-                        class="btn btn-outline-primary float-end"
+                           class=" dripicons-view-list"></i></a>
+                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
                         onclick="$('#subitemComponent > #showModal').modal('show')"
                         (click)="showModal = 'Add Subitem List'">+
-                        Add</button>
+                        Add</a>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select SubitemList" [clearable]="false"
                      [virtualScroll]="true" formControlName="subitem_list_id"
@@ -43,18 +73,18 @@
                <div class="form-group">
                   <label class="form-label">Category</label>
                   <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                     <a type="button" *ngIf="settings.category.add"
+                        style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-sm btn-outline-primary" (click)="setView('Category')"><i
-                           class=" dripicons-view-list"></i></button>
-                     <button type="button" style="padding: 1px 6px !important;"
-                        class="btn btn-outline-primary float-end"
+                           class=" dripicons-view-list"></i></a>
+                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
                         onclick="$('#subitemComponent > #showModal').modal('show')"
                         (click)="showModal = 'Add Category'">+
-                        Add</button>
+                        Add</a>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="false"
-                     [virtualScroll]="true" formControlName="category_id"
-                     [ngClass]="{'validation':subitemForm.get('category_id')?.errors && (subitemForm.get('category_id')?.touched || subitemForm.get ('category_id')?.dirty)}">
+                     [virtualScroll]="true" [multiple]="true" formControlName="categories"
+                     [ngClass]="{'validation':subitemForm.get('categories')?.errors && (subitemForm.get('categories')?.touched || subitemForm.get ('categories')?.dirty)}">
                      <ng-option selected="selected" disabled value="">Select Category</ng-option>
                      <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
                         {{item.category_eng}}</ng-option>
@@ -65,13 +95,12 @@
                <div class="form-group">
                   <label class="form-label">Default Unit</label>
                   <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                     <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-sm btn-outline-primary" (click)="setView('Unit')"><i
-                           class=" dripicons-view-list"></i></button>
-                     <button type="button" style="padding: 1px 6px !important;"
-                        class="btn btn-outline-primary float-end"
+                           class=" dripicons-view-list"></i></a>
+                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
                         onclick="$('#subitemComponent > #showModal').modal('show')" (click)="showModal = 'Add Unit'">+
-                        Add</button>
+                        Add</a>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Default Unit" [clearable]="false"
                      [virtualScroll]="true" formControlName="unit_id"

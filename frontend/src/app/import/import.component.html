@@ -85,12 +85,12 @@
                   <th style="width: 80px;">Date</th>
                   <th style="width: 100px;">MM</th>
                   <th style="width: 100px;">Aawak MM</th>
-                  <th style="width: 200px;">Sewadhari</th>
+                  <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Sewadhari</th>
                   <th style="width: 100px;">Item</th>
                   <th style="width: 100px;">Subitem</th>
-                  <th style="width: 100px;">Product</th>
+                  <th style="width: 100px;" *ngIf="settings.aawak.product_id">Product</th>
                   <th style="width: 100px;">Company</th>
-                  <th style="width: 100px;">Condition</th>
+                  <th style="width: 100px;" *ngIf="settings.aawak.condition_id">Condition</th>
                   <th style="width: 250px;">Item Details</th>
                   <th style="width: 70px;">Quantity</th>
                   <th style="width: 70px;">Rate</th>
@@ -114,7 +114,7 @@
                      <td [ngClass]="{'marked': data.aj_mm && !data.aj_mm_id}">
                         {{data.aj_mm}}
                      </td>
-                     <td [ngClass]="{'marked': data.pbk && !data.pbk_id}">
+                     <td *ngIf="settings.aawak.pbk_id" [ngClass]="{'marked': (data.pbk.roll_no || data.pbk.pbk || data.pbk.relation || data.pbk.relative) && !data.pbk_id}">
                         {{data.pbk.roll_no?data.pbk.roll_no:'____'}} {{data.pbk.name?data.pbk.name:'-'}} <br />
                         {{data.pbk.relation?data.pbk.relation:'-'}} - {{data.pbk.relative?data.pbk.relative:'-'}}
                      </td>
@@ -122,13 +122,13 @@
                      <td [ngClass]="{'marked': !data.subitem_id && data.subitem}">
                         {{data.subitem?data.subitem:'-'}}
                      </td>
-                     <td [ngClass]="{'marked': data.product && !data.product_id}">
+                     <td *ngIf="settings.aawak.product_id" [ngClass]="{'marked': data.product && !data.product_id}">
                         {{data.product?data.product:'-'}}
                      </td>
                      <td>
                         {{data.company_name?data.company_name:'-'}}
                      </td>
-                     <td [ngClass]="{'marked': data.condition && !data.condition_id}">
+                     <td *ngIf="settings.aawak.condition_id" [ngClass]="{'marked': data.condition && !data.condition_id}">
                         {{data.condition?data.condition:'-'}}
                      </td>
                      <td>{{data.item_detail?data.item_detail:'-'}}</td>
@@ -154,6 +154,7 @@
                            <table class="card-body" style="width: 99.7%;table-layout: fixed;">
                               <tr>
                                  <th>No.</th>
+                                 <th>Date</th>
                                  <th>कहा भेजा</th>
                                  <th>किसको दिया</th>
                                  <th>जवाक प्रकार</th>
@@ -168,10 +169,11 @@
                                     <i class="uil-corner-down-right"></i>
                                     <span class="mx-1">{{j+1}}</span>
                                  </td>
+                                 <td [ngClass]="{'marked': !jwk.date}">{{jwk.date}}</td>
                                  <td [ngClass]="{'marked': !jwk.aj_mm_id}">{{jwk.aj_mm}}</td>
                                  <td [ngClass]="{'marked': jwk.nimitt && !jwk.nimitt_id}">{{jwk.nimitt}} </td>
                                  <td [ngClass]="{'marked': !jwk.aj_type_id}">{{jwk.aj_type}}</td>
-                                 <td [ngClass]="{'marked': !jwk.qty || !jwk.unit_id}">{{jwk.qty}} {{jwk.unit}}</td>
+                                 <td [ngClass]="{'marked': !jwk.qty || !data.unit_id}">{{jwk.qty}} {{data.unit}}</td>
                               </tr>
                            </table>
                         </td>
@@ -332,11 +334,11 @@
                   <th style="width: 80px;">Date</th>
                   <th style="width: 100px;">MM</th>
                   <th style="width: 100px;">Aawak MM</th>
-                  <th style="width: 200px;">Sewadhari</th>
+                  <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Sewadhari</th>
                   <th style="width: 100px;">Item</th>
-                  <th style="width: 100px;">Product</th>
+                  <th style="width: 100px;" *ngIf="settings.aawak.product_id"> Product</th>
                   <th style="width: 100px;">Company</th>
-                  <th style="width: 100px;">Condition</th>
+                  <th style="width: 100px;" *ngIf="settings.aawak.condition_id">Condition</th>
                   <th style="width: 250px;">Item Details</th>
                   <th style="width: 70px;">Quantity</th>
                   <th style="width: 80px;">Aawak Type</th>
@@ -358,21 +360,21 @@
                      <td [ngClass]="{'marked': data.aj_mm && !data.aj_mm_id}">
                         {{data.aj_mm_hin}} <br /> {{data.aj_mm_code}}
                      </td>
-                     <td [ngClass]="{'marked': data.pbk && !data.pbk_id}">
+                     <td *ngIf="settings.aawak.pbk_id" [ngClass]="{'marked': (data.pbk.roll_no || data.pbk.pbk || data.pbk.relation || data.pbk.relative) && !data.pbk_id}" >
                         {{data.roll_no?data.roll_no:'____'}} {{data.pbk_hin?data.pbk_hin:'-'}} <br />
                         {{data.relation?data.relation:'-'}} - {{data.relative_name?data.relative_name:'-'}}
                      </td>
                      <td [ngClass]="{'marked': !data.item_id || (!data.subitem_id && data.subitem)}">
                         {{data.item_hin}} - {{data.subitem_hin}}
                      </td>
-                     <td [ngClass]="{'marked': data.product && !data.product_id}">
+                     <td *ngIf="settings.aawak.product_id" [ngClass]="{'marked': data.product && !data.product_id}">
                         {{data.product_code?data.product_code:'-'}} <br />
                         {{data.sr_num?data.sr_num:'-'}}
                      </td>
                      <td>
                         {{data.company_name?data.company_name:'-'}}
                      </td>
-                     <td [ngClass]="{'marked': data.condition && !data.condition_id}">
+                     <td *ngIf="settings.aawak.condition_id" [ngClass]="{'marked': data.condition && !data.condition_id}">
                         {{data.condition_hin?data.condition_hin:'-'}}
                      </td>
                      <td>{{data.item_detail?data.item_detail:'-'}}</td>
@@ -398,6 +400,7 @@
                            <table class="card-body" style="width: 99.7%;table-layout: fixed;">
                               <tr>
                                  <th>No.</th>
+                                 <th>Date</th>
                                  <th>कहा भेजा</th>
                                  <th>किसको दिया</th>
                                  <th>जवाक प्रकार</th>
@@ -412,11 +415,12 @@
                                     <i class="uil-corner-down-right"></i>
                                     <span class="mx-1">{{j+1}}</span>
                                  </td>
+                                 <td [ngClass]="{'marked': !jwk.date}">{{jwk.date}}</td>
                                  <td [ngClass]="{'marked': !jwk.aj_mm_id}">{{jwk.aj_mm_hin}}</td>
                                  <td [ngClass]="{'marked': jwk.nimitt && !jwk.nimitt_id}">{{data.nimitt_hin}}
                                     ({{data.nimitt_state_hin}}) </td>
                                  <td [ngClass]="{'marked': !jwk.aj_type_id}">{{jwk.aj_type_hin}}</td>
-                                 <td [ngClass]="{'marked': !jwk.qty || !jwk.unit_id}">{{jwk.qty}} {{jwk.unit_short}}
+                                 <td [ngClass]="{'marked': !jwk.qty || !data.unit_id}">{{jwk.qty}} {{data.unit_short?data.unit_short:'-'}}
                                  </td>
                               </tr>
                            </table>

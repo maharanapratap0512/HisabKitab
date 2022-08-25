@@ -7,7 +7,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2'
 
 declare var $: any;
 
@@ -39,6 +39,7 @@ export class AawakEntryComponent implements OnInit {
 	subitems: any = [];
 	pbks: any = [];
 	aawak_types: any = [];
+	jawak_types: any = [];
 	products: any = [];
 	categories: any = [];
 	isCondition: any = false;
@@ -46,6 +47,8 @@ export class AawakEntryComponent implements OnInit {
 	jmm: any = null;
 	jqty: any = null;
 	jnimitt: any = null;
+	jdate: any = null;
+	jtype: any = null;
 	nimitts: any = [];
 	categoryAll: any;
 	itemAll: any;
@@ -60,6 +63,7 @@ export class AawakEntryComponent implements OnInit {
 		aawak_type_id: null,
 		item_id: null,
 		subitem_id: null,
+		company_name: null,
 		product_id: null,
 		unit_id: null,
 		condition_id: null,
@@ -70,7 +74,6 @@ export class AawakEntryComponent implements OnInit {
 		item_detail: null,
 		description: null,
 		remaining_qty: null,
-		company_name: null,
 		isbill: null,
 		document: null,
 		jawak_detail: []
@@ -98,6 +101,7 @@ export class AawakEntryComponent implements OnInit {
 			// this.departments = result.department ? result.department : [];
 			this.pbks = result.pbk ? result.pbk : [];
 			this.aawak_types = result.aawak_type ? result.aawak_type : [];
+			this.jawak_types = result.jawak_type ? result.jawak_type : [];
 			this.nimitts = result.nimitt ? result.nimitt : [];
 		});
 		this.settings = this.auth.webUser.settings;
@@ -106,15 +110,22 @@ export class AawakEntryComponent implements OnInit {
 
 	ngOnInit(): void { }
 
+	ngOnDestroy(): void {
+		this.response.emit(this.awkfg);
+	}
+
 	ngOnChanges(changes: SimpleChanges) {
 		console.log("changes.getData.currentValue", changes.getData.currentValue);
 		if (changes.isEdit && changes.isEdit.currentValue) {
-			this.gs.observeList().subscribe(result => {
-				this.items = result.itemmix ? result.itemmix : [];
-				this.categories = result.category ? result.category : [];
-			});
 		}
-		if (changes.getData.currentValue) {
+
+		if (changes.getData.currentValue && Object.keys(changes.getData.currentValue).length > 0) {
+			if (changes.getData.currentValue.item_id) {
+				this.gs.observeList().subscribe(result => {
+					this.items = result.itemmix ? result.itemmix : [];
+					this.categories = result.category ? result.category : [];
+				});
+			}
 			this.getData = changes.getData.currentValue;
 			this.awkfg.pkt_num = changes.getData.currentValue.pkt_num
 			this.awkfg.date = changes.getData.currentValue.date
@@ -142,22 +153,63 @@ export class AawakEntryComponent implements OnInit {
 
 			this.selDept_id = changes.getData.currentValue.dept_id;
 			this.oldQty = changes.getData.currentValue.qty;
-			this.imagepath = ((this.awkfg.document.images && this.awkfg.document.images.length > 0) ? this.awkfg.document.images[0] : null);
+			this.imagepath = ((this.awkfg.document && this.awkfg.document.images && this.awkfg.document.images.length > 0) ? this.awkfg.document.images[0] : null);
+			console.log(this.awkfg);
+
 			this.itemSelected(changes.getData.currentValue.item_id);
 		}
 	}
 
-	getDepartments(){
-		this.http.get(this.api.getUrl('DEPT')+this.auth.webUser.dept_id).subscribe((data:any)=>{
+	getDepartments() {
+		this.http.get(this.api.getUrl('DEPT') + this.auth.webUser.dept_id).subscribe((data: any) => {
 			this.departments = data['result'] || [];
 		})
 	}
+
+	dateChange() {
+		this.jdate = this.awkfg.date;
+	}
+
+	jwkmmChanged(ev: any) {
+		if (ev && ev.id == this.awkfg.mm_id) {
+			let jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == 27);
+			if (jwk_type) {
+				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin };
+			}
+
+		}
+		else {
+			let jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == this.awkfg.aawak_type_id);
+			if (jwk_type) {
+				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin };
+			}
+		}
+
+	}
+
 	add_jwk() {
+		let jwk_type
+		if (this.jmm.id == this.awkfg.mm_id) {
+			jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == 27);
+			if (jwk_type) {
+				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin };
+			}
+		}
+		else {
+			jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == this.awkfg.aawak_type_id);
+			if (jwk_type) {
+				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin };
+			}
+			else {
+				this.jtype = null;
+			}
+		}
+
 		let jwkfg: any = {
 			jawak_mm_id: (this.jmm ? this.jmm.id : null),
 			nimitt_id: (this.jnimitt ? this.jnimitt.id : null),
 			qty: this.jqty,
-			date: this.awkfg.date,
+			date: this.jdate,
 			pkt_num: null,
 			mm_id: this.awkfg.mm_id,
 			pbk_id: null,
@@ -168,23 +220,22 @@ export class AawakEntryComponent implements OnInit {
 			company_name: null,
 			product_id: this.awkfg.product_id,
 			condition_id: this.awkfg.condition_id,
-			jawak_type_id: (this.jmm.id == this.awkfg.mm_id) ? 27 : 28,
+			jawak_type_id: (this.jtype ? this.jtype.id : (jwk_type ? jwk_type._id : null)),
+			jawak_type_hin: (this.jtype ? this.jtype.list_name_hin : (jwk_type ? jwk_type.list_name_hin : null)),
 			unit_id: this.awkfg.unit_id,
 			dept_id: this.awkfg.dept_id,
 			jawak_mm_hin: (this.jmm ? this.jmm.mm_hin : ''),
 			nimitt_hin: (this.jnimitt ? this.jnimitt.nimitt_hin : ''),
 			nimitt_state_hin: (this.jnimitt ? this.jnimitt.state_hin : ''),
 		}
-		// let jwkfg2: any = {
 
-		// 	qty: this.jqty
-		// }
 		this.awkfg.jawak_detail.push(jwkfg);
 
 		// this.jwkArr.push(jwkfg2);
 		this.jmm = null;
 		this.jqty = null;
 		this.jnimitt = null;
+		this.jtype = null;
 	}
 
 	remove(i: any, id: any = null) {
@@ -226,30 +277,21 @@ export class AawakEntryComponent implements OnInit {
 		$('#aawakEntryComponent > #showModal').modal('show')
 	}
 
-	closeModal(name: any) {
-		this.showModal = name;
+	closeModal() {
+		// this.showModal = name;
 		$('#aawakEntryComponent > #showModal').modal('hide')
 	}
 
 	imagesSelectResponse(ev: any) {
 		if (ev.path) {
 			this.isLoader = true;
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			this.imagepath = ev.path;
 			this.awkfg.document = { images: [ev.path] }
-			this.awkfg.isbill = true;
 			this.isLoader = false;
 		}
 		else {
 			this.isLoader = false;
-		}
-	}
-
-	isbillchanged(ev: any) {
-		if (!ev.target.checked) {
-			this.awkfg.document = null;
-			this.imagepath = null
 		}
 	}
 
@@ -263,6 +305,7 @@ export class AawakEntryComponent implements OnInit {
 					this.jmm = null;
 					this.jqty = null;
 					this.jnimitt = null;
+					this.jtype = null;
 					this.imagepath = null;
 					this.isLoader = false;
 					this.toastr.success('Aawak Added Successfully.');
@@ -568,7 +611,7 @@ export class AawakEntryComponent implements OnInit {
 	catSelected(ev: any) {
 		if (ev) {
 			this.cat = ev;
-			this.items = this.itemAll.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
+			this.items = this.itemAll.filter((i: { categories: any, subitems: any[] }) => i.categories.includes(ev) || (i.subitems.filter((s: { categories: any }) => s.categories.includes(ev)).length));
 		}
 		else {
 			this.cat = null;
@@ -583,23 +626,19 @@ export class AawakEntryComponent implements OnInit {
 	itemSelected(ev: any) {
 		if (ev) {
 			let item = this.items.find((i: { _id: any; }) => i._id == ev);
-			let category_ids = this.categories.map((c: { _id: any; }) => c._id);
 			console.log("item", item);
-			console.log("category_ids", category_ids);
 
 			// this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
 			this.getProductData(ev);
 			if (this.cat) {
-				this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
+				this.subitems = item.subitems.filter((s: { categories: any; }) => s.categories.includes(this.cat));
 			}
 			else {
-				this.subitems = item.subitems.filter(((s: { category_id: any; }) => category_ids.includes(s.category_id)));
+				this.subitems = item.subitems;
 			}
 
-			if (this.cat && this.cat != item.category_id) {
+			if (this.cat && !item.categories.includes(this.cat)) {
 				// this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
-				this.awkfg.subitem_id = this.subitems[0]._id;
-			} else if (!category_ids.includes(item.category_id) && this.subitems.length > 0) {
 				this.awkfg.subitem_id = this.subitems[0]._id;
 			}
 			this.awkfg.unit_id = item.unit_id;
@@ -663,15 +702,17 @@ export class AawakEntryComponent implements OnInit {
 	}
 
 	getProductData(item_id: any) {
-		let body = {
-			item_id: item_id
-		}
-		this.http.put(this.api.getUrl('PRODUCT') + this.selDept_id, body).subscribe((data: any) => {
-			if (data['result']) {
-				this.productsAll = data['result'];
-				this.products = this.productsAll;
+		if (item_id && item_id != undefined) {
+			let body = {
+				item_id: item_id
 			}
-		});
+			this.http.put(this.api.getUrl('PRODUCT') + this.selDept_id, body).subscribe((data: any) => {
+				if (data['result']) {
+					this.productsAll = data['result'];
+					this.products = this.productsAll;
+				}
+			});
+		}
 	}
 
 }

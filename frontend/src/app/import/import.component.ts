@@ -63,6 +63,8 @@ export class ImportComponent implements OnInit {
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
     this.settings = this.auth.webUser.settings;
+    console.log(this.settings);
+    
   }
 
   ngOnInit(): void {

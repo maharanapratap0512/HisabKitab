@@ -106,8 +106,8 @@
 
                               <div class="col-md-3 mb-3" *ngIf="settings.product_id || settings.condition_id">
                                  <div class="form-group">
-                                    <label class="form-label">Product & Condition</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Product"
+                                    <label class="form-label">Condition</label>
+                                    <!-- <ng-select class="custom" style="width: 100%;" placeholder="Select Product"
                                        [clearable]="true" [virtualScroll]="true" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.product_id" name="product_id"
                                        (change)="productSelected($event)" *ngIf="settings.product_id">
@@ -117,7 +117,7 @@
                                           : {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num
                                           : ''}}
                                        </ng-option>
-                                    </ng-select>
+                                    </ng-select> -->
                                     <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition"
                                        [clearable]="false" [virtualScroll]="true" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.condition_id" name="condition_id"
@@ -226,7 +226,7 @@
                            <th style="width: 150px;">Jawak MM</th>
                            <th style="width: 200px;" *ngIf="settings.pbk_id">PBK</th>
                            <th style="width: 150px;">Item - Subitem</th>
-                           <th style="width: 200px;" *ngIf="settings.product_id">Product</th>
+                           <!-- <th style="width: 200px;" *ngIf="settings.product_id">Product</th> -->
                            <th style="width: 150px;" *ngIf="settings.condition_id">Condition</th>
                            <th style="width: 100px;">Quantity</th>
                            <th style="width: 120px;">Jawak Type</th>
@@ -250,7 +250,7 @@
                               {{data.mm_eng}}
                            </td>
                            <td *ngIf="settings.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
-                           <td>{{data.date | date:'yyyy-MM-dd'}}</td>
+                           <td>{{data.date | date:'dd-MM-yyyy'}}</td>
                            <td>
                               <span *ngIf="!data.jawak_mm_id">-</span>
                               {{data.jawak_mm_hin}}<br />
@@ -265,11 +265,11 @@
                               {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
                               {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
                            </td>
-                           <td *ngIf="settings.product_id">
+                           <!-- <td *ngIf="settings.product_id">
                               <span *ngIf="!data.product_id">-</span>
                               {{data.sr_num ? data.sr_num : ''}} <br />
                               {{data.product_code ? data.product_code : ''}}
-                           </td>
+                           </td> -->
                            <td *ngIf="settings.condition_id">
                               {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
                            </td>

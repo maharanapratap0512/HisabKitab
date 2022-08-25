@@ -27,14 +27,13 @@
                <div class="form-group">
                   <label class="form-label">Gender</label>
                   <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                     <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-sm btn-outline-primary" (click)="setView('Gender')"><i
-                           class=" dripicons-view-list"></i></button>
-                     <button type="button" style="padding: 1px 6px !important;"
-                        class="btn btn-outline-primary float-end"
+                           class=" dripicons-view-list"></i></a>
+                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
                         onclick="$('#nimittEntryComponent > #showModal').modal('show')"
                         (click)="showModal='Add Gender'">+
-                        Add</button>
+                        Add</a>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Gender" [clearable]="false"
                      [virtualScroll]="true" formControlName="gender"
@@ -62,9 +61,9 @@
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">State</label>
-                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
                      onclick="$('#nimittEntryComponent > #showModal').modal('show')" (click)="showModal='Add State'">+
-                     Add</button>
+                     Add</a>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select State" [clearable]="false"
                      [virtualScroll]="true" formControlName="state_id"
                      [ngClass]="{'validation':nimittForm.get('state_id')?.errors && (nimittForm.get('state_id')?.touched || nimittForm.get ('state_id')?.dirty)}">

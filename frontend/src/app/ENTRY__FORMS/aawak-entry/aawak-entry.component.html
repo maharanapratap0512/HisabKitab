@@ -46,7 +46,7 @@
             </div>
          </div>
 
-         
+
          <!-- Aawak Entry Form Start from here -->
          <div class="row">
             <div class="col-md-2 mb-3" *ngIf="settings.aawak.pkt_num">
@@ -60,17 +60,18 @@
             <div class="col-md-2 mb-3">
                <label for="example-date" class="form-label">Date</label>
                <input class="form-control" id="example-date" type="date" [(ngModel)]="awkfg.date" name="date"
-                  #date="ngModel"
+                  #date="ngModel" (focusout)="dateChange()"
                   [ngClass]="{'validation' : (date?.touched || f.submitted) && date.errors?.['required']}" required>
             </div>
 
             <div class="col-md-3 mb-3" *ngIf="!isEdit">
                <div class="form-group">
                   <label class="form-label"> MM</label>
-                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <a type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
                      onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add MM'">
                      + Add
-                  </button>
+                  </a>
                   <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.mm_id" name="mm_id" #mm_id="ngModel" [readonly]="isEdit"
                      [ngClass]="{ 'validation': (mm_id?.touched || f.submitted) && mm_id.errors?.['required']}"
@@ -85,10 +86,11 @@
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Aawak MM</label>
-                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <a *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
                      onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add AMM'">
                      + Add
-                  </button>
+                  </a>
                   <ng-select class="custom" style="width: 100%;" placeholder="Incoming(Aawak) MM" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.aawak_mm_id" name="aawak_mm_id" #aawak_mm_id="ngModel"
                      [ngClass]="{ 'validation': (aawak_mm_id?.touched || f.submitted) && aawak_mm_id.errors?.['required']}"
@@ -103,9 +105,10 @@
             <div class="col-md-2 mb-3" *ngIf="settings.aawak.nimitt_id">
                <div class="form-group">
                   <label class="form-label">Nimitt</label>
-                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <a type="button" *ngIf="settings.nimitt.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
                      onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Nimitt'">+
-                     Add</button>
+                     Add</a>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Nimitt" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.nimitt_id" name="nimitt_id" #nimitt_id="ngModel">
                      <ng-option selected="selected" disabled value="">Select Nimitt</ng-option>
@@ -119,11 +122,12 @@
             <div class="col-md-3 mb-3" *ngIf="settings.aawak.pbk_id">
                <div class="form-group">
                   <label class="form-label">Sewadhari</label>
-                  <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                  <a type="button" *ngIf="settings.pbk.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
                      onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add PBK'">
                      + PBK
-                  </button>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Filter PBK by State" [clearable]="true"
+                  </a>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Filter PBK by State" [clearable]="true" F
                      [virtualScroll]="true" (change)="stateSelected($event)">
                      <ng-option selected="selected" disabled value="">Select State to Filter Pbk
                      </ng-option>
@@ -172,16 +176,16 @@
             <div class="col-md-3 mb-3" *ngIf="!isEdit">
                <div class="form-group">
                   <label class="form-label">Item & Subitem</label>
-                  <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
+                  <div class="float-end" *ngIf="settings.item.add">
+                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
                         onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add Item'">
                         + Item
-                     </button>
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                     </a>
+                     <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-outline-primary" onclick="$('#aawakEntryComponent > #showModal').modal('show')"
                         (click)="showModal = 'Add Subitem'">
                         + Subitem
-                     </button>
+                     </a>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.item_id" name="item_id" #item_id="ngModel"
@@ -202,28 +206,40 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="settings.aawak.product_id || settings.aawak.condition_id">
+            <!-- product & condition  -->
+            <!-- <div class="col-md-3 mb-3" *ngIf="settings.aawak.product_id || settings.aawak.condition_id">
                <div class="form-group">
                   <label class="form-label">Product & Condition</label>
                   <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
+                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
                         onclick="$('#aawakEntryComponent > #showModal').modal('show')"
                         (click)="showModal = 'Add Product'">
                         + Product
-                     </button>
-                     <!-- <button type=" button" style="padding: 1px 6px !important; margin-right: 2px !important;"
-                        class="btn btn-outline-primary" (click)="openModal('Add Condition')">
-                        + Condition
-                     </button> -->
+                     </a>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Product" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.product_id" name="product_id" #product_id="ngModel"
-                     (change)="productSelected($event)" [readonly]="isEdit" *ngIf="!isEdit && settings.aawak.product_id">
+                     (change)="productSelected($event)" [readonly]="isEdit"
+                     *ngIf="!isEdit && settings.aawak.product_id">
                      <ng-option selected="selected" disabled value="">Select Product</ng-option>
                      <ng-option *ngFor="let item of products" [value]="item._id">
                         {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num : ''}}
                      </ng-option>
                   </ng-select>
+                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.condition_id" name="condition_id" #condition_id="ngModel"
+                     *ngIf="settings.aawak.condition_id">
+                     <ng-option selected="selected" disabled value="">Select Condition</ng-option>
+                     <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
+                        {{item.list_name_eng}} </ng-option>
+                  </ng-select>
+               </div>
+            </div> -->
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label"></label>
+                  <input type="text" *ngIf="settings.aawak.company_name" class="form-control" placeholder="Company Name"
+                     [(ngModel)]="awkfg.company_name" name="company_name" #actual_amt="ngModel">
                   <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.condition_id" name="condition_id" #condition_id="ngModel"
                      *ngIf="settings.aawak.condition_id">
@@ -278,12 +294,12 @@
                <div class="form-group">
                   <label class="form-label">Aawak Type</label>
                   <div class="float-end">
-                     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                     <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-sm btn-outline-primary" (click)="setView('aawak_type')"><i
-                           class=" dripicons-view-list"></i></button>
-                     <button type="button" style="padding: 1px 6px !important;"
-                        class="btn btn-outline-primary float-end" (click)="openModal('Add Aawak Type')">+
-                        Add</button>
+                           class=" dripicons-view-list"></i></a>
+                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                        (click)="openModal('Add Aawak Type')">+
+                        Add</a>
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Aawak Type" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.aawak_type_id" name="aawak_type_id"
@@ -304,12 +320,12 @@
                   <label class="form-label">बिल है?</label>
                   <div class="form-check form-switch">
                      <input type="checkbox" class="form-check-input" [(ngModel)]="awkfg.isbill"
-                        (change)="isbillchanged($event)" [ngModelOptions]="{standalone: true}">
+                        [ngModelOptions]="{standalone: true}">
                   </div>
                </div>
             </div>
 
-            <div class="col-md-2 mb-3" *ngIf="settings.aawak.isbill">
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.document">
                <div class="form-group">
                   <a onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
                      class="form-control" style="cursor: pointer;">
@@ -337,20 +353,38 @@
                </div>
             </div>
 
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label text-warning">जावक सेक्शन भरने के बाद बटन क्लिक करे।</label>
+                  <button class="form-control btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                     (click)="aawakFormSubmit(f)">Submit</button>
+                  <button class=" form-control btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                     (click)="aawakFormUpdate(f)">Update</button>
+                  <!-- <button class="btn btn-light submit mx-3" type="button" (click)="mmForm.reset()">clear</button> -->
+               </div>
+            </div>
 
          </div>
          <div class="row">
 
             <!-- Jawak Details array -->
-            <div class="col-md-8 mb-3" *ngIf="settings.aawak.jawak.visible">
+            <div class="col-md-12 mb-3" *ngIf="settings.aawak.jawak.visible">
                <div class=" card card-body">
                   <h5 class="card-title">Jawak Details</h5>
                   <div class="row">
-                     <div class="col-md-5 mb-1">
+
+                     <div class="col-md-2 mb-3">
+                        <label for="example-date" class="form-label">Date</label>
+                        <input class="form-control" id="example-date" type="date" [(ngModel)]="jdate"
+                           [ngModelOptions]="{standalone: true}" required>
+                     </div>
+
+                     <div class="col-md-3 mb-1">
                         <div class="form-group">
                            <label class="form-label">Jawak MM</label>
                            <ng-select class="custom" style="width: 100%;" placeholder="Jawak MM" [clearable]="true"
-                              [virtualScroll]="true" [(ngModel)]="jmm" [ngModelOptions]="{standalone: true}">
+                              [virtualScroll]="true" (change)="jwkmmChanged($event)" [(ngModel)]="jmm"
+                              [ngModelOptions]="{standalone: true}">
                               <ng-option selected="selected" disabled value="">Jawak MM</ng-option>
                               <ng-option *ngFor="let item of mms" [value]="{ id: item._id, mm_hin: item.mm_hin}">
                                  {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
@@ -358,7 +392,7 @@
                         </div>
                      </div>
 
-                     <div class="col-md-4 mb-3">
+                     <div class="col-md-3 mb-3">
                         <div class="form-group">
                            <label class="form-label">किसको दिया</label>
                            <ng-select class="custom" style="width: 100%;" placeholder="Select Person" [clearable]="true"
@@ -379,19 +413,46 @@
                               [ngModelOptions]="{standalone: true}">
                         </div>
                      </div>
-                     <div class="col-1 mb-1">
-                        <label class="form-label">Clear</label>
+
+                     <div class="col-md-2 mb-3">
+                        <div class="form-group">
+                           <label class="form-label">Jawak Type</label>
+                           <!-- <div class="float-end">
+                              <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                                 class="btn btn-sm btn-outline-primary" (click)="setView('aawak_type')"><i
+                                    class=" dripicons-view-list"></i></button>
+                              <button type="button" style="padding: 1px 6px !important;"
+                                 class="btn btn-outline-primary float-end" (click)="openModal('Add Aawak Type')">+
+                                 Add</button>
+                           </div> -->
+                           <ng-select class="custom" style="width: 100%;" placeholder="Jawak Type" [clearable]="true"
+                              [virtualScroll]="true" [(ngModel)]="jtype" [ngModelOptions]="{standalone: true}" required>
+                              <ng-option selected="selected" disabled value="">Jawak Type
+                              </ng-option>
+                              <ng-option *ngFor="let item of jawak_types"
+                                 [value]="{ id: item._id, list_name_hin: item.list_name_hin}">
+                                 {{item.list_name_hin}} : {{item.list_name_eng}}
+                              </ng-option>
+                           </ng-select>
+                        </div>
                      </div>
+
+                     <!-- <div class="col-1 mb-1">
+                        <label class="form-label">Clear</label>
+                     </div> -->
                   </div>
-                  <button type="button" [disabled]="(jmm === null && jnimitt === null) || jqty === null"
+                  <button type="button"
+                     [disabled]="(jmm === null && jnimitt === null) || date === null || jqty === null"
                      class="btn btn-primary mt-3" (click)="add_jwk()">+ Add</button>
                   <div class="mt-3 p-2" style="max-height: 200px;;overflow-y: auto;">
                      <div class="row mb-2 border-secondary border-bottom"
                         *ngFor="let f of awkfg.jawak_detail;let i=index">
                         <div class="col-md-1">{{i+1}}</div>
-                        <div class="col-md-4">{{f.jawak_mm_hin}}</div>
-                        <div class="col-md-4">{{f.nimitt_hin}} ({{f.nimitt_state_hin}})</div>
-                        <div class="col-md-2">{{f.qty}}</div>
+                        <div class="col-md-2">{{f.date}}</div>
+                        <div class="col-md-2">{{f.jawak_mm_hin}}</div>
+                        <div class="col-md-2">{{f.nimitt_hin}} ({{f.nimitt_state_hin}})</div>
+                        <div class="col-md-1">{{f.qty}}</div>
+                        <div class="col-md-2">{{f.jawak_type_hin}}</div>
                         <div class="col-md-1">
                            <button class="btn btn-sm btn-light mb-1" style="font-size: small;line-height: 8px;"
                               type="button" (click)="remove(i,f._id)">X</button>
@@ -399,14 +460,6 @@
                      </div>
                   </div>
                </div>
-            </div>
-
-            <div class="col-md-2 mb-3">
-               <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
-                  (click)="aawakFormSubmit(f)">Submit</button>
-               <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
-                  (click)="aawakFormUpdate(f)">Update</button>
-               <!-- <button class="btn btn-light submit mx-3" type="button" (click)="mmForm.reset()">clear</button> -->
             </div>
 
          </div>

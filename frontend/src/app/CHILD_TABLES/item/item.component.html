@@ -14,7 +14,7 @@
             <div class="row border-bottom border-secondary">
                <div class="card-body">
                   <div class="row d-flex justify-content-between">
-                     <div class="col-3">
+                     <div class="col-3" *ngIf="settings.item.add">
                         <button class="btn btn-primary" onclick="$('#showModal').modal('show')"
                            (click)="showModal = 'Add Item'">
                            <i class="dripicons-plus h4 icon-mx-1"> </i>Add Item
@@ -24,6 +24,10 @@
                            (click)="showModal = 'Add Subitem'">
                            <i class="dripicons-plus h4 icon-mx-1"> </i>Add Subitem
                         </button>
+                        <!-- <button class="btn btn-success mx-3"
+                           (click)="exportItem()">
+                           <i class="dripicons-plus h4 icon-mx-1"> </i>Export 
+                        </button> -->
                      </div>
                      <div class="col-3">
                         <div class="form-group">
@@ -91,9 +95,9 @@
                                  <span class="mx-1"
                                     style="font-size: x-large;position: absolute;line-height: 28px;cursor: pointer"
                                     (click)="protectionToggle(data._id, data.active)">
-                                    <i *ngIf="auth.webUser.dept_id == 1 && data.active" data-toggle="tooltip"
+                                    <i *ngIf="[1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
                                        title="Protected" class="uil-shield-check text-warning"></i>
-                                    <i *ngIf="auth.webUser.dept_id == 1 && !data.active" data-toggle="tooltip"
+                                    <i *ngIf="[1,6].includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
                                        title="Unprotected" class="uil-shield-slash text-danger"></i>
                                  </span>
                               </td>
@@ -101,14 +105,14 @@
                                  <button class="btn btn-sm btn-outline-success" type="button"
                                     (click)="addSubitem(data)"><i class="uil uil-plus"></i></button>
                                  <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"
-                                    *ngIf="auth.webUser.dept_id == 1 || !data.active">
+                                    *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active">
                                     <i class="uil uil-pen"></i>
                                  </button>
                                  <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"
-                                    *ngIf="auth.webUser.dept_id == 1 || !data.active">
+                                    *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active">
                                     <i class="uil-trash"></i>
                                  </button>
-                                 <span *ngIf="auth.webUser.dept_id != 1 && data.active" data-toggle="tooltip"
+                                 <span *ngIf="![1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
                                     title="Protected" class="text-warning mx-1"
                                     style="font-size: xx-large;cursor: pointer;position: absolute;line-height: 0px;">
                                     <i class="uil-shield-check"></i>
@@ -122,7 +126,11 @@
                               <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
                               <td>{{data.item_code?data.item_code:'-'}}</td>
                               <td>{{data.unit_id?data.unit_short + ' : ' + data.unit_full:'-'}}</td>
-                              <td>{{data.category_id?data.category_hin + ' : ' + data.category_eng:'-'}}</td>
+                              <td>
+                                 <ng-container *ngFor="let cat of data.categories_hin">
+                                    {{cat}},
+                                 </ng-container>
+                              </td>
                               <td>{{data.extra_note?data.extra_note:'-'}}</td>
                            </tr>
                            <!-- <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse"
@@ -136,7 +144,7 @@
                               <th>Extra Note</th>
                            </tr> -->
                            <ng-container *ngFor="let si of data.subitems ;let j=index">
-                              <ng-container>
+                              <ng-container *ngIf="si">
                                  <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show"
                                     *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
                                     <td style="border: none;"></td>
@@ -149,24 +157,24 @@
                                                 <span class="mx-1"
                                                    style="font-size: x-large;position: absolute;line-height: 0px;cursor: pointer"
                                                    (click)="protectionToggleSubitem(si._id, si.active)">
-                                                   <i *ngIf="auth.webUser.dept_id == 1 && si.active"
+                                                   <i *ngIf="[1,6].includes(auth.webUser.dept_id) && si.active"
                                                       data-toggle="tooltip" title="Protected"
                                                       class="uil-shield-check text-warning"></i>
-                                                   <i *ngIf="auth.webUser.dept_id == 1 && !si.active"
+                                                   <i *ngIf="[1,6].includes(auth.webUser.dept_id) && !si.active"
                                                       data-toggle="tooltip" title="Unprotected"
                                                       class="uil-shield-slash text-danger"></i>
                                                 </span>
                                              </td>
                                              <td style="width: 160px;">
-                                                <button *ngIf="auth.webUser.dept_id == 1 || !si.active"
+                                                <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !si.active"
                                                    class="btn btn-sm btn-primary mx-1" type="button"
                                                    (click)="edit(si, 'subitem')">
                                                    <i class="uil uil-pen"></i></button>
-                                                <button *ngIf="auth.webUser.dept_id == 1 || !si.active"
+                                                <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !si.active"
                                                    class="btn btn-sm btn-danger" type="button"
                                                    (click)="deleteSubitem(i, j,si._id)">
                                                    <i class="uil-trash"></i></button>
-                                                <span *ngIf="auth.webUser.dept_id != 1 && si.active"
+                                                <span *ngIf="![1,6].includes(auth.webUser.dept_id) && si.active"
                                                    data-toggle="tooltip" title="Protected" class="text-warning mx-1"
                                                    style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                                    <i class="uil-shield-check"></i>
@@ -183,7 +191,9 @@
                                                 {{si.unit_id?si.unit_short + ' : ' + si.unit_full:'-'}}
                                              </td>
                                              <td style="width: 180px;" class="nav-item">
-                                                {{si.category_id?si.category_hin + ' : ' + si.category_eng:'-'}}
+                                                <ng-container *ngFor="let scat of si.categories_hin">
+                                                   {{scat}},
+                                                </ng-container>
                                              </td>
                                              <td style="width: 250px;" class="nav-item">
                                                 {{si.extra_note?si.extra_note:'N/A'}}

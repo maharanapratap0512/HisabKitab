@@ -23,7 +23,8 @@ export class SubitemComponent implements OnInit {
   editData: any = {};
   subitemData: any = [];
   total_count: any = 0;
-  baseurl:any;
+  baseurl: any;
+  settings: any = {};
 
   constructor(
     private fb: FormBuilder,
@@ -39,6 +40,7 @@ export class SubitemComponent implements OnInit {
     this.spinner.show();
     this.getSubitemData();
     this.baseurl = this.api.getUrl('BASE');
+    this.settings = this.auth.webUser.settings;
   }
 
   getSubitemData() {
@@ -119,18 +121,18 @@ export class SubitemComponent implements OnInit {
     body.query = {
       _id: id
     }
-    body.set = {      
+    body.set = {
       active: !active
     };
-    this.http.put(this.api.getUrl('SUBITEM'), body).subscribe((data: any) => {     
-        this.subitemData.splice(this.subitemData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);    
-        this.isLoader = false;  
-        if(data['result'].active){
-          this.toastr.success("Protetion Shield Activated");
-        }      
-        else{          
-          this.toastr.success("Protetion Shield Deactivated");
-        }
+    this.http.put(this.api.getUrl('SUBITEM'), body).subscribe((data: any) => {
+      this.subitemData.splice(this.subitemData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);
+      this.isLoader = false;
+      if (data['result'].active) {
+        this.toastr.success("Protetion Shield Activated");
+      }
+      else {
+        this.toastr.success("Protetion Shield Deactivated");
+      }
     }, err => {
       this.toastr.error(err['message']);
       this.isLoader = false;

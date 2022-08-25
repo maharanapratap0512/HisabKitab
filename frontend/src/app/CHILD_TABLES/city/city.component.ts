@@ -30,6 +30,7 @@ export class CityComponent implements OnInit {
   total_count: any = 0;
   citytypes: any = [];
   states: any = [];
+  settings:any = {};
 
   constructor(
     private fb: FormBuilder,
@@ -44,6 +45,7 @@ export class CityComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getcityData();
+    this.settings = this.auth.webUser.settings;
     this.gs.observeList().subscribe(result => {
       this.states = result.state ? result.state : [];
     });

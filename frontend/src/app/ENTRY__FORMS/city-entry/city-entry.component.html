@@ -25,15 +25,15 @@
                     <div class="form-group">
                         <label class="form-label">State</label>
                         <div class="float-end">
-                            <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                            <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                                 class="btn btn-sm btn-outline-primary" (click)="setView('State')">
                                 <i class=" dripicons-view-list"></i>
-                            </button>
-                            <button type="button" style="padding: 1px 6px !important;"
+                            </a>
+                            <a type="button" style="padding: 1px 6px !important;"
                                 class="btn btn-outline-primary float-end"
                                 onclick="$('#cityEntryComponent > #addState').modal('show')"
                                 (click)="showModal = 'addState'">+ Add
-                            </button>
+                            </a>
                         </div>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select State" [clearable]="false"
                             [virtualScroll]="true" formControlName="state_id"

@@ -94,7 +94,7 @@ export class SubitemListEntryComponent implements OnInit {
       };
       this.http.put(this.api.getUrl('SUBITEMLIST'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          this.gs.Lists.subitem_list.splice(this.gs.Lists.subitem.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
+          this.gs.Lists.subitem_list.splice(this.gs.Lists.subitem_list.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result']);
           this.subitemListForm.reset();
           this.isLoader = false;
           this.toastr.success('Subitem List Updated Successfully.')

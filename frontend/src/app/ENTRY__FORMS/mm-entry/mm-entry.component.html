@@ -45,11 +45,10 @@
                 <div class="col-md-3 mb-3" *ngIf="!parentMM">
                     <div class="form-group">
                         <label class="form-label">MM State</label>
-                        <button type="button" style="padding: 1px 6px !important;"
-                            class="btn btn-outline-primary float-end"
+                        <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
                             onclick="$('#mmEntryComponent > #showModal').modal('show')"
                             (click)="showModal='Add State'">+
-                            Add</button>
+                            Add</a>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select MM State" [clearable]="false"
                             [virtualScroll]="true" formControlName="state_id"
                             [ngClass]="{'validation':mmForm.get('state_id')?.errors && (mmForm.get('state_id')?.touched || mmForm.get ('state_id')?.dirty)}">
@@ -63,14 +62,14 @@
                     <div class="form-group">
                         <label class="form-label">Department</label>
                         <div class="float-end">
-                            <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                            <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                                 class="btn btn-sm btn-outline-primary" (click)="setView('Department')"><i
-                                    class=" dripicons-view-list"></i></button>
-                            <button type="button" style="padding: 1px 6px !important;"
+                                    class=" dripicons-view-list"></i></a>
+                            <a type="button" style="padding: 1px 6px !important;"
                                 class="btn btn-outline-primary float-end"
                                 onclick="$('#mmEntryComponent > #showModal').modal('show')"
                                 (click)="showModal='Add Department'">+
-                                Add</button>
+                                Add</a>
                         </div>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Department"
                             [clearable]="false" [virtualScroll]="true" formControlName="dept_id"
@@ -108,11 +107,10 @@
                 <div class="col-md-2 mb-3">
                     <div class="form-group">
                         <label class="form-label">Nimitt</label>
-                        <button type="button" style="padding: 1px 6px !important;"
-                            class="btn btn-outline-primary float-end"
+                        <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
                             onclick="$('#mmEntryComponent > #showModal').modal('show')"
                             (click)="showModal='Add Nimitt'">+
-                            Add</button>
+                            Add</a>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Nimitt" [clearable]="true"
                             [virtualScroll]="true" formControlName="nimitt_id"
                             [ngClass]="{'validation':mmForm.get('nimitt_id')?.errors && (mmForm.get('nimitt_id')?.touched || mmForm.get ('nimitt_id')?.dirty)}">

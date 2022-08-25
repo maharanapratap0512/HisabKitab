@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const fs = require('fs');
 const DBContex = require('../models/DBContex');
+const Fn = require('../models/functions');
 const { product } = require('../models/query');
 const DB = new DBContex();
 
@@ -123,7 +124,7 @@ router.put('/correction', async (req, res, next) => {
                 if (req.body[i].type == 'item' && req.body[i].subitem) {
                     await DB.runQuery('excel_correction', 'update_subitem', { obj: req.body[i] });
                 } else {
-                    console.log("req.body[i].type",req.body[i].type);
+                    console.log("req.body[i].type", req.body[i].type);
                     await DB.runQuery('excel_correction', 'update_' + req.body[i].type, { obj: req.body[i] });
                 }
                 if (req.body[i].dictionary) {
@@ -155,6 +156,13 @@ router.put('/correction', async (req, res, next) => {
 router.put('/final', async (req, res, next) => {
     try {
         for (let row of req.body) {
+            // if (typeof row.date == "string") {
+            //     row.date = Fn.StringToDate(row.date);
+            // }
+            // else if (typeof row.date == "number") {
+            //     row.date = Fn.ExcelDateToJSDate(row.date)
+            //     console.log("Exceldate", date);
+            // }
             DB.insert('aawak', {
                 date: row.date, mm_id: row.mm_id, pkt_num: row.pkt_num, pbk_id: row.pbk_id, aawak_mm_id: row.aj_mm_id,
                 item_id: row.item_id, subitem_id: row.subitem_id, product_id: row.product_id, item_detail: null,
@@ -175,7 +183,7 @@ router.put('/final', async (req, res, next) => {
                 }
             });
         }
-        await DB.runQuery('temp_import','delete');
+        await DB.runQuery('temp_import', 'delete');
         res.json({
             success: true
         });
@@ -189,26 +197,26 @@ router.put('/updates/:dept_id', async (req, res, next) => {
         let lists = {}
 
         if (req.params.dept_id) {
-            lists.country = await DB.getList('country', { dept_id: req.params.dept_id, conditionString:`country.active = 0` }) || []
-            lists.state = await DB.getList('state', { dept_id: req.params.dept_id, conditionString:`state.active = 0` }) || []
-            lists.city = await DB.getList('city', { dept_id: req.params.dept_id, conditionString:`city.active = 0` }) || []
-            lists.unit = await DB.getList('unit', { dept_id: req.params.dept_id, conditionString:`unit.active = 0` }) || []
-            lists.support_list = await DB.getList('support_list', { dept_id: req.params.dept_id, conditionString:`support_list.active = 0` }) || []
-            lists.category = await DB.getList('category', { dept_id: req.params.dept_id, conditionString:`category.active = 0` }) || []
-            lists.mm = await DB.getList('mm', { dept_id: req.params.dept_id, conditionString:`mm.active = 0` }) || []
-            lists.item = await DB.getList('item', { dept_id: req.params.dept_id, conditionString:`item.active = 0` }) || []
-            lists.subitem = await DB.getList('subitem', { dept_id: req.params.dept_id, conditionString:`subitem.active = 0` }) || []
-            lists.subitem_list = await DB.getList('subitem_list', { dept_id: req.params.dept_id, conditionString:`subitem_list.active = 0` }) || []
-            lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id, conditionString:`pbk.active = 0` }) || []
-            lists.pbk = await DB.getList('nimitt', { dept_id: req.params.dept_id, conditionString:`nimitt.active = 0` }) || []
-            lists.product = await DB.getList('product', { dept_id: req.params.dept_id, conditionString:`product.active = 0` }) || []
-            lists.aawak = await DB.getList('aawak', { dept_id: req.params.dept_id, conditionString:`aawak.active = 0` }) || []
-            lists.jawak = await DB.getList('jawak', { dept_id: req.params.dept_id, conditionString:`jawak.active = 0` }) || []
-            lists.point = await DB.getList('point', { dept_id: req.params.dept_id, conditionString:`point.active = 0` }) || []
+            lists.country = await DB.getList('country', { dept_id: req.params.dept_id, conditionString: `country.active = 0` }) || []
+            lists.state = await DB.getList('state', { dept_id: req.params.dept_id, conditionString: `state.active = 0` }) || []
+            lists.city = await DB.getList('city', { dept_id: req.params.dept_id, conditionString: `city.active = 0` }) || []
+            lists.unit = await DB.getList('unit', { dept_id: req.params.dept_id, conditionString: `unit.active = 0` }) || []
+            lists.support_list = await DB.getList('support_list', { dept_id: req.params.dept_id, conditionString: `support_list.active = 0` }) || []
+            lists.category = await DB.getList('category', { dept_id: req.params.dept_id, conditionString: `category.active = 0` }) || []
+            lists.mm = await DB.getList('mm', { dept_id: req.params.dept_id, conditionString: `mm.active = 0` }) || []
+            lists.item = await DB.getList('item', { dept_id: req.params.dept_id, conditionString: `item.active = 0` }) || []
+            lists.subitem = await DB.getList('subitem', { dept_id: req.params.dept_id, conditionString: `subitem.active = 0` }) || []
+            lists.subitem_list = await DB.getList('subitem_list', { dept_id: req.params.dept_id, conditionString: `subitem_list.active = 0` }) || []
+            lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id, conditionString: `pbk.active = 0` }) || []
+            lists.pbk = await DB.getList('nimitt', { dept_id: req.params.dept_id, conditionString: `nimitt.active = 0` }) || []
+            lists.product = await DB.getList('product', { dept_id: req.params.dept_id, conditionString: `product.active = 0` }) || []
+            lists.aawak = await DB.getList('aawak', { dept_id: req.params.dept_id, conditionString: `aawak.active = 0` }) || []
+            lists.jawak = await DB.getList('jawak', { dept_id: req.params.dept_id, conditionString: `jawak.active = 0` }) || []
+            lists.point = await DB.getList('point', { dept_id: req.params.dept_id, conditionString: `point.active = 0` }) || []
             lists.department = await DB.getList('department', { conditionString: ` department._id = ${req.params.dept_id}` }) || []
             lists.department_config = await DB.getList('department_config', { conditionString: ` department_config.dept_id = ${req.params.dept_id}` }) || []
-            lists.dictionary = await DB.getList('dictionary', { dept_id: req.params.dept_id, conditionString:`dictionary.active = 0` }) || []
-            lists.merge_history = await DB.getList('merge_history', { dept_id: req.params.dept_id, conditionString:`merge_history.active = 0` }) || []
+            lists.dictionary = await DB.getList('dictionary', { dept_id: req.params.dept_id, conditionString: `dictionary.active = 0` }) || []
+            lists.merge_history = await DB.getList('merge_history', { dept_id: req.params.dept_id, conditionString: `merge_history.active = 0` }) || []
             res.json({
                 success: true,
                 result: lists
@@ -244,9 +252,27 @@ router.post('/', async (req, res, next) => {
     if (req.body) {
         try {
             for (let i in req.body) {
+                if (typeof req.body[i].date == "string") {
+                    req.body[i].date = Fn.StringToDate(req.body[i].date).toISOString().split('T')[0];
+                }
+                else if (typeof req.body[i].date == "number") {
+                    req.body[i].date = Fn.ExcelDateToJSDate(req.body[i].date).toISOString().split('T')[0];
+                    // console.log("Exceldate", date);
+                }
                 req.body[i].type = 'awk';
                 req.body[i].pbk = ((req.body[i].pbk && (req.body[i].pbk.roll_no || req.body[i].pbk.pbk || req.body[i].pbk.relation || req.body[i].pbk.relative)) ? JSON.stringify(req.body[i].pbk) : null);
+                for(let j in req.body[i].jawak_detail){
+                    if (typeof req.body[i].jawak_detail[j].date == "string") {
+                        req.body[i].jawak_detail[j].date = Fn.StringToDate(req.body[i].jawak_detail[j].date).toISOString().split('T')[0];
+                    }
+                    else if (typeof req.body[i].jawak_detail[j].date == "number") {
+                        req.body[i].jawak_detail[j].date = Fn.ExcelDateToJSDate(req.body[i].jawak_detail[j].date).toISOString().split('T')[0];
+                        // console.log("Exceldate", date);
+                    }
+                }
                 req.body[i].jawak_detail = (req.body[i].jawak_detail ? JSON.stringify(req.body[i].jawak_detail) : JSON.stringify([]))
+
+                console.log(req.body[i]);
                 let result = await DB.insert('temp_import', req.body[i], null, false);
             }
             await DB.getCount('temp_import').then(async (resolve) => {

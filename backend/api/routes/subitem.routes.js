@@ -27,6 +27,7 @@ router.get('/:dept_id', async (req, res, next) => {
         await DB.getList('subitem', { full: true, dept_id: req.params.dept_id }).then((resolve) => {
             for (let i = 0; i < resolve.data.length; i++) {
                 resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
+                resolve.data[i].categories = resolve.data[i].categories ? JSON.parse(resolve[i].categories) : [];
             }
             res.json({
                 success: true,
@@ -44,8 +45,11 @@ router.post('/:dept_id', async (req, res, next) => {
     try {
         if (req.body) {
             req.body.document = JSON.stringify(req.body.document ? req.body.document : []);
+            req.body.categories = JSON.stringify(req.body.categories ? req.body.categories : []);
             await DB.insert('subitem', req.body, req.params.dept_id).then((data) => {
                 data.document = data.document ? JSON.parse(data.document) : [];
+                data.categories = data.categories ? JSON.parse(data.categories) : [];
+                data.categories_hin = data.categories_hin ? JSON.parse(data.categories_hin) : [];
                 res.json({
                     success: true,
                     result: data || {}
@@ -64,8 +68,11 @@ router.put('/', async (req, res, next) => {
     try {
         if (req.body.set && req.body.query) {
             req.body.set.document = JSON.stringify(req.body.set.document ? req.body.set.document : []);
+            req.body.set.categories = JSON.stringify(req.body.set.categories ? req.body.set.categories : []);
             await DB.update('subitem', req.body.set, req.body.query._id).then(async (data) => {
                 data.document = data.document ? JSON.parse(data.document) : [];
+                data.categories = data.categories ? JSON.parse(data.categories) : [];
+                data.categories_hin = data.categories_hin ? JSON.parse(data.categories_hin) : [];
                 res.json({
                     success: true,
                     result: data || {}

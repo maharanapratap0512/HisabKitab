@@ -6,6 +6,8 @@ import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
+import { AuthService } from 'src/app/services/auth.service';
+declare var $: any;
 
 @Component({
   selector: 'app-data-view',
@@ -23,13 +25,17 @@ export class DataViewComponent implements OnInit {
   records: any;
   apiName: any;
   term: any;
+  editData: any;
+  showModal: string = "";
+
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
     private api: ApiService,
     private toastr: ToastrService,
     private gs: GlobalService,
-    private spinner: NgxSpinnerService) {
+    private spinner: NgxSpinnerService,
+    public auth: AuthService) {
   }
 
   ngOnInit(): void {
@@ -38,6 +44,7 @@ export class DataViewComponent implements OnInit {
   ngOnChanges(changes: SimpleChanges) {
     console.log("changes", changes);
     if (changes.Type.currentValue) {
+      this.Type = changes.Type.currentValue;
       switch (changes.Type.currentValue) {
         case 'mm': this.setMMFields();
           this.apiName = 'MM';
@@ -91,9 +98,26 @@ export class DataViewComponent implements OnInit {
     }
   }
 
+  closeModal() {
+    this.showModal = "";
+    $('#dataViewComponent #showModal').modal('hide');
+  }
 
   edit(data: any) {
+    this.editData = data;
+    this.showModal = 'Edit ' + this.Type;
+    $('#dataViewComponent > #showModal').modal('show');
+  }
 
+  editResponse(ev: any) {
+    if (ev._id) {
+      for (let i in this.records) {
+        if (this.records[i]._id == ev._id) {
+          this.records[i] = ev;
+        }
+      }
+      this.closeModal();
+    }
   }
 
 
@@ -277,5 +301,6 @@ export class DataViewComponent implements OnInit {
       }
     ]
   }
+
 
 }
