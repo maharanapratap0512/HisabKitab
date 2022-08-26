@@ -212,28 +212,28 @@ export class AawakComponent implements OnInit {
       // console.log("exportAJdata", result);
       for (let i = 0; i < result.length; i++) {
         let jawakArray = [];
-        for (let j in result[i].jawak_detail) {          
+        for (let j in result[i].jawak_detail) {
           jawakArray.push({
             'Date': result[i].jawak_detail[j].date ? result[i].jawak_detail[j].date : '-',
-            'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
-            'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
             'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
+            'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
+            'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
+            'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
             'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
             'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
             'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
-            'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
             // 'Bachat': bachat
           });
         }
         jawakArray.push({
-          'Date':'',
+          'Date': '',
+          'Pkt No': '',
           'Jawak MM': '',
-          'Kisko Diya':'',
-          'Pkt No': 'बचत',
-          'Jawak Type':'',
+          'Jawak Detail': '',
+          'Kisko Diya': 'बचत',
+          'Jawak Type': '',
           'Qty': result[i].remaining_qty ? result[i].remaining_qty : 0,
           'Unit': result[i].unit_id ? result[i].unit_short : '',
-          'Jawak Detail':''
         });
         let awkObj: any = {
           'No': i + 1,
@@ -249,9 +249,25 @@ export class AawakComponent implements OnInit {
           awkObj.Relative = result[i].relative_name ? result[i].relative_name : '-';
         }
 
+        let cat = '';
+        let item = this.gs.Lists.itemmix.find((it: { _id: any; }) => it._id == result[i].item_id);
+        if (item) {
+          if (result[i].subitem_id) {
+            let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
+            if (subitem) {
+              cat = subitem.categories_hin.join(', ');
+            } else {
+              cat = item.categories_hin.join(', ');
+            }
+          }
+          else {
+            cat = item.categories_hin.join(', ');
+          }
+        }
         awkObj = {
           ...awkObj,
-          'Item': result[i].item_id ? result[i].item_hin : '-',
+          'Category': cat,
+            'Item': result[i].item_id ? result[i].item_hin : '-',
           'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
           'Company': result[i].company_name ? result[i].company_name : '-',
           'Condition': result[i].condition_id ? result[i].condition_hin : '-',

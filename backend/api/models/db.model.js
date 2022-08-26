@@ -872,6 +872,153 @@ class dbModal {
       drop_item_backup: `drop table if exists item_backup`,
       drop_subitem_backup: `drop table if exists subitem_backup`,
       drop_department_config_backup: `drop table if exists department_config_backup`,
+    },
+    //version: 8
+    /* 
+      => Aawak - drop jawak_ref_ids and insert jawak_ref_id as integer
+      => Product - recreating table and triggers
+      => product_tracking - aawak, jawak of products.
+      => recreating subitem to add ON delete cascade on item reference.
+    */
+    {
+      // aawak_drop_jref: `ALTER TABLE aawak DROP COLUMN 'jawak_ref_ids'`,
+      aawak_add_jref: `ALTER TABLE aawak ADD COLUMN jawak_ref_id int null REFERENCES jawak(_id) ON UPDATE CASCADE ON DELETE CASCADE`,
+      subitem_rename: `ALTER TABLE subitem rename to subitem_backup`,
+      subitem_recreate: `CREATE TABLE subitem(
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        item_id integer not null REFERENCES item(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        subitem_list_id integer not null REFERENCES subitem_list(_id),
+        categories json not null,
+        unit_id integer null REFERENCES unit(_id),
+        extra_note text,
+        document json,
+        active tinyint default 0,    
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime')),
+        UNIQUE(item_id, subitem_list_id)
+        );`,
+      transfer_data: `insert into subitem select * from subitem_backup`,
+      drop_backup: `drop table if exists subitem_backup`,
+      drop_product: `drop table if exists product`,
+      product: `create table product(
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        mm_id integer not null REFERENCES mm(_id),
+        purchased_by varchar(200) null,
+        purchase_date date null,
+        item_id integer not null references item(_id) ON UPDATE CASCADE,
+        subitem_id integer null references subitem(_id) ON UPDATE CASCADE,
+        unit_id integer not null references unit(_id),
+        product_code varchar(100) unique null,
+        company_name varchar(100) null,
+        model_name varchar(100) null,
+        sr_num varchar(50) unique null,
+        condition_id integer not null references support_list(_id),
+        price numeric(10,2) null,
+        product_detail text null,
+        accessories text null,
+        purchase_from text null,
+        warranty_period int null,
+        dept_id integer references department(_id),
+        warranty_from varchar(100) null,
+        document json,
+        nimmit_id integer null REFERENCES nimmit(_id),
+        active tinyint default 0,  
+        hl tinyint default 0,
+        last_date date,
+        last_mm integer null REFERENCES mm(_id),
+        last_condition integer REFERENCES support_list(_id),
+        last_ref_id integer references product_tracking(_id),
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      );`,
+      product_tracking: `create table if not exists product_tracking(
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        product_id integer not null REFERENCES product(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        date date not null,
+        mm_id integer not null REFERENCES mm(_id),
+        entry_type varchar(25) not null,
+        aj_mm_id integer not null REFERENCES mm(_id),
+        pkt_num varchar(25),
+        nimitt_id integer REFERENCES nimitt(_id),
+        old_condition_id integer,
+        condition_id integer REFERENCES support_list(_id),
+        transfer_detail text,
+        repairing_ref integer REFERENCES product_repair(_id),
+        hl tinyint default 0,
+        active tinyint default 0,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))      
+      )`,
+      product_repair: `create table if not exists product_repair(
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        product_id integer not null REFERENCES product(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        date date not null
+      )`,
+      prdct_ins_bcht_updt:
+        `CREATE TRIGGER IF NOT EXISTS "prdct_ins_bcht_updt"
+          AFTER INSERT ON "product"
+          FOR EACH ROW
+          BEGIN 
+            update bachat set 
+            Stock = Stock + 1,
+            New = New + (CASE WHEN NEW.condition_id = 33 THEN 1 ELSE 0 END),
+            Old = Old + (CASE WHEN NEW.condition_id = 34 THEN 1 ELSE 0 END),
+            Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN 1 ELSE 0 END),
+            Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END),
+            Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN 1 ELSE 0 END)
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id; 
+
+            insert or ignore into bachat(mm_id,item_id,subitem_id, Stock, New, Old, Defective, Repairing, Scrap, unit_id, dept_id) 
+            values(NEW.mm_id, NEW.item_id, NEW.subitem_id, 1, (CASE WHEN NEW.condition_id = 33 THEN 1 ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN 1 ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN 1 ELSE 0 END), (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN 1 ELSE 0 END), NEW.unit_id, NEW.dept_id);             
+          END;`,
+
+      prdct_updt_bcht_updt:
+        `CREATE TRIGGER IF NOT EXISTS "prdct_updt_bcht_updt"
+          AFTER UPDATE ON "product"
+          FOR EACH ROW
+          WHEN OLD.condition_id != NEW.condition_id
+          BEGIN 
+            update bachat set 
+            New = New + (CASE WHEN NEW.condition_id = 33 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
+            Old = Old + (CASE WHEN NEW.condition_id = 34 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
+            Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
+            Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END) - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END),
+            Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN 1 ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END)
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = 1;           
+          END;`,
+
+      prdct_del_bcht_updt:
+        `CREATE TRIGGER IF NOT EXISTS "prdct_del_bcht_updt"
+          AFTER DELETE ON "product"
+          FOR EACH ROW        
+          BEGIN 
+            update bachat set 
+            Stock = Stock - 1,
+            New = New - (CASE WHEN OLD.condition_id = 33 THEN 1 ELSE 0 END),
+            Old = Old - (CASE WHEN OLD.condition_id = 34 THEN 1 ELSE 0 END),
+            Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN 1 ELSE 0 END),
+            Repairing = Repairing - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN 1 ELSE 0 END),
+            Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN 1 ELSE 0 END)
+            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND (OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = 1;  
+          END;`,
+
+      tracking_ins_jawak:
+        `CREATE TRIGGER IF NOT EXISTS "tracking_ins_jawak"
+          AFTER INSERT ON "product_tracking" 
+          FOR EACH ROW
+          WHEN NEW.entry_type = 'jwk' AND NEW.mm_id <> NEW.aj_mm_id
+          BEGIN                         
+            insert into product_tracking(product_id, date, mm_id, entry_type, aj_mm_id, pkt_num, new_condition_id, transfer_detail, hl) values(NEW.product_id, NEW.date, NEW.aj_mm_id, 'awk', NEW.mm_id, pkt_num, NEW.new_condition_id, NEW.transfer_detail, 1);            
+          END;`,
+      tracking_ins_aawak:
+        `CREATE TRIGGER IF NOT EXISTS "tracking_ins_aawak"
+          AFTER INSERT ON "product_tracking"
+          FOR EACH ROW
+          WHEN NEW.entry_type = 'awk'
+          BEGIN                         
+          update product set last_date = NEW.date, last_mm = NEW.mm_id, last_condition = NEW.new_condition_id, last_ref_id = NEW._id, hl = 1, updated_at = (datetime('now', 'localtime')) where _id = NEW.product_id AND date <= NEW.date;           
+          END;`,
+
     }
   ];
   migrationLength;
@@ -893,9 +1040,9 @@ class dbModal {
           let userVersion = this.db.pragma('user_version', { simple: true });
           console.log("current user version : ", userVersion);
           //set old userversion 8 to 1
-          if (userVersion == 8) {
-            userVersion = 1;
-          }
+          // if (userVersion == 8) {
+          //   userVersion = 1;
+          // }
           //comparing userversion with total migrations
           if (this.migrationLength > userVersion) {
             //looping through migrations positioned after userversion.
