@@ -19,6 +19,7 @@ class DBContex {
         'jawak',
         'bachat',
         'product',
+        'product_tracking',
         'department_config',
         'merge_history'
     ];

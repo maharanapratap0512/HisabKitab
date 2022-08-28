@@ -62,6 +62,7 @@ export class ProductEntryComponent implements OnInit {
       product_detail: [null],
       item_id: [null],
       subitem_id: [null],
+      unit_id: [1],
       mm_id: [null],
       document: [null],
       dept_id: [this.auth.webUser.dept_id],

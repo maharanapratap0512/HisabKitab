@@ -43,6 +43,7 @@
                            <th style="width:80px;">No.</th>
                            <th style="width:120px;">Manage</th>
                            <th *ngIf="settings.document" style="width: 120px;">Document</th>
+                           <th style="width: 180px;" class="text-success">Current Status</th>
                            <th *ngIf="settings.purchase_date" style="width:101px;">Purchase Date</th>
                            <th style="width:150px;">Mm</th>
                            <th style="width:180px;">Item - Subitem</th>
@@ -64,14 +65,29 @@
                         <tr *ngFor="let data of productData | filter:term; let i=index">
                            <td>{{i+1}}</td>
                            <td>
-                              <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
-                                    class="uil uil-pen"></i></button>
-                              <button class="btn btn-sm btn-danger mx-1" type="button" (click)="delete(i,data._id)"><i
-                                    class="uil-trash"></i></button>
+                              <div class="d-flex justify-content-between mb-1">
+                                 <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
+                                       class="uil uil-pen"></i></button>
+                                 <button class="btn btn-sm btn-danger mx-1" type="button"
+                                    (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
+                              </div>
+                              <div class="d-flex justify-content-between mb-1">
+                                 <button class="btn btn-sm btn-warning" type="button" (click)="addJawak(data)"><i
+                                       class="mdi mdi-plus noti-icon"></i></button>
+                                 <!-- <button class="btn btn-sm btn-danger mx-1" type="button" (click)="delete(i,data._id)"><i
+                                       class="uil-trash"></i></button> -->
+                              </div>
                            </td>
                            <ng-container (click)="rowDetail(data)">
                               <td *ngIf="settings.document">
-                                 <img [src]="getImage1(data.document)" height="60px">
+
+                                 <img *ngIf="data.document && data.document.images"
+                                    [src]="baseurl + data.document.images[0]" height="60px">
+                              </td>
+                              <td class="text-success">
+                                 {{data.last_mm_hin ? data.last_mm_hin : ''}} <br />
+                                 {{data.last_condition_hin ? data.last_condition_hin : ''}} <br />
+                                 {{data.last_date ? data.last_date : ''}}
                               </td>
                               <td>{{data.purchase_date}}</td>
                               <td>{{data.mm_id?data.mm_hin:''}} <br /> {{data.mm_eng ? data.mm_eng:'-'}}</td>
@@ -115,12 +131,15 @@
       <div class="modal-content">
          <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
-            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
-               aria-label="Close"></button>
+            <button type="button" (click)="closeModal()" class="btn-close" aria-label="Close"></button>
          </div>
          <div class="modal-body">
-            <app-product-entry *ngIf="showModal == 'Add Product'" (response)='addProductResponse($event)'>
-            </app-product-entry>
+            <app-product-transfer-entry *ngIf="showModal == 'Add Jawak'" [productData]="viewProduct"
+               (response)='addJawakResponse($event)'>
+            </app-product-transfer-entry>
+
+            <app-product-entry *ngIf="showModal == 'Edit Product'" (response)='editProductResponse($event)'
+               [getData]="editData" [isEdit]="true"></app-product-entry>
 
             <app-product-entry *ngIf="showModal == 'Edit Product'" (response)='editProductResponse($event)'
                [getData]="editData" [isEdit]="true"></app-product-entry>
@@ -129,8 +148,7 @@
 
          </div>
          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" style="width: 120px;"
-               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+            <button type="button" class="btn btn-secondary" style="width: 120px;" (click)="closeModal()">Close</button>
          </div>
       </div>
    </div>

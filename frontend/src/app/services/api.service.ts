@@ -32,6 +32,7 @@ export class ApiService {
     STATE: base_url + 'states/',
     CITY: base_url + 'cities/',
     PRODUCT: base_url + 'products/',
+    PRDCT_TRNSFR: base_url + 'product_tracking/',
     ITEM: base_url + 'items/',
     ITEMMIX: base_url + 'items/itemmix/',
     SUBITEM: base_url + 'subitems/',

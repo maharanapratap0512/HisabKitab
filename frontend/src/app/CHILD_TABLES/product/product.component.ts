@@ -84,10 +84,38 @@ export class ProductComponent implements OnInit {
     }
   }
 
+  openModal(type:any){
+    this.showModal = type;
+    $('#showModal').modal('show');
+  }
+
+  closeModal(){
+    this.showModal = ''
+    $('#showModal').modal('hide');
+  }
+
   edit(data: any) {
     this.editData = data;
     this.showModal = 'Edit Product'
     $('#showModal').modal('show');
+  }
+
+  addJawak(product:any){
+    this.viewProduct = product;
+    this.openModal('Add Jawak');
+  }
+
+  addJawakResponse(ev:any){
+    let index = this.productData.findIndex((p:any)=>{p._id == ev.product_id});
+    console.log(index);
+    this.productData[index].last_mm = ev.aj_mm_id
+    this.productData[index].last_mm_hin = ev.aj_mm_hin
+    this.productData[index].last_condition = ev.condition_id
+    this.productData[index].last_condition_hin = ev.condition_hin
+    this.productData[index].last_date = ev.date
+    console.log(this.productData);
+    
+    
   }
 
   delete(i: any, id: any) {
@@ -125,11 +153,11 @@ export class ProductComponent implements OnInit {
     $('#showModal').modal('show');
   }
 
-  getImage1(doc:any){
-    let imgs = doc;
-    // console.log(doc);
+  // getImage1(doc:any){
+  //   let imgs = doc;
+  //   // console.log(doc);
     
-    return this.baseurl + ((imgs && imgs.images && imgs.images.length > 0) ? imgs.images[0].toString() : '');
-  }
+  //   return this.baseurl + ((imgs && imgs.images && imgs.images.length > 0) ? imgs.images[0].toString() : '');
+  // }
 
 }

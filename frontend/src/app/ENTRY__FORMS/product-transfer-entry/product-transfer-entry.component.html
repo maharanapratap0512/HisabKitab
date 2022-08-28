@@ -1,0 +1,163 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
+</ngx-spinner>
+
+<div class="row" id="prdctTrnsfrEntryComponent">
+   <div class="card-body">
+      <form [formGroup]="prdctTrnsfrForm">
+
+         <!-- Products Detail and other Readonly Fields while editing -->
+         <div class="row">
+            <div class="card card-body" *ngIf="productData">
+               <div class="row">
+                  <div class="col-4">
+                     <div>
+                        <h5>
+                           <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Item </span>
+                           <span class="font-12">
+                              <!-- {{getData.item_hin}} {{getData.subitem_hin ? ' : ' + getData.subitem_hin :
+                              ''}} -->
+                           </span>
+                        </h5>
+                     </div>
+                  </div>
+                  <div class="col-4">
+                     <div>
+                        <h5>
+                           <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">MM </span>
+                           <span class="font-12">
+                              <!-- {{getData.mm_hin}} - {{getData.mm_eng}} -->
+                           </span>
+                        </h5>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <div class="row">
+
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Date</label>
+                  <input type="date" class="form-control" placeholder="Date" formControlName="date"
+                     [ngClass]="{'validation':prdctTrnsfrForm.get('date')?.errors && (prdctTrnsfrForm.get('date')?.touched || prdctTrnsfrForm.get ('date')?.dirty)}">
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Pkt Num</label>
+                  <input type="text" class="form-control" placeholder="Pkt No" formControlName="pkt_num"
+                     [ngClass]="{'validation':prdctTrnsfrForm.get('pkt_num')?.errors && (prdctTrnsfrForm.get('pkt_num')?.touched || prdctTrnsfrForm.get ('pkt_num')?.dirty)}">
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">MM</label>
+                  <a type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end" (click)="openModal('Add MM')">
+                     + Add
+                  </a>
+                  <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="false"
+                     [virtualScroll]="true" formControlName="aj_mm_id"
+                     [ngClass]="{'validation':prdctTrnsfrForm.get('aj_mm_id')?.errors && (prdctTrnsfrForm.get('aj_mm_id')?.touched || prdctTrnsfrForm.get ('aj_mm_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">MM</ng-option>
+                     <ng-option *ngFor="let item of mms" [value]="item._id">
+                        {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code?' : '+item.mm_code:''}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Nimitt / Kisko Diya</label>
+                  <a type="button" *ngIf="settings.nimitt.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end" (click)="openModal('Add Nimitt')">+
+                     Add</a>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Nimitt" [clearable]="false"
+                     [virtualScroll]="true" formControlName="nimitt_id"
+                     [ngClass]="{'validation':prdctTrnsfrForm.get('nimitt_id')?.errors && (prdctTrnsfrForm.get('nimitt_id')?.touched || prdctTrnsfrForm.get ('nimitt_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Nimitt</ng-option>
+                     <ng-option *ngFor="let item of nimitts" [value]="item._id">
+                        {{item.nimitt_hin}} : {{item.nimitt_eng}} ({{item.state_hin}})</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Condition</label>
+                  <div class="float-end">
+                     <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-sm btn-outline-primary" (click)="setView('Condition')">
+                        <i class=" dripicons-view-list"></i>
+                     </a>
+                  </div>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Condition" [clearable]="false"
+                     [virtualScroll]="true" formControlName="condition_id"
+                     [ngClass]="{'validation':prdctTrnsfrForm.get('condition_id')?.errors && (prdctTrnsfrForm.get('condition_id')?.touched || prdctTrnsfrForm.get ('condition_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Condition </ng-option>
+                     <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
+                        {{item.list_name_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+               <div class="form-group">
+                  <label class="form-label">prdctTrnsfr Details</label>
+                  <textarea class="form-control" placeholder="prdctTrnsfr Details" formControlName="transfer_detail"
+                     [ngClass]="{'validation':prdctTrnsfrForm.get('transfer_detail')?.errors && (prdctTrnsfrForm.get('transfer_detail')?.touched || prdctTrnsfrForm.get ('transfer_detail')?.dirty)}"></textarea>
+               </div>
+            </div>
+
+
+
+            <div class="col-md-2 mb-3">
+               <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!this.isEdit"
+                  (click)="prdctTrnsfrFormSubmit()">Submit</button>
+               <button class="btn btn-warning submit mx-3" type="submit" *ngIf="this.isEdit"
+                  (click)="prdctTrnsfrFormUpdate()">Update</button>
+               <!-- <button class="btn btn-light submit" type="button" (click)="prdctTrnsfrForm.reset()">Clear</button> -->
+            </div>
+
+         </div>
+      </form>
+   </div>
+
+
+
+   <!-- Modal -->
+   <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" style="width:95%">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+               <button type="button" class="btn-close" (click)=" closeModal()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+               <!-- Add MM -->
+               <app-mm-entry *ngIf="showModal == 'Add MM'" (response)="mmAddResponse($event)"></app-mm-entry>
+
+               <!-- Add Condition -->
+               <app-support-list-entry *ngIf="showModal == 'Add Condition'" (response)='conditionAddResponse($event)'
+                  list_type="condition"> </app-support-list-entry>
+
+               <!-- Condition List -->
+               <app-data-view *ngIf="showModal == 'View Data'" [getData]="viewData" [Type]="viewType"></app-data-view>
+
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" style="width: 120px;"
+                  (click)="closeModal()">Close</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+</div>
