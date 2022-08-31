@@ -18,6 +18,7 @@ export class ProductTransferEntryComponent implements OnInit {
   @Input() getData: any;
   @Input() productData: any;
   @Input() isEdit: any;
+  @Input() isVerify: any;
   @Output() response = new EventEmitter();
   prdctTrnsfrForm: FormGroup;
   mms: any = [];
@@ -49,10 +50,11 @@ export class ProductTransferEntryComponent implements OnInit {
       pkt_num: [null],
       condition_id: [null, Validators.required],
       nimitt_id: [null],
-      old_condition: [null, Validators.required],
+      old_condition_id: [null],
       transfer_detail: [null],
       repairing_ref: [null],
       dept_id: this.auth.webUser.dept_id,
+      hl: false
     });
     this.settings = this.auth.webUser.settings;
   }
@@ -77,12 +79,15 @@ export class ProductTransferEntryComponent implements OnInit {
     }
     if (changes.productData && changes.productData.currentValue) {
       this.productData = changes.productData.currentValue;
-      if(this.productData._id){
+      console.log(this.productData);
+
+      if (this.productData._id) {
         this.prdctTrnsfrForm.patchValue({
           product_id: this.productData._id,
           mm_id: this.productData.last_mm ? this.productData.last_mm : this.productData.mm_id,
-          old_condition:this.productData.last_condition ? this.productData.last_condition : this.productData.condition_id,
-          entry_type:'jwk'
+          old_condition_id: this.productData.last_condition ? this.productData.last_condition : this.productData.condition_id,
+          condition_id: this.productData.last_condition ? this.productData.last_condition : this.productData.condition_id,
+          entry_type: 'jwk'
         });
       }
     }
@@ -94,13 +99,19 @@ export class ProductTransferEntryComponent implements OnInit {
         mm_id: changes.getData.currentValue.mm_id,
         entry_type: changes.getData.currentValue.entry_type,
         aj_mm_id: changes.getData.currentValue.aj_mm_id,
-        pkt_num: changes.getData.currentValue.pkt_num,
+        pkt_num: changes.getData.currentValue.pkt_num ? changes.getData.currentValue.pkt_num : null,
         condition_id: changes.getData.currentValue.condition_id,
-        nimitt_id: changes.getData.currentValue.nimitt_id,
-        old_condition: changes.getData.currentValue.old_condition,
-        transfer_detail: changes.getData.currentValue.transfer_detail,
-        repairing_ref: changes.getData.currentValue.repairing_ref,
+        nimitt_id: changes.getData.currentValue.nimitt_id ? changes.getData.currentValue.nimitt_id : null,
+        old_condition_id: changes.getData.currentValue.old_condition_id ? changes.getData.currentValue.old_condition_id : null,
+        transfer_detail: changes.getData.currentValue.transfer_detail ? changes.getData.currentValue.transfer_detail : null,
+        repairing_ref: changes.getData.currentValue.repairing_ref ? changes.getData.currentValue.repairing_ref : null,
+        hl: changes.getData.currentValue.hl ? changes.getData.currentValue.hl : false,
       });
+      console.log(this.prdctTrnsfrForm.value);
+      
+    }
+    if (changes.isVerify && changes.isVerify.currentValue) {
+      this.isVerify = changes.isVerify.currentValue;      
     }
   }
 
@@ -140,7 +151,7 @@ export class ProductTransferEntryComponent implements OnInit {
     }
     else {
       console.log(this.prdctTrnsfrForm.value);
-      
+
       this.gs.validationFireOnSubmit(this.prdctTrnsfrForm);
     }
   }
@@ -161,9 +172,10 @@ export class ProductTransferEntryComponent implements OnInit {
         pkt_num: this.prdctTrnsfrForm.value.pkt_num,
         condition_id: this.prdctTrnsfrForm.value.condition_id,
         nimitt_id: this.prdctTrnsfrForm.value.nimitt_id,
-        old_condition: this.prdctTrnsfrForm.value.old_condition,
+        old_condition_id: this.prdctTrnsfrForm.value.old_condition_id,
         transfer_detail: this.prdctTrnsfrForm.value.transfer_detail,
         repairing_ref: this.prdctTrnsfrForm.value.repairing_ref,
+        hl: (this.isVerify ? 0 : this.prdctTrnsfrForm.value.hl),
       };
       // console.log("body", body);
 
@@ -183,6 +195,8 @@ export class ProductTransferEntryComponent implements OnInit {
       });
     }
     else {
+      console.log(this.prdctTrnsfrForm);
+      
       this.gs.validationFireOnSubmit(this.prdctTrnsfrForm);
     }
   }

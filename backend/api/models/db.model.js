@@ -1009,7 +1009,7 @@ class dbModal {
           FOR EACH ROW
           WHEN NEW.entry_type = 'jwk' AND NEW.mm_id <> NEW.aj_mm_id
           BEGIN                         
-            insert into product_tracking(product_id, date, mm_id, entry_type, aj_mm_id, pkt_num, new_condition_id, transfer_detail, hl) values(NEW.product_id, NEW.date, NEW.aj_mm_id, 'awk', NEW.mm_id, pkt_num, NEW.new_condition_id, NEW.transfer_detail, 1);            
+            insert into product_tracking(product_id, date, mm_id, entry_type, aj_mm_id, pkt_num, condition_id, transfer_detail, hl) values(NEW.product_id, NEW.date, NEW.aj_mm_id, 'awk', NEW.mm_id, NEW.pkt_num, NEW.condition_id, NEW.transfer_detail, 1);            
           END;`,
       tracking_ins_aawak:
         `CREATE TRIGGER IF NOT EXISTS "tracking_ins_aawak"
@@ -1017,7 +1017,7 @@ class dbModal {
           FOR EACH ROW
           WHEN NEW.entry_type = 'awk'
           BEGIN                         
-          update product set last_date = NEW.date, last_mm = NEW.mm_id, last_condition = NEW.new_condition_id, last_ref_id = NEW._id, hl = 1, updated_at = (datetime('now', 'localtime')) where _id = NEW.product_id AND date <= NEW.date;           
+          update product set last_date = NEW.date, last_mm = NEW.mm_id, last_condition = NEW.condition_id, last_ref_id = NEW._id, hl = 1, updated_at = (datetime('now', 'localtime')) where _id = NEW.product_id AND (last_date IS NULL OR last_date <= NEW.date);           
           END;`,
 
     }

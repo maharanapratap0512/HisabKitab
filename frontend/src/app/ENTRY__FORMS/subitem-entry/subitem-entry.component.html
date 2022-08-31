@@ -16,38 +16,7 @@
                         {{item.item_eng}} : {{item.item_code}}</ng-option>
                   </ng-select>
                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-               <div class="form-group">
-                  <label class="form-label">Subitem Hin</label>
-                  <div class="ng-autocomplete">
-                     <ng-autocomplete [data]="subitem_list" searchKeyword="subitem_hin"
-                        placeholder="Enter Subitem Hindi" (selected)='selectSubitemHin($event)'
-                        [initialValue]="subitemForm.value.subitem_hin" (inputChanged)='searchSubitemHin($event)'
-                        [itemTemplate]="hinItemTemplate">
-                     </ng-autocomplete>
-
-                     <ng-template #hinItemTemplate let-item>
-                        <a [innerHTML]="item.subitem_hin"></a>
-                     </ng-template>
-                  </div>
-               </div>
-            </div>
-            <div class="col-md-3 mb-3">
-               <div class="form-group">
-                  <label class="form-label">Subitem Eng</label>
-                  <div class="ng-autocomplete">
-                     <ng-autocomplete [data]="subitem_list" searchKeyword="subitem_eng" placeholder="Enter Subitem Eng"
-                        (selected)='selectSubitemEng($event)' (inputChanged)='searchSubitemEng($event)'
-                        [itemTemplate]="engItemTemplate">
-                     </ng-autocomplete>
-
-                     <ng-template #engItemTemplate let-item>
-                        <a innerHTML="item.subitem_eng"></a>
-                     </ng-template>
-                  </div>
-               </div>
-            </div>
+            </div>            
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Subitem List</label>

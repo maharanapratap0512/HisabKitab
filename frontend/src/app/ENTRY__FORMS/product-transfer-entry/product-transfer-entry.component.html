@@ -9,15 +9,15 @@
 
          <!-- Products Detail and other Readonly Fields while editing -->
          <div class="row">
-            <div class="card card-body" *ngIf="productData">
-               <div class="row">
+            <div class="card card-body">
+               <div class="row" *ngIf="productData">
                   <div class="col-4">
                      <div>
                         <h5>
-                           <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Item </span>
+                           <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Product : </span>
                            <span class="font-12">
-                              <!-- {{getData.item_hin}} {{getData.subitem_hin ? ' : ' + getData.subitem_hin :
-                              ''}} -->
+                              Sr No : {{productData.sr_no ? productData.sr_no : ''}} <br />
+                              Code : {{productData.product_code ? productData.product_code : ''}}
                            </span>
                         </h5>
                      </div>
@@ -27,11 +27,53 @@
                         <h5>
                            <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">MM </span>
                            <span class="font-12">
-                              <!-- {{getData.mm_hin}} - {{getData.mm_eng}} -->
+                              {{productData.last_mm_hin ? productData.last_mm_hin : (productData.mm_hin ? productData.mm_hin : '')}}
                            </span>
                         </h5>
                      </div>
                   </div>
+                  <div class="col-4">
+                     <div>
+                        <h5>
+                           <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Condition </span>
+                           <span class="font-12">
+                              {{productData.last_condition_hin ? productData.last_condition_hin : (productData.condition_hin ? productData.condition_hin : '')}}
+                           </span>
+                        </h5>
+                     </div>
+                  </div>
+               </div>
+               <div class="row" *ngIf="isEdit || isVerify">
+                  <div class="col-3">
+                     <div>
+                        <h5>
+                           <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">From : </span>
+                           <span class="font-12">
+                              {{getData.mm_hin}}
+                           </span>
+                        </h5>
+                     </div>
+                  </div>
+                  <div class="col-3">
+                     <div>
+                        <h5>
+                           <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">To :</span>
+                           <span class="font-12">
+                              {{getData.aj_mm_hin}}
+                           </span>
+                        </h5>
+                     </div>
+                  </div>
+                  <!-- <div class="col-4">
+                     <div>
+                        <h5>
+                           <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Condition </span>
+                           <span class="font-12">
+                              {{productData.last_condition_hin ? productData.last_condition_hin : (productData.condition_hin ? productData.condition_hin : '')}}
+                           </span>
+                        </h5>
+                     </div>
+                  </div> -->
                </div>
             </div>
          </div>
@@ -54,7 +96,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="!isVerify">
                <div class="form-group">
                   <label class="form-label">MM</label>
                   <a type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
@@ -112,15 +154,17 @@
                   <textarea class="form-control" placeholder="prdctTrnsfr Details" formControlName="transfer_detail"
                      [ngClass]="{'validation':prdctTrnsfrForm.get('transfer_detail')?.errors && (prdctTrnsfrForm.get('transfer_detail')?.touched || prdctTrnsfrForm.get ('transfer_detail')?.dirty)}"></textarea>
                </div>
-            </div>
+            </div>            
 
 
 
             <div class="col-md-2 mb-3">
-               <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!this.isEdit"
+               <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!this.isEdit && !this.isVerify"
                   (click)="prdctTrnsfrFormSubmit()">Submit</button>
                <button class="btn btn-warning submit mx-3" type="submit" *ngIf="this.isEdit"
                   (click)="prdctTrnsfrFormUpdate()">Update</button>
+               <button class="btn btn-info submit mx-3" type="submit" *ngIf="isVerify"
+                  (click)="prdctTrnsfrFormUpdate()">Verify Aawak</button>
                <!-- <button class="btn btn-light submit" type="button" (click)="prdctTrnsfrForm.reset()">Clear</button> -->
             </div>
 

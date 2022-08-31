@@ -619,6 +619,23 @@ const point = {
 const product = {
     select:
         `select * from product ?`
+    , select_full_old:
+        `select product.*,
+        mm.mm_hin,mm.mm_eng,mm.mm_code, 
+        item.item_hin,item.item_eng,item.item_code,
+        subitem_list.subitem_hin,subitem_list.subitem_eng,
+        support_list.list_name_hin as condition_hin,support_list.list_name_eng as condition_eng,
+        lmm.mm_hin as last_mm_hin, lmm.mm_eng as last_mm_eng, lmm.mm_code as last_mm_code, 
+        lc.list_name_hin as last_condition_hin, lc.list_name_eng as last_condition_eng        
+        from product 
+        left join mm on mm._id = product.mm_id
+        left join mm lmm on lmm._id = product.last_mm
+        left join item on item._id = product.item_id
+        left join subitem on subitem._id = product.subitem_id
+        left join subitem_list on subitem_list._id = subitem.subitem_list_id
+        left join support_list on support_list._id = product.condition_id
+        left join support_list lc on lc._id = product.last_condition ?
+     limit @limit offset @offset`
     , select_full:
         `select product.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, 
@@ -626,8 +643,20 @@ const product = {
         subitem_list.subitem_hin,subitem_list.subitem_eng,
         support_list.list_name_hin as condition_hin,support_list.list_name_eng as condition_eng,
         lmm.mm_hin as last_mm_hin, lmm.mm_eng as last_mm_eng, lmm.mm_code as last_mm_code, 
-        lc.list_name_hin as last_condition_hin, lc.list_name_eng as last_condition_eng
+        lc.list_name_hin as last_condition_hin, lc.list_name_eng as last_condition_eng,
+        CASE WHEN pt._id IS NULL THEN json('[]') ELSE json_group_array(json_object('_id', pt._id, 'product_id', pt.product_id, 'date', pt.date, 'mm_id', pt.mm_id, 'mm_hin', pt.mm_hin, 'entry_type', pt.entry_type, 'aj_mm_id', pt.aj_mm_id, 'aj_mm_hin', pt.ajmm_hin, 'pkt_num', pt.pkt_num, 'nimitt_id', pt.nimitt_id, 'condition_id', pt.condition_id, 'condition_hin', pt.condition_hin, 'transfer_detail', pt.transfer_detail, 'hl', pt.hl )) END as tracking 
         from product 
+        left join (select product_tracking.*,
+            mm.mm_hin,mm.mm_eng,mm.mm_code, 
+            ajmm.mm_hin as ajmm_hin, ajmm.mm_eng as ajmm_eng, ajmm.mm_code as ajmm_code, 
+            support_list.list_name_hin as condition_hin,support_list.list_name_eng as condition_eng,
+            oc.list_name_hin as old_condition_hin, oc.list_name_eng as old_condition_eng
+            from product_tracking 
+            left join product pd on pd._id = product_tracking.product_id
+            left join mm on mm._id = product_tracking.mm_id
+            left join mm ajmm on ajmm._id = product_tracking.aj_mm_id
+            left join support_list on support_list._id = product_tracking.condition_id
+            left join support_list oc on oc._id = product_tracking.old_condition_id order by product_tracking.date desc, product_tracking.entry_type desc) pt on pt.product_id = product._id
         left join mm on mm._id = product.mm_id
         left join mm lmm on lmm._id = product.last_mm
         left join item on item._id = product.item_id
@@ -678,50 +707,40 @@ const product_tracking = {
     , select_full:
         `select product_tracking.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, 
-        ajmm.mm_hin as ajmm_hin, ajmm.mm_eng as ajmm_eng, ajmm.mm_code as ajmm_code, 
+        ajmm.mm_hin as aj_mm_hin, ajmm.mm_eng as aj_mm_eng, ajmm.mm_code as aj_mm_code, 
         support_list.list_name_hin as condition_hin,support_list.list_name_eng as condition_eng,
         oc.list_name_hin as old_condition_hin, oc.list_name_eng as old_condition_eng
         from product_tracking 
         left join product pd on pd._id = product_tracking.product_id
         left join mm on mm._id = product_tracking.mm_id
         left join mm ajmm on ajmm._id = product_tracking.aj_mm_id
-        left join item on item._id = product_tracking.item_id
         left join support_list on support_list._id = product_tracking.condition_id
-        left join support_list oc on oc._id = product_tracking.old_condition_id ? limit @limit offset @offset`
+        left join support_list oc on oc._id = product_tracking.old_condition_id ? limit @limit offset @offset`    
     , insert:
         `insert into product_tracking (
-        mm_id, purchased_by, purchase_date, item_id, subitem_id, unit_id, product_tracking_code, company_name,
-        model_name, sr_num, condition_id, price, product_tracking_detail, accessories, purchase_from,
-        warranty_period, dept_id, warranty_from, document, isbill, active)
+        product_id, date, mm_id, entry_type, aj_mm_id, pkt_num, nimitt_id, old_condition_id,
+        condition_id, transfer_detail, repairing_ref, active)
     values (
-        @mm_id, @purchased_by, @purchase_date, @item_id, @subitem_id, @unit_id, @product_tracking_code, @company_name,
-        @model_name, @sr_num, @condition_id, @price, @product_tracking_detail, @accessories, @purchase_from,
-        @warranty_period, @dept_id, @warranty_from, @document, @isbill, @active)`
+        @product_id, @date, @mm_id, @entry_type, @aj_mm_id, @pkt_num, @nimitt_id, @old_condition_id,
+        @condition_id, @transfer_detail, @repairing_ref, @active)`
     , update:
         `update product_tracking set 
+        product_id=@product_id,
+        date=@date,
         mm_id=@mm_id,
-        purchased_by=@purchased_by,
-        purchase_date=@purchase_date,
-        item_id=@item_id,
-        subitem_id=@subitem_id,
-        unit_id=@unit_id,
-        product_tracking_code=@product_tracking_code,
-        company_name=@company_name,
-        model_name=@model_name,
-        sr_num=@sr_num,
+        entry_type=@entry_type,
+        aj_mm_id=@aj_mm_id,
+        pkt_num=@pkt_num,
+        nimitt_id=@nimitt_id,
+        old_condition_id=@old_condition_id,
         condition_id=@condition_id,
-        price=@price,
-        product_tracking_detail=@product_tracking_detail,
-        accessories=@accessories,
-        purchase_from=@purchase_from,
-        warranty_period=@warranty_period,
-        dept_id=@dept_id,
-        warranty_from=@warranty_from,
-        document=@document,
-        isbill=@isbill,
+        transfer_detail=@transfer_detail,
+        repairing_ref=@repairing_ref,
+        hl=@hl,
+        active=@active,
         updated_at=datetime('now','localtime')`
     , order:
-        `purchase_date, mm.mm_hin, mm.mm_eng, item_hin, item_eng, subitem_hin, subitem_eng`
+        `date, pkt_num`
 }
 
 const state = {
@@ -1058,5 +1077,5 @@ genDeptDB = {
 
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, product_tracking
 };

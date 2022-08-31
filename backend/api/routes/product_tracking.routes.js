@@ -79,11 +79,9 @@ router.post('/:dept_id', async (req, res, next) => {
 // update product_tracking
 router.put('/', async (req, res, next) => {
     try {
-        if (req.body.set && req.body.query) {
-            req.body.set.document = req.body.set.document ? JSON.stringify(req.body.set.document) : null;
-            req.body.set.isbill = req.body.set.isbill ? 1 : 0;
+        if (req.body.set && req.body.query) {            
+            req.body.set.hl = req.body.set.hl ? 1 : 0;
             await DB.update('product_tracking', req.body.set, req.body.query._id).then(async (data) => {
-                data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
                 res.json({
                     success: true,
                     result: data || {}

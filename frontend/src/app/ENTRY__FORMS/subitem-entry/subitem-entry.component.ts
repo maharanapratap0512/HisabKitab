@@ -45,8 +45,6 @@ export class SubitemEntryComponent implements OnInit {
   ) {
     this.subitemForm = this.fb.group({
       subitem_list_id: [null],
-      subitem_hin: [null, Validators.required],
-      subitem_eng: [null, Validators.required],
       unit_id: [null],
       item_id: [null, Validators.required],
       categories: [[], Validators.required],
@@ -78,73 +76,7 @@ export class SubitemEntryComponent implements OnInit {
       });
       this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0] : null;
     }
-  }
-
-  selectSubitemHin(item: any) {
-    // do something with selected item  
-    if (item) {
-      this.subitemForm.patchValue({
-        subitem_list_id: item._id,
-        subitem_hin: item.subitem_hin,
-        subitem_eng: item.subitem_eng,
-      });
-    }
-    else {
-      this.subitemForm.patchValue({
-        subitem_list_id: null,
-        subitem_hin: null,
-        subitem_eng: null,
-      });
-    }
-
-  }
-
-  searchSubitemHin(search: string) {
-    if (search) {
-      this.subitemForm.patchValue({
-        subitem_list_id: null,
-        subitem_hin: search
-      });
-    } else {
-      this.subitemForm.patchValue({
-        subitem_list_id: null,
-        subitem_eng: null
-      });
-    }
-  }
-
-  selectSubitemEng(item: any) {
-    // do something with selected item  
-    if (item) {
-      this.subitemForm.patchValue({
-        subitem_list_id: item._id,
-        subitem_hin: item.subitem_hin,
-        subitem_eng: item.subitem_eng,
-      });
-    }
-    else {
-      this.subitemForm.patchValue({
-        subitem_list_id: null,
-        subitem_hin: null,
-        subitem_eng: null,
-      });
-    }
-
-  }
-
-  searchSubitemEng(search: string) {
-    if (search) {
-      this.subitemForm.patchValue({
-        subitem_list_id: null,
-        subitem_eng: search
-      });
-    } else {
-      this.subitemForm.patchValue({
-        subitem_list_id: null,
-        subitem_eng: null
-      });
-    }
-  }
+  }  
 
   subitemFormSubmit() {
     if (this.subitemForm.valid) {

@@ -61,56 +61,107 @@
                            <th style="width:110px;" *ngIf="settings.nimitt_id">Nimitt</th>
                         </tr>
                      </thead>
-                     <tbody>
-                        <tr *ngFor="let data of productData | filter:term; let i=index">
-                           <td>{{i+1}}</td>
-                           <td>
-                              <div class="d-flex justify-content-between mb-1">
-                                 <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
-                                       class="uil uil-pen"></i></button>
-                                 <button class="btn btn-sm btn-danger mx-1" type="button"
-                                    (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
-                              </div>
-                              <div class="d-flex justify-content-between mb-1">
-                                 <button class="btn btn-sm btn-warning" type="button" (click)="addJawak(data)"><i
-                                       class="mdi mdi-plus noti-icon"></i></button>
-                                 <!-- <button class="btn btn-sm btn-danger mx-1" type="button" (click)="delete(i,data._id)"><i
+                     <tbody class="accordion" id="accordionExample">
+                        <ng-container class="accordion-item"
+                           *ngFor="let data of productData | filter:term; let i=index">
+                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
+                              [attr.aria-controls]="'#collapse-' + i" class="main-row">
+                              <td>{{i+1}}</td>
+                              <td>
+                                 <div class="d-flex justify-content-between mb-1">
+                                    <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
+                                          class="uil uil-pen"></i></button>
+                                    <button class="btn btn-sm btn-danger mx-1" type="button"
+                                       (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
+                                 </div>
+                                 <div class="d-flex justify-content-between mb-1">
+                                    <button *ngIf="!data.tracking[data.tracking.length-1].hl"
+                                       class="btn btn-sm btn-warning" type="button" (click)="addJawak(data)"><i
+                                          class="mdi mdi-plus noti-icon"></i></button>
+                                    <button *ngIf="data.tracking[data.tracking.length-1].hl"
+                                       class="btn btn-sm btn-outline-info" type="button"
+                                       (click)="verifyAawak(data.tracking[data.tracking.length-1])">Verify
+                                       Aawak</button>
+                                    <!-- <button class="btn btn-sm btn-danger mx-1" type="button" (click)="delete(i,data._id)"><i
                                        class="uil-trash"></i></button> -->
-                              </div>
-                           </td>
-                           <ng-container (click)="rowDetail(data)">
-                              <td *ngIf="settings.document">
+                                 </div>
+                              </td>
+                              <ng-container (click)="rowDetail(data)">
+                                 <td *ngIf="settings.document">
 
-                                 <img *ngIf="data.document && data.document.images"
-                                    [src]="baseurl + data.document.images[0]" height="60px">
-                              </td>
-                              <td class="text-success">
-                                 {{data.last_mm_hin ? data.last_mm_hin : ''}} <br />
-                                 {{data.last_condition_hin ? data.last_condition_hin : ''}} <br />
-                                 {{data.last_date ? data.last_date : ''}}
-                              </td>
-                              <td>{{data.purchase_date}}</td>
-                              <td>{{data.mm_id?data.mm_hin:''}} <br /> {{data.mm_eng ? data.mm_eng:'-'}}</td>
-                              <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}} <br />
-                                 {{data.subitem_id? data.subitem_hin + ' : ' + data.subitem_eng:''}}</td>
-                              <td *ngIf="settings.company_name">{{data.company_name}} <br /> {{data.model_name}}</td>
-                              <td>{{data.sr_num}} <br /> {{data.product_code}}</td>
-                              <td>{{data.price}}</td>
-                              <td>{{data.condition_id ? data.condition_hin: ''}}<br />
-                                 {{data.condition_id ? data.condition_eng:''}}</td>
-                              <td *ngIf="settings.warranty_period || settings.warranty_from">
-                                 {{data.warranty_period ? data.warranty_period + 'M' : ''}} <br />
-                                 {{data.warranty_from ? 'From : ' + data.warranty_from : ""}}
-                              </td>
-                              <td *ngIf="settings.purchased_by || settings.purchase_from">
-                                 {{data.purchased_by ? 'By : ' + data.purchased_by : ""}}<br />
-                                 {{data.purchase_from ? 'From : ' + data.purchase_from : ""}}
-                              </td>
-                              <td *ngIf="settings.product_detail">{{data.product_detail}}</td>
-                              <td *ngIf="settings.accessories">{{data.accessories}}</td>
-                              <td *ngIf="settings.nimitt_id">{{data.nimitt_hin}}</td>
+                                    <img *ngIf="data.document && data.document.images"
+                                       [src]="baseurl + data.document.images[0]" height="60px">
+                                 </td>
+                                 <td class="text-success">
+                                    {{data.last_mm_hin ? data.last_mm_hin : ''}} <br />
+                                    {{data.last_condition_hin ? data.last_condition_hin : ''}} <br />
+                                    {{data.last_date ? data.last_date : ''}}
+                                 </td>
+                                 <td>{{data.purchase_date}}</td>
+                                 <td>{{data.mm_id?data.mm_hin:''}} <br /> {{data.mm_eng ? data.mm_eng:'-'}}</td>
+                                 <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}} <br />
+                                    {{data.subitem_id? data.subitem_hin + ' : ' + data.subitem_eng:''}}</td>
+                                 <td *ngIf="settings.company_name">{{data.company_name}} <br /> {{data.model_name}}</td>
+                                 <td>{{data.sr_num}} <br /> {{data.product_code}}</td>
+                                 <td>{{data.price}}</td>
+                                 <td>{{data.condition_id ? data.condition_hin: ''}}<br />
+                                    {{data.condition_id ? data.condition_eng:''}}</td>
+                                 <td *ngIf="settings.warranty_period || settings.warranty_from">
+                                    {{data.warranty_period ? data.warranty_period + 'M' : ''}} <br />
+                                    {{data.warranty_from ? 'From : ' + data.warranty_from : ""}}
+                                 </td>
+                                 <td *ngIf="settings.purchased_by || settings.purchase_from">
+                                    {{data.purchased_by ? 'By : ' + data.purchased_by : ""}}<br />
+                                    {{data.purchase_from ? 'From : ' + data.purchase_from : ""}}
+                                 </td>
+                                 <td *ngIf="settings.product_detail">{{data.product_detail}}</td>
+                                 <td *ngIf="settings.accessories">{{data.accessories}}</td>
+                                 <td *ngIf="settings.nimitt_id">{{data.nimitt_hin}}</td>
+                              </ng-container>
+                           </tr>
+                           <ng-container *ngIf="data.tracking.length > 0">
+                              <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse ribbon-box"
+                                 aria-labelledby="headingOne">
+                                 <td style="border: none;"></td>
+                                 <td colspan="10" class="sub-row">
+                                    <table class="card-body" style="width: 99.7%;table-layout: fixed;">
+                                       <tr>
+                                          <th>No.</th>
+                                          <th>Date</th>
+                                          <th>Pkt Num</th>
+                                          <th>कहा से कहा</th>
+                                          <th>किसको दिया</th>
+                                          <th>Condition</th>
+                                          <th>Transfer Detail</th>
+                                          <th style="width:0px;">
+                                             <div class="ribbon ribbon-secondary text-light float-end"> Trace Record
+                                             </div>
+                                          </th>
+                                       </tr>
+                                       <tr *ngFor="let trk of data.tracking; let j = index;"
+                                          [ngClass]="{'awk_row':trk.entry_type=='awk', 'jwk_row':trk.entry_type=='jwk'}">
+                                          <td style="width: 80px;">
+                                             <i class="uil-corner-down-right"></i>
+                                             <span class="mx-1">{{j+1}}</span>
+                                             <a *ngIf="j == data.tracking.length-1"
+                                                (click)="deleteTracking(trk._id, i, j)" class="mx-1 text-danger"
+                                                style="cursor: pointer;"><i class="uil uil-trash"></i></a>
+                                          </td>
+                                          <td>{{trk.date}}</td>
+                                          <td>{{trk.pkt_num ? trk.pkt_num : ''}}</td>
+                                          <td>{{trk.mm_hin}} {{trk.entry_type == 'jwk' ? ' --> ' : '<--'}}
+                                                {{trk.aj_mm_hin}}</td>
+                                          <td>{{trk.nimitt_id ? trk.nimitt_id : ''}}</td>
+                                          <!-- <td>{{trk.nimitt_id}} {{trk.nimitt_state_hin ?
+                                             "("+trk.nimitt_state_hin+")":''}}</td> -->
+                                          <td>{{trk.condition_hin}}</td>
+                                          <td>{{trk.transfer_detail}}</td>
+                                       </tr>
+                                    </table>
+                                 </td>
+                              </tr>
                            </ng-container>
-                        </tr>
+                        </ng-container>
                      </tbody>
                   </table>
                </div>
@@ -138,8 +189,12 @@
                (response)='addJawakResponse($event)'>
             </app-product-transfer-entry>
 
-            <app-product-entry *ngIf="showModal == 'Edit Product'" (response)='editProductResponse($event)'
-               [getData]="editData" [isEdit]="true"></app-product-entry>
+            <app-product-transfer-entry *ngIf="showModal == 'Verify Aawak'" [isVerify]="true" [getData]="editData"
+               (response)='verifyAawakResponse($event)'>
+            </app-product-transfer-entry>
+
+            <app-product-entry *ngIf="showModal == 'Add Product'" (response)='addProductResponse($event)'>
+            </app-product-entry>
 
             <app-product-entry *ngIf="showModal == 'Edit Product'" (response)='editProductResponse($event)'
                [getData]="editData" [isEdit]="true"></app-product-entry>

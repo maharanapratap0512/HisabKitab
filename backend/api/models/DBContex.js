@@ -130,7 +130,7 @@ class DBContex {
                 obj.active = dept_id == 1 ? 1 : 0;
 
                 // console.log("insert",result);
-                // console.log("insert obj_______", obj);
+                console.log("insert obj_______", obj);
                 console.log("sql", this.query[tblname].insert);
                 const result = this.db.prepare(this.query[tblname].insert).run(obj);
 
@@ -198,8 +198,9 @@ class DBContex {
                 sql += ` where ${tblname}._id = ${id} `
                 obj.active = obj.active ? 1 : 0;
 
-                const result = await this.db.prepare(sql).run(obj);
                 console.log("updt obj_____", obj);
+                console.log("updt obj_____", sql);
+                const result = this.db.prepare(sql).run(obj);
                 console.log("updt result_____", result);
 
                 let getres = {};
@@ -252,7 +253,7 @@ class DBContex {
                 const result = await this.db.prepare(`delete from ${tblname} where _id = ${id} `).run();
                 return resolve(result);
             }
-            catch (err) { reject(err) }
+            catch (err) { console.log(err);reject(err) }
         })
     }
 

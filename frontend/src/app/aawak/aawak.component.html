@@ -16,7 +16,7 @@
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
                         <button class="btn btn-primary w-100" (click)="openModal('Add Aawak')">
-                           <i class="dripicons-plus h4 icon-mx-2"> </i>Add Aawak
+                           <i class="dripicons-plus h4 icon-mx-2"> </i> Aawak
                         </button>
                      </div>
                      <div class="col-3">
@@ -26,7 +26,7 @@
                         </div>
                      </div>
                      <div class="col-2">
-                        <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse"
+                        <button class="btn btn-outline-info w-100" type="button" data-bs-toggle="collapse"
                            data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i
                               class="uil-search-plus h4 icon-mx-2"></i> Advance Search
                         </button>
@@ -50,10 +50,18 @@
                            style="font-weight: 700 !important;">
                            <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                         </button>
-                        <button class="btn btn-success mx-3" style="font-weight: 700 !important;"
+
+                        <button type="button" class="btn btn-outline-success dropdown-toggle mx-2" data-bs-toggle="dropdown"
+                           aria-expanded="false"> Export To Excel </button>
+                        <div class="dropdown-menu">
+                           <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
+                           <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
+                           <a class="dropdown-item" (click)="exportJawakData()">Jawak Only</a>
+                        </div>
+                        <!-- <button class="btn btn-success mx-3" style="font-weight: 700 !important;"
                            (click)="exportAJdataData()">
                            <i class=" uil-top-arrow-from-top"></i> Export Aawak
-                        </button>
+                        </button> -->
                      </div>
 
                      <div class="col-2">
@@ -278,7 +286,7 @@
             </div>
 
             <div class="row" *ngIf="aawakData.length">
-               <pagination-controls class="pagi text-end" (pageChange)="getaawakData(page = $event)" [autoHide]="true">
+               <pagination-controls class="pagi text-end" (pageChange)="getAawakPage(page = $event)" [autoHide]="true">
                </pagination-controls>
                <div class="card-body" style="overflow: auto;">
                   <table id="datatable-buttons" class="table table-hover dt-responsive" #TABLE>
@@ -371,7 +379,7 @@
                               </td>
                               <td *ngIf="settings.aawak.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
                               <td *ngIf="settings.aawak.isbill">{{data.isbill ? 'हाँ' : 'नहीं'}} </td>
-                              <td *ngIf="settings.aawak.document">                                 
+                              <td *ngIf="settings.aawak.document">
                                  <img *ngIf="data.document && data.document.images"
                                     [src]="baseurl + data.document.images[0]" height="50px"
                                     style="border-radius: 10px;">

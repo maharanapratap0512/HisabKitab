@@ -35,6 +35,7 @@ export class AawakComponent implements OnInit {
   aawakAll: any = [];
   total_count: any = 0;
   allAJData: any = [];
+  awkCount:any = 0;
   mms: any = [];
   viewData: any = [];
   items: any = [];
@@ -177,6 +178,13 @@ export class AawakComponent implements OnInit {
     });
   }
 
+  getAawakPage(page:any = null){
+    if(page){
+      this.pageNo = page;
+      this.getFilteredAawakData();
+    }
+  }
+
   getFilteredAawakData(pageNo: any = null) {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
@@ -199,7 +207,7 @@ export class AawakComponent implements OnInit {
     return jawakArray;
   }
 
-  exportAJdataData() {
+  exportAJData() {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
     this.pageNo = 0;
@@ -291,6 +299,122 @@ export class AawakComponent implements OnInit {
         console.log(this.allAJData);
 
         this.export(this.allAJData);
+        this.isLoader = false;
+      }
+    });
+  }
+  
+  exportAawakData() {
+    this.isLoader = true;
+    this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
+    this.pageNo = 0;
+    this.allAJData = [];
+    this.exportAJdata$ = new Subject();
+
+    this.getMoreAJ();
+
+    this.exportAJdata$.subscribe(async (result: any) => {
+      // console.log("exportAJdata", result);
+      for (let i = 0; i < result.length; i++) {        
+        let awkObj: any = {
+          'No': i + 1,
+          'Date': result[i].date ? result[i].date : '-',
+          'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
+          'MM': result[i].mm_hin,
+          'Aawak MM': result[i].aawak_mm_id ? result[i].aawak_mm_hin : '-',
+        };
+        if (this.settings.aawak.pbk_id) {
+          awkObj['Roll No'] = result[i].roll_no ? result[i].roll_no : '-';
+          awkObj.Pbk = result[i].pbk_hin ? result[i].pbk_hin : '-';
+          awkObj.Relation = result[i].relation ? result[i].relation : '-';
+          awkObj.Relative = result[i].relative_name ? result[i].relative_name : '-';
+        }
+
+        let cat = '';
+        let item = this.gs.Lists.itemmix.find((it: { _id: any; }) => it._id == result[i].item_id);
+        if (item) {
+          if (result[i].subitem_id) {
+            let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
+            if (subitem) {
+              cat = subitem.categories_hin.join(', ');
+            } else {
+              cat = item.categories_hin.join(', ');
+            }
+          }
+          else {
+            cat = item.categories_hin.join(', ');
+          }
+        }
+        awkObj = {
+          ...awkObj,
+          'Category': cat,
+          'Item': result[i].item_id ? result[i].item_hin : '-',
+          'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
+          'Company': result[i].company_name ? result[i].company_name : '-',
+          'Condition': result[i].condition_id ? result[i].condition_hin : '-',
+          'Bill': result[i].isbill ? 'है' : '-',
+          'Qty': result[i].qty ? result[i].qty : '-',
+          'Unit': result[i].unit_id ? result[i].unit_short : '-',
+          'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
+          'Aawak Type': result[i].aawak_type_id ? result[i].aawak_type_hin : '-',
+          'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
+          'Description': result[i].description ? result[i].description : '-',
+          // 'बचत':result[i].remaining_qty ? result[i].remaining_qty : 0,      
+        };
+        this.allAJData.push(awkObj);
+      }
+
+      if (this.allAJData.length < this.total_count) {
+        this.getMoreAJ();
+      }
+      else {
+        let date = new Date();;
+        this.excelExportService.exportAsExcelFile(this.allAJData, "Aawak_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+        this.isLoader = false;
+      }
+    });
+  }
+  exportJawakData() {
+    this.isLoader = true;
+    this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
+    this.pageNo = 0;   
+    this.awkCount = 0; 
+    this.allAJData = [];
+    this.exportAJdata$ = new Subject();
+
+    this.getMoreAJ();
+
+    this.exportAJdata$.subscribe(async (result: any) => {
+      for (let i = 0; i < result.length; i++) {   
+        
+        let awkObj = {
+          'Item': result[i].item_id ? result[i].item_hin : '-',
+          'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
+          'Company': result[i].company_name ? result[i].company_name : '-',
+        };
+
+        for (let j in result[i].jawak_detail) {
+          this.allAJData.push({
+            'Date': result[i].jawak_detail[j].date ? result[i].jawak_detail[j].date : '-',
+            'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
+            ...awkObj,
+            'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
+            'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
+            'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
+            'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
+            'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+            'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-'
+          });
+        }   
+      }
+      this.awkCount += result.length;                         
+
+      if (this.awkCount < this.total_count) {
+        this.getMoreAJ();
+      }
+      else {
+        let date = new Date();
+        this.excelExportService.exportAsExcelFile(this.allAJData, "Jawak_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
         this.isLoader = false;
       }
     });
