@@ -663,8 +663,7 @@ const product = {
         left join subitem on subitem._id = product.subitem_id
         left join subitem_list on subitem_list._id = subitem.subitem_list_id
         left join support_list on support_list._id = product.condition_id
-        left join support_list lc on lc._id = product.last_condition ?
-     limit @limit offset @offset`
+        left join support_list lc on lc._id = product.last_condition ? group by product._id # limit @limit offset @offset`
     , insert:
         `insert into product (
         mm_id, purchased_by, purchase_date, item_id, subitem_id, unit_id, product_code, company_name,

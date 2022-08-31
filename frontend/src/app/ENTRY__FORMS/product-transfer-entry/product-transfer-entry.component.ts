@@ -43,7 +43,7 @@ export class ProductTransferEntryComponent implements OnInit {
   ) {
     this.prdctTrnsfrForm = this.fb.group({
       product_id: [null, Validators.required],
-      date: [null, Validators.required],
+      date: [null, Validators.required,],
       mm_id: [null, Validators.required],
       entry_type: [null, Validators.required],
       aj_mm_id: [null],
@@ -80,7 +80,21 @@ export class ProductTransferEntryComponent implements OnInit {
     if (changes.productData && changes.productData.currentValue) {
       this.productData = changes.productData.currentValue;
       console.log(this.productData);
-
+      this.prdctTrnsfrForm = this.fb.group({
+        product_id: [null, Validators.required],
+        date: [null, Validators.required,],
+        mm_id: [null, Validators.required],
+        entry_type: [null, Validators.required],
+        aj_mm_id: [null, Validators.required],
+        pkt_num: [null],
+        condition_id: [null, Validators.required],
+        nimitt_id: [null],
+        old_condition_id: [null],
+        transfer_detail: [null],
+        repairing_ref: [null],
+        dept_id: this.auth.webUser.dept_id,
+        hl: false
+      }, { validator: this.verifyDate('date') });
       if (this.productData._id) {
         this.prdctTrnsfrForm.patchValue({
           product_id: this.productData._id,
@@ -108,10 +122,27 @@ export class ProductTransferEntryComponent implements OnInit {
         hl: changes.getData.currentValue.hl ? changes.getData.currentValue.hl : false,
       });
       console.log(this.prdctTrnsfrForm.value);
-      
+
     }
     if (changes.isVerify && changes.isVerify.currentValue) {
-      this.isVerify = changes.isVerify.currentValue;      
+      this.isVerify = changes.isVerify.currentValue;
+    }
+  }
+
+  verifyDate(date: string) {
+    return (group: FormGroup): { [key: string]: any } => {
+      let fdate = group.controls[date];
+      if (this.productData.last_date && fdate.value < this.productData.last_date) {
+        return {
+          date: "must > " + this.productData.last_date
+        };
+      }
+      else if (this.productData.purchase_date && fdate.value < this.productData.purchase_date) {
+        return {
+          date: "must > " + this.productData.purchase_date
+        };
+      }
+      return {};
     }
   }
 
@@ -150,7 +181,7 @@ export class ProductTransferEntryComponent implements OnInit {
       });
     }
     else {
-      console.log(this.prdctTrnsfrForm.value);
+      console.log(this.prdctTrnsfrForm);
 
       this.gs.validationFireOnSubmit(this.prdctTrnsfrForm);
     }
@@ -196,7 +227,7 @@ export class ProductTransferEntryComponent implements OnInit {
     }
     else {
       console.log(this.prdctTrnsfrForm);
-      
+
       this.gs.validationFireOnSubmit(this.prdctTrnsfrForm);
     }
   }

@@ -33,7 +33,7 @@ export class ProductEntryComponent implements OnInit {
   items: any = [];
   itemAll: any = [];
   units: any = [];
-  nimitts:any = [];
+  nimitts: any = [];
   cat: any = null;
   categories: any = [];
   categoryAll: any = [];
@@ -68,7 +68,7 @@ export class ProductEntryComponent implements OnInit {
       dept_id: [this.auth.webUser.dept_id],
       accessories: [null],
       nimitt_id: [null],
-      isbill:false
+      isbill: false
     });
     this.settings = this.auth.webUser.settings;
   }
@@ -90,13 +90,13 @@ export class ProductEntryComponent implements OnInit {
   ngOnChanges(changes: SimpleChanges) {
     console.log("product-changes", changes);
     if (changes.isEdit && changes.isEdit.currentValue) {
-			this.gs.observeList().subscribe(result => {
-				this.items = result.itemmix ? result.itemmix : [];
-				this.nimitts = result.nimitt ? result.nimitt : [];
-				this.conditions = result.condition ? result.condition : [];
-				this.categories = result.category ? result.category : [];
-			});
-		}
+      this.gs.observeList().subscribe(result => {
+        this.items = result.itemmix ? result.itemmix : [];
+        this.nimitts = result.nimitt ? result.nimitt : [];
+        this.conditions = result.condition ? result.condition : [];
+        this.categories = result.category ? result.category : [];
+      });
+    }
     if (changes.getData && changes.getData.currentValue) {
       this.getData = changes.getData.currentValue;
       this.productForm.patchValue({
@@ -133,7 +133,7 @@ export class ProductEntryComponent implements OnInit {
       this.imagepath = ev.path;
       this.productForm.patchValue({
         document: { images: [ev.path] }
-      });      
+      });
       this.isLoader = false;
     }
     else {
@@ -212,7 +212,7 @@ export class ProductEntryComponent implements OnInit {
         isbill: this.productForm.value.isbill
       };
       // console.log("body", body);
-      
+
       this.http.put(this.api.getUrl('PRODUCT'), body).subscribe((data: any) => {
         if (data && data['success']) {
           this.productForm.reset();
@@ -335,35 +335,32 @@ export class ProductEntryComponent implements OnInit {
     this.productForm.patchValue({
       item_id: null,
       subitem_id: null,
-      unit_id:null
+      unit_id: null
 
     });
   }
 
   itemSelected(ev: any) {
     if (ev) {
-      let item = this.items.find((i: { _id: any; }) => i._id == ev);      
-      let category_ids = this.categories.map((c: { _id: any; }) => c._id);
-
-      this.productForm.patchValue({
-        unit_id: item.unit_id,
-        subitem_id: null
-      });
+      let item = this.items.find((i: { _id: any; }) => i._id == ev);
+      console.log("item", item);
 
       if (this.cat) {
-        this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
+        this.subitems = item.subitems.filter((s: { categories: any; }) => s.categories.includes(this.cat));
       }
       else {
-        this.subitems = item.subitems.filter(((s: { category_id: any; }) => category_ids.includes(s.category_id)));
+        this.subitems = item.subitems;
       }
 
-      if (this.subitems.length > 0 && (!category_ids.includes(item.category_id) || (this.cat && this.cat != item.category_id))) {
+      if (this.cat && !item.categories.includes(this.cat)) {
+        // this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
         this.productForm.patchValue({
           subitem_id: this.subitems[0]._id
         });
-        this.subitemSelected(this.subitems[0]._id);
       }
-      
+      this.productForm.patchValue({
+        unit_id: item.unit_id
+      })
     }
     else {
       this.subitems = [];
@@ -379,12 +376,12 @@ export class ProductEntryComponent implements OnInit {
       let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
       this.productForm.patchValue({
         unit_id: subitem.unit_id
-      });
+      })
     }
     else {
       
     }
-  }
+  }  
 
   getItemData(ev: any) {
     this.http.put(this.api.getUrl('ITEMMIX') + ev, {}).subscribe((data: any) => {

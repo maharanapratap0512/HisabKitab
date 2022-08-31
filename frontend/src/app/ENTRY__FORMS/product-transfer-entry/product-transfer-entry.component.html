@@ -27,7 +27,10 @@
                         <h5>
                            <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">MM </span>
                            <span class="font-12">
-                              {{productData.last_mm_hin ? productData.last_mm_hin : (productData.mm_hin ? productData.mm_hin : '')}}
+                              {{productData.last_mm_hin ? productData.last_mm_hin : (productData.mm_hin ?
+                              productData.mm_hin : '')}} <br />
+                              {{productData.last_date ? productData.last_date : (productData.purchase_date ?
+                              productData.purchase_date : '')}}
                            </span>
                         </h5>
                      </div>
@@ -37,7 +40,8 @@
                         <h5>
                            <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Condition </span>
                            <span class="font-12">
-                              {{productData.last_condition_hin ? productData.last_condition_hin : (productData.condition_hin ? productData.condition_hin : '')}}
+                              {{productData.last_condition_hin ? productData.last_condition_hin :
+                              (productData.condition_hin ? productData.condition_hin : '')}}
                            </span>
                         </h5>
                      </div>
@@ -84,7 +88,8 @@
                <div class="form-group">
                   <label class="form-label">Date</label>
                   <input type="date" class="form-control" placeholder="Date" formControlName="date"
-                     [ngClass]="{'validation':prdctTrnsfrForm.get('date')?.errors && (prdctTrnsfrForm.get('date')?.touched || prdctTrnsfrForm.get ('date')?.dirty)}">
+                     [ngClass]="{'validation':prdctTrnsfrForm.get('date')?.errors && (prdctTrnsfrForm.get('date')?.touched || prdctTrnsfrForm.get ('date')?.dirty) || (prdctTrnsfrForm.errors && prdctTrnsfrForm.errors.date) }">
+                  <span *ngIf="prdctTrnsfrForm.errors && prdctTrnsfrForm.errors.date" class="label-error">{{prdctTrnsfrForm.errors.date}}</span>
                </div>
             </div>
 
@@ -154,7 +159,7 @@
                   <textarea class="form-control" placeholder="prdctTrnsfr Details" formControlName="transfer_detail"
                      [ngClass]="{'validation':prdctTrnsfrForm.get('transfer_detail')?.errors && (prdctTrnsfrForm.get('transfer_detail')?.touched || prdctTrnsfrForm.get ('transfer_detail')?.dirty)}"></textarea>
                </div>
-            </div>            
+            </div>
 
 
 

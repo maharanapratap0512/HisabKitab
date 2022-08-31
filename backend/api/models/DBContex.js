@@ -74,7 +74,7 @@ class DBContex {
 
 
                 if (this.tbl_need_dept_config.includes(tblname)) {
-                    conditionQuery = (!options.dept_id || options.dept_id == 1) ? null : ` ${tblname}._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='${tblname}')`;                    
+                    conditionQuery = (!options.dept_id || options.dept_id == 1) ? null : ` ${tblname}._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='${tblname}')`;
                 }
                 else if (this.tbl_with_dept_id.includes(tblname)) {
                     conditionQuery = (options.dept_id ? `(${tblname}.dept_id = ${options.dept_id})` : null)
@@ -102,7 +102,7 @@ class DBContex {
                     sql = sql.replace('#', (order ? ` order by ${order}` : ``));
                     console.log(sql);
                 }
-                else if (["itemmix", "item", "subitem"].includes(tblname)) {
+                else if (["itemmix", "item", "subitem", "product"].includes(tblname)) {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : ''));
                     sql = sql.replace('#', (order ? ` order by ${order}` : ``));
                 }
@@ -152,10 +152,8 @@ class DBContex {
                         }
                     }
                     if (get) {
-                        let sql = this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${result.lastInsertRowid} `);
-                        // if (tblname == "mm") {
-                        //     console.log("get sql_______", sql);
-                        // }
+                        let sql = this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${result.lastInsertRowid} `).replace('#', ``);
+
                         getres = await this.db.prepare(sql).get({ order: `${tblname}._id`, limit: 1, offset: -1 });
                     }
                     else {
@@ -205,7 +203,7 @@ class DBContex {
 
                 let getres = {};
                 if (result.changes) {
-                    getres = await this.db.prepare(this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${id} `)).get({ limit: 1, offset: -1, order: `${tblname}._id` });
+                    getres = await this.db.prepare(this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${id} `).replace('#', ``)).get({ limit: 1, offset: -1, order: `${tblname}._id` });
                 }
                 // console.log("updt getres_____", getres);
                 resolve(getres)
@@ -253,7 +251,7 @@ class DBContex {
                 const result = await this.db.prepare(`delete from ${tblname} where _id = ${id} `).run();
                 return resolve(result);
             }
-            catch (err) { console.log(err);reject(err) }
+            catch (err) { console.log(err); reject(err) }
         })
     }
 
