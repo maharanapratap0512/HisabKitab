@@ -5495,8 +5495,10 @@ fieldset:disabled .btn {
 
 .card-footer {
    padding: .75rem 1.5rem;
-   background-color: #464f5b;
-   border-top: 1px solid #4d5662
+   background-color: #16263fb0;
+   border: 0.5px solid #404954;
+   /* background-color: #464f5b; */
+   /* border-top: 1px solid #4d5662 */
 }
 
 .card-footer:last-child {
@@ -22489,11 +22491,13 @@ Not supports in Firefox and IE */
    color: #525252;
 }
 
-.pagi .ngx-pagination a, .ngx-pagination button {
+.pagi .ngx-pagination a,
+.ngx-pagination button {
    color: #92a1ad;
 }
 
-.pagi .ngx-pagination a:hover, .ngx-pagination button:hover {
+.pagi .ngx-pagination a:hover,
+.ngx-pagination button:hover {
    background: #5d68cc99;
    color: #fff;
    transition: transform 0.2s ease;

@@ -12,6 +12,8 @@ import { FileSaverModule } from 'ngx-filesaver';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgtUniversalModule } from '@ng-toolkit/universal';
 import { DropDownTreeModule } from '@syncfusion/ej2-angular-dropdowns';
+import { GalleryModule } from "ng-gallery";
+import { LightboxModule } from "ng-gallery/lightbox"
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -135,7 +137,9 @@ import { ProductTransferEntryComponent } from './ENTRY__FORMS/product-transfer-e
     NgxSpinnerModule,
     NgtUniversalModule,
     NgxPaginationModule,
-    AutocompleteLibModule
+    AutocompleteLibModule,
+    GalleryModule,
+    LightboxModule
 
   ],
   providers: [GlobalService],

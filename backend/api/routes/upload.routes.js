@@ -136,9 +136,13 @@ router.put('/image', async (req, res) => {
       }
       //  console.log("WElcome");
       fs.readdir(folderPath, (err, files) => {
+         let docArr = [];
+         for (let i in files) {
+            docArr.push({ doc: files[i] })
+         }
          res.json({
             success: true,
-            result: files,
+            result: docArr,
             dirpath: 'public//' + req.body.type + '//',
          });
       });

@@ -80,11 +80,14 @@
                 <div class="col-md-2 mb-3">
                     <div class="form-group">
                         <label class="form-label">Image</label>
-                        <a onclick="$('#itemComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
-                            class="form-control" style="cursor: pointer;">
+                        <a onclick="$('#itemComponent > #showModal').modal('show')"
+                            (click)="showModal='Add Image';editDoc=this.itemForm.value.document" class="form-control"
+                            style="cursor: pointer;">
                             <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
-                            <img src="{{this.api.getUrl('BASE')+imagepath}}" alt="image" class="rounded m-1" height="48"
-                                *ngIf="imagepath">
+                            <ng-container *ngFor="let img of imagepath">
+                                <img src="{{this.api.getUrl('BASE')+img}}" alt="image" height="25" width="25"
+                                    *ngIf="imagepath" style="object-fit: cover;">
+                            </ng-container>
                             <i *ngIf="!imagepath">Click To Change</i>
                         </a>
                     </div>
@@ -122,7 +125,7 @@
 
                     <!-- Add Image -->
                     <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)"
-                        type="item">
+                        [getData]="editDoc" [isEdit]="true" type="item">
                     </app-files-view>
                 </div>
                 <div class="modal-footer">

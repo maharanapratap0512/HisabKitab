@@ -97,8 +97,9 @@
                                     (click)="protectionToggle(data._id, data.active)">
                                     <i *ngIf="[1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
                                        title="Protected" class="uil-shield-check text-warning"></i>
-                                    <i *ngIf="[1,6].includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
-                                       title="Unprotected" class="uil-shield-slash text-danger"></i>
+                                    <i *ngIf="[1,6].includes(auth.webUser.dept_id) && !data.active"
+                                       data-toggle="tooltip" title="Unprotected"
+                                       class="uil-shield-slash text-danger"></i>
                                  </span>
                               </td>
                               <td>
@@ -112,16 +113,20 @@
                                     *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active">
                                     <i class="uil-trash"></i>
                                  </button>
-                                 <span *ngIf="![1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
-                                    title="Protected" class="text-warning mx-1"
+                                 <span *ngIf="![1,6].includes(auth.webUser.dept_id) && data.active"
+                                    data-toggle="tooltip" title="Protected" class="text-warning mx-1"
                                     style="font-size: xx-large;cursor: pointer;position: absolute;line-height: 0px;">
                                     <i class="uil-shield-check"></i>
                                  </span>
                               </td>
                               <td>
-                                 <img *ngIf="data.document && data.document.images"
-                                    [src]="baseurl + data.document.images[0]" height="60px" alt="x"
-                                    style="padding: 5px; border-radius: 15px;">
+                                 <div class="d-flex flex-wrap" *ngIf="data.document && data.document.images" gallerize
+                                    style="position: relative;">
+                                    <img *ngFor=" let img of data.document.images" src="{{baseurl + img}}" height="20px"
+                                       width="20px" alt="image" style="object-fit: cover;">
+                                    <span class="badge bg-info"
+                                       style="position: absolute;left:75px;top:-10px;">{{data.document.images.length}}</span>
+                                 </div>
                               </td>
                               <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
                               <td>{{data.item_code?data.item_code:'-'}}</td>

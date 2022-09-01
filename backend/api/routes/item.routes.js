@@ -67,18 +67,19 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
         }
         await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id, conditionString: itemCondition, sconditionString: sitemCondition, limit: limit, offset: offset }).then((resolve) => {
             let subitem_count = 0;
-            // console.log("resolve", resolve);
-            // console.log("resolve.length", resolve.length);
             for (let i = 0; i < resolve.data.length; i++) {
-
                 resolve.data[i].subitems = ((resolve.data[i].subitems && resolve.data[i].subitems != "[null]") ? JSON.parse(resolve.data[i].subitems) : []);
                 resolve.data[i].document = ((resolve.data[i].document && resolve.data[i].document != "[null]") ? JSON.parse(resolve.data[i].document) : []);
                 resolve.data[i].categories = JSON.parse(resolve.data[i].categories)
                 resolve.data[i].categories_hin = JSON.parse(resolve.data[i].categories_hin)
                 // resolve.data[i].categories_eng = JSON.parse(resolve.data[i].categories_eng)
-
                 subitem_count += resolve.data[i].subitems.length;
+                
+                for (let j = 0; j < resolve.data[i].subitems.length; j++) {
+                    resolve.data[i].subitems[j].categories_hin = ((resolve.data[i].subitems[j].categories_hin && resolve.data[i].subitems[j].categories_hin != "[null]") ? JSON.parse(resolve.data[i].subitems[j].categories_hin) : []);
+                }
             }
+
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -86,7 +87,7 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
                 subitem_count: subitem_count
             });
         });
-    } catch (err) {  console.log(err);next(err) };
+    } catch (err) { console.log(err); next(err) };
 });
 
 // post item

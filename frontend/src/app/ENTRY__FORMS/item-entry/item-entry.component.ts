@@ -24,8 +24,10 @@ export class ItemEntryComponent implements OnInit {
   showModal: string = '';
   viewType: any;
   viewData: any = [];
-  imagepath: any;
-  settings:any = {};
+  imagepath: any = [];
+  settings: any = {};
+  editDoc: any = {};
+  docFile: any = [];
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -64,15 +66,16 @@ export class ItemEntryComponent implements OnInit {
         extra_note: changes.getData.currentValue.extra_note,
         document: changes.getData.currentValue.document ? changes.getData.currentValue.document : []
       });
-      this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0] : null;
+      this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images : null;
     }
+    console.log("this.itemForm.value.document", this.imagepath);
+
   }
 
   itemFormSubmit() {
     if (this.itemForm.valid) {
       this.isLoader = true;
       // console.log(this.itemForm.value);
-      
       this.http.post(this.api.getUrl('ITEM') + this.auth.webUser.dept_id, this.itemForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.gs.Lists.itemmix.unshift(data['result']);
@@ -141,7 +144,7 @@ export class ItemEntryComponent implements OnInit {
         {
           categories: [].concat(this.itemForm.value.categories, ev._id)
         });
-        
+
       this.isLoader = false;
     }
     else {
@@ -171,14 +174,21 @@ export class ItemEntryComponent implements OnInit {
   }
 
   imagesSelectResponse(ev: any) {
-    if (ev.path) {
+    console.log("imgres", ev);
+    if (ev) {
       this.isLoader = true;
       $('#itemComponent > #showModal').modal('hide');
       this.showModal = '';
-      this.imagepath = ev.path;
+      for (let i in ev) {
+        console.log("ev[i].path", ev[i].path);
+        this.docFile.push(ev[i].path)
+      }
+      console.log("docFile", this.docFile);
+
       this.itemForm.patchValue({
-        document: { images: [ev.path] }
+        document: { images: this.docFile }
       });
+      console.log(" this.itemForm", this.itemForm.value.document);
       this.isLoader = false;
     }
     else {
