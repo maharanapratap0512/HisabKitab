@@ -60,7 +60,7 @@ export class FilesViewComponent implements OnInit {
       //     break;
       // }
     }
-    if (changes.getData.currentValue) {
+    if (changes.getData && changes.getData.currentValue) {
       this.editDoc = changes.getData.currentValue
     }
   }
@@ -123,6 +123,8 @@ export class FilesViewComponent implements OnInit {
   // }
 
   imageSubmit() {
+    console.log(this.docForm.value.file);
+    
     this.response.emit(this.docForm.value.file);
     this.toastr.success("Images Selected Successfully.")
   }
@@ -162,18 +164,18 @@ export class FilesViewComponent implements OnInit {
 
   docArr(event: any, item: any) {
     const formArray: FormArray = this.docForm.get('file') as FormArray
-    var obj = {}
-    obj = {
-      path: this.imageFolder + event.target.value,
-      baseUrl: this.baseUrl
-    }
+    var obj = this.imageFolder + event.target.value;
+    // obj = {
+    //   path: this.imageFolder + event.target.value,
+    //   baseUrl: this.baseUrl
+    // }
     if (event.target.checked) {
       formArray.push(new FormControl(obj))
     }
     else {
       let i: number = 0
       formArray.controls.forEach((ctrl = new FormControl()) => {
-        if (ctrl.value.path == this.imageFolder + event.target.value) {
+        if (ctrl.value == this.imageFolder + event.target.value) {
           formArray.removeAt(i)
           return
         }
@@ -183,13 +185,16 @@ export class FilesViewComponent implements OnInit {
   }
 
   patchDocForm(data: any) {
-    const formArray: FormArray = this.docForm.get('file') as FormArray;
-    data.forEach((x: any) => {
-      formArray.push(this.fb.group({
-        path: x,
-        baseUrl: this.baseUrl
-      }));
-    });
+    if (data) {
+      const formArray: FormArray = this.docForm.get('file') as FormArray;
+      data.forEach((x: any) => {
+        formArray.push(new FormControl(x));
+        // formArray.push(this.fb.group({
+        //   path: x,
+        //   baseUrl: this.baseUrl
+        // }));
+      });
+    }
   }
 
 }

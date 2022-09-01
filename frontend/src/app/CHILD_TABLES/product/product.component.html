@@ -75,10 +75,12 @@
                                        (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
                                  </div>
                                  <div class="d-flex justify-content-between mb-1">
-                                    <button *ngIf="data.tracking.length < 1 || (data.tracking.length > 0 && !data.tracking[data.tracking.length-1].hl)"
+                                    <button
+                                       *ngIf="data.tracking.length < 1 || (data.tracking.length > 0 && !data.tracking[data.tracking.length-1].hl)"
                                        class="btn btn-sm btn-warning" type="button" (click)="addJawak(data)"><i
                                           class="mdi mdi-plus noti-icon"></i></button>
-                                    <button *ngIf="data.tracking.length > 0 &&  data.tracking[data.tracking.length-1].hl"
+                                    <button
+                                       *ngIf="data.tracking.length > 0 &&  data.tracking[data.tracking.length-1].hl"
                                        class="btn btn-sm btn-outline-info" type="button"
                                        (click)="verifyAawak(data.tracking[data.tracking.length-1])">Verify
                                        Aawak</button>
@@ -88,9 +90,11 @@
                               </td>
                               <ng-container (click)="rowDetail(data)">
                                  <td *ngIf="settings.document">
+                                    <div class="d-flex" *ngIf="data.document && data.document.images">
+                                       <img [src]="baseurl + data.document.images[0]" height="60px">
+                                       <span class="imageCount">x{{data.document.images.length}}</span>
 
-                                    <img *ngIf="data.document && data.document.images"
-                                       [src]="baseurl + data.document.images[0]" height="60px">
+                                    </div>
                                  </td>
                                  <td class="text-success">
                                     {{data.last_mm_hin ? data.last_mm_hin : data.mm_hin}} <br />

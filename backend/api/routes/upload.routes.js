@@ -142,6 +142,7 @@ router.put('/image', async (req, res) => {
          }
          res.json({
             success: true,
+            // result: files,
             result: docArr,
             dirpath: 'public//' + req.body.type + '//',
          });

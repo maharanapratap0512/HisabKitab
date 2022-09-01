@@ -99,11 +99,14 @@ export class ProductEntryComponent implements OnInit {
     }
     if (changes.getData && changes.getData.currentValue) {
       this.getData = changes.getData.currentValue;
+      console.log(this.getData);
+      
       this.productForm.patchValue({
         mm_id: changes.getData.currentValue.mm_id,
         purchased_by: changes.getData.currentValue.purchased_by,
         purchase_date: changes.getData.currentValue.purchase_date,
         item_id: changes.getData.currentValue.item_id,
+        unit_id: changes.getData.currentValue.unit_id,
         subitem_id: changes.getData.currentValue.subitem_id,
         product_code: changes.getData.currentValue.product_code,
         company_name: changes.getData.currentValue.company_name,
@@ -121,18 +124,18 @@ export class ProductEntryComponent implements OnInit {
         isbill: changes.getData.currentValue.isbill,
         nimitt_id: changes.getData.currentValue.nimitt_id
       });
-      this.imagepath = ((changes.getData.currentValue.document.images && changes.getData.currentValue.document.images.length > 0) ? changes.getData.currentValue.document.images[0] : null)
+      this.imagepath = (changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images : null)
     }
   }
 
   imagesSelectResponse(ev: any) {
-    if (ev.path) {
+    if (ev) {
       this.isLoader = true;
       $('#productEntryComponent > #addImages').modal('hide');
       this.showModal = '';
-      this.imagepath = ev.path;
+      this.imagepath = ev;
       this.productForm.patchValue({
-        document: { images: [ev.path] }
+        document: { images: ev }
       });
       this.isLoader = false;
     }
@@ -194,6 +197,7 @@ export class ProductEntryComponent implements OnInit {
         purchased_by: this.productForm.value.purchased_by,
         purchase_date: this.productForm.value.purchase_date,
         item_id: this.productForm.value.item_id,
+        unit_id: this.productForm.value.unit_id,
         subitem_id: this.productForm.value.subitem_id,
         product_code: this.productForm.value.product_code,
         company_name: this.productForm.value.company_name,

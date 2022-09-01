@@ -247,9 +247,11 @@
                   <a onclick="$('#productEntryComponent > #addImages').modal('show')" (click)="showModal='Add Image'"
                      class="form-control" style="cursor: pointer;">
                      <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
-                     <img src="{{this.api.getUrl('BASE')+imagepath}}" alt="image" class="rounded m-1" height="48"
-                        *ngIf="imagepath">
-                     <i *ngIf="!imagepath">Click To Change</i>
+                     <div *ngIf="imagepath && imagepath.length > 0">
+                        <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image" class="rounded m-1" height="48" /> 
+                        x {{imagepath.length}}
+                     </div>
+                     <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
                   </a>
                </div>
             </div>
@@ -291,7 +293,7 @@
             </div>
             <div class="modal-body">
                <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)"
-                  type="product">
+                  type="product" [getData]="productForm.value.document">
                </app-files-view>
             </div>
             <div class="modal-footer">
@@ -316,9 +318,9 @@
                <!-- Add MM -->
                <app-mm-entry *ngIf="showModal == 'Add MM'" (response)="mmAddResponse($event)"></app-mm-entry>
 
-               <!-- Add Category  -->
-               <!-- <app-category-entry *ngIf="showModal == 'Add Category'" (response)="categoryAddResponse($event)">
-               </app-category-entry> -->
+               <!-- add image
+               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)" type="product">
+               </app-files-view> -->
 
                <!-- Add Item  -->
                <app-item-entry *ngIf="showModal == 'Add Item'" (response)="itemAddResponse($event)"></app-item-entry>
