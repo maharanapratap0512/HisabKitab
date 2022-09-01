@@ -100,7 +100,7 @@ class DBContex {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : ''));
                     sql = sql.replace('&', (sconditionQuery ? ` AND ${sconditionQuery}` : ''));
                     sql = sql.replace('#', (order ? ` order by ${order}` : ``));
-                    console.log(sql);
+                    // console.log(sql);
                 }
                 else if (["itemmix", "item", "subitem", "product"].includes(tblname)) {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : ''));
@@ -116,7 +116,7 @@ class DBContex {
                 });
             }
             catch (err) {
-                console.log(err);
+                // console.log(err);
                 reject(err)
             }
         })
@@ -130,8 +130,8 @@ class DBContex {
                 obj.active = dept_id == 1 ? 1 : 0;
 
                 // console.log("insert",result);
-                console.log("insert obj_______", obj);
-                console.log("sql", this.query[tblname].insert);
+                // console.log("insert obj_______", obj);
+                // console.log("sql", this.query[tblname].insert);
                 const result = this.db.prepare(this.query[tblname].insert).run(obj);
 
                 let getres = [];
@@ -143,9 +143,9 @@ class DBContex {
                         let t = this.db.prepare(q).run(p);
                     }
                     else if (tblname == "support_list") {
-                        console.log("support_list");
+                        // console.log("support_list");
                         if (obj.list_type && this.tbl_from_supp_list.includes(obj.list_type)) {
-                            console.log("aj_type");
+                            // console.log("aj_type");
                             let q = this.query.department_config.update_config_value;
                             let p = { tblname: "aj_type", dept_id: dept_id, new_id: result.lastInsertRowid.toString() }
                             let t = this.db.prepare(q).run(p);
@@ -165,7 +165,7 @@ class DBContex {
                 resolve(getres);
             }
             catch (err) {
-                console.log("insert errr", err);
+                // console.log("insert errr", err);
                 reject(err)
             }
         })
@@ -196,8 +196,8 @@ class DBContex {
                 sql += ` where ${tblname}._id = ${id} `
                 obj.active = obj.active ? 1 : 0;
 
-                console.log("updt obj_____", obj);
-                console.log("updt obj_____", sql);
+                // console.log("updt obj_____", obj);
+                // console.log("updt obj_____", sql);
                 const result = this.db.prepare(sql).run(obj);
                 console.log("updt result_____", result);
 
@@ -209,7 +209,7 @@ class DBContex {
                 resolve(getres)
             }
             catch (err) {
-                console.log("err", err);
+                // console.log("err", err);
                 reject(err)
             }
         })
@@ -224,7 +224,7 @@ class DBContex {
                 obj.active = obj.active ? 1 : 0;
 
                 const result = await this.db.prepare(sql).run(obj);
-                console.log("updt result_____", result);
+                // console.log("updt result_____", result);
 
                 let getres = {};
                 if (result.changes && get) {
@@ -233,11 +233,11 @@ class DBContex {
                 else {
                     getres = result;
                 }
-                console.log("updt getres_____", getres);
+                // console.log("updt getres_____", getres);
                 resolve(getres)
             }
             catch (err) {
-                console.log("err", err);
+                // console.log("err", err);
                 reject(err)
             }
         });
@@ -285,13 +285,13 @@ class DBContex {
                 }
                 // console.log("sql count", sql);
                 if (tblname == 'itemmix') {
-                    console.log("sql", sql);
+                    // console.log("sql", sql);
                     // console.log("stmt", stmt);
                 }
                 const stmt = await this.db.prepare(sql).get();
                 if (tblname == 'itemmix') {
 
-                    console.log("stmt", stmt);
+                    // console.log("stmt", stmt);
                 }
                 resolve(stmt);
             }
@@ -305,16 +305,16 @@ class DBContex {
                 console.log("delete out", filepath);
                 this.fs.unlink(filepath, (err) => {
                     if (err) {
-                        console.log(err);
+                        // console.log(err);
                     }
-                    console.log("delete in", filepath);
+                    // console.log("delete in", filepath);
                     resolve();
                 });
 
             }
             catch (ex) {
                 reject(ex);
-                console.log(ex);
+                // console.log(ex);
             }
         })
     }
@@ -341,10 +341,10 @@ class DBContex {
                         exportDB.prepare(`attach '${this.path.resolve(this.DBFolder, 'Database.db')}' as mainDB;`).run();
 
                         for (let key of Object.keys(this.query.genDeptDB)) {
-                            console.log(key);
+                            // console.log(key);
                             if (key == "point") {
-                                console.log("point", exportDB.prepare(`select * from point`).all());
-                                console.log("this.query.genDeptDB[key]", this.query.genDeptDB[key]);
+                                // console.log("point", exportDB.prepare(`select * from point`).all());
+                                // console.log("this.query.genDeptDB[key]", this.query.genDeptDB[key]);
                             }
 
                             let result = exportDB.prepare(this.query.genDeptDB[key]).run({ dept_id: dept_id });

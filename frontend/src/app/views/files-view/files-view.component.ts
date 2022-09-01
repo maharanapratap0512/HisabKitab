@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2'
+declare var $: any;
 
 
 @Component({
@@ -22,10 +23,12 @@ export class FilesViewComponent implements OnInit {
   baseUrl: any;
   isLoader: any;
   renameFileName: any;
+  docForm: FormGroup;
   @Input() getData: any;
   @Input() type: any;
   @Input() isEdit: any;
   @Output() response = new EventEmitter();
+  editDoc: any = [];
 
   constructor(
     private fb: FormBuilder,
@@ -35,10 +38,14 @@ export class FilesViewComponent implements OnInit {
     private gs: GlobalService,
     private spinner: NgxSpinnerService
   ) {
-
+    this.docForm = new FormGroup({
+      file: new FormArray([])
+    })
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    // console.log("changes.getData.currentValue_________", changes.getData.currentValue);
+
     if (changes.type) {
       this.type = changes.type.currentValue;
       this.baseUrl = this.api.getUrl('BASE');
@@ -53,6 +60,9 @@ export class FilesViewComponent implements OnInit {
       //     break;
       // }
     }
+    if (changes.getData.currentValue) {
+      this.editDoc = changes.getData.currentValue
+    }
   }
 
   ngOnInit(): void {
@@ -65,9 +75,25 @@ export class FilesViewComponent implements OnInit {
     this.http.put(this.api.getUrl('IMAGE'), { type: this.type }).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.imageName = data['result'];
+        // this.imageName.map((x: { isChecked: boolean; }) => (x.isChecked = false))
+        // console.log("be4 ischecked imageName", this.imageName);
+        this.patchDocForm(this.editDoc.images)
+        for (let j in this.editDoc.images) {
+          // console.log("this.editDoc", this.editDoc);
+          let str = this.editDoc.images[j].toString().split('//');
+          // console.log("str[str.length - 1]", str[str.length - 1]);
+          for (let i in this.imageName) {
+            // console.log("imgnm", this.imageName[i].doc);
+            if (this.imageName[i].doc == str[str.length - 1]) {
+              this.imageName[i].isChecked = true;
+              // console.log("match");
+            }
+          }
+        }
         this.imageFolder = data['dirpath'];
         this.isLoader = false;
       }
+      // console.log("ischecked imageName", this.imageName);
       this.isLoader = false;
     });
   }
@@ -75,7 +101,6 @@ export class FilesViewComponent implements OnInit {
   changeDocument(event: any): void {
     // this.doctfile = event.target.files[0];
     const formData = new FormData();
-
     formData.append('type', this.type);
     formData.append('image', event.target.files[0]);
     this.http.postFormData(this.api.getUrl(this.apiName), formData).subscribe((data: any) => {
@@ -92,13 +117,14 @@ export class FilesViewComponent implements OnInit {
   }
 
 
-  imageClicked(path: any) {
-    this.selectedImges.push({ path: this.imageFolder + path, baseUrl: this.baseUrl })
-    // console.log("this.selectedImges", this.selectedImges);
-  }
+  // imageClicked(path: any) {
+  //   this.selectedImges.push({ path: this.imageFolder + path, baseUrl: this.baseUrl })
+  //   console.log("this.selectedImges", this.selectedImges);
+  // }
 
   imageSubmit() {
-    this.response.emit(this.selectedImges);
+    this.response.emit(this.docForm.value.file);
+    this.toastr.success("Images Selected Successfully.")
   }
 
   imageDelete(name: any) {
@@ -119,7 +145,7 @@ export class FilesViewComponent implements OnInit {
         this.isLoader = true
         this.http.delete(this.api.getUrl(this.apiName), body).subscribe((data: any) => {
           if (data['success'] && data['result']) {
-            this.toastr.success("IMAGE deleted Successfully.")
+            this.toastr.success("Image Deleted Successfully.")
             this.imageName.splice(this.imageName.indexOf(name), 1);
             this.isLoader = false
           }
@@ -131,6 +157,39 @@ export class FilesViewComponent implements OnInit {
       }
     })
 
+  }
+
+
+  docArr(event: any, item: any) {
+    const formArray: FormArray = this.docForm.get('file') as FormArray
+    var obj = {}
+    obj = {
+      path: this.imageFolder + event.target.value,
+      baseUrl: this.baseUrl
+    }
+    if (event.target.checked) {
+      formArray.push(new FormControl(obj))
+    }
+    else {
+      let i: number = 0
+      formArray.controls.forEach((ctrl = new FormControl()) => {
+        if (ctrl.value.path == this.imageFolder + event.target.value) {
+          formArray.removeAt(i)
+          return
+        }
+        i++;
+      })
+    }
+  }
+
+  patchDocForm(data: any) {
+    const formArray: FormArray = this.docForm.get('file') as FormArray;
+    data.forEach((x: any) => {
+      formArray.push(this.fb.group({
+        path: x,
+        baseUrl: this.baseUrl
+      }));
+    });
   }
 
 }

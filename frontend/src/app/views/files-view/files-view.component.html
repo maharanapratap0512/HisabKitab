@@ -17,22 +17,32 @@
                 </div>
             </div>
 
-            <div class="col-md-2 mb-3" *ngFor="let file of imageName">
+            <div class="col-md-2 mb-3" *ngFor="let file of imageName;let i =index">
                 <div class="container">
-                    <img [src]="baseUrl+imageFolder+file" alt="image" />
-                    <p class="title">{{file}}</p>
+                    <img [src]="baseUrl+imageFolder+file.doc" alt="image" />
+                    <p class="title">{{file.doc}}</p>
                     <div class="overlay"></div>
-                    <div class="close btn btn-sm btn-outline-danger" (click)="imageDelete(file)">
+                    <div class="close btn btn-sm btn-outline-danger" (click)="imageDelete(file.doc)">
                         <i class="mdi mdi-trash-can-outline"></i>
                     </div>
-                    <div class="button btn btn-sm btn-outline-success" (click)="imageClicked(file)">
+                    <!--<div class="button btn btn-sm btn-outline-success" (click)="imageClicked(file)">
                         <i class="mdi mdi-check"></i>
+                    </div> -->
+                </div>
+
+                <div class="card-footer" style="padding: .25rem 1.5rem;">
+                    <div [formGroup]="docForm" class="form-check form-checkbox-success">
+                        <input type="checkbox" class="form-check-input" [id]="i" value="{{file.doc}}"
+                            (change)="docArr($event,file.doc)" formArrayName="file"
+                            [attr.checked]="file.isChecked ? true : null">
+                        <!-- <label class="form-check-label" for="customCheckcolor2">Success Checkbox</label> -->
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3">
-                <button class   ="btn btn-primary" type="submit" (click)="imageSubmit()">Submit</button>
+            <div class="col-md-2 d-flex align-items-center">
+                <button class="btn btn-primary" style="width: 100%;" type="submit"
+                    (click)="imageSubmit()">Submit</button>
             </div>
         </div>
     </div>
