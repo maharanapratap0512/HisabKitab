@@ -656,7 +656,7 @@ const product = {
             left join mm on mm._id = product_tracking.mm_id
             left join mm ajmm on ajmm._id = product_tracking.aj_mm_id
             left join support_list on support_list._id = product_tracking.condition_id
-            left join support_list oc on oc._id = product_tracking.old_condition_id order by product_tracking.date desc, product_tracking.entry_type desc) pt on pt.product_id = product._id
+            left join support_list oc on oc._id = product_tracking.old_condition_id) pt on pt.product_id = product._id
         left join mm on mm._id = product.mm_id
         left join mm lmm on lmm._id = product.last_mm
         left join item on item._id = product.item_id

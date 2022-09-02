@@ -106,7 +106,7 @@ export class FilesViewComponent implements OnInit {
     this.http.postFormData(this.api.getUrl(this.apiName), formData).subscribe((data: any) => {
       if (data) {
         this.toastr.success("IMAGE added successully.")
-        this.imageName.unshift(data['file'].split('\\').at(-1));
+        this.imageName.unshift({doc:data['file'].split('\\').at(-1), isChecked: false});
       }
       else {
         this.toastr.error(data['message']);
