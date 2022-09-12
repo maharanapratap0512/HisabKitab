@@ -78,8 +78,7 @@
                            <tbody class="accordion" id="accordionExample">
                               <ng-container class="accordion-item"
                                  *ngFor="let data of bachatData | filter:termBachat; let i=index">
-                                 <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i"
-                                    aria-expanded="true" [attr.aria-controls]="'#collapse-' + i" class="main-row">
+                                 <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true" [attr.aria-controls]="'#collapse-' + i" class="main-row">
                                     <td>{{i+1}}</td>
                                     <td>
                                        {{data.mm_hin}}<br />

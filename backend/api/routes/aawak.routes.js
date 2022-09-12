@@ -123,9 +123,6 @@ router.get('/pending/:dept_id', async (req, res, next) => {
 router.put('/pending/:dept_id', async (req, res, next) => {
     let conditionString = `remaining_qty <> 0 ${req.body.mm_id ? ` AND aawak.mm_id = ${req.body.mm_id}` : ``} `;
 
-
-
-
     await DB.getList("aawak", { full: true, dept_id: req.params.dept_id, conditionString: conditionString }).then(async (resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
@@ -152,13 +149,16 @@ router.put('/pending/:dept_id', async (req, res, next) => {
 router.put('/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = 100, offset = null, page = 1;
     let conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month}'` : ``} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.aawak_mm_id && req.body.aawak_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aawak_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = ${req.body.pkt_num}` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``}`;
-    if (conditionString.trim() == `1=1`) {
+    if(req.body.orderBy){
+        orderBy = req.body.orderBy;
+    }
+    else if (conditionString.trim() == `1=1`) {
         orderBy = "aawak._id desc";
     }
     if (req.body.pageNo && req.body.pageNo > 0) {
         offset = (req.body.pageNo - 1) * limit;
         page = req.body.pageNo;
-    }
+    }    
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
     await DB.getList('aawak', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then(async (resolve) => {
         for (let i in resolve.data) {

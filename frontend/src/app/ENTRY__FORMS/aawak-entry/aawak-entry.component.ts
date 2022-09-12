@@ -278,7 +278,7 @@ export class AawakEntryComponent implements OnInit {
 	}
 
 	closeModal() {
-		// this.showModal = name;
+		// this.showModal = '';
 		$('#aawakEntryComponent > #showModal').modal('hide')
 	}
 
@@ -667,6 +667,10 @@ export class AawakEntryComponent implements OnInit {
 		this.isCondition = true;
 		let product = this.products.find((p: { _id: any; }) => p._id == ev);
 		this.awkfg.condition_id = product ? product.condition_id : null;
+		this.awkfg.qty = 1;
+		this.awkfg.unit_id = 1;
+		this.awkfg.rate = product.price ? product.price : null;
+		this.rateclick();
 	}
 
 	deptSelected(ev: any) {
@@ -706,10 +710,10 @@ export class AawakEntryComponent implements OnInit {
 			let body = {
 				item_id: item_id
 			}
-			this.http.put(this.api.getUrl('PRODUCT') + this.selDept_id, body).subscribe((data: any) => {
+			this.http.put(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, body).subscribe((data: any) => {
 				if (data['result']) {
-					this.productsAll = data['result'];
-					this.products = this.productsAll;
+					// this.productsAll = data['result'];
+					this.products = data['result'];
 				}
 			});
 		}

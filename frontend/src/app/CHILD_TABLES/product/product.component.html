@@ -40,14 +40,14 @@
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
-                           <th style="width:80px;">No.</th>
-                           <th style="width:120px;">Manage</th>
+                           <th style="width:60px;">No.</th>
+                           <th style="width:110px;">Manage</th>
                            <th *ngIf="settings.document" style="width: 120px;">Document</th>
-                           <th style="width: 180px;" class="text-success">Current Status</th>
+                           <th style="width: 160px;" class="text-success">Current Status</th>
                            <th *ngIf="settings.purchase_date" style="width:101px;">Purchase Date</th>
                            <th style="width:150px;">Mm</th>
                            <th style="width:180px;">Item - Subitem</th>
-                           <th *ngIf="settings.company_name" style="width:110px;">Company - Model</th>
+                           <th *ngIf="settings.company_name" style="width:150px;">Company - Model</th>
                            <th style="width:180px;">S/R - P. Code</th>
                            <th style="width:100px;">Price</th>
                            <th style="width:100px;">Condition</th>
@@ -64,107 +64,55 @@
                      <tbody class="accordion" id="accordionExample">
                         <ng-container class="accordion-item"
                            *ngFor="let data of productData | filter:term; let i=index">
-                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
-                              [attr.aria-controls]="'#collapse-' + i" class="main-row">
+                           <!-- <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
+                              [attr.aria-controls]="'#collapse-' + i" class="main-row"> -->
+                           <tr>
                               <td>{{i+1}}</td>
                               <td>
                                  <div class="d-flex justify-content-between mb-1">
                                     <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
                                           class="uil uil-pen"></i></button>
-                                    <button class="btn btn-sm btn-danger mx-1" type="button"
+                                    <button class="btn btn-sm btn-danger ml-1" type="button"
                                        (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
                                  </div>
                                  <div class="d-flex justify-content-between mb-1">
-                                    <button
-                                       *ngIf="data.tracking.length < 1 || (data.tracking.length > 0 && !data.tracking[data.tracking.length-1].hl)"
-                                       class="btn btn-sm btn-warning" type="button" (click)="addJawak(data)"><i
-                                          class="mdi mdi-plus noti-icon"></i></button>
-                                    <button
-                                       *ngIf="data.tracking.length > 0 &&  data.tracking[data.tracking.length-1].hl"
-                                       class="btn btn-sm btn-outline-info" type="button"
-                                       (click)="verifyAawak(data.tracking[data.tracking.length-1])">Verify
-                                       Aawak</button>
-                                    <!-- <button class="btn btn-sm btn-danger mx-1" type="button" (click)="delete(i,data._id)"><i
-                                       class="uil-trash"></i></button> -->
+                                    <button class="btn btn-sm btn-outline-info w-100" type="button"
+                                       (click)="viewProduct(data)"><i class="dripicons-view-list mx-1"></i>View</button>                                    
                                  </div>
                               </td>
-                              <ng-container (click)="rowDetail(data)">
-                                 <td *ngIf="settings.document">
-                                    <div class="d-flex" *ngIf="data.document && data.document.images">
-                                       <img [src]="baseurl + data.document.images[0]" height="60px">
-                                       <span class="imageCount">x{{data.document.images.length}}</span>
+                              <td *ngIf="settings.document">
+                                 <div class="d-flex" *ngIf="data.document && data.document.images">
+                                    <img [src]="baseurl + data.document.images[0]" height="60px">
+                                    <span class="imageCount">x{{data.document.images.length}}</span>
 
-                                    </div>
-                                 </td>
-                                 <td class="text-success">
-                                    {{data.last_mm_hin ? data.last_mm_hin : data.mm_hin}} <br />
-                                    {{data.last_condition_hin ? data.last_condition_hin : data.condition_hin}} <br />
-                                    {{data.last_date ? data.last_date : data.purchase_date}}
-                                 </td>
-                                 <td>{{data.purchase_date}}</td>
-                                 <td>{{data.mm_id?data.mm_hin:''}} <br /> {{data.mm_eng ? data.mm_eng:'-'}}</td>
-                                 <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}} <br />
-                                    {{data.subitem_id? data.subitem_hin + ' : ' + data.subitem_eng:''}}</td>
-                                 <td *ngIf="settings.company_name">{{data.company_name}} <br /> {{data.model_name}}</td>
-                                 <td>{{data.sr_num}} <br /> {{data.product_code}}</td>
-                                 <td>{{data.price}}</td>
-                                 <td>{{data.condition_id ? data.condition_hin: ''}}<br />
-                                    {{data.condition_id ? data.condition_eng:''}}</td>
-                                 <td *ngIf="settings.warranty_period || settings.warranty_from">
-                                    {{data.warranty_period ? data.warranty_period + 'M' : ''}} <br />
-                                    {{data.warranty_from ? 'From : ' + data.warranty_from : ""}}
-                                 </td>
-                                 <td *ngIf="settings.purchased_by || settings.purchase_from">
-                                    {{data.purchased_by ? 'By : ' + data.purchased_by : ""}}<br />
-                                    {{data.purchase_from ? 'From : ' + data.purchase_from : ""}}
-                                 </td>
-                                 <td *ngIf="settings.product_detail">{{data.product_detail}}</td>
-                                 <td *ngIf="settings.accessories">{{data.accessories}}</td>
-                                 <td *ngIf="settings.nimitt_id">{{data.nimitt_hin}}</td>
-                              </ng-container>
+                                 </div>
+                              </td>
+                              <td class="text-success">
+                                 {{data.last_mm_hin ? data.last_mm_hin : data.mm_hin}} <br />
+                                 {{data.last_condition_hin ? data.last_condition_hin : data.condition_hin}} <br />
+                                 {{data.last_date ? data.last_date : data.purchase_date}}
+                              </td>
+                              <td>{{data.purchase_date}}</td>
+                              <td>{{data.mm_id?data.mm_hin:''}} <br /> {{data.mm_eng ? data.mm_eng:'-'}}</td>
+                              <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}} <br />
+                                 {{data.subitem_id? data.subitem_hin + ' : ' + data.subitem_eng:''}}</td>
+                              <td *ngIf="settings.company_name">{{data.company_name}} <br /> {{data.model_name}}</td>
+                              <td>{{data.sr_num}} <br /> {{data.product_code}}</td>
+                              <td>{{data.price}}</td>
+                              <td>{{data.condition_id ? data.condition_hin: ''}}<br />
+                                 {{data.condition_id ? data.condition_eng:''}}</td>
+                              <td *ngIf="settings.warranty_period || settings.warranty_from">
+                                 {{data.warranty_period ? data.warranty_period + 'M' : ''}} <br />
+                                 {{data.warranty_from ? 'From : ' + data.warranty_from : ""}}
+                              </td>
+                              <td *ngIf="settings.purchased_by || settings.purchase_from">
+                                 {{data.purchased_by ? 'By : ' + data.purchased_by : ""}}<br />
+                                 {{data.purchase_from ? 'From : ' + data.purchase_from : ""}}
+                              </td>
+                              <td *ngIf="settings.product_detail">{{data.product_detail}}</td>
+                              <td *ngIf="settings.accessories">{{data.accessories}}</td>
+                              <td *ngIf="settings.nimitt_id">{{data.nimitt_hin}}</td>
                            </tr>
-                           <ng-container *ngIf="data.tracking.length > 0">
-                              <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse ribbon-box"
-                                 aria-labelledby="headingOne">
-                                 <td style="border: none;"></td>
-                                 <td colspan="10" class="sub-row">
-                                    <table class="card-body" style="width: 99.7%;table-layout: fixed;">
-                                       <tr>
-                                          <th>No.</th>
-                                          <th>Date</th>
-                                          <th>Pkt Num</th>
-                                          <th>कहा से कहा</th>
-                                          <th>किसको दिया</th>
-                                          <th>Condition</th>
-                                          <th>Transfer Detail</th>
-                                          <th style="width:0px;">
-                                             <div class="ribbon ribbon-secondary text-light float-end"> Trace Record
-                                             </div>
-                                          </th>
-                                       </tr>
-                                       <tr *ngFor="let trk of data.tracking; let j = index;"
-                                          [ngClass]="{'awk_row':trk.entry_type=='awk', 'jwk_row':trk.entry_type=='jwk'}">
-                                          <td style="width: 80px;">
-                                             <i class="uil-corner-down-right"></i>
-                                             <span class="mx-1">{{j+1}}</span>
-                                             <a *ngIf="j == data.tracking.length-1"
-                                                (click)="deleteTracking(trk._id, i, j)" class="mx-1 text-danger"
-                                                style="cursor: pointer;"><i class="uil uil-trash"></i></a>
-                                          </td>
-                                          <td>{{trk.date}}</td>
-                                          <td>{{trk.pkt_num ? trk.pkt_num : ''}}</td>
-                                          <td>{{trk.mm_hin}} {{trk.entry_type == 'jwk' ? ' --> ' : '<--'}}
-                                                {{trk.aj_mm_hin}}</td>
-                                          <td>{{trk.nimitt_id ? trk.nimitt_id : ''}}</td>
-                                          <!-- <td>{{trk.nimitt_id}} {{trk.nimitt_state_hin ?
-                                             "("+trk.nimitt_state_hin+")":''}}</td> -->
-                                          <td>{{trk.condition_hin}}</td>
-                                          <td>{{trk.transfer_detail}}</td>
-                                       </tr>
-                                    </table>
-                                 </td>
-                              </tr>
-                           </ng-container>
                         </ng-container>
                      </tbody>
                   </table>
@@ -189,13 +137,6 @@
             <button type="button" (click)="closeModal()" class="btn-close" aria-label="Close"></button>
          </div>
          <div class="modal-body">
-            <app-product-transfer-entry *ngIf="showModal == 'Add Jawak'" [productData]="viewProduct"
-               (response)='addJawakResponse($event)'>
-            </app-product-transfer-entry>
-
-            <app-product-transfer-entry *ngIf="showModal == 'Verify Aawak'" [isVerify]="true" [getData]="editData"
-               (response)='verifyAawakResponse($event)'>
-            </app-product-transfer-entry>
 
             <app-product-entry *ngIf="showModal == 'Add Product'" (response)='addProductResponse($event)'>
             </app-product-entry>
@@ -203,7 +144,7 @@
             <app-product-entry *ngIf="showModal == 'Edit Product'" (response)='editProductResponse($event)'
                [getData]="editData" [isEdit]="true"></app-product-entry>
 
-            <app-product-view *ngIf="showModal == 'View Product'" [getData]="viewProduct"></app-product-view>
+            <app-product-view *ngIf="showModal == 'View Product'" [getData]="editData"></app-product-view>
 
          </div>
          <div class="modal-footer">

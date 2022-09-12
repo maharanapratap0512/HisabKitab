@@ -99,6 +99,8 @@ router.post('/:dept_id', async (req, res, next) => {
             await DB.insert('item', req.body, req.params.dept_id).then((data) => {
                 data.document = data.document ? JSON.parse(data.document) : [];
                 data.categories = data.categories ? JSON.parse(data.categories) : [];
+                data.categories_hin = data.categories_hin ? JSON.parse(data.categories_hin) : [];
+                data.subitems = data.subitems ? JSON.parse(data.subitems) : [];
                 res.json({
                     success: true,
                     result: data || {}
@@ -122,6 +124,7 @@ router.put('/', async (req, res, next) => {
                 data.document = data.document ? JSON.parse(data.document) : [];
                 data.categories = data.categories ? JSON.parse(data.categories) : [];
                 data.categories_hin = data.categories_hin ? JSON.parse(data.categories_hin) : [];
+                data.subitems = data.subitems ? JSON.parse(data.subitems) : [];
                 res.json({
                     success: true,
                     result: data || {}

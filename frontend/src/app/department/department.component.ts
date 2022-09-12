@@ -65,6 +65,7 @@ export class DepartmentComponent implements OnInit {
   pbkTotal: any;
   getItem$ = new Subject();
   itemTotal: any;
+  settings: any = {}
 
   constructor(
     private fb: FormBuilder,
@@ -74,7 +75,9 @@ export class DepartmentComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService
-  ) { }
+  ) {
+    this.settings = this.auth.webUser.settings
+  }
 
   ngOnInit(): void {
     // this.settingsAll.push({
@@ -93,10 +96,11 @@ export class DepartmentComponent implements OnInit {
       this.genders = result.gender ? result.gender : [];
       this.statuses = result.status ? result.status : [];
     });
+    this.deptSelected(this.auth.webUser.dept_id);
     this.settingsAll = {
       pbk: {
         visible: false,
-        add:false,
+        add: false,
         roll_no: false,
         pbk_hin: true,
         pbk_eng: false,
@@ -117,7 +121,7 @@ export class DepartmentComponent implements OnInit {
       },
       nimitt: {
         visible: false,
-        add:false,
+        add: false,
       },
       product: {
         visible: false,
@@ -153,7 +157,7 @@ export class DepartmentComponent implements OnInit {
         nimitt_id: false,
         item_id: true,
         subitem_id: true,
-        company_name:false,
+        company_name: false,
         filter_by_dept: false,
         filter_by_cat: false,
         product_id: false,
@@ -166,7 +170,7 @@ export class DepartmentComponent implements OnInit {
         item_detail: false,
         description: false,
         isbill: false,
-        document:false,
+        document: false,
         jawak: {
           visible: false,
           jawak_mm_id: true,
@@ -201,23 +205,23 @@ export class DepartmentComponent implements OnInit {
       },
       category: {
         visible: false,
-        add:false,
+        add: false,
       },
       item: {
         visible: false,
-        add:false,
+        add: false,
       },
       mm: {
         visible: false,
-        add:false,
+        add: false,
       },
       city: {
         visible: false,
-        add:false,
+        add: false,
       },
       department: {
         visible: false,
-        add:false,
+        add: false,
       },
       point: {
         visible: false
@@ -239,38 +243,35 @@ export class DepartmentComponent implements OnInit {
   }
 
   deptSelected(ev: any) {
+    let getdept = this.auth.webUser.dept_id;
     if (ev) {
-      this.isLoader = true;
-      this.http.get(this.api.getUrl('DEPTCONFIG') + ev).subscribe((data) => {
-        if (data['result'] && data['success']) {
-          for (let i of data['result']) {
-            this.deptConf[i.config_key] = i;
-            if (i.config_key == "settings") {
-              this.applySettings(i.config_value);
-            }
+      getdept = ev;
+    }
+
+    this.isLoader = true;
+    this.http.get(this.api.getUrl('DEPTCONFIG') + getdept).subscribe((data) => {
+      if (data['result'] && data['success']) {
+        for (let i of data['result']) {
+          this.deptConf[i.config_key] = i;
+          if (i.config_key == "settings") {
+            this.applySettings(i.config_value);
           }
-          this.loadPBK();
-          if (this.dept_id > 1) {
-            this.loadMM();
-            this.loadCategory();
-            // this.loadItems();
-            this.loadItemMix();
-            // this.loadSubitems();
-            this.loadAJTypes();
-            this.loadDepartment();
-
-          }
-
-          // console.log(this.deptConf);
-
-          this.isLoader = false;
         }
+        if (this.dept_id) {
+          this.loadPBK();
+          this.loadMM();
+          this.loadAJTypes();
+          this.loadDepartment();
+        }
+        this.loadCategory();
+        this.loadItemMix();
+        // console.log(this.deptConf);
+
         this.isLoader = false;
-      });
-    }
-    else {
-      this.deptConf = {};
-    }
+      }
+      this.isLoader = false;
+    });
+
   }
 
   importZip = async (ev: any) => {
@@ -515,7 +516,7 @@ export class DepartmentComponent implements OnInit {
 
 
   cancel() {
-    this.deptSelected(this.dept_id);
+    this.deptSelected(this.dept_id ? this.dept_id : this.auth.webUser.dept_id);
   }
 
   downloadDB() {
@@ -998,6 +999,33 @@ export class DepartmentComponent implements OnInit {
     });
     this.toastr.success("Updated Settings downloaded for '" + dept.dept_eng + "'");
     this.isLoader = false;
+  }
+
+  exportLists = async () => {
+    this.isLoader = true;
+    this.dataZip = new JSZip();
+
+    this.http.get(this.api.getUrl('IMPORTEXPORT') + 'update_lists/' + this.dept_id).subscribe((data) => {
+      if (data['result'] && data['success']) {
+        for (let key of Object.keys(data['result'])) {
+          this.dataZip.file(key + ".json", JSON.stringify(data['result'][key].data ? data['result'][key].data : data['result'][key]));
+        }
+        let date = new Date();
+        let dept = this.departments.find((d: { _id: any; }) => d._id == this.dept_id);
+
+        this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
+          FileSaver.saveAs(content, dept.dept_eng + "_updated_lists_" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + ".zip");
+        });
+        this.toastr.success("Updated Lists downloaded for '" + dept.dept_eng + "'");
+        this.isLoader = false;
+      }
+      else {
+        this.toastr.warning("Lists not found");
+      }
+    }, err => {
+      this.toastr.error(err['error']);
+      this.isLoader = false;
+    });
   }
 
   saveDeptSettings() {

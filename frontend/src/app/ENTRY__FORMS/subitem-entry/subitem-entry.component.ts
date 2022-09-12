@@ -76,7 +76,7 @@ export class SubitemEntryComponent implements OnInit {
       });
       this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0] : null;
     }
-  }  
+  }
 
   subitemFormSubmit() {
     if (this.subitemForm.valid) {
@@ -87,7 +87,7 @@ export class SubitemEntryComponent implements OnInit {
           let i = this.gs.Lists.itemmix.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
           this.gs.Lists.itemmix[i].subitems.push(data['result']);
           // this.gs.Lists.itemmix[i].categories.push(data['result'].categories);
-          this.subitemForm.reset();
+          this.subitemForm.reset({ item_id: data['result'].item_id });
           this.isLoader = false;
           this.toastr.success('SUBITEM added successfully.')
           this.response.emit(data['result']);

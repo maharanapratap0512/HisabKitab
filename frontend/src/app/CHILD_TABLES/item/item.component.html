@@ -75,7 +75,7 @@
                      <thead>
                         <tr>
                            <th style="width: 50px;">No.</th>
-                           <th style="width: 160px;">Manage</th>
+                           <th style="width: 210px;">Manage</th>
                            <th style="width: 100px;">Image</th>
                            <th style="width: 250px;">Item Name (Hin-Eng)</th>
                            <th style="width: 180px;">Item Code</th>
@@ -87,9 +87,9 @@
                      <tbody class="accordion" id="accordionExample">
                         <ng-container class="accordion-item"
                            *ngFor="let data of itemData | filter:term| paginate: {itemsPerPage: itemsPerPage,currentPage: page,totalItems: total_count}; let i=index; ">
-                           <!-- <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
-                              [attr.aria-controls]="'#collapse-' + i" class="item-row"> -->
-                           <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
+                              [attr.aria-controls]="'#collapse-' + i" class="main-row">
+                           <!-- <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row"> -->
                               <td style="font-size: large;">
                                  {{itemsPerPage * (page - 1) + (i+1)}}
                                  <span class="mx-1"
@@ -105,6 +105,8 @@
                               <td>
                                  <button class="btn btn-sm btn-outline-success" type="button"
                                     (click)="addSubitem(data)"><i class="uil uil-plus"></i></button>
+                                 <button class="btn btn-sm btn-outline-info ml-1" type="button"
+                                    (click)="cloneWithSubitem(data)"><i class="uil uil-copy"></i></button>
                                  <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"
                                     *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active">
                                     <i class="uil uil-pen"></i>
@@ -150,7 +152,7 @@
                            </tr> -->
                            <ng-container *ngFor="let si of data.subitems ;let j=index">
                               <ng-container *ngIf="si">
-                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show"
+                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse"
                                     *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
                                     <td style="border: none;"></td>
                                     <td colspan="6" class="sub-row">
@@ -219,7 +221,6 @@
             </div>
 
             <h2 class="text-center m-5" *ngIf="!itemData.length">No Data!</h2>
-
          </div>
       </div>
    </div>
@@ -246,10 +247,17 @@
             </app-subitem-entry>
             <app-subitem-entry *ngIf="showModal == 'Add Subitem From Item'" (response)='addSubitemResponse($event)'
                [getData]="editData"></app-subitem-entry>
+            <app-item-entry *ngIf="showModal == 'Clone Item'" (response)='cloneItemResponse($event)'
+               [getData]="editData"></app-item-entry>
             <app-subitem-entry *ngIf="showModal == 'Edit Subitem'" (response)='editSubitemResponse($event)'
                [getData]="editData" [isEdit]="true"></app-subitem-entry>
          </div>
          <div class="modal-footer">
+            <div class="form-check form-switch">
+               <input type="checkbox" class="form-check-input" [(ngModel)]="auto_close"
+                  [ngModelOptions]="{standalone: true}">
+               <label class="form-check-label" for="customSwitch2">Auto Close</label>
+            </div>
             <button type="button" class="btn btn-secondary" style="width: 120px;"
                onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
          </div>

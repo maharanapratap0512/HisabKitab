@@ -28,6 +28,7 @@ export class ItemEntryComponent implements OnInit {
   settings: any = {};
   editDoc: any = {};
   docFile: any = [];
+  auto_close:any = true;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -59,14 +60,14 @@ export class ItemEntryComponent implements OnInit {
     if (changes.getData.currentValue) {
       this.itemForm.patchValue({
         item_hin: changes.getData.currentValue.item_hin,
-        item_eng: changes.getData.currentValue.item_eng,
-        item_code: changes.getData.currentValue.item_code,
-        unit_id: changes.getData.currentValue.unit_id,
+        item_eng: changes.getData.currentValue.item_eng ? changes.getData.currentValue.item_eng : null,
+        item_code: changes.getData.currentValue.item_code ? changes.getData.currentValue.item_code : null,
+        unit_id: changes.getData.currentValue.unit_id ? changes.getData.currentValue.unit_id : null,
         categories: changes.getData.currentValue.categories,
-        extra_note: changes.getData.currentValue.extra_note,
+        extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
         document: changes.getData.currentValue.document ? changes.getData.currentValue.document : []
       });
-      this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images : null;
+      this.imagepath = (changes.getData.currentValue.document && changes.getData.currentValue.document.images) ? changes.getData.currentValue.document.images : null;
     }
     console.log("this.itemForm.value.document", this.imagepath);
 

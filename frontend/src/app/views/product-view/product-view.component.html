@@ -1,28 +1,25 @@
 <div class="row" id="productViewComponent">
     <div class="card-body">
         <div class="row" *ngIf="product">
-            <div class="col-lg-8" style="border-right: 0.5px #4c5763 dashed ;">
+            <div class="col-lg-7" style="border-right: 0.5px #4c5763 dashed ;">
                 <!-- Product image -->
-                <a href="javascript: void(0);" class="text-center d-block mb-4">
-                    <img [src]="product.image1" class="img-fluid" style="max-width: 80%;" alt="Product-img" />
-                </a>
+                <div style="height:400px;">
+                    <a href="javascript: void(0);" class="text-center d-block mb-4">
+                        <img [src]="baseUrl + product.image" class="img-fluid" style="max-width: 80%;" alt="Product-img" />
+                    </a>
+                </div>
 
-                <div class="d-lg-flex d-none justify-content-center">
-                    <a href="javascript: void(0);" (click)="changeImage(1)" *ngIf="product.image1">
-                        <img [src]="product.image1" class="img-fluid img-thumbnail p-2"
-                            style="max-width: 75px;" alt="Product-img" />
-                    </a>
-                    <a href="javascript: void(0);" class="ms-2" (click)="changeImage(1)" *ngIf="product.image2">
-                        <img [src]="product.image2" class="img-fluid img-thumbnail p-2"
-                            style="max-width: 75px;" alt="Product-img" />
-                    </a>
-                    <a href="javascript: void(0);" class="ms-2" (click)="changeImage(1)" *ngIf="product.image3">
-                        <img [src]="product.image3" class="img-fluid img-thumbnail p-2"
-                            style="max-width: 75px;" alt="Product-img" />
+
+                <div class="d-lg-flex d-none" style="overflow-x:auto;"
+                    *ngIf="product.document && product.document.images">
+                    <a *ngFor="let img of product.document.images; let i = index;" href="javascript: void(0);"
+                        (click)="product.image = img">
+                        <img [src]="baseUrl + img" class="img-fluid img-thumbnail mx-1 p-1 h-100" style="max-width: 75px; object-fit: cover;"
+                            alt="Product-img + i" />
                     </a>
                 </div>
             </div> <!-- end col -->
-            <div class="col-lg-4" style="overflow-y: auto; height: 30vw;">
+            <div class="col-lg-5" style="overflow-y: auto; height: 30vw;">
                 <form class="ps-lg-4">
                     <!-- Product title -->
                     <h3 class="mt-0">
@@ -155,23 +152,34 @@
             </div> <!-- end col -->
         </div> <!-- end row-->
 
-        <!-- <div class="table-responsive mt-4">
+        <div class="table-responsive mt-4">
             <table class="table table-bordered table-centered mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>Outlets</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Revenue</th>
+                        <th>No.</th>
+                        <th>Date</th>
+                        <th>pkt</th>
+                        <th>MM</th>
+                        <th>कहा से आया</th>
+                        <th>Date</th>
+                        <th>pkt</th>
+                        <th>कहा भेजा</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr></tr>
-                    <tr></tr>
-                    <tr></tr>
+                    <tr *ngFor="let trk of product.tracking_detail; let j=index;">
+                        <td>{{j+1}}</td>
+                        <td>{{trk.date}}</td>
+                        <td>{{trk.pkt_num}}</td>
+                        <td>{{trk.mm_hin}}</td>
+                        <td>{{trk.aawak_mm_hin}}</td>
+                        <td>{{trk.jdate}}</td>
+                        <td>{{trk.jpkt_num}}</td>
+                        <td>{{trk.jawak_mm_hin}}</td>
+                    </tr>
                 </tbody>
             </table>
-        </div> end table-responsive -->
+        </div>
 
     </div> <!-- end card-body-->
 </div>

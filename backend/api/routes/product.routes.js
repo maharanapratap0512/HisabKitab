@@ -11,7 +11,7 @@ router.get('/', async (req, res, next) => {
         await DB.getList('product', {full:true}).then((data) => {
             for (let i in data) {
                 data[i].document = (data[i].document != "[null]" ? JSON.parse(data[i].document) : {});
-                data[i].tracking = (data[i].tracking != "[null]" ? JSON.parse(data[i].tracking) : {});
+                // data[i].tracking = (data[i].tracking != "[null]" ? JSON.parse(data[i].tracking) : {});
             }
             res.json({
                 success: true,
@@ -29,7 +29,6 @@ router.get('/:dept_id', async (req, res, next) => {
         await DB.getList('product', { full: true, dept_id: req.params.dept_id, limit: 100 }).then((resolve) => {
             for (let i in resolve.data) {
                 resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
-                resolve.data[i].tracking = (resolve.data[i].tracking != "[null]" ? JSON.parse(resolve.data[i].tracking) : {});
             }
             res.json({
                 success: true,
@@ -44,13 +43,13 @@ router.get('/:dept_id', async (req, res, next) => {
 // get Filter product by dept_id
 router.put('/:dept_id', async (req, res, next) => {
     try {
-        let conditionString = ` 1=1 ${req.body._id ? ` AND product._id = ${req.body._id}` : ``}`;
+        let conditionString = ` 1=1 ${req.body._id ? ` AND product._id = ${req.body._id}` : ``} ${req.body.item_id ? ` AND product.item_id = ${req.body.item_id}` : ``}`;
         // let conditionString = ` 1=1 ${req.body._id ? `product._id = ${req.body._id}` : ``} ${typeof req.body.item_id == "string" || typeof req.body.item_id == "number" ? ` AND product.item_id = (${req.body.item_id})` : ``} ${req.body.item_id.length > 0 ? ` AND product.item_id IN (${req.body.item_id})` : ``}`;
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-        await DB.getList('product', { full:true, dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
+        await DB.getList('product', { full:req.body.full? true:false, dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
             for (let i in resolve.data) {
                 resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
-                resolve.data[i].tracking = (resolve.data[i].tracking != "[null]" ? JSON.parse(resolve.data[i].tracking) : {});
+                // resolve.data[i].tracking = (resolve.data[i].tracking != "[null]" ? JSON.parse(resolve.data[i].tracking) : {});
             }
             res.json({
                 success: true,
@@ -70,7 +69,7 @@ router.post('/:dept_id', async (req, res, next) => {
             req.body.isbill = req.body.isbill ? 1 : 0;
             await DB.insert('product', req.body, req.params.dept_id).then((data) => {
                 data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
-                data.tracking = (data.tracking != "[null]" ? JSON.parse(data.tracking) : {});
+                // data.tracking = (data.tracking != "[null]" ? JSON.parse(data.tracking) : {});
                 
                 res.json({
                     success: true,
@@ -93,7 +92,7 @@ router.put('/', async (req, res, next) => {
             req.body.set.isbill = req.body.set.isbill ? 1 : 0;
             await DB.update('product', req.body.set, req.body.query._id).then(async (data) => {
                 data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
-                data.tracking = (data.tracking != "[null]" ? JSON.parse(data.tracking) : {});
+                // data.tracking = (data.tracking != "[null]" ? JSON.parse(data.tracking) : {});
                 res.json({
                     success: true,
                     result: data || {}

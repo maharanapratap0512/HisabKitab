@@ -15,7 +15,7 @@
           <div class="col-3 mb-2">
 
             <label class="form-label">Select Department</label>
-            <div class="float-end">
+            <div class="float-end" *ngIf="settings.department.add">
               <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                 class="btn btn-sm btn-outline-primary" (click)="setView('View Department')"><i
                   class=" dripicons-view-list"></i></button>
@@ -23,8 +23,9 @@
                 onclick="$('#showModal').modal('show')" (click)="showModal='Add Department'">+
                 Add</button>
             </div>
-            <ng-select class="custom" style="width: 100%;" placeholder="Select Department" [clearable]="true"
-              [virtualScroll]="true" (change)="deptSelected($event)" [(ngModel)]="dept_id">
+            <ng-select *ngIf="departments.length > 0" class="custom" style="width: 100%;"
+              placeholder="Select Department" [clearable]="true" [virtualScroll]="true" (change)="deptSelected($event)"
+              [(ngModel)]="dept_id">
               <!-- <ng-option selected="selected" disabled value="">Select MM States</ng-option> -->
               <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_eng}}
                 :
@@ -32,7 +33,7 @@
             </ng-select>
           </div>
 
-          <div class="col-2 mt-3 mb-2" *ngIf="dept_id">
+          <div class="col-2 mt-3 mb-2">
             <button class="btn btn-success w-100" (click)="saveDeptSettings()">
               <i class="dripicons-check" style="font-size: large;"> </i>Save
             </button>
@@ -42,31 +43,34 @@
               <i class="dripicons-download" style="font-size: large;"> </i> Generate DB
             </button>
           </div>
-          <div class="col-2 mt-3 mb-2" *ngIf="dept_id">
-            <button class="btn btn-outline-info w-100 " (click)="import.click()" data-toggle="tooltip"
+          <div class="col-3 mt-3 mb-2">
+            <div class="d-flex justify-content-between">
+              <button class="btn btn-outline-info" (click)="import.click()" data-toggle="tooltip"
               title="Import Data (.Zip file)"> Import Data (.Zip)</button>
-            <input #import type="file" class="inputtag" accept="*.zip, application/ZIP" (change)="importZip($event)"
-              hidden />
+              <input #import type="file" class="inputtag" accept="*.zip, application/ZIP" (change)="importZip($event)"
+                hidden />
+              <button *ngIf="dept_id" class="btn btn-outline-info" (click)="exportLists()">Export Lists</button>
+            </div>
           </div>
-          <div class="col-2 mt-3 mb-2" *ngIf="dept_id">
+          <div class="col-2 mt-3 mb-2">
             <button class="btn btn-secondary w-100" (click)="cancel()">
               <i class="dripicons-check" style="font-size: large;"> </i>Cancel
             </button>
           </div>
         </div>
 
-        <div class="row" *ngIf="dept_id">
+        <div class="row">
           <div class="col-md-2 mb-2 mb-sm-0 card card-body">
             <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
               <!-- <a class="nav-link" [ngClass]="{'active show': dept_id > 2}" id="v-pills-setting-tab" -->
               <a class="nav-link active show" id="v-pills-setting-tab" data-bs-toggle="pill" href="#v-pills-setting"
-                role="tab" aria-controls="v-pills-setting" aria-selected="true">
+                role="tab" aria-controls="v-pills-setting" aria-selected="true" *ngIf="dept_id">
                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                 <span class="d-none d-md-block">Software Settings
                 </span>
               </a>
               <a class="nav-link" id="v-pills-mm-tab" data-bs-toggle="pill" href="#v-pills-mm" role="tab"
-                aria-controls="v-pills-mm" aria-selected="true">
+                aria-controls="v-pills-mm" aria-selected="true" *ngIf="dept_id">
                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                 <span class="d-none d-md-block">MM
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.mm &&
@@ -75,7 +79,7 @@
                 </span>
               </a>
               <a class="nav-link" id="v-pills-pbk-tab" data-bs-toggle="pill" href="#v-pills-pbk" role="tab"
-                aria-controls="v-pills-pbk" aria-selected="false">
+                aria-controls="v-pills-pbk" aria-selected="false" *ngIf="dept_id">
                 <i class="mdi mdi-account-circle d-md-none d-block"></i>
                 <span class="d-none d-md-block">PBK / Sewadhari
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.pbk &&
@@ -84,7 +88,7 @@
                 </span>
               </a>
               <a class="nav-link" id="v-pills-dept-tab" data-bs-toggle="pill" href="#v-pills-dept" role="tab"
-                aria-controls="v-pills-dept" aria-selected="false">
+                aria-controls="v-pills-dept" aria-selected="false" *ngIf="dept_id">
                 <i class="mdi mdi-account-circle d-md-none d-block"></i>
                 <span class="d-none d-md-block">Departments
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.department &&
@@ -128,7 +132,7 @@
                                 </span>
                             </a> -->
               <a class="nav-link" id="v-pills-ajtypes-tab" data-bs-toggle="pill" href="#v-pills-ajtypes" role="tab"
-                aria-controls="v-pills-ajtypes" aria-selected="false">
+                aria-controls="v-pills-ajtypes" aria-selected="false" *ngIf="dept_id">
                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
                 <span class="d-none d-md-block">Aawak/Jawak Types
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.aj_type &&
@@ -146,11 +150,10 @@
           <div class="col-md-10">
             <div class="tab-content card card-body" id="v-pills-tabContent">
 
-
               <!-- Setting Tab -->
               <!-- <div class="tab-pane fade" [ngClass]="{'active show': dept_id > 2}" id="v-pills-setting" -->
               <div class="tab-pane fade active show" id="v-pills-setting" role="tabpanel"
-                aria-labelledby="v-pills-setting-tab"
+                aria-labelledby="v-pills-setting-tab" *ngIf="dept_id"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
                 <div class="row">
                   <div class="col-3">
@@ -1071,6 +1074,7 @@
 
               <!-- MM Tab -->
               <div class="tab-pane fade" id="v-pills-mm" role="tabpanel" aria-labelledby="v-pills-home-tab"
+                *ngIf="dept_id"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
                 <div class="row">
 
@@ -1135,7 +1139,7 @@
 
 
               <!-- Pbk Tab -->
-              <div class="tab-pane fade" id="v-pills-pbk" role="tabpanel"
+              <div class="tab-pane fade" id="v-pills-pbk" role="tabpanel" *ngIf="dept_id"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                 aria-labelledby="v-pills-profile-tab">
                 <div class="row">
@@ -1208,8 +1212,8 @@
                 </div>
               </div>
 
-              <!-- Category Tab -->
-              <div class="tab-pane fade" id="v-pills-dept" role="tabpanel"
+              <!-- Department Tab -->
+              <div class="tab-pane fade" id="v-pills-dept" role="tabpanel" *ngIf="dept_id"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                 aria-labelledby="v-pills-dept-tab">
                 <div class="row">
@@ -1247,7 +1251,8 @@
               </div>
 
               <!-- Category Tab -->
-              <div class="tab-pane fade" id="v-pills-category" role="tabpanel"
+              <div class="tab-pane fade" [class]="{'show':!dept_id, 'active':!dept_id}" id="v-pills-category"
+                role="tabpanel"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                 aria-labelledby="v-pills-settings-tab">
                 <div class="row">
@@ -1328,14 +1333,6 @@
                           [ngClass]="{'highlight': data.chk, 'item': !data.chk}"
                           (click)="itemmixRowClicked(i, data.chk, data._id)">
                           <td>{{i+1}}</td>
-                          <!-- <td>
-                                                        <button class="btn btn-sm btn-outline-success" type="button"
-                                                            (click)="addSubitem(data)"><i class="uil uil-plus"></i></button>
-                                                        <button class="btn btn-sm btn-primary mx-1" type="button"
-                                                            (click)="edit(data)"><i class="uil uil-pen"></i></button>
-                                                        <button class="btn btn-sm btn-danger" type="button"
-                                                            (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
-                                                    </td> -->
                           <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
                           <td>{{data.item_code?data.item_code:'-'}}</td>
                           <td>{{data.unit_id?data.unit_short + ' : ' + data.unit_full:'-'}}
@@ -1357,16 +1354,6 @@
                                       <i class="uil-corner-down-right pl-4"></i>
                                       &nbsp;&nbsp;&nbsp;{{j+1}}
                                     </td>
-                                    <!-- <td style="width: 160px;">
-                                                                            <button class="btn btn-sm btn-primary mx-1"
-                                                                                type="button"
-                                                                                (click)="edit(si, 'subitem')"><i
-                                                                                    class="uil uil-pen"></i></button>
-                                                                            <button class="btn btn-sm btn-danger"
-                                                                                type="button"
-                                                                                (click)="deleteSubitem(i, j,si._id)"><i
-                                                                                    class="uil-trash"></i></button>
-                                                                        </td> -->
                                     <td style="width: 250px;" class="nav-item">
                                       {{si.subitem_hin +' : '+ si.subitem_eng}}
                                     </td>
@@ -1524,7 +1511,7 @@
 
 
               <!-- AJtype tab -->
-              <div class="tab-pane fade" id="v-pills-ajtypes" role="tabpanel"
+              <div class="tab-pane fade" id="v-pills-ajtypes" role="tabpanel" *ngIf="dept_id"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                 aria-labelledby="v-pills-settings-tab">
                 <div class="row">

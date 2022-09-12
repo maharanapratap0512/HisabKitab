@@ -129,6 +129,11 @@
                     </app-files-view>
                 </div>
                 <div class="modal-footer">
+                    <div class="form-check form-switch">
+                        <input type="checkbox" class="form-check-input" [(ngModel)]="auto_close"
+                            [ngModelOptions]="{standalone: true}">
+                        <label class="form-check-label" for="customSwitch2">Auto Close</label>
+                    </div>
                     <button type="button" class="btn btn-secondary" style="width: 120px;"
                         onclick="$('#itemComponent > #showModal').modal('hide')" (click)="showModal = ''">Close</button>
                 </div>

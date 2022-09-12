@@ -322,6 +322,7 @@ const aawak = {
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
         item.item_hin, item.item_eng, item.item_code, item.categories as item_categories,
         sil.subitem_hin, sil.subitem_eng, si.categories as subitem_categories,
+        product.sr_num, product.product_code,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         unit.unit_short, unit.unit_full,
@@ -619,7 +620,7 @@ const point = {
 const product = {
     select:
         `select * from product ?`
-    , select_full_old:
+    , select_full:
         `select product.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, 
         item.item_hin,item.item_eng,item.item_code,
@@ -636,7 +637,7 @@ const product = {
         left join support_list on support_list._id = product.condition_id
         left join support_list lc on lc._id = product.last_condition ?
      limit @limit offset @offset`
-    , select_full:
+    , select_full_new:
         `select product.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, 
         item.item_hin,item.item_eng,item.item_code,
@@ -698,48 +699,6 @@ const product = {
         updated_at=datetime('now','localtime')`
     , order:
         `purchase_date, mm.mm_hin, mm.mm_eng, item_hin, item_eng, subitem_hin, subitem_eng`
-}
-
-const product_tracking = {
-    select:
-        `select * from product_tracking ?`
-    , select_full:
-        `select product_tracking.*,
-        mm.mm_hin,mm.mm_eng,mm.mm_code, 
-        ajmm.mm_hin as aj_mm_hin, ajmm.mm_eng as aj_mm_eng, ajmm.mm_code as aj_mm_code, 
-        support_list.list_name_hin as condition_hin,support_list.list_name_eng as condition_eng,
-        oc.list_name_hin as old_condition_hin, oc.list_name_eng as old_condition_eng
-        from product_tracking 
-        left join product pd on pd._id = product_tracking.product_id
-        left join mm on mm._id = product_tracking.mm_id
-        left join mm ajmm on ajmm._id = product_tracking.aj_mm_id
-        left join support_list on support_list._id = product_tracking.condition_id
-        left join support_list oc on oc._id = product_tracking.old_condition_id ? limit @limit offset @offset`    
-    , insert:
-        `insert into product_tracking (
-        product_id, date, mm_id, entry_type, aj_mm_id, pkt_num, nimitt_id, old_condition_id,
-        condition_id, transfer_detail, repairing_ref, active)
-    values (
-        @product_id, @date, @mm_id, @entry_type, @aj_mm_id, @pkt_num, @nimitt_id, @old_condition_id,
-        @condition_id, @transfer_detail, @repairing_ref, @active)`
-    , update:
-        `update product_tracking set 
-        product_id=@product_id,
-        date=@date,
-        mm_id=@mm_id,
-        entry_type=@entry_type,
-        aj_mm_id=@aj_mm_id,
-        pkt_num=@pkt_num,
-        nimitt_id=@nimitt_id,
-        old_condition_id=@old_condition_id,
-        condition_id=@condition_id,
-        transfer_detail=@transfer_detail,
-        repairing_ref=@repairing_ref,
-        hl=@hl,
-        active=@active,
-        updated_at=datetime('now','localtime')`
-    , order:
-        `date, pkt_num`
 }
 
 const state = {
@@ -1050,15 +1009,18 @@ genDeptDB = {
     city: `insert into city select * from mainDB.city`,
     unit: `insert into unit select * from mainDB.unit`,
 
-    category: `insert into category select * from mainDB.category where category._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='category')`,
+    category: `insert into category select * from mainDB.category`,
+    // category: `insert into category select * from mainDB.category where category._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='category')`,
 
     mm: `insert into mm select * from mainDB.mm where mm._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='mm')`,
 
-    item: `insert into item select * from mainDB.item where item._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='item')`,
+    item: `insert into item select * from mainDB.item`,
+    // item: `insert into item select * from mainDB.item where item._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='item')`,
 
     subitem_list: `insert into subitem_list select * from mainDB.subitem_list `,
 
-    subitem: `insert into subitem select * from mainDB.subitem where subitem._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='subitem')`,
+    subitem: `insert into subitem select * from mainDB.subitem `,
+    // subitem: `insert into subitem select * from mainDB.subitem where subitem._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='subitem')`,
 
     pbk: `insert into pbk select * from mainDB.pbk where pbk._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='pbk')`,
 
@@ -1076,5 +1038,5 @@ genDeptDB = {
 
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, product_tracking
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history
 };

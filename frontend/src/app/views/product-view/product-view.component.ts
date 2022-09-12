@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ApiService } from 'src/app/services/api.service';
+import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 
@@ -26,9 +27,10 @@ export class ProductViewComponent implements OnInit {
     private http: HttpService,
     private api: ApiService,
     private gs: GlobalService,
-    private spinner: NgxSpinnerService
+    private spinner: NgxSpinnerService,
+    public auth: AuthService
   ) {
-
+    this.baseUrl = this.api.getUrl('BASE');
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -36,13 +38,10 @@ export class ProductViewComponent implements OnInit {
 
     if (changes.getData.currentValue) {
       this.product = changes.getData.currentValue;
-      // this.baseUrl = this.api.getUrl('BASE');
-      let imgs = JSON.parse(this.product.document);
-      if (imgs.images) {
-        for (let i = 0; i < imgs.images.length; i++) {
-          this.product['image'+(i+1)] = imgs.images[i] ? this.api.getUrl('BASE') + imgs.images[i] : null;
-        }
-      }
+    }
+    this.getAawakData();
+    if (this.product.document && this.product.document.images && this.product.document.images.length > 0) {
+      this.product.image = this.product.document.images[0];
     }
     console.log("prdt", this.product);
   }
@@ -50,10 +49,50 @@ export class ProductViewComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  changeImage(i:any){
-    let img = this.product['image1'];
-    this.product.image1 = this.product['image'+i];
-    this.product['image'+i] = img;
+  getAawakData() {
+    this.isLoader = true;
+    let body = {
+      product_id: [this.product._id],
+      orderBy: `date desc`
+    }
+    this.http.put(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, body).subscribe((data: any) => {
+      if (data['result']) {
+        this.product.tracking_detail = [];
+        for (let i in data['result']) {
+          let trk = {
+            date: data['result'][i].date,
+            pkt_num: data['result'][i].pkt_num,
+            mm_hin: data['result'][i].mm_hin,
+            aawak_mm_hin: data['result'][i].aawak_mm_hin,
+            jdate: null,
+            jpkt_num: null,
+            jawak_mm_hin: null
+          };
+          for (let j = 0; j < data['result'][i].jawak_detail.length; j++) {
+            if (j == 0) {
+              trk.jdate = data['result'][i].jawak_detail[j].date;
+              trk.jpkt_num = data['result'][i].jawak_detail[j].pkt_num;
+              trk.jawak_mm_hin = data['result'][i].jawak_detail[j].jawak_mm_hin;
+              this.product.tracking_detail.push(trk);
+            } else {
+              trk = {
+                date:null,
+                pkt_num:null,
+                mm_hin:null,
+                aawak_mm_hin:null,
+                jdate: data['result'][i].jawak_detail[j].date,
+                jpkt_num: data['result'][i].jawak_detail[j].pkt_num,
+                jawak_mm_hin: data['result'][i].jawak_detail[j].jawak_mm_hin
+              }
+              this.product.tracking_detail.push(trk);
+            }
+          }
+          console.log(this.product.tracking_detail);
+          
+        }
 
+      }
+    });
+    this.isLoader = false;
   }
 }

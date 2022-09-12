@@ -151,7 +151,6 @@ router.put('/correction', async (req, res, next) => {
     };
 });
 
-
 //  final import
 router.put('/final', async (req, res, next) => {
     try {
@@ -231,22 +230,49 @@ router.put('/updates/:dept_id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+//get all updated list
+router.get('/update_lists/:dept_id', async (req, res, next) => {
+    try {
+        let lists = {}
 
+        if (req.params.dept_id) {
+            lists.country = await DB.getList('country') || []
+            lists.state = await DB.getList('state') || []
+            lists.city = await DB.getList('city') || []
+            lists.unit = await DB.getList('unit') || []
+            lists.support_list = await DB.getList('support_list') || []
+            lists.category = await DB.getList('category') || []
+            lists.mm = await DB.getList('mm') || []
+            lists.item = await DB.getList('item') || []
+            lists.subitem = await DB.getList('subitem') || []
+            lists.subitem_list = await DB.getList('subitem_list') || []
+            lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id}) || []
+            lists.nimitt = await DB.getList('nimitt', { dept_id: req.params.dept_id }) || []
+            lists.product = await DB.getList('product', { dept_id: req.params.dept_id}) || []
+            // lists.aawak = await DB.getList('aawak', { dept_id: req.params.dept_id }) || []
+            // lists.jawak = await DB.getList('jawak', { dept_id: req.params.dept_id }) || []
+            lists.point = await DB.getList('point') || []
+            lists.department = await DB.getList('department') || []
+            lists.department_config = await DB.getList('department_config', { conditionString: ` department_config.dept_id = ${req.params.dept_id}` }) || []
+            lists.dictionary = await DB.getList('dictionary') || []
+            lists.merge_history = await DB.getList('merge_history', { dept_id: req.params.dept_id }) || []
+            res.json({
+                success: true,
+                result: lists
+            })
+        }
+        else {
+            res.json({
+                success: true,
+                result: lists
+            })
+        }
+    } catch (err) { next(err) };
+});
 
-//  department DB download
-// router.get('/updates/:dept_id', async (req, res, next) => {
-//     DB.generateUpdateDB(req.params.dept_id).then(async (result) => {
-//         res.json({
-//             success: true,
-//             result: result
-//         });
+router.put('/update_apply/:dept_id', async(req, res, next)=>{
 
-
-//     }, (reject) => {
-//         next(reject);
-//     });
-// });
-
+});
 
 router.post('/', async (req, res, next) => {
     if (req.body) {
@@ -288,8 +314,6 @@ router.post('/', async (req, res, next) => {
         }
     }
 });
-
-
 
 // tempimport delete
 router.delete('/all', async (req, res, next) => {

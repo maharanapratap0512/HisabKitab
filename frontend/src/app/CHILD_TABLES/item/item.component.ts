@@ -34,8 +34,9 @@ export class ItemComponent implements OnInit {
   si_total_count: any = 0;;
   subitemData: any = [];
   conditionObj: any = {};
-  baseurl:any;
-  settings:any = {};
+  baseurl: any;
+  settings: any = {};
+  auto_close: any = true;
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
@@ -58,7 +59,7 @@ export class ItemComponent implements OnInit {
     this.settings = this.auth.webUser.settings;
   }
 
-  getItemData(pageNo:any) {
+  getItemData(pageNo: any) {
     this.isLoader = true;
     this.conditionObj.pageNo = pageNo;
     this.http.put(this.api.getUrl('ITEMMIX') + this.auth.webUser.dept_id, this.conditionObj).subscribe((data: any) => {
@@ -73,25 +74,25 @@ export class ItemComponent implements OnInit {
     });
   }
 
-  exportItem(){
+  exportItem() {
     let item = [];
-    for(let it of this.itemData){
+    for (let it of this.itemData) {
       item.push({
-        item_hin:it.item_hin,
-        item_eng:it.item_eng,
-        subitem_hin:null,
-        subitem_eng:null,
-        unit:it.unit_short,
-        category:it.categories_hin
+        item_hin: it.item_hin,
+        item_eng: it.item_eng,
+        subitem_hin: null,
+        subitem_eng: null,
+        unit: it.unit_short,
+        category: it.categories_hin
       });
-      for(let sit of it.subitems){
+      for (let sit of it.subitems) {
         item.push({
-          item_hin:it.item_hin,
-          item_eng:it.item_eng,
-          subitem_hin:sit.subitem_hin,
-          subitem_eng:sit.subitem_eng,
-          unit:sit.unit_short,
-          category:sit.categories_hin
+          item_hin: it.item_hin,
+          item_eng: it.item_eng,
+          subitem_hin: sit.subitem_hin,
+          subitem_eng: sit.subitem_eng,
+          unit: sit.unit_short,
+          category: sit.categories_hin
         });
       }
     }
@@ -99,6 +100,14 @@ export class ItemComponent implements OnInit {
     this.excelExportService.exportAsExcelFile(item, 'asthai_item_list.xlsx');
   }
 
+  closeModal() {
+    if (this.auto_close) {
+      $('#showModal').modal('hide');
+      this.showModal = '';
+    } else {
+
+    }
+  }
   catSelected(ev: any) {
     if (ev) {
       this.conditionObj.categories = ev;
@@ -131,11 +140,52 @@ export class ItemComponent implements OnInit {
     $('#showModal').modal('show');
   }
 
+  cloneWithSubitem(item: any) {
+    this.editData = {
+      categories: item.categories,
+      unit_id: item.unit_id,
+      subitems: item.subitems
+    }
+    this.showModal = 'Clone Item';
+    $('#showModal').modal('show');
+  }
+
+  cloneItemResponse(ev: any) {
+    if (ev._id) {
+      this.isLoader = true;
+      for (let i in this.editData.subitems) {
+        let subitem = this.editData.subitems[i];
+        subitem.item_id = ev._id;
+        this.http.post(this.api.getUrl('SUBITEM') + this.auth.webUser.dept_id, subitem).subscribe((data: any) => {
+          if (data['result'] && data['success']) {
+            // this.gs.Lists.subitem.unshift(data['result'])
+            let j = this.gs.Lists.itemmix.findIndex((i: { _id: any; }) => i._id == ev._id);
+            this.gs.Lists.itemmix[j].subitems.push(data['result']);
+            // ev.subitems.push(data['result']);
+            this.toastr.success('SUBITEM added successfully.')
+          } else {
+            this.toastr.error(data['message']);
+            this.isLoader = false;
+          }
+        }, err => {
+          this.toastr.error(err['error']);
+          this.isLoader = false;
+        });
+      }
+      this.itemData.unshift(ev);
+      this.closeModal();
+      this.isLoader = false;
+    }
+    else{
+      console.log("clone item", ev);
+      
+    }
+  }
+
   addItemResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      $('#showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal();
       this.itemData.unshift(ev);
       this.isLoader = false;
     }
@@ -147,12 +197,11 @@ export class ItemComponent implements OnInit {
   editItemResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      $('#showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal();
       let index = this.itemData.indexOf(this.editData);
-      
-      if(index>=0){
-        console.log("index",index);
+
+      if (index >= 0) {
+        console.log("index", index);
         // ev.categories = this.itemData[index].categories;
         ev.subitems = this.itemData[index].subitems;
         this.itemData.splice(index, 1, ev);
@@ -166,12 +215,11 @@ export class ItemComponent implements OnInit {
 
 
   addSubitemResponse(ev: any) {
-    console.log("item",ev);
-    
+    console.log("item", ev);
+
     if (ev._id) {
       this.isLoader = true;
-      $('#showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal();
       let i = this.itemData.findIndex((i: { _id: any; }) => i._id == ev.item_id);
       this.itemData[i].subitems.push(ev);
       // this.itemData[i].categories.push(ev.category_id);
@@ -186,8 +234,7 @@ export class ItemComponent implements OnInit {
   editSubitemResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      $('#showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal();
       let i = this.itemData.findIndex((i: { _id: any; }) => i._id == ev.item_id);
       let j = this.itemData[i].subitems.findIndex((i: { _id: any; }) => i._id == ev._id);
       this.itemData[i].subitems.splice(j, 1, ev);
@@ -275,7 +322,7 @@ export class ItemComponent implements OnInit {
     };
     this.http.put(this.api.getUrl('ITEM'), body).subscribe((data: any) => {
       let i = this.itemData.findIndex((i: { _id: any; }) => i._id == data['result']._id);
-      
+
       this.itemData[i].active = data['result'].active;
       this.isLoader = false;
       if (data['result'].active) {

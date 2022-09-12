@@ -110,6 +110,9 @@ class DBContex {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
 
+                if(tblname=="aawak")
+                    console.log(sql);
+
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {
                     resolve({ data: result, total_count: res.total_count });
