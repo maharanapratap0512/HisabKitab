@@ -46,6 +46,7 @@ export class ApiService {
     IMPORTEXPORT: base_url + 'importexport/',
     EXPORTUPDATES: base_url + 'importexport/updates/',
     IMPORTUPDATE: base_url + 'importexport/import/',
+    APPLYUPDATE: base_url + 'importexport/update_apply/',
     DEPTCONFIG: base_url + 'department_config/',
     DEPTCONFSAVE: base_url + 'department_config/save',
     LOGIN: base_url + 'departments/login',

@@ -220,12 +220,17 @@
                         <i class="uil-layer-group me-1"></i>Department
                      </a>
                   </li>
+                  <li class="nav-item">
+                     <a class="nav-link" routerLinkActive="active" routerLink="report" role="button">
+                        <i class="uil-layer-group me-1"></i>Reports
+                     </a>
+                  </li>
                   <li class="nav-item" *ngIf="settings.point.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="point" role="button">
                         <i class="uil-layer-group me-1"></i>Points
                      </a>
                   </li>
-                  
+
                   <!-- <li class="nav-item">
                      <a class="nav-link" role="button" (click)="exportUpdate()">
                         <i class="uil-layer-group me-1"></i>Download Update
@@ -471,17 +476,20 @@
          </div> -->
 
          <!-- update details -->
-         <button class="btn btn-sm btn-outline-primary w-100 mt-1" (click)="openModal('Update History')">Update History</button>
+         <button class="btn btn-sm btn-outline-primary w-100 mt-1" (click)="openModal('Update History')">Update
+            History</button>
 
          <!-- import zip -->
          <button class="btn btn-outline-info w-100 mt-1" (click)="import.click()" data-toggle="tooltip"
             title="Import Data (.DB file)"> Import Update (.Zip)</button>
-         <input #import type="file" class="inputtag" accept="*.zip, application/ZIP" (change)="importZip($event)" hidden />
+         <input #import type="file" class="inputtag" accept="*.zip, application/ZIP" (change)="importZip($event)"
+            hidden />
 
          <!-- import old software -->
          <button class="btn btn-outline-warning w-100 mt-1" (click)="importOld.click()" data-toggle="tooltip"
             title="Import Data (.DB file)"> Import Old Data (.json)</button>
-         <input #importOld type="file" class="inputtag" accept="*.json, application/JSON" (change)="importOldData($event)" hidden />
+         <input #importOld type="file" class="inputtag" accept="*.json, application/JSON"
+            (change)="importOldData($event)" hidden />
 
          <!-- import zip -->
          <button class="btn btn-outline-success w-100 mt-1" (click)="exportLatestUpdate()"> Export Update</button>
@@ -567,20 +575,20 @@
 
 
 
-<!-- Add Aawak Entry Model -->
+<!-- Model -->
 <div class="modal fade" id="modal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
    aria-hidden="true">
    <div class="modal-dialog" style="width: 90%;">
       <div class="modal-content">
          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">{{modal}}</h5>
-            <button type="button" onclick="$('#modal').modal('hide')" class="btn-close" aria-label="Close"></button>
+            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <button type="button" (click)='closeModal()' class="btn-close" aria-label="Close"></button>
          </div>
          <div class="modal-body">
-            <app-import *ngIf="modal == 'import'" [importData]="importData"></app-import>
+            <app-import *ngIf="showModal == 'import'" [importData]="importData"></app-import>
 
             <!-- update detail -->
-            <app-update-detail *ngIf="modal == 'Update History'"></app-update-detail>
+            <app-update-detail *ngIf="showModal == 'Update History'"></app-update-detail>
             <!-- <app-jawak-entry (response)='addJawakResponse($ev+ent)' *ngIf="modal == 'Add Jawak'"></app-jawak-entry> -->
 
             <!-- <app-jawak-entry (response)='editJawakResponse($event)' *ngIf="modal == 'Edit Jawak'"
@@ -588,8 +596,72 @@
             </app-jawak-entry> -->
          </div>
          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;" (click)="closeModal()">Close</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Import Model -->
+<div class="modal fade" id="importmodal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Import Result</h5>
+            <button type="button" (click)='closeImportModal()' class="btn-close" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <div class="row" style="padding: 10px 50px;">
+               <h3>All Applied Update Display Here....</h3>
+               <ul class="nav nav-pills bg-nav-pills">
+                  <li class="nav-item" *ngFor="let data of importResult; let i = index">
+                     <a href="{{'#'+data.type}}" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0"
+                        [ngClass]="{'active':i==0}" *ngIf="data.new_entries.length > 0 || data.update_entries.length > 0">
+                        {{data.type}}
+                        <span class="translate-middle bell badge rounded-pill bg-info">
+                           {{data.total_count}}
+                        </span>
+                     </a>
+                  </li>
+               </ul>
+            </div>
+
+            <div class="tab-content">
+               <!-- exceldata -->
+               <ng-container *ngFor="let data of importResult; let i = index;">
+                  <div class="tab-pane show" [ngClass]="{'active': i==0}" id="{{data.type}}" style="overflow: auto;"
+                     *ngIf="data.new_entries.length > 0 || data.update_entries.length > 0">
+                     <table id="datatable-buttons" class="table table-hover dt-responsive">
+                        <thead>
+                           <tr>
+                              <th style="width: 50px;">No.</th>
+                              <th style="width: 100px;">Operation</th>
+                              <th *ngFor="let key of data.columns">{{key}}</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr class="main-row" *ngFor="let new_data of data.new_entries; let j = index;">
+                              <td>{{j+1}} </td>
+                              <td>New Insert </td>
+                              <td *ngFor="let key of data.columns"> {{new_data[key] ? new_data[key] : ''}}</td>
+                           </tr>
+                           <tr class="main-row" *ngFor="let new_data of data.update_entries; let j = index;">
+                              <td>{{data.new_entries.length+j+1}} </td>
+                              <td>Update </td>
+                              <td *ngFor="let key of data.columns"> {{new_data[key] ? new_data[key] : ''}}</td>
+                           </tr>
+
+                        </tbody>
+                     </table>
+                  </div>
+               </ng-container>
+
+            </div>
+         </div>
+         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"
-               onclick="$('#modal').modal('hide')" (click)="modal= ''">Close</button>
+               (click)="closeImportModal()">Close</button>
          </div>
       </div>
    </div>

@@ -1,0 +1,26 @@
+.file {
+   position: relative;
+   overflow: hidden;
+}
+
+.inputtag {
+   position: absolute;
+   // font-size: 50px;
+   opacity: 0;
+   right: 0;
+   top: 0;
+}
+
+.marked {
+   font-weight: 800;
+   color: #140a0a;
+   border: 0.5px solid #da2534;
+   background-color: #f0a8ae;
+}
+
+.success {
+   font-weight: 800;
+   color: #61a44e;
+   border: 0.5px solid #00ff22;
+   background-color: #adff99;
+}

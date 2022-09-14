@@ -246,9 +246,9 @@ router.get('/update_lists/:dept_id', async (req, res, next) => {
             lists.item = await DB.getList('item') || []
             lists.subitem = await DB.getList('subitem') || []
             lists.subitem_list = await DB.getList('subitem_list') || []
-            lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id}) || []
+            lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id }) || []
             lists.nimitt = await DB.getList('nimitt', { dept_id: req.params.dept_id }) || []
-            lists.product = await DB.getList('product', { dept_id: req.params.dept_id}) || []
+            lists.product = await DB.getList('product', { dept_id: req.params.dept_id }) || []
             // lists.aawak = await DB.getList('aawak', { dept_id: req.params.dept_id }) || []
             // lists.jawak = await DB.getList('jawak', { dept_id: req.params.dept_id }) || []
             lists.point = await DB.getList('point') || []
@@ -270,8 +270,57 @@ router.get('/update_lists/:dept_id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
-router.put('/update_apply/:dept_id', async(req, res, next)=>{
+router.put('/update_apply/:dept_id', async (req, res, next) => {
+    try {
 
+        if (req.body.type && req.body.data) {
+            let total_count = 0;
+            let new_entries = [];
+            let update_entries = [];
+            let insert = DB.db.transaction(async (tblname, data) => {
+                try {                    
+                    const insert_stmt = DB.db.prepare(DB.query[tblname].insert_ignore);
+                    const update_stmt = DB.db.prepare(DB.query[tblname].import_update);
+                    for (let i in data) {
+
+                        let updt_res = update_stmt.run(data[i]);
+                        // console.log("updt_res", updt_res);
+                        if (updt_res) {
+                            if (updt_res.changes > 0) {
+                                update_entries.push(data[i]);
+                            }
+                        }
+                        
+                        let res = insert_stmt.run(data[i]);
+                        // console.log("res", res);
+                        if (res) {
+                            total_count++;
+                            if (res.changes > 0) {
+                                new_entries.push(data[i]);
+                            }
+                        }                        
+                    }
+                    res.json({
+                        type: tblname,
+                        total_count: total_count,
+                        new_entries: new_entries,
+                        update_entries: update_entries,
+                        columns: data.length > 0 ? Object.keys(data[0]) : []
+                    })
+                }
+                catch (ex) {
+                    console.log(ex);
+                    return next(ex);
+                }
+            });
+
+            insert(req.body.type, req.body.data);
+
+        }
+    }
+    catch (err) {
+        return next(err);
+    }
 });
 
 router.post('/', async (req, res, next) => {
@@ -287,7 +336,7 @@ router.post('/', async (req, res, next) => {
                 }
                 req.body[i].type = 'awk';
                 req.body[i].pbk = ((req.body[i].pbk && (req.body[i].pbk.roll_no || req.body[i].pbk.pbk || req.body[i].pbk.relation || req.body[i].pbk.relative)) ? JSON.stringify(req.body[i].pbk) : null);
-                for(let j in req.body[i].jawak_detail){
+                for (let j in req.body[i].jawak_detail) {
                     if (typeof req.body[i].jawak_detail[j].date == "string") {
                         req.body[i].jawak_detail[j].date = Fn.StringToDate(req.body[i].jawak_detail[j].date).toISOString().split('T')[0];
                     }

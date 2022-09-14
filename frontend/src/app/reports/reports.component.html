@@ -1,0 +1,120 @@
+<!-- Begin page -->
+<div class="wrapper">
+   <div class="content-page">
+      <div class="content">
+         <div class="container-fluid">
+
+            <div class="row">
+               <div class="card-body">
+                  Under Construction
+                  <!-- <div class="row d-flex justify-content-between">
+                     <div class="col-3">
+                        <div class="form-group">
+                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                              name="search">
+                        </div>
+                     </div>
+                     <div class="col-3 d-flex">
+                        <button class="file btn btn-success" style="font-weight: 700 !important;">
+                           <i class="uil uil-arrow-to-bottom"></i> Import Aawak
+                           <input type="file" class="inputtag"
+                              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                              (change)="excelImport($event)" />
+                        </button>
+
+                     </div>
+                     <div class="col-3">
+                        <button class="file btn btn-success" style="font-weight: 700 !important;" (click)="filterError()">Find Error</button>
+                     </div>
+
+                     <div class="col-2">
+                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
+                           Count : {{total_count}}
+                        </button>
+                     </div>
+                  </div> -->
+               </div>
+            </div>
+
+
+            <div class="row" *ngIf="jsonData.length">
+               <div class="card-body" style="overflow: auto;">
+                  <table id="datatable-buttons" class="table table-hover dt-responsive" #TABLE>
+                     <thead>
+                        <tr>
+                           <th style="width: 40px;">No.</th>
+                           <th>Month</th>
+                           <th>Date</th>
+                           <th>sthan</th>
+                           <th>parchi No</th>
+                           <th>qty</th>
+                           <th>unit</th>
+                           <th>rate</th>
+                           <th>cost</th>
+                           <th>Plus Minus</th>
+                           <th>Total Cost</th>
+                           <th>Final Amount</th>
+                           <th>Correct Amount</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let data of jsonData | filter: term; let i=index" class="main-row" [ngClass]="{'marked': data.error}">
+                           <td>{{i+1}}</td>
+                           <td>{{data.month}}</td>
+                           <td>{{data.date}}</td>
+                           <td>{{data['स्थान का नाम']}}</td>
+                           <td>{{data.parchi_no}}</td>
+                           <td>{{data.qty}}</td>
+                           <td>{{data.unit}}</td>
+                           <td>{{data.rate}}</td>
+                           <td>{{data.cost}}</td>
+                           <td>{{data.pm}}</td>
+                           <td>{{data.total_cost}}</td>
+                           <td>{{data.final}}</td>
+                           <td>{{data.correct}}</td>
+                        </tr>
+                        <tr>
+                           <td></td>
+                           <td></td>
+                           <td></td>
+                           <td></td>
+                           <td></td>
+                           <td></td>
+                           <td></td>
+                           <td>{{total.cost}}</td>
+                           <td>{{total.pm}}</td>
+                           <td [ngClass]="{'success':(total.cost + total.pm) == total.total_cost}">{{total.total_cost}}</td>
+                           <td [ngClass]="{'success':total.total_cost == total.final, 'marked':total.total_cost != total.final}">{{total.final}}</td>
+                        </tr>
+
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+
+         </div>
+      </div>
+   </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
+               aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+         </div>
+      </div>
+   </div>
+</div>

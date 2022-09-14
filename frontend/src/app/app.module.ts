@@ -65,6 +65,7 @@ import { NimittEntryComponent } from './ENTRY__FORMS/nimitt-entry/nimitt-entry.c
 import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { UpdateDetailComponent } from './layout/update-detail/update-detail.component';
 import { ProductTransferEntryComponent } from './ENTRY__FORMS/product-transfer-entry/product-transfer-entry.component';
+import { ReportsComponent } from './reports/reports.component';
 
 
 
@@ -114,6 +115,7 @@ import { ProductTransferEntryComponent } from './ENTRY__FORMS/product-transfer-e
     NimittEntryComponent,
     UpdateDetailComponent,
     ProductTransferEntryComponent,
+    ReportsComponent,
   ],
   imports: [
     BrowserModule,

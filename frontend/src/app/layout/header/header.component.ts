@@ -22,8 +22,9 @@ export class HeaderComponent implements OnInit {
   topPosToStartShowing = 100;
   isLoader: boolean = false;
   settings: any;
-  modal: any = '';
+  showModal: any = '';
   importData: any = [];
+  importResult:any = [];
 
   constructor(
     private http: HttpService,
@@ -48,8 +49,17 @@ export class HeaderComponent implements OnInit {
   }
 
   openModal(type: String) {
-    this.modal = type;
+    this.showModal = type;
     $('#modal').modal('show');
+  }
+
+  closeModal() {
+    this.showModal = "";
+    $('#modal').modal('hide');
+  }
+  closeImportModal() {
+    this.showModal = "";
+    $('#importmodal').modal('hide');
   }
 
   gotoTop() {
@@ -96,9 +106,9 @@ export class HeaderComponent implements OnInit {
 
   exportLatestUpdate = async () => {
     Swal.fire({
-      title: 'Start Date',    
+      title: 'Start Date',
       html:
-        '<span>Date filter functionality currently not working, but still download update is working.</span>'+
+        '<span>Date filter functionality currently not working, but still download update is working.</span>' +
         '<input id="exportDate" type="date" class="swal2-input">',
       focusConfirm: false,
       showCancelButton: true,
@@ -155,15 +165,12 @@ export class HeaderComponent implements OnInit {
           if (zip) {
             // getting name of all exists files in zip in array.
             let fileNames = Object.keys(zip.files);
-
             // loop through all files
             for (let i in fileNames) {
 
               //accept only files that listed below, other ignore.
               switch (fileNames[i]) {
                 case 'settings.json':
-                  console.log("settings file found");
-
                   zip.file(fileNames[i]).async("string").then((data: any) => {
 
                     if (data) {
@@ -196,12 +203,146 @@ export class HeaderComponent implements OnInit {
                     else {
                       this.toastr.error('can not read settings file from zip')
                     }
-                    // this.importFile('ITEMTYPEIMPORT', JSON.parse(data));
+                  });
+                  break;
+
+                case 'country.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'country', data: JSON.parse(data) }).subscribe((result: any) => {
+                        this.importResult.push(result);
+                      });
+                    }
+                  }, (err:any) => {
+                    console.log(err);
+                    
+                  });
+                  break;
+                case 'state.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'state', data: JSON.parse(data) }).subscribe((result: any) => {
+                        this.importResult.push(result);
+                      });
+                    }
+                  }, (err:any) => {
+                    console.log(err);
+                    
+                  });
+                  break;
+                case 'city.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'city', data: JSON.parse(data) }).subscribe((result: any) => {
+                        this.importResult.push(result);
+                      });
+                    }
+                  }, (err:any) => {
+                    console.log(err);
+                    
+                  });
+                  break;
+                case 'category.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'category', data: JSON.parse(data) }).subscribe((result: any) => {
+                        this.importResult.push(result);
+                      });
+                    }
+                  }, (err:any) => {
+                    console.log(err);
+                    
+                  });
+                  break;
+                case 'department_config.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'department_config', data: JSON.parse(data) }).subscribe((result: any) => {
+                        this.importResult.push(result);
+                      });
+                    }
+                  }, (err:any) => {
+                    console.log(err);
+                    
+                  });
+                  break;
+                // case 'department.json':
+                //   zip.file(fileNames[i]).async("string").then((data: any) => {
+                //     if (data) {
+                //       this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'department', data: JSON.parse(data) }).subscribe((result: any) => {
+                //         this.importResult.push(result);
+                //       });
+                //     }
+                //   }, (err:any) => {
+                //     console.log(err);
+                    
+                //   });
+                //   break;
+                case 'support_list.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'support_list', data: JSON.parse(data) }).subscribe((result: any) => {
+                        this.importResult.push(result);
+                      });
+                    }
+                  }, (err:any) => {
+                    console.log(err);
+                    
+                  });
+                  break;
+                case 'subitem_list.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'subitem_list', data: JSON.parse(data) }).subscribe((result: any) => {
+                        this.importResult.push(result);
+                      });
+                    }
+                  }, (err:any) => {
+                    console.log(err);
+                    
+                  });
+                  break;
+                case 'unit.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'unit', data: JSON.parse(data) }).subscribe((result: any) => {
+                        this.importResult.push(result);
+                      });
+                    }
+                  }, (err:any) => {
+                    console.log(err);
+                    
+                  });
+                  break;
+                case 'subitem.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'subitem', data: JSON.parse(data) }).subscribe((result: any) => {
+                        this.importResult.push(result);
+                      });
+                    }
+                  }, (err:any) => {
+                    console.log(err);
+                    
+                  });
+                  break;
+                case 'mm.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'mm', data: JSON.parse(data) }).subscribe((result: any) => {
+                        this.importResult.push(result);
+                      });
+                    }
+                  }, (err:any) => {
+                    console.log(err);
+                    
                   });
                   break;
 
               }
             }
+
+            $('#importmodal').modal('show');
           }
 
         });

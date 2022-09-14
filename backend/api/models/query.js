@@ -14,6 +14,27 @@ const country = {
             @country_hin,
             @country_eng,
             @active)`
+    , insert_ignore:
+        `insert or ignore into country (
+            _id,
+            country_hin,
+            country_eng,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @country_hin,
+            @country_eng,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update country set 
+        country_hin=@country_hin,
+        country_eng=@country_eng,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update country set 
         country_hin=@country_hin,
@@ -41,6 +62,29 @@ const city = {
             @city_eng,
             @state_id,
             @active)`
+    , insert_ignore:
+        `insert or ignore into city (
+            _id,
+            city_hin,
+            city_eng,
+            state_id,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @city_hin,
+            @city_eng,
+            @state_id,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update city set 
+        city_hin=@city_hin,
+        city_eng=@city_eng,
+        state_id=@state_id,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update city set
         city_hin=@city_hin,
@@ -68,6 +112,27 @@ const category = {
             @category_hin,
             @category_eng,
             @active)`
+    , insert_ignore:
+        `insert or ignore into category (
+            _id,
+            category_hin,
+            category_eng,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @category_hin,
+            @category_eng,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update category set 
+        category_hin=@category_hin,
+        category_eng=@category_eng,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update category set
         category_hin=@category_hin,
@@ -97,6 +162,33 @@ const department = {
             @dept_code,
             @password,
             @active)`
+    , insert_ignore:
+        `insert or ignore into department (
+            _id,
+            dept_eng,
+            dept_hin,
+            dept_code,
+            password,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @dept_eng,
+            @dept_hin,
+            @dept_code,
+            @password,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update department set 
+        dept_eng=@dept_eng,
+        dept_hin=@dept_hin,
+        dept_code=@dept_code,
+        password=@password,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update department set
         dept_eng=@dept_eng,
@@ -126,6 +218,27 @@ const department_config = {
             @config_key,
             @config_value,
             @active)`
+    , insert_ignore:
+        `insert or ignore into department_config (
+            dept_id,
+            config_key,
+            config_value,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @dept_id,
+            @config_key,
+            @config_value,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update department_config set 
+        config_key=@config_key,
+        config_value=@config_value,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id AND dept_id = @dept_id AND updated_at != @updated_at`
     , update:
         `update department_config set
         config_key=@config_key,
@@ -165,6 +278,42 @@ const item = {
             @extra_note,
             @document,
             @active)`
+    , insert_ignore:
+        `insert or ignore into item (
+            _id,
+            item_hin,
+            item_eng,
+            item_code,
+            categories,
+            unit_id,
+            extra_note,
+            document,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @item_hin,
+            @item_eng,
+            @item_code,
+            @categories,
+            @unit_id,
+            @extra_note,
+            @document,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update item set 
+        item_hin=@item_hin,
+        item_eng=@item_eng,
+        item_code=@item_code,
+        categories=@categories,
+        extra_note=@extra_note,
+        document=@document,
+        unit_id=@unit_id,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update item set
         item_hin=@item_hin,
@@ -459,6 +608,45 @@ const mm = {
         values (
             @mm_hin, @mm_eng,  @mm_code, @dept_id, @state_id,
             @parent_mm_id, @opening_date, @nimitt_id, @active)`
+    , insert_ignore:
+        `insert or ignore into mm (
+            _id,
+            mm_hin,
+            mm_eng,
+            mm_code,
+            dept_id,
+            state_id,
+            parent_mm_id,
+            opening_date,
+            nimitt_id,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @mm_hin,
+            @mm_eng,
+            @mm_code,
+            @dept_id,
+            @state_id,
+            @parent_mm_id,
+            @opening_date,
+            @nimitt_id,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update mm set 
+        mm_hin=@mm_hin,
+        mm_eng=@mm_eng,
+        mm_code=@mm_code,
+        dept_id=@dept_id,
+        state_id=@state_id,
+        parent_mm_id=@parent_mm_id,
+        opening_date=@opening_date,
+        nimitt_id=@nimitt_id,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update mm set 
         mm_hin=@mm_hin,
@@ -602,6 +790,42 @@ const point = {
         @point_hin,
         @point_eng,
         @active)`
+    , insert_ignore:
+        `insert or ignore into country (
+            _id,
+            type,
+            mrl_date,	
+            clrf_date,
+            time_from,
+            time_to,
+            point_hin,
+            point_eng,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @type,
+            @mrl_date,	
+            @clrf_date,
+            @time_from,
+            @time_to,
+            @point_hin,
+            @point_eng,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update country set 
+        type=@type,
+        mrl_date=@mrl_date,	
+        clrf_date=@clrf_date,
+        time_from=@time_from,
+        time_to=@time_to,
+        point_hin=@point_hin,
+        point_eng=@point_eng,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update point set 
         type=@type,
@@ -711,15 +935,39 @@ const state = {
         left join country cnt on cnt._id = state.country_id  ? limit @limit offset @offset`
     , insert:
         `insert into state (
-        state_hin,
-        state_eng,
-        country_id,
-        active)
-    values (
-        @state_hin,
-        @state_eng,
-        @country_id,
-        @active)`
+            state_hin,
+            state_eng,
+            country_id,
+            active)
+        values (
+            @state_hin,
+            @state_eng,
+            @country_id,
+            @active)`
+    , insert_ignore:
+        `insert or ignore into state (
+            _id,
+            state_hin,
+            state_eng,
+            country_id,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @state_hin,
+            @state_eng,
+            @country_id,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update state set 
+        state_hin=@state_hin,
+        state_eng=@state_eng,
+        country_id=@country_id,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update state set 
         state_hin=@state_hin,
@@ -764,6 +1012,39 @@ const subitem = {
         @extra_note,
         @document,
         @active)`
+    , insert_ignore:
+        `insert or ignore into subitem (
+            _id,
+            item_id,
+            subitem_list_id,
+            categories,
+            unit_id,
+            extra_note,
+            document,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @item_id,
+            @subitem_list_id,
+            @categories,
+            @unit_id,
+            @extra_note,
+            @document,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update subitem set 
+        item_id=@item_id,
+        subitem_list_id=@subitem_list_id,
+        categories=@categories,
+        unit_id=@unit_id,
+        extra_note=@extra_note,
+        document=@document,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update subitem set 
         item_id=@item_id,
@@ -795,6 +1076,27 @@ const subitem_list = {
         @subitem_hin,
         @subitem_eng,
         @active)`
+    , insert_ignore:
+        `insert or ignore into subitem_list (
+            _id,
+            subitem_hin,
+            subitem_eng,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @subitem_hin,
+            @subitem_eng,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update subitem_list set 
+        subitem_hin=@subitem_hin,
+        subitem_eng=@subitem_eng,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update subitem_list set 
         subitem_hin=@subitem_hin,
@@ -820,6 +1122,30 @@ const support_list = {
         @list_name_hin,
         @list_name_eng,
         @active)`
+    , insert_ignore:
+        `insert or ignore into support_list (
+            _id,
+            list_type,
+            list_name_hin,
+            list_name_eng,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @list_type,
+            @list_name_hin,
+            @list_name_eng,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update support_list set 
+        list_type=@list_type,
+        list_name_hin=@list_name_hin,
+        list_name_eng=@list_name_eng,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update support_list set 
         list_type=@list_type,
@@ -982,6 +1308,27 @@ const unit = {
             @unit_short,
             @unit_full,
             @active)`
+    , insert_ignore:
+        `insert or ignore into unit (
+            _id,
+            unit_short,
+            unit_full,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @unit_short,
+            @unit_full,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update unit set 
+        unit_short=@unit_short,
+        unit_full=@unit_full,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update unit set
         unit_short=@unit_short,
@@ -1032,9 +1379,6 @@ genDeptDB = {
 
     // bachat: `insert into bachat select * from mainDB.bachat where dept_id = ?`,
 }
-
-
-
 
 
 module.exports = {

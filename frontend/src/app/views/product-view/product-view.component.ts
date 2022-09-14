@@ -34,7 +34,6 @@ export class ProductViewComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log("change", changes);
 
     if (changes.getData.currentValue) {
       this.product = changes.getData.currentValue;
@@ -43,7 +42,6 @@ export class ProductViewComponent implements OnInit {
     if (this.product.document && this.product.document.images && this.product.document.images.length > 0) {
       this.product.image = this.product.document.images[0];
     }
-    console.log("prdt", this.product);
   }
 
   ngOnInit(): void {
@@ -68,12 +66,12 @@ export class ProductViewComponent implements OnInit {
             jpkt_num: null,
             jawak_mm_hin: null
           };
+          this.product.tracking_detail.push(trk);
           for (let j = 0; j < data['result'][i].jawak_detail.length; j++) {
             if (j == 0) {
-              trk.jdate = data['result'][i].jawak_detail[j].date;
-              trk.jpkt_num = data['result'][i].jawak_detail[j].pkt_num;
-              trk.jawak_mm_hin = data['result'][i].jawak_detail[j].jawak_mm_hin;
-              this.product.tracking_detail.push(trk);
+              this.product.tracking_detail[i].jdate = data['result'][i].jawak_detail[j].date;
+              this.product.tracking_detail[i].jpkt_num = data['result'][i].jawak_detail[j].pkt_num;
+              this.product.tracking_detail[i].jawak_mm_hin = data['result'][i].jawak_detail[j].jawak_mm_hin;              
             } else {
               trk = {
                 date:null,
@@ -87,8 +85,6 @@ export class ProductViewComponent implements OnInit {
               this.product.tracking_detail.push(trk);
             }
           }
-          console.log(this.product.tracking_detail);
-          
         }
 
       }

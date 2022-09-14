@@ -225,6 +225,11 @@ export class DepartmentComponent implements OnInit {
       },
       point: {
         visible: false
+      },
+      report:{
+        visible:true,
+        pbk:false,
+        product:false        
       }
     }
 

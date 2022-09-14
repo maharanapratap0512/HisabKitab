@@ -110,7 +110,7 @@ class DBContex {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
 
-                if(tblname=="aawak")
+                if (tblname == "aawak")
                     console.log(sql);
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
@@ -173,6 +173,7 @@ class DBContex {
             }
         })
     }
+
 
     //under construction
     // insertMany = this.db.transaction((data) => {
