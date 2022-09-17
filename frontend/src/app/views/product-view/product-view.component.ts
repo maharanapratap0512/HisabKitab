@@ -17,10 +17,9 @@ export class ProductViewComponent implements OnInit {
   baseUrl: any;
   isLoader: any;
   product: any = null;
-  item: any = null;
   renameFileName: any;
   @Input() getData: any;
-  // @Input() isEdit: any;
+  @Input() item: any;
   @Output() response = new EventEmitter();
 
   constructor(
@@ -34,14 +33,13 @@ export class ProductViewComponent implements OnInit {
     this.baseUrl = this.api.getUrl('BASE');
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    console.log("changes.getData.currentValue ", changes.getData.currentValue);
-    if (changes.getData.currentValue && changes.getData.currentValue.company_name) {
+  ngOnChanges(changes: SimpleChanges) {    
+    if (changes.getData && changes.getData.currentValue) {
       this.product = changes.getData.currentValue;
       this.getAawakData();
     }
-    else if (changes.getData.currentValue && !changes.getData.currentValue.company_name) {
-      this.item = changes.getData.currentValue
+    if (changes.item && changes.item.currentValue) {
+      this.item = changes.item.currentValue
     }
 
     if (this.product && this.product.document && this.product.document.images && this.product.document.images.length > 0) {

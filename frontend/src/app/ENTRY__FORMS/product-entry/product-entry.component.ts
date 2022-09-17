@@ -125,6 +125,8 @@ export class ProductEntryComponent implements OnInit {
         isbill: changes.getData.currentValue.isbill,
         nimitt_id: changes.getData.currentValue.nimitt_id
       });
+      this.sr_numChanged({target:{value:changes.getData.currentValue.sr_num}});
+      this.codeChanged({target:{value:changes.getData.currentValue.product_code}});
       this.imagepath = (changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images : null)
     }
   }

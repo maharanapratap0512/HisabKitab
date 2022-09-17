@@ -255,7 +255,7 @@
                [getData]="editData"></app-item-entry>
             <app-subitem-entry *ngIf="showModal == 'Edit Subitem'" (response)='editSubitemResponse($event)'
                [getData]="editData" [isEdit]="true"></app-subitem-entry>
-            <app-product-view *ngIf="showModal == 'View Product'" [getData]="editData"></app-product-view>
+            <app-product-view *ngIf="showModal == 'View Product'" [item]="editData"></app-product-view>
          </div>
          <div class="modal-footer">
             <div class="form-check form-switch">
