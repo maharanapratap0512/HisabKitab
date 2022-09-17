@@ -130,6 +130,7 @@ export class ProductEntryComponent implements OnInit {
   }
 
   imagesSelectResponse(ev: any) {
+    console.log("prod", ev);
     if (ev) {
       this.isLoader = true;
       $('#productEntryComponent > #addImages').modal('hide');

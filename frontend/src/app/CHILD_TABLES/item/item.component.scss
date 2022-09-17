@@ -5,9 +5,19 @@
 
 .main-row {
    background-color: #4e5af421;
-    color: #fff;
+   color: #fff;
 }
 
 .sub-row {
    background-color: #4956f108;
+}
+
+.imageCount {
+   position: absolute;
+   background-color: #0000003d;
+   font-size: small;
+   margin: 3px;
+   // left: 300px;
+   // bottom: 0px;
+   // right: 15px;
 }

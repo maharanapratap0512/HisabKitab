@@ -102,10 +102,11 @@
                                  </div>
                               </td>
                               <td *ngIf="settings.document">
-                                 <div class="d-flex" *ngIf="data.document && data.document.images">
-                                    <img [src]="baseurl + data.document.images[0]" height="60px">
+                                 <div class="d-flex flex-wrap" *ngIf="data.document && data.document.images"
+                                    (click)="viewProduct(data)">
                                     <span class="imageCount">x{{data.document.images.length}}</span>
-
+                                    <img *ngFor=" let img of data.document.images" [src]="baseurl + img" height="25px"
+                                       width="25px" alt="image" style="object-fit: cover;">
                                  </div>
                               </td>
                               <td

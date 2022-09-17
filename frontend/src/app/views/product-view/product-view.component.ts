@@ -17,6 +17,7 @@ export class ProductViewComponent implements OnInit {
   baseUrl: any;
   isLoader: any;
   product: any = null;
+  item: any = null;
   renameFileName: any;
   @Input() getData: any;
   // @Input() isEdit: any;
@@ -34,13 +35,20 @@ export class ProductViewComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-
-    if (changes.getData.currentValue) {
+    console.log("changes.getData.currentValue ", changes.getData.currentValue);
+    if (changes.getData.currentValue && changes.getData.currentValue.company_name) {
       this.product = changes.getData.currentValue;
+      this.getAawakData();
     }
-    this.getAawakData();
-    if (this.product.document && this.product.document.images && this.product.document.images.length > 0) {
+    else if (changes.getData.currentValue && !changes.getData.currentValue.company_name) {
+      this.item = changes.getData.currentValue
+    }
+
+    if (this.product && this.product.document && this.product.document.images && this.product.document.images.length > 0) {
       this.product.image = this.product.document.images[0];
+    }
+    else if (this.item && this.item.document && this.item.document.images && this.item.document.images.length > 0) {
+      this.item.image = this.item.document.images[0];
     }
   }
 
@@ -71,13 +79,13 @@ export class ProductViewComponent implements OnInit {
             if (j == 0) {
               this.product.tracking_detail[i].jdate = data['result'][i].jawak_detail[j].date;
               this.product.tracking_detail[i].jpkt_num = data['result'][i].jawak_detail[j].pkt_num;
-              this.product.tracking_detail[i].jawak_mm_hin = data['result'][i].jawak_detail[j].jawak_mm_hin;              
+              this.product.tracking_detail[i].jawak_mm_hin = data['result'][i].jawak_detail[j].jawak_mm_hin;
             } else {
               trk = {
-                date:null,
-                pkt_num:null,
-                mm_hin:null,
-                aawak_mm_hin:null,
+                date: null,
+                pkt_num: null,
+                mm_hin: null,
+                aawak_mm_hin: null,
                 jdate: data['result'][i].jawak_detail[j].date,
                 jpkt_num: data['result'][i].jawak_detail[j].pkt_num,
                 jawak_mm_hin: data['result'][i].jawak_detail[j].jawak_mm_hin

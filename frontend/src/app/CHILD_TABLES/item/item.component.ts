@@ -120,6 +120,11 @@ export class ItemComponent implements OnInit {
 
     }
   }
+  viewProduct(data: any) {        
+    this.editData = data;
+    this.showModal = 'View Product'
+    $('#showModal').modal('show');
+  }
   catSelected(ev: any) {
     if (ev) {
       this.conditionObj.categories = ev;
