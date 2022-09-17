@@ -301,8 +301,8 @@
                            <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
                            <th style="width: 150px;">Aawak Type</th>
                            <th style="width: 180px;">Item - Subitem</th>
+                           <th style="width: 150px;" *ngIf="settings.aawak.condition_id || settings.aawak.product_id">Product</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.company_name">Company</th>
-                           <th style="width: 100px;" *ngIf="settings.aawak.condition_id">Condition</th>
                            <th style="width: 100px;">Qty</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.actual_amt">Actual Amt</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.nimitt_id">Nimitt</th>
@@ -359,11 +359,12 @@
                                  {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
                                  {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
                               </td>
+                              <td *ngIf="settings.aawak.condition_id || settings.aawak.product_id">
+                                 {{data.product_id ? (data.product_code ? data.product_code : '') + " : " + (data.sr_num ? data.sr_num : '') : ''}} <br />
+                                 {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
+                              </td>
                               <td *ngIf="settings.aawak.company_name">
                                  {{data.company_name ? data.company_name : ''}}
-                              </td>
-                              <td *ngIf="settings.aawak.condition_id">
-                                 {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
                               </td>
                               <td>
                                  {{data.qty}} {{data.unit_short}} <br />

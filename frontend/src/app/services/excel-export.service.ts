@@ -38,7 +38,11 @@ export class ExcelExportService {
     const data: Blob = new Blob([buffer], {
       type: EXCEL_TYPE
     });
-    FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+    if(fileName && fileName.trim()==''){
+      FileSaver.saveAs(data, 'HK_export_' + new Date().getTime() + EXCEL_EXTENSION);
+    }else{
+      FileSaver.saveAs(data, fileName + EXCEL_EXTENSION);
+    }
   }
 
 

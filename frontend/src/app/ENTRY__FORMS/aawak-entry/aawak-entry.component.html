@@ -250,18 +250,18 @@
                </div>
             </div> -->
 
-            <div class="col-md-2 mb-3">
+            <div class="col-md-2 mb-3" [ngClass]="{'readOnly':awkfg.product_id}">
                <div class="form-group">
                   <label class="form-label">Quantity</label>
                   <div class="input-group">
                      <input type="text" class="form-control" placeholder="Quantity" [(ngModel)]="awkfg.qty" name="qty"
-                        #qty="ngModel" (focusout)="qtyclick()"
+                        #qty="ngModel" (focusout)="qtyclick()" [readonly]="awkfg.product_id"
                         [ngClass]="{ 'validation': (qty?.touched || f.submitted) && qty.errors?.['required']}" required>
                      <span class="input-group-text ml-1 border border-secondary"
                         style="padding: 0px; min-width: 40%;background: #252932;">
                         <ng-select class="custom" style="width: 100%;" placeholder="Unit" [clearable]="true"
                            [virtualScroll]="true" [(ngModel)]="awkfg.unit_id" name="unit_id" #unit_id="ngModel"
-                           [readonly]="isEdit">
+                           [readonly]="isEdit || awkfg.product_id">
                            <ng-option selected="selected" disabled value="">Unit</ng-option>
                            <ng-option *ngFor="let item of units" [value]="item._id">{{item.unit_short}}</ng-option>
                         </ng-select>
@@ -327,13 +327,16 @@
 
             <div class="col-md-2 mb-3" *ngIf="settings.aawak.document">
                <div class="form-group">
+                  <!-- <label class="form-label">Image</label> -->
                   <a onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
                      class="form-control" style="cursor: pointer;">
                      <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
-                     <img src="{{this.api.getUrl('BASE')+imagepath}}" alt="image" class="rounded m-1" height="48"
-                        *ngIf="imagepath">
-                     <i *ngIf="!imagepath">Click To Change</i>
-                  </a>
+                     <div *ngIf="imagepath && imagepath.length > 0">
+                        <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image" class="rounded m-1" height="48" /> 
+                        x {{imagepath.length}}
+                     </div>
+                     <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
+                  </a>                  
                </div>
             </div>
 

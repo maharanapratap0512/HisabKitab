@@ -23,11 +23,7 @@
                         <button class="btn btn-success mx-3" onclick="$('#showModal').modal('show')"
                            (click)="showModal = 'Add Subitem'">
                            <i class="dripicons-plus h4 icon-mx-1"> </i>Add Subitem
-                        </button>
-                        <!-- <button class="btn btn-success mx-3"
-                           (click)="exportItem()">
-                           <i class="dripicons-plus h4 icon-mx-1"> </i>Export 
-                        </button> -->
+                        </button>                        
                      </div>
                      <div class="col-3">
                         <div class="form-group">
@@ -70,11 +66,18 @@
             <div class="row" *ngIf="itemData.length">
                <pagination-controls class="pagi text-end" (pageChange)="getItemData(page = $event)" [autoHide]="true">
                </pagination-controls>
+               <div>
+                  <div class="form-check form-switch">
+                     <input type="checkbox" class="form-check-input" [(ngModel)]="expandAll"
+                        [ngModelOptions]="{standalone: true}">
+                        <label class="form-check-label" for="customSwitch2">Expand All</label>
+                     </div>
+               </div>
                <div class="card-body" style="overflow: auto;">
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
-                           <th style="width: 50px;">No.</th>
+                           <th style="width: 50px;" (click)="FilterActive()">No.</th>
                            <th style="width: 210px;">Manage</th>
                            <th style="width: 100px;">Image</th>
                            <th style="width: 250px;">Item Name (Hin-Eng)</th>
@@ -152,7 +155,7 @@
                            </tr> -->
                            <ng-container *ngFor="let si of data.subitems ;let j=index">
                               <ng-container *ngIf="si">
-                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse"
+                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse" [ngClass]="{'show':expandAll}"
                                     *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
                                     <td style="border: none;"></td>
                                     <td colspan="6" class="sub-row">

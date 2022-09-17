@@ -1302,7 +1302,7 @@ class dbModal {
           console.log(err);
         }
 
-      });
+      });     
 
       this.db.pragma('foreign_keys=OFF');
       this.db.pragma('legacy_alter_table=ON');

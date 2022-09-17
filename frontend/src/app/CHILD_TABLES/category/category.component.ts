@@ -4,9 +4,11 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { ExcelExportService } from 'src/app/services/excel-export.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
 declare var $: any;
 
 @Component({
@@ -22,7 +24,7 @@ export class CategoryComponent implements OnInit {
   editData: any = {};
   categoryData: any = [];
   total_count: any = 0;
-  settings:any = {};
+  settings: any = {};
 
   constructor(
     private http: HttpService,
@@ -30,8 +32,10 @@ export class CategoryComponent implements OnInit {
     public gs: GlobalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    public auth: AuthService
-  ) { }
+    public auth: AuthService,
+    private excelExportService: ExcelExportService
+  ) {    
+   }
 
   ngOnInit(): void {
     this.spinner.show();
@@ -77,6 +81,52 @@ export class CategoryComponent implements OnInit {
     }
   }
 
+  exportToExcel() {
+    this.isLoader = true;
+    this.http.get(this.api.getUrl('CATEGORY') + 1).subscribe((data) => {
+      if (data['result'] && data['success']) {
+        let date = new Date();
+        this.excelExportService.exportAsExcelFile(data['result'], "Category_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+        this.isLoader = false;
+      }
+      this.isLoader = false;
+    });
+  }
+
+  excelImport(ev: any) {
+    let workBooks: any = null;
+    const reader = new FileReader();
+    const file = ev.target.files[0];
+    reader.onload = (event) => {
+      this.isLoader = true;
+      const data = reader.result;
+      workBooks = XLSX.read(data, { type: 'binary' });
+      console.log(workBooks);
+
+      let jsonData: any = [];
+      jsonData = XLSX.utils.sheet_to_json(workBooks.Sheets[workBooks.SheetNames[0]]);
+      // this.jsonData = workBooks.SheetNames.reduce((initial: any, name: any) => {
+      //   const sheet = workBooks.Sheets[name];
+      //   initial[name] = XLSX.utils.sheet_to_json(sheet);
+      //   return initial;
+      // }, {});
+      this.http.put(this.api.getUrl('CATEGORY') + 'import', jsonData).subscribe((data:any) => {
+        if (data['result'] && data['success']) {
+          console.log(data);
+          
+          this.isLoader = false;
+        }
+        this.isLoader = false;
+      });
+
+    }
+
+
+    reader.readAsBinaryString(file);
+    ev = '';
+
+  }
+
   edit(data: any) {
     this.editData = data;
     this.showModal = 'Edit Category'
@@ -116,18 +166,18 @@ export class CategoryComponent implements OnInit {
     body.query = {
       _id: id
     }
-    body.set = {      
+    body.set = {
       active: !active
     };
-    this.http.put(this.api.getUrl('CATEGORY'), body).subscribe((data: any) => {     
-        this.categoryData.splice(this.categoryData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);    
-        this.isLoader = false;  
-        if(data['result'].active){
-          this.toastr.success("Protetion Shield Activated");
-        }      
-        else{          
-          this.toastr.success("Protetion Shield Deactivated");
-        }
+    this.http.put(this.api.getUrl('CATEGORY'), body).subscribe((data: any) => {
+      this.categoryData.splice(this.categoryData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);
+      this.isLoader = false;
+      if (data['result'].active) {
+        this.toastr.success("Protetion Shield Activated");
+      }
+      else {
+        this.toastr.success("Protetion Shield Deactivated");
+      }
     }, err => {
       this.toastr.error(err['message']);
       this.isLoader = false;

@@ -149,7 +149,8 @@ export class HeaderComponent implements OnInit {
 
   importZip = async (ev: any) => {
     this.isLoader = true;
-
+    console.log("clicked", ev);
+    
     if (ev.target.files[0]) {
 
       const fileReader: any = new FileReader();
@@ -165,6 +166,8 @@ export class HeaderComponent implements OnInit {
           if (zip) {
             // getting name of all exists files in zip in array.
             let fileNames = Object.keys(zip.files);
+            console.log("readed",zip);
+            
             // loop through all files
             for (let i in fileNames) {
 
@@ -318,6 +321,18 @@ export class HeaderComponent implements OnInit {
                   zip.file(fileNames[i]).async("string").then((data: any) => {
                     if (data) {
                       this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'subitem', data: JSON.parse(data) }).subscribe((result: any) => {
+                        this.importResult.push(result);
+                      });
+                    }
+                  }, (err:any) => {
+                    console.log(err);
+                    
+                  });
+                  break;
+                case 'item.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'item', data: JSON.parse(data) }).subscribe((result: any) => {
                         this.importResult.push(result);
                       });
                     }

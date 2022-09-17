@@ -112,6 +112,21 @@ const category = {
             @category_hin,
             @category_eng,
             @active)`
+    , import:
+        `insert into category (
+            _id,
+            category_hin,
+            category_eng,
+            created_at,
+            updated_at,
+            active)
+        values (
+            @_id,
+            @category_hin,
+            @category_eng,
+            @created_at,
+            @updated_at,
+            @active)`
     , insert_ignore:
         `insert or ignore into category (
             _id,
@@ -277,6 +292,29 @@ const item = {
             @unit_id,
             @extra_note,
             @document,
+            @active)`
+    , import:
+        `insert into item (
+            item_hin,
+            item_eng,
+            item_code,
+            categories,
+            unit_id,
+            extra_note,
+            document,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @item_hin,
+            @item_eng,
+            @item_code,
+            @categories,
+            @unit_id,
+            @extra_note,
+            @document,
+            @created_at,
+            @updated_at,
             @active)`
     , insert_ignore:
         `insert or ignore into item (
@@ -1012,6 +1050,27 @@ const subitem = {
         @extra_note,
         @document,
         @active)`
+    , import:
+        `insert into subitem (
+        item_id,
+        subitem_list_id,
+        categories,
+        unit_id,
+        extra_note,
+        document,
+        created_at,
+        updated_at,
+        active)
+    values (
+        @item_id,
+        @subitem_list_id,
+        @categories,
+        @unit_id,
+        @extra_note,
+        @document,
+        @created_at,
+        @updated_at,
+        @active)`
     , insert_ignore:
         `insert or ignore into subitem (
             _id,
@@ -1076,6 +1135,17 @@ const subitem_list = {
         @subitem_hin,
         @subitem_eng,
         @active)`
+    , import:
+        `insert into subitem_list (
+        _id,
+        subitem_hin,
+        subitem_eng,
+        active)
+    values (
+        @_id,
+        @subitem_hin,
+        @subitem_eng,
+        1)`
     , insert_ignore:
         `insert or ignore into subitem_list (
             _id,

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
@@ -13,6 +13,7 @@ declare var $: any;
   templateUrl: './product-entry.component.html',
   styleUrls: ['./product-entry.component.scss']
 })
+
 export class ProductEntryComponent implements OnInit {
 
   @Input() getData: any;
@@ -49,22 +50,22 @@ export class ProductEntryComponent implements OnInit {
   ) {
     this.productForm = this.fb.group({
       model_name: [null],
-      sr_num: [null],
+      sr_num: [null, Validators.required],
       company_name: [null],
       price: [null],
-      condition_id: [null],
+      condition_id: [null, Validators.required],
       warranty_period: [null],
       warranty_from: [null],
       purchase_date: [null],
       purchase_from: [null],
       purchased_by: [null],
-      product_code: [null],
+      product_code: [null, Validators.required],
       product_detail: [null],
-      item_id: [null],
+      item_id: [null, Validators.required],
       subitem_id: [null],
       unit_id: [1],
-      mm_id: [null],
-      document: [null],
+      mm_id: [null, Validators.required],
+      document: [[]],
       dept_id: [this.auth.webUser.dept_id],
       accessories: [null],
       nimitt_id: [null],
@@ -100,7 +101,7 @@ export class ProductEntryComponent implements OnInit {
     if (changes.getData && changes.getData.currentValue) {
       this.getData = changes.getData.currentValue;
       console.log(this.getData);
-      
+
       this.productForm.patchValue({
         mm_id: changes.getData.currentValue.mm_id,
         purchased_by: changes.getData.currentValue.purchased_by,
@@ -235,6 +236,23 @@ export class ProductEntryComponent implements OnInit {
     else {
       this.gs.validationFireOnSubmit(this.productForm);
     }
+  }
+
+  sr_numChanged(ev: any) {
+    if (ev.target.value) {
+      this.productForm.controls['product_code'].clearValidators();                 
+    } else {    
+      this.productForm.controls['product_code'].setValidators(Validators.required);                 
+    }
+    this.productForm.controls['product_code'].updateValueAndValidity();
+  }
+  codeChanged(ev: any) {
+    if (ev.target.value) {
+      this.productForm.controls['sr_num'].clearValidators();                 
+    } else {    
+      this.productForm.controls['sr_num'].setValidators(Validators.required);                 
+    }
+    this.productForm.controls['sr_num'].updateValueAndValidity();
   }
 
   mmAddResponse(ev: any) {
@@ -383,9 +401,9 @@ export class ProductEntryComponent implements OnInit {
       })
     }
     else {
-      
+
     }
-  }  
+  }
 
   getItemData(ev: any) {
     this.http.put(this.api.getUrl('ITEMMIX') + ev, {}).subscribe((data: any) => {

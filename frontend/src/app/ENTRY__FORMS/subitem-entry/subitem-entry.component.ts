@@ -87,7 +87,11 @@ export class SubitemEntryComponent implements OnInit {
           let i = this.gs.Lists.itemmix.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
           this.gs.Lists.itemmix[i].subitems.push(data['result']);
           // this.gs.Lists.itemmix[i].categories.push(data['result'].categories);
-          this.subitemForm.reset({ item_id: data['result'].item_id });
+          this.subitemForm.reset({
+            item_id: data['result'].item_id, 
+            unit_id: data['result'].unit_id,
+            categories: data['result'].categories           
+          });
           this.isLoader = false;
           this.toastr.success('SUBITEM added successfully.')
           this.response.emit(data['result']);

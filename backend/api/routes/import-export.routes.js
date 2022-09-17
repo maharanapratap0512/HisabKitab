@@ -70,11 +70,11 @@ router.get('/correction', async (req, res, next) => {
         correctionList.push(...DB.db.prepare(`select DISTINCT aj_mm as name, 'aj_mm' as type, null as id, false as dictionary from temp_import where aj_mm IS NOT NULL AND aj_mm_id IS NULL`).all());
 
         //jwk_mm        
-        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_mm') as name, 'aj_mm' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_mm_id') IS NULL`).all());
+        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_mm') as name, 'aj_mm' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_mm_id') IS NULL AND json_extract(json_each.value, '$.aj_mm') IS NOT NULL`).all());
         // jwk_type
-        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_type') as name, 'jwk_type' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_type_id') IS NULL`).all());
+        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_type') as name, 'jwk_type' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_type_id') IS NULL AND json_extract(json_each.value, '$.aj_type') IS NOT NULL`).all());
         // jwk_nimitt
-        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.nimitt') as name, 'nimitt' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.nimitt_id') IS NULL`).all());
+        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.nimitt') as name, 'nimitt' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.nimitt_id') IS NULL AND json_extract(json_each.value, '$.nimitt') IS NOT NULL`).all());
 
         res.json({
             success: true,
@@ -248,7 +248,7 @@ router.get('/update_lists/:dept_id', async (req, res, next) => {
             lists.subitem_list = await DB.getList('subitem_list') || []
             lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id }) || []
             lists.nimitt = await DB.getList('nimitt', { dept_id: req.params.dept_id }) || []
-            lists.product = await DB.getList('product', { dept_id: req.params.dept_id }) || []
+            // lists.product = await DB.getList('product', { dept_id: req.params.dept_id }) || []
             // lists.aawak = await DB.getList('aawak', { dept_id: req.params.dept_id }) || []
             // lists.jawak = await DB.getList('jawak', { dept_id: req.params.dept_id }) || []
             lists.point = await DB.getList('point') || []
@@ -282,15 +282,25 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
                     const insert_stmt = DB.db.prepare(DB.query[tblname].insert_ignore);
                     const update_stmt = DB.db.prepare(DB.query[tblname].import_update);
                     for (let i in data) {
-
-                        let updt_res = update_stmt.run(data[i]);
-                        // console.log("updt_res", updt_res);
-                        if (updt_res) {
-                            if (updt_res.changes > 0) {
-                                update_entries.push(data[i]);
-                            }
+                        if(!data[i]._id){
+                            data[i]._id = null;
                         }
-                        
+                        if(tblname=="item" || tblname=="subitem" ){
+                            data[i].categories = JSON.parse(data[i].categories ? data[i].categories : "[]");
+                            data[i].categories = data[i].categories.filter(c=>c);
+                            data[i].categories = JSON.stringify(data[i].categories);
+                            data[i].active = 1;
+
+
+                        }
+                        // let updt_res = update_stmt.run(data[i]);
+                        // // console.log("updt_res", updt_res);
+                        // if (updt_res) {
+                        //     if (updt_res.changes > 0) {
+                        //         update_entries.push(data[i]);
+                        //     }
+                        // }
+
                         let res = insert_stmt.run(data[i]);
                         // console.log("res", res);
                         if (res) {

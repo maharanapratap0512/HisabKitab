@@ -51,6 +51,9 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
         if (req.body._id) {
             itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` item._id = ${req.body._id}`;
         }
+        if (req.body.active) {
+            itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` item.active = ${req.body.active}`;
+        }
         if (req.body.categories) {
             itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` (json_each.value = ${req.body.categories} OR subitems <> '[]')`;
             sitemCondition += (sitemCondition.trim() != `` ? ` AND` : ``) + ` json_each.value = ${req.body.categories}`;

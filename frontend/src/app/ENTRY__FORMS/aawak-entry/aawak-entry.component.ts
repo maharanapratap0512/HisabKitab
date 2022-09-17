@@ -106,6 +106,7 @@ export class AawakEntryComponent implements OnInit {
 		});
 		this.settings = this.auth.webUser.settings;
 		this.getDepartments();
+		this.getProductData(null);
 	}
 
 	ngOnInit(): void { }
@@ -179,7 +180,7 @@ export class AawakEntryComponent implements OnInit {
 
 		}
 		else {
-			let jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == this.awkfg.aawak_type_id);
+			let jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == 28);
 			if (jwk_type) {
 				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin };
 			}
@@ -188,7 +189,7 @@ export class AawakEntryComponent implements OnInit {
 	}
 
 	add_jwk() {
-		let jwk_type
+		let jwk_type;
 		if (this.jmm.id == this.awkfg.mm_id) {
 			jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == 27);
 			if (jwk_type) {
@@ -196,7 +197,7 @@ export class AawakEntryComponent implements OnInit {
 			}
 		}
 		else {
-			jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == this.awkfg.aawak_type_id);
+			jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == 28);
 			if (jwk_type) {
 				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin };
 			}
@@ -230,6 +231,8 @@ export class AawakEntryComponent implements OnInit {
 		}
 
 		this.awkfg.jawak_detail.push(jwkfg);
+		console.log("addjawak", this.awkfg);
+
 
 		// this.jwkArr.push(jwkfg2);
 		this.jmm = null;
@@ -283,11 +286,11 @@ export class AawakEntryComponent implements OnInit {
 	}
 
 	imagesSelectResponse(ev: any) {
-		if (ev.path) {
+		if (ev) {
 			this.isLoader = true;
 			this.closeModal();
-			this.imagepath = ev.path;
-			this.awkfg.document = { images: [ev.path] }
+			this.imagepath = ev;
+			this.awkfg.document = {images: ev}
 			this.isLoader = false;
 		}
 		else {
@@ -315,7 +318,7 @@ export class AawakEntryComponent implements OnInit {
 						date: this.awkfg.date,
 						mm_id: this.awkfg.mm_id,
 						aawak_mm_id: this.awkfg.aawak_mm_id,
-						nimitt_id: this.awkfg.nimitt_id
+						nimitt_id: this.awkfg.nimitt_id,
 					});
 					this.awkfg.jawak_detail = []
 
@@ -706,17 +709,19 @@ export class AawakEntryComponent implements OnInit {
 	}
 
 	getProductData(item_id: any) {
+		let body = {};
 		if (item_id && item_id != undefined) {
-			let body = {
+			body = {
 				item_id: item_id
 			}
-			this.http.put(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, body).subscribe((data: any) => {
-				if (data['result']) {
-					// this.productsAll = data['result'];
-					this.products = data['result'];
-				}
-			});
+
 		}
+		this.http.put(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, body).subscribe((data: any) => {
+			if (data['result']) {
+				// this.productsAll = data['result'];
+				this.products = data['result'];
+			}
+		});
 	}
 
 }

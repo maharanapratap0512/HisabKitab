@@ -81,7 +81,7 @@
                </div>
             </div>
 
-            <div class="col-md-2 mb-3" *ngIf="settings.aawak.nimitt_id">
+            <div class="col-md-2 mb-3" *ngIf="settings.product.nimitt_id">
                <div class="form-group">
                   <label class="form-label">Nimitt</label>
                   <a type="button" *ngIf="settings.nimitt.add" style="padding: 1px 6px !important;"
@@ -170,9 +170,9 @@
                <div class="form-group">
                   <label class="form-label">Serial No / Product Code</label>
                   <input type="text" class="form-control" placeholder="S/R Number" formControlName="sr_num"
-                     [ngClass]="{'validation':productForm.get('sr_num')?.errors && (productForm.get('sr_num')?.touched || productForm.get ('sr_num')?.dirty)}">
+                     [ngClass]="{'validation':productForm.get('sr_num')?.errors && (productForm.get('sr_num')?.touched || productForm.get ('sr_num')?.dirty)}" (input)="sr_numChanged($event)">
                   <input type="text" class="form-control mt-1" placeholder="Product Code" formControlName="product_code"
-                     [ngClass]="{'validation':productForm.get('product_code')?.errors && (productForm.get('product_code')?.touched || productForm.get ('product_code')?.dirty)}">
+                     [ngClass]="{'validation':productForm.get('product_code')?.errors && (productForm.get('product_code')?.touched || productForm.get ('product_code')?.dirty)}" (input)="codeChanged($event)">
                </div>
             </div>
 

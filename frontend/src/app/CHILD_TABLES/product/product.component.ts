@@ -3,6 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
+import { ExcelExportService } from 'src/app/services/excel-export.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
@@ -21,6 +22,7 @@ export class ProductComponent implements OnInit {
   showModal: string = '';
   editData: any = {};
   productData: any = [];
+  productDataAll: any = [];
   total_count: any = 0;;
   baseurl: any;
   settings: any = {};
@@ -32,7 +34,8 @@ export class ProductComponent implements OnInit {
     public gs: GlobalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    public auth: AuthService
+    public auth: AuthService,
+    private excelExportService:ExcelExportService
   ) {
     this.settings = this.auth.webUser.settings.product;
   }
@@ -47,6 +50,7 @@ export class ProductComponent implements OnInit {
     this.isLoader = true;
     this.http.get(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id).subscribe((data) => {
       if (data['result'] && data['success']) {
+        this.productDataAll = data['result'];
         this.productData = data['result'];
         this.total_count = data['total_count'];
         this.isLoader = false;
@@ -95,7 +99,40 @@ export class ProductComponent implements OnInit {
     this.editData = data;
     this.showModal = 'Edit Product'
     $('#showModal').modal('show');
-  } 
+  }
+
+  exportToExcel() {
+    let excelData = [];
+    for (let i in this.productData) {
+      excelData.push({
+        No: i,
+        "अभी कहा है": this.productData[i].last_mm_hin ? this.productData[i].last_mm_hin : this.productData[i].mm_hin,
+        "कब से है": this.productData[i].last_date ? this.productData[i].last_date : this.productData[i].purchase_date,
+        "अभी की स्थिति": this.productData[i].last_condition_hin ? this.productData[i].last_condition_hin : this.productData[i].condition_hin,
+        "Sr No": this.productData[i].sr_num ? this.productData[i].sr_num : '',
+        "Pr Code": this.productData[i].product_code ? this.productData[i].product_code : '',
+        "तारीख": this.productData[i].purchase_date ? this.productData[i].purchase_date : '',
+        "मि.म.": this.productData[i].mm_hin,
+        "आइटम": this.productData[i].item_hin,
+        "सबआइटम": this.productData[i].subitem_hin ? this.productData[i].subitem_hin : '',
+        "कंपनी": this.productData[i].company_name ? this.productData[i].company_name : '',
+        "मोडेल": this.productData[i].model_name ? this.productData[i].model_name : '',
+        "कन्डिशन": this.productData[i].condition_hin,
+        "रेट": this.productData[i].price ? this.productData[i].price : 0,
+        "वॉरन्टी समय": this.productData[i].warranty_period ? this.productData[i].warranty_period : '',
+        "वॉरन्टी कहाँ से ?": this.productData[i].warranty_from ? this.productData[i].warranty_from : '',
+        "कहाँ से खरीदा": this.productData[i].purchase_from ? this.productData[i].purchase_from : '',
+        "किसके थ्रू": this.productData[i].purchased_by ? this.productData[i].purchased_by : '',
+        "डेटाइल माहिती": this.productData[i].product_detail ? this.productData[i].product_detail : '',
+        "साथ मे क्या2 आया": this.productData[i].accessories ? this.productData[i].accessories : '',
+        "निमित्त": this.productData[i].nimitt_hin ? this.productData[i].nimitt_hin : ''
+
+      });
+    }
+    let date = new Date();
+    this.excelExportService.exportAsExcelFile(excelData, "product_list_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
+
+  }
 
   delete(i: any, id: any) {
     Swal.fire({
@@ -125,7 +162,7 @@ export class ProductComponent implements OnInit {
     })
   }
 
-  viewProduct(data: any) {        
+  viewProduct(data: any) {
     this.editData = data;
     this.showModal = 'View Product'
     $('#showModal').modal('show');

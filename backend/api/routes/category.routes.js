@@ -66,6 +66,28 @@ router.put('/', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+// update category 
+router.put('/import/', async (req, res, next) => {
+    try {
+        if (req.body) {
+            let stmt = DB.db.prepare(DB.query.subitem_list.import);
+            for(let i in req.body){
+                if(req.body[i].subitem_eng == undefined){
+                    req.body[i].subitem_eng = null;
+                }
+                else if(req.body[i].subitem_eng.trim() == 'NULL' || req.body[i].subitem_eng.trim() == ''){
+                    req.body[i].subitem_eng = null;
+                }
+                console.log(req.body[i]);
+                let res = stmt.run(req.body[i])
+            }            
+        }
+        else {
+            return next(new Error('Id not Found.'))
+        }
+    } catch (err) { next(err) };
+});
+
 
 // delete category 
 router.delete('/:id', async (req, res, next) => {

@@ -35,7 +35,7 @@ export class AawakComponent implements OnInit {
   aawakAll: any = [];
   total_count: any = 0;
   allAJData: any = [];
-  awkCount:any = 0;
+  awkCount: any = 0;
   mms: any = [];
   viewData: any = [];
   items: any = [];
@@ -127,6 +127,7 @@ export class AawakComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getaawakData();
+    this.getProductData();
     this.checkTempImport();
     this.getDictionary();
 
@@ -158,6 +159,18 @@ export class AawakComponent implements OnInit {
     })
   }
 
+  getProductData() {   
+    this.isLoader = true 
+    this.http.put(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, {}).subscribe((data: any) => {
+      if (data['result']) {
+        this.products = data['result'];
+        this.productsAll = data['result'];
+        this.isLoader=false;
+      }
+    });
+    this.isLoader = false;
+  }
+
   getaawakData(pageNo: any = null) {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
@@ -178,8 +191,8 @@ export class AawakComponent implements OnInit {
     });
   }
 
-  getAawakPage(page:any = null){
-    if(page){
+  getAawakPage(page: any = null) {
+    if (page) {
       this.pageNo = page;
       this.getFilteredAawakData();
     }
@@ -275,8 +288,10 @@ export class AawakComponent implements OnInit {
         awkObj = {
           ...awkObj,
           'Category': cat,
-            'Item': result[i].item_id ? result[i].item_hin : '-',
+          'Item': result[i].item_id ? result[i].item_hin : '-',
           'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
+          'Product Code': result[i].product_code ? result[i].product_code : '-',
+          'Sr No': result[i].sr_num ? result[i].sr_num : '-',
           'Company': result[i].company_name ? result[i].company_name : '-',
           'Condition': result[i].condition_id ? result[i].condition_hin : '-',
           'Bill': result[i].isbill ? 'है' : '-',
@@ -303,7 +318,7 @@ export class AawakComponent implements OnInit {
       }
     });
   }
-  
+
   exportAawakData() {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
@@ -315,7 +330,7 @@ export class AawakComponent implements OnInit {
 
     this.exportAJdata$.subscribe(async (result: any) => {
       // console.log("exportAJdata", result);
-      for (let i = 0; i < result.length; i++) {        
+      for (let i = 0; i < result.length; i++) {
         let awkObj: any = {
           'No': i + 1,
           'Date': result[i].date ? result[i].date : '-',
@@ -350,6 +365,8 @@ export class AawakComponent implements OnInit {
           'Category': cat,
           'Item': result[i].item_id ? result[i].item_hin : '-',
           'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
+          'Product Code': result[i].product_code ? result[i].product_code : '-',
+          'Sr No': result[i].sr_num ? result[i].sr_num : '-',
           'Company': result[i].company_name ? result[i].company_name : '-',
           'Condition': result[i].condition_id ? result[i].condition_hin : '-',
           'Bill': result[i].isbill ? 'है' : '-',
@@ -377,16 +394,16 @@ export class AawakComponent implements OnInit {
   exportJawakData() {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
-    this.pageNo = 0;   
-    this.awkCount = 0; 
+    this.pageNo = 0;
+    this.awkCount = 0;
     this.allAJData = [];
     this.exportAJdata$ = new Subject();
 
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
-      for (let i = 0; i < result.length; i++) {   
-        
+      for (let i = 0; i < result.length; i++) {
+
         let awkObj = {
           'Item': result[i].item_id ? result[i].item_hin : '-',
           'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
@@ -405,9 +422,9 @@ export class AawakComponent implements OnInit {
             'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
             'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-'
           });
-        }   
+        }
       }
-      this.awkCount += result.length;                         
+      this.awkCount += result.length;
 
       if (this.awkCount < this.total_count) {
         this.getMoreAJ();
@@ -779,7 +796,7 @@ export class AawakComponent implements OnInit {
                 }
                 break;
               case "item": obj.item = exceldata[i][j];
-                let getitem = this.items.find((i: any) => [i.item_hin, i.item_eng, i.item_code].includes(obj.item));
+                let getitem = this.items.find((i: any) => [i.item_hin.trim(), i.item_eng, i.item_code].includes(obj.item));
                 if (getitem) {
                   obj.item_id = getitem._id;
                 } else {
@@ -790,7 +807,7 @@ export class AawakComponent implements OnInit {
               case "subitem": obj.subitem = exceldata[i][j];
                 if (obj.item_id) {
                   let getitem = this.items.find((i: any) => i._id == obj.item_id);
-                  let getsubitem = getitem.subitems.find((m: any) => [m.subitem_hin, m.subitem_eng, m.subitem_code].includes(obj.subitem));
+                  let getsubitem = getitem.subitems.find((m: any) => [m.subitem_hin.trim(), m.subitem_eng, m.subitem_code].includes(obj.subitem));
                   obj.subitem_id = getsubitem ? getsubitem._id : null;
                 }
                 break;
@@ -798,10 +815,18 @@ export class AawakComponent implements OnInit {
               case "product_code":
               case "product code":
               case "serial no":
+              case "sr no":
                 if (this.settings.aawak.product_id) {
-                  obj.product = exceldata[i][j];
-                  let getproduct = this.products.find((p: any) => [p.sr_no, p.product_code].includes(obj.product));
-                  obj.product_id = getproduct ? getproduct._id : null;
+                  if(!obj.product){
+                    obj.product = exceldata[i][j];
+                  }
+                  if(!obj.product_id){
+                    
+                    let getproduct = this.productsAll.find((p: any) => [p.sr_no, p.product_code].includes(exceldata[i][j]));
+                    console.log(exceldata[i][j], getproduct, this.productsAll);
+                    
+                    obj.product_id = getproduct ? getproduct._id : null;
+                  }
                 }
                 break;
               case "company":

@@ -21,7 +21,7 @@ export class ItemComponent implements OnInit {
   itemsPerPage = 100;
   currentPage: any;
   totalItems: any;
-
+  expandAll:any = false;
   isLoader: boolean = false;
   term: any;
   showModal: string = '';
@@ -59,6 +59,11 @@ export class ItemComponent implements OnInit {
     this.settings = this.auth.webUser.settings;
   }
 
+  FilterActive(){
+   this.itemData = this.itemDataAll.filter((i: { active: any; })=>!i.active)
+   
+  }
+
   getItemData(pageNo: any) {
     this.isLoader = true;
     this.conditionObj.pageNo = pageNo;
@@ -66,6 +71,7 @@ export class ItemComponent implements OnInit {
       if (data['result'] && data['success']) {
         // this.itemDataAll = data['result'];
         this.itemData = data['result'];
+        this.itemDataAll = data['result'];
         this.total_count = data['total_count'];
         this.si_total_count = data['subitem_count']
         this.isLoader = false;
@@ -78,20 +84,26 @@ export class ItemComponent implements OnInit {
     let item = [];
     for (let it of this.itemData) {
       item.push({
+        _id:it._id,
+        subitem_id:null,
         item_hin: it.item_hin,
         item_eng: it.item_eng,
         subitem_hin: null,
         subitem_eng: null,
         unit: it.unit_short,
+        category_id: it.categories,
         category: it.categories_hin
       });
       for (let sit of it.subitems) {
         item.push({
+          _id:it._id,
+          subitem_id:sit._id,
           item_hin: it.item_hin,
           item_eng: it.item_eng,
           subitem_hin: sit.subitem_hin,
           subitem_eng: sit.subitem_eng,
           unit: sit.unit_short,
+          category_id: sit.categories,
           category: sit.categories_hin
         });
       }
