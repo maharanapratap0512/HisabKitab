@@ -100,7 +100,7 @@ export class ProductEntryComponent implements OnInit {
     if (changes.getData && changes.getData.currentValue) {
       this.getData = changes.getData.currentValue;
       console.log(this.getData);
-      
+
       this.productForm.patchValue({
         mm_id: changes.getData.currentValue.mm_id,
         purchased_by: changes.getData.currentValue.purchased_by,
@@ -129,6 +129,7 @@ export class ProductEntryComponent implements OnInit {
   }
 
   imagesSelectResponse(ev: any) {
+    console.log("prod", ev);
     if (ev) {
       this.isLoader = true;
       $('#productEntryComponent > #addImages').modal('hide');
@@ -383,9 +384,9 @@ export class ProductEntryComponent implements OnInit {
       })
     }
     else {
-      
+
     }
-  }  
+  }
 
   getItemData(ev: any) {
     this.http.put(this.api.getUrl('ITEMMIX') + ev, {}).subscribe((data: any) => {

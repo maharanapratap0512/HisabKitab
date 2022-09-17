@@ -180,16 +180,10 @@ export class ItemEntryComponent implements OnInit {
       this.isLoader = true;
       $('#itemComponent > #showModal').modal('hide');
       this.showModal = '';
-      for (let i in ev) {
-        console.log("ev[i].path", ev[i].path);
-        this.docFile.push(ev[i].path)
-      }
-      console.log("docFile", this.docFile);
-
+      this.imagepath = ev;
       this.itemForm.patchValue({
-        document: { images: this.docFile }
+        document: { images: ev }
       });
-      console.log(" this.itemForm", this.itemForm.value.document);
       this.isLoader = false;
     }
     else {
