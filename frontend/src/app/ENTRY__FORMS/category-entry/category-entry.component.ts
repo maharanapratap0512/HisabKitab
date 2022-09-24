@@ -38,10 +38,10 @@ export class CategoryEntryComponent implements OnInit {
 
   ngOnChanges(changes: SimpleChanges) {
     console.log("cat-changes", changes);
-    if (changes.getData.currentValue) {
+    if (changes.getData && changes.getData.currentValue) {
       this.categoryForm.patchValue({
         category_eng: changes.getData.currentValue.category_eng,
-        category_hin: changes.getData.currentValue.category_hin
+        category_hin: changes.getData.currentValue.category_hin ? changes.getData.currentValue.category_hin : null
       });
     }
   }

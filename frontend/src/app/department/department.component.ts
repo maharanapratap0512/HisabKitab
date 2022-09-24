@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
+import * as e from 'express';
 import * as FileSaver from 'file-saver';
 import * as JSZip from 'jszip';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -48,13 +49,18 @@ export class DepartmentComponent implements OnInit {
   termDept: any;
   categories: any = [];
   items: any = [];
+  cities: any = [];
   itemmix: any = [];
   itemsAll: any = [];
   subitems: any = [];
+  countries: any = [];
   subitemsAll: any = [];
   ajtypes: any = [];
+  support_lists: any = [];
+  subitem_lists: any = [];
   viewData: any = [];
   states: any = [];
+  units: any = [];
   genders: any = [];
   statuses: any = [];
   itemMixCondition: any = {};
@@ -66,6 +72,15 @@ export class DepartmentComponent implements OnInit {
   getItem$ = new Subject();
   itemTotal: any;
   settings: any = {}
+  importData: any = {};
+  editData: any = {};
+  isEdit: boolean = false;
+  iZip: any;
+  iFilenames: any = [];
+  filterBlank: boolean = false;
+  page = 1;
+  pi = 0;
+
 
   constructor(
     private fb: FormBuilder,
@@ -91,10 +106,17 @@ export class DepartmentComponent implements OnInit {
     // });
     this.spinner.show();
     this.getDepartments();
+    this.getSupportList();
     this.gs.observeList().subscribe(result => {
       this.states = result.state ? result.state : [];
+      this.units = result.unit ? result.unit : [];
+      this.mms = result.mm ? result.mm : [];
+      // this.support_lists = result.support_list ? result.support_list : [];
+      this.subitem_lists = result.subitem_list ? result.subitem_list : [];
       this.genders = result.gender ? result.gender : [];
       this.statuses = result.status ? result.status : [];
+      this.cities = result.city ? result.city : [];
+      this.countries = result.country ? result.country : [];
     });
     this.deptSelected(this.auth.webUser.dept_id);
     this.settingsAll = {
@@ -226,10 +248,10 @@ export class DepartmentComponent implements OnInit {
       point: {
         visible: false
       },
-      report:{
-        visible:true,
-        pbk:false,
-        product:false        
+      report: {
+        visible: true,
+        pbk: false,
+        product: false
       }
     }
 
@@ -241,6 +263,17 @@ export class DepartmentComponent implements OnInit {
       if (data['result'] && data['success']) {
         // this.departments = data['result'].filter((i: { _id: number; }) => i._id > 1);
         this.departments = data['result'];
+        this.isLoader = false;
+      }
+      this.isLoader = false;
+    });
+  }
+  getSupportList() {
+    this.isLoader = true;
+    this.http.get(this.api.getUrl('SUPPORTLIST')).subscribe((data) => {
+      if (data['result'] && data['success']) {
+        // this.departments = data['result'].filter((i: { _id: number; }) => i._id > 1);
+        this.support_lists = data['result'].data;
         this.isLoader = false;
       }
       this.isLoader = false;
@@ -295,208 +328,9 @@ export class DepartmentComponent implements OnInit {
 
           //checking zip data found or not
           if (zip) {
-            // getting name of all exists files in zip in array.
-            let fileNames = Object.keys(zip.files);
-
-            // loop through all files
-            for (let i in fileNames) {
-
-              //accept only files that listed below, other ignore.
-              switch (fileNames[i]) {
-                case 'settings.json':
-
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-
-                    if (data) {
-                      let setting = JSON.parse(data);
-                      let body = {
-                        query: {
-                          _id: (setting._id ? setting._id : null),
-                          dept_id: setting.dept_id,
-                          config_key: setting.config_key,
-                        },
-                        set: {
-                          config_key: setting.config_key,
-                          config_value: setting.config_value,
-                          active: setting.active,
-                          created_at: setting.created_at,
-                          updated_at: setting.updated_at,
-                        }
-                      }
-
-                      this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((resdata: any) => {
-                        if (resdata.result.length > 0) {
-                          let setting = JSON.parse(resdata.result[0].config_value);
-                          if (resdata.result[0].dept_id == this.auth.webUser.dept_id) {
-                            this.auth.updateSettings(setting);
-                          }
-                          this.toastr.success("settings import successfully");
-                        }
-                      });
-                    }
-                    else {
-                      this.toastr.error('can not read settings file from zip')
-                    }
-                  });
-                  break;
-
-                case 'category.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let category = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
-                      console.log("category", category);
-
-                    }
-                    else {
-                      this.toastr.error('can not read category file from zip');
-                    }
-                  });
-                  break;
-
-                case 'city.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let city = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
-                      console.log("city", city);
-
-                    }
-                    else {
-                      this.toastr.error('can not read city file from zip');
-                    }
-                  });
-                  break;
-
-                case 'country.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let country = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
-                      console.log("country", country);
-
-                    }
-                    else {
-                      this.toastr.error('can not read country file from zip');
-                    }
-                  });
-                  break;
-
-                case 'item.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let item = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
-                      console.log("item", item);
-
-                    }
-                    else {
-                      this.toastr.error('can not read item file from zip');
-                    }
-                  });
-                  break;
-
-                case 'mm.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let mm = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
-                      console.log("mm", mm);
-
-                    }
-                    else {
-                      this.toastr.error('can not read mm file from zip');
-                    }
-                  });
-                  break;
-
-                case 'pbk.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let pbk = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
-                      console.log("pbk", pbk);
-
-                    }
-                    else {
-                      this.toastr.error('can not read pbk file from zip');
-                    }
-                  });
-                  break;
-
-                case 'product.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let product = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
-                      console.log("product", product);
-
-                    }
-                    else {
-                      this.toastr.error('can not read product file from zip');
-                    }
-                  });
-                  break;
-
-                case 'state.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let state = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
-                      console.log("state", state);
-
-                    }
-                    else {
-                      this.toastr.error('can not read state file from zip');
-                    }
-                  });
-                  break;
-
-                case 'subitem.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let subitem = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
-                      console.log("subitem", subitem);
-
-                    }
-                    else {
-                      this.toastr.error('can not read subitem file from zip');
-                    }
-                  });
-                  break;
-
-                case 'subitem_list.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let subitem_list = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
-                      console.log("subitem_list", subitem_list);
-
-                    }
-                    else {
-                      this.toastr.error('can not read subitem_list file from zip');
-                    }
-                  });
-                  break;
-
-                case 'support_list.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let support_list = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
-                      console.log("support_list", support_list);
-
-                    }
-                    else {
-                      this.toastr.error('can not read support_list file from zip');
-                    }
-                  });
-                  break;
-
-                case 'unit.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let unit = JSON.parse(data).filter((c: { active: number; }) => c.active == 0);
-                      console.log("unit", unit);
-
-                    }
-                    else {
-                      this.toastr.error('can not read unit file from zip');
-                    }
-                  });
-                  break;
-              }
-            }
+            this.iZip = zip;
+            this.iFilenames = [{ name: 'country' }, { name: 'state' }, { name: 'city' }, { name: 'support_list' }, { name: 'mm' }, { name: 'unit' }, { name: 'subitem_list' }, { name: 'item' }, { name: 'subitem' }];
+            this.loadImportData();
           }
 
         });
@@ -506,6 +340,582 @@ export class DepartmentComponent implements OnInit {
     }
     this.isLoader = false;
     ev = null;
+  }
+
+  loadImportData() {
+    let files = Object.keys(this.iZip.files);
+
+    for (let i in this.iFilenames) {
+      if (!this.iFilenames[i].finish && files.includes(this.iFilenames[i].name + '.json')) {
+        this.iZip.file(this.iFilenames[i].name + '.json').async("string").then((data: any) => {
+          if (data) {
+            let iData: any = JSON.parse(data);
+            this.importData = { type: this.iFilenames[i].name, count: iData.length }
+
+            switch (this.iFilenames[i].name) {
+              case 'country': this.matchCountry(iData, i);
+                break;
+              case 'state': this.matchState(iData, i);
+                break;
+              case 'city': this.matchCity(iData, i);
+                break;
+              case 'support_list': this.matchSupportList(iData, i);
+                break;
+              case 'mm': this.matchMM(iData, i);
+                break;
+              case 'unit': this.matchUnit(iData, i);
+                break;
+              case 'subitem_list': this.matchSubitemList(iData, i);
+                break;
+              case 'item': this.matchItem(iData, i);
+                break;
+              case 'subitem': this.matchSubitem(iData, i);
+                break;
+
+            }
+
+          }
+        });
+        break;
+      } else {
+        this.iFilenames[i].finish = true;
+      }
+    }
+
+    $('#importModal').modal('show');
+  }
+
+  finishMatching(data: any, index: any) {
+    let pendingCount = data.filter((c: { update: any; alt_found: any; insert: any; }) => c.update || c.alt_found || c.insert).length;
+    if (pendingCount > 0) {
+      this.importData.columns = Object.keys(data[0]);
+      this.importData.pendingCount = pendingCount;
+      this.importData.data = data
+
+    } else {
+      if (this.iFilenames[index].name == 'item') {
+        this.iFilenames[index].result = data.filter((d: { new_id: any; }) => d.new_id).map((d: { _id: any, new_id: any, new_subitem_id: any }) => ({ _id: d._id, new_id: d.new_id, subitem_id: d.new_subitem_id }));
+      } else {
+        this.iFilenames[index].result = data.filter((d: { new_id: any; }) => d.new_id).map((d: { _id: any, new_id: any }) => ({ _id: d._id, new_id: d.new_id }));
+      }
+      this.iFilenames[index].finish = true;
+      console.log(this.iFilenames);
+
+      this.loadImportData();
+    }
+
+  }
+
+  matchCountry(countryData: any, index: any) {
+
+    for (let i in countryData) {
+      // matching through list of categories
+      for (let cnt of this.countries) {
+        if (cnt._id == countryData[i]._id && cnt.created_at == countryData[i].created_at) {
+          if (cnt.country_hin == countryData[i].country_hin && cnt.country_eng == countryData[i].country_eng) {
+            countryData[i].found = true;
+          }
+          else {
+            countryData[i].update = true;
+          }
+          break;
+        }
+        else {
+          if (cnt.country_hin == countryData[i].country_hin || cnt.country_eng == countryData[i].country_eng) {
+            countryData[i].alt_found = true;
+            countryData[i].new_id = cnt._id
+          }
+        }
+      }
+      countryData[i].insert = (countryData[i].found || countryData[i].update || countryData[i].alt_found) ? false : true;
+    }
+    if (countryData.filter((c: { update: any; alt_found: any; insert: any; }) => c.update || c.alt_found || c.insert).length > 0) {
+      this.importData.columns = Object.keys(countryData[0]);
+      this.importData.data = countryData
+    } else {
+      this.iFilenames[index].result = countryData.filter((d: { new_id: any; }) => d.new_id).map((d: { _id: any, new_id: any }) => ({ _id: d._id, new_id: d.new_id }));
+      this.iFilenames[index].finish = true;
+      this.loadImportData();
+    }
+
+  }
+
+  matchState(stateData: any, index: any) {
+    for (let i in stateData) {
+
+      // replacing old id of country with new one if found
+      let country = this.iFilenames.find((f: { name: any }) => f.name == "country");
+      if (country && country.result && country.result.length > 0) {
+        for (let j in country.result) {
+          if (country.result[j]._id == stateData[i].country_id) {
+            stateData[i].country_id = country.result[j].new_id;
+            break;
+          }
+        }
+      }
+
+      // matching through list of categories
+      for (let st of this.states) {
+        if (st._id == stateData[i]._id && st.created_at == stateData[i].created_at) {
+          if (st.state_hin == stateData[i].state_hin && st.state_eng == stateData[i].state_eng && st.country_id == stateData[i].country_id) {
+            stateData[i].found = true;
+          }
+          else {
+            stateData[i].update = true;
+          }
+          break;
+        }
+        else {
+          if ((st.state_hin == stateData[i].state_hin || st.state_eng == stateData[i].state_eng) && st.country_id == stateData[i].country_id) {
+            stateData[i].alt_found = true;
+            stateData[i].new_id = st._id
+          }
+        }
+      }
+      stateData[i].insert = (stateData[i].found || stateData[i].update || stateData[i].alt_found) ? false : true;
+    }
+    if (stateData.filter((c: { update: any; alt_found: any; insert: any; }) => c.update || c.alt_found || c.insert).length > 0) {
+      this.importData.columns = Object.keys(stateData[0]);
+      this.importData.data = stateData
+    } else {
+      this.iFilenames[index].result = stateData.filter((d: { new_id: any; }) => d.new_id).map((d: { _id: any, new_id: any }) => ({ _id: d._id, new_id: d.new_id }));
+      this.iFilenames[index].finish = true;
+      this.loadImportData();
+    }
+
+  }
+
+  matchMM(mmData: any, index: any) {
+    for (let i in mmData) {
+
+      let state = this.iFilenames.find((f: { name: any }) => f.name == "state");
+      if (state && state.result && state.result.length > 0) {
+        for (let j in state.result) {
+          if (state.result[j]._id == mmData[i].state_id) {
+            mmData[i].state_id = state.result[j].new_id;
+            break;
+          }
+        }
+      }
+
+      // matching through list of mms
+      for (let mm of this.mms) {
+        if (mm._id == mmData[i]._id && mm.created_at == mmData[i].created_at) {
+          if (mm.mm_hin == mmData[i].mm_hin && mm.mm_eng == mmData[i].mm_eng && mm.state_id == mmData[i].state_id) {
+            mmData[i].found = true;
+          }
+          else {
+            mmData[i].update = true;
+          }
+          break;
+        }
+        else {
+          if ((mm.mm_hin == mmData[i].mm_hin || mm.mm_eng == mmData[i].mm_eng) && mm.state_id == mmData[i].state_id) {
+            mmData[i].alt_found = true;
+            mmData[i].new_id = mm._id
+          }
+        }
+      }
+      mmData[i].insert = (mmData[i].found || mmData[i].update || mmData[i].alt_found) ? false : true;
+    }
+    this.finishMatching(mmData, index);
+  }
+
+  matchCity(cityData: any, index: any) {
+    for (let i in cityData) {
+      //replacing old ids of state to new_id      
+      let state = this.iFilenames.find((f: { name: any }) => f.name == "state");
+      if (state && state.result && state.result.length > 0) {
+        for (let j in state.result) {
+          if (state.result[j]._id == cityData[i].state_id) {
+            cityData[i].state_id = state.result[j].new_id;
+            break;
+          }
+        }
+      }
+
+      // matching through list of categories
+      for (let ct of this.cities) {
+        if (ct._id == cityData[i]._id && ct.created_at == cityData[i].created_at) {
+          if (ct.city_hin == cityData[i].city_hin && ct.city_eng == cityData[i].city_eng && ct.state_id == cityData[i].state_id) {
+            cityData[i].found = true;
+          }
+          else {
+            cityData[i].update = true;
+          }
+          break;
+        }
+        else {
+          if ((ct.city_hin == cityData[i].city_hin || ct.city_eng == cityData[i].city_eng) && ct.state_id == cityData[i].state_id) {
+            cityData[i].alt_found = true;
+            cityData[i].new_id = ct._id
+          }
+        }
+      }
+      cityData[i].insert = (cityData[i].found || cityData[i].update || cityData[i].alt_found) ? false : true;
+    }
+    this.finishMatching(cityData, index);
+  }
+
+  matchSupportList(splistData: any, index: any) {
+    for (let i in splistData) {
+      // matching through list of categories
+      for (let sl of this.support_lists) {
+        if (sl._id == splistData[i]._id && sl.created_at == splistData[i].created_at) {
+          if (sl.list_type == splistData[i].list_type && sl.list_name_hin == splistData[i].list_name_hin && sl.list_name_eng == splistData[i].list_name_eng) {
+            splistData[i].found = true;
+          }
+          else {
+            splistData[i].update = true;
+          }
+          break;
+        }
+        else {
+          if (sl.list_type == splistData[i].list_type && (sl.list_name_hin == splistData[i].list_name_hin || sl.list_name_eng == splistData[i].list_name_eng)) {
+            splistData[i].alt_found = true;
+            splistData[i].new_id = sl._id
+          }
+        }
+      }
+      splistData[i].insert = (splistData[i].found || splistData[i].update || splistData[i].alt_found) ? false : true;
+    }
+    this.finishMatching(splistData, index);
+  }
+
+  matchUnit(unitData: any, index: any) {
+
+    for (let i in unitData) {
+      // matching through list of categories
+      for (let ut of this.units) {
+        if (ut._id == unitData[i]._id && ut.created_at == unitData[i].created_at) {
+          if (ut.unit_short == unitData[i].unit_short && ut.unit_full == unitData[i].unit_full) {
+            unitData[i].found = true;
+          }
+          else {
+            unitData[i].update = true;
+          }
+          break;
+        }
+        else {
+          if (ut.unit_full == unitData[i].unit_full || ut.unit_short == unitData[i].unit_short) {
+            unitData[i].alt_found = true;
+            unitData[i].new_id = ut._id
+          }
+        }
+      }
+      unitData[i].insert = (unitData[i].found || unitData[i].update || unitData[i].alt_found) ? false : true;
+    }
+    this.finishMatching(unitData, index);
+  }
+
+  matchSubitemList(siListData: any, index: any) {
+    for (let i in siListData) {
+      // matching through list of subitem_lists
+      for (let si of this.subitem_lists) {
+        if (si._id == siListData[i]._id && si.created_at == siListData[i].created_at) {
+          console.log(si, siListData[i]);
+          if (si.subitem_hin == siListData[i].subitem_hin && (!si.subitem_eng || si.subitem_eng == siListData[i].subitem_eng)) {
+            siListData[i].found = true;
+          }
+          else {
+            siListData[i].update = true;
+          }
+          break;
+        }
+        else {
+          if (si.subitem_hin == siListData[i].subitem_hin || (si.subitem_eng && si.subitem_eng == siListData[i].subitem_eng)) {
+            siListData[i].alt_found = true;
+            siListData[i].new_id = si._id
+            break;
+          }
+          else if ((siListData[i].subitem_eng && si.subitem_hin.replace(/\s/g, "") == siListData[i].subitem_eng.replace(/\s/g, "")) || (si.subitem_eng && si.subitem_eng.replace(/\s/g, "") == siListData[i].subitem_hin.replace(/\s/g, ""))) {
+            siListData[i].alt_found = true;
+            siListData[i].new_id = si._id
+            break;
+          }
+        }
+      }
+      siListData[i].insert = (siListData[i].found || siListData[i].update || siListData[i].alt_found) ? false : true;
+    }
+    this.finishMatching(siListData, index);
+  }
+
+  matchItem(itemData: any, index: any) {
+
+    for (let i in itemData) {
+      //replacing old id of unit with new one    
+      let unit = this.iFilenames.find((f: { name: any }) => f.name == "unit");
+      if (unit && unit.result && unit.result.length > 0) {
+        for (let j in unit.result) {
+          if (unit.result[j]._id == itemData[i].unit_id) {
+            itemData[i].unit_id = unit.result[j].new_id;
+            break;
+          }
+        }
+      }
+      if (typeof itemData[i].categories == 'string') {
+        itemData[i].categories = JSON.parse(itemData[i].categories);
+      }
+      //replacing old id of category with new one    
+      let category = this.iFilenames.find((f: { name: any }) => f.name == "category");
+      if (category && category.result && category.result.length > 0) {
+        for (let j in category.result) {
+          for (let k in itemData[i].categories) {
+            if (category.result[j]._id == itemData[i].categories[k]) {
+              itemData[i].categories[k] = category.result[j].new_id;
+              break;
+            }
+          }
+        }
+      }
+
+      for (let it of this.itemmix) {
+        if (it._id == itemData[i]._id && it.created_at == itemData[i].created_at) {
+          if (it.item_hin == itemData[i].item_hin && it.item_eng == itemData[i].item_eng && it.item_code == itemData[i].item_code && it.categories == itemData[i].categories && it.unit_id == itemData[i].unit_id && it.extra_note == itemData[i].extra_note) {
+            itemData[i].found = true;
+          }
+          else {
+            itemData[i].update = true;
+          }
+          itemData[i].new_item = it;
+          itemData[i].new_id = it._id;
+          break;
+        }
+        else {
+          if (it.item_hin == itemData[i].item_hin || it.item_eng == itemData[i].item_eng) {
+            itemData[i].new_item = it;
+            itemData[i].new_id = it._id;
+            break;
+          } else if ((itemData[i].item_eng && it.item_hin.replace(/\s/g, "") == itemData[i].item_eng.replace(/\s/g, "")) || (it.item_eng && it.item_eng.replace(/\s/g, "") == itemData[i].item_hin.replace(/\s/g, ""))) {
+            itemData[i].new_item = it;
+            itemData[i].new_id = it._id;
+            break;
+          }
+        }
+      }
+      itemData[i].insert = (itemData[i].found || itemData[i].update || itemData[i].alt_found) ? false : true;
+    }
+    this.finishMatching(itemData, index);
+  }
+
+  matchSubitem(subitemData: any, index: any) {
+    let item = this.iFilenames.find((f: { name: any }) => f.name == "item");
+    console.log("item", item);
+
+    // let ite  mData: any;
+    for (let i in subitemData) {
+
+      //replacing old id of unit with new one    
+      let unit = this.iFilenames.find((f: { name: any }) => f.name == "unit");
+      if (unit && unit.result && unit.result.length > 0) {
+        for (let j in unit.result) {
+          if (unit.result[j]._id == subitemData[i].unit_id) {
+            subitemData[i].unit_id = unit.result[j].new_id;
+            break;
+          }
+        }
+      }
+      //replacing old subitem_list_id with new one.
+      let subitem_list = this.iFilenames.find((f: { name: any }) => f.name == "subitem_list");
+      if (subitem_list && subitem_list.result && subitem_list.result.length > 0) {
+        for (let j in subitem_list.result) {
+          if (subitem_list.result[j]._id == subitemData[i].subitem_list_id) {
+            subitemData[i].subitem_list_id = subitem_list.result[j].new_id;
+            break;
+          }
+        }
+      }
+
+      if (typeof subitemData[i].categories == 'string') {
+        subitemData[i].categories = JSON.parse(subitemData[i].categories).filter((c: any) => c);
+      }
+      //replacing old id of category with new one    
+      let category = this.iFilenames.find((f: { name: any }) => f.name == "category");
+      if (category && category.result && category.result.length > 0) {
+        for (let j in category.result) {
+          for (let k in subitemData[i].categories) {
+            if (category.result[j]._id == subitemData[i].categories[k]) {
+              subitemData[i].categories[k] = category.result[j].new_id;
+              break;
+            }
+          }
+        }
+      }
+
+      let subitem = this.subitem_lists.find((s: { _id: any; }) => s._id == subitemData[i].subitem_list_id);
+      if (subitem) {
+        subitemData[i].subitem_hin = subitem.subitem_hin;
+        subitemData[i].subitem_eng = subitem.subitem_eng;
+      }
+
+      subitemData[i].item_hin = null;
+      subitemData[i].item_eng = null;
+
+
+      //replacing old item_id with new one.      
+      if (item && item.result && item.result.length > 0) {
+        for (let j in item.result) {
+          if (item.result[j]._id == subitemData[i].item_id) {
+            subitemData[i].item_id = item.result[j].new_id;
+            subitemData[i].new_subitem_id = item.result[j].new_subtiem_id
+            break;
+          }
+        }
+      }
+
+      let itemData = this.itemmix.find((it: { _id: any; }) => it._id == subitemData[i].item_id);
+
+      if (itemData) {
+        subitemData[i].new_item = itemData;
+        subitemData[i].new_id = itemData._id;
+        subitemData[i].item_hin = itemData.item_hin;
+        subitemData[i].item_eng = itemData.item_eng;
+        for (let sit of itemData.subitems) {
+          if (sit._id == subitemData[i]._id) {
+            subitemData[i].new_subitem_id = sit._id;
+            if (sit.subitem_list_id == subitemData[i].subitem_list_id && JSON.stringify(sit.categories) == JSON.stringify(subitemData[i].categories) && sit.unit_id == subitemData[i].unit_id && sit.extra_note == subitemData[i].extra_note) {
+              subitemData[i].found = true;
+            }
+            else {
+              subitemData[i].update = true;
+            }
+            break;
+          }
+          else if (sit.subitem_list_id == subitemData[i].subitem_list_id) {
+            subitemData[i].new_subitem_id = sit._id;
+            if (JSON.stringify(sit.categories) == JSON.stringify(subitemData[i].categories) && sit.unit_id == subitemData[i].unit_id && sit.extra_note == subitemData[i].extra_note) {
+              subitemData[i].found = true;
+            } else {
+              subitemData[i].update = true;
+            }
+          }
+        }
+        if (!subitemData[i].found && !subitemData[i].update) {
+          subitemData[i].insert = true;
+        }
+      }
+    }
+    this.finishMatching(subitemData, index);
+  }
+
+  importItemSelected(ev: any, index: any) {
+    this.importData.data[index].new_id = ev ? ev._id : null;
+  }
+
+  combinedItemSubitem() {
+    let itemData = this.importData.item.data;
+    let subitemData = this.importData.subitem.data;
+    for (let i in itemData) {
+      itemData[i].subitems = subitemData.filter((s: { item_id: any; }) => s.item_id == itemData[i]._id);
+    }
+    console.log(itemData);
+
+  }
+
+  submitImportData() {
+    if (this.importData.data.find((i: { found: any; new_id: any; }) => !i.found && !i.new_id)) {
+      this.importData.error = true;
+      this.importData.msg = 'some correction may be pending';
+    } else {
+      for (let i in this.iFilenames) {
+        if (this.iFilenames[i].name == this.importData.type) {
+          if (this.importData.type == 'item') {
+            this.iFilenames[i].result = this.importData.data.filter((d: { _id: any, new_id: any; }) => d.new_id && d.new_id != d._id).map((d: { _id: any, new_id: any, new_subitem_id: any }) => ({ _id: d._id, new_id: d.new_id, subitem_id: d.new_subitem_id }));
+          } else {
+            this.iFilenames[i].result = this.importData.data.filter((d: { new_id: any; }) => d.new_id).map((d: { _id: any, new_id: any }) => ({ _id: d._id, new_id: d.new_id }));
+          }
+          this.iFilenames[i].finish = true;
+          break;
+        }
+      }
+      this.loadImportData();
+    }
+
+  }
+
+  bulkImportSubitem() {
+    console.log("clicked");
+    
+    this.isLoader = true;
+    for(let index in this.importData.data){
+      if(!this.importData.data[index].found && this.importData.data[index].new_id){
+        this.http.post(this.api.getUrl('SUBITEM') + this.auth.webUser.dept_id, this.importData.data[index]).subscribe((data: any) => {
+          if (data['result'] && data['success']) {
+            // this.gs.Lists.subitem.unshift(data['result'])
+            let i = this.gs.Lists.itemmix.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
+            this.gs.Lists.itemmix[i].subitems.push(data['result']);
+            this.itemmix[this.itemmix.findIndex((it: { _id: any; }) => it._id == data['result'].item_id)].subitems.push(data['result']);
+            this.importData.data[index].new_subitem_id = data['result']._id;
+            this.toastr.success('SUBITEM added successfully.')
+          } else {
+            this.toastr.error(data['message']);
+          }
+        }, err => {
+          this.toastr.error(err['error']);
+        });
+      }
+      else{
+        console.log(this.importData.data[index]);
+        
+      }
+    }
+    this.isLoader = false;
+  }
+
+  insertImportData(index: any) {
+
+    if (this.importData.type == 'subitem') {
+      this.isLoader = true;
+      this.http.post(this.api.getUrl('SUBITEM') + this.auth.webUser.dept_id, this.importData.data[index]).subscribe((data: any) => {
+        if (data['result'] && data['success']) {
+          // this.gs.Lists.subitem.unshift(data['result'])
+          let i = this.gs.Lists.itemmix.findIndex((i: { _id: any; }) => i._id == data['result'].item_id);
+          this.gs.Lists.itemmix[i].subitems.push(data['result']);
+          this.itemmix[this.itemmix.findIndex((it: { _id: any; }) => it._id == data['result'].item_id)].subitems.push(data['result']);
+          this.importData.data[index].new_subitem_id = data['result']._id;
+          this.isLoader = false;
+          this.toastr.success('SUBITEM added successfully.')
+        } else {
+          this.toastr.error(data['message']);
+          this.isLoader = false;
+        }
+      }, err => {
+        this.toastr.error(err['error']);
+        this.isLoader = false;
+      });
+    } else {
+      this.showModal = this.importData.type;
+      this.editData = this.importData.data[index];
+      console.log(this.showModal, this.editData);
+      $('#showModal').modal('show');
+    }
+  }
+
+  importListAddResponse(ev: any) {
+    if (ev && ev._id) {
+      for (let i in this.importData.data) {
+        if (this.importData.data[i]._id == this.editData._id) {
+          if (this.importData.type == 'item') {
+            this.itemmix.push(ev);
+            this.importData.data[i].new_item = ev;
+            this.importData.data[i].new_id = ev._id;
+          } else if (this.importData.type == 'subitem') {
+            this.itemmix[this.itemmix.findIndex((it: { _id: any; }) => it._id == ev.item_id)].subitems.push(ev);
+            this.importData.data[i].new_subitem_id = ev._id;
+          } else {
+            this.importData.data[i].new_id = ev._id;
+          }
+        }
+      }
+      this.showModal = '';
+      $('#showModal').modal('hide')
+    }
+  }
+
+  deleteData(i: any) {
+    if (i) {
+      this.importData.data.splice(i, 1);
+    }
   }
 
   applySettings(configValue: any) {
@@ -1137,4 +1547,5 @@ export class DepartmentComponent implements OnInit {
 
     }
   }
+
 }

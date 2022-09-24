@@ -22,13 +22,12 @@ router.post('/', async (req, res, next) => {
     try {
         if (req.body && req.body.unit_short) {
             await DB.insert('unit', req.body).then(async (data) => {
-                if (err) {
-                    return next(err);
-                }
                 res.json({
                     success: true,
                     result: data || []
                 });
+            }, (err)=>{
+                return next(err);
             });
         }
         else {

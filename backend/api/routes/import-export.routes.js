@@ -293,13 +293,13 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
 
 
                         }
-                        // let updt_res = update_stmt.run(data[i]);
-                        // // console.log("updt_res", updt_res);
-                        // if (updt_res) {
-                        //     if (updt_res.changes > 0) {
-                        //         update_entries.push(data[i]);
-                        //     }
-                        // }
+                        let updt_res = update_stmt.run(data[i]);
+                        // console.log("updt_res", updt_res);
+                        if (updt_res) {
+                            if (updt_res.changes > 0) {
+                                update_entries.push(data[i]);
+                            }
+                        }
 
                         let res = insert_stmt.run(data[i]);
                         // console.log("res", res);

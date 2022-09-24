@@ -20,7 +20,7 @@ router.get('/', async (req, res, next) => {
 // get category 
 router.get('/:dept_id', async (req, res, next) => {
     try {
-        await DB.getList('category', { dept_id: req.params.dept_id, order:`category_eng desc` }).then(async (resolve) => {
+        await DB.getList('category', { dept_id: req.params.dept_id, order: `category_eng desc` }).then(async (resolve) => {
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -41,6 +41,39 @@ router.post('/:dept_id', async (req, res, next) => {
                     result: data || {}
                 });
             });
+        }
+        else {
+            return next(new Error('Please fill required fields.'))
+        }
+    } catch (err) { next(err) };
+});
+
+// post category 
+router.post('/import/:dept_id', async (req, res, next) => {
+    try {
+        if (req.body && req.body.length > 0) {
+            let istmt = DB.db.prepare(DB.query.category.import);
+            let ustmt = DB.db.prepare(DB.query.category.update);
+            for (let i in req.body) {
+                if (req.body[i].yes) {
+                    if (req.body[i].status == 'insert') {
+                        let ires = istmt.run(req.body[i]);
+                        if (ires) {
+                            req.body[i].new_id = ires.lastInsertRowid;
+                        }
+                    }
+                    else if (req.body[i].status == 'update') {
+                        let ures = ustmt.run(req.body[i]);
+                        if (ures) {
+                            req.body[i].new_id == ures.lastInsertRowid;
+                        }
+                    }
+                }
+            }
+            res.json({
+                success: true,
+                result: req.body
+            })
         }
         else {
             return next(new Error('Please fill required fields.'))
@@ -71,16 +104,16 @@ router.put('/import/', async (req, res, next) => {
     try {
         if (req.body) {
             let stmt = DB.db.prepare(DB.query.subitem_list.import);
-            for(let i in req.body){
-                if(req.body[i].subitem_eng == undefined){
+            for (let i in req.body) {
+                if (req.body[i].subitem_eng == undefined) {
                     req.body[i].subitem_eng = null;
                 }
-                else if(req.body[i].subitem_eng.trim() == 'NULL' || req.body[i].subitem_eng.trim() == ''){
+                else if (req.body[i].subitem_eng.trim() == 'NULL' || req.body[i].subitem_eng.trim() == '') {
                     req.body[i].subitem_eng = null;
                 }
                 console.log(req.body[i]);
                 let res = stmt.run(req.body[i])
-            }            
+            }
         }
         else {
             return next(new Error('Id not Found.'))

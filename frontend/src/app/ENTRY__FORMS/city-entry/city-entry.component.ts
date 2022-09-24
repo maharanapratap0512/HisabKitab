@@ -118,7 +118,7 @@ export class CityEntryComponent implements OnInit {
   StateAddResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      $('#cityComponent > #addState').modal('hide');
+      $('#cityEntryComponent > #addState').modal('hide');
       this.showModal = '';
       // this.states.unshift(ev);
       this.cityForm.patchValue(

@@ -72,9 +72,9 @@ export class SubitemEntryComponent implements OnInit {
         item_id: changes.getData.currentValue.item_id,
         categories: changes.getData.currentValue.categories,
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
-        document: changes.getData.currentValue.document ? changes.getData.currentValue.document : null
+        document: changes.getData.currentValue.document ? changes.getData.currentValue.document : []
       });
-      this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0] : null;
+      this.imagepath = (changes.getData.currentValue.document && changes.getData.currentValue.document.images) ? changes.getData.currentValue.document.images[0] : null;
     }
   }
 

@@ -173,6 +173,7 @@ export class ItemComponent implements OnInit {
       for (let i in this.editData.subitems) {
         let subitem = this.editData.subitems[i];
         subitem.item_id = ev._id;
+        subitem.categories = ev.categories;
         this.http.post(this.api.getUrl('SUBITEM') + this.auth.webUser.dept_id, subitem).subscribe((data: any) => {
           if (data['result'] && data['success']) {
             // this.gs.Lists.subitem.unshift(data['result'])

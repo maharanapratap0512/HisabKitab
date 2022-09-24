@@ -247,6 +247,17 @@
                                     {{item.subitem_hin}}:{{item.subitem_eng}}</ng-option>
                               </ng-select>
                            </div>
+                           
+                           <!-- product dropdown -->
+                           <div class="col-4">
+                              <ng-select *ngIf="data.type == 'product'" class="custom custom-import"
+                                 placeholder="Select Product" [virtualScroll]="true" [(ngModel)]="data.id"
+                                 [ngModelOptions]="{standalone: true}">
+                                 <ng-option selected="selected" disabled value="">-- Select Product --</ng-option>
+                                 <ng-option *ngFor="let item of products" [value]="item._id">
+                                    {{item.product_code}}:{{item.sr_num}}</ng-option>
+                              </ng-select>
+                           </div>
 
                            <!-- pbk dropdown -->
                            <ng-select *ngIf="data.type == 'pbk'" class="custom custom-import" placeholder="Select Pbk"
@@ -304,7 +315,7 @@
                         </div>
                      </td>
                      <td><input type="checkbox" class="form-check-input" [(ngModel)]="data.dictionary"
-                           [ngModelOptions]="{standalone: true}"> </td>
+                           [ngModelOptions]="{standalone: true}" [disabled]="data.type=='product'"> </td>
                   </tr>
                </tbody>
             </table>

@@ -62,6 +62,21 @@ const city = {
             @city_eng,
             @state_id,
             @active)`
+    , import:
+        `insert into city (
+            city_hin,
+            city_eng,
+            state_id,
+            created_at,
+            updated_at,
+            active)
+        values (
+            @city_hin,
+            @city_eng,
+            @state_id,
+            @created_at,
+            datetime('now','localtime'),
+            @active)`
     , insert_ignore:
         `insert or ignore into city (
             _id,
@@ -114,18 +129,16 @@ const category = {
             @active)`
     , import:
         `insert into category (
-            _id,
             category_hin,
             category_eng,
             created_at,
             updated_at,
             active)
         values (
-            @_id,
             @category_hin,
             @category_eng,
             @created_at,
-            @updated_at,
+            datetime('now','localtime'),
             @active)`
     , insert_ignore:
         `insert or ignore into category (
@@ -146,7 +159,6 @@ const category = {
         `update category set 
         category_hin=@category_hin,
         category_eng=@category_eng,
-        created_at=@created_at,
         updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update category set
@@ -249,11 +261,10 @@ const department_config = {
             @updated_at,
             @active)`
     , import_update:
-        `update department_config set 
-        config_key=@config_key,
+        `update department_config set         
         config_value=@config_value,
         created_at=@created_at,
-        updated_at=@updated_at where _id = @_id AND dept_id = @dept_id AND updated_at != @updated_at`
+        updated_at=@updated_at where dept_id = @dept_id AND config_key=@config_key`
     , update:
         `update department_config set
         config_key=@config_key,

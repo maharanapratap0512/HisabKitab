@@ -58,12 +58,15 @@ export class ItemEntryComponent implements OnInit {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.getData.currentValue) {
+      if (typeof changes.getData.currentValue.document == 'string') {
+        changes.getData.currentValue.document = JSON.parse(changes.getData.currentValue.document.trim() != '' ? changes.getData.currentValue.document : '[]');
+      }
       this.itemForm.patchValue({
         item_hin: changes.getData.currentValue.item_hin,
         item_eng: changes.getData.currentValue.item_eng ? changes.getData.currentValue.item_eng : null,
         item_code: changes.getData.currentValue.item_code ? changes.getData.currentValue.item_code : null,
         unit_id: changes.getData.currentValue.unit_id ? changes.getData.currentValue.unit_id : null,
-        categories: changes.getData.currentValue.categories,
+        categories: typeof changes.getData.currentValue.categories == 'string' ? JSON.parse(changes.getData.currentValue.categories) : changes.getData.currentValue.categories,
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
         document: changes.getData.currentValue.document ? changes.getData.currentValue.document : []
       });
@@ -80,7 +83,7 @@ export class ItemEntryComponent implements OnInit {
       this.http.post(this.api.getUrl('ITEM') + this.auth.webUser.dept_id, this.itemForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.gs.Lists.itemmix.unshift(data['result']);
-          this.itemForm.reset({            
+          this.itemForm.reset({
             unit_id: data['result'].unit_id,
             categories: data['result'].categories
           });

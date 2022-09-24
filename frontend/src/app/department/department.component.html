@@ -1119,8 +1119,7 @@
                           <td>
                             <div class="form-check form-switch">
                               <input type="checkbox" class="form-check-input"
-                                [(ngModel)]="settingsAll.department.visible" [ngModelOptions]="{standalone: true}"
-                                disabled>
+                                [(ngModel)]="settingsAll.department.visible" [ngModelOptions]="{standalone: true}">
                             </div>
                           </td>
                           <td>डिपार्ट्मन्ट / Department</td>
@@ -1681,7 +1680,303 @@
 
 
 
+<!-- import Modal -->
+<div class="modal fade" id="importModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" style="width: 90%;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Import Zip Data</h5>
+        <button type="button" onclick="$('#importModal').modal('hide')" class="btn-close" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row" *ngIf="importData">
+          <ul class="nav nav-pills bg-nav-pills">
+            <!-- category -->
+            <!-- <li class="nav-item active" *ngIf="importData.category">
+              <a href="{{'#category'}}" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
+                Category
+                <span class="translate-middle bell badge rounded-pill bg-info">
+                  {{importData.category.data.length}}
+                </span>
+              </a>
+            </li> -->
+            <!-- country -->
+            <li class="nav-item" *ngIf="importData">
+              <a href="#import" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
+                {{importData.type}}
+                <span class="translate-middle bell badge rounded-pill bg-info">
+                  {{importData.data && importData.data.length ? importData.data.length : 0}}
+                </span>
+              </a>
+            </li>
+            <!-- state -->
+            <!-- <li class="nav-item" *ngIf="importData.state">
+              <a href="{{'#state'}}" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0"
+                (click)="matchState()">
+                State
+                <span class="translate-middle bell badge rounded-pill bg-info">
+                  {{importData.state.data.length}}
+                </span>
+              </a>
+            </li> -->
+            <!-- city -->
+            <!-- <li class="nav-item" *ngIf="importData.city">
+              <a href="{{'#city'}}" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0"
+                (click)="matchCity()">
+                City
+                <span class="translate-middle bell badge rounded-pill bg-info">
+                  {{importData.city.data.length}}
+                </span>
+              </a>
+            </li> -->
+            <!-- mm -->
+            <!-- <li class="nav-item" *ngIf="importData.mm">
+              <a href="{{'#mm'}}" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0"
+                (click)="matchMM()">
+                MM
+                <span class="translate-middle bell badge rounded-pill bg-info">
+                  {{importData.mm.data.length}}
+                </span>
+              </a>
+            </li> -->
+            <!-- unit -->
+            <!-- <li class="nav-item" *ngIf="importData.unit">
+              <a href="{{'#unit'}}" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
+                Unit
+                <span class="translate-middle bell badge rounded-pill bg-info">
+                  {{importData.unit.data.length}}
+                </span>
+              </a>
+            </li> -->
+            <!-- support_list -->
+            <!-- <li class="nav-item" *ngIf="importData.support_list">
+              <a href="{{'#support_list'}}" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
+                Support List
+                <span class="translate-middle bell badge rounded-pill bg-info">
+                  {{importData.support_list.data.length}}
+                </span>
+              </a>
+            </li> -->
+            <!-- subitem_list -->
+            <!-- <li class="nav-item" *ngIf="importData.subitem_list">
+              <a href="{{'#subitem_list'}}" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
+                Subitem List
+                <span class="translate-middle bell badge rounded-pill bg-info">
+                  {{importData.subitem_list.data.length}}
+                </span>
+              </a>
+            </li> -->
+            <!-- item -->
+            <!-- <li class="nav-item" *ngIf="importData.item">
+              <a href="{{'#item'}}" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0"
+                (click)="matchItem()">
+                Items
+                <span class="translate-middle bell badge rounded-pill bg-info">
+                  {{importData.item.data.length}}
+                </span>
+              </a>
+            </li> -->
+          </ul>
+        </div>
 
+        <div class="tab-content" *ngIf="importData">
+          <!-- Category Pane -->
+          <!-- <div class="tab-pane show active" id="category" style="overflow: auto;"
+            *ngIf="importData.category && importData.category.data.length > 0">
+            <table id="datatable-buttons" class="table table-hover dt-responsive">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">No.</th>
+                  <th style="width: 150px;">Operation</th>
+                  <th style="width: 250px;">Binding</th>
+                  <ng-container *ngFor="let key of importData.category.columns">
+                    <th
+                      *ngIf="!['active', '_id',  'created_at', 'updated_at', 'found', 'alt_found', 'insert', 'update'].includes(key)">
+                      {{key}}</th>
+                  </ng-container>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let data of importData.category.data; let i = index;">
+                  <tr class="main-row" *ngIf="!data.found">
+                    <td>{{i+1}} </td>
+                    <td>
+                      <ng-container *ngIf="!data.done">
+                        <button class="btn btn-sm btn-warning mr-1" *ngIf="data.update">Update</button>
+                        <button class="btn btn-sm btn-warning mr-1" *ngIf="data.insert"
+                          (click)="insertImportData('CATEGORY', i)">Insert</button>
+                        <button class="btn btn-sm btn-danger" (click)="deleteData(i, 'CATEGORY')"><i
+                            class="uil-trash"></i></button>
+                      </ng-container>
+                    </td>
+                    <td>
+                      <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="true"
+                        [virtualScroll]="true" [ngModelOptions]="{standalone: true}"
+                        [ngModel]="importData.category.data[i].new_id">
+                        <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
+                          {{item.category_eng}}</ng-option>
+                      </ng-select>
+                    </td>
+                    <ng-container *ngFor="let key of importData.category.columns">
+                      <td
+                        *ngIf="!['active', '_id', 'created_at', 'updated_at', 'found', 'alt_found', 'insert', 'update'].includes(key)">
+                        {{data[key] ? data[key] : ''}}</td>
+                    </ng-container>
+                  </tr>
+                </ng-container>
+
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td>*</td>
+                  <td>
+                    <button class="btn btn-success" (click)="submitImportData('CATEGORY')">Submit</button>
+                  </td>
+                  <td colspan="2"
+                    [ngClass]="{'text-warning':!importData.category.result, 'text-success':importData.category.result}">
+                    {{importData.category.msg ? importData.category.msg : 'take action on all data and press submit
+                    button'}}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div> -->
+          <!-- Country Pane -->
+          <div class="tab-pane show active" id="import" style="overflow: auto;" *ngIf="importData">
+            <pagination-controls class="pagi text-end" (pageChange)="page = $event; pi = 100*(page-1);"
+              [autoHide]="true">
+            </pagination-controls>
+            <div class="form-check form-switch">
+              <input type="checkbox" class="form-check-input" [(ngModel)]="filterBlank"
+                [ngModelOptions]="{standalone: true}">
+              <label class="form-check-label" for="customSwitch2">Hide Solved</label>
+            </div>
+            <button class="btn btn-success" (click)="bulkImportSubitem()">Bulk import</button>
+            <table id="datatable-buttons" class="table table-hover dt-responsive">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">No.</th>
+                  <th style="width: 150px;">Operation</th>
+                  <th style="width: 250px;">Binding</th>
+                  <ng-container *ngFor="let key of importData.columns">
+                    <th
+                      *ngIf="!['active', '_id',  'created_at', 'updated_at', 'found', 'alt_found', 'insert', 'update', 'new_item'].includes(key)">
+                      {{key}}</th>
+                  </ng-container>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container
+                  *ngFor="let data of importData.data | paginate: {itemsPerPage: 100,currentPage: page,totalItems: importData.pendingCount}; let i = index;">
+                  <tr class="main-row"
+                    *ngIf="!data.found && (!(data.new_id && (importData.type != 'subitem' || data.new_subitem_id)) || !filterBlank)"
+                    [ngClass]="{'marked':importData.type == 'subitem' && !data.new_subitem_id}">
+                    <td>{{pi +i+1}} </td>
+                    <td>
+                      <ng-container *ngIf="!data.done">
+                        <button class="btn btn-sm btn-warning mr-1" *ngIf="data.update">Update</button>
+                        <button class="btn btn-sm btn-warning mr-1" *ngIf="data.insert"
+                          (click)="insertImportData(pi+i)">Insert</button>
+                        <button class="btn btn-sm btn-danger" (click)="deleteData(pi+i)"><i
+                            class="uil-trash"></i></button>
+                      </ng-container>
+                    </td>
+                    <td>
+                      <ng-select class="custom" style="width: 100%;" placeholder="Select Country" [clearable]="true"
+                        [virtualScroll]="true" [ngModelOptions]="{standalone: true}"
+                        *ngIf="importData.type == 'country'" [ngModel]="importData.data[pi+i].new_id">
+                        <ng-option *ngFor="let item of countries" [value]="item._id">{{item.country_hin}} :
+                          {{item.country_eng}}</ng-option>
+                      </ng-select>
+                      <ng-select class="custom" style="width: 100%;" placeholder="Select State" [clearable]="true"
+                        [virtualScroll]="true" [ngModelOptions]="{standalone: true}" *ngIf="importData.type == 'state'"
+                        [ngModel]="importData.data[pi+i].new_id">
+                        <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}} :
+                          {{item.state_eng}} ({{item.state_hin}})</ng-option>
+                      </ng-select>
+                      <ng-select class="custom" style="width: 100%;" placeholder="Select City" [clearable]="true"
+                        [virtualScroll]="true" [ngModelOptions]="{standalone: true}" *ngIf="importData.type == 'city'"
+                        [ngModel]="importData.data[pi+i].new_id">
+                        <ng-option *ngFor="let item of cities" [value]="item._id">{{item.city_hin}} :
+                          {{item.city_eng}} ({{item.state_hin}})</ng-option>
+                      </ng-select>
+                      <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="true"
+                        [virtualScroll]="true" [ngModelOptions]="{standalone: true}" *ngIf="importData.type == 'mm'"
+                        [ngModel]="importData.data[pi+i].new_id">
+                        <ng-option *ngFor="let item of mms" [value]="item._id">{{item.mm_hin}} :
+                          {{item.mm_eng}} ({{item.state_hin}})</ng-option>
+                      </ng-select>
+                      <ng-select class="custom" style="width: 100%;" placeholder="Select Unit" [clearable]="true"
+                        [virtualScroll]="true" [ngModelOptions]="{standalone: true}" *ngIf="importData.type == 'unit'"
+                        [ngModel]="importData.data[pi+i].new_id">
+                        <ng-option *ngFor="let item of units" [value]="item._id">{{item.unit_full}} :
+                          {{item.unit_short}}</ng-option>
+                      </ng-select>
+                      <ng-select class="custom" style="width: 100%;" placeholder="Select Subitem List"
+                        [clearable]="true" [virtualScroll]="true" [ngModelOptions]="{standalone: true}"
+                        *ngIf="importData.type == 'subitem_list'" [ngModel]="importData.data[pi+i].new_id">
+                        <ng-option *ngFor="let item of subitem_lists" [value]="item._id">{{item.subitem_hin}} :
+                          {{item.subitem_eng}}</ng-option>
+                      </ng-select>
+                      <ng-select class="custom" style="width: 100%;" placeholder="Select Support List"
+                        [clearable]="true" [virtualScroll]="true" [ngModelOptions]="{standalone: true}"
+                        *ngIf="importData.type == 'support_list'" [ngModel]="importData.data[pi+i].new_id">
+                        <ng-option *ngFor="let item of support_lists" [value]="item._id">{{item.list_name_hin}} :
+                          {{item.list_name_eng}} ({{item.list_type}})</ng-option>
+                      </ng-select>
+                      <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="true"
+                        [virtualScroll]="true" [ngModelOptions]="{standalone: true}"
+                        *ngIf="['item', 'subitem'].includes(importData.type)"
+                        [(ngModel)]="importData.data[pi+i].new_item" (change)="importItemSelected($event, i)">
+                        <ng-option *ngFor="let item of itemmix" [value]="item">{{item.item_hin}} :
+                          {{item.item_eng}} ({{item.item_code}})</ng-option>
+                      </ng-select>
+                      <ng-select class="custom" style="width: 100%;" placeholder="Select Subitem" [clearable]="true"
+                        [virtualScroll]="true" [ngModelOptions]="{standalone: true}"
+                        *ngIf="['item', 'subitem'].includes(importData.type) && importData.data[pi+i].new_item && importData.data[pi+i].new_item.subitems"
+                        [(ngModel)]="importData.data[pi+i].new_subitem_id">
+                        <ng-option *ngFor="let item of importData.data[pi+i].new_item.subitems" [value]="item._id">
+                          {{item.subitem_hin}} : {{item.subitem_eng}}</ng-option>
+                      </ng-select>
+                    </td>
+                    <ng-container *ngFor="let key of importData.columns">
+                      <td
+                        *ngIf="!['active', '_id', 'created_at', 'updated_at', 'found', 'alt_found', 'insert', 'update', 'new_item'].includes(key)">
+                        {{data[key] ? data[key] : ''}}</td>
+                    </ng-container>
+                  </tr>
+                </ng-container>
+
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td>*</td>
+                  <td>
+                    <button class="btn btn-success" (click)="submitImportData()">Submit</button>
+                  </td>
+                  <td colspan="2" [ngClass]="{'text-warning':importData.error}">
+                    {{importData.msg ? importData.msg : 'take action on all data and press submit button'}}
+                  </td>
+                  <td colspan="importData.columns.length - 4">
+                    <pagination-controls class="pagi text-end" (pageChange)="page = $event; pi = 100 * ($event - 1)"
+                      [autoHide]="true">
+                    </pagination-controls>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" style="width: 120px;"
+          onclick="$('#importModal').modal('hide')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 
@@ -1699,11 +1994,57 @@
       <div class="modal-body">
         <app-department-entry *ngIf="showModal == 'Add Department'" (response)='addDeptResponse($event)'>
         </app-department-entry>
-        <!-- <app-department-entry *ngIf="showModal == 'Edit Department'" (response)='editDeptResponse($event)'
-                    [getData]="editData" [isEdit]="true"></app-department-entry> -->
 
         <app-data-view *ngIf="showModal == 'View Department'" [getData]="viewData" Type="department">
         </app-data-view>
+
+        <!-- country -->
+        <app-country-entry *ngIf="showModal == 'country'" (response)="importListAddResponse($event)"
+          [getData]="editData" [isEdit]="isEdit">
+        </app-country-entry>
+
+        <!-- State  -->
+        <app-state-entry *ngIf="showModal == 'state'" (response)="importListAddResponse($event)" [getData]="editData"
+          [isEdit]="isEdit">
+        </app-state-entry>
+
+        <!-- Category  -->
+        <app-category-entry *ngIf="showModal == 'category'" (response)="importListAddResponse($event)"
+          [getData]="editData" [isEdit]="isEdit">
+        </app-category-entry>
+
+        <!-- subitem_list  -->
+        <app-subitem-list-entry *ngIf="showModal == 'subitem_list'" (response)="importListAddResponse($event)"
+          [getData]="editData" [isEdit]="isEdit">
+        </app-subitem-list-entry>
+
+        <!-- Item  -->
+        <app-item-entry *ngIf="showModal == 'item'" (response)="importListAddResponse($event)" [getData]="editData"
+          [isEdit]="isEdit"></app-item-entry>
+
+        <!-- Subitem  -->
+        <app-subitem-entry *ngIf="showModal == 'subitem'" (response)="importListAddResponse($event)"
+          [getData]="editData" [isEdit]="isEdit">
+        </app-subitem-entry>
+
+        <!-- Unit -->
+        <app-unit-entry *ngIf=" showModal=='unit'" (response)="importListAddResponse($event)" [getData]="editData"
+          [isEdit]="isEdit">
+        </app-unit-entry>
+
+        <!-- MM -->
+        <app-mm-entry *ngIf="showModal == 'mm'" (response)="importListAddResponse($event)" [getData]="editData"
+          [isEdit]="isEdit"></app-mm-entry>
+
+        <!-- support_list -->
+        <app-support-list-entry *ngIf="showModal == 'support_list'" (response)='importListAddResponse($event)'
+          list_type="editData.list_type" [getData]="editData" [isEdit]="isEdit"> </app-support-list-entry>
+
+        <!-- PBK -->
+        <app-pbk-entry *ngIf="showModal == 'pbk'" (response)='importListAddResponse($event)' [getData]="editData"
+          [isEdit]="isEdit">
+        </app-pbk-entry>
+
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" style="width: 120px;" onclick="$('#showModal').modal('hide')"

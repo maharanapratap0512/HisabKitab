@@ -20,6 +20,8 @@ export class ImportComponent implements OnInit {
   @Output() response = new EventEmitter();
   term: any;
   items: any = [];
+  products: any = [];
+  productsAll: any = [];
   itemAll: any = [];
   subitems: any = [];
   units: any = [];
@@ -71,6 +73,19 @@ export class ImportComponent implements OnInit {
 
     this.getImportData();
     this.getUnmatchedList();
+    this.getProductData();
+  }
+
+  getProductData() {   
+    this.isLoader = true 
+    this.http.put(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, {}).subscribe((data: any) => {
+      if (data['result']) {
+        this.products = data['result'];
+        this.productsAll = data['result'];
+        this.isLoader=false;
+      }
+    });
+    this.isLoader = false;
   }
 
   getImportData() {
