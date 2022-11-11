@@ -98,7 +98,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="!isEdit">
+            <div class="col-md-2 mb-3" *ngIf="!isEdit">
                <div class="form-group">
                   <label class="form-label">Filter Items By</label>
                   <!-- <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -156,7 +156,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="settings.product.company_name">
+            <div class="col-md-2 mb-3" *ngIf="settings.product.company_name">
                <div class="form-group">
                   <label class="form-label">Company & Model</label>
                   <input type="text" class="form-control" placeholder="Company Name" formControlName="company_name"
@@ -166,19 +166,22 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.product.warranty_period">
                <div class="form-group">
-                  <label class="form-label">Serial No / Product Code</label>
-                  <input type="text" class="form-control" placeholder="S/R Number" formControlName="sr_num"
-                     [ngClass]="{'validation':productForm.get('sr_num')?.errors && (productForm.get('sr_num')?.touched || productForm.get ('sr_num')?.dirty)}" (input)="sr_numChanged($event)">
-                  <input type="text" class="form-control mt-1" placeholder="Product Code" formControlName="product_code"
-                     [ngClass]="{'validation':productForm.get('product_code')?.errors && (productForm.get('product_code')?.touched || productForm.get ('product_code')?.dirty)}" (input)="codeChanged($event)">
+                  <label class="form-label">Warranty Detail</label>
+                  <input type="number" class="form-control" placeholder="ex. 6,12,24 (Month)"
+                     formControlName="warranty_period"
+                     [ngClass]="{'validation':productForm.get('warranty_period')?.errors && (productForm.get('warranty_period')?.touched || productForm.get ('warranty_period')?.dirty)}">
+                  <input type="text" class="form-control mt-1" placeholder="Warranty From"
+                     formControlName="warranty_from"
+                     [ngClass]="{'validation':productForm.get('warranty_from')?.errors && (productForm.get('warranty_from')?.touched || productForm.get ('warranty_from')?.dirty)}">
+
                </div>
             </div>
 
             <div class="col-md-2 mb-3">
                <div class="form-group">
-                  <label class="form-label">Condition</label>
+                  <label class="form-label">Condition & Rate</label>
                   <div class="float-end">
                      <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
                         class="btn btn-sm btn-outline-primary" (click)="setView('Condition')">
@@ -197,43 +200,20 @@
                      <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
                         {{item.list_name_eng}}</ng-option>
                   </ng-select>
-               </div>
-            </div>
-
-            <div class="col-md-2 mb-3" *ngIf="settings.product.warranty_period">
-               <div class="form-group">
-                  <label class="form-label">Warranty Period</label>
-                  <input type="number" class="form-control" placeholder="ex. 6,12,24 (Month)"
-                     formControlName="warranty_period"
-                     [ngClass]="{'validation':productForm.get('warranty_period')?.errors && (productForm.get('warranty_period')?.touched || productForm.get ('warranty_period')?.dirty)}">
-               </div>
-            </div>
-
-            <div class="col-md-3 mb-3" *ngIf="settings.product.warranty_from">
-               <div class="form-group">
-                  <label class="form-label">Warranty From / Address</label>
-                  <input type="text" class="form-control" placeholder="Warranty From" formControlName="warranty_from"
-                     [ngClass]="{'validation':productForm.get('warranty_from')?.errors && (productForm.get('warranty_from')?.touched || productForm.get ('warranty_from')?.dirty)}">
+                  <input type="number" class="form-control mt-1" placeholder="Price" formControlName="price"
+                     [ngClass]="{'validation':productForm.get('price')?.errors && (productForm.get('price')?.touched || productForm.get ('price')?.dirty)}">
                </div>
             </div>
 
             <div class="col-md-3 mb-3" *ngIf="settings.product.accessories">
                <div class="form-group">
                   <label class="form-label">Accessories</label>
-                  <input type="text" class="form-control" placeholder="Accessories" formControlName="accessories"
-                     [ngClass]="{'validation':productForm.get('accessories')?.errors && (productForm.get('accessories')?.touched || productForm.get ('accessories')?.dirty)}">
+                  <textarea type="text" class="form-control" placeholder="Accessories" formControlName="accessories"
+                     [ngClass]="{'validation':productForm.get('accessories')?.errors && (productForm.get('accessories')?.touched || productForm.get ('accessories')?.dirty)}"></textarea>
                </div>
             </div>
 
-            <div class="col-md-2 mb-3">
-               <div class="form-group">
-                  <label class="form-label">Price</label>
-                  <input type="number" class="form-control" placeholder="Price" formControlName="price"
-                     [ngClass]="{'validation':productForm.get('price')?.errors && (productForm.get('price')?.touched || productForm.get ('price')?.dirty)}">
-               </div>
-            </div>
-
-            <div class="col-md-4 mb-3" *ngIf="settings.product.product_detail">
+            <div class="col-md-3 mb-3" *ngIf="settings.product.product_detail">
                <div class="form-group">
                   <label class="form-label">Product Details</label>
                   <textarea class="form-control" placeholder="Product Details" formControlName="product_detail"
@@ -241,18 +221,55 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="settings.product.document">
+            <div class="col-md-2 mb-3" *ngIf="settings.product.document">
                <div class="form-group">
                   <label class="form-label">Image</label>
                   <a onclick="$('#productEntryComponent > #addImages').modal('show')" (click)="showModal='Add Image'"
                      class="form-control" style="cursor: pointer;">
                      <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
                      <div *ngIf="imagepath && imagepath.length > 0">
-                        <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image" class="rounded m-1" height="48" /> 
+                        <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image" class="rounded m-1"
+                           height="48" />
                         x {{imagepath.length}}
                      </div>
                      <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
                   </a>
+               </div>
+            </div>
+
+            <div class="col-md-4 mb-3" style="border: 1px solid grey; border-radius:5px;">
+               <div class="form-group">
+                  <label class="form-label">Product Code</label>
+                  <div class="d-flex justify-content-between">
+                     <input type="text" class="form-control" placeholder="Product Code"
+                        formControlName="product_code"
+                        [ngClass]="{'validation':productForm.get('product_code')?.errors && (productForm.get('product_code')?.touched || productForm.get ('product_code')?.dirty)}"
+                        (input)="codeChanged($event)">
+                     <input type="text" class="form-control mx-1" placeholder="S/R Number" formControlName="sr_num"
+                        [ngClass]="{'validation':productForm.get('sr_num')?.errors && (productForm.get('sr_num')?.touched || productForm.get ('sr_num')?.dirty)}"
+                        (input)="sr_numChanged($event)">
+                     <button class="btn btn-sm btn-outline-primary">Add</button>
+                  </div>
+                  <div>
+                     <table style="width: 99.7%;table-layout: fixed;">
+                        <!-- <thead>
+                           <th style="width: 5%;">No.</th>
+                           <th style="width: 40%;">Product Code</th>
+                           <th style="width: 50%;">Serial No</th>
+                           <th style="width: 5%;"></th>
+                        </thead> -->
+                        <tbody>
+                           <!-- <tr *ngFor="let pd of productForm.products, let i = index;"> -->
+                           <tr>
+                              <th>10</th>
+                              <td>{{"code"}}</td>
+                              <td>{{"sr_num"}}</td>
+                              <!-- <td style="cursor: pointer;" (click)="removeFamilyInfo(i)">x</td> -->
+                              <td style="cursor: pointer;">x</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
                </div>
             </div>
 
@@ -292,8 +309,8 @@
                   aria-label="Close"></button>
             </div>
             <div class="modal-body">
-               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)"
-                  type="product" [getData]="productForm.value.document">
+               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)" type="product"
+                  [getData]="productForm.value.document">
                </app-files-view>
             </div>
             <div class="modal-footer">

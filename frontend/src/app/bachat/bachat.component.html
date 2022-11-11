@@ -13,8 +13,7 @@
             <!-- Add Button, Search Field, Filter button, Total Count -->
             <div class="row" *ngIf="bachatData.length">
                <div class="card-body">
-                  <div class="row d-flex justify-content-between">
-                     <div class="col-2"></div>
+                  <div class="row d-flex justify-content-between">                     
                      <div class="col-5">
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
@@ -26,6 +25,9 @@
                            data-bs-target="#collapseExample" aria-expanded="false"
                            aria-controls="collapseExample"><i class="uil-search-plus h4 icon-mx-2"></i> Advance Search
                         </button>
+                     </div>
+                     <div class="col-3">
+                        <button type="button" class="btn btn-outline-success" (click)="excelExport()"> Export To Excel </button>
                      </div>
                      <div class="col-2">
                         <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">

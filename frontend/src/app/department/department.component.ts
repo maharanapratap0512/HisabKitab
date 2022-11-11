@@ -163,7 +163,7 @@ export class DepartmentComponent implements OnInit {
         warranty_period: false,
         warranty_from: false,
         accessories: false,
-        price: false,
+        price: true,
         nimitt_id: false,
         product_detail: false,
         document: false
@@ -1041,9 +1041,9 @@ export class DepartmentComponent implements OnInit {
 
   catItemSelected(ev: any) {
     if (ev) {
-      this.itemMixCondition.category_id = ev;
+      this.itemMixCondition.categories = ev;
     } else {
-      this.itemMixCondition.category_id = null;
+      this.itemMixCondition.categories = null;
     }
     this.loadItemMix();
   }
@@ -1410,7 +1410,7 @@ export class DepartmentComponent implements OnInit {
     let dept = this.departments.find((d: { _id: any; }) => d._id == this.dept_id);
 
     this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
-      FileSaver.saveAs(content, dept.dept_eng + "_update_" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + ".zip");
+      FileSaver.saveAs(content, dept.dept_eng + "_settings_update_" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + ".zip");
     });
     this.toastr.success("Updated Settings downloaded for '" + dept.dept_eng + "'");
     this.isLoader = false;

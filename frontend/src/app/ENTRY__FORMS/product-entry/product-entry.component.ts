@@ -69,7 +69,8 @@ export class ProductEntryComponent implements OnInit {
       dept_id: [this.auth.webUser.dept_id],
       accessories: [null],
       nimitt_id: [null],
-      isbill: false
+      isbill: false,
+      products: [[]]
     });
     this.settings = this.auth.webUser.settings;
   }
@@ -123,7 +124,8 @@ export class ProductEntryComponent implements OnInit {
         document: changes.getData.currentValue.document,
         warranty_from: changes.getData.currentValue.warranty_from,
         isbill: changes.getData.currentValue.isbill,
-        nimitt_id: changes.getData.currentValue.nimitt_id
+        nimitt_id: changes.getData.currentValue.nimitt_id,
+        products: changes.getData.currentValue.products ? changes.getData.currentValue.products : [],
       });
       this.sr_numChanged({target:{value:changes.getData.currentValue.sr_num}});
       this.codeChanged({target:{value:changes.getData.currentValue.product_code}});

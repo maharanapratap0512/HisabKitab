@@ -60,6 +60,7 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
         }
         if (req.body.subitem_list_id) {
             sitemCondition += (sitemCondition.trim() != `` ? ` AND` : ``) + ` subitem.subitem_list_id = ${req.body.subitem_list_id}`;
+            itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` subitems <> '[]'`;
         }
         if (itemCondition.trim() == `` && sitemCondition.trim() == ``) {
             orderBy = "item._id desc";

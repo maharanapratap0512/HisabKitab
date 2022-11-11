@@ -65,7 +65,8 @@ import { UpdateDetailComponent } from './layout/update-detail/update-detail.comp
 import { ProductTransferEntryComponent } from './ENTRY__FORMS/product-transfer-entry/product-transfer-entry.component';
 import { ReportsComponent } from './reports/reports.component';
 
-
+import { GridModule } from '@syncfusion/ej2-angular-grids';
+import { PageService, SortService, FilterService, FreezeService } from '@syncfusion/ej2-angular-grids';
 
 @NgModule({
   declarations: [
@@ -138,9 +139,10 @@ import { ReportsComponent } from './reports/reports.component';
     NgtUniversalModule,
     NgxPaginationModule,
     AutocompleteLibModule,
+    GridModule
 
   ],
-  providers: [GlobalService],
+  providers: [GlobalService, PageService, SortService, FilterService, FreezeService],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

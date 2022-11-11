@@ -63,12 +63,10 @@ router.get('/:dept_id', async (req, res, next) => {
     let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
     await DB.getList('bachat', { full: true, dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
-        // for(let i in data){
-        //     data[i].bachat_qty = JSON.parse(data[i].bachat_qty);
-        //     for(let bcht of data[i].bachat_qty){
-        //         data[i][bcht.bachat_type_eng] = bcht.qty;
-        //     }
-        // }
+        for(let i in resolve.data){
+            resolve.data[i].icategories = resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []
+            resolve.data[i].scategories = resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : null
+        }
         res.json({
             success: true,
             result: resolve.data || [],

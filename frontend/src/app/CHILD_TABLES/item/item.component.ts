@@ -21,7 +21,7 @@ export class ItemComponent implements OnInit {
   itemsPerPage = 100;
   currentPage: any;
   totalItems: any;
-  expandAll:any = false;
+  expandAll: any = false;
   isLoader: boolean = false;
   term: any;
   showModal: string = '';
@@ -59,9 +59,9 @@ export class ItemComponent implements OnInit {
     this.settings = this.auth.webUser.settings;
   }
 
-  FilterActive(){
-   this.itemData = this.itemDataAll.filter((i: { active: any; })=>!i.active)
-   
+  FilterActive() {
+    this.itemData = this.itemDataAll.filter((i: { active: any; }) => !i.active)
+
   }
 
   getItemData(pageNo: any) {
@@ -80,36 +80,37 @@ export class ItemComponent implements OnInit {
     });
   }
 
-  exportItem() {
+  exportToExcel() {
     let item = [];
-    for (let it of this.itemData) {
+    let counter = 1;
+    for (let i in this.itemData) {
       item.push({
-        _id:it._id,
-        subitem_id:null,
-        item_hin: it.item_hin,
-        item_eng: it.item_eng,
-        subitem_hin: null,
-        subitem_eng: null,
-        unit: it.unit_short,
-        category_id: it.categories,
-        category: it.categories_hin
+        No: counter++,
+        "Item Hin": this.itemData[i].item_hin.trim(),
+        "Item Eng": this.itemData[i].item_eng,
+        "Subitem Hin": null,
+        "Subitem Eng": null,
+        "Categories": this.itemData[i].categories_hin.join(", "),
+        "Unit": this.itemData[i].unit_short
       });
-      for (let sit of it.subitems) {
+      for (let j in this.itemData[i].subitems) {
         item.push({
-          _id:it._id,
-          subitem_id:sit._id,
-          item_hin: it.item_hin,
-          item_eng: it.item_eng,
-          subitem_hin: sit.subitem_hin,
-          subitem_eng: sit.subitem_eng,
-          unit: sit.unit_short,
-          category_id: sit.categories,
-          category: sit.categories_hin
+          No: counter++,
+          "Item Hin": this.itemData[i].item_hin,
+          "Item Eng": this.itemData[i].item_eng,
+          "Subitem Hin": this.itemData[i].subitems[j].subitem_hin,
+          "Subitem Eng": this.itemData[i].subitems[j].subitem_eng,
+          "Categories": this.itemData[i].subitems[j].categories_hin.join(", "),
+          "Unit": this.itemData[i].subitems[j].unit_short
         });
       }
     }
 
-    this.excelExportService.exportAsExcelFile(item, 'asthai_item_list.xlsx');
+    let date = new Date();
+    console.log(date);
+    
+    this.excelExportService.exportAsExcelFile(item, "item_list-" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
+
   }
 
   closeModal() {
@@ -120,7 +121,7 @@ export class ItemComponent implements OnInit {
 
     }
   }
-  viewProduct(data: any) {        
+  viewProduct(data: any) {
     this.editData = data;
     this.showModal = 'View Product'
     $('#showModal').modal('show');
@@ -194,9 +195,9 @@ export class ItemComponent implements OnInit {
       this.closeModal();
       this.isLoader = false;
     }
-    else{
+    else {
       console.log("clone item", ev);
-      
+
     }
   }
 

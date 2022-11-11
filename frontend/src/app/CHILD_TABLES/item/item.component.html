@@ -13,24 +13,22 @@
             <!-- Add Button, Search Field, Filter button, Total Count -->
             <div class="row border-bottom border-secondary">
                <div class="card-body">
-                  <div class="row d-flex justify-content-between">
-                     <div class="col-3" *ngIf="settings.item.add">
+                  <div class="row">
+                     <div class="col-4 d-flex justify-content-between">
                         <button class="btn btn-primary" onclick="$('#showModal').modal('show')"
-                           (click)="showModal = 'Add Item'">
+                           (click)="showModal = 'Add Item'" *ngIf="settings.item.add">
                            <i class="dripicons-plus h4 icon-mx-1"> </i>Add Item
                         </button>
 
                         <button class="btn btn-success mx-3" onclick="$('#showModal').modal('show')"
-                           (click)="showModal = 'Add Subitem'">
+                           (click)="showModal = 'Add Subitem'" *ngIf="settings.item.add">
                            <i class="dripicons-plus h4 icon-mx-1"> </i>Add Subitem
-                        </button>                        
+                        </button>
+
+                        <button class="btn btn-outline-success" (click)="exportToExcel()">Export To Excel
+                        </button>
                      </div>
-                     <div class="col-3">
-                        <div class="form-group">
-                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                              name="search">
-                        </div>
-                     </div>
+
                      <div class="col-2">
                         <div class="form-group">
                            <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
@@ -51,6 +49,7 @@
                            </ng-select>
                         </div>
                      </div>
+                     <div class="col-2"></div>
                      <div class="col-2">
                         <button class="btn btn-light float-end py-0 w-100" style="width: 60%;">
                            <span class="float-start">Items Count : </span> <span
@@ -63,16 +62,25 @@
                </div>
             </div>
 
-            <div class="row" *ngIf="itemData.length">
-               <pagination-controls class="pagi text-end" (pageChange)="page = $event" [autoHide]="true">
-               </pagination-controls>
-               <div>
+            <div class="row">
+               <div class="col-2 mt-4">
                   <div class="form-check form-switch">
                      <input type="checkbox" class="form-check-input" [(ngModel)]="expandAll"
                         [ngModelOptions]="{standalone: true}">
-                        <label class="form-check-label" for="customSwitch2">Expand All</label>
-                     </div>
+                     <label class="form-check-label" for="customSwitch2">Expand All</label>
+                  </div>
                </div>
+               <div class="col-4 mt-3">
+                  <div class="form-group">
+                     <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term" name="search">
+                  </div>
+               </div>
+               <div class="col-6">
+                  <pagination-controls class="pagi text-end" (pageChange)="page = $event" [autoHide]="true">
+                  </pagination-controls>
+               </div>
+            </div>
+            <div class="row" *ngIf="itemData.length">
                <div class="card-body" style="overflow: auto;">
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
@@ -156,8 +164,9 @@
                            </tr> -->
                            <ng-container *ngFor="let si of data.subitems ;let j=index">
                               <ng-container *ngIf="si">
-                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse" [ngClass]="{'show':expandAll}"
-                                    *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
+                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse"
+                                    [ngClass]="{'show':expandAll}" *ngIf="data.subitems.length > 0"
+                                    aria-labelledby="headingOne">
                                     <td style="border: none;"></td>
                                     <td colspan="6" class="sub-row">
                                        <table class="" style="width: 99.7%;table-layout: fixed;">

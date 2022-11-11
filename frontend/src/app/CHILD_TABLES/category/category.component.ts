@@ -34,8 +34,8 @@ export class CategoryComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public auth: AuthService,
     private excelExportService: ExcelExportService
-  ) {    
-   }
+  ) {
+  }
 
   ngOnInit(): void {
     this.spinner.show();
@@ -86,7 +86,16 @@ export class CategoryComponent implements OnInit {
     this.http.get(this.api.getUrl('CATEGORY') + 1).subscribe((data) => {
       if (data['result'] && data['success']) {
         let date = new Date();
-        this.excelExportService.exportAsExcelFile(data['result'], "Category_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+        let catData = [];
+        for (let i = 0; i < data['result'].length; i++) {
+          catData.push({
+            "Sr No": i + 1,
+            "_id": data['result'][i]._id,
+            "Category Hin": data['result'][i].category_hin,
+            "Category Eng": data['result'][i].category_eng
+          });
+        }
+        this.excelExportService.exportAsExcelFile(catData, "Category_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
         this.isLoader = false;
       }
       this.isLoader = false;
@@ -110,10 +119,10 @@ export class CategoryComponent implements OnInit {
       //   initial[name] = XLSX.utils.sheet_to_json(sheet);
       //   return initial;
       // }, {});
-      this.http.put(this.api.getUrl('CATEGORY') + 'import', jsonData).subscribe((data:any) => {
+      this.http.put(this.api.getUrl('CATEGORY') + 'import', jsonData).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           console.log(data);
-          
+
           this.isLoader = false;
         }
         this.isLoader = false;

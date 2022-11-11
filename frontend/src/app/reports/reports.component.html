@@ -39,8 +39,33 @@
                </div>
             </div>
 
+            <div class="row">
+               <!-- help: https://ej2.syncfusion.com/angular/documentation/grid/getting-started/ -->
+               <ejs-grid [dataSource]='reportData' [allowPaging]="true" [pageSettings]="pageSettings"
+                  [allowSorting]="true" [allowFiltering]="true" height='267px'>
+                  <e-columns>
+                     <e-column field="roll_no" headerText="Roll No" textAlign="left" width="50"></e-column>
+                     <e-column field="pbk_hin" headerText="Pbk Name" textAlign="left" width="90"></e-column>
+                     <e-column field="date" headerText="Date" textAlign="left" format="yMd"></e-column>
+                     <e-column field="pkt_num" headerText="Pkt Num" textAlign="left"></e-column>
+                     <e-column field="mm_hin" headerText="MM" textAlign="left"></e-column>
+                     <e-column field="item_hin" headerText="Item" textAlign="left"></e-column>
+                     <e-column field="subitem_hin" headerText="Subitem" textAlign="left"></e-column>
+                     <e-column field="company_name" headerText="Company" textAlign="left"></e-column>
+                     <e-column field="qty" headerText="Qty" textAlign="center" format="N2"></e-column>
+                     <e-column field="unit_short" headerText="Unit" textAlign="left"></e-column>
+                     <e-column field="condition_hin" headerText="Condition"></e-column>
+                     <e-column field="rate" headerText="Rate" textAlign="center" format="C2"></e-column>
+                     <e-column field="actual_amt" headerText="Amount" textAlign="center" format="C2"></e-column>
+                     <e-column field="aawak_type_hin" headerText="Aawak Type"></e-column>
+                     <e-column field="nimitt_hin" headerText="Nimiit"></e-column>
+                     <e-column field="item_detail" headerText="Item Detail"></e-column>
+                     <e-column field="description" headerText="Description"></e-column>
+                  </e-columns>
+               </ejs-grid>
+            </div>
 
-            <div class="row" *ngIf="jsonData.length">
+            <div class="row">
                <div class="card-body" style="overflow: auto;">
                   <table id="datatable-buttons" class="table table-hover dt-responsive" #TABLE>
                      <thead>
@@ -61,34 +86,6 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <tr *ngFor="let data of jsonData | filter: term; let i=index" class="main-row" [ngClass]="{'marked': data.error}">
-                           <td>{{i+1}}</td>
-                           <td>{{data.month}}</td>
-                           <td>{{data.date}}</td>
-                           <td>{{data['स्थान का नाम']}}</td>
-                           <td>{{data.parchi_no}}</td>
-                           <td>{{data.qty}}</td>
-                           <td>{{data.unit}}</td>
-                           <td>{{data.rate}}</td>
-                           <td>{{data.cost}}</td>
-                           <td>{{data.pm}}</td>
-                           <td>{{data.total_cost}}</td>
-                           <td>{{data.final}}</td>
-                           <td>{{data.correct}}</td>
-                        </tr>
-                        <tr>
-                           <td></td>
-                           <td></td>
-                           <td></td>
-                           <td></td>
-                           <td></td>
-                           <td></td>
-                           <td></td>
-                           <td>{{total.cost}}</td>
-                           <td>{{total.pm}}</td>
-                           <td [ngClass]="{'success':(total.cost + total.pm) == total.total_cost}">{{total.total_cost}}</td>
-                           <td [ngClass]="{'success':total.total_cost == total.final, 'marked':total.total_cost != total.final}">{{total.final}}</td>
-                        </tr>
 
                      </tbody>
                   </table>

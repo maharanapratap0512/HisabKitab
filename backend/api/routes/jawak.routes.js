@@ -48,6 +48,7 @@ router.put('/:dept_id', async (req, res, next) => {
         await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then((resolve) => {
             res.json({
                 success: true,
+                pageNo: page,
                 result: resolve.data || [],
                 total_count: resolve.total_count
             });

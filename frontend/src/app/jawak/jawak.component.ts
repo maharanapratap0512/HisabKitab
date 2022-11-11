@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
 import Swal from 'sweetalert2';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
+import { ExcelExportService } from '../services/excel-export.service';
 import { GlobalService } from '../services/global.service';
 import { HttpService } from '../services/http.service';
 declare var $: any;
@@ -20,7 +22,7 @@ export class JawakComponent implements OnInit {
   itemsPerPage = 100;
   currentPage: any;
   totalItems: any;
-  
+
   isLoader: boolean = false;
   term: any;
   showModal: String = '';
@@ -42,6 +44,10 @@ export class JawakComponent implements OnInit {
   productsAll: any = [];
   states: any = [];
   departments: any = [];
+  pageNo: any = 0;
+  exportJwkdata$ = new Subject();
+  allJwkData: any = [];
+  jwkCount: any = 0;
   filterBody: any = {
     pbk_id: [],
     mm_id: [],
@@ -66,6 +72,7 @@ export class JawakComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public gs: GlobalService,
     public auth: AuthService,
+    public excelExportService: ExcelExportService
   ) {
     this.settings = this.auth.webUser.settings.jawak;
   }
@@ -89,6 +96,61 @@ export class JawakComponent implements OnInit {
     $('#showModal').modal('show');
   }
 
+  exportExcel() {
+    this.isLoader = true;
+    // this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
+    this.pageNo = 0;
+    this.jwkCount = 0;
+    this.allJwkData = [];
+    this.exportJwkdata$ = new Subject();
+
+    this.getMoreAJ();
+
+    this.exportJwkdata$.subscribe(async (result: any) => {
+      for (let i = 0; i < result.length; i++) {
+        
+        this.allJwkData.push({
+          'Date': result[i].date ? result[i].date : '-',
+          'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
+          'MM': result[i].mm_id ? result[i].mm_hin : '-',
+          'Item': result[i].item_id ? result[i].item_hin : '-',
+          'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
+          'Company': result[i].company_name ? result[i].company_name : '-',
+          'Jawak MM': result[i].jawak_mm_id ? result[i].jawak_mm_hin : '-',
+          'Jawak Detail': result[i].description ? result[i].description : '-',
+          'Kisko Diya': result[i].nimitt_id ? result[i].nimitt_hin + '(' + result[i].nimitt_state_hin + ')' : '-',
+          'Jawak Type': result[i].jawak_type_id ? result[i].jawak_type_hin : '-',
+          'Qty': result[i].qty ? result[i].qty : '-',
+          'Unit': result[i].unit_id ? result[i].unit_short : '-'
+        });
+      }
+
+      if (this.allJwkData.length < this.total_count) {
+        this.getMoreAJ();
+      }
+      else {
+        let date = new Date();
+        this.excelExportService.exportAsExcelFile(this.allJwkData, "Jawak_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+        this.isLoader = false;
+      }
+    });
+  }
+
+  getMoreAJ() {
+    // this.isLoader = true;
+    this.filterBody.pageNo = this.pageNo + 1;
+    this.http.put(this.api.getUrl('JAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+      if (data['result'] && data["result"].length) {
+        if (data["pageNo"]) {
+          this.pageNo = data["pageNo"];
+        }
+        this.total_count = data.total_count;
+        this.exportJwkdata$.next(data['result']);
+        // this.isLoader = false;
+      }
+      // this.isLoader = false;
+    });
+  }
 
   getJawakData(pageNo: any) {
     this.isLoader = true;

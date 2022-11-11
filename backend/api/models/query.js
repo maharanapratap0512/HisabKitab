@@ -551,8 +551,8 @@ const bachat = {
     , select_full:
         `select bachat.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng,      
-        it.item_hin, it.item_eng, it.item_code, it.categories as icategories, cti.category_hin as icat_hin, cti.category_eng as icat_eng, 
-        sil.subitem_hin, sil.subitem_eng, si.categories as scategories, cts.category_hin as scat_hin, cts.category_eng as scat_eng, 
+        it.item_hin, it.item_eng, it.item_code, it.categories as icategories,
+        sil.subitem_hin, sil.subitem_eng, si.categories as scategories, 
         bachat.unit_id,unit.unit_short, unit.unit_full,             
         dept.dept_eng, dept.dept_hin, dept.dept_code
         from bachat
@@ -560,9 +560,7 @@ const bachat = {
         left join item it on it._id = bachat.item_id
         left join subitem si on si._id = bachat.subitem_id
         left join subitem_list sil on sil._id = si.subitem_list_id
-        left join unit on unit._id = bachat.unit_id
-        left join category cti on cti._id = it.categories   
-        left join category cts on cts._id = si.categories   
+        left join unit on unit._id = bachat.unit_id   
         left join state st on st._id = mm.state_id
         left join department dept on dept._id = bachat.dept_id ? limit @limit offset @offset`
     ,
@@ -1433,14 +1431,15 @@ genDeptDB = {
     state: `insert into state select * from mainDB.state`,
     dictionary: `insert into dictionary select * from dictionary`,
     delete_s_list: `delete from support_list`,
-    support_list: `insert into support_list select * from mainDB.support_list where list_type NOT IN ('aawak_type', 'jawak_type') OR support_list._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='aj_type')`,
+    // support_list: `insert into support_list select * from mainDB.support_list where list_type NOT IN ('aawak_type', 'jawak_type') OR support_list._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='aj_type')`,
+    support_list: `insert into support_list select * from mainDB.support_list`,
     city: `insert into city select * from mainDB.city`,
     unit: `insert into unit select * from mainDB.unit`,
 
     category: `insert into category select * from mainDB.category`,
     // category: `insert into category select * from mainDB.category where category._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='category')`,
 
-    mm: `insert into mm select * from mainDB.mm where mm._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='mm')`,
+    mm: `insert into mm select * from mainDB.mm`,
 
     item: `insert into item select * from mainDB.item`,
     // item: `insert into item select * from mainDB.item where item._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='item')`,
@@ -1461,7 +1460,35 @@ genDeptDB = {
     // bachat: `insert into bachat select * from mainDB.bachat where dept_id = ?`,
 }
 
+reports = {
+    pbk: `select aawak.*, 
+    mm.mm_hin,mm.mm_eng,mm.mm_code,
+    amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
+    pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
+    item.item_hin, item.item_eng, item.item_code, item.categories as item_categories,
+    sil.subitem_hin, sil.subitem_eng, si.categories as subitem_categories,
+    product.sr_num, product.product_code,
+    sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
+    dept.dept_eng, dept.dept_hin, dept.dept_code,
+    unit.unit_short, unit.unit_full,
+    slat.list_name_hin as aawak_type_hin, slat.list_name_eng as aawak_type_eng,
+    nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, pst.state_hin as nimitt_state_hin, pst.state_eng as nimitt_state_eng
+    from aawak 
+    left join mm on mm._id = aawak.mm_id
+    left join pbk on pbk._id = aawak.pbk_id
+    left join mm amm on amm._id = aawak.aawak_mm_id
+    left join item on item._id = aawak.item_id
+    left join subitem si on si._id = aawak.subitem_id
+    left join subitem_list sil on sil._id = si.subitem_list_id
+    left join product on product._id = aawak.product_id
+    left join support_list sl on sl._id = aawak.condition_id
+    left join unit on unit._id = aawak.unit_id
+    left join department dept on dept._id = aawak.dept_id
+    left join support_list slat on slat._id = aawak.aawak_type_id
+    left join nimitt nmt on nmt._id = aawak.nimitt_id
+    left join state pst on pst._id = nmt.state_id ?`
+}
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports
 };

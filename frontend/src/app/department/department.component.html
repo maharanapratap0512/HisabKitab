@@ -43,7 +43,7 @@
               <i class="dripicons-download" style="font-size: large;"> </i> Generate DB
             </button>
           </div>
-          <div class="col-3 mt-3 mb-2">
+          <div class="col-3 mt-3 mb-2" *ngIf="dept_id">
             <div class="d-flex justify-content-between">
               <button class="btn btn-outline-info" (click)="import.click()" data-toggle="tooltip"
                 title="Import Data (.Zip file)"> Import Data (.Zip)</button>
@@ -1387,9 +1387,10 @@
                   <div class="col-3">
                     <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="true"
                       [virtualScroll]="true" (change)="catItemSelected($event)">
-                      <ng-option *ngFor="let item of categories" [value]="item._id">
-                        {{item.category_hin}} :
-                        {{item.category_eng}}</ng-option>
+                      <ng-container *ngFor="let item of categories">
+                        <ng-option [value]="item._id" *ngIf="item.chk">
+                          {{item.category_hin}} : {{item.category_eng}}</ng-option>
+                      </ng-container>
                     </ng-select>
                   </div>
                   <div class="col-2" *ngIf="!termItemmix ">

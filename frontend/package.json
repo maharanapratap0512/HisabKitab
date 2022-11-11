@@ -21,6 +21,7 @@
     "@ng-select/ng-select": "^9.0.2",
     "@ng-toolkit/universal": "^8.1.0",
     "@syncfusion/ej2-angular-dropdowns": "^20.2.36",
+    "@syncfusion/ej2-angular-grids": "^20.2.49",
     "angular-ng-autocomplete": "^2.0.12",
     "exceljs": "^4.3.0",
     "file-saver": "^2.0.5",

@@ -52,7 +52,7 @@ export class ImportComponent implements OnInit {
   ) {
     this.gs.observeList().subscribe(result => {
       this.itemAll = result.itemmix ? result.itemmix : [];
-      this.items = result.itemmix && this.auth.webUser.dept_id > 2 ? result.itemmix : [];
+      this.items = result.itemmix  ? result.itemmix : [];
       this.categories = result.category ? result.category : [];
       this.units = result.unit ? result.unit : [];
       this.states = result.state ? result.state : [];
@@ -168,10 +168,10 @@ export class ImportComponent implements OnInit {
       let item = this.items.find((i: { _id: any; }) => i._id == ev);
       let category_ids = this.categories.map((c: { _id: any; }) => c._id);
       if (this.cat) {
-        this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
+        this.subitems = item.subitems.filter((s: { categories: any; }) => s.categories.include(this.cat));
       }
       else {
-        this.subitems = item.subitems.filter(((s: { category_id: any; }) => category_ids.includes(s.category_id)));
+        this.subitems = item.subitems;
       }
     }
     else {
