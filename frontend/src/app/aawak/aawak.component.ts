@@ -159,13 +159,13 @@ export class AawakComponent implements OnInit {
     })
   }
 
-  getProductData() {   
-    this.isLoader = true 
+  getProductData() {
+    this.isLoader = true
     this.http.put(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, {}).subscribe((data: any) => {
       if (data['result']) {
         this.products = data['result'];
         this.productsAll = data['result'];
-        this.isLoader=false;
+        this.isLoader = false;
       }
     });
     this.isLoader = false;
@@ -817,14 +817,14 @@ export class AawakComponent implements OnInit {
               case "serial no":
               case "sr no":
                 if (this.settings.aawak.product_id) {
-                  if(!obj.product){
+                  if (!obj.product) {
                     obj.product = exceldata[i][j];
                   }
-                  if(!obj.product_id){
-                    
+                  if (!obj.product_id) {
+
                     let getproduct = this.productsAll.find((p: any) => [p.sr_no, p.product_code].includes(exceldata[i][j]));
                     console.log(exceldata[i][j], getproduct, this.productsAll);
-                    
+
                     obj.product_id = getproduct ? getproduct._id : null;
                   }
                 }
@@ -911,6 +911,14 @@ export class AawakComponent implements OnInit {
                   }
                 }
                 break;
+              case "item_detail":
+              case "item detail":
+                obj.item_detail = exceldata[i][j];
+                break;
+              case "description":
+              case "desc":
+                obj.description = exceldata[i][j];
+                break;
               case "dept":
                 // case "department": obj.dept = exceldata[i][j];
                 //   let getdept = this.departments.find((d: any) => [d.dept_hin, d.dept_eng, d.dept_code].includes(obj.dept));                
@@ -969,6 +977,16 @@ export class AawakComponent implements OnInit {
                 break;
               case "qty":
               case "quantity": jwkobj.qty = exceldata[i][j];
+                break;
+              case "pkt no":
+              case "pkt num":
+              case "pkt_num":
+              case "pkt": jwkobj.pkt_num = exceldata[i][j];
+                break;
+              case "description":
+              case "jawak_detail":
+              case "jawak detail":
+              case "jawak description": jwkobj.description = exceldata[i][j];
                 break;
               default:
                 jwkobj[columns[j]] = exceldata[i][j];
