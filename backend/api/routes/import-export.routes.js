@@ -151,6 +151,26 @@ router.put('/correction', async (req, res, next) => {
     };
 });
 
+//  apply correction on unmatched or correction list
+router.put('/ignore', async (req, res, next) => {
+    try {
+        let result = { success: false }
+        if (req.body && req.body.name && ['nimitt', 'product'].includes(req.body.type)) {
+            let rslt = DB.db.prepare(DB.query.excel_correction['ignore_' + req.body.type]).run(req.body);
+            if (rslt.changes > 0) {
+                result.success = true;
+            }
+        }
+        else {
+            result.success = false
+            result.err = "requested data not matched to criteria."
+        }
+        res.json(result);
+    } catch (err) {
+        console.log(err); next(err)
+    };
+});
+
 //  final import
 router.put('/final', async (req, res, next) => {
     try {
@@ -278,16 +298,16 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
             let new_entries = [];
             let update_entries = [];
             let insert = DB.db.transaction(async (tblname, data) => {
-                try {                    
+                try {
                     const insert_stmt = DB.db.prepare(DB.query[tblname].insert_ignore);
                     const update_stmt = DB.db.prepare(DB.query[tblname].import_update);
                     for (let i in data) {
-                        if(!data[i]._id){
+                        if (!data[i]._id) {
                             data[i]._id = null;
                         }
-                        if(tblname=="item" || tblname=="subitem" ){
+                        if (tblname == "item" || tblname == "subitem") {
                             data[i].categories = JSON.parse(data[i].categories ? data[i].categories : "[]");
-                            data[i].categories = data[i].categories.filter(c=>c);
+                            data[i].categories = data[i].categories.filter(c => c);
                             data[i].categories = JSON.stringify(data[i].categories);
                             data[i].active = 1;
 
@@ -308,7 +328,7 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
                             if (res.changes > 0) {
                                 new_entries.push(data[i]);
                             }
-                        }                        
+                        }
                     }
                     res.json({
                         type: tblname,

@@ -1371,6 +1371,10 @@ const excel_correction = {
     update_pbk: `update temp_import set pbk_id = @id where pbk = @pbk`,
     update_unit: `update temp_import set unit_id = @id where unit = @name`,
     update_jawak: `update temp_import set jawak_detail = @jawak_detail where _id = @_id`,
+
+    ignore_nimitt: `update temp_import set description = description || '; nimitt - ' || nimitt, nimitt = null where nimitt = @name`,
+    ignore_product: `update temp_import set item_detail = item_detail || '; CODE - ' || product, product = null where product = @name`,
+
 }
 
 const unit = {

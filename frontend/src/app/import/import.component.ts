@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
+import * as e from 'express';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
@@ -52,7 +53,7 @@ export class ImportComponent implements OnInit {
   ) {
     this.gs.observeList().subscribe(result => {
       this.itemAll = result.itemmix ? result.itemmix : [];
-      this.items = result.itemmix  ? result.itemmix : [];
+      this.items = result.itemmix ? result.itemmix : [];
       this.categories = result.category ? result.category : [];
       this.units = result.unit ? result.unit : [];
       this.states = result.state ? result.state : [];
@@ -66,7 +67,7 @@ export class ImportComponent implements OnInit {
     });
     this.settings = this.auth.webUser.settings;
     console.log(this.settings);
-    
+
   }
 
   ngOnInit(): void {
@@ -76,13 +77,13 @@ export class ImportComponent implements OnInit {
     this.getProductData();
   }
 
-  getProductData() {   
-    this.isLoader = true 
+  getProductData() {
+    this.isLoader = true
     this.http.put(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, {}).subscribe((data: any) => {
       if (data['result']) {
         this.products = data['result'];
         this.productsAll = data['result'];
-        this.isLoader=false;
+        this.isLoader = false;
       }
     });
     this.isLoader = false;
@@ -189,6 +190,30 @@ export class ImportComponent implements OnInit {
 
   }
 
+  ignoreCorrection(data: any, i: any) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "इस फील्ड का डाटा मिटा दिया जाएगा और डिस्क्रिप्शन मे ट्रांसफर किया जाएगा, इसे वापस undo नहीं कर सकते है।",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'हाँ, जी। '
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http.put(this.api.getUrl('IMPORTEXPORT') + 'ignore', data).subscribe((data: any) => {          
+          if(data.success){
+            this.unmatchedData[i].ignore = true;
+          }
+          else{
+            this.toastr.error("error occur");
+          }
+        });
+      }
+    });
+
+  }
+
   importFinal() {
     let valid = this.importData.filter((i: { valid: boolean, jawak_detail: any[]; }) => i.valid == false && i.jawak_detail.filter((j: { valid: Boolean; }) => j.valid == false).length == 0);
 
@@ -207,9 +232,6 @@ export class ImportComponent implements OnInit {
         confirmButtonText: 'OK'
       });
     }
-
-
-
   }
 
 

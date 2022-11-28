@@ -37,8 +37,8 @@ export class NimittEntryComponent implements OnInit {
     this.nimittForm = this.fb.group({
       nimitt_eng: [null, Validators.required],
       nimitt_hin: [null, Validators.required],
-      roll_no: [null, Validators.required],
-      relative_name: [null, Validators.required],
+      roll_no: [null],
+      relative_name: [null],
       gender: [null, Validators.required],
       townarea: [null, Validators.required],
       state_id: [null, Validators.required],
