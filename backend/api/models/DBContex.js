@@ -53,7 +53,7 @@ class DBContex {
         return new Promise(async (resolve, reject) => {
             try {
                 let sql = this.query[object][key];
-                const result = this.db.prepare(sql).run(options.obj ? options.obj : {});
+                const result = this.db.prepare(sql).run(options.obj ? options.obj : {});                
                 resolve(result);
             }
             catch (err) {
@@ -263,9 +263,10 @@ class DBContex {
         return new Promise(async (resolve, reject) => {
             try {
                 const result = this.db.prepare(`delete from ${tblname} ${conditionString ? `where ${conditionString}` : ``} `).run();
+                console.log(result);
                 return resolve(result);
             }
-            catch (err) { reject(err) }
+            catch (err) { console.log(err); reject(err) }
         })
     }
 

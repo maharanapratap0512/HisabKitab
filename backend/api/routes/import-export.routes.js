@@ -121,8 +121,12 @@ router.put('/correction', async (req, res, next) => {
                         await DB.runQuery('excel_correction', 'update_jawak', { obj: obj });
                     }
                 }
-                if (req.body[i].type == 'item' && req.body[i].subitem) {
-                    await DB.runQuery('excel_correction', 'update_subitem', { obj: req.body[i] });
+                if (req.body[i].type == 'item' && req.body[i].extra_note) {
+                    let qname = 'update_subitem';
+                    if(req.body[i].id && !req.body[i].id2){
+                        qname = 'update_ignore_subitem';
+                    }
+                    await DB.runQuery('excel_correction', qname, { obj: req.body[i] });
                 } else {
                     console.log("req.body[i].type", req.body[i].type);
                     await DB.runQuery('excel_correction', 'update_' + req.body[i].type, { obj: req.body[i] });
@@ -156,7 +160,7 @@ router.put('/ignore', async (req, res, next) => {
     try {
         let result = { success: false }
         if (req.body && req.body.name && ['nimitt', 'product'].includes(req.body.type)) {
-            let rslt = DB.db.prepare(DB.query.excel_correction['ignore_' + req.body.type]).run(req.body);
+            let rslt = DB.db.prepare(DB.query.excel_correction['ignore_' + req.body.type]).run(req.body);            
             if (rslt.changes > 0) {
                 result.success = true;
             }

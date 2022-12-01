@@ -1362,6 +1362,7 @@ const excel_correction = {
     update_mm: `update temp_import set mm_id = @id where mm = @name`,
     update_item: `update temp_import set item_id = @id, subitem_id = @id2 where item = @name`,
     update_subitem: `update temp_import set item_id = @id, subitem_id = @id2 where item = @name AND subitem = @extra_note`,
+    update_ignore_subitem: `update temp_import set item = item || ' ' || subitem, item_id = @id, subitem_id = @id2, subitem = null where item = @name AND subitem = @extra_note`,
     update_aj_mm: `update temp_import set aj_mm_id = @id where aj_mm = @name`,
     update_awk_type: `update temp_import set aj_type_id = @id where type = 'awk' AND aj_type = @name`,
     update_jwk_type: `update temp_import set aj_type_id = @id where type = 'jwk' AND aj_type = @name`,
@@ -1373,7 +1374,9 @@ const excel_correction = {
     update_jawak: `update temp_import set jawak_detail = @jawak_detail where _id = @_id`,
 
     ignore_nimitt: `update temp_import set description = description || '; nimitt - ' || nimitt, nimitt = null where nimitt = @name`,
-    ignore_product: `update temp_import set item_detail = item_detail || '; CODE - ' || product, product = null where product = @name`,
+    ignore_product: `update temp_import set item_detail = item_detail || '; CODE - ' || product, product = null where product = @name`,    
+    // ignore_item: `update temp_import set item = item || ' ' || subitem, item_id = @id, subitem = null where item = @name AND subitem = @extra_note`,
+    
 
 }
 

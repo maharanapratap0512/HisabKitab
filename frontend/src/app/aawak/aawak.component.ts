@@ -529,7 +529,6 @@ export class AawakComponent implements OnInit {
           if (data['success']) {
             this.isLoader = false;
             this.aawakData.splice(i, 1);
-            this.gs.Lists.aawak.splice(this.gs.Lists.aawak.indexOf((i: { _id: any; }) => i._id == id), 1);
             this.total_count -= 1;
             this.toastr.success('Deleted Successfully');
           }

@@ -330,13 +330,15 @@
                         <td><input type="checkbox" class="form-check-input" [(ngModel)]="data.dictionary"
                               [ngModelOptions]="{standalone: true}" [disabled]="data.type=='product'"> </td>
                         <td>
-                           <div *ngIf="!data.ignore && (data.type == 'nimitt' || data.type == 'product')" class="btn btn-warning"
-                              (click)="ignoreCorrection(data, i)">Ignore</div>
-                              <div *ngIf="data.ignore"> Ignored</div>
+                           <div
+                              *ngIf="!data.ignore && (data.type == 'nimitt' || data.type == 'product')"
+                              class="btn btn-warning" (click)="ignoreCorrection(data, i)">Ignore</div>
+                           <div *ngIf="data.extra_note && data.id" class="text-warning">You can't select subitem after applying "Apply" Button.</div>                         
+                           <div *ngIf="data.ignore"> Ignored</div>
                         </td>
                      </tr>
                   </ng-container>
-               </tbody>
+               </tbody> 
             </table>
             <div class="col-10"></div>
             <div class="col-2">

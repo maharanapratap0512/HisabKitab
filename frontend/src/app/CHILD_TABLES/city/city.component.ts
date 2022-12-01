@@ -4,6 +4,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { ExcelExportService } from 'src/app/services/excel-export.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
@@ -39,7 +40,8 @@ export class CityComponent implements OnInit {
     public gs: GlobalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    public auth: AuthService
+    public auth: AuthService,
+    private excelExportService:ExcelExportService
   ) { }
 
   ngOnInit(): void {
@@ -124,6 +126,24 @@ export class CityComponent implements OnInit {
         });
       }
     })
+  }
+
+  exportToExcel() {
+    this.isLoader = true;
+    let date = new Date();
+    let mmData = [];
+    for (let i = 0; i < this.cityData.length; i++) {
+      mmData.push({
+        "Sr No": i + 1,
+        "_id": this.cityData[i]._id,
+        "MM Hin": this.cityData[i].city_hin,
+        "MM Eng": this.cityData[i].city_eng,
+        "MM Code": this.cityData[i].state_hin,        
+      });
+    }
+    
+    this.excelExportService.exportAsExcelFile(mmData, "City_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
+    this.isLoader = false;
   }
 
   protectionToggle(id: any, active: any) {

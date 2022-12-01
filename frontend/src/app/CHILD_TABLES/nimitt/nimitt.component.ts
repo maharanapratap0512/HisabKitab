@@ -3,6 +3,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { ExcelExportService } from 'src/app/services/excel-export.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
@@ -29,7 +30,8 @@ export class NimittComponent implements OnInit {
     public gs: GlobalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    public auth: AuthService
+    public auth: AuthService,
+    private excelExportService: ExcelExportService
   ) { }
 
   ngOnInit(): void {
@@ -108,6 +110,28 @@ export class NimittComponent implements OnInit {
         });
       }
     })
+  }
+
+  exportToExcel() {
+    this.isLoader = true;
+    let date = new Date();
+    let nimittD = [];
+    for (let i = 0; i < this.nimittData.length; i++) {
+      nimittD.push({
+        "Sr No": i + 1,
+        "_id": this.nimittData[i]._id,
+        "Roll No": this.nimittData[i].roll_no,
+        "MM Hin": this.nimittData[i].nimitt_hin,
+        "MM Eng": this.nimittData[i].nimitt_eng,
+        "Gender": this.nimittData[i].gender,
+        "Father Name": this.nimittData[i].relative_name,
+        "Townarea": this.nimittData[i].townarea,
+        "State": this.nimittData[i].state_hin,        
+      });
+    }
+    
+    this.excelExportService.exportAsExcelFile(nimittD, "Nimitt_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
+    this.isLoader = false;
   }
 
   protectionToggle(id: any, active: any) {

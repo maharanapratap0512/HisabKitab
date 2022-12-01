@@ -4,6 +4,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { ExcelExportService } from 'src/app/services/excel-export.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
@@ -27,11 +28,12 @@ export class MmComponent implements OnInit {
   editData: any = {};
   mmData: any = [];
   mmAll: any = [];
-  total_count: any = 0;;
+  total_count: any = 0;
+  ;
   departments: any = [];
   states: any = [];
   temp: any = {};
-  settings:any = {};
+  settings: any = {};
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
@@ -39,7 +41,8 @@ export class MmComponent implements OnInit {
     public gs: GlobalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    public auth: AuthService
+    public auth: AuthService,
+    private excelExportService: ExcelExportService
   ) { }
 
   ngOnInit(): void {
@@ -80,6 +83,29 @@ export class MmComponent implements OnInit {
     else {
       this.mmData = this.mmAll;
     }
+  }
+
+  exportToExcel() {
+    this.isLoader = true;
+    let date = new Date();
+    let mmExportData = [];
+    for (let i = 0; i < this.mmData.length; i++) {
+      mmExportData.push({
+        "Sr No": i + 1,
+        "_id": this.mmData[i]._id,
+        "MM Hin": this.mmData[i].mm_hin,
+        "MM Eng": this.mmData[i].mm_eng,
+        "MM Code": this.mmData[i].mm_code,
+        "Department": this.mmData[i].dept_hin,
+        "Parent MM": this.mmData[i].parent_mm_hin,
+        "State": this.mmData[i].state_hin,
+        "Opening Date": this.mmData[i].opening_date,
+        "Nimitt": this.mmData[i].nimitt_hin
+      });
+    }
+    
+    this.excelExportService.exportAsExcelFile(mmExportData, "MM_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+    this.isLoader = false;
   }
 
   addMMResponse(ev: any) {
@@ -149,19 +175,19 @@ export class MmComponent implements OnInit {
     body.query = {
       _id: id
     }
-    body.set = {      
+    body.set = {
       active: !active
     };
     this.http.put(this.api.getUrl('MM'), body).subscribe((data: any) => {
-        console.log("data", data);      
-        this.mmData.splice(this.mmData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);    
-        this.isLoader = false;  
-        if(data['result'].active){
-          this.toastr.success("Protetion Shield Activated");
-        }      
-        else{          
-          this.toastr.success("Protetion Shield Deactivated");
-        }
+      console.log("data", data);
+      this.mmData.splice(this.mmData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);
+      this.isLoader = false;
+      if (data['result'].active) {
+        this.toastr.success("Protetion Shield Activated");
+      }
+      else {
+        this.toastr.success("Protetion Shield Deactivated");
+      }
     }, err => {
       this.toastr.error(err['message']);
       this.isLoader = false;

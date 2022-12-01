@@ -20,7 +20,7 @@
                            <i class="dripicons-plus h4 icon-mx-2"> </i>Add MM
                         </button>
                      </div>
-                     <div class="col-4">
+                     <div class="col-2">
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
@@ -41,6 +41,9 @@
                            <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_eng}} :
                               {{item.dept_code}}</ng-option>
                         </ng-select>
+                     </div>
+                     <div class="col-2">
+                        <button class="btn btn-outline-success" (click)="exportToExcel()">Export To Excel</button>
                      </div>
                      <div class="col-2">
                         <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total

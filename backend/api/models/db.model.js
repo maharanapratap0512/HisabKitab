@@ -1252,6 +1252,159 @@ class dbModal {
 
           END; `
     },
+    {      
+      drop_awk_ins_bcht_ins:
+        `DROP TRIGGER IF exists 'awk_ins_bcht_ins' `,
+      drop_awk_ins_bcht_updt:
+        `DROP TRIGGER IF exists 'awk_ins_bcht_updt'`,
+      rename_bachat:
+        `ALTER TABLE bachat RENAME TO 'old_bachat'`,
+      rename_aawak:
+        `ALTER TABLE aawak RENAME TO 'old_aawak'`,
+      recreate_bachat:
+        `create table IF NOT EXISTS bachat(
+          _id integer primary key AUTOINCREMENT,
+          mm_id integer not null references mm(_id) ON DELETE CASCADE,
+          item_id integer not null references item(_id) ON DELETE CASCADE,
+          subitem_id integer null references subitem(_id) ON DELETE CASCADE,
+          Stock decimal(10,2) default 0,
+          Used decimal(10,2) default 0,
+          New decimal(10,2) default 0,
+          Old decimal(10,2) default 0,
+          Defective decimal(10,2) default 0,     
+          Scrap decimal(10,2) default 0,  
+          Repairing decimal(10, 2) default 0,
+          unit_id integer not null references unit(_id) ON DELETE CASCADE,
+          dept_id integer not null references department(_id) ON DELETE CASCADE,
+          active tinyint default 0,
+          created_at timestamp default (strftime('%Y-%m-%d %H:%M:%f', 'now')),
+          updated_at timestamp default (strftime('%Y-%m-%d %H:%M:%f', 'now')),
+          unique(mm_id,item_id,unit_id,dept_id,subitem_id)
+        );`,
+      recreate_aawak:
+        `CREATE TABLE aawak(
+          _id integer UNIQUE primary key AUTOINCREMENT,
+          date date not null,
+          mm_id integer not null references mm(_id) ON UPDATE CASCADE,
+          pkt_num varchar(50) null,
+          pbk_id integer null references pbk(_id) ON UPDATE CASCADE,
+          aawak_mm_id integer null references mm(_id) ON UPDATE CASCADE,
+          item_id integer not null references item(_id) ON UPDATE CASCADE,
+          subitem_id integer null references subitem(_id) ON UPDATE CASCADE,
+          product_id integer null references product(_id) ON UPDATE CASCADE,
+          item_detail text null,
+          company_name varchar(100) null,
+          condition_id integer null references support_list(_id) ON UPDATE CASCADE,
+          qty DECIMAL(10,2) not null,
+          rate DECIMAL(10,2) null,
+          actual_amt DECIMAL(10,2) null,
+          aawak_type_id int not null references support_list(_id) ON UPDATE CASCADE,
+          unit_id integer not null references unit(_id) ON UPDATE CASCADE,
+          description text null,
+          nimitt_id integer REFERENCES nimitt(_id) ON UPDATE CASCADE,
+          remaining_qty decimal(10,2) null,
+          isbill tinyint(1) default 0,
+          document json,
+          hl tinyint default 0,
+          active tinyint default 0,
+          dept_id integer references department(_id) ON UPDATE CASCADE,          
+          updated_at timestamp default (strftime('%Y-%m-%d %H:%M:%f', 'now')), 
+          created_at timestamp default (strftime('%Y-%m-%d %H:%M:%f', 'now')),
+          unique(date,pkt_num,pbk_id,mm_id,item_id,subitem_id,product_id,condition_id,aawak_type_id,dept_id)
+        );`,
+      copy_awk:
+        `insert into aawak(_id, date, mm_id, pkt_num, pbk_id, aawak_mm_id, item_id, subitem_id, product_id, item_detail, company_name, condition_id, qty, rate, actual_amt, aawak_type_id, unit_id, description, nimitt_id, remaining_qty, isbill, document, hl, active, dept_id, created_at, updated_at) select _id, date, mm_id, pkt_num, pbk_id, aawak_mm_id, item_id, subitem_id, product_id, item_detail, company_name, condition_id, qty, rate, actual_amt, aawak_type_id, unit_id, description, nimitt_id, remaining_qty, isbill, document, hl, active, dept_id, created_at, updated_at from old_aawak`,
+      copy_bcht:
+        `insert into bachat(_id, mm_id, item_id, subitem_id, Stock, Used, New, Old, Defective, Scrap, Repairing, unit_id, dept_id, active, created_at, updated_at) select _id, mm_id, item_id, subitem_id, Stock, Used, New, Old, Defective, Scrap, Repairing, unit_id, dept_id, active, created_at, updated_at from old_bachat`,
+      drop_old_aawak:
+        `drop table if exists 'old_aawak'`,
+      drop_old_bachat:
+        `drop table if exists 'old_bachat'`,
+      awk_ins_bcht_ins:
+      `CREATE TRIGGER IF not exists "awk_ins_bcht_ins" 
+        AFTER INSERT ON "aawak" 
+        FOR EACH ROW
+        WHEN NOT EXISTS(select _id from bachat where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND(NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
+        BEGIN
+          insert or ignore into bachat(mm_id, item_id, subitem_id, Stock, New, Old, Defective, Repairing, Scrap, unit_id, dept_id) 
+          values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN(select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);
+
+          update product set 
+          last_date = NEW.date,
+          last_mm = NEW.mm_id,
+          last_condition = NEW.condition_id,
+          last_entry_type = 'awk',
+          last_ref_id = NEW._id
+          where _id = NEW.product_id AND(last_date IS NULL OR last_date <= NEW.date);
+
+        END; `,
+        awk_ins_bcht_updt:
+        `CREATE TRIGGER IF not exists "awk_ins_bcht_updt" 
+          AFTER INSERT ON "aawak" 
+          FOR EACH ROW     
+          WHEN EXISTS(select _id from bachat where created_at != NEW.created_at AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
+          BEGIN
+              update bachat set 
+              Stock = Stock + NEW.qty,
+              New = New + (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END),
+              Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
+              Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
+              Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END),
+              Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
+              where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id;        
+              
+              update product set 
+              last_date = NEW.date,
+              last_mm = NEW.mm_id,
+              last_condition = NEW.condition_id,
+              last_entry_type = 'awk',
+              last_ref_id = NEW._id
+              where _id = NEW.product_id AND (last_date IS NULL OR last_date <= NEW.date);
+          END;`,
+      drop_awk_del_bcht_updt:
+        `DROP TRIGGER IF EXISTS "awk_del_bcht_updt"`,
+      awk_del_bcht_updt:
+        `CREATE TRIGGER IF NOT EXISTS "awk_del_bcht_updt" 
+          AFTER DELETE ON "aawak" 
+          FOR EACH ROW
+          BEGIN
+            update bachat set
+            Stock = Stock - OLD.qty,
+            New = New - (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+            Old = Old - (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+            Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+            Repairing = Repairing - (CASE WHEN(select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
+            Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
+            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND(OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;
+
+            update product set 
+            last_entry_type = 'deleted',
+            last_ref_id = null
+            where _id = OLD.product_id AND last_ref_id = OLD._id;
+          END; `,
+      drop_jwk_del_bcht_updt:
+        `DROP TRIGGER IF exists "jwk_del_bcht_updt" `,
+      jwk_del_bcht_updt:
+        `CREATE TRIGGER IF not exists "jwk_del_bcht_updt" 
+          AFTER DELETE ON "jawak" 
+          FOR EACH ROW
+          BEGIN
+            update bachat set 
+            Stock = Stock + OLD.qty,
+            Used = Used - (CASE WHEN OLD.jawak_type_id = 27 THEN OLD.qty ELSE 0 END),
+            New = New + (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+            Old = Old + (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+            Defective = Defective + (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+            Repairing = Repairing + (CASE WHEN(select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
+            Scrap = Scrap + (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
+            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND(OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;
+
+            update product set 
+            last_entry_type = 'deleted',
+            last_ref_id = null
+            where _id = OLD.product_id AND last_ref_id = OLD._id;
+          END; `,
+    }
   ];
   migrationLength;
   constructor(dbPath) {
@@ -1302,7 +1455,7 @@ class dbModal {
           console.log(err);
         }
 
-      });     
+      });
 
       this.db.pragma('foreign_keys=OFF');
       this.db.pragma('legacy_alter_table=ON');
