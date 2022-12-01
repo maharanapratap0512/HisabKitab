@@ -34,6 +34,7 @@ export class AawakComponent implements OnInit {
   aawakData: any = [];
   aawakAll: any = [];
   total_count: any = 0;
+  export_total_count:any = 0;
   allAJData: any = [];
   awkCount: any = 0;
   mms: any = [];
@@ -63,7 +64,8 @@ export class AawakComponent implements OnInit {
     subitem_id: [],
     condition_id: [],
     pkt_num: null,
-    nimitt_id: []
+    nimitt_id: [], 
+    remaining_qty: false
   };
   cat: any;
   settings: any = {};
@@ -318,6 +320,91 @@ export class AawakComponent implements OnInit {
       }
     });
   }
+  exportPendingData() {
+    this.isLoader = true;
+    this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
+    this.pageNo = 0;
+    this.allAJData = [];
+    this.exportAJdata$ = new Subject();
+
+    this.filterBody.remaining_qty = true;
+    this.getMoreAJ();
+
+    this.exportAJdata$.subscribe(async (result: any) => {
+
+      for (let i = 0; i < result.length; i++) {
+        let jawakArray = [];
+        jawakArray.push({
+          'Date': '',
+          'Pkt No': '',
+          'Jawak MM': '',
+          'Jawak Detail': '',
+          'Kisko Diya': 'बचत',
+          'Jawak Type': '',
+          'Qty': result[i].remaining_qty ? result[i].remaining_qty : 0,
+          'Unit': result[i].unit_id ? result[i].unit_short : '',
+        });
+        let awkObj: any = {
+          '_id': result[i]._id,
+          'No': i + 1,
+          'Date': result[i].date ? result[i].date : '-',
+          'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
+          'MM': result[i].mm_hin,
+          'Aawak MM': result[i].aawak_mm_id ? result[i].aawak_mm_hin : '-',
+        };
+        if (this.settings.aawak.pbk_id) {
+          awkObj['Roll No'] = result[i].roll_no ? result[i].roll_no : '-';
+          awkObj.Pbk = result[i].pbk_hin ? result[i].pbk_hin : '-';
+          awkObj.Relation = result[i].relation ? result[i].relation : '-';
+          awkObj.Relative = result[i].relative_name ? result[i].relative_name : '-';
+        }
+
+        let cat = '';
+        let item = this.gs.Lists.itemmix.find((it: { _id: any; }) => it._id == result[i].item_id);
+        if (item) {
+          if (result[i].subitem_id) {
+            let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
+            if (subitem) {
+              cat = subitem.categories_hin.join(', ');
+            } else {
+              cat = item.categories_hin.join(', ');
+            }
+          }
+          else {
+            cat = item.categories_hin.join(', ');
+          }
+        }
+        awkObj = {
+          ...awkObj,
+          'Category': cat,
+          'Item': result[i].item_id ? result[i].item_hin : '-',
+          'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
+          'Product Code': result[i].product_code ? result[i].product_code : '-',
+          'Sr No': result[i].sr_num ? result[i].sr_num : '-',
+          'Company': result[i].company_name ? result[i].company_name : '-',
+          'Condition': result[i].condition_id ? result[i].condition_hin : '-',
+          'Bill': result[i].isbill ? 'है' : '-',
+          'Qty': result[i].qty ? result[i].qty : '-',
+          'Unit': result[i].unit_id ? result[i].unit_short : '-',
+          'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
+          'Aawak Type': result[i].aawak_type_id ? result[i].aawak_type_hin : '-',
+          'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
+          'Description': result[i].description ? result[i].description : '-',
+          // 'बचत':result[i].remaining_qty ? result[i].remaining_qty : 0,       
+          'Jawak Detail': jawakArray,
+        };
+        this.allAJData.push(awkObj);
+      }
+      
+      if (this.allAJData.length < this.export_total_count) {
+        this.getMoreAJ();
+      }
+      else {        
+        this.export(this.allAJData);
+        this.isLoader = false;
+      }
+    });
+  }
 
   exportAawakData() {
     this.isLoader = true;
@@ -445,6 +532,7 @@ export class AawakComponent implements OnInit {
       if (data['result'] && data["result"].length) {
         if (data["pageNo"]) {
           this.pageNo = data["pageNo"];
+          this.export_total_count = data['total_count'];
         }
         this.exportAJdata$.next(data['result']);
         // this.isLoader = false;
