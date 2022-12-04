@@ -16,6 +16,22 @@ export class GlobalService {
   Lists: any = null;
   Config: any = {};
   // getList$ = new Subject();
+  date = new Date();
+  years: any = [];
+  months: any = [
+    { m: 1, name: 'January' },
+    { m: 2, name: 'February' },
+    { m: 3, name: 'March' },
+    { m: 4, name: 'April' },
+    { m: 5, name: 'May' },
+    { m: 6, name: 'June' },
+    { m: 7, name: 'July' },
+    { m: 8, name: 'August' },
+    { m: 9, name: 'September' },
+    { m: 10, name: 'October' },
+    { m: 11, name: 'November' },
+    { m: 12, name: 'December' },
+  ];
 
   constructor(
     private http: HttpService,
@@ -23,9 +39,13 @@ export class GlobalService {
     private toastr: ToastrService,
     public auth: AuthService
   ) {
+    let date = new Date();
+    for (let yr = date.getFullYear(); yr >= 2021; yr--) {
+      this.years.push(yr);
+    }
     // this.getList();
   }
-  
+
   // validationFireOnSubmit(fg: FormGroup) {
   // Object.keys(fg.controls).forEach(key => {
   //   const control = fg.get(key);
@@ -56,13 +76,13 @@ export class GlobalService {
         this.Lists = {}
         this.http.get(this.api.URLS['LISTALL'] + '/' + this.auth.webUser.dept_id).subscribe((data) => {
           if (data['success'] && data['result']) {
-            for(let key of Object.keys(data['result'])){
+            for (let key of Object.keys(data['result'])) {
               // console.log('key',data['result'][]);
-              
+
               this.Lists[key] = data['result'][key].data;
             }
             console.log(this.Lists);
-            
+
             // this.Lists.country = data['result'].country;
             // this.Lists.city = data['result'].city;
             // this.Lists.mm = data['result'].mm;

@@ -27,6 +27,10 @@ export class ReportsComponent implements OnInit {
   total_count: any = 0;
   reportData: any = [];
   pageSettings: PageSettingsModel;
+  filterBody: any = {}
+  years: any = [];
+  months: any = [];
+  mms:any = [];
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -36,19 +40,33 @@ export class ReportsComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public auth: AuthService,
     private excelExportService: ExcelExportService) {
-    this.pageSettings = { pageSize: 5 }
+    this.pageSettings = { pageSize: 5 }  
+    this.years = gs.years;
+    this.months = gs.months;
   }
 
   ngOnInit(): void {
     this.spinner.show();
+
     this.gs.observeList().subscribe(result => {
-      // console.log("dashboard", result);
+      this.mms = result.mm ? result.mm : [];
     });
     this.settings = this.auth.webUser.settings;
-    this.http.put(this.api.getUrl('REPORT')+'pbk/', {}).subscribe((data:any)=>{
+    this.http.put(this.api.getUrl('REPORT') + 'pbk/', {}).subscribe((data: any) => {
       this.reportData = data;
-      
+
     })
+  }
+
+  yearChanged(ev:any){
+    if(ev && ev == this.gs.date.getFullYear())
+    {
+      this.months = this.gs.months.filter((i: { m: number; })=>i.m <= this.gs.date.getMonth())
+    }
+    else{
+      this.months = this.gs.months;
+    }
+
   }
 
 

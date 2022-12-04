@@ -5,37 +5,45 @@
          <div class="container-fluid">
 
             <div class="row">
+               <div class="card-header">Generate Reports (Under Construction)</div>
                <div class="card-body">
-                  Under Construction
-                  <!-- <div class="row d-flex justify-content-between">
-                     <div class="col-3">
+                  <div class="row">
+                     <!-- Month and Year -->
+                     <div class="col-md-3 mb-2">
                         <div class="form-group">
-                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                              name="search">
+                           <label class="form-label">Month-Year</label>
+                           <div class="d-flex justify-content-between">
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Year"
+                                 (change)="yearChanged($event)" [clearable]="true" [virtualScroll]="true"
+                                 [(ngModel)]="filterBody.year" name="year">
+                                 <ng-option selected="selected" disabled value="">Select Year
+                                 </ng-option>
+                                 <ng-option *ngFor="let item of years" [value]="item">{{item}}</ng-option>
+                              </ng-select>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Month"
+                                 [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month" name="month">
+                                 <ng-option selected="selected" disabled value="">Select Month
+                                 </ng-option>
+                                 <ng-option *ngFor="let item of months" [value]="item.m">{{item.m}} : {{item.name}}
+                                 </ng-option>
+                              </ng-select>
+
+                           </div>
                         </div>
                      </div>
-                     <div class="col-3 d-flex">
-                        <button class="file btn btn-success" style="font-weight: 700 !important;">
-                           <i class="uil uil-arrow-to-bottom"></i> Import Aawak
-                           <input type="file" class="inputtag"
-                              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                              (change)="excelImport($event)" />
-                        </button>
 
+                     <!-- MM -->
+                     <div class="col-md-3 mb-3">
+                        <div class="form-group">
+                           <label class="form-label">MM</label>
+                           <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
+                              [virtualScroll]="true" name="mm_id" [(ngModel)]="filterBody.mm_id">
+                              <ng-option *ngFor="let item of mms" [value]="item._id">
+                                 {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                           </ng-select>
+                        </div>
                      </div>
-                     <div class="col-3">
-                        <button class="file btn btn-success" style="font-weight: 700 !important;" (click)="filterError()">Find Error</button>
-                     </div>
-
-                     <div class="col-2">
-                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
-                           Count : {{total_count}}
-                        </button>
-                     </div>
-                  </div> -->
-                  <!-- <div class="col-3">
-                     <button class="file btn btn-success" style="font-weight: 700 !important;" (click)="exportExcel()">Export</button>
-                  </div> -->
+                  </div>
                </div>
             </div>
 
