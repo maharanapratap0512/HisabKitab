@@ -18,7 +18,11 @@ const DB = new DBContex();
 // by pbk 
 router.put('/pbk/', async (req, res, next) => {
     try {
-        let stmt = DB.db.prepare(DB.query.reports.pbk.replace('?', `where pbk_id is not null`));
+        let conditionString = `1=1`;
+        conditionString += `${req.body.pbk_id ? ` AND pbk_id = ${req.body.pbk_id}` : ``}`
+        let query = DB.query.reports.pbk.replace('?', (conditionString.trim() != `1=1` ? `where ` + conditionString : ``));
+        console.log(query);
+        let stmt = DB.db.prepare(query);
         res.json({
             result:stmt.all()
         })
