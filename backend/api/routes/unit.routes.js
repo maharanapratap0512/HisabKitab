@@ -10,7 +10,8 @@ router.get('/', async (req, res, next) => {
         await DB.getList('unit').then((resolve) => {
             res.json({
                 success: true,
-                result: resolve || []
+                result: resolve.data || [],
+                total_count: (resolve.total_count ? resolve.total_count : 0),
             });
         });
     } catch (err) { next(err) };

@@ -7,10 +7,11 @@ const DB = new DBContex();
 // get support_list all
 router.get('/', async (req, res, next) => {
     try {
-        await DB.getList('support_list').then((response) => {
+        await DB.getList('support_list').then((resolve) => {
             res.json({
                 success: true,
-                result: response || []
+                result: resolve.data || [],
+                total_count: (resolve.total_count ? resolve.total_count : 0),
             });
         });
     } catch (err) { next(err) };

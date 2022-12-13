@@ -41,7 +41,20 @@ export class ImportComponent implements OnInit {
   um_units: any = [];
   um_pbks: any = [];
   cat: any = null;
-
+  nCountry: any = [];
+  nState: any = [];
+  nCity: any = [];
+  nMM: any = [];
+  nCategory: any = [];
+  nSubitemList: any = [];
+  nItem: any = [];
+  nSubitem: any = [];
+  nDept: any = [];
+  nDeptConf: any = [];
+  nPbk: any = [];
+  nNimitt: any = [];
+  nSupportList: any = [];
+  nUnit: any = [];
 
   constructor(private fb: FormBuilder,
     private http: HttpService,

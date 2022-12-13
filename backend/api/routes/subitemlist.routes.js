@@ -27,7 +27,8 @@ router.get('/', async (req, res, next) => {
     await DB.getList('subitem_list').then((resolve) => {
         res.json({
             success: true,
-            result: resolve || []
+            result: resolve.data || [],
+            total_count: (resolve.total_count ? resolve.total_count : 0),
         });
     }, (err) => { return next(err) });
 });
