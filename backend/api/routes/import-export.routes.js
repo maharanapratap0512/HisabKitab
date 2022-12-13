@@ -298,14 +298,14 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
     try {
 
         if (req.body.type && req.body.data) {
-            let total_count = 0;
+            let total_count = 0, i =0;
             let new_entries = [];
             let update_entries = [];
             let insert = DB.db.transaction(async (tblname, data) => {
                 try {
                     const insert_stmt = DB.db.prepare(DB.query[tblname].insert_ignore);
                     const update_stmt = DB.db.prepare(DB.query[tblname].import_update);
-                    for (let i in data) {
+                    for (i = 0; i < data.length; i++) {
                         if (!data[i]._id) {
                             data[i]._id = null;
                         }
@@ -314,11 +314,9 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
                             data[i].categories = data[i].categories.filter(c => c);
                             data[i].categories = JSON.stringify(data[i].categories);
                             data[i].active = 1;
-
-
                         }
+                                                
                         let updt_res = update_stmt.run(data[i]);
-                        // console.log("updt_res", updt_res);
                         if (updt_res) {
                             if (updt_res.changes > 0) {
                                 update_entries.push(data[i]);
@@ -343,7 +341,7 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
                     })
                 }
                 catch (ex) {
-                    console.log(ex);
+                    console.log(ex, data[i]);
                     return next(ex);
                 }
             });

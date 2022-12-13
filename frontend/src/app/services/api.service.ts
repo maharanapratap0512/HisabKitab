@@ -53,6 +53,7 @@ export class ApiService {
     NIMITT: base_url + 'nimitt/',
     DICT: base_url + 'dictionary/',
     REPORT: base_url + 'reports/',
+    REPORTPBK: base_url + 'reports/pbk/',
   };
 
   getUrl(key: string): string {

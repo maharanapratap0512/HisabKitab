@@ -32,6 +32,38 @@
                         </div>
                      </div>
 
+                     <!-- state for aawak filter -->
+                     <div class="col-md-3 mb-3">
+                        <div class="form-group">
+                           <label class="form-label">State for Pbk</label>
+                           <ng-select class="custom" style="width: 100%;" placeholder="Filter PBK by State"
+                              [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)">
+                              <ng-option selected="selected" disabled value="">Select State to Filter Pbk
+                              </ng-option>
+                              <ng-option *ngFor="let item of states" [value]="item._id">
+                                 {{item.state_hin}} : {{item.state_eng}}
+                              </ng-option>
+                           </ng-select>
+                        </div>
+                     </div>
+
+                     <!-- pbk -->
+                     <div class="col-md-3 mb-3">
+                        <div class="form-group">
+                           <label class="form-label">Sewadhari</label>
+                           <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Roll no. or Pbk name"
+                              [clearable]="false" [virtualScroll]="true" [(ngModel)]="filterBody.pbk_id" name="pbk_id">
+                              <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
+                              </ng-option>
+                              <ng-option *ngFor="let item of pbks" [value]="item._id">
+                                 {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} :
+                                 {{item.relation}} :
+                                 {{item.relative_name}}
+                              </ng-option>
+                           </ng-select>
+                        </div>
+                     </div>
+
                      <!-- MM -->
                      <div class="col-md-3 mb-3">
                         <div class="form-group">
@@ -43,34 +75,47 @@
                            </ng-select>
                         </div>
                      </div>
+
+
+                     <div class="col-md-2 mb-3">
+                        <button class="btn btn-primary" (click)="searchReport()">Search</button>
+                     </div>
+
+
                   </div>
                </div>
             </div>
 
+            <!-- reports  -->
             <div class="row">
-               <!-- help: https://ej2.syncfusion.com/angular/documentation/grid/getting-started/ -->
-               <ejs-grid [dataSource]='reportData' [allowPaging]="true" [pageSettings]="pageSettings"
-                  [allowSorting]="true" [allowFiltering]="true" height='267px'>
-                  <e-columns>
-                     <e-column field="roll_no" headerText="Roll No" textAlign="left" width="50"></e-column>
-                     <e-column field="pbk_hin" headerText="Pbk Name" textAlign="left" width="90"></e-column>
-                     <e-column field="date" headerText="Date" textAlign="left" format="yMd"></e-column>
-                     <e-column field="pkt_num" headerText="Pkt Num" textAlign="left"></e-column>
-                     <e-column field="mm_hin" headerText="MM" textAlign="left"></e-column>
-                     <e-column field="item_hin" headerText="Item" textAlign="left"></e-column>
-                     <e-column field="subitem_hin" headerText="Subitem" textAlign="left"></e-column>
-                     <e-column field="company_name" headerText="Company" textAlign="left"></e-column>
-                     <e-column field="qty" headerText="Qty" textAlign="center" format="N2"></e-column>
-                     <e-column field="unit_short" headerText="Unit" textAlign="left"></e-column>
-                     <e-column field="condition_hin" headerText="Condition"></e-column>
-                     <e-column field="rate" headerText="Rate" textAlign="center" format="C2"></e-column>
-                     <e-column field="actual_amt" headerText="Amount" textAlign="center" format="C2"></e-column>
-                     <e-column field="aawak_type_hin" headerText="Aawak Type"></e-column>
-                     <e-column field="nimitt_hin" headerText="Nimiit"></e-column>
-                     <e-column field="item_detail" headerText="Item Detail"></e-column>
-                     <e-column field="description" headerText="Description"></e-column>
-                  </e-columns>
-               </ejs-grid>
+               <div class="card-body" style="position: relative;">
+                  <ngx-spinner *ngIf="reportLoader" size="small" color="#fff" type="ball-scale" [fullScreen]="false">
+                     <p class="loading">Loading...</p>
+                  </ngx-spinner>
+                  <!-- help: https://ej2.syncfusion.com/angular/documentation/grid/getting-started/ -->
+                  <ejs-grid [dataSource]='reportData' [allowPaging]="true" [pageSettings]="pageSettings"
+                     [allowSorting]="true" [allowFiltering]="true" height='267px'>
+                     <e-columns>
+                        <e-column field="roll_no" headerText="Roll No" textAlign="left" width="50"></e-column>
+                        <e-column field="pbk_hin" headerText="Pbk Name" textAlign="left" width="90"></e-column>
+                        <e-column field="date" headerText="Date" textAlign="left" format="yMd"></e-column>
+                        <e-column field="pkt_num" headerText="Pkt Num" textAlign="left"></e-column>
+                        <e-column field="mm_hin" headerText="MM" textAlign="left"></e-column>
+                        <e-column field="item_hin" headerText="Item" textAlign="left"></e-column>
+                        <e-column field="subitem_hin" headerText="Subitem" textAlign="left"></e-column>
+                        <e-column field="company_name" headerText="Company" textAlign="left"></e-column>
+                        <e-column field="qty" headerText="Qty" textAlign="center" format="N2"></e-column>
+                        <e-column field="unit_short" headerText="Unit" textAlign="left"></e-column>
+                        <e-column field="condition_hin" headerText="Condition"></e-column>
+                        <e-column field="rate" headerText="Rate" textAlign="center" format="C2"></e-column>
+                        <e-column field="actual_amt" headerText="Amount" textAlign="center" format="C2"></e-column>
+                        <e-column field="aawak_type_hin" headerText="Aawak Type"></e-column>
+                        <e-column field="nimitt_hin" headerText="Nimiit"></e-column>
+                        <e-column field="item_detail" headerText="Item Detail"></e-column>
+                        <e-column field="description" headerText="Description"></e-column>
+                     </e-columns>
+                  </ejs-grid>
+               </div>
             </div>
 
             <div class="row">
@@ -101,6 +146,8 @@
             </div>
 
          </div>
+
+
       </div>
    </div>
 </div>

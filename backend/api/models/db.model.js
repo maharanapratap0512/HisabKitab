@@ -1324,7 +1324,7 @@ class dbModal {
       `CREATE TRIGGER IF not exists "awk_ins_bcht_ins" 
         AFTER INSERT ON "aawak" 
         FOR EACH ROW
-        WHEN NOT EXISTS(select _id from bachat where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND(NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
+        WHEN NOT EXISTS(select _id from bachat where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND IFNULL(subitem_id, 0) = IFNULL(NEW.subitem_id, 0) AND unit_id = NEW.unit_id)  
         BEGIN
           insert or ignore into bachat(mm_id, item_id, subitem_id, Stock, New, Old, Defective, Repairing, Scrap, unit_id, dept_id) 
           values(NEW.mm_id, NEW.item_id, NEW.subitem_id, NEW.qty, (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END), (CASE WHEN(select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END), (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END), NEW.unit_id, NEW.dept_id);
@@ -1338,29 +1338,104 @@ class dbModal {
           where _id = NEW.product_id AND(last_date IS NULL OR last_date <= NEW.date);
 
         END; `,
-        awk_ins_bcht_updt:
-        `CREATE TRIGGER IF not exists "awk_ins_bcht_updt" 
-          AFTER INSERT ON "aawak" 
-          FOR EACH ROW     
-          WHEN EXISTS(select _id from bachat where created_at != NEW.created_at AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id)  
+      awk_ins_bcht_updt:
+      `CREATE TRIGGER IF not exists "awk_ins_bcht_updt" 
+        AFTER INSERT ON "aawak" 
+        FOR EACH ROW     
+        WHEN EXISTS(select _id from bachat where created_at != NEW.created_at AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND IFNULL(subitem_id, 0) = IFNULL(NEW.subitem_id, 0) AND unit_id = NEW.unit_id)  
+        BEGIN
+            update bachat set 
+            Stock = Stock + NEW.qty,
+            New = New + (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END),
+            Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
+            Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
+            Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END),
+            Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND IFNULL(subitem_id, 0) = IFNULL(NEW.subitem_id, 0) AND unit_id = NEW.unit_id;        
+            
+            update product set 
+            last_date = NEW.date,
+            last_mm = NEW.mm_id,
+            last_condition = NEW.condition_id,
+            last_entry_type = 'awk',
+            last_ref_id = NEW._id
+            where _id = NEW.product_id AND (last_date IS NULL OR last_date <= NEW.date);
+        END;`,
+      awk_updt_bcht_updt:
+      `DROP TRIGGER IF EXISTS "awk_updt_bcht_updt"`,
+      awk_updt_bcht_updt:
+        `CREATE TRIGGER IF NOT EXISTS "awk_updt_bcht_updt"
+          AFTER UPDATE ON "aawak"
+          FOR EACH ROW
           BEGIN
-              update bachat set 
-              Stock = Stock + NEW.qty,
-              New = New + (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END),
-              Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
-              Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
-              Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END),
-              Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
-              where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND (NEW.subitem_id IS NULL OR subitem_id = NEW.subitem_id) AND unit_id = NEW.unit_id;        
+            update bachat set 
+            Stock = Stock + (NEW.qty - OLD.qty),
+            New = New + (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+            Old = Old + (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+            Defective = Defective + (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+            Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END) - (CASE WHEN (select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
+            Scrap = Scrap + (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
+            where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND IFNULL(subitem_id, 0) = IFNULL(NEW.subitem_id, 0) AND unit_id = NEW.unit_id;  
+
+            update product set 
+            last_date = NEW.date,
+            last_mm = NEW.mm_id,
+            last_condition = NEW.condition_id
+            where _id = NEW.product_id AND last_ref_id = NEW._id;
               
+          END;`,      
+
+      drop_jwk_ins_bcht_updt:
+        `DROP TRIGGER IF exists "jwk_ins_bcht_updt" `,
+      jwk_ins_bcht_updt:
+        `CREATE TRIGGER IF not exists "jwk_ins_bcht_updt" 
+            AFTER INSERT ON "jawak" 
+            FOR EACH ROW        
+            BEGIN
+              update bachat set 
+              Stock = Stock - NEW.qty,
+              Used = Used + (CASE WHEN NEW.jawak_type_id = 27 THEN NEW.qty ELSE 0 END),
+              New = New - (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END),
+              Old = Old - (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END),
+              Defective = Defective - (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END),
+              Repairing = Repairing - (CASE WHEN(select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END),
+              Scrap = Scrap - (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END)
+              where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND IFNULL(subitem_id, 0) = IFNULL(NEW.subitem_id, 0) AND unit_id = NEW.unit_id;
+
+              update product set 
+              last_date = NEW.date,
+              last_mm = NEW.jawak_mm_id,
+              last_condition = NEW.condition_id,
+              last_entry_type = 'jwk',
+              last_ref_id = NEW._id
+              where _id = NEW.product_id AND (last_date IS NULL OR last_date <= NEW.date);
+
+            END; `,
+
+      drop_jwk_updt_bcht_updt:
+        `DROP TRIGGER IF exists "jwk_updt_bcht_updt"`,
+      jwk_updt_bcht_updt:
+        `CREATE TRIGGER IF not exists "jwk_updt_bcht_updt" 
+            AFTER UPDATE ON "jawak" 
+            FOR EACH ROW        
+            BEGIN
+              update bachat set 
+              Stock = Stock - (NEW.qty - OLD.qty),
+              Used = Used + (CASE WHEN NEW.jawak_type_id = 27 THEN NEW.qty ELSE 0 END) - (CASE WHEN OLD.jawak_type_id = 27 THEN OLD.qty ELSE 0 END),
+              New = New - (CASE WHEN NEW.condition_id = 33 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+              Old = Old - (CASE WHEN NEW.condition_id = 34 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+              Defective = Defective - (CASE WHEN NEW.condition_id = 35 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+              Repairing = Repairing - (CASE WHEN(select list_name_eng from support_list where _id = NEW.condition_id) LIKE '%Repairing%' THEN NEW.qty ELSE 0 END) + (CASE WHEN(select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
+              Scrap = Scrap - (CASE WHEN NEW.condition_id = 36 THEN NEW.qty ELSE 0 END) + (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
+              where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND IFNULL(subitem_id, 0) = IFNULL(NEW.subitem_id, 0) AND unit_id = NEW.unit_id;
+
               update product set 
               last_date = NEW.date,
               last_mm = NEW.mm_id,
-              last_condition = NEW.condition_id,
-              last_entry_type = 'awk',
-              last_ref_id = NEW._id
-              where _id = NEW.product_id AND (last_date IS NULL OR last_date <= NEW.date);
-          END;`,
+              last_condition = NEW.condition_id
+              where _id = NEW.product_id AND last_ref_id = NEW._id;
+            END; `,               
+      
       drop_awk_del_bcht_updt:
         `DROP TRIGGER IF EXISTS "awk_del_bcht_updt"`,
       awk_del_bcht_updt:
@@ -1375,7 +1450,7 @@ class dbModal {
             Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
             Repairing = Repairing - (CASE WHEN(select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
             Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
-            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND(OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;
+            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND IFNULL(subitem_id, 0) = IFNULL(OLD.subitem_id, 0) AND unit_id = OLD.unit_id;
 
             update product set 
             last_entry_type = 'deleted',
@@ -1397,7 +1472,7 @@ class dbModal {
             Defective = Defective + (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
             Repairing = Repairing + (CASE WHEN(select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
             Scrap = Scrap + (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
-            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND(OLD.subitem_id IS NULL OR subitem_id = OLD.subitem_id) AND unit_id = OLD.unit_id;
+            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND IFNULL(subitem_id, 0) = IFNULL(OLD.subitem_id, 0) AND unit_id = OLD.unit_id;
 
             update product set 
             last_entry_type = 'deleted',
