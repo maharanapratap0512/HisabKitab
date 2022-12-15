@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import * as e from 'express';
+import { forEach } from 'jszip';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
@@ -18,6 +19,7 @@ export class ImportComponent implements OnInit {
 
   isLoader: boolean = false;
   @Input() importData: any;
+  @Input() updateData: any;
   @Output() response = new EventEmitter();
   term: any;
   items: any = [];
@@ -41,20 +43,8 @@ export class ImportComponent implements OnInit {
   um_units: any = [];
   um_pbks: any = [];
   cat: any = null;
-  nCountry: any = [];
-  nState: any = [];
-  nCity: any = [];
-  nMM: any = [];
-  nCategory: any = [];
-  nSubitemList: any = [];
-  nItem: any = [];
-  nSubitem: any = [];
-  nDept: any = [];
-  nDeptConf: any = [];
-  nPbk: any = [];
-  nNimitt: any = [];
-  nSupportList: any = [];
-  nUnit: any = [];
+  updateLists: any = [];
+  uData: any = {};
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -153,9 +143,31 @@ export class ImportComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    console.log("cccccccc", changes);
+
     if (changes.importData && changes.importData.currentValue) {
       this.importData = changes.importData.currentValue;
     }
+    if (changes.updateData && changes.updateData.currentValue) {
+      this.uData = changes.updateData.currentValue;
+      console.log("this.uData", this.uData);
+
+      // for (let [key, value] of Object.entries(this.uData)) {
+
+      //   console.log(">>>>>>", key);
+      // }
+      console.log(this.uData.country)
+
+
+      console.log("updateDataLisrt", Object.keys(this.uData));
+      // this.updateLists = ;      
+    }
+    else {
+      this.updateData = null;
+    }
+    console.log("importData", this.importData);
+    console.log("updateLists", this.updateLists);
+
   }
 
   getUnmatchedList() {
@@ -214,11 +226,11 @@ export class ImportComponent implements OnInit {
       confirmButtonText: 'हाँ, जी। '
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.put(this.api.getUrl('IMPORTEXPORT') + 'ignore', data).subscribe((data: any) => {          
-          if(data.success){
+        this.http.put(this.api.getUrl('IMPORTEXPORT') + 'ignore', data).subscribe((data: any) => {
+          if (data.success) {
             this.unmatchedData[i].ignore = true;
           }
-          else{
+          else {
             this.toastr.error("error occur");
           }
         });

@@ -4,7 +4,7 @@
 </ngx-spinner>
 
 
-<div class="row">
+<div class="row" *ngIf="importData && importData.length">
 
    <div class="row" style="padding: 10px 50px;">
       <ul class="nav nav-pills bg-nav-pills">
@@ -330,15 +330,15 @@
                         <td><input type="checkbox" class="form-check-input" [(ngModel)]="data.dictionary"
                               [ngModelOptions]="{standalone: true}" [disabled]="data.type=='product'"> </td>
                         <td>
-                           <div
-                              *ngIf="!data.ignore && (data.type == 'nimitt' || data.type == 'product')"
+                           <div *ngIf="!data.ignore && (data.type == 'nimitt' || data.type == 'product')"
                               class="btn btn-warning" (click)="ignoreCorrection(data, i)">Ignore</div>
-                           <div *ngIf="data.extra_note && data.id" class="text-warning">You can't select subitem after applying "Apply" Button.</div>                         
+                           <div *ngIf="data.extra_note && data.id" class="text-warning">You can't select subitem after
+                              applying "Apply" Button.</div>
                            <div *ngIf="data.ignore"> Ignored</div>
                         </td>
                      </tr>
                   </ng-container>
-               </tbody> 
+               </tbody>
             </table>
             <div class="col-10"></div>
             <div class="col-2">
@@ -473,6 +473,55 @@
             </tbody>
          </table>
       </div>
+
+   </div>
+
+</div>
+
+
+<div class="row" *ngIf="updateLists.length">
+
+   <div class="row" style="padding: 10px 50px;">
+      <ul class="nav nav-pills bg-nav-pills">
+         <li class="nav-item" *ngFor="let data of updateLists; first as f;">
+            <a href="{{'#'+data}}" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0 "
+               [class]="{'active':f}">
+               {{data}}
+               <span class="translate-middle bell badge rounded-pill bg-danger">
+                  {{uData[data].updates.length}}
+               </span>
+            </a>
+         </li>
+      </ul>
+   </div>
+
+   <div class="tab-content">
+      <ng-container *ngFor="let list of updateLists; first as f;">
+         <div class="tab-pane show" [class]="{'active':f}" id="{{list}}" style="overflow: auto;">
+            <table id="datatable-buttons" class="table table-hover dt-responsive">
+               <thead>
+                  <tr>
+                     <th style="width: 50px;">No.</th>
+                     <ng-container *ngFor="let key of uData[list].columns">
+                        <th *ngIf="!['active', '_id',  'created_at', 'updated_at'].includes(key)">
+                           {{key}}</th>
+                     </ng-container>
+                  </tr>
+               </thead>
+               <tbody>
+                  <ng-container *ngFor="let data of uData[list].changes; let i = index;">
+                     <tr [ngClass]="{'marked':data.status == 3, 'warned':data.status == 2}">
+                        <td>{{i+1}} </td>
+                        <ng-container *ngFor="let key of uData[list].columns">
+                           <td *ngIf="!['active', '_id', 'created_at', 'updated_at'].includes(key)">
+                              {{data[key] ? data[key] : ''}}</td>
+                        </ng-container>
+                     </tr>
+                  </ng-container>
+               </tbody>               
+            </table>
+         </div>
+      </ng-container>
 
    </div>
 

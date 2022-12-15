@@ -24,7 +24,7 @@ export class HeaderComponent implements OnInit {
   settings: any;
   showModal: any = '';
   importData: any = [];
-  importResult: any = [];
+  importResult: any = {};
 
   constructor(
     private http: HttpService,
@@ -377,7 +377,7 @@ export class HeaderComponent implements OnInit {
       fileReader.readAsArrayBuffer(ev.target.files[0]); //reading 1st file only
 
       fileReader.onload = () => {
-
+        this.importResult = {};
         this.dataZip = new JSZip();
         //loading zip file content
         this.dataZip.loadAsync(fileReader.result).then((zip: any) => {
@@ -430,31 +430,9 @@ export class HeaderComponent implements OnInit {
 
                 case 'country.json':
                   zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nCountry = JSON.parse(data);
-
+                    if (data) {                     
                       this.http.get(this.api.getUrl('COUNTRY')).subscribe((res: any) => {
-                        for (let i in res.result) {
-                          for (let j in nCountry) {
-                            if (res.result[i]._id == nCountry[j]._id) {
-                              if (res.result[i].updated_at != nCountry[j].updated_at) {
-                                nCountry[j].status = 2;
-                                res.result[i].status = 2;
-                                nCountry[j].oldData = res.result[i];
-                              }
-                              else {
-                                nCountry[j].status = 1;
-                                res.result[i].status = 1;
-                              }
-                              break;
-                            }
-                          }
-                          if (!res.result[i].status) {
-                            nCountry.unshift({ status: 3, ...res.result[i] });
-                          }
-                        }
-                        console.log("Country", nCountry);
-                        this.importResult.push({ type: 'country', data: nCountry })
+                        this.processingImportData('country', JSON.parse(data), res.result);
                       });
                     }
                   }, (err: any) => {
@@ -466,27 +444,7 @@ export class HeaderComponent implements OnInit {
                     if (data) {
                       let nState = JSON.parse(data);
                       this.http.get(this.api.getUrl('STATE')).subscribe((res: any) => {
-                        for (let i in res.result) {
-                          for (let j in nState) {
-                            if (res.result[i]._id == nState[j]._id) {
-                              if (res.result[i].updated_at != nState[j].updated_at) {
-                                nState[j].status = 2;
-                                res.result[i].status = 2;
-                                nState[j].oldData = res.result[i];
-                              }
-                              else {
-                                nState[j].status = 1;
-                                res.result[i].status = 1;
-                              }
-                              break;
-                            }
-                          }
-                          if (!res.result[i].status) {
-                            nState.unshift({ status: 3, ...res.result[i] });
-                          }
-                        }
-                        console.log("State", nState);
-                        this.importResult.push({ type: 'state', data: nState })
+                        this.processingImportData('state', JSON.parse(data), res.result);
                       });
                     }
                   }, (err: any) => {
@@ -499,27 +457,7 @@ export class HeaderComponent implements OnInit {
                     if (data) {
                       let nCity = JSON.parse(data);
                       this.http.get(this.api.getUrl('CITY')).subscribe((res: any) => {
-                        for (let i in res.result) {
-                          for (let j in nCity) {
-                            if (res.result[i]._id == nCity[j]._id) {
-                              if (res.result[i].updated_at != nCity[j].updated_at) {
-                                nCity[j].status = 2;
-                                res.result[i].status = 2;
-                                nCity[j].oldData = res.result[i];
-                              }
-                              else {
-                                nCity[j].status = 1;
-                                res.result[i].status = 1;
-                              }
-                              break;
-                            }
-                          }
-                          if (!res.result[i].status) {
-                            nCity.unshift({ status: 3, ...res.result[i] });
-                          }
-                        }
-                        console.log("City", nCity);
-                        this.importResult.push({ type: 'city', data: nCity })
+                        this.processingImportData('city', JSON.parse(data), res.result);
                       });
                     }
                   }, (err: any) => {
@@ -532,27 +470,7 @@ export class HeaderComponent implements OnInit {
                     if (data) {
                       let nCategory = JSON.parse(data);
                       this.http.get(this.api.getUrl('CATEGORY')).subscribe((res: any) => {
-                        for (let i in res.result) {
-                          for (let j in nCategory) {
-                            if (res.result[i]._id == nCategory[j]._id) {
-                              if (res.result[i].updated_at != nCategory[j].updated_at) {
-                                nCategory[j].status = 2;
-                                res.result[i].status = 2;
-                                nCategory[j].oldData = res.result[i];
-                              }
-                              else {
-                                nCategory[j].status = 1;
-                                res.result[i].status = 1;
-                              }
-                              break;
-                            }
-                          }
-                          if (!res.result[i].status) {
-                            nCategory.unshift({ status: 3, ...res.result[i] });
-                          }
-                        }
-                        console.log("Category", nCategory);
-                        this.importResult.push({ type: 'category', data: nCategory })
+                        this.processingImportData('category', JSON.parse(data), res.result);
                       });
                     }
                   }, (err: any) => {
@@ -578,27 +496,7 @@ export class HeaderComponent implements OnInit {
                     if (data) {
                       let nDept = JSON.parse(data);
                       this.http.get(this.api.getUrl('DEPT')).subscribe((res: any) => {
-                        for (let i in res.result) {
-                          for (let j in nDept) {
-                            if (res.result[i]._id == nDept[j]._id) {
-                              if (res.result[i].updated_at != nDept[j].updated_at) {
-                                nDept[j].status = 2;
-                                res.result[i].status = 2;
-                                nDept[j].oldData = res.result[i];
-                              }
-                              else {
-                                nDept[j].status = 1;
-                                res.result[i].status = 1;
-                              }
-                              break;
-                            }
-                          }
-                          if (!res.result[i].status) {
-                            nDept.unshift({ status: 3, ...res.result[i] });
-                          }
-                        }
-                        console.log("Dept", nDept);
-                        this.importResult.push({ type: 'dept', data: nDept })
+                        this.processingImportData('dept', JSON.parse(data), res.result);
                       });
                     }
                   }, (err: any) => {
@@ -611,27 +509,7 @@ export class HeaderComponent implements OnInit {
                     if (data) {
                       let nSupportList = JSON.parse(data);
                       this.http.get(this.api.getUrl('SUPPORTLIST')).subscribe((res: any) => {
-                        for (let i in res.result) {
-                          for (let j in nSupportList) {
-                            if (res.result[i]._id == nSupportList[j]._id) {
-                              if (res.result[i].updated_at != nSupportList[j].updated_at) {
-                                nSupportList[j].status = 2;
-                                res.result[i].status = 2;
-                                nSupportList[j].oldData = res.result[i];
-                              }
-                              else {
-                                nSupportList[j].status = 1;
-                                res.result[i].status = 1;
-                              }
-                              break;
-                            }
-                          }
-                          if (!res.result[i].status) {
-                            nSupportList.unshift({ status: 3, ...res.result[i] });
-                          }
-                        }
-                        console.log("SupportList", nSupportList);
-                        this.importResult.push({ type: 'support_list', data: nSupportList })
+                        this.processingImportData('support_list', JSON.parse(data), res.result);
                       });
                     }
                   }, (err: any) => {
@@ -644,27 +522,7 @@ export class HeaderComponent implements OnInit {
                     if (data) {
                       let nSubitemList = JSON.parse(data);
                       this.http.get(this.api.getUrl('SUBITEMLIST')).subscribe((res: any) => {
-                        for (let i in res.result) {
-                          for (let j in nSubitemList) {
-                            if (res.result[i]._id == nSubitemList[j]._id) {
-                              if (res.result[i].updated_at != nSubitemList[j].updated_at) {
-                                nSubitemList[j].status = 2;
-                                res.result[i].status = 2;
-                                nSubitemList[j].oldData = res.result[i];
-                              }
-                              else {
-                                nSubitemList[j].status = 1;
-                                res.result[i].status = 1;
-                              }
-                              break;
-                            }
-                          }
-                          if (!res.result[i].status) {
-                            nSubitemList.unshift({ status: 3, ...res.result[i] });
-                          }
-                        }
-                        console.log("SubitemList", nSubitemList);
-                        this.importResult.push({ type: 'subitem_list', data: nSubitemList })
+                        this.processingImportData('subitem_list', JSON.parse(data), res.result);
                       });
                     }
                   }, (err: any) => {
@@ -677,27 +535,7 @@ export class HeaderComponent implements OnInit {
                     if (data) {
                       let nUnit = JSON.parse(data);
                       this.http.get(this.api.getUrl('UNIT')).subscribe((res: any) => {
-                        for (let i in res.result) {
-                          for (let j in nUnit) {
-                            if (res.result[i]._id == nUnit[j]._id) {
-                              if (res.result[i].updated_at != nUnit[j].updated_at) {
-                                nUnit[j].status = 2;
-                                res.result[i].status = 2;
-                                nUnit[j].oldData = res.result[i];
-                              }
-                              else {
-                                nUnit[j].status = 1;
-                                res.result[i].status = 1;
-                              }
-                              break;
-                            }
-                          }
-                          if (!res.result[i].status) {
-                            nUnit.unshift({ status: 3, ...res.result[i] });
-                          }
-                        }
-                        console.log("Unit", nUnit);
-                        this.importResult.push({ type: 'unit', data: nUnit })
+                        this.processingImportData('unit', JSON.parse(data), res.result);
                       });
                     }
                   }, (err: any) => {
@@ -710,27 +548,7 @@ export class HeaderComponent implements OnInit {
                     if (data) {
                       let nSubitem = JSON.parse(data);
                       this.http.get(this.api.getUrl('SUBITEM')).subscribe((res: any) => {
-                        for (let i in res.result) {
-                          for (let j in nSubitem) {
-                            if (res.result[i]._id == nSubitem[j]._id) {
-                              if (res.result[i].updated_at != nSubitem[j].updated_at) {
-                                nSubitem[j].status = 2;
-                                res.result[i].status = 2;
-                                nSubitem[j].oldData = res.result[i];
-                              }
-                              else {
-                                nSubitem[j].status = 1;
-                                res.result[i].status = 1;
-                              }
-                              break;
-                            }
-                          }
-                          if (!res.result[i].status) {
-                            nSubitem.unshift({ status: 3, ...res.result[i] });
-                          }
-                        }
-                        console.log("Subitem", nSubitem);
-                        this.importResult.push({ type: 'subitem', data: nSubitem })
+                        this.processingImportData('subitem', JSON.parse(data), res.result);
                       });
                     }
                   }, (err: any) => {
@@ -743,27 +561,7 @@ export class HeaderComponent implements OnInit {
                     if (data) {
                       let nItem = JSON.parse(data);
                       this.http.get(this.api.getUrl('ITEM')).subscribe((res: any) => {
-                        for (let i in res.result) {
-                          for (let j in nItem) {
-                            if (res.result[i]._id == nItem[j]._id) {
-                              if (res.result[i].updated_at != nItem[j].updated_at) {
-                                nItem[j].status = 2;
-                                res.result[i].status = 2;
-                                nItem[j].oldData = res.result[i];
-                              }
-                              else {
-                                nItem[j].status = 1;
-                                res.result[i].status = 1;
-                              }
-                              break;
-                            }
-                          }
-                          if (!res.result[i].status) {
-                            nItem.unshift({ status: 3, ...res.result[i] });
-                          }
-                        }
-                        console.log("Item", nItem);
-                        this.importResult.push({ type: 'item', data: nItem })
+                        this.processingImportData('item', JSON.parse(data), res.result);
                       });
                     }
                   }, (err: any) => {
@@ -776,39 +574,44 @@ export class HeaderComponent implements OnInit {
                     if (data) {
                       let nMM = JSON.parse(data);
                       this.http.get(this.api.getUrl('MM')).subscribe((res: any) => {
-                        for (let i in res.result) {
-                          for (let j in nMM) {
-                            if (res.result[i]._id == nMM[j]._id) {
-                              if (res.result[i].updated_at != nMM[j].updated_at) {
-                                nMM[j].status = 2;
-                                res.result[i].status = 2;
-                                nMM[j].oldData = res.result[i];
-                              }
-                              else {
-                                nMM[j].status = 1;
-                                res.result[i].status = 1;
-                              }
-                              break;
-                            }
-                          }
-                          if (!res.result[i].status) {
-                            nMM.unshift({ status: 3, ...res.result[i] });
-                          }
-                        }
-                        console.log("MM", nMM);
-                        this.importResult.push({ type: 'mm', data: nMM })
+                        this.processingImportData('mm', JSON.parse(data), res.result);
                       });
                     }
                   }, (err: any) => {
                     console.log(err);
-
+                  });
+                  break;
+                case 'pbk.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      let nPBK = JSON.parse(data);
+                      this.http.get(this.api.getUrl('PBK')).subscribe((res: any) => {
+                        this.processingImportData('pbk', JSON.parse(data), res.result);
+                      });
+                    }
+                  }, (err: any) => {
+                    console.log(err);
+                  });
+                  break;
+                case 'nimitt.json':
+                  zip.file(fileNames[i]).async("string").then((data: any) => {
+                    if (data) {
+                      let nNimitt = JSON.parse(data);
+                      this.http.get(this.api.getUrl('NIMITT')).subscribe((res: any) => {
+                        this.processingImportData('nimitt', JSON.parse(data), res.result);
+                      });
+                    }
+                  }, (err: any) => {
+                    console.log(err);
                   });
                   break;
 
               }
             }
+            console.log("import", this.importResult);
+            
+            this.openModal('import_update');
 
-            $('#importmodal').modal('show');
           }
 
         });
@@ -817,6 +620,42 @@ export class HeaderComponent implements OnInit {
 
     }
     ev = null;
+  }
+
+  /*
+  changes => an array of insert, update and delete items.
+  found => an array of same items with no changes.
+  columns => contains keys of items object.
+  status => 0 - found, 1 - insert, 2 - update, 3 - delete. 
+  */
+  processingImportData(type: string, newData: any[], oldData: any[]) {
+    
+    if(!this.importData[type]){
+      this.importResult[type] = { changes: [], found: [], columns: [] }
+    }
+    for (let i in oldData) {
+      for (let j = 0; j < newData.length; j++) {
+        if (oldData[i]._id == newData[j]._id) {
+          if (oldData[i].updated_at != newData[j].updated_at) {
+            oldData[i].status = 2;
+            this.importResult[type].changes.push({ status: 2, ...newData[j], oldData: oldData[i] });
+          }
+          else {
+            this.importResult[type].found.push(newData[j]);
+            oldData[i].status = 0;
+          }
+          newData.splice(j, 1);
+          break;
+        }
+      }
+      if (!oldData[i].status) {
+        this.importResult[type].changes.unshift({ status: 3, ...oldData[i] });
+      }
+    }
+    for (let i in newData){
+      this.importResult[type].changes.push({status: 1, ...newData[i]})
+    }
+    this.importResult[type].columns = Object.keys(this.importResult[type].changes[0] || []);
   }
 
   importOldData = async (ev: any) => {
