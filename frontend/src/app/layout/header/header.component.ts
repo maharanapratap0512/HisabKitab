@@ -24,7 +24,9 @@ export class HeaderComponent implements OnInit {
   settings: any;
   showModal: any = '';
   importData: any = [];
-  importResult: any = {};
+  importResult: any = [];
+  importList: any = [];
+  tab: any = '';
 
   constructor(
     private http: HttpService,
@@ -377,10 +379,11 @@ export class HeaderComponent implements OnInit {
       fileReader.readAsArrayBuffer(ev.target.files[0]); //reading 1st file only
 
       fileReader.onload = () => {
-        this.importResult = {};
+        this.isLoader = true;
+        this.importResult = [];
         this.dataZip = new JSZip();
         //loading zip file content
-        this.dataZip.loadAsync(fileReader.result).then((zip: any) => {
+        this.dataZip.loadAsync(fileReader.result).then(async (zip: any) => {
 
           //checking zip data found or not
           if (zip) {
@@ -389,228 +392,233 @@ export class HeaderComponent implements OnInit {
 
             // loop through all files
             for (let i in fileNames) {
-
+              let fname = fileNames[i].split('.')[0];
+              await zip.file(fileNames[i]).async("string").then((data: any) => {
+                if (data) {
+                  this.importResult.push({ type: fname, data: JSON.parse(data) });
+                }
+              }, (err: any) => {
+                console.log(err);
+              });
               //accept only files that listed below, other ignore.
-              switch (fileNames[i]) {
-                case 'settings.json':
-                  // zip.file(fileNames[i]).async("string").then((data: any) => {
+              // switch (fileNames[i]) {
+              //   case 'settings.json':
+              //     // zip.file(fileNames[i]).async("string").then((data: any) => {
 
-                  //   if (data) {
-                  //     let setting = JSON.parse(data);
-                  //     let body = {
-                  //       query: {
-                  //         // _id: (setting._id ? setting._id : null),
-                  //         dept_id: setting.dept_id,
-                  //         config_key: setting.config_key,
-                  //       },
-                  //       set: {
-                  //         config_key: setting.config_key,
-                  //         config_value: setting.config_value,
-                  //         active: setting.active,
-                  //         created_at: setting.created_at,
-                  //         updated_at: setting.updated_at,
-                  //       }
-                  //     }
+              //     //   if (data) {
+              //     //     let setting = JSON.parse(data);
+              //     //     let body = {
+              //     //       query: {
+              //     //         // _id: (setting._id ? setting._id : null),
+              //     //         dept_id: setting.dept_id,
+              //     //         config_key: setting.config_key,
+              //     //       },
+              //     //       set: {
+              //     //         config_key: setting.config_key,
+              //     //         config_value: setting.config_value,
+              //     //         active: setting.active,
+              //     //         created_at: setting.created_at,
+              //     //         updated_at: setting.updated_at,
+              //     //       }
+              //     //     }
 
-                  //     this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((data: any) => {
-                  //       if (data.result.length > 0) {
-                  //         let setting = JSON.parse(data.result[0].config_value);
-                  //         if (data.result[0].dept_id == this.auth.webUser.dept_id) {
-                  //           this.auth.updateSettings(setting);
-                  //         }
-                  //         this.toastr.success("settings import successfully");
-                  //       }
-                  //     });
-                  //   }
-                  //   else {
-                  //     this.toastr.error('can not read settings file from zip')
-                  //   }
-                  // });
-                  break;
+              //     //     this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((data: any) => {
+              //     //       if (data.result.length > 0) {
+              //     //         let setting = JSON.parse(data.result[0].config_value);
+              //     //         if (data.result[0].dept_id == this.auth.webUser.dept_id) {
+              //     //           this.auth.updateSettings(setting);
+              //     //         }
+              //     //         this.toastr.success("settings import successfully");
+              //     //       }
+              //     //     });
+              //     //   }
+              //     //   else {
+              //     //     this.toastr.error('can not read settings file from zip')
+              //     //   }
+              //     // });
+              //     break;
 
-                case 'country.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {                     
-                      this.http.get(this.api.getUrl('COUNTRY')).subscribe((res: any) => {
-                        this.processingImportData('country', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
-                  });
-                  break;
-                case 'state.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nState = JSON.parse(data);
-                      this.http.get(this.api.getUrl('STATE')).subscribe((res: any) => {
-                        this.processingImportData('state', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
+              //   case 'country.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         jsonData = JSON.parse(data);
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
+              //     });
+              //     break;
+              //   case 'state.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         let nState = JSON.parse(data);
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
 
-                  });
-                  break;
-                case 'city.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nCity = JSON.parse(data);
-                      this.http.get(this.api.getUrl('CITY')).subscribe((res: any) => {
-                        this.processingImportData('city', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
+              //     });
+              //     break;
+              //   case 'city.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         let nCity = JSON.parse(data);
+              //         this.http.get(this.api.getUrl('CITY')).subscribe((res: any) => {
+              //           this.processingImportData('city', JSON.parse(data), res.result);
+              //         });
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
 
-                  });
-                  break;
-                case 'category.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nCategory = JSON.parse(data);
-                      this.http.get(this.api.getUrl('CATEGORY')).subscribe((res: any) => {
-                        this.processingImportData('category', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
+              //     });
+              //     break;
+              //   case 'category.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         let nCategory = JSON.parse(data);
+              //         this.http.get(this.api.getUrl('CATEGORY')).subscribe((res: any) => {
+              //           this.processingImportData('category', JSON.parse(data), res.result);
+              //         });
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
 
-                  });
-                  break;
-                case 'department_config.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nDeptConf = JSON.parse(data);
-                      // this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'department_config', data: JSON.parse(data) }).subscribe((result: any) => {
-                      //   this.importResult.push(result);
-                      // });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
+              //     });
+              //     break;
+              //   case 'department_config.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         let nDeptConf = JSON.parse(data);
+              //         // this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: 'department_config', data: JSON.parse(data) }).subscribe((result: any) => {
+              //         //   this.importResult.push(result);
+              //         // });
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
 
-                  });
-                  break;
-                case 'department.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nDept = JSON.parse(data);
-                      this.http.get(this.api.getUrl('DEPT')).subscribe((res: any) => {
-                        this.processingImportData('dept', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
+              //     });
+              //     break;
+              //   case 'department.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         this.http.get(this.api.getUrl('DEPT')).subscribe((res: any) => {
+              //           this.processingImportData('department', JSON.parse(data), res.result);
+              //         });
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
 
-                  });
-                  break;
-                case 'support_list.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nSupportList = JSON.parse(data);
-                      this.http.get(this.api.getUrl('SUPPORTLIST')).subscribe((res: any) => {
-                        this.processingImportData('support_list', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
+              //     });
+              //     break;
+              //   case 'support_list.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         let nSupportList = JSON.parse(data);
+              //         this.http.get(this.api.getUrl('SUPPORTLIST')).subscribe((res: any) => {
+              //           this.processingImportData('support_list', JSON.parse(data), res.result);
+              //         });
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
 
-                  });
-                  break;
-                case 'subitem_list.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nSubitemList = JSON.parse(data);
-                      this.http.get(this.api.getUrl('SUBITEMLIST')).subscribe((res: any) => {
-                        this.processingImportData('subitem_list', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
+              //     });
+              //     break;
+              //   case 'subitem_list.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         let nSubitemList = JSON.parse(data);
+              //         this.http.get(this.api.getUrl('SUBITEMLIST')).subscribe((res: any) => {
+              //           this.processingImportData('subitem_list', JSON.parse(data), res.result);
+              //         });
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
 
-                  });
-                  break;
-                case 'unit.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nUnit = JSON.parse(data);
-                      this.http.get(this.api.getUrl('UNIT')).subscribe((res: any) => {
-                        this.processingImportData('unit', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
+              //     });
+              //     break;
+              //   case 'unit.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         let nUnit = JSON.parse(data);
+              //         this.http.get(this.api.getUrl('UNIT')).subscribe((res: any) => {
+              //           this.processingImportData('unit', JSON.parse(data), res.result);
+              //         });
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
 
-                  });
-                  break;
-                case 'subitem.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nSubitem = JSON.parse(data);
-                      this.http.get(this.api.getUrl('SUBITEM')).subscribe((res: any) => {
-                        this.processingImportData('subitem', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
+              //     });
+              //     break;
+              //   case 'subitem.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         let nSubitem = JSON.parse(data);
+              //         this.http.get(this.api.getUrl('SUBITEM')).subscribe((res: any) => {
+              //           this.processingImportData('subitem', JSON.parse(data), res.result);
+              //         });
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
 
-                  });
-                  break;
-                case 'item.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nItem = JSON.parse(data);
-                      this.http.get(this.api.getUrl('ITEM')).subscribe((res: any) => {
-                        this.processingImportData('item', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
+              //     });
+              //     break;
+              //   case 'item.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         let nItem = JSON.parse(data);
+              //         this.http.get(this.api.getUrl('ITEM')).subscribe((res: any) => {
+              //           this.processingImportData('item', JSON.parse(data), res.result);
+              //         });
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
 
-                  });
-                  break;
-                case 'mm.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nMM = JSON.parse(data);
-                      this.http.get(this.api.getUrl('MM')).subscribe((res: any) => {
-                        this.processingImportData('mm', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
-                  });
-                  break;
-                case 'pbk.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nPBK = JSON.parse(data);
-                      this.http.get(this.api.getUrl('PBK')).subscribe((res: any) => {
-                        this.processingImportData('pbk', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
-                  });
-                  break;
-                case 'nimitt.json':
-                  zip.file(fileNames[i]).async("string").then((data: any) => {
-                    if (data) {
-                      let nNimitt = JSON.parse(data);
-                      this.http.get(this.api.getUrl('NIMITT')).subscribe((res: any) => {
-                        this.processingImportData('nimitt', JSON.parse(data), res.result);
-                      });
-                    }
-                  }, (err: any) => {
-                    console.log(err);
-                  });
-                  break;
+              //     });
+              //     break;
+              //   case 'mm.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         let nMM = JSON.parse(data);
+              //         this.http.get(this.api.getUrl('MM')).subscribe((res: any) => {
+              //           this.processingImportData('mm', JSON.parse(data), res.result);
+              //         });
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
+              //     });
+              //     break;
+              //   case 'pbk.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         let nPBK = JSON.parse(data);
+              //         this.http.get(this.api.getUrl('PBK')).subscribe((res: any) => {
+              //           this.processingImportData('pbk', JSON.parse(data), res.result);
+              //         });
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
+              //     });
+              //     break;
+              //   case 'nimitt.json':
+              //     zip.file(fileNames[i]).async("string").then((data: any) => {
+              //       if (data) {
+              //         let nNimitt = JSON.parse(data);
+              //         this.http.get(this.api.getUrl('NIMITT')).subscribe((res: any) => {
+              //           this.processingImportData('nimitt', JSON.parse(data), res.result);
+              //         });
+              //       }
+              //     }, (err: any) => {
+              //       console.log(err);
+              //     });
+              //     break;
 
-              }
+              // }
             }
-            console.log("import", this.importResult);
-            
-            this.openModal('import_update');
+
+            await this.processingImportData();
+
+            console.log("return", this.importResult);
+
+            this.isLoader = false;
+            $('#importmodal').modal('show');
 
           }
 
@@ -628,34 +636,99 @@ export class HeaderComponent implements OnInit {
   columns => contains keys of items object.
   status => 0 - found, 1 - insert, 2 - update, 3 - delete. 
   */
-  processingImportData(type: string, newData: any[], oldData: any[]) {
-    
-    if(!this.importData[type]){
-      this.importResult[type] = { changes: [], found: [], columns: [] }
-    }
-    for (let i in oldData) {
-      for (let j = 0; j < newData.length; j++) {
-        if (oldData[i]._id == newData[j]._id) {
-          if (oldData[i].updated_at != newData[j].updated_at) {
-            oldData[i].status = 2;
-            this.importResult[type].changes.push({ status: 2, ...newData[j], oldData: oldData[i] });
-          }
-          else {
-            this.importResult[type].found.push(newData[j]);
-            oldData[i].status = 0;
-          }
-          newData.splice(j, 1);
+
+  async processingImportData() {
+    for (let i in this.importResult) {
+      let API = null;
+      switch (this.importResult[i].type) {
+        case 'settings':
           break;
-        }
+        case 'country':
+          API = 'COUNTRY';
+          break;
+        case 'state':
+          API = 'STATE';
+          break;
+        case 'city':
+          API = 'CITY';
+          break;
+        case 'category':
+          API = 'CATEGORY';
+          break;
+        case 'department_config':
+          break;
+        case 'department':
+          API = 'DEPT';
+          break;
+        case 'support_list':
+          API = 'SUPPORTLIST';
+          break;
+        case 'subitem_list':
+          API = 'SUBITEMLIST';
+          break;
+        case 'unit':
+          API = 'UNIT';
+          break;
+        case 'subitem':
+          API = 'SUBITEM';
+          break;
+        case 'item':
+          API = 'ITEM';
+          break;
+        case 'mm':
+          API = 'MM';
+          break;
+        case 'pbk':
+          API = 'PBK';
+          break;
+        case 'nimitt':
+          API = 'NIMITT';
+          break;
+        default: this.importResult.splice(i, 1);
       }
-      if (!oldData[i].status) {
-        this.importResult[type].changes.unshift({ status: 3, ...oldData[i] });
-      }
+      if (API) {
+        await this.http.get(this.api.getUrl(API)).subscribe((res: any) => {
+          let result: any = { changes: [], found: [], columns: [] }
+          for (let j in res.result) {
+            for (let k = 0; k < this.importResult[i].data.length; k++) {
+              if (res.result[j]._id == this.importResult[i].data[k]._id) {
+                if (res.result[j].updated_at != this.importResult[i].data[k].updated_at) {
+                  res.result[j].status = 2;
+                  this.importResult[i].data[k].status = 2;
+                  if (result.columns.length < 1) {
+                    result.columns = [...Object.keys(this.importResult[i].data[k]), "status"];
+                  }
+                  result.changes.push({ status: 2, ...this.importResult[i].data[k], oldData: res.result[j] });
+                }
+                else {
+                  result.found.push(this.importResult[i].data[k]);
+                  res.result[j].status = 4;
+                  this.importResult[i].data[k].status = 4;
+                }
+                break;
+              }
+            }
+            if (!res.result[j].status) {
+              if (result.columns.length < 1) {
+                result.columns = [...Object.keys(res.result[j]), "status"];
+              }
+              result.changes.unshift({ status: 3, ...res.result[j] });
+            }
+          }
+          for (let j in this.importResult[i].data) {
+            if (!this.importResult[i].data[j].status) {
+              if (result.columns.length < 1) {
+                result.columns = [...Object.keys(this.importResult[i].data[j]), "status"];
+              }
+              result.changes.push({ status: 1, ...this.importResult[i].data[j] })
+            }
+          }
+          this.importResult[i].data = result;
+        });
+      };
     }
-    for (let i in newData){
-      this.importResult[type].changes.push({status: 1, ...newData[i]})
-    }
-    this.importResult[type].columns = Object.keys(this.importResult[type].changes[0] || []);
+    console.log("final", this.importResult);
+
   }
 
   importOldData = async (ev: any) => {

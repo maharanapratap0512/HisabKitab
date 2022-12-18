@@ -150,24 +150,15 @@ export class ImportComponent implements OnInit {
     }
     if (changes.updateData && changes.updateData.currentValue) {
       this.uData = changes.updateData.currentValue;
-      console.log("this.uData", this.uData);
-
-      // for (let [key, value] of Object.entries(this.uData)) {
-
-      //   console.log(">>>>>>", key);
-      // }
-      console.log(this.uData.country)
-
-
-      console.log("updateDataLisrt", Object.keys(this.uData));
+      console.log("this.uData", this.uData);        
+      setTimeout(() => {
+        console.log("this.uData", this.uData.category);      
+        setTimeout(() => {        
+          console.log("this.uData", Object.keys(this.uData.category));            
+        }, 6000);      
+      }, 5000);    
       // this.updateLists = ;      
-    }
-    else {
-      this.updateData = null;
-    }
-    console.log("importData", this.importData);
-    console.log("updateLists", this.updateLists);
-
+    }    
   }
 
   getUnmatchedList() {

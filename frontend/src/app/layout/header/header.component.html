@@ -585,7 +585,7 @@
             <button type="button" (click)='closeModal()' class="btn-close" aria-label="Close"></button>
          </div>
          <div class="modal-body">
-            <app-import *ngIf="showModal == 'import_update'" [updateData]="importResult"></app-import>
+            <!-- <app-import *ngIf="showModal == 'import_update'" [updateData]="importResult"></app-import> -->
 
             <!-- update detail -->
             <app-update-detail *ngIf="showModal == 'Update History'"></app-update-detail>
@@ -612,51 +612,52 @@
             <button type="button" (click)='closeImportModal()' class="btn-close" aria-label="Close"></button>
          </div>
          <div class="modal-body">
-            <div class="row" style="padding: 10px 50px;">
-               <h3>All Applied Update Display Here....</h3>
-               <ul class="nav nav-pills bg-nav-pills">
-                  <!-- <li class="nav-item" *ngFor="let data of importResult; let i = index">
-                     <a href="{{'#'+data.type}}" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0"
-                        [ngClass]="{'active':i==0}" *ngIf="data.new_entries.length > 0 || data.update_entries.length > 0">
-                        {{data.type}}
-                        <span class="translate-middle bell badge rounded-pill bg-info">
-                           {{data.total_count}}
-                        </span>
-                     </a>
-                  </li> -->
-               </ul>
-            </div>
+            <div class="card-body">
+               <div class="row" style="padding: 10px 50px;">
+                  <ul class="nav nav-pills bg-nav-pills">
+                     <ng-container *ngFor="let data of importResult; first as f;">
+                        <li class="nav-item" *ngIf="data.data.changes && data.data.changes.length > 0">
+                           <a href="{{'#'+data.type}}" data-bs-toggle="tab" aria-expanded="true"
+                              class="nav-link rounded-0 " [class]="{'active':f}">
+                              {{data.type}}
+                              <span class="translate-middle bell badge rounded-pill bg-danger">
+                                 {{data.data.changes.length}}
+                              </span>
+                           </a>
+                        </li>
+                     </ng-container>
+                  </ul>
+               </div>
 
-            <div class="tab-content">
-               <!-- exceldata -->
-               <!-- <ng-container *ngFor="let data of importResult; let i = index;">
-                  <div class="tab-pane show" [ngClass]="{'active': i==0}" id="{{data.type}}" style="overflow: auto;"
-                     *ngIf="data.new_entries.length > 0 || data.update_entries.length > 0">
-                     <table id="datatable-buttons" class="table table-hover dt-responsive">
-                        <thead>
-                           <tr>
-                              <th style="width: 50px;">No.</th>
-                              <th style="width: 100px;">Operation</th>
-                              <th *ngFor="let key of data.columns">{{key}}</th>
-                           </tr>
-                        </thead>
-                        <tbody>
-                           <tr class="main-row" *ngFor="let new_data of data.new_entries; let j = index;">
-                              <td>{{j+1}} </td>
-                              <td>New Insert </td>
-                              <td *ngFor="let key of data.columns"> {{new_data[key] ? new_data[key] : ''}}</td>
-                           </tr>
-                           <tr class="main-row" *ngFor="let new_data of data.update_entries; let j = index;">
-                              <td>{{data.new_entries.length+j+1}} </td>
-                              <td>Update </td>
-                              <td *ngFor="let key of data.columns"> {{new_data[key] ? new_data[key] : ''}}</td>
-                           </tr>
+               <div class="tab-content">
+                  <ng-container *ngFor="let data of importResult; first as f;">
+                     <div *ngIf="data.data.changes.length > 0" class="tab-pane show" [class]="{'active':f}" id="{{data.type}}" style="overflow: auto;">
+                        <table id="datatable-buttons" class="table table-hover dt-responsive">
+                           <thead>
+                              <tr>
+                                 <th style="width: 50px;">No.</th>
+                                 <ng-container *ngFor="let key of data.data.columns">
+                                    <th *ngIf="!['active', '_id',  'created_at', 'updated_at'].includes(key)">
+                                       {{key}}</th>
+                                 </ng-container>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <ng-container *ngFor="let rw of data.data.changes; let i = index;">
+                                 <tr [ngClass]="{'marked':rw.status == 3, 'warned':rw.status == 2}">
+                                    <td>{{i+1}} </td>
+                                    <ng-container *ngFor="let key of data.data.columns">
+                                       <td *ngIf="!['active', '_id', 'created_at', 'updated_at'].includes(key)">
+                                          {{rw[key] ? rw[key] : ''}}</td>
+                                    </ng-container>
+                                 </tr>
+                              </ng-container>
+                           </tbody>
+                        </table>
+                     </div>
+                  </ng-container>
 
-                        </tbody>
-                     </table>
-                  </div>
-               </ng-container> -->
-
+               </div>
             </div>
          </div>
          <div class="modal-footer">

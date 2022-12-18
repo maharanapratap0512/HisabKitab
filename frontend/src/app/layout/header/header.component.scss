@@ -3,6 +3,26 @@
 //    line-height: 50px;
 
 // }
+.marked {
+    font-weight: 800;
+    color: #140a0a;
+    border: 0.5px solid #da2534;
+    background-color: #f0a8ae;
+ }
+ 
+ .success {
+    font-weight: 800;
+    color: #140a0a;
+    border: 0.5px solid #da2534;
+    background-color: #f0a8ae;
+ }
+ 
+ .warned {
+    font-weight: 800;
+    color: #140a0a;
+    border: 0.5px solid #ffc400;
+    background-color: #ffe799;
+ }
 
 .noti-icon {
     line-height: 56px !important;
