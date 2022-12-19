@@ -723,7 +723,7 @@ export class HeaderComponent implements OnInit {
               result.changes.push({ status: 1, ...this.importResult[i].data[j] })
             }
           }
-          this.importResult[i].data = result;
+          this.importResult[i].result = result;
         });
       };
     }

@@ -616,12 +616,12 @@
                <div class="row" style="padding: 10px 50px;">
                   <ul class="nav nav-pills bg-nav-pills">
                      <ng-container *ngFor="let data of importResult; first as f;">
-                        <li class="nav-item" *ngIf="data.data.changes && data.data.changes.length > 0">
+                        <li class="nav-item" *ngIf="data.result && data.result.changes.length > 0">
                            <a href="{{'#'+data.type}}" data-bs-toggle="tab" aria-expanded="true"
                               class="nav-link rounded-0 " [class]="{'active':f}">
                               {{data.type}}
                               <span class="translate-middle bell badge rounded-pill bg-danger">
-                                 {{data.data.changes.length}}
+                                 {{data.result.changes.length}}
                               </span>
                            </a>
                         </li>
@@ -631,22 +631,22 @@
 
                <div class="tab-content">
                   <ng-container *ngFor="let data of importResult; first as f;">
-                     <div *ngIf="data.data.changes.length > 0" class="tab-pane show" [class]="{'active':f}" id="{{data.type}}" style="overflow: auto;">
+                     <div *ngIf="data.result && data.result.changes.length > 0" class="tab-pane show" [class]="{'active':f}" id="{{data.type}}" style="overflow: auto;">
                         <table id="datatable-buttons" class="table table-hover dt-responsive">
                            <thead>
                               <tr>
                                  <th style="width: 50px;">No.</th>
-                                 <ng-container *ngFor="let key of data.data.columns">
+                                 <ng-container *ngFor="let key of data.result.columns">
                                     <th *ngIf="!['active', '_id',  'created_at', 'updated_at'].includes(key)">
                                        {{key}}</th>
                                  </ng-container>
                               </tr>
                            </thead>
                            <tbody>
-                              <ng-container *ngFor="let rw of data.data.changes; let i = index;">
-                                 <tr [ngClass]="{'marked':rw.status == 3, 'warned':rw.status == 2}">
+                              <ng-container *ngFor="let rw of data.result.changes; let i = index;">
+                                 <tr [ngClass]="{'marked':rw.status == 3, 'warned':rw.status == 2, 'success':rw.status == 1}">
                                     <td>{{i+1}} </td>
-                                    <ng-container *ngFor="let key of data.data.columns">
+                                    <ng-container *ngFor="let key of data.result.columns">
                                        <td *ngIf="!['active', '_id', 'created_at', 'updated_at'].includes(key)">
                                           {{rw[key] ? rw[key] : ''}}</td>
                                     </ng-container>
