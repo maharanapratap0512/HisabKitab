@@ -34,7 +34,7 @@ export class AawakComponent implements OnInit {
   aawakData: any = [];
   aawakAll: any = [];
   total_count: any = 0;
-  export_total_count:any = 0;
+  export_total_count: any = 0;
   allAJData: any = [];
   awkCount: any = 0;
   mms: any = [];
@@ -64,7 +64,7 @@ export class AawakComponent implements OnInit {
     subitem_id: [],
     condition_id: [],
     pkt_num: null,
-    nimitt_id: [], 
+    nimitt_id: [],
     remaining_qty: false
   };
   cat: any;
@@ -395,11 +395,11 @@ export class AawakComponent implements OnInit {
         };
         this.allAJData.push(awkObj);
       }
-      
+
       if (this.allAJData.length < this.export_total_count) {
         this.getMoreAJ();
       }
-      else {        
+      else {
         this.export(this.allAJData);
         this.isLoader = false;
       }
@@ -784,6 +784,8 @@ export class AawakComponent implements OnInit {
       this.loadingStatus = "डाटा पढ़ा एवं सॉफ्टवेयर के डाटा से जोड़ा जा रहा है।";
       for (let i = startRow + 2; i < exceldata.length; i++) {
 
+        console.log("err", exceldata[i]);
+
         //aawak form
         var obj: any = {
           type: null,
@@ -910,8 +912,6 @@ export class AawakComponent implements OnInit {
                   if (!obj.product_id) {
 
                     let getproduct = this.productsAll.find((p: any) => [p.sr_no, p.product_code].includes(exceldata[i][j]));
-                    console.log(exceldata[i][j], getproduct, this.productsAll);
-
                     obj.product_id = getproduct ? getproduct._id : null;
                   }
                 }
@@ -1091,12 +1091,20 @@ export class AawakComponent implements OnInit {
           obj.item_id = dictitem ? dictitem.id : null;
           obj.subitem_id = dictitem ? dictitem.id2 : null;
         }
+
         // check for required Fields in aawak object
-        if (obj.date && obj.mm && (obj.aj_mm || obj.pbk) && obj.qty && obj.unit && obj.aj_type) {
+        if (obj.date && obj.mm && (obj.aj_mm || obj.pbk) && obj.item && obj.qty && obj.unit && obj.aj_type) {
+          
           finalJson.push(obj);
+        }
+        else{
+          console.log("err", obj);
+
         }
         // check for required Fields in jawak object
         if (jwkobj.qty && (jwkobj.aj_mm || jwkobj.nimitt)) {
+          console.log("err", finalJson[finalJson.length - 1]);
+
           finalJson[finalJson.length - 1].jawak_detail.push(jwkobj);
         }
 

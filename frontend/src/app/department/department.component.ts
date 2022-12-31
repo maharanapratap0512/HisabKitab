@@ -297,10 +297,10 @@ export class DepartmentComponent implements OnInit {
         }
         if (this.dept_id) {
           this.loadPBK();
-          this.loadMM();
           this.loadAJTypes();
           this.loadDepartment();
         }
+        this.loadMM();
         this.loadCategory();
         this.loadItemMix();
         // console.log(this.deptConf);
@@ -1195,6 +1195,9 @@ export class DepartmentComponent implements OnInit {
         if (this.itemTotal > this.itemmix.length) {
           this.getMoreItemMix();
         }
+        else{
+          this.itemsAll = this.itemmix;
+        }
 
         this.getItem$.subscribe((result: any) => {
           if (this.deptConf.item && this.deptConf.item.config_value) {
@@ -1213,6 +1216,9 @@ export class DepartmentComponent implements OnInit {
           if (this.itemTotal > this.itemmix.length) {
             this.getMoreItemMix();
           }
+          else{          
+            this.itemsAll = this.itemmix;
+          }
         });
       }
     });
@@ -1228,6 +1234,15 @@ export class DepartmentComponent implements OnInit {
         this.getItem$.next(data['result']);
       }
     });
+  }
+  
+  itemMixSelected(ev:any){
+    if(ev){
+      this.itemmix = this.itemsAll.filter((it: { _id: any; })=>it._id == ev);
+    }
+    else{
+      this.itemmix = this.itemsAll;
+    }
   }
   // loadItems() {
   //   this.http.get(this.api.getUrl('ITEM') + 1).subscribe((data) => {

@@ -70,7 +70,7 @@
                 </span>
               </a>
               <a class="nav-link" id="v-pills-mm-tab" data-bs-toggle="pill" href="#v-pills-mm" role="tab"
-                aria-controls="v-pills-mm" aria-selected="true" *ngIf="dept_id">
+                aria-controls="v-pills-mm" aria-selected="true">
                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                 <span class="d-none d-md-block">MM
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.mm &&
@@ -1156,8 +1156,8 @@
 
 
               <!-- MM Tab -->
-              <div class="tab-pane fade" id="v-pills-mm" role="tabpanel" aria-labelledby="v-pills-home-tab"
-                *ngIf="dept_id"
+              <div class="tab-pane fade" id="v-pills-mm" [class]="{'show':!dept_id, 'active':!dept_id}" role="tabpanel"
+                aria-labelledby="v-pills-home-tab"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
                 <div class="row">
 
@@ -1334,8 +1334,7 @@
               </div>
 
               <!-- Category Tab -->
-              <div class="tab-pane fade" [class]="{'show':!dept_id, 'active':!dept_id}" id="v-pills-category"
-                role="tabpanel"
+              <div class="tab-pane fade" id="v-pills-category" role="tabpanel"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                 aria-labelledby="v-pills-settings-tab">
                 <div class="row">
@@ -1390,6 +1389,15 @@
                       <ng-container *ngFor="let item of categories">
                         <ng-option [value]="item._id" *ngIf="item.chk">
                           {{item.category_hin}} : {{item.category_eng}}</ng-option>
+                      </ng-container>
+                    </ng-select>
+                  </div>
+                  <div class="col-3">
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="true"
+                      [virtualScroll]="true" (change)="itemMixSelected($event)">
+                      <ng-container *ngFor="let item of itemsAll">
+                        <ng-option [value]="item._id">
+                          {{item.item_hin}} : {{item.item_eng}} ({{item.item_code}})</ng-option>
                       </ng-container>
                     </ng-select>
                   </div>

@@ -1252,6 +1252,7 @@ class dbModal {
 
           END; `
     },
+    //v10
     {      
       drop_awk_ins_bcht_ins:
         `DROP TRIGGER IF exists 'awk_ins_bcht_ins' `,
@@ -1479,8 +1480,29 @@ class dbModal {
             last_ref_id = null
             where _id = OLD.product_id AND last_ref_id = OLD._id;
           END; `,
+    },
+    //version: 11
+    /*
+      => Import History - new table for maintaining import data history.
+    */
+    {
+      import_history: `create table if not exists import_history(
+        _id integer auto_increment primary key,
+        entry_date timestamp default (datetime('now', 'localtime')),
+        mm_id integer not null references mm(_id),
+        month integer not null,
+        year integer not null,
+        updated_at timestamp default (strftime('%Y-%m-%d %H:%M:%f', 'now')),
+        unique(mm_id, month, year)
+      )`,
+      add_col_mon_item: `alter table item add column restrict_month integer null`,
+      add_col_year_item: `alter table item add column restrict_year integer null`,
+      add_col_mon_subitem: `alter table subitem add column restrict_month integer null`,
+      add_col_year_subitem: `alter table subitem add column restrict_year integer null`,
+      add_col_mon_mm: `alter table mm add column restrict_month integer null`,
+      add_col_year_mm: `alter table mm add column restrict_year integer null`
     }
-  ];
+  ];  
   migrationLength;
   constructor(dbPath) {
     try {
@@ -1530,8 +1552,7 @@ class dbModal {
           console.log(err);
         }
 
-      });
-
+      });      
       this.db.pragma('foreign_keys=OFF');
       this.db.pragma('legacy_alter_table=ON');
       runMigration();

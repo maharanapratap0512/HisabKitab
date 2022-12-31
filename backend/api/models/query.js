@@ -743,6 +743,33 @@ const nimitt = {
             @townarea,
             @document,
             @active)`
+    , insert_ignore:
+        `insert into nimitt (
+            _id,
+            roll_no,
+            nimitt_eng, 
+            nimitt_hin, 
+            gender, 
+            state_id, 
+            relative_name, 
+            townarea, 
+            document, 
+            created_at,
+            updated_at,
+            active)
+        values (
+            @_id,
+            @roll_no,
+            @nimitt_eng, 
+            @nimitt_hin,
+            @gender, 
+            @state_id,
+            @relative_name,
+            @townarea,
+            @document,
+            @created_at,
+            @updated_at,
+            @active)`
     , update:
         `update nimitt set 
         roll_no=@roll_no,
@@ -753,7 +780,18 @@ const nimitt = {
         relative_name=@relative_name,
         townarea=@townarea,
         document=@document,
-        updated_at=datetime('now','localtime')`
+        updated_at=datetime('now','localtime')`        
+    , import_update:
+        `update nimitt set 
+        roll_no=@roll_no,
+        nimitt_eng=@nimitt_eng,
+        nimitt_hin=@nimitt_hin,
+        gender=@gender,
+        state_id=@state_id,
+        relative_name=@relative_name,
+        townarea=@townarea,
+        document=@document,
+        updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update_active:
         `update nimitt set
         active=@active,

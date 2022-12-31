@@ -123,7 +123,7 @@ router.put('/correction', async (req, res, next) => {
                 }
                 if (req.body[i].type == 'item' && req.body[i].extra_note) {
                     let qname = 'update_subitem';
-                    if(req.body[i].id && !req.body[i].id2){
+                    if (req.body[i].id && !req.body[i].id2) {
                         qname = 'update_ignore_subitem';
                     }
                     await DB.runQuery('excel_correction', qname, { obj: req.body[i] });
@@ -160,7 +160,7 @@ router.put('/ignore', async (req, res, next) => {
     try {
         let result = { success: false }
         if (req.body && req.body.name && ['nimitt', 'product'].includes(req.body.type)) {
-            let rslt = DB.db.prepare(DB.query.excel_correction['ignore_' + req.body.type]).run(req.body);            
+            let rslt = DB.db.prepare(DB.query.excel_correction['ignore_' + req.body.type]).run(req.body);
             if (rslt.changes > 0) {
                 result.success = true;
             }
@@ -186,25 +186,28 @@ router.put('/final', async (req, res, next) => {
             //     row.date = Fn.ExcelDateToJSDate(row.date)
             //     console.log("Exceldate", date);
             // }
-            DB.insert('aawak', {
-                date: row.date, mm_id: row.mm_id, pkt_num: row.pkt_num, pbk_id: row.pbk_id, aawak_mm_id: row.aj_mm_id,
-                item_id: row.item_id, subitem_id: row.subitem_id, product_id: row.product_id, item_detail: row.item_detail,
-                condition_id: row.condition_id, qty: row.qty, rate: row.rate, actual_amt: row.actual_amt,
-                aawak_type_id: row.aj_type_id, unit_id: row.unit_id, description: row.description, nimitt_id: row.nimitt_id,
-                dept_id: row.dept_id, company_name: row.company_name, isbill: row.isbill, document: null
-            }, null, false).then((data) => {
-                if (data) {
-                    for (let jwk of row.jawak_detail) {
-                        DB.insert('jawak', {
-                            date: jwk.date ? jwk.date : row.date, mm_id: row.mm_id, pkt_num: jwk.pkt_num,
-                            pbk_id: jwk.pbk_id ? jwk.pbk_id : null, jawak_mm_id: jwk.aj_mm_id, item_id: row.item_id,
-                            subitem_id: row.subitem_id, product_id: row.product_id, item_detail: null,
-                            condition_id: jwk.condition_id, qty: jwk.qty, jawak_type_id: jwk.aj_type_id,
-                            unit_id: row.unit_id, description: jwk.description, nimitt_id: jwk.nimitt_id, company_name: row.company_name, aawak_ref_id: data, dept_id: row.dept_id
-                        }, null, false);
+            setTimeout(async() => {
+                await DB.insert('aawak', {
+                    date: row.date, mm_id: row.mm_id, pkt_num: row.pkt_num, pbk_id: row.pbk_id, aawak_mm_id: row.aj_mm_id,
+                    item_id: row.item_id, subitem_id: row.subitem_id, product_id: row.product_id, item_detail: row.item_detail,
+                    condition_id: row.condition_id, qty: row.qty, rate: row.rate, actual_amt: row.actual_amt,
+                    aawak_type_id: row.aj_type_id, unit_id: row.unit_id, description: row.description, nimitt_id: row.nimitt_id,
+                    dept_id: row.dept_id, company_name: row.company_name, isbill: row.isbill, document: null
+                }, null, false).then((data) => {
+                    if (data) {
+                        for (let jwk of row.jawak_detail) {
+                            DB.insert('jawak', {
+                                date: jwk.date ? jwk.date : row.date, mm_id: row.mm_id, pkt_num: jwk.pkt_num,
+                                pbk_id: jwk.pbk_id ? jwk.pbk_id : null, jawak_mm_id: jwk.aj_mm_id, item_id: row.item_id,
+                                subitem_id: row.subitem_id, product_id: row.product_id, item_detail: null,
+                                condition_id: jwk.condition_id, qty: jwk.qty, jawak_type_id: jwk.aj_type_id,
+                                unit_id: row.unit_id, description: jwk.description, nimitt_id: jwk.nimitt_id, company_name: row.company_name, aawak_ref_id: data, dept_id: row.dept_id
+                            }, null, false);
+                        }
                     }
-                }
-            });
+                });
+            }, 10);
+            
         }
         await DB.runQuery('temp_import', 'delete');
         res.json({
@@ -298,7 +301,7 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
     try {
 
         if (req.body.type && req.body.data) {
-            let total_count = 0, i =0;
+            let total_count = 0, i = 0;
             let new_entries = [];
             let update_entries = [];
             let insert = DB.db.transaction(async (tblname, data) => {
@@ -315,22 +318,25 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
                             data[i].categories = JSON.stringify(data[i].categories);
                             data[i].active = 1;
                         }
-                                                
-                        let updt_res = update_stmt.run(data[i]);
-                        if (updt_res) {
-                            if (updt_res.changes > 0) {
-                                update_entries.push(data[i]);
+
+                        if (data[i].status == 2) {
+                            let updt_res = update_stmt.run(data[i]);
+                            if (updt_res) {
+                                if (updt_res.changes > 0) {
+                                    update_entries.push(data[i]);
+                                }
+                            }
+                        } else if (data[i].status == 1) {
+                            let res = insert_stmt.run(data[i]);
+                            // console.log("res", res);
+                            if (res) {
+                                total_count++;
+                                if (res.changes > 0) {
+                                    new_entries.push(data[i]);
+                                }
                             }
                         }
 
-                        let res = insert_stmt.run(data[i]);
-                        // console.log("res", res);
-                        if (res) {
-                            total_count++;
-                            if (res.changes > 0) {
-                                new_entries.push(data[i]);
-                            }
-                        }
                     }
                     res.json({
                         type: tblname,
@@ -352,6 +358,15 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
     }
     catch (err) {
         return next(err);
+    }
+});
+
+router.put('/aff_data/', async (req, res, next) => {
+    try {
+        let conditionString = `1=1 ${(req.body.mm && req.body.mm.length > 0) ? ` OR aawak.mm_id in (${req.body.mm.join(',')}) OR aawak.aawak_mm_id in (${req.body.mm.join(',')})` : ``} ${(req.body.item && req.body.item.length > 0) ? ` OR aawak.item_id in (${req.body.item.join(',')})` : ``} ${(req.body.subitem && req.body.subitem.length > 0) ? ` OR aawak.subitem_id in (${req.body.subitem.join(',')})` : ``} ${(req.body.pbk && req.body.pbk.length > 0) ? ` OR aawak.pbk_id in (${req.body.pbk.join(',')})` : ``} ${(req.body.support_list && req.body.support_list.length > 0) ? ` OR aawak.condition_id in (${req.body.support_list.join(',')})` : ``} ${(req.body.support_list && req.body.support_list.length > 0) ? ` OR aawak.aawak_type_id in (${req.body.support_list.join(',')})` : ``} ${(req.body.unit && req.body.unit.length > 0) ? ` OR aawak.unit_id in (${req.body.unit.join(',')})` : ``} ${(req.body.department && req.body.department.length > 0) ? ` OR aawak.dept_id in (${req.body.department.join(',')})` : ``}`;
+    }
+    catch (ex) {
+
     }
 });
 

@@ -10,7 +10,8 @@ router.get('/', async (req, res, next) => {
         await DB.getList('pbk').then((resolve) => {
             res.json({
                 success: true,
-                result: resolve || []
+                result: resolve.data || [],
+                total_count: resolve.total_count
             });
         });
     } catch (err) { next(err) };

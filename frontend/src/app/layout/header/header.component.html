@@ -626,12 +626,27 @@
                            </a>
                         </li>
                      </ng-container>
+                     <li class="nav-item">
+                        <a href="#affected" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0 "
+                           (click)="getAffectedData()">
+                           Affected Entry
+                           <span class="translate-middle bell badge rounded-pill bg-danger">
+                              {{affData.length}}
+                           </span>
+                        </a>
+                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link rounded-0 " (click)="importUpdates()">
+                           Import Update
+                        </a>
+                     </li>
                   </ul>
                </div>
 
                <div class="tab-content">
                   <ng-container *ngFor="let data of importResult; first as f;">
-                     <div *ngIf="data.result && data.result.changes.length > 0" class="tab-pane show" [class]="{'active':f}" id="{{data.type}}" style="overflow: auto;">
+                     <div *ngIf="data.result && data.result.changes.length > 0" class="tab-pane show"
+                        [class]="{'active':f}" id="{{data.type}}" style="overflow: auto;">
                         <table id="datatable-buttons" class="table table-hover dt-responsive">
                            <thead>
                               <tr>
@@ -644,11 +659,15 @@
                            </thead>
                            <tbody>
                               <ng-container *ngFor="let rw of data.result.changes; let i = index;">
-                                 <tr [ngClass]="{'marked':rw.status == 3, 'warned':rw.status == 2, 'success':rw.status == 1}">
+                                 <tr
+                                    [ngClass]="{'marked':rw.status == 3, 'warned':rw.status == 2, 'success':rw.status == 1}">
                                     <td>{{i+1}} </td>
                                     <ng-container *ngFor="let key of data.result.columns">
                                        <td *ngIf="!['active', '_id', 'created_at', 'updated_at'].includes(key)">
-                                          {{rw[key] ? rw[key] : ''}}</td>
+                                          {{rw[key] ? rw[key] : ''}} <br />
+                                          <span *ngIf="rw.status == 2" style="text-decoration: line-through;">
+                                             {{rw.oldData[key] ? rw.oldData[key]: ''}}</span>
+                                       </td>
                                     </ng-container>
                                  </tr>
                               </ng-container>
@@ -656,7 +675,21 @@
                         </table>
                      </div>
                   </ng-container>
+                  <div class="tab-pane show" id="affected" style="overflow: auto;">
+                     <table id="datatable-buttons" class="table table-hover dt-responsive">
+                        <thead>
+                           <tr>
+                              <th style="width: 50px;">No.</th>
 
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>{{1}} </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
                </div>
             </div>
          </div>
