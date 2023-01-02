@@ -1253,7 +1253,7 @@ class dbModal {
           END; `
     },
     //v10
-    {      
+    {
       drop_awk_ins_bcht_ins:
         `DROP TRIGGER IF exists 'awk_ins_bcht_ins' `,
       drop_awk_ins_bcht_updt:
@@ -1322,7 +1322,7 @@ class dbModal {
       drop_old_bachat:
         `drop table if exists 'old_bachat'`,
       awk_ins_bcht_ins:
-      `CREATE TRIGGER IF not exists "awk_ins_bcht_ins" 
+        `CREATE TRIGGER IF not exists "awk_ins_bcht_ins" 
         AFTER INSERT ON "aawak" 
         FOR EACH ROW
         WHEN NOT EXISTS(select _id from bachat where mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND IFNULL(subitem_id, 0) = IFNULL(NEW.subitem_id, 0) AND unit_id = NEW.unit_id)  
@@ -1340,7 +1340,7 @@ class dbModal {
 
         END; `,
       awk_ins_bcht_updt:
-      `CREATE TRIGGER IF not exists "awk_ins_bcht_updt" 
+        `CREATE TRIGGER IF not exists "awk_ins_bcht_updt" 
         AFTER INSERT ON "aawak" 
         FOR EACH ROW     
         WHEN EXISTS(select _id from bachat where created_at != NEW.created_at AND mm_id = NEW.mm_id AND item_id = NEW.item_id AND dept_id = NEW.dept_id AND IFNULL(subitem_id, 0) = IFNULL(NEW.subitem_id, 0) AND unit_id = NEW.unit_id)  
@@ -1363,7 +1363,7 @@ class dbModal {
             where _id = NEW.product_id AND (last_date IS NULL OR last_date <= NEW.date);
         END;`,
       awk_updt_bcht_updt:
-      `DROP TRIGGER IF EXISTS "awk_updt_bcht_updt"`,
+        `DROP TRIGGER IF EXISTS "awk_updt_bcht_updt"`,
       awk_updt_bcht_updt:
         `CREATE TRIGGER IF NOT EXISTS "awk_updt_bcht_updt"
           AFTER UPDATE ON "aawak"
@@ -1384,7 +1384,7 @@ class dbModal {
             last_condition = NEW.condition_id
             where _id = NEW.product_id AND last_ref_id = NEW._id;
               
-          END;`,      
+          END;`,
 
       drop_jwk_ins_bcht_updt:
         `DROP TRIGGER IF exists "jwk_ins_bcht_updt" `,
@@ -1435,8 +1435,8 @@ class dbModal {
               last_mm = NEW.mm_id,
               last_condition = NEW.condition_id
               where _id = NEW.product_id AND last_ref_id = NEW._id;
-            END; `,               
-      
+            END; `,
+
       drop_awk_del_bcht_updt:
         `DROP TRIGGER IF EXISTS "awk_del_bcht_updt"`,
       awk_del_bcht_updt:
@@ -1494,7 +1494,7 @@ class dbModal {
         month integer not null,
         year integer not null,
         dept_id integer not null references department(_id),
-        updated_at timestamp default (strftime('%Y-%m-%d %H:%M:%f', 'now')),
+        updated_at timestamp default (strftime('%Y-%m-%d %H:%M:%f', datetime('now', 'localtime'))),
         unique(mm_id, month, year, dept_id)
       )`,
       add_col_mon_item: `alter table item add column restrict_month integer null`,
@@ -1503,8 +1503,40 @@ class dbModal {
       add_col_year_subitem: `alter table subitem add column restrict_year integer null`,
       add_col_mon_mm: `alter table mm add column restrict_month integer null`,
       add_col_year_mm: `alter table mm add column restrict_year integer null`
+    },
+    //version 12
+    /*
+      => creating new table vehicle
+    */
+    {
+      vehicle: `create table if not exists vehicle(
+        _id integer primary key AUTOINCREMENT,
+        mm_id integer not null references mm(_id),
+        vehicle_type varchar(100),
+        gadi_name varchar(100),
+        gadi_num varhcar(25) not null,
+        fuel_type varchar(50),
+        seating_capacity integer,
+        owner_name varchar(100),
+        nominee varchar(100),
+        aawak_type varchar(50) not null,
+        rc_date date,
+        rc_exp_date date,
+        rc_amount decimal(7, 2),
+        insurance_date date,
+        insurance_exp_date date,
+        insurance_type varchar(25),
+        insurance_company varchar(50),
+        insurance_amount decimal(7, 2),
+        puc_date date,
+        puc_exp_date date,
+        puc_amount decimal(7, 2),
+        created_at timestamp default (strftime('%Y-%m-%d %H:%M:%f', datetime('now', 'localtime'))),
+        updated_at timestamp default (strftime('%Y-%m-%d %H:%M:%f', datetime('now', 'localtime'))),
+        unique(gadi_num)
+        )`
     }
-  ];  
+  ];
   migrationLength;
   constructor(dbPath) {
     try {
@@ -1554,7 +1586,7 @@ class dbModal {
           console.log(err);
         }
 
-      });      
+      });
       this.db.pragma('foreign_keys=OFF');
       this.db.pragma('legacy_alter_table=ON');
       runMigration();

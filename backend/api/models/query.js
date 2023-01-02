@@ -1276,6 +1276,153 @@ const support_list = {
     , order:
         ``
 }
+const vehicle = {
+    select:
+        `select * from vehicle ?`
+    , select_full:
+        `select * from vehicle ? limit @limit offset @offset`
+    , insert:
+        `insert into vehicle (
+        mm_id,
+        vehicle_type,
+        gadi_name,
+        gadi_num,
+        fuel_type,
+        seating_capacity,
+        owner_name,
+        nominee,
+        aawak_type,
+        rc_name,
+        rc_exp_date,
+        rc_amount,
+        insurance_date,
+        insurance_exp_date,
+        insurance_amount,
+        puc_date,
+        puc_exp_date,
+        puc_amount,
+        active)
+    values (
+        @mm_id,
+        @vehicle_type,
+        @gadi_name,
+        @gadi_num,
+        @fuel_type,
+        @seating_capacity,
+        @owner_name,
+        @nominee,
+        @aawak_type,
+        @rc_name,
+        @rc_exp_date,
+        @rc_amount,
+        @insurance_date,
+        @insurance_exp_date,
+        @insurance_amount,
+        @puc_date,
+        @puc_exp_date,
+        @puc_amount,
+        @active)`
+    , insert_ignore:
+        `insert or ignore into vehicle (
+            _id,
+            mm_id,
+            vehicle_type,
+            gadi_name,
+            gadi_num,
+            fuel_type,
+            seating_capacity,
+            owner_name,
+            nominee,
+            aawak_type,
+            rc_name,
+            rc_exp_date,
+            rc_amount,
+            insurance_date,
+            insurance_exp_date,
+            insurance_amount,
+            puc_date,
+            puc_exp_date,
+            puc_amount,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @mm_id,
+            @vehicle_type,
+            @gadi_name,
+            @gadi_num,
+            @fuel_type,
+            @seating_capacity,
+            @owner_name,
+            @nominee,
+            @aawak_type,
+            @rc_name,
+            @rc_exp_date,
+            @rc_amount,
+            @insurance_date,
+            @insurance_exp_date,
+            @insurance_amount,
+            @puc_date,
+            @puc_exp_date,
+            @puc_amount,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update vehicle set 
+            mm_id = @mm_id,
+            vehicle_type = @vehicle_type,
+            gadi_name = @gadi_name,
+            gadi_num = @gadi_num,
+            fuel_type = @fuel_type,
+            seating_capacity = @seating_capacity,
+            owner_name = @owner_name,
+            nominee = @nominee,
+            aawak_type = @aawak_type,
+            rc_name = @rc_name,
+            rc_exp_date = @rc_exp_date,
+            rc_amount = @rc_amount,
+            insurance_date = @insurance_date,
+            insurance_exp_date = @insurance_exp_date,
+            insurance_amount = @insurance_amount,
+            puc_date = @puc_date,
+            puc_exp_date = @puc_exp_date,
+            puc_amount = @puc_amount,
+            created_at = @created_at,
+            updated_at = @updated_at,
+            active = @active where _id = @_id AND updated_at != @updated_at`
+    , update:
+        `update vehicle set 
+            mm_id = @mm_id,
+            vehicle_type = @vehicle_type,
+            gadi_name = @gadi_name,
+            gadi_num = @gadi_num,
+            fuel_type = @fuel_type,
+            seating_capacity = @seating_capacity,
+            owner_name = @owner_name,
+            nominee = @nominee,
+            aawak_type = @aawak_type,
+            rc_name = @rc_name,
+            rc_exp_date = @rc_exp_date,
+            rc_amount = @rc_amount,
+            insurance_date = @insurance_date,
+            insurance_exp_date = @insurance_exp_date,
+            insurance_amount = @insurance_amount,
+            puc_date = @puc_date,
+            puc_exp_date = @puc_exp_date,
+            puc_amount = @puc_amount,
+            created_at = @created_at,
+            updated_at = @updated_at,
+            active = @active
+            updated_at=strftime('%Y-%m-%d %H:%M:%f', datetime('now', 'localtime'))`
+    , update_active:
+        `update vehicle set
+        active=@active,
+        updated_at=strftime('%Y-%m-%d %H:%M:%f', datetime('now', 'localtime'))`
+    , order:
+        ``
+}
 
 const temp_import = {
     select:
