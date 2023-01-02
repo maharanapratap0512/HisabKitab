@@ -108,7 +108,7 @@ export class AawakComponent implements OnInit {
     ref_id: null,
     jawak_detail: []
   }
-  importPending: any = false;
+  // importPending: any = false;
   dictionary: any = [];
   loadingStatus: any = "मैं आत्मा शांत स्वरूप हूँ ।";
   // months: any = [{no:1, name:'January'}]
@@ -130,7 +130,7 @@ export class AawakComponent implements OnInit {
     this.spinner.show();
     this.getaawakData();
     this.getProductData();
-    this.checkTempImport();
+    this.gs.checkTempImport();
     this.getDictionary();
 
     this.gs.observeList().subscribe(result => {
@@ -148,17 +148,6 @@ export class AawakComponent implements OnInit {
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
     this.baseurl = this.api.getUrl('BASE');
-  }
-
-  checkTempImport() {
-    this.http.get(this.api.getUrl('IMPORTEXPORT')).subscribe((data: any) => {
-      if (data.total_count > 0) {
-        this.importPending = true;
-      }
-      else {
-        this.importPending = false;
-      }
-    })
   }
 
   getProductData() {
@@ -1117,7 +1106,7 @@ export class AawakComponent implements OnInit {
       this.http.post(this.api.getUrl('IMPORTEXPORT'), finalJson).subscribe((data: any) => {
         if (data.total_count) {
           this.openModal("import");
-          this.importPending = true;
+          this.gs.importPending = true;
         }
         this.isLoader = false;
       });
@@ -1134,7 +1123,7 @@ export class AawakComponent implements OnInit {
 
     if (ev) {
       this.closeModal();
-      this.checkTempImport();
+      this.gs.checkTempImport();
       this.getaawakData();
     }
   }

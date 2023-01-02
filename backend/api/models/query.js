@@ -780,7 +780,7 @@ const nimitt = {
         relative_name=@relative_name,
         townarea=@townarea,
         document=@document,
-        updated_at=datetime('now','localtime')`        
+        updated_at=datetime('now','localtime')`
     , import_update:
         `update nimitt set 
         roll_no=@roll_no,
@@ -1361,6 +1361,32 @@ const temp_import = {
     delete: `delete from temp_import`,
 }
 
+const import_history = {
+    select:
+        `select * from import_history ?`
+    , select_full:
+        `select json_group_array(json_object('_id', import_history._id, 'entry_date', import_history.entry_date, 'month', import_history.month, 'updated_at', import_history.updated_at)) as monthly_detail, import_history.year, import_history.mm_id, import_history.dept_id,
+        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id,
+        st.state_hin, st.state_eng,
+        dept.dept_hin, dept.dept_eng, dept.dept_code
+        from import_history 
+        left join mm on mm._id = import_history.mm_id        
+        left join state st on mm.state_id = st._id        
+        left join department dept on dept._id = import_history.dept_id ? group by mm_id, year`
+    , insert:
+        `insert into import_history (mm_id, month, year, dept_id)
+        values (@mm_id, @month, @year, @dept_id)`
+    , update:
+        `update import_history set  
+        mm_id = @mm_id, 
+        month = @month, 
+        year = @year,
+        updated_at = @updated_at`
+    , order:
+        ``,
+    delete: `delete from import_history`,
+}
+
 const dictionary = {
     insert: `insert or ignore into dictionary(type, name, extra_note, id, id2) values(@type, @name, @extra_note, @id, @id2)`,
     select: `select * from dictionary`,
@@ -1412,9 +1438,9 @@ const excel_correction = {
     update_jawak: `update temp_import set jawak_detail = @jawak_detail where _id = @_id`,
 
     ignore_nimitt: `update temp_import set description = description || '; nimitt - ' || nimitt, nimitt = null where nimitt = @name`,
-    ignore_product: `update temp_import set item_detail = item_detail || '; CODE - ' || product, product = null where product = @name`,    
+    ignore_product: `update temp_import set item_detail = item_detail || '; CODE - ' || product, product = null where product = @name`,
     // ignore_item: `update temp_import set item = item || ' ' || subitem, item_id = @id, subitem = null where item = @name AND subitem = @extra_note`,
-    
+
 
 }
 
@@ -1535,5 +1561,5 @@ reports = {
 }
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history
 };

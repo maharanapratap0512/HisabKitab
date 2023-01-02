@@ -15,6 +15,7 @@ export class GlobalService {
 
   Lists: any = null;
   Config: any = {};
+  importPending:any = false;
   // getList$ = new Subject();
   date = new Date();
   years: any = [];
@@ -80,29 +81,7 @@ export class GlobalService {
               // console.log('key',data['result'][]);
 
               this.Lists[key] = data['result'][key].data;
-            }
-            console.log(this.Lists);
-
-            // this.Lists.country = data['result'].country;
-            // this.Lists.city = data['result'].city;
-            // this.Lists.mm = data['result'].mm;
-            // this.Lists.state = data['result'].state;
-            // this.Lists.pbk = data['result'].pbk;
-            // this.Lists.nimitt = data['result'].nimitt;
-            // this.Lists.gender = data['result'].gender;
-            // this.Lists.relation = data['result'].relation;
-            // this.Lists.status = data['result'].status;
-            // this.Lists.condition = data['result'].condition;
-            // this.Lists.aawak_type = data['result'].aj_type.filter((aj: { list_type: string; }) => aj.list_type == 'aawak_type');
-            // this.Lists.jawak_type = data['result'].aj_type.filter((aj: { list_type: string; }) => aj.list_type == 'jawak_type');
-            // this.Lists.category = data['result'].category;
-            // this.Lists.unit = data['result'].unit;
-            // // this.Lists.item = data['result'].item;
-            // this.Lists.itemmix = data['result'].itemmix;
-            // this.Lists.subitem_list = data['result'].subitem_list;
-            // // this.Lists.subitem = data['result'].subitem;
-            // this.Lists.department = data['result'].department;
-            // this.Lists.sitem = data['result'].sitem;
+            }            
           }
           observer.next(this.Lists);
         });
@@ -114,62 +93,6 @@ export class GlobalService {
     return data;
   }
 
-
-  // async getList() {
-  //   this.http.get(this.api.URLS['LISTALL'] + '/' + this.auth.webUser.dept_id).subscribe((data) => {
-  //     if (data['success'] && data['result']) {
-  //       this.Lists.country = data['result'].country;
-  //       this.Lists.city = data['result'].city;
-  //       this.Lists.mm = data['result'].mm;
-  //       this.Lists.state = data['result'].state;
-  //       this.Lists.pbk = data['result'].pbk;
-  //       this.Lists.gender = data['result'].gender;
-  //       this.Lists.relation = data['result'].relation;
-  //       this.Lists.status = data['result'].status;
-  //       this.Lists.condition = data['result'].condition;
-  //       this.Lists.aawak_type = data['result'].aj_type.filter((aj: { list_type: string; }) => aj.list_type == 'aawak_type');
-  //       this.Lists.jawak_type = data['result'].aj_type.filter((aj: { list_type: string; }) => aj.list_type == 'jawak_type');
-  //       this.Lists.category = data['result'].category;
-  //       this.Lists.unit = data['result'].unit;
-  //       this.Lists.item = data['result'].item;
-  //       this.Lists.itemmix = data['result'].itemmix;
-  //       this.Lists.subitem_list = data['result'].subitem_list;
-  //       this.Lists.subitem = data['result'].subitem;
-  //       this.Lists.department = data['result'].department;
-  //       this.Lists.sitem = data['result'].sitem;
-  //     }
-  //     this.getList$.next(this.Lists);
-  //   });
-  // }
-
-  // getList() {
-  //   return new Promise((resolve) => {
-  //     this.http.get(this.api.URLS['LISTALL'] + '/' + this.auth.webUser.dept_id).subscribe((data) => {
-  //       if (data['success'] && data['result']) {
-  //         this.Lists.country = data['result'].country;
-  //         this.Lists.city = data['result'].city;
-  //         this.Lists.mm = data['result'].mm;
-  //         this.Lists.state = data['result'].state;
-  //         this.Lists.pbk = data['result'].pbk;
-  //         this.Lists.gender = data['result'].gender;
-  //         this.Lists.relation = data['result'].relation;
-  //         this.Lists.status = data['result'].status;
-  //         this.Lists.condition = data['result'].condition;
-  //         this.Lists.aawak_type = data['result'].aj_type.filter((aj: { list_type: string; })=>aj.list_type == 'aawak_type');
-  //         this.Lists.jawak_type = data['result'].aj_type.filter((aj: { list_type: string; })=>aj.list_type == 'jawak_type');
-  //         this.Lists.category = data['result'].category;
-  //         this.Lists.unit = data['result'].unit;
-  //         this.Lists.item = data['result'].item;
-  //         this.Lists.itemmix = data['result'].itemmix;
-  //         this.Lists.subitem_list = data['result'].subitem_list;
-  //         this.Lists.subitem = data['result'].subitem;
-  //         this.Lists.department = data['result'].department;
-  //         this.Lists.sitem = data['result'].sitem;
-  //       }
-  //       return resolve(1);
-  //     });
-  //   });
-  // }
 
 
   async getDeptConfig() {
@@ -185,5 +108,15 @@ export class GlobalService {
     });
   }
 
+  checkTempImport() {
+    this.http.get(this.api.getUrl('IMPORTEXPORT')).subscribe((data: any) => {
+      if (data.total_count > 0) {
+        this.importPending = true;
+      }
+      else {
+        this.importPending = false;
+      }
+    })
+  }
 
 }

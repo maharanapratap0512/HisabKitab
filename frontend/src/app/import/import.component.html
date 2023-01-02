@@ -350,14 +350,53 @@
 
       <!-- tobeimport -->
       <div class="tab-pane p-4" id="tobeimport" style="overflow: auto;">
-         <div class="row" *ngIf="unmatchedData.length < 1">
-            <div class="col-10">
-               कोई भी करेक्शन की जरूरत नहीं है, आगे डाटा वेरीफाई करके इम्पोर्ट करे ।
+         <form [formGroup]="importForm">
+            <div class="row" *ngIf="unmatchedData.length < 1">
+               <div class="col-md-3 mb-3">
+                  <div class="form-group">
+                     <label class="form-label">MM</label>
+                     <!-- <a type="button" style="padding: 1px 6px !important;"
+                           class="btn btn-outline-primary float-end"
+                           onclick="$('#subitemComponent > #showModal').modal('show')"
+                           (click)="showModal = 'Add Item'">+
+                           Add</a> -->
+                     <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="false"
+                        [virtualScroll]="true" formControlName="mm_id"
+                        [ngClass]="{'validation':importForm.get('mm_id')?.errors && (importForm.get('mm_id')?.touched || importForm.get ('mm_id')?.dirty)}">
+                        <ng-option selected="selected" disabled value="">Select MM</ng-option>
+                        <ng-option *ngFor="let item of mms" [value]="item._id">{{item.mm_hin}} :
+                           {{item.mm_eng}} : {{item.mm_code?' : '+item.mm_code:''}}</ng-option>
+                     </ng-select>
+                  </div>
+               </div>
+               <div class="col-md-2 mb-3">
+                  <label class="form-label">Year</label>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Year" [virtualScroll]="true"
+                     formControlName="year" (change)="yearChanged($event)"
+                     [ngClass]="{'validation':importForm.get('year')?.errors && (importForm.get('year')?.touched || importForm.get ('year')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Year
+                     </ng-option>
+                     <ng-option *ngFor="let item of years" [value]="item">{{item}}</ng-option>
+                  </ng-select>
+               </div>
+               <div class="col-md-2 mb-3">
+                  <label class="form-label">Month</label>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Month" [virtualScroll]="true"
+                     formControlName="month"
+                     [ngClass]="{'validation':importForm.get('month')?.errors && (importForm.get('month')?.touched || importForm.get ('month')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select Month
+                     </ng-option>
+                     <ng-option *ngFor="let item of months" [value]="item.m">{{item.m}} : {{item.name}}</ng-option>
+                  </ng-select>
+               </div>
+               <div class="col-md-2 mb-3">
+                  <button class="w-100 btn btn-primary" type="submit" (click)="importFinal()">Import Data</button>
+               </div>
+               <!-- <div class="col-10">
+                  कोई भी करेक्शन की जरूरत नहीं है, आगे डाटा वेरीफाई करके इम्पोर्ट करे ।
+               </div> -->
             </div>
-            <div class="col-2">
-               <button class="w-100 btn btn-primary" (click)="importFinal()">Import Data</button>
-            </div>
-         </div>
+         </form>
          <table id="datatable-buttons" class="table table-hover dt-responsive">
             <thead>
                <tr>
@@ -477,5 +516,3 @@
    </div>
 
 </div>
-
-

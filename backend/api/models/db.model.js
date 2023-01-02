@@ -1484,16 +1484,18 @@ class dbModal {
     //version: 11
     /*
       => Import History - new table for maintaining import data history.
+      => Alter table item, subitem, mm - Add restrict_month and restrict_year columns. 
     */
     {
       import_history: `create table if not exists import_history(
-        _id integer auto_increment primary key,
+        _id integer primary key AUTOINCREMENT,
         entry_date timestamp default (datetime('now', 'localtime')),
         mm_id integer not null references mm(_id),
         month integer not null,
         year integer not null,
+        dept_id integer not null references department(_id),
         updated_at timestamp default (strftime('%Y-%m-%d %H:%M:%f', 'now')),
-        unique(mm_id, month, year)
+        unique(mm_id, month, year, dept_id)
       )`,
       add_col_mon_item: `alter table item add column restrict_month integer null`,
       add_col_year_item: `alter table item add column restrict_year integer null`,

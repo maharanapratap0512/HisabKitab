@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import * as e from 'express';
 import { forEach } from 'jszip';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -21,6 +21,7 @@ export class ImportComponent implements OnInit {
   @Input() importData: any;
   @Input() updateData: any;
   @Output() response = new EventEmitter();
+  importForm: FormGroup;
   term: any;
   items: any = [];
   products: any = [];
@@ -45,6 +46,8 @@ export class ImportComponent implements OnInit {
   cat: any = null;
   updateLists: any = [];
   uData: any = {};
+  years: any = [];
+  months: any = [];
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -54,6 +57,8 @@ export class ImportComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public auth: AuthService
   ) {
+    this.years = gs.years;
+    this.months = gs.months;
     this.gs.observeList().subscribe(result => {
       this.itemAll = result.itemmix ? result.itemmix : [];
       this.items = result.itemmix ? result.itemmix : [];
@@ -69,7 +74,13 @@ export class ImportComponent implements OnInit {
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
     this.settings = this.auth.webUser.settings;
-    console.log(this.settings);
+
+    this.importForm = this.fb.group({
+      mm_id: [null, Validators.required],
+      month: [null, Validators.required],
+      year: [null, Validators.required],
+      dept_id: [this.auth.webUser.dept_id]
+    });
 
   }
 
@@ -78,6 +89,15 @@ export class ImportComponent implements OnInit {
     this.getImportData();
     this.getUnmatchedList();
     this.getProductData();
+  }
+
+  yearChanged(ev: any) {
+    if (ev && ev == this.gs.date.getFullYear()) {
+      this.months = this.gs.months.filter((i: { m: number; }) => i.m <= this.gs.date.getMonth())
+    }
+    else {
+      this.months = this.gs.months;
+    }
   }
 
   getProductData() {
@@ -150,15 +170,15 @@ export class ImportComponent implements OnInit {
     }
     if (changes.updateData && changes.updateData.currentValue) {
       this.uData = changes.updateData.currentValue;
-      console.log("this.uData", this.uData);        
+      console.log("this.uData", this.uData);
       setTimeout(() => {
-        console.log("this.uData", this.uData.category);      
-        setTimeout(() => {        
-          console.log("this.uData", Object.keys(this.uData.category));            
-        }, 6000);      
-      }, 5000);    
+        console.log("this.uData", this.uData.category);
+        setTimeout(() => {
+          console.log("this.uData", Object.keys(this.uData.category));
+        }, 6000);
+      }, 5000);
       // this.updateLists = ;      
-    }    
+    }
   }
 
   getUnmatchedList() {
@@ -231,22 +251,27 @@ export class ImportComponent implements OnInit {
   }
 
   importFinal() {
-    let valid = this.importData.filter((i: { valid: boolean, jawak_detail: any[]; }) => i.valid == false && i.jawak_detail.filter((j: { valid: Boolean; }) => j.valid == false).length == 0);
+    if (this.importForm.valid) {
+      let valid = this.importData.filter((i: { valid: boolean, jawak_detail: any[]; }) => i.valid == false && i.jawak_detail.filter((j: { valid: Boolean; }) => j.valid == false).length == 0);
 
-    if (valid == 0) {
-      this.http.put(this.api.getUrl('IMPORTEXPORT') + 'final', this.importData).subscribe((data: any) => {
-        this.response.emit(1);
-      });
-    } else {
-      Swal.fire({
-        title: 'Error!',
-        text: "Some invalid row exists",
-        icon: 'error',
-        showCancelButton: false,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'OK'
-      });
+      if (valid == 0) {
+        this.http.put(this.api.getUrl('IMPORTEXPORT') + 'final', { data: this.importData, history: this.importForm.value }).subscribe((data: any) => {
+          this.response.emit(1);
+        });
+      } else {
+        Swal.fire({
+          title: 'Error!',
+          text: "Some invalid row exists",
+          icon: 'error',
+          showCancelButton: false,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'OK'
+        });
+      }
+    }
+    else {
+      this.gs.validationFireOnSubmit(this.importForm);
     }
   }
 

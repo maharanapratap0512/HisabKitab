@@ -39,14 +39,14 @@
                         </ng-select>
                      </div> -->
                      <div class="col-3 d-flex">
-                        <button *ngIf="!importPending" class="file btn btn-success"
+                        <button *ngIf="!gs.importPending" class="file btn btn-success"
                            style="font-weight: 700 !important;">
                            <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                            <input type="file" class="inputtag"
                               accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                               (change)="excelImport($event)" />
                         </button>
-                        <button *ngIf="importPending" class="file btn btn-success" (click)="openModal('import')"
+                        <button *ngIf="gs.importPending" class="file btn btn-success" (click)="openModal('import')"
                            style="font-weight: 700 !important;">
                            <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                         </button>

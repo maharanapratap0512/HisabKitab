@@ -46,6 +46,7 @@ const importExportRoutes = require('./api/routes/import-export.routes');
 const nimittRoutes = require('./api/routes/nimitt.routes');
 const dictionaryRoutes = require('./api/routes/dictionary.routes');
 const reportRoutes = require('./api/routes/reports.routes');
+const importHistoryRoutes = require('./api/routes/import_history.routes');
 
 
 // // Routes - Binding
@@ -74,6 +75,7 @@ app.use('/api/importexport', importExportRoutes);
 app.use('/api/nimitt', nimittRoutes);
 app.use('/api/dictionary', dictionaryRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/import_history', importHistoryRoutes);
 
 
 

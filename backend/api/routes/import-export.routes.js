@@ -178,7 +178,7 @@ router.put('/ignore', async (req, res, next) => {
 //  final import
 router.put('/final', async (req, res, next) => {
     try {
-        for (let row of req.body) {
+        for (let row of req.body.data) {
             // if (typeof row.date == "string") {
             //     row.date = Fn.StringToDate(row.date);
             // }
@@ -209,6 +209,7 @@ router.put('/final', async (req, res, next) => {
             }, 10);
             
         }
+        await DB.insert('import_history', req.body.history, null, false);
         await DB.runQuery('temp_import', 'delete');
         res.json({
             success: true
