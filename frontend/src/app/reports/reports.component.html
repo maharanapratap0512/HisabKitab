@@ -94,14 +94,14 @@
                   </ngx-spinner>
                   <!-- help: https://ej2.syncfusion.com/angular/documentation/grid/getting-started/ -->
                   <ejs-grid [dataSource]='reportData' [allowPaging]="true" [pageSettings]="pageSettings"
-                     [allowSorting]="true" [allowFiltering]="true" height='267px'>
+                     [allowSorting]="true" [filterSettings]='filterSettings' [allowFiltering]="true" height='267px'>
                      <e-columns>
-                        <e-column field="roll_no" headerText="Roll No" textAlign="left" width="50"></e-column>
+                        <e-column field="roll_no" [filter]="filter" headerText="Roll No" textAlign="left" width="50"></e-column>
                         <e-column field="pbk_hin" headerText="Pbk Name" textAlign="left" width="90"></e-column>
                         <e-column field="date" headerText="Date" textAlign="left" format="yMd"></e-column>
                         <e-column field="pkt_num" headerText="Pkt Num" textAlign="left"></e-column>
-                        <e-column field="mm_hin" headerText="MM" textAlign="left"></e-column>
-                        <e-column field="item_hin" headerText="Item" textAlign="left"></e-column>
+                        <e-column field="mm_hin" [filter]="filter" headerText="MM" textAlign="left"></e-column>
+                        <e-column field="item_hin" headerText="Item" [filter]='filter' textAlign="left"></e-column>
                         <e-column field="subitem_hin" headerText="Subitem" textAlign="left"></e-column>
                         <e-column field="company_name" headerText="Company" textAlign="left"></e-column>
                         <e-column field="qty" headerText="Qty" textAlign="center" format="N2"></e-column>
@@ -115,33 +115,6 @@
                         <e-column field="description" headerText="Description"></e-column>
                      </e-columns>
                   </ejs-grid>
-               </div>
-            </div>
-
-            <div class="row">
-               <div class="card-body" style="overflow: auto;">
-                  <table id="datatable-buttons" class="table table-hover dt-responsive" #TABLE>
-                     <thead>
-                        <tr>
-                           <th style="width: 40px;">No.</th>
-                           <th>Month</th>
-                           <th>Date</th>
-                           <th>sthan</th>
-                           <th>parchi No</th>
-                           <th>qty</th>
-                           <th>unit</th>
-                           <th>rate</th>
-                           <th>cost</th>
-                           <th>Plus Minus</th>
-                           <th>Total Cost</th>
-                           <th>Final Amount</th>
-                           <th>Correct Amount</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-
-                     </tbody>
-                  </table>
                </div>
             </div>
 

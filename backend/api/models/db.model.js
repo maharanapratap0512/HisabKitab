@@ -1514,7 +1514,7 @@ class dbModal {
         mm_id integer not null references mm(_id),
         vehicle_type varchar(100),
         gadi_name varchar(100),
-        gadi_num varhcar(25) not null,
+        gadi_num varhcar(25) unique not null,
         fuel_type varchar(50),
         seating_capacity integer,
         owner_name varchar(100),
@@ -1531,10 +1531,22 @@ class dbModal {
         puc_date date,
         puc_exp_date date,
         puc_amount decimal(7, 2),
-        created_at timestamp default (strftime('%Y-%m-%d %H:%M:%f', datetime('now', 'localtime'))),
-        updated_at timestamp default (strftime('%Y-%m-%d %H:%M:%f', datetime('now', 'localtime'))),
+        created_at timestamp default (UNIXEPOCH()),
+        updated_at timestamp default (UNIXEPOCH()),
         unique(gadi_num)
-        )`
+        )`,
+      vehicle_document: `create table if not exists vehicle_document(
+        _id integer primary key AUTOINCREMENT,
+        vehicle_id integer not null references vehicle(_id),
+        gadi_num varhcar(25),
+        doc_type varchar(25) not null,
+        doc_date date,
+        exp_date date,
+        ins_type varchar(25),
+        amount decimal(7,2),
+        created_at timestamp default (UNIXEPOCH()),
+        updated_at timestamp default (UNIXEPOCH())
+      )`
     }
   ];
   migrationLength;
@@ -1554,11 +1566,8 @@ class dbModal {
 
           //getting current user version
           let userVersion = this.db.pragma('user_version', { simple: true });
-          console.log("current user version : ", userVersion);
-          //set old userversion 8 to 1
-          // if (userVersion == 8) {
-          //   userVersion = 1;
-          // }
+          console.log("current user version : ", userVersion);               
+                    
           //comparing userversion with total migrations
           if (this.migrationLength > userVersion) {
             //looping through migrations positioned after userversion.
@@ -1567,7 +1576,7 @@ class dbModal {
               for (let query of Object.keys(migrationQueries)) {
                 console.log(migrationQueries[query]);
                 //executing individual query.
-                this.db.prepare(migrationQueries[query]).run();
+                this.db.prepare(migrationQueries[query]).run();                
               }
               console.log("updating database ... ");
             }

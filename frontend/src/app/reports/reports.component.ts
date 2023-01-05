@@ -11,12 +11,14 @@ import { AuthService } from '../services/auth.service';
 import { ExcelExportService } from '../services/excel-export.service';
 import { observable, Observable, of, Subject } from 'rxjs';
 declare var $: any;
-import { PageSettingsModel } from '@syncfusion/ej2-angular-grids';
+import { FilterService, GridComponent, PageSettingsModel, VirtualScrollService } from '@syncfusion/ej2-angular-grids';
+import { DropDownListComponent } from '@syncfusion/ej2-angular-dropdowns';
 
 @Component({
   selector: 'app-reports',
   templateUrl: './reports.component.html',
-  styleUrls: ['./reports.component.scss']
+  styleUrls: ['./reports.component.scss'],
+  providers: [FilterService, VirtualScrollService]
 })
 export class ReportsComponent implements OnInit {
 
@@ -36,6 +38,32 @@ export class ReportsComponent implements OnInit {
   pbks: any = [];
   pbksAll: any = [];
 
+  public dReady: boolean = false;
+  public dtTime: boolean = false;
+  public isDataBound: boolean = false;
+  public isDataChanged: boolean = true;
+  public intervalFun: any;
+  public clrIntervalFun: any;
+  public clrIntervalFun1: any;
+  public clrIntervalFun2: any;
+  public dropSlectedIndex: number = 0;
+  public stTime: any;
+  public filter: Object;
+  public filterSettings: Object;
+  public selectionSettings: Object;
+  public height: string = '240px';
+  // @ViewChild('sample')
+  // public listObj: DropDownListComponent;
+  // @ViewChild('overviewgrid')
+  // public gridInstance: GridComponent;
+  // public ddlData: Object[] = [
+  //   { text: '1,000 Rows and 11 Columns', value: '1000' },
+  //   { text: '10,000 Rows and 11 Columns', value: '10000' },
+  //   { text: '1,00,000 Rows and 11 Columns', value: '100000' }
+  // ];
+  public fields: Object = { text: 'text', value: 'value' };
+  public item: number[] = [1, 2, 3, 4, 5];
+
   constructor(private fb: FormBuilder,
     private http: HttpService,
     private api: ApiService,
@@ -47,6 +75,10 @@ export class ReportsComponent implements OnInit {
     this.pageSettings = { pageSize: 5 }
     this.years = gs.years;
     this.months = gs.months;
+    this.filterSettings = { type: "Menu" };
+    this.filter = { type: "CheckBox" };
+    this.stTime = performance.now();
+    this.selectionSettings = { persistSelection: true, type: "Multiple", checkboxOnly: true };
   }
 
   ngOnInit(): void {
@@ -63,7 +95,8 @@ export class ReportsComponent implements OnInit {
     this.http.put(this.api.getUrl('REPORT') + 'pbk/', {}).subscribe((data: any) => {
       this.reportData = data;
 
-    })
+
+    })    
   }
 
   yearChanged(ev: any) {
@@ -73,7 +106,6 @@ export class ReportsComponent implements OnInit {
     else {
       this.months = this.gs.months;
     }
-
   }
 
   stateSelected(ev: any) {
@@ -83,14 +115,14 @@ export class ReportsComponent implements OnInit {
       this.pbks = this.pbksAll;
   }
 
-  searchReport(){
+  searchReport() {
     console.log("submited");
-    
+
     this.reportLoader = true;
     this.http.put(this.api.getUrl('REPORTPBK'), this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         console.log(data);
-        
+
       }
     });
     this.reportLoader = false;
@@ -101,5 +133,24 @@ export class ReportsComponent implements OnInit {
     this.showModal = type;
     $('#showModal').modal('show');
   }
+
+  // valueChange(args: any): void {
+  //   this.listObj.hidePopup();
+  //   this.gridInstance.showSpinner();
+  //   this.dropSlectedIndex = 0;
+  //   let index: number = this.listObj.value as number;
+  //   clearTimeout(this.clrIntervalFun2);
+  //   this.clrIntervalFun2 = setTimeout(() => {
+  //     this.isDataChanged = true;
+  //     this.stTime = null;
+  //     let contentElement: Element = this.gridInstance.contentModule.getPanel().firstChild as Element;
+  //     contentElement.scrollLeft = 0;
+  //     contentElement.scrollTop = 0;
+  //     this.gridInstance.pageSettings.currentPage = 1;
+  //     this.stTime = performance.now();
+  //     this.gridInstance.dataSource = this.reportData;
+  //     this.gridInstance.hideSpinner();
+  //   }, 100);
+  // }
 
 }
