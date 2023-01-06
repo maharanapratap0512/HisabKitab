@@ -1506,7 +1506,7 @@ class dbModal {
     },
     //version 12
     /*
-      => creating new table vehicle
+      => creating new table vehicle and vehicle_document
     */
     {
       vehicle: `create table if not exists vehicle(
