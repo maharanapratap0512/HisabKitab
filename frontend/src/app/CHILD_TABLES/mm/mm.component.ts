@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
+import { AppComponent } from 'src/app/app.component';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ExcelExportService } from 'src/app/services/excel-export.service';
@@ -42,7 +44,8 @@ export class MmComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService,
-    private excelExportService: ExcelExportService
+    private excelExportService: ExcelExportService,
+    private app: AppComponent
   ) { }
 
   ngOnInit(): void {
@@ -103,7 +106,7 @@ export class MmComponent implements OnInit {
         "Nimitt": this.mmData[i].nimitt_hin
       });
     }
-    
+
     this.excelExportService.exportAsExcelFile(mmExportData, "MM_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
     this.isLoader = false;
   }
@@ -142,6 +145,41 @@ export class MmComponent implements OnInit {
     $('#showModal').modal('show');
   }
 
+  lockMM(i: any, id: any) {
+    this.app.appModal$ = new Subject();
+    this.app.appModal$.subscribe((result: any) => {
+      if (result) {
+        this.http.put(this.api.getUrl('MM') + 'lock/', { _id: id, ...result }).subscribe((data: any) => {
+          this.mmData[i] = data['result'];
+          if (data['result'].restrict_month) {
+            this.toastr.success("Lock Activated.");
+          }
+          else {
+            this.toastr.success("Lock Deactivated.");
+          }
+        }, err => {
+          this.toastr.error(err['message']);
+          this.isLoader = false;
+        });
+      }
+
+    });
+    this.app.openModal('lockModal');
+  }
+  unlockMM(i: any, id: any) {
+    this.http.put(this.api.getUrl('MM') + 'lock/', { _id: id, restrict_month: null, restrict_year: null }).subscribe((data: any) => {
+      this.mmData[i] = data['result'];
+      if (data['result'].restrict_month) {
+        this.toastr.success("Lock Activated.");
+      }
+      else {
+        this.toastr.success("Lock Deactivated.");
+      }
+    }, err => {
+      this.toastr.error(err['message']);
+      this.isLoader = false;
+    });
+  }
   delete(i: any, id: any) {
     Swal.fire({
       title: 'Are you sure?',

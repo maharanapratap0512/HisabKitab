@@ -67,6 +67,7 @@ import { ReportsComponent } from './reports/reports.component';
 
 import { GridModule } from '@syncfusion/ej2-angular-grids';
 import { PageService, SortService, FilterService, FreezeService } from '@syncfusion/ej2-angular-grids';
+import { FilterByDatePipe } from './pipe/filter-by-date.pipe';
 
 @NgModule({
   declarations: [
@@ -115,6 +116,7 @@ import { PageService, SortService, FilterService, FreezeService } from '@syncfus
     UpdateDetailComponent,
     ProductTransferEntryComponent,
     ReportsComponent,
+    FilterByDatePipe,
   ],
   imports: [
     BrowserModule,

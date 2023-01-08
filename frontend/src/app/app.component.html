@@ -1,10 +1,53 @@
-
-
 <router-outlet></router-outlet>
 
 <ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="small" color="#fff" type="ball-scale"
    [fullScreen]="true">
-      <p style="color: white"> {{point_hin}} </p>
-      <button class="btn btn-light" *ngIf="isBtn" (click)="skipBtn()">सेवा जारी रखे</button>
-      <button class="btn btn-link px-3" *ngIf="!isBtn">{{sec}} Sec</button>
+   <p style="color: white"> {{point_hin}} </p>
+   <button class="btn btn-light" *ngIf="isBtn" (click)="skipBtn()">सेवा जारी रखे</button>
+   <button class="btn btn-link px-3" *ngIf="!isBtn">{{sec}} Sec</button>
 </ngx-spinner>
+
+<div class="modal fade" id="lockModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{appModal}}</h5>
+            <button type="button" (click)="closeModal()" class="btn-close" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+               <!-- Month and Year -->
+               <div class="form-group">
+                  <div class="col-md-3 mb-2">
+                     <label class="form-label">Month-Year</label>
+                     <div class="d-flex justify-content-between">
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Year"
+                           (change)="months = gs.yearChangedGetMonth($event)" [clearable]="true" [virtualScroll]="true"
+                           [(ngModel)]="lockYear" name="year" required>
+                           <ng-option selected="selected" disabled value="">Select Year
+                           </ng-option>
+                           <ng-option *ngFor="let item of years" [value]="item">{{item}}</ng-option>
+                        </ng-select>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Month" [clearable]="true"
+                           [virtualScroll]="true" [(ngModel)]="lockMonth" name="month" required>
+                           <ng-option selected="selected" disabled value="">Select Month
+                           </ng-option>
+                           <ng-option *ngFor="let item of months" [value]="item.m">{{item.m}} : {{item.name}}
+                           </ng-option>
+                        </ng-select>
+
+                     </div>
+                  </div>
+                  <div class="col-md-2 mb-3">
+                     <button class="btn btn-primary" (click)="submitLockData()">Lock</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="modal-footer">
+         <button type="button" class="btn btn-secondary" style="width: 120px;" (click)="closeModal()">Close</button>
+      </div>
+   </div>
+</div>

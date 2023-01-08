@@ -119,4 +119,12 @@ export class GlobalService {
     })
   }
 
+  yearChangedGetMonth(year: any) {
+    if (year && year == this.date.getFullYear()) {
+      return this.months.filter((i: { m: number; }) => i.m <= this.date.getMonth()+1)
+    }
+    else {
+      return this.months;
+    }
+  }
 }

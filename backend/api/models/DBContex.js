@@ -192,11 +192,11 @@ class DBContex {
     //     })
     // });
 
-    async update(tblname, obj, id) {
+    async update(tblname, obj, id, key=null) {
         return new Promise(async (resolve, reject) => {
             try {
-                let key = Object.keys(obj);
-                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update;
+                let keys = Object.keys(obj);
+                let sql = key ? this.query[tblname][key] : (keys[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update);
                 sql += ` where ${tblname}._id = ${id} `
                 obj.active = obj.active ? 1 : 0;
 

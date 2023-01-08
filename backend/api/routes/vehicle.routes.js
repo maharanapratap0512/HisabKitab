@@ -6,7 +6,7 @@ const DB = new DBContex();
 // get vehicle all
 router.get('/', async (req, res, next) => {
     try {
-        await DB.getList('vehicle').then(async (resolve) => {
+        await DB.getList('vehicle', {full:true}).then(async (resolve) => {
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -20,7 +20,7 @@ router.get('/', async (req, res, next) => {
 // get vehicle 
 router.get('/:dept_id', async (req, res, next) => {
     try {
-        await DB.getList('vehicle', { order: `vehicle._id desc` }).then(async (resolve) => {
+        await DB.getList('vehicle', { order: `vehicle._id desc`, full:true }).then(async (resolve) => {
             res.json({
                 success: true,
                 result: resolve.data || [],

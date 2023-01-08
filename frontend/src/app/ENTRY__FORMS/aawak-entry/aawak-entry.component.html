@@ -77,7 +77,7 @@
                      [ngClass]="{ 'validation': (mm_id?.touched || f.submitted) && mm_id.errors?.['required']}"
                      required>
                      <ng-option selected="selected" disabled value="">MM</ng-option>
-                     <ng-option *ngFor="let item of mms" [value]="item._id">
+                     <ng-option *ngFor="let item of mms | filterByDate:awkfg.date" [value]="item._id">
                         {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
                   </ng-select>
                </div>
@@ -96,7 +96,7 @@
                      [ngClass]="{ 'validation': (aawak_mm_id?.touched || f.submitted) && aawak_mm_id.errors?.['required']}"
                      [required]="awkfg.pbk_id === null">
                      <ng-option selected=" selected" disabled value="">Incoming(Aawak) MM</ng-option>
-                     <ng-option *ngFor="let item of mms" [value]="item._id">
+                     <ng-option *ngFor="let item of mms | filterByDate:awkfg.date" [value]="item._id">
                         {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
                   </ng-select>
                </div>
@@ -193,14 +193,14 @@
                      [ngClass]="{ 'validation': (item_id?.touched || f.submitted) && item_id.errors?.['required']}"
                      required>
                      <ng-option selected="selected" disabled value="">Select Item</ng-option>
-                     <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                     <ng-option *ngFor="let item of items | filterByDate:awkfg.date" [value]="item._id">{{item.item_hin}} :
                         {{item.item_eng}} : {{item.item_code}}</ng-option>
                   </ng-select>
                   <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
                      [clearable]="true" [virtualScroll]="true" [(ngModel)]="awkfg.subitem_id" name="subitem_id"
                      #subitem_id="ngModel" [readonly]="isEdit">
                      <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
-                     <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}} :
+                     <ng-option *ngFor="let item of subitems | filterByDate:awkfg.date" [value]="item._id">{{item.subitem_hin}} :
                         {{item.subitem_eng}}</ng-option>
                   </ng-select>
                </div>

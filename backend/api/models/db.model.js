@@ -1541,12 +1541,33 @@ class dbModal {
         gadi_num varhcar(25),
         doc_type varchar(25) not null,
         doc_date date,
-        exp_date date,
-        ins_type varchar(25),
+        exp_date date not null,
+        insurance_type varchar(25),
         amount decimal(7,2),
-        created_at timestamp default (UNIXEPOCH()),
-        updated_at timestamp default (UNIXEPOCH())
-      )`
+        created_at timestamp default (UNIXEPOCH())
+      )`,
+      vehicle_ins_doc_insert: `CREATE TRIGGER IF not exists "vehicle_ins_doc_ins" 
+        AFTER INSERT ON "vehicle" 
+        FOR EACH ROW        
+        BEGIN
+          insert or ignore into vehicle_document(vehicle_id, gadi_num, doc_type, doc_date, exp_date, amount) 
+          values(NEW._id, NEW.gadi_num, 'rc', NEW.rc_date, NEW.rc_exp_date, NEW.rc_amount);
+          insert or ignore into vehicle_document(vehicle_id, gadi_num, doc_type, doc_date, exp_date, insurance_type, amount) 
+          values(NEW._id, NEW.gadi_num, 'insurance', NEW.insurance_date, NEW.insurance_exp_date, NEW.insurance_type, NEW.insurance_amount);
+          insert or ignore into vehicle_document(vehicle_id, gadi_num, doc_type, doc_date, exp_date, amount) 
+          values(NEW._id, NEW.gadi_num, 'puc', NEW.puc_date, NEW.puc_exp_date, NEW.puc_amount);
+        END; `,
+      vehicle_updt_doc_insert: `CREATE TRIGGER IF not exists "vehicle_updt_doc_ins" 
+        AFTER INSERT ON "vehicle" 
+        FOR EACH ROW        
+        BEGIN
+          insert or ignore into vehicle_document(vehicle_id, gadi_num, doc_type, doc_date, exp_date, amount) 
+          values(NEW._id, NEW.gadi_num, 'rc', NEW.rc_date, NEW.rc_exp_date, NEW.rc_amount);
+          insert or ignore into vehicle_document(vehicle_id, gadi_num, doc_type, doc_date, exp_date, insurance_type, amount) 
+          values(NEW._id, NEW.gadi_num, 'insurance', NEW.insurance_date, NEW.insurance_exp_date, NEW.insurance_type, NEW.insurance_amount);
+          insert or ignore into vehicle_document(vehicle_id, gadi_num, doc_type, doc_date, exp_date, amount) 
+          values(NEW._id, NEW.gadi_num, 'puc', NEW.puc_date, NEW.puc_exp_date, NEW.puc_amount);
+        END; `,
     }
   ];
   migrationLength;
@@ -1562,12 +1583,10 @@ class dbModal {
       // transactions for updating database changes called migration.
       let runMigration = this.db.transaction(() => {
         try {
-          //turn on foreign keys
-
           //getting current user version
           let userVersion = this.db.pragma('user_version', { simple: true });
-          console.log("current user version : ", userVersion);               
-                    
+          console.log("current user version : ", userVersion);
+
           //comparing userversion with total migrations
           if (this.migrationLength > userVersion) {
             //looping through migrations positioned after userversion.
@@ -1576,7 +1595,7 @@ class dbModal {
               for (let query of Object.keys(migrationQueries)) {
                 console.log(migrationQueries[query]);
                 //executing individual query.
-                this.db.prepare(migrationQueries[query]).run();                
+                this.db.prepare(migrationQueries[query]).run();
               }
               console.log("updating database ... ");
             }
@@ -1585,11 +1604,7 @@ class dbModal {
 
             console.log("database updated to version ", this.migrationLength);
           }
-          // for (let query of Object.keys(this.Migrations[2])) {
-          //   console.log(query, this.Migrations[2][query]);
-          //   //executing individual query.
-          //   this.db.prepare(this.Migrations[2][query]).run();
-          // }
+
         }
         catch (err) {
           console.log(err);
