@@ -1,0 +1,153 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
+</ngx-spinner>
+
+<!-- Begin page -->
+<div class="wrapper">
+   <div class="content-page">
+      <div class="content">
+         <div class="container-fluid">
+
+            <!-- First Row -->
+            <!-- Add Button, Search Field, Filter button, Total Count -->
+            <div class="row border-bottom border-secondary">
+               <div class="card-body">
+                  <div class="row d-flex justify-content-between">
+                     <div class="col-2">
+                        <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
+                           (click)="showModal = 'Add Vehicle'">
+                           <i class="dripicons-plus h4 icon-mx-2"> </i>Add Vehicle
+                        </button>
+                     </div>
+                     <div class="col-2">
+                        <div class="form-group">
+                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                              name="search">
+                        </div>
+                     </div>
+                     <div class="col-2">
+                        <ng-select class="custom w-100" style="width: 100%;" placeholder="Filter State"
+                           [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)">
+                           <!-- <ng-option selected="selected" disabled value="">Select MM States</ng-option> -->
+                           <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}} :
+                              {{item.state_eng}}</ng-option>
+                        </ng-select>
+                     </div>
+                     <div class="col-2">
+                        <ng-select class="custom w-100" style="width: 100%;" placeholder="Filter Department"
+                           [clearable]="true" [virtualScroll]="true" (change)="mmDeptSelected($event)">
+                           <!-- <ng-option selected="selected" disabled value="">Select MM Type</ng-option> -->
+                           <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_eng}} :
+                              {{item.dept_code}}</ng-option>
+                        </ng-select>
+                     </div>
+                     <div class="col-2">
+                        <button class="btn btn-outline-success" (click)="exportToExcel()">Export To Excel</button>
+                     </div>
+                     <div class="col-2">
+                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
+                           Count : {{total_count}}
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div class="row" *ngIf="mmData.length">
+               <pagination-controls class="pagi text-end" (pageChange)="page = $event" [autoHide]="true">
+               </pagination-controls>
+               <div class="card-body">
+                  <table class="table table-hover dt-responsive">
+                     <thead>
+                        <tr>
+                           <th style="width: 60px;">No.</th>
+                           <th style="width: 120px;">Manage</th>
+                           <th style="width: 150px;">MM(Hin)</th>
+                           <th style="width: 150px;">MM(Eng)</th>
+                           <th style="width: 100px;">MM Code</th>
+                           <th style="width: 100px;">Department</th>
+                           <th style="width: 150px;">Parent MM</th>
+                           <th style="width: 150px;">MM State</th>
+                           <th style="width: 130px;">Opening Date</th>
+                           <th style="width: 200px;">Nimit Name</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr
+                           *ngFor="let data of mmData | filter:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index">
+                           <td style="font-size: large;">
+                              {{itemsPerPage * (page-1) + i+1}}
+                              <span class="mx-1" style="font-size: x-large;position: absolute;line-height: 28px;"
+                                 (click)="protectionToggle(data._id, data.active)">
+                                 <i *ngIf="[1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
+                                    title="Protected" class="uil-shield-check text-warning"></i>
+                                 <i *ngIf="[1,6].includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
+                                    title="Unprotected" class="uil-shield-slash text-danger"></i>
+                              </span>
+                           </td>
+                           <td>
+                              <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active"
+                                 class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                                    class="uil uil-pen"></i></button>
+                              <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active"
+                                 class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                    class="uil-trash"></i></button>
+                              <span *ngIf="![1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
+                                 title="Protected" class="text-warning mx-1"
+                                 style="font-size: xx-large;cursor: pointer;line-height: 0px;">
+                                 <i class="uil-shield-check"></i>
+                              </span>
+                           </td>
+                           <td>{{data.mm_hin}}</td>
+                           <td>{{data.mm_eng}}</td>
+                           <td>{{data.mm_code}}</td>
+                           <td>{{data.dept_id?data.dept_hin + ' : ' + data.dept_eng:'-'}}</td>
+                           <td>
+                              {{data.parent_mm_id ? data.parent_mm_hin + ' : ' + data.parent_mm_eng + ' : ' +
+                              data.parent_mm_code:'-'}}
+                           </td>
+                           <td>{{data.state_hin}} : {{data.state_eng}}</td>
+                           <td>{{data.opening_date | date: 'dd-MM-yyyy'}}</td>
+                           <td>
+                              {{data.nimitt_id ? data.nimitt_hin + ' ('+ data.state_hin + ')':'-'}}
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+               <pagination-controls class="pagi text-center" (pageChange)="page = $event" [autoHide]="true">
+               </pagination-controls>
+            </div>
+
+            <h2 class="text-center m-5" *ngIf="!mmData.length">No Data!</h2>
+         </div>
+      </div>
+   </div>
+</div>
+
+
+
+<!-- addVehicle Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
+               aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <app-vehicle-entry *ngIf="showModal == 'Add Vehicle'"
+               (response)='addVehicleResponse($event)'></app-vehicle-entry>
+            <app-vehicle-entry *ngIf="showModal == 'Edit Vehicle'" (response)='editVehicleResponse($event)'
+               [getData]="editData" [isEdit]="true"></app-vehicle-entry>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+         </div>
+      </div>
+   </div>
+</div>

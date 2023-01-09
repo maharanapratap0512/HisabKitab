@@ -24,6 +24,7 @@ import { BachatComponent } from './bachat/bachat.component';
 import { PointComponent } from './CHILD_TABLES/point/point.component';
 import { NimittComponent } from './CHILD_TABLES/nimitt/nimitt.component';
 import { ReportsComponent } from './reports/reports.component';
+import { VehicleComponent } from './vehicle/vehicle.component';
 
 const routes: Routes = [
    {
@@ -53,6 +54,7 @@ const routes: Routes = [
          { path: "point", component: PointComponent },
          { path: "nimitt", component: NimittComponent },
          { path: "report", component: ReportsComponent},
+         { path: "vehicle", component: VehicleComponent},
 
          { path: "files", component: FilesViewComponent },
          { path: "import_export", component: ImportExportComponent },

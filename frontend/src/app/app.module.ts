@@ -12,6 +12,8 @@ import { FileSaverModule } from 'ngx-filesaver';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgtUniversalModule } from '@ng-toolkit/universal';
 import { DropDownTreeModule } from '@syncfusion/ej2-angular-dropdowns';
+import { GridModule } from '@syncfusion/ej2-angular-grids';
+import { PageService, SortService, FilterService, FreezeService } from '@syncfusion/ej2-angular-grids';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -64,9 +66,9 @@ import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { UpdateDetailComponent } from './layout/update-detail/update-detail.component';
 import { ProductTransferEntryComponent } from './ENTRY__FORMS/product-transfer-entry/product-transfer-entry.component';
 import { ReportsComponent } from './reports/reports.component';
+import { VehicleComponent } from './vehicle/vehicle.component';
+import { VehicleEntryComponent } from './ENTRY__FORMS/vehicle-entry/vehicle-entry.component';
 
-import { GridModule } from '@syncfusion/ej2-angular-grids';
-import { PageService, SortService, FilterService, FreezeService } from '@syncfusion/ej2-angular-grids';
 
 @NgModule({
   declarations: [
@@ -115,6 +117,8 @@ import { PageService, SortService, FilterService, FreezeService } from '@syncfus
     UpdateDetailComponent,
     ProductTransferEntryComponent,
     ReportsComponent,
+    VehicleComponent,
+    VehicleEntryComponent,
   ],
   imports: [
     BrowserModule,
