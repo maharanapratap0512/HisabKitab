@@ -54,7 +54,8 @@ export class ApiService {
     DICT: base_url + 'dictionary/',
     REPORT: base_url + 'reports/',
     REPORTPBK: base_url + 'reports/pbk/',
-    IMPORTHISTORY: base_url + 'import_history/'
+    IMPORTHISTORY: base_url + 'import_history/',
+    VEHICLE:base_url+'vehicle/'
   };
 
   getUrl(key: string): string {

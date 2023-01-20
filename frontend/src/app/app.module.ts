@@ -69,6 +69,7 @@ import { ReportsComponent } from './reports/reports.component';
 import { VehicleComponent } from './vehicle/vehicle.component';
 import { VehicleEntryComponent } from './ENTRY__FORMS/vehicle-entry/vehicle-entry.component';
 
+import { FilterByDatePipe } from './pipe/filter-by-date.pipe';
 
 @NgModule({
   declarations: [
@@ -119,6 +120,7 @@ import { VehicleEntryComponent } from './ENTRY__FORMS/vehicle-entry/vehicle-entr
     ReportsComponent,
     VehicleComponent,
     VehicleEntryComponent,
+    FilterByDatePipe,
   ],
   imports: [
     BrowserModule,

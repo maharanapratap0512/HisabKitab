@@ -33,10 +33,12 @@ export class AawakEntryComponent implements OnInit {
 	oldQty: any;
 	cat: any;
 	items: any = [];
+	itemsAll: any = [];
 	units: any = [];
 	mms: any = [];
 	conditions: any = [];
 	subitems: any = [];
+	subitemsAll: any = [];
 	pbks: any = [];
 	aawak_types: any = [];
 	jawak_types: any = [];
@@ -109,7 +111,9 @@ export class AawakEntryComponent implements OnInit {
 		this.getProductData(null);
 	}
 
-	ngOnInit(): void { }
+	ngOnInit(): void { 		
+		
+	}
 
 	ngOnDestroy(): void {
 		this.response.emit(this.awkfg);
@@ -123,7 +127,7 @@ export class AawakEntryComponent implements OnInit {
 		if (changes.getData.currentValue && Object.keys(changes.getData.currentValue).length > 0) {
 			if (changes.getData.currentValue.item_id) {
 				this.gs.observeList().subscribe(result => {
-					this.items = result.itemmix ? result.itemmix : [];
+					this.itemsAll = result.itemmix ? result.itemmix : [];
 					this.categories = result.category ? result.category : [];
 				});
 			}
@@ -169,7 +173,22 @@ export class AawakEntryComponent implements OnInit {
 
 	dateChange() {
 		this.jdate = this.awkfg.date;
+		// this.filterItemByDate();		
 	}
+
+	// filterItemByDate(){
+	// 	if(this.awkfg.date){
+	// 		let awkDate = new Date(this.awkfg.date);			
+	// 		this.items = this.itemAll.filter((i: { restrict_year: number; restrict_month: number; })=>!i.restrict_year || (awkDate < new Date(i.restrict_year, (i.restrict_month ? i.restrict_month : 1))));
+	// 	}
+	// }
+
+	// filterSubitemByDate(){
+	// 	if(this.awkfg.date){
+	// 		let awkDate = new Date(this.awkfg.date);			
+	// 		this.subitems = this.subitemsAll.filter((s: { restrict_year: number; restrict_month: number; })=>!s.restrict_year || (awkDate < new Date(s.restrict_year, (s.restrict_month ? s.restrict_month : 1))));
+	// 	}
+	// }
 
 	jwkmmChanged(ev: any) {
 		if (ev && ev.id == this.awkfg.mm_id) {
@@ -640,6 +659,7 @@ export class AawakEntryComponent implements OnInit {
 				this.subitems = item.subitems;
 			}
 
+			// this.filterSubitemByDate();
 			if (this.cat && !item.categories.includes(this.cat)) {
 				// this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
 				this.awkfg.subitem_id = this.subitems[0]._id;

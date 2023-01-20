@@ -47,6 +47,8 @@ const nimittRoutes = require('./api/routes/nimitt.routes');
 const dictionaryRoutes = require('./api/routes/dictionary.routes');
 const reportRoutes = require('./api/routes/reports.routes');
 const importHistoryRoutes = require('./api/routes/import_history.routes');
+const vehicleRoutes = require('./api/routes/vehicle.routes');
+const vehicleDocRoutes = require('./api/routes/vehicle_document.routes');
 
 
 // // Routes - Binding
@@ -76,6 +78,8 @@ app.use('/api/nimitt', nimittRoutes);
 app.use('/api/dictionary', dictionaryRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/import_history', importHistoryRoutes);
+app.use('/api/vehicle', vehicleRoutes);
+app.use('/api/vehicle_document', vehicleDocRoutes);
 
 
 

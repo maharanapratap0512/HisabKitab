@@ -377,6 +377,11 @@ const item = {
         `update item set
         active=@active,
         updated_at=datetime('now','localtime')`
+    , update_lock:
+        `update item set
+        restrict_month=@restrict_month,
+        restrict_year=@restrict_year,
+        updated_at=datetime('now','localtime')`
     , order:
         ` item_hin, item_eng`
 }
@@ -384,7 +389,7 @@ const item = {
 const itemmix = {
     select_full: `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
     unit.unit_full, unit.unit_short ,
-    (select json_group_array(json_object('_id', si._id , 'item_id', si.item_id , 'subitem_list_id', si.subitem_list_id , 'subitem_hin', si.subitem_hin , 'subitem_eng', si.subitem_eng , 'categories_hin', si.categories_hin, 'unit_full', si.unit_full , 'unit_short', si.unit_short , 'categories', json(si.categories) , 'extra_note', si.extra_note, 'unit_id', si.unit_id , 'active', si.active)) as subitems from (select subitem.*, sl.subitem_hin, sl.subitem_eng, json_group_array(cat.category_hin) as categories_hin, ut.unit_short, ut.unit_full from subitem, json_each(subitem.categories)
+    (select json_group_array(json_object('_id', si._id , 'item_id', si.item_id , 'subitem_list_id', si.subitem_list_id , 'subitem_hin', si.subitem_hin , 'subitem_eng', si.subitem_eng , 'categories_hin', si.categories_hin, 'unit_full', si.unit_full , 'unit_short', si.unit_short , 'categories', json(si.categories) , 'extra_note', si.extra_note, 'unit_id', si.unit_id , 'restrict_month', si.restrict_month, 'restrict_year', si.restrict_year, 'active', si.active)) as subitems from (select subitem.*, sl.subitem_hin, sl.subitem_eng, json_group_array(cat.category_hin) as categories_hin, ut.unit_short, ut.unit_full from subitem, json_each(subitem.categories)
         left join category cat on cat._id = json_each.value
         left join unit ut on ut._id = subitem.unit_id
         left join subitem_list sl on  sl._id = subitem.subitem_list_id where subitem.item_id = item._id & group by subitem._id) as si) as subitems from item, json_each(item.categories)
@@ -708,6 +713,11 @@ const mm = {
     , update_active:
         `update mm set
         active=@active,
+        updated_at=datetime('now','localtime')`
+    , update_lock:
+        `update mm set
+        restrict_month=@restrict_month,
+        restrict_year=@restrict_year,
         updated_at=datetime('now','localtime')`
     , order:
         `mm_hin, mm_eng`
@@ -1164,6 +1174,11 @@ const subitem = {
         `update subitem set
         active=@active,
         updated_at=datetime('now','localtime')`
+    , update_lock:
+        `update subitem set
+        restrict_month=@restrict_month,
+        restrict_year=@restrict_year,
+        updated_at=datetime('now','localtime')`
     , order:
         `subitem_hin, subitem_eng`
 }
@@ -1276,11 +1291,14 @@ const support_list = {
     , order:
         ``
 }
+
 const vehicle = {
     select:
         `select * from vehicle ?`
     , select_full:
-        `select * from vehicle ? limit @limit offset @offset`
+        `select vehicle.*, 
+        mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id from vehicle
+        left join mm on mm._id = vehicle.mm_id ? limit @limit offset @offset`
     , insert:
         `insert into vehicle (
         mm_id,
@@ -1292,7 +1310,7 @@ const vehicle = {
         owner_name,
         nominee,
         aawak_type,
-        rc_name,
+        rc_date,
         rc_exp_date,
         rc_amount,
         insurance_date,
@@ -1300,8 +1318,8 @@ const vehicle = {
         insurance_amount,
         puc_date,
         puc_exp_date,
-        puc_amount,
-        active)
+        puc_amount
+        )
     values (
         @mm_id,
         @vehicle_type,
@@ -1312,16 +1330,15 @@ const vehicle = {
         @owner_name,
         @nominee,
         @aawak_type,
-        @rc_name,
-        @rc_exp_date,
+        UNIXEPOCH(@rc_date),
+        UNIXEPOCH(@rc_exp_date),
         @rc_amount,
-        @insurance_date,
-        @insurance_exp_date,
+        UNIXEPOCH(@insurance_date),
+        UNIXEPOCH(@insurance_exp_date),
         @insurance_amount,
-        @puc_date,
-        @puc_exp_date,
-        @puc_amount,
-        @active)`
+        UNIXEPOCH(@puc_date),
+        UNIXEPOCH(@puc_exp_date),
+        @puc_amount)`
     , insert_ignore:
         `insert or ignore into vehicle (
             _id,
@@ -1334,7 +1351,7 @@ const vehicle = {
             owner_name,
             nominee,
             aawak_type,
-            rc_name,
+            rc_date,
             rc_exp_date,
             rc_amount,
             insurance_date,
@@ -1357,7 +1374,7 @@ const vehicle = {
             @owner_name,
             @nominee,
             @aawak_type,
-            @rc_name,
+            @rc_date,
             @rc_exp_date,
             @rc_amount,
             @insurance_date,
@@ -1380,7 +1397,7 @@ const vehicle = {
             owner_name = @owner_name,
             nominee = @nominee,
             aawak_type = @aawak_type,
-            rc_name = @rc_name,
+            rc_date = @rc_date,
             rc_exp_date = @rc_exp_date,
             rc_amount = @rc_amount,
             insurance_date = @insurance_date,
@@ -1403,23 +1420,30 @@ const vehicle = {
             owner_name = @owner_name,
             nominee = @nominee,
             aawak_type = @aawak_type,
-            rc_name = @rc_name,
-            rc_exp_date = @rc_exp_date,
+            rc_date = UNIXEPOCH(@rc_date),
+            rc_exp_date = UNIXEPOCH(@rc_exp_date),
             rc_amount = @rc_amount,
-            insurance_date = @insurance_date,
-            insurance_exp_date = @insurance_exp_date,
+            insurance_date = UNIXEPOCH(@insurance_date),
+            insurance_exp_date = UNIXEPOCH(@insurance_exp_date),
             insurance_amount = @insurance_amount,
-            puc_date = @puc_date,
-            puc_exp_date = @puc_exp_date,
+            puc_date = UNIXEPOCH(@puc_date),
+            puc_exp_date = UNIXEPOCH(@puc_exp_date),
             puc_amount = @puc_amount,
-            created_at = @created_at,
-            updated_at = @updated_at,
-            active = @active
-            updated_at=strftime('%Y-%m-%d %H:%M:%f', datetime('now', 'localtime'))`
+            updated_at=UNIXEPOCH()`
     , update_active:
         `update vehicle set
         active=@active,
-        updated_at=strftime('%Y-%m-%d %H:%M:%f', datetime('now', 'localtime'))`
+        updated_at=UNIXEPOCH()`
+    , order:
+        ``
+}
+
+const vehicle_document = {
+    select:
+        `select * from vehicle_document ?`
+    , select_full:
+        `select * from vehicle_document
+        ? limit @limit offset @offset`
     , order:
         ``
 }
@@ -1708,5 +1732,5 @@ reports = {
 }
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document
 };

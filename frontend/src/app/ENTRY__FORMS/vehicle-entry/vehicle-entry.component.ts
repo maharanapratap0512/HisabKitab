@@ -38,16 +38,15 @@ export class VehicleEntryComponent implements OnInit {
     public auth: AuthService
   ) {
     this.vehForm = this.fb.group({
-
-      mm_id: [null],
+      mm_id: [null, Validators.required],
       vehicle_type: [null],
       gadi_name: [null],
       gadi_num: [null, Validators.required],
       seating_capacity: [null],
       fuel_type: [null],
-      owner_name: [null, Validators.required],
+      owner_name: [null],
       nominee: [null],
-      aawak_type: [null],
+      aawak_type: [null, Validators.required],
       rc_date: [null],
       rc_exp_date: [null],
       rc_amount: [null],
@@ -73,25 +72,37 @@ export class VehicleEntryComponent implements OnInit {
 
   openModal(name: any) {
     this.showModal = name;
-    $('#mmEntryComponent > #' + name).modal('show')
+    $('#vehEntryComponent > #' + name).modal('show')
   }
 
   closeModal(name: any) {
     this.showModal = name;
-    $('#mmEntryComponent > #' + this.showModal).modal('hide')
+    $('#vehEntryComponent > #' + this.showModal).modal('hide')
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.getData.currentValue) {
       this.vehForm.patchValue({
-        mm_eng: changes.getData.currentValue.mm_eng,
-        mm_hin: changes.getData.currentValue.mm_hin,
-        mm_code: changes.getData.currentValue.mm_code,
-        parent_mm_id: changes.getData.currentValue.parent_mm_id,
-        dept_id: changes.getData.currentValue.dept_id,
-        state_id: changes.getData.currentValue.state_id,
-        opening_date: changes.getData.currentValue.opening_date,
-        nimitt_id: changes.getData.currentValue.nimitt_id,
+        mm_id: changes.getData.currentValue.mm_id,
+        vehicle_type: changes.getData.currentValue.vehicle_type,
+        gadi_name: changes.getData.currentValue.gadi_name,
+        gadi_num: changes.getData.currentValue.gadi_num,
+        seating_capacity: changes.getData.currentValue.seating_capacity,
+        fuel_type: changes.getData.currentValue.fuel_type,
+        owner_name: changes.getData.currentValue.owner_name,
+        nominee: changes.getData.currentValue.nominee,
+        aawak_type: changes.getData.currentValue.aawak_type,
+        rc_date: changes.getData.currentValue.rc_date,
+        rc_exp_date: changes.getData.currentValue.rc_exp_date,
+        rc_amount: changes.getData.currentValue.rc_amount,
+        insurance_date: changes.getData.currentValue.insurance_date,
+        insurance_exp_date: changes.getData.currentValue.insurance_exp_date,
+        insurance_type: changes.getData.currentValue.insurance_type,
+        insurance_company: changes.getData.currentValue.insurance_company,
+        insurance_amount: changes.getData.currentValue.insurance_amount,
+        puc_date: changes.getData.currentValue.puc_date,
+        puc_exp_date: changes.getData.currentValue.puc_exp_date,
+        puc_amount: changes.getData.currentValue.puc_amount
       });
     }
   }
@@ -100,13 +111,11 @@ export class VehicleEntryComponent implements OnInit {
   vehFormSubmit() {
     if (this.vehForm.valid) {
       this.isLoader = true;
-      this.http.post(this.api.getUrl('MM') + this.auth.webUser.dept_id, this.vehForm.value).subscribe((data: any) => {
+      this.http.post(this.api.getUrl('VEHICLE') + this.auth.webUser.dept_id, this.vehForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
-          this.gs.Lists.mm.unshift(data['result']);
-          // this.mms.unshift(data['result']);
           this.vehForm.reset();
           this.isLoader = false;
-          this.toastr.success('MM Added Successfully.');
+          this.toastr.success('Vehicle Detail Added Successfully.');
           this.response.emit(data['result']);
         } else {
           this.toastr.error(data['message']);
@@ -130,22 +139,34 @@ export class VehicleEntryComponent implements OnInit {
         _id: this.getData._id
       }
       body.set = {
-        mm_eng: this.vehForm.value.mm_eng,
-        mm_hin: this.vehForm.value.mm_hin,
-        mm_code: this.vehForm.value.mm_code,
-        parent_mm_id: this.vehForm.value.parent_mm_id,
-        dept_id: this.vehForm.value.dept_id,
-        state_id: this.vehForm.value.state_id,
-        opening_date: this.vehForm.value.opening_date,
-        nimitt_id: this.vehForm.value.nimitt_id
+        mm_id: this.vehForm.value.mm_id,
+        vehicle_type: this.vehForm.value.vehicle_type,
+        gadi_name: this.vehForm.value.gadi_name,
+        gadi_num: this.vehForm.value.gadi_num,
+        seating_capacity: this.vehForm.value.seating_capacity,
+        fuel_type: this.vehForm.value.fuel_type,
+        owner_name: this.vehForm.value.owner_name,
+        nominee: this.vehForm.value.nominee,
+        aawak_type: this.vehForm.value.aawak_type,
+        rc_date: this.vehForm.value.rc_date,
+        rc_exp_date: this.vehForm.value.rc_exp_date,
+        rc_amount: this.vehForm.value.rc_amount,
+        insurance_date: this.vehForm.value.insurance_date,
+        insurance_exp_date: this.vehForm.value.insurance_exp_date,
+        insurance_type: this.vehForm.value.insurance_type,
+        insurance_company: this.vehForm.value.insurance_company,
+        insurance_amount: this.vehForm.value.insurance_amount,
+        puc_date: this.vehForm.value.puc_date,
+        puc_exp_date: this.vehForm.value.puc_exp_date,
+        puc_amount: this.vehForm.value.puc_amount
       };
-      this.http.put(this.api.getUrl('MM'), body).subscribe((data: any) => {
+      this.http.put(this.api.getUrl('VEHICLE'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          this.gs.Lists.mm.splice(this.gs.Lists.mm.indexOf((i: { _id: any }) => { i._id = this.getData._id }), 1, data['result']);
-          this.mms.splice(this.mms.indexOf((i: { _id: any }) => { i._id = this.getData._id }), 1, data['result']);
+          // this.gs.Lists.mm.splice(this.gs.Lists.mm.indexOf((i: { _id: any }) => { i._id = this.getData._id }), 1, data['result']);
+          // this.mms.splice(this.mms.indexOf((i: { _id: any }) => { i._id = this.getData._id }), 1, data['result']);
           this.vehForm.reset();
           this.isLoader = false;
-          this.toastr.success('MM Updated Successfully.');
+          this.toastr.success('Vehicle Updated Successfully.');
           this.response.emit(data['result']);
         } else {
           this.toastr.error(data['message']);
@@ -164,7 +185,7 @@ export class VehicleEntryComponent implements OnInit {
   stateAddResponse(ev: any) {
     this.isLoader = true;
     if (ev._id) {
-      $('#mmEntryComponent > #showModal').modal('hide');
+      $('#vehEntryComponent > #showModal').modal('hide');
       this.showModal = '';
       this.vehForm.patchValue({ state_id: ev._id });
       this.isLoader = false;
@@ -177,7 +198,7 @@ export class VehicleEntryComponent implements OnInit {
   nimittAddResponse(ev: any) {
     this.isLoader = true;
     if (ev._id) {
-      $('#mmEntryComponent > #showModal').modal('hide');
+      $('#vehEntryComponent > #showModal').modal('hide');
       this.showModal = '';
       this.vehForm.patchValue({ nimitt_id: ev._id });
       this.isLoader = false;
@@ -190,7 +211,7 @@ export class VehicleEntryComponent implements OnInit {
   departmentAddResponse(ev: any) {
     this.isLoader = true;
     if (ev._id) {
-      $('#mmEntryComponent > #showModal').modal('hide');
+      $('#vehEntryComponent > #showModal').modal('hide');
       this.showModal = '';
       this.vehForm.patchValue({ dept_id: ev._id });
       this.isLoader = false;
@@ -206,7 +227,7 @@ export class VehicleEntryComponent implements OnInit {
     switch (type) {
       case 'Department':
         this.viewData = this.gs.Lists.department;
-        $('#mmEntryComponent > #dataView').modal('show');
+        $('#vehEntryComponent > #dataView').modal('show');
         break;
     }
   }

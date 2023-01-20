@@ -20,16 +20,15 @@
                            <i class="dripicons-plus h4 icon-mx-2"> </i>Add Vehicle
                         </button>
                      </div>
-                     <div class="col-2">
+                     <div class="col-4">
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
                         </div>
                      </div>
-                     <div class="col-2">
+                     <!-- <div class="col-2">
                         <ng-select class="custom w-100" style="width: 100%;" placeholder="Filter State"
                            [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)">
-                           <!-- <ng-option selected="selected" disabled value="">Select MM States</ng-option> -->
                            <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}} :
                               {{item.state_eng}}</ng-option>
                         </ng-select>
@@ -37,11 +36,10 @@
                      <div class="col-2">
                         <ng-select class="custom w-100" style="width: 100%;" placeholder="Filter Department"
                            [clearable]="true" [virtualScroll]="true" (change)="mmDeptSelected($event)">
-                           <!-- <ng-option selected="selected" disabled value="">Select MM Type</ng-option> -->
                            <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_eng}} :
                               {{item.dept_code}}</ng-option>
                         </ng-select>
-                     </div>
+                     </div> -->
                      <div class="col-2">
                         <button class="btn btn-outline-success" (click)="exportToExcel()">Export To Excel</button>
                      </div>
@@ -54,31 +52,43 @@
                </div>
             </div>
 
-            <div class="row" *ngIf="mmData.length">
+            <div class="row" *ngIf="vehData.length">
                <pagination-controls class="pagi text-end" (pageChange)="page = $event" [autoHide]="true">
                </pagination-controls>
-               <div class="card-body">
+               <div class="card-body" style="overflow: auto;">
                   <table class="table table-hover dt-responsive">
                      <thead>
                         <tr>
                            <th style="width: 60px;">No.</th>
                            <th style="width: 120px;">Manage</th>
-                           <th style="width: 150px;">MM(Hin)</th>
-                           <th style="width: 150px;">MM(Eng)</th>
-                           <th style="width: 100px;">MM Code</th>
-                           <th style="width: 100px;">Department</th>
-                           <th style="width: 150px;">Parent MM</th>
-                           <th style="width: 150px;">MM State</th>
-                           <th style="width: 130px;">Opening Date</th>
-                           <th style="width: 200px;">Nimit Name</th>
+                           <th style="width: 150px;">MM</th>
+                           <th style="width: 150px;">Vehicle Type</th>
+                           <th style="width: 100px;">Gadi Name</th>
+                           <th style="width: 100px;">Gadi No.</th>
+                           <th style="width: 150px;">Fuel Type</th>
+                           <th style="width: 150px;">Seating Capacity</th>
+                           <th style="width: 130px;">Owner Name</th>
+                           <th style="width: 200px;">Nominee</th>
+                           <th style="width: 200px;">Aawak Type</th>
+                           <th style="width: 200px;">RC</th>
+                           <th style="width: 200px;">RC Exp.</th>
+                           <th style="width: 200px;">RC Amount</th>
+                           <th style="width: 200px;">Insurance</th>
+                           <th style="width: 200px;">Insurance Exp.</th>
+                           <th style="width: 200px;">Insurance Type</th>
+                           <th style="width: 200px;">Insurance Company</th>
+                           <th style="width: 200px;">Insurance Ammount</th>
+                           <th style="width: 200px;">PUC</th>
+                           <th style="width: 200px;">PUC Exp.</th>
+                           <th style="width: 200px;">PUC Amount</th>
                         </tr>
                      </thead>
                      <tbody>
                         <tr
-                           *ngFor="let data of mmData | filter:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index">
+                           *ngFor="let data of vehData | filter:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index">
                            <td style="font-size: large;">
                               {{itemsPerPage * (page-1) + i+1}}
-                              <span class="mx-1" style="font-size: x-large;position: absolute;line-height: 28px;"
+                              <span class="mx-1" style="font-size: x-large;position: relative;;line-height: 28px;"
                                  (click)="protectionToggle(data._id, data.active)">
                                  <i *ngIf="[1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
                                     title="Protected" class="uil-shield-check text-warning"></i>
@@ -99,19 +109,30 @@
                                  <i class="uil-shield-check"></i>
                               </span>
                            </td>
-                           <td>{{data.mm_hin}}</td>
-                           <td>{{data.mm_eng}}</td>
-                           <td>{{data.mm_code}}</td>
-                           <td>{{data.dept_id?data.dept_hin + ' : ' + data.dept_eng:'-'}}</td>
-                           <td>
-                              {{data.parent_mm_id ? data.parent_mm_hin + ' : ' + data.parent_mm_eng + ' : ' +
-                              data.parent_mm_code:'-'}}
-                           </td>
-                           <td>{{data.state_hin}} : {{data.state_eng}}</td>
-                           <td>{{data.opening_date | date: 'dd-MM-yyyy'}}</td>
-                           <td>
+                           <td>{{data.mm_hin}}:{{data.mm_eng}}-{{data.mm_code}}</td>
+                           <!-- <td>{{data.dept_id?data.dept_hin + ' : ' + data.dept_eng:'-'}}</td> -->
+                           <td>{{data.vehicle_type ? data.vehicle_type:''}}</td>
+                           <td>{{data.gadi_name}}</td>
+                           <td>{{data.gadi_num}}</td>
+                           <td>{{data.fuel_type}}</td>
+                           <td>{{data.seating_capacity}}</td>
+                           <td>{{data.owner_name}}</td>
+                           <td>{{data.nominee}}</td>
+                           <td>{{data.aawak_type}}</td>
+                           <td>{{data.rc_date | date: 'dd-MM-yyyy'}}</td>
+                           <td>{{data.rc_exp_date | date: 'dd-MM-yyyy'}}</td>
+                           <td>{{data.rc_amount}}</td>
+                           <td>{{data.insurance_date | date: 'dd-MM-yyyy'}}</td>
+                           <td>{{data.insurance_exp_date | date: 'dd-MM-yyyy'}}</td>
+                           <td>{{data.insurance_type}}</td>
+                           <td>{{data.insurance_company}}</td>
+                           <td>{{data.insurance_amount}}</td>
+                           <td>{{data.puc_date | date: 'dd-MM-yyyy'}}</td>
+                           <td>{{data.puc_exp_date | date: 'dd-MM-yyyy'}}</td>
+                           <td>{{data.puc_amount}}</td>
+                           <!-- <td>
                               {{data.nimitt_id ? data.nimitt_hin + ' ('+ data.state_hin + ')':'-'}}
-                           </td>
+                           </td> -->
                         </tr>
                      </tbody>
                   </table>
@@ -120,7 +141,7 @@
                </pagination-controls>
             </div>
 
-            <h2 class="text-center m-5" *ngIf="!mmData.length">No Data!</h2>
+            <h2 class="text-center m-5" *ngIf="!vehData.length">No Data!</h2>
          </div>
       </div>
    </div>

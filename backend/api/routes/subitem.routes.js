@@ -85,6 +85,23 @@ router.put('/', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+// toggle lock
+router.put('/lock/', async (req, res, next) => {
+    try {
+        if (req.body._id) {
+            await DB.update('subitem', req.body, req.body._id, 'update_lock').then(async (data) => {
+                res.json({
+                    success: true,
+                    result: data || {}
+                });
+            });
+        }
+        else {
+            return next(new Error('Id not found.'))
+        }
+    } catch (err) { next(err) };
+});
+
 
 // delete subitem 
 router.delete('/:id', async (req, res, next) => {

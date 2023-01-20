@@ -4,6 +4,8 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { ApiService } from './services/api.service';
 import { GlobalService } from './services/global.service';
 import { HttpService } from './services/http.service';
+import { Subject } from 'rxjs';
+declare var $:any;
 
 @Component({
   selector: 'app-root',
@@ -21,6 +23,12 @@ export class AppComponent {
   sec: any = this.btnShowTimer / 1000;
   mainTimer: any;
   point_hin:any;
+  appModal$ = new Subject();
+  appModal:string = '';
+  months:any = [];
+  years:any = [];
+  lockMonth:any;
+  lockYear:any;
 
   constructor(
     private toastr: ToastrService,
@@ -29,6 +37,18 @@ export class AppComponent {
     public gs: GlobalService,
     private http:HttpService
   ) {
+    this.months = gs.months;
+    this.years = gs.years;
+
+  }
+
+  openModal(name:string){
+    this.appModal = name;
+    $('#'+name).modal('show');
+  }
+  closeModal(){
+    $('#'+this.appModal).modal('hide');
+    this.appModal = '';
   }
 
   ngOnInit(): void {
@@ -54,6 +74,17 @@ export class AppComponent {
 
   }
 
+  submitLockData(){
+    if(this.lockMonth && this.lockYear){      
+      this.appModal$.next({restrict_month: this.lockMonth, restrict_year: this.lockYear});
+    }
+    else{
+      this.appModal$.next(null);
+    }
+    this.appModal$.complete();    
+    this.closeModal();
+  }
+
   timer() {
     this.sec = this.btnShowTimer / 1000;
     this.isBtn = false;
@@ -74,7 +105,6 @@ export class AppComponent {
     this.isLoader = false;
     this.timer();
   }
-
 
   getPoint(){
     this.http.get(this.api.getUrl('POINT') + "random/").subscribe((data: any) => {

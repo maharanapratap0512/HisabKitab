@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { Subject } from 'rxjs';
+import { AppComponent } from 'src/app/app.component';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ExcelExportService } from 'src/app/services/excel-export.service';
@@ -46,6 +48,7 @@ export class ItemComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public auth: AuthService,
     private excelExportService: ExcelExportService,
+    private app: AppComponent
   ) { }
 
   ngOnInit(): void {
@@ -108,7 +111,7 @@ export class ItemComponent implements OnInit {
 
     let date = new Date();
     console.log(date);
-    
+
     this.excelExportService.exportAsExcelFile(item, "item_list-" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
 
   }
@@ -121,6 +124,59 @@ export class ItemComponent implements OnInit {
 
     }
   }
+
+  lockItem(i: any, id: any) {
+    this.app.appModal$ = new Subject();
+    this.app.appModal$.subscribe((result: any) => {
+      if (result) {
+        this.toggleLock(i, { _id: id, ...result }, 'ITEM');
+      }
+    });
+    this.app.openModal('lockModal');
+  }
+
+  unlockItem(i: any, id: any) {
+    this.toggleLock(i, { _id: id, restrict_month: null, restrict_year: null }, 'ITEM');
+  }
+
+  lockSubitem(i: any, j: any, id: any) {
+    this.app.appModal$ = new Subject();
+    this.app.appModal$.subscribe((result: any) => {
+      if (result) {        
+        this.toggleLock(i, { _id: id, ...result }, 'SUBITEM', j);
+      }
+    });
+    this.app.openModal('lockModal');
+  }
+
+  unlockSubitem(i: any, j: any, id: any) {
+    if(this.itemData[i].restrict_year){
+      this.toggleLock(i, { _id: this.itemData[i]._id, restrict_month: null, restrict_year: null }, 'ITEM');
+    }
+    this.toggleLock(i, { _id: id, restrict_month: null, restrict_year: null }, 'SUBITEM', j);
+  }
+
+  toggleLock(i: any, row: any, APIname: any, j: any = null) {
+    this.http.put(this.api.getUrl(APIname) + 'lock/', row).subscribe((data: any) => {
+      if (data['result'].restrict_year) {
+        this.toastr.success(APIname + " Lock Successfully.");
+      }
+      else {
+        this.toastr.success(APIname + " Unlock Successfully.");
+      }
+      if (APIname == 'SUBITEM') {
+        this.itemData[i].subitems[j].restrict_month = data['result'].restrict_month;
+        this.itemData[i].subitems[j].restrict_year = data['result'].restrict_year;
+      } else {
+        this.itemData[i].restrict_month = data['result'].restrict_month;
+        this.itemData[i].restrict_year = data['result'].restrict_year;
+      }
+    }, err => {
+      this.toastr.error(err['message']);
+      this.isLoader = false;
+    });
+  }
+
   viewProduct(data: any) {
     this.editData = data;
     this.showModal = 'View Product'

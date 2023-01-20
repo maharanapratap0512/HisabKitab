@@ -15,8 +15,8 @@
                <div class="card-body">
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
-                        <button class="btn btn-primary w-100" *ngIf="settings.mm.add" onclick="$('#showModal').modal('show')"
-                           (click)="showModal = 'Add MM'">
+                        <button class="btn btn-primary w-100" *ngIf="settings.mm.add"
+                           onclick="$('#showModal').modal('show')" (click)="showModal = 'Add MM'">
                            <i class="dripicons-plus h4 icon-mx-2"> </i>Add MM
                         </button>
                      </div>
@@ -62,7 +62,9 @@
                      <thead>
                         <tr>
                            <th style="width: 60px;">No.</th>
-                           <th style="width: 120px;">Manage</th>
+                           <th style="width: 120px;">
+                              Manage
+                           </th>
                            <th style="width: 150px;">MM(Hin)</th>
                            <th style="width: 150px;">MM(Eng)</th>
                            <th style="width: 100px;">MM Code</th>
@@ -75,28 +77,35 @@
                      </thead>
                      <tbody>
                         <tr
-                           *ngFor="let data of mmData | filter:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index">
+                           *ngFor="let data of mmData | filter:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index" [ngClass]="{'text-light':data.restrict_year}">
                            <td style="font-size: large;">
                               {{itemsPerPage * (page-1) + i+1}}
-                              <span class="mx-1" style="font-size: x-large;position: absolute;line-height: 28px;"
+                              <!-- <span class="mx-1" style="font-size: x-large;position: absolute;line-height: 28px;"
                                  (click)="protectionToggle(data._id, data.active)">
                                  <i *ngIf="[1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
                                     title="Protected" class="uil-shield-check text-warning"></i>
                                  <i *ngIf="[1,6].includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
                                     title="Unprotected" class="uil-shield-slash text-danger"></i>
-                              </span>
+                              </span> -->
                            </td>
-                           <td>
-                              <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active"
-                                 class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
-                                    class="uil uil-pen"></i></button>
-                              <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active" class="btn btn-sm btn-danger"
-                                 type="button" (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
-                              <span *ngIf="![1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
+                           <td>                              
+                              <div *ngIf="[1,6].includes(auth.webUser.dept_id)">
+                                 <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)">
+                                    <i class="uil uil-pen"></i></button>
+                                 <button *ngIf="!data.restrict_year" class="btn btn-sm btn-outline-warning"
+                                    type="button" (click)="lockMM(i,data._id)"><i class="uil-unlock-alt"></i></button>
+                                 <button *ngIf="data.restrict_year" class="btn btn-sm btn-warning" type="button"
+                                    (click)="unlockMM(i,data._id)"><i class="uil-lock-alt"></i></button>
+                              </div>
+                              <div *ngIf="data.restrict_year" class="lock-date text-warning">
+                                 {{data.restrict_month}}/{{data.restrict_year}} से लॉक। 
+                              </div>
+                              <!-- <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active" class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i class="uil-trash"></i></button> -->
+                              <!-- <span *ngIf="![1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
                                  title="Protected" class="text-warning mx-1"
                                  style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                  <i class="uil-shield-check"></i>
-                              </span>
+                              </span> -->
                            </td>
                            <td>{{data.mm_hin}}</td>
                            <td>{{data.mm_eng}}</td>

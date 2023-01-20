@@ -6,7 +6,7 @@ const DB = new DBContex();
 // get vehicle all
 router.get('/', async (req, res, next) => {
     try {
-        await DB.getList('vehicle').then(async (resolve) => {
+        await DB.getList('vehicle', {full:true}).then(async (resolve) => {
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -20,7 +20,7 @@ router.get('/', async (req, res, next) => {
 // get vehicle 
 router.get('/:dept_id', async (req, res, next) => {
     try {
-        await DB.getList('vehicle', { order: `vehicle._id desc` }).then(async (resolve) => {
+        await DB.getList('vehicle', { order: `vehicle._id desc`, full:true }).then(async (resolve) => {
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -34,7 +34,7 @@ router.get('/:dept_id', async (req, res, next) => {
 // post vehicle 
 router.post('/:dept_id', async (req, res, next) => {
     try {
-        if (req.body && req.body.vehicle_num) {
+        if (req.body && req.body.gadi_num) {
             await DB.insert('vehicle', req.body).then((data) => {
                 res.json({
                     success: true,

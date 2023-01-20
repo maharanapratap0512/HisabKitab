@@ -21,17 +21,15 @@ export class VehicleComponent implements OnInit {
   itemsPerPage = 50;
   // currentPage: any;
   // totalItems: any;
-
   isLoader: boolean = false;
   term: any;
   showModal: string = '';
   editData: any = {};
-  mmData: any = [];
-  mmAll: any = [];
+  vehData: any = [];
+  // mmAll: any = [];
   total_count: any = 0;
-  ;
-  departments: any = [];
-  states: any = [];
+  // departments: any = [];
+  // states: any = [];
   temp: any = {};
   settings: any = {};
   constructor(
@@ -47,20 +45,19 @@ export class VehicleComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
-    this.getmmData();
-    this.gs.observeList().subscribe(result => {
-      this.states = result.state ? result.state : [];
-      this.departments = result.department ? result.department : [];
-    });
+    this.getvehData();
+    // this.gs.observeList().subscribe(result => {
+    //   this.states = result.state ? result.state : [];
+    //   this.departments = result.department ? result.department : [];
+    // });
     this.settings = this.auth.webUser.settings;
   }
 
-  getmmData() {
+  getvehData() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('MM') + this.auth.webUser.dept_id).subscribe((data) => {
+    this.http.get(this.api.getUrl('VEHICLE') + this.auth.webUser.dept_id).subscribe((data) => {
       if (data['result'] && data['success']) {
-        this.mmData = data['result'];
-        this.mmAll = data['result'];
+        this.vehData = data['result'];
         this.total_count = data['total_count'];
         this.isLoader = false;
       }
@@ -68,43 +65,54 @@ export class VehicleComponent implements OnInit {
     });
   }
 
-  stateSelected(ev: any) {
-    if (ev)
-      this.mmData = this.mmAll.filter((mm: { state_id: any; }) => mm.state_id == ev);
-    else
-      this.mmData = this.mmAll;
-  }
+  // stateSelected(ev: any) {
+  //   if (ev)
+  //     this.vehData = this.mmAll.filter((mm: { state_id: any; }) => mm.state_id == ev);
+  //   else
+  //     this.vehData = this.mmAll;
+  // }
 
-  mmDeptSelected(ev: any) {
-
-    if (ev) {
-      this.mmData = this.mmAll.filter((mm: { dept_id: any; }) => mm.dept_id == ev);
-    }
-    else {
-      this.mmData = this.mmAll;
-    }
-  }
+  // mmDeptSelected(ev: any) {
+  //   if (ev) {
+  //     this.vehData = this.mmAll.filter((mm: { dept_id: any; }) => mm.dept_id == ev);
+  //   }
+  //   else {
+  //     this.vehData = this.mmAll;
+  //   }
+  // }
 
   exportToExcel() {
     this.isLoader = true;
     let date = new Date();
-    let mmExportData = [];
-    for (let i = 0; i < this.mmData.length; i++) {
-      mmExportData.push({
+    let vehExportData = [];
+    for (let i = 0; i < this.vehData.length; i++) {
+      vehExportData.push({
         "Sr No": i + 1,
-        "_id": this.mmData[i]._id,
-        "MM Hin": this.mmData[i].mm_hin,
-        "MM Eng": this.mmData[i].mm_eng,
-        "MM Code": this.mmData[i].mm_code,
-        "Department": this.mmData[i].dept_hin,
-        "Parent MM": this.mmData[i].parent_mm_hin,
-        "State": this.mmData[i].state_hin,
-        "Opening Date": this.mmData[i].opening_date,
-        "Nimitt": this.mmData[i].nimitt_hin
+        "_id": this.vehData[i]._id,
+        "mm_id": this.vehData[i].mm_id,
+        "vehicle_type": this.vehData[i].vehicle_type,
+        "gadi_name": this.vehData[i].gadi_name,
+        "gadi_num": this.vehData[i].gadi_num,
+        "seating_capacity": this.vehData[i].seating_capacity,
+        "fuel_type": this.vehData[i].fuel_type,
+        "owner_name": this.vehData[i].owner_name,
+        "nominee": this.vehData[i].nominee,
+        "aawak_type": this.vehData[i].aawak_type,
+        "rc_date": this.vehData[i].rc_date,
+        "rc_exp_date": this.vehData[i].rc_exp_date,
+        "rc_amount": this.vehData[i].rc_amount,
+        "insurance_date": this.vehData[i].insurance_date,
+        "insurance_exp_date": this.vehData[i].insurance_exp_date,
+        "insurance_type": this.vehData[i].insurance_type,
+        "insurance_company": this.vehData[i].insurance_company,
+        "insurance_amount": this.vehData[i].insurance_amount,
+        "puc_date": this.vehData[i].puc_date,
+        "puc_exp_date": this.vehData[i].puc_exp_date,
+        "puc_amount": this.vehData[i].puc_amount
       });
     }
     
-    this.excelExportService.exportAsExcelFile(mmExportData, "MM_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+    this.excelExportService.exportAsExcelFile(vehExportData, "MM_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
     this.isLoader = false;
   }
 
@@ -113,12 +121,11 @@ export class VehicleComponent implements OnInit {
       this.isLoader = true;
       $('#showModal').modal('hide');
       this.showModal = '';
-      this.mmData.unshift(ev);
+      this.vehData.unshift(ev);
       this.isLoader = false;
     }
     else {
       this.toastr.error("Something went Wrong.")
-      console.log("message", ev)
     }
   }
 
@@ -127,18 +134,17 @@ export class VehicleComponent implements OnInit {
       this.isLoader = true;
       $('#showModal').modal('hide');
       this.showModal = '';
-      this.mmData.splice(this.mmData.indexOf(this.editData), 1, ev);
+      this.vehData.splice(this.vehData.indexOf(this.editData), 1, ev);
       this.isLoader = false;
     }
     else {
       this.toastr.error("Something went Wrong.")
-      console.log("message", ev);
     }
   }
 
   edit(data: any) {
     this.editData = data;
-    this.showModal = 'Edit MM'
+    this.showModal = 'Edit Vehicle'
     $('#showModal').modal('show');
   }
 
@@ -153,11 +159,11 @@ export class VehicleComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(this.api.getUrl('MM') + '/' + id).subscribe((data: any) => {
+        this.http.delete(this.api.getUrl('VEHICLE') + '/' + id).subscribe((data: any) => {
           if (data['success']) {
             this.isLoader = false;
-            this.mmData.splice(i, 1);
-            this.gs.Lists.mm.splice(this.gs.Lists.mm.indexOf((i: { _id: any; }) => i._id == id), 1);
+            this.vehData.splice(i, 1);
+            // this.gs.Lists.vehData.splice(this.gs.Lists.vehData.indexOf((i: { _id: any; }) => i._id == id), 1);
             this.total_count -= 1;
             this.toastr.success('Deleted Successfully');
           }
@@ -178,9 +184,9 @@ export class VehicleComponent implements OnInit {
     body.set = {
       active: !active
     };
-    this.http.put(this.api.getUrl('MM'), body).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('VEHICLE'), body).subscribe((data: any) => {
       console.log("data", data);
-      this.mmData.splice(this.mmData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);
+      this.vehData.splice(this.vehData.findIndex((i: { _id: any; }) => i._id == id), 1, data['result']);
       this.isLoader = false;
       if (data['result'].active) {
         this.toastr.success("Protetion Shield Activated");
