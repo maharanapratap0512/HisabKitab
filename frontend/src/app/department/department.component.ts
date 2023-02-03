@@ -225,6 +225,10 @@ export class DepartmentComponent implements OnInit {
         defective: false,
         scrap: false
       },
+      vehicle:{
+        visible:false,
+        add:false,
+      },
       category: {
         visible: false,
         add: false,

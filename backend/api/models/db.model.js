@@ -1558,7 +1558,7 @@ class dbModal {
           values(NEW._id, NEW.gadi_num, 'puc', NEW.puc_date, NEW.puc_exp_date, NEW.puc_amount);
         END; `,
       vehicle_updt_doc_insert: `CREATE TRIGGER IF not exists "vehicle_updt_doc_ins" 
-        AFTER INSERT ON "vehicle" 
+        AFTER UPDATE ON "vehicle" 
         FOR EACH ROW        
         BEGIN
           insert or ignore into vehicle_document(vehicle_id, gadi_num, doc_type, doc_date, exp_date, amount) 
@@ -1578,7 +1578,7 @@ class dbModal {
       this.migrationLength = this.Migrations.length;
       // path = require('path');
       this.db = new Database(dbPath);
-      console.log("connected with Database");
+      console.log("connected with Database");             
 
       // transactions for updating database changes called migration.
       let runMigration = this.db.transaction(() => {

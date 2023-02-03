@@ -1,0 +1,35 @@
+.insurance{
+   background-color: #23234fcf;
+}
+
+.puc{
+   background-color: #38620e94;
+}
+
+.rc{
+   background-color: #1a57578c;
+}
+thead > .insurance{
+   color: #4b4bc9;
+}
+
+thead > .puc{
+   color: #4e8913;
+}
+
+thead > .rc{
+   color: #02b2b2;
+}
+
+.warning{
+   color: #ff8100;
+   font-weight: bold;
+   border: 1px solid;
+}
+
+.error{
+   color: #ff0000;
+   font-weight: bolder;
+   font-size: large;
+   border: 2px solid;
+}

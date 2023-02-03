@@ -6,7 +6,7 @@ const DB = new DBContex();
 // get vehicle all
 router.get('/', async (req, res, next) => {
     try {
-        await DB.getList('vehicle', {full:true}).then(async (resolve) => {
+        await DB.getList('vehicle', { full: true }).then(async (resolve) => {
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -20,7 +20,34 @@ router.get('/', async (req, res, next) => {
 // get vehicle 
 router.get('/:dept_id', async (req, res, next) => {
     try {
-        await DB.getList('vehicle', { order: `vehicle._id desc`, full:true }).then(async (resolve) => {
+        await DB.getList('vehicle', { order: `vehicle._id desc`, full: true }).then(async (resolve) => {
+            let time = DB.db.prepare('select UNIXEPOCH() * 1000 as time').get().time;
+            console.log(resolve);
+            if (time) {
+                for (let i in resolve.data) {
+                    if (resolve.data[i].rc_exp_date - time < 604800000) {
+                        resolve.data[i].rc_error = true;
+                    }
+                    else if (resolve.data[i].rc_exp_date - time < 2629743000) {
+                        resolve.data[i].rc_warning = true;
+                    }
+
+                    if (resolve.data[i].puc_exp_date - time < 604800000) {
+                        resolve.data[i].puc_error = true;
+                    }
+                    else if (resolve.data[i].puc_exp_date - time < 2629743000) {
+                        resolve.data[i].puc_warning = true;
+                    }
+
+                    if (resolve.data[i].insurance_exp_date - time < 604800000) {
+                        resolve.data[i].insurance_error = true;
+                    }
+                    else if (resolve.data[i].insurance_exp_date - time < 2629743000) {
+                        resolve.data[i].insurance_warning = true;
+                    }
+                    // console.log(resolve[i]);
+                }
+            }
             res.json({
                 success: true,
                 result: resolve.data || [],

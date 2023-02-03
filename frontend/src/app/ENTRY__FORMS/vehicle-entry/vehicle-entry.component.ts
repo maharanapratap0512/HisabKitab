@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
@@ -19,16 +19,12 @@ export class VehicleEntryComponent implements OnInit {
   @Input() isEdit: any;
   @Output() response = new EventEmitter();
   vehForm: FormGroup;
-  states: any = [];
-  nimitts: any = [];
   mms: any = [];
-  departments: any = [];
   showModal: string = ''
   isLoader: boolean = false;
   viewType: any;
-  parentMM: any;
   viewData: any = [];
-
+  
   constructor(private fb: FormBuilder,
     private http: HttpService,
     private api: ApiService,
@@ -58,15 +54,12 @@ export class VehicleEntryComponent implements OnInit {
       puc_date: [null],
       puc_exp_date: [null],
       puc_amount: [null],
-    });
+    });    
   }
 
   ngOnInit(): void {
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
-      this.states = result.state ? result.state : [];
-      this.departments = result.department ? result.department : [];
-      this.nimitts = result.nimitt ? result.nimitt : [];
     });
   }
 
@@ -82,6 +75,10 @@ export class VehicleEntryComponent implements OnInit {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.getData.currentValue) {
+      changes.getData.currentValue.rc_date = new Date(changes.getData.currentValue.rc_date).toLocaleDateString();
+      console.log( new Date(changes.getData.currentValue.rc_date).toLocaleString());
+      const rc_date:any = this.vehForm.get('rc_date');
+      rc_date.setValue(new Date(changes.getData.currentValue.rc_date).toLocaleString());
       this.vehForm.patchValue({
         mm_id: changes.getData.currentValue.mm_id,
         vehicle_type: changes.getData.currentValue.vehicle_type,
@@ -92,23 +89,24 @@ export class VehicleEntryComponent implements OnInit {
         owner_name: changes.getData.currentValue.owner_name,
         nominee: changes.getData.currentValue.nominee,
         aawak_type: changes.getData.currentValue.aawak_type,
-        rc_date: changes.getData.currentValue.rc_date,
-        rc_exp_date: changes.getData.currentValue.rc_exp_date,
+        // rc_date: changes.getData.currentValue.rc_date,
+        rc_exp_date: new Date(changes.getData.currentValue.rc_exp_date).toLocaleDateString(),
         rc_amount: changes.getData.currentValue.rc_amount,
-        insurance_date: changes.getData.currentValue.insurance_date,
-        insurance_exp_date: changes.getData.currentValue.insurance_exp_date,
+        insurance_date: new Date(changes.getData.currentValue.insurance_date).toLocaleDateString(),
+        insurance_exp_date: new Date(changes.getData.currentValue.insurance_exp_date).toLocaleDateString(),
         insurance_type: changes.getData.currentValue.insurance_type,
         insurance_company: changes.getData.currentValue.insurance_company,
         insurance_amount: changes.getData.currentValue.insurance_amount,
-        puc_date: changes.getData.currentValue.puc_date,
-        puc_exp_date: changes.getData.currentValue.puc_exp_date,
+        puc_date: new Date(changes.getData.currentValue.puc_date),
+        puc_exp_date: new Date(changes.getData.currentValue.puc_exp_date),
         puc_amount: changes.getData.currentValue.puc_amount
       });
     }
   }
 
 
-  vehFormSubmit() {
+  vehFormSubmit() {    
+    
     if (this.vehForm.valid) {
       this.isLoader = true;
       this.http.post(this.api.getUrl('VEHICLE') + this.auth.webUser.dept_id, this.vehForm.value).subscribe((data: any) => {
@@ -181,46 +179,6 @@ export class VehicleEntryComponent implements OnInit {
       this.gs.validationFireOnSubmit(this.vehForm);
     }
   }
-
-  stateAddResponse(ev: any) {
-    this.isLoader = true;
-    if (ev._id) {
-      $('#vehEntryComponent > #showModal').modal('hide');
-      this.showModal = '';
-      this.vehForm.patchValue({ state_id: ev._id });
-      this.isLoader = false;
-    }
-    else {
-      this.isLoader = false;
-    }
-  }
-
-  nimittAddResponse(ev: any) {
-    this.isLoader = true;
-    if (ev._id) {
-      $('#vehEntryComponent > #showModal').modal('hide');
-      this.showModal = '';
-      this.vehForm.patchValue({ nimitt_id: ev._id });
-      this.isLoader = false;
-    }
-    else {
-      this.isLoader = false;
-    }
-  }
-
-  departmentAddResponse(ev: any) {
-    this.isLoader = true;
-    if (ev._id) {
-      $('#vehEntryComponent > #showModal').modal('hide');
-      this.showModal = '';
-      this.vehForm.patchValue({ dept_id: ev._id });
-      this.isLoader = false;
-    }
-    else {
-      this.isLoader = false;
-    }
-  }
-
 
   setView(type: string) {
     this.viewType = type;

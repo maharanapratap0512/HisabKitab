@@ -31,7 +31,7 @@
                   Bachat
                </a>
             </li>
-            <li class="notification-list mx-1" style="line-height: 68px;">
+            <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.vehicle && settings.vehicle.visible">
                <a class="btn btn-info btn-info-custom lh-xl" routerLinkActive="active" routerLink="vehicle">
                   Vehicle
                </a>

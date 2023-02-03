@@ -16,7 +16,7 @@
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
                         <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
-                           (click)="showModal = 'Add Vehicle'">
+                           (click)="showModal = 'Add Vehicle'" *ngIf="settings.vehicle.add">
                            <i class="dripicons-plus h4 icon-mx-2"> </i>Add Vehicle
                         </button>
                      </div>
@@ -66,11 +66,11 @@
                            <th style="width: 100px;">Gadi Name</th>
                            <th style="width: 100px;">Gadi No.</th>
                            <th style="width: 150px;">Fuel Type</th>
-                           <th style="width: 150px;">Seating Capacity</th>
+                           <th style="width: 100px;">Seating Capacity</th>
                            <th style="width: 130px;">Owner Name</th>
                            <th style="width: 200px;">Nominee</th>
-                           <th style="width: 200px;">Aawak Type</th>
-                           <th style="width: 200px;">RC</th>
+                           <th style="width: 150px;">Aawak Type</th>
+                           <!-- <th style="width: 200px;">RC</th>
                            <th style="width: 200px;">RC Exp.</th>
                            <th style="width: 200px;">RC Amount</th>
                            <th style="width: 200px;">Insurance</th>
@@ -80,60 +80,82 @@
                            <th style="width: 200px;">Insurance Ammount</th>
                            <th style="width: 200px;">PUC</th>
                            <th style="width: 200px;">PUC Exp.</th>
-                           <th style="width: 200px;">PUC Amount</th>
+                           <th style="width: 200px;">PUC Amount</th> -->
                         </tr>
                      </thead>
-                     <tbody>
-                        <tr
+                     <tbody class="accordion">
+                        <ng-container class="accordion-item"
                            *ngFor="let data of vehData | filter:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index">
-                           <td style="font-size: large;">
-                              {{itemsPerPage * (page-1) + i+1}}
-                              <span class="mx-1" style="font-size: x-large;position: relative;;line-height: 28px;"
-                                 (click)="protectionToggle(data._id, data.active)">
-                                 <i *ngIf="[1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
-                                    title="Protected" class="uil-shield-check text-warning"></i>
-                                 <i *ngIf="[1,6].includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
-                                    title="Unprotected" class="uil-shield-slash text-danger"></i>
-                              </span>
-                           </td>
-                           <td>
-                              <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active"
-                                 class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
-                                    class="uil uil-pen"></i></button>
-                              <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active"
-                                 class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
-                                    class="uil-trash"></i></button>
-                              <span *ngIf="![1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
-                                 title="Protected" class="text-warning mx-1"
-                                 style="font-size: xx-large;cursor: pointer;line-height: 0px;">
-                                 <i class="uil-shield-check"></i>
-                              </span>
-                           </td>
-                           <td>{{data.mm_hin}}:{{data.mm_eng}}-{{data.mm_code}}</td>
-                           <!-- <td>{{data.dept_id?data.dept_hin + ' : ' + data.dept_eng:'-'}}</td> -->
-                           <td>{{data.vehicle_type ? data.vehicle_type:''}}</td>
-                           <td>{{data.gadi_name}}</td>
-                           <td>{{data.gadi_num}}</td>
-                           <td>{{data.fuel_type}}</td>
-                           <td>{{data.seating_capacity}}</td>
-                           <td>{{data.owner_name}}</td>
-                           <td>{{data.nominee}}</td>
-                           <td>{{data.aawak_type}}</td>
-                           <td>{{data.rc_date | date: 'dd-MM-yyyy'}}</td>
-                           <td>{{data.rc_exp_date | date: 'dd-MM-yyyy'}}</td>
-                           <td>{{data.rc_amount}}</td>
-                           <td>{{data.insurance_date | date: 'dd-MM-yyyy'}}</td>
-                           <td>{{data.insurance_exp_date | date: 'dd-MM-yyyy'}}</td>
-                           <td>{{data.insurance_type}}</td>
-                           <td>{{data.insurance_company}}</td>
-                           <td>{{data.insurance_amount}}</td>
-                           <td>{{data.puc_date | date: 'dd-MM-yyyy'}}</td>
-                           <td>{{data.puc_exp_date | date: 'dd-MM-yyyy'}}</td>
-                           <td>{{data.puc_amount}}</td>
-                           <!-- <td>
-                              {{data.nimitt_id ? data.nimitt_hin + ' ('+ data.state_hin + ')':'-'}}
-                           </td> -->
-                        </tr>
+                           <tr>
+                              <td rowspan="2" style="font-size: large;">
+                                 {{itemsPerPage * (page-1) + i+1}}
+                                 <!-- <span class="mx-1" style="font-size: x-large;position: relative;;line-height: 28px;"
+                                    (click)="protectionToggle(data._id, data.active)">
+                                    <i *ngIf="[1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
+                                       title="Protected" class="uil-shield-check text-warning"></i>
+                                    <i *ngIf="[1,6].includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
+                                       title="Unprotected" class="uil-shield-slash text-danger"></i>
+                                 </span> -->
+                              </td>
+                              <td>
+                                 <div *ngIf="[1,6].includes(auth.webUser.dept_id)">
+                                    <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                                          class="uil uil-pen"></i></button>
+                                    <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                          class="uil-trash"></i></button>
+                                 </div>
+                              </td>
+                              <td>{{data.mm_hin}}:{{data.mm_eng}}-{{data.mm_code}}</td>
+                              <td>{{data.vehicle_type ? data.vehicle_type:''}}</td>
+                              <td>{{data.gadi_name}}</td>
+                              <td>{{data.gadi_num}}</td>
+                              <td>{{data.fuel_type}}</td>
+                              <td>{{data.seating_capacity}}</td>
+                              <td>{{data.owner_name}}</td>
+                              <td>{{data.nominee}}</td>
+                              <td>{{data.aawak_type}}</td>
+                           </tr>
+                           <tr class="accordion-collapse collapse show " aria-labelledby="headingOne">
+                              <td colspan="10">
+                                 <div class="row">
+                                    <table class="">
+                                       <thead>
+                                          <th style="width: 100px;" class="rc">RC Date</th>
+                                          <th style="width: 100px;" class="rc">RC Exp.</th>
+                                          <th style="width: 100px;" class="rc">RC Amt.</th>
+                                          <th style="width: 100px;" class="insurance">Ins.. Date</th>
+                                          <th style="width: 100px;" class="insurance">Ins.. Exp.</th>
+                                          <th style="width: 100px;" class="insurance">Ins.. Type</th>
+                                          <th style="width: 100px;" class="insurance">Ins.. Company</th>
+                                          <th style="width: 100px;" class="insurance">Ins.. Amt.</th>
+                                          <th style="width: 100px;" class="puc">PUC Date</th>
+                                          <th style="width: 100px;" class="puc">PUC Exp.</th>
+                                          <th style="width: 100px;" class="puc">PUC Amt.</th>
+                                       </thead>
+                                       <tr>
+                                          <td class="rc">{{data.rc_date | date: 'dd-MM-yyyy'}}</td>
+                                          <td class="rc" [class]="{'warning':data.rc_warning, 'error':data.rc_error}">
+                                             {{data.rc_exp_date | date: 'dd-MM-yyyy'}}</td>
+                                          <td class="rc">{{data.rc_amount}}</td>
+                                          <td class="insurance">{{data.insurance_date | date: 'dd-MM-yyyy'}}</td>
+                                          <td class="insurance"
+                                             [class]="{'warning':data.insurance_warning, 'error':data.insurance_error}">
+                                             {{data.insurance_exp_date | date: 'dd-MM-yyyy'}}</td>
+                                          <td class="insurance">{{data.insurance_type}}</td>
+                                          <td class="insurance">{{data.insurance_company}}</td>
+                                          <td class="insurance">{{data.insurance_amount}}</td>
+                                          <td class="puc">{{data.puc_date | date: 'dd-MM-yyyy'}}</td>
+                                          <td class="puc"
+                                             [class]="{'warning':data.puc_warning, 'error':data.puc_error}">
+                                             {{data.puc_exp_date | date: 'dd-MM-yyyy'}}</td>
+                                          <td class="puc">{{data.puc_amount}}</td>
+                                       </tr>
+                                    </table>
+                                 </div>
+                              </td>
+                           </tr>
+                        </ng-container>
+
                      </tbody>
                   </table>
                </div>

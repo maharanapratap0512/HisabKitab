@@ -3,10 +3,14 @@
     <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
 </ngx-spinner>
 <div class="row" id="vehEntryComponent">
-    <div class="card-body">
-        <form [formGroup]="vehForm">
+    <form [formGroup]="vehForm">
+        <div class="card card-body">
+            <h5 class="card-title">
+                Vehicle Information
+            </h5>
+            <!-- vehicle Information -->
             <div class="row">
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2 mb-3">
                     <div class="form-group">
                         <label class="form-label">MM</label>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="true"
@@ -14,12 +18,11 @@
                             [ngClass]="{'validation':vehForm.get('mm_id')?.errors && (vehForm.get('mm_id')?.touched || vehForm.get ('mm_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select MM</ng-option>
                             <ng-option *ngFor="let item of mms" [value]="item._id">
-                                {{item.mm_hin}}:{{item.mm_eng}}{{item.mm_code? ' : '+item.mm_code:''}}</ng-option>
+                                {{item.mm_hin}}:{{item.mm_eng}}{{item.mm_code? ' :
+                                '+item.mm_code:''}}</ng-option>
                         </ng-select>
                     </div>
                 </div>
-            </div>
-            <div class="row">
                 <div class="col-md-2 mb-3">
                     <div class="form-group">
                         <label class="form-label">Vehicle Type</label>
@@ -85,89 +88,96 @@
                             [ngClass]="{'validation':vehForm.get('aawak_type')?.errors && (vehForm.get('aawak_type')?.touched || vehForm.get ('aawak_type')?.dirty)}">
                     </div>
                 </div>
-                <!-- RC -->
-                <div class="row">
-                    <div class="col-md-2 mb-3">
-                        <label for="date" class="form-label">RC</label>
-                        <input class="form-control" type="date" formControlName="rc_date">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label for="date" class="form-label">RC Exp.</label>
-                        <input class="form-control" type="date" formControlName="rc_exp_date"
-                            [ngClass]="{'validation':vehForm.get('rc_exp_date')?.errors && (vehForm.get('rc_exp_date')?.touched || vehForm.get ('rc_exp_date')?.dirty)}">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <div class="form-group">
-                            <label class="form-label">RC Amount</label>
-                            <input type="number" class="form-control" placeholder="RC Amount"
-                                formControlName="rc_amount">
-                        </div>
+
+
+            </div>
+        </div>
+
+        <!-- Vehicle Information Card -->
+
+        <div class="card card-body">
+            <h5 class="card-title">
+                Vehicle Document Information
+            </h5>
+            <!-- RC And PUC Detail -->
+            <div class="row">
+                <div class="col-md-2 mb-3">
+                    <label for="date" class="form-label">RC</label>
+                    <input class="form-control" type="date" formControlName="rc_date">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="date" class="form-label">RC Exp.</label>
+                    <input class="form-control" type="date" formControlName="rc_exp_date"
+                        [ngClass]="{'validation':vehForm.get('rc_exp_date')?.errors && (vehForm.get('rc_exp_date')?.touched || vehForm.get ('rc_exp_date')?.dirty)}">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">RC Amount</label>
+                        <input type="number" class="form-control" placeholder="RC Amount" formControlName="rc_amount">
                     </div>
                 </div>
-                <!-- Inssurance -->
-                <div class="row">
-                    <div class="col-md-2 mb-3">
-                        <label for="date" class="form-label">Insurance</label>
-                        <input class="form-control" type="date" formControlName="insurance_date">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label for="date" class="form-label">Insurance Exp.</label>
-                        <input class="form-control" type="date" formControlName="insurance_exp_date"
-                            [ngClass]="{'validation':vehForm.get('insurance_exp_date')?.errors && (vehForm.get('insurance_exp_date')?.touched || vehForm.get ('insurance_exp_date')?.dirty)}">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <div class="form-group">
-                            <label class="form-label">Insurance Type</label>
-                            <input type="text" class="form-control" placeholder="Insurance Type"
-                                formControlName="insurance_type"
-                                [ngClass]="{'validation':vehForm.get('insurance_type')?.errors && (vehForm.get('insurance_type')?.touched || vehForm.get ('insurance_type')?.dirty)}">
-                        </div>
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <div class="form-group">
-                            <label class="form-label">Insurance Company</label>
-                            <input type="text" class="form-control" placeholder="Insurance Company"
-                                formControlName="insurance_company"
-                                [ngClass]="{'validation':vehForm.get('insurance_company')?.errors && (vehForm.get('insurance_company')?.touched || vehForm.get ('insurance_company')?.dirty)}">
-                        </div>
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <div class="form-group">
-                            <label class="form-label">Insurance Amount</label>
-                            <input type="number" class="form-control" placeholder="Insurance Amount"
-                                formControlName="insurance_amount">
-                        </div>
-                    </div>
+                <div class="col-md-2 mb-3">
+                    <label for="date" class="form-label">PUC</label>
+                    <input class="form-control" type="date" formControlName="puc_date">
                 </div>
-                <!-- PUC -->
-                <div class="row">
-                    <div class="col-md-2 mb-3">
-                        <label for="date" class="form-label">PUC</label>
-                        <input class="form-control" type="date" formControlName="puc_date">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label for="date" class="form-label">PUC Exp.</label>
-                        <input class="form-control" type="date" formControlName="puc_exp_date"
-                            [ngClass]="{'validation':vehForm.get('puc_exp_date')?.errors && (vehForm.get('puc_exp_date')?.touched || vehForm.get ('puc_exp_date')?.dirty)}">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <div class="form-group">
-                            <label class="form-label">PUC Amount</label>
-                            <input type="number" class="form-control" placeholder="PUC Amount"
-                                formControlName="puc_amount">
-                        </div>
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
-                            (click)="vehFormSubmit()">Submit</button>
-                        <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
-                            (click)="vehFormUpdate()">Update</button>
-                        <!-- <button class="btn btn-light submit mx-3" type="button" (click)="vehForm.reset()">clear</button> -->
+                <div class="col-md-2 mb-3">
+                    <label for="date" class="form-label">PUC Exp.</label>
+                    <input class="form-control" type="date" formControlName="puc_exp_date"
+                        [ngClass]="{'validation':vehForm.get('puc_exp_date')?.errors && (vehForm.get('puc_exp_date')?.touched || vehForm.get ('puc_exp_date')?.dirty)}">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">PUC Amount</label>
+                        <input type="number" class="form-control" placeholder="PUC Amount" formControlName="puc_amount">
                     </div>
                 </div>
             </div>
-        </form>
-    </div>
+
+            <!-- Inssurance -->
+            <div class="row">
+                <div class="col-md-2 mb-3">
+                    <label for="date" class="form-label">Insurance</label>
+                    <input class="form-control" type="date" formControlName="insurance_date">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="date" class="form-label">Insurance Exp.</label>
+                    <input class="form-control" type="date" formControlName="insurance_exp_date"
+                        [ngClass]="{'validation':vehForm.get('insurance_exp_date')?.errors && (vehForm.get('insurance_exp_date')?.touched || vehForm.get ('insurance_exp_date')?.dirty)}">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Insurance Type</label>
+                        <input type="text" class="form-control" placeholder="Insurance Type"
+                            formControlName="insurance_type"
+                            [ngClass]="{'validation':vehForm.get('insurance_type')?.errors && (vehForm.get('insurance_type')?.touched || vehForm.get ('insurance_type')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Insurance Company</label>
+                        <input type="text" class="form-control" placeholder="Insurance Company"
+                            formControlName="insurance_company"
+                            [ngClass]="{'validation':vehForm.get('insurance_company')?.errors && (vehForm.get('insurance_company')?.touched || vehForm.get ('insurance_company')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Insurance Amount</label>
+                        <input type="number" class="form-control" placeholder="Insurance Amount"
+                            formControlName="insurance_amount">
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                        (click)="vehFormSubmit()">Submit</button>
+                    <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                        (click)="vehFormUpdate()">Update</button>
+                    <!-- <button class="btn btn-light submit mx-3" type="button" (click)="vehForm.reset()">clear</button> -->
+                </div>
+            </div>
+        </div>
+
+    </form>
 </div>
 
 
@@ -183,18 +193,7 @@
                     (click)="showModal = ''" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Add State  -->
-                <app-state-entry *ngIf="showModal == 'Add State'" (response)="stateAddResponse($event)">
-                </app-state-entry>
 
-                <!-- Add Nimitt  -->
-                <app-pbk-entry *ngIf="showModal == 'Add Nimitt'" (response)="nimittAddResponse($event)"
-                    [isNimitt]="true">
-                </app-pbk-entry>
-
-                <!-- Add Department -->
-                <app-support-list-entry *ngIf="showModal == 'Add Department'" (response)='departmentAddResponse($event)'
-                    list_type="dept_id"> </app-support-list-entry>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" style="width: 120px;"

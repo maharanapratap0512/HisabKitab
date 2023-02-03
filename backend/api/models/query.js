@@ -1159,6 +1159,8 @@ const subitem = {
         unit_id=@unit_id,
         extra_note=@extra_note,
         document=@document,
+        restrict_month=@restrict_month,
+        restrict_year=@restrict_year,
         created_at=@created_at,
         updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
@@ -1169,6 +1171,8 @@ const subitem = {
         unit_id=@unit_id,
         extra_note=@extra_note,
         document=@document,
+        restrict_month=@restrict_month,
+        restrict_year=@restrict_year,
         updated_at=datetime('now','localtime')`
     , update_active:
         `update subitem set
@@ -1294,9 +1298,9 @@ const support_list = {
 
 const vehicle = {
     select:
-        `select * from vehicle ?`
+        `select *, (vehicle.insurance_date * 1000) as insurance_date, (vehicle.insurance_exp_date * 1000) as insurance_exp_date, (vehicle.rc_date * 1000) as rc_date, (vehicle.rc_exp_date * 1000) as rc_exp_date, (vehicle.puc_date * 1000) as puc_date, (vehicle.puc_exp_date * 1000) as puc_exp_date from vehicle ?`
     , select_full:
-        `select vehicle.*, 
+        `select vehicle.*, (vehicle.insurance_date * 1000) as insurance_date, (vehicle.insurance_exp_date * 1000) as insurance_exp_date, (vehicle.rc_date * 1000) as rc_date, (vehicle.rc_exp_date * 1000) as rc_exp_date, (vehicle.puc_date * 1000) as puc_date, (vehicle.puc_exp_date * 1000) as puc_exp_date,
         mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id from vehicle
         left join mm on mm._id = vehicle.mm_id ? limit @limit offset @offset`
     , insert:
@@ -1316,6 +1320,8 @@ const vehicle = {
         insurance_date,
         insurance_exp_date,
         insurance_amount,
+        insurance_type,
+        insurance_company,
         puc_date,
         puc_exp_date,
         puc_amount
@@ -1336,6 +1342,8 @@ const vehicle = {
         UNIXEPOCH(@insurance_date),
         UNIXEPOCH(@insurance_exp_date),
         @insurance_amount,
+        @insurance_type,
+        @insurance_company,
         UNIXEPOCH(@puc_date),
         UNIXEPOCH(@puc_exp_date),
         @puc_amount)`
@@ -1357,6 +1365,8 @@ const vehicle = {
             insurance_date,
             insurance_exp_date,
             insurance_amount,
+            insurance_type,
+            insurance_company,
             puc_date,
             puc_exp_date,
             puc_amount,
@@ -1380,6 +1390,8 @@ const vehicle = {
             @insurance_date,
             @insurance_exp_date,
             @insurance_amount,
+            @insurance_type,
+            @insurance_company,
             @puc_date,
             @puc_exp_date,
             @puc_amount,
@@ -1403,6 +1415,8 @@ const vehicle = {
             insurance_date = @insurance_date,
             insurance_exp_date = @insurance_exp_date,
             insurance_amount = @insurance_amount,
+            insurance_type = @insurance_type,
+            insurance_company = @insurance_company,
             puc_date = @puc_date,
             puc_exp_date = @puc_exp_date,
             puc_amount = @puc_amount,
@@ -1426,6 +1440,8 @@ const vehicle = {
             insurance_date = UNIXEPOCH(@insurance_date),
             insurance_exp_date = UNIXEPOCH(@insurance_exp_date),
             insurance_amount = @insurance_amount,
+            insurance_type = @insurance_type,
+            insurance_company = @insurance_company,
             puc_date = UNIXEPOCH(@puc_date),
             puc_exp_date = UNIXEPOCH(@puc_exp_date),
             puc_amount = @puc_amount,

@@ -763,6 +763,25 @@
                           </tr>
                         </ng-container>
 
+                        <!-- vehicle -->
+                        <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                          <td>4</td>
+                          <td>
+                            <div class="form-check form-switch">
+                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.vehicle.visible"
+                                [ngModelOptions]="{standalone: true}">
+                            </div>
+                          </td>
+                          <td>वाहन / Vehicle</td>
+                          <td>इस पेज से गाड़ियों की एवं गाड़ियों के डॉक्युमेंट्स की माहिती रख सकते है।  </td>
+                          <td>
+                            <div class="form-check form-switch">
+                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.vehicle.add"
+                                [ngModelOptions]="{standalone: true}">
+                            </div>
+                          </td>
+                        </tr>                        
+
                         <!-- PBK Configuration -->
                         <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
                           <td>5</td>

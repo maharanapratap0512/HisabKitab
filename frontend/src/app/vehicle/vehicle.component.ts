@@ -31,7 +31,7 @@ export class VehicleComponent implements OnInit {
   // departments: any = [];
   // states: any = [];
   temp: any = {};
-  settings: any = {};
+  settings: any = {};  
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
