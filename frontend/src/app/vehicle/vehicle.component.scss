@@ -1,24 +1,30 @@
 .insurance{
-   background-color: #23234fcf;
+   background-color: #9c9c9c81;
+   padding: 3px;
+   text-align: center;
 }
 
 .puc{
-   background-color: #38620e94;
+   background-color: #68ba5185;
+   padding: 3px;
+   text-align: center;
 }
 
 .rc{
-   background-color: #1a57578c;
+   background-color: #b7681880;
+   padding: 3px;
+   text-align: center;
 }
 thead > .insurance{
-   color: #4b4bc9;
+   color: #dddddd;
 }
 
 thead > .puc{
-   color: #4e8913;
+   color: #05ff00;
 }
 
 thead > .rc{
-   color: #02b2b2;
+   color: #ff8500;
 }
 
 .warning{

@@ -24,7 +24,7 @@ export class VehicleEntryComponent implements OnInit {
   isLoader: boolean = false;
   viewType: any;
   viewData: any = [];
-  
+
   constructor(private fb: FormBuilder,
     private http: HttpService,
     private api: ApiService,
@@ -54,7 +54,7 @@ export class VehicleEntryComponent implements OnInit {
       puc_date: [null],
       puc_exp_date: [null],
       puc_amount: [null],
-    });    
+    });
   }
 
   ngOnInit(): void {
@@ -73,12 +73,20 @@ export class VehicleEntryComponent implements OnInit {
     $('#vehEntryComponent > #' + this.showModal).modal('hide')
   }
 
+  formatDate(d: any) {
+    var date = new Date(d)
+    var year =date.getFullYear()
+    var month = '' + (date.getMonth() + 1);
+    var day = '' + date.getDate()
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    var formatted = year + "-" + month + "-" + day;
+    // console.log("formatted////////////", formatted);
+    return (formatted)
+  }
+
   ngOnChanges(changes: SimpleChanges) {
     if (changes.getData.currentValue) {
-      changes.getData.currentValue.rc_date = new Date(changes.getData.currentValue.rc_date).toLocaleDateString();
-      console.log( new Date(changes.getData.currentValue.rc_date).toLocaleString());
-      const rc_date:any = this.vehForm.get('rc_date');
-      rc_date.setValue(new Date(changes.getData.currentValue.rc_date).toLocaleString());
       this.vehForm.patchValue({
         mm_id: changes.getData.currentValue.mm_id,
         vehicle_type: changes.getData.currentValue.vehicle_type,
@@ -89,24 +97,25 @@ export class VehicleEntryComponent implements OnInit {
         owner_name: changes.getData.currentValue.owner_name,
         nominee: changes.getData.currentValue.nominee,
         aawak_type: changes.getData.currentValue.aawak_type,
-        // rc_date: changes.getData.currentValue.rc_date,
-        rc_exp_date: new Date(changes.getData.currentValue.rc_exp_date).toLocaleDateString(),
+        rc_date: this.formatDate(changes.getData.currentValue.rc_date),
+        rc_exp_date: this.formatDate(changes.getData.currentValue.rc_exp_date),
         rc_amount: changes.getData.currentValue.rc_amount,
-        insurance_date: new Date(changes.getData.currentValue.insurance_date).toLocaleDateString(),
-        insurance_exp_date: new Date(changes.getData.currentValue.insurance_exp_date).toLocaleDateString(),
+        insurance_date: this. formatDate(changes.getData.currentValue.insurance_date),
+        insurance_exp_date: this. formatDate(changes.getData.currentValue.insurance_exp_date),
         insurance_type: changes.getData.currentValue.insurance_type,
         insurance_company: changes.getData.currentValue.insurance_company,
         insurance_amount: changes.getData.currentValue.insurance_amount,
-        puc_date: new Date(changes.getData.currentValue.puc_date),
-        puc_exp_date: new Date(changes.getData.currentValue.puc_exp_date),
+        puc_date: this. formatDate(changes.getData.currentValue.puc_date),
+        puc_exp_date: this. formatDate(changes.getData.currentValue.puc_exp_date),
         puc_amount: changes.getData.currentValue.puc_amount
       });
+      // console.log("patch______", this.vehForm.value);
     }
   }
 
 
-  vehFormSubmit() {    
-    
+  vehFormSubmit() {
+
     if (this.vehForm.valid) {
       this.isLoader = true;
       this.http.post(this.api.getUrl('VEHICLE') + this.auth.webUser.dept_id, this.vehForm.value).subscribe((data: any) => {
