@@ -1,39 +1,46 @@
-.insurance{
+.insurance {
    background-color: #9c9c9c81;
    padding: 3px;
    text-align: center;
+   cursor: pointer;
 }
 
-.puc{
+.puc {
    background-color: #68ba5185;
    padding: 3px;
    text-align: center;
+   cursor: pointer
 }
 
-.rc{
+.rc {
    background-color: #b7681880;
    padding: 3px;
    text-align: center;
+   cursor: pointer
 }
-thead > .insurance{
+
+thead>.insurance {
    color: #dddddd;
+   cursor: default;
 }
 
-thead > .puc{
+thead>.puc {
    color: #05ff00;
+   cursor: default;
 }
 
-thead > .rc{
+thead>.rc {
    color: #ff8500;
+   cursor: default;
 }
 
-.warning{
+.warning {
    color: #ff8100;
    font-weight: bold;
    border: 1px solid;
 }
 
-.error{
+.error {
    color: #ff0000;
    font-weight: bolder;
    font-size: large;

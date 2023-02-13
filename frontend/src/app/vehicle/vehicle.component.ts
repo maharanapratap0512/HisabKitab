@@ -25,13 +25,14 @@ export class VehicleComponent implements OnInit {
   term: any;
   showModal: string = '';
   editData: any = {};
+  mode: any = '';
   vehData: any = [];
   // mmAll: any = [];
   total_count: any = 0;
   // departments: any = [];
   // states: any = [];
   temp: any = {};
-  settings: any = {};  
+  settings: any = {};
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
@@ -111,7 +112,7 @@ export class VehicleComponent implements OnInit {
         "puc_amount": this.vehData[i].puc_amount
       });
     }
-    
+
     this.excelExportService.exportAsExcelFile(vehExportData, "MM_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
     this.isLoader = false;
   }
@@ -142,10 +143,13 @@ export class VehicleComponent implements OnInit {
     }
   }
 
-  edit(data: any) {
+  edit(data: any, mode: string) {
     this.editData = data;
+    this.mode = mode;
     this.showModal = 'Edit Vehicle'
     $('#showModal').modal('show');
+    console.log("mode//////", mode);
+
   }
 
   delete(i: any, id: any) {

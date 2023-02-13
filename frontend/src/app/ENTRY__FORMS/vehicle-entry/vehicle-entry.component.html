@@ -4,7 +4,7 @@
 </ngx-spinner>
 <div class="row" id="vehEntryComponent">
     <form [formGroup]="vehForm">
-        <div class="card card-body">
+        <div class="card card-body" *ngIf="mode == 'full'">
             <h5 class="card-title">
                 Vehicle Information
             </h5>
@@ -101,40 +101,46 @@
             </h5>
             <!-- RC And PUC Detail -->
             <div class="row">
-                <div class="col-md-2 mb-3">
-                    <label for="date" class="form-label">RC</label>
-                    <input class="form-control" type="date" formControlName="rc_date">
-                </div>
-                <div class="col-md-2 mb-3">
-                    <label for="date" class="form-label">RC Exp.</label>
-                    <input class="form-control" type="date" formControlName="rc_exp_date"
-                        [ngClass]="{'validation':vehForm.get('rc_exp_date')?.errors && (vehForm.get('rc_exp_date')?.touched || vehForm.get ('rc_exp_date')?.dirty)}">
-                </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">RC Amount</label>
-                        <input type="number" class="form-control" placeholder="RC Amount" formControlName="rc_amount">
+                <ng-container *ngIf="mode === 'full' || 'rc'">
+                    <div class="col-md-2 mb-3">
+                        <label for="date" class="form-label">RC</label>
+                        <input class="form-control" type="date" formControlName="rc_date">
                     </div>
-                </div>
-                <div class="col-md-2 mb-3">
-                    <label for="date" class="form-label">PUC</label>
-                    <input class="form-control" type="date" formControlName="puc_date">
-                </div>
-                <div class="col-md-2 mb-3">
-                    <label for="date" class="form-label">PUC Exp.</label>
-                    <input class="form-control" type="date" formControlName="puc_exp_date"
-                        [ngClass]="{'validation':vehForm.get('puc_exp_date')?.errors && (vehForm.get('puc_exp_date')?.touched || vehForm.get ('puc_exp_date')?.dirty)}">
-                </div>
-                <div class="col-md-2 mb-3">
-                    <div class="form-group">
-                        <label class="form-label">PUC Amount</label>
-                        <input type="number" class="form-control" placeholder="PUC Amount" formControlName="puc_amount">
+                    <div class="col-md-2 mb-3">
+                        <label for="date" class="form-label">RC Exp.</label>
+                        <input class="form-control" type="date" formControlName="rc_exp_date"
+                            [ngClass]="{'validation':vehForm.get('rc_exp_date')?.errors && (vehForm.get('rc_exp_date')?.touched || vehForm.get ('rc_exp_date')?.dirty)}">
                     </div>
-                </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="form-group">
+                            <label class="form-label">RC Amount</label>
+                            <input type="number" class="form-control" placeholder="RC Amount"
+                                formControlName="rc_amount">
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="mode === 'full' || 'puc'">
+                    <div class="col-md-2 mb-3">
+                        <label for="date" class="form-label">PUC</label>
+                        <input class="form-control" type="date" formControlName="puc_date">
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label for="date" class="form-label">PUC Exp.</label>
+                        <input class="form-control" type="date" formControlName="puc_exp_date"
+                            [ngClass]="{'validation':vehForm.get('puc_exp_date')?.errors && (vehForm.get('puc_exp_date')?.touched || vehForm.get ('puc_exp_date')?.dirty)}">
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="form-group">
+                            <label class="form-label">PUC Amount</label>
+                            <input type="number" class="form-control" placeholder="PUC Amount"
+                                formControlName="puc_amount">
+                        </div>
+                    </div>
+                </ng-container>
             </div>
 
             <!-- Inssurance -->
-            <div class="row">
+            <div class="row" *ngIf="mode === 'ins' || 'full'">
                 <div class="col-md-2 mb-3">
                     <label for="date" class="form-label">Insurance</label>
                     <input class="form-control" type="date" formControlName="insurance_date">

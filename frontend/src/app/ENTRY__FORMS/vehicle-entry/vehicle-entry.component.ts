@@ -17,6 +17,7 @@ export class VehicleEntryComponent implements OnInit {
 
   @Input() getData: any;
   @Input() isEdit: any;
+  @Input() mode: any;
   @Output() response = new EventEmitter();
   vehForm: FormGroup;
   mms: any = [];
@@ -75,7 +76,7 @@ export class VehicleEntryComponent implements OnInit {
 
   formatDate(d: any) {
     var date = new Date(d)
-    var year =date.getFullYear()
+    var year = date.getFullYear()
     var month = '' + (date.getMonth() + 1);
     var day = '' + date.getDate()
     if (month.length < 2) month = '0' + month;
@@ -86,6 +87,7 @@ export class VehicleEntryComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    this.mode = changes.mode.currentValue;
     if (changes.getData.currentValue) {
       this.vehForm.patchValue({
         mm_id: changes.getData.currentValue.mm_id,
@@ -100,13 +102,13 @@ export class VehicleEntryComponent implements OnInit {
         rc_date: this.formatDate(changes.getData.currentValue.rc_date),
         rc_exp_date: this.formatDate(changes.getData.currentValue.rc_exp_date),
         rc_amount: changes.getData.currentValue.rc_amount,
-        insurance_date: this. formatDate(changes.getData.currentValue.insurance_date),
-        insurance_exp_date: this. formatDate(changes.getData.currentValue.insurance_exp_date),
+        insurance_date: this.formatDate(changes.getData.currentValue.insurance_date),
+        insurance_exp_date: this.formatDate(changes.getData.currentValue.insurance_exp_date),
         insurance_type: changes.getData.currentValue.insurance_type,
         insurance_company: changes.getData.currentValue.insurance_company,
         insurance_amount: changes.getData.currentValue.insurance_amount,
-        puc_date: this. formatDate(changes.getData.currentValue.puc_date),
-        puc_exp_date: this. formatDate(changes.getData.currentValue.puc_exp_date),
+        puc_date: this.formatDate(changes.getData.currentValue.puc_date),
+        puc_exp_date: this.formatDate(changes.getData.currentValue.puc_exp_date),
         puc_amount: changes.getData.currentValue.puc_amount
       });
       // console.log("patch______", this.vehForm.value);

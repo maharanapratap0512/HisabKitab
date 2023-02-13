@@ -99,7 +99,7 @@
                               </td>
                               <td>
                                  <div *ngIf="[1,6].includes(auth.webUser.dept_id)">
-                                    <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                                    <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data,'full')"><i
                                           class="uil uil-pen"></i></button>
                                     <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                           class="uil-trash"></i></button>
@@ -133,22 +133,31 @@
                                           <th style="width: 100px;" class="puc">PUC Amt.</th>
                                        </thead>
                                        <tr>
-                                          <td class="rc">{{data.rc_date | date: 'dd-MM-yyyy'}}</td>
-                                          <td class="rc" [class]="{'warning':data.rc_warning, 'error':data.rc_error}">
+
+                                          <td class="rc" (click)="edit(data,'rc')">{{data.rc_date | date: 'dd-MM-yyyy'}}
+                                          </td>
+                                          <td class="rc" (click)="edit(data,'rc')"
+                                             [class]="{'warning':data.rc_warning, 'error':data.rc_error}">
                                              {{data.rc_exp_date | date: 'dd-MM-yyyy'}}</td>
-                                          <td class="rc">{{data.rc_amount}}</td>
-                                          <td class="insurance">{{data.insurance_date | date: 'dd-MM-yyyy'}}</td>
-                                          <td class="insurance"
+                                          <td class="rc" (click)="edit(data,'rc')">{{data.rc_amount}}</td>
+
+                                          <td class="insurance" (click)="edit(data,'ins')">{{data.insurance_date | date:
+                                             'dd-MM-yyyy'}}</td>
+                                          <td class="insurance" (click)="edit(data,'ins')"
                                              [class]="{'warning':data.insurance_warning, 'error':data.insurance_error}">
                                              {{data.insurance_exp_date | date: 'dd-MM-yyyy'}}</td>
-                                          <td class="insurance">{{data.insurance_type}}</td>
-                                          <td class="insurance">{{data.insurance_company}}</td>
-                                          <td class="insurance">{{data.insurance_amount}}</td>
-                                          <td class="puc">{{data.puc_date | date: 'dd-MM-yyyy'}}</td>
-                                          <td class="puc"
+                                          <td class="insurance" (click)="edit(data,'ins')">{{data.insurance_type}}</td>
+                                          <td class="insurance" (click)="edit(data,'ins')">{{data.insurance_company}}
+                                          </td>
+                                          <td class="insurance" (click)="edit(data,'ins')">{{data.insurance_amount}}
+                                          </td>
+
+                                          <td class="puc" (click)="edit(data,'puc')">{{data.puc_date | date:
+                                             'dd-MM-yyyy'}}</td>
+                                          <td class="puc" (click)="edit(data,'puc')"
                                              [class]="{'warning':data.puc_warning, 'error':data.puc_error}">
                                              {{data.puc_exp_date | date: 'dd-MM-yyyy'}}</td>
-                                          <td class="puc">{{data.puc_amount}}</td>
+                                          <td class="puc" (click)="edit(data,'puc')">{{data.puc_amount}}</td>
                                        </tr>
                                     </table>
                                  </div>
@@ -185,7 +194,7 @@
             <app-vehicle-entry *ngIf="showModal == 'Add Vehicle'"
                (response)='addVehicleResponse($event)'></app-vehicle-entry>
             <app-vehicle-entry *ngIf="showModal == 'Edit Vehicle'" (response)='editVehicleResponse($event)'
-               [getData]="editData" [isEdit]="true"></app-vehicle-entry>
+               [getData]="editData" [mode]="mode" [isEdit]="true"></app-vehicle-entry>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"
