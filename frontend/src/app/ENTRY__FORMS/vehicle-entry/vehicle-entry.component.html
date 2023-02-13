@@ -101,7 +101,7 @@
             </h5>
             <!-- RC And PUC Detail -->
             <div class="row">
-                <ng-container *ngIf="mode === 'full' || 'rc'">
+                <ng-container *ngIf="mode === 'rc' || mode === 'full'">
                     <div class="col-md-2 mb-3">
                         <label for="date" class="form-label">RC</label>
                         <input class="form-control" type="date" formControlName="rc_date">
@@ -119,7 +119,7 @@
                         </div>
                     </div>
                 </ng-container>
-                <ng-container *ngIf="mode === 'full' || 'puc'">
+                <ng-container *ngIf="mode === 'puc' || mode === 'full'">
                     <div class="col-md-2 mb-3">
                         <label for="date" class="form-label">PUC</label>
                         <input class="form-control" type="date" formControlName="puc_date">
@@ -140,7 +140,7 @@
             </div>
 
             <!-- Inssurance -->
-            <div class="row" *ngIf="mode === 'ins' || 'full'">
+            <div class="row" *ngIf="mode === 'ins' || mode === 'full'">
                 <div class="col-md-2 mb-3">
                     <label for="date" class="form-label">Insurance</label>
                     <input class="form-control" type="date" formControlName="insurance_date">
