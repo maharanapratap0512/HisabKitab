@@ -101,7 +101,7 @@
             </h5>
             <!-- RC And PUC Detail -->
             <div class="row">
-                <ng-container *ngIf="mode === 'full' || 'rc'">
+                <ng-container *ngIf="mode == 'full' || mode == 'rc'">
                     <div class="col-md-2 mb-3">
                         <label for="date" class="form-label">RC</label>
                         <input class="form-control" type="date" formControlName="rc_date">
@@ -118,8 +118,15 @@
                                 formControlName="rc_amount">
                         </div>
                     </div>
+                    <div class="col-md-2 mb-3" *ngIf="mode != 'full'">
+                        <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                            (click)="vehFormSubmit()">Submit</button>
+                        <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                            (click)="vehFormUpdate()">Update</button>
+                        <!-- <button class="btn btn-light submit mx-3" type="button" (click)="vehForm.reset()">clear</button> -->
+                    </div>
                 </ng-container>
-                <ng-container *ngIf="mode === 'full' || 'puc'">
+                <ng-container *ngIf="mode == 'full' || mode == 'puc'">
                     <div class="col-md-2 mb-3">
                         <label for="date" class="form-label">PUC</label>
                         <input class="form-control" type="date" formControlName="puc_date">
@@ -136,11 +143,18 @@
                                 formControlName="puc_amount">
                         </div>
                     </div>
+                    <div class="col-md-2 mb-3" *ngIf="mode != 'full'">
+                        <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                            (click)="vehFormSubmit()">Submit</button>
+                        <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                            (click)="vehFormUpdate()">Update</button>
+                        <!-- <button class="btn btn-light submit mx-3" type="button" (click)="vehForm.reset()">clear</button> -->
+                    </div>
                 </ng-container>
             </div>
 
             <!-- Inssurance -->
-            <div class="row" *ngIf="mode === 'ins' || 'full'">
+            <div class="row" *ngIf="mode == 'ins' || mode == 'full'">
                 <div class="col-md-2 mb-3">
                     <label for="date" class="form-label">Insurance</label>
                     <input class="form-control" type="date" formControlName="insurance_date">

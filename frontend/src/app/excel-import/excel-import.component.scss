@@ -1,0 +1,18 @@
+// class for file input button
+.file {
+   position: relative;
+   overflow: hidden;
+}
+
+.inputtag {
+   position: absolute;
+   // font-size: 50px;
+   opacity: 0;
+   right: 0;
+   top: 0;
+}
+
+td{
+   padding-left: 5px;
+   padding-right: 5px;
+}

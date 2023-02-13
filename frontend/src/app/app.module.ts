@@ -70,6 +70,7 @@ import { VehicleComponent } from './vehicle/vehicle.component';
 import { VehicleEntryComponent } from './ENTRY__FORMS/vehicle-entry/vehicle-entry.component';
 
 import { FilterByDatePipe } from './pipe/filter-by-date.pipe';
+import { ExcelImportComponent } from './excel-import/excel-import.component';
 
 @NgModule({
   declarations: [
@@ -121,6 +122,7 @@ import { FilterByDatePipe } from './pipe/filter-by-date.pipe';
     VehicleComponent,
     VehicleEntryComponent,
     FilterByDatePipe,
+    ExcelImportComponent,
   ],
   imports: [
     BrowserModule,

@@ -1591,7 +1591,8 @@ class dbModal {
           if (this.migrationLength > userVersion) {
             //looping through migrations positioned after userversion.
             for (const migrationQueries of this.Migrations.splice(userVersion)) {
-              //loop through all queries exists in migration              
+              //loop through all queries exists in migration           
+              // need to change for...of to for...in.
               for (let query of Object.keys(migrationQueries)) {
                 console.log(migrationQueries[query]);
                 //executing individual query.
@@ -1621,9 +1622,6 @@ class dbModal {
       console.log("error db model", ex);
     }
   }
-
-
-
 
 }
 

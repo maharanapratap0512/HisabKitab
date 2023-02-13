@@ -294,6 +294,8 @@ const item = {
             unit_id,
             extra_note,
             document,
+            restrict_month,
+            restrict_year,
             active)
         values (
             @item_hin,
@@ -303,6 +305,8 @@ const item = {
             @unit_id,
             @extra_note,
             @document,
+            @restrict_month,
+            @restrict_year,
             @active)`
     , import:
         `insert into item (
@@ -313,6 +317,8 @@ const item = {
             unit_id,
             extra_note,
             document,
+            restrict_month,
+            restrict_year,
             created_at,
             updated_at,
             active) 
@@ -324,6 +330,8 @@ const item = {
             @unit_id,
             @extra_note,
             @document,
+            @restrict_month,
+            @restrict_year,
             @created_at,
             @updated_at,
             @active)`
@@ -337,6 +345,8 @@ const item = {
             unit_id,
             extra_note,
             document,
+            restrict_month,
+            restrict_year,
             created_at,
             updated_at,
             active) 
@@ -349,6 +359,8 @@ const item = {
             @unit_id,
             @extra_note,
             @document,
+            @restrict_month,
+            @restrict_year,
             @created_at,
             @updated_at,
             @active)`
@@ -361,6 +373,8 @@ const item = {
         extra_note=@extra_note,
         document=@document,
         unit_id=@unit_id,
+        restrict_month=@restrict_month,
+        restrict_year=@restrict_year,
         created_at=@created_at,
         updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
@@ -372,6 +386,8 @@ const item = {
         extra_note=@extra_note,
         document=@document,
         unit_id=@unit_id,
+        restrict_month=@restrict_month,
+        restrict_year=@restrict_year,
         updated_at=datetime('now','localtime')`
     , update_active:
         `update item set
@@ -656,10 +672,10 @@ const mm = {
     , insert:
         `insert into mm (
             mm_hin, mm_eng, mm_code, dept_id, state_id,
-            parent_mm_id, opening_date, nimitt_id, active)
+            parent_mm_id, opening_date, nimitt_id, restrict_month, restrict_year, active)
         values (
             @mm_hin, @mm_eng,  @mm_code, @dept_id, @state_id,
-            @parent_mm_id, @opening_date, @nimitt_id, @active)`
+            @parent_mm_id, @opening_date, @nimitt_id, @restrict_month, @restrict_year, @active)`
     , insert_ignore:
         `insert or ignore into mm (
             _id,
@@ -671,6 +687,8 @@ const mm = {
             parent_mm_id,
             opening_date,
             nimitt_id,
+            restrict_month,
+            restrict_year,
             created_at,
             updated_at,
             active) 
@@ -684,6 +702,8 @@ const mm = {
             @parent_mm_id,
             @opening_date,
             @nimitt_id,
+            @restrict_month,
+            @restrict_year,
             @created_at,
             @updated_at,
             @active)`
@@ -697,6 +717,8 @@ const mm = {
         parent_mm_id=@parent_mm_id,
         opening_date=@opening_date,
         nimitt_id=@nimitt_id,
+        restrict_month=@restrict_month,
+        restrict_year=@restrict_year,
         created_at=@created_at,
         updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
@@ -709,6 +731,8 @@ const mm = {
         parent_mm_id=@parent_mm_id,
         opening_date=@opening_date,
         nimitt_id=@nimitt_id,
+        restrict_month=@restrict_month,
+        restrict_year=@restrict_year,
         updated_at=datetime('now','localtime')`
     , update_active:
         `update mm set
@@ -1098,6 +1122,8 @@ const subitem = {
         unit_id,
         extra_note,
         document,
+        restrict_month,
+        restrict_year,
         active)
     values (
         @item_id,
@@ -1106,6 +1132,8 @@ const subitem = {
         @unit_id,
         @extra_note,
         @document,
+        @restrict_month,
+        @restrict_year,
         @active)`
     , import:
         `insert into subitem (
@@ -1115,6 +1143,8 @@ const subitem = {
         unit_id,
         extra_note,
         document,
+        restrict_month,
+        restrict_year,
         created_at,
         updated_at,
         active)
@@ -1125,6 +1155,8 @@ const subitem = {
         @unit_id,
         @extra_note,
         @document,
+        @restrict_month,
+        @restrict_year,
         @created_at,
         @updated_at,
         @active)`
@@ -1137,6 +1169,8 @@ const subitem = {
             unit_id,
             extra_note,
             document,
+            restrict_month,
+            restrict_year,
             created_at,
             updated_at,
             active) 
@@ -1148,6 +1182,8 @@ const subitem = {
             @unit_id,
             @extra_note,
             @document,
+            @restrict_month,
+            @restrict_year,
             @created_at,
             @updated_at,
             @active)`
