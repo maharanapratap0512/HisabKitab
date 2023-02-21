@@ -475,6 +475,7 @@ export class HeaderComponent implements OnInit {
           API = 'CATEGORY';
           break;
         case 'department_config':
+          // API = 'DEPTCONF';
           break;
         case 'department':
           API = 'DEPT';
@@ -545,7 +546,10 @@ export class HeaderComponent implements OnInit {
           }
           this.importResult[i].result = result;
         });
-      };
+      }
+      else{
+        this.importResult[i].result = {changes: this.importResult[i].data, found: [], columns: []}
+      }
     }
     console.log("final", this.importResult);
 

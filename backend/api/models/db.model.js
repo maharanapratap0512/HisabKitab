@@ -1568,7 +1568,8 @@ class dbModal {
           insert or ignore into vehicle_document(vehicle_id, gadi_num, doc_type, doc_date, exp_date, amount) 
           values(NEW._id, NEW.gadi_num, 'puc', NEW.puc_date, NEW.puc_exp_date, NEW.puc_amount);
         END; `,
-    }
+    },
+    
   ];
   migrationLength;
   constructor(dbPath) {

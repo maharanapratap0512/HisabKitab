@@ -16,3 +16,24 @@ td{
    padding-left: 5px;
    padding-right: 5px;
 }
+
+.marked {
+   font-weight: 800;
+   color: #140a0a;
+   border: 0.5px solid #da2534;
+   background-color: #f0a8ae;
+}
+
+.success {
+   font-weight: 800;
+   color: #140a0a;
+   border: 0.5px solid #00f933;
+   background-color: #b1ecb2b3;
+}
+
+.warned {
+   font-weight: 800;
+   color: #140a0a;
+   border: 0.5px solid #ffc400;
+   background-color: #ffe799;
+}

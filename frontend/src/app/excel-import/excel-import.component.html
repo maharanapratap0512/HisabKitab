@@ -8,10 +8,11 @@
       <div class="col-md-2">
          <!-- <div class="form-group"> -->
          <!-- <label class="form-label">Import Type</label> -->
-         <ng-select class="custom" style="width: 100%;" placeholder="Select Import Type" [clearable]="true" (change)="headerConfig = EIService.config[$event]"
+         <ng-select class="custom" style="width: 100%;" placeholder="Select Import Type" [clearable]="true"
+            (change)="headerConfig = EIService.config[$event.name]; secondHeader = $event.secondHeader"
             [virtualScroll]="true" [(ngModel)]="importType" [ngModelOptions]="{standalone: true}">
             <ng-option selected="selected" disabled value="">Select MM</ng-option>
-            <ng-option *ngFor="let item of EIService.import_list" [value]="item.name">
+            <ng-option *ngFor="let item of EIService.importList" [value]="item">
                {{item.name}}</ng-option>
          </ng-select>
          <!-- </div> -->
@@ -25,43 +26,48 @@
          </button>
       </div>
       <div class="col-md-3">
-         <div class="form-check form-switch">
+         <!-- <div class="form-check form-switch">
             <input type="checkbox" id="isHeader2" [(ngModel)]="is2Header" [ngModelOptions]="{standalone: true}"
                class="form-check-input">
             <label class="form-check-label" for="isHeader2">has 2 header row</label>
-         </div>
+         </div> -->
       </div>
       <div class="col-md-2"></div>
       <div class="col-md-2">
-         <button class="btn btn-primary" (click)="nextClick()" *ngIf="nextButton">Next</button>
+         <button class="btn btn-primary" (click)="setExcelToObjectArray()" *ngIf="stepNo == 1">आगे बढ़े</button>
+         <button class="btn btn-primary" (click)="verifyExcelData()" *ngIf="stepNo == 2">आगे बढ़े</button>
+         <!-- <span class="text-warning" *ngIf="!nextButton">Dark वाले सारे कॉलम इक्सेल फाइल मे होने जरूरी है। </span> -->
       </div>
 
    </div>
    <!-- row for header listing -->
    <div class="row mt-2" style="display: block;" *ngIf="importType">
       <b>Comulns List : </b>
-      <span *ngFor="let col of headerConfig" [ngClass]="{'text-danger':col.not_null}">{{col.name}}
-         <i class="mdi mdi-check-circle-outline text-success" *ngIf="col.found"></i> 
-      </span>
+      <span *ngFor="let col of headerConfig"
+         [ngClass]="{'fw-bold fst-italic fs-5':col.not_null, 'text-success': col.found}">{{col.name}}
+         <i class="mdi mdi-check-circle fs-4" *ngIf="col.found"></i>
+      </span> <span class="text-warning">(Dark & Big headers are compulsory.)</span>
    </div>
 </div>
 
-<div class="row" *ngIf="excelArr && excelArr.length > 0">
+<!-- step 1 : select header row -->
+<div class="row" *ngIf="stepNo <= 1 && excelArr && excelArr.length > 0">
    <div class="card card-body" style="overflow: auto;">
+      <h4 class="card-title">Select Header row जिस लाइन मे हेडिंग हो उस लाइन से सामने का चेकबॉक्स सिलेक्ट करे। </h4>
       <table class="table-hover dt-responsive">
          <thead>
             <td>Header</td>
-            <td *ngIf="is2Header">Sub Header</td>
+            <td *ngIf="secondHeader">Sub Header</td>
          </thead>
          <tbody>
             <tr *ngFor="let row of excelArr; let i=index;">
                <td>
                   <div class="form-check">
-                     <input type="radio" id="{{'Header'+i}}" [(ngModel)]="header1" [ngModelOptions]="{standalone: true}" (change)="headerChanged(i)"
-                        [value]="i" name="headerRadio" class="form-check-input">
+                     <input type="radio" id="{{'Header'+i}}" [(ngModel)]="header1" [ngModelOptions]="{standalone: true}"
+                        (change)="headerChanged(i)" [value]="i" name="headerRadio" class="form-check-input">
                   </div>
                </td>
-               <td *ngIf="is2Header">
+               <td *ngIf="secondHeader">
                   <div class="form-check">
                      <input type="radio" id="{{'Subheader'+i}}" [(ngModel)]="header2"
                         [ngModelOptions]="{standalone: true}" name="subHeaderRadio" class="form-check-input">
@@ -73,5 +79,260 @@
             </tr>
          </tbody>
       </table>
+   </div>
+</div>
+
+<!-- step 2 : Verify final excel data -->
+<div class="=row" *ngIf="stepNo == 2 && excelArrObj && excelArrObj.length > 0">
+   <div class="card card-body" style="overflow: auto;">
+      <h4 class="card-title">इक्सेल डाटा वेरफाइ करे, और फिर आगे बढ़े। </h4>
+      <div class="row">
+         <table id="datatable-buttons" class="table table-hover dt-responsive">
+            <thead>
+               <tr>
+                  <th *ngFor="let header of headerList">
+                     {{header.name}}
+                  </th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let data of excelArrObj; let i=index;">
+                  <td *ngFor="let header of headerList">
+                     {{data[header.name]}}
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+</div>
+
+<!-- step 3 : analyse data, make correction, save to dictionary -->
+<div class="row px-2" *ngIf="stepNo >= 3  && excelArrObj && excelArrObj.length > 0">   
+   <!-- <div class="row" style="padding: 10px 50px;"> -->
+      <button class="btn btn-outline-success btn-lg btn-rounded w-100" (click)="finalImport()">इम्पोर्ट करे।</button>
+      <ul class="nav nav-pills bg-nav-pills mt-2">
+         <!-- <li class="nav-item">
+            <button class="btn btn-danger" (click)="clearTempImport()">Clear Data</button>
+         </li> -->
+         <li class="nav-item">
+            <a href="#exceldata" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
+               Excel Data
+               <span class="translate-middle bell badge rounded-pill bg-danger">
+                  <!-- {{tempdata.length}} -->
+               </span>
+            </a>
+         </li>
+         <li class="nav-item" *ngIf="unmatchedData.length > 0">
+            <a href="#correction" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0 active">
+               Make Correction
+               <!-- <span class="translate-middle bell badge rounded-pill bg-danger">
+                  {{tempdata.length}}
+               </span> -->
+            </a>
+         </li>         
+         <!-- <li class="nav-item">
+            <a href="#duplicate" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+               Duplicate Data
+               <span class="translate-middle bell badge rounded-pill" style="background-color: #bf7d40;">
+                  {{this.duplicatedata.length}}
+               </span>
+            </a>
+         </li> -->
+         <!-- <li class="nav-item">
+            <a href="#skipped" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+               Skipped Data
+               <span class="translate-middle bell badge rounded-pill" style="background-color: #da2534;">
+               </span>
+            </a>
+         </li> -->               
+      </ul>
+   <!-- </div> -->
+
+   <div class="tab-content">
+      <!-- exceldata -->
+      <div class="tab-pane" id="exceldata" style="overflow: auto;">
+         <table id="datatable-buttons" class="table table-hover dt-responsive">
+            <thead>
+               <tr>
+                  <th *ngFor="let header of headerList">
+                     {{header.name}}
+                  </th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let data of excelArrObj; let i=index;">
+                  <td *ngFor="let header of headerList"
+                     [ngClass]="{'marked': header.ref_field && !data[header.ref_field]}">
+                     {{data[header.name]}}
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+
+      <!-- correction -->
+      <div class="tab-pane p-4 show active" id="correction" style="overflow: auto;">
+         <div class="row" *ngIf="unmatchedData.length > 0">
+            <table id="datatable-buttons" class="table table-hover dt-responsive">
+               <thead>
+                  <tr>
+                     <th style="width: 50px;">No.</th>
+                     <th style="width: 100px;">Type</th>
+                     <th style="width: 200px;">Name</th>
+                     <th style="width: 500px;">Select Proper Value</th>
+                     <th style="width: 100px;">Dictionary</th>
+                     <th style="width: 100px;">Ignore</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr *ngFor="let data of unmatchedData; let i=index;"
+                     [ngClass]="{'ignored':data.ignore, 'success':data.done}">
+                     <td>{{i+1}}</td>
+                     <td> {{data.type}} </td>
+                     <td> {{data.value}} </td>
+                     <td>
+                        <div class="row">
+                           <!-- mm dropdown -->
+                           <ng-select *ngIf="data.type == 'mm' || data.type == 'aj_mm'" class="custom custom-import"
+                              placeholder="Select MM" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select MM --</ng-option>
+                              <ng-option *ngFor="let item of mms" [value]="item._id">{{item.mm_hin}}:{{item.mm_eng}}
+                                 :
+                                 {{item.mm_code}}</ng-option>
+                           </ng-select>
+
+                           <!-- item dropdown -->
+                           <!-- <div class="col-4">
+                              <ng-select *ngIf="data.type == 'item'" class="custom custom-import"
+                                 placeholder="Select Category" [virtualScroll]="true" (change)="catSelected($event)">
+                                 <ng-option selected="selected" disabled value="">-- Select Category --</ng-option>
+                                 <ng-option *ngFor="let item of categories" [value]="item._id">
+                                    {{item.category_hin}}:{{item.category_eng}}</ng-option>
+                              </ng-select>
+                           </div> -->
+                           <!-- item dropdown -->
+                           <!-- <div class="col-4">
+                              <ng-select *ngIf="data.type == 'item'" class="custom custom-import"
+                                 placeholder="Select Item" [virtualScroll]="true" [(ngModel)]="data.id"
+                                 [ngModelOptions]="{standalone: true}" (change)="itemSelected($event)">
+                                 <ng-option selected="selected" disabled value="">-- Select Item --</ng-option>
+                                 <ng-option *ngFor="let item of items" [value]="item._id">
+                                    {{item.item_hin}}:{{item.item_eng}}</ng-option>
+                              </ng-select>
+                           </div> -->
+                           <!-- subitem dropdown -->
+                           <!-- <div class="col-4">
+                              <ng-select *ngIf="data.type == 'item'" class="custom custom-import"
+                                 placeholder="Select Subitem" [virtualScroll]="true" [(ngModel)]="data.id2"
+                                 [ngModelOptions]="{standalone: true}">
+                                 <ng-option selected="selected" disabled value="">-- Select Subitem --</ng-option>
+                                 <ng-option *ngFor="let item of subitems" [value]="item._id">
+                                    {{item.subitem_hin}}:{{item.subitem_eng}}</ng-option>
+                              </ng-select>
+                           </div> -->
+
+                           <!-- product dropdown -->
+                           <div class="col-4">
+                              <ng-select *ngIf="data.type == 'product'" class="custom custom-import"
+                                 placeholder="Select Product" [virtualScroll]="true" [(ngModel)]="data.id"
+                                 [ngModelOptions]="{standalone: true}">
+                                 <ng-option selected="selected" disabled value="">-- Select Product --</ng-option>
+                                 <ng-option *ngFor="let item of products" [value]="item._id">
+                                    {{item.product_code}}:{{item.sr_num}}</ng-option>
+                              </ng-select>
+                           </div>
+
+                           <!-- pbk dropdown -->
+                           <ng-select *ngIf="data.type == 'pbk'" class="custom custom-import" placeholder="Select Pbk"
+                              [virtualScroll]="true" [(ngModel)]="data.pbk_id" [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Pbk --</ng-option>
+                              <ng-option *ngFor="let item of pbks" [value]="item._id">
+                                 {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :
+                                 {{item.relative_name}}</ng-option>
+                           </ng-select>
+
+                           <!-- aawak type dropdown -->
+                           <ng-select *ngIf="data.type == 'awk_type'" class="custom custom-import"
+                              placeholder="Select Aawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Aawak Type --</ng-option>
+                              <ng-option *ngFor="let item of aawak_types" [value]="item._id">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                           </ng-select>
+
+                           <!-- jawak type dropdown -->
+                           <ng-select *ngIf="data.type == 'jwk_type'" class="custom custom-import"
+                              placeholder="Select Jawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Jawak Type --</ng-option>
+                              <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                           </ng-select>
+
+                           <!-- Condition dropdown -->
+                           <ng-select *ngIf="data.type == 'condition'" class="custom custom-import"
+                              placeholder="Select Condition" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Condition --</ng-option>
+                              <ng-option *ngFor="let item of conditions" [value]="item._id">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                           </ng-select>
+
+                           <!-- Nimitt dropdown -->
+                           <ng-select *ngIf="data.type == 'nimitt'" class="custom custom-import"
+                              placeholder="Select Nimitt" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Nimitt --</ng-option>
+                              <ng-option *ngFor="let item of nimitts" [value]="item._id">
+                                 {{item.nimitt_hin}}:{{item.nimitt_eng}} ({{item.state_hin}})</ng-option>
+                           </ng-select>
+
+                           <!-- Unit dropdown -->
+                           <ng-select *ngIf="data.type == 'unit'" class="custom custom-import" placeholder="Select Unit"
+                              [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Unit --</ng-option>
+                              <ng-option *ngFor="let item of units" [value]="item._id">
+                                 {{item.unit_short}}:{{item.unit_full}}</ng-option>
+                           </ng-select>
+
+                        </div>
+                     </td>
+                     <td>
+                        <input type="checkbox" class="form-check-input" [(ngModel)]="data.dictionary"
+                           [ngModelOptions]="{standalone: true}" [disabled]="data.type=='product'">
+                     </td>
+                     <td>
+                        <button *ngIf="!data.id" class="btn btn-warning"
+                           (click)="ignoreCorrection(data, i)">Ignore</button>
+                        <button *ngIf="data.id" class="btn btn-success"
+                           (click)="correctionSubmit(data, i)">Correct</button>
+                        <span *ngIf="data.ignore" class="text-warning"> Ignored</span>
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+            <div class="col-10"></div>
+            <div class="col-2">
+               <!-- <button class="w-100 btn btn-warning" (click)="applyCorrection()">Apply</button> -->
+            </div>
+         </div>
+
+      </div>
+
+      <!-- tobeimport -->
+      <div class="tab-pane p-4" id="tobeimport" style="overflow: auto;">
+
+         <table id="datatable-buttons" class="table table-hover dt-responsive">
+            <thead>
+               <tr></tr>
+            </thead>
+            <tbody>
+               <tr></tr>
+            </tbody>
+         </table>
+      </div>
+
    </div>
 </div>

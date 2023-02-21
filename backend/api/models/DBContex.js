@@ -53,13 +53,33 @@ class DBContex {
         return new Promise(async (resolve, reject) => {
             try {
                 let sql = this.query[object][key];
-                const result = this.db.prepare(sql).run(options.obj ? options.obj : {});                
+                const result = this.db.prepare(sql).run(options.obj ? options.obj : {});
                 resolve(result);
             }
             catch (err) {
                 reject(err);
             }
         });
+    }
+
+    selectWithCondition(tblname, key, data, options = {}) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let conditionString = this.query.conditions[tblname + '_' + key];
+                let sql = this.query[tblname].select;
+                if (options.full) {
+                    sql = this.query[tblname].select_full;
+                    data.limit = options.limit ? options.limit : -1;
+                    data.offset = options.offset ? options.offset : -1
+                }
+                sql = sql.replace('?', (conditionString ? ` where ${conditionString}` : ''));
+                const result = await this.db.prepare(sql).all(data);
+                resolve(result);
+            }
+            catch (err) {
+                reject(err);
+            }
+        })
     }
 
     // options = { full:boolean, dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
@@ -192,7 +212,7 @@ class DBContex {
     //     })
     // });
 
-    async update(tblname, obj, id, key=null) {
+    async update(tblname, obj, id, key = null) {
         return new Promise(async (resolve, reject) => {
             try {
                 let keys = Object.keys(obj);

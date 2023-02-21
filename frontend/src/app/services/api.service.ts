@@ -47,6 +47,7 @@ export class ApiService {
     EXPORTUPDATES: base_url + 'importexport/updates/',
     IMPORTUPDATE: base_url + 'importexport/import/',
     APPLYUPDATE: base_url + 'importexport/update_apply/',
+    EXCELIMPORT: base_url + 'excelimport/',
     DEPTCONFIG: base_url + 'department_config/',
     DEPTCONFSAVE: base_url + 'department_config/save',
     LOGIN: base_url + 'departments/login',
@@ -55,7 +56,8 @@ export class ApiService {
     REPORT: base_url + 'reports/',
     REPORTPBK: base_url + 'reports/pbk/',
     IMPORTHISTORY: base_url + 'import_history/',
-    VEHICLE:base_url+'vehicle/'
+    VEHICLE:base_url+'vehicle/',
+    
   };
 
   getUrl(key: string): string {

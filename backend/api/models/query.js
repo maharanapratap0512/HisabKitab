@@ -1457,8 +1457,7 @@ const vehicle = {
             puc_exp_date = @puc_exp_date,
             puc_amount = @puc_amount,
             created_at = @created_at,
-            updated_at = @updated_at,
-            active = @active where _id = @_id AND updated_at != @updated_at`
+            updated_at = @updated_at where _id = @_id AND updated_at != @updated_at`
     , update:
         `update vehicle set 
             mm_id = @mm_id,
@@ -1711,6 +1710,10 @@ const unit = {
         `unit_short, unit_full`
 }
 
+const conditions = {
+    vehicle_duplicate: `gadi_num = @gadi_num`
+}
+
 genDeptDB = {
 
     point: `insert into point select * from mainDB.point`,
@@ -1783,6 +1786,12 @@ reports = {
     left join state pst on pst._id = nmt.state_id ?`
 }
 
+const test = {
+    select: `select * from test ?`,
+    select_full: `select * from test ?`,
+    insert: `insert into test(name) values(@name)`,
+}
+
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test
 };
