@@ -49,7 +49,9 @@ export class SubitemEntryComponent implements OnInit {
       item_id: [null, Validators.required],
       categories: [[], Validators.required],
       extra_note: [null],
-      document: [null]
+      document: [null],
+      restrict_month:[null],
+      restrict_year: [null],
     });
   }
 
@@ -72,7 +74,9 @@ export class SubitemEntryComponent implements OnInit {
         item_id: changes.getData.currentValue.item_id,
         categories: changes.getData.currentValue.categories,
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
-        document: changes.getData.currentValue.document ? changes.getData.currentValue.document : []
+        document: changes.getData.currentValue.document ? changes.getData.currentValue.document : [],
+        restrict_month: changes.getData.currentValue.restrict_month ? changes.getData.currentValue.restrict_month : null,
+        restrict_year: changes.getData.currentValue.restrict_year ? changes.getData.currentValue.restrict_year : null,
       });
       this.imagepath = (changes.getData.currentValue.document && changes.getData.currentValue.document.images) ? changes.getData.currentValue.document.images[0] : null;
     }
@@ -123,6 +127,8 @@ export class SubitemEntryComponent implements OnInit {
         categories: this.subitemForm.value.categories,
         extra_note: this.subitemForm.value.extra_note,
         document: this.subitemForm.value.document,
+        restrict_month: this.subitemForm.value.restrict_month ? this.subitemForm.value.restrict_month : null,
+        restrict_year: this.subitemForm.value.restrict_year ? this.subitemForm.value.restrict_year : null,
       };
       this.http.put(this.api.getUrl('SUBITEM'), body).subscribe((data: any) => {
         if (data && data['success']) {

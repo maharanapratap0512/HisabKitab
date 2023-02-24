@@ -39,11 +39,13 @@ export class ItemEntryComponent implements OnInit {
   ) {
     this.itemForm = this.fb.group({
       item_hin: [null, Validators.required],
-      item_eng: [null, Validators.required],
+      item_eng: [null],
       item_code: [null],
       unit_id: [null],
       categories: [[], Validators.required],
       extra_note: [null],
+      restrict_month:[null],
+      restrict_year: [null],
       document: [[]]
     });
   }
@@ -68,6 +70,8 @@ export class ItemEntryComponent implements OnInit {
         unit_id: changes.getData.currentValue.unit_id ? changes.getData.currentValue.unit_id : null,
         categories: typeof changes.getData.currentValue.categories == 'string' ? JSON.parse(changes.getData.currentValue.categories) : changes.getData.currentValue.categories,
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
+        restrict_month: changes.getData.currentValue.restrict_month ? changes.getData.currentValue.restrict_month : null,
+        restrict_year: changes.getData.currentValue.restrict_year ? changes.getData.currentValue.restrict_year : null,
         document: changes.getData.currentValue.document ? changes.getData.currentValue.document : []
       });
       this.imagepath = (changes.getData.currentValue.document && changes.getData.currentValue.document.images) ? changes.getData.currentValue.document.images : null;
@@ -119,6 +123,8 @@ export class ItemEntryComponent implements OnInit {
         categories: this.itemForm.value.categories,
         extra_note: this.itemForm.value.extra_note,
         document: this.itemForm.value.document ? this.itemForm.value.document : [],
+        restrict_month: this.itemForm.value.restrict_month ? this.itemForm.value.restrict_month : null,
+        restrict_year: this.itemForm.value.restrict_year ? this.itemForm.value.restrict_year : null,
       };
       this.http.put(this.api.getUrl('ITEM'), body).subscribe((data: any) => {
         if (data && data['success']) {

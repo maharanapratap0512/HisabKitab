@@ -45,7 +45,9 @@ export class MmEntryComponent implements OnInit {
       dept_id: [2, Validators.required],
       state_id: [null, Validators.required],
       opening_date: [null],
-      nimitt_id: [null]
+      nimitt_id: [null],
+      restrict_month:[null],
+      restrict_year: [null],
     });
   }
 
@@ -79,6 +81,8 @@ export class MmEntryComponent implements OnInit {
         state_id: changes.getData.currentValue.state_id,
         opening_date: changes.getData.currentValue.opening_date,
         nimitt_id: changes.getData.currentValue.nimitt_id,
+        restrict_month: changes.getData.currentValue.restrict_month ? changes.getData.currentValue.restrict_month : null,
+        restrict_year: changes.getData.currentValue.restrict_year ? changes.getData.currentValue.restrict_year : null,
       });
     }
   }
@@ -124,7 +128,9 @@ export class MmEntryComponent implements OnInit {
         dept_id: this.mmForm.value.dept_id,
         state_id: this.mmForm.value.state_id,
         opening_date: this.mmForm.value.opening_date,
-        nimitt_id: this.mmForm.value.nimitt_id
+        nimitt_id: this.mmForm.value.nimitt_id,
+        restrict_month: this.mmForm.value.restrict_month ? this.mmForm.value.restrict_month : null,
+        restrict_year: this.mmForm.value.restrict_year ? this.mmForm.value.restrict_year : null,
       };
       this.http.put(this.api.getUrl('MM'), body).subscribe((data: any) => {
         if (data && data['success']) {
