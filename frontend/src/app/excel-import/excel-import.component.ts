@@ -34,6 +34,7 @@ export class ExcelImportComponent implements OnInit {
   excelArr: any = [];
   excelArrObj: any = [];
   headerList: any = [];
+  swHeaderList: any = [];
   headerConfig: any = [];
   secondHeader: any = false;
   header1: any = 0;
@@ -41,6 +42,10 @@ export class ExcelImportComponent implements OnInit {
   stepNo: any = 0;
   excelData: any = [];
   unmatchedData: any = [];
+  newInsertedData: any = [];
+  duplicateDate: any = [];
+  willUpdateData: any = [];
+  rejectedData: any = [];
   settings: any;
   constructor(
     public EIService: ExcelImportService,
@@ -188,18 +193,49 @@ export class ExcelImportComponent implements OnInit {
     this.unmatchedData[index].done = true;
   }
 
-  finalImport() {  
-    if(this.unmatchedData.length > 0){
-      
-    }  
-    this.http.put(this.api.getUrl('EXCELIMPORT') + 'final/' + this.auth.webUser.dept_id, { importType: this.importType, headerList: this.headerList, excelData: this.excelArrObj[0] }).subscribe((res: any) => {
-      console.log(res);
-      
-    });
+  finalImport() {
+    this.swHeaderList = this.getSwHeaderList();
+    if (this.unmatchedData.length > 0) {
+
+    }
+    for (let i in this.excelArrObj) {
+      this.http.put(this.api.getUrl('EXCELIMPORT') + 'final/' + this.auth.webUser.dept_id, { importType: this.importType, headerList: this.headerList, excelData: this.excelArrObj[i] }).subscribe((res: any) => {
+        console.log(res);
+        switch (res.result.status) {
+          case 'inserted': this.newInsertedData.push(res.result.data)
+            break;
+          case 'update': this.willUpdateData.push(res.result.data)
+            break;
+          case 'duplicate': this.duplicateDate.push(res.result.data)
+            break;
+          default:
+        }
+
+      });
+    }
+
+  }
+
+  updateData() {
+    for (let i in this.willUpdateData) {
+      this.http.put(this.api.getUrl('EXCELIMPORT') + 'update/' + this.auth.webUser.dept_id, { importType: this.importType, headerList: this.headerList, excelData: this.willUpdateData[i] }).subscribe((res: any) => {
+        console.log(res);
+        this.willUpdateData[i].status = true;
+
+      });
+    }
   }
 
   getHeaderList() {
     return this.headerConfig.filter((h: { found: any; }) => h.found);
+  }
+
+  getSwHeaderList() {
+    return this.headerConfig.map((h: { name: any; ref_data: any; found: any; }) => {
+      if (h.found) {
+        return h.ref_data ? h.ref_data : h.name;
+      }
+    });
   }
 
 }

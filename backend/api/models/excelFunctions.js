@@ -82,12 +82,11 @@ class ExcelFunctions {
       let duplicate = await this.Fn.checkDuplication(type, data);
       if (duplicate && type.autoUpdate) {
          let fullDuplicate = await this.checkFullDuplication(duplicate, data, headerList);
-         console.log(fullDuplicate);
          if (fullDuplicate.found) {
             status = 'duplicate'
          } else {
             status = 'update'
-            data.duplicate = duplicate.list
+            data.duplicate = fullDuplicate.list
          }
       }
       else {
@@ -98,6 +97,10 @@ class ExcelFunctions {
       return { status: status, data: data };
    }
 
+   async updateExcelData(type, data){
+      return await this.Fn.updateExcelData(type, { ...this[type.name + '_form'], ...data}, this.dept_id);
+
+   }
 
 
    async checkFullDuplication(list, data, headerList) {

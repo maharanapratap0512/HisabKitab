@@ -58,6 +58,13 @@ class Functions {
       })
    }
 
+   async updateExcelData(type, data, dept_id = null) {
+      return await this.DB.updateMany(type.name, data, this.DB.query.conditions[type.name + '_duplicate'], false).then((result) => {
+         console.log('update', result);
+         return result;
+      })
+   }
+
    ExcelDateToJSDate = (intDate) => {
       return new Date((Math.floor(intDate - 25569) * 86400) * 1000);
    }

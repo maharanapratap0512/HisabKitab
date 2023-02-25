@@ -163,7 +163,7 @@ router.put('/verify/:dept_id', async (req, res, next) => {
 
                         default:
 
-                    }
+                    }                    
                     req.body.excelData[i][req.body.config[j].ref_field] = id;
                 }
             }
@@ -177,11 +177,23 @@ router.put('/verify/:dept_id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
-//  verify all reference columns
+//  verify all and insert
 router.put('/final/:dept_id', async (req, res, next) => {
     try {
         let fn = new ExcelFunctions([], req.params.dept_id);
         let result = await fn.verifyAndInsert(req.body.importType, req.body.excelData, req.body.headerList);
+        res.json({
+            success: true,
+            result: result
+        })
+    } catch (err) { next(err) };
+});
+
+// update data
+router.put('/update/:dept_id', async (req, res, next) => {
+    try {
+        let fn = new ExcelFunctions([], req.params.dept_id);
+        let result = await fn.updateExcelData(req.body.importType, req.body.excelData);
         res.json({
             success: true,
             result: result

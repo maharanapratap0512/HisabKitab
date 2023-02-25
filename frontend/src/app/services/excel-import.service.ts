@@ -13,7 +13,7 @@ export class ExcelImportService {
   ];
   config: any = {
     vehicle: [
-      { col_name: 'mm', name: 'mm', alt_names: ["mm_name", "mm name"], not_null: true, ref_table: 'mm', ref_field: 'mm_id' },
+      { col_name: 'mm', name: 'mm', alt_names: ["mm_name", "mm name"], not_null: true, ref_table: 'mm', ref_field: 'mm_id', ref_data: 'mm_hin' },
       { col_name: 'vehicle_type', name: 'vehicle_type', alt_names: ["vehicle type", "gadi type", "gadi_type"], not_null: false },
       { col_name: 'gadi_name', name: 'gadi_name', alt_names: ["gadi name", "vehicle name", "vehicle_name"], not_null: false },
       { col_name: 'gadi_num', name: 'gadi_num', alt_names: ["gadi num", "vehicle num", "vehicle_num", "gadi_no", "gadi no", "vehicle no", "vehicle_no"], not_null: true },

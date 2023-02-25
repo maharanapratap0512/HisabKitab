@@ -1456,8 +1456,7 @@ const vehicle = {
             puc_date = @puc_date,
             puc_exp_date = @puc_exp_date,
             puc_amount = @puc_amount,
-            created_at = @created_at,
-            updated_at = @updated_at where _id = @_id AND updated_at != @updated_at`
+            updated_at = UNIXEPOCH() `
     , update:
         `update vehicle set 
             mm_id = @mm_id,

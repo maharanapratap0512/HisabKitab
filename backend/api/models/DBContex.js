@@ -243,10 +243,10 @@ class DBContex {
         return new Promise(async (resolve, reject) => {
             try {
                 let key = Object.keys(obj);
-                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update;
+                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].import_update;
                 sql += (conditionString ? ` where ${conditionString}` : '');
                 obj.active = obj.active ? 1 : 0;
-
+                console.log(sql);
                 const result = await this.db.prepare(sql).run(obj);
                 // console.log("updt result_____", result);
 

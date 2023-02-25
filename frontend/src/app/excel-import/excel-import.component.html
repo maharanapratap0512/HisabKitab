@@ -86,7 +86,7 @@
 <div class="=row" *ngIf="stepNo == 2 && excelArrObj && excelArrObj.length > 0">
    <div class="card card-body" style="overflow: auto;">
       <h4 class="card-title">इक्सेल डाटा वेरफाइ करे, और फिर आगे बढ़े। </h4>
-      <div class="row">
+      <div class="row" style="overflow: auto;">
          <table id="datatable-buttons" class="table table-hover dt-responsive">
             <thead>
                <tr>
@@ -108,67 +108,87 @@
 </div>
 
 <!-- step 3 : analyse data, make correction, save to dictionary -->
-<div class="row px-2" *ngIf="stepNo >= 3  && excelArrObj && excelArrObj.length > 0">   
+<div class="row px-2" *ngIf="stepNo >= 3  && excelArrObj && excelArrObj.length > 0">
    <!-- <div class="row" style="padding: 10px 50px;"> -->
-      <button class="btn btn-outline-success btn-lg btn-rounded w-100" (click)="finalImport()">इम्पोर्ट करे।</button>
-      <ul class="nav nav-pills bg-nav-pills mt-2">
-         <!-- <li class="nav-item">
+   <button class="btn btn-outline-success btn-lg btn-rounded w-50" (click)="finalImport()">इम्पोर्ट करे।</button>
+   <button class="btn btn-outline-success btn-lg btn-rounded w-50" (click)="updateData()" *ngIf="willUpdateData.length">अपडेट करे।</button>
+   <ul class="nav nav-pills bg-nav-pills mt-2">
+      <!-- <li class="nav-item">
             <button class="btn btn-danger" (click)="clearTempImport()">Clear Data</button>
          </li> -->
-         <li class="nav-item">
-            <a href="#exceldata" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
-               Excel Data
-               <span class="translate-middle bell badge rounded-pill bg-danger">
-                  <!-- {{tempdata.length}} -->
-               </span>
-            </a>
-         </li>
-         <li class="nav-item" *ngIf="unmatchedData.length > 0">
-            <a href="#correction" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0 active">
-               Make Correction
-               <!-- <span class="translate-middle bell badge rounded-pill bg-danger">
+      <li class="nav-item">
+         <a href="#exceldata" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
+            Excel Data
+            <span class="translate-middle bell badge rounded-pill bg-danger">
+               {{excelArrObj.length}}
+            </span>
+         </a>
+      </li>
+      <li class="nav-item" *ngIf="unmatchedData.length > 0">
+         <a href="#correction" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0 active">
+            Make Correction
+            <!-- <span class="translate-middle bell badge rounded-pill bg-danger">
                   {{tempdata.length}}
                </span> -->
-            </a>
-         </li>         
-         <!-- <li class="nav-item">
-            <a href="#duplicate" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
-               Duplicate Data
-               <span class="translate-middle bell badge rounded-pill" style="background-color: #bf7d40;">
-                  {{this.duplicatedata.length}}
-               </span>
-            </a>
-         </li> -->
-         <!-- <li class="nav-item">
-            <a href="#skipped" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
-               Skipped Data
-               <span class="translate-middle bell badge rounded-pill" style="background-color: #da2534;">
-               </span>
-            </a>
-         </li> -->               
-      </ul>
+         </a>
+      </li>
+      <li class="nav-item" *ngIf="newInsertedData.length">
+         <a href="#insert" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+            New Insert
+            <span class="translate-middle bell badge rounded-pill" style="background-color: #bf7d40;">
+               {{newInsertedData.length}}
+            </span>
+         </a>
+      </li>
+      <li class="nav-item" *ngIf="willUpdateData.length">
+         <a href="#update" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+            Update Available
+            <span class="translate-middle bell badge rounded-pill" style="background-color: #bf7d40;">
+               {{willUpdateData.length}}
+            </span>
+         </a>
+      </li>
+      <li class="nav-item" *ngIf="duplicateDate.length">
+         <a href="#duplicate" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+            Duplicate
+            <span class="translate-middle bell badge rounded-pill" style="background-color: #bf7d40;">
+               {{duplicateDate.length}}
+            </span>
+         </a>
+      </li>
+      <li class="nav-item" *ngIf="rejectedData.length">
+         <a href="#skipped" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+            Rejected
+            <span class="translate-middle bell badge rounded-pill" style="background-color: #da2534;">
+               {{rejectedData.length}}
+            </span>
+         </a>
+      </li>
+   </ul>
    <!-- </div> -->
 
    <div class="tab-content">
       <!-- exceldata -->
       <div class="tab-pane" id="exceldata" style="overflow: auto;">
-         <table id="datatable-buttons" class="table table-hover dt-responsive">
-            <thead>
-               <tr>
-                  <th *ngFor="let header of headerList">
-                     {{header.name}}
-                  </th>
-               </tr>
-            </thead>
-            <tbody>
-               <tr *ngFor="let data of excelArrObj; let i=index;">
-                  <td *ngFor="let header of headerList"
-                     [ngClass]="{'marked': header.ref_field && !data[header.ref_field]}">
-                     {{data[header.name]}}
-                  </td>
-               </tr>
-            </tbody>
-         </table>
+        <div class="row" style="overflow: auto;">
+           <table id="datatable-buttons" class="table table-hover dt-responsive">
+              <thead>
+                 <tr>
+                    <th *ngFor="let header of headerList">
+                       {{header.name}}
+                    </th>
+                 </tr>
+              </thead>
+              <tbody>
+                 <tr *ngFor="let data of excelArrObj; let i=index;">
+                    <td *ngFor="let header of headerList"
+                       [ngClass]="{'marked': header.ref_field && !data[header.ref_field]}">
+                       {{data[header.name]}}
+                    </td>
+                 </tr>
+              </tbody>
+           </table>
+        </div> 
       </div>
 
       <!-- correction -->
@@ -321,15 +341,89 @@
 
       </div>
 
-      <!-- tobeimport -->
-      <div class="tab-pane p-4" id="tobeimport" style="overflow: auto;">
+      <!-- insert -->
+      <div class="tab-pane p-4" id="insert" style="overflow: auto;">
+         <div class="row" style="overflow: auto;">
+            <table id="datatable-buttons" class="table table-hover dt-responsive">
+               <thead>
+                  <tr>
+                     <th *ngFor="let header of headerList">
+                        {{header.name}}
+                     </th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr *ngFor="let data of newInsertedData; let i = index;">
+                     <td *ngFor="let header of swHeaderList">
+                        {{data[header]}}
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+      </div>
+
+      <!-- update -->
+      <div class="tab-pane p-4" id="update" style="overflow: auto;">
+         <div class="row" style="overflow: auto;">
+            <table id="datatable-buttons" class="table table-hover dt-responsive">
+               <thead>
+                  <tr>
+                     <th *ngFor="let header of headerList">
+                        {{header.name}}
+                     </th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr *ngFor="let data of willUpdateData; let i = index;" [ngClass]="{'success':data.status}">
+                     <td *ngFor="let header of headerList">
+                        {{data[header.name]}}
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+      </div>
+
+      <!-- duplicate -->
+      <div class="tab-pane p-4" id="duplicate" style="overflow: auto;">
 
          <table id="datatable-buttons" class="table table-hover dt-responsive">
             <thead>
-               <tr></tr>
+               <tr>
+                  <th *ngFor="let header of headerList">
+                     {{header.name}}
+                  </th>
+               </tr>
             </thead>
             <tbody>
-               <tr></tr>
+               <tr *ngFor="let data of duplicateDate; let i = index;">
+                  <td *ngFor="let header of headerList">
+                     {{data[header.name]}}
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+
+      <!-- rejected -->
+      <div class="tab-pane p-4" id="rejected" style="overflow: auto;">
+
+         <table id="datatable-buttons" class="table table-hover dt-responsive">
+            <thead>
+               <tr>
+                  <th *ngFor="let header of headerList">
+                     {{header.name}}
+                  </th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let data of rejectedData; let i = index;">
+                  <td *ngFor="let header of headerList"
+                     [ngClass]="{'marked': header.ref_field && !data[header.ref_field]}">
+                     {{data[header.name]}}
+                  </td>
+               </tr>
             </tbody>
          </table>
       </div>
