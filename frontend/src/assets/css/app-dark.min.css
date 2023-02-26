@@ -22349,6 +22349,7 @@ Not supports in Firefox and IE */
 /* total width */
 ::-webkit-scrollbar {
    background-color: #343a40;
+   height: 10px;
    width: 10px;
 }
 
@@ -22363,13 +22364,13 @@ Not supports in Firefox and IE */
 
 /* scrollbar itself */
 ::-webkit-scrollbar-thumb {
-   background-color: #979797;
+   background-color: #4c53b2;
    border-radius: 16px;
    border: 1px solid #343a40
 }
 
 ::-webkit-scrollbar-thumb:hover {
-   background-color: #7e7e7e;
+   background-color: #727cf5;
    border: 0.5px solid #343a40
 }
 
