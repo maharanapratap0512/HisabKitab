@@ -6,20 +6,111 @@ class Functions {
       this.DB = new this.DBContex();
    }
 
-   mmConvertLower(data) {
-      for (let i in data) {
-         data[i].mm_hin = data[i].mm_hin.toLowerCase();
-         data[i].mm_eng = data[i].mm_eng ? data[i].mm_eng.toLowerCase() : null;
-         data[i].mm_code = data[i].mm_code ? data[i].mm_code.toLowerCase() : null;
+   convertToLower(data, fieldList = null) {
+      if(fieldList && fieldList.length > 0){
+         for (let i in data) {
+            for(let field of fieldList){
+               data[i][field] = data[i][field] ? data[i][field].toLowerCase() : null;
+            }
+         }
+      } else{
+         for (let i in data) {
+            for(let key of Object.keys(data[i])){
+               data[i][key] = data[i][key] ? data[i][key].toLowerCase() : null;
+            }
+         }
       }
       return data;
    }
 
    async getMMs(dept_id = null) {
 
-      return await this.DB.getList('mm', { dept_id: dept_id }).then(async (resolve) => {
-         // console.log(resolve);
-         return this.mmConvertLower(resolve.data || []);
+      return await this.DB.getList('mm', { dept_id: dept_id }).then(async (resolve) => {         
+         return this.convertToLower(resolve.data || [], ['mm_hin', 'mm_eng', 'mm_code']);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getStates(dept_id = null) {
+
+      return await this.DB.getList('state').then(async (resolve) => {         
+         return this.convertToLower(resolve.data || [], ['state_hin', 'state_eng']);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getCategories(dept_id = null) {
+
+      return await this.DB.getList('category', { dept_id: dept_id }).then(async (resolve) => {         
+         return this.convertToLower(resolve.data || [], ['category_hin', 'category_eng']);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getUnits(dept_id = null) {
+
+      return await this.DB.getList('unit').then(async (resolve) => {         
+         return this.convertToLower(resolve.data || [], ['unit_short', 'unit_full']);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getitems(dept_id = null) {
+
+      return await this.DB.getList('item', { dept_id: dept_id }).then(async (resolve) => {         
+         return this.convertToLower(resolve.data || [], ['item_hin', 'item_eng', 'item_code']);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getSubitems(dept_id = null) {
+
+      return await this.DB.getList('subitem', { dept_id: dept_id }).then(async (resolve) => {         
+         return resolve.data || [];
+         // return this.convertToLower(resolve.data || []);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getSubiemList(dept_id = null) {
+
+      return await this.DB.getList('subitem_list', { dept_id: dept_id }).then(async (resolve) => {         
+         return this.convertToLower(resolve.data || [], ['subitem_hin', 'subitem_eng']);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getSupportList(dept_id = null) {
+      return await this.DB.getList('support_list', { dept_id: dept_id }).then(async (resolve) => {         
+         return this.convertToLower(resolve.data || [], ['list_name_hin', 'list_name_eng']);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getCountries(dept_id = null) {
+      return await this.DB.getList('country').then(async (resolve) => {         
+         return this.convertToLower(resolve.data || [], ['country_hin', 'country_eng']);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getCities(dept_id = null) {
+      return await this.DB.getList('city').then(async (resolve) => {         
+         return this.convertToLower(resolve.data || [], ['city_hin', 'city_eng']);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getNimitts(dept_id = null) {
+      return await this.DB.getList('nimitt', { dept_id: dept_id }).then(async (resolve) => {         
+         return this.convertToLower(resolve.data || [], ['nimitt_hin', 'nimitt_eng', 'gender', 'relative_name']);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getPbks(dept_id = null) {
+      return await this.DB.getList('pbk', { dept_id: dept_id }).then(async (resolve) => {         
+         return this.convertToLower(resolve.data || [], ['nimitt_hin', 'nimitt_eng', 'gender', 'relation', 'relative_name']);
       }, (err) => {
          return [];
       });
@@ -53,14 +144,14 @@ class Functions {
 
    async insertExcelData(type, data, dept_id = null) {
       return await this.DB.insert(type.name, data, dept_id).then((result) => {
-         console.log('insert', result);
+         // console.log('insert', result);
          return result;
       })
    }
 
    async updateExcelData(type, data, dept_id = null) {
       return await this.DB.updateMany(type.name, data, this.DB.query.conditions[type.name + '_duplicate'], false).then((result) => {
-         console.log('update', result);
+         // console.log('update', result);
          return result;
       })
    }

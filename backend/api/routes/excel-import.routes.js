@@ -160,6 +160,22 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                     switch (req.body.config[j].ref_table) {
                         case 'mm': id = await fn.matchMMs(name);
                             break;
+                        case 'country': id = await fn.matchCountry(name);
+                            break;
+                        case 'state': id = await fn.matchState(name);
+                            break;
+                        case 'city': id = await fn.matchCity(name);
+                            break;
+                        case 'category': id = await fn.matchCategory(name);
+                            break;
+                        case 'unit': id = await fn.matchUnit(name);
+                            break;
+                        case 'subitem_list': id = await fn.matchSubitemList(name);
+                            break;
+                        case 'nimitt': id = await fn.matchNimitt(name);
+                            break;
+                        case 'pbk': id = await fn.matchPbk(name);
+                            break;
 
                         default:
 

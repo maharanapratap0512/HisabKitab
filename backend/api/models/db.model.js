@@ -1601,11 +1601,14 @@ class dbModal {
               }
               console.log("updating database ... ");
             }
-
-            this.db.pragma(`user_version = ${this.migrationLength}`);
-
+            
+            this.db.pragma(`user_version = ${this.migrationLength}`);            
             console.log("database updated to version ", this.migrationLength);
           }
+
+          // console.log(new Date(1677628800000).getTime() - new Date("04-01-2023").getTime())
+          // console.log("1677628800000", new Date(1677628800000).toDateString(),  new Date(new Date(1677628800000).toLocaleDateString()).getTime());
+          // console.log("01-03-2023", new Date("01/03/2023").getTime());
 
         }
         catch (err) {

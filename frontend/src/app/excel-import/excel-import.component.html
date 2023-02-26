@@ -111,7 +111,8 @@
 <div class="row px-2" *ngIf="stepNo >= 3  && excelArrObj && excelArrObj.length > 0">
    <!-- <div class="row" style="padding: 10px 50px;"> -->
    <button class="btn btn-outline-success btn-lg btn-rounded w-50" (click)="finalImport()">इम्पोर्ट करे।</button>
-   <button class="btn btn-outline-success btn-lg btn-rounded w-50" (click)="updateData()" *ngIf="willUpdateData.length">अपडेट करे।</button>
+   <button class="btn btn-outline-success btn-lg btn-rounded w-50" (click)="updateData()"
+      *ngIf="willUpdateData.length">अपडेट करे।</button>
    <ul class="nav nav-pills bg-nav-pills mt-2">
       <!-- <li class="nav-item">
             <button class="btn btn-danger" (click)="clearTempImport()">Clear Data</button>
@@ -170,25 +171,25 @@
    <div class="tab-content">
       <!-- exceldata -->
       <div class="tab-pane" id="exceldata" style="overflow: auto;">
-        <div class="row" style="overflow: auto;">
-           <table id="datatable-buttons" class="table table-hover dt-responsive">
-              <thead>
-                 <tr>
-                    <th *ngFor="let header of headerList">
-                       {{header.name}}
-                    </th>
-                 </tr>
-              </thead>
-              <tbody>
-                 <tr *ngFor="let data of excelArrObj; let i=index;">
-                    <td *ngFor="let header of headerList"
-                       [ngClass]="{'marked': header.ref_field && !data[header.ref_field]}">
-                       {{data[header.name]}}
-                    </td>
-                 </tr>
-              </tbody>
-           </table>
-        </div> 
+         <div class="row" style="overflow: auto;">
+            <table id="datatable-buttons" class="table table-hover dt-responsive">
+               <thead>
+                  <tr>
+                     <th *ngFor="let header of headerList">
+                        {{header.name}}
+                     </th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr *ngFor="let data of excelArrObj; let i=index;">
+                     <td *ngFor="let header of headerList"
+                        [ngClass]="{'marked': header.ref_field && !data[header.ref_field]}">
+                        {{data[header.name]}}
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
       </div>
 
       <!-- correction -->
