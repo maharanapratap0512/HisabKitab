@@ -84,13 +84,13 @@
 
 <!-- step 2 : Verify final excel data -->
 <div class="=row" *ngIf="stepNo == 2 && excelArrObj && excelArrObj.length > 0">
-   <div class="card card-body" style="overflow: auto;">
+   <div class="card-body" style="overflow: auto;">
       <h4 class="card-title">इक्सेल डाटा वेरफाइ करे, और फिर आगे बढ़े। </h4>
       <div class="row" style="overflow: auto;">
-         <table id="datatable-buttons" class="table table-hover dt-responsive">
+         <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
             <thead>
                <tr>
-                  <th *ngFor="let header of headerList">
+                  <th style="width: fit-content;" *ngFor="let header of headerList">
                      {{header.name}}
                   </th>
                </tr>
@@ -170,6 +170,7 @@
 
    <div class="tab-content">
       <!-- exceldata -->
+<<<<<<< HEAD
       <div class="tab-pane" id="exceldata" style="overflow: auto;">
          <div class="row" style="overflow: auto;">
             <table id="datatable-buttons" class="table table-hover dt-responsive">
@@ -190,6 +191,28 @@
                </tbody>
             </table>
          </div>
+=======
+      <div class="tab-pane" id="exceldata">
+        <div class="row" style="overflow: auto;">
+           <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
+              <thead>
+                 <tr>
+                    <th *ngFor="let header of headerList">
+                       {{header.name}}
+                    </th>
+                 </tr>
+              </thead>
+              <tbody>
+                 <tr *ngFor="let data of excelArrObj; let i=index;">
+                    <td *ngFor="let header of headerList"
+                       [ngClass]="{'marked': header.ref_field && !data[header.ref_field]}">
+                       {{data[header.name]}}
+                    </td>
+                 </tr>
+              </tbody>
+           </table>
+        </div> 
+>>>>>>> abf510ae88b1d408c9fa3461165654a95a927626
       </div>
 
       <!-- correction -->
@@ -320,7 +343,7 @@
 
                         </div>
                      </td>
-                     <td>
+                     <td class="text-center">
                         <input type="checkbox" class="form-check-input" [(ngModel)]="data.dictionary"
                            [ngModelOptions]="{standalone: true}" [disabled]="data.type=='product'">
                      </td>
@@ -343,9 +366,9 @@
       </div>
 
       <!-- insert -->
-      <div class="tab-pane p-4" id="insert" style="overflow: auto;">
+      <div class="tab-pane p-4" id="insert">
          <div class="row" style="overflow: auto;">
-            <table id="datatable-buttons" class="table table-hover dt-responsive">
+            <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
                <thead>
                   <tr>
                      <th *ngFor="let header of headerList">
@@ -365,9 +388,9 @@
       </div>
 
       <!-- update -->
-      <div class="tab-pane p-4" id="update" style="overflow: auto;">
+      <div class="tab-pane p-4" id="update" >
          <div class="row" style="overflow: auto;">
-            <table id="datatable-buttons" class="table table-hover dt-responsive">
+            <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
                <thead>
                   <tr>
                      <th *ngFor="let header of headerList">
@@ -387,9 +410,9 @@
       </div>
 
       <!-- duplicate -->
-      <div class="tab-pane p-4" id="duplicate" style="overflow: auto;">
+      <div class="tab-pane p-4" id="duplicate">
 
-         <table id="datatable-buttons" class="table table-hover dt-responsive">
+         <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
             <thead>
                <tr>
                   <th *ngFor="let header of headerList">
@@ -408,9 +431,9 @@
       </div>
 
       <!-- rejected -->
-      <div class="tab-pane p-4" id="rejected" style="overflow: auto;">
+      <div class="tab-pane p-4" id="rejected">
 
-         <table id="datatable-buttons" class="table table-hover dt-responsive">
+         <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
             <thead>
                <tr>
                   <th *ngFor="let header of headerList">
