@@ -193,27 +193,42 @@ export class ExcelImportComponent implements OnInit {
     this.unmatchedData[index].done = true;
   }
 
-  finalImport() {
+  async finalImport() {
+    this.newInsertedData = []
+    this.willUpdateData = []
+    this.duplicateDate = []
+    this.rejectedData = []
     this.swHeaderList = this.getSwHeaderList();
-    if (this.unmatchedData.length > 0) {
-
-    }
     for (let i in this.excelArrObj) {
-      this.http.put(this.api.getUrl('EXCELIMPORT') + 'final/' + this.auth.webUser.dept_id, { importType: this.importType, headerList: this.headerList, excelData: this.excelArrObj[i] }).subscribe((res: any) => {
-        console.log(res);
-        switch (res.result.status) {
-          case 'inserted': this.newInsertedData.push(res.result.data)
-            break;
-          case 'update': this.willUpdateData.push(res.result.data)
-            break;
-          case 'duplicate': this.duplicateDate.push(res.result.data)
-            break;
-          default:
-        }
+      if (await this.verifyForRejection(this.excelArrObj[i])) {
+        this.rejectedData.push(this.excelArrObj[i]);
+      } else {
+        this.http.put(this.api.getUrl('EXCELIMPORT') + 'final/' + this.auth.webUser.dept_id, { importType: this.importType, headerList: this.headerList, excelData: this.excelArrObj[i] }).subscribe((res: any) => {
+          switch (res.result.status) {
+            case 'inserted': this.newInsertedData.push(res.result.data)
+              break;
+            case 'update': this.willUpdateData.push(res.result.data)
+              break;
+            case 'duplicate': this.duplicateDate.push(res.result.data)
+              break;
+            default: this.rejectedData.push(res.result.data)
+          }
 
-      });
+        });
+      }
     }
 
+  }
+
+  verifyForRejection(data: any) {
+    for (let j in this.headerList) {
+      if (this.headerList[j].not_null && !data[this.headerList[j].name]) {
+        return true;
+      } else if (this.headerList[j].ref_table && data[this.headerList[j].name] && !data[this.headerList[j].ref_field]) {
+        return true;
+      }
+    }
+    return false;
   }
 
   updateData() {

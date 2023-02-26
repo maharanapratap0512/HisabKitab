@@ -128,7 +128,6 @@ router.put('/correction', async (req, res, next) => {
                     }
                     await DB.runQuery('excel_correction', qname, { obj: req.body[i] });
                 } else {
-                    console.log("req.body[i].type", req.body[i].type);
                     await DB.runQuery('excel_correction', 'update_' + req.body[i].type, { obj: req.body[i] });
                 }
                 if (req.body[i].dictionary) {
@@ -329,7 +328,6 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
                             }
                         } else if (data[i].status == 1) {
                             let res = insert_stmt.run(data[i]);
-                            // console.log("res", res);
                             if (res) {
                                 total_count++;
                                 if (res.changes > 0) {
@@ -395,7 +393,6 @@ router.post('/', async (req, res, next) => {
                 }
                 req.body[i].jawak_detail = (req.body[i].jawak_detail ? JSON.stringify(req.body[i].jawak_detail) : JSON.stringify([]))
 
-                console.log(req.body[i]);
                 let result = await DB.insert('temp_import', req.body[i], null, false);
             }
             await DB.getCount('temp_import').then(async (resolve) => {
