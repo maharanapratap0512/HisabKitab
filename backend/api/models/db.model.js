@@ -1603,7 +1603,7 @@ class dbModal {
             }
             
             this.db.pragma(`user_version = ${this.migrationLength}`);            
-            console.log("database updated to version ", this.migrationLength);
+            console.log("database updated to `version` ", this.migrationLength);
           }
 
           // console.log(new Date(1677628800000).getTime() - new Date("04-01-2023").getTime())

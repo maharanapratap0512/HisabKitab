@@ -20,28 +20,32 @@
                            <i class="dripicons-plus h4 icon-mx-2"> </i>Add Vehicle
                         </button>
                      </div>
-                     <div class="col-4">
+                     <div class="col-3">
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
                         </div>
                      </div>
-                     <!-- <div class="col-2">
-                        <ng-select class="custom w-100" style="width: 100%;" placeholder="Filter State"
-                           [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)">
-                           <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}} :
-                              {{item.state_eng}}</ng-option>
+                     
+                     <div class="col-2">
+                        <ng-select class="custom w-100" style="width: 100%;" placeholder="Filter MM"
+                           [clearable]="true" [virtualScroll]="true" (change)="mmSelected($event)">
+                           <ng-option *ngFor="let item of mms" [value]="item._id">{{item.mm_hin}} :
+                              {{item.mm_eng}} ({{item.mm_code}})</ng-option>
                         </ng-select>
                      </div>
-                     <div class="col-2">
+                     <!-- <div class="col-2">
                         <ng-select class="custom w-100" style="width: 100%;" placeholder="Filter Department"
                            [clearable]="true" [virtualScroll]="true" (change)="mmDeptSelected($event)">
                            <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_eng}} :
                               {{item.dept_code}}</ng-option>
                         </ng-select>
                      </div> -->
-                     <div class="col-2">
-                        <button class="btn btn-outline-success" (click)="exportToExcel()">Export To Excel</button>
+                     <div class="col-3">
+                        <div class="d-flex justify-content-between">
+                           <button class="btn btn-outline-success mr-1" (click)="exportToExcel()">Export To Excel</button>
+                           <button class="btn btn-outline-info" (click)="openModal('Excel Import')">Import Excel</button>
+                        </div>
                      </div>
                      <div class="col-2">
                         <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
@@ -53,6 +57,9 @@
             </div>
 
             <div class="row" *ngIf="vehData.length">
+               <div class="row">
+                 
+               </div>
                <pagination-controls class="pagi text-end" (pageChange)="page = $event" [autoHide]="true">
                </pagination-controls>
                <div class="card-body" style="overflow: auto;">
@@ -195,6 +202,7 @@
                (response)='addVehicleResponse($event)'></app-vehicle-entry>
             <app-vehicle-entry *ngIf="showModal == 'Edit Vehicle'" (response)='editVehicleResponse($event)'
                [getData]="editData" [mode]="mode" [isEdit]="true"></app-vehicle-entry>
+            <app-excel-import *ngIf="showModal == 'Excel Import'" importType="vehicle"></app-excel-import>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"

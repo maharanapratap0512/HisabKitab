@@ -88,6 +88,7 @@
                               <table id="datatable-buttons" class="table table-hover dt-responsive">
                                  <thead>
                                     <tr>
+                                       <td>Year</td>
                                        <td style="width: 50px;">No.</td>
                                        <td>State</td>
                                        <td>MM</td>
@@ -105,8 +106,17 @@
                                        <td>Dec</td>
                                     </tr>
                                  </thead>
-                                 <tbody *ngFor="let data of historyData | filter:termHistory; let i=index">
-                                    <tr>
+                                 <tbody>
+                                    <!-- <div class="card ribbon-box">
+                                       <div class="card-body">
+                                           <div class="ribbon-two ribbon-two-primary"><span>Primary</span></div>
+                                           <p class="mb-0">Quisque nec turpis at urna dictum luctus. Suspendisse
+                                               convallis dignissim eros at volutpat. In egestas mattis dui. Aliquam
+                                               mattis dictum aliquet. </p>
+                                       </div> 
+                                   </div> -->
+                                    <tr class="ribbon-box" *ngFor="let data of historyData | filter:termHistory; let i=index">
+                                       <td><div class="ribbon ribbon-secondary text-light"><span>{{data.year}}</span></div></td>
                                        <td>{{i+1}}</td>
                                        <td>
                                           {{data.state_hin}}<br />
@@ -116,12 +126,14 @@
                                           {{data.mm_hin}}<br />
                                           {{data.mm_eng}}
                                        </td>
+                                       <!-- <td>{{data.year}}</td> -->
                                        <td *ngFor="let m of months">
                                           <div *ngIf="data['m'+m.m]" style="text-align: center;">
                                              <i class="uil-check-circle text-success h3"></i> <br>
                                              <span>{{data['m'+m.m+'_date'] | date:'dd-MM-yyyy'}}</span>
                                           </div>
                                        </td>
+                                       
                                     </tr>
                                  </tbody>
                               </table>

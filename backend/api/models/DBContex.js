@@ -130,8 +130,8 @@ class DBContex {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
 
-                if (tblname == "aawak")
-                    console.log(sql);
+                // if (tblname == "import_history")
+                //     console.log(sql);
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {
@@ -243,7 +243,7 @@ class DBContex {
         return new Promise(async (resolve, reject) => {
             try {
                 let key = Object.keys(obj);
-                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].import_update;
+                let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update;
                 sql += (conditionString ? ` where ${conditionString}` : '');
                 obj.active = obj.active ? 1 : 0;
                 console.log(sql);

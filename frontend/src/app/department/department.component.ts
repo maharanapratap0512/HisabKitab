@@ -225,9 +225,9 @@ export class DepartmentComponent implements OnInit {
         defective: false,
         scrap: false
       },
-      vehicle:{
-        visible:false,
-        add:false,
+      vehicle: {
+        visible: false,
+        add: false,
       },
       category: {
         visible: false,
@@ -839,10 +839,10 @@ export class DepartmentComponent implements OnInit {
 
   bulkImportSubitem() {
     console.log("clicked");
-    
+
     this.isLoader = true;
-    for(let index in this.importData.data){
-      if(!this.importData.data[index].found && this.importData.data[index].new_id){
+    for (let index in this.importData.data) {
+      if (!this.importData.data[index].found && this.importData.data[index].new_id) {
         this.http.post(this.api.getUrl('SUBITEM') + this.auth.webUser.dept_id, this.importData.data[index]).subscribe((data: any) => {
           if (data['result'] && data['success']) {
             // this.gs.Lists.subitem.unshift(data['result'])
@@ -858,9 +858,9 @@ export class DepartmentComponent implements OnInit {
           this.toastr.error(err['error']);
         });
       }
-      else{
+      else {
         console.log(this.importData.data[index]);
-        
+
       }
     }
     this.isLoader = false;
@@ -1199,7 +1199,7 @@ export class DepartmentComponent implements OnInit {
         if (this.itemTotal > this.itemmix.length) {
           this.getMoreItemMix();
         }
-        else{
+        else {
           this.itemsAll = this.itemmix;
         }
 
@@ -1220,7 +1220,7 @@ export class DepartmentComponent implements OnInit {
           if (this.itemTotal > this.itemmix.length) {
             this.getMoreItemMix();
           }
-          else{          
+          else {
             this.itemsAll = this.itemmix;
           }
         });
@@ -1239,12 +1239,12 @@ export class DepartmentComponent implements OnInit {
       }
     });
   }
-  
-  itemMixSelected(ev:any){
-    if(ev){
-      this.itemmix = this.itemsAll.filter((it: { _id: any; })=>it._id == ev);
+
+  itemMixSelected(ev: any) {
+    if (ev) {
+      this.itemmix = this.itemsAll.filter((it: { _id: any; }) => it._id == ev);
     }
-    else{
+    else {
       this.itemmix = this.itemsAll;
     }
   }
@@ -1490,76 +1490,126 @@ export class DepartmentComponent implements OnInit {
 
   }
 
+  selection(type: any, _id: any) {
+    this.deptConf[type].config_value.push(_id);
+    return;
+  }
 
-  selectAll(type: any) {
+  deSelection(type: any, _id: any) {
+    for (let i in this.deptConf[type].config_value) {
+      if (this.deptConf[type].config_value[i] == _id) {
+        this.deptConf[type].config_value.splice(i, 1);
+        break;
+      }
+    }
+    return;
+  }
+
+  toggleSelectionAll(type: any, chk: boolean) {
     switch (type) {
       case 'mm':
         this.mms.map((i: { _id: any, chk: boolean; }) => {
-          if (!i.chk) {
-            this.deptConf.mm.config_value.push(i._id);
+          if (!i.chk && chk) {
+            this.selection(type, i._id);
             i.chk = true;
+          }
+          if (!chk && i.chk) {
+            this.deSelection(type, i._id);
+            i.chk = false;
           }
         });
         break;
       case 'pbk':
         this.pbks.map((i: { _id: any, chk: boolean; }) => {
-          if (!i.chk) {
-            this.deptConf.pbk.config_value.push(i._id);
+          if (!i.chk && chk) {
+            this.selection(type, i._id);
             i.chk = true;
+          }
+          if (!chk && i.chk) {
+            this.deSelection(type, i._id);
+            i.chk = false;
           }
         });
         break;
       case 'category':
         this.categories.map((i: { _id: any, chk: boolean; }) => {
-          if (!i.chk) {
-            this.deptConf.category.config_value.push(i._id);
+          if (!i.chk && chk) {
+            this.selection(type, i._id);
             i.chk = true;
+          }
+          if (!chk && i.chk) {
+            this.deSelection(type, i._id);
+            i.chk = false;
           }
         });
         break;
       case 'item':
         this.items.map((i: { _id: any, chk: boolean; }) => {
-          if (!i.chk) {
-            this.deptConf.item.config_value.push(i._id);
+          if (!i.chk && chk) {
+            this.selection(type, i._id);
             i.chk = true;
+          }
+          if (!chk && i.chk) {
+            this.deSelection(type, i._id);
+            i.chk = false;
           }
         });
         break;
       case 'itemmix':
         this.itemmix.map((i: { _id: any, chk: boolean, subitems: any; }) => {
-          if (!i.chk) {
-            this.deptConf.item.config_value.push(i._id);
+          if (!i.chk && chk) {
+            this.selection('item', i._id);
             i.chk = true;
           }
+          if (!chk && i.chk) {
+            this.deSelection('item', i._id);
+            i.chk = false;
+          }
           i.subitems.map((j: { _id: any, chk: boolean }) => {
-            if (!j.chk) {
-              this.deptConf.subitem.config_value.push(j._id);
+            if (!j.chk && chk) {
+              this.selection('subitem', j._id);
               j.chk = true;
             }
+            if (!chk && j.chk) {
+              this.deSelection('subitem', j._id);
+              j.chk = false;
+             }
           });
         });
         break;
       case 'subitem':
         this.subitems.map((i: { _id: any, chk: boolean; }) => {
-          if (!i.chk) {
-            this.deptConf.subitem.config_value.push(i._id);
+          if (!i.chk && chk) {
+            this.selection(type, i._id);
             i.chk = true;
+          }
+          if (!chk && i.chk) {
+            this.deSelection(type, i._id);
+            i.chk = false;
           }
         });
         break;
-      case 'ajtype':
+      case 'aj_type':
         this.ajtypes.map((i: { _id: any, chk: boolean; }) => {
-          if (!i.chk) {
-            this.deptConf.aj_type.config_value.push(i._id);
+          if (!i.chk && chk) {
+            this.selection(type, i._id);
             i.chk = true;
+          }
+          if (!chk && i.chk) {
+            this.deSelection(type, i._id);
+            i.chk = false;
           }
         });
         break;
       case 'department':
         this.department.map((i: { _id: any, chk: boolean; }) => {
-          if (!i.chk) {
-            this.deptConf.department.config_value.push(i._id);
+          if (!i.chk && chk) {
+            this.selection(type, i._id);
             i.chk = true;
+          }
+          if (!chk && i.chk) {
+            this.deSelection(type, i._id);
+            i.chk = false;
           }
         });
         break;

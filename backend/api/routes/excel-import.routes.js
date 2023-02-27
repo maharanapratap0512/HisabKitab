@@ -150,9 +150,9 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                 if (req.body.config[j].type == 'date') {
                     req.body.excelData[i][req.body.config[j].name] = fn.setDateFormat(req.body.excelData[i][req.body.config[j].name]);
                 }
-                // if (req.body.config[j].type == 'unix_date') {
-                //     req.body.excelData[i][req.body.config[j].name] = fn.setDateUnixSecond(req.body.excelData[i][req.body.config[j].name]);
-                // }
+                if (req.body.config[j].type == 'unix_date') {
+                    req.body.excelData[i][req.body.config[j].name] = fn.setDateFormat(req.body.excelData[i][req.body.config[j].name]);
+                }
                 if (req.body.config[j].ref_table) {
                     let id = null;
                     let name = req.body.excelData[i][req.body.config[j].name].trim().toLowerCase();

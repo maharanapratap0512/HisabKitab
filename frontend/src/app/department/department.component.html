@@ -63,13 +63,16 @@
           <div class="col-md-2 mb-2 mb-sm-0 card card-body">
             <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
               <!-- <a class="nav-link" [ngClass]="{'active show': dept_id > 2}" id="v-pills-setting-tab" -->
-              <a class="nav-link active show" id="v-pills-setting-tab" data-bs-toggle="pill" href="#v-pills-setting"
+
+                <!-- software setting tab -->
+              <!-- <a class="nav-link active show" id="v-pills-setting-tab" data-bs-toggle="pill" href="#v-pills-setting"
                 role="tab" aria-controls="v-pills-setting" aria-selected="true" *ngIf="dept_id">
                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                 <span class="d-none d-md-block">Software Settings
                 </span>
-              </a>
-              <a class="nav-link" id="v-pills-mm-tab" data-bs-toggle="pill" href="#v-pills-mm" role="tab"
+              </a> -->
+
+              <a class="nav-link active show" id="v-pills-mm-tab" data-bs-toggle="pill" href="#v-pills-mm" role="tab"
                 aria-controls="v-pills-mm" aria-selected="true">
                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                 <span class="d-none d-md-block">MM
@@ -152,7 +155,7 @@
 
               <!-- Setting Tab -->
               <!-- <div class="tab-pane fade" [ngClass]="{'active show': dept_id > 2}" id="v-pills-setting" -->
-              <div class="tab-pane fade active show" id="v-pills-setting" role="tabpanel"
+              <div class="tab-pane fade" id="v-pills-setting" role="tabpanel"
                 aria-labelledby="v-pills-setting-tab" *ngIf="dept_id"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
                 <div class="row">
@@ -1175,7 +1178,8 @@
 
 
               <!-- MM Tab -->
-              <div class="tab-pane fade" id="v-pills-mm" [class]="{'show':!dept_id, 'active':!dept_id}" role="tabpanel"
+              <!-- [class]="{'show':!dept_id, 'active':!dept_id}" -->
+              <div class="tab-pane fade active show" id="v-pills-mm" role="tabpanel"
                 aria-labelledby="v-pills-home-tab"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
                 <div class="row">
@@ -1196,8 +1200,12 @@
                     </ng-select>
                   </div>
                   <div class="col-2" *ngIf="!termMM">
-                    <button type="button" class="btn btn-outline-success" (click)="selectAll('mm')">+
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('mm', true)">+
                       Select All</button>
+                  </div>
+                  <div class="col-2" *ngIf="!termMM">
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('mm', false)">+
+                      Deselect All</button>
                   </div>
                 </div>
                 <div class="row mt-3 px-3">
@@ -1245,13 +1253,13 @@
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                 aria-labelledby="v-pills-profile-tab">
                 <div class="row">
-                  <div class="col-3">
+                  <div class="col-2">
                     <div class="form-group">
                       <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="termPbk"
                         name="search">
                     </div>
                   </div>
-                  <div class="col-3">
+                  <div class="col-2">
                     <ng-select class="custom" style="width: 100%;" placeholder="Select State" [clearable]="true"
                       [virtualScroll]="true" (change)="pbkStateSelected($event)">
                       <ng-option *ngFor="let item of states" [value]="item._id">{{item.state_hin}}
@@ -1275,8 +1283,12 @@
                     </ng-select>
                   </div>
                   <div class="col-2" *ngIf="!termPbk">
-                    <button type="button" class="btn btn-outline-success" (click)="selectAll('pbk')">+
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('pbk', true)">+
                       Select All</button>
+                  </div>
+                  <div class="col-2" *ngIf="!termMM">
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('pbk', false)">+
+                      Deselect All</button>
                   </div>
                 </div>
                 <div class="row mt-3 px-3">
@@ -1326,8 +1338,12 @@
                     </div>
                   </div>
                   <div class="col-2" *ngIf="!termCat">
-                    <button type="button" class="btn btn-outline-success" (click)="selectAll('department')">+
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('department', true)">+
                       Select All</button>
+                  </div>
+                  <div class="col-2" *ngIf="!termMM">
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('department', false)">+
+                      Deselect All</button>
                   </div>
                 </div>
                 <div class="row mt-3 px-3">
@@ -1364,8 +1380,12 @@
                     </div>
                   </div>
                   <div class="col-2" *ngIf="!termCat">
-                    <button type="button" class="btn btn-outline-success" (click)="selectAll('category')">+
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('category', true)">+
                       Select All</button>
+                  </div>
+                  <div class="col-2" *ngIf="!termMM">
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('category', false)">+
+                      Deselect All</button>
                   </div>
                 </div>
                 <div class="row mt-3 px-3">
@@ -1396,13 +1416,13 @@
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                 aria-labelledby="v-pills-settings-tab">
                 <div class="row">
-                  <div class="col-4">
+                  <div class="col-3">
                     <div class="form-group">
                       <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="termItemmix"
                         name="search">
                     </div>
                   </div>
-                  <div class="col-3">
+                  <div class="col-2">
                     <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="true"
                       [virtualScroll]="true" (change)="catItemSelected($event)">
                       <ng-container *ngFor="let item of categories">
@@ -1421,8 +1441,12 @@
                     </ng-select>
                   </div>
                   <div class="col-2" *ngIf="!termItemmix ">
-                    <button type="button" class="btn btn-outline-success" (click)="selectAll('itemmix')">+
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('itemmix', true)">+
                       Select All</button>
+                  </div>
+                  <div class="col-2" *ngIf="!termMM">
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('itemmix', false)">+
+                      Deselect All</button>
                   </div>
                 </div>
                 <div class="row mt-3 px-3">
@@ -1521,8 +1545,12 @@
                     </ng-select>
                   </div>
                   <div class="col-2" *ngIf="!termItem ">
-                    <button type="button" class="btn btn-outline-success" (click)="selectAll('item')">+
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('item', true)">+
                       Select All</button>
+                  </div>
+                  <div class="col-2" *ngIf="!termMM">
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('item', false)">+
+                      Deselect All</button>
                   </div>
                 </div>
                 <div class="row mt-3 px-3">
@@ -1561,13 +1589,13 @@
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                 aria-labelledby="v-pills-settings-tab">
                 <div class="row">
-                  <div class="col-4">
+                  <div class="col-3">
                     <div class="form-group">
                       <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="termSubitem"
                         name="search">
                     </div>
                   </div>
-                  <div class="col-3">
+                  <div class="col-2">
                     <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="true"
                       [virtualScroll]="true" (change)="subitemCatSelected($event)">
                       <ng-option *ngFor="let item of categories" [value]="item._id">
@@ -1584,8 +1612,12 @@
                     </ng-select>
                   </div>
                   <div class="col-2" *ngIf="!termSubitem ">
-                    <button type="button" class="btn btn-outline-success" (click)="selectAll('subitem')">+
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('subitem', true)">+
                       Select All</button>
+                  </div>
+                  <div class="col-2" *ngIf="!termMM">
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('subitem', false)">+
+                      Deselect All</button>
                   </div>
                 </div>
                 <div class="row mt-3 px-3">
@@ -1633,8 +1665,12 @@
                     </div>
                   </div>
                   <div class="col-2" *ngIf="!termAJType">
-                    <button type="button" class="btn btn-outline-success" (click)="selectAll('ajtype')">+
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('aj_type', true)">+
                       Select All</button>
+                  </div>
+                  <div class="col-2" *ngIf="!termMM">
+                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('aj_type', false)">+
+                      Deselect All</button>
                   </div>
                 </div>
                 <div class="row mt-3 px-3">

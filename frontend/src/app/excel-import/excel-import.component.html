@@ -9,8 +9,8 @@
          <!-- <div class="form-group"> -->
          <!-- <label class="form-label">Import Type</label> -->
          <ng-select class="custom" style="width: 100%;" placeholder="Select Import Type" [clearable]="true"
-            (change)="headerConfig = EIService.config[$event.name]; secondHeader = $event.secondHeader"
-            [virtualScroll]="true" [(ngModel)]="importType" [ngModelOptions]="{standalone: true}">
+            (change)="importTypeChanged($event)" [virtualScroll]="true" [(ngModel)]="importType"
+            [ngModelOptions]="{standalone: true}">
             <ng-option selected="selected" disabled value="">Select MM</ng-option>
             <ng-option *ngFor="let item of EIService.importList" [value]="item">
                {{item.name}}</ng-option>
@@ -44,9 +44,9 @@
    <div class="row mt-2" style="display: block;" *ngIf="importType">
       <b>Comulns List : </b>
       <span *ngFor="let col of headerConfig"
-         [ngClass]="{'fw-bold fst-italic fs-5':col.not_null, 'text-success': col.found}">{{col.name}}
+         [ngClass]="{'fw-bold fs-5':col.not_null,'badge-outline-danger':col.not_null && !col.found, 'badge-outline-success': col.not_null && col.found, 'text-success': col.found}">{{col.name}}
          <i class="mdi mdi-check-circle fs-4" *ngIf="col.found"></i>
-      </span> <span class="text-warning">(Dark & Big headers are compulsory.)</span>
+      </span> <span class="text-warning">(Highlighted headers are compulsory.)</span>
    </div>
 </div>
 
@@ -171,25 +171,25 @@
    <div class="tab-content">
       <!-- exceldata -->
       <div class="tab-pane" id="exceldata">
-        <div class="row" style="overflow: auto;">
-           <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
-              <thead>
-                 <tr>
-                    <th *ngFor="let header of headerList">
-                       {{header.name}}
-                    </th>
-                 </tr>
-              </thead>
-              <tbody>
-                 <tr *ngFor="let data of excelArrObj; let i=index;">
-                    <td *ngFor="let header of headerList"
-                       [ngClass]="{'marked': header.ref_field && !data[header.ref_field]}">
-                       {{data[header.name]}}
-                    </td>
-                 </tr>
-              </tbody>
-           </table>
-        </div> 
+         <div class="row" style="overflow: auto;">
+            <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
+               <thead>
+                  <tr>
+                     <th *ngFor="let header of headerList">
+                        {{header.name}}
+                     </th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr *ngFor="let data of excelArrObj; let i=index;">
+                     <td *ngFor="let header of headerList"
+                        [ngClass]="{'marked': header.ref_field && !data[header.ref_field]}">
+                        {{data[header.name]}}
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
       </div>
 
       <!-- correction -->
@@ -365,7 +365,7 @@
       </div>
 
       <!-- update -->
-      <div class="tab-pane p-4" id="update" >
+      <div class="tab-pane p-4" id="update">
          <div class="row" style="overflow: auto;">
             <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
                <thead>
@@ -388,45 +388,47 @@
 
       <!-- duplicate -->
       <div class="tab-pane p-4" id="duplicate">
-
-         <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
-            <thead>
-               <tr>
-                  <th *ngFor="let header of headerList">
-                     {{header.name}}
-                  </th>
-               </tr>
-            </thead>
-            <tbody>
-               <tr *ngFor="let data of duplicateDate; let i = index;">
-                  <td *ngFor="let header of headerList">
-                     {{data[header.name]}}
-                  </td>
-               </tr>
-            </tbody>
-         </table>
+         <div class="row" style="overflow: auto;">
+            <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
+               <thead>
+                  <tr>
+                     <th *ngFor="let header of headerList">
+                        {{header.name}}
+                     </th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr *ngFor="let data of duplicateDate; let i = index;">
+                     <td *ngFor="let header of headerList">
+                        {{data[header.name]}}
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
       </div>
 
       <!-- rejected -->
       <div class="tab-pane p-4" id="rejected">
-
-         <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
-            <thead>
-               <tr>
-                  <th *ngFor="let header of headerList">
-                     {{header.name}}
-                  </th>
-               </tr>
-            </thead>
-            <tbody>
-               <tr *ngFor="let data of rejectedData; let i = index;">
-                  <td *ngFor="let header of headerList"
-                     [ngClass]="{'marked': header.ref_field && !data[header.ref_field]}">
-                     {{data[header.name]}}
-                  </td>
-               </tr>
-            </tbody>
-         </table>
+         <div class="row" style="overflow: auto;">
+            <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
+               <thead>
+                  <tr>
+                     <th *ngFor="let header of headerList">
+                        {{header.name}}
+                     </th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr *ngFor="let data of rejectedData; let i = index;">
+                     <td *ngFor="let header of headerList"
+                        [ngClass]="{'marked': header.ref_field && !data[header.ref_field]}">
+                        {{data[header.name]}}
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
       </div>
 
    </div>

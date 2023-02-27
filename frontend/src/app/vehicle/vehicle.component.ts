@@ -27,7 +27,8 @@ export class VehicleComponent implements OnInit {
   editData: any = {};
   mode: any = '';
   vehData: any = [];
-  // mmAll: any = [];
+  vehDataAll: any = [];
+  mms: any = [];
   total_count: any = 0;
   // departments: any = [];
   // states: any = [];
@@ -47,18 +48,23 @@ export class VehicleComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getvehData();
-    // this.gs.observeList().subscribe(result => {
-    //   this.states = result.state ? result.state : [];
-    //   this.departments = result.department ? result.department : [];
-    // });
+    this.gs.observeList().subscribe(result => {
+      this.mms = result.mm ? result.mm : [];
+    });
     this.settings = this.auth.webUser.settings;
+  }
+
+  openModal(type:string){
+    this.showModal = type;
+    $('#showModal').modal('show')
   }
 
   getvehData() {
     this.isLoader = true;
     this.http.get(this.api.getUrl('VEHICLE') + this.auth.webUser.dept_id).subscribe((data) => {
       if (data['result'] && data['success']) {
-        this.vehData = data['result'];
+        this.vehDataAll = data['result'];
+        this.vehData = this.vehDataAll;
         this.total_count = data['total_count'];
         this.isLoader = false;
       }
@@ -66,12 +72,12 @@ export class VehicleComponent implements OnInit {
     });
   }
 
-  // stateSelected(ev: any) {
-  //   if (ev)
-  //     this.vehData = this.mmAll.filter((mm: { state_id: any; }) => mm.state_id == ev);
-  //   else
-  //     this.vehData = this.mmAll;
-  // }
+  mmSelected(ev: any) {
+    if (ev)
+      this.vehData = this.vehDataAll.filter((veh: { mm_id: any; }) => veh.mm_id == ev);
+    else
+      this.vehData = this.vehDataAll;
+  }
 
   // mmDeptSelected(ev: any) {
   //   if (ev) {
@@ -89,7 +95,7 @@ export class VehicleComponent implements OnInit {
     for (let i = 0; i < this.vehData.length; i++) {
       vehExportData.push({
         "Sr No": i + 1,
-        "_id": this.vehData[i]._id,
+        // "_id": this.vehData[i]._id,
         "mm_id": this.vehData[i].mm_id,
         "vehicle_type": this.vehData[i].vehicle_type,
         "gadi_name": this.vehData[i].gadi_name,
@@ -99,21 +105,21 @@ export class VehicleComponent implements OnInit {
         "owner_name": this.vehData[i].owner_name,
         "nominee": this.vehData[i].nominee,
         "aawak_type": this.vehData[i].aawak_type,
-        "rc_date": this.vehData[i].rc_date,
-        "rc_exp_date": this.vehData[i].rc_exp_date,
+        "rc_date": new Date(this.vehData[i].rc_date).toLocaleDateString(),
+        "rc_exp_date": new Date(this.vehData[i].rc_exp_date).toLocaleDateString(),
         "rc_amount": this.vehData[i].rc_amount,
-        "insurance_date": this.vehData[i].insurance_date,
-        "insurance_exp_date": this.vehData[i].insurance_exp_date,
+        "insurance_date": new Date(this.vehData[i].insurance_date).toLocaleDateString(),
+        "insurance_exp_date": new Date(this.vehData[i].insurance_exp_date).toLocaleDateString(),
         "insurance_type": this.vehData[i].insurance_type,
         "insurance_company": this.vehData[i].insurance_company,
         "insurance_amount": this.vehData[i].insurance_amount,
-        "puc_date": this.vehData[i].puc_date,
-        "puc_exp_date": this.vehData[i].puc_exp_date,
+        "puc_date": new Date(this.vehData[i].puc_date).toLocaleDateString(),
+        "puc_exp_date": new Date(this.vehData[i].puc_exp_date).toLocaleDateString(),
         "puc_amount": this.vehData[i].puc_amount
       });
     }
 
-    this.excelExportService.exportAsExcelFile(vehExportData, "MM_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+    this.excelExportService.exportAsExcelFile(vehExportData, "Vehicle_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + (date.getMonth()+1) + "-" + date.getFullYear() + '.xlsx');
     this.isLoader = false;
   }
 

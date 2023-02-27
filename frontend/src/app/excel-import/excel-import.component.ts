@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { ExcelImportService } from '../services/excel-import.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import * as XLSX from 'xlsx';
@@ -15,7 +15,8 @@ import Swal from 'sweetalert2';
   styleUrls: ['./excel-import.component.scss']
 })
 export class ExcelImportComponent implements OnInit {
-  importType: any;
+  @Input() importType: any;
+  // importType: any;
   isLoader: any = false;
   items: any = [];
   products: any = [];
@@ -74,10 +75,40 @@ export class ExcelImportComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.importType) {
+      for (let i in this.EIService.importList) {
+        if (this.EIService.importList[i].name == this.importType) {
+          this.importType = this.EIService.importList[i];
+          this.importTypeChanged(this.EIService.importList[i]);
+          break;
+        }
+      }
+    }
+
+  }
+
+  ngOnChange(changes: SimpleChanges) {
+    console.log(changes);
+    // if (changes.importType.currentValue) {
+
+    //   for(let i in this.EIService.importList){
+    //     if(this.EIService.importList[i].name == changes.importType.currentValue){
+    //       console.log(this.EIService.importList[i]);
+
+    //       this.importType = this.EIService.importList[i];
+    //       this.importTypeChanged(this.EIService.importList[i]);
+    //       break;
+    //     }
+    //   }
+    // }
+  }
+
+  importTypeChanged(ev: any) {
+    this.headerConfig = this.EIService.config[ev.name];
+    this.secondHeader = ev.secondHeader
   }
 
   excelImport(ev: any) {
-
     if (ev) {
       let workBooks: any = null;
       const reader = new FileReader();
@@ -99,6 +130,11 @@ export class ExcelImportComponent implements OnInit {
   }
 
   headerChanged(index: any) {
+    // reset header found status
+    for (let j in this.headerConfig) {
+      this.headerConfig[j].found = false;
+      this.headerConfig[j].index = null;
+    }
     //matching incoming header with header set in config object.
     for (let i in this.excelArr[index]) {
       let header = this.excelArr[index][i].trim().toLowerCase();

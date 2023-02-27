@@ -298,7 +298,7 @@ class ExcelFunctions {
    async verifyAndInsert(type, data, headerList) {
       let status;
       let duplicate = await this.Fn.checkDuplication(type, data);
-      if (duplicate && type.autoUpdate) {
+      if (duplicate) {
          let fullDuplicate = await this.checkFullDuplication(duplicate, data, headerList);
          if (fullDuplicate.found) {
             status = 'duplicate'
@@ -316,6 +316,7 @@ class ExcelFunctions {
    }
 
    async updateExcelData(type, data) {
+      console.log(data);
       return await this.Fn.updateExcelData(type, { ...this[type.name + '_form'], ...data }, this.dept_id);
 
    }
@@ -326,19 +327,23 @@ class ExcelFunctions {
       for (let i in list) {
          let changes = false;
          for (let j in headerList) {
-            // console.log(headerList[j].name, list[i][headerList[j].name], data[headerList[j].name]);
-            let listData = (list[i][headerList[j].name] && typeof list[i][headerList[j].name] == 'string') ? list[i][headerList[j].name].trim().toLowerCase() : list[i][headerList[j].name];
-            let exData = (data[headerList[j].name] && typeof data[headerList[j].name] == 'string') ? data[headerList[j].name].trim().toLowerCase() : data[headerList[j].name];
-
-            if(headerList[j].type == 'date'){
-               listData = new Date(listData).getTime();
-               exData = new Date(exData).getTime();
+            let listData;
+            let exData;
+            if (headerList[j].ref_table) {
+               listData = list[i][headerList[j].ref_field]
+               exData = data[headerList[j].ref_field]
+            } else {
+               listData = (list[i][headerList[j].name] && typeof list[i][headerList[j].name] == 'string') ? list[i][headerList[j].name].trim().toLowerCase() : list[i][headerList[j].name];
+               exData = (data[headerList[j].name] && typeof data[headerList[j].name] == 'string') ? data[headerList[j].name].trim().toLowerCase() : data[headerList[j].name];
+               if (headerList[j].type == 'date') {
+                  listData = new Date(listData).getTime();
+                  exData = new Date(exData).getTime();
+               }
+               else if (headerList[j].type == 'unix_date') {
+                  listData = new Date(new Date(listData).toDateString()).getTime()
+                  exData = new Date(listData).getTime()
+               }
             }
-            else if(headerList[j].type == 'unix_date'){
-               listData = new Date(new Date(listData).toDateString()).getTime()
-               exData = new Date(listData).getTime()
-            }
-
 
             if (typeof listData != 'undefined' && listData != exData) {
                changes = true;

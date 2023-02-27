@@ -22,29 +22,9 @@ router.get('/:dept_id', async (req, res, next) => {
     try {
         await DB.getList('vehicle', { order: `vehicle._id desc`, full: true }).then(async (resolve) => {
             let time = DB.db.prepare('select UNIXEPOCH() * 1000 as time').get().time;
-            console.log(resolve);
             if (time) {
                 for (let i in resolve.data) {
-                    if (resolve.data[i].rc_exp_date - time < 604800000) {
-                        resolve.data[i].rc_error = true;
-                    }
-                    else if (resolve.data[i].rc_exp_date - time < 2629743000) {
-                        resolve.data[i].rc_warning = true;
-                    }
-
-                    if (resolve.data[i].puc_exp_date - time < 604800000) {
-                        resolve.data[i].puc_error = true;
-                    }
-                    else if (resolve.data[i].puc_exp_date - time < 2629743000) {
-                        resolve.data[i].puc_warning = true;
-                    }
-
-                    if (resolve.data[i].insurance_exp_date - time < 604800000) {
-                        resolve.data[i].insurance_error = true;
-                    }
-                    else if (resolve.data[i].insurance_exp_date - time < 2629743000) {
-                        resolve.data[i].insurance_warning = true;
-                    }
+                    resolve.data[i] = await verifyExpiryDate(resolve.data[i], time);
                     // console.log(resolve[i]);
                 }
             }
@@ -58,14 +38,17 @@ router.get('/:dept_id', async (req, res, next) => {
 });
 
 
+
 // post vehicle 
 router.post('/:dept_id', async (req, res, next) => {
     try {
         if (req.body && req.body.gadi_num) {
-            await DB.insert('vehicle', req.body).then((data) => {
+            await DB.insert('vehicle', req.body).then(async (data) => {
+                let time = DB.db.prepare('select UNIXEPOCH() * 1000 as time').get().time;
+                
                 res.json({
                     success: true,
-                    result: data || {}
+                    result: await verifyExpiryDate(data, time) || {}
                 });
             });
         }
@@ -114,9 +97,10 @@ router.put('/', async (req, res, next) => {
     try {
         if (req.body.set && req.body.query) {
             await DB.update('vehicle', req.body.set, req.body.query._id).then(async (data) => {
+                let time = DB.db.prepare('select UNIXEPOCH() * 1000 as time').get().time;
                 res.json({
                     success: true,
-                    result: data || {}
+                    result: await verifyExpiryDate(data, time) || {}
                 });
             });
         }
@@ -144,5 +128,29 @@ router.delete('/:id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+
+verifyExpiryDate = (data, ctime) => {
+    if (data.rc_exp_date - ctime < 604800000) {
+        data.rc_error = true;
+    }
+    else if (data.rc_exp_date - ctime < 2629743000) {
+        data.rc_warning = true;
+    }
+
+    if (data.puc_exp_date - ctime < 604800000) {
+        data.puc_error = true;
+    }
+    else if (data.puc_exp_date - ctime < 2629743000) {
+        data.puc_warning = true;
+    }
+
+    if (data.insurance_exp_date - ctime < 604800000) {
+        data.insurance_error = true;
+    }
+    else if (data.insurance_exp_date - ctime < 2629743000) {
+        data.insurance_warning = true;
+    }
+    return data;
+}
 
 module.exports = router;
