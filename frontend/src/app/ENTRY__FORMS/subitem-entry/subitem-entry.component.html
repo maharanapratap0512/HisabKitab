@@ -16,7 +16,7 @@
                         {{item.item_eng}} : {{item.item_code}}</ng-option>
                   </ng-select>
                </div>
-            </div>            
+            </div>
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Subitem List</label>
@@ -89,16 +89,19 @@
             </div>
             <div class="col-md-2 mb-3">
                <div class="form-group">
-                   <label class="form-label">Image</label>
-                   <a onclick="$('#subitemComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
-                       class="form-control" style="cursor: pointer;">
-                       <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
-                       <img src="{{this.api.getUrl('BASE')+imagepath}}" alt="image" class="rounded m-1" height="48"
-                           *ngIf="imagepath">
-                       <i *ngIf="!imagepath">Click To Change</i>
-                   </a>
+                  <label class="form-label">Image</label>
+                  <a onclick="$('#subitemComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
+                     class="form-control" style="cursor: pointer;">
+                     <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
+                     <ng-container *ngFor="let img of imagepath">
+                        <img src="{{this.api.getUrl('BASE')+img}}" alt="image" height="25" width="25" *ngIf="imagepath"
+                           style="object-fit: cover;">
+                     </ng-container>
+
+                     <i *ngIf="!imagepath">Click To Change</i>
+                  </a>
                </div>
-           </div>
+            </div>
             <div class="col-md-3 mb-3">
                <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
                   (click)="subitemFormSubmit()">Submit</button>
@@ -139,10 +142,9 @@
                   (response)="subitemListAddResponse($event)">
                </app-subitem-list-entry>
 
-                <!-- Add Image -->
-                <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)"
-                type="item">
-            </app-files-view>
+               <!-- Add Image -->
+               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)" type="item">
+               </app-files-view>
 
             </div>
             <div class="modal-footer">

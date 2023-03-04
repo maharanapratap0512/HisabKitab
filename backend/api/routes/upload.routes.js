@@ -153,6 +153,42 @@ router.put('/image', async (req, res) => {
    }
 });
 
+//return base64 of all available images.
+router.put('/base64', async (req, res) => {
+   try {
+      let folderPath = path.resolve(__dirname + "/../../../../Data/Documents/Images");
+      switch (req.body.type) {
+         case "pbk": folderPath = path.resolve(__dirname + "/../../../../Data/Documents/pbk");
+            break;
+         case "aawak": folderPath = path.resolve(__dirname + "/../../../../Data/Documents/aawak");
+            break;
+         case "product": folderPath = path.resolve(__dirname + "/../../../../Data/Documents/product");
+            break;
+         case "item": folderPath = path.resolve(__dirname + "/../../../../Data/Documents/item");
+            break;
+      }
+      //  console.log("WElcome");
+      fs.readdir(folderPath, (err, files) => {
+         let imageArr = [];
+         for (let i in files) {
+            imageArr.push(image_base64(path.resolve(folderPath + "/" + files[i])));
+         }
+         res.json({
+            success: true,
+            filenames: files,
+            files: imageArr,
+         });
+      });
+   }
+   catch (err) {
+      res.status(500).json(errorHandler(err));
+   }
+});
+
+function image_base64(file) {
+   return "data:image/" + file.split('.').pop() + ";base64, " + fs.readFileSync(file, 'base64');
+}
+
 //delete images.
 router.delete('/image/', async (req, res, next) => {
    try {

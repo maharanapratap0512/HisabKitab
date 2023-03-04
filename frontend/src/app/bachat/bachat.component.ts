@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
+import { DomSanitizer } from '@angular/platform-browser';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
@@ -9,6 +10,7 @@ import { ExcelExportService } from '../services/excel-export.service';
 import { GlobalService } from '../services/global.service';
 import { HttpService } from '../services/http.service';
 declare var $: any;
+
 
 @Component({
   selector: 'app-bachat',
@@ -39,7 +41,11 @@ export class BachatComponent implements OnInit {
     subitem_id: [],
     condition_id: [],
   };
+  images: any = [];
+  imageNames: any = [];
   settings: any = {};
+  imagesToShow: any = [];
+  currentImage: any;
 
 
   constructor(
@@ -50,9 +56,11 @@ export class BachatComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService,
-    private excelExportService: ExcelExportService
+    private excelExportService: ExcelExportService,
+    private domSanitizer: DomSanitizer
   ) {
     this.settings = this.auth.webUser.settings.bachat;
+    this.getBase64Images();
   }
 
   ngOnInit(): void {
@@ -66,17 +74,66 @@ export class BachatComponent implements OnInit {
     });
   }
 
+  getBase64Images() {
+    this.http.put(this.api.getUrl('IMAGE64'), { type: 'item' }).subscribe((data: any) => {
+      if (data['success']) {
+        this.imageNames = data['filenames'];
+        this.images = data['files'];
+      }
+    });
+  }
+
   getbachatData() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('BACHAT') + this.auth.webUser.dept_id).subscribe((data) => {
+    this.http.get(this.api.getUrl('BACHAT') + this.auth.webUser.dept_id).subscribe(async (data) => {
       if (data['result'] && data['success']) {
-        this.bachatData = data['result'];
+
         this.bachatAll = data['result'];
-        this.total_count = data['total_count'];
+        this.total_count = data['total_count'];        
+        this.bachatData = this.bachatAll;
         this.isLoader = false;
       }
       this.isLoader = false;
     });
+  }
+
+  openImageModal() {
+    $('#showImageModal').modal('show');
+  }  
+
+  showImages(list: any) {
+    this.imagesToShow = [];
+    this.currentImage = null;
+    for (let i in list) {
+      let iname = list[i].split('/').pop();
+      for (let j in this.imageNames) {
+        if (iname == this.imageNames[j]) {
+          this.imagesToShow.push(this.domSanitizer.bypassSecurityTrustUrl(this.images[j]));
+          break;
+        }
+      }
+    }
+
+    if (this.imagesToShow.length > 0) {
+      this.currentImage = this.imagesToShow[0];
+    }
+    this.openImageModal();
+  }
+
+  // openImage(data: any) {
+  //   var image = new Image(1000, 700);
+  //   image.src = data;
+
+  //   window.open("")?.document.write(image.outerHTML);
+  // }
+
+  setImages(data: any) {
+
+    if (data.sdocument && data.sdocument.images) {
+      this.showImages(data.sdocument.images)
+    } else if (data.idocument && data.idocument.images) {
+      this.showImages(data.idocument.images)
+    }
   }
 
   stateSelected(ev: any) {
@@ -146,19 +203,19 @@ export class BachatComponent implements OnInit {
     let bchtData: any = [];
     for (let i = 0; i < this.bachatData.length; i++) {
       bchtData.push({
-        'No.': i+1,
+        'No.': i + 1,
         'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
         'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
         'MM': this.bachatData[i].mm_hin,
         'Item': this.bachatData[i].item_id ? this.bachatData[i].item_hin : '-',
         'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
-        'Used': this.bachatData[i].Used ? this.bachatData[i].Used : '-',        
-        'New': this.bachatData[i].New ? this.bachatData[i].New : '-',        
-        'Old': this.bachatData[i].Old ? this.bachatData[i].Old : '-',        
-        'In Repair': this.bachatData[i].Repairing ? this.bachatData[i].Repairing : '-',        
-        'Defective': this.bachatData[i].Defective ? this.bachatData[i].Defective : '-',        
-        'Scrap': this.bachatData[i].Scrap ? this.bachatData[i].Scrap : '-',        
-        'Total Stock': this.bachatData[i].Stock ? this.bachatData[i].Stock : '-',        
+        'Used': this.bachatData[i].Used ? this.bachatData[i].Used : '-',
+        'New': this.bachatData[i].New ? this.bachatData[i].New : '-',
+        'Old': this.bachatData[i].Old ? this.bachatData[i].Old : '-',
+        'In Repair': this.bachatData[i].Repairing ? this.bachatData[i].Repairing : '-',
+        'Defective': this.bachatData[i].Defective ? this.bachatData[i].Defective : '-',
+        'Scrap': this.bachatData[i].Scrap ? this.bachatData[i].Scrap : '-',
+        'Total Stock': this.bachatData[i].Stock ? this.bachatData[i].Stock : '-',
         'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-'
       });
     }

@@ -18,6 +18,7 @@ export class ApiService {
     LISTALL: base_url + 'dropdown/all',
     LIST: base_url + 'dropdown/',
     IMAGE: base_url + 'upload/image',
+    IMAGE64: base_url + 'upload/base64',
 
     POINT: base_url + 'points/',
     MM: base_url + 'mms/',
@@ -42,6 +43,7 @@ export class ApiService {
     SUPPORTLIST: base_url + 'supportlists/',
     AJTYPE: base_url + 'supportlists/ajtypes/',
     DEPT: base_url + 'departments/',
+    DEPT_SETTINGS: base_url + 'departments/settings/',
     EXPORTFULL: base_url + 'departments/dbfull/',
     IMPORTEXPORT: base_url + 'importexport/',
     EXPORTUPDATES: base_url + 'importexport/updates/',

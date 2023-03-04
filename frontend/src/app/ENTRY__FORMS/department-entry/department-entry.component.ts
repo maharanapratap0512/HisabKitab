@@ -32,6 +32,7 @@ export class DepartmentEntryComponent implements OnInit {
       dept_eng: [null, Validators.required],
       dept_hin: [null],
       dept_code: [null],
+      settings: [{}],
       password: [null, Validators.required]
     });
   }
@@ -46,6 +47,7 @@ export class DepartmentEntryComponent implements OnInit {
         dept_eng: changes.getData.currentValue.dept_eng,
         dept_hin: changes.getData.currentValue.dept_hin,
         dept_code: changes.getData.currentValue.dept_code,
+        settings: changes.getData.currentValue.settings,
         password: changes.getData.currentValue.password
       });
     }
@@ -86,7 +88,8 @@ export class DepartmentEntryComponent implements OnInit {
         dept_eng: this.deptForm.value.dept_eng,
         dept_hin: this.deptForm.value.dept_hin,
         dept_code: this.deptForm.value.dept_code,
-        password: this.deptForm.value.password
+        password: this.deptForm.value.password,
+        settings: this.deptForm.value.settings,
       };
       this.http.put(this.api.getUrl('DEPT'), body).subscribe((data: any) => {
         if (data && data['success']) {

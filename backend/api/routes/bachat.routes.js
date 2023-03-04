@@ -66,6 +66,8 @@ router.get('/:dept_id', async (req, res, next) => {
         for(let i in resolve.data){
             resolve.data[i].icategories = resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []
             resolve.data[i].scategories = resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : null
+            resolve.data[i].idocument = resolve.data[i].idocument ? JSON.parse(resolve.data[i].idocument) : []
+            resolve.data[i].sdocument = resolve.data[i].sdocument ? JSON.parse(resolve.data[i].sdocument) : []
         }
         res.json({
             success: true,

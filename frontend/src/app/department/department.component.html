@@ -65,12 +65,12 @@
               <!-- <a class="nav-link" [ngClass]="{'active show': dept_id > 2}" id="v-pills-setting-tab" -->
 
                 <!-- software setting tab -->
-              <!-- <a class="nav-link active show" id="v-pills-setting-tab" data-bs-toggle="pill" href="#v-pills-setting"
-                role="tab" aria-controls="v-pills-setting" aria-selected="true" *ngIf="dept_id">
+              <a class="nav-link" id="v-pills-setting-tab" data-bs-toggle="pill" href="#v-pills-setting"
+                role="tab" aria-controls="v-pills-setting" aria-selected="true" *ngIf="dept_id && settings.department.settings">
                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                 <span class="d-none d-md-block">Software Settings
                 </span>
-              </a> -->
+              </a>
 
               <a class="nav-link active show" id="v-pills-mm-tab" data-bs-toggle="pill" href="#v-pills-mm" role="tab"
                 aria-controls="v-pills-mm" aria-selected="true">
@@ -1149,6 +1149,10 @@
                           <td>
                             <div class="form-check form-switch">
                               <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.department.add"
+                                [ngModelOptions]="{standalone: true}">
+                            </div>
+                            <div class="form-check form-switch">
+                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.department.settings"
                                 [ngModelOptions]="{standalone: true}">
                             </div>
                           </td>

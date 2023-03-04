@@ -50,7 +50,7 @@ export class SubitemEntryComponent implements OnInit {
       categories: [[], Validators.required],
       extra_note: [null],
       document: [null],
-      restrict_month:[null],
+      restrict_month: [null],
       restrict_year: [null],
     });
   }
@@ -92,9 +92,9 @@ export class SubitemEntryComponent implements OnInit {
           this.gs.Lists.itemmix[i].subitems.push(data['result']);
           // this.gs.Lists.itemmix[i].categories.push(data['result'].categories);
           this.subitemForm.reset({
-            item_id: data['result'].item_id, 
+            item_id: data['result'].item_id,
             unit_id: data['result'].unit_id,
-            categories: data['result'].categories           
+            categories: data['result'].categories
           });
           this.isLoader = false;
           this.toastr.success('SUBITEM added successfully.')
@@ -242,9 +242,9 @@ export class SubitemEntryComponent implements OnInit {
       this.isLoader = true;
       $('#subitemComponent > #showModal').modal('hide');
       this.showModal = '';
-      this.imagepath = ev[0].path;
+      this.imagepath = ev;
       this.subitemForm.patchValue({
-        document: { images: ev.map((x: { path: any; }) => x.path) }
+        document: { images: ev }
       });
       this.isLoader = false;
     }
