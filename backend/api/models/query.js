@@ -181,12 +181,14 @@ const department = {
             dept_eng,
             dept_hin,
             dept_code,
+            settings,
             password,
             active)
         values (
             @dept_eng,
             @dept_hin,
             @dept_code,
+            @settings,
             @password,
             @active)`
     , insert_ignore:
@@ -195,6 +197,7 @@ const department = {
             dept_eng,
             dept_hin,
             dept_code,
+            settings,
             password,
             created_at,
             updated_at,
@@ -204,6 +207,7 @@ const department = {
             @dept_eng,
             @dept_hin,
             @dept_code,
+            @settings,
             @password,
             @created_at,
             @updated_at,
@@ -213,6 +217,7 @@ const department = {
         dept_eng=@dept_eng,
         dept_hin=@dept_hin,
         dept_code=@dept_code,
+        settings=@settings,
         password=@password,
         created_at=@created_at,
         updated_at=@updated_at where _id = @_id AND updated_at != @updated_at`
@@ -221,11 +226,16 @@ const department = {
         dept_eng=@dept_eng,
         dept_hin=@dept_hin,
         dept_code=@dept_code,
+        settings=@settings,
         password=@password,
         updated_at=datetime('now','localtime')`
     , update_active:
         `update department set
         active=@active,
+        updated_at=datetime('now','localtime')`
+    , update_settings:
+        `update department set
+        settings=@settings,
         updated_at=datetime('now','localtime')`
 }
 
@@ -572,8 +582,8 @@ const bachat = {
     , select_full:
         `select bachat.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng,      
-        it.item_hin, it.item_eng, it.item_code, it.categories as icategories,
-        sil.subitem_hin, sil.subitem_eng, si.categories as scategories, 
+        it.item_hin, it.item_eng, it.item_code, it.categories as icategories, it.document as idocument,
+        sil.subitem_hin, sil.subitem_eng, si.categories as scategories, si.document as sdocument,
         bachat.unit_id,unit.unit_short, unit.unit_full,             
         dept.dept_eng, dept.dept_hin, dept.dept_code
         from bachat

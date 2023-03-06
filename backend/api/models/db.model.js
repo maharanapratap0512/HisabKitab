@@ -1568,7 +1568,71 @@ class dbModal {
           insert or ignore into vehicle_document(vehicle_id, gadi_num, doc_type, doc_date, exp_date, amount) 
           values(NEW._id, NEW.gadi_num, 'puc', NEW.puc_date, NEW.puc_exp_date, NEW.puc_amount);
         END; `,
+
+      
     },
+    {      
+      closing: `create table if not exists closing(
+        _id integer primary key AUTOINCREMENT,
+        month int not null,
+        year int not null,
+        mm_id integer not null references mm(_id) ON UPDATE CASCADE ON DELETE CASCADE, 
+        dept_id integer not null references dept(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        closed tinyint(1) default 0,
+        created_at timestamp default (UNIXEPOCH()),
+        updated_at timestamp default (UNIXEPOCH()),
+        unique(month, year, mm_id, dept_id)
+      )`,
+      bachat_history: `create table if not exists bachat_history(
+        _id integer primary key AUTOINCREMENT,
+        month int not null,
+        year int not null,
+        mm_id integer not null references mm(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id) ,
+        unit_id integer not null references unit(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        dept_id integer not null references dept(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        qty decimal(10,2) default 0,
+        created_at timestamp default (UNIXEPOCH()),
+        updated_at timestamp default (UNIXEPOCH()),
+        unique(month, year, mm_id, item_id, unit_id, dept_id, subitem_id)
+      )`,
+      // alt_awk: `alter table aawak add column usage_category_id integer references category(_id) ON UPDATE CASCADE ON DELETE CASCADE`,
+      // alt_jwk: `alter table jawak add column usage_category_id integer references category(_id) ON UPDATE CASCADE ON DELETE CASCADE`,
+      item_dictionary: `create table if not exists item_dictionary(
+        _id integer primary key AUTOINCREMENT,
+        item_id integer not null references item(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        subitem_id integer references subitem(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        alt_name varchar(150) not null unique,
+        updated_at timestamp default (UNIXEPOCH())
+      )`,
+      rel_item_category: `create table if not exists rel_item_category(
+        item_id integer not null references item(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        category_id integer not null references category(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        updated_at timestamp default (UNIXEPOCH()),
+        primary key(item_id, category_id)
+      )`,
+      rel_subitem_category: `create table if not exists rel_subitem_category(
+        subitem_id integer not null references subitem(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        category_id integer not null references category(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        updated_at timestamp default (UNIXEPOCH()),
+        primary key(subitem_id, category_id)
+      )`,
+      rename_dept: `alter table department rename to dept`,
+      department: `create table department(
+        _id integer primary key AUTOINCREMENT,
+        dept_eng varchar(100) not null unique,
+        dept_hin varchar(100) unique,
+        dept_code varchar(100) unique,
+        settings json default (json('{}')),
+        password varchar(300) not null,
+        active tinyint(1) default 0,
+        created_at timestamp default (UNIXEPOCH()),
+        updated_at timestamp default (UNIXEPOCH())
+      )`,
+      transfer_dept: `insert into department(_id, dept_eng, dept_hin, dept_code, settings, password, active, created_at, updated_at) select _id, dept_eng, dept_hin, dept_code, (select config_value from department_config dc where dc.dept_id = dept._id AND config_key = 'settings'), password, active, created_at, updated_at from dept`,
+      drop_dept: `drop table dept`
+    }
     
   ];
   migrationLength;
@@ -1605,10 +1669,6 @@ class dbModal {
             this.db.pragma(`user_version = ${this.migrationLength}`);            
             console.log("database updated to `version` ", this.migrationLength);
           }
-
-          // console.log(new Date(1677628800000).getTime() - new Date("04-01-2023").getTime())
-          // console.log("1677628800000", new Date(1677628800000).toDateString(),  new Date(new Date(1677628800000).toLocaleDateString()).getTime());
-          // console.log("01-03-2023", new Date("01/03/2023").getTime());
 
         }
         catch (err) {

@@ -248,6 +248,7 @@ export class DepartmentComponent implements OnInit {
       department: {
         visible: false,
         add: false,
+        settings: false,
       },
       point: {
         visible: false
@@ -1463,24 +1464,25 @@ export class DepartmentComponent implements OnInit {
   }
 
   saveDeptSettings() {
-    // this.deptConf.mm.config_value = this.deptConf.mm.config_value.join(',') + ',';
-    // this.deptConf.pbk.config_value = this.deptConf.pbk.config_value.join(',') + ',';
-    // this.deptConf.department.config_value = this.deptConf.department.config_value.join(',') + ',';
-    // this.deptConf.category.config_value = this.deptConf.category.config_value.join(',') + ',';
-    // this.deptConf.item.config_value = this.deptConf.item.config_value.join(',') + ',';
-    // this.deptConf.subitem.config_value = this.deptConf.subitem.config_value.join(',') + ',';
-    // this.deptConf.aj_type.config_value = this.deptConf.aj_type.config_value.join(',') + ',';
-    this.deptConf.settings.config_value = this.settingsAll;
+    if (this.settings.department.settings) {
+      // this.deptConf.settings.config_value = this.settingsAll;
+      let body = {
+        query:{ _id: this.dept_id},
+        set: { settings: this.settingsAll }
+      }
+      this.http.put(this.api.getUrl('DEPT_SETTINGS'), body).subscribe((data: any) => {
+        if (data && data['success']) {
+          this.toastr.success('Department Settings Updated Successfully.');
+          if (this.dept_id == this.auth.webUser.dept_id) {
+            this.auth.updateSettings(this.settingsAll);
+          }
+        }
+      });
+    }
 
     this.http.put(this.api.getUrl('DEPTCONFSAVE'), this.deptConf).subscribe((data: any) => {
       if (data && data['success']) {
-        // console.log("data", data);
-        // this.deptSelected(this.dept_id);
         this.isLoader = false;
-        this.toastr.success('Department Updated Successfully.');
-        if (this.dept_id == this.auth.webUser.dept_id) {
-          this.auth.updateSettings(this.settingsAll);
-        }
         this.deptSelected(this.dept_id);
       }
     }, err => {
@@ -1573,7 +1575,7 @@ export class DepartmentComponent implements OnInit {
             if (!chk && j.chk) {
               this.deSelection('subitem', j._id);
               j.chk = false;
-             }
+            }
           });
         });
         break;

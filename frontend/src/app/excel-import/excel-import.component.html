@@ -11,7 +11,7 @@
          <ng-select class="custom" style="width: 100%;" placeholder="Select Import Type" [clearable]="true"
             (change)="importTypeChanged($event)" [virtualScroll]="true" [(ngModel)]="importType"
             [ngModelOptions]="{standalone: true}">
-            <ng-option selected="selected" disabled value="">Select MM</ng-option>
+            <ng-option selected="selected" disabled value="">Select Import Type</ng-option>
             <ng-option *ngFor="let item of EIService.importList" [value]="item">
                {{item.name}}</ng-option>
          </ng-select>
