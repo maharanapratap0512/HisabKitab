@@ -17,12 +17,17 @@
                         Stock Summary
                      </a>
                   </li>
+                  <li class="nav-item">
+                     <a href="#closing" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+                        Closing
+                     </a>
+                  </li>
                </ul>
             </div>
 
 
             <div class="tab-content">
-               <!-- import history -->
+
                <div class="tab-pane show active" id="history" style="overflow: auto;">
                   <div class="row mt-3">
                      <!-- Stock/bachat Card -->
@@ -115,8 +120,12 @@
                                                mattis dictum aliquet. </p>
                                        </div> 
                                    </div> -->
-                                    <tr class="ribbon-box" *ngFor="let data of historyData | filter:termHistory; let i=index">
-                                       <td><div class="ribbon ribbon-secondary text-light"><span>{{data.year}}</span></div></td>
+                                    <tr class="ribbon-box"
+                                       *ngFor="let data of historyData | filter:termHistory; let i=index">
+                                       <td>
+                                          <div class="ribbon ribbon-secondary text-light"><span>{{data.year}}</span>
+                                          </div>
+                                       </td>
                                        <td>{{i+1}}</td>
                                        <td>
                                           {{data.state_hin}}<br />
@@ -133,7 +142,7 @@
                                              <span>{{data['m'+m.m+'_date'] | date:'dd-MM-yyyy'}}</span>
                                           </div>
                                        </td>
-                                       
+
                                     </tr>
                                  </tbody>
                               </table>
@@ -341,6 +350,10 @@
                      </div>
                   </div>
 
+               </div>
+
+               <div class="tab-pane" id="closing" style="overflow: auto;">
+                  <app-closing></app-closing>
                </div>
 
 

@@ -11,12 +11,12 @@ import * as XLSX from 'xlsx';
 declare var $: any;
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  selector: 'app-closing',
+  templateUrl: './closing.component.html',
+  styleUrls: ['./closing.component.scss']
 })
 
-export class DashboardComponent implements OnInit {
+export class ClosingComponent implements OnInit {
 
   isLoader: any = false;
   termAawak: any;

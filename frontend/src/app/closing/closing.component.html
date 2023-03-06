@@ -1,0 +1,122 @@
+<div class="row mt-3">
+   <!-- Stock/bachat Card -->
+   <div class="col-md-12 col-12">
+      <div class="card card-body">
+         <h5 class="card-title">
+            Closing Summary
+         </h5>
+
+         <!-- Filter Row -->
+         <div class="row mb-3">
+            <div class="col-12 px-2">
+               <div class="row">
+                  <div class="col-3">
+                     <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="termHistory"
+                           name="search">
+                     </div>
+                  </div>
+
+                  <div class="col-2">
+                     <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total
+                        Count : {{historyData.length?historyData.length:'0'}} </button>
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <!-- main table  -->
+         <div class="row p-1" style="overflow-y: auto; max-height: 500px;">
+            <table id="datatable-buttons" class="table table-hover dt-responsive">
+               <thead>
+                  <tr>
+                     <td>Year</td>
+                     <td style="width: 50px;">No.</td>
+                     <td>State</td>
+                     <td>MM</td>
+                     <td>Jan</td>
+                     <td>Feb</td>
+                     <td>Mar</td>
+                     <td>Apr</td>
+                     <td>May</td>
+                     <td>Jun</td>
+                     <td>Jul</td>
+                     <td>Aug</td>
+                     <td>Sep</td>
+                     <td>Oct</td>
+                     <td>Nov</td>
+                     <td>Dec</td>
+                  </tr>
+               </thead>
+               <tbody>
+                  <!-- <div class="card ribbon-box">
+                                       <div class="card-body">
+                                           <div class="ribbon-two ribbon-two-primary"><span>Primary</span></div>
+                                           <p class="mb-0">Quisque nec turpis at urna dictum luctus. Suspendisse
+                                               convallis dignissim eros at volutpat. In egestas mattis dui. Aliquam
+                                               mattis dictum aliquet. </p>
+                                       </div> 
+                                   </div> -->
+                  <tr class="ribbon-box" *ngFor="let data of historyData | filter:termHistory; let i=index">
+                     <td>
+                        <div class="ribbon ribbon-secondary text-light"><span>{{data.year}}</span></div>
+                     </td>
+                     <td>{{i+1}}</td>
+                     <td>
+                        {{data.state_hin}}<br />
+                        {{data.state_eng}}
+                     </td>
+                     <td>
+                        {{data.mm_hin}}<br />
+                        {{data.mm_eng}}
+                     </td>
+                     <!-- <td>{{data.year}}</td> -->
+                     <td *ngFor="let m of months">
+                        <div *ngIf="data['m'+m.m]" style="text-align: center;">
+                           <i class="uil-check-circle text-success h3"></i> <br>
+                           <span>{{data['m'+m.m+'_date'] | date:'dd-MM-yyyy'}}</span>
+                        </div>
+                     </td>
+
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+      </div>
+   </div>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
+               aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <app-aawak-entry *ngIf="showModal == 'Add Aawak'" [getData]="awkDraft"
+               (response)='addAawakResponse($event)'></app-aawak-entry>
+
+            <app-import *ngIf='showModal == "import"' (response)='importResponse($event)'></app-import>
+
+            <app-excel-import *ngIf='showModal == "excel_import"'></app-excel-import>
+
+            <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
+               [aawakRef]="editData"></app-jawak-entry>
+
+            <app-data-view *ngIf="showModal == 'Show Jawak'" [getData]="viewData" Type="jawak"></app-data-view>
+            <!-- <app-jawak-entry *ngIf="showModal == 'Edit Aawak'" (response)='editAawakResponse($event)'
+               [getData]="editData" [isEdit]="true"></app-jawak-entry> -->
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+         </div>
+      </div>
+   </div>
+</div>
