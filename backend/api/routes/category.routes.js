@@ -103,13 +103,13 @@ router.put('/', async (req, res, next) => {
 router.put('/import/', async (req, res, next) => {
     try {
         if (req.body) {
-            let stmt = DB.db.prepare(DB.query.subitem_list.import);
+            let stmt = DB.db.prepare(DB.query.category.import);
             for (let i in req.body) {
-                if (req.body[i].subitem_eng == undefined) {
-                    req.body[i].subitem_eng = null;
+                if (req.body[i].category_eng == undefined) {
+                    req.body[i].category_eng = null;
                 }
-                else if (req.body[i].subitem_eng.trim() == 'NULL' || req.body[i].subitem_eng.trim() == '') {
-                    req.body[i].subitem_eng = null;
+                else if (req.body[i].category_eng.trim() == 'NULL' || req.body[i].category_eng.trim() == '') {
+                    req.body[i].category_eng = null;
                 }
                 console.log(req.body[i]);
                 let res = stmt.run(req.body[i])

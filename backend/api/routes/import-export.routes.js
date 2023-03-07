@@ -178,44 +178,45 @@ router.put('/ignore', async (req, res, next) => {
 router.put('/final', async (req, res, next) => {
     try {
         for (let row of req.body.data) {
-            // if (typeof row.date == "string") {
-            //     row.date = Fn.StringToDate(row.date);
-            // }
-            // else if (typeof row.date == "number") {
-            //     row.date = Fn.ExcelDateToJSDate(row.date)
-            //     console.log("Exceldate", date);
-            // }
-            setTimeout(async() => {
-                await DB.insert('aawak', {
-                    date: row.date, mm_id: row.mm_id, pkt_num: row.pkt_num, pbk_id: row.pbk_id, aawak_mm_id: row.aj_mm_id,
-                    item_id: row.item_id, subitem_id: row.subitem_id, product_id: row.product_id, item_detail: row.item_detail,
-                    condition_id: row.condition_id, qty: row.qty, rate: row.rate, actual_amt: row.actual_amt,
-                    aawak_type_id: row.aj_type_id, unit_id: row.unit_id, description: row.description, nimitt_id: row.nimitt_id,
-                    dept_id: row.dept_id, company_name: row.company_name, isbill: row.isbill, document: null
-                }, null, false).then((data) => {
-                    if (data) {
-                        for (let jwk of row.jawak_detail) {
-                            DB.insert('jawak', {
-                                date: jwk.date ? jwk.date : row.date, mm_id: row.mm_id, pkt_num: jwk.pkt_num,
-                                pbk_id: jwk.pbk_id ? jwk.pbk_id : null, jawak_mm_id: jwk.aj_mm_id, item_id: row.item_id,
-                                subitem_id: row.subitem_id, product_id: row.product_id, item_detail: null,
-                                condition_id: jwk.condition_id, qty: jwk.qty, jawak_type_id: jwk.aj_type_id,
-                                unit_id: row.unit_id, description: jwk.description, nimitt_id: jwk.nimitt_id, company_name: row.company_name, aawak_ref_id: data, dept_id: row.dept_id
-                            }, null, false);
+            setTimeout(async () => {
+                if(row.awk_id && req.body.history.autoUpdate){
+                    await insertJawak(row, row.awk_id);
+                }else{
+                    await DB.insert('aawak', {
+                        date: row.date, mm_id: row.mm_id, pkt_num: row.pkt_num, pbk_id: row.pbk_id, aawak_mm_id: row.aj_mm_id,
+                        item_id: row.item_id, subitem_id: row.subitem_id, product_id: row.product_id, item_detail: row.item_detail,
+                        condition_id: row.condition_id, qty: row.qty, rate: row.rate, actual_amt: row.actual_amt,
+                        aawak_type_id: row.aj_type_id, unit_id: row.unit_id, description: row.description, nimitt_id: row.nimitt_id,
+                        dept_id: row.dept_id, company_name: row.company_name, isbill: row.isbill, document: null
+                    }, null, false).then((data) => {
+                        if (data) {
+                            insertJawak(row.jawak_detail, data);
                         }
-                    }
-                });
+                    });
+                }
             }, 10);
-            
+
         }
         await DB.insert('import_history', req.body.history, null, false);
         await DB.runQuery('temp_import', 'delete');
         res.json({
-            success: true
+            success: true,
         });
 
     } catch (err) { next(err) };
 });
+
+async function insertJawak(row, awkId){
+    for (let jwk of row.jawak_detail) {
+        await DB.insert('jawak', {
+            date: jwk.date ? jwk.date : row.date, mm_id: row.mm_id, pkt_num: jwk.pkt_num,
+            pbk_id: jwk.pbk_id ? jwk.pbk_id : null, jawak_mm_id: jwk.aj_mm_id, item_id: row.item_id,
+            subitem_id: row.subitem_id, product_id: row.product_id, item_detail: null,
+            condition_id: jwk.condition_id, qty: jwk.qty, jawak_type_id: jwk.aj_type_id,
+            unit_id: row.unit_id, description: jwk.description, nimitt_id: jwk.nimitt_id, company_name: row.company_name, aawak_ref_id: awkId, dept_id: row.dept_id
+        }, null, false);
+    }
+}
 
 //get all updated list
 router.put('/updates/:dept_id', async (req, res, next) => {

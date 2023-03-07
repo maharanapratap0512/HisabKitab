@@ -1631,7 +1631,8 @@ class dbModal {
         updated_at timestamp default (UNIXEPOCH())
       )`,
       transfer_dept: `insert into department(_id, dept_eng, dept_hin, dept_code, settings, password, active, created_at, updated_at) select _id, dept_eng, dept_hin, dept_code, (select config_value from department_config dc where dc.dept_id = dept._id AND config_key = 'settings'), password, active, created_at, updated_at from dept`,
-      drop_dept: `drop table dept`
+      drop_dept: `drop table dept`,
+      alt_temp_import: `alter table temp_import add column awk_id int`,
     }
     
   ];
