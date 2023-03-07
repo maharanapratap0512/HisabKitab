@@ -777,6 +777,7 @@ export class AawakComponent implements OnInit {
 
         //aawak form
         var obj: any = {
+          awk_id:null,
           type: null,
           date: null,
           pkt_num: null,
@@ -829,6 +830,10 @@ export class AawakComponent implements OnInit {
           //for aawak value (0 to jawak start)
           if (j < jawakStart) {
             switch (columns[j]) {
+              case "_id":
+              case "awk_id":
+                obj.awk_id = exceldata[i][j];
+                break;
               case "mm": obj.mm = exceldata[i][j];
                 let getmm = this.mms.find((m: any) => [m.mm_hin, m.mm_eng, m.mm_code].includes(obj.mm));
                 if (getmm) {

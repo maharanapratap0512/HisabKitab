@@ -21,6 +21,10 @@ export class ImportComponent implements OnInit {
   @Input() importData: any;
   @Input() updateData: any;
   @Output() response = new EventEmitter();
+  page = 1;
+  itemsPerPage = 100;
+  currentPage: any;
+  total_count: any;
   importForm: FormGroup;
   term: any;
   items: any = [];
@@ -79,7 +83,8 @@ export class ImportComponent implements OnInit {
       mm_id: [null, Validators.required],
       month: [null, Validators.required],
       year: [null, Validators.required],
-      dept_id: [this.auth.webUser.dept_id]
+      dept_id: [this.auth.webUser.dept_id],
+      autoUpdate: [false]
     });
 
   }
@@ -116,6 +121,7 @@ export class ImportComponent implements OnInit {
     this.http.get(this.api.getUrl('IMPORTEXPORT')).subscribe((data: any) => {
       if (data.success) {
         this.importData = data.result;
+        this.total_count = data.total_count;
         for (let i in this.importData) {
           console.log("this.importData[i]", this.importData[i]);
 

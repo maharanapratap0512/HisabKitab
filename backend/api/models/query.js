@@ -661,6 +661,73 @@ const bachat = {
         `mm.mm_hin, mm.mm_eng, item_hin, subitem_hin, item_eng, subitem_eng, unit.unit_short`
 }
 
+const bachat_history = {
+    select:
+        `select * from bachat_history ?`
+    , select_full:
+        `select bachat_history.*,
+        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng,      
+        it.item_hin, it.item_eng, it.item_code, it.categories as icategories, it.document as idocument,
+        sil.subitem_hin, sil.subitem_eng, si.categories as scategories, si.document as sdocument,
+        bachat_history.unit_id,unit.unit_short, unit.unit_full,             
+        dept.dept_eng, dept.dept_hin, dept.dept_code
+        from bachat_history
+        left join mm on mm._id = bachat_history.mm_id
+        left join item it on it._id = bachat_history.item_id
+        left join subitem si on si._id = bachat_history.subitem_id
+        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join unit on unit._id = bachat_history.unit_id   
+        left join state st on st._id = mm.state_id
+        left join department dept on dept._id = bachat_history.dept_id ? limit @limit offset @offset`
+    ,    
+    insert:
+        `insert into bachat_history (
+            mm_id,
+            item_id,
+            subitem_id,
+            Stock,
+            Used,
+            New,
+            Old,
+            Defective,
+            Scrap,
+            unit_id,
+            dept_id,
+            Repairing,
+            active)
+        values (
+            @mm_id,
+            @item_id,
+            @subitem_id,
+            @Stock,
+            @Used,
+            @New,
+            @Old,
+            @Defective,
+            @Scrap,
+            @unit_id,
+            @dept_id,
+            @Repairing,
+            @active)`
+    , update:
+        `update bachat_history set
+        mm_id=@mm_id,
+        item_id=@item_id,
+        subitem_id=@subitem_id,
+        Stock=@Stock,
+        Used=@Used,
+        New=@New,
+        Old=@Old,
+        Defective=@Defective,
+        Scrap=@Scrap,
+        unit_id=@unit_id,
+        dept_id=@dept_id,
+        Repairing=@Repairing,
+        updated_at=datetime('now','localtime')`
+    , order:
+        `mm.mm_hin, mm.mm_eng, item_hin, subitem_hin, item_eng, subitem_eng, unit.unit_short`
+}
+
 const mm = {
     select:
         `select * from mm ?`
@@ -1540,19 +1607,20 @@ const temp_import = {
         left join state pst on pst._id = nmt.state_id ? limit @limit offset @offset`
     , insert:
         `insert into temp_import (
-        type, date, pkt_num, item_detail, qty, rate, actual_amt,
+        awk_id, type, date, pkt_num, item_detail, qty, rate, actual_amt,
         company_name, description, isbill, document, mm, mm_id, pbk,
         pbk_id, aj_mm, aj_mm_id, item, item_id, subitem, subitem_id,
         product, product_id, condition, condition_id, unit, unit_id, aj_type,
         aj_type_id, nimitt, nimitt_id, dept, dept_id, jawak_detail)
     values (
-        @type, @date, @pkt_num, @item_detail, @qty, @rate, @actual_amt,
+        @awk_id, @type, @date, @pkt_num, @item_detail, @qty, @rate, @actual_amt,
         @company_name, @description, @isbill, @document, @mm, @mm_id, @pbk,
         @pbk_id, @aj_mm, @aj_mm_id, @item, @item_id, @subitem, @subitem_id,
         @product, @product_id, @condition, @condition_id, @unit, @unit_id, @aj_type,
         @aj_type_id, @nimitt, @nimitt_id, @dept, @dept_id, @jawak_detail)`
     , update:
         `update temp_import set 
+        awk_id=@awk_id,
         type=@type,
         date=@date,
         pkt_num=@pkt_num,
@@ -1605,7 +1673,7 @@ const import_history = {
         left join state st on mm.state_id = st._id        
         left join department dept on dept._id = import_history.dept_id ? group by mm_id, year`
     , insert:
-        `insert into import_history (mm_id, month, year, dept_id)
+        `insert or update into import_history (mm_id, month, year, dept_id)
         values (@mm_id, @month, @year, @dept_id)`
     , update:
         `update import_history set  
@@ -1616,6 +1684,33 @@ const import_history = {
     , order:
         ``,
     delete: `delete from import_history`,
+}
+
+const closing = {
+    select:
+        `select * from closing ?`
+    , select_full:
+        `select json_group_array(json_object('_id', closing._id, 'month', closing.month, 'closed', closing.closed, 'updated_at', closing.updated_at)) as monthly_detail, closing.year, closing.mm_id, closing.dept_id,
+        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id,
+        st.state_hin, st.state_eng,
+        dept.dept_hin, dept.dept_eng, dept.dept_code
+        from closing 
+        left join mm on mm._id = closing.mm_id        
+        left join state st on mm.state_id = st._id        
+        left join department dept on dept._id = closing.dept_id ? group by mm_id, year`
+    , insert:
+        `insert into closing (mm_id, month, year, dept_id, closed)
+        values (@mm_id, @month, @year, @dept_id, @closed)`
+    , update:
+        `update closing set  
+        mm_id = @mm_id, 
+        month = @month, 
+        year = @year,
+        closed = @closed,
+        updated_at = @updated_at`
+    , order:
+        ``,
+    delete: `delete from closing`,
 }
 
 const dictionary = {
@@ -1802,5 +1897,5 @@ const test = {
 }
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_history, closing
 };
