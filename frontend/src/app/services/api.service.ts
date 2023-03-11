@@ -58,7 +58,8 @@ export class ApiService {
     REPORT: base_url + 'reports/',
     REPORTPBK: base_url + 'reports/pbk/',
     IMPORTHISTORY: base_url + 'import_history/',
-    VEHICLE:base_url+'vehicle/',
+    VEHICLE: base_url + 'vehicle/',
+    CLOSING: base_url+ 'closing/'
     
   };
 

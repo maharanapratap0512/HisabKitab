@@ -6,6 +6,58 @@
             Closing Summary
          </h5>
 
+         <div class="row">
+            <!-- Month and Year -->
+            <div class="col-md-3 mb-2">
+               <div class="form-group">
+                  <label class="form-label">Year</label>
+                  <div class="d-flex justify-content-between">
+                     <ng-select class="custom" style="width: 100%;" placeholder="Select Year"
+                        (change)="yearChanged($event)" [clearable]="true" [virtualScroll]="true"
+                        [(ngModel)]="filterObj.year" name="year">
+                        <ng-option selected="selected" disabled value="">Select Year
+                        </ng-option>
+                        <ng-option *ngFor="let item of years" [value]="item">{{item}}</ng-option>
+                     </ng-select>
+                  </div>
+               </div>
+            </div>
+
+            <!-- state for aawak filter -->
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">State</label>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Filter by State"
+                     [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)">
+                     <ng-option selected="selected" disabled value="">Select State to Filter Pbk
+                     </ng-option>
+                     <ng-option *ngFor="let item of states" [value]="item._id">
+                        {{item.state_hin}} : {{item.state_eng}}
+                     </ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <!-- MM -->
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">MM</label>
+                  <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
+                     [virtualScroll]="true" name="mm_id" [(ngModel)]="filterObj.mm_id">
+                     <ng-option *ngFor="let item of mms" [value]="item._id">
+                        {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+
+            <!-- <div class="col-md-2 mb-3">
+               <button class="btn btn-primary" (click)="searchReport()">Search</button>
+            </div> -->
+
+
+         </div>
+
          <!-- Filter Row -->
          <div class="row mb-3">
             <div class="col-12 px-2">

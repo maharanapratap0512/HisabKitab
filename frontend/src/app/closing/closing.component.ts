@@ -54,10 +54,12 @@ export class ClosingComponent implements OnInit {
   settings: any = {};
   filterObj: any = {
     mm_id: null,
-    items: []
+    items: [],
+    year: null
   }
   loadingStatus: any = "मैं आत्मा शांत स्वरूप हूँ ।";
   dictionary: any = [];
+  years: any;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -69,8 +71,9 @@ export class ClosingComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
+    this.years = this.gs.years;
     this.getBachat();
-    this.getImportHistory();
+    this.getClosing();
     // this.getPendingAawak();
     this.gs.observeList().subscribe(result => {
       this.mmsAll = result.mm ? result.mm : [];
@@ -113,9 +116,9 @@ export class ClosingComponent implements OnInit {
     $('#showModal').modal('hide');
   }
 
-  getImportHistory() {
+  getClosing() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('IMPORTHISTORY') + this.auth.webUser.dept_id).subscribe((data: any) => {
+    this.http.get(this.api.getUrl('CLOSING') + this.auth.webUser.dept_id).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         for (let row of data['result']) {
           let monthly_detail: any = {};
@@ -704,10 +707,26 @@ export class ClosingComponent implements OnInit {
       this.closeModal();
       this.gs.checkTempImport();
       this.getBachat();
-      this.getImportHistory();
+      this.getClosing();
     }
   }
 
+
+  yearChanged(ev: any) {
+    // if (ev && ev == this.gs.date.getFullYear()) {
+    //   this.months = this.gs.months.filter((i: { m: number; }) => i.m <= this.gs.date.getMonth())
+    // }
+    // else {
+    //   this.months = this.gs.months;
+    // }
+  }
+
+  stateSelected(ev: any) {
+    // if (ev)
+    //   this.pbks = this.pbks.filter((pbk: { state_id: any; }) => pbk.state_id == ev);
+    // else
+    //   this.pbks = this.pbksAll;
+  }
 
 
 }
