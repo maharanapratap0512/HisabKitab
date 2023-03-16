@@ -51,8 +51,8 @@
                            <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                         </button>
 
-                        <button type="button" class="btn btn-outline-success dropdown-toggle mx-2" data-bs-toggle="dropdown"
-                           aria-expanded="false"> Export To Excel </button>
+                        <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                           data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
                         <div class="dropdown-menu">
                            <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
                            <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
@@ -302,10 +302,12 @@
                            <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
                            <th style="width: 150px;">Aawak Type</th>
                            <th style="width: 180px;">Item - Subitem</th>
-                           <th style="width: 150px;" *ngIf="settings.aawak.condition_id || settings.aawak.product_id">Product</th>
+                           <th style="width: 150px;" *ngIf="settings.aawak.condition_id || settings.aawak.product_id">
+                              Product</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.company_name">Company</th>
                            <th style="width: 100px;">Qty</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.actual_amt">Actual Amt</th>
+                           <th style="width: 120px;">Usage Category</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.nimitt_id">Nimitt</th>
                            <th style="width: 200px;" *ngIf="settings.aawak.item_detail">Item Detail</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.isbill">IsBill</th>
@@ -361,7 +363,8 @@
                                  {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
                               </td>
                               <td *ngIf="settings.aawak.condition_id || settings.aawak.product_id">
-                                 {{data.product_id ? (data.product_code ? data.product_code : '') + " : " + (data.sr_num ? data.sr_num : '') : ''}} <br />
+                                 {{data.product_id ? (data.product_code ? data.product_code : '') + " : " + (data.sr_num
+                                 ? data.sr_num : '') : ''}} <br />
                                  {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
                               </td>
                               <td *ngIf="settings.aawak.company_name">
@@ -375,6 +378,7 @@
                               </td>
                               <td>@ {{data.rate?data.rate:'-'}} <br>
                                  = {{data.actual_amt?data.actual_amt:'-'}}</td>
+                              <!-- <td>{{data.usage_category_id ? category_hin : ''}}</td> -->
                               <td *ngIf="settings.aawak.nimitt_id">
                                  {{data.nimitt_id?data.nimitt_hin:'-'}}<br />
                                  {{data.nimitt_id? '(' + data.nimitt_state_hin + ')': ''}}
@@ -399,6 +403,7 @@
                                           <th>कहा भेजा</th>
                                           <th>किसको दिया</th>
                                           <th>जावक प्रकार</th>
+                                          <th>जावक केटेगरी</th>
                                           <th>परिमाण</th>
                                           <th style="width:0px;">
                                              <div class="ribbon ribbon-secondary text-light float-end"> Destribution
@@ -416,6 +421,8 @@
                                           <td>{{jwk.nimitt_hin}} {{jwk.nimitt_state_hin ?
                                              "("+jwk.nimitt_state_hin+")":''}}</td>
                                           <td>{{jwk.jawak_type_hin}}{{jwk.jawak_type_eng ? " : "+jwk.jawak_type_eng :
+                                             ''}}</td>
+                                          <td>{{jwk.category_hin}}{{jwk.category_eng ? " : "+jwk.category_eng :
                                              ''}}</td>
                                           <td>{{jwk.qty}} {{jwk.unit_short}}</td>
                                        </tr>

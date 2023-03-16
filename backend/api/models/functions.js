@@ -7,15 +7,15 @@ class Functions {
    }
 
    convertToLower(data, fieldList = null) {
-      if(fieldList && fieldList.length > 0){
+      if (fieldList && fieldList.length > 0) {
          for (let i in data) {
-            for(let field of fieldList){
+            for (let field of fieldList) {
                data[i][field] = data[i][field] ? data[i][field].toLowerCase() : null;
             }
          }
-      } else{
+      } else {
          for (let i in data) {
-            for(let key of Object.keys(data[i])){
+            for (let key of Object.keys(data[i])) {
                data[i][key] = data[i][key] ? data[i][key].toLowerCase() : null;
             }
          }
@@ -25,7 +25,7 @@ class Functions {
 
    async getMMs(dept_id = null) {
 
-      return await this.DB.getList('mm', { dept_id: dept_id }).then(async (resolve) => {         
+      return await this.DB.getList('mm', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['mm_hin', 'mm_eng', 'mm_code']);
       }, (err) => {
          return [];
@@ -33,7 +33,7 @@ class Functions {
    }
    async getStates(dept_id = null) {
 
-      return await this.DB.getList('state').then(async (resolve) => {         
+      return await this.DB.getList('state').then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['state_hin', 'state_eng']);
       }, (err) => {
          return [];
@@ -41,7 +41,7 @@ class Functions {
    }
    async getCategories(dept_id = null) {
 
-      return await this.DB.getList('category', { dept_id: dept_id }).then(async (resolve) => {         
+      return await this.DB.getList('category', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['category_hin', 'category_eng']);
       }, (err) => {
          return [];
@@ -49,7 +49,7 @@ class Functions {
    }
    async getUnits(dept_id = null) {
 
-      return await this.DB.getList('unit').then(async (resolve) => {         
+      return await this.DB.getList('unit').then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['unit_short', 'unit_full']);
       }, (err) => {
          return [];
@@ -57,7 +57,7 @@ class Functions {
    }
    async getitems(dept_id = null) {
 
-      return await this.DB.getList('item', { dept_id: dept_id }).then(async (resolve) => {         
+      return await this.DB.getList('item', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['item_hin', 'item_eng', 'item_code']);
       }, (err) => {
          return [];
@@ -65,7 +65,7 @@ class Functions {
    }
    async getSubitems(dept_id = null) {
 
-      return await this.DB.getList('subitem', { dept_id: dept_id }).then(async (resolve) => {         
+      return await this.DB.getList('subitem', { dept_id: dept_id }).then(async (resolve) => {
          return resolve.data || [];
          // return this.convertToLower(resolve.data || []);
       }, (err) => {
@@ -74,42 +74,42 @@ class Functions {
    }
    async getSubiemList(dept_id = null) {
 
-      return await this.DB.getList('subitem_list', { dept_id: dept_id }).then(async (resolve) => {         
+      return await this.DB.getList('subitem_list', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['subitem_hin', 'subitem_eng']);
       }, (err) => {
          return [];
       });
    }
    async getSupportList(dept_id = null) {
-      return await this.DB.getList('support_list', { dept_id: dept_id }).then(async (resolve) => {         
+      return await this.DB.getList('support_list', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['list_name_hin', 'list_name_eng']);
       }, (err) => {
          return [];
       });
    }
    async getCountries(dept_id = null) {
-      return await this.DB.getList('country').then(async (resolve) => {         
+      return await this.DB.getList('country').then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['country_hin', 'country_eng']);
       }, (err) => {
          return [];
       });
    }
    async getCities(dept_id = null) {
-      return await this.DB.getList('city').then(async (resolve) => {         
+      return await this.DB.getList('city').then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['city_hin', 'city_eng']);
       }, (err) => {
          return [];
       });
    }
    async getNimitts(dept_id = null) {
-      return await this.DB.getList('nimitt', { dept_id: dept_id }).then(async (resolve) => {         
+      return await this.DB.getList('nimitt', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['nimitt_hin', 'nimitt_eng', 'gender', 'relative_name']);
       }, (err) => {
          return [];
       });
    }
    async getPbks(dept_id = null) {
-      return await this.DB.getList('pbk', { dept_id: dept_id }).then(async (resolve) => {         
+      return await this.DB.getList('pbk', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['nimitt_hin', 'nimitt_eng', 'gender', 'relation', 'relative_name']);
       }, (err) => {
          return [];
@@ -156,6 +156,7 @@ class Functions {
       })
    }
 
+
    ExcelDateToJSDate = (intDate) => {
       return new Date((Math.floor(intDate - 25569) * 86400) * 1000);
    }
@@ -165,6 +166,7 @@ class Functions {
    }
 
    StringToDate = (stringDate) => {
+      console.log(stringDate);
       let datearr = stringDate.split(/[./-]+/);
       if (datearr && datearr.length == 3) {
 
@@ -192,6 +194,10 @@ class Functions {
       }
       // yyyy-mm-dd
       return;
+   }
+
+   JulianDateToJSDate = (julianDate) => {
+      return new Date((julianDate - 2440587.5) * 86400000);
    }
 
 }

@@ -25,6 +25,7 @@ import { PointComponent } from './CHILD_TABLES/point/point.component';
 import { NimittComponent } from './CHILD_TABLES/nimitt/nimitt.component';
 import { ReportsComponent } from './reports/reports.component';
 import { VehicleComponent } from './vehicle/vehicle.component';
+import { BachatNewComponent } from './bachat-new/bachat-new.component';
 
 const routes: Routes = [
    {
@@ -43,6 +44,7 @@ const routes: Routes = [
          { path: "aawak", component: AawakComponent },
          { path: "jawak", component: JawakComponent },
          { path: "bachat", component: BachatComponent },
+         { path: "bachat_new", component: BachatNewComponent },
          { path: "pbk", component: PbkComponent },
          { path: "mm", component: MmComponent },
          { path: "category", component: CategoryComponent },

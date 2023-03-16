@@ -64,6 +64,23 @@ router.put('/', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+//hisab closed : copy bachat to bachat history.
+router.put('/', async (req, res, next) => {
+    try {
+        if (req.body) {
+            await DB.update('closing', req.body.set, req.body.query._id).then(async (data) => {
+                res.json({
+                    success: true,
+                    result: data || {}
+                });
+            });
+        }
+        else {
+            return next(new Error('Id not Found.'))
+        }
+    } catch (err) { next(err) };
+});
+
 
 // delete closing 
 router.delete('/:id', async (req, res, next) => {

@@ -3,6 +3,7 @@ class DBContex {
     dbModal;
     DBFolder;
     dbmodal;
+    tbInterface;
     db;
     fs;
     path;
@@ -18,8 +19,8 @@ class DBContex {
         'aawak',
         'jawak',
         'bachat',
+        'bachat_new',
         'product',
-        'product_tracking',
         'department_config',
         'merge_history'
     ];
@@ -40,6 +41,7 @@ class DBContex {
     constructor() {
         this.query = require('../models/query');
         this.dbModal = require('../models/db.model');
+        this.tbInterface = require('../models/table_interface');
         this.path = require('path');
         this.fs = require('fs');
         this.DBFolder = this.path.resolve(__dirname, '../../../../Data');
@@ -131,7 +133,7 @@ class DBContex {
                 }
 
                 // if (tblname == "import_history")
-                //     console.log(sql);
+                    // console.log(sql);
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {
@@ -393,6 +395,96 @@ class DBContex {
             }
         });
     }
+
+    async getBachatFromAJ(AJobj) {
+        let ajDate = new Date(AJobj.date);
+        let bachatObj = {
+            ...this.tbInterface.bachat_new,
+            month: ajDate.getMonth(),
+            year: ajDate.getFullYear(),
+            mm_id: AJobj.mm_id,
+            item_id: AJobj.item_id,
+            subitem_id: AJobj.subitem_id,
+            unit_id: AJobj.unit_id,
+            dept_id: AJobj.dept_id,
+            condition_id: AJobj.condition_id
+        };
+        let bachat = await this.db.prepare(this.query.bachat_new.select_exists).get(bachatObj);
+
+        return bachat || bachatObj;
+    }
+
+    async updateBachatFromAJInsert(AJobj, operation) {
+        let bachat = await this.getBachatFromAJ(AJobj)
+        switch (operation.toLowerCase()) {
+            case 'aawak':
+                bachat.total_aawak += parseInt(AJobj.qty);
+                bachat.bachat += parseInt(AJobj.qty);
+                break;
+
+            case 'jawak':
+                if (AJobj.jawak_type_id == 27)
+                    bachat.used_jawak += parseInt(AJobj.qty);
+                else
+                    bachat.jawak += parseInt(AJobj.qty);
+                bachat.bachat -= parseInt(AJobj.qty);
+                break;
+
+        }
+        if (bachat._id) {
+            this.db.prepare(this.query.bachat_new.update_auto).run({ ...bachat });
+        } else {
+            this.db.prepare(this.query.bachat_new.insert).run({ ...bachat });
+        }
+    }
+
+    async updateBachatFromAJDelete(AJobj, operation) {
+        let ajDate = new Date(AJobj.date);
+        AJobj.month = ajDate.getMonth();
+        AJobj.year = ajDate.getFullYear();
+        let sql = null;
+        switch (operation.toLowerCase()) {
+            case 'aawak':
+                sql = this.query.bachat_new.update_awk_del;
+                break
+            case 'jawak':
+                sql = this.query.bachat_new.update_jwk_del;
+                break
+
+        }
+        let res = this.db.prepare(sql).run(AJobj);
+    }
+
+    async updateBachatFromAJUpdate(AJobj, operation) {
+        let AJobjOld = await this.getById(operation.toLowerCase(), AJobj._id);
+        console.log("AJobjOld", AJobjOld);
+        await this.updateBachatFromAJDelete(AJobjOld, operation.toLowerCase())
+        await this.updateBachatFromAJInsert(AJobj, operation.toLowerCase());
+
+    }
+
+    async getById(tblname, id, options = {}) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let sql = options.full ? (this.query[tblname] ? this.query[tblname].select_full : this.query[tblname].select) : (this.query[tblname] ? this.query[tblname].select : '');
+                sql = sql.replace('?', ` where ${tblname}._id = ${id}`);
+                if (tblname == "itemmix") {
+                    sql = sql.replace('&', '');
+                    sql = sql.replace('#', ``);
+                }
+                else if (["itemmix", "item", "subitem", "product"].includes(tblname)) {
+                    sql = sql.replace('#', ``);
+                }
+                const result = await this.db.prepare(sql).get({ order: `${tblname}._id`, limit: 1, offset: -1 });
+                resolve(result)
+            }
+            catch (ex) {
+                reject(ex);
+            }
+
+        });
+    }
+
 }
 
 module.exports = DBContex; 

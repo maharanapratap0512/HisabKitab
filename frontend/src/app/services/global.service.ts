@@ -93,7 +93,16 @@ export class GlobalService {
     return data;
   }
 
-
+  formatDisplayDate(d: any) {
+    var date = new Date(d)
+    var year = date.getFullYear()
+    var month = '' + (date.getMonth() + 1);
+    var day = '' + date.getDate()
+    // if (month.length < 2) month = '0' + month;
+    // if (day.length < 2) day = '0' + day;
+    var formatted = day.padStart(2, "0") + "-" + month.padStart(2, "0") + "-" + year;
+    return (formatted)
+  }
 
   async getDeptConfig() {
     return new Promise((resolve) => {

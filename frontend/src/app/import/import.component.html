@@ -82,8 +82,8 @@
          <table id="datatable-buttons" class="table table-hover dt-responsive">
             <thead>
                <tr>
-                  <th style="width: 50px;">No.</th>                  
-                  <th style="width: 50px;">Awk ID</th>                  
+                  <th style="width: 50px;">No.</th>
+                  <th style="width: 50px;">Awk ID</th>
                   <th style="width: 80px;">Pkt No.</th>
                   <th style="width: 80px;">Date</th>
                   <th style="width: 100px;">MM</th>
@@ -159,7 +159,7 @@
                   <ng-container *ngIf="data.jawak_detail.length > 0">
                      <tr class="ribbon-box">
                         <td style="border: none;"></td>
-                        <td colspan="11" class="sub-row">
+                        <td colspan="12" class="sub-row">
                            <table class="card-body" style="width: 99.7%;table-layout: fixed;">
                               <tr>
                                  <th>No.</th>
@@ -170,6 +170,7 @@
                                  <th>Description</th>
                                  <th>जवाक प्रकार</th>
                                  <th>परिमाण</th>
+                                 <th>जवाक केटेगरी</th>
                                  <th style="width:0px;">
                                     <div class="ribbon ribbon-secondary text-light float-end"> Destribution
                                     </div>
@@ -187,6 +188,8 @@
                                  <td>{{jwk.description}}</td>
                                  <td [ngClass]="{'marked': !jwk.aj_type_id}">{{jwk.aj_type}}</td>
                                  <td [ngClass]="{'marked': !jwk.qty || !data.unit_id}">{{jwk.qty}} {{data.unit}}</td>
+                                 <td [ngClass]="{'marked': jwk.usage_category && !data.usage_category_id}">
+                                    {{jwk.usage_category}}</td>
                               </tr>
                            </table>
                         </td>
@@ -240,8 +243,8 @@
 
                               <!-- item dropdown -->
                               <div class="col-4">
-                                 <ng-select *ngIf="data.type == 'item'" class="custom custom-import"
-                                    placeholder="Select Category" [virtualScroll]="true" (change)="catSelected($event)">
+                                 <ng-select *ngIf="data.type == 'item' || data.type == 'category'" class="custom custom-import"
+                                    placeholder="Select Category" [virtualScroll]="true" (change)="catSelected($event, data.type)">
                                     <ng-option selected="selected" disabled value="">-- Select Category --</ng-option>
                                     <ng-option *ngFor="let item of categories" [value]="item._id">
                                        {{item.category_hin}}:{{item.category_eng}}</ng-option>
@@ -489,7 +492,7 @@
                   <ng-container *ngIf="data.jawak_detail.length > 0">
                      <tr class="ribbon-box">
                         <td style="border: none;"></td>
-                        <td colspan="11" class="sub-row">
+                        <td colspan="12" class="sub-row">
                            <table class="card-body" style="width: 99.7%;table-layout: fixed;">
                               <tr>
                                  <th>No.</th>
@@ -500,6 +503,7 @@
                                  <th>Description</th>
                                  <th>जवाक प्रकार</th>
                                  <th>परिमाण</th>
+                                 <th>जवाक केटेगरी</th>
                                  <th style="width:0px;">
                                     <div class="ribbon ribbon-secondary text-light float-end"> Destribution
                                     </div>
@@ -521,6 +525,8 @@
                                  <td [ngClass]="{'marked': !jwk.qty || !data.unit_id}">{{jwk.qty}}
                                     {{data.unit_short?data.unit_short:'-'}}
                                  </td>
+                                 <td [ngClass]="{'marked': jwk.usage_category && !data.usage_category_id}">
+                                    {{jwk.usage_category}}</td>
                               </tr>
                            </table>
                         </td>

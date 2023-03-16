@@ -72,6 +72,7 @@ import { VehicleEntryComponent } from './ENTRY__FORMS/vehicle-entry/vehicle-entr
 import { FilterByDatePipe } from './pipe/filter-by-date.pipe';
 import { ExcelImportComponent } from './excel-import/excel-import.component';
 import { ClosingComponent } from './closing/closing.component';
+import { BachatNewComponent } from './bachat-new/bachat-new.component';
 
 @NgModule({
   declarations: [
@@ -125,6 +126,7 @@ import { ClosingComponent } from './closing/closing.component';
     FilterByDatePipe,
     ExcelImportComponent,
     ClosingComponent,
+    BachatNewComponent,
   ],
   imports: [
     BrowserModule,

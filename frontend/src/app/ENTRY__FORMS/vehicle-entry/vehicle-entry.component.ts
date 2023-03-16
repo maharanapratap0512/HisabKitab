@@ -79,16 +79,15 @@ export class VehicleEntryComponent implements OnInit {
     var year = date.getFullYear()
     var month = '' + (date.getMonth() + 1);
     var day = '' + date.getDate()
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-    var formatted = year + "-" + month + "-" + day;
-    // console.log("formatted////////////", formatted);
+    // if (month.length < 2) month = '0' + month;
+    // if (day.length < 2) day = '0' + day;
+    var formatted = year + "-" + month.padStart(2, "0") + "-" + day.padStart(2, "0");
     return (formatted)
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    this.mode = changes.mode.currentValue;
-    if (changes.getData.currentValue) {
+    this.mode = changes.mode?.currentValue;
+    if (changes.getData && changes.getData.currentValue) {
       this.vehForm.patchValue({
         mm_id: changes.getData.currentValue.mm_id,
         vehicle_type: changes.getData.currentValue.vehicle_type,
@@ -99,16 +98,16 @@ export class VehicleEntryComponent implements OnInit {
         owner_name: changes.getData.currentValue.owner_name,
         nominee: changes.getData.currentValue.nominee,
         aawak_type: changes.getData.currentValue.aawak_type,
-        rc_date: this.formatDate(changes.getData.currentValue.rc_date),
-        rc_exp_date: this.formatDate(changes.getData.currentValue.rc_exp_date),
+        rc_date: changes.getData.currentValue.rc_date ? this.formatDate(changes.getData.currentValue.rc_date) : null,
+        rc_exp_date: changes.getData.currentValue.rc_exp_date ? this.formatDate(changes.getData.currentValue.rc_exp_date) : null,
         rc_amount: changes.getData.currentValue.rc_amount,
-        insurance_date: this.formatDate(changes.getData.currentValue.insurance_date),
-        insurance_exp_date: this.formatDate(changes.getData.currentValue.insurance_exp_date),
+        insurance_date: changes.getData.currentValue.insurance_date ? this.formatDate(changes.getData.currentValue.insurance_date) : null,
+        insurance_exp_date: changes.getData.currentValue.insurance_exp_date ? this.formatDate(changes.getData.currentValue.insurance_exp_date) : null,
         insurance_type: changes.getData.currentValue.insurance_type,
         insurance_company: changes.getData.currentValue.insurance_company,
         insurance_amount: changes.getData.currentValue.insurance_amount,
-        puc_date: this.formatDate(changes.getData.currentValue.puc_date),
-        puc_exp_date: this.formatDate(changes.getData.currentValue.puc_exp_date),
+        puc_date: changes.getData.currentValue.puc_date ? this.formatDate(changes.getData.currentValue.puc_date) : null,
+        puc_exp_date: changes.getData.currentValue.puc_exp_date ? this.formatDate(changes.getData.currentValue.puc_exp_date) : null,
         puc_amount: changes.getData.currentValue.puc_amount
       });
       // console.log("patch______", this.vehForm.value);

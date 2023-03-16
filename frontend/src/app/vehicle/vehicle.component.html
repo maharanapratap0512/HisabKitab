@@ -15,8 +15,8 @@
                <div class="card-body">
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
-                        <button class="btn btn-primary w-100" onclick="$('#showModal').modal('show')"
-                           (click)="showModal = 'Add Vehicle'" *ngIf="settings.vehicle.add">
+                        <button class="btn btn-primary w-100" (click)="openModal('Add Vehicle', 'full')"
+                           *ngIf="settings.vehicle.add">
                            <i class="dripicons-plus h4 icon-mx-2"> </i>Add Vehicle
                         </button>
                      </div>
@@ -26,10 +26,10 @@
                               name="search">
                         </div>
                      </div>
-                     
+
                      <div class="col-2">
-                        <ng-select class="custom w-100" style="width: 100%;" placeholder="Filter MM"
-                           [clearable]="true" [virtualScroll]="true" (change)="mmSelected($event)">
+                        <ng-select class="custom w-100" style="width: 100%;" placeholder="Filter MM" [clearable]="true"
+                           [virtualScroll]="true" (change)="mmSelected($event)">
                            <ng-option *ngFor="let item of mms" [value]="item._id">{{item.mm_hin}} :
                               {{item.mm_eng}} ({{item.mm_code}})</ng-option>
                         </ng-select>
@@ -43,8 +43,10 @@
                      </div> -->
                      <div class="col-3">
                         <div class="d-flex justify-content-between">
-                           <button class="btn btn-outline-success mr-1" (click)="exportToExcel()">Export To Excel</button>
-                           <button class="btn btn-outline-info" (click)="openModal('Excel Import')">Import Excel</button>
+                           <button class="btn btn-outline-success mr-1" (click)="exportToExcel()">Export To
+                              Excel</button>
+                           <button class="btn btn-outline-info" (click)="openModal('Excel Import')">Import
+                              Excel</button>
                         </div>
                      </div>
                      <div class="col-2">
@@ -58,7 +60,7 @@
 
             <div class="row" *ngIf="vehData.length">
                <div class="row">
-                 
+
                </div>
                <pagination-controls class="pagi text-end" (pageChange)="page = $event" [autoHide]="true">
                </pagination-controls>
@@ -106,8 +108,8 @@
                               </td>
                               <td>
                                  <div *ngIf="[1,6].includes(auth.webUser.dept_id)">
-                                    <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data,'full')"><i
-                                          class="uil uil-pen"></i></button>
+                                    <button class="btn btn-sm btn-primary mx-1" type="button"
+                                       (click)="edit(data,'full')"><i class="uil uil-pen"></i></button>
                                     <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                           class="uil-trash"></i></button>
                                  </div>
@@ -198,7 +200,7 @@
                aria-label="Close"></button>
          </div>
          <div class="modal-body">
-            <app-vehicle-entry *ngIf="showModal == 'Add Vehicle'"
+            <app-vehicle-entry *ngIf="showModal == 'Add Vehicle'" [mode]="mode"
                (response)='addVehicleResponse($event)'></app-vehicle-entry>
             <app-vehicle-entry *ngIf="showModal == 'Edit Vehicle'" (response)='editVehicleResponse($event)'
                [getData]="editData" [mode]="mode" [isEdit]="true"></app-vehicle-entry>

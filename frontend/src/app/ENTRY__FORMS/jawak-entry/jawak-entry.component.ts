@@ -62,10 +62,11 @@ export class JawakEntryComponent implements OnInit {
       pbk_id: [null],
       item_id: [null, Validators.required],
       subitem_id: [null],
+      usage_category_id: [null],
       item_detail: [null],
       product_id: [null],
       condition_id: [null],
-      company_name:[null],
+      company_name: [null],
       qty: [null, Validators.required],
       jawak_type_id: [null, Validators.required],
       unit_id: [null, Validators.required],
@@ -105,6 +106,7 @@ export class JawakEntryComponent implements OnInit {
         pbk_id: changes.getData.currentValue.pbk_id,
         item_id: changes.getData.currentValue.item_id,
         subitem_id: changes.getData.currentValue.subitem_id,
+        usage_category_id: changes.getData.currentValue.usage_category_id,
         item_detail: changes.getData.currentValue.item_detail,
         product_id: changes.getData.currentValue.product_id,
         condition_id: changes.getData.currentValue.condition_id,
@@ -280,7 +282,7 @@ export class JawakEntryComponent implements OnInit {
       console.log("form valid");
 
       this.isLoader = true;
-      this.http.post(this.api.getUrl('JAWAK') + this.auth.webUser.dept_id, this.jawakForm.value).subscribe((data: any) => {
+      this.http.post(this.api.getUrl('JAWAK') + 'new/' + this.auth.webUser.dept_id, this.jawakForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.gs.Lists.pbk.unshift(data['result'])
           this.jawakForm.reset({ active: true });
@@ -311,6 +313,7 @@ export class JawakEntryComponent implements OnInit {
         _id: this.getData._id
       }
       body.set = {
+        _id: this.getData._id,
         date: this.jawakForm.value.date,
         mm_id: this.jawakForm.value.mm_id,
         pkt_num: this.jawakForm.value.pkt_num,
@@ -318,6 +321,7 @@ export class JawakEntryComponent implements OnInit {
         pbk_id: this.jawakForm.value.pbk_id,
         item_id: this.jawakForm.value.item_id,
         subitem_id: this.jawakForm.value.subitem_id,
+        usage_category_id: this.jawakForm.value.usage_category_id,
         item_detail: this.jawakForm.value.item_detail,
         product_id: this.jawakForm.value.product_id,
         condition_id: this.jawakForm.value.condition_id,
@@ -330,7 +334,7 @@ export class JawakEntryComponent implements OnInit {
         nimitt_id: this.jawakForm.value.nimitt_id,
         dept_id: this.jawakForm.value.dept_id,
       };
-      this.http.put(this.api.getUrl('JAWAK'), body).subscribe((data: any) => {
+      this.http.put(this.api.getUrl('JAWAK') + 'new/', body).subscribe((data: any) => {
         if (data && data['success']) {
           // this.gs.Lists.pbk.splice(this.gs.Lists.pbk.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result'])
           this.jawakForm.reset();

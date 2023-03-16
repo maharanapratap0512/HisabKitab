@@ -93,15 +93,14 @@
                      <p class="loading">Loading...</p>
                   </ngx-spinner>
                   <!-- help: https://ej2.syncfusion.com/angular/documentation/grid/getting-started/ -->
-                  <ejs-grid [dataSource]='reportData' [allowPaging]="true" [pageSettings]="pageSettings"
-                     [allowSorting]="true" [filterSettings]='filterSettings' [allowFiltering]="true" height='267px'>
+                  <ejs-grid [dataSource]='reportData' allowPaging='true' allowSorting='true' [sortSettings]='initialSort' [pageSettings]='pageSettings' height='500px'>
                      <e-columns>
-                        <e-column field="roll_no" [filter]="filter" headerText="Roll No" textAlign="left" width="50"></e-column>
+                        <e-column field="roll_no" headerText="Roll No" textAlign="left" width="50"></e-column>
                         <e-column field="pbk_hin" headerText="Pbk Name" textAlign="left" width="90"></e-column>
                         <e-column field="date" headerText="Date" textAlign="left" format="yMd"></e-column>
                         <e-column field="pkt_num" headerText="Pkt Num" textAlign="left"></e-column>
-                        <e-column field="mm_hin" [filter]="filter" headerText="MM" textAlign="left"></e-column>
-                        <e-column field="item_hin" headerText="Item" [filter]='filter' textAlign="left"></e-column>
+                        <e-column field="mm_hin" headerText="MM" textAlign="left"></e-column>
+                        <e-column field="item_hin" headerText="Item" textAlign="left"></e-column>
                         <e-column field="subitem_hin" headerText="Subitem" textAlign="left"></e-column>
                         <e-column field="company_name" headerText="Company" textAlign="left"></e-column>
                         <e-column field="qty" headerText="Qty" textAlign="center" format="N2"></e-column>

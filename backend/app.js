@@ -41,6 +41,7 @@ const departmentConfigRoutes = require('./api/routes/department_config.routes');
 const aawakEntryRoutes = require('./api/routes/aawak.routes');
 const jawakEntryRoutes = require('./api/routes/jawak.routes');
 const bachatRoutes = require('./api/routes/bachat.routes');
+const bachatNewRoutes = require('./api/routes/bachat_new.routes');
 const pointRoutes = require('./api/routes/point.routes');
 const importExportRoutes = require('./api/routes/import-export.routes');
 const excelImportRoutes = require('./api/routes/excel-import.routes');
@@ -74,6 +75,7 @@ app.use('/api/aawak', aawakEntryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/jawak', jawakEntryRoutes);
 app.use('/api/bachat', bachatRoutes);
+app.use('/api/bachat_new', bachatNewRoutes);
 app.use('/api/points', pointRoutes);
 app.use('/api/importexport', importExportRoutes);
 app.use('/api/excelimport', excelImportRoutes);
@@ -96,6 +98,7 @@ app.use('/api/closing', closingRoutes);
 
 
 app.use((error, req, res, next) => {
+    console.log(error);
     let status = error.status || 500;
     let msg = (status == 404) ? "Browsed path not found" : error.message;
     res.status(status).json(msg);

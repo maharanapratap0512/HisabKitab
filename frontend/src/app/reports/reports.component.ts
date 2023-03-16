@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
@@ -11,14 +11,14 @@ import { AuthService } from '../services/auth.service';
 import { ExcelExportService } from '../services/excel-export.service';
 import { observable, Observable, of, Subject } from 'rxjs';
 declare var $: any;
-import { FilterService, GridComponent, PageSettingsModel, VirtualScrollService } from '@syncfusion/ej2-angular-grids';
+import { FilterService, GridComponent, PageSettingsModel, SortService, VirtualScrollService } from '@syncfusion/ej2-angular-grids';
 import { DropDownListComponent } from '@syncfusion/ej2-angular-dropdowns';
 
 @Component({
   selector: 'app-reports',
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.scss'],
-  providers: [FilterService, VirtualScrollService]
+  providers: [SortService, FilterService, VirtualScrollService]
 })
 export class ReportsComponent implements OnInit {
 
@@ -29,7 +29,7 @@ export class ReportsComponent implements OnInit {
   term: any;
   total_count: any = 0;
   reportData: any = [];
-  pageSettings: PageSettingsModel;
+  // pageSettings: PageSettingsModel;
   filterBody: any = {}
   years: any = [];
   months: any = [];
@@ -37,7 +37,8 @@ export class ReportsComponent implements OnInit {
   states: any = [];
   pbks: any = [];
   pbksAll: any = [];
-
+  public initialSort: Object;
+  public pageSettings: Object;
   public dReady: boolean = false;
   public dtTime: boolean = false;
   public isDataBound: boolean = false;
@@ -52,15 +53,7 @@ export class ReportsComponent implements OnInit {
   public filterSettings: Object;
   public selectionSettings: Object;
   public height: string = '240px';
-  // @ViewChild('sample')
-  // public listObj: DropDownListComponent;
-  // @ViewChild('overviewgrid')
-  // public gridInstance: GridComponent;
-  // public ddlData: Object[] = [
-  //   { text: '1,000 Rows and 11 Columns', value: '1000' },
-  //   { text: '10,000 Rows and 11 Columns', value: '10000' },
-  //   { text: '1,00,000 Rows and 11 Columns', value: '100000' }
-  // ];
+
   public fields: Object = { text: 'text', value: 'value' };
   public item: number[] = [1, 2, 3, 4, 5];
 
@@ -79,6 +72,12 @@ export class ReportsComponent implements OnInit {
     this.filter = { type: "CheckBox" };
     this.stTime = performance.now();
     this.selectionSettings = { persistSelection: true, type: "Multiple", checkboxOnly: true };
+    // sourceFiles.files = ['reports.component.scss'];
+    this.initialSort = {
+      columns: [{ field: 'roll_no', direction: 'Ascending' }]
+    };
+    this.pageSettings = { pageCount: 5 }
+
   }
 
   ngOnInit(): void {
@@ -96,7 +95,7 @@ export class ReportsComponent implements OnInit {
       this.reportData = data;
 
 
-    })    
+    })
   }
 
   yearChanged(ev: any) {

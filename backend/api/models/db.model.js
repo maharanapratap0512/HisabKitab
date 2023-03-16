@@ -1,3 +1,4 @@
+const { version } = require('os');
 let path = require('path');
 
 class dbModal {
@@ -1569,9 +1570,14 @@ class dbModal {
           values(NEW._id, NEW.gadi_num, 'puc', NEW.puc_date, NEW.puc_exp_date, NEW.puc_amount);
         END; `,
 
-      
+
     },
-    {      
+    // version13
+    /*
+      =>new table : bachat_history, closing
+      =>settings transfer from department_config to department.
+     */
+    {
       closing: `create table if not exists closing(
         _id integer primary key AUTOINCREMENT,
         month int not null,
@@ -1583,22 +1589,6 @@ class dbModal {
         updated_at timestamp default (UNIXEPOCH()),
         unique(month, year, mm_id, dept_id)
       )`,
-      bachat_history: `create table if not exists bachat_history(
-        _id integer primary key AUTOINCREMENT,
-        month int not null,
-        year int not null,
-        mm_id integer not null references mm(_id) ON UPDATE CASCADE ON DELETE CASCADE,
-        item_id integer not null references item(_id),
-        subitem_id integer null references subitem(_id) ,
-        unit_id integer not null references unit(_id) ON UPDATE CASCADE ON DELETE CASCADE,
-        dept_id integer not null references dept(_id) ON UPDATE CASCADE ON DELETE CASCADE,
-        qty decimal(10,2) default 0,
-        created_at timestamp default (UNIXEPOCH()),
-        updated_at timestamp default (UNIXEPOCH()),
-        unique(month, year, mm_id, item_id, unit_id, dept_id, subitem_id)
-      )`,
-      // alt_awk: `alter table aawak add column usage_category_id integer references category(_id) ON UPDATE CASCADE ON DELETE CASCADE`,
-      // alt_jwk: `alter table jawak add column usage_category_id integer references category(_id) ON UPDATE CASCADE ON DELETE CASCADE`,
       item_dictionary: `create table if not exists item_dictionary(
         _id integer primary key AUTOINCREMENT,
         item_id integer not null references item(_id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -1633,8 +1623,44 @@ class dbModal {
       transfer_dept: `insert into department(_id, dept_eng, dept_hin, dept_code, settings, password, active, created_at, updated_at) select _id, dept_eng, dept_hin, dept_code, (select config_value from department_config dc where dc.dept_id = dept._id AND config_key = 'settings'), password, active, created_at, updated_at from dept`,
       drop_dept: `drop table dept`,
       alt_temp_import: `alter table temp_import add column awk_id int`,
+    },
+    // version 14
+    /*
+      => add min max rate for items
+      => add usage_category in aawak and jawak.
+     */
+    {
+      alter_item_min: `alter table item add column min_rate decimal(7,2) default 0`,
+      alter_item_max: `alter table item add column max_rate decimal(7,2) default 0`,
+      alter_subitem_min: `alter table subitem add column min_rate decimal(7,2) default 0`,
+      alter_subitem_max: `alter table subitem add column max_rate decimal(7,2) default 0`,
+      alter_temp_import_cat: `alter table temp_import add column usage_category varchar(100)`,
+      alter_temp_import: `alter table temp_import add column usage_category_id integer`,
+      alt_awk: `alter table aawak add column usage_category_id integer references category(_id) ON UPDATE CASCADE ON DELETE CASCADE`,
+      alt_jwk: `alter table jawak add column usage_category_id integer references category(_id) ON UPDATE CASCADE ON DELETE CASCADE`,
+      drop_bachat_history: `drop table if exists bachat_history`,
+      drop_bachat_new: `drop table if exists bachat_new`,
+      bachat_new: `create table if not exists bachat_new(
+        _id integer primary key AUTOINCREMENT,
+        month int not null,
+        year int not null,
+        mm_id integer not null references mm(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id) ,
+        unit_id integer not null references unit(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        dept_id integer not null references department(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        condition_id integer null references support_list(_id) ON UPDATE CASCADE,
+        total_aawak decimal(10,2) default 0,
+        jawak decimal(10,2) default 0,
+        used_jawak decimal(10,2) default 0,
+        bachat decimal(10,2) default 0,
+        created_at timestamp default (julianday('now','localtime')),
+        updated_at timestamp default (julianday('now','localtime')),
+        unique(month, year, mm_id, item_id, unit_id, dept_id, subitem_id, condition_id)
+      )`,
+
     }
-    
+
   ];
   migrationLength;
   constructor(dbPath) {
@@ -1644,7 +1670,7 @@ class dbModal {
       this.migrationLength = this.Migrations.length;
       // path = require('path');
       this.db = new Database(dbPath);
-      console.log("connected with Database");             
+      console.log("connected with Database");
 
       // transactions for updating database changes called migration.
       let runMigration = this.db.transaction(() => {
@@ -1652,7 +1678,6 @@ class dbModal {
           //getting current user version
           let userVersion = this.db.pragma('user_version', { simple: true });
           console.log("current user version : ", userVersion);
-
           //comparing userversion with total migrations
           if (this.migrationLength > userVersion) {
             //looping through migrations positioned after userversion.
@@ -1666,8 +1691,9 @@ class dbModal {
               }
               console.log("updating database ... ");
             }
-            
-            this.db.pragma(`user_version = ${this.migrationLength}`);            
+
+            this.db.pragma(`user_version = ${this.migrationLength}`);
+
             console.log("database updated to `version` ", this.migrationLength);
           }
 
@@ -1677,11 +1703,25 @@ class dbModal {
         }
 
       });
+
       this.db.pragma('foreign_keys=OFF');
       this.db.pragma('legacy_alter_table=ON');
       runMigration();
       this.db.pragma('legacy_alter_table=OFF');
       this.db.pragma('foreign_keys=ON');
+
+      console.log(this.db.prepare(this.query.bachat_new.select_exists).get({
+        month: 2,
+        year: 2023,
+        month: 2,
+        year: 2023,
+        mm_id: 1,
+        item_id: 355,
+        subitem_id: null,
+        unit_id: 1,
+        dept_id: 1,
+        condition_id: 33,
+      }));
     }
     catch (ex) {
       console.log("error db model", ex);

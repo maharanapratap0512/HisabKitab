@@ -193,7 +193,7 @@ export class AawakComponent implements OnInit {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
     this.filterBody.pageNo = this.pageNo;
-    this.http.put(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.aawakData = data['result'];
         this.aawakAll = data['result'];
@@ -517,7 +517,7 @@ export class AawakComponent implements OnInit {
   getMoreAJ() {
     // this.isLoader = true;
     this.filterBody.pageNo = this.pageNo + 1;
-    this.http.put(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data["result"].length) {
         if (data["pageNo"]) {
           this.pageNo = data["pageNo"];
@@ -559,24 +559,26 @@ export class AawakComponent implements OnInit {
   }
 
   addAawakResponse(ev: any) {
-    if (ev._id) {
+    if (ev.length > 0 && ev[0]._id) {
       this.isLoader = true;
       // $('#showModal').modal('hide');
       // this.showModal = '';
-      this.aawakData.unshift(ev);
+      this.aawakData.unshift(ev[0]);
       this.isLoader = false;
     }
     else {
-      this.aawakDraft = ev;
+      console.log(ev);
+      
+      this.aawakDraft = ev[0];
       this.toastr.info("Saved in Draft.");
     }
   }
 
   editAawakResponse(ev: any) {
-    if (ev._id) {
+    if (ev.length > 0) {
       this.isLoader = true;
       this.closeModal();
-      this.aawakData.splice(this.aawakData.indexOf(this.editData), 1, ev);
+      this.aawakData.splice(this.aawakData.indexOf(this.editData), 1, ev[0]);
       this.isLoader = false;
     }
     else {
@@ -777,7 +779,7 @@ export class AawakComponent implements OnInit {
 
         //aawak form
         var obj: any = {
-          awk_id:null,
+          awk_id: null,
           type: null,
           date: null,
           pkt_num: null,
@@ -799,6 +801,8 @@ export class AawakComponent implements OnInit {
           item_id: null,
           subitem: null,
           subitem_id: null,
+          usage_category: null,
+          usage_category_id: null,
           product: null,
           product_id: null,
           condition: null,
@@ -1043,6 +1047,22 @@ export class AawakComponent implements OnInit {
                   jwkobj.nimitt_id = dictnimitt ? dictnimitt.id : null;
                 }
                 break;
+              case "jawak category":
+              case "jawak_category":
+              case "jwk category":
+              case "jwk_cateogry":
+              case "usage_category":
+              case "usage category":
+                jwkobj.usage_category = exceldata[i][j];
+                let getcategory = this.categories.find((c: { category_hin: any; category_eng: any; }) => [c.category_hin, c.category_eng].includes(exceldata[i][j]));
+                if (getcategory) {
+                  jwkobj.usage_category_id = getcategory._id;
+                  jwkobj.usage_category_hin = getcategory.category_hin;
+                } else {
+                  let dictcategory = this.dictionary.find((d: any) => d.type == "category" && d.name == exceldata[i][j])
+                  jwkobj.usage_category_id = dictcategory ? dictcategory.id : null;
+                }
+                break;
               case "jwk_type":
               case "jwk type":
               case "jawak_type":
@@ -1088,10 +1108,10 @@ export class AawakComponent implements OnInit {
 
         // check for required Fields in aawak object
         if (obj.date && obj.mm && (obj.aj_mm || obj.pbk) && obj.item && obj.qty && obj.unit && obj.aj_type) {
-          
+
           finalJson.push(obj);
         }
-        else{
+        else {
           console.log("err", obj);
 
         }

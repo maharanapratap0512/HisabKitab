@@ -23,7 +23,31 @@
                             [ngClass]="{'validation':itemForm.get('item_code')?.errors && (itemForm.get('item_code')?.touched || itemForm.get ('item_code')?.dirty)}">
                     </div>
                 </div>
+
                 <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <div class="float-end">
+                            <a type="button" *ngIf="settings.category.add"
+                                style="padding: 1px 6px !important; margin-right: 2px !important;"
+                                class="btn btn-sm btn-outline-primary" (click)="setView('Category')"><i
+                                    class=" dripicons-view-list"></i></a>
+                            <a type="button" style="padding: 1px 6px !important;"
+                                class="btn btn-outline-primary float-end"
+                                onclick="$('#itemComponent > #showModal').modal('show')"
+                                (click)="showModal = 'Add Category'">+
+                                Add</a>
+                        </div>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="true"
+                            [virtualScroll]="true" [multiple]="true" formControlName="categories"
+                            [ngClass]="{'validation':itemForm.get('categories')?.errors && (itemForm.get('categories')?.touched || itemForm.get ('categories')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Category</ng-option>
+                            <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
+                                {{item.category_eng}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
                     <div class="form-group">
                         <label class="form-label">Default Unit</label>
                         <div class="float-end">
@@ -49,28 +73,17 @@
                 </div>
                 <div class="col-md-3 mb-3">
                     <div class="form-group">
-                        <label class="form-label">Category</label>
-                        <div class="float-end">
-                            <a type="button" *ngIf="settings.category.add"
-                                style="padding: 1px 6px !important; margin-right: 2px !important;"
-                                class="btn btn-sm btn-outline-primary" (click)="setView('Category')"><i
-                                    class=" dripicons-view-list"></i></a>
-                            <a type="button" style="padding: 1px 6px !important;"
-                                class="btn btn-outline-primary float-end"
-                                onclick="$('#itemComponent > #showModal').modal('show')"
-                                (click)="showModal = 'Add Category'">+
-                                Add</a>
+                        <label class="form-label">Price Range</label>
+                        <div class="d-flex justify-content-between">
+                            <input type="number" class="form-control pr-2" placeholder="Min..."
+                                formControlName="min_rate"
+                                [ngClass]="{'validation':itemForm.get('min_rate')?.errors && (itemForm.get('min_rate')?.touched || itemForm.get ('min_rate')?.dirty)}">
+                            <input type="number" class="form-control" placeholder="Max..." formControlName="max_rate"
+                                [ngClass]="{'validation':itemForm.get('max_rate')?.errors && (itemForm.get('max_rate')?.touched || itemForm.get ('max_rate')?.dirty)}">
                         </div>
-                        <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="true"
-                            [virtualScroll]="true" [multiple]="true" formControlName="categories"
-                            [ngClass]="{'validation':itemForm.get('categories')?.errors && (itemForm.get('categories')?.touched || itemForm.get ('categories')?.dirty)}">
-                            <ng-option selected="selected" disabled value="">Select Category</ng-option>
-                            <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
-                                {{item.category_eng}}</ng-option>
-                        </ng-select>
                     </div>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
                     <div class="form-group">
                         <label class="form-label">Extra Note</label>
                         <textarea class="form-control" placeholder="Extra Note" formControlName="extra_note"
@@ -80,16 +93,16 @@
                 <div class="col-md-2 mb-3">
                     <div class="form-group">
                         <label class="form-label">Image</label>
-                        <a onclick="$('#itemComponent > #showModal').modal('show')"
-                            (click)="showModal='Add Image';editDoc=this.itemForm.value.document" class="form-control"
+                        <div onclick="$('#itemComponent > #showModal').modal('show')"
+                            (click)="showModal='Add Image';editDoc=this.itemForm.value.document;" class="form-control"
                             style="cursor: pointer;">
-                            <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
+                            <i class="uil-image-plus" *ngIf="!imagepath || (imagepath && imagepath.length < 1)" style="font-size:200%; "></i>
                             <ng-container *ngFor="let img of imagepath">
                                 <img src="{{this.api.getUrl('BASE')+img}}" alt="image" height="25" width="25"
                                     *ngIf="imagepath" style="object-fit: cover;">
                             </ng-container>
-                            <i *ngIf="!imagepath">Click To Change</i>
-                        </a>
+                            <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-2 mb-3">

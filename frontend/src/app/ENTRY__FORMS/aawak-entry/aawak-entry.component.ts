@@ -65,6 +65,7 @@ export class AawakEntryComponent implements OnInit {
 		aawak_type_id: null,
 		item_id: null,
 		subitem_id: null,
+		usage_category_id: null,
 		company_name: null,
 		product_id: null,
 		unit_id: null,
@@ -111,11 +112,13 @@ export class AawakEntryComponent implements OnInit {
 		this.getProductData(null);
 	}
 
-	ngOnInit(): void { 		
-		
+	ngOnInit(): void {
+
 	}
 
 	ngOnDestroy(): void {
+		console.log(this.awkfg);
+
 		this.response.emit(this.awkfg);
 	}
 
@@ -132,29 +135,30 @@ export class AawakEntryComponent implements OnInit {
 				});
 			}
 			this.getData = changes.getData.currentValue;
-			this.awkfg.pkt_num = changes.getData.currentValue.pkt_num
+			this.awkfg.pkt_num = changes.getData.currentValue.pkt_num ? changes.getData.currentValue.pkt_num : null
 			this.awkfg.date = changes.getData.currentValue.date
 			this.awkfg.mm_id = changes.getData.currentValue.mm_id
-			this.awkfg.aawak_mm_id = changes.getData.currentValue.aawak_mm_id
+			this.awkfg.aawak_mm_id = changes.getData.currentValue.aawak_mm_id ? changes.getData.currentValue.aawak_mm_id : null
 			this.awkfg.dept_id = this.auth.webUser.dept_id
-			this.awkfg.pbk_id = changes.getData.currentValue.pbk_id
+			this.awkfg.pbk_id = changes.getData.currentValue.pbk_id ? changes.getData.currentValue.pbk_id : null
 			this.awkfg.aawak_type_id = changes.getData.currentValue.aawak_type_id
 			this.awkfg.item_id = changes.getData.currentValue.item_id
-			this.awkfg.subitem_id = changes.getData.currentValue.subitem_id
-			this.awkfg.product_id = changes.getData.currentValue.product_id
+			this.awkfg.subitem_id = changes.getData.currentValue.subitem_id ? changes.getData.currentValue.subitem_id : null
+			this.awkfg.usage_category_id = changes.getData.currentValue.usage_category_id ? changes.getData.currentValue.usage_category_id : null
+			this.awkfg.product_id = changes.getData.currentValue.product_id ? changes.getData.currentValue.product_id : null
 			this.awkfg.unit_id = changes.getData.currentValue.unit_id
-			this.awkfg.condition_id = changes.getData.currentValue.condition_id
+			this.awkfg.condition_id = changes.getData.currentValue.condition_id ? changes.getData.currentValue.condition_id : null
 			this.awkfg.qty = changes.getData.currentValue.qty
-			this.awkfg.rate = changes.getData.currentValue.rate
-			this.awkfg.actual_amt = changes.getData.currentValue.actual_amt
-			this.awkfg.nimitt_id = changes.getData.currentValue.nimitt_id
-			this.awkfg.item_detail = changes.getData.currentValue.item_detail
-			this.awkfg.description = changes.getData.currentValue.description
+			this.awkfg.rate = changes.getData.currentValue.rate ? changes.getData.currentValue.rate : null
+			this.awkfg.actual_amt = changes.getData.currentValue.actual_amt ? changes.getData.currentValue.actual_amt : null
+			this.awkfg.nimitt_id = changes.getData.currentValue.nimitt_id ? changes.getData.currentValue.nimitt_id : null
+			this.awkfg.item_detail = changes.getData.currentValue.item_detail ? changes.getData.currentValue.item_detail : null
+			this.awkfg.description = changes.getData.currentValue.description ? changes.getData.currentValue.description : null
 			this.awkfg.remaining_qty = changes.getData.currentValue.remaining_qty
-			this.awkfg.company_name = changes.getData.currentValue.company_name
-			this.awkfg.isbill = changes.getData.currentValue.isbill
-			this.awkfg.document = changes.getData.currentValue.document
-			this.awkfg.jawak_detail = changes.getData.currentValue.jawak_detail
+			this.awkfg.company_name = changes.getData.currentValue.company_name ? changes.getData.currentValue.company_name : null
+			this.awkfg.isbill = changes.getData.currentValue.isbill ? changes.getData.currentValue.isbill : false;
+			this.awkfg.document = changes.getData.currentValue.document ? changes.getData.currentValue.document : []
+			this.awkfg.jawak_detail = changes.getData.currentValue.jawak_detail ? changes.getData.currentValue.jawak_detail : []
 
 			this.selDept_id = changes.getData.currentValue.dept_id;
 			this.oldQty = changes.getData.currentValue.qty;
@@ -173,22 +177,7 @@ export class AawakEntryComponent implements OnInit {
 
 	dateChange() {
 		this.jdate = this.awkfg.date;
-		// this.filterItemByDate();		
 	}
-
-	// filterItemByDate(){
-	// 	if(this.awkfg.date){
-	// 		let awkDate = new Date(this.awkfg.date);			
-	// 		this.items = this.itemAll.filter((i: { restrict_year: number; restrict_month: number; })=>!i.restrict_year || (awkDate < new Date(i.restrict_year, (i.restrict_month ? i.restrict_month : 1))));
-	// 	}
-	// }
-
-	// filterSubitemByDate(){
-	// 	if(this.awkfg.date){
-	// 		let awkDate = new Date(this.awkfg.date);			
-	// 		this.subitems = this.subitemsAll.filter((s: { restrict_year: number; restrict_month: number; })=>!s.restrict_year || (awkDate < new Date(s.restrict_year, (s.restrict_month ? s.restrict_month : 1))));
-	// 	}
-	// }
 
 	jwkmmChanged(ev: any) {
 		if (ev && ev.id == this.awkfg.mm_id) {
@@ -235,6 +224,7 @@ export class AawakEntryComponent implements OnInit {
 			pbk_id: null,
 			item_id: this.awkfg.item_id,
 			subitem_id: this.awkfg.subitem_id,
+			usage_category_id: null,
 			item_detail: null,
 			description: null,
 			company_name: null,
@@ -309,7 +299,7 @@ export class AawakEntryComponent implements OnInit {
 			this.isLoader = true;
 			this.closeModal();
 			this.imagepath = ev;
-			this.awkfg.document = {images: ev}
+			this.awkfg.document = { images: ev }
 			this.isLoader = false;
 		}
 		else {
@@ -318,11 +308,11 @@ export class AawakEntryComponent implements OnInit {
 	}
 
 	aawakFormSubmit(awkform: NgForm) {
-		console.log("awkform", awkform);
+		console.log("awkfg", this.awkfg);
 		if (awkform.valid) {
 			this.isLoader = true;
 			// this.awkfg.remaining_qty = this.awkfg.qty;
-			this.http.post(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, this.awkfg).subscribe((data: any) => {
+			this.http.post(this.api.getUrl('AAWAK') + 'new/' + this.auth.webUser.dept_id, this.awkfg).subscribe((data: any) => {
 				if (data['result'] && data['success']) {
 					this.jmm = null;
 					this.jqty = null;
@@ -363,8 +353,8 @@ export class AawakEntryComponent implements OnInit {
 			this.isLoader = true;
 			let body = { query: {}, set: {} };
 			body.query = { _id: this.getData._id };
-			body.set = this.awkfg;
-			this.http.put(this.api.getUrl('AAWAK'), body).subscribe((data: any) => {
+			body.set = { _id: this.getData._id, ...this.awkfg };
+			this.http.put(this.api.getUrl('AAWAK') + 'new/', body).subscribe((data: any) => {
 				if (data && data['success']) {
 					this.jmm = null;
 					this.jqty = null;
@@ -668,10 +658,8 @@ export class AawakEntryComponent implements OnInit {
 		}
 		else {
 			this.subitems = [];
-			this.awkfg = {
-				unit_id: null,
-				subitem_id: null
-			};
+			this.awkfg.unit_id = null
+			this.awkfg.subitem_id = null
 		}
 	}
 

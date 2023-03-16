@@ -1,0 +1,257 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+   [fullScreen]="true">
+   <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
+</ngx-spinner>
+
+<!-- Begin page -->
+<div class="wrapper">
+   <div class="content-page">
+      <div class="content">
+         <div class="container-fluid">
+
+            <!-- First Row -->
+            <!-- Add Button, Search Field, Filter button, Total Count -->
+            <div class="row" *ngIf="bachatData.length">
+               <div class="card-body">
+                  <div class="row d-flex justify-content-between">
+                     <div class="col-5">
+                        <div class="form-group">
+                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                              name="search">
+                        </div>
+                     </div>
+                     <div class="col-2">
+                        <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse"
+                           data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i
+                              class="uil-search-plus h4 icon-mx-2"></i> Advance Search
+                        </button>
+                     </div>
+                     <div class="col-3">
+                        <button type="button" class="btn btn-outline-success" (click)="excelExport()"> Export To Excel
+                        </button>
+                     </div>
+                     <div class="col-2">
+                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">
+                           Total Count : {{total_count}}
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <!-- fliter collapse -->
+            <div class="collapse" id="collapseExample">
+               <div class="card card-body">
+                  <div class="row">
+                     <div class="card-body">
+                        <form #filterForm="ngForm">
+                           <div class="row">
+                              <div class="col-3">
+                                 <ng-select class="custom" style="width: 100%;" placeholder="Select State"
+                                    [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)">
+                                    <ng-option *ngFor="let item of states" [value]="item._id">
+                                       {{item.state_hin}}:{{item.state_eng}}</ng-option>
+                                 </ng-select>
+                              </div>
+                              <div class="col-3">
+                                 <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
+                                    [clearable]="true" [virtualScroll]="true" (change)="mmSelected($event)">
+                                    <ng-option *ngFor="let item of mms" [value]="item._id">
+                                       {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
+                                 </ng-select>
+                              </div>
+                              <div class="col-3">
+                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
+                                    [clearable]="true" [virtualScroll]="true" (change)="catSelected($event)">
+                                    <ng-option *ngFor="let item of categories" [value]="item._id">
+                                       {{item.category_hin}}:{{item.category_eng}}</ng-option>
+                                 </ng-select>
+                              </div>
+                              <div class="col-3">
+                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                    [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)">
+                                    <ng-option *ngFor="let item of items" [value]="item._id">
+                                       {{item.item_hin}}:{{item.item_eng}}</ng-option>
+                                 </ng-select>
+                              </div>
+                           </div>
+                        </form>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div class="row" *ngIf="bachatData.length">
+               <div class="card-body" style="overflow: auto;">
+                  <h4 class="card-title">Click Row to See More Details.</h4>
+                  <table id="datatable-buttons" class="table table-hover dt-responsive">
+                     <thead>
+                        <tr>
+                           <!-- <td>Image</td> -->
+                           <td style="width: 70px;">No.</td>
+                           <td>MM</td>
+                           <!-- <td>Category</td> -->
+                           <td>Item</td>
+                           <td>Total Aawak</td>
+                           <td>Used</td>
+                           <td>Other Jawak</td>
+                           <td>Bachat</td>
+                        </tr>
+                     </thead>
+                     <tbody class="accordion" id="accordionExample">
+                        <ng-container *ngFor="let data of bachatData | filter:term; let i=index" class="accordion-item">
+                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
+                              [attr.aria-controls]="'#collapse-' + i" class="main-row">
+                              <!-- <td>
+                                 <div> 
+                                    <img [src]="data.image" class="img-fluid img-thumbnail mx-1 p-1 h-100" *ngIf="data.image"
+                                    style="max-width: 75px; object-fit: cover;" alt="item-img + {{i}}"  />
+                                 </div>
+                              </td> -->
+                              <td>{{i+1}}</td>
+                              <td>
+                                 {{data.mm_hin}}<br />
+                                 {{data.mm_eng}}
+                              </td>
+                              <!-- <td *ngIf="!data.scat_id">
+                                 {{data.icat_hin}}<br />
+                                 {{data.icat_eng}}
+                              </td> -->
+                              <!-- <td *ngIf="data.scat_id">
+                                 {{data.scat_hin}}<br />
+                                 {{data.scat_eng}}
+                              </td> -->
+                              <td>
+                                 {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}} <br />
+                                 {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
+                              </td>
+                              <td>
+                                 {{data.total_aawak_all + " " + data.unit_short}}
+                              </td>
+                              <td>
+                                 {{data.total_used_all + " " + data.unit_short}}
+                              </td>
+                              <td>
+                                 {{data.total_jawak_all + " "+ data.unit_short}}
+                              </td>
+                              <td>
+                                 <span class="px-1"
+                                    [ngClass]="{'error': data.total_bachat_all < 0, 'stock':data.total_bachat_all > 0}">
+                                    {{data.total_bachat_all + " " + data.unit_short}}
+                                 </span>
+                              </td>
+
+                           </tr>
+                           <ng-container *ngIf="data.arr_condition_id.length > 0">
+                              <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse ribbon-box"
+                                 aria-labelledby="headingOne">
+                                 <td style="border: none;"></td>
+                                 <td colspan="6" class="sub-row">
+                                    <table class="" style="width: 99.7%;table-layout: fixed;">
+                                       <!-- <thead>
+                                          <td>C</td>
+                                       </thead> -->
+                                       <tbody>
+                                          <tr *ngFor="let bcht of data.arr_condition_hin; let j = index;">
+                                             <td style="width: 75px;">
+                                                <i class="uil-corner-down-right"></i>
+                                                <span class="mx-1">{{j+1}} </span>
+                                             </td>
+                                             <td> {{bcht}}</td>
+                                             <td> {{data.arr_sum_aawak[j] + " " + data.unit_short }}</td>
+                                             <td> {{data.arr_sum_used[j] + " " + data.unit_short }}</td>
+                                             <td> {{data.arr_sum_jawak[j] + " " + data.unit_short }}</td>
+                                             <td>
+                                                <span class="px-1"
+                                                   [ngClass]="{'error': data.arr_sum_bachat[j] < 0, 'stock':data.arr_sum_bachat[j] > 0}">
+                                                   {{data.arr_sum_bachat[j] + " " + data.unit_short}}
+                                                </span>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </td>
+                              </tr>
+
+                           </ng-container>
+                        </ng-container>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+
+            <h2 class="text-center m-5" *ngIf="!bachatData.length">No Data!</h2>
+         </div>
+      </div>
+   </div>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+   aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
+               aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
+               [aawakRef]="editData"></app-jawak-entry>
+            <!-- <app-aawak-entry *ngIf="showModal == 'Add Aawak'" (response)='addAawakResponse($event)'></app-aawak-entry>
+            <app-aawak-entry *ngIf="showModal == 'Edit Aawak'" (response)='editAawakResponse($event)'
+               [getData]="editData" [isEdit]="true"></app-aawak-entry> -->
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+         </div>
+      </div>
+   </div>
+
+</div>
+<!-- ImageModal -->
+<div class="modal fade" id="showImageModal" data-bs-backdrop="static" tabindex="-1"
+   aria-labelledby="exampleImageModalLabel" aria-hidden="true">
+   <div class="modal-dialog" style="width: 90%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleImageModalLabel">Show Image</h5>
+            <button type="button" onclick="$('#showImageModal').modal('hide')" class="btn-close"
+               aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <div class="card-body">
+               <div class="row">
+                  <div class="col-lg-1" style="border-right: 0.5px #4c5763 dashed; height: 500px; overflow-y: auto;">
+                     <div>
+                        <a *ngFor="let img of imagesToShow; let i = index;" href="javascript: void(0);" class="mt-1"
+                           (click)="currentImage = img">
+                           <img [src]="img" class="img-fluid img-thumbnail mx-1 p-1 h-100"
+                              style="max-width: 75px; object-fit: cover;" alt="item-img + {{i}}" />
+                        </a>
+                     </div>
+                  </div>
+                  <div class="col-lg-11">
+
+                     <!-- Product image -->
+                     <div class="m-1 p-1" style="height:500px;border: 0.5px #3c454f solid;">
+                        <a class=" text-center mb-4">
+                           <img [src]="currentImage" class="img-fluid" style="height: 100%;width: 100%;
+                                  object-fit: contain;" alt="item-img" />
+                        </a>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" style="width: 120px;"
+               onclick="$('#showImageModal').modal('hide')">Close</button>
+         </div>
+      </div>
+   </div>
+</div>

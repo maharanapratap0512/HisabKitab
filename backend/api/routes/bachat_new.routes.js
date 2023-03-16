@@ -3,10 +3,10 @@ const DBContex = require('../models/DBContex');
 const DB = new DBContex();
 
 
-// get bachat_history all
+// get bachat_new all
 router.get('/', async (req, res, next) => {
     try {
-        await DB.getList('bachat_history').then(async (resolve) => {
+        await DB.getList('bachat_new').then(async (resolve) => {
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -17,25 +17,33 @@ router.get('/', async (req, res, next) => {
 });
 
 
-// get bachat_history 
+// get bachat_new 
 router.get('/:dept_id', async (req, res, next) => {
     try {
-        await DB.getList('bachat_history', { dept_id: req.params.dept_id }).then(async (resolve) => {
-            res.json({
-                success: true,
-                result: resolve.data || [],
-                total_count: resolve.total_count
-            });
-        });
-    } catch (err) { next(err) };
+        let sql = DB.query.bachat_new.select_all.replace('?', ` where dept_id = ${req.params.dept_id}`);
+        let bachat = [];
+        let stmt = DB.db.prepare(sql);
+        for(let row of stmt.iterate()){
+            for(let key of Object.keys(row)){
+                if(key.includes('arr')){
+                    row[key] = row[key] ? JSON.parse(row[key]) : []
+                }
+            }
+            bachat.push(row);
+        }
+        res.json({
+            success:true,
+            result: bachat
+        })
+    } catch (err) { console.log(err); next(err) };
 });
 
 
-// post bachat_history 
+// post bachat_new 
 router.post('/:dept_id', async (req, res, next) => {
     try {
         if (req.body) {
-            await DB.insert('bachat_history', req.body, req.params.dept_id).then((data) => {
+            await DB.insert('bachat_new', req.body, req.params.dept_id).then((data) => {
                 res.json({
                     success: true,
                     result: data || {}
@@ -48,12 +56,12 @@ router.post('/:dept_id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
-// post bachat_history 
+// post bachat_new 
 // router.post('/import/:dept_id', async (req, res, next) => {
 //     try {
 //         if (req.body && req.body.length > 0) {
-//             let istmt = DB.db.prepare(DB.query.bachat_history.import);
-//             let ustmt = DB.db.prepare(DB.query.bachat_history.update);
+//             let istmt = DB.db.prepare(DB.query.bachat_new.import);
+//             let ustmt = DB.db.prepare(DB.query.bachat_new.update);
 //             for (let i in req.body) {
 //                 if (req.body[i].yes) {
 //                     if (req.body[i].status == 'insert') {
@@ -82,11 +90,11 @@ router.post('/:dept_id', async (req, res, next) => {
 // });
 
 
-// update bachat_history 
+// update bachat_new 
 router.put('/', async (req, res, next) => {
     try {
         if (req.body.set && req.body.query) {
-            await DB.update('bachat_history', req.body.set, req.body.query._id).then(async (data) => {
+            await DB.update('bachat_new', req.body.set, req.body.query._id).then(async (data) => {
                 res.json({
                     success: true,
                     result: data || {}
@@ -100,11 +108,11 @@ router.put('/', async (req, res, next) => {
 });
 
 
-// delete bachat_history 
+// delete bachat_new 
 router.delete('/:id', async (req, res, next) => {
     try {
         if (req.params.id) {
-            await DB.delete('bachat_history', req.params.id).then((data) => {
+            await DB.delete('bachat_new', req.params.id).then((data) => {
                 res.json({
                     success: true,
                     result: data

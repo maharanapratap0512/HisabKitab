@@ -56,6 +56,7 @@ export class JawakComponent implements OnInit {
     product_id: [],
     item_id: [],
     subitem_id: [],
+    usage_category_id: [],
     condition_id: [],
     nimitt_id: null,
     pkt_num: null
@@ -139,7 +140,7 @@ export class JawakComponent implements OnInit {
   getMoreAJ() {
     // this.isLoader = true;
     this.filterBody.pageNo = this.pageNo + 1;
-    this.http.put(this.api.getUrl('JAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('JAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data["result"].length) {
         if (data["pageNo"]) {
           this.pageNo = data["pageNo"];
@@ -155,7 +156,7 @@ export class JawakComponent implements OnInit {
   getJawakData(pageNo: any) {
     this.isLoader = true;
     this.filterBody.pageNo = pageNo;
-    this.http.put(this.api.getUrl('JAWAK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('JAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.jawakData = data['result'];
         this.total_count = data['result'].length;

@@ -46,6 +46,8 @@ export class ItemEntryComponent implements OnInit {
       extra_note: [null],
       restrict_month:[null],
       restrict_year: [null],
+      min_rate:[0],
+      max_rate: [0],
       document: [[]]
     });
   }
@@ -72,6 +74,8 @@ export class ItemEntryComponent implements OnInit {
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
         restrict_month: changes.getData.currentValue.restrict_month ? changes.getData.currentValue.restrict_month : null,
         restrict_year: changes.getData.currentValue.restrict_year ? changes.getData.currentValue.restrict_year : null,
+        min_rate: changes.getData.currentValue.min_rate ? changes.getData.currentValue.min_rate : 0,
+        max_rate: changes.getData.currentValue.max_rate ? changes.getData.currentValue.max_rate : 0,
         document: changes.getData.currentValue.document ? changes.getData.currentValue.document : []
       });
       this.imagepath = (changes.getData.currentValue.document && changes.getData.currentValue.document.images) ? changes.getData.currentValue.document.images : null;
@@ -125,6 +129,8 @@ export class ItemEntryComponent implements OnInit {
         document: this.itemForm.value.document ? this.itemForm.value.document : [],
         restrict_month: this.itemForm.value.restrict_month ? this.itemForm.value.restrict_month : null,
         restrict_year: this.itemForm.value.restrict_year ? this.itemForm.value.restrict_year : null,
+        min_rate: this.itemForm.value.min_rate ? this.itemForm.value.min_rate : 0,
+        max_rate: this.itemForm.value.max_rate ? this.itemForm.value.max_rate : 0,
       };
       this.http.put(this.api.getUrl('ITEM'), body).subscribe((data: any) => {
         if (data && data['success']) {

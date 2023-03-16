@@ -54,8 +54,9 @@ export class VehicleComponent implements OnInit {
     this.settings = this.auth.webUser.settings;
   }
 
-  openModal(type:string){
+  openModal(type:string, mode:string = ''){
     this.showModal = type;
+    this.mode = mode;
     $('#showModal').modal('show')
   }
 
@@ -96,7 +97,7 @@ export class VehicleComponent implements OnInit {
       vehExportData.push({
         "Sr No": i + 1,
         // "_id": this.vehData[i]._id,
-        "mm_id": this.vehData[i].mm_id,
+        "mm": this.vehData[i].mm_hin,
         "vehicle_type": this.vehData[i].vehicle_type,
         "gadi_name": this.vehData[i].gadi_name,
         "gadi_num": this.vehData[i].gadi_num,
@@ -105,16 +106,16 @@ export class VehicleComponent implements OnInit {
         "owner_name": this.vehData[i].owner_name,
         "nominee": this.vehData[i].nominee,
         "aawak_type": this.vehData[i].aawak_type,
-        "rc_date": new Date(this.vehData[i].rc_date).toLocaleDateString(),
-        "rc_exp_date": new Date(this.vehData[i].rc_exp_date).toLocaleDateString(),
+        "rc_date": this.gs.formatDisplayDate(this.vehData[i].rc_date),
+        "rc_exp_date": this.gs.formatDisplayDate(this.vehData[i].rc_exp_date),
         "rc_amount": this.vehData[i].rc_amount,
-        "insurance_date": new Date(this.vehData[i].insurance_date).toLocaleDateString(),
-        "insurance_exp_date": new Date(this.vehData[i].insurance_exp_date).toLocaleDateString(),
+        "insurance_date": this.gs.formatDisplayDate(this.vehData[i].insurance_date),
+        "insurance_exp_date": this.gs.formatDisplayDate(this.vehData[i].insurance_exp_date),
         "insurance_type": this.vehData[i].insurance_type,
         "insurance_company": this.vehData[i].insurance_company,
         "insurance_amount": this.vehData[i].insurance_amount,
-        "puc_date": new Date(this.vehData[i].puc_date).toLocaleDateString(),
-        "puc_exp_date": new Date(this.vehData[i].puc_exp_date).toLocaleDateString(),
+        "puc_date": this.gs.formatDisplayDate(this.vehData[i].puc_date),
+        "puc_exp_date": this.gs.formatDisplayDate(this.vehData[i].puc_exp_date),
         "puc_amount": this.vehData[i].puc_amount
       });
     }

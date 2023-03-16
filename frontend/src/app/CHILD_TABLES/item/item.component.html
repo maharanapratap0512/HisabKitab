@@ -92,6 +92,7 @@
                            <th style="width: 180px;">Item Code</th>
                            <th style="width: 180px;">Default Unit</th>
                            <th style="width: 180px;">Category</th>
+                           <th style="width: 120px;">Price</th>
                            <th style="width: 250px;">Extra Note</th>
                         </tr>
                      </thead>
@@ -99,7 +100,8 @@
                         <ng-container class="accordion-item"
                            *ngFor="let data of itemData | filter:term| paginate: {itemsPerPage: itemsPerPage,currentPage: page,totalItems: total_count}; let i=index; ">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
-                              [attr.aria-controls]="'#collapse-' + i" class="main-row" [ngClass]="{'text-light':data.restrict_year}">
+                              [attr.aria-controls]="'#collapse-' + i" class="main-row"
+                              [ngClass]="{'text-light':data.restrict_year}">
                               <!-- <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row"> -->
                               <td style="font-size: large;">
                                  {{itemsPerPage * (page - 1) + (i+1)}}
@@ -113,7 +115,7 @@
                                        class="uil-shield-slash text-danger"></i>
                                  </span> -->
                               </td>
-                              <td>                                 
+                              <td>
                                  <div *ngIf="[1,6].includes(auth.webUser.dept_id)">
                                     <button class="btn btn-sm btn-outline-success" type="button"
                                        (click)="addSubitem(data)"><i class="uil uil-plus"></i></button>
@@ -133,7 +135,7 @@
                                     </button> -->
                                  </div>
                                  <div *ngIf="data.restrict_year" class="lock-date text-warning">
-                                    {{data.restrict_month}}/{{data.restrict_year}} से लॉक। 
+                                    {{data.restrict_month}}/{{data.restrict_year}} से लॉक।
                                  </div>
 
                                  <!-- <span *ngIf="![1,6].includes(auth.webUser.dept_id) && data.active"
@@ -160,6 +162,9 @@
                                     {{cat}},
                                  </ng-container>
                               </td>
+                              <td>
+                                 {{(data.min_rate || data.max_rate) ? data.min_rate + ' - ' + data.max_rate : ''}}
+                              </td>
                               <td>{{data.extra_note?data.extra_note:'-'}}</td>
                            </tr>
                            <!-- <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse"
@@ -175,17 +180,17 @@
                            <ng-container *ngFor="let si of data.subitems ;let j=index">
                               <ng-container *ngIf="si">
                                  <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse"
-                                    [ngClass]="{'show':expandAll, 'text-light':si.restrict_year}" *ngIf="data.subitems.length > 0"
-                                    aria-labelledby="headingOne">
+                                    [ngClass]="{'show':expandAll, 'text-light':si.restrict_year}"
+                                    *ngIf="data.subitems.length > 0" aria-labelledby="headingOne">
                                     <td style="border: none;"></td>
-                                    <td colspan="6" class="sub-row">
+                                    <td colspan="8" class="sub-row">
                                        <table class="" style="width: 99.7%;table-layout: fixed;">
                                           <tr>
                                              <td style="width: 75px;">
                                                 <i class="uil-corner-down-right"></i>
                                                 <span class="mx-1">{{j+1}}</span>
                                              </td>
-                                             <td style="width: 160px;">                                                
+                                             <td style="width: 160px;">
                                                 <div *ngIf="[1,6].includes(auth.webUser.dept_id)">
                                                    <button class="btn btn-sm btn-primary mx-1" type="button"
                                                       (click)="edit(si, 'subitem')">
@@ -204,9 +209,10 @@
                                                       <i class="uil-trash"></i></button> -->
                                                 </div>
                                                 <div *ngIf="si.restrict_year" class="lock-date text-warning">
-                                                   {{si.restrict_month}}/{{si.restrict_year}} से लॉक। 
+                                                   {{si.restrict_month}}/{{si.restrict_year}} से लॉक।
                                                 </div>
                                              </td>
+                                             <td></td>
                                              <td style="width: 250px;" class="nav-item">
                                                 {{si.subitem_hin +' : '+ si.subitem_eng}}
                                              </td>
@@ -222,6 +228,10 @@
                                                    {{scat}},
                                                 </ng-container>
                                              </td>
+                                             <td>
+                                                {{(si.min_rate || si.max_rate) ? si.min_rate + ' - ' +
+                                                si.max_rate : ''}}
+                                             </td>
                                              <td style="width: 250px;" class="nav-item">
                                                 {{si.extra_note?si.extra_note:'N/A'}}
                                              </td>
@@ -235,8 +245,7 @@
                      </tbody>
                   </table>
                </div>
-               <pagination-controls class="pagi text-center" (pageChange)="page = $event"
-                  [autoHide]="true">
+               <pagination-controls class="pagi text-center" (pageChange)="page = $event" [autoHide]="true">
                </pagination-controls>
             </div>
 

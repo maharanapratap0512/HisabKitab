@@ -71,6 +71,8 @@ router.get('/correction', async (req, res, next) => {
 
         //jwk_mm        
         correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_mm') as name, 'aj_mm' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_mm_id') IS NULL AND json_extract(json_each.value, '$.aj_mm') IS NOT NULL`).all());
+        //category        
+        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.usage_category') as name, 'category' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.usage_category_id') IS NULL AND json_extract(json_each.value, '$.usage_category') IS NOT NULL`).all());
         // jwk_type
         correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_type') as name, 'jwk_type' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_type_id') IS NULL AND json_extract(json_each.value, '$.aj_type') IS NOT NULL`).all());
         // jwk_nimitt
@@ -105,6 +107,9 @@ router.put('/correction', async (req, res, next) => {
                         break;
                     case 'nimitt': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.nimitt_id') IS NULL AND json_extract(json_each.value, '$.nimitt') IS NOT NULL ;`);
                         type = 'nimitt';
+                        break;
+                    case 'usage_category': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.usage_category_id') IS NULL AND json_extract(json_each.value, '$.usage_category') IS NOT NULL ;`);
+                        type = 'usage_category';
                         break;
                 }
 
@@ -177,44 +182,63 @@ router.put('/ignore', async (req, res, next) => {
 //  final import
 router.put('/final', async (req, res, next) => {
     try {
-        for (let row of req.body.data) {
-            setTimeout(async () => {
-                if(row.awk_id && req.body.history.autoUpdate){
+        let insert = DB.db.transaction(async () => {
+            let error;
+            for (let row of req.body.data) {
+                let time = 1000;
+                setTimeout(async () => {
+                if (row.awk_id && req.body.history.autoUpdate) {
                     await insertJawak(row, row.awk_id);
-                }else{
+                } else {
                     await DB.insert('aawak', {
                         date: row.date, mm_id: row.mm_id, pkt_num: row.pkt_num, pbk_id: row.pbk_id, aawak_mm_id: row.aj_mm_id,
                         item_id: row.item_id, subitem_id: row.subitem_id, product_id: row.product_id, item_detail: row.item_detail,
                         condition_id: row.condition_id, qty: row.qty, rate: row.rate, actual_amt: row.actual_amt,
                         aawak_type_id: row.aj_type_id, unit_id: row.unit_id, description: row.description, nimitt_id: row.nimitt_id,
-                        dept_id: row.dept_id, company_name: row.company_name, isbill: row.isbill, document: null
-                    }, null, false).then((data) => {
+                        dept_id: row.dept_id, company_name: row.company_name, isbill: row.isbill, document: null, usage_category_id: row.usage_category_id, usage_category: row.usage_category,
+                    }, null, false).then(async (data) => {
                         if (data) {
-                            insertJawak(row.jawak_detail, data);
+                            await insertJawak(row, data).then({}, (err) => {
+                                error = err;
+                                return;
+                            });
                         }
                     });
-                }
-            }, 10);
+                    if(error){
+                        return next(error);
+                    }
 
-        }
-        await DB.insert('import_history', req.body.history, null, false);
-        await DB.runQuery('temp_import', 'delete');
-        res.json({
-            success: true,
+                }
+                }, time);
+
+            }
+            await DB.insert('import_history', req.body.history, null, false);
+            await DB.runQuery('temp_import', 'delete');
+
+            res.json({
+                success: true,
+            });
         });
 
-    } catch (err) { next(err) };
+        insert();
+
+    } catch (err) { console.log(err); next(err) };
 });
 
-async function insertJawak(row, awkId){
-    for (let jwk of row.jawak_detail) {
-        await DB.insert('jawak', {
-            date: jwk.date ? jwk.date : row.date, mm_id: row.mm_id, pkt_num: jwk.pkt_num,
-            pbk_id: jwk.pbk_id ? jwk.pbk_id : null, jawak_mm_id: jwk.aj_mm_id, item_id: row.item_id,
-            subitem_id: row.subitem_id, product_id: row.product_id, item_detail: null,
-            condition_id: jwk.condition_id, qty: jwk.qty, jawak_type_id: jwk.aj_type_id,
-            unit_id: row.unit_id, description: jwk.description, nimitt_id: jwk.nimitt_id, company_name: row.company_name, aawak_ref_id: awkId, dept_id: row.dept_id
-        }, null, false);
+async function insertJawak(row, awkId) {
+    if (row.jawak_detail) {
+        for (let jwk of row.jawak_detail) {
+            let resd = await DB.insert('jawak', {
+                date: jwk.date ? jwk.date : row.date, mm_id: row.mm_id, pkt_num: jwk.pkt_num,
+                pbk_id: jwk.pbk_id ? jwk.pbk_id : null, jawak_mm_id: jwk.aj_mm_id, item_id: row.item_id,
+                subitem_id: row.subitem_id, product_id: row.product_id, item_detail: null,
+                condition_id: jwk.condition_id, qty: jwk.qty, jawak_type_id: jwk.aj_type_id,
+                unit_id: row.unit_id, description: jwk.description, nimitt_id: jwk.nimitt_id, company_name: row.company_name, aawak_ref_id: awkId, dept_id: row.dept_id, usage_category: jwk.usage_category,
+            }, null, false).then({}, (err) => {
+                throw err;
+                // console.log(err);
+            });
+        }
     }
 }
 
@@ -305,6 +329,7 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
             let total_count = 0, i = 0;
             let new_entries = [];
             let update_entries = [];
+            let delete_entries = [];
             let insert = DB.db.transaction(async (tblname, data) => {
                 try {
                     const insert_stmt = DB.db.prepare(DB.query[tblname].insert_ignore);
@@ -320,7 +345,17 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
                             data[i].active = 1;
                         }
 
-                        if (data[i].status == 2) {
+                        if (data[i].status == 3) {
+                            DB.delete(tblname, data[i]._id).then((del_res) => {
+                                if (del_res) {
+                                    delete_entries.push(data[i]);
+                                }
+                            }, (err) => {
+                                console.log(err);
+                            });
+
+                        }
+                        else if (data[i].status == 2) {
                             let updt_res = update_stmt.run(data[i]);
                             if (updt_res) {
                                 if (updt_res.changes > 0) {
@@ -343,6 +378,7 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
                         total_count: total_count,
                         new_entries: new_entries,
                         update_entries: update_entries,
+                        delete_entries: delete_entries,
                         columns: data.length > 0 ? Object.keys(data[0]) : []
                     })
                 }
@@ -352,7 +388,9 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
                 }
             });
 
+            DB.db.pragma('foreign_keys=OFF');
             insert(req.body.type, req.body.data);
+            DB.db.pragma('foreign_keys=ON');
 
         }
     }

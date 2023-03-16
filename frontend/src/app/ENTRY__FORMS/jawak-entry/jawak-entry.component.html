@@ -386,6 +386,19 @@
                     </div>
                 </div>
 
+                <div class="col-md-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Jawak Category</label>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
+                            [clearable]="true" [virtualScroll]="true" formControlName="usage_category_id"
+                            [ngClass]="{'validation':jawakForm.get('usage_category_id')?.errors && (jawakForm.get('usage_')?.touched || jawakForm.get ('usage_category_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Category</ng-option>
+                            <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
+                                {{item.category_eng}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+
                 <div class="col-md-3 mb-3" *ngIf="settings.jawak.item_detail">
                     <div class="form-group">
                         <label class="form-label">Item Detail</label>

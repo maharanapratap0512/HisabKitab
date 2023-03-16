@@ -195,8 +195,8 @@ export class ImportComponent implements OnInit {
     });
   }
 
-  catSelected(ev: any) {
-    if (ev) {
+  catSelected(ev: any, type: any) {
+    if (ev && type != "category") {
       this.cat = ev;
       this.items = this.itemAll.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
     }

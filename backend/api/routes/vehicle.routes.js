@@ -20,7 +20,7 @@ router.get('/', async (req, res, next) => {
 // get vehicle 
 router.get('/:dept_id', async (req, res, next) => {
     try {
-        await DB.getList('vehicle', { order: `vehicle._id desc`, full: true }).then(async (resolve) => {
+        await DB.getList('vehicle', { orderBy: `vehicle._id desc`, full: true }).then(async (resolve) => {
             let time = DB.db.prepare('select UNIXEPOCH() * 1000 as time').get().time;
             if (time) {
                 for (let i in resolve.data) {

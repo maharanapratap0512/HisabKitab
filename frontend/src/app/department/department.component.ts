@@ -1424,10 +1424,10 @@ export class DepartmentComponent implements OnInit {
 
   exportDeptSettings = async () => {
     this.isLoader = true;
-    this.dataZip = new JSZip();
-    this.dataZip.file("settings.json", JSON.stringify(this.deptConf.settings));
     let date = new Date();
-    let dept = this.departments.find((d: { _id: any; }) => d._id == this.dept_id);
+    let dept = await this.departments.find((d: { _id: any; }) => d._id == this.dept_id);
+    this.dataZip = new JSZip();
+    this.dataZip.file("settings.json", JSON.stringify(dept));
 
     this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
       FileSaver.saveAs(content, dept.dept_eng + "_settings_update_" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + ".zip");
@@ -1475,6 +1475,11 @@ export class DepartmentComponent implements OnInit {
           this.toastr.success('Department Settings Updated Successfully.');
           if (this.dept_id == this.auth.webUser.dept_id) {
             this.auth.updateSettings(this.settingsAll);
+            for(let i in this.gs.Lists.department){
+              if(this.gs.Lists.department[i]._id == this.dept_id){
+                this.gs.Lists.department[i].settings = this.settingsAll;
+              }
+            }
           }
         }
       });

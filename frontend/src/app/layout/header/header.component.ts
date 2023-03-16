@@ -392,13 +392,19 @@ export class HeaderComponent implements OnInit {
           if (zip) {
             // getting name of all exists files in zip in array.
             let fileNames = Object.keys(zip.files);
+            console.log("fileNames", fileNames);
 
             // loop through all files
             for (let i in fileNames) {
               let fname = fileNames[i].split('.')[0];
-              await zip.file(fileNames[i]).async("string").then((data: any) => {
+              await zip.file(fileNames[i]).async("string").then(async (data: any) => {
                 if (data) {
-                  this.importResult.push({ type: fname, data: JSON.parse(data) });
+                  if (fname == 'settings') {
+                    this.updateSettings(data);
+                  } else {
+                    await this.importResult.push({ type: fname, data: JSON.parse(data) });
+                  }
+
                 }
               }, (err: any) => {
                 console.log(err);
@@ -406,8 +412,6 @@ export class HeaderComponent implements OnInit {
             }
 
             await this.processingImportData();
-
-            console.log("return", this.importResult);
 
             this.isLoader = false;
             $('#importmodal').modal('show');
@@ -422,6 +426,29 @@ export class HeaderComponent implements OnInit {
     ev = null;
   }
 
+  updateSettings(data: any) {
+    console.log(data);
+    let setting = JSON.parse(data);
+    let body = {
+      query: {
+        _id: setting._id
+      },
+      set: {
+        ...setting
+      }
+    }
+
+    this.http.put(this.api.getUrl('DEPT'), body).subscribe((data: any) => {
+      if (data.success) {
+
+        if (data.result._id == this.auth.webUser.dept_id) {
+          this.auth.updateSettings(JSON.parse(data.result.settings));
+        }
+        this.toastr.success("settings import successfully");
+      }
+    });
+  }
+
   /*
   changes => an array of insert, update and delete items.
   found => an array of same items with no changes.
@@ -430,33 +457,33 @@ export class HeaderComponent implements OnInit {
   */
 
   async processingImportData() {
+
     for (let i in this.importResult) {
-      let API = null;
+
+      let API: string | null = null;
       this.del_filter[this.importResult[i].type] = [];
       switch (this.importResult[i].type) {
         case 'settings.json':
+
+          console.log("case", this.importResult[i]);
           let setting = this.importResult[i].data;
           let body = {
             query: {
-              // _id: (setting._id ? setting._id : null),
-              dept_id: setting.dept_id,
-              config_key: setting.config_key,
+              _id: setting._id
             },
             set: {
-              config_key: setting.config_key,
-              config_value: setting.config_value,
-              active: setting.active,
-              created_at: setting.created_at,
-              updated_at: setting.updated_at,
+              ...setting
             }
           }
 
-          this.http.put(this.api.getUrl('DEPTCONFIG'), body).subscribe((data: any) => {
+          this.http.put(this.api.getUrl('DEPT'), body).subscribe((data: any) => {
             if (data.result.length > 0) {
-              let setting = JSON.parse(data.result[0].config_value);
-              if (data.result[0].dept_id == this.auth.webUser.dept_id) {
-                this.auth.updateSettings(setting);
-              }
+              console.log("res", data);
+
+              // let setting = JSON.parse(data.result[0].config_value);
+              // if (data.result[0].dept_id == this.auth.webUser.dept_id) {
+              //   this.auth.updateSettings(setting);
+              // }
               this.toastr.success("settings import successfully");
             }
           });
@@ -509,6 +536,7 @@ export class HeaderComponent implements OnInit {
       if (API) {
         await this.http.get(this.api.getUrl(API)).subscribe((res: any) => {
           let result: any = { changes: [], found: [], columns: [] }
+
           for (let j in res.result) {
             for (let k = 0; k < this.importResult[i].data.length; k++) {
               if (res.result[j]._id == this.importResult[i].data[k]._id) {
@@ -537,21 +565,20 @@ export class HeaderComponent implements OnInit {
             }
           }
           for (let j in this.importResult[i].data) {
+            if (result.columns.length < 1) {
+              result.columns = [...Object.keys(this.importResult[i].data[j]), "status"];
+            }
             if (!this.importResult[i].data[j].status) {
-              if (result.columns.length < 1) {
-                result.columns = [...Object.keys(this.importResult[i].data[j]), "status"];
-              }
               result.changes.push({ status: 1, ...this.importResult[i].data[j] })
             }
           }
           this.importResult[i].result = result;
         });
       }
-      else{
-        this.importResult[i].result = {changes: this.importResult[i].data, found: [], columns: []}
+      else {
+        this.importResult[i].result = { changes: this.importResult[i].data, found: [], columns: [] }
       }
     }
-    console.log("final", this.importResult);
 
   }
 
@@ -564,9 +591,9 @@ export class HeaderComponent implements OnInit {
 
   importUpdates() {
     for (let i in this.importResult) {
-      if(this.importResult[i].result && this.importResult[i].result.changes && this.importResult[i].result.changes.length > 0){
+      if (this.importResult[i].result && this.importResult[i].result.changes && this.importResult[i].result.changes.length > 0) {
         this.http.put(this.api.getUrl('APPLYUPDATE') + this.auth.webUser.dept_id, { type: this.importResult[i].type, data: this.importResult[i].result.changes }).subscribe((result: any) => {
-          if(result){
+          if (result) {
             this.toastr.success(this.importResult[i].type + " import successfully");
           }
         });
