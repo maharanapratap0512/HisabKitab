@@ -159,7 +159,7 @@ export class JawakComponent implements OnInit {
     this.http.put(this.api.getUrl('JAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.jawakData = data['result'];
-        this.total_count = data['result'].length;
+        this.total_count = data['total_count'];
         this.isLoader = false;
       }
       this.isLoader = false;
