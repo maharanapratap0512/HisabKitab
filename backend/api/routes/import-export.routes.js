@@ -182,63 +182,55 @@ router.put('/ignore', async (req, res, next) => {
 //  final import
 router.put('/final', async (req, res, next) => {
     try {
-        let insert = DB.db.transaction(async () => {
-            let error;
-            for (let row of req.body.data) {
-                let time = 1000;
-                setTimeout(async () => {
-                if (row.awk_id && req.body.history.autoUpdate) {
-                    await insertJawak(row, row.awk_id);
+        let insert = DB.db.transaction(async (AJdata, ImportHistory) => {
+            for (let i in AJdata) {
+                if (AJdata[i].awk_id && req.body.history.autoUpdate) {
+                    AJdata[i].jawak_detail = await insertJawak(AJdata[i], AJdata[i].awk_id);
                 } else {
-                    await DB.insert('aawak', {
-                        date: row.date, mm_id: row.mm_id, pkt_num: row.pkt_num, pbk_id: row.pbk_id, aawak_mm_id: row.aj_mm_id,
-                        item_id: row.item_id, subitem_id: row.subitem_id, product_id: row.product_id, item_detail: row.item_detail,
-                        condition_id: row.condition_id, qty: row.qty, rate: row.rate, actual_amt: row.actual_amt,
-                        aawak_type_id: row.aj_type_id, unit_id: row.unit_id, description: row.description, nimitt_id: row.nimitt_id,
-                        dept_id: row.dept_id, company_name: row.company_name, isbill: row.isbill, document: null, usage_category_id: row.usage_category_id, usage_category: row.usage_category,
-                    }, null, false).then(async (data) => {
-                        if (data) {
-                            await insertJawak(row, data).then({}, (err) => {
-                                error = err;
-                                return;
-                            });
+                    let awkObj = {
+                        date: AJdata[i].date, mm_id: AJdata[i].mm_id, pkt_num: AJdata[i].pkt_num, pbk_id: AJdata[i].pbk_id, aawak_mm_id: AJdata[i].aj_mm_id, item_id: AJdata[i].item_id, subitem_id: AJdata[i].subitem_id, product_id: AJdata[i].product_id, item_detail: AJdata[i].item_detail, condition_id: AJdata[i].condition_id, qty: AJdata[i].qty, rate: AJdata[i].rate, actual_amt: AJdata[i].actual_amt, aawak_type_id: AJdata[i].aj_type_id, unit_id: AJdata[i].unit_id, description: AJdata[i].description, nimitt_id: AJdata[i].nimitt_id, dept_id: AJdata[i].dept_id, company_name: AJdata[i].company_name, isbill: AJdata[i].isbill, document: null, usage_category_id: AJdata[i].usage_category_id, usage_category: AJdata[i].usage_category,
+                    };
+                    await Fn.insertAJ(awkObj, 'aawak').then(async (resolve) => {
+                        if (resolve) {
+                            AJdata[i]._id = resolve;
+                            AJdata[i].jawak_detail = await insertJawak(AJdata[i], resolve);
                         }
+                    }, (err) => {
+                        AJdata[i].error = err;
                     });
-                    if(error){
-                        return next(error);
-                    }
-
                 }
-                }, time);
-
             }
-            await DB.insert('import_history', req.body.history, null, false);
+            await DB.insert('import_history', ImportHistory, null, false);
             await DB.runQuery('temp_import', 'delete');
 
             res.json({
                 success: true,
+                data: AJdata
             });
         });
 
-        insert();
+        await insert(req.body.data, req.body.history);
 
     } catch (err) { console.log(err); next(err) };
 });
 
 async function insertJawak(row, awkId) {
     if (row.jawak_detail) {
-        for (let jwk of row.jawak_detail) {
-            let resd = await DB.insert('jawak', {
-                date: jwk.date ? jwk.date : row.date, mm_id: row.mm_id, pkt_num: jwk.pkt_num,
-                pbk_id: jwk.pbk_id ? jwk.pbk_id : null, jawak_mm_id: jwk.aj_mm_id, item_id: row.item_id,
-                subitem_id: row.subitem_id, product_id: row.product_id, item_detail: null,
-                condition_id: jwk.condition_id, qty: jwk.qty, jawak_type_id: jwk.aj_type_id,
-                unit_id: row.unit_id, description: jwk.description, nimitt_id: jwk.nimitt_id, company_name: row.company_name, aawak_ref_id: awkId, dept_id: row.dept_id, usage_category: jwk.usage_category,
-            }, null, false).then({}, (err) => {
-                throw err;
-                // console.log(err);
+        for (let i in row.jawak_detail) {
+            let jwkObj = {
+                date: row.jawak_detail[i].date ? row.jawak_detail[i].date : row.date, mm_id: row.mm_id, pkt_num: row.jawak_detail[i].pkt_num, pbk_id: row.jawak_detail[i].pbk_id ? row.jawak_detail[i].pbk_id : null, jawak_mm_id: row.jawak_detail[i].aj_mm_id, item_id: row.item_id, subitem_id: row.subitem_id, product_id: row.product_id, item_detail: null, condition_id: row.condition_id, qty: row.jawak_detail[i].qty, jawak_type_id: row.jawak_detail[i].aj_type_id, unit_id: row.unit_id, description: row.jawak_detail[i].description, nimitt_id: row.jawak_detail[i].nimitt_id, company_name: row.company_name, aawak_ref_id: awkId, dept_id: row.dept_id, usage_category_id: row.jawak_detail[i].usage_category_id,
+            }
+            await Fn.insertAJ(jwkObj, 'jawak').then((jwkResult) => {
+                row.jawak_detail[i]._id = jwkResult;
+            }, (err) => {
+                console.log(err);
+                row.jawak_detail[i].error = err;
             });
         }
+        return row.jawak_detail
+    }
+    else {
+        return []
     }
 }
 

@@ -1,9 +1,112 @@
 class Functions {
    DB;
    DBContex;
+   insertAJ;
+   deleteAJ;
    constructor() {
       this.DBContex = require('./DBContex');
       this.DB = new this.DBContex();
+
+      this.insertAJ = this.DB.db.transaction(async (obj, type) => {
+         return new Promise(async (resolve, reject) => {
+            try {
+               let stmtInsert = this.DB.db.prepare(this.DB.query[type].insert);
+               let stmtInsertBachat = this.DB.db.prepare(this.DB.query.bachat_new['insert_' + type + '_ins']);
+               let stmtUpdateBachat = this.DB.db.prepare(this.DB.query.bachat_new['update_' + type + '_ins']);
+               let objDate = new Date(obj.date);
+               obj.month = objDate.getMonth();
+               obj.year = objDate.getFullYear();
+               obj.document = JSON.stringify(obj.document ? obj.document : {});
+               obj.isbill = obj.isbill ? 1 : 0;
+               obj.active = 1;
+               let insResult = stmtInsert.run(obj);
+               if (insResult.changes == 1 && insResult.lastInsertRowid) {
+                  let bachat = await this.DB.getBachatFromAJ(obj);
+                  let bachatResult;
+                  if (bachat._id) {
+                     bachatResult = stmtUpdateBachat.run(obj);
+                  }
+                  else {
+                     bachatResult = stmtInsertBachat.run(obj);
+                  }
+                  resolve(insResult.lastInsertRowid);
+               } else {
+                  reject(false);
+               }
+
+            } catch (err) {
+               console.log(type, obj);
+               reject(err);
+            }
+         });
+      });
+
+      this.updateAJ = this.DB.db.transaction(async (obj, type, objOld = null) => {
+         return new Promise(async (resolve, reject) => {
+            try {
+               let stmtUpdate = this.DB.db.prepare(this.DB.query[type].update + ` where ${type}._id = ${obj._id}`);
+               let stmtInsertBachat = this.DB.db.prepare(this.DB.query.bachat_new['insert_' + type + '_ins']);
+               let stmtUpdateBachat = this.DB.db.prepare(this.DB.query.bachat_new['update_' + type + '_ins']);
+               let stmtDeleteBachat = this.DB.db.prepare(this.DB.query.bachat_new['update_' + type + '_del']);
+               if(!objOld){
+                  objOld = await this.DB.getById(type, obj._id);
+               }
+               let objDate = new Date(obj.date);
+               obj.month = objDate.getMonth();
+               obj.year = objDate.getFullYear();
+
+               let objOldDate = new Date(objOld.date);
+               objOld.month = objOldDate.getMonth();
+               objOld.year = objOldDate.getFullYear();
+
+               obj.document = JSON.stringify(obj.document ? obj.document : {});
+               obj.isbill = obj.isbill ? 1 : 0;
+
+               let updtResult = stmtUpdate.run(obj);
+               if (updtResult.changes == 1) {
+                  stmtDeleteBachat.run(objOld);
+                  // let bachatUpdate = await this.DB.getBachatFromAJ(obj);
+                  let bachatUpdate = stmtUpdateBachat.run(obj);
+                  console.log(bachatUpdate);
+                  if (!bachatUpdate.changes) {
+                     bachatUpdate = stmtInsertBachat.run(obj);
+                  }                  
+                  resolve(true);
+               } else {
+                  reject(false);
+               }
+
+            } catch (err) {
+               // throw err;
+               reject(err);
+            }
+         });
+      });
+
+      this.deleteAJ = this.DB.db.transaction(async (id, type) => {
+         return new Promise(async (resolve, reject) => {
+            try {
+               let stmtUpdateBachat = this.DB.db.prepare(this.DB.query.bachat_new['update_' + type + '_del']);
+               let stmtDelete = this.DB.db.prepare(this.DB.query[type].delete)
+               let obj = await this.DB.getById(type, id);
+               let objDate = new Date(obj.date);
+               obj.month = objDate.getMonth();
+               obj.year = objDate.getFullYear();
+console.log(obj);
+               let delResult = stmtDelete.run({ _id: id });
+               if (delResult.changes == 1) {
+                  stmtUpdateBachat.run(obj);
+                  resolve(true);
+               } else {
+                  reject(false);
+               }
+
+            } catch (err) {
+               throw err;
+               reject(err);
+            }
+         });
+      });
    }
 
    convertToLower(data, fieldList = null) {
@@ -166,7 +269,6 @@ class Functions {
    }
 
    StringToDate = (stringDate) => {
-      console.log(stringDate);
       let datearr = stringDate.split(/[./-]+/);
       if (datearr && datearr.length == 3) {
 
@@ -199,6 +301,9 @@ class Functions {
    JulianDateToJSDate = (julianDate) => {
       return new Date((julianDate - 2440587.5) * 86400000);
    }
+
+
+
 
 }
 

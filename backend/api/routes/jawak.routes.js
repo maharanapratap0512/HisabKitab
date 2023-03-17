@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const DBContex = require('../models/DBContex');
 const DB = new DBContex();
-
+const Fn = require('../models/functions');
 
 
 // get jawak
@@ -112,26 +112,24 @@ router.put('/', async (req, res, next) => {
 router.post('/new/:dept_id', async (req, res, next) => {
     try {
         if (req.body) {
-            let insertJawak = DB.db.transaction(async (jwkObj) => {
-                try {
-                    await DB.insert('jawak', req.body, req.params.dept_id).then(async (data) => {
-                        await DB.updateBachatFromAJInsert(jwkObj, 'jawak');
+
+            await Fn.insertAJ(req.body, 'jawak').then(async (resolve) => {
+                if (resolve) {
+
+                    await DB.getById('jawak', resolve, { full: true }).then(async (data) => {
                         res.json({
-                            success: true,
-                            result: data || {}
+                            result: data || {},
+                            success: true
                         });
+                    }, (reject) => {
+                        return next(reject)
                     });
+
                 }
-                catch (ex) {
-                    console.log(ex);
-                    return next(ex);
+                else {
+                    return next(new Error('Please fill required fields.'))
                 }
             });
-
-            await insertJawak(req.body)
-        }
-        else {
-            return next(new Error('Please fill required fields.'))
         }
     } catch (err) { next(err) };
 });
@@ -141,22 +139,19 @@ router.put('/new', async (req, res, next) => {
     try {
         if (req.body.set && req.body.query) {
 
-            let updateJawak = DB.db.transaction(async (jwkObj) => {
-                try {
-                    await DB.updateBachatFromAJUpdate(jwkObj, 'jawak');
-                    await DB.update('jawak', req.body.set, req.body.query._id).then((data) => {
-                        res.json({
-                            success: true,
-                            result: data || []
-                        });
-                    });
+            await Fn.updateAJ(req.body.set, 'jawak').then(async (resolve) => {
+                if (resolve) {
+                    let jawak = await DB.getById('jawak', req.body.set._id, { full: true });
+                    res.json({
+                        success: true,
+                        result: jawak || []
+                    })
+                } else {
+                    throw new Error('something went wrong');
                 }
-                catch (ex) {
-                    return next(ex)
-                }
-            });
-
-            await updateJawak(req.body.set);
+            }, (reject) => {
+                return next(reject);
+            })
         }
         else {
             return next(new Error('Id not found.'))
@@ -169,31 +164,13 @@ router.put('/new', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     try {
         if (req.params.id) {
-            let deleteJawak = DB.db.transaction(async (id) => {
-                try {
-                    await DB.getById('jawak', id).then(async (jwkObj) => {
-                        await DB.updateBachatFromAJDelete(jwkObj, 'jawak');
-                    });
-                    await DB.delete('jawak', id).then((data) => {
-                        res.json({
-                            success: true,
-                            result: data
-                        })
-                    })
-                }
-                catch (ex) {
-                    console.log(ex);
-                    return next(ex);
-                }
-            });
-            await deleteJawak(req.params.id);
-
-            // await DB.delete('jawak', req.params.id).then((data) => {
-            //     res.json({
-            //         success: true,
-            //         result: data
-            //     });
-            // });
+            
+            await Fn.deleteAJ(req.params.id,'jawak').then((resolve)=>{
+                res.json({
+                    success:true,
+                    result:resolve
+                })
+            })
         }
         else {
             return next(new Error('Id not found.'))

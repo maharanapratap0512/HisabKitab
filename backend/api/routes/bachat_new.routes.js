@@ -23,16 +23,16 @@ router.get('/:dept_id', async (req, res, next) => {
         let sql = DB.query.bachat_new.select_all.replace('?', ` where dept_id = ${req.params.dept_id}`);
         let bachat = [];
         let stmt = DB.db.prepare(sql);
-        for(let row of stmt.iterate()){
-            for(let key of Object.keys(row)){
-                if(key.includes('arr')){
+        for (let row of stmt.iterate({ order: 'updated_at desc' })) {
+            for (let key of Object.keys(row)) {
+                if (key.includes('arr')) {
                     row[key] = row[key] ? JSON.parse(row[key]) : []
                 }
             }
             bachat.push(row);
         }
         res.json({
-            success:true,
+            success: true,
             result: bachat
         })
     } catch (err) { console.log(err); next(err) };

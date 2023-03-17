@@ -123,7 +123,6 @@ export class ImportComponent implements OnInit {
         this.importData = data.result;
         this.total_count = data.total_count;
         for (let i in this.importData) {
-          console.log("this.importData[i]", this.importData[i]);
 
           if (this.importData[i].date && this.importData[i].mm_id && (this.importData[i].aj_mm_id || this.importData[i].pbk_id) && this.importData[i].item_id && this.importData[i].qty && this.importData[i].unit_id && this.importData[i].aj_type_id) {
             this.importData[i].valid = true;
@@ -169,7 +168,6 @@ export class ImportComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log("cccccccc", changes);
 
     if (changes.importData && changes.importData.currentValue) {
       this.importData = changes.importData.currentValue;

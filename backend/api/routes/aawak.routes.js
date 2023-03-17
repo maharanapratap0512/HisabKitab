@@ -2,6 +2,7 @@
 const router = require('express').Router();
 const { json } = require('body-parser');
 const DBContex = require('../models/DBContex');
+const Fn = require('../models/functions');
 const query = require('../models/query');
 const DB = new DBContex();
 
@@ -75,43 +76,29 @@ router.post('/:dept_id', async (req, res, next) => {
 //aawak post with dept
 router.post('/new/:dept_id', async (req, res, next) => {
     if (req.body) {
-        let insertAawak = DB.db.transaction(async (awkobj, dept_id) => {
-            try {
-                // convert required column data to string      
-                awkobj.document = JSON.stringify(awkobj.document ? awkobj.document : {});
-                awkobj.isbill = awkobj.isbill ? 1 : 0;
-                awkobj.dept_id = dept_id;
-                awkobj.active = 1;
-                // run insert query written query.js
-                let awkResult = DB.db.prepare(DB.query.aawak.insert).run(awkobj);
-                // if inserted successfully
-                if (awkResult.changes == 1 && awkResult.lastInsertRowid) {
-                    // maintain bachat_new states
-                    // checking for bachat row exists or not and Update bachat row
-                    // let bachat = await DB.getBachatFromAJ(awkobj);
-                    await DB.updateBachatFromAJInsert(awkobj, 'Aawak');
 
-                    // loop through jawak to add using awk _id
-                    for (let i in awkobj.jawak_detail || []) {
-                        awkobj.jawak_detail[i].aawak_ref_id = awkResult.lastInsertRowid;
-                        awkobj.jawak_detail[i].active = 1;
-                        let jwkResult = DB.db.prepare(DB.query.jawak.insert).run(awkobj.jawak_detail[i]);
-                        if (jwkResult.changes) {
-                            // maintain bachat_new states
-                            // checking for bachat row exists or not and Update bachat row
-                            // let bachat = await DB.getBachatFromAJ(awkobj.jawak_detail[i]);
-                            await DB.updateBachatFromAJInsert(awkobj.jawak_detail[i], 'Jawak');
-                        }
+        req.body.dept_id = req.params.dept_id;
+        // await insertAawak(req.body, req.params.dept_id);
+        try {
+            await Fn.insertAJ(req.body, 'aawak').then(async (resolve) => {
+                if (resolve) {
+                    for (let i in req.body.jawak_detail) {
+                        req.body.jawak_detail[i].aawak_ref_id = resolve;
+                        await Fn.insertAJ(req.body.jawak_detail[i], 'jawak').then(async (jwkResult) => {
+
+                        }, (err) => {
+                            return next(err);
+                        })
                     }
 
-                    await DB.getList('aawak', { full: true, dept_id: dept_id, conditionString: ` aawak._id = ${awkResult.lastInsertRowid}` }).then(async (data) => {
+                    await DB.getList('aawak', { full: true, conditionString: ` aawak._id = ${resolve}` }).then(async (data) => {
                         for (let i in data.data) {
                             data.data[i].document = (data.data[i].document ? JSON.parse(data.data[i].document) : {});
                             data.data[i].isbill = data.data[i].isbill ? true : false;
 
                             let jwkconditionString = ` jawak.aawak_ref_id = ${data.data[i]._id}`;
 
-                            await DB.getList('jawak', { full: true, dept_id: dept_id, conditionString: jwkconditionString }).then(async (jwkdata) => {
+                            await DB.getList('jawak', { full: true, conditionString: jwkconditionString }).then(async (jwkdata) => {
                                 data.data[i].jawak_detail = jwkdata.data;
                             });
                         }
@@ -121,15 +108,13 @@ router.post('/new/:dept_id', async (req, res, next) => {
                         });
                     });
                 }
-
-            }
-            catch (ex) {
-                DB.db.prepare('ROLLBACK').run();
-                next(ex);
-            }
-        });
-
-        await insertAawak(req.body, req.params.dept_id);
+            }, (reject) => {
+                return next(reject)
+            });
+        }
+        catch (err) {
+            return next(err);
+        }
     }
 
     else {
@@ -211,50 +196,44 @@ router.put('/pending/:dept_id', async (req, res, next) => {
 // aawak update
 router.put('/new', async (req, res, next) => {
     if (req.body.set && req.body.query) {
-        let updateAawak = DB.db.transaction(async (awkobj) => {
-            try {
-                awkobj.document = JSON.stringify(awkobj.document ? awkobj.document : {});
-                awkobj.isbill = awkobj.isbill ? 1 : 0;
 
-                await DB.updateBachatFromAJUpdate(awkobj, 'aawak');
-                let awkResult = await DB.db.prepare(DB.query.aawak.update + ` where aawak._id = ${awkobj._id}`).run(awkobj);
-                if (awkResult) {
-
-                    for (let i = 0; i < awkobj.jawak_detail.length; i++) {
-                        if (!awkobj.jawak_detail[i]._id) {
-                            awkobj.jawak_detail[i].aawak_ref_id = awkobj._id;
-                            awkobj.jawak_detail[i].active = 1;
-                            let jwkResult = DB.db.prepare(DB.query.jawak.insert).run(awkobj.jawak_detail[i]);
-                            if(jwkResult){
-                                DB.updateBachatFromAJInsert(awkobj.jawak_detail[i], 'jawak');
+        // await updateAawak(req.body.set);
+        let oldAwk = await DB.getById('aawak', req.body.set._id);
+        await Fn.updateAJ(req.body.set, 'aawak', oldAwk).then(async (resolve) => {
+            if (resolve) {
+                if (req.body.set.condition_id != oldAwk.condition_id) {
+                    await DB.getList('jawak', { conditionString: ` aawak_ref_id = ${oldAwk._id}` }).then(async (jwkdata) => {
+                        if (jwkdata.data) {
+                            for (let jwk of jwkdata.data) {
+                                await Fn.updateAJ({ ...jwk, condition_id: req.body.set.condition_id }, 'jawak', jwk);
                             }
                         }
-                    }
-
-                    await DB.getList('aawak', { full: true, conditionString: ` aawak._id = ${awkobj._id}` }).then(async (data) => {
-                        for (let i in data.data) {
-                            data.data[i].document = (data.data[i].document ? JSON.parse(data.data[i].document) : {});
-                            data.data[i].isbill = data.data[i].isbill ? true : false;
-
-                            let jwkconditionString = ` jawak.aawak_ref_id = ${data.data[i]._id}`;
-
-                            await DB.getList('jawak', { full: true, conditionString: jwkconditionString }).then(async (jwkdata) => {
-                                data.data[i].jawak_detail = jwkdata.data;
-                            });
-                        }
-                        res.json({
-                            result: data.data,
-                            success: true
-                        });
                     });
                 }
-            }
-            catch (ex) {
-                return next(ex)
-            }
-        });
 
-        await updateAawak(req.body.set);
+                await DB.getList('aawak', { full: true, conditionString: ` aawak._id = ${req.body.set._id}` }).then(async (data) => {
+                    for (let i in data.data) {
+                        data.data[i].document = (data.data[i].document ? JSON.parse(data.data[i].document) : {});
+                        data.data[i].isbill = data.data[i].isbill ? true : false;
+
+                        let jwkconditionString = ` jawak.aawak_ref_id = ${data.data[i]._id}`;
+
+                        await DB.getList('jawak', { full: true, conditionString: jwkconditionString }).then(async (jwkdata) => {
+                            data.data[i].jawak_detail = jwkdata.data;
+                        });
+                    }
+                    res.json({
+                        result: data.data,
+                        success: true
+                    });
+                });
+
+            } else {
+                next(new Error('something went wrong'));
+            }
+        }, (reject) => {
+            return next(reject);
+        })
 
     }
     else {
@@ -350,37 +329,31 @@ router.put('/', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
         // let condition = '_id = ' + req.params.id;
-        let deleteAawak = DB.db.transaction(async (id)=>{
-            try{
-                await DB.getList('jawak', {conditionString: ` aawak_ref_id = ${id}` }).then(async (jwkdata) => {
-                    if(jwkdata.data){
-                        for(let i in jwkdata.data){
-                            await DB.updateBachatFromAJDelete(jwkdata.data[i], 'jawak');
+        let deleteAawak = DB.db.transaction(async (id) => {
+            try {
+                await DB.getList('jawak', { conditionString: ` aawak_ref_id = ${id}` }).then(async (jwkdata) => {
+                    if (jwkdata.data) {
+                        for (let i in jwkdata.data) {
+                            ;
+                            await Fn.deleteAJ(jwkdata.data[i]._id, 'jawak', jwkdata.data[i]);
                         }
                     }
                 });
-                await DB.getById('aawak', id).then((awkObj)=>{
-                    DB.updateBachatFromAJDelete(awkObj, 'aawak');                
+                await Fn.deleteAJ(id, 'aawak').then((data) => {
+                    if (data) {
+                        res.json({
+                            success: true,
+                            result: data
+                        })
+                    }
                 });
-                await DB.delete('aawak', id).then((data)=>{
-                    res.json({
-                        success:true,
-                        result: data
-                    })
-                })
             }
-            catch(ex){
-                console.log(ex);
+            catch (ex) {
                 return next(ex);
             }
         });
+
         await deleteAawak(req.params.id);
-        // await DB.delete('aawak', req.params.id).then((data) => {
-        //     res.json({
-        //         success: true,
-        //         result: data
-        //     });
-        // })
     }
     else {
         return next(new Error('Id not found.'))

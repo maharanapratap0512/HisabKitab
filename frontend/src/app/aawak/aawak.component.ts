@@ -242,7 +242,7 @@ export class AawakComponent implements OnInit {
           'Pkt No': '',
           'Jawak MM': '',
           'Jawak Detail': '',
-          'Kisko Diya': 'बचत',
+          'Kisko Diya': 'बचत =>',
           'Jawak Type': '',
           'Qty': result[i].remaining_qty ? result[i].remaining_qty : 0,
           'Unit': result[i].unit_id ? result[i].unit_short : '',
@@ -328,7 +328,7 @@ export class AawakComponent implements OnInit {
           'Pkt No': '',
           'Jawak MM': '',
           'Jawak Detail': '',
-          'Kisko Diya': 'बचत',
+          'Kisko Diya': 'बचत =>',
           'Jawak Type': '',
           'Qty': result[i].remaining_qty ? result[i].remaining_qty : 0,
           'Unit': result[i].unit_id ? result[i].unit_short : '',
@@ -747,7 +747,7 @@ export class AawakComponent implements OnInit {
       this.loadingStatus = "फाइल का अध्ययन किया जा रहा है।";
       // const dataString = JSON.stringify(jsonData);      
       let sheetdata = jsonData[workBooks.SheetNames[0]];
-      let filterdata = sheetdata.filter((i: any) => (!i.includes("बचत")));
+      let filterdata = sheetdata.filter((i: any) => (!i.includes("बचत =>")));
       let exceldata = filterdata.filter((i: any) => (i.length));
       let awakStart: any = 0, jawakStart: any = 0, startRow: any = 0;
 

@@ -414,6 +414,7 @@ class DBContex {
         return bachat || bachatObj;
     }
 
+
     async updateBachatFromAJInsert(AJobj, operation) {
         let bachat = await this.getBachatFromAJ(AJobj)
         switch (operation.toLowerCase()) {
