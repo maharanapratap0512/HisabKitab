@@ -80,6 +80,7 @@ router.post('/new/:dept_id', async (req, res, next) => {
         req.body.dept_id = req.params.dept_id;
         // await insertAawak(req.body, req.params.dept_id);
         try {
+            await Fn.begin();
             await Fn.insertAJ(req.body, 'aawak').then(async (resolve) => {
                 if (resolve) {
                     for (let i in req.body.jawak_detail) {
@@ -87,7 +88,7 @@ router.post('/new/:dept_id', async (req, res, next) => {
                         await Fn.insertAJ(req.body.jawak_detail[i], 'jawak').then(async (jwkResult) => {
 
                         }, (err) => {
-                            return next(err);
+                            throw err;
                         })
                     }
 
@@ -102,17 +103,21 @@ router.post('/new/:dept_id', async (req, res, next) => {
                                 data.data[i].jawak_detail = jwkdata.data;
                             });
                         }
+                        Fn.commit();
                         res.json({
                             result: data.data,
                             success: true
                         });
+                    }, (err) => {
+                        throw err;
                     });
                 }
             }, (reject) => {
-                return next(reject)
+                throw reject;
             });
         }
         catch (err) {
+            Fn.rollback();
             return next(err);
         }
     }
@@ -195,12 +200,12 @@ router.put('/pending/:dept_id', async (req, res, next) => {
 
 // aawak update
 router.put('/new', async (req, res, next) => {
-    if (req.body.set && req.body.query) {
-
-        // await updateAawak(req.body.set);
-        let oldAwk = await DB.getById('aawak', req.body.set._id);
-        await Fn.updateAJ(req.body.set, 'aawak', oldAwk).then(async (resolve) => {
-            if (resolve) {
+    try {
+        if (req.body.set && req.body.query) {
+            await Fn.begin();
+            // await updateAawak(req.body.set);
+            let oldAwk = await DB.getById('aawak', req.body.set._id);
+            await Fn.updateAJ(req.body.set, 'aawak', oldAwk).then(async (resolve) => {
                 if (req.body.set.condition_id != oldAwk.condition_id) {
                     await DB.getList('jawak', { conditionString: ` aawak_ref_id = ${oldAwk._id}` }).then(async (jwkdata) => {
                         if (jwkdata.data) {
@@ -208,6 +213,8 @@ router.put('/new', async (req, res, next) => {
                                 await Fn.updateAJ({ ...jwk, condition_id: req.body.set.condition_id }, 'jawak', jwk);
                             }
                         }
+                    }, (err) => {
+                        throw err;
                     });
                 }
 
@@ -222,22 +229,27 @@ router.put('/new', async (req, res, next) => {
                             data.data[i].jawak_detail = jwkdata.data;
                         });
                     }
+                    await Fn.commit();
                     res.json({
                         result: data.data,
                         success: true
                     });
+                }, (err) => {
+                    throw err;
                 });
 
-            } else {
-                next(new Error('something went wrong'));
-            }
-        }, (reject) => {
-            return next(reject);
-        })
+            }, (reject) => {
+                throw reject;
+            })
 
+        }
+        else {
+            throw new Error('Id not found.')
+        }
     }
-    else {
-        return next(new Error('Id not found.'))
+    catch (err) {
+        await Fn.rollback();
+        return next(err);
     }
 });
 
@@ -329,31 +341,29 @@ router.put('/', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
         // let condition = '_id = ' + req.params.id;
-        let deleteAawak = DB.db.transaction(async (id) => {
-            try {
-                await DB.getList('jawak', { conditionString: ` aawak_ref_id = ${id}` }).then(async (jwkdata) => {
-                    if (jwkdata.data) {
-                        for (let i in jwkdata.data) {
-                            ;
-                            await Fn.deleteAJ(jwkdata.data[i]._id, 'jawak', jwkdata.data[i]);
-                        }
+        try {
+            await Fn.begin();
+            await DB.getList('jawak', { conditionString: ` aawak_ref_id = ${req.params.id}` }).then(async (jwkdata) => {
+                if (jwkdata.data) {
+                    for (let i in jwkdata.data) {
+                        await Fn.deleteAJ(jwkdata.data[i]._id, 'jawak', jwkdata.data[i]);
                     }
-                });
-                await Fn.deleteAJ(id, 'aawak').then((data) => {
-                    if (data) {
-                        res.json({
-                            success: true,
-                            result: data
-                        })
-                    }
-                });
-            }
-            catch (ex) {
-                return next(ex);
-            }
-        });
-
-        await deleteAawak(req.params.id);
+                }
+            });
+            await Fn.deleteAJ(req.params.id, 'aawak').then((data) => {
+                if (data) {
+                    Fn.commit();
+                    res.json({
+                        success: true,
+                        result: data
+                    })
+                }
+            });
+        }
+        catch (ex) {
+            await Fn.rollback();
+            return next(ex);
+        }
     }
     else {
         return next(new Error('Id not found.'))

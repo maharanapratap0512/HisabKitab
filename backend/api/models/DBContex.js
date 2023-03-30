@@ -132,8 +132,8 @@ class DBContex {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
 
-                // if (tblname == "import_history")
-                    // console.log(sql);
+                if (tblname == "department_config")
+                    console.log(sql);
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {
@@ -373,7 +373,7 @@ class DBContex {
                                 // console.log("point", exportDB.prepare(`select * from point`).all());
                                 // console.log("this.query.genDeptDB[key]", this.query.genDeptDB[key]);
                             }
-
+                            // console.log(this.query.genDeptDB[key]);
                             let result = exportDB.prepare(this.query.genDeptDB[key]).run({ dept_id: dept_id });
                         }
                     });

@@ -301,6 +301,7 @@
                            <th style="width: 150px;">Aawak Mm</th>
                            <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
                            <th style="width: 150px;">Aawak Type</th>
+                           <th style="width: 150px;">Category</th>
                            <th style="width: 180px;">Item - Subitem</th>
                            <th style="width: 150px;" *ngIf="settings.aawak.condition_id || settings.aawak.product_id">
                               Product</th>
@@ -358,6 +359,10 @@
                               </td>
                               <td>{{data.aawak_type_id?data.aawak_type_hin:''}} <br />
                                  {{data.aawak_type_eng ? data.aawak_type_eng:''}}</td>
+                              <td>
+                                 {{data.categories_hin}} <br/>
+                                 {{data.categories_eng}}
+                              </td>
                               <td>
                                  {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
                                  {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}

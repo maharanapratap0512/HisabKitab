@@ -148,7 +148,7 @@ export class FilesViewComponent implements OnInit {
         this.http.delete(this.api.getUrl(this.apiName), body).subscribe((data: any) => {
           if (data['success'] && data['result']) {
             this.toastr.success("Image Deleted Successfully.")
-            this.imageName.splice(this.imageName.indexOf(name), 1);
+            this.imageName.splice(this.imageName.indexOf((i: { doc: any; })=>i.doc == name), 1);
             this.isLoader = false
           }
           this.isLoader = false

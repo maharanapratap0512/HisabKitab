@@ -7,6 +7,9 @@ const DB = new DBContex();
 router.get('/', async (req, res, next) => {
     try {
         await DB.getList('department').then(async (resolve) => {
+            for(let i in resolve.data){
+                resolve.data[i].settings = JSON.parse(resolve.data[i].settings ? resolve.data[i].settings : {})
+            }
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -21,6 +24,9 @@ router.get('/', async (req, res, next) => {
 router.get('/:dept_id', async (req, res, next) => {
     try {
         await DB.getList('department', { dept_id: req.params.dept_id }).then(async (resolve) => {
+            for(let i in resolve.data){
+                resolve.data[i].settings = JSON.parse(resolve.data[i].settings ? resolve.data[i].settings : {})
+            }
             res.json({
                 success: true,
                 result: resolve.data || [],

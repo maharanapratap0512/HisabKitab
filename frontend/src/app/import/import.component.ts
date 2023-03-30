@@ -7,6 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
+import { ExcelExportService } from '../services/excel-export.service';
 import { GlobalService } from '../services/global.service';
 import { HttpService } from '../services/http.service';
 
@@ -52,14 +53,16 @@ export class ImportComponent implements OnInit {
   uData: any = {};
   years: any = [];
   months: any = [];
-
+  failImport: any = [];
+  loaderStatus: string = 'मैं आत्मा शांत स्वरूप हूँ ।';
   constructor(private fb: FormBuilder,
     private http: HttpService,
     private api: ApiService,
     private gs: GlobalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    public auth: AuthService
+    public auth: AuthService,
+    private excelExportService: ExcelExportService,
   ) {
     this.years = gs.years;
     this.months = gs.months;
@@ -196,7 +199,7 @@ export class ImportComponent implements OnInit {
   catSelected(ev: any, type: any) {
     if (ev && type != "category") {
       this.cat = ev;
-      this.items = this.itemAll.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
+      this.items = this.itemAll.filter((i: { categories: any }) => i.categories.includes(ev));
     }
     else {
       this.cat = null;
@@ -207,9 +210,9 @@ export class ImportComponent implements OnInit {
   itemSelected(ev: any) {
     if (ev) {
       let item = this.items.find((i: { _id: any; }) => i._id == ev);
-      let category_ids = this.categories.map((c: { _id: any; }) => c._id);
+      // let category_ids = this.categories.map((c: { _id: any; }) => c._id);
       if (this.cat) {
-        this.subitems = item.subitems.filter((s: { categories: any; }) => s.categories.include(this.cat));
+        this.subitems = item.subitems.filter((s: { categories: any; }) => s.categories.includes(this.cat));
       }
       else {
         this.subitems = item.subitems;
@@ -254,14 +257,190 @@ export class ImportComponent implements OnInit {
 
   }
 
-  importFinal() {
+  async importFinal() {
+    this.isLoader = true;
     if (this.importForm.valid) {
       let valid = this.importData.filter((i: { valid: boolean, jawak_detail: any[]; }) => i.valid == false && i.jawak_detail.filter((j: { valid: Boolean; }) => j.valid == false).length == 0);
 
       if (valid == 0) {
-        this.http.put(this.api.getUrl('IMPORTEXPORT') + 'final', { data: this.importData, history: this.importForm.value }).subscribe((data: any) => {
+        this.failImport = [];
+        for (let i in this.importData) {
+          this.loaderStatus = 'Importing ' + i + ' out of ' + this.importData.length;
+          await this.http.put(this.api.getUrl('IMPORTEXPORT') + 'process', { data: this.importData[i], autoUpdate: this.importForm.value.autoUpdate }).subscribe((data: any) => {
+            if (data['success'] && data['data']) {
+
+              let errJwk = [];
+              for (let jwk of data['data'].jawak_detail) {
+                if (jwk.error) {
+                  errJwk.push(jwk)
+                }
+              }
+              if (errJwk.length > 0) {
+                this.failImport.push({ ...data['data'], jawak_detail: errJwk });
+              }
+            }
+            else {
+              this.failImport.push(this.importData[i]);
+              this.toastr.error('Something went wrong');
+            }
+
+          }, (err) => {
+            this.failImport.push(this.importData[i]);
+            this.toastr.error(err['error'])
+          });
+        }
+
+        this.loaderStatus = 'Setup History and Cleaning Import Data';
+        this.http.put(this.api.getUrl('IMPORTEXPORT') + 'finish', { history: this.importForm.value }).subscribe((data: any) => {
+          if (this.failImport.length > 0) {
+            this.loaderStatus = 'Exporting Failed in Excel File.';
+            console.log(this.failImport);
+            let failExcelData: any = [];
+            for (let i = 0; i < this.failImport.length; i++) {
+              let jawakArray = [];
+              for (let jwk of this.failImport[i].jawak_detail) {
+                jawakArray.push({
+                  'Date': jwk.date ? jwk.date : '-',
+                  'Pkt No': jwk.pkt_num ? jwk.pkt_num : '-',
+                  'Jawak MM': jwk.aj_mm ? jwk.aj_mm : '-',
+                  'Jawak Detail': jwk.description ? jwk.description : '-',
+                  'Kisko Diya': jwk.nimitt ? jwk.nimitt : '-',
+                  'Jawak Type': jwk.aj_type ? jwk.aj_type : '-',
+                  'Qty': jwk.qty ? jwk.qty : '-',
+                  'Unit': jwk.unit ? jwk.unit : '-',
+                  'Error': jwk.error['error']
+                });
+              }
+              let awkObj: any = {
+                '_id': this.failImport[i].awk_id ? this.failImport[i].awk_id : '',
+                'No': i + 1,
+                'Date': this.failImport[i].date ? this.failImport[i].date : '-',
+                'Pkt No': this.failImport[i].pkt_num ? this.failImport[i].pkt_num : '-',
+                'MM': this.failImport[i].mm ? this.failImport[i].mm : '-',
+                'Aawak MM': this.failImport[i].aj_mm ? this.failImport[i].aj_mm : '-',
+              };
+              if (this.settings.aawak.pbk_id) {
+                awkObj['Roll No'] = this.failImport[i].roll_no ? this.failImport[i].roll_no : '-';
+                awkObj.Pbk = this.failImport[i].pbk.name ? this.failImport[i].pbk.name : '-';
+                awkObj.Relation = this.failImport[i].pbk.relation ? this.failImport[i].pbk.relation : '-';
+                awkObj.Relative = this.failImport[i].pbk.relative ? this.failImport[i].pbk.relative : '-';
+              }
+
+              awkObj = {
+                ...awkObj,
+                'Item': this.failImport[i].item ? this.failImport[i].item : '-',
+                'Subitem': this.failImport[i].subitem ? this.failImport[i].subitem : '-',
+                'Product Code': this.failImport[i].product ? this.failImport[i].product : '-',
+                'Company': this.failImport[i].company_name ? this.failImport[i].company_name : '-',
+                'Condition': this.failImport[i].condition ? this.failImport[i].condition : '-',
+                'Bill': this.failImport[i].isbill ? 'है' : '-',
+                'Qty': this.failImport[i].qty ? this.failImport[i].qty : '-',
+                'Unit': this.failImport[i].unit ? this.failImport[i].unit : '-',
+                'Price': this.failImport[i].rate ? this.failImport[i].rate : '-',
+                'Amount': this.failImport[i].actual_amt ? this.failImport[i].actual_amt : '-',
+                'Aawak Type': this.failImport[i].aj_type ? this.failImport[i].aj_type : '-',
+                'Item Detail': this.failImport[i].item_detail ? this.failImport[i].item_detail : '-',
+                'Description': this.failImport[i].description ? this.failImport[i].description : '-',
+                'Error': this.failImport[i].error ? this.failImport[i].error['error'] : '-',
+                'Jawak Detail': jawakArray,
+              };
+              failExcelData.push(awkObj);
+            }
+            let date = new Date();
+            let filename = "FAIL_AJ_Import_";
+            // console.log(filename);
+
+            this.excelExportService.generateExcel(failExcelData, filename + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
+          }
+
           this.response.emit(1);
+        }, (err) => {
+          this.toastr.error(err['error']);
         });
+
+        // this.http.put(this.api.getUrl('IMPORTEXPORT') + 'final', { data: this.importData, history: this.importForm.value }).subscribe((data: any) => {
+        //   if (data['success'] && data['data']) {
+        //     this.failImport = [];
+        //     for (let row of data['data']) {
+        //       let errJwk = [];
+        //       for (let i in row.jawak_detail) {
+        //         if (row.jawak_detail[i].error) {
+        //           errJwk.push(row.jawak_detail[i])
+        //         }
+        //       }
+        //       if (row.error) {
+        //         this.failImport.push(row);
+        //       } else if (errJwk.length > 0) {
+        //         this.failImport.push({ ...row, jawak_detail: errJwk });
+        //       }
+        //     }
+
+        //     if (this.failImport.length > 0) {
+        //       console.log(this.failImport);
+        //       let failExcelData: any = [];
+        //       for (let i = 0; i < this.failImport.length; i++) {
+        //         let jawakArray = [];
+        //         for (let jwk of this.failImport[i].jawak_detail) {
+        //           jawakArray.push({
+        //             'Date': jwk.date ? jwk.date : '-',
+        //             'Pkt No': jwk.pkt_num ? jwk.pkt_num : '-',
+        //             'Jawak MM': jwk.aj_mm ? jwk.aj_mm : '-',
+        //             'Jawak Detail': jwk.description ? jwk.description : '-',
+        //             'Kisko Diya': jwk.nimitt ? jwk.nimitt : '-',
+        //             'Jawak Type': jwk.aj_type ? jwk.aj_type : '-',
+        //             'Qty': jwk.qty ? jwk.qty : '-',
+        //             'Unit': jwk.unit ? jwk.unit : '-',
+        //             // 'Bachat': bachat
+        //           });
+        //         }
+        //         let awkObj: any = {
+        //           '_id': this.failImport[i].awk_id ? this.failImport[i].awk_id : '',
+        //           'No': i + 1,
+        //           'Date': this.failImport[i].date ? this.failImport[i].date : '-',
+        //           'Pkt No': this.failImport[i].pkt_num ? this.failImport[i].pkt_num : '-',
+        //           'MM': this.failImport[i].mm ? this.failImport[i].mm : '-',
+        //           'Aawak MM': this.failImport[i].aj_mm ? this.failImport[i].aj_mm : '-',
+        //         };
+        //         if (this.settings.aawak.pbk_id) {
+        //           awkObj['Roll No'] = this.failImport[i].roll_no ? this.failImport[i].roll_no : '-';
+        //           awkObj.Pbk = this.failImport[i].pbk.name ? this.failImport[i].pbk.name : '-';
+        //           awkObj.Relation = this.failImport[i].pbk.relation ? this.failImport[i].pbk.relation : '-';
+        //           awkObj.Relative = this.failImport[i].pbk.relative ? this.failImport[i].pbk.relative : '-';
+        //         }
+
+        //         awkObj = {
+        //           ...awkObj,
+        //           'Item': this.failImport[i].item ? this.failImport[i].item : '-',
+        //           'Subitem': this.failImport[i].subitem ? this.failImport[i].subitem : '-',
+        //           'Product Code': this.failImport[i].product ? this.failImport[i].product : '-',
+        //           'Company': this.failImport[i].company_name ? this.failImport[i].company_name : '-',
+        //           'Condition': this.failImport[i].condition ? this.failImport[i].condition : '-',
+        //           'Bill': this.failImport[i].isbill ? 'है' : '-',
+        //           'Qty': this.failImport[i].qty ? this.failImport[i].qty : '-',
+        //           'Unit': this.failImport[i].unit ? this.failImport[i].unit : '-',
+        //           'Price': this.failImport[i].rate ? this.failImport[i].rate : '-',
+        //           'Amount': this.failImport[i].actual_amt ? this.failImport[i].actual_amt : '-',
+        //           'Aawak Type': this.failImport[i].aj_type ? this.failImport[i].aj_type : '-',
+        //           'Item Detail': this.failImport[i].item_detail ? this.failImport[i].item_detail : '-',
+        //           'Description': this.failImport[i].description ? this.failImport[i].description : '-',
+        //           'Jawak Detail': jawakArray,
+        //         };
+        //         failExcelData.push(awkObj);
+        //       }
+        //       let date = new Date();
+        //       let filename = "FAIL_AJ_Import_";              
+        //       // console.log(filename);
+
+        //       this.excelExportService.generateExcel(failExcelData, filename + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
+        //     }
+
+        //     this.response.emit(1);
+        //   }
+        //   else {
+        //     this.toastr.error('Something went wrong');
+        //   }
+
+        // });
       } else {
         Swal.fire({
           title: 'Error!',
@@ -277,6 +456,8 @@ export class ImportComponent implements OnInit {
     else {
       this.gs.validationFireOnSubmit(this.importForm);
     }
+    this.loaderStatus = 'मैं आत्मा शांत स्वरूप हूँ ।';
+    this.isLoader = false;
   }
 
 

@@ -427,8 +427,14 @@ export class HeaderComponent implements OnInit {
   }
 
   updateSettings(data: any) {
-    console.log(data);
     let setting = JSON.parse(data);
+    console.log(typeof setting.settings == 'string');
+    
+    if(typeof setting.settings == 'string'){
+      setting.settings = JSON.parse(setting.settings);
+    }
+    console.log(setting);
+    
     let body = {
       query: {
         _id: setting._id

@@ -290,15 +290,15 @@ export class DepartmentComponent implements OnInit {
     if (ev) {
       getdept = ev;
     }
+    if (getdept.settings) {
+      this.applySettings(getdept.settings);
+    }
 
     this.isLoader = true;
     this.http.get(this.api.getUrl('DEPTCONFIG') + getdept).subscribe((data) => {
       if (data['result'] && data['success']) {
         for (let i of data['result']) {
           this.deptConf[i.config_key] = i;
-          if (i.config_key == "settings") {
-            this.applySettings(i.config_value);
-          }
         }
         if (this.dept_id) {
           this.loadPBK();
@@ -1426,6 +1426,7 @@ export class DepartmentComponent implements OnInit {
     this.isLoader = true;
     let date = new Date();
     let dept = await this.departments.find((d: { _id: any; }) => d._id == this.dept_id);
+    console.log(dept)
     this.dataZip = new JSZip();
     this.dataZip.file("settings.json", JSON.stringify(dept));
 
@@ -1467,7 +1468,7 @@ export class DepartmentComponent implements OnInit {
     if (this.settings.department.settings) {
       // this.deptConf.settings.config_value = this.settingsAll;
       let body = {
-        query:{ _id: this.dept_id},
+        query: { _id: this.dept_id },
         set: { settings: this.settingsAll }
       }
       this.http.put(this.api.getUrl('DEPT_SETTINGS'), body).subscribe((data: any) => {
@@ -1475,8 +1476,8 @@ export class DepartmentComponent implements OnInit {
           this.toastr.success('Department Settings Updated Successfully.');
           if (this.dept_id == this.auth.webUser.dept_id) {
             this.auth.updateSettings(this.settingsAll);
-            for(let i in this.gs.Lists.department){
-              if(this.gs.Lists.department[i]._id == this.dept_id){
+            for (let i in this.gs.Lists.department) {
+              if (this.gs.Lists.department[i]._id == this.dept_id) {
                 this.gs.Lists.department[i].settings = this.settingsAll;
               }
             }

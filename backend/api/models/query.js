@@ -1866,6 +1866,10 @@ const excel_correction = {
     update_unit: `update temp_import set unit_id = @id where unit = @name`,
     update_jawak: `update temp_import set jawak_detail = @jawak_detail where _id = @_id`,
 
+    ignore_jwk_nimitt: ` update temp_import set 
+        description = description || '; nimitt - ' || @name,
+        jawak_detail = json_set(jawak_detail, ti.fk, json_set(ti.value, '$.nimitt', null))
+    from (select _id, json_each.fullkey as fk, json_each.value as value from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.nimitt') = @name) as ti where ti._id = temp_import._id`,
     ignore_nimitt: `update temp_import set description = description || '; nimitt - ' || nimitt, nimitt = null where nimitt = @name`,
     ignore_product: `update temp_import set item_detail = item_detail || '; CODE - ' || product, product = null where product = @name`,
     // ignore_item: `update temp_import set item = item || ' ' || subitem, item_id = @id, subitem = null where item = @name AND subitem = @extra_note`,
@@ -1924,8 +1928,11 @@ const conditions = {
 genDeptDB = {
 
     point: `insert into point select * from mainDB.point`,
-    insertDept: `insert into department select * from mainDB.department`,
-    // insertDeptConfig: `insert into department_config select * from mainDB.department_config`,
+    insertDept: `insert into department(_id, dept_eng, dept_hin, dept_code, settings, password, active, created_at, updated_at) select _id, dept_eng, dept_hin, dept_code, '{}', password, active, created_at, updated_at from mainDB.department`,
+    
+    updateDept: `update department set settings = (select settings from mainDB.department dp where dp._id = department._id) where department._id in (select json_each.value from mainDB.department_config, json_each(config_value) where dept_id = @dept_id AND config_key='department')`,
+
+    insertDeptConfig: `insert into department_config(_id, dept_id, config_key, config_value, active, created_at, updated_at) select _id, dept_id, config_key, '[]', active, created_at, updated_at from mainDB.department_config`,
 
     // insertDept: `insert into department select * from mainDB.department dept where (select dpc.config_value from mainDB.department_config dpc where dpc.dept_id = ? AND dpc.config_key = 'department') LIKE '%,'|| dept._id||',%'`,
 
@@ -1960,8 +1967,12 @@ genDeptDB = {
     product: `insert into product select * from mainDB.product where dept_id = @dept_id`,
     aawak: `insert into aawak select * from mainDB.aawak where dept_id = @dept_id`,
     jawak: `insert into jawak select * from mainDB.jawak where dept_id = @dept_id`,
+    bachat_new: `insert into bachat_new select * from mainDB.bachat_new where dept_id = @dept_id`,
+    vehicle: `insert into vehicle select * from mainDB.vehicle`,
+    vehicle_document: `insert or ignore into vehicle_document select * from mainDB.vehicle_document`,
 
     import_history: `insert into import_history select * from mainDB.import_history where dept_id = @dept_id`,
+    dictionary: `insert into dictionary select * from mainDB.dictionary`,
 
     // bachat: `insert into bachat select * from mainDB.bachat where dept_id = ?`,
 }

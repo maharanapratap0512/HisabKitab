@@ -1628,6 +1628,7 @@ class dbModal {
     /*
       => add min max rate for items
       => add usage_category in aawak and jawak.
+      => Create bachat_new Table.
      */
     {
       alter_item_min: `alter table item add column min_rate decimal(7,2) default 0`,
@@ -1710,18 +1711,21 @@ class dbModal {
       this.db.pragma('legacy_alter_table=OFF');
       this.db.pragma('foreign_keys=ON');
 
-      console.log(this.db.prepare(this.query.bachat_new.select_exists).get({
-        month: 2,
-        year: 2023,
-        month: 2,
-        year: 2023,
-        mm_id: 1,
-        item_id: 355,
-        subitem_id: null,
-        unit_id: 1,
-        dept_id: 1,
-        condition_id: null,
-      }));
+      // console.log(this.db.prepare(this.query.bachat_new.select_exists).get({
+      //   month: 2,
+      //   year: 2023,
+      //   month: 2,
+      //   year: 2023,
+      //   mm_id: 1,
+      //   item_id: 355,
+      //   subitem_id: null,
+      //   unit_id: 1,
+      //   dept_id: 1,
+      //   condition_id: null,
+      // }));
+      console.log(this.db.prepare(` update temp_import 
+ set jawak_detail = json_set(jawak_detail, ti.fk, json_set(ti.value, '$.nimitt', null))
+ from (select _id, json_each.fullkey as fk, json_each.value as value from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.nimitt') = 'tttt') as ti where ti._id = temp_import._id;`).run());
     }
     catch (ex) {
       console.log("error db model", ex);

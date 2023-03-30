@@ -167,8 +167,31 @@ export class AawakComponent implements OnInit {
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
     this.http.get(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id).subscribe((data: any) => {
       if (data['result'] && data['success']) {
-        this.aawakData = data['result'];
         this.aawakAll = data['result'];
+        for (let i in this.aawakAll) {
+          this.aawakAll[i].categories_hin = '';
+          this.aawakAll[i].categories_eng = '';
+          if (this.aawakAll[i].subitem_categories && this.aawakAll[i].subitem_categories.length > 0) {
+            // console.log(this.aawakAll[i].subitem_categories, this.categories);
+            
+            for (let j in this.categories) {
+              if (this.aawakAll[i].subitem_categories.includes(this.categories[j]._id)) {
+                this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                this.aawakAll[i].categories_eng += this.categories[j].category_eng + ', ';
+              }
+            }
+          } else {
+            // console.log(this.aawakAll[i].item_categories, this.categories);
+            
+            for (let j in this.categories) {
+              if (this.aawakAll[i].item_categories.includes(this.categories[j]._id)) {
+                this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                this.aawakAll[i].categories_eng += this.categories[j].category_eng + ', ';
+              }
+            }
+          }
+        }
+        this.aawakData = this.aawakAll;
         this.total_count = data['total_count'];
         this.isLoader = false;
       }
@@ -229,6 +252,7 @@ export class AawakComponent implements OnInit {
             'Date': result[i].jawak_detail[j].date ? result[i].jawak_detail[j].date : '-',
             'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
             'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
+            'Jawak Category': result[i].jawak_detail[j].usage_category_id ? result[i].jawak_detail[j].category_hin : '-',
             'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
             'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
             'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
@@ -241,6 +265,7 @@ export class AawakComponent implements OnInit {
           'Date': '',
           'Pkt No': '',
           'Jawak MM': '',
+          'Jawak Category': '',
           'Jawak Detail': '',
           'Kisko Diya': 'बचत =>',
           'Jawak Type': '',
@@ -302,7 +327,7 @@ export class AawakComponent implements OnInit {
         this.getMoreAJ();
       }
       else {
-        console.log(this.allAJData);
+        // console.log(this.allAJData);
 
         this.export(this.allAJData);
         this.isLoader = false;
@@ -327,6 +352,7 @@ export class AawakComponent implements OnInit {
           'Date': '',
           'Pkt No': '',
           'Jawak MM': '',
+          'Jawak Category': '',
           'Jawak Detail': '',
           'Kisko Diya': 'बचत =>',
           'Jawak Type': '',
@@ -492,6 +518,7 @@ export class AawakComponent implements OnInit {
             'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
             ...awkObj,
             'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
+            'Jawak Category': result[i].jawak_detail[j].usage_category_id ? result[i].jawak_detail[j].category_hin : '-',
             'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
             'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
             'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
@@ -532,7 +559,7 @@ export class AawakComponent implements OnInit {
 
 
   export(json: any) {
-    console.log("json", json);
+    // console.log("json", json);
 
     let date = new Date();
     let filename = "AJ_";
@@ -542,7 +569,7 @@ export class AawakComponent implements OnInit {
         filename += mm.mm_hin + "_";
       }
     }
-    console.log(filename);
+    // console.log(filename);
 
     this.excelExportService.generateExcel(json, filename + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
     // this.excelExportService.exportAsExcelFile(json, 'AawakJawak');
@@ -567,8 +594,8 @@ export class AawakComponent implements OnInit {
       this.isLoader = false;
     }
     else {
-      console.log(ev);
-      
+      // console.log(ev);
+
       this.aawakDraft = ev[0];
       this.toastr.info("Saved in Draft.");
     }
@@ -695,7 +722,7 @@ export class AawakComponent implements OnInit {
       let items = this.items.filter((i: { _id: any; }) => ev.includes(i._id));
       this.products = this.productsAll.filter((p: { item_id: any; }) => ev.includes(p.item_id));
       this.subitems = [];
-      console.log(items);
+      // console.log(items);
 
       if (this.cat) {
         for (let i in items) {
@@ -751,6 +778,7 @@ export class AawakComponent implements OnInit {
       let exceldata = filterdata.filter((i: any) => (i.length));
       let awakStart: any = 0, jawakStart: any = 0, startRow: any = 0;
 
+      // let awkFail = false;
       for (let i = 0; i < exceldata.length; i++) {
         if (exceldata[i][0] && ['awk detail', 'awak detail', 'aawak detail', 'aawak', 'आवक'].includes(exceldata[i][0].toString().toLowerCase().trim())) {
           startRow = i;
@@ -770,12 +798,12 @@ export class AawakComponent implements OnInit {
       let columns = exceldata[startRow + 1].map((r: any) => (typeof r == "string" ? r.toLowerCase().trim() : r));
 
       console.log("columns", columns);
-      console.log("exceldata", exceldata);
+      // console.log("exceldata", exceldata);
 
       this.loadingStatus = "डाटा पढ़ा एवं सॉफ्टवेयर के डाटा से जोड़ा जा रहा है।";
       for (let i = startRow + 2; i < exceldata.length; i++) {
 
-        console.log("err", exceldata[i]);
+        // console.log("err", exceldata[i]);
 
         //aawak form
         var obj: any = {
@@ -1105,25 +1133,31 @@ export class AawakComponent implements OnInit {
           obj.item_id = dictitem ? dictitem.id : null;
           obj.subitem_id = dictitem ? dictitem.id2 : null;
         }
+        // console.log(obj);
 
+
+        // finalJson.push(obj);
         // check for required Fields in aawak object
         if (obj.date && obj.mm && (obj.aj_mm || obj.pbk) && obj.item && obj.qty && obj.unit && obj.aj_type) {
-
           finalJson.push(obj);
+          // awkPush = true;
         }
         else {
-          console.log("err", obj);
-
+          // awkPush = false;
         }
         // check for required Fields in jawak object
+        // finalJson[finalJson.length - 1].jawak_detail.push(jwkobj);
         if (jwkobj.qty && (jwkobj.aj_mm || jwkobj.nimitt)) {
-          console.log("err", finalJson[finalJson.length - 1]);
 
           finalJson[finalJson.length - 1].jawak_detail.push(jwkobj);
+          // jwkPush = true;
+        }
+        else {
+          console.log("err", finalJson[finalJson.length - 1]);
+          // jwkPush = false;
         }
 
       }
-      console.log("finalJson", finalJson);
 
 
       this.loadingStatus = "डाटा को अपलोड किया जा रहा है।";

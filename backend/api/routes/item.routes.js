@@ -69,7 +69,7 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
             offset = (req.body.pageNo - 1) * limit;
             page = req.body.pageNo;
         }
-        await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id, conditionString: itemCondition, sconditionString: sitemCondition, limit: limit, offset: offset }).then((resolve) => {
+        await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id, conditionString: itemCondition, sconditionString: sitemCondition, limit: limit, offset: offset, orderBy: orderBy }).then((resolve) => {
             let subitem_count = 0;
             for (let i = 0; i < resolve.data.length; i++) {
                 resolve.data[i].subitems = ((resolve.data[i].subitems && resolve.data[i].subitems != "[null]") ? JSON.parse(resolve.data[i].subitems) : []);
