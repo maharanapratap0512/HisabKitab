@@ -416,24 +416,37 @@ export class ExcelExportService {
       bold: true,
     };
     worksheet.columns = Header;
+    let awkErrorCol: any = null;
+    let jwkErrorCol: any = null;
+    for (let i = 0; i < Header.length; i++) {
+      if (Header[i].key == 'Error') {
+        awkErrorCol = i + 1;
+      }
+      if (Header[i].key == 'J_Error') {
+        jwkErrorCol = i + 1;
+      }
+    }
 
     /* Now we use the keys we defined earlier to insert your data by iterating through arrData and calling worksheet.addRow()*/
     let rowNum = 3;
     json.forEach(function (item, i) {
-      // for (let j = 0; j < Subtitle.length; j++) {
-      //   if(j>0 && json[i][Subtitle[j]].length > 0){          
-      //     for (let key of Object.keys(json[i][Subtitle[j]][0])) {
-      //       json[i][Subtitle[j].substring(0,1) + '_' + key] = json[i][Subtitle[j]][0][key];
-      //     } 
-      //     json[i][Subtitle[j]].shift();
-      //   }
-      // }      
+
       worksheet.addRow(json[i]);
-      worksheet.getCell(rowNum, 'Error').font = {
-        name: 'Arial Black',
-        color: { argb: 'FFFF0000' },
-        family: 2,
-        size: 12
+      if (awkErrorCol) {
+        worksheet.getCell(rowNum, awkErrorCol).font = {
+          name: 'Arial Black',
+          color: { argb: 'FFFF0000' },
+          family: 2,
+          size: 12
+        }
+      }
+      if (jwkErrorCol) {
+        worksheet.getCell(rowNum, jwkErrorCol).font = {
+          name: 'Arial Black',
+          color: { argb: 'FFFF0000' },
+          family: 2,
+          size: 12
+        }
       }
       rowNum += 1;
       for (let j = 0; j < Subtitle.length; j++) {
@@ -446,22 +459,18 @@ export class ExcelExportService {
               row[Subtitle[j].substring(0, 1) + '_' + key] = subrow[key];
             }
             worksheet.addRow(row);
-            worksheet.getCell(rowNum, Subtitle[j].substring(0, 1) + '_Error').font = {
-              name: 'Arial Black',
-              color: { argb: 'FFFF0000' },
-              family: 2,
-              size: 12
+            if (jwkErrorCol) {
+              worksheet.getCell(rowNum, jwkErrorCol).font = {
+                name: 'Arial Black',
+                color: { argb: 'FFFF0000' },
+                family: 2,
+                size: 12
+              }
             }
             rowNum++;
           });
         }
       }
-      // worksheet.getRow(rowNum).font = {
-      //   name: 'Arial Black',
-      //   color: { argb: 'FFFF0000' },
-      //   family: 2,
-      //   size: 12
-      // };
       worksheet.addRow({})
       rowNum++;
     });
@@ -474,7 +483,7 @@ export class ExcelExportService {
           left: { style: "thin" },
           bottom: { style: "thin" },
           right: { style: "thin" }
-        };;
+        };
       });
     });
 
