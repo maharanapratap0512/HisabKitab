@@ -207,7 +207,9 @@
       <!-- correction -->
       <div class="tab-pane p-4" id="correction" style="overflow: auto;">
          <div class="row" *ngIf="unmatchedData.length > 0">
-            <table id="datatable-buttons" class="table table-hover dt-responsive" *ngIf="unmatchedData.length > 0">
+            <pagination-controls class="pagi text-center" (pageChange)="pageCorrection = $event" [autoHide]="true">
+            </pagination-controls>
+            <table id="datatable-buttons" class="table table-hover dt-responsive">
                <thead>
                   <tr>
                      <th style="width: 50px;">No.</th>
@@ -219,9 +221,10 @@
                   </tr>
                </thead>
                <tbody>
-                  <ng-container *ngFor="let data of unmatchedData | filter:term; let i=index">
+                  <ng-container
+                     *ngFor="let data of unmatchedData | filter:term | paginate: {itemsPerPage: 10,currentPage: pageCorrection,totalItems: unmatchedData.length}; let i=index">
                      <tr [class]="{'ignored':data.ignore}">
-                        <td>{{i+1}}</td>
+                        <td>{{10 * (pageCorrection - 1) + (i+1)}}</td>
                         <td>{{data.type}} </td>
                         <!-- <td *ngIf="data.type == 'item'">{{data.name}} - {{data.subitem}} </td> -->
                         <td *ngIf="data.type == 'pbk'">
@@ -243,8 +246,9 @@
 
                               <!-- item dropdown -->
                               <div class="col-4">
-                                 <ng-select *ngIf="data.type == 'item' || data.type == 'category'" class="custom custom-import"
-                                    placeholder="Select Category" [virtualScroll]="true" (change)="catSelected($event, data.type)">
+                                 <ng-select *ngIf="data.type == 'item' || data.type == 'category'"
+                                    class="custom custom-import" placeholder="Select Category" [virtualScroll]="true"
+                                    (change)="catSelected($event, data.type)">
                                     <ng-option selected="selected" disabled value="">-- Select Category --</ng-option>
                                     <ng-option *ngFor="let item of categories" [value]="item._id">
                                        {{item.category_hin}}:{{item.category_eng}}</ng-option>
@@ -351,6 +355,13 @@
                      </tr>
                   </ng-container>
                </tbody>
+               <tfoot>
+                  <td colspan="6">
+                     <pagination-controls class="pagi text-center" (pageChange)="pageCorrection = $event"
+                        [autoHide]="true">
+                     </pagination-controls>
+                  </td>
+               </tfoot>
             </table>
             <div class="col-10"></div>
             <div class="col-2">
@@ -363,7 +374,12 @@
       <!-- tobeimport -->
       <div class="tab-pane p-4" id="tobeimport" style="overflow: auto;">
          <form [formGroup]="importForm">
-            <div class="row" *ngIf="unmatchedData.length < 1">
+            <div class="progress">
+               <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                  aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" [style]="progressStyle"> {{processedCount}}
+                  out of {{importData.length}} </div>
+            </div>
+            <div class="row mt-1">
                <div class="col-md-3 mb-3">
                   <div class="form-group">
                      <label class="form-label">MM</label>

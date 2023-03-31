@@ -213,8 +213,9 @@ router.put('/process', async (req, res, next) => {
                     awkData.jawak_detail[i].jwk_id = jwkResult;
                     await Fn.commit();
                 }, async (err) => {
+                    console.log(err);
                     await Fn.rollback();
-                    awkData.jawak_detail[i].error = err;
+                    awkData.jawak_detail[i].error = err.message;
                 });
             }
 
@@ -226,8 +227,11 @@ router.put('/process', async (req, res, next) => {
 
         } catch (err) {
             await Fn.rollback();
-            console.log(err);
-            return next(err)
+            req.body.data.error = err.message;
+            res.json({
+                success: false,
+                data: req.body.data
+            })
         };
     }
     else {

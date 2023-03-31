@@ -691,7 +691,7 @@ const bachat_new = {
     select:
         `select * from bachat_new ?`
     , select_exists:
-        `select * from bachat_new where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND (@subitem_id IS NULL OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
+        `select * from bachat_new where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     // , select_exists: `select strftime('%m', @date)`
     , select_full:
         `select bachat_new.*,
@@ -727,7 +727,7 @@ const bachat_new = {
         left join unit on unit._id = bcht.unit_id
         group by bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.unit_id order by @order;`
     , insert:
-        `insert or replace into bachat_new (
+        `insert into bachat_new (
             month, year, mm_id, item_id, subitem_id, condition_id, dept_id, total_aawak, jawak, used_jawak, bachat, unit_id)
         values(
             @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, @total_aawak, @jawak, @used_jawak, @bachat, @unit_id);`
@@ -741,7 +741,7 @@ const bachat_new = {
         set
             total_aawak = total_aawak + @qty,
             bachat = bachat + @qty
-        where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND (@subitem_id IS NULL OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
+        where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , update_byid_aawak_ins:
         `update bachat_new
         set
@@ -753,7 +753,7 @@ const bachat_new = {
         set
             total_aawak = total_aawak - @qty,
             bachat = bachat - @qty
-        where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND (@subitem_id IS NULL OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
+        where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , insert_jawak_ins:
         `insert into bachat_new (
             month, year, mm_id, item_id, subitem_id, condition_id, dept_id, jawak, used_jawak, bachat, unit_id)
@@ -765,14 +765,14 @@ const bachat_new = {
             jawak = (CASE WHEN @jawak_type_id <> 27 THEN jawak + @qty ELSE jawak END),
             used_jawak = (CASE WHEN @jawak_type_id = 27 THEN used_jawak + @qty ELSE used_jawak END),
             bachat = bachat - @qty
-        where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND (@subitem_id IS NULL OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
+        where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , update_jawak_del:
         `update bachat_new
         set
             jawak = (CASE WHEN @jawak_type_id <> 27 THEN jawak - @qty ELSE jawak END),
             used_jawak = (CASE WHEN @jawak_type_id = 27 THEN used_jawak - @qty ELSE used_jawak END),
             bachat = bachat + @qty
-        where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND (@subitem_id IS NULL OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
+        where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , update:
         `update bachat_new set
         month=@month,

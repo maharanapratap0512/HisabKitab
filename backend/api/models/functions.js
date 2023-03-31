@@ -41,7 +41,6 @@ class Functions {
             }
 
          } catch (err) {
-            console.log(type, obj);
             reject(err);
          }
       });

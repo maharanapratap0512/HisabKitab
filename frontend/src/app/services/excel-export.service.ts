@@ -38,9 +38,9 @@ export class ExcelExportService {
     const data: Blob = new Blob([buffer], {
       type: EXCEL_TYPE
     });
-    if(fileName && fileName.trim()==''){
+    if (fileName && fileName.trim() == '') {
       FileSaver.saveAs(data, 'HK_export_' + new Date().getTime() + EXCEL_EXTENSION);
-    }else{
+    } else {
       FileSaver.saveAs(data, fileName + EXCEL_EXTENSION);
     }
   }
@@ -288,7 +288,7 @@ export class ExcelExportService {
       // color: { argb: '96C8FB' },
       family: 2,
       size: 12,
-      bold:true,      
+      bold: true,
     };
     worksheet.columns = Header;
 
@@ -326,6 +326,142 @@ export class ExcelExportService {
         family: 2,
         size: 12
       };
+      worksheet.addRow({})
+      rowNum++;
+    });
+
+
+    worksheet.eachRow({ includeEmpty: true }, function (row, rowNumber) {
+      row.eachCell({ includeEmpty: false }, function (cell, colNumber) {
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" }
+        };;
+      });
+    });
+
+    let fileName = excelFileName + ".xlsx";
+    const excelBuffer: any = workbook.xlsx.writeBuffer();
+    workbook.xlsx.writeBuffer()
+      .then(function (buffer: any) {
+        // done buffering
+        const data: Blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        FileSaver.saveAs(data, fileName);
+      });
+  }
+
+  exportFailedImport(json: any[], excelFileName: string, options = {}): void {
+    let workbook = new Workbook();
+    var worksheet = workbook.addWorksheet('Sheet1');
+
+    let colCount = Object.keys(json[0]).length;
+    let Subtitle = ['Aawak Detail'];
+    let Header = [];
+    for (let key of Object.keys(json[0])) {
+      if (typeof json[0][key] == "object" && json[0][key].length > 0) {
+
+        colCount += Object.keys(json[0][key][0]).length;
+        Subtitle.push(key);
+      }
+      else {
+        Header.push({ Header: key, key: key });
+      }
+    }
+
+
+    /*TITLE*/
+    worksheet.mergeCells([1, 1, 1, colCount - Subtitle.length + 1]);
+    worksheet.getCell('A1').value = 'आवक जावक बुक'
+    worksheet.getRow(1).font = { name: 'Corbel', family: 4, size: 20, };
+    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    // worksheet.getCell(1,1).fill = {
+    //   type: 'pattern', pattern: 'solid', fgColor: { argb: '96C8FB' }, bgColor: { argb: '96C8FB' }
+    // };
+
+    /*SUBTITLE*/
+    let endCell = 1;
+    let startCell = 1;
+    for (let i = 0; i < Subtitle.length; i++) {
+      endCell += (i == 0 ? (Object.keys(json[0]).length - Subtitle.length) : Object.keys(json[0][Subtitle[i]][0]).length);
+
+      worksheet.mergeCells([2, startCell, 2, endCell]);
+      worksheet.getCell(2, startCell).value = Subtitle[i];
+      worksheet.getCell(2, startCell).fill = {
+        type: 'pattern', pattern: 'solid', fgColor: { argb: '96C8FB' }, bgColor: { argb: '96C8FB' }
+        //adding fields to header
+      };
+      startCell = endCell + 1;
+      if (i > 0) {
+
+        for (let key of Object.keys(json[0][Subtitle[i]][0])) {
+          Header.push({ Header: key, key: Subtitle[i].substring(0, 1) + '_' + key });
+        }
+      }
+
+    }
+
+    worksheet.getRow(2).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+
+    /*Column headers*/
+    console.log(Header);
+
+    worksheet.getRow(3).values = Header.map(h => h.Header);
+    worksheet.getRow(3).font = {
+      // name: 'Arial Black',
+      // color: { argb: '96C8FB' },
+      family: 2,
+      size: 12,
+      bold: true,
+    };
+    worksheet.columns = Header;
+
+    /* Now we use the keys we defined earlier to insert your data by iterating through arrData and calling worksheet.addRow()*/
+    let rowNum = 3;
+    json.forEach(function (item, i) {
+      // for (let j = 0; j < Subtitle.length; j++) {
+      //   if(j>0 && json[i][Subtitle[j]].length > 0){          
+      //     for (let key of Object.keys(json[i][Subtitle[j]][0])) {
+      //       json[i][Subtitle[j].substring(0,1) + '_' + key] = json[i][Subtitle[j]][0][key];
+      //     } 
+      //     json[i][Subtitle[j]].shift();
+      //   }
+      // }      
+      worksheet.addRow(json[i]);
+      worksheet.getCell(rowNum, 'Error').font = {
+        name: 'Arial Black',
+        color: { argb: 'FFFF0000' },
+        family: 2,
+        size: 12
+      }
+      rowNum += 1;
+      for (let j = 0; j < Subtitle.length; j++) {
+
+        if (j > 0) {
+          json[i][Subtitle[j]].forEach(function (subrow: any) {
+
+            let row: any = {};
+            for (let key of Object.keys(subrow)) {
+              row[Subtitle[j].substring(0, 1) + '_' + key] = subrow[key];
+            }
+            worksheet.addRow(row);
+            worksheet.getCell(rowNum, Subtitle[j].substring(0, 1) + '_Error').font = {
+              name: 'Arial Black',
+              color: { argb: 'FFFF0000' },
+              family: 2,
+              size: 12
+            }
+            rowNum++;
+          });
+        }
+      }
+      // worksheet.getRow(rowNum).font = {
+      //   name: 'Arial Black',
+      //   color: { argb: 'FFFF0000' },
+      //   family: 2,
+      //   size: 12
+      // };
       worksheet.addRow({})
       rowNum++;
     });
