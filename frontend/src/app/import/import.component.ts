@@ -23,7 +23,8 @@ export class ImportComponent implements OnInit {
   @Input() importData: any;
   @Input() updateData: any;
   @Output() response = new EventEmitter();
-  page = 1;
+  pageED = 1;
+  pageTI = 1;
   itemsPerPage = 100;
   currentPage = 1;
   pageCorrection = 1;

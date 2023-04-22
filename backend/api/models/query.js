@@ -712,19 +712,22 @@ const bachat_new = {
         left join department dept on dept._id = bachat_new.dept_id ? limit @limit offset @offset`
     , select_all:
         `select bcht.*, json_group_array(list_name_hin) as arr_condition_hin, json_group_array(condition_id) as arr_condition_id, json_group_array(sum_aawak) as arr_sum_aawak, json_group_array(sum_used) as arr_sum_used, json_group_array(sum_jawak) as arr_sum_jawak, json_group_array(sum_bachat) as arr_sum_bachat, sum(sum_aawak) as total_aawak_all, sum(sum_jawak) as total_jawak_all, sum(sum_used) as total_used_all, sum(sum_bachat) as total_bachat_all,
-        mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id,
-        it.item_hin, it.item_eng, it.item_code,
-        sitl.subitem_hin, sitl.subitem_eng,
-        unit.unit_short, unit.unit_full
+        mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
+        it.item_hin, it.item_eng, it.item_code, it.categories as arr_item_categories,
+        sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+        unit.unit_short, unit.unit_full,
+        dept.dept_code, dept.dept_hin, dept.dept_eng
         from (select sum(total_aawak) as sum_aawak, sum(used_jawak) as sum_used, sum(jawak) as sum_jawak, sum(bachat) as sum_bachat, bachat_new.*,
             sl.list_name_hin, sl.list_name_eng from bachat_new
             left join support_list sl on sl._id = bachat_new.condition_id ?
             group by mm_id, item_id, subitem_id, unit_id, condition_id) bcht 
         left join mm on mm._id = bcht.mm_id
+        left join state st on st._id = mm.state_id
         left join item it on it._id = bcht.item_id
         left join subitem sit on sit._id = bcht.subitem_id
         left join subitem_list sitl on sitl._id = sit.subitem_list_id
         left join unit on unit._id = bcht.unit_id
+        left join department dept on dept._id = bcht.dept_id #
         group by bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.unit_id order by @order;`
     , insert:
         `insert into bachat_new (

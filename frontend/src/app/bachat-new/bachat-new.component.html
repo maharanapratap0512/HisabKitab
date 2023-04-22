@@ -27,12 +27,16 @@
                         </button>
                      </div>
                      <div class="col-3">
-                        <button type="button" class="btn btn-outline-success" (click)="excelExport()"> Export To Excel
-                        </button>
+                        <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                           data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
+                        <div class="dropdown-menu">
+                           <a class="dropdown-item" (click)="excelExportBachatOnly()">Bachat Only</a>
+                           <a class="dropdown-item" (click)="excelExportFull()">Full Saar</a>
+                        </div>
                      </div>
                      <div class="col-2">
                         <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">
-                           Total Count : {{total_count}}
+                           Total Count : {{bachatData.length}}
                         </button>
                      </div>
                   </div>
@@ -48,30 +52,42 @@
                            <div class="row">
                               <div class="col-3">
                                  <ng-select class="custom" style="width: 100%;" placeholder="Select State"
-                                    [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)">
+                                    [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)"
+                                    [(ngModel)]="filterBody.state_id" [ngModelOptions]="{standalone: true}">
                                     <ng-option *ngFor="let item of states" [value]="item._id">
                                        {{item.state_hin}}:{{item.state_eng}}</ng-option>
                                  </ng-select>
                               </div>
                               <div class="col-3">
                                  <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
-                                    [clearable]="true" [virtualScroll]="true" (change)="mmSelected($event)">
+                                    [clearable]="true" [virtualScroll]="true" (change)="filter()"
+                                    [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
                                     <ng-option *ngFor="let item of mms" [value]="item._id">
                                        {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
                                  </ng-select>
                               </div>
                               <div class="col-3">
                                  <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
-                                    [clearable]="true" [virtualScroll]="true" (change)="catSelected($event)">
+                                    [clearable]="true" [virtualScroll]="true" (change)="catSelected($event)"
+                                    [(ngModel)]="filterBody.category_id" [ngModelOptions]="{standalone: true}">
                                     <ng-option *ngFor="let item of categories" [value]="item._id">
                                        {{item.category_hin}}:{{item.category_eng}}</ng-option>
                                  </ng-select>
                               </div>
                               <div class="col-3">
                                  <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
-                                    [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)">
+                                    [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)"
+                                    [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}">
                                     <ng-option *ngFor="let item of items" [value]="item._id">
                                        {{item.item_hin}}:{{item.item_eng}}</ng-option>
+                                 </ng-select>
+                              </div>
+                              <div class="col-3 mt-2">
+                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Subitem"
+                                    [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.subitem_id"
+                                    [ngModelOptions]="{standalone: true}" (change)="filter()">
+                                    <ng-option *ngFor="let item of subitems" [value]="item._id">
+                                       {{item.subitem_hin}}:{{item.subitem_eng}}</ng-option>
                                  </ng-select>
                               </div>
                            </div>
@@ -89,8 +105,9 @@
                         <tr>
                            <!-- <td>Image</td> -->
                            <td style="width: 70px;">No.</td>
+                           <td>Department</td>
                            <td>MM</td>
-                           <!-- <td>Category</td> -->
+                           <td>Category</td>
                            <td>Item</td>
                            <td>Total Aawak</td>
                            <td>Used</td>
@@ -110,17 +127,14 @@
                               </td> -->
                               <td>{{i+1}}</td>
                               <td>
-                                 {{data.mm_hin}}<br />
-                                 {{data.mm_eng}}
+                                 {{data.dept_hin}} {{data.dept_code ? "(" + data.dept_code + ")" : ''}}
                               </td>
-                              <!-- <td *ngIf="!data.scat_id">
-                                 {{data.icat_hin}}<br />
-                                 {{data.icat_eng}}
-                              </td> -->
-                              <!-- <td *ngIf="data.scat_id">
-                                 {{data.scat_hin}}<br />
-                                 {{data.scat_eng}}
-                              </td> -->
+                              <td>
+                                 {{data.mm_hin}} ({{data.state_hin}})<br />
+                                 {{data.mm_eng}} ({{data.state_eng}})
+                              </td>
+                              <td>
+                                 {{data.categories_eng ? data.categories_eng : data.categories_hin}}
                               <td>
                                  {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}} <br />
                                  {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
@@ -145,7 +159,7 @@
                            <ng-container *ngIf="data.arr_condition_id.length > 0">
                               <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse ribbon-box"
                                  aria-labelledby="headingOne">
-                                 <td style="border: none;"></td>
+                                 <td colspan="3" style="border: none;"></td>
                                  <td colspan="6" class="sub-row">
                                     <table class="" style="width: 99.7%;table-layout: fixed;">
                                        <!-- <thead>

@@ -31,16 +31,14 @@ export class BachatNewComponent implements OnInit {
   conditions: any = [];
   categories: any = [];
   items: any = [];
-  conditionObj: any = {};
+  subitems: any = [];
+  // conditionObj: any = {};
   filterBody: any = {
-    pbk_id: [],
-    mm_id: [],
-    aawak_mm_id: [],
-    aawak_type_id: [],
-    product_id: [],
-    item_id: [],
-    subitem_id: [],
-    condition_id: [],
+    mm_id: null,
+    state_id: null,
+    category_id: null,
+    item_id: null,
+    subitem_id: null,
   };
   images: any = [];
   imageNames: any = [];
@@ -91,9 +89,25 @@ export class BachatNewComponent implements OnInit {
       if (data['result'] && data['success']) {
 
         this.bachatAll = data['result'];
-
-
-        this.total_count = data['total_count'];        
+        for (let i in this.bachatAll) {
+          this.bachatAll[i].categories_hin = '';
+          this.bachatAll[i].categories_eng = '';
+          if (this.bachatAll[i].arr_subitem_categories && this.bachatAll[i].arr_subitem_categories.length > 0) {
+            for (let j in this.categories) {
+              if (this.bachatAll[i].arr_subitem_categories.includes(this.categories[j]._id)) {
+                this.bachatAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                this.bachatAll[i].categories_eng += this.categories[j].category_eng + ', ';
+              }
+            }
+          } else {
+            for (let j in this.categories) {
+              if (this.bachatAll[i].arr_item_categories.includes(this.categories[j]._id)) {
+                this.bachatAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                this.bachatAll[i].categories_eng += this.categories[j].category_eng + ', ';
+              }
+            }
+          }
+        }
         this.bachatData = this.bachatAll;
         this.isLoader = false;
       }
@@ -103,7 +117,7 @@ export class BachatNewComponent implements OnInit {
 
   openImageModal() {
     $('#showImageModal').modal('show');
-  }  
+  }
 
   showImages(list: any) {
     this.imagesToShow = [];
@@ -141,35 +155,38 @@ export class BachatNewComponent implements OnInit {
   }
 
   stateSelected(ev: any) {
-    // this.bachatData = this.bachatAll.filter((b: { state_id: any; }) => b.state_id == ev);
-    if (ev)
-      this.conditionObj.state_id = ev;
-    else
-      this.conditionObj.state_id = null;
-    this.filter();
-  }
+    if (ev) {
+      this.mms = this.gs.Lists.mm.filter((b: { state_id: any; }) => b.state_id == ev);
+    }
+    else {
+      this.mms = this.gs.Lists.mm;
+    }
 
-  mmSelected(ev: any) {
-    if (ev)
-      this.conditionObj.mm_id = ev;
-    else
-      this.conditionObj.mm_id = null;
     this.filter();
   }
 
   catSelected(ev: any) {
-    if (ev)
-      this.conditionObj.category_id = ev;
-    else
-      this.conditionObj.category_id = null;
+    if (ev) {
+      this.items = this.gs.Lists.itemmix.filter((i: { categories: string | any[]; }) => i.categories.includes(ev));
+    }
+    else {
+      this.items = this.gs.Lists.itemmix;
+    }
     this.filter();
   }
 
   itemSelected(ev: any) {
-    if (ev)
-      this.conditionObj.item_id = ev;
-    else
-      this.conditionObj.item_id = null;
+    if (ev) {
+      let item = this.items.find((i: { _id: any; }) => i._id == ev);
+      
+      if (this.filterBody.category_id && item) {
+        this.subitems = item.subitems.filter((s: { categories: string | any[]; }) => s.categories.includes(this.filterBody.category_id));
+      } else {
+        this.subitems = item.subitems ? item.subitems : [];
+      }
+    } else {
+      this.subitems = [];
+    }
     this.filter();
   }
 
@@ -202,55 +219,107 @@ export class BachatNewComponent implements OnInit {
     // this.isLoader = false;
   }
 
-  excelExport() {
+  excelExportBachatOnly() {
     this.isLoader = true;
     let bchtData: any = [];
     for (let i = 0; i < this.bachatData.length; i++) {
-      bchtData.push({
+
+      let bachatRow: any = {
         'No.': i + 1,
         'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
         'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
         'MM': this.bachatData[i].mm_hin,
-        'Item': this.bachatData[i].item_id ? this.bachatData[i].item_hin : '-',
+        'Category': this.bachatData[i].categories_hin,
+        'Item': this.bachatData[i].item_hin,
         'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
-        'Used': this.bachatData[i].Used ? this.bachatData[i].Used : '-',
-        'New': this.bachatData[i].New ? this.bachatData[i].New : '-',
-        'Old': this.bachatData[i].Old ? this.bachatData[i].Old : '-',
-        'In Repair': this.bachatData[i].Repairing ? this.bachatData[i].Repairing : '-',
-        'Defective': this.bachatData[i].Defective ? this.bachatData[i].Defective : '-',
-        'Scrap': this.bachatData[i].Scrap ? this.bachatData[i].Scrap : '-',
-        'Total Stock': this.bachatData[i].Stock ? this.bachatData[i].Stock : '-',
-        'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-'
-      });
+        'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-',
+      }
+      for (let j in this.conditions) {
+        let qty = '0';
+        for (let k in this.bachatData[i].arr_condition_id) {
+          if (this.conditions[j]._id == this.bachatData[i].arr_condition_id[k]) {
+            qty = this.bachatData[i].arr_sum_bachat[k] ? this.bachatData[i].arr_sum_bachat[k] : '0';
+          }
+        }
+        bachatRow[this.conditions[j].list_name_hin] = qty;
+      }
+      bachatRow['टोटल बचत'] = this.bachatData[i].total_bachat_all ? this.bachatData[i].total_bachat_all : '0';
+      bchtData.push(bachatRow);
     }
     let date = new Date();
-    this.excelExportService.exportAsExcelFile(bchtData, "Jawak_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+    this.excelExportService.exportAsExcelFile(bchtData, "Bachat_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+    this.isLoader = false;
+  }
+
+  excelExportFull() {
+    this.isLoader = true;
+    let bchtData: any = [];
+    for (let i = 0; i < this.bachatData.length; i++) {
+
+      let bachatRow: any = {
+        'No.': i + 1,
+        'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
+        'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
+        'MM': this.bachatData[i].mm_hin,
+        'Category': this.bachatData[i].categories_hin,
+        'Item': this.bachatData[i].item_hin,
+        'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
+        'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-',
+      }
+      for (let j in this.conditions) {
+        let aawak = 0, jawak = 0, used = 0, bachat = 0;
+        for (let k in this.bachatData[i].arr_condition_id) {
+          if (this.conditions[j]._id == this.bachatData[i].arr_condition_id[k]) {
+            aawak = this.bachatData[i].arr_sum_aawak[k] ? this.bachatData[i].arr_sum_aawak[k] : '0';
+            jawak = this.bachatData[i].arr_sum_jawak[k] ? this.bachatData[i].arr_sum_jawak[k] : '0';
+            used = this.bachatData[i].arr_sum_used[k] ? this.bachatData[i].arr_sum_used[k] : '0';
+            bachat = this.bachatData[i].arr_sum_bachat[k] ? this.bachatData[i].arr_sum_bachat[k] : '0';
+          }
+        }
+        bachatRow[this.conditions[j].list_name_hin + "_आवक"] = aawak;
+        bachatRow[this.conditions[j].list_name_hin + "_यूज"] = used;
+        bachatRow[this.conditions[j].list_name_hin + "_जावक"] = jawak;
+        bachatRow[this.conditions[j].list_name_hin + "_बचत"] = bachat;
+      }
+      bachatRow['टोटल बचत'] = this.bachatData[i].total_bachat_all ? this.bachatData[i].total_bachat_all : '0';
+      bchtData.push(bachatRow);
+    }
+    let date = new Date();
+    this.excelExportService.exportAsExcelFile(bchtData, "Bachat_Full_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
     this.isLoader = false;
   }
 
 
   filter() {
-    this.bachatData = this.bachatAll;
-    for (let [key, value] of Object.entries(this.conditionObj)) {
-      if (value)
-        this.bachatData = this.bachatData.filter((b: any) => {
-          if (key == "category_id") {
-            if (b.scategories && b.scategories.length > 0) {
-              console.log(b.scategories, value);
-
-              return b.scategories.includes(value);
+    this.isLoader = true;
+    this.http.put(this.api.getUrl('BACHATNEW') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe(async (data:any) => {
+      if (data['result'] && data['success']) {
+        
+        this.bachatAll = data['result'];
+        for (let i in this.bachatAll) {
+          this.bachatAll[i].categories_hin = '';
+          this.bachatAll[i].categories_eng = '';
+          if (this.bachatAll[i].arr_subitem_categories && this.bachatAll[i].arr_subitem_categories.length > 0) {
+            for (let j in this.categories) {
+              if (this.bachatAll[i].arr_subitem_categories.includes(this.categories[j]._id)) {
+                this.bachatAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                this.bachatAll[i].categories_eng += this.categories[j].category_eng + ', ';
+              }
             }
-            else {
-              console.log(b.icategories, value);
-              return b.icategories.includes(value);
+          } else {
+            for (let j in this.categories) {
+              if (this.bachatAll[i].arr_item_categories.includes(this.categories[j]._id)) {
+                this.bachatAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                this.bachatAll[i].categories_eng += this.categories[j].category_eng + ', ';
+              }
             }
           }
-          else {
-            return b[key] == value;
-          }
-        });
-
-    }
+        }
+        this.bachatData = this.bachatAll;
+        this.isLoader = false;
+      }
+      this.isLoader = false;
+    });
   }
 
   filterFormSubmit(formdata: any) {
