@@ -55,10 +55,14 @@ export class AawakComponent implements OnInit {
   baseurl: any;
   departments: any = [];
   filterBody: any = {
+    type:'aawak',
     pbk_id: [],
+    month:null,
+    year:null,
     mm_id: [],
-    aawak_mm_id: [],
+    aj_mm_id: [],
     aawak_type_id: [],
+    jawak_type_id: [],
     product_id: [],
     item_id: [],
     subitem_id: [],
@@ -212,7 +216,7 @@ export class AawakComponent implements OnInit {
     }
   }
 
-  getFilteredAawakData(pageNo: any = null) {
+  getFilteredData(pageNo: any = null) {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
     this.filterBody.pageNo = this.pageNo;
@@ -225,6 +229,19 @@ export class AawakComponent implements OnInit {
       }
       this.isLoader = false;
     });
+  }
+  
+
+  getFilteredAawakData() {
+    this.filterBody.type = 'aawak';
+    this.pageNo = 0;
+    this.getFilteredData();
+  }
+
+  getFilteredJawakData() {
+    this.filterBody.type = 'jawak';
+    this.pageNo = 0;
+    this.getFilteredData();
   }
 
   async getJawakObj(awk: any) {

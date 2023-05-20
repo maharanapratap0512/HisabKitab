@@ -206,7 +206,7 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-3 mb-3">
+                              <div class="col-md-2 mb-3">
                                  <div class="form-group">
                                     <label class="form-label">MM</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
@@ -218,7 +218,7 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-3 mb-3">
+                              <div class="col-md-2 mb-3">
                                  <div class="form-group">
                                     <label class="form-label">Aawak MM</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Aawak MM"
@@ -249,6 +249,22 @@
 
                               <div class="col-md-2 mb-3">
                                  <div class="form-group">
+                                    <label class="form-label">Jawak Type</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Aawak Type"
+                                       [clearable]="false" [virtualScroll]="true" [multiple]="true"
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.jawak_type_id"
+                                       name="jawak_type_id">
+                                       <ng-option selected="selected" disabled value="">Aawak Type
+                                       </ng-option>
+                                       <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                          {{item.list_name_hin}} : {{item.list_name_eng}}
+                                       </ng-option>
+                                    </ng-select>
+                                 </div>
+                              </div>
+
+                              <div class="col-md-2 mb-3">
+                                 <div class="form-group">
                                     <label class="form-label">Nimitt</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Nimitt"
                                        [clearable]="false" [virtualScroll]="true" [multiple]="true"
@@ -263,21 +279,29 @@
                               </div>
                               <div class="col-md-3 mb-3 text-center">
                                  <button class="btn btn-primary submit mx-2" type="submit"
-                                    (click)="getFilteredAawakData()">Submit</button>
-                                 <!-- (click)="filterFormSubmit(filterForm.value)">Submit</button> -->
+                                    (click)="getFilteredAawakData()">Filter Aawak</button>
 
+                                 <button class="btn btn-primary submit mx-2" type="submit"
+                                    (click)="getFilteredJawakData()">Filter Jawak</button>
+                                 <!-- (click)="filterFormSubmit(filterForm.value)">Submit</button> -->
+                              </div>
+                              <div class="col-md-2 mb-3 text-center">
                                  <button class="btn btn-outline-secondary submit mx-2" type="button" (click)="filterBody= {
-                                    pbk_id: [],
-                                    mm_id: [],
-                                    aawak_mm_id: [],
-                                    aawak_type_id: [],
-                                    product_id: [],
-                                    item_id: [],
-                                    subitem_id: [],
-                                    condition_id: [],
-                                    pkt_num:null,
-                                    nimitt_id:[]
-                                  };">Clear All</button>
+                                 type:'aawak',
+                                 month:null,
+                                 year:null,
+                                 pbk_id: [],
+                                 mm_id: [],
+                                 aj_mm_id: [],
+                                 aawak_type_id: [],
+                                 jawak_type_id: [],
+                                 product_id: [],
+                                 item_id: [],
+                                 subitem_id: [],
+                                 condition_id: [],
+                                 pkt_num:null,
+                                 nimitt_id:[]
+                               };">Clear All</button>
                               </div>
                            </div>
                         </form>
@@ -360,7 +384,7 @@
                               <td>{{data.aawak_type_id?data.aawak_type_hin:''}} <br />
                                  {{data.aawak_type_eng ? data.aawak_type_eng:''}}</td>
                               <td>
-                                 {{data.categories_hin}} <br/>
+                                 {{data.categories_hin}} <br />
                                  {{data.categories_eng}}
                               </td>
                               <td>

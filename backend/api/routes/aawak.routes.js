@@ -253,26 +253,41 @@ router.put('/new', async (req, res, next) => {
     }
 });
 
-//aawak get by dept + filter + pageNo
+//aawak & jawak distribution get by dept + filter + pageNo
 router.put('/filter/:dept_id', async (req, res, next) => {
-    let orderBy = null, limit = 100, offset = null, page = 1;
-    let conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month}'` : ``} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.aawak_mm_id && req.body.aawak_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aawak_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = '${req.body.pkt_num}'` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``} ${req.body.remaining_qty ? `AND remaining_qty <> 0` : ``}`;
+    let orderBy = null, limit = 100, offset = null, page = 1, conditionString, jwkIds;
+    if (req.body.type == 'jawak') {
+        let jwkConditionString = `1=1 ${req.body.year ? ` AND strftime('%Y', jawak.date) = '${req.body.year}'` : ''} ${req.body.month ? ` AND strftime('%m', jawak.date) = '${req.body.month.toString().padStart(2, '0')}'` : ''} ${req.body.mm_id && req.body.mm_id.length > 0 ? ` AND jawak.mm_id in (${req.body.mm_id.join(',')})` : ''} ${req.body.condition_id && req.body.condition_id.length > 0 ? ` AND jawak.condition_id in (${req.body.condition_id.join(',')})` : ''} ${req.body.item_id && req.body.item_id.length > 0 ? ` AND jawak.item_id in (${req.body.item_id.join(',')})` : ''} ${req.body.aj_mm_id && req.body.aj_mm_id.length > 0 ? ` AND jawak.jawak_mm_id in (${req.body.aj_mm_id.join(',')})` : ''} ${req.body.jawak_type_id && req.body.jawak_type_id.length > 0 ? ` AND jawak.jawak_type_id in (${req.body.jawak_type_id.join(',')})` : ''} ${req.body.pbk_id && req.body.pbk_id.length > 0 ? ` AND jawak.pbk_id in (${req.body.pbk_id.join(',')})` : ''} ${req.body.subitem_id && req.body.subitem_id.length > 0 ? ` AND jawak.subitem_id in (${req.body.subitem_id.join(',')})` : ''} ${req.body.product_id && req.body.product_id.length > 0 ? ` AND jawak.product_id in (${req.body.product_id.join(',')})` : ''} ${(req.body.nimitt_id && req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND jawak.nimitt_id in ${req.body.nimitt_id.join(',')}` : ''} ${req.body.pkt_num ? ` AND jawak.pkt_num = ${req.body.pkt_num}` : ''} ${req.body.usage_category_id && req.body.usage_category_id.length > 0 ? ` AND jawak.usage_category_id in (${req.body.usage_category_id.join(',')})` : ''}`
+
+        jwkIds = await DB.db.prepare(`select _id from jawak where ${jwkConditionString}`).all();
+        if (jwkIds && jwkIds.length > 0) {
+            jwkIds = jwkIds.map(j => j._id).join(',');
+        }
+
+        conditionString = ` aawak._id in (select aawak_ref_id from jawak where jawak._id in (${jwkIds}))`;
+
+    } else {
+        conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month}'` : ``} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.aj_mm_id && req.body.aj_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aj_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = '${req.body.pkt_num}'` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``} ${req.body.remaining_qty ? `AND remaining_qty <> 0` : ``}`;
+
+    }
+
     if (req.body.orderBy) {
         orderBy = req.body.orderBy;
     }
     else if (conditionString.trim() == `1=1`) {
         orderBy = "aawak._id desc";
     }
+
     if (req.body.pageNo && req.body.pageNo > 0) {
         offset = (req.body.pageNo - 1) * limit;
         page = req.body.pageNo;
     }
-    // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+
     await DB.getList('aawak', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then(async (resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
-            let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
+            let jwkconditionString = `${jwkIds && jwkIds.length > 0 ? ` jawak._id in (${jwkIds}) AND ` : ``} aawak_ref_id = ${resolve.data[i]._id}`;
 
             await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString, orderBy: `jawak._id` }).then((jwkdata) => {
                 resolve.data[i].jawak_detail = jwkdata.data;

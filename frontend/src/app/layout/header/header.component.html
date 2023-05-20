@@ -9,11 +9,19 @@
             <span class="topnav-logo-lg">
                <img src="assets\favicon_io\android-chrome-512x512.png" alt="" height="32">
             </span>
-            <span class="hk mx-2"><strong><u>HISAB KITAB</u></strong></span>
-            <!-- <span class="topnav-logo-sm">
-               <img src="assets/images/logo_sm_dark.png" alt="" height="16">
-            </span> -->
+            <span class="hk mx-2"><strong><u>HISAB KITAB</u></strong>
+            </span>
+            <span>(v14.2)</span>
          </a>
+         <!-- <a routerLink="dashboard" class="topnav-logo">
+            <span class="topnav-logo-lg">
+               <img src="assets\favicon_io\android-chrome-512x512.png" alt="" height="32">
+            </span>
+            <span class="d-lg-flex flex-column gap-1 d-none">
+               <h5 class="my-0">Hisab Kitab</h5>
+               <h6 class="my-0 fw-normal">V14.2</h6>
+            </span>
+         </a> -->
 
          <ul class="list-unstyled topbar-menu float-end mb-0">
             <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.aawak.visible">
@@ -36,7 +44,8 @@
                   Bachat New
                </a>
             </li>
-            <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.vehicle && settings.vehicle.visible">
+            <li class="notification-list mx-1" style="line-height: 68px;"
+               *ngIf="settings.vehicle && settings.vehicle.visible">
                <a class="btn btn-info btn-info-custom lh-xl" routerLinkActive="active" routerLink="vehicle">
                   Vehicle
                </a>

@@ -238,12 +238,12 @@ export class BachatNewComponent implements OnInit {
         let qty = '0';
         for (let k in this.bachatData[i].arr_condition_id) {
           if (this.conditions[j]._id == this.bachatData[i].arr_condition_id[k]) {
-            qty = this.bachatData[i].arr_sum_bachat[k] ? this.bachatData[i].arr_sum_bachat[k] : '0';
+            qty = this.bachatData[i].arr_sum_bachat[k] ? this.bachatData[i].arr_sum_bachat[k] : 0;
           }
         }
         bachatRow[this.conditions[j].list_name_hin] = qty;
       }
-      bachatRow['टोटल बचत'] = this.bachatData[i].total_bachat_all ? this.bachatData[i].total_bachat_all : '0';
+      bachatRow['टोटल बचत'] = this.bachatData[i].total_bachat_all ? this.bachatData[i].total_bachat_all : 0;
       bchtData.push(bachatRow);
     }
     let date = new Date();
@@ -258,30 +258,57 @@ export class BachatNewComponent implements OnInit {
 
       let bachatRow: any = {
         'No.': i + 1,
+        'टोटल बचत': this.bachatData[i].total_bachat_all ? this.bachatData[i].total_bachat_all : 0,
+        'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-',
         'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
         'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
         'MM': this.bachatData[i].mm_hin,
         'Category': this.bachatData[i].categories_hin,
         'Item': this.bachatData[i].item_hin,
         'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
-        'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-',
-      }
+      }      
       for (let j in this.conditions) {
         let aawak = 0, jawak = 0, used = 0, bachat = 0;
         for (let k in this.bachatData[i].arr_condition_id) {
           if (this.conditions[j]._id == this.bachatData[i].arr_condition_id[k]) {
-            aawak = this.bachatData[i].arr_sum_aawak[k] ? this.bachatData[i].arr_sum_aawak[k] : '0';
-            jawak = this.bachatData[i].arr_sum_jawak[k] ? this.bachatData[i].arr_sum_jawak[k] : '0';
-            used = this.bachatData[i].arr_sum_used[k] ? this.bachatData[i].arr_sum_used[k] : '0';
-            bachat = this.bachatData[i].arr_sum_bachat[k] ? this.bachatData[i].arr_sum_bachat[k] : '0';
+            aawak = this.bachatData[i].arr_sum_aawak[k] ? this.bachatData[i].arr_sum_aawak[k] : 0;
+            jawak = this.bachatData[i].arr_sum_jawak[k] ? this.bachatData[i].arr_sum_jawak[k] : 0;
+            used = this.bachatData[i].arr_sum_used[k] ? this.bachatData[i].arr_sum_used[k] : 0;
+            bachat = this.bachatData[i].arr_sum_bachat[k] ? this.bachatData[i].arr_sum_bachat[k] : 0;
           }
         }
         bachatRow[this.conditions[j].list_name_hin + "_आवक"] = aawak;
         bachatRow[this.conditions[j].list_name_hin + "_यूज"] = used;
         bachatRow[this.conditions[j].list_name_hin + "_जावक"] = jawak;
         bachatRow[this.conditions[j].list_name_hin + "_बचत"] = bachat;
-      }
-      bachatRow['टोटल बचत'] = this.bachatData[i].total_bachat_all ? this.bachatData[i].total_bachat_all : '0';
+      }      
+      bachatRow['यूनिट'] = this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-';
+      bchtData.push(bachatRow);
+    }
+    let date = new Date();
+    this.excelExportService.exportAsExcelFile(bchtData, "Bachat_Full_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+    this.isLoader = false;
+  }
+
+  excelExportSaar() {
+    this.isLoader = true;
+    let bchtData: any = [];
+    for (let i = 0; i < this.bachatData.length; i++) {
+
+      let bachatRow: any = {
+        'No.': i + 1,
+        'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
+        'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
+        'MM': this.bachatData[i].mm_hin,
+        'Category': this.bachatData[i].categories_hin,
+        'Item': this.bachatData[i].item_hin,
+        'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
+        'टोटल आवक': this.bachatData[i].total_aawak_all ? this.bachatData[i].total_aawak_all : 0,
+        'घर मे यूज': this.bachatData[i].total_used_all ? this.bachatData[i].total_used_all : 0,
+        'टोटल जावक': this.bachatData[i].total_jawak_all ? this.bachatData[i].total_jawak_all : 0,
+        'बचत': this.bachatData[i].total_bachat_all ? this.bachatData[i].total_bachat_all : 0,
+        'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-',
+      }            
       bchtData.push(bachatRow);
     }
     let date = new Date();

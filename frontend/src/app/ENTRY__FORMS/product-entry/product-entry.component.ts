@@ -50,7 +50,6 @@ export class ProductEntryComponent implements OnInit {
   ) {
     this.productForm = this.fb.group({
       model_name: [null],
-      sr_num: [null, Validators.required],
       company_name: [null],
       price: [null],
       condition_id: [null, Validators.required],
@@ -59,7 +58,7 @@ export class ProductEntryComponent implements OnInit {
       purchase_date: [null],
       purchase_from: [null],
       purchased_by: [null],
-      product_code: [null, Validators.required],
+      code_sr_num: [null, Validators.required],
       product_detail: [null],
       item_id: [null, Validators.required],
       subitem_id: [null],
@@ -72,6 +71,7 @@ export class ProductEntryComponent implements OnInit {
       isbill: false,
       products: [[]]
     });
+    
     this.settings = this.auth.webUser.settings;
   }
 
@@ -127,8 +127,8 @@ export class ProductEntryComponent implements OnInit {
         nimitt_id: changes.getData.currentValue.nimitt_id,
         products: changes.getData.currentValue.products ? changes.getData.currentValue.products : [],
       });
-      this.sr_numChanged({target:{value:changes.getData.currentValue.sr_num}});
-      this.codeChanged({target:{value:changes.getData.currentValue.product_code}});
+      this.sr_numChanged({ target: { value: changes.getData.currentValue.sr_num } });
+      this.codeChanged({ target: { value: changes.getData.currentValue.product_code } });
       this.imagepath = (changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images : null)
     }
   }
@@ -245,19 +245,23 @@ export class ProductEntryComponent implements OnInit {
 
   sr_numChanged(ev: any) {
     if (ev.target.value) {
-      this.productForm.controls['product_code'].clearValidators();                 
-    } else {    
-      this.productForm.controls['product_code'].setValidators(Validators.required);                 
+      this.productForm.controls['product_code'].clearValidators();
+    } else {
+      this.productForm.controls['product_code'].setValidators(Validators.required);
     }
     this.productForm.controls['product_code'].updateValueAndValidity();
   }
   codeChanged(ev: any) {
     if (ev.target.value) {
-      this.productForm.controls['sr_num'].clearValidators();                 
-    } else {    
-      this.productForm.controls['sr_num'].setValidators(Validators.required);                 
+      this.productForm.controls['sr_num'].clearValidators();
+    } else {
+      this.productForm.controls['sr_num'].setValidators(Validators.required);
     }
     this.productForm.controls['sr_num'].updateValueAndValidity();
+  }
+
+  productAdd(){
+
   }
 
   mmAddResponse(ev: any) {
@@ -329,6 +333,23 @@ export class ProductEntryComponent implements OnInit {
       this.productForm.patchValue(
         {
           condition_id: ev._id
+        });
+      this.isLoader = false;
+    }
+    else {
+      this.isLoader = false;
+      console.log("err", ev);
+    }
+  }
+
+  addNimittResponse(ev: any) {
+    this.isLoader = true;
+    if (ev._id) {
+      $('#productEntryComponent > #showModal').modal('hide');
+      this.showModal = '';
+      this.productForm.patchValue(
+        {
+          nimitt_id: ev._id
         });
       this.isLoader = false;
     }
