@@ -77,7 +77,7 @@
    <div class="tab-content">
       <!-- exceldata -->
       <div class="tab-pane show active" id="exceldata" style="overflow: auto;">
-         <pagination-controls class="pagi text-center" (pageChange)="page = $event" [autoHide]="true">
+         <pagination-controls class="pagi text-center" id="pagi1" (pageChange)="page = $event" [autoHide]="true">
          </pagination-controls>
          <table id="datatable-buttons" class="table table-hover dt-responsive">
             <thead>
@@ -107,7 +107,7 @@
             </thead>
             <tbody>
                <ng-container
-                  *ngFor="let data of importData | filter:term | paginate: {itemsPerPage: itemsPerPage,currentPage: page,totalItems: total_count}; let i=index">
+                  *ngFor="let data of importData | filter:term | paginate: {id:'pagi1',itemsPerPage: itemsPerPage,currentPage: page,totalItems: total_count}; let i=index">
                   <tr class="main-row">
                      <td>{{itemsPerPage * (page - 1) + (i+1)}}</td>
                      <td>{{data.awk_id ? data.awk_id : ''}} </td>
