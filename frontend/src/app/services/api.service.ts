@@ -57,7 +57,7 @@ export class ApiService {
     NIMITT: base_url + 'nimitt/',
     DICT: base_url + 'dictionary/',
     REPORT: base_url + 'reports/',
-    REPORTPBK: base_url + 'reports/pbk/',
+    REPORTAJ: base_url + 'reports/aj/',
     IMPORTHISTORY: base_url + 'import_history/',
     VEHICLE: base_url + 'vehicle/',
     CLOSING: base_url+ 'closing/'

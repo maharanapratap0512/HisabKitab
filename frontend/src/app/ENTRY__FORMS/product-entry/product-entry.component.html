@@ -241,14 +241,13 @@
                <div class="form-group">
                   <label class="form-label">Product Code</label>
                   <div class="d-flex justify-content-between">
-                     <input type="text" class="form-control" placeholder="Product Code"
-                        formControlName="product_code"
+                     <input type="text" class="form-control" placeholder="Product Code" formControlName="product_code"
                         [ngClass]="{'validation':productForm.get('product_code')?.errors && (productForm.get('product_code')?.touched || productForm.get ('product_code')?.dirty)}"
                         (input)="codeChanged($event)">
                      <input type="text" class="form-control mx-1" placeholder="S/R Number" formControlName="sr_num"
                         [ngClass]="{'validation':productForm.get('sr_num')?.errors && (productForm.get('sr_num')?.touched || productForm.get ('sr_num')?.dirty)}"
                         (input)="sr_numChanged($event)">
-                     <button class="btn btn-sm btn-outline-primary">Add</button>
+                     <button class="btn btn-sm btn-outline-primary" (click)="productAdd()">Add</button>
                   </div>
                   <div>
                      <table style="width: 99.7%;table-layout: fixed;">
@@ -261,7 +260,7 @@
                         <tbody>
                            <!-- <tr *ngFor="let pd of productForm.products, let i = index;"> -->
                            <tr>
-                              <th>10</th>
+                              <th>No</th>
                               <td>{{"code"}}</td>
                               <td>{{"sr_num"}}</td>
                               <!-- <td style="cursor: pointer;" (click)="removeFamilyInfo(i)">x</td> -->
@@ -349,6 +348,10 @@
                <!-- Add Condition -->
                <app-support-list-entry *ngIf="showModal == 'Add Condition'" (response)='conditionAddResponse($event)'
                   list_type="condition"> </app-support-list-entry>
+
+               <!-- add Nimitt -->
+               <app-nimitt-entry *ngIf="showModal == 'Add Nimitt'" (response)='addNimittResponse($event)'>
+               </app-nimitt-entry>
 
             </div>
             <div class="modal-footer">

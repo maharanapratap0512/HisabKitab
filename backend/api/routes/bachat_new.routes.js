@@ -20,7 +20,7 @@ router.get('/', async (req, res, next) => {
 // get bachat_new 
 router.get('/:dept_id', async (req, res, next) => {
     try {
-        let sql = DB.query.bachat_new.select_all.replace('?', ` where dept_id = ${req.params.dept_id}`);
+        let sql = DB.query.bachat_new.select_all.replace('?', ` where dept_id = ${req.params.dept_id}`).replace('#','');
         let bachat = [];
         let stmt = DB.db.prepare(sql);
         for (let row of stmt.iterate({ order: 'updated_at desc' })) {
@@ -30,6 +30,36 @@ router.get('/:dept_id', async (req, res, next) => {
                 }
             }
             bachat.push(row);
+        }
+        res.json({
+            success: true,
+            result: bachat
+        })
+    } catch (err) { console.log(err); next(err) };
+});
+
+// get filtered bachat_new 
+router.put('/filter/:dept_id', async (req, res, next) => {
+    try {
+        let conditionQuery1 = ` where dept_id = ${req.params.dept_id}`;
+        let conditionQuery2 = ``;
+        if (req.body) {
+            conditionQuery1 += `${req.body.mm_id ? ` AND bachat_new.mm_id = ${req.body.mm_id}` : ``} ${req.body.item_id ? ` AND bachat_new.item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND bachat_new.subitem_id = ${req.body.subitem_id}` : ``}`
+            conditionQuery2 += `${req.body.state_id ? ` where mm.state_id = ${req.body.state_id}` : ``} `;
+
+        }
+        let sql = DB.query.bachat_new.select_all.replace('?', conditionQuery1).replace('#', conditionQuery2);
+        let bachat = [];
+        let stmt = DB.db.prepare(sql);
+        for (let row of stmt.iterate({ order: 'updated_at desc' })) {
+            for (let key of Object.keys(row)) {
+                if (key.includes('arr')) {
+                    row[key] = row[key] ? JSON.parse(row[key]) : []
+                }
+            }
+            if (!req.body.category_id || (req.body.category_id && ((row.arr_subitem_categories && row.arr_subitem_categories.includes(req.body.category_id)) || (!row.arr_subitem_categories && row.arr_item_categories.includes(req.body.category_id))))) {
+                bachat.push(row);
+            }
         }
         res.json({
             success: true,

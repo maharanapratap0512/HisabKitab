@@ -11,7 +11,7 @@ import { AuthService } from '../services/auth.service';
 import { ExcelExportService } from '../services/excel-export.service';
 import { observable, Observable, of, Subject } from 'rxjs';
 declare var $: any;
-import { FilterService, GridComponent, PageSettingsModel, SortService, VirtualScrollService } from '@syncfusion/ej2-angular-grids';
+import { FilterService, FilterSettingsModel, GridComponent, IFilter, PageSettingsModel, SortService, ToolbarItems, VirtualScrollService } from '@syncfusion/ej2-angular-grids';
 import { DropDownListComponent } from '@syncfusion/ej2-angular-dropdowns';
 
 @Component({
@@ -28,34 +28,26 @@ export class ReportsComponent implements OnInit {
   settings: any = {};
   term: any;
   total_count: any = 0;
-  reportData: any = [];
-  // pageSettings: PageSettingsModel;
+  reportData: any = [{ id: 1, value: 'om' }, { id: 2, value: 'mehul' }, { id: 3, value: 'raghul' },];
   filterBody: any = {}
-  years: any = [];
+
   months: any = [];
   mms: any = [];
   states: any = [];
   pbks: any = [];
   pbksAll: any = [];
-  public initialSort: Object;
-  public pageSettings: Object;
-  public dReady: boolean = false;
-  public dtTime: boolean = false;
-  public isDataBound: boolean = false;
-  public isDataChanged: boolean = true;
-  public intervalFun: any;
-  public clrIntervalFun: any;
-  public clrIntervalFun1: any;
-  public clrIntervalFun2: any;
-  public dropSlectedIndex: number = 0;
-  public stTime: any;
-  public filter: Object;
-  public filterSettings: Object;
-  public selectionSettings: Object;
-  public height: string = '240px';
 
-  public fields: Object = { text: 'text', value: 'value' };
-  public item: number[] = [1, 2, 3, 4, 5];
+
+  // syncfusion support 
+  @ViewChild('filterItemTemplate')
+  public filterItemTemplate: any;
+  public filterOption!: FilterSettingsModel;
+  public toolbarOptions!: ToolbarItems[];
+
+  // public fields: object = { text: 'Id', value: 'id' };
+  public filter!: IFilter;
+  public height = '220px';
+  public childGrid: any;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -65,18 +57,6 @@ export class ReportsComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public auth: AuthService,
     private excelExportService: ExcelExportService) {
-    this.pageSettings = { pageSize: 5 }
-    this.years = gs.years;
-    this.months = gs.months;
-    this.filterSettings = { type: "Menu" };
-    this.filter = { type: "CheckBox" };
-    this.stTime = performance.now();
-    this.selectionSettings = { persistSelection: true, type: "Multiple", checkboxOnly: true };
-    // sourceFiles.files = ['reports.component.scss'];
-    this.initialSort = {
-      columns: [{ field: 'roll_no', direction: 'Ascending' }]
-    };
-    this.pageSettings = { pageCount: 5 }
 
   }
 
@@ -90,42 +70,12 @@ export class ReportsComponent implements OnInit {
       this.pbksAll = result.pbk ? result.pbk : [];
     });
     this.settings = this.auth.webUser.settings;
-    // this.reportLoader = true;
-    this.http.put(this.api.getUrl('REPORT') + 'pbk/', {}).subscribe((data: any) => {
-      this.reportData = data;
-
-
-    })
-  }
-
-  yearChanged(ev: any) {
-    if (ev && ev == this.gs.date.getFullYear()) {
-      this.months = this.gs.months.filter((i: { m: number; }) => i.m <= this.gs.date.getMonth())
-    }
-    else {
-      this.months = this.gs.months;
-    }
-  }
-
-  stateSelected(ev: any) {
-    if (ev)
-      this.pbks = this.pbks.filter((pbk: { state_id: any; }) => pbk.state_id == ev);
-    else
-      this.pbks = this.pbksAll;
-  }
-
-  searchReport() {
-    console.log("submited");
-
-    this.reportLoader = true;
-    this.http.put(this.api.getUrl('REPORTPBK'), this.filterBody).subscribe((data: any) => {
-      if (data['result'] && data['success']) {
-        console.log(data);
-
-      }
-    });
-    this.reportLoader = false;
-
+    // this.reportLoader = true; 
+    this.filterOption = { type: 'CheckBox' }
+    this.filter = {
+      type: 'CheckBox'
+    };
+    this.toolbarOptions = ['Search'];
   }
 
   openModal(type: String) {
@@ -133,23 +83,31 @@ export class ReportsComponent implements OnInit {
     $('#showModal').modal('show');
   }
 
-  // valueChange(args: any): void {
-  //   this.listObj.hidePopup();
-  //   this.gridInstance.showSpinner();
-  //   this.dropSlectedIndex = 0;
-  //   let index: number = this.listObj.value as number;
-  //   clearTimeout(this.clrIntervalFun2);
-  //   this.clrIntervalFun2 = setTimeout(() => {
-  //     this.isDataChanged = true;
-  //     this.stTime = null;
-  //     let contentElement: Element = this.gridInstance.contentModule.getPanel().firstChild as Element;
-  //     contentElement.scrollLeft = 0;
-  //     contentElement.scrollTop = 0;
-  //     this.gridInstance.pageSettings.currentPage = 1;
-  //     this.stTime = performance.now();
-  //     this.gridInstance.dataSource = this.reportData;
-  //     this.gridInstance.hideSpinner();
-  //   }, 100);
-  // }
+  closeModal() {
+    $('#showModal').modal('hide');
+    this.showModal = '';
+  }
 
+  searchReport() {
+    this.http.put(this.api.getUrl('REPORTAJ') + this.auth.webUser.dept_id, this.filterBody).subscribe((result: any) => {
+
+      if (result.success && result.data) {
+        this.reportData = result.data;
+
+        this.childGrid = {
+          dataSource: result.data.aj,
+          queryString: '_id',
+          allowPaging: true,
+          pageSettings: { pageSize: 10, pageCount: 5 },
+          columns: [
+            { field: 'aawak_type_eng', headerText: 'Aawak Type', textAlign: 'Left', width: 120 },
+            { field: 'awk_qty', headerText: 'Qty', width: 80 },
+            { field: 'jawak_type_eng', headerText: 'Jawak Type', width: 120 },
+            { field: 'jwk_qty', headerText: 'Qty', width: 80 }
+          ],
+        };
+      }
+    });
+
+  }
 }

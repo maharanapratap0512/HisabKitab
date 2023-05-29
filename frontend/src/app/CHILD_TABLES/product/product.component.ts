@@ -47,7 +47,7 @@ export class ProductComponent implements OnInit {
   }
 
   getProductData() {
-    this.isLoader = true;
+    this.isLoader = true; 
     this.http.get(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id).subscribe((data) => {
       if (data['result'] && data['success']) {
         this.productDataAll = data['result'];

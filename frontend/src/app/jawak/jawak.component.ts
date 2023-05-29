@@ -30,6 +30,7 @@ export class JawakComponent implements OnInit {
   jawakData: any = [];
   editData: any = {};
   mms: any = [];
+  months:any = [];
   viewData: any = [];
   items: any = [];
   units: any = [];
@@ -49,6 +50,8 @@ export class JawakComponent implements OnInit {
   allJwkData: any = [];
   jwkCount: any = 0;
   filterBody: any = {
+    month:null,
+    year:null,
     pbk_id: [],
     mm_id: [],
     jawak_mm_id: [],
@@ -80,6 +83,7 @@ export class JawakComponent implements OnInit {
 
   ngOnInit(): void {
     this.getJawakData(1);
+    this.months = this.gs.months;
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];

@@ -4,7 +4,7 @@
 </ngx-spinner>
 
 
-<div class="row" *ngIf="importData && importData.length">
+<div class="row" *ngIf="importData && importData.length" id="importComponent">
 
    <div class="row" style="padding: 10px 50px;">
       <ul class="nav nav-pills bg-nav-pills">
@@ -77,7 +77,8 @@
    <div class="tab-content">
       <!-- exceldata -->
       <div class="tab-pane show active" id="exceldata" style="overflow: auto;">
-         <pagination-controls class="pagi text-center" id="pagi1" (pageChange)="page = $event" [autoHide]="true">
+         <pagination-controls id="excelDataPagination" class="pagi text-center" (pageChange)="pageED = $event"
+            [autoHide]="true">
          </pagination-controls>
          <table id="datatable-buttons" class="table table-hover dt-responsive">
             <thead>
@@ -107,9 +108,9 @@
             </thead>
             <tbody>
                <ng-container
-                  *ngFor="let data of importData | filter:term | paginate: {id:'pagi1',itemsPerPage: itemsPerPage,currentPage: page,totalItems: total_count}; let i=index">
+                  *ngFor="let data of importData | filter:term | paginate: { id:'excelDataPagination', itemsPerPage: 100,currentPage: pageED,totalItems: importData.length}; let i=index">
                   <tr class="main-row">
-                     <td>{{itemsPerPage * (page - 1) + (i+1)}}</td>
+                     <td>{{100 * (pageED - 1) + (i+1)}}</td>
                      <td>{{data.awk_id ? data.awk_id : ''}} </td>
                      <td>{{data.pkt_num ? data.pkt_num : '-'}} </td>
                      <td [ngClass]="{'marked': !data.date}">{{data.date?(data.date | date:'dd-MM-yyyy'):'-'}}
@@ -198,8 +199,11 @@
                </ng-container>
             </tbody>
             <tfoot>
-               <pagination-controls class="pagi text-center" (pageChange)="page = $event" [autoHide]="true">
-               </pagination-controls>
+               <td colspan="8">
+                  <pagination-controls id="excelDataPagination" class="pagi text-center" (pageChange)="pageED = $event"
+                     [autoHide]="true">
+                  </pagination-controls>
+               </td>
             </tfoot>
          </table>
       </div>
@@ -207,7 +211,8 @@
       <!-- correction -->
       <div class="tab-pane p-4" id="correction" style="overflow: auto;">
          <div class="row" *ngIf="unmatchedData.length > 0">
-            <pagination-controls class="pagi text-center" (pageChange)="pageCorrection = $event" [autoHide]="true">
+            <pagination-controls id="unmatchedPagination" class="pagi text-center"
+               (pageChange)="pageCorrection = $event" [autoHide]="true">
             </pagination-controls>
             <table id="datatable-buttons" class="table table-hover dt-responsive">
                <thead>
@@ -222,7 +227,7 @@
                </thead>
                <tbody>
                   <ng-container
-                     *ngFor="let data of unmatchedData | filter:term | paginate: {itemsPerPage: 10,currentPage: pageCorrection,totalItems: unmatchedData.length}; let i=index">
+                     *ngFor="let data of unmatchedData | filter:term | paginate: {id:'unmatchedPagination', itemsPerPage: 10,currentPage: pageCorrection,totalItems: unmatchedData.length}; let i=index">
                      <tr [class]="{'ignored':data.ignore}">
                         <td>{{10 * (pageCorrection - 1) + (i+1)}}</td>
                         <td>{{data.type}} </td>
@@ -357,8 +362,8 @@
                </tbody>
                <tfoot>
                   <td colspan="6">
-                     <pagination-controls class="pagi text-center" (pageChange)="pageCorrection = $event"
-                        [autoHide]="true">
+                     <pagination-controls id="unmatchedPagination" class="pagi text-center"
+                        (pageChange)="pageCorrection = $event" [autoHide]="true">
                      </pagination-controls>
                   </td>
                </tfoot>
@@ -431,7 +436,8 @@
                </div> -->
             </div>
          </form>
-         <pagination-controls class="pagi text-end" (pageChange)="page = $event" [autoHide]="true">
+         <pagination-controls id="toBIPagination" class="pagi text-end" (pageChange)="pageTI = $event"
+            [autoHide]="true">
          </pagination-controls>
          <table id="datatable-buttons" class="table table-hover dt-responsive">
             <thead>
@@ -457,9 +463,9 @@
             </thead>
             <tbody>
                <ng-container
-                  *ngFor="let data of importData | filter:term | paginate: {itemsPerPage: itemsPerPage,currentPage: page,totalItems: total_count}; let i=index">
+                  *ngFor="let data of importData | filter:term | paginate: {id:'toBIPagination', itemsPerPage: 100,currentPage: pageTI,totalItems: importData.length}; let i=index">
                   <tr class="main-row" [ngClass]="{'marked': !data.valid, 'warned':data._id}">
-                     <td>{{itemsPerPage * (page - 1) + (i+1)}}</td>
+                     <td>{{100 * (pageTI - 1) + (i+1)}}</td>
                      <td>{{data.pkt_num ? data.pkt_num : '-'}} </td>
                      <td [ngClass]="{'marked': !data.date}">{{data.date?(data.date | date:'dd-MM-yyyy'):'-'}}
                      </td>
@@ -551,8 +557,11 @@
                </ng-container>
             </tbody>
             <tfoot>
-               <pagination-controls class="pagi text-center" (pageChange)="page = $event" [autoHide]="true">
-               </pagination-controls>
+               <td colspan="8">
+                  <pagination-controls id="toBIPagination" class="pagi text-center" (pageChange)="pageTI = $event"
+                     [autoHide]="true">
+                  </pagination-controls>
+               </td>
             </tfoot>
          </table>
       </div>

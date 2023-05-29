@@ -31,7 +31,16 @@
                               class="uil-search-plus h4 icon-mx-2"></i> Advance Search
                         </button>
                      </div>
+
                      <div class="col-2">
+                        <!-- <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                           data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
+                        <div class="dropdown-menu">
+                           <a class="dropdown-item" (click)="exportExcel()">Jawak Only</a>
+                           <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
+                           <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
+                           <a class="dropdown-item" (click)="exportPendingData()">Pending Destribution</a>
+                        </div> -->
                         <button type="button" class="btn btn-outline-success" (click)="exportExcel()"> Export To Excel
                         </button>
                      </div>
@@ -52,11 +61,25 @@
                      <div class="card-body">
                         <form #filterForm="ngForm">
                            <div class="row">
-                              <div class="col-md-3 mb-3" *ngIf="settings.pkt_num">
+                              <div class="col-md-3 mb-2">
                                  <div class="form-group">
-                                    <label class="form-label">Pkt No.</label>
-                                    <input type="text" class="form-control" placeholder="Pkt No."
-                                       [(ngModel)]="filterBody.pkt_num" name="pkt_num">
+                                    <label class="form-label">Month-Year</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Year"
+                                       (change)="months = gs.yearChangedGetMonth($event)" [clearable]="true"
+                                       [virtualScroll]="true" [(ngModel)]="filterBody.year" name="year">
+                                       <ng-option selected="selected" disabled value="">Select Year
+                                       </ng-option>
+                                       <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Month"
+                                       [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month"
+                                       name="month">
+                                       <ng-option selected="selected" disabled value="">Select Month
+                                       </ng-option>
+                                       <ng-option *ngFor="let item of months" [value]="item.m">{{item.m}} :
+                                          {{item.name}}
+                                       </ng-option>
+                                    </ng-select>
                                  </div>
                               </div>
 
@@ -133,6 +156,14 @@
                                  </div>
                               </div>
 
+                              <div class="col-md-2 mb-3" *ngIf="settings.pkt_num">
+                                 <div class="form-group">
+                                    <label class="form-label">Pkt No.</label>
+                                    <input type="text" class="form-control" placeholder="Pkt No."
+                                       [(ngModel)]="filterBody.pkt_num" name="pkt_num">
+                                 </div>
+                              </div>
+
                               <div class="col-md-3 mb-3">
                                  <div class="form-group">
                                     <label class="form-label">MM</label>
@@ -158,7 +189,7 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-3 mb-3">
+                              <div class="col-md-2 mb-3">
                                  <div class="form-group">
                                     <label class="form-label">Jawak Type</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Jawak Type"
@@ -174,7 +205,7 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-3 mb-3" *ngIf="settings.nimitt_id">
+                              <div class="col-md-2 mb-3" *ngIf="settings.nimitt_id">
                                  <div class="form-group">
                                     <label class="form-label">Nimitt</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Nimitt"
