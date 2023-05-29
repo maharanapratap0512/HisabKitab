@@ -212,14 +212,16 @@ export class AawakComponent implements OnInit {
   getAawakPage(page: any = null) {
     if (page) {
       this.pageNo = page;
-      this.getFilteredAawakData();
+      this.getFilteredData();
     }
   }
 
   getFilteredData(pageNo: any = null) {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
+    console.log(this.filterBody);
     this.filterBody.pageNo = this.pageNo;
+    console.log(this.filterBody);
     this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.aawakData = data['result'];

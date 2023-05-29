@@ -11,9 +11,9 @@ import { Ng2SearchPipeModule } from 'ng2-search-filter';
 import { FileSaverModule } from 'ngx-filesaver';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgtUniversalModule } from '@ng-toolkit/universal';
-import { DropDownTreeModule } from '@syncfusion/ej2-angular-dropdowns';
-import { GridModule } from '@syncfusion/ej2-angular-grids';
-import { PageService, SortService, FilterService, FreezeService } from '@syncfusion/ej2-angular-grids';
+import { DropDownTreeModule, MultiSelectModule, CheckBoxSelectionService, DropDownListAllModule } from '@syncfusion/ej2-angular-dropdowns';
+import { GridModule, PageService, SortService, FilterService, FreezeService, ToolbarService  } from '@syncfusion/ej2-angular-grids';
+import { CheckBoxModule } from '@syncfusion/ej2-angular-buttons';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -73,6 +73,7 @@ import { FilterByDatePipe } from './pipe/filter-by-date.pipe';
 import { ExcelImportComponent } from './excel-import/excel-import.component';
 import { ClosingComponent } from './closing/closing.component';
 import { BachatNewComponent } from './bachat-new/bachat-new.component';
+import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -127,6 +128,7 @@ import { BachatNewComponent } from './bachat-new/bachat-new.component';
     ExcelImportComponent,
     ClosingComponent,
     BachatNewComponent,
+    AdminDashboardComponent,
   ],
   imports: [
     BrowserModule,
@@ -151,13 +153,16 @@ import { BachatNewComponent } from './bachat-new/bachat-new.component';
     NgtUniversalModule,
     NgxPaginationModule,
     AutocompleteLibModule,
-    GridModule
+    GridModule,
+    MultiSelectModule,
+    CheckBoxModule, 
+    DropDownListAllModule
 
   ],
-  providers: [GlobalService, PageService, SortService, FilterService, FreezeService],
+  providers: [GlobalService, PageService, SortService, FilterService, FreezeService, CheckBoxSelectionService, ToolbarService ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class AppModule { 
-  
+export class AppModule {
+
 }

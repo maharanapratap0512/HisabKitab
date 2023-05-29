@@ -12,28 +12,26 @@
                      <div class="col-md-3 mb-2">
                         <div class="form-group">
                            <label class="form-label">Month-Year</label>
-                           <div class="d-flex justify-content-between">
-                              <ng-select class="custom" style="width: 100%;" placeholder="Select Year"
-                                 (change)="yearChanged($event)" [clearable]="true" [virtualScroll]="true"
-                                 [(ngModel)]="filterBody.year" name="year">
-                                 <ng-option selected="selected" disabled value="">Select Year
-                                 </ng-option>
-                                 <ng-option *ngFor="let item of years" [value]="item">{{item}}</ng-option>
-                              </ng-select>
-                              <ng-select class="custom" style="width: 100%;" placeholder="Select Month"
-                                 [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month" name="month">
-                                 <ng-option selected="selected" disabled value="">Select Month
-                                 </ng-option>
-                                 <ng-option *ngFor="let item of months" [value]="item.m">{{item.m}} : {{item.name}}
-                                 </ng-option>
-                              </ng-select>
-
-                           </div>
+                           <ng-select class="custom" style="width: 100%;" placeholder="Select Year"
+                              (change)="months = gs.yearChangedGetMonth($event)" [clearable]="true"
+                              [virtualScroll]="true" [(ngModel)]="filterBody.year" name="year" required>
+                              <ng-option selected="selected" disabled value="">Select Year
+                              </ng-option>
+                              <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
+                           </ng-select>
+                           <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Month"
+                              [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month" name="month" required>
+                              <ng-option selected="selected" disabled value="">Select Month
+                              </ng-option>
+                              <ng-option *ngFor="let item of months" [value]="item.m">{{item.m}} :
+                                 {{item.name}}
+                              </ng-option>
+                           </ng-select>
                         </div>
                      </div>
 
                      <!-- state for aawak filter -->
-                     <div class="col-md-3 mb-3">
+                     <!-- <div class="col-md-3 mb-3">
                         <div class="form-group">
                            <label class="form-label">State for Pbk</label>
                            <ng-select class="custom" style="width: 100%;" placeholder="Filter PBK by State"
@@ -45,7 +43,7 @@
                               </ng-option>
                            </ng-select>
                         </div>
-                     </div>
+                     </div> -->
 
                      <!-- pbk -->
                      <div class="col-md-3 mb-3">
@@ -92,28 +90,19 @@
                   <ngx-spinner *ngIf="reportLoader" size="small" color="#fff" type="ball-scale" [fullScreen]="false">
                      <p class="loading">Loading...</p>
                   </ngx-spinner>
-                  <!-- help: https://ej2.syncfusion.com/angular/documentation/grid/getting-started/ -->
-                  <ejs-grid [dataSource]='reportData' allowPaging='true' allowSorting='true' [sortSettings]='initialSort' [pageSettings]='pageSettings' height='500px'>
-                     <e-columns>
-                        <e-column field="roll_no" headerText="Roll No" textAlign="left" width="50"></e-column>
-                        <e-column field="pbk_hin" headerText="Pbk Name" textAlign="left" width="90"></e-column>
-                        <e-column field="date" headerText="Date" textAlign="left" format="yMd"></e-column>
-                        <e-column field="pkt_num" headerText="Pkt Num" textAlign="left"></e-column>
-                        <e-column field="mm_hin" headerText="MM" textAlign="left"></e-column>
-                        <e-column field="item_hin" headerText="Item" textAlign="left"></e-column>
-                        <e-column field="subitem_hin" headerText="Subitem" textAlign="left"></e-column>
-                        <e-column field="company_name" headerText="Company" textAlign="left"></e-column>
-                        <e-column field="qty" headerText="Qty" textAlign="center" format="N2"></e-column>
-                        <e-column field="unit_short" headerText="Unit" textAlign="left"></e-column>
-                        <e-column field="condition_hin" headerText="Condition"></e-column>
-                        <e-column field="rate" headerText="Rate" textAlign="center" format="C2"></e-column>
-                        <e-column field="actual_amt" headerText="Amount" textAlign="center" format="C2"></e-column>
-                        <e-column field="aawak_type_hin" headerText="Aawak Type"></e-column>
-                        <e-column field="nimitt_hin" headerText="Nimiit"></e-column>
-                        <e-column field="item_detail" headerText="Item Detail"></e-column>
-                        <e-column field="description" headerText="Description"></e-column>
-                     </e-columns>
-                  </ejs-grid>
+
+                  <ejs-grid id="Grid" #grid [dataSource]='reportData' [toolbar]='toolbarOptions' [allowFiltering]='true'
+                     [allowPaging]='true' [allowSorting]="true" [filterSettings]='filterOption' height="272px"
+                     [childGrid]="childGrid">
+                     <ejs-column>
+                        <e-column field='state_eng' [filter]='filter' headerText='State' width=120></e-column>
+                        <e-column field='mm_eng' [filter]='filter' headerText='MM' width=120></e-column>
+                        <e-column field='item_eng' [filter]='filter' headerText='Item' width=120></e-column>
+                        <e-column field='subitem_eng' [filter]='filter' headerText='Subitem' width=120></e-column>
+                        <e-column field='unit_short' [filter]='filter' headerText='Unit' width=120></e-column>
+                     </ejs-column>
+                  </ejs-grid>`
+                  <!-- <ng-template #filterItemTemplate let-data>{{changeItems(data)}}</ng-template> -->
                </div>
             </div>
 

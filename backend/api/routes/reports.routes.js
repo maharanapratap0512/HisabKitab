@@ -15,6 +15,93 @@ const DB = new DBContex();
 //     });
 // });
 
+
+
+// by condition + aj_types 
+router.put('/aj/:dept_id', async (req, res, next) => {
+    try {
+        let conditionString = `month = '${req.body.month}' AND year = '${req.body.year}' AND bcht.dept_id = ${req.params.dept_id}`;
+        let data = [], aj = []
+        let stmt = DB.db.prepare(`select bcht.*, json_group_array(condition_id) as condition_ids, json_group_array(bachat) as bachats,
+        json_group_array(sl.list_name_hin) as condition_hin, json_group_array(sl.list_name_eng) as condition_eng, 
+        mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
+        it.item_hin, it.item_eng, it.item_code, it.categories as arr_item_categories,
+        sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+        unit.unit_short, unit.unit_full,
+        dept.dept_code, dept.dept_hin, dept.dept_eng from bachat_new bcht 
+        left join mm on mm._id = bcht.mm_id
+        left join state st on st._id = mm.state_id
+        left join item it on it._id = bcht.item_id
+        left join subitem sit on sit._id = bcht.subitem_id
+        left join subitem_list sitl on sitl._id = sit.subitem_list_id
+        left join unit on unit._id = bcht.unit_id
+        left join support_list sl on sl._id = bcht.condition_id
+        left join department dept on dept._id = bcht.dept_id where ${conditionString}
+        group by bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.unit_id`);
+        let awkstmt = DB.db.prepare(`select aawak_type_id, sum(qty) as awk_qty,
+        sl.list_name_hin as aawak_type_hin, sl.list_name_eng as aawak_type_eng from aawak
+        left join support_list sl on sl._id = aawak.aawak_type_id
+        where dept_id = @dept_id AND mm_id = @mm_id AND item_id = @item_id AND ((subitem_id IS NULL AND @subitem_id IS NULL) OR subitem_id = @subitem_id) AND unit_id = @unit_id group by aawak_type_id`);
+        let jwkstmt = DB.db.prepare(`select jawak_type_id, sum(qty) as jwk_qty,
+        sl.list_name_hin as jawak_type_hin, sl.list_name_eng as jawak_type_eng from jawak
+        left join support_list sl on sl._id = jawak.jawak_type_id
+        where dept_id = @dept_id AND mm_id = @mm_id AND item_id = @item_id AND ((subitem_id IS NULL AND @subitem_id IS NULL) OR subitem_id = @subitem_id) AND unit_id = @unit_id group by jawak_type_id`);
+
+        let condition_ids, condition_hin, condition_eng, bachats;
+        for (let row of stmt.iterate()) {
+            condition_ids = row.condition_ids ? JSON.parse(row.condition_ids) : []
+            condition_hin = row.condition_hin ? JSON.parse(row.condition_hin) : []
+            condition_eng = row.condition_eng ? JSON.parse(row.condition_eng) : []
+            bachats = row.bachats ? JSON.parse(row.bachats) : []
+            row.condition_ids = condition_ids;
+            row.condition_hin = condition_hin;
+            row.condition_eng = condition_eng;
+            row.bachats = bachats;
+            for (let i = 0; i < row.condition_eng.length; i++) {
+                row[condition_eng[i]] = row.bachats[i];
+            }
+            let aawak = awkstmt.all(row);
+            let jawak = jwkstmt.all(row);            
+            let awklength = aawak.length;
+            let jwklength = jawak.length;
+            const maxLength = Math.max(awklength, jwklength);
+
+            for (let i = 0; i < maxLength; i++) {
+                let obj = {
+                    _id: row._id,
+                    aawak_type_id: null,
+                    aawak_type_hin: null,
+                    aawak_type_eng: null,
+                    awk_qty: null,
+                    jawak_type_id: null,
+                    jawak_type_hin: null,
+                    jawak_type_eng: null,
+                    jwk_qty: null,
+                }
+
+                for (const key in (i < awklength ? aawak[i] : {})) {
+                    obj[key] = aawak[i][key];
+                }
+
+                for (const key in (i < jwklength ? jawak[i] : {})) {
+                    obj[key] = jawak[i][key];
+                }
+
+                aj.push(obj);
+
+            }
+            data.push(row);
+        }
+
+        res.json({
+            success: true,
+            data: data,
+            ajData: aj
+        })
+    } catch (err) { next(err) };
+});
+
+
 // by pbk 
 router.put('/pbk/', async (req, res, next) => {
     try {
@@ -24,7 +111,7 @@ router.put('/pbk/', async (req, res, next) => {
         console.log(query);
         let stmt = DB.db.prepare(query);
         res.json({
-            result:stmt.all()
+            result: stmt.all()
         })
     } catch (err) { next(err) };
 });
