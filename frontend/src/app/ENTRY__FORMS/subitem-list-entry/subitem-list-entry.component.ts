@@ -38,6 +38,7 @@ export class SubitemListEntryComponent implements OnInit {
     this.subitemListForm = this.fb.group({
       subitem_hin: [null, Validators.required],
       subitem_eng: [null],
+      subitem_roman: [null],
       extra_note:[null]
     });
   }
@@ -51,6 +52,7 @@ export class SubitemListEntryComponent implements OnInit {
       this.subitemListForm.patchValue({
         subitem_hin: changes.getData.currentValue.subitem_hin,
         subitem_eng: changes.getData.currentValue.subitem_eng,
+        subitem_roman: changes.getData.currentValue.subitem_roman,
         extra_note: changes.getData.currentValue.extra_note,
       });
     }
@@ -90,6 +92,7 @@ export class SubitemListEntryComponent implements OnInit {
       body.set = {
         subitem_hin: this.subitemListForm.value.subitem_hin,
         subitem_eng: this.subitemListForm.value.subitem_eng,
+        subitem_roman: this.subitemListForm.value.subitem_roman,
         extra_note: this.subitemListForm.value.extra_note
       };
       this.http.put(this.api.getUrl('SUBITEMLIST'), body).subscribe((data: any) => {

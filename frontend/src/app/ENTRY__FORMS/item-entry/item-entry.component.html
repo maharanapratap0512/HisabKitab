@@ -1,4 +1,21 @@
 <div class="row" id="itemComponent">
+    <div class="col-12" *ngIf="!isEditForm">
+        <div class="float-end">
+            <button class="btn btn-sm btn-outline-primary" (click)="isEditForm=true">Edit Form</button>
+        </div>
+    </div>
+    <div class="col-12 card" *ngIf="isEditForm">
+        <div class="row card-body">
+            <div class="col-2 col-md-2 col-sm-4 ps-0" *ngFor="let cntrl of auth.settingsUI.item">
+                <div class="form-check form-switch">
+                    <input type="checkbox" class="form-check-input"
+                        [(ngModel)]="auth.webUser.settings.item[cntrl.colName]" [ngModelOptions]="{standalone: true}">
+                    <label class="form-check-label" for="customSwitch2">{{cntrl.title}}</label>
+                </div>
+            </div>
+            <div class="col-2 float-end"><button class="btn btn-sm btn-success" (click)="saveFormSettings()">Save</button></div>
+        </div>
+    </div>
     <div class="card-body">
         <form [formGroup]="itemForm">
             <div class="row">
@@ -9,14 +26,22 @@
                             [ngClass]="{'validation':itemForm.get('item_hin')?.errors && (itemForm.get('item_hin')?.touched || itemForm.get ('item_hin')?.dirty)}">
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="settings.item_eng">
                     <div class="form-group">
                         <label class="form-label">Item Name (Eng)</label>
                         <input type="text" class="form-control" placeholder="Item Name (Eng)" formControlName="item_eng"
                             [ngClass]="{'validation':itemForm.get('item_eng')?.errors && (itemForm.get('item_eng')?.touched || itemForm.get ('item_eng')?.dirty)}">
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="settings.item_roman">
+                    <div class="form-group">
+                        <label class="form-label">Item Name (Roman)</label>
+                        <input type="text" class="form-control" placeholder="Item Name (Roman)"
+                            formControlName="item_roman"
+                            [ngClass]="{'validation':itemForm.get('item_roman')?.errors && (itemForm.get('item_roman')?.touched || itemForm.get ('item_roman')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3" *ngIf="settings.item_code">
                     <div class="form-group">
                         <label class="form-label">Item Code</label>
                         <input type="text" class="form-control" placeholder="Item Code" formControlName="item_code"
@@ -28,7 +53,7 @@
                     <div class="form-group">
                         <label class="form-label">Category</label>
                         <div class="float-end">
-                            <a type="button" *ngIf="settings.category.add"
+                            <a type="button" *ngIf="mainSettings.category.add"
                                 style="padding: 1px 6px !important; margin-right: 2px !important;"
                                 class="btn btn-sm btn-outline-primary" (click)="setView('Category')"><i
                                     class=" dripicons-view-list"></i></a>
@@ -71,7 +96,7 @@
                         </ng-select>
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="settings.price_range">
                     <div class="form-group">
                         <label class="form-label">Price Range</label>
                         <div class="d-flex justify-content-between">
@@ -83,20 +108,21 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="settings.extra_note">
                     <div class="form-group">
                         <label class="form-label">Extra Note</label>
                         <textarea class="form-control" placeholder="Extra Note" formControlName="extra_note"
                             [ngClass]="{'validation':itemForm.get('extra_note')?.errors && (itemForm.get('extra_note')?.touched || itemForm.get ('extra_note')?.dirty)}"></textarea>
                     </div>
                 </div>
-                <div class="col-md-2 mb-3">
+                <div class="col-md-2 mb-3" *ngIf="settings.document">
                     <div class="form-group">
                         <label class="form-label">Image</label>
                         <div onclick="$('#itemComponent > #showModal').modal('show')"
                             (click)="showModal='Add Image';editDoc=this.itemForm.value.document;" class="form-control"
                             style="cursor: pointer;">
-                            <i class="uil-image-plus" *ngIf="!imagepath || (imagepath && imagepath.length < 1)" style="font-size:200%; "></i>
+                            <i class="uil-image-plus" *ngIf="!imagepath || (imagepath && imagepath.length < 1)"
+                                style="font-size:200%; "></i>
                             <ng-container *ngFor="let img of imagepath">
                                 <img src="{{this.api.getUrl('BASE')+img}}" alt="image" height="25" width="25"
                                     *ngIf="imagepath" style="object-fit: cover;">
@@ -106,10 +132,12 @@
                     </div>
                 </div>
                 <div class="col-md-2 mb-3">
-                    <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!isEdit"
-                        (click)="itemFormSubmit()">Submit</button>
-                    <button class="btn btn-warning submit mx-3" type="submit" *ngIf="isEdit"
-                        (click)="itemFormUpdate()">Update</button>
+                    <div class="form-group">
+                        <button class="btn btn-primary submit" type="submit" *ngIf="!isEdit"
+                            (click)="itemFormSubmit()">Submit</button>
+                        <button class="btn btn-warning submit" type="submit" *ngIf="isEdit"
+                            (click)="itemFormUpdate()">Update</button>
+                    </div>
                     <!-- <button class="btn btn-light submit mx-3" type="button" (click)="itemForm.reset()">Clear</button> -->
                 </div>
             </div>

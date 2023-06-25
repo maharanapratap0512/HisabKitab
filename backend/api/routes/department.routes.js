@@ -7,7 +7,7 @@ const DB = new DBContex();
 router.get('/', async (req, res, next) => {
     try {
         await DB.getList('department').then(async (resolve) => {
-            for(let i in resolve.data){
+            for (let i in resolve.data) {
                 resolve.data[i].settings = JSON.parse(resolve.data[i].settings ? resolve.data[i].settings : {})
             }
             res.json({
@@ -24,7 +24,7 @@ router.get('/', async (req, res, next) => {
 router.get('/:dept_id', async (req, res, next) => {
     try {
         await DB.getList('department', { dept_id: req.params.dept_id }).then(async (resolve) => {
-            for(let i in resolve.data){
+            for (let i in resolve.data) {
                 resolve.data[i].settings = JSON.parse(resolve.data[i].settings ? resolve.data[i].settings : {})
             }
             res.json({
@@ -123,15 +123,15 @@ router.put('/login', async (req, res, next) => {
             let result = {};
             await DB.getList('department', { conditionString: condition }).then(async (response) => {
                 if (response.total_count == 1 && response.data.length > 0) {
-                    // await DB.getList('department_config', { conditionString: `dept_id = ${req.body.dept_id} and config_key = 'settings'` }).then(setting => {
-                    //     response.settings = JSON.parse(setting.data[0].config_value);
-                    //     response.settings_id = setting.data[0]._id;
-                    // });
                     result = response.data[0];
+                    // await DB.getList('department_config', { conditionString: `dept_id = ${req.body.dept_id} and config_key = 'settings'` }).then((setting) => {
+                    // });
                     result.total_count = response.total_count;
                     result.settings = result.settings ? JSON.parse(result.settings) : {};
+                    res.json(result || {});
+                } else {
+                    res.json({})
                 }
-                res.json(result || {});
             });
         }
         else {

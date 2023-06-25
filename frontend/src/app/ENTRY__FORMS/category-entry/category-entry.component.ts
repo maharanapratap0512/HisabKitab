@@ -30,7 +30,8 @@ export class CategoryEntryComponent implements OnInit {
   ) {
     this.categoryForm = this.fb.group({
       category_eng: [null, Validators.required],
-      category_hin: [null, Validators.required]
+      category_hin: [null, Validators.required],
+      category_roman: [null],
     });
   }
 
@@ -41,7 +42,8 @@ export class CategoryEntryComponent implements OnInit {
     if (changes.getData && changes.getData.currentValue) {
       this.categoryForm.patchValue({
         category_eng: changes.getData.currentValue.category_eng,
-        category_hin: changes.getData.currentValue.category_hin ? changes.getData.currentValue.category_hin : null
+        category_hin: changes.getData.currentValue.category_hin ? changes.getData.currentValue.category_hin : null,
+        category_roman: changes.getData.currentValue.category_roman ? changes.getData.currentValue.category_roman : null
       });
     }
   }
@@ -78,10 +80,7 @@ export class CategoryEntryComponent implements OnInit {
         _id: this.getData._id
       }
       body.set = {
-        category_eng: this.categoryForm.value.category_eng,
-        category_hin: this.categoryForm.value.category_hin,
-        isverify: this.categoryForm.value.isverify,
-        active: this.categoryForm.value.active
+        ...this.categoryForm.value
       };
       this.http.put(this.api.getUrl('CATEGORY'), body).subscribe((data: any) => {
         if (data && data['success']) {

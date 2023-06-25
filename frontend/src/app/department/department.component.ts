@@ -65,6 +65,8 @@ export class DepartmentComponent implements OnInit {
   statuses: any = [];
   itemMixCondition: any = {};
   settingsAll: any = [];
+  settingsUI: any = {};
+  // deptSettings: any = {};
   dataZip: JSZip = new JSZip();
   pbkPageNo: any = 2;
   getPbk$ = new Subject();
@@ -95,15 +97,7 @@ export class DepartmentComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // this.settingsAll.push({
-    //   name: "Aawak",
-    //   detail: "",
-    //   visible: false,
-    //   fields:[{
-    //     name:"date",
-    //     visible:false
-    //   }]
-    // });
+
     this.spinner.show();
     this.getDepartments();
     this.getSupportList();
@@ -118,55 +112,15 @@ export class DepartmentComponent implements OnInit {
       this.cities = result.city ? result.city : [];
       this.countries = result.country ? result.country : [];
     });
-    this.deptSelected(this.auth.webUser.dept_id);
+
+    this.settingsUI = this.auth.settingsUI;
+
     this.settingsAll = {
       pbk: {
-        visible: false,
-        add: false,
-        roll_no: false,
-        pbk_hin: true,
-        pbk_eng: false,
-        gender: true,
-        state_id: true,
-        relation: false,
-        relative_name: false,
-        birth_date: false,
-        age: false,
-        address: false,
-        townarea: false,
-        city_id: false,
-        mo_no: false,
-        alt_mo_no: false,
-        class_mm_id: false,
-        bhatti_date: false,
-        doccument: false
       },
       nimitt: {
-        visible: false,
-        add: false,
       },
       product: {
-        visible: false,
-        purchase_date: false,
-        mm_id: true,
-        purchased_by: false,
-        purchase_from: false,
-        filter_dept: false,
-        filter_category: true,
-        item_id: true,
-        subitem_id: true,
-        company_name: false,
-        model_name: false,
-        sr_num: true,
-        product_code: true,
-        condition_id: true,
-        warranty_period: false,
-        warranty_from: false,
-        accessories: false,
-        price: true,
-        nimitt_id: false,
-        product_detail: false,
-        document: false
       },
       aawak: {
         visible: false,
@@ -260,11 +214,16 @@ export class DepartmentComponent implements OnInit {
       }
     }
 
+    this.deptSelected(this.auth.webUser.dept_id);
+
+    this.applySettings(this.auth.webUser.settings);
+
+
   }
 
   getDepartments() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('DEPT') + this.auth.webUser.dept_id).subscribe((data) => {
+    this.http.get(this.api.getUrl('DEPT') + this.auth.webUser.dept_id).subscribe(async (data) => {
       if (data['result'] && data['success']) {
         // this.departments = data['result'].filter((i: { _id: number; }) => i._id > 1);
         this.departments = data['result'];
@@ -273,6 +232,7 @@ export class DepartmentComponent implements OnInit {
       this.isLoader = false;
     });
   }
+
   getSupportList() {
     this.isLoader = true;
     this.http.get(this.api.getUrl('SUPPORTLIST')).subscribe((data) => {
@@ -285,17 +245,15 @@ export class DepartmentComponent implements OnInit {
     });
   }
 
-  deptSelected(ev: any) {
-    let getdept = this.auth.webUser.dept_id;
-    if (ev) {
-      getdept = ev;
-    }
-    if (getdept.settings) {
+  async deptSelected(ev: any) {
+    let getdept = await this.departments.find((d: { _id: any; }) => d._id == ev);
+
+    if (getdept && getdept.settings) {
       this.applySettings(getdept.settings);
     }
 
     this.isLoader = true;
-    this.http.get(this.api.getUrl('DEPTCONFIG') + getdept).subscribe((data) => {
+    this.http.get(this.api.getUrl('DEPTCONFIG') + ev).subscribe((data) => {
       if (data['result'] && data['success']) {
         for (let i of data['result']) {
           this.deptConf[i.config_key] = i;
@@ -1465,35 +1423,37 @@ export class DepartmentComponent implements OnInit {
   }
 
   saveDeptSettings() {
+
+    let dept_id = this.dept_id || this.auth.webUser.dept_id;
     if (this.settings.department.settings) {
       // this.deptConf.settings.config_value = this.settingsAll;
       let body = {
-        query: { _id: this.dept_id },
+        query: { _id: dept_id },
         set: { settings: this.settingsAll }
       }
       this.http.put(this.api.getUrl('DEPT_SETTINGS'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          this.toastr.success('Department Settings Updated Successfully.');
-          if (this.dept_id == this.auth.webUser.dept_id) {
-            this.auth.updateSettings(this.settingsAll);
+          if (dept_id == this.auth.webUser.dept_id) {
+            this.auth.webUser.settings = this.settingsAll;
             for (let i in this.gs.Lists.department) {
-              if (this.gs.Lists.department[i]._id == this.dept_id) {
+              if (this.gs.Lists.department[i]._id == dept_id) {
                 this.gs.Lists.department[i].settings = this.settingsAll;
               }
             }
           }
+          this.toastr.success('Department Settings Updated Successfully.');
         }
       });
     }
 
     this.http.put(this.api.getUrl('DEPTCONFSAVE'), this.deptConf).subscribe((data: any) => {
       if (data && data['success']) {
-        this.isLoader = false;
-        this.deptSelected(this.dept_id);
+        // this.isLoader = false;
+        this.deptSelected(dept_id);
       }
     }, err => {
       this.toastr.error(err['error']);
-      this.isLoader = false;
+      // this.isLoader = false;
     });
 
   }

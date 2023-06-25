@@ -16,12 +16,12 @@
                   <div class="row">
                      <div class="col-4 d-flex justify-content-between">
                         <button class="btn btn-primary" onclick="$('#showModal').modal('show')"
-                           (click)="showModal = 'Add Item'" *ngIf="settings.item.add">
+                           (click)="showModal = 'Add Item'" *ngIf="settings.add">
                            <i class="dripicons-plus h4 icon-mx-1"> </i>Add Item
                         </button>
 
                         <button class="btn btn-success mx-3" onclick="$('#showModal').modal('show')"
-                           (click)="showModal = 'Add Subitem'" *ngIf="settings.item.add">
+                           (click)="showModal = 'Add Subitem'" *ngIf="settings.add">
                            <i class="dripicons-plus h4 icon-mx-1"> </i>Add Subitem
                         </button>
 
@@ -87,13 +87,15 @@
                         <tr>
                            <th style="width: 50px;" (click)="FilterActive()">No.</th>
                            <th style="width: 210px;">Manage</th>
-                           <th style="width: 100px;">Image</th>
-                           <th style="width: 250px;">Item Name (Hin-Eng)</th>
-                           <th style="width: 180px;">Item Code</th>
-                           <th style="width: 180px;">Default Unit</th>
+                           <th style="width: 100px;" *ngIf="settings.document">Image</th>
+                           <th style="width: 150px;">Item Hin</th>
+                           <th style="width: 150px;" *ngIf="settings.item_eng">Item Eng</th>
+                           <th style="width: 150px;" *ngIf="settings.item_roman">Item Roman</th>
+                           <th style="width: 120px;" *ngIf="settings.item_code">Item Code</th>
+                           <th style="width: 150px;">Default Unit</th>
                            <th style="width: 180px;">Category</th>
-                           <th style="width: 120px;">Price</th>
-                           <th style="width: 250px;">Extra Note</th>
+                           <th style="width: 120px;" *ngIf="settings.price_range">Price</th>
+                           <th style="width: 250px;" *ngIf="settings.extra_note">Extra Note</th>
                         </tr>
                      </thead>
                      <tbody class="accordion" id="accordionExample">
@@ -108,15 +110,15 @@
                                  <!-- <span class="mx-1"
                                     style="font-size: x-large;position: absolute;line-height: 28px;cursor: pointer"
                                     (click)="protectionToggle(data._id, data.active)">
-                                    <i *ngIf="[1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
+                                    <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
                                        title="Protected" class="uil-shield-check text-warning"></i>
-                                    <i *ngIf="[1,6].includes(auth.webUser.dept_id) && !data.active"
+                                    <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && !data.active"
                                        data-toggle="tooltip" title="Unprotected"
                                        class="uil-shield-slash text-danger"></i>
                                  </span> -->
                               </td>
                               <td>
-                                 <div *ngIf="[1,6].includes(auth.webUser.dept_id)">
+                                 <div *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id)">
                                     <button class="btn btn-sm btn-outline-success" type="button"
                                        (click)="addSubitem(data)"><i class="uil uil-plus"></i></button>
                                     <button class="btn btn-sm btn-outline-info ml-1" type="button"
@@ -130,7 +132,7 @@
                                     <button *ngIf="data.restrict_year" class="btn btn-sm btn-warning" type="button"
                                        (click)="unlockItem(i,data._id)"><i class="uil-lock-alt"></i></button>
                                     <!-- <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"
-                                       *ngIf="[1,6].includes(auth.webUser.dept_id)">
+                                       *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id)">
                                        <i class="uil-trash"></i>
                                     </button> -->
                                  </div>
@@ -138,13 +140,13 @@
                                     {{data.restrict_month}}/{{data.restrict_year}} से लॉक।
                                  </div>
 
-                                 <!-- <span *ngIf="![1,6].includes(auth.webUser.dept_id) && data.active"
+                                 <!-- <span *ngIf="!gs.exceptionDept.includes(auth.webUser.dept_id) && data.active"
                                     data-toggle="tooltip" title="Protected" class="text-warning mx-1"
                                     style="font-size: xx-large;cursor: pointer;position: absolute;line-height: 0px;">
                                     <i class="uil-shield-check"></i>
                                  </span> -->
                               </td>
-                              <td>
+                              <td *ngIf="settings.document">
                                  <div class="d-flex flex-wrap" *ngIf="data.document && data.document.images"
                                     (click)="viewProduct(data)" style="cursor: pointer;">
                                     <span class="imageCount">x{{data.document.images.length}}</span>
@@ -154,18 +156,20 @@
                                           style="position: absolute;left:75px;top:-10px;">{{data.document.images.length}}</span> -->
                                  </div>
                               </td>
-                              <td>{{data.item_hin}} : {{data.item_eng?data.item_eng:'-'}}</td>
-                              <td>{{data.item_code?data.item_code:'-'}}</td>
+                              <td>{{data.item_hin}}</td>
+                              <td *ngIf="settings.item_eng">{{data.item_eng?data.item_eng:'-'}}</td>
+                              <td *ngIf="settings.item_roman">{{data.item_roman?data.item_roman:'-'}}</td>
+                              <td *ngIf="settings.item_code">{{data.item_code?data.item_code:'-'}}</td>
                               <td>{{data.unit_id?data.unit_short + ' : ' + data.unit_full:'-'}}</td>
                               <td>
                                  <ng-container *ngFor="let cat of data.categories_hin">
                                     {{cat}},
                                  </ng-container>
                               </td>
-                              <td>
+                              <td *ngIf="settings.price_range">
                                  {{(data.min_rate || data.max_rate) ? data.min_rate + ' - ' + data.max_rate : ''}}
                               </td>
-                              <td>{{data.extra_note?data.extra_note:'-'}}</td>
+                              <td *ngIf="settings.extra_note">{{data.extra_note?data.extra_note:'-'}}</td>
                            </tr>
                            <!-- <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse"
                               aria-labelledby="headingOne">
@@ -190,8 +194,8 @@
                                                 <i class="uil-corner-down-right"></i>
                                                 <span class="mx-1">{{j+1}}</span>
                                              </td>
-                                             <td style="width: 160px;">
-                                                <div *ngIf="[1,6].includes(auth.webUser.dept_id)">
+                                             <td style="width: 135px;">
+                                                <div *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id)">
                                                    <button class="btn btn-sm btn-primary mx-1" type="button"
                                                       (click)="edit(si, 'subitem')">
                                                       <i class=" uil uil-pen"></i>
@@ -203,7 +207,7 @@
                                                    <button *ngIf="si.restrict_year" class="btn btn-sm btn-warning"
                                                       type="button" (click)="unlockSubitem(i, j, si._id)"><i
                                                          class="uil-lock-alt"></i></button>
-                                                   <!-- <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !si.active"
+                                                   <!-- <button *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) || !si.active"
                                                       class="btn btn-sm btn-danger" type="button"
                                                       (click)="deleteSubitem(i, j,si._id)">
                                                       <i class="uil-trash"></i></button> -->
@@ -212,15 +216,19 @@
                                                    {{si.restrict_month}}/{{si.restrict_year}} से लॉक।
                                                 </div>
                                              </td>
-                                             <td></td>
-                                             <td style="width: 250px;" class="nav-item">
-                                                {{si.subitem_hin +' : '+ si.subitem_eng}}
+                                             <td style="width: 100px;"></td>
+                                             <td style="width: 150px;" class="nav-item">
+                                                {{si.subitem_hin}}
                                              </td>
-                                             <td style="width: 180px;" class="nav-item">
-                                                {{si.subitem_code?si.subitem_code_hin + ' : ' +
-                                                si.subitem_code_eng:'-'}}
+                                             <td style="width: 150px;" class="nav-item" *ngIf="settings.subitem_eng">
+                                                {{si.subitem_eng ? si.subitem_eng : ''}}
                                              </td>
-                                             <td style="width: 180px;" class="nav-item">
+                                             <td style="width: 150px;" class="nav-item" *ngIf="settings.subitem_roman">
+                                                {{si.subitem_roman ? si.subitem_roman : ''}}
+                                             </td>
+                                             <td style="width: 120px;" class="nav-item" *ngIf="settings.item_code">
+                                             </td>
+                                             <td style="width: 150px;" class="nav-item">
                                                 {{si.unit_id?si.unit_short + ' : ' + si.unit_full:'-'}}
                                              </td>
                                              <td style="width: 180px;" class="nav-item">
@@ -228,11 +236,11 @@
                                                    {{scat}},
                                                 </ng-container>
                                              </td>
-                                             <td>
+                                             <td *ngIf="settings.price_range">
                                                 {{(si.min_rate || si.max_rate) ? si.min_rate + ' - ' +
                                                 si.max_rate : ''}}
                                              </td>
-                                             <td style="width: 250px;" class="nav-item">
+                                             <td style="width: 250px;" class="nav-item" *ngIf="settings.extra_note">
                                                 {{si.extra_note?si.extra_note:'N/A'}}
                                              </td>
                                           </tr>

@@ -64,11 +64,19 @@
             <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
               <!-- <a class="nav-link" [ngClass]="{'active show': dept_id > 2}" id="v-pills-setting-tab" -->
 
-                <!-- software setting tab -->
-              <a class="nav-link" id="v-pills-setting-tab" data-bs-toggle="pill" href="#v-pills-setting"
-                role="tab" aria-controls="v-pills-setting" aria-selected="true" *ngIf="dept_id && settings.department.settings">
+              <!-- software setting tab -->
+              <!-- <a class="nav-link" id="v-pills-setting-tab" data-bs-toggle="pill" href="#v-pills-setting" role="tab"
+                aria-controls="v-pills-setting" aria-selected="true">
                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                 <span class="d-none d-md-block">Software Settings
+                </span>
+              </a> -->
+
+              <!-- New software setting tab -->
+              <a class="nav-link" id="v-pills-settingNew-tab" data-bs-toggle="pill" href="#v-pills-settingNew"
+                role="tab" aria-controls="v-pills-settingNew" aria-selected="true">
+                <i class="mdi mdi-home-variant d-md-none d-block"></i>
+                <span class="d-none d-md-block">Software Settings New
                 </span>
               </a>
 
@@ -153,10 +161,74 @@
           <div class="col-md-10">
             <div class="tab-content card card-body" id="v-pills-tabContent">
 
+              <div class="tab-pane fade" id="v-pills-settingNew" role="tabpanel"
+                aria-labelledby="v-pills-settingNew-tab"
+                style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
+                <div class="row">
+                  <div class="col-3">
+                    <button class="btn btn-info w-100" (click)="exportDeptSettings()">
+                      <i class="dripicons-export" style=" font-size: large;"> </i> Export Settings
+                      Only
+                    </button>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="card-body" style="overflow: auto;">
+                    <table id="datatable-buttons" class="table table-hover dt-responsive">
+                      <thead>
+                        <tr>
+                          <th style="width: 40px;">No.</th>
+                          <th style="width: 40px;">Page Visibility</th>
+                          <th style="width: 101px;">Page</th>
+                          <th style="width: 150px;">Detail</th>
+                          <th style="width: 75px;">New Entry</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <ng-container *ngFor="let row of settingsUI.pageList; let i = index;">
+                          <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
+                            <td>{{i+1}}</td>
+                            <td *ngIf="settingsAll[row.key]">
+                              <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input"
+                                  [(ngModel)]="settingsAll[row.key].visible" [ngModelOptions]="{standalone: true}">
+                              </div>
+                            </td>
+                            <td>{{row.title}}</td>
+                            <td>{{row.detail}}</td>
+                            <td>
+                              <div class="form-check form-switch" *ngIf="row.add">
+                                <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll[row.key].add"
+                                  [ngModelOptions]="{standalone: true}">
+                              </div>
+                            </td>
+                          </tr>
+                          <tr class="collapse show ribbon-box" [attr.id]="'[row.key]_row'"
+                            *ngIf="settingsAll[row.key].visible && (settingsUI[row.key] && settingsUI[row.key].length > 0)">
+                            <!-- <td style="border: none;"></td> -->
+                            <td colspan="5" class="sub-row">
+                              <div class="row p-1 ps-3" style="width: 99.7%;">
+                                <div class="col-2 col-md-2 col-sm-4 ps-0" *ngFor="let cntrl of settingsUI[row.key]">
+                                  <div class="form-check form-switch">
+                                    <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll[row.key][cntrl.colName]"
+                                      [ngModelOptions]="{standalone: true}">
+                                    <label class="form-check-label" for="customSwitch2">{{cntrl.title}}</label>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        </ng-container>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+
               <!-- Setting Tab -->
               <!-- <div class="tab-pane fade" [ngClass]="{'active show': dept_id > 2}" id="v-pills-setting" -->
-              <div class="tab-pane fade" id="v-pills-setting" role="tabpanel"
-                aria-labelledby="v-pills-setting-tab" *ngIf="dept_id"
+              <div class="tab-pane fade" id="v-pills-setting" role="tabpanel" aria-labelledby="v-pills-setting-tab"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
                 <div class="row">
                   <div class="col-3">
@@ -238,8 +310,6 @@
                                       <label class="form-check-label" for="customSwitch2">PBK/Sewadhari</label>
                                     </div>
                                   </td>
-                                </tr>
-                                <tr>
                                   <td>
                                     <div class="form-check form-switch">
                                       <input type="checkbox" class="form-check-input"
@@ -247,6 +317,8 @@
                                       <label class="form-check-label" for="customSwitch2">Nimitt</label>
                                     </div>
                                   </td>
+                                </tr>
+                                <tr>
                                   <td>
                                     <div class="form-check form-switch">
                                       <input type="checkbox" class="form-check-input"
@@ -261,6 +333,14 @@
                                         [(ngModel)]="settingsAll.aawak.subitem_id" [ngModelOptions]="{standalone: true}"
                                         disabled>
                                       <label class="form-check-label" for="customSwitch2">Subitem</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.aawak.usage_category_id"
+                                        [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Usage Category</label>
                                     </div>
                                   </td>
                                   <td>
@@ -330,8 +410,6 @@
                                       <label class="form-check-label" for="customSwitch2">Aawak Type</label>
                                     </div>
                                   </td>
-                                </tr>
-                                <tr>
                                   <td>
                                     <div class="form-check form-switch">
                                       <input type="checkbox" class="form-check-input"
@@ -339,6 +417,8 @@
                                       <label class="form-check-label" for="customSwitch2">Is Bill</label>
                                     </div>
                                   </td>
+                                </tr>
+                                <tr>
                                   <td>
                                     <div class="form-check form-switch">
                                       <input type="checkbox" class="form-check-input"
@@ -431,6 +511,14 @@
                                   <td>
                                     <div class="form-check form-switch">
                                       <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.jawak.company_name"
+                                        [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Company Name</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
                                         [(ngModel)]="settingsAll.jawak.nimitt_id" [ngModelOptions]="{standalone: true}">
                                       <label class="form-check-label" for="customSwitch2">Person</label>
                                     </div>
@@ -470,6 +558,14 @@
                                       <label class="form-check-label" for="customSwitch2">jawak Type</label>
                                     </div>
                                   </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.jawak.usage_category_id"
+                                        [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Usage Category</label>
+                                    </div>
+                                  </td>
                                 </tr>
 
                                 <tr>
@@ -487,6 +583,14 @@
                                         [(ngModel)]="settingsAll.jawak.description"
                                         [ngModelOptions]="{standalone: true}">
                                       <label class="form-check-label" for="customSwitch2">Description</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.jawak.aawak_ref_id"
+                                        [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">aawak reference</label>
                                     </div>
                                   </td>
                                 </tr>
@@ -776,14 +880,14 @@
                             </div>
                           </td>
                           <td>वाहन / Vehicle</td>
-                          <td>इस पेज से गाड़ियों की एवं गाड़ियों के डॉक्युमेंट्स की माहिती रख सकते है।  </td>
+                          <td>इस पेज से गाड़ियों की एवं गाड़ियों के डॉक्युमेंट्स की माहिती रख सकते है। </td>
                           <td>
                             <div class="form-check form-switch">
                               <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.vehicle.add"
                                 [ngModelOptions]="{standalone: true}">
                             </div>
                           </td>
-                        </tr>                        
+                        </tr>
 
                         <!-- PBK Configuration -->
                         <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
@@ -1054,7 +1158,47 @@
                           </td>
 
                         </tr>
-
+                        <ng-container *ngIf="settingsAll.nimitt.visible">
+                          <tr class="collapse show ribbon-box" [attr.id]="'nimitt_row'">
+                            <!-- <td style="border: none;"></td> -->
+                            <td colspan="5" class="sub-row">
+                              <table class="card-body" style="width: 99.7%;table-layout: fixed;">
+                                <tr>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.nimitt.roll_no" [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Roll No</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.nimitt.nimitt_eng"
+                                        [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Nimitt Name (Eng)</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.nimitt.relative_name"
+                                        [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Father Name</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.nimitt.townarea" [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Townarea</label>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </ng-container>
                         <!-- MM -->
                         <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
                           <td>8</td>
@@ -1074,6 +1218,45 @@
                           </td>
 
                         </tr>
+                        <ng-container *ngIf="settingsAll.mm.visible">
+                          <tr class="collapse show ribbon-box" [attr.id]="'mm_row'">
+                            <!-- <td style="border: none;"></td> -->
+                            <td colspan="5" class="sub-row">
+                              <table class="card-body" style="width: 99.7%;table-layout: fixed;">
+                                <tr>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.mm.mm_eng" [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">MM Name (Eng)</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.mm.mm_roman" [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">MM Name (Roman)</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.mm.mm_code" [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">MM Code</label>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <div class="form-check form-switch">
+                                      <input type="checkbox" class="form-check-input"
+                                        [(ngModel)]="settingsAll.mm.parent_mm_id" [ngModelOptions]="{standalone: true}">
+                                      <label class="form-check-label" for="customSwitch2">Parent MM</label>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </ng-container>
 
                         <!-- Item / Subitem -->
                         <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row">
@@ -1152,8 +1335,8 @@
                                 [ngModelOptions]="{standalone: true}">
                             </div>
                             <div class="form-check form-switch">
-                              <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll.department.settings"
-                                [ngModelOptions]="{standalone: true}">
+                              <input type="checkbox" class="form-check-input"
+                                [(ngModel)]="settingsAll.department.settings" [ngModelOptions]="{standalone: true}">
                             </div>
                           </td>
 
@@ -1183,8 +1366,7 @@
 
               <!-- MM Tab -->
               <!-- [class]="{'show':!dept_id, 'active':!dept_id}" -->
-              <div class="tab-pane fade active show" id="v-pills-mm" role="tabpanel"
-                aria-labelledby="v-pills-home-tab"
+              <div class="tab-pane fade active show" id="v-pills-mm" role="tabpanel" aria-labelledby="v-pills-home-tab"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
                 <div class="row">
 
@@ -1342,11 +1524,13 @@
                     </div>
                   </div>
                   <div class="col-2" *ngIf="!termCat">
-                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('department', true)">+
+                    <button type="button" class="btn btn-outline-success"
+                      (click)="toggleSelectionAll('department', true)">+
                       Select All</button>
                   </div>
                   <div class="col-2" *ngIf="!termMM">
-                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('department', false)">+
+                    <button type="button" class="btn btn-outline-success"
+                      (click)="toggleSelectionAll('department', false)">+
                       Deselect All</button>
                   </div>
                 </div>
@@ -1384,11 +1568,13 @@
                     </div>
                   </div>
                   <div class="col-2" *ngIf="!termCat">
-                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('category', true)">+
+                    <button type="button" class="btn btn-outline-success"
+                      (click)="toggleSelectionAll('category', true)">+
                       Select All</button>
                   </div>
                   <div class="col-2" *ngIf="!termMM">
-                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('category', false)">+
+                    <button type="button" class="btn btn-outline-success"
+                      (click)="toggleSelectionAll('category', false)">+
                       Deselect All</button>
                   </div>
                 </div>
@@ -1445,11 +1631,13 @@
                     </ng-select>
                   </div>
                   <div class="col-2" *ngIf="!termItemmix ">
-                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('itemmix', true)">+
+                    <button type="button" class="btn btn-outline-success"
+                      (click)="toggleSelectionAll('itemmix', true)">+
                       Select All</button>
                   </div>
                   <div class="col-2" *ngIf="!termMM">
-                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('itemmix', false)">+
+                    <button type="button" class="btn btn-outline-success"
+                      (click)="toggleSelectionAll('itemmix', false)">+
                       Deselect All</button>
                   </div>
                 </div>
@@ -1616,11 +1804,13 @@
                     </ng-select>
                   </div>
                   <div class="col-2" *ngIf="!termSubitem ">
-                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('subitem', true)">+
+                    <button type="button" class="btn btn-outline-success"
+                      (click)="toggleSelectionAll('subitem', true)">+
                       Select All</button>
                   </div>
                   <div class="col-2" *ngIf="!termMM">
-                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('subitem', false)">+
+                    <button type="button" class="btn btn-outline-success"
+                      (click)="toggleSelectionAll('subitem', false)">+
                       Deselect All</button>
                   </div>
                 </div>
@@ -1669,11 +1859,13 @@
                     </div>
                   </div>
                   <div class="col-2" *ngIf="!termAJType">
-                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('aj_type', true)">+
+                    <button type="button" class="btn btn-outline-success"
+                      (click)="toggleSelectionAll('aj_type', true)">+
                       Select All</button>
                   </div>
                   <div class="col-2" *ngIf="!termMM">
-                    <button type="button" class="btn btn-outline-success" (click)="toggleSelectionAll('aj_type', false)">+
+                    <button type="button" class="btn btn-outline-success"
+                      (click)="toggleSelectionAll('aj_type', false)">+
                       Deselect All</button>
                   </div>
                 </div>

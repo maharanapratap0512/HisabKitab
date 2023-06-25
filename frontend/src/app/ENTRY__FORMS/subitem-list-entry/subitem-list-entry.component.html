@@ -19,6 +19,14 @@
                </div>
             </div>
             <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Subitem Name (Roman)</label>
+                  <input type="text" class="form-control" placeholder="Subitem Name (Roman)"
+                     formControlName="subitem_roman"
+                     [ngClass]="{'validation':subitemListForm.get('subitem_roman')?.errors && (subitemListForm.get('subitem_roman')?.touched || subitemListForm.get ('subitem_roman')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
                <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
                   (click)="subitemListFormSubmit()">Submit</button>
                <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"

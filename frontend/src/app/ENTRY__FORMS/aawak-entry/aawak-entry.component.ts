@@ -131,6 +131,7 @@ export class AawakEntryComponent implements OnInit {
 			if (changes.getData.currentValue.item_id) {
 				this.gs.observeList().subscribe(result => {
 					this.itemsAll = result.itemmix ? result.itemmix : [];
+					this.items = result.itemmix ? result.itemmix : [];
 					this.categories = result.category ? result.category : [];
 				});
 			}
@@ -643,10 +644,10 @@ export class AawakEntryComponent implements OnInit {
 			// this.products = this.productsAll.filter((p: { item_id: any; }) => p.item_id == ev);
 			this.getProductData(ev);
 			if (this.cat) {
-				this.subitems = item.subitems.filter((s: { categories: any; }) => s.categories.includes(this.cat));
+				this.subitems = item.subitems?.filter((s: { categories: any; }) => s.categories.includes(this.cat));
 			}
 			else {
-				this.subitems = item.subitems;
+				this.subitems = item.subitems || [];
 			}
 
 			// this.filterSubitemByDate();

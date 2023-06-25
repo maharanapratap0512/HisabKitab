@@ -12,7 +12,7 @@ import { FileSaverModule } from 'ngx-filesaver';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgtUniversalModule } from '@ng-toolkit/universal';
 import { DropDownTreeModule, MultiSelectModule, CheckBoxSelectionService, DropDownListAllModule } from '@syncfusion/ej2-angular-dropdowns';
-import { GridModule, PageService, SortService, FilterService, FreezeService, ToolbarService  } from '@syncfusion/ej2-angular-grids';
+import { GridModule, PageService, SortService, FilterService, FreezeService, ToolbarService, AggregateService  } from '@syncfusion/ej2-angular-grids';
 import { CheckBoxModule } from '@syncfusion/ej2-angular-buttons';
 
 import { AppComponent } from './app.component';
@@ -159,7 +159,7 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
     DropDownListAllModule
 
   ],
-  providers: [GlobalService, PageService, SortService, FilterService, FreezeService, CheckBoxSelectionService, ToolbarService ],
+  providers: [GlobalService, PageService, SortService, FilterService, FreezeService, CheckBoxSelectionService, ToolbarService, AggregateService ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

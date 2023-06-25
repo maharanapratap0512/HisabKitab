@@ -202,7 +202,7 @@ export class HeaderComponent implements OnInit {
                         if (data.result.length > 0) {
                           let setting = JSON.parse(data.result[0].config_value);
                           if (data.result[0].dept_id == this.auth.webUser.dept_id) {
-                            this.auth.updateSettings(setting);
+                            this.auth.webUser.settings = setting;
                           }
                           this.toastr.success("settings import successfully");
                         }
@@ -429,12 +429,12 @@ export class HeaderComponent implements OnInit {
   updateSettings(data: any) {
     let setting = JSON.parse(data);
     console.log(typeof setting.settings == 'string');
-    
-    if(typeof setting.settings == 'string'){
+
+    if (typeof setting.settings == 'string') {
       setting.settings = JSON.parse(setting.settings);
     }
     console.log(setting);
-    
+
     let body = {
       query: {
         _id: setting._id
@@ -444,13 +444,16 @@ export class HeaderComponent implements OnInit {
       }
     }
 
-    this.http.put(this.api.getUrl('DEPT'), body).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('DEPT'), body).subscribe(async (data: any) => {
       if (data.success) {
 
         if (data.result._id == this.auth.webUser.dept_id) {
-          this.auth.updateSettings(JSON.parse(data.result.settings));
+          this.auth.webUser.settings = data.result.settings;
         }
         this.toastr.success("settings import successfully");
+        setTimeout(() => {
+          window.location.reload()
+        }, 500);
       }
     });
   }

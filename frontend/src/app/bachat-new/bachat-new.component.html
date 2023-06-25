@@ -98,16 +98,46 @@
                </div>
             </div>
 
+            <div class="row">
+               <div class="col-md-2 mb-2">
+                  <div class="form-group">
+                     <label class="form-label">Year</label>
+                     <ng-select class="custom" style="width: 100%;" placeholder="Select Year" [clearable]="true"
+                        [virtualScroll]="true" [(ngModel)]="filterBody.year" name="year"
+                        (change)="months = gs.yearChangedGetMonth($event)">
+                        <ng-option selected="selected" disabled value="">Select Year
+                        </ng-option>
+                        <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
+                     </ng-select>
+                  </div>
+               </div>
+               <div class="col-md-2 mb-2">
+                  <div class="form-group">
+                     <label class="form-label">Month</label>
+                     <ng-select class="custom" style="width: 100%;" placeholder="Select Month" [clearable]="true"
+                        [virtualScroll]="true" [(ngModel)]="filterBody.months" name="month" [multiple]="true"
+                        [ngModalOptions]="{standalone: true}">
+                        <ng-option selected="selected" disabled value="">Select Month
+                        </ng-option>
+                        <ng-option *ngFor="let item of months" [value]="item.m">{{item.name}}</ng-option>
+                     </ng-select>
+                  </div>
+               </div>
+               <div class="col-md-2 mb-2">
+                  <button class="btn btn-primary" (click)="filter()">Submit</button>
+               </div>
+            </div>
+
             <div class="row" *ngIf="bachatData.length">
                <div class="card-body" style="overflow: auto;">
                   <h4 class="card-title">Click Row to See More Details.</h4>
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
-                        <tr>
+                        <tr *ngIf="monthsSel.length <= 0">
                            <!-- <td>Image</td> -->
                            <td style="width: 70px;">No.</td>
-                           <td>Department</td>
-                           <td>MM</td>
+                           <td style="width: 100px;">Department</td>
+                           <td style="width: 180px;">M     M      </td>
                            <td>Category</td>
                            <td>Item</td>
                            <td>Total Aawak</td>
@@ -115,6 +145,26 @@
                            <td>Other Jawak</td>
                            <td>Bachat</td>
                         </tr>
+                        <ng-container *ngIf="monthsSel.length > 0">
+                           <tr>
+                              <td rowspan="2" style="width: 70px;">No.</td>
+                              <td rowspan="2" style="width: 100px;">Department</td>
+                              <td rowspan="2" style="width: 180px;">Mini_Madhuban</td>
+                              <td rowspan="2">Category</td>
+                              <td rowspan="2">Item_Subitem_Name</td>
+                              <td rowspan="2">पिछला बचत</td>
+                              <th colspan="4" class="center-header partition" *ngFor="let row of monthsSel">{{ row.name +
+                                 " - " + filterBody.year }}</th>
+                           </tr>
+                           <tr>
+                              <ng-container *ngFor="let row of monthsSel">
+                                 <td class="partition">Total Aawak</td>
+                                 <td>Used</td>
+                                 <td>Other Jawak</td>
+                                 <td>Bachat</td>
+                              </ng-container>
+                           </tr>
+                        </ng-container>
                      </thead>
                      <tbody class="accordion" id="accordionExample">
                         <ng-container *ngFor="let data of bachatData | filter:term; let i=index" class="accordion-item">
@@ -140,24 +190,34 @@
                                  {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}} <br />
                                  {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
                               </td>
-                              <td>
-                                 {{data.total_aawak_all + " " + data.unit_short}}
-                              </td>
-                              <td>
-                                 {{data.total_used_all + " " + data.unit_short}}
-                              </td>
-                              <td>
-                                 {{data.total_jawak_all + " "+ data.unit_short}}
-                              </td>
-                              <td>
-                                 <span class="px-1"
-                                    [ngClass]="{'error': data.total_bachat_all < 0, 'stock':data.total_bachat_all > 0}">
-                                    {{data.total_bachat_all + " " + data.unit_short}}
-                                 </span>
-                              </td>
-
+                              <ng-container *ngIf="monthsSel.length <= 0">
+                                 <td>
+                                    {{data.total_aawak_all + " " + data.unit_short}}
+                                 </td>
+                                 <td>
+                                    {{data.total_used_all + " " + data.unit_short}}
+                                 </td>
+                                 <td>
+                                    {{data.total_jawak_all + " "+ data.unit_short}}
+                                 </td>
+                                 <td>
+                                    <span class="px-1"
+                                       [ngClass]="{'error': data.total_bachat_all < 0, 'stock':data.total_bachat_all > 0}">
+                                       {{data.total_bachat_all + " " + data.unit_short}}
+                                    </span>
+                                 </td>
+                              </ng-container>
+                              <ng-container *ngIf="monthsSel.length > 0">
+                                 <td>{{data.past_bachat}}</td>
+                                 <ng-container *ngFor="let row of monthsSel; let m = index;">
+                                    <td class="partition">{{data.arr_sum_aawak[m]}}</td>
+                                    <td>{{data.arr_sum_used[m]}}</td>
+                                    <td>{{data.arr_sum_jawak[m]}}</td>
+                                    <td>{{data.arr_sum_bachat[m]}}</td>
+                                 </ng-container>
+                              </ng-container>
                            </tr>
-                           <ng-container *ngIf="data.arr_condition_id.length > 0">
+                           <ng-container *ngIf="data.arr_condition_id && data.arr_condition_id.length > 0">
                               <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse ribbon-box"
                                  aria-labelledby="headingOne">
                                  <td colspan="3" style="border: none;"></td>
@@ -189,6 +249,7 @@
                               </tr>
 
                            </ng-container>
+
                         </ng-container>
                      </tbody>
                   </table>

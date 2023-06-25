@@ -19,6 +19,14 @@
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Category Name (Roman)</label>
+                        <input type="text" class="form-control" placeholder="Category Name (Roman)"
+                            formControlName="category_roman"
+                            [ngClass]="{'validation':categoryForm.get('category_roman')?.errors && (categoryForm.get('category_roman')?.touched || categoryForm.get ('category_roman')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
                     <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
                         (click)="categoryFormSubmit()">Submit</button>
                     <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"

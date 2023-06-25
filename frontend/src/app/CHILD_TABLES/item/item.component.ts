@@ -59,7 +59,10 @@ export class ItemComponent implements OnInit {
       this.subitem_lists = result.subitem_list ? result.subitem_list : [];
     });
     this.baseurl = this.api.getUrl('BASE');
-    this.settings = this.auth.webUser.settings;
+    this.settings = this.auth.webUser.settings.item;
+    
+    // this.showModal = 'Add Item'
+    // $('#showModal').modal('show')
   }
 
   FilterActive() {
@@ -142,7 +145,7 @@ export class ItemComponent implements OnInit {
   lockSubitem(i: any, j: any, id: any) {
     this.app.appModal$ = new Subject();
     this.app.appModal$.subscribe((result: any) => {
-      if (result) {        
+      if (result) {
         this.toggleLock(i, { _id: id, ...result }, 'SUBITEM', j);
       }
     });
@@ -150,7 +153,7 @@ export class ItemComponent implements OnInit {
   }
 
   unlockSubitem(i: any, j: any, id: any) {
-    if(this.itemData[i].restrict_year){
+    if (this.itemData[i].restrict_year) {
       this.toggleLock(i, { _id: this.itemData[i]._id, restrict_month: null, restrict_year: null }, 'ITEM');
     }
     this.toggleLock(i, { _id: id, restrict_month: null, restrict_year: null }, 'SUBITEM', j);
