@@ -8,7 +8,7 @@ const DB = new DBContex();
 // get product all
 router.get('/', async (req, res, next) => {
     try {
-        await DB.getList('product', {full:true}).then((data) => {
+        await DB.getList('product', { full: true }).then((data) => {
             for (let i in data) {
                 data[i].document = (data[i].document != "[null]" ? JSON.parse(data[i].document) : {});
                 // data[i].tracking = (data[i].tracking != "[null]" ? JSON.parse(data[i].tracking) : {});
@@ -26,7 +26,7 @@ router.get('/', async (req, res, next) => {
 router.get('/:dept_id', async (req, res, next) => {
     try {
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-        await DB.getList('product', { full: true, dept_id: req.params.dept_id, limit: 100 }).then((resolve) => {
+        await DB.getList('product', { full: true, dept_id: req.params.dept_id, orderBy: 'product._id desc', limit: 100 }).then((resolve) => {
             for (let i in resolve.data) {
                 resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
             }
@@ -46,7 +46,7 @@ router.put('/:dept_id', async (req, res, next) => {
         let conditionString = ` 1=1 ${req.body._id ? ` AND product._id = ${req.body._id}` : ``} ${req.body.item_id ? ` AND product.item_id = ${req.body.item_id}` : ``}`;
         // let conditionString = ` 1=1 ${req.body._id ? `product._id = ${req.body._id}` : ``} ${typeof req.body.item_id == "string" || typeof req.body.item_id == "number" ? ` AND product.item_id = (${req.body.item_id})` : ``} ${req.body.item_id.length > 0 ? ` AND product.item_id IN (${req.body.item_id})` : ``}`;
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-        await DB.getList('product', { full:req.body.full? true:false, dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
+        await DB.getList('product', { full: req.body.full ? true : false, dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
             for (let i in resolve.data) {
                 resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
                 // resolve.data[i].tracking = (resolve.data[i].tracking != "[null]" ? JSON.parse(resolve.data[i].tracking) : {});
@@ -67,15 +67,25 @@ router.post('/:dept_id', async (req, res, next) => {
         if (req.body) {
             req.body.document = req.body.document ? JSON.stringify(req.body.document) : null;
             req.body.isbill = req.body.isbill ? 1 : 0;
-            await DB.insert('product', req.body, req.params.dept_id).then((data) => {
-                data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
-                // data.tracking = (data.tracking != "[null]" ? JSON.parse(data.tracking) : {});
-                
-                res.json({
-                    success: true,
-                    result: data || {}
+            let dataArr = [];
+
+            for (let i of req.body.products) {
+                req.body.product_code = i.product_code
+                req.body.sr_num = i.sr_num
+                // delete newObj.products;
+
+                await DB.insert('product', req.body, req.params.dept_id).then((data) => {
+                    data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
+                    // data.tracking = (data.tracking != "[null]" ? JSON.parse(data.tracking) : {});
+                    dataArr.push(data);
                 });
-            })
+            }
+
+            res.json({
+                success: true,
+                result: dataArr || {}
+            });
+
         }
         else {
             return next(new Error('Please fill required fields.'))

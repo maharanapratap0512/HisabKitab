@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, ValidatorFn, ValidationErrors } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, ValidatorFn, ValidationErrors, FormArray } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
@@ -39,6 +39,8 @@ export class ProductEntryComponent implements OnInit {
   categories: any = [];
   categoryAll: any = [];
   settings: any = {};
+  product_code: any = null;
+  sr_num: any = null;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -58,7 +60,7 @@ export class ProductEntryComponent implements OnInit {
       purchase_date: [null],
       purchase_from: [null],
       purchased_by: [null],
-      code_sr_num: [null, Validators.required],
+      // code_sr_num: [null, Validators.required],
       product_detail: [null],
       item_id: [null, Validators.required],
       subitem_id: [null],
@@ -71,7 +73,7 @@ export class ProductEntryComponent implements OnInit {
       isbill: false,
       products: [[]]
     });
-    
+
     this.settings = this.auth.webUser.settings;
   }
 
@@ -169,7 +171,8 @@ export class ProductEntryComponent implements OnInit {
   }
 
   productFormSubmit() {
-    if (this.productForm.valid) {
+    if (this.productForm.valid && this.productForm.value.products.length) {
+      console.log("this.productForm.value", this.productForm.value);
       this.isLoader = true;
       this.http.post(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, this.productForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
@@ -188,6 +191,7 @@ export class ProductEntryComponent implements OnInit {
     }
     else {
       this.gs.validationFireOnSubmit(this.productForm);
+      console.log("vbc");
     }
   }
 
@@ -260,7 +264,17 @@ export class ProductEntryComponent implements OnInit {
     this.productForm.controls['sr_num'].updateValueAndValidity();
   }
 
-  productAdd(){
+  productAdd() {
+    this.productForm.value.products.push({ product_code: this.product_code, sr_num: this.sr_num });
+    console.log("this.productForm.value", this.productForm.value);
+    this.product_code = null;
+    this.sr_num = null;
+  }
+
+
+  deleteItem(index: number): void {
+    this.productForm.value.products.splice(index, 1);
+    // console.log("this.productForm.value.products.splice(index, 1);", this.productForm.value.products.splice(index, 1));
 
   }
 

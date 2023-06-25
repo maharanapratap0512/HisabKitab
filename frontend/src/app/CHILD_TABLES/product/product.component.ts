@@ -61,9 +61,9 @@ export class ProductComponent implements OnInit {
 
   addProductResponse(ev: any) {
     this.isLoader = true;
-    if (ev._id) {
+    if (ev.length) {
       this.closeModal();
-      this.productData.unshift(ev);
+      this.productData.unshift(...ev);
       this.isLoader = false;
     }
     else {
@@ -74,7 +74,7 @@ export class ProductComponent implements OnInit {
 
   editProductResponse(ev: any) {
     this.isLoader = true;
-    if (ev._id) {
+    if (ev.length) {
       this.closeModal();
       this.productData.splice(this.productData.indexOf(this.editData), 1, ev);
       this.isLoader = false;

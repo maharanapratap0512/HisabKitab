@@ -241,32 +241,29 @@
                <div class="form-group">
                   <label class="form-label">Product Code</label>
                   <div class="d-flex justify-content-between">
-                     <input type="text" class="form-control" placeholder="Product Code" formControlName="product_code"
-                        [ngClass]="{'validation':productForm.get('product_code')?.errors && (productForm.get('product_code')?.touched || productForm.get ('product_code')?.dirty)}"
-                        (input)="codeChanged($event)">
-                     <input type="text" class="form-control mx-1" placeholder="S/R Number" formControlName="sr_num"
-                        [ngClass]="{'validation':productForm.get('sr_num')?.errors && (productForm.get('sr_num')?.touched || productForm.get ('sr_num')?.dirty)}"
-                        (input)="sr_numChanged($event)">
-                     <button class="btn btn-sm btn-outline-primary" (click)="productAdd()">Add</button>
+                     <input type="text" class="form-control" placeholder="Product Code" [(ngModel)]="product_code"
+                        [ngModelOptions]="{ standalone: true }" #product_codeInput="ngModel"
+                        [ngClass]="{'validation':!productForm.value.products.length && (!product_code && !sr_num) && product_codeInput.touched}">
+                     <input type="text" class="form-control mx-1" placeholder="S/R Number" [(ngModel)]="sr_num"
+                        [ngModelOptions]="{ standalone: true }" #sr_numInput="ngModel"
+                        [ngClass]="{'validation':!productForm.value.products.length  && (!product_code && !sr_num) && sr_numInput.touched}">
+                     <button class="btn btn-sm btn-outline-primary" [disabled]="!product_code && !sr_num"
+                        (click)="productAdd()">Add</button>
                   </div>
-                  <div>
-                     <table style="width: 99.7%;table-layout: fixed;">
-                        <!-- <thead>
-                           <th style="width: 5%;">No.</th>
+                  <div class="mt-1" *ngIf="productForm.value.products.length">
+                     <table style="table-layout: fixed;">
+                        <thead>
+                           <th style="width: 10%;">No.</th>
                            <th style="width: 40%;">Product Code</th>
                            <th style="width: 50%;">Serial No</th>
-                           <th style="width: 5%;"></th>
-                        </thead> -->
-                        <tbody>
-                           <!-- <tr *ngFor="let pd of productForm.products, let i = index;"> -->
-                           <tr>
-                              <th>No</th>
-                              <td>{{"code"}}</td>
-                              <td>{{"sr_num"}}</td>
-                              <!-- <td style="cursor: pointer;" (click)="removeFamilyInfo(i)">x</td> -->
-                              <td style="cursor: pointer;">x</td>
-                           </tr>
-                        </tbody>
+                           <th style="width: 5%;">X</th>
+                        </thead>
+                        <tr *ngFor="let pd of productForm.value.products, let i = index;">
+                           <th>{{i+1}}</th>
+                           <td>{{pd.product_code?pd.product_code:'-'}}</td>
+                           <td>{{pd.sr_num?pd.sr_num:'-'}}</td>
+                           <td style="cursor: pointer;" (click)="deleteItem(i)">x</td>
+                        </tr>
                      </table>
                   </div>
                </div>
