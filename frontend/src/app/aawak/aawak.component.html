@@ -407,7 +407,7 @@
                               </td>
                               <td>@ {{data.rate?data.rate:'-'}} <br>
                                  = {{data.actual_amt?data.actual_amt:'-'}}</td>
-                              <!-- <td>{{data.usage_category_id ? category_hin : ''}}</td> -->
+                              <td>{{data.usage_category_id ? data.category_hin : ''}}</td>
                               <td *ngIf="settings.aawak.nimitt_id">
                                  {{data.nimitt_id?data.nimitt_hin:'-'}}<br />
                                  {{data.nimitt_id? '(' + data.nimitt_state_hin + ')': ''}}

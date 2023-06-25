@@ -15,7 +15,8 @@ export class GlobalService {
 
   Lists: any = null;
   Config: any = {};
-  importPending:any = false;
+  importPending: any = false;
+  exceptionDept: any = [1, 5];
   // getList$ = new Subject();
   date = new Date();
   years: any = [];
@@ -33,6 +34,10 @@ export class GlobalService {
     { m: 11, name: 'November' },
     { m: 12, name: 'December' },
   ];
+
+  formConfig: any = {
+    item: {}
+  }
 
   constructor(
     private http: HttpService,
@@ -81,7 +86,7 @@ export class GlobalService {
               // console.log('key',data['result'][]);
 
               this.Lists[key] = data['result'][key].data;
-            }            
+            }
           }
           observer.next(this.Lists);
         });
@@ -129,11 +134,15 @@ export class GlobalService {
   }
 
   yearChangedGetMonth(year: any) {
-    if (year && year == this.date.getFullYear()) {
-      return this.months.filter((i: { m: number; }) => i.m <= this.date.getMonth()+1)
-    }
-    else {
-      return this.months;
+    if (year) {
+      if (year == this.date.getFullYear()) {
+        return this.months.filter((i: { m: number; }) => i.m <= this.date.getMonth() + 1)
+      } else {
+        return this.months;
+      }
+    } else {
+      return []
     }
   }
+
 }

@@ -17,6 +17,7 @@ export class ItemEntryComponent implements OnInit {
   @Input() getData: any;
   @Input() isEdit: any;
   @Output() response = new EventEmitter();
+  isEditForm: any = false;
   itemForm: FormGroup;
   categories: any = [];
   units: any = [];
@@ -25,7 +26,9 @@ export class ItemEntryComponent implements OnInit {
   viewType: any;
   viewData: any = [];
   imagepath: any = [];
+  mainSettings: any = {};
   settings: any = {};
+  itemFormSettings: any = {}
   editDoc: any = {};
   docFile: any = [];
   auto_close: any = true;
@@ -33,23 +36,25 @@ export class ItemEntryComponent implements OnInit {
   constructor(private fb: FormBuilder,
     private http: HttpService,
     public api: ApiService,
-    private gs: GlobalService,
+    protected gs: GlobalService,
     private toastr: ToastrService,
     public auth: AuthService
   ) {
     this.itemForm = this.fb.group({
       item_hin: [null, Validators.required],
       item_eng: [null],
+      item_roman: [null],
       item_code: [null],
       unit_id: [null],
       categories: [[], Validators.required],
       extra_note: [null],
-      restrict_month:[null],
+      restrict_month: [null],
       restrict_year: [null],
-      min_rate:[0],
+      min_rate: [0],
       max_rate: [0],
       document: [[]]
     });
+
   }
 
   ngOnInit(): void {
@@ -57,7 +62,8 @@ export class ItemEntryComponent implements OnInit {
       this.units = result.unit ? result.unit : [];
       this.categories = result.category ? result.category : [];
     });
-    this.settings = this.auth.webUser.settings;
+    this.settings = this.auth.webUser.settings.item;
+    this.mainSettings = this.auth.webUser.settings;
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -68,6 +74,7 @@ export class ItemEntryComponent implements OnInit {
       this.itemForm.patchValue({
         item_hin: changes.getData.currentValue.item_hin,
         item_eng: changes.getData.currentValue.item_eng ? changes.getData.currentValue.item_eng : null,
+        item_roman: changes.getData.currentValue.item_roman ? changes.getData.currentValue.item_roman : null,
         item_code: changes.getData.currentValue.item_code ? changes.getData.currentValue.item_code : null,
         unit_id: changes.getData.currentValue.unit_id ? changes.getData.currentValue.unit_id : null,
         categories: typeof changes.getData.currentValue.categories == 'string' ? JSON.parse(changes.getData.currentValue.categories) : changes.getData.currentValue.categories,
@@ -82,6 +89,17 @@ export class ItemEntryComponent implements OnInit {
     }
     console.log("this.itemForm.value.document", this.imagepath);
 
+  }
+
+  saveFormSettings() {
+    this.isEditForm = false; 
+    this.auth.updateSettings();
+    this.settings = this.auth.webUser.settings.item;
+  }
+
+  closeModal() {
+    $('#itemComponent > #showModal').modal('hide');
+    this.showModal = '';
   }
 
   itemFormSubmit() {
@@ -122,6 +140,7 @@ export class ItemEntryComponent implements OnInit {
       body.set = {
         item_hin: this.itemForm.value.item_hin,
         item_eng: this.itemForm.value.item_eng,
+        item_roman: this.itemForm.value.item_roman,
         item_code: this.itemForm.value.item_code,
         unit_id: this.itemForm.value.unit_id,
         categories: this.itemForm.value.categories,
@@ -156,8 +175,7 @@ export class ItemEntryComponent implements OnInit {
   categoryAddResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      $('#itemComponent > #showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal();
       // this.categories.unshift(ev);
       this.itemForm.patchValue(
         {
@@ -177,8 +195,7 @@ export class ItemEntryComponent implements OnInit {
   unitAddResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      $('#itemComponent > #showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal();
       // this.units.unshift(ev);
       this.itemForm.patchValue(
         {
@@ -196,8 +213,7 @@ export class ItemEntryComponent implements OnInit {
     console.log("imgres", ev);
     if (ev) {
       this.isLoader = true;
-      $('#itemComponent > #showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal();
       this.imagepath = ev;
       this.itemForm.patchValue({
         document: { images: ev }

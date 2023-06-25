@@ -82,14 +82,14 @@
                               {{itemsPerPage * (page-1) + i+1}}
                               <!-- <span class="mx-1" style="font-size: x-large;position: absolute;line-height: 28px;"
                                  (click)="protectionToggle(data._id, data.active)">
-                                 <i *ngIf="[1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
+                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
                                     title="Protected" class="uil-shield-check text-warning"></i>
-                                 <i *ngIf="[1,6].includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
+                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
                                     title="Unprotected" class="uil-shield-slash text-danger"></i>
                               </span> -->
                            </td>
                            <td>                              
-                              <div *ngIf="[1,6].includes(auth.webUser.dept_id)">
+                              <div *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id)">
                                  <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)">
                                     <i class="uil uil-pen"></i></button>
                                  <button *ngIf="!data.restrict_year" class="btn btn-sm btn-outline-warning"
@@ -100,8 +100,8 @@
                               <div *ngIf="data.restrict_year" class="lock-date text-warning">
                                  {{data.restrict_month}}/{{data.restrict_year}} से लॉक। 
                               </div>
-                              <!-- <button *ngIf="[1,6].includes(auth.webUser.dept_id) || !data.active" class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i class="uil-trash"></i></button> -->
-                              <!-- <span *ngIf="![1,6].includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
+                              <!-- <button *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) || !data.active" class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i class="uil-trash"></i></button> -->
+                              <!-- <span *ngIf="!gs.exceptionDept.includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
                                  title="Protected" class="text-warning mx-1"
                                  style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                  <i class="uil-shield-check"></i>

@@ -39,13 +39,13 @@
                             </div>
                         </td>
                         <td>
-                            <button *ngIf="[1,6].includes(auth.webUser.dept_id) || Type=='jawak'"
+                            <button *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) || Type=='jawak'"
                                 class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button>
-                            <button *ngIf="[1,6].includes(auth.webUser.dept_id) || Type=='jawak'"
+                            <button *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) || Type=='jawak'"
                                 class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                     class="uil-trash"></i></button>
-                            <span *ngIf="![1,6].includes(auth.webUser.dept_id) && Type!='jawak'" data-toggle="tooltip"
+                            <span *ngIf="!gs.exceptionDept.includes(auth.webUser.dept_id) && Type!='jawak'" data-toggle="tooltip"
                                 title="Protected" class="text-warning mx-1"
                                 style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                 <i class="uil-shield-check"></i>

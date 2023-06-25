@@ -1,12 +1,11 @@
-class Functions {
-   DB;
+const DBContex = require('./DBContex');
+class Functions extends DBContex {
    DBContex;
    constructor() {
-      this.DBContex = require('./DBContex');
-      this.DB = new this.DBContex();
-      const begin = this.DB.db.prepare('BEGIN');
-      const commit = this.DB.db.prepare('COMMIT');
-      const rollback = this.DB.db.prepare('ROLLBACK');
+      super();
+      const begin = this.db.prepare('BEGIN');
+      const commit = this.db.prepare('COMMIT');
+      const rollback = this.db.prepare('ROLLBACK');
 
       this.begin = () => begin.run();
       this.commit = () => commit.run();
@@ -16,18 +15,18 @@ class Functions {
    async insertAJ(obj, type) {
       return new Promise(async (resolve, reject) => {
          try {
-            let stmtInsert = this.DB.db.prepare(this.DB.query[type].insert);
-            let stmtInsertBachat = this.DB.db.prepare(this.DB.query.bachat_new['insert_' + type + '_ins']);
-            let stmtUpdateBachat = this.DB.db.prepare(this.DB.query.bachat_new['update_' + type + '_ins']);
+            let stmtInsert = this.db.prepare(this.query[type].insert);
+            let stmtInsertBachat = this.db.prepare(this.query.bachat_new['insert_' + type + '_ins']);
+            let stmtUpdateBachat = this.db.prepare(this.query.bachat_new['update_' + type + '_ins']);
             let objDate = new Date(obj.date);
-            obj.month = objDate.getMonth();
+            obj.month = objDate.getMonth() + 1;
             obj.year = objDate.getFullYear();
             obj.document = JSON.stringify(obj.document ? obj.document : {});
             obj.isbill = obj.isbill ? 1 : 0;
             obj.active = 1;
             let insResult = stmtInsert.run(obj);
             if (insResult.changes == 1 && insResult.lastInsertRowid) {
-               let bachat = await this.DB.getBachatFromAJ(obj);
+               let bachat = await this.getBachatFromAJ(obj);
                let bachatResult;
                if (bachat._id) {
                   bachatResult = stmtUpdateBachat.run(obj);
@@ -49,15 +48,15 @@ class Functions {
    async updateAJ(obj, type, objOld = null) {
       return new Promise(async (resolve, reject) => {
          try {
-            let stmtUpdate = this.DB.db.prepare(this.DB.query[type].update + ` where ${type}._id = ${obj._id}`);
-            let stmtInsertBachat = this.DB.db.prepare(this.DB.query.bachat_new['insert_' + type + '_ins']);
-            let stmtUpdateBachat = this.DB.db.prepare(this.DB.query.bachat_new['update_' + type + '_ins']);
-            let stmtDeleteBachat = this.DB.db.prepare(this.DB.query.bachat_new['update_' + type + '_del']);
+            let stmtUpdate = this.db.prepare(this.query[type].update + ` where ${type}._id = ${obj._id}`);
+            let stmtInsertBachat = this.db.prepare(this.query.bachat_new['insert_' + type + '_ins']);
+            let stmtUpdateBachat = this.db.prepare(this.query.bachat_new['update_' + type + '_ins']);
+            let stmtDeleteBachat = this.db.prepare(this.query.bachat_new['update_' + type + '_del']);
             if (!objOld) {
-               objOld = await this.DB.getById(type, obj._id);
+               objOld = await this.getById(type, obj._id);
             }
             let objDate = new Date(obj.date);
-            obj.month = objDate.getMonth();
+            obj.month = objDate.getMonth() + 1;
             obj.year = objDate.getFullYear();
 
             let objOldDate = new Date(objOld.date);
@@ -70,7 +69,7 @@ class Functions {
             let updtResult = stmtUpdate.run(obj);
             if (updtResult.changes == 1) {
                stmtDeleteBachat.run(objOld);
-               // let bachatUpdate = await this.DB.getBachatFromAJ(obj);
+               // let bachatUpdate = await this.getBachatFromAJ(obj);
                let bachatUpdate = stmtUpdateBachat.run(obj);
                console.log(bachatUpdate);
                if (!bachatUpdate.changes) {
@@ -91,11 +90,11 @@ class Functions {
    async deleteAJ(id, type) {
       return new Promise(async (resolve, reject) => {
          try {
-            let stmtUpdateBachat = this.DB.db.prepare(this.DB.query.bachat_new['update_' + type + '_del']);
-            let stmtDelete = this.DB.db.prepare(this.DB.query[type].delete)
-            let obj = await this.DB.getById(type, id);
+            let stmtUpdateBachat = this.db.prepare(this.query.bachat_new['update_' + type + '_del']);
+            let stmtDelete = this.db.prepare(this.query[type].delete)
+            let obj = await this.getById(type, id);
             let objDate = new Date(obj.date);
-            obj.month = objDate.getMonth();
+            obj.month = objDate.getMonth() + 1;
             obj.year = objDate.getFullYear();
             console.log(obj);
             let delResult = stmtDelete.run({ _id: id });
@@ -111,6 +110,20 @@ class Functions {
          }
       });
    }
+
+   async getLastVoucherNo(tblname){
+      // return new Promise(async(resolve, reject)=>{
+          try{
+              let row = this.db.prepare(`select max(voucher_no) from ${tblname}`).get();
+
+            //   resolve(row.voucher_num || 0);
+            return row.voucher_num || 0;
+          }
+          catch(err){
+              return 0;
+          }
+      // });
+  }
 
    convertToLower(data, fieldList = null) {
       if (fieldList && fieldList.length > 0) {
@@ -131,7 +144,7 @@ class Functions {
 
    async getMMs(dept_id = null) {
 
-      return await this.DB.getList('mm', { dept_id: dept_id }).then(async (resolve) => {
+      return await this.getList('mm', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['mm_hin', 'mm_eng', 'mm_code']);
       }, (err) => {
          return [];
@@ -139,7 +152,7 @@ class Functions {
    }
    async getStates(dept_id = null) {
 
-      return await this.DB.getList('state').then(async (resolve) => {
+      return await this.getList('state').then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['state_hin', 'state_eng']);
       }, (err) => {
          return [];
@@ -147,7 +160,7 @@ class Functions {
    }
    async getCategories(dept_id = null) {
 
-      return await this.DB.getList('category', { dept_id: dept_id }).then(async (resolve) => {
+      return await this.getList('category', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['category_hin', 'category_eng']);
       }, (err) => {
          return [];
@@ -155,7 +168,7 @@ class Functions {
    }
    async getUnits(dept_id = null) {
 
-      return await this.DB.getList('unit').then(async (resolve) => {
+      return await this.getList('unit').then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['unit_short', 'unit_full']);
       }, (err) => {
          return [];
@@ -163,7 +176,7 @@ class Functions {
    }
    async getitems(dept_id = null) {
 
-      return await this.DB.getList('item', { dept_id: dept_id }).then(async (resolve) => {
+      return await this.getList('item', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['item_hin', 'item_eng', 'item_code']);
       }, (err) => {
          return [];
@@ -171,7 +184,7 @@ class Functions {
    }
    async getSubitems(dept_id = null) {
 
-      return await this.DB.getList('subitem', { dept_id: dept_id }).then(async (resolve) => {
+      return await this.getList('subitem', { dept_id: dept_id }).then(async (resolve) => {
          return resolve.data || [];
          // return this.convertToLower(resolve.data || []);
       }, (err) => {
@@ -180,42 +193,42 @@ class Functions {
    }
    async getSubiemList(dept_id = null) {
 
-      return await this.DB.getList('subitem_list', { dept_id: dept_id }).then(async (resolve) => {
+      return await this.getList('subitem_list', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['subitem_hin', 'subitem_eng']);
       }, (err) => {
          return [];
       });
    }
    async getSupportList(dept_id = null) {
-      return await this.DB.getList('support_list', { dept_id: dept_id }).then(async (resolve) => {
+      return await this.getList('support_list', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['list_name_hin', 'list_name_eng']);
       }, (err) => {
          return [];
       });
    }
    async getCountries(dept_id = null) {
-      return await this.DB.getList('country').then(async (resolve) => {
+      return await this.getList('country').then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['country_hin', 'country_eng']);
       }, (err) => {
          return [];
       });
    }
    async getCities(dept_id = null) {
-      return await this.DB.getList('city').then(async (resolve) => {
+      return await this.getList('city').then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['city_hin', 'city_eng']);
       }, (err) => {
          return [];
       });
    }
    async getNimitts(dept_id = null) {
-      return await this.DB.getList('nimitt', { dept_id: dept_id }).then(async (resolve) => {
+      return await this.getList('nimitt', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['nimitt_hin', 'nimitt_eng', 'gender', 'relative_name']);
       }, (err) => {
          return [];
       });
    }
    async getPbks(dept_id = null) {
-      return await this.DB.getList('pbk', { dept_id: dept_id }).then(async (resolve) => {
+      return await this.getList('pbk', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['nimitt_hin', 'nimitt_eng', 'gender', 'relation', 'relative_name']);
       }, (err) => {
          return [];
@@ -223,7 +236,7 @@ class Functions {
    }
 
    async getDictionary(dict_type) {
-      return await this.DB.getList('dictionary', { conditionString: `type = '${dict_type}'` }).then(async (resolve) => {
+      return await this.getList('dictionary', { conditionString: `type = '${dict_type}'` }).then(async (resolve) => {
          return resolve.data || [];
       }, (err) => {
          return [];
@@ -231,7 +244,7 @@ class Functions {
    }
 
    async checkDuplication(type, data) {
-      return await this.DB.selectWithCondition(type.name, 'duplicate', data).then(async (resolve) => {
+      return await this.selectWithCondition(type.name, 'duplicate', data).then(async (resolve) => {
          if (resolve.length) {
             return resolve;
          }
@@ -240,7 +253,7 @@ class Functions {
    }
 
    async checkFullDuplication(type, data) {
-      return await this.DB.selectWithCondition(type.name, 'duplicate_full', data).then(async (resolve) => {
+      return await this.selectWithCondition(type.name, 'duplicate_full', data).then(async (resolve) => {
          if (resolve.length) {
             return resolve;
          }
@@ -249,14 +262,14 @@ class Functions {
    }
 
    async insertExcelData(type, data, dept_id = null) {
-      return await this.DB.insert(type.name, data, dept_id).then((result) => {
+      return await this.insert(type.name, data, dept_id).then((result) => {
          // console.log('insert', result);
          return result;
       })
    }
 
    async updateExcelData(type, data, dept_id = null) {
-      return await this.DB.updateMany(type.name, data, this.DB.query.conditions[type.name + '_duplicate'], false).then((result) => {
+      return await this.updateMany(type.name, data, this.query.conditions[type.name + '_duplicate'], false).then((result) => {
          // console.log('update', result);
          return result;
       })

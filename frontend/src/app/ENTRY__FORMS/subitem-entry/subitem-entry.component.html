@@ -13,7 +13,7 @@
                      [ngClass]="{'validation':subitemForm.get('item_id')?.errors && (subitemForm.get('item_id')?.touched || subitemForm.get ('item_id')?.dirty)}">
                      <ng-option selected="selected" disabled value="">Select Item</ng-option>
                      <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
-                        {{item.item_eng}} : {{item.item_code}}</ng-option>
+                        {{item.item_eng}} : {{item.item_roman}} : {{item.item_code}}</ng-option>
                   </ng-select>
                </div>
             </div>
@@ -34,7 +34,7 @@
                      [ngClass]="{'validation':subitemForm.get('subitem_list')?.errors && (subitemForm.get('subitem_list')?.touched || subitemForm.get ('subitem_list')?.dirty)}">
                      <ng-option selected="selected" disabled value="">Select Subitem List</ng-option>
                      <ng-option *ngFor="let item of subitem_list" [value]="item._id">{{item.subitem_hin}} :
-                        {{item.subitem_eng}}</ng-option>
+                        {{item.subitem_eng}} : {{item.subitem_roman}}</ng-option>
                   </ng-select>
                </div>
             </div>
@@ -56,7 +56,7 @@
                      [ngClass]="{'validation':subitemForm.get('categories')?.errors && (subitemForm.get('categories')?.touched || subitemForm.get ('categories')?.dirty)}">
                      <ng-option selected="selected" disabled value="">Select Category</ng-option>
                      <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
-                        {{item.category_eng}}</ng-option>
+                        {{item.category_eng}} : {{item.category_roman}}</ng-option>
                   </ng-select>
                </div>
             </div>
@@ -80,7 +80,7 @@
                   </ng-select>
                </div>
             </div>
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.item.price_range">
                <div class="form-group">
                   <label class="form-label">Price Range</label>
                   <div class="d-flex justify-content-between">
@@ -91,14 +91,14 @@
                   </div>
                </div>
             </div>
-            <div class="col-md-5 mb-3">
+            <div class="col-md-5 mb-3" *ngIf="settings.item.extra_note">
                <div class="form-group">
                   <label class="form-label">Extra Note</label>
                   <textarea class="form-control" placeholder="Extra Note" formControlName="extra_note"
                      [ngClass]="{'validation':subitemForm.get('extra_note')?.errors && (subitemForm.get('extra_note')?.touched || subitemForm.get ('extra_note')?.dirty)}"></textarea>
                </div>
             </div>
-            <div class="col-md-2 mb-3">
+            <div class="col-md-2 mb-3" *ngIf="settings.item.document">
                <div class="form-group">
                   <label class="form-label">Image</label>
                   <a onclick="$('#subitemComponent > #showModal').modal('show')" (click)="showModal='Add Image'"

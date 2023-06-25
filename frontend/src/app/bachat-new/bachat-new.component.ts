@@ -39,12 +39,16 @@ export class BachatNewComponent implements OnInit {
     category_id: null,
     item_id: null,
     subitem_id: null,
+    year: null,
+    months: []
   };
   images: any = [];
   imageNames: any = [];
   settings: any = {};
   imagesToShow: any = [];
   currentImage: any;
+  months: any = [];
+  monthsSel: any = []
 
 
   constructor(
@@ -60,6 +64,7 @@ export class BachatNewComponent implements OnInit {
   ) {
     this.settings = this.auth.webUser.settings.bachat;
     this.getBase64Images();
+    // this.months = gs.months;
   }
 
   ngOnInit(): void {
@@ -72,6 +77,9 @@ export class BachatNewComponent implements OnInit {
       this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
     });
+    this.filterBody.year = 2023;
+    this.filterBody.months = [5, 3, 2];
+    this.filter();
   }
 
   getBase64Images() {
@@ -178,7 +186,7 @@ export class BachatNewComponent implements OnInit {
   itemSelected(ev: any) {
     if (ev) {
       let item = this.items.find((i: { _id: any; }) => i._id == ev);
-      
+
       if (this.filterBody.category_id && item) {
         this.subitems = item.subitems.filter((s: { categories: string | any[]; }) => s.categories.includes(this.filterBody.category_id));
       } else {
@@ -266,7 +274,7 @@ export class BachatNewComponent implements OnInit {
         'Category': this.bachatData[i].categories_hin,
         'Item': this.bachatData[i].item_hin,
         'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
-      }      
+      }
       for (let j in this.conditions) {
         let aawak = 0, jawak = 0, used = 0, bachat = 0;
         for (let k in this.bachatData[i].arr_condition_id) {
@@ -281,7 +289,7 @@ export class BachatNewComponent implements OnInit {
         bachatRow[this.conditions[j].list_name_hin + "_यूज"] = used;
         bachatRow[this.conditions[j].list_name_hin + "_जावक"] = jawak;
         bachatRow[this.conditions[j].list_name_hin + "_बचत"] = bachat;
-      }      
+      }
       bachatRow['यूनिट'] = this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-';
       bchtData.push(bachatRow);
     }
@@ -308,7 +316,7 @@ export class BachatNewComponent implements OnInit {
         'टोटल जावक': this.bachatData[i].total_jawak_all ? this.bachatData[i].total_jawak_all : 0,
         'बचत': this.bachatData[i].total_bachat_all ? this.bachatData[i].total_bachat_all : 0,
         'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-',
-      }            
+      }
       bchtData.push(bachatRow);
     }
     let date = new Date();
@@ -319,10 +327,20 @@ export class BachatNewComponent implements OnInit {
 
   filter() {
     this.isLoader = true;
-    this.http.put(this.api.getUrl('BACHATNEW') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe(async (data:any) => {
+    this.http.put(this.api.getUrl('BACHATNEW') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe(async (data: any) => {
       if (data['result'] && data['success']) {
-        
+
         this.bachatAll = data['result'];
+
+        if (this.filterBody.months.length > 0) {
+          this.monthsSel = this.gs.months.filter((m: { m: any; }) => data['months'].includes(m.m));
+          // for (let i in this.bachatAll) {
+
+          // }
+          console.log(this.monthsSel);
+          
+        }
+
         for (let i in this.bachatAll) {
           this.bachatAll[i].categories_hin = '';
           this.bachatAll[i].categories_eng = '';

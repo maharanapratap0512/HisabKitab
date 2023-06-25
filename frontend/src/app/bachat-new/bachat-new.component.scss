@@ -17,3 +17,18 @@
    background-color: rgba(4, 19, 198, 0.16);
     color: #fff;
 }
+
+.center-header {
+   text-align: center;
+ }
+
+ .table {
+   width: 99.7%;
+   table-layout: auto !important;
+}
+
+.partition
+{
+   // border-color: var(--bs-table-bg);
+   border-left-width: 1px;
+}

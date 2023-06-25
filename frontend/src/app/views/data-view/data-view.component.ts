@@ -33,7 +33,7 @@ export class DataViewComponent implements OnInit {
     private http: HttpService,
     private api: ApiService,
     private toastr: ToastrService,
-    private gs: GlobalService,
+    protected gs: GlobalService,
     private spinner: NgxSpinnerService,
     public auth: AuthService) {
   }

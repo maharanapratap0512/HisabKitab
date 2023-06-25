@@ -122,21 +122,25 @@ const category = {
         `insert into category (
             category_hin,
             category_eng,
+            category_roman,
             active)
         values (
             @category_hin,
             @category_eng,
+            @category_roman,
             @active)`
     , import:
         `insert into category (
             category_hin,
             category_eng,
+            category_roman,
             created_at,
             updated_at,
             active)
         values (
             @category_hin,
             @category_eng,
+            @category_roman,
             @created_at,
             datetime('now','localtime'),
             @active)`
@@ -145,6 +149,7 @@ const category = {
             _id,
             category_hin,
             category_eng,
+            category_roman,
             created_at,
             updated_at,
             active) 
@@ -152,6 +157,7 @@ const category = {
             @_id,
             @category_hin,
             @category_eng,
+            @category_roman,
             @created_at,
             @updated_at,
             @active)`
@@ -159,14 +165,82 @@ const category = {
         `update category set 
         category_hin=@category_hin,
         category_eng=@category_eng,
+        category_roman=@category_roman,
         updated_at=@updated_at where _id = @_id`
     , update:
         `update category set
         category_hin=@category_hin,
         category_eng=@category_eng,
+        category_roman=@category_roman,
         updated_at=datetime('now','localtime')`
     , update_active:
         `update category set
+        active=@active,
+        updated_at=datetime('now','localtime')`
+}
+
+const usage_list = {
+    select:
+        `select * from usage_list ?`
+    , select_full:
+        `select * from usage_list ? limit @limit offset @offset`
+    , insert:
+        `insert into usage_list (
+            usage_hin,
+            usage_eng,
+            usage_roman,
+            active)
+        values (
+            @usage_hin,
+            @usage_eng,
+            @usage_roman,
+            @active)`
+    , import:
+        `insert into usage_list (
+            usage_hin,
+            usage_eng,
+            usage_roman,
+            created_at,
+            updated_at,
+            active)
+        values (
+            @usage_hin,
+            @usage_eng,
+            @usage_roman,
+            @created_at,
+            datetime('now','localtime'),
+            @active)`
+    , insert_ignore:
+        `insert or ignore into usage_list (
+            _id,
+            usage_hin,
+            usage_eng,
+            usage_roman,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @usage_hin,
+            @usage_eng,
+            @usage_roman,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update usage_list set 
+        usage_hin=@usage_hin,
+        usage_eng=@usage_eng,
+        usage_roman=@usage_roman,
+        updated_at=@updated_at where _id = @_id`
+    , update:
+        `update usage_list set
+        usage_hin=@usage_hin,
+        usage_eng=@usage_eng,
+        usage_roman=@usage_roman,
+        updated_at=datetime('now','localtime')`
+    , update_active:
+        `update usage_list set
         active=@active,
         updated_at=datetime('now','localtime')`
 }
@@ -297,99 +371,24 @@ const item = {
         left join unit on unit._id = item.unit_id ? group by item._id limit @limit offset @offset`
     , insert:
         `insert into item (
-            item_hin,
-            item_eng,
-            item_code,
-            categories,
-            unit_id,
-            extra_note,
-            document,
-            restrict_month,
-            restrict_year,
-            min_rate,
-            max_rate,
-            active)
+            item_hin, item_eng, item_roman, item_code, categories, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, active)
         values (
-            @item_hin,
-            @item_eng,
-            @item_code,
-            @categories,
-            @unit_id,
-            @extra_note,
-            @document,
-            @restrict_month,
-            @restrict_year,
-            @min_rate,
-            @max_rate,
-            @active)`
+            @item_hin, @item_eng, @item_roman, @item_code, @categories, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @active)`
     , import:
         `insert into item (
-            item_hin,
-            item_eng,
-            item_code,
-            categories,
-            unit_id,
-            extra_note,
-            document,
-            restrict_month,
-            restrict_year,
-            min_rate,
-            max_rate,
-            created_at,
-            updated_at,
-            active) 
+            item_hin, item_eng, item_roman, item_code, categories, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, created_at, updated_at, active) 
         values (
-            @item_hin,
-            @item_eng,
-            @item_code,
-            @categories,
-            @unit_id,
-            @extra_note,
-            @document,
-            @restrict_month,
-            @restrict_year,
-            @min_rate,
-            @max_rate,
-            @created_at,
-            @updated_at,
-            @active)`
+            @item_hin, @item_eng, @item_roman, @item_code, @categories, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @created_at, @updated_at, @active)`
     , insert_ignore:
         `insert or ignore into item (
-            _id,
-            item_hin,
-            item_eng,
-            item_code,
-            categories,
-            unit_id,
-            extra_note,
-            document,
-            restrict_month,
-            restrict_year,
-            min_rate,
-            max_rate,
-            created_at,
-            updated_at,
-            active) 
+            _id, item_hin, item_eng, item_roman, item_code, categories, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, created_at, updated_at, active) 
         values (
-            @_id,
-            @item_hin,
-            @item_eng,
-            @item_code,
-            @categories,
-            @unit_id,
-            @extra_note,
-            @document,
-            @restrict_month,
-            @restrict_year,
-            @min_rate,
-            @max_rate,
-            @created_at,
-            @updated_at,
-            @active)`
+            @_id, @item_hin, @item_eng, @item_roman, @item_code, @categories, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @created_at, @updated_at, @active)`
     , import_update:
         `update item set 
         item_hin=@item_hin,
         item_eng=@item_eng,
+        item_roman=@item_roman,
         item_code=@item_code,
         categories=@categories,
         extra_note=@extra_note,
@@ -405,6 +404,7 @@ const item = {
         `update item set
         item_hin=@item_hin,
         item_eng=@item_eng,
+        item_roman=@item_roman,
         item_code=@item_code,
         categories=@categories,
         extra_note=@extra_note,
@@ -433,7 +433,7 @@ const item = {
 const itemmix = {
     select_full: `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
     unit.unit_full, unit.unit_short ,
-    (select json_group_array(json_object('_id', si._id , 'item_id', si.item_id , 'subitem_list_id', si.subitem_list_id , 'subitem_hin', si.subitem_hin , 'subitem_eng', si.subitem_eng , 'categories_hin', si.categories_hin, 'unit_full', si.unit_full , 'unit_short', si.unit_short , 'categories', json(si.categories) , 'extra_note', si.extra_note, 'unit_id', si.unit_id , 'restrict_month', si.restrict_month, 'restrict_year', si.restrict_year, 'min_rate', si.min_rate, 'max_rate', si.max_rate, 'active', si.active)) as subitems from (select subitem.*, sl.subitem_hin, sl.subitem_eng, json_group_array(cat.category_hin) as categories_hin, ut.unit_short, ut.unit_full from subitem, json_each(subitem.categories)
+    (select json_group_array(json_object('_id', si._id , 'item_id', si.item_id , 'subitem_list_id', si.subitem_list_id , 'subitem_hin', si.subitem_hin , 'subitem_eng', si.subitem_eng, 'subitem_roman', si.subitem_roman, 'categories_hin', si.categories_hin, 'unit_full', si.unit_full , 'unit_short', si.unit_short , 'categories', json(si.categories) , 'extra_note', si.extra_note, 'unit_id', si.unit_id , 'restrict_month', si.restrict_month, 'restrict_year', si.restrict_year, 'min_rate', si.min_rate, 'max_rate', si.max_rate, 'active', si.active)) as subitems from (select subitem.*, sl.subitem_hin, sl.subitem_eng, sl.subitem_roman, json_group_array(cat.category_hin) as categories_hin, ut.unit_short, ut.unit_full from subitem, json_each(subitem.categories)
         left join category cat on cat._id = json_each.value
         left join unit ut on ut._id = subitem.unit_id
         left join subitem_list sl on  sl._id = subitem.subitem_list_id where subitem.item_id = item._id & group by subitem._id) as si) as subitems from item, json_each(item.categories)
@@ -462,9 +462,9 @@ const jawak = {
         amm.mm_hin,amm.mm_eng,amm.mm_code,
         jmm.mm_hin as jawak_mm_hin, jmm.mm_eng as jawak_mm_eng, jmm.mm_code as jawak_mm_code,
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation,
-        it.item_hin, it.item_eng, it.item_code,
-        sil.subitem_hin, sil.subitem_eng,
-        cat.category_hin, cat.category_eng,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman,
+        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman,
+        cat.category_hin, cat.category_eng, cat.category_roman,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         unit.unit_short, unit.unit_full,
@@ -572,9 +572,9 @@ const aawak = {
         mm.mm_hin,mm.mm_eng,mm.mm_code,
         amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
-        item.item_hin, item.item_eng, item.item_code, item.categories as item_categories,
-        sil.subitem_hin, sil.subitem_eng, si.categories as subitem_categories,
-        cat.category_hin, cat.category_eng,
+        item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
+        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories,
+        cat.category_hin, cat.category_eng, cat.category_roman,
         product.sr_num, product.product_code,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code,
@@ -607,8 +607,8 @@ const bachat = {
     , select_full:
         `select bachat.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng,      
-        it.item_hin, it.item_eng, it.item_code, it.categories as icategories, it.document as idocument,
-        sil.subitem_hin, sil.subitem_eng, si.categories as scategories, si.document as sdocument,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as icategories, it.document as idocument,
+        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as scategories, si.document as sdocument,
         bachat.unit_id,unit.unit_short, unit.unit_full,             
         dept.dept_eng, dept.dept_hin, dept.dept_code
         from bachat
@@ -622,8 +622,8 @@ const bachat = {
     ,
     with_pending_aawak: `select bachat.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id,     
-        it.item_hin, it.item_eng, it.item_code, it.categories as icategories,
-        sil.subitem_hin, sil.subitem_eng, si.categories as scategories,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as icategories,
+        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as scategories,
         bachat.unit_id,unit.unit_short, unit.unit_full,             
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         CASE WHEN aawak._id is not null THEN json_group_array(json_object('_id', aawak._id, 'date', aawak.date, 'aawak_mm_id', aawak.aawak_mm_id, 'aawak_mm_hin', amm.mm_hin, 'pkt_num', aawak.pkt_num, 'pbk_id', aawak.pbk_id, 'roll_no', pbk.roll_no, 'pbk_hin', pbk.pbk_hin, 'relation', pbk.relation, 'relative_name', pbk.relative_name, 'item_detail', aawak.item_detail, 'company_name', aawak.company_name, 'condition_id', aawak.condition_id, 'condition_hin', cnd.list_name_hin, 'qty', aawak.qty, 'rate', aawak.rate, 'actual_amt', aawak.actual_amt, 'aawak_type_id', aawak.aawak_type_id, 'aawak_type_hin', awk_type.list_name_hin, 'description', aawak.description, 'remaining_qty', aawak.remaining_qty )) ELSE json('[]') END as aawaks from bachat 
@@ -696,8 +696,8 @@ const bachat_new = {
     , select_full:
         `select bachat_new.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng,      
-        it.item_hin, it.item_eng, it.item_code, it.categories as icategories, it.document as idocument,
-        sil.subitem_hin, sil.subitem_eng, si.categories as scategories, si.document as sdocument,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as icategories, it.document as idocument,
+        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as scategories, si.document as sdocument,
         bachat_new.unit_id,unit.unit_short, unit.unit_full,             
         slc.list_name_hin as condition_hin, slc.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code
@@ -713,7 +713,7 @@ const bachat_new = {
     , select_all:
         `select bcht.*, json_group_array(list_name_hin) as arr_condition_hin, json_group_array(condition_id) as arr_condition_id, json_group_array(sum_aawak) as arr_sum_aawak, json_group_array(sum_used) as arr_sum_used, json_group_array(sum_jawak) as arr_sum_jawak, json_group_array(sum_bachat) as arr_sum_bachat, sum(sum_aawak) as total_aawak_all, sum(sum_jawak) as total_jawak_all, sum(sum_used) as total_used_all, sum(sum_bachat) as total_bachat_all,
         mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
-        it.item_hin, it.item_eng, it.item_code, it.categories as arr_item_categories,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
         sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
         unit.unit_short, unit.unit_full,
         dept.dept_code, dept.dept_hin, dept.dept_eng
@@ -729,6 +729,7 @@ const bachat_new = {
         left join unit on unit._id = bcht.unit_id
         left join department dept on dept._id = bcht.dept_id #
         group by bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.unit_id order by @order;`
+    
     , insert:
         `insert into bachat_new (
             month, year, mm_id, item_id, subitem_id, condition_id, dept_id, total_aawak, jawak, used_jawak, bachat, unit_id)
@@ -1125,8 +1126,8 @@ const product = {
     , select_full:
         `select product.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, 
-        item.item_hin,item.item_eng,item.item_code,
-        subitem_list.subitem_hin,subitem_list.subitem_eng,
+        item.item_hin,item.item_eng,item.item_code, item.item_roman,
+        subitem_list.subitem_hin,subitem_list.subitem_eng, subitem_list.subitem_roman,
         support_list.list_name_hin as condition_hin,support_list.list_name_eng as condition_eng,
         lmm.mm_hin as last_mm_hin, lmm.mm_eng as last_mm_eng, lmm.mm_code as last_mm_code, 
         lc.list_name_hin as last_condition_hin, lc.list_name_eng as last_condition_eng        
@@ -1142,8 +1143,8 @@ const product = {
     , select_full_new:
         `select product.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, 
-        item.item_hin,item.item_eng,item.item_code,
-        subitem_list.subitem_hin,subitem_list.subitem_eng,
+        item.item_hin,item.item_eng,item.item_code, item.item_roman,
+        subitem_list.subitem_hin,subitem_list.subitem_eng, subitem_list.subitem_roman,
         support_list.list_name_hin as condition_hin,support_list.list_name_eng as condition_eng,
         lmm.mm_hin as last_mm_hin, lmm.mm_eng as last_mm_eng, lmm.mm_code as last_mm_code, 
         lc.list_name_hin as last_condition_hin, lc.list_name_eng as last_condition_eng,
@@ -1267,7 +1268,7 @@ const subitem = {
         `select subitem.*, json_group_array(cat.category_hin) as categories_hin,
         unit.unit_full, unit.unit_short, 
         item.item_eng, item.item_hin, 
-        subitem_list.subitem_eng, subitem_list.subitem_hin 
+        subitem_list.subitem_eng, subitem_list.subitem_hin, subitem_list.subitem_roman
         from subitem, json_each(subitem.categories)
         left join category cat on cat._id = json_each.value
         left join unit on unit._id = subitem.unit_id
@@ -1409,27 +1410,32 @@ const subitem_list = {
         `insert into subitem_list (
         subitem_hin,
         subitem_eng,
+        subitem_roman,
         active)
     values (
         @subitem_hin,
         @subitem_eng,
+        @subitem_roman,
         @active)`
     , import:
         `insert into subitem_list (
         _id,
         subitem_hin,
         subitem_eng,
+        subitem_roman,
         active)
     values (
         @_id,
         @subitem_hin,
         @subitem_eng,
+        @subitem_roman,
         1)`
     , insert_ignore:
         `insert or ignore into subitem_list (
             _id,
             subitem_hin,
             subitem_eng,
+            subitem_roman,
             created_at,
             updated_at,
             active) 
@@ -1437,6 +1443,7 @@ const subitem_list = {
             @_id,
             @subitem_hin,
             @subitem_eng,
+            @subitem_roman,
             @created_at,
             @updated_at,
             @active)`
@@ -1444,12 +1451,14 @@ const subitem_list = {
         `update subitem_list set 
         subitem_hin=@subitem_hin,
         subitem_eng=@subitem_eng,
+        subitem_roman=@subitem_roman,
         created_at=@created_at,
         updated_at=@updated_at where _id = @_id`
     , update:
         `update subitem_list set 
         subitem_hin=@subitem_hin,
         subitem_eng=@subitem_eng,
+        subitem_roman=@subitem_roman,
         updated_at=datetime('now','localtime')`
     , order:
         `subitem_hin, subitem_eng`
@@ -1683,9 +1692,9 @@ const temp_import = {
         mm.mm_hin,mm.mm_eng,mm.mm_code,
         amm.mm_hin as aj_mm_hin, amm.mm_eng as aj_mm_eng, amm.mm_code as aj_mm_code, 
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
-        item.item_hin, item.item_eng, item.item_code,
-        sil.subitem_hin, sil.subitem_eng,
-        cat.category_hin, cat.category_eng,
+        item.item_hin, item.item_eng, item.item_code, item.item_roman,
+        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman,
+        cat.category_hin, cat.category_eng, cat.category_roman,
         product.sr_num, product.product_code,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code,
@@ -1790,32 +1799,32 @@ const import_history = {
     delete: `delete from import_history`,
 }
 
-const closing = {
-    select:
-        `select * from closing ?`
-    , select_full:
-        `select json_group_array(json_object('_id', closing._id, 'month', closing.month, 'closed', closing.closed, 'updated_at', closing.updated_at)) as monthly_detail, closing.year, closing.mm_id, closing.dept_id,
-        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id,
-        st.state_hin, st.state_eng,
-        dept.dept_hin, dept.dept_eng, dept.dept_code
-        from closing 
-        left join mm on mm._id = closing.mm_id        
-        left join state st on mm.state_id = st._id        
-        left join department dept on dept._id = closing.dept_id ? group by mm_id, year`
-    , insert:
-        `insert into closing (mm_id, month, year, dept_id, closed)
-        values (@mm_id, @month, @year, @dept_id, @closed)`
-    , update:
-        `update closing set  
-        mm_id = @mm_id, 
-        month = @month, 
-        year = @year,
-        closed = @closed,
-        updated_at = @updated_at`
-    , order:
-        ``,
-    delete: `delete from closing`,
-}
+// const closing = {
+//     select:
+//         `select * from closing ?`
+//     , select_full:
+//         `select json_group_array(json_object('_id', closing._id, 'month', closing.month, 'closed', closing.closed, 'updated_at', closing.updated_at)) as monthly_detail, closing.year, closing.mm_id, closing.dept_id,
+//         mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id,
+//         st.state_hin, st.state_eng,
+//         dept.dept_hin, dept.dept_eng, dept.dept_code
+//         from closing 
+//         left join mm on mm._id = closing.mm_id        
+//         left join state st on mm.state_id = st._id        
+//         left join department dept on dept._id = closing.dept_id ? group by mm_id, year`
+//     , insert:
+//         `insert into closing (mm_id, month, year, dept_id, closed)
+//         values (@mm_id, @month, @year, @dept_id, @closed)`
+//     , update:
+//         `update closing set  
+//         mm_id = @mm_id, 
+//         month = @month, 
+//         year = @year,
+//         closed = @closed,
+//         updated_at = @updated_at`
+//     , order:
+//         ``,
+//     delete: `delete from closing`,
+// }
 
 const dictionary = {
     insert: `insert or ignore into dictionary(type, name, extra_note, id, id2) values(@type, @name, @extra_note, @id, @id2)`,
@@ -1985,8 +1994,8 @@ reports = {
     mm.mm_hin,mm.mm_eng,mm.mm_code,
     amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
     pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
-    item.item_hin, item.item_eng, item.item_code, item.categories as item_categories,
-    sil.subitem_hin, sil.subitem_eng, si.categories as subitem_categories,
+    item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
+    sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories,
     product.sr_num, product.product_code,
     sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
     dept.dept_eng, dept.dept_hin, dept.dept_code,
@@ -2016,5 +2025,5 @@ const test = {
 }
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, closing
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, usage_list
 };

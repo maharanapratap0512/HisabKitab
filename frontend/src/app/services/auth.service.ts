@@ -1,5 +1,8 @@
 import { Injectable, Inject } from '@angular/core';
 import { LOCAL_STORAGE, WINDOW } from '@ng-toolkit/universal';
+import { settings } from 'cluster';
+import { ApiService } from './api.service';
+import { HttpService } from './http.service';
 
 
 @Injectable({
@@ -8,14 +11,120 @@ import { LOCAL_STORAGE, WINDOW } from '@ng-toolkit/universal';
 export class AuthService {
   user: any;
   webUser: any = {};
-  AdminUser: any = {};
+  // settings: any = {};
+  settingsUI = {
+    pageList: [
+      { key: 'aawak', title: 'Aawak', detail: '' },
+      { key: 'jawak', title: 'Jawak', detail: '' },
+      { key: 'bachat', title: 'Bachat', detail: '' },
+      { key: 'report', title: 'Report', detail: '', },
+      { key: 'product', title: 'Product', detail: 'Can be tranced between All MM', add: true },
+      { key: 'mm', title: 'MM', detail: '', add: true },
+      { key: 'category', title: 'Category', detail: '', add: true },
+      { key: 'item', title: 'Item & Subitem', detail: '', add: true },
+      { key: 'nimitt', title: 'Nimitt', detail: '', add: true },
+      { key: 'pbk', title: 'PBK / Sewadhari', detail: '', add: true },
+      { key: 'city', title: 'City', detail: '', add: true },
+      { key: 'point', title: 'Point', detail: '', },
+      // { key: 'department', title: 'Department', detail: '' },
+    ],
+    pbk: [
+      { colName: 'roll_no', title: 'Roll No' },
+      { colName: 'pbk_eng', title: 'PBK Name (Eng)' },
+      { colName: 'relation', title: 'Relation' },
+      { colName: 'relative_name', title: 'Relative Name' },
+      { colName: 'birth_date', title: 'Birth Date' },
+      { colName: 'age', title: 'Age' },
+      { colName: 'address', title: 'Address' },
+      { colName: 'townarea', title: 'Townarea' },
+      { colName: 'city_id', title: 'City' },
+      { colName: 'mo_no', title: 'Mobile No.' },
+      { colName: 'alt_mo_no', title: 'Alt. Mo. No.' },
+      { colName: 'class_mm_id', title: 'Class MM' },
+      { colName: 'bhatti_date', title: 'Bhatti Date' },
+      { colName: 'document', title: 'Image' }
+    ],
+    product: [
+      { colName: 'purchase_date', title: 'Purchase Date' },
+      { colName: 'purchased_by', title: 'Purchase By' },
+      { colName: 'purchase_from', title: 'Purchase From' },
+      { colName: 'filter_dept', title: 'Filter By Dept' },
+      { colName: 'filter_category', title: 'Filter By Category' },
+      { colName: 'company_name', title: 'Company' },
+      { colName: 'model_name', title: 'Model' },
+      { colName: 'warranty_period', title: 'Warranty Period' },
+      { colName: 'warranty_from', title: 'Warranty From' },
+      { colName: 'accessories', title: 'Accessories' },
+      { colName: 'price', title: 'Price' },
+      { colName: 'nimitt_id', title: 'Nimitt' },
+      { colName: 'product_detail', title: 'Product Detail' },
+      { colName: 'document', title: 'Images' },
+    ],
+    aawak: [
+      { colName: 'pkt_num', title: 'Pkt Num' },
+      { colName: 'filter_by_state', title: 'Filter PBK' },
+      { colName: 'pbk_id', title: 'PBK / Sewadhari' },
+      { colName: 'nimitt_id', title: 'Nimitt' },
+      { colName: 'company_name', title: 'Company' },
+      { colName: 'filter_by_dept', title: 'Filter By Dept' },
+      { colName: 'filter_by_cat', title: 'Filter By Category' },
+      { colName: 'product_id', title: 'Product' },
+      { colName: 'condition_id', title: 'Condition' },
+      { colName: 'rate', title: 'Rate / Price' },
+      { colName: 'actual_amt', title: 'Act. Amount' },
+      { colName: 'item_detail', title: 'Item Detail' },
+      { colName: 'description', title: 'Description' },
+      { colName: 'isbill', title: 'बिल है?' },
+      { colName: 'document', title: 'Image' },
+      { colName: 'jawak', title: 'Jawak Section' }
+    ],
+    jawak: [
+      { colName: 'pkt_num', title: 'Pkt Num' },
+      { colName: 'nimitt_id', title: 'Person' },
+      { colName: 'filter_by_state', title: 'Filter PBK' },
+      { colName: 'pbk_id', title: 'PBK / Sewadhari' },
+      { colName: 'product_id', title: 'Product' },
+      { colName: 'condition_id', title: 'Condition' },
+      { colName: 'item_detail', title: 'Item Detail' },
+      { colName: 'description', title: 'Description' }
+    ],
+    nimitt: [
+      { colName: 'roll_no', title: 'Roll No' },
+      { colName: 'nimitt_eng', title: 'Name (Eng)' },
+      { colName: 'relative_name', title: 'Father Name' },
+      { colName: 'townarea', title: 'Townarea' },
+    ],
+    mm: [
+      { colName: 'mm_eng', title: 'Name (Eng)' },
+      { colName: 'mm_roman', title: 'Name (Roman)' },
+      { colName: 'mm_code', title: 'MM Code' },
+      { colName: 'parent_mm_id', title: 'Parent MM' },
+    ],
+    item: [
+      { colName: 'item_eng', title: 'Name (Eng)' },
+      { colName: 'item_roman', title: 'Name (Roman)' },
+      { colName: 'item_code', title: 'Item Code' },
+      { colName: 'price_range', title: 'Price Range' },
+      { colName: 'extra_note', title: 'Extra Note' },
+      { colName: 'document', title: 'Images' },
+      { colName: 'subitem_eng', title: 'Subitem (Eng)' },
+      { colName: 'subitem_roman', title: 'Subitem (Roman)' },
+    ],
+    bachat: [],
+    category: [],
+    report: [],
+    point: []
+
+  }
 
   constructor(
     @Inject(LOCAL_STORAGE) private localStorage: any,
-    @Inject(WINDOW) private Window: any
+    @Inject(WINDOW) private Window: any,
+    private api: ApiService,
+    private http: HttpService
   ) {
     this.webUser = this.getWebUser();
-    
+
   }
 
   // getToken() {
@@ -38,9 +147,25 @@ export class AuthService {
     this.webUser = user;
   }
 
-  async updateSettings(setting:any ){
-    this.webUser.settings = setting;
-    this.Window.sessionStorage.setItem('WebUser', JSON.stringify(this.webUser));
+  // async updateMainSettings(setting: any) {
+
+  //   this.webUser.settings = setting;
+  //   this.Window.sessionStorage.setItem('WebUser', JSON.stringify(this.webUser));
+  // }
+
+  async updateSettings() {
+
+    let body = {
+      query: { _id: this.webUser.dept_id },
+      set: { settings: this.webUser.settings }
+    }
+    this.http.put(this.api.getUrl('DEPT_SETTINGS'), body).subscribe((data: any) => {
+      if (data && data['success']) {
+        this.webUser.settings = data.result.settings;
+        this.setWebUser(this.webUser)
+      }
+    });
+
   }
 
   getWebUser() {

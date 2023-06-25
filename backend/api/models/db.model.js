@@ -1660,8 +1660,69 @@ class dbModal {
         unique(month, year, mm_id, item_id, unit_id, dept_id, subitem_id, condition_id)
       )`,
 
-    }
+    },
 
+    // version 15
+    /*
+      =>creating triger for dept_config insert after new dept insert
+      =>new table: usage_category.
+      =>roman field added in category
+      =>recreating AJPP with new Column: voucher_no, is_xl, usage_category_id fk with new table.
+      =>recreating import_history: new field - awk, jwk, total, success.
+    */
+    {
+      dept_ins_config_ins:
+        `CREATE TRIGGER IF NOT EXISTS "dept_ins_config_ins"
+          AFTER INSERT ON "department"
+          FOR EACH ROW 
+          BEGIN
+            insert into department_config(dept_id, config_key, config_value, active) values(NEW._id, 'mm', json('[]'), NEW.active),(NEW._id, 'item', json('[]'), NEW.active),(NEW._id, 'category', json('[]'), NEW.active), (NEW._id, 'subitem', json('[]'), NEW.active), (NEW._id, 'subitem_list', json('[]'), NEW.active),(NEW._id, 'pbk', json('[]'), NEW.active),(NEW._id, 'department', json('[]'), NEW.active),(NEW._id, 'aj_type', json('[]'), NEW.active), (NEW._id, 'settings', json('{}'), NEW.active), (NEW._id, 'nimitt', json('[]'), NEW.active);
+          END;`,
+      cat_roman: `ALTER table category add column category_roman varchar(50);`,
+      usage_cat: `create table if not exists usage_list(
+        _id integer primary key,
+        usage_hin varchar(50) unique not null,
+        usage_eng varchar(50) unique,
+        usage_roman varchar(50) unique,
+        active tinyint(1) default 0,
+        created_at timestamp default (UNIXEPOCH()),
+        updated_at timestamp default (UNIXEPOCH())
+      )`,
+      alt_prdct: `ALTER TABLE product add column voucher_no int`,
+      alt_prdct_xl: `ALTER TABLE product add column is_xl tinyint(1) default false`,
+      alt_awk: `ALTER TABLE aawak add column voucher_no int`,
+      alt_awk_xl: `ALTER TABLE aawak add column is_xl tinyint(1) default false`,
+      alt_awk_ul: `ALTER TABLE aawak add column usage_list_id integer references usage_list(_id)`,
+      alt_jwk: `ALTER TABLE jawak add column voucher_no int`,
+      alt_jwk_xl: `ALTER TABLE jawak add column is_xl tinyint(1) default false`,
+      alt_jwk_ul: `ALTER TABLE jawak add column usage_list_id integer references usage_list(_id)`,
+      rename_bachat_new: `alter table bachat_new rename to bachat_new_backup`,
+      bachat_new: `create table if not exists bachat_new(
+        _id integer primary key AUTOINCREMENT,
+        month int not null,
+        year int not null,
+        mm_id integer not null references mm(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id) ,
+        unit_id integer not null references unit(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        dept_id integer not null references department(_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        condition_id integer null references support_list(_id) ON UPDATE CASCADE,
+        total_aawak decimal(10,2) default 0,
+        jawak decimal(10,2) default 0,
+        used_jawak decimal(10,2) default 0,
+        bachat decimal(10,2) default 0,
+        created_at timestamp default (julianday('now','localtime')),
+        updated_at timestamp default (julianday('now','localtime')),
+        unique(month, year, mm_id, item_id, unit_id, dept_id, subitem_id, condition_id)
+      )`,
+      transfer_bachat: `insert into bachat_new(_id ,month ,year ,mm_id ,item_id ,subitem_id ,unit_id ,dept_id ,condition_id ,total_aawak ,jawak ,used_jawak ,bachat ,created_at ,updated_at) select _id ,month + 1 ,year ,mm_id ,item_id ,subitem_id ,unit_id ,dept_id ,condition_id ,total_aawak ,jawak ,used_jawak ,bachat ,created_at ,updated_at from bachat_new_backup`
+
+    },
+
+    /* TODO cleanup task 
+      1. remove table - closing.
+      2. remove usage_category_id column from awk, jwk.
+    */
   ];
   migrationLength;
   constructor(dbPath) {
@@ -1705,6 +1766,8 @@ class dbModal {
 
       });
 
+      // console.log(this.db.pragma(`table_info('aawak')`));
+      console.log(this.db.prepare(`select strftime('%Y-%m', 2022 || '-' || 10 || '-01') < strftime('%Y-%m', @year);`).all({ month: 11, year: '2022-11-01' }));
       this.db.pragma('foreign_keys=OFF');
       this.db.pragma('legacy_alter_table=ON');
       runMigration();

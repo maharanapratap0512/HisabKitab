@@ -211,7 +211,7 @@ export class AawakComponent implements OnInit {
 
   getAawakPage(page: any = null) {
     if (page) {
-      this.pageNo = page;
+      this.pageNo = page; 
       this.getFilteredData();
     }
   }

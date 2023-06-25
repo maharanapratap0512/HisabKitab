@@ -26,7 +26,8 @@ class DBContex {
     ];
     tbl_from_supp_list = [
         'jawak_type',
-        'aawak_type'
+        'aawak_type',
+        'condition'
     ]
     supp_list = [
         // 'mm_type',
@@ -146,8 +147,6 @@ class DBContex {
             }
         })
     }
-
-
 
     async insert(tblname, obj, dept_id = null, get = true) {
         return new Promise(async (resolve, reject) => {
