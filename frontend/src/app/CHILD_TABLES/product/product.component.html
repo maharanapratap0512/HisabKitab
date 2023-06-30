@@ -82,9 +82,8 @@
                            <th style="width:110px;" *ngIf="settings.nimitt_id">Nimitt</th>
                         </tr>
                      </thead>
-                     <tbody class="accordion" id="accordionExample">
-                        <ng-container class="accordion-item"
-                           *ngFor="let data of productData | filter:term; let i=index">
+                     <tbody>
+                        <ng-container *ngFor="let data of productData | filter:term; let i=index">
                            <!-- <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
                               [attr.aria-controls]="'#collapse-' + i" class="main-row"> -->
                            <tr>
@@ -115,7 +114,11 @@
                                  {{data.last_condition_hin ? data.last_condition_hin : data.condition_hin}} <br />
                                  {{data.last_date ? data.last_date : data.purchase_date}}
                               </td>
-                              <td>{{data.sr_num}} <br /> {{data.product_code}}</td>
+                              <td>
+                                 <ng-container *ngFor="let p of data.products; let j=index">
+                                   {{j+1}}. {{p.sr_num?p.sr_num:'N/A'}} -- {{p.product_code?p.product_code:'N/A'}}<br>
+                                 </ng-container>
+                              </td>
                               <td>{{data.purchase_date}}</td>
                               <td>{{data.mm_id?data.mm_hin:''}} <br /> {{data.mm_eng ? data.mm_eng:'-'}}</td>
                               <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}} <br />

@@ -65,6 +65,19 @@ class DBContex {
         });
     }
 
+    allQuery(object, key, options = {}) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let sql = this.query[object][key];
+                const result = this.db.prepare(sql).all(options.obj ? options.obj : {});
+                resolve(result);
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
     selectWithCondition(tblname, key, data, options = {}) {
         return new Promise(async (resolve, reject) => {
             try {

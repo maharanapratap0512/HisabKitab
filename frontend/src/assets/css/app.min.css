@@ -53,7 +53,7 @@ body {
    font-weight: 400;
    line-height: 1.5;
    color: #4a5158;
-   background-color: #fafbfe;
+   background-color: #ebddfd;
    -webkit-text-size-adjust: 100%;
    -webkit-tap-highlight-color: transparent
 }
@@ -14668,7 +14668,7 @@ body[data-leftbar-theme=dark][data-leftbar-compact-mode=condensed] .side-nav .si
 
 .navbar-custom {
    padding: 0 24px;
-   background-color: #fff;
+   background-color: #cfb0ff;
    -webkit-box-shadow: 0 0 35px 0 rgba(154, 161, 171, .15);
    box-shadow: 0 0 35px 0 rgba(154, 161, 171, .15);
    min-height: 70px;
@@ -15310,8 +15310,8 @@ body[data-layout=detached] .footer .container-xxl {
 }
 
 .topnav {
-   background: #313a46;
-   /* background: linear-gradient(to bottom, #5059c8, #5500aa); */
+   /* background: #313a46; */
+   background: linear-gradient(to bottom, #5059c8, #5500aa);
 }
 
 .topnav .topnav-menu {
@@ -22377,7 +22377,4 @@ Not supports in Firefox and IE */
    font-size: larger !important;
    color: #fff !important;
    font-weight: bold;
-   -webkit-box-shadow: 0px -15px 20px 15px rgb(38 39 40);
-   -moz-box-shadow: 0px -15px 20px 15px rgb(38 39 40);
-   box-shadow: 0px -15px 20px 15px rgb(38 39 40);
 }

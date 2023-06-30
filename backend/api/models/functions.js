@@ -111,19 +111,17 @@ class Functions extends DBContex {
       });
    }
 
-   async getLastVoucherNo(tblname){
+   async getLastVoucherNo(tblname) {
       // return new Promise(async(resolve, reject)=>{
-          try{
-              let row = this.db.prepare(`select max(voucher_no) from ${tblname}`).get();
-
-            //   resolve(row.voucher_num || 0);
-            return row.voucher_num || 0;
-          }
-          catch(err){
-              return 0;
-          }
+      try {
+         let row = this.db.prepare(`select max(voucher_no) as v_no from ${tblname}`).get();
+         return row.v_no || 0;
+      }
+      catch (err) {
+         return 0;
+      }
       // });
-  }
+   }
 
    convertToLower(data, fieldList = null) {
       if (fieldList && fieldList.length > 0) {

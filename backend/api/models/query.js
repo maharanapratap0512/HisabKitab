@@ -729,7 +729,7 @@ const bachat_new = {
         left join unit on unit._id = bcht.unit_id
         left join department dept on dept._id = bcht.dept_id #
         group by bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.unit_id order by @order;`
-    
+
     , insert:
         `insert into bachat_new (
             month, year, mm_id, item_id, subitem_id, condition_id, dept_id, total_aawak, jawak, used_jawak, bachat, unit_id)
@@ -762,7 +762,7 @@ const bachat_new = {
         `insert into bachat_new (
             month, year, mm_id, item_id, subitem_id, condition_id, dept_id, jawak, used_jawak, bachat, unit_id)
         values(
-            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, (CASE WHEN @jawak_type_id <> 27 THEN @qty ELSE 0 END), (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END), 0 - @qty, @unit_id);`    
+            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, (CASE WHEN @jawak_type_id <> 27 THEN @qty ELSE 0 END), (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END), 0 - @qty, @unit_id);`
     , update_jawak_ins:
         `update bachat_new
         set
@@ -1125,6 +1125,7 @@ const product = {
         `select * from product ?`
     , select_full:
         `select product.*,
+        json_group_array(json_object( '_id',product._id,'product_code',product_code,'sr_num',sr_num)) as products,
         mm.mm_hin,mm.mm_eng,mm.mm_code, 
         item.item_hin,item.item_eng,item.item_code, item.item_roman,
         subitem_list.subitem_hin,subitem_list.subitem_eng, subitem_list.subitem_roman,
@@ -1139,6 +1140,7 @@ const product = {
         left join subitem_list on subitem_list._id = subitem.subitem_list_id
         left join support_list on support_list._id = product.condition_id
         left join support_list lc on lc._id = product.last_condition ?
+        group by voucher_no
      limit @limit offset @offset`
     , select_full_new:
         `select product.*,
@@ -1172,11 +1174,11 @@ const product = {
         `insert into product (
         mm_id, purchased_by, purchase_date, item_id, subitem_id, unit_id, product_code, company_name,
         model_name, sr_num, condition_id, price, product_detail, accessories, purchase_from,
-        warranty_period, dept_id, warranty_from, document, isbill, active)
+        warranty_period, dept_id, warranty_from, document, isbill, voucher_no, active)
     values (
         @mm_id, @purchased_by, @purchase_date, @item_id, @subitem_id, @unit_id, @product_code, @company_name,
         @model_name, @sr_num, @condition_id, @price, @product_detail, @accessories, @purchase_from,
-        @warranty_period, @dept_id, @warranty_from, @document, @isbill, @active)`
+        @warranty_period, @dept_id, @warranty_from, @document, @isbill, @voucher_no, @active)`
     , update:
         `update product set 
         mm_id=@mm_id,
@@ -1199,9 +1201,12 @@ const product = {
         warranty_from=@warranty_from,
         document=@document,
         isbill=@isbill,
+        voucher_no=@voucher_no,
         updated_at=datetime('now','localtime')`
     , order:
-        `purchase_date, mm.mm_hin, mm.mm_eng, item_hin, item_eng, subitem_hin, subitem_eng`
+        `product._id desc`
+    , grpByVoucher:
+        `select voucher_no, json_group_array(json_object( '_id',_id,'product_code',product_code,'sr_num',sr_num)) as productGroup,* from product group by voucher_no`
 }
 
 const state = {
@@ -1941,7 +1946,7 @@ genDeptDB = {
 
     point: `insert into point select * from mainDB.point`,
     insertDept: `insert into department(_id, dept_eng, dept_hin, dept_code, settings, password, active, created_at, updated_at) select _id, dept_eng, dept_hin, dept_code, '{}', password, active, created_at, updated_at from mainDB.department`,
-    
+
     updateDept: `update department set settings = (select settings from mainDB.department dp where dp._id = department._id) where department._id in (select json_each.value from mainDB.department_config, json_each(config_value) where dept_id = @dept_id AND config_key='department')`,
 
     insertDeptConfig: `insert into department_config(_id, dept_id, config_key, config_value, active, created_at, updated_at) select _id, dept_id, config_key, '[]', active, created_at, updated_at from mainDB.department_config`,

@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const DBContex = require('../models/DBContex');
+const Fn = require('../models/functions');
 const DB = new DBContex();
 
 
@@ -26,15 +27,18 @@ router.get('/', async (req, res, next) => {
 router.get('/:dept_id', async (req, res, next) => {
     try {
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-        await DB.getList('product', { full: true, dept_id: req.params.dept_id, orderBy: 'product._id desc', limit: 100 }).then((resolve) => {
+        await DB.getList('product', { full: true, dept_id: req.params.dept_id, orderBy: 'product._id desc', limit: 100 }).then(async (resolve) => {
             for (let i in resolve.data) {
                 resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
+                resolve.data[i].products = (resolve.data[i].products ? JSON.parse(resolve.data[i].products) : []);
             }
+
             res.json({
                 success: true,
                 result: resolve.data || [],
                 total_count: resolve.total_count
             });
+
         });
     } catch (err) { next(err) };
 });
@@ -68,12 +72,14 @@ router.post('/:dept_id', async (req, res, next) => {
             req.body.document = req.body.document ? JSON.stringify(req.body.document) : null;
             req.body.isbill = req.body.isbill ? 1 : 0;
             let dataArr = [];
+            let voucher = await Fn.getLastVoucherNo('product') + 1;
 
             for (let i of req.body.products) {
                 req.body.product_code = i.product_code
                 req.body.sr_num = i.sr_num
-                // delete newObj.products;
+                req.body.voucher_no = voucher;
 
+                // delete newObj.products;
                 await DB.insert('product', req.body, req.params.dept_id).then((data) => {
                     data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
                     // data.tracking = (data.tracking != "[null]" ? JSON.parse(data.tracking) : {});
