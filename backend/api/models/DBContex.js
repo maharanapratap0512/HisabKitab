@@ -133,7 +133,7 @@ class DBContex {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
 
-                // if (tblname == "department_config")
+                // if (tblname == "product")
                 //     console.log(sql);
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
@@ -224,7 +224,7 @@ class DBContex {
                 // console.log("updt obj_____", obj);
                 // console.log("updt obj_____", sql);
                 const result = this.db.prepare(sql).run(obj);
-                console.log("updt result_____", result);
+                // console.log("updt result_____", result);
 
                 let getres = {};
                 if (result.changes) {
@@ -399,7 +399,7 @@ class DBContex {
         let ajDate = new Date(AJobj.date);
         let bachatObj = {
             ...this.tbInterface.bachat_new,
-            month: ajDate.getMonth(),
+            month: ajDate.getMonth() + 1,
             year: ajDate.getFullYear(),
             mm_id: AJobj.mm_id,
             item_id: AJobj.item_id,
@@ -409,7 +409,7 @@ class DBContex {
             condition_id: AJobj.condition_id
         };
         let bachat = await this.db.prepare(this.query.bachat_new.select_exists).get(bachatObj);
-
+        console.log(bachat);
         return bachat || bachatObj;
     }
 

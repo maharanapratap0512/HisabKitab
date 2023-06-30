@@ -137,7 +137,7 @@
                            <!-- <td>Image</td> -->
                            <td style="width: 70px;">No.</td>
                            <td style="width: 100px;">Department</td>
-                           <td style="width: 180px;">M     M      </td>
+                           <td style="width: 180px;">M M </td>
                            <td>Category</td>
                            <td>Item</td>
                            <td>Total Aawak</td>
@@ -153,7 +153,8 @@
                               <td rowspan="2">Category</td>
                               <td rowspan="2">Item_Subitem_Name</td>
                               <td rowspan="2">पिछला बचत</td>
-                              <th colspan="4" class="center-header partition" *ngFor="let row of monthsSel">{{ row.name +
+                              <th colspan="4" class="center-header partition" *ngFor="let row of monthsSel">{{ row.name
+                                 +
                                  " - " + filterBody.year }}</th>
                            </tr>
                            <tr>
@@ -169,7 +170,7 @@
                      <tbody class="accordion" id="accordionExample">
                         <ng-container *ngFor="let data of bachatData | filter:term; let i=index" class="accordion-item">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
-                              [attr.aria-controls]="'#collapse-' + i" class="main-row">
+                              [attr.aria-controls]="'#collapse-' + i" class="main-row" (click)="rowClicked(data, i)">
                               <!-- <td>
                                  <div> 
                                     <img [src]="data.image" class="img-fluid img-thumbnail mx-1 p-1 h-100" *ngIf="data.image"
@@ -192,13 +193,19 @@
                               </td>
                               <ng-container *ngIf="monthsSel.length <= 0">
                                  <td>
-                                    {{data.total_aawak_all + " " + data.unit_short}}
+                                    <span [ngClass]="{'error': data.total_aawak_all < 0}">
+                                       {{data.total_aawak_all + " " + data.unit_short}}
+                                    </span>
                                  </td>
                                  <td>
-                                    {{data.total_used_all + " " + data.unit_short}}
+                                    <span [ngClass]="{'error': data.total_used_all < 0}">
+                                       {{data.total_used_all + " " + data.unit_short}}
+                                    </span>
                                  </td>
                                  <td>
-                                    {{data.total_jawak_all + " "+ data.unit_short}}
+                                    <span [ngClass]="{'error': data.total_jawak_all < 0}">
+                                       {{data.total_jawak_all + " "+ data.unit_short}}
+                                    </span>
                                  </td>
                                  <td>
                                     <span class="px-1"
@@ -208,16 +215,24 @@
                                  </td>
                               </ng-container>
                               <ng-container *ngIf="monthsSel.length > 0">
-                                 <td>{{data.past_bachat}}</td>
+                                 <td>{{data.past_bachat + " " + data.unit_short}}</td>
                                  <ng-container *ngFor="let row of monthsSel; let m = index;">
-                                    <td class="partition">{{data.arr_sum_aawak[m]}}</td>
-                                    <td>{{data.arr_sum_used[m]}}</td>
-                                    <td>{{data.arr_sum_jawak[m]}}</td>
-                                    <td>{{data.arr_sum_bachat[m]}}</td>
+                                    <td class="partition"><span
+                                          [ngClass]="{'error': data.arr_sum_aawak[m] < 0}">{{data.arr_sum_aawak[m]}}</span>
+                                    </td>
+                                    <td><span
+                                          [ngClass]="{'error': data.arr_sum_used[m] < 0}">{{data.arr_sum_used[m]}}</span>
+                                    </td>
+                                    <td><span
+                                          [ngClass]="{'error': data.arr_sum_jawak[m] < 0}">{{data.arr_sum_jawak[m]}}</span>
+                                    </td>
+                                    <td><span
+                                          [ngClass]="{'error': data.arr_sum_bachat[m] < 0, 'stock':data.arr_sum_bachat[m] > 0}">{{data.arr_sum_bachat[m]}}</span>
+                                    </td>
                                  </ng-container>
                               </ng-container>
                            </tr>
-                           <ng-container *ngIf="data.arr_condition_id && data.arr_condition_id.length > 0">
+                           <ng-container *ngIf="monthsSel.length <= 0 && data.arr_condition_id.length > 0">
                               <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse ribbon-box"
                                  aria-labelledby="headingOne">
                                  <td colspan="3" style="border: none;"></td>
@@ -232,10 +247,13 @@
                                                 <i class="uil-corner-down-right"></i>
                                                 <span class="mx-1">{{j+1}} </span>
                                              </td>
-                                             <td> {{bcht}}</td>
-                                             <td> {{data.arr_sum_aawak[j] + " " + data.unit_short }}</td>
-                                             <td> {{data.arr_sum_used[j] + " " + data.unit_short }}</td>
-                                             <td> {{data.arr_sum_jawak[j] + " " + data.unit_short }}</td>
+                                             <td><span [ngClass]="{'error': bcht < 0}"> {{bcht}}</span></td>
+                                             <td><span [ngClass]="{'error': data.arr_sum_aawak[j] < 0}">
+                                                   {{data.arr_sum_aawak[j] + " " + data.unit_short }}</span></td>
+                                             <td><span [ngClass]="{'error': data.arr_sum_used[j] < 0}">
+                                                   {{data.arr_sum_used[j] + " " + data.unit_short }}</span></td>
+                                             <td><span [ngClass]="{'error': data.arr_sum_jawak[j] < 0}">
+                                                   {{data.arr_sum_jawak[j] + " " + data.unit_short }}</span></td>
                                              <td>
                                                 <span class="px-1"
                                                    [ngClass]="{'error': data.arr_sum_bachat[j] < 0, 'stock':data.arr_sum_bachat[j] > 0}">
@@ -248,6 +266,55 @@
                                  </td>
                               </tr>
 
+                           </ng-container>
+                           <!-- [attr.id]="'collapse-' + i" -->
+                           <ng-container *ngIf="monthsSel.length > 0 && data.subReport"
+                              class="accordion-collapse collapse ribbon-box show" aria-labelledby="headingOne">
+                              <tr *ngFor="let sdata of data[data.currentReport]; let j = index;">
+                                 <ng-container *ngIf="j == 0">
+                                    <td colspan="3" [attr.rowspan]="data[data.currentReport].length"
+                                       style="border: none;">
+                                       <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
+                                          aria-orientation="vertical">
+                                          <ng-container *ngFor="let op of operationList;">
+                                             <a class="nav-link"
+                                                [ngClass]="{'active': data.currentReport == op.key, 'no-data': !data[op.key] || data[op.key].length < 1}"
+                                                (click)="operationClick(op.key, i)">
+                                                <i class="mdi mdi-home-variant d-md-none d-block"></i>
+                                                <span class="d-none d-md-block">{{op.name}}</span>
+                                             </a>
+                                          </ng-container>
+                                       </div>
+                                    </td>
+                                 </ng-container>
+                                 <td>{{j+1}}</td>
+                                 <td>
+                                    {{(sdata.list_name_hin ? sdata.list_name_hin : 'N/A')}}
+                                    {{(sdata.list_name_eng ? " : " + sdata.list_name_eng : '')}}
+                                 </td>
+                                 <ng-container *ngIf="monthsSel.length > 0">
+                                    <td>{{sdata.past_bachat ? sdata.past_bachat : 0 + " " + sdata.unit_short}}</td>
+                                    <ng-container *ngFor="let row of monthsSel; let m = index;">
+                                       <td class="partition">{{sdata.arr_sum_aawak[m] ? sdata.arr_sum_aawak[m] : '-'}}
+                                       </td>
+                                       <td>
+                                          <span [ngClass]="{'error': sdata.arr_sum_used[m] < 0}">
+                                             {{sdata.arr_sum_used[m] ? sdata.arr_sum_used[m] : '-'}}
+                                          </span>
+                                       </td>
+                                       <td>
+                                          <span [ngClass]="{'error': sdata.arr_sum_jawak[m] < 0}">
+                                             {{sdata.arr_sum_jawak[m] ? sdata.arr_sum_jawak[m] : '-'}}
+                                          </span>
+                                       </td>
+                                       <td>
+                                          <span [ngClass]="{'error': sdata.arr_sum_bachat[m] < 0}">
+                                             {{sdata.arr_sum_bachat[m] ? sdata.arr_sum_bachat[m] : '-'}}
+                                          </span>
+                                       </td>
+                                    </ng-container>
+                                 </ng-container>
+                              </tr>
                            </ng-container>
 
                         </ng-container>

@@ -27,6 +27,7 @@ class Functions extends DBContex {
             let insResult = stmtInsert.run(obj);
             if (insResult.changes == 1 && insResult.lastInsertRowid) {
                let bachat = await this.getBachatFromAJ(obj);
+               console.log(bachat);
                let bachatResult;
                if (bachat._id) {
                   bachatResult = stmtUpdateBachat.run(obj);
@@ -111,19 +112,19 @@ class Functions extends DBContex {
       });
    }
 
-   async getLastVoucherNo(tblname){
+   async getLastVoucherNo(tblname) {
       // return new Promise(async(resolve, reject)=>{
-          try{
-              let row = this.db.prepare(`select max(voucher_no) from ${tblname}`).get();
+      try {
+         let row = this.db.prepare(`select max(voucher_no) from ${tblname}`).get();
 
-            //   resolve(row.voucher_num || 0);
-            return row.voucher_num || 0;
-          }
-          catch(err){
-              return 0;
-          }
+         //   resolve(row.voucher_num || 0);
+         return row.voucher_num || 0;
+      }
+      catch (err) {
+         return 0;
+      }
       // });
-  }
+   }
 
    convertToLower(data, fieldList = null) {
       if (fieldList && fieldList.length > 0) {
@@ -140,6 +141,26 @@ class Functions extends DBContex {
          }
       }
       return data;
+   }
+
+   sortAndFillMonths(arrMonth = [1, 12]) {
+
+      // Step 1: Sort month in accending order.
+      arrMonth.sort((a, b) => a - b);
+
+      // Step 2: Find the minimum and maximum values
+      const minMonth = arrMonth[0];
+      const maxMonth = arrMonth[arrMonth.length - 1];
+
+      // Step 3: Create a new array for the result
+      const result = [];
+
+      // Step 4: Iterate from the minimum value to the maximum value
+      for (let month = minMonth; month <= maxMonth; month++) {
+         result.push(month);
+      }
+
+      return result;
    }
 
    async getMMs(dept_id = null) {

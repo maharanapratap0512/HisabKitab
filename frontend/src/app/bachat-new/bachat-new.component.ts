@@ -49,7 +49,12 @@ export class BachatNewComponent implements OnInit {
   currentImage: any;
   months: any = [];
   monthsSel: any = []
-
+  clickOperation: any = 1;
+  operationList: any = [
+    { key: 'condition_wise', name: 'Condition Wise' },
+    { key: 'awk_type_wise', name: 'A/J Type Wise' },
+  ]
+  subBachatData: any = []
 
   constructor(
     private fb: FormBuilder,
@@ -77,9 +82,9 @@ export class BachatNewComponent implements OnInit {
       this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
     });
-    this.filterBody.year = 2023;
-    this.filterBody.months = [5, 3, 2];
-    this.filter();
+    // this.filterBody.year = 2023;
+    // this.filterBody.months = [5, 3, 2];
+    // this.filter();
   }
 
   getBase64Images() {
@@ -334,11 +339,10 @@ export class BachatNewComponent implements OnInit {
 
         if (this.filterBody.months.length > 0) {
           this.monthsSel = this.gs.months.filter((m: { m: any; }) => data['months'].includes(m.m));
-          // for (let i in this.bachatAll) {
 
-          // }
-          console.log(this.monthsSel);
-          
+        }
+        else {
+          this.monthsSel = []
         }
 
         for (let i in this.bachatAll) {
@@ -373,6 +377,30 @@ export class BachatNewComponent implements OnInit {
     }
     else {
       this.toastr.error('All Fields are Empty.');
+    }
+  }
+
+
+  rowClicked(row: any, i: any) {
+    row.months = this.filterBody.months;
+    this.http.put(this.api.getUrl('BACHATNEW') + 'condition/' + this.auth.webUser.dept_id, row).subscribe(async (data: any) => {
+      if (data['result'] && data['success']) {
+        this.bachatData[i].condition_wise = data['result'];
+        this.bachatData[i].awk_type_wise = data['awk'];
+
+        if (this.bachatData[i].condition_wise.length > 0 || this.bachatData[i].awk_type_wise.length > 0) {
+          this.bachatData[i].subReport = true;
+          this.bachatData[i].currentReport = 'condition_wise';
+        } else {
+          this.bachatData[i].subReport = false;
+        }
+      }
+    });
+  }
+
+  operationClick(key: any, i: any) {
+    if (this.bachatData[i][key] && this.bachatData[i][key].length > 0) {
+      this.bachatData[i].currentReport = key;
     }
   }
 

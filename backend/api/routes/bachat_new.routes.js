@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const DBContex = require('../models/DBContex');
+const Fn = require('../models/functions');
 const DB = new DBContex();
 
 
@@ -50,7 +51,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
 
         }
         if (req.body.months && req.body.months.length > 0) {
-            months = req.body.months.sort((a, b) => a - b);
+            months = Fn.sortAndFillMonths(req.body.months);
             conditionQuery1 += ` AND month in (${months.join(',')}) AND year = '${req.body.year}'`
 
             // let sql = DB.query.bachat_new.select_all.replace('?', conditionQuery1).replace('#', conditionQuery2);
@@ -122,7 +123,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                 // row.arr_sum_jawak = jawak;
                 // row.arr_sum_used = used;
                 // row.arr_sum_bachat = bcht;
-                
+
 
                 // fill 0 to months that are in range but not in row
                 row.arr_sum_aawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_aawak[row.arr_months.indexOf(m)] : 0);
@@ -161,6 +162,200 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             months: months
         })
     } catch (err) { console.log(err); next(err) };
+});
+
+router.put('/condition/:dept_id', async (req, res, next) => {
+    try {
+        let bachat = [], months = [];
+        let conditionQuery1 = `where dept_id = ${req.params.dept_id}`, awkCondition = `where awk.dept_id = ${req.params.dept_id}`;
+        if (req.body) {
+            conditionQuery1 += `${req.body.mm_id ? ` AND bachat_new.mm_id = ${req.body.mm_id}` : ``} ${req.body.item_id ? ` AND bachat_new.item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND bachat_new.subitem_id = ${req.body.subitem_id}` : ``} ${req.body.unit_id ? ` AND bachat_new.unit_id = ${req.body.unit_id}` : ``}`
+            awkCondition += `${req.body.mm_id ? ` AND awk.mm_id = ${req.body.mm_id}` : ``} ${req.body.item_id ? ` AND awk.item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND awk.subitem_id = ${req.body.subitem_id}` : ``} ${req.body.unit_id ? ` AND awk.unit_id = ${req.body.unit_id}` : ``}`
+            // conditionQuery2 += `${req.body.state_id ? ` where mm.state_id = ${req.body.state_id}` : ``} `;
+
+        }
+        months = Fn.sortAndFillMonths(req.body.months);
+        conditionQuery1 += ` AND month in (${months.join(',')}) AND year = '${req.body.year}'`
+        awkCondition += ` AND awk.month in (${months.join(',')}) AND awk.year = '${req.body.year}'`
+
+        // let sql = DB.query.bachat_new.select_all.replace('?', conditionQuery1).replace('#', conditionQuery2);
+        let sql = `select bcht.*,
+            JSON_GROUP_ARRAY(bcht.month) as arr_months, 
+            JSON_GROUP_ARRAY(bcht.t_a) as arr_sum_aawak, 
+            JSON_GROUP_ARRAY(bcht.t_j) as arr_sum_jawak, 
+            JSON_GROUP_ARRAY(bcht.t_u) as arr_sum_used,
+            JSON_GROUP_ARRAY(bcht.t_b) as arr_sum_bachat,
+            mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
+            it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
+            sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+            sl.list_name_hin, sl.list_name_eng,
+            unit.unit_short, unit.unit_full,
+            dept.dept_code, dept.dept_hin, dept.dept_eng from (select sum(total_aawak) as t_a, sum(jawak) as t_j, sum(used_jawak) as t_u, sum(bachat) as t_b, * from bachat_new ${conditionQuery1}        
+            group by dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, month, year) bcht
+            left join mm on mm._id = bcht.mm_id
+            left join state st on st._id = mm.state_id
+            left join item it on it._id = bcht.item_id
+            left join subitem sit on sit._id = bcht.subitem_id
+            left join subitem_list sitl on sitl._id = sit.subitem_list_id
+            left join support_list sl on sl._id = bcht.condition_id
+            left join unit on unit._id = bcht.unit_id
+            left join department dept on dept._id = bcht.dept_id
+            group by bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id;`
+
+        // console.log(sql);
+        let stmt = DB.db.prepare(sql);
+
+        for (let row of stmt.iterate({ order: 'updated_at desc' })) {
+
+            for (let key of Object.keys(row)) {
+                if (key.includes('arr')) {
+                    row[key] = row[key] ? JSON.parse(row[key]) : []
+                }
+            }
+
+            let past_bachat = DB.db.prepare(`select sum(bachat) as pb_qty from bachat_new where dept_id = @dept_id AND mm_id = @mm_id AND item_id = @item_id AND ((subitem_id IS NULL AND @subitem_id IS NULL) OR subitem_id = @subitem_id) AND condition_id = @condition_id AND unit_id = @unit_id AND (year < ${req.body.year} OR (year = ${req.body.year} AND month < ${months[0]}))`).get(row);
+
+            row.past_bachat = past_bachat.pb_qty || 0;
+
+
+            // fill 0 to months that are in range but not in row
+            row.arr_sum_aawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_aawak[row.arr_months.indexOf(m)] : 0);
+            row.arr_sum_jawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_jawak[row.arr_months.indexOf(m)] : 0);
+            row.arr_sum_used = months.map(m => row.arr_months.includes(m) ? row.arr_sum_used[row.arr_months.indexOf(m)] : 0);
+            row.arr_sum_bachat = months.map(m => row.arr_months.includes(m) ? row.arr_sum_bachat[row.arr_months.indexOf(m)] : 0);
+            row.arr_months = months;
+
+            // add pichla bachat of previos month to all months bachat.
+            for (let i = 0; i < row.arr_sum_bachat.length; i++) {
+                row.arr_sum_bachat[i] += i == 0 ? row.past_bachat || 0 : row.arr_sum_bachat[i - 1] || 0;
+            }
+
+            bachat.push(row);
+        }
+
+
+        let awksql = `select awk.dept_id, awk.mm_id, awk.item_id, awk.subitem_id, awk.unit_id, awk.aawak_type_id, awk.year,json_group_array(awk.month) as arr_months, json_group_array(awk.t_qty) as arr_sum_aawak, json_group_array(jwk.used) as arr_sum_used, json_group_array(jwk.other) as arr_sum_jawak, 
+        sl.list_name_hin, sl.list_name_eng,
+        unit.unit_short, unit.unit_full from mn_awk_type_wise awk
+        left join mn_jwk_aj_type jwk on awk.month = jwk.month AND awk.year = jwk.year AND awk.dept_id = jwk.dept_id AND awk.mm_id = jwk.mm_id AND awk.item_id = jwk.item_id AND awk.subitem_id = jwk.subitem_id AND awk.unit_id = jwk.unit_id AND awk.aawak_type_id = jwk.aawak_type_id 
+        left join support_list sl on sl._id = awk.aawak_type_id
+        left join unit on unit._id = awk.unit_id ${awkCondition}        
+        group by awk.year, awk.dept_id, awk.mm_id, awk.item_id, awk.subitem_id, awk.unit_id, awk.aawak_type_id`;
+        // console.log(awksql);
+        let awk = await DB.db.prepare(awksql).all();
+
+        for (let i in awk) {
+
+            let row = awk[i];
+
+            for (let key of Object.keys(row)) {
+                if (key.includes('arr')) {
+                    row[key] = row[key] ? JSON.parse(row[key]) : []
+                }
+            }
+
+
+            // fill 0 to months that are in range but not in row
+            row.arr_sum_aawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_aawak[row.arr_months.indexOf(m)] : 0);
+            row.arr_sum_jawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_jawak[row.arr_months.indexOf(m)] : 0);
+            row.arr_sum_used = months.map(m => row.arr_months.includes(m) ? row.arr_sum_used[row.arr_months.indexOf(m)] : 0);
+            // row.arr_sum_bachat = months.map(m => row.arr_months.includes(m) ? row.arr_sum_bachat[row.arr_months.indexOf(m)] : 0);
+            row.arr_months = months;
+
+            row.arr_sum_bachat = [];
+            // add pichla bachat of previos month to all months bachat.
+            for (let i = 0; i < row.arr_months.length; i++) {
+                row.arr_sum_bachat[i] = (row.arr_sum_aawak[i] - row.arr_sum_jawak[i] - row.arr_sum_used[i]) + (i == 0 ? row.past_bachat || 0 : row.arr_sum_bachat[i - 1] || 0);
+            }
+
+            awk[i] = row;
+        }
+
+        res.json({
+            success: true,
+            result: bachat,
+            awk: awk,
+            months: months
+        })
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.put('/aj_type/:dept_id', async (req, res, next) => {
+    try {
+        let bachat = [], months = [];
+        let conditionQuery1 = `where dept_id = ${req.params.dept_id}`;
+        if (req.body) {
+            conditionQuery1 += `${req.body.mm_id ? ` AND aawak.mm_id = ${req.body.mm_id}` : ``} ${req.body.item_id ? ` AND aawak.item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND aawak.subitem_id = ${req.body.subitem_id}` : ``} ${req.body.unit_id ? ` AND aawak.unit_id = ${req.body.unit_id}` : ``}`
+            // conditionQuery2 += `${req.body.state_id ? ` where mm.state_id = ${req.body.state_id}` : ``} `;
+
+        }
+        months = req.body.months.sort((a, b) => a - b);
+        conditionQuery1 += ` AND month in (${months.join(',')}) AND year = '${req.body.year}'`
+
+        // let sql = DB.query.bachat_new.select_all.replace('?', conditionQuery1).replace('#', conditionQuery2);
+        let sql = `select bcht.*,
+            JSON_GROUP_ARRAY(bcht.month) as arr_months, 
+            JSON_GROUP_ARRAY(bcht.t_a) as arr_sum_aawak, 
+            JSON_GROUP_ARRAY(bcht.t_j) as arr_sum_jawak, 
+            JSON_GROUP_ARRAY(bcht.t_u) as arr_sum_used,
+            JSON_GROUP_ARRAY(bcht.t_b) as arr_sum_bachat,
+            mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
+            it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
+            sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+            sl.list_name_hin, sl.list_name_eng,
+            unit.unit_short, unit.unit_full,
+            dept.dept_code, dept.dept_hin, dept.dept_eng from (select sum(total_aawak) as t_a, sum(jawak) as t_j, sum(used_jawak) as t_u, sum(bachat) as t_b, * from bachat_new ${conditionQuery1}        
+            group by dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, month, year) bcht
+            left join mm on mm._id = bcht.mm_id
+            left join state st on st._id = mm.state_id
+            left join item it on it._id = bcht.item_id
+            left join subitem sit on sit._id = bcht.subitem_id
+            left join subitem_list sitl on sitl._id = sit.subitem_list_id
+            left join support_list sl on sl._id = bcht.condition_id
+            left join unit on unit._id = bcht.unit_id
+            left join department dept on dept._id = bcht.dept_id
+            group by bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id;`
+
+        // console.log(sql);
+        let stmt = DB.db.prepare(sql);
+
+        for (let row of stmt.iterate({ order: 'updated_at desc' })) {
+
+            for (let key of Object.keys(row)) {
+                if (key.includes('arr')) {
+                    row[key] = row[key] ? JSON.parse(row[key]) : []
+                }
+            }
+
+            let past_bachat = DB.db.prepare(`select sum(bachat) as pb_qty from bachat_new where dept_id = @dept_id AND mm_id = @mm_id AND item_id = @item_id AND ((subitem_id IS NULL AND @subitem_id IS NULL) OR subitem_id = @subitem_id) AND condition_id = @condition_id AND unit_id = @unit_id AND (year < ${req.body.year} OR (year = ${req.body.year} AND month < ${months[0]}))`).get(row);
+
+            row.past_bachat = past_bachat.pb_qty || 0;
+
+
+            // fill 0 to months that are in range but not in row
+            row.arr_sum_aawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_aawak[row.arr_months.indexOf(m)] : 0);
+            row.arr_sum_jawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_jawak[row.arr_months.indexOf(m)] : 0);
+            row.arr_sum_used = months.map(m => row.arr_months.includes(m) ? row.arr_sum_used[row.arr_months.indexOf(m)] : 0);
+            row.arr_sum_bachat = months.map(m => row.arr_months.includes(m) ? row.arr_sum_bachat[row.arr_months.indexOf(m)] : 0);
+            row.arr_months = months;
+
+            // add pichla bachat of previos month to all months bachat.
+            for (let i = 0; i < row.arr_sum_bachat.length; i++) {
+                row.arr_sum_bachat[i] += i == 0 ? row.past_bachat || 0 : row.arr_sum_bachat[i - 1] || 0;
+            }
+
+            bachat.push(row);
+        }
+        res.json({
+            success: true,
+            result: bachat,
+            months: months
+        })
+    } catch (err) {
+        next(err);
+    }
 });
 
 

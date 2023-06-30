@@ -42,6 +42,18 @@ export class ReportsComponent implements OnInit {
   pbks: any = [];
   pbksAll: any = [];
   categories: any = []
+  countries:any = [
+    { name: 'Australia', code: 'AU' },
+    { name: 'Brazil', code: 'BR' },
+    { name: 'China', code: 'CN' },
+    { name: 'Egypt', code: 'EG' },
+    { name: 'France', code: 'FR' },
+    { name: 'Germany', code: 'DE' },
+    { name: 'India', code: 'IN' },
+    { name: 'Japan', code: 'JP' },
+    { name: 'Spain', code: 'ES' },
+    { name: 'United States', code: 'US' }
+];
 
   // syncfusion support 
   @ViewChild('Grid') grid!: GridComponent
@@ -90,11 +102,11 @@ export class ReportsComponent implements OnInit {
     };
     this.toolbarOptions = ['Search'];
 
-    this.filterBody = {
-      month: 11,
-      year: 2022
-    }
-    this.searchReport();
+    // this.filterBody = {
+    //   month: 11,
+    //   year: 2022
+    // }
+    // this.searchReport();
     
   }
 
