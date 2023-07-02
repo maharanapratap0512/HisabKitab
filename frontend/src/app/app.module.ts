@@ -132,7 +132,7 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
     BachatNewComponent,
     AdminDashboardComponent,
   ],
-  imports: [
+  imports: [    
     BrowserModule,
     DropDownTreeModule,
     AppRoutingModule,

@@ -131,7 +131,7 @@
             <div class="row" *ngIf="bachatData.length">
                <div class="card-body" style="overflow: auto;">
                   <h4 class="card-title">Click Row to See More Details.</h4>
-                  <table id="datatable-buttons" class="table table-hover dt-responsive">
+                  <table id="datatable-buttons" class="table dt-responsive">
                      <thead>
                         <tr *ngIf="monthsSel.length <= 0">
                            <!-- <td>Image</td> -->
@@ -216,20 +216,31 @@
                               </ng-container>
                               <ng-container *ngIf="monthsSel.length > 0">
                                  <td>{{data.past_bachat + " " + data.unit_short}}</td>
+
                                  <ng-container *ngFor="let row of monthsSel; let m = index;">
-                                    <td class="partition"><span
+                                    <td (mouseenter)="data.showTooltip[m] = true" (mouseleave)="data.showTooltip[m] = false"
+                                       (click)="editComment(row.m, data, 'main_row')" class="partition comment" [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
                                           [ngClass]="{'error': data.arr_sum_aawak[m] < 0}">{{data.arr_sum_aawak[m]}}</span>
                                     </td>
-                                    <td><span
+                                    <td (mouseenter)="data.showTooltip[m] = true" (mouseleave)="data.showTooltip[m] = false"
+                                       (click)="editComment(row.m, data, 'main_row')" class="comment" [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
                                           [ngClass]="{'error': data.arr_sum_used[m] < 0}">{{data.arr_sum_used[m]}}</span>
                                     </td>
-                                    <td><span
+                                    <td (mouseenter)="data.showTooltip[m] = true" (mouseleave)="data.showTooltip[m] = false"
+                                       (click)="editComment(row.m, data, 'main_row')" class="comment" [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
                                           [ngClass]="{'error': data.arr_sum_jawak[m] < 0}">{{data.arr_sum_jawak[m]}}</span>
                                     </td>
-                                    <td><span
-                                          [ngClass]="{'error': data.arr_sum_bachat[m] < 0, 'stock':data.arr_sum_bachat[m] > 0}">{{data.arr_sum_bachat[m]}}</span>
+                                    <td (mouseenter)="data.showTooltip[m] = true" (mouseleave)="data.showTooltip[m] = false"
+                                       (click)="editComment(row.m, data, 'main_row')" class="comment-cell" [ngClass]="{'cell-highlight':data.showTooltip[m]}">
+                                       <div class="cell-content"
+                                          [ngClass]="{'error': data.arr_sum_bachat[m] < 0, 'stock':data.arr_sum_bachat[m] > 0}">
+                                          {{data.arr_sum_bachat[m]}}</div>
+                                       <div [ngClass]="{'comment-indicator':data.arr_comment[m]}">
+                                       </div>
+                                       <div class="comment-tooltip" [hidden]="!data.showTooltip[m] || !data.arr_comment[m]">{{data.arr_comment[m]}}</div>
                                     </td>
                                  </ng-container>
+
                               </ng-container>
                            </tr>
                            <ng-container *ngIf="monthsSel.length <= 0 && data.arr_condition_id.length > 0">

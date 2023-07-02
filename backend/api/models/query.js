@@ -179,70 +179,50 @@ const category = {
         updated_at=datetime('now','localtime')`
 }
 
-const usage_list = {
+const report_comment = {
     select:
-        `select * from usage_list ?`
+        `select * from report_comment ?`
     , select_full:
-        `select * from usage_list ? limit @limit offset @offset`
+        `select * from report_comment ? limit @limit offset @offset`
     , insert:
-        `insert into usage_list (
-            usage_hin,
-            usage_eng,
-            usage_roman,
-            active)
+        `insert into report_comment (
+            report_type,
+            row_type,
+            month,
+            year,
+            dept_id,
+            mm_id,
+            item_id,
+            subitem_id,
+            unit_id,
+            type_id,
+            comment)
         values (
-            @usage_hin,
-            @usage_eng,
-            @usage_roman,
-            @active)`
-    , import:
-        `insert into usage_list (
-            usage_hin,
-            usage_eng,
-            usage_roman,
-            created_at,
-            updated_at,
-            active)
-        values (
-            @usage_hin,
-            @usage_eng,
-            @usage_roman,
-            @created_at,
-            datetime('now','localtime'),
-            @active)`
-    , insert_ignore:
-        `insert or ignore into usage_list (
-            _id,
-            usage_hin,
-            usage_eng,
-            usage_roman,
-            created_at,
-            updated_at,
-            active) 
-        values (
-            @_id,
-            @usage_hin,
-            @usage_eng,
-            @usage_roman,
-            @created_at,
-            @updated_at,
-            @active)`
-    , import_update:
-        `update usage_list set 
-        usage_hin=@usage_hin,
-        usage_eng=@usage_eng,
-        usage_roman=@usage_roman,
-        updated_at=@updated_at where _id = @_id`
+            @report_type,
+            @row_type,
+            @month,
+            @year,
+            @dept_id,
+            @mm_id,
+            @item_id,
+            @subitem_id,
+            @unit_id,
+            @type_id,
+            @comment)`
     , update:
-        `update usage_list set
-        usage_hin=@usage_hin,
-        usage_eng=@usage_eng,
-        usage_roman=@usage_roman,
-        updated_at=datetime('now','localtime')`
-    , update_active:
-        `update usage_list set
-        active=@active,
-        updated_at=datetime('now','localtime')`
+        `update report_comment set
+        report_type=@report_type,
+        row_type=@row_type,
+        month=@month,
+        year=@year,
+        dept_id=@dept_id,
+        mm_id=@mm_id,
+        item_id=@item_id,
+        subitem_id=@subitem_id,
+        unit_id=@unit_id,
+        type_id=@type_id,
+        comment=@comment,
+        updated_at=(UNIXEPOCH('now','localtime'))`
 }
 
 const department = {
@@ -686,7 +666,6 @@ const bachat = {
         `mm.mm_hin, mm.mm_eng, item_hin, subitem_hin, item_eng, subitem_eng, unit.unit_short`
 }
 
-
 const bachat_new = {
     select:
         `select * from bachat_new ?`
@@ -729,7 +708,7 @@ const bachat_new = {
         left join unit on unit._id = bcht.unit_id
         left join department dept on dept._id = bcht.dept_id #
         group by bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.unit_id order by @order;`
-    
+
     , insert:
         `insert into bachat_new (
             month, year, mm_id, item_id, subitem_id, condition_id, dept_id, total_aawak, jawak, used_jawak, bachat, unit_id)
@@ -762,7 +741,7 @@ const bachat_new = {
         `insert into bachat_new (
             month, year, mm_id, item_id, subitem_id, condition_id, dept_id, jawak, used_jawak, bachat, unit_id)
         values(
-            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, (CASE WHEN @jawak_type_id <> 27 THEN @qty ELSE 0 END), (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END), 0 - @qty, @unit_id);`    
+            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, (CASE WHEN @jawak_type_id <> 27 THEN @qty ELSE 0 END), (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END), 0 - @qty, @unit_id);`
     , update_jawak_ins:
         `update bachat_new
         set
@@ -1941,7 +1920,7 @@ genDeptDB = {
 
     point: `insert into point select * from mainDB.point`,
     insertDept: `insert into department(_id, dept_eng, dept_hin, dept_code, settings, password, active, created_at, updated_at) select _id, dept_eng, dept_hin, dept_code, '{}', password, active, created_at, updated_at from mainDB.department`,
-    
+
     updateDept: `update department set settings = (select settings from mainDB.department dp where dp._id = department._id) where department._id in (select json_each.value from mainDB.department_config, json_each(config_value) where dept_id = @dept_id AND config_key='department')`,
 
     insertDeptConfig: `insert into department_config(_id, dept_id, config_key, config_value, active, created_at, updated_at) select _id, dept_id, config_key, '[]', active, created_at, updated_at from mainDB.department_config`,
@@ -2025,5 +2004,5 @@ const test = {
 }
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, usage_list
+    country, city, category, department, department_config, item, itemmix, aawak, bachat, jawak, mm, nimitt, pbk, point, product, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, report_comment
 };

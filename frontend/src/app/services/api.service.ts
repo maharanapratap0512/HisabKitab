@@ -60,7 +60,7 @@ export class ApiService {
     REPORTAJ: base_url + 'reports/aj/',
     IMPORTHISTORY: base_url + 'import_history/',
     VEHICLE: base_url + 'vehicle/',
-    CLOSING: base_url+ 'closing/'
+    COMMENT: base_url+ 'comment/'
     
   };
 

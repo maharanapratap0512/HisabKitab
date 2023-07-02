@@ -37,3 +37,83 @@
    text-decoration: line-through;
    cursor: no-drop;
 }
+
+
+// big ! symbol for comment indication
+// .comment-cell {
+//    position: relative;
+//  }
+
+//  .comment-indicator {
+//    position: absolute;
+//    top: -10px;
+//    right: -10px;
+//    background-color: yellow;
+//    color: black;
+//    font-weight: bold;
+//    width: 20px;
+//    height: 20px;
+//    display: flex;
+//    align-items: center;
+//    justify-content: center;
+//    border-radius: 50%;
+//  }
+
+
+.cell-highlight {
+   // border: solid yellow 3px;
+   --bs-table-accent-bg: rgba(170, 170, 170, 0.1);
+   /* --bs-table-accent-bg: var(--bs-table-hover-bg); */
+   color: white;
+   transition: transform 0.2s ease;
+   transform: scale(100.5%);
+   /* Zoom-in effect */
+   width: 120%;
+   /* Increase width */
+   height: 120%;
+   /* Increase height */
+}
+
+.comment-cell {
+   position: relative;
+}
+
+.cell-content {
+   /* Set the width and height of the cell */
+   // width: 100px;
+   // height: 50px;
+}
+
+.comment-indicator {
+   position: absolute;
+   top: 0;
+   right: 0;
+   width: 0;
+   height: 0;
+   border-top: 8px solid transparent;
+   border-right: 8px solid red;
+   /* Replace 'red' with desired color */
+   transform: rotate(-90deg);
+}
+
+.comment-tooltip {
+   position: absolute;
+   top: -30px;
+   /* Adjust as needed */
+   right: 0;
+   background-color: #595959;
+   border: 1px solid #232323d9;
+   padding: 6px;
+}
+
+.comment-indicator-alt {
+   position: absolute;
+   top: 0;
+   right: 0;
+   width: 0;
+   height: 0;
+   border-top: 4px solid red;
+   border-right: 4px solid red;
+   border-bottom: 4px solid transparent;
+   border-left: 4px solid transparent;
+}

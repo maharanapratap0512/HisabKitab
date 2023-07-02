@@ -9,6 +9,7 @@ import { AuthService } from '../services/auth.service';
 import { ExcelExportService } from '../services/excel-export.service';
 import { GlobalService } from '../services/global.service';
 import { HttpService } from '../services/http.service';
+import { TooltipModule } from 'primeng/tooltip';
 declare var $: any;
 
 
@@ -82,9 +83,9 @@ export class BachatNewComponent implements OnInit {
       this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
     });
-    // this.filterBody.year = 2023;
-    // this.filterBody.months = [5, 3, 2];
-    // this.filter();
+    this.filterBody.year = 2023;
+    this.filterBody.months = [5, 3, 1];
+    this.filter();
   }
 
   getBase64Images() {
@@ -346,6 +347,7 @@ export class BachatNewComponent implements OnInit {
         }
 
         for (let i in this.bachatAll) {
+          this.bachatAll[i].showTooltip = {};
           this.bachatAll[i].categories_hin = '';
           this.bachatAll[i].categories_eng = '';
           if (this.bachatAll[i].arr_subitem_categories && this.bachatAll[i].arr_subitem_categories.length > 0) {
@@ -403,6 +405,39 @@ export class BachatNewComponent implements OnInit {
       this.bachatData[i].currentReport = key;
     }
   }
+
+  editComment(index: any, data: any, row_type:any) {
+
+    Swal.fire({
+      title: 'Enter Comment',
+      input: 'textarea',
+      inputPlaceholder: 'comment',
+      showCancelButton: true,
+      confirmButtonText: 'Save',
+      inputValue:data.arr_comment[index]
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // User clicked the Submit button and provided a name
+        data.comment = result.value;
+        data.month = this.monthsSel[index].m;
+        data.report_type = 'full_saar';
+        data.row_type = row_type;
+        data.type_id = null;
+        this.http.post(this.api.getUrl('COMMENT') + this.auth.webUser.dept_id, data).subscribe(async (result: any) => {
+          console.log(result);
+          
+        });
+      } else {
+        // User clicked the Cancel button or dismissed the modal
+        // Swal.fire('No name entered', 'You did not provide a name', 'error');
+      }
+    }).catch((error) => {
+      // An error occurred
+      this.toastr.error('Error:', error);
+    });
+
+  }
+
 
 }
 
