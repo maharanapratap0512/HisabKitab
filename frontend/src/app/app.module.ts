@@ -10,7 +10,6 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { Ng2SearchPipeModule } from 'ng2-search-filter';
 import { FileSaverModule } from 'ngx-filesaver';
 import { NgxSpinnerModule } from 'ngx-spinner';
-import { NgtUniversalModule } from '@ng-toolkit/universal';
 import { DropDownTreeModule, MultiSelectModule, CheckBoxSelectionService, DropDownListAllModule } from '@syncfusion/ej2-angular-dropdowns';
 import { GridModule, PageService, SortService, FilterService, FreezeService, ToolbarService, AggregateService  } from '@syncfusion/ej2-angular-grids';
 import { CheckBoxModule } from '@syncfusion/ej2-angular-buttons';
@@ -74,6 +73,7 @@ import { ExcelImportComponent } from './excel-import/excel-import.component';
 import { ClosingComponent } from './closing/closing.component';
 import { BachatNewComponent } from './bachat-new/bachat-new.component';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
+
 
 // import { DropdownModule } from 'primeng/dropdown';
 
@@ -152,7 +152,6 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
     Ng2SearchPipeModule,
     FileSaverModule,
     NgxSpinnerModule,
-    NgtUniversalModule,
     NgxPaginationModule,
     AutocompleteLibModule,
     GridModule,

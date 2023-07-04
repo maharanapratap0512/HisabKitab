@@ -1,13 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
-import { LOCAL_STORAGE, WINDOW } from '@ng-toolkit/universal';
+// import { LOCAL_STORAGE, WINDOW } from '@ng-toolkit/universal';
 import { settings } from 'cluster';
 import { ApiService } from './api.service';
 import { HttpService } from './http.service';
 
-
-@Injectable({
-  providedIn: 'root'
-})
 export class AuthService {
   user: any;
   webUser: any = {};
@@ -118,8 +114,6 @@ export class AuthService {
   }
 
   constructor(
-    @Inject(LOCAL_STORAGE) private localStorage: any,
-    @Inject(WINDOW) private Window: any,
     private api: ApiService,
     private http: HttpService
   ) {
@@ -137,20 +131,20 @@ export class AuthService {
 
   loggedIn() {
     // return !!this.localStorage.getItem('WebUser');
-    return !!this.Window.sessionStorage.getItem('WebUser');
+    return !!window.sessionStorage.getItem('WebUser');
   }
 
   // For WebUser
   async setWebUser(user: any) {
     // this.localStorage.setItem('WebUser', JSON.stringify(user));
-    this.Window.sessionStorage.setItem('WebUser', JSON.stringify(user));
+    window.sessionStorage.setItem('WebUser', JSON.stringify(user));
     this.webUser = user;
   }
 
   // async updateMainSettings(setting: any) {
 
   //   this.webUser.settings = setting;
-  //   this.Window.sessionStorage.setItem('WebUser', JSON.stringify(this.webUser));
+  //   window.sessionStorage.setItem('WebUser', JSON.stringify(this.webUser));
   // }
 
   async updateSettings() {
@@ -170,12 +164,12 @@ export class AuthService {
 
   getWebUser() {
     // return JSON.parse(this.localStorage.getItem('WebUser') || '{}');
-    return JSON.parse(this.Window.sessionStorage.getItem('WebUser') || '{}');
+    return JSON.parse(window.sessionStorage.getItem('WebUser') || '{}');
   }
 
   removewebUser() {
     // this.localStorage.removeItem('WebUser');
-    this.Window.sessionStorage.removeItem('WebUser');
+    window.sessionStorage.removeItem('WebUser');
     // this.localStorage.removeItem('Authorization');
   }
 }

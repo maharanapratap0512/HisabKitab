@@ -9,7 +9,7 @@ import { AuthService } from '../services/auth.service';
 import { ExcelExportService } from '../services/excel-export.service';
 import { GlobalService } from '../services/global.service';
 import { HttpService } from '../services/http.service';
-import { TooltipModule } from 'primeng/tooltip';
+// import { TooltipModule } from 'primeng/tooltip';
 declare var $: any;
 
 
