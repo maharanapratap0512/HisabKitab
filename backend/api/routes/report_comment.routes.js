@@ -66,6 +66,22 @@ router.put('/', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+// update report_comment text only 
+router.put('/:id', async (req, res, next) => {
+    try {
+        if (req.body && req.params.id) {
+            await DB.runQuery('report_comment', 'update_text',{ obj: {_id: req.params.id, comment: req.body.comment} }).then(async (data) => {
+                res.json({
+                    success: (data.changes > 0 ? true : false),
+                });
+            });
+        }
+        else {
+            return next(new Error('Id not Found.'))
+        }
+    } catch (err) { next(err) };
+});
+
 // delete report_comment 
 router.delete('/:id', async (req, res, next) => {
     try {

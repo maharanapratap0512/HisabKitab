@@ -108,7 +108,7 @@
             </thead>
             <tbody>
                <ng-container
-                  *ngFor="let data of importData | filter:term | paginate: { id:'excelDataPagination', itemsPerPage: 100,currentPage: pageED,totalItems: importData.length}; let i=index">
+                  *ngFor="let data of importData | search:term | paginate: { id:'excelDataPagination', itemsPerPage: 100,currentPage: pageED,totalItems: importData.length}; let i=index">
                   <tr class="main-row">
                      <td>{{100 * (pageED - 1) + (i+1)}}</td>
                      <td>{{data.awk_id ? data.awk_id : ''}} </td>
@@ -227,7 +227,7 @@
                </thead>
                <tbody>
                   <ng-container
-                     *ngFor="let data of unmatchedData | filter:term | paginate: {id:'unmatchedPagination', itemsPerPage: 10,currentPage: pageCorrection,totalItems: unmatchedData.length}; let i=index">
+                     *ngFor="let data of unmatchedData | search:term | paginate: {id:'unmatchedPagination', itemsPerPage: 10,currentPage: pageCorrection,totalItems: unmatchedData.length}; let i=index">
                      <tr [class]="{'ignored':data.ignore}">
                         <td>{{10 * (pageCorrection - 1) + (i+1)}}</td>
                         <td>{{data.type}} </td>
@@ -463,7 +463,7 @@
             </thead>
             <tbody>
                <ng-container
-                  *ngFor="let data of importData | filter:term | paginate: {id:'toBIPagination', itemsPerPage: 100,currentPage: pageTI,totalItems: importData.length}; let i=index">
+                  *ngFor="let data of importData | search:term | paginate: {id:'toBIPagination', itemsPerPage: 100,currentPage: pageTI,totalItems: importData.length}; let i=index">
                   <tr class="main-row" [ngClass]="{'marked': !data.valid, 'warned':data._id}">
                      <td>{{100 * (pageTI - 1) + (i+1)}}</td>
                      <td>{{data.pkt_num ? data.pkt_num : '-'}} </td>

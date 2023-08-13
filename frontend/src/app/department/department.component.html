@@ -1410,7 +1410,7 @@
                       </tr>
                     </thead>
                     <tbody style="max-height: 500px; min-height: 400px; overflow-y: auto;">
-                      <tr *ngFor="let data of mms | filter:termMM; let i=index"
+                      <tr *ngFor="let data of mms | search:termMM; let i=index"
                         [ngClass]="{'highlight': data.chk == true}" (click)="mmRowClicked(i, data.chk, data._id)">
                         <td>{{i+1}}</td>
                         <td>{{data.mm_hin}}</td>
@@ -1491,7 +1491,7 @@
                       </tr>
                     </thead>
                     <tbody style="max-height: 500px; overflow-y: auto;">
-                      <tr *ngFor="let data of pbks | filter:termPbk; let i=index"
+                      <tr *ngFor="let data of pbks | search:termPbk; let i=index"
                         [ngClass]="{'highlight': data.chk == true}" (click)="pbkRowClicked(i, data.chk, data._id)">
                         <td>{{i+1}}</td>
                         <td>
@@ -1544,7 +1544,7 @@
                       </tr>
                     </thead>
                     <tbody style="max-height: 500px; overflow-y: auto;">
-                      <tr *ngFor="let data of department| filter:termDept; let i=index"
+                      <tr *ngFor="let data of department| search:termDept; let i=index"
                         [ngClass]="{'highlight': data.chk == true}"
                         (click)="departmentRowClicked(i, data.chk, data._id)">
                         <td>{{i+1}}</td>
@@ -1588,7 +1588,7 @@
                       </tr>
                     </thead>
                     <tbody style="max-height: 500px; overflow-y: auto;">
-                      <tr *ngFor="let data of categories | filter:termCat; let i=index"
+                      <tr *ngFor="let data of categories | search:termCat; let i=index"
                         [ngClass]="{'highlight': data.chk == true}" (click)="categoryRowClicked(i, data.chk, data._id)">
                         <td>{{i+1}}</td>
                         <td>{{data.category_hin}}</td>
@@ -1655,7 +1655,7 @@
                     </thead>
                     <tbody class="accordion" id="accordionExample">
                       <ng-container class="accordion-item"
-                        *ngFor="let data of itemmix | filter:termItemmix; let i=index">
+                        *ngFor="let data of itemmix | search:termItemmix; let i=index">
                         <tr data-bs-toggle="collapse" aria-expanded="true"
                           [ngClass]="{'highlight': data.chk, 'item': !data.chk}"
                           (click)="itemmixRowClicked(i, data.chk, data._id)">
@@ -1667,7 +1667,7 @@
                           <td>{{data.categories_hin?data.categories_hin:'-'}}</td>
                           <td>{{data.extra_note?data.extra_note:'-'}}</td>
                         </tr>
-                        <ng-container *ngFor="let si of data.subitems | filter:termItemmix;let j=index">
+                        <ng-container *ngFor="let si of data.subitems | search:termItemmix;let j=index">
                           <ng-container *ngIf="si">
                             <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse show"
                               *ngIf="data.subitems.length > 0" aria-labelledby="headingOne"
@@ -1759,7 +1759,7 @@
                       </tr>
                     </thead>
                     <tbody style="max-height: 500px; overflow-y: auto;">
-                      <tr *ngFor="let data of items | filter:termItem; let i=index"
+                      <tr *ngFor="let data of items | search:termItem; let i=index"
                         [ngClass]="{'highlight': data.chk == true}" (click)="itemRowClicked(i, data.chk, data._id)">
                         <td>{{i+1}}</td>
                         <td>{{data.item_hin}}</td>
@@ -1829,7 +1829,7 @@
                       </tr>
                     </thead>
                     <tbody style="max-height: 500px; overflow-y: auto;">
-                      <tr *ngFor="let data of subitems | filter:termSubitem; let i=index"
+                      <tr *ngFor="let data of subitems | search:termSubitem; let i=index"
                         [ngClass]="{'highlight': data.chk == true}" (click)="subitemRowClicked(i, data.chk, data._id)">
                         <td>{{i+1}}</td>
                         <td>{{data.item_hin}} : {{data.item_eng}}</td>
@@ -1880,7 +1880,7 @@
                       </tr>
                     </thead>
                     <tbody style="max-height: 500px; overflow-y: auto;">
-                      <tr *ngFor="let data of ajtypes | filter:termAJType; let i=index"
+                      <tr *ngFor="let data of ajtypes | search:termAJType; let i=index"
                         [ngClass]="{'highlight': data.chk == true}" (click)="ajtypeRowClicked(i, data.chk, data._id)">
                         <td>{{i+1}}</td>
                         <td>{{data.list_type}}</td>
@@ -1913,7 +1913,7 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <tr *ngFor="let data of deptData | filter:term; let i=index">
+                        <tr *ngFor="let data of deptData | search:term; let i=index">
                            <td>{{i+1}}</td>
                            <td>
                               <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i

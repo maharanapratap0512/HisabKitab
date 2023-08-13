@@ -46,13 +46,13 @@ router.put('/filter/:dept_id', async (req, res, next) => {
         let conditionQuery1 = `where bn.dept_id = ${req.params.dept_id}`;
         let conditionQuery2 = ``;
         if (req.body) {
-            conditionQuery1 += `${req.body.mm_id ? ` AND bn.mm_id = ${req.body.mm_id}` : ``} ${req.body.item_id ? ` AND bn.item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND bn.subitem_id = ${req.body.subitem_id}` : ``}`
+            conditionQuery1 += `${req.body.mm_id ? ` AND bn.mm_id = ${req.body.mm_id}` : ``} ${req.body.item_id ? ` AND bn.item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND bn.subitem_id = ${req.body.subitem_id}` : ``} ${req.body.year ? ` AND bn.year = '${req.body.year}'`: ``}`
             conditionQuery2 += `${req.body.state_id ? ` where mm.state_id = ${req.body.state_id}` : ``} `;
 
         }
         if (req.body.months && req.body.months.length > 0) {
             months = Fn.sortAndFillMonths(req.body.months);
-            conditionQuery1 += ` AND bn.month in (${months.join(',')}) AND bn.year = '${req.body.year}'`
+            conditionQuery1 += ` AND bn.month in (${months.join(',')})`
 
             // let sql = DB.query.bachat_new.select_all.replace('?', conditionQuery1).replace('#', conditionQuery2);
             let sql = `select bcht.*,
@@ -126,19 +126,22 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                 // row.arr_sum_used = used;
                 // row.arr_sum_bachat = bcht;
                 // console.log(`select *, JSON_GROUP_ARRAY(comment) as arr_comment, JSON_GROUP_ARRAY(month) as arr_months from report_comment where month in (${months.join(',')}) AND year = ${row.year} AND dept_id = ${row.dept_id} AND mm_id = ${row.mm_id} AND item_id = ${row.item_id} AND unit_id = ${row.unit_id} AND report_type = 'full_saar' AND row_type = 'main_row' AND ((subitem_id IS NULL AND ${row.subitem_id} IS NULL) OR subitem_id = ${row.subitem_id})`);
-                let crow = Fn.db.prepare(`select *, JSON_GROUP_ARRAY(comment) as arr_comment, JSON_GROUP_ARRAY(month) as arr_months from report_comment where month in (${months.join(',')}) AND year = ${row.year} AND dept_id = ${row.dept_id} AND mm_id = ${row.mm_id} AND item_id = ${row.item_id} AND unit_id = ${row.unit_id} AND report_type = 'full_saar' AND row_type = 'main_row' AND ((subitem_id IS NULL AND ${row.subitem_id} IS NULL) OR subitem_id = ${row.subitem_id}) group by item_id`).get({ ...row, months: months.join(',') })
+                let crow = Fn.db.prepare(`select *, JSON_GROUP_ARRAY(_id) as arr_comment_id, JSON_GROUP_ARRAY(comment) as arr_comment, JSON_GROUP_ARRAY(month) as arr_months from report_comment where month in (${months.join(',')}) AND year = ${row.year} AND dept_id = ${row.dept_id} AND mm_id = ${row.mm_id} AND item_id = ${row.item_id} AND unit_id = ${row.unit_id} AND report_type = 'full_saar' AND row_type = 'main_row' AND ((subitem_id IS NULL AND ${row.subitem_id} IS NULL) OR subitem_id = ${row.subitem_id}) group by item_id`).get({ ...row, months: months.join(',') })
                 if (crow) {
-                    console.log(crow);
+                    // console.log(crow);
                     crow.arr_months = crow.arr_months ? JSON.parse(crow.arr_months) : []
                     crow.arr_comment = crow.arr_comment ? JSON.parse(crow.arr_comment) : []
+                    crow.arr_comment_id = crow.arr_comment_id ? JSON.parse(crow.arr_comment_id) : []
                 } else {
                     crow = {
                         arr_comment: [],
+                        arr_comment_id: [],
                         arr_months: []
                     }
                 }
                 row.arr_comment = months.map(m => crow.arr_months.includes(m) ? crow.arr_comment[crow.arr_months.indexOf(m)] : null);
-                
+                row.arr_comment_id = months.map(m => crow.arr_months.includes(m) ? crow.arr_comment_id[crow.arr_months.indexOf(m)] : null);
+
                 // fill 0 to months that are in range but not in row
                 row.arr_sum_aawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_aawak[row.arr_months.indexOf(m)] : 0);
                 row.arr_sum_jawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_jawak[row.arr_months.indexOf(m)] : 0);
@@ -146,7 +149,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                 row.arr_sum_bachat = months.map(m => row.arr_months.includes(m) ? row.arr_sum_bachat[row.arr_months.indexOf(m)] : 0);
                 // row.arr_comment = months.map(m => row.arr_months.includes(m) ? row.arr_comment[row.arr_months.indexOf(m)] : null);
                 row.arr_months = months;
-
+                row.showTooltip = {};
 
 
                 // add pichla bachat of previos month to all months bachat.
@@ -234,6 +237,22 @@ router.put('/condition/:dept_id', async (req, res, next) => {
 
             row.past_bachat = past_bachat.pb_qty || 0;
 
+            let crow = Fn.db.prepare(`select *, JSON_GROUP_ARRAY(_id) as arr_comment_id, JSON_GROUP_ARRAY(comment) as arr_comment, JSON_GROUP_ARRAY(month) as arr_months from report_comment where month in (${months.join(',')}) AND year = ${row.year} AND dept_id = ${row.dept_id} AND mm_id = ${row.mm_id} AND item_id = ${row.item_id} AND unit_id = ${row.unit_id} AND report_type = 'full_saar' AND row_type = 'condition_wise' AND ((type_id IS NULL AND ${row.condition_id} IS NULL) OR type_id = ${row.condition_id}) AND ((subitem_id IS NULL AND ${row.subitem_id} IS NULL) OR subitem_id = ${row.subitem_id}) group by item_id`).get({ ...row, months: months.join(',') })
+            if (crow) {
+                console.log(crow);
+                crow.arr_months = crow.arr_months ? JSON.parse(crow.arr_months) : []
+                crow.arr_comment = crow.arr_comment ? JSON.parse(crow.arr_comment) : []
+                crow.arr_comment_id = crow.arr_comment_id ? JSON.parse(crow.arr_comment_id) : []
+            } else {
+                crow = {
+                    arr_comment: [],
+                    arr_comment_id: [],
+                    arr_months: []
+                }
+            }
+            row.arr_comment = months.map(m => crow.arr_months.includes(m) ? crow.arr_comment[crow.arr_months.indexOf(m)] : null);
+            row.arr_comment_id = months.map(m => crow.arr_months.includes(m) ? crow.arr_comment_id[crow.arr_months.indexOf(m)] : null);
+            console.log("row", row);
 
             // fill 0 to months that are in range but not in row
             row.arr_sum_aawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_aawak[row.arr_months.indexOf(m)] : 0);
@@ -241,7 +260,7 @@ router.put('/condition/:dept_id', async (req, res, next) => {
             row.arr_sum_used = months.map(m => row.arr_months.includes(m) ? row.arr_sum_used[row.arr_months.indexOf(m)] : 0);
             row.arr_sum_bachat = months.map(m => row.arr_months.includes(m) ? row.arr_sum_bachat[row.arr_months.indexOf(m)] : 0);
             row.arr_months = months;
-
+            row.showTooltip = {}
             // add pichla bachat of previos month to all months bachat.
             for (let i = 0; i < row.arr_sum_bachat.length; i++) {
                 row.arr_sum_bachat[i] += i == 0 ? row.past_bachat || 0 : row.arr_sum_bachat[i - 1] || 0;
@@ -271,14 +290,29 @@ router.put('/condition/:dept_id', async (req, res, next) => {
                 }
             }
 
-
+            let crow = Fn.db.prepare(`select *, JSON_GROUP_ARRAY(_id) as arr_comment_id, JSON_GROUP_ARRAY(comment) as arr_comment, JSON_GROUP_ARRAY(month) as arr_months from report_comment where month in (${months.join(',')}) AND year = ${row.year} AND dept_id = ${row.dept_id} AND mm_id = ${row.mm_id} AND item_id = ${row.item_id} AND unit_id = ${row.unit_id} AND report_type = 'full_saar' AND row_type = 'awk_type_wise' AND ((type_id IS NULL AND ${row.aawak_type_id} IS NULL) OR type_id = ${row.aawak_type_id}) AND ((subitem_id IS NULL AND ${row.subitem_id} IS NULL) OR subitem_id = ${row.subitem_id}) group by item_id`).get({ ...row, months: months.join(',') })
+            if (crow) {
+                console.log(crow);
+                crow.arr_months = crow.arr_months ? JSON.parse(crow.arr_months) : []
+                crow.arr_comment = crow.arr_comment ? JSON.parse(crow.arr_comment) : []
+                crow.arr_comment_id = crow.arr_comment_id ? JSON.parse(crow.arr_comment_id) : []
+            } else {
+                crow = {
+                    arr_comment: [],
+                    arr_comment_id: [],
+                    arr_months: []
+                }
+            }
+            row.arr_comment = months.map(m => crow.arr_months.includes(m) ? crow.arr_comment[crow.arr_months.indexOf(m)] : null);
+            row.arr_comment_id = months.map(m => crow.arr_months.includes(m) ? crow.arr_comment_id[crow.arr_months.indexOf(m)] : null);
+            console.log("row", row);
             // fill 0 to months that are in range but not in row
             row.arr_sum_aawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_aawak[row.arr_months.indexOf(m)] : 0);
             row.arr_sum_jawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_jawak[row.arr_months.indexOf(m)] : 0);
             row.arr_sum_used = months.map(m => row.arr_months.includes(m) ? row.arr_sum_used[row.arr_months.indexOf(m)] : 0);
             // row.arr_sum_bachat = months.map(m => row.arr_months.includes(m) ? row.arr_sum_bachat[row.arr_months.indexOf(m)] : 0);
             row.arr_months = months;
-
+            row.showTooltip = {};
             row.arr_sum_bachat = [];
             // add pichla bachat of previos month to all months bachat.
             for (let i = 0; i < row.arr_months.length; i++) {
@@ -350,6 +384,21 @@ router.put('/aj_type/:dept_id', async (req, res, next) => {
 
             row.past_bachat = past_bachat.pb_qty || 0;
 
+            let crow = Fn.db.prepare(`select *, JSON_GROUP_ARRAY(_id) as arr_comment_id, JSON_GROUP_ARRAY(comment) as arr_comment, JSON_GROUP_ARRAY(month) as arr_months from report_comment where month in (${months.join(',')}) AND year = ${row.year} AND dept_id = ${row.dept_id} AND mm_id = ${row.mm_id} AND item_id = ${row.item_id} AND unit_id = ${row.unit_id} AND report_type = 'full_saar' AND row_type = 'awk_type_wise' AND ((subitem_id IS NULL AND ${row.subitem_id} IS NULL) OR subitem_id = ${row.subitem_id}) group by item_id`).get({ ...row, months: months.join(',') })
+            if (crow) {
+                console.log(crow);
+                crow.arr_months = crow.arr_months ? JSON.parse(crow.arr_months) : []
+                crow.arr_comment = crow.arr_comment ? JSON.parse(crow.arr_comment) : []
+                crow.arr_comment_id = crow.arr_comment_id ? JSON.parse(crow.arr_comment_id) : []
+            } else {
+                crow = {
+                    arr_comment: [],
+                    arr_comment_id: [],
+                    arr_months: []
+                }
+            }
+            row.arr_comment = months.map(m => crow.arr_months.includes(m) ? crow.arr_comment[crow.arr_months.indexOf(m)] : null);
+            row.arr_comment_id = months.map(m => crow.arr_months.includes(m) ? crow.arr_comment_id[crow.arr_months.indexOf(m)] : null);
 
             // fill 0 to months that are in range but not in row
             row.arr_sum_aawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_aawak[row.arr_months.indexOf(m)] : 0);
@@ -357,7 +406,7 @@ router.put('/aj_type/:dept_id', async (req, res, next) => {
             row.arr_sum_used = months.map(m => row.arr_months.includes(m) ? row.arr_sum_used[row.arr_months.indexOf(m)] : 0);
             row.arr_sum_bachat = months.map(m => row.arr_months.includes(m) ? row.arr_sum_bachat[row.arr_months.indexOf(m)] : 0);
             row.arr_months = months;
-
+            row.showTooltip = {};
             // add pichla bachat of previos month to all months bachat.
             for (let i = 0; i < row.arr_sum_bachat.length; i++) {
                 row.arr_sum_bachat[i] += i == 0 ? row.past_bachat || 0 : row.arr_sum_bachat[i - 1] || 0;

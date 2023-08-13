@@ -4,6 +4,10 @@ import { settings } from 'cluster';
 import { ApiService } from './api.service';
 import { HttpService } from './http.service';
 
+@Injectable({
+  providedIn: 'root'
+})
+
 export class AuthService {
   user: any;
   webUser: any = {};
@@ -132,6 +136,7 @@ export class AuthService {
   loggedIn() {
     // return !!this.localStorage.getItem('WebUser');
     return !!window.sessionStorage.getItem('WebUser');
+    // return false;
   }
 
   // For WebUser
@@ -165,11 +170,13 @@ export class AuthService {
   getWebUser() {
     // return JSON.parse(this.localStorage.getItem('WebUser') || '{}');
     return JSON.parse(window.sessionStorage.getItem('WebUser') || '{}');
+    // return ''
   }
 
   removewebUser() {
     // this.localStorage.removeItem('WebUser');
     window.sessionStorage.removeItem('WebUser');
     // this.localStorage.removeItem('Authorization');
+    // return '';
   }
 }

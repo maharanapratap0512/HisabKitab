@@ -48,7 +48,7 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <tr *ngFor="let data of pointData | filter:term; let i=index">
+                        <tr *ngFor="let data of pointData | search:term; let i=index">
                            <td style="font-size: large;">
                               {{i+1}}
                            </td>

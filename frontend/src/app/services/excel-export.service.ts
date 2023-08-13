@@ -3,6 +3,7 @@ import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
 import { Workbook } from 'exceljs';
 import { AuthService } from './auth.service';
+import { GlobalService } from './global.service';
 
 
 const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
@@ -13,7 +14,8 @@ const EXCEL_EXTENSION = '.xlsx';
 })
 export class ExcelExportService {
 
-  constructor(public auth: AuthService) { }
+  constructor(public auth: AuthService,
+    public gs: GlobalService) { }
 
   public exportAsExcelFile(json: any[], excelFileName: string): void {
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json);
@@ -498,6 +500,54 @@ export class ExcelExportService {
   }
 
 
+
+  generateReportExcel(json: any[], excelFileName: string, options: any = {}): void {
+    let workbook = new Workbook();
+    var worksheet = workbook.addWorksheet('Sheet1');
+    console.log(json);
+    console.log(options);
+    let monthCount = options.months.length;
+    let headers = Object.keys(json[0]).filter(key => !key.includes("arr_"));
+    console.log(Object.keys(json));
+    console.log(headers);
+    let headerCount = headers.length;
+
+    // Title
+    worksheet.mergeCells([1, 1, 1, 10]);
+    worksheet.getCell('A1').value = 'रिपोर्ट ' + options.months[0] + "-" + options.year + " से " + options.months[monthCount - 1] + "-" + options.year;
+    worksheet.getRow(1).font = { name: 'Corbel', family: 4, size: 20, };
+    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+
+    // Header
+    for (let i = 0; i < headerCount; i++) {
+      worksheet.mergeCells([2, i + 1, 3, i + 1]);
+      worksheet.getCell(2, i + 1).value = headers[i];
+      worksheet.getCell(2, i + 1).fill = {
+        type: 'pattern', pattern: 'solid', fgColor: { argb: '96C8FB' }, bgColor: { argb: '96C8FB' }
+      };
+    }
+
+    // SubHeader  
+    let startCell = headerCount + 1;
+    for (let i = 0; i < monthCount; i++) {
+      worksheet.mergeCells([2, startCell, 3, startCell + 3]);
+      worksheet.getCell(3, startCell).value = this.gs.months[options.months[i]-1] + "-" + options.year;
+      worksheet.getCell(3, startCell).fill = {
+        type: 'pattern', pattern: 'solid', fgColor: { argb: '96C8FB' }, bgColor: { argb: '96C8FB' }
+        //adding fields to header
+      };
+      startCell = startCell + 4;      
+    }
+
+    let fileName = excelFileName + '_' + options.year + ".xlsx";
+    const excelBuffer: any = workbook.xlsx.writeBuffer();
+    workbook.xlsx.writeBuffer()
+      .then(function (buffer: any) {
+        // done buffering
+        const data: Blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        FileSaver.saveAs(data, fileName);
+      });
+  }
 
 
 

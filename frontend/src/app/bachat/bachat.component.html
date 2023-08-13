@@ -105,7 +105,7 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <ng-container *ngFor="let data of bachatData | filter:term; let i=index">
+                        <ng-container *ngFor="let data of bachatData | search:term; let i=index">
                            <tr (click)="setImages(data)">
                               <!-- <td>
                                  <div> 

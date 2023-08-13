@@ -96,14 +96,63 @@
    transform: rotate(-90deg);
 }
 
+// .comment-tooltip {
+//    position: absolute;
+//    top: -30px;
+//    /* Adjust as needed */
+//    right: 0;
+//    background-color: #595959;
+//    border: 1px solid #232323d9;
+//    padding: 6px;
+// }
+
 .comment-tooltip {
    position: absolute;
    top: -30px;
-   /* Adjust as needed */
    right: 0;
    background-color: #595959;
    border: 1px solid #232323d9;
-   padding: 6px;
+   padding: 5px;
+   width: max-content;
+   /* auto adjust width based on comment text */
+   max-width: 220px;
+   /* Set a maximum width for the tooltip */
+   white-space: pre-wrap;
+   /* Wrap the text inside the tooltip */
+   overflow-wrap: break-word;
+   /* Handle word wrapping for long words */
+   max-height: 100px;
+   overflow-y: scroll;
+}
+
+.comment-tooltip textarea {
+   background-color: #595959;
+   color: #fff;
+   width: max-content;
+   /* auto adjust width based on comment text */
+   max-width: 220px;
+   /* Set a maximum width for the tooltip */
+   white-space: pre-wrap;
+   /* Wrap the text inside the tooltip */
+   overflow-wrap: break-word;
+   /* Handle word wrapping for long words */
+   max-height: 100px;
+   overflow-y: scroll;
+}
+
+
+.comment-tooltip.changed {
+   background-color: yellow;
+   /* Set a color for the changed tooltip */
+   transition: background-color 0.3s ease;
+   /* Add a transition effect */
+}
+
+.comment-tooltip textarea.changed {
+   background-color: yellow;
+   /* Set a color for the changed textarea */
+   color: black;
+   /* Set a color for the changed text inside the textarea */
 }
 
 .comment-indicator-alt {

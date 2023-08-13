@@ -273,7 +273,7 @@
                      </thead>
                      <tbody>
                         <tr
-                           *ngFor="let data of jawakData | filter:term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
+                           *ngFor="let data of jawakData | search:term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
                            <td>{{itemsPerPage * (page-1) + i+1}}</td>
                            <td>
                               <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i

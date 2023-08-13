@@ -223,6 +223,11 @@ const report_comment = {
         type_id=@type_id,
         comment=@comment,
         updated_at=(UNIXEPOCH('now','localtime'))`
+    , update_text:
+        `update report_comment set 
+        comment=@comment,
+        updated_at=(UNIXEPOCH('now', 'localtime'))
+        where _id=@_id`
 }
 
 const department = {
@@ -696,9 +701,9 @@ const bachat_new = {
         sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
         unit.unit_short, unit.unit_full,
         dept.dept_code, dept.dept_hin, dept.dept_eng
-        from (select sum(total_aawak) as sum_aawak, sum(used_jawak) as sum_used, sum(jawak) as sum_jawak, sum(bachat) as sum_bachat, bachat_new.*,
-            sl.list_name_hin, sl.list_name_eng from bachat_new
-            left join support_list sl on sl._id = bachat_new.condition_id ?
+        from (select sum(total_aawak) as sum_aawak, sum(used_jawak) as sum_used, sum(jawak) as sum_jawak, sum(bachat) as sum_bachat, bn.*,
+            sl.list_name_hin, sl.list_name_eng from bachat_new bn
+            left join support_list sl on sl._id = bn.condition_id ?
             group by mm_id, item_id, subitem_id, unit_id, condition_id) bcht 
         left join mm on mm._id = bcht.mm_id
         left join state st on st._id = mm.state_id

@@ -94,7 +94,7 @@
                      </thead>
                      <tbody class="accordion">
                         <ng-container class="accordion-item"
-                           *ngFor="let data of vehData | filter:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index">
+                           *ngFor="let data of vehData | search:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index">
                            <tr>
                               <td rowspan="2" style="font-size: large;">
                                  {{itemsPerPage * (page-1) + i+1}}

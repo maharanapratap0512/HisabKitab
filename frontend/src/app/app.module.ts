@@ -7,11 +7,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { Ng2SearchPipeModule } from 'ng2-search-filter';
 import { FileSaverModule } from 'ngx-filesaver';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { DropDownTreeModule, MultiSelectModule, CheckBoxSelectionService, DropDownListAllModule } from '@syncfusion/ej2-angular-dropdowns';
-import { GridModule, PageService, SortService, FilterService, FreezeService, ToolbarService, AggregateService  } from '@syncfusion/ej2-angular-grids';
+import { GridModule, PageService, SortService, FilterService, FreezeService, ToolbarService, AggregateService } from '@syncfusion/ej2-angular-grids';
 import { CheckBoxModule } from '@syncfusion/ej2-angular-buttons';
 
 import { AppComponent } from './app.component';
@@ -73,7 +72,10 @@ import { ExcelImportComponent } from './excel-import/excel-import.component';
 import { ClosingComponent } from './closing/closing.component';
 import { BachatNewComponent } from './bachat-new/bachat-new.component';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
-
+import { SearchPipe } from './pipe/search.pipe';
+import { AuthService } from './services/auth.service';
+// import { FilterPipeModule } from 'ngx-filter-pipe';
+// import { MultiSearchPipeModule } from 'multi-search-pipe';
 
 // import { DropdownModule } from 'primeng/dropdown';
 
@@ -127,12 +129,14 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
     VehicleComponent,
     VehicleEntryComponent,
     FilterByDatePipe,
+    SearchPipe,
     ExcelImportComponent,
     ClosingComponent,
     BachatNewComponent,
     AdminDashboardComponent,
+
   ],
-  imports: [    
+  imports: [
     BrowserModule,
     DropDownTreeModule,
     AppRoutingModule,
@@ -149,18 +153,17 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
       easing: 'ease-in'
     }),
     NgSelectModule,
-    Ng2SearchPipeModule,
     FileSaverModule,
     NgxSpinnerModule,
     NgxPaginationModule,
     AutocompleteLibModule,
     GridModule,
     MultiSelectModule,
-    CheckBoxModule, 
+    CheckBoxModule,
     DropDownListAllModule,
 
   ],
-  providers: [GlobalService, PageService, SortService, FilterService, FreezeService, CheckBoxSelectionService, ToolbarService, AggregateService ],
+  providers: [GlobalService, PageService, SortService, FilterService, FreezeService, CheckBoxSelectionService, ToolbarService, AggregateService, AuthService],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

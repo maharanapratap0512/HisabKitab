@@ -121,7 +121,7 @@
                                        </div> 
                                    </div> -->
                                     <tr class="ribbon-box"
-                                       *ngFor="let data of historyData | filter:termHistory; let i=index">
+                                       *ngFor="let data of historyData | search:termHistory; let i=index">
                                        <td>
                                           <div class="ribbon ribbon-secondary text-light"><span>{{data.year}}</span>
                                           </div>
@@ -227,7 +227,7 @@
                                  </thead>
                                  <tbody class="accordion" id="accordionExample">
                                     <ng-container class="accordion-item"
-                                       *ngFor="let data of bachatData | filter:termBachat; let i=index">
+                                       *ngFor="let data of bachatData | search:termBachat; let i=index">
                                        <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i"
                                           aria-expanded="true" [attr.aria-controls]="'#collapse-' + i" class="main-row">
                                           <td>{{i+1}}</td>

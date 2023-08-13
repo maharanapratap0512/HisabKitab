@@ -342,7 +342,7 @@
                      </thead>
                      <tbody>
                         <ng-container
-                           *ngFor="let data of aawakData | filter: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
+                           *ngFor="let data of aawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
                               aria-expanded="true" [attr.aria-controls]="'collapseExample-'+i" class="main-row">
                               <td>{{itemsPerPage * (page-1) + i+1}}</td>

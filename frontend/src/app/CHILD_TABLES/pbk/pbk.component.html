@@ -163,7 +163,7 @@
                      </thead>
                      <tbody>
                         <tr
-                           *ngFor="let data of pbkData | filter:term | paginate: {itemsPerPage: itemsPerPage,currentPage: page,totalItems: total_count}; let i=index; ">
+                           *ngFor="let data of pbkData | search:term | paginate: {itemsPerPage: itemsPerPage,currentPage: page,totalItems: total_count}; let i=index; ">
                            <td style="font-size: large;">
                               {{itemsPerPage * (page - 1) + (i+1)}}<br>
                               <span style="font-size: x-large;position: relative;line-height: 28px; cursor:pointer;"
