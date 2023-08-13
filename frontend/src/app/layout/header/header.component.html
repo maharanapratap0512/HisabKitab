@@ -11,7 +11,7 @@
             </span>
             <span class="hk mx-2"><strong><u>HISAB KITAB</u></strong>
             </span>
-            <span>(v14.2)</span>
+            <span>(v15.0 Testing)</span>
          </a>
          <!-- <a routerLink="dashboard" class="topnav-logo">
             <span class="topnav-logo-lg">
@@ -526,7 +526,7 @@
          </div>
 
          <div class="form-check form-switch mb-1">
-            <input class="form-check-input" type="checkbox" name="color-scheme-mode" value="dark" id="dark-mode-check">
+            <input class="form-check-input" type="checkbox" name="color-scheme-mode" value="dark" id="dark-mode-check" (change)="darkModeToggle($event)">
             <label class="form-check-label" for="dark-mode-check">Dark Mode</label>
          </div>
 

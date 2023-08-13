@@ -75,6 +75,8 @@ import { ClosingComponent } from './closing/closing.component';
 import { BachatNewComponent } from './bachat-new/bachat-new.component';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 
+// import { DropdownModule } from 'primeng/dropdown';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -156,7 +158,7 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
     GridModule,
     MultiSelectModule,
     CheckBoxModule, 
-    DropDownListAllModule
+    DropDownListAllModule,
 
   ],
   providers: [GlobalService, PageService, SortService, FilterService, FreezeService, CheckBoxSelectionService, ToolbarService, AggregateService ],

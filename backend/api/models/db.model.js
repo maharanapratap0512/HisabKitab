@@ -1679,23 +1679,14 @@ class dbModal {
             insert into department_config(dept_id, config_key, config_value, active) values(NEW._id, 'mm', json('[]'), NEW.active),(NEW._id, 'item', json('[]'), NEW.active),(NEW._id, 'category', json('[]'), NEW.active), (NEW._id, 'subitem', json('[]'), NEW.active), (NEW._id, 'subitem_list', json('[]'), NEW.active),(NEW._id, 'pbk', json('[]'), NEW.active),(NEW._id, 'department', json('[]'), NEW.active),(NEW._id, 'aj_type', json('[]'), NEW.active), (NEW._id, 'settings', json('{}'), NEW.active), (NEW._id, 'nimitt', json('[]'), NEW.active);
           END;`,
       cat_roman: `ALTER table category add column category_roman varchar(50);`,
-      usage_cat: `create table if not exists usage_list(
-        _id integer primary key,
-        usage_hin varchar(50) unique not null,
-        usage_eng varchar(50) unique,
-        usage_roman varchar(50) unique,
-        active tinyint(1) default 0,
-        created_at timestamp default (UNIXEPOCH()),
-        updated_at timestamp default (UNIXEPOCH())
-      )`,
       alt_prdct: `ALTER TABLE product add column voucher_no int`,
       alt_prdct_xl: `ALTER TABLE product add column is_xl tinyint(1) default false`,
       alt_awk: `ALTER TABLE aawak add column voucher_no int`,
       alt_awk_xl: `ALTER TABLE aawak add column is_xl tinyint(1) default false`,
-      alt_awk_ul: `ALTER TABLE aawak add column usage_list_id integer references usage_list(_id)`,
+      alt_awk_ul: `ALTER TABLE aawak add column usage_list_id integer references support_list(_id)`,
       alt_jwk: `ALTER TABLE jawak add column voucher_no int`,
       alt_jwk_xl: `ALTER TABLE jawak add column is_xl tinyint(1) default false`,
-      alt_jwk_ul: `ALTER TABLE jawak add column usage_list_id integer references usage_list(_id)`,
+      alt_jwk_ul: `ALTER TABLE jawak add column usage_list_id integer references support_list(_id)`,
       rename_bachat_new: `alter table bachat_new rename to bachat_new_backup`,
       bachat_new: `create table if not exists bachat_new(
         _id integer primary key AUTOINCREMENT,
@@ -1715,7 +1706,23 @@ class dbModal {
         updated_at timestamp default (julianday('now','localtime')),
         unique(month, year, mm_id, item_id, unit_id, dept_id, subitem_id, condition_id)
       )`,
-      transfer_bachat: `insert into bachat_new(_id ,month ,year ,mm_id ,item_id ,subitem_id ,unit_id ,dept_id ,condition_id ,total_aawak ,jawak ,used_jawak ,bachat ,created_at ,updated_at) select _id ,month + 1 ,year ,mm_id ,item_id ,subitem_id ,unit_id ,dept_id ,condition_id ,total_aawak ,jawak ,used_jawak ,bachat ,created_at ,updated_at from bachat_new_backup`
+      transfer_bachat: `insert into bachat_new(_id ,month ,year ,mm_id ,item_id ,subitem_id ,unit_id ,dept_id ,condition_id ,total_aawak ,jawak ,used_jawak ,bachat ,created_at ,updated_at) select _id ,month + 1 ,year ,mm_id ,item_id ,subitem_id ,unit_id ,dept_id ,condition_id ,total_aawak ,jawak ,used_jawak ,bachat ,created_at ,updated_at from bachat_new_backup`,
+      drop_backup: `drop table if exists bachat_new_backup`,
+      report_comment: `create table if not exists report_comment(
+        _id integer primary key AUTOINCREMENT,
+        report_type varchar(25) not null,
+        row_type varchar(25) not null,
+        month int null,
+        year int null,
+        dept_id integer not null references department(_id),
+        mm_id integer not null references mm(_id),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id) ,
+        unit_id integer not null references unit(_id),
+        type_id integer null references support_list(_id),
+        comment text,
+        updated_at timestamp default (UNIXEPOCH())
+      )`
 
     },
 
@@ -1724,6 +1731,33 @@ class dbModal {
       2. remove usage_category_id column from awk, jwk.
     */
   ];
+
+  views = {
+    // drop_1: `drop view if exists mn_jwk_aj_type`,
+    mn_jwk_aj_type:
+      `create view if not exists mn_jwk_aj_type
+      AS
+      select dept_id, month, year, mm_id, item_id, subitem_id, unit_id, aawak_type_id, 
+      sum(t_qty) as total_jawak, 
+      sum(used_qty) as used, 
+      sum(other_qty) as other 
+        from (select CAST(strftime('%Y', jawak.date) AS INTEGER) as year, CAST(strftime('%m', jawak.date) AS INTEGER) as month, sum(jawak.qty) as t_qty, 
+        CASE WHEN jawak_type_id = 28 THEN sum(jawak.qty) ELSE 0 END as 'used_qty', 
+        CASE WHEN jawak_type_id <> 28 THEN sum(jawak.qty) ELSE 0 END as 'other_qty', 
+        CASE WHEN jawak_type_id = 28 THEN 'used' ELSE 'other' END as jawak_type, jawak.*, aawak.aawak_type_id 
+        from jawak
+        left join aawak on aawak._id = jawak.aawak_ref_id 
+        group by month, year, jawak.dept_id, jawak.mm_id, jawak.item_id, jawak.subitem_id, jawak.unit_id, aawak_type_id, jawak_type) jwk
+      GROUP BY month, year, dept_id, mm_id, item_id, subitem_id, unit_id, aawak_type_id;`,
+    // drop_2: `drop view if exists mn_awk_type_wise`,
+    mn_awk_type_wise:
+      `create view if not exists mn_awk_type_wise
+      as
+      select CAST(strftime('%Y', date) AS INTEGER) as year, CAST(strftime('%m', date) AS INTEGER) as month, dept_id, mm_id, item_id, subitem_id, unit_id, aawak_type_id,
+      sum(qty) as t_qty, sum(rate) as t_rate, sum(actual_amt) as t_amt, sum(remaining_qty) as t_remaining_qty 
+      from aawak
+      group by month, year, dept_id, mm_id, item_id, subitem_id, unit_id, aawak_type_id;`,
+  }
   migrationLength;
   constructor(dbPath) {
     try {
@@ -1767,10 +1801,16 @@ class dbModal {
       });
 
       // console.log(this.db.pragma(`table_info('aawak')`));
-      console.log(this.db.prepare(`select strftime('%Y-%m', 2022 || '-' || 10 || '-01') < strftime('%Y-%m', @year);`).all({ month: 11, year: '2022-11-01' }));
+      // console.log(this.db.prepare(`select strftime('%Y-%m', 2022 || '-' || 10 || '-01') < strftime('%Y-%m', @year);`).all({ month: 11, year: '2022-11-01' }));
       this.db.pragma('foreign_keys=OFF');
       this.db.pragma('legacy_alter_table=ON');
       runMigration();
+
+      for (const viewQuery of Object.values(this.views)) {
+        // console.log(viewQuery);
+        this.db.prepare(viewQuery).run();
+      }
+
       this.db.pragma('legacy_alter_table=OFF');
       this.db.pragma('foreign_keys=ON');
 

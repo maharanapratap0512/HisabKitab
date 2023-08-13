@@ -1,6 +1,6 @@
 const DBContex = require('./DBContex');
 class Functions extends DBContex {
-   DBContex;
+   
    constructor() {
       super();
       const begin = this.db.prepare('BEGIN');
@@ -27,6 +27,7 @@ class Functions extends DBContex {
             let insResult = stmtInsert.run(obj);
             if (insResult.changes == 1 && insResult.lastInsertRowid) {
                let bachat = await this.getBachatFromAJ(obj);
+               console.log(bachat);
                let bachatResult;
                if (bachat._id) {
                   bachatResult = stmtUpdateBachat.run(obj);
@@ -138,6 +139,26 @@ class Functions extends DBContex {
          }
       }
       return data;
+   }
+
+   sortAndFillMonths(arrMonth = [1, 12]) {
+
+      // Step 1: Sort month in accending order.
+      arrMonth.sort((a, b) => a - b);
+
+      // Step 2: Find the minimum and maximum values
+      const minMonth = arrMonth[0];
+      const maxMonth = arrMonth[arrMonth.length - 1];
+
+      // Step 3: Create a new array for the result
+      const result = [];
+
+      // Step 4: Iterate from the minimum value to the maximum value
+      for (let month = minMonth; month <= maxMonth; month++) {
+         result.push(month);
+      }
+
+      return result;
    }
 
    async getMMs(dept_id = null) {

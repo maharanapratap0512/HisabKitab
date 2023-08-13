@@ -85,6 +85,17 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['login']);
   }
 
+  darkModeToggle(ev: any) {
+    const config = $("body").data("layout-config");
+    config.darkMode = ev.target.checked;
+    console.log("darkMode", config);
+    
+    $(document.body).attr("data-layout-config", JSON.stringify(config));
+    // $(document.body)  .data("layout-config", config);
+    // $("body").toggleClass("dark-mode");
+
+  }
+
   exportUpdate() {
     this.isLoader = true;
     this.http.get(this.api.getUrl('IMPORTUPDATES') + this.auth.webUser.dept_id).subscribe((data) => {

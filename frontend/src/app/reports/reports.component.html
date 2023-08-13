@@ -11,14 +11,7 @@
                      <!-- Month and Year -->
                      <div class="col-md-3 mb-2">
                         <div class="form-group">
-                           <label class="form-label">Month-Year</label>
-                           <ng-select class="custom" style="width: 100%;" placeholder="Select Year"
-                              (change)="months = gs.yearChangedGetMonth($event)" [clearable]="true"
-                              [virtualScroll]="true" [(ngModel)]="filterBody.year" name="year" required>
-                              <ng-option selected="selected" disabled value="">Select Year
-                              </ng-option>
-                              <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
-                           </ng-select>
+                           
                            <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Month"
                               [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month" name="month"
                               required>
