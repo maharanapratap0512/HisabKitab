@@ -55,7 +55,7 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <tr *ngFor="let data of nimittData | filter:term; let i=index">
+                        <tr *ngFor="let data of nimittData | search:term; let i=index">
                            <td style="font-size: large;">
                               {{i+1}}
                               <span class="mx-1"

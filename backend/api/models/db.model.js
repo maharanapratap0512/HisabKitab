@@ -1721,9 +1721,10 @@ class dbModal {
         unit_id integer not null references unit(_id),
         type_id integer null references support_list(_id),
         comment text,
-        updated_at timestamp default (UNIXEPOCH())
-      )`
-
+        updated_at timestamp default (UNIXEPOCH('now', 'localtime'))
+      )`,
+      add_success_ih:`alter table import_history add column success_count int default 0`,
+      add_fail_ih:`alter table import_history add column fail_count int default 0`,
     },
 
     /* TODO cleanup task 

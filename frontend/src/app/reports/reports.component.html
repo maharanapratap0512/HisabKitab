@@ -102,7 +102,7 @@
                      </thead>
                      <tbody>
                         <ng-container
-                           *ngFor="let data of reportData | filter: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
+                           *ngFor="let data of reportData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-'+i" aria-expanded="false"
                               [attr.aria-controls]="'collapse-'+i" class="main-row">
                               <td>{{itemsPerPage * (page-1) + i+1}}</td>

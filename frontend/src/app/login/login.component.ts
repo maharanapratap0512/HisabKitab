@@ -83,6 +83,7 @@ export class LoginComponent implements OnInit {
    }
 
    loginSubmit() {
+      
       if (this.loginForm.valid) {
          this.http.put(this.api.getUrl('LOGIN'), this.loginForm.value).subscribe(async (data: any) => {
             if (data['total_count'] == 1) {

@@ -60,7 +60,7 @@
                   "styles": [
                      "src/styles.scss",
                      "node_modules/ngx-toastr/toastr.css",
-                     "node_modules/primeng/resources/themes/bootstrap4-dark-blue/theme.css",
+                     "node_modules/primeng/resources/themes/bootstrap4-light-blue/theme.css",
                      "node_modules/primeng/resources/primeng.min.css"
                   ],
                   "scripts": [
@@ -138,6 +138,5 @@
             }
          }
       }
-   },
-   "defaultProject": "sewa2021"
+  }
 }

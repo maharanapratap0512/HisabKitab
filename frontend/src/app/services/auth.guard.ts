@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
-import { AuthService } from './auth.service';
 import { HttpService } from './http.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthGuard implements CanActivate {
+export class AuthGuard {
   constructor(
     private api: ApiService,
     private http: HttpService,
@@ -33,11 +33,11 @@ export class AuthGuard implements CanActivate {
 
   canLoad(): boolean {
     if (this.auth.getWebUser() && this.auth.getWebUser()['dept_id']) {
-      return true;
-    } else {
-      this._router.navigate(['/login']);
-      return false;
+        return true;
+      } else {
+        this._router.navigate(['/login']);
+        return false;
+      }
     }
-  }
 
-}
+  }

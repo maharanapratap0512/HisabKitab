@@ -82,9 +82,9 @@ export class BachatNewComponent implements OnInit {
       this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
     });
-    // this.filterBody.year = 2023;
-    // this.filterBody.months = [5, 3, 2];
-    // this.filter();
+    this.filterBody.year = 2023;
+    this.filterBody.months = [5, 3, 1];
+    this.filter();
   }
 
   getBase64Images() {
@@ -329,6 +329,37 @@ export class BachatNewComponent implements OnInit {
     this.isLoader = false;
   }
 
+  excelExportMonthlyMain() {
+    this.isLoader = true;
+    let bchtData: any = [];
+    for (let i = 0; i < this.bachatData.length; i++) {
+
+      let bachatRow: any = {
+        'No.': i + 1,
+        'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
+        'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
+        'MM': this.bachatData[i].mm_hin,
+        'Category': this.bachatData[i].categories_eng ? this.bachatData[i].categories_eng : this.bachatData[i].categories_hin,
+        'Item': this.bachatData[i].item_hin,
+        'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
+        'unit': this.bachatData[i].unit_short,
+        'पिछला बचत': this.bachatData[i].past_bachat ? this.bachatData[i].past_bachat : 0,
+        'arr_sum_aawak': this.bachatData[i].arr_sum_aawak ? this.bachatData[i].arr_sum_aawak : [],
+        'arr_sum_used': this.bachatData[i].arr_sum_used ? this.bachatData[i].arr_sum_used : [],
+        'arr_sum_jawak': this.bachatData[i].arr_sum_jawak ? this.bachatData[i].arr_sum_jawak : [],
+        'arr_sum_bachat': this.bachatData[i].arr_sum_bachat ? this.bachatData[i].arr_sum_bachat : [],
+        'arr_comment': this.bachatData[i].arr_comment ? this.bachatData[i].arr_comment : [],
+      }
+      bchtData.push(bachatRow);
+    }
+    let option:any = {};
+    option.months = this.monthsSel;
+    option.year = this.filterBody.year;
+    // let date = new Date();
+    this.excelExportService.generateReportExcel(bchtData,'test', option);
+    this.isLoader = false;
+  }
+
 
   filter() {
     this.isLoader = true;
@@ -346,6 +377,7 @@ export class BachatNewComponent implements OnInit {
         }
 
         for (let i in this.bachatAll) {
+          this.bachatAll[i].showTooltip = {};
           this.bachatAll[i].categories_hin = '';
           this.bachatAll[i].categories_eng = '';
           if (this.bachatAll[i].arr_subitem_categories && this.bachatAll[i].arr_subitem_categories.length > 0) {
@@ -402,6 +434,99 @@ export class BachatNewComponent implements OnInit {
     if (this.bachatData[i][key] && this.bachatData[i][key].length > 0) {
       this.bachatData[i].currentReport = key;
     }
+  }
+
+  editComment(index: any, month: any, data: any, row_type: any, sindex: any = -1) {
+
+    Swal.fire({
+      title: 'Enter Comment',
+      input: 'textarea',
+      inputPlaceholder: 'comment',
+      showCancelButton: true,
+      confirmButtonText: 'Save',
+      showDenyButton: true,
+      denyButtonText: 'Delete',
+      inputValue: data.arr_comment[month]
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // User clicked the Submit button and provided a name
+
+        if (data.arr_comment_id[month]) {
+          let body = {
+            _id: data.arr_comment_id[month],
+            comment: result.value
+          }
+          this.http.put(this.api.getUrl('COMMENT') + data.arr_comment_id[month], body).subscribe(async (res: any) => {
+            if (res.success) {
+              this.toastr.success("comment Updated.")
+
+              if (sindex >= 0) {
+                this.bachatData[index][this.bachatData[index].currentReport][sindex].arr_comment[month] = result.value;
+              } else {
+                this.bachatData[index].arr_comment[month] = result.value;
+              }
+            }
+            else
+              this.toastr.error("something went wrong");
+          });
+
+        } else {
+          data.comment = result.value;
+          data.month = this.monthsSel[month].m;
+          data.report_type = 'full_saar';
+          data.row_type = row_type;
+          if (this.bachatData[index].currentReport == 'awk_type_wise') {
+            data.type_id = data.aawak_type_id;
+          } else if (this.bachatData[index].currentReport == 'condition_wise') {
+            data.type_id = data.condition_id;
+          } else {
+            data.type_id = null;
+          }
+          this.http.post(this.api.getUrl('COMMENT') + this.auth.webUser.dept_id, data).subscribe(async (res: any) => {
+            this.toastr.success("comment added : " + res.result.comment);
+            if (sindex >= 0) {
+              console.log("sindex", this.bachatData[index][this.bachatData[index].currentReport][sindex]);
+              this.bachatData[index][this.bachatData[index].currentReport][sindex].arr_comment[month] = res.result.comment;
+              this.bachatData[index][this.bachatData[index].currentReport][sindex].arr_comment_id[month] = res.result._id;
+              console.log("sindex", this.bachatData[index][this.bachatData[index].currentReport][sindex]);
+            } else {
+              this.bachatData[index].arr_comment[month] = res.result.comment;
+              this.bachatData[index].arr_comment_id[month] = res.result._id;
+            }
+          });
+        }
+      } else if (result.isDenied) {
+        if (data.arr_comment_id[month]) {
+          this.http.delete(this.api.getUrl('COMMENT') + data.arr_comment_id[month]).subscribe(async (res: any) => {
+            this.toastr.success("comment Deleted");
+            if (sindex >= 0) {
+              this.bachatData[index][this.bachatData[index].currentReport][sindex].arr_comment[month] = null;
+              this.bachatData[index][this.bachatData[index].currentReport][sindex].arr_comment_id[month] = null;
+            } else {
+              this.bachatData[index].arr_comment[month] = null;
+              this.bachatData[index].arr_comment_id[month] = null;
+            }
+          });
+        } else {
+          this.toastr.warning('There is no any comment exists.')
+        }
+      }
+    }).catch((error) => {
+      // An error occurred
+      this.toastr.error('Error:', error);
+    });
+
+  }
+
+  toggleEditMode(i: number, m: number): void {
+    this.bachatData[i].editMode = this.bachatData[i].editMode ? this.bachatData[i].editMode : [];
+    this.bachatData[i].editMode[m] = !this.bachatData[i].editMode[m];
+  }
+
+  // Function to handle changes in the textarea input
+  handleInputChange(i: number, m: number): void {
+    this.bachatData[i].commentChanged = this.bachatData[i].commentChanged ? this.bachatData[i].commentChanged : [];
+    this.bachatData[i].commentChanged[m] = true;
   }
 
 }

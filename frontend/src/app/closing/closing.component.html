@@ -109,7 +109,7 @@
                                                mattis dictum aliquet. </p>
                                        </div> 
                                    </div> -->
-                  <tr class="ribbon-box" *ngFor="let data of historyData | filter:termHistory; let i=index">
+                  <tr class="ribbon-box" *ngFor="let data of historyData | search:termHistory; let i=index">
                      <td>
                         <div class="ribbon ribbon-secondary text-light"><span>{{data.year}}</span></div>
                      </td>

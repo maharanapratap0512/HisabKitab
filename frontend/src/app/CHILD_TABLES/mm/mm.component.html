@@ -77,7 +77,7 @@
                      </thead>
                      <tbody>
                         <tr
-                           *ngFor="let data of mmData | filter:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index" [ngClass]="{'text-light':data.restrict_year}">
+                           *ngFor="let data of mmData | search:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index" [ngClass]="{'text-light':data.restrict_year}">
                            <td style="font-size: large;">
                               {{itemsPerPage * (page-1) + i+1}}
                               <!-- <span class="mx-1" style="font-size: x-large;position: absolute;line-height: 28px;"

@@ -55,7 +55,7 @@
                      <!-- <div style="height: 25px; box-shadow: none; border: none;"></div> -->
                      <tbody>
                         <tr
-                           *ngFor="let data of cityData | filter:term | paginate : { itemsPerPage: itemsPerPage, currentPage: page}; let i=index">
+                           *ngFor="let data of cityData | search:term | paginate : { itemsPerPage: itemsPerPage, currentPage: page}; let i=index">
                            <td style="font-size: large;">
                               {{itemsPerPage * (page-1) + i+1}}
                               <span class="mx-1"

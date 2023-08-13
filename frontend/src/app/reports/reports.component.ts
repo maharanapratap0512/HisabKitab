@@ -11,6 +11,7 @@ import { AuthService } from '../services/auth.service';
 import { ExcelExportService } from '../services/excel-export.service';
 import { observable, Observable, of, Subject } from 'rxjs';
 declare var $: any;
+import 'tslib';
 import { FilterService, FilterSettingsModel, GridComponent, IFilter, PageSettingsModel, SortService, ToolbarItems, VirtualScrollService, DetailRowService, RowDataBoundEventArgs } from '@syncfusion/ej2-angular-grids';
 import { DropDownListComponent } from '@syncfusion/ej2-angular-dropdowns';
 
