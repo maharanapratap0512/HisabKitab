@@ -511,10 +511,18 @@ export class ExcelExportService {
     console.log(Object.keys(json));
     console.log(headers);
     let headerCount = headers.length;
+    const headerStyle: any = { type: 'pattern', pattern: 'solid', fgColor: { argb: '96C8FB' }, bgColor: { argb: '96C8FB' } };
+    const errorStyle: any = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC7CE' }, bgColor: { argb: 'FD0101' } };
+    const headerBorder: any = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' },
+    }
 
     // Title
-    worksheet.mergeCells([1, 1, 1, 10]);
-    worksheet.getCell('A1').value = 'रिपोर्ट ' + options.months[0] + "-" + options.year + " से " + options.months[monthCount - 1] + "-" + options.year;
+    worksheet.mergeCells([1, 1, 1, headerCount + (monthCount * 4)]);
+    worksheet.getCell('A1').value = 'रिपोर्ट ' + options.months[0].name + "-" + options.year + " से " + options.months[monthCount - 1].name + "-" + options.year;
     worksheet.getRow(1).font = { name: 'Corbel', family: 4, size: 20, };
     worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
 
@@ -522,22 +530,76 @@ export class ExcelExportService {
     for (let i = 0; i < headerCount; i++) {
       worksheet.mergeCells([2, i + 1, 3, i + 1]);
       worksheet.getCell(2, i + 1).value = headers[i];
-      worksheet.getCell(2, i + 1).fill = {
-        type: 'pattern', pattern: 'solid', fgColor: { argb: '96C8FB' }, bgColor: { argb: '96C8FB' }
-      };
+      worksheet.getCell(2, i + 1).fill = headerStyle;
+      worksheet.getRow(2).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
     }
 
     // SubHeader  
     let startCell = headerCount + 1;
     for (let i = 0; i < monthCount; i++) {
-      worksheet.mergeCells([2, startCell, 3, startCell + 3]);
-      worksheet.getCell(3, startCell).value = this.gs.months[options.months[i]-1] + "-" + options.year;
-      worksheet.getCell(3, startCell).fill = {
-        type: 'pattern', pattern: 'solid', fgColor: { argb: '96C8FB' }, bgColor: { argb: '96C8FB' }
-        //adding fields to header
-      };
-      startCell = startCell + 4;      
+      worksheet.mergeCells([2, startCell, 2, startCell + 3]);
+
+      worksheet.getCell(2, startCell).value = options.months[i].name + "-" + options.year;
+      // worksheet.getCell(2, startCell).fill = headerStyle;
+      worksheet.getRow(2).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+
+      worksheet.getCell(3, startCell).value = 'Aawak';
+      // worksheet.getCell(3, startCell).fill = headerStyle;
+      worksheet.getCell(3, startCell + 1).value = 'Used';
+      // worksheet.getCell(3, startCell + 1).fill = headerStyle;
+      worksheet.getCell(3, startCell + 2).value = 'Jawak';
+      // worksheet.getCell(3, startCell + 2).fill = headerStyle;
+      worksheet.getCell(3, startCell + 3).value = 'Bachat';
+      // worksheet.getCell(3, startCell + 3).fill = headerStyle;
+      worksheet.getRow(3).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      startCell = startCell + 4;
     }
+
+
+    worksheet.getRows(2, 2)?.forEach(row => {
+      row.eachCell(cell => {
+        cell.fill = headerStyle;
+        cell.border = headerBorder;
+      });
+    });
+
+    // writing data
+    let rowNum = 4;
+    for (let i = 0; i < json.length; i++) {
+      for (let j = 0; j < headerCount; j++) {
+        worksheet.getCell(rowNum, j + 1).value = json[i][headers[j]];
+      }
+      for (let j = 0; j < monthCount; j++) {
+        const cell1 = worksheet.getCell(rowNum, headerCount + (j * 4) + 1);
+        cell1.value = json[i].arr_sum_aawak[j];
+        if (json[i].arr_comment[j]) {
+          cell1.note = json[i].arr_comment[j]
+        }
+        if (json[i].arr_sum_aawak[j] < 0) {
+          cell1.fill = errorStyle;
+        }
+        worksheet.getCell(rowNum, headerCount + (j * 4) + 2).value = json[i].arr_sum_used[j];
+        if (json[i].arr_sum_used[j] < 0) {
+          worksheet.getCell(rowNum, headerCount + (j * 4) + 2).fill = errorStyle;
+        }
+        worksheet.getCell(rowNum, headerCount + (j * 4) + 3).value = json[i].arr_sum_jawak[j];
+        if (json[i].arr_sum_jawak[j] < 0) {
+          worksheet.getCell(rowNum, headerCount + (j * 4) + 3).fill = errorStyle;
+        }
+        worksheet.getCell(rowNum, headerCount + (j * 4) + 4).value = json[i].arr_sum_bachat[j];
+        if (json[i].arr_sum_bachat[j] < 0) {
+          worksheet.getCell(rowNum, headerCount + (j * 4) + 4).fill = errorStyle;
+        }
+      }
+      rowNum++;
+    }
+
+    worksheet.getRows(4, rowNum)?.forEach(row => {
+      for (let i = headerCount; i < row.cellCount + 4; i++) {
+        row.getCell(i).border = { right: { style: 'double' } };
+        i = i + 3;
+      }
+    });
 
     let fileName = excelFileName + '_' + options.year + ".xlsx";
     const excelBuffer: any = workbook.xlsx.writeBuffer();
@@ -548,11 +610,6 @@ export class ExcelExportService {
         FileSaver.saveAs(data, fileName);
       });
   }
-
-
-
-
-
 
 
 }
