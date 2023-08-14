@@ -65,6 +65,19 @@ class DBContex {
         });
     }
 
+    allQuery(object, key, options = {}) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let sql = this.query[object][key];
+                const result = this.db.prepare(sql).all(options.obj ? options.obj : {});
+                resolve(result);
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
     selectWithCondition(tblname, key, data, options = {}) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -85,7 +98,7 @@ class DBContex {
         })
     }
 
-    // options = { full:boolean, dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+    // options = { full:boolean, dept_id : int, conditionString : string, orderBy : string, limit : int, offset : int }
     async getList(tblname, options = {}) {
         return new Promise(async (resolve, reject) => {
             try {

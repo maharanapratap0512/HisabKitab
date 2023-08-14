@@ -1708,7 +1708,7 @@ class dbModal {
       )`,
       transfer_bachat: `insert into bachat_new(_id ,month ,year ,mm_id ,item_id ,subitem_id ,unit_id ,dept_id ,condition_id ,total_aawak ,jawak ,used_jawak ,bachat ,created_at ,updated_at) select _id ,month + 1 ,year ,mm_id ,item_id ,subitem_id ,unit_id ,dept_id ,condition_id ,total_aawak ,jawak ,used_jawak ,bachat ,created_at ,updated_at from bachat_new_backup`,
       drop_backup: `drop table if exists bachat_new_backup`,
-      report_comment: `create table report_comment(
+      report_comment: `create table if not exists report_comment(
         _id integer primary key AUTOINCREMENT,
         report_type varchar(25) not null,
         row_type varchar(25) not null,
@@ -1811,7 +1811,6 @@ class dbModal {
         // console.log(viewQuery);
         this.db.prepare(viewQuery).run();
       }
-
 
       this.db.pragma('legacy_alter_table=OFF');
       this.db.pragma('foreign_keys=ON');

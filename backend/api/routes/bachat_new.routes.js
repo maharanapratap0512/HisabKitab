@@ -189,8 +189,8 @@ router.put('/condition/:dept_id', async (req, res, next) => {
         let bachat = [], months = [];
         let conditionQuery1 = `where dept_id = ${req.params.dept_id}`, awkCondition = `where awk.dept_id = ${req.params.dept_id}`;
         if (req.body) {
-            conditionQuery1 += `${req.body.mm_id ? ` AND bachat_new.mm_id = ${req.body.mm_id}` : ``} ${req.body.item_id ? ` AND bachat_new.item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND bachat_new.subitem_id = ${req.body.subitem_id}` : ``} ${req.body.unit_id ? ` AND bachat_new.unit_id = ${req.body.unit_id}` : ``}`
-            awkCondition += `${req.body.mm_id ? ` AND awk.mm_id = ${req.body.mm_id}` : ``} ${req.body.item_id ? ` AND awk.item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND awk.subitem_id = ${req.body.subitem_id}` : ``} ${req.body.unit_id ? ` AND awk.unit_id = ${req.body.unit_id}` : ``}`
+            conditionQuery1 += `${req.body.mm_id ? ` AND bachat_new.mm_id = ${req.body.mm_id}` : ``} ${req.body.item_id ? ` AND bachat_new.item_id = ${req.body.item_id}` : ``} ${req.body.item_id ? ` AND ((bachat_new.subitem_id IS NULL AND ${req.body.subitem_id} IS NULL) OR bachat_new.subitem_id = ${req.body.subitem_id})` : ``} ${req.body.unit_id ? ` AND bachat_new.unit_id = ${req.body.unit_id}` : ``}`
+            awkCondition += `${req.body.mm_id ? ` AND awk.mm_id = ${req.body.mm_id}` : ``} ${req.body.item_id ? ` AND awk.item_id = ${req.body.item_id}` : ``} ${req.body.item_id ? ` AND ((awk.subitem_id IS NULL AND ${req.body.subitem_id} IS NULL) OR awk.subitem_id = ${req.body.subitem_id})` : ``} ${req.body.unit_id ? ` AND awk.unit_id = ${req.body.unit_id}` : ``}`
             // conditionQuery2 += `${req.body.state_id ? ` where mm.state_id = ${req.body.state_id}` : ``} `;
 
         }
@@ -273,7 +273,7 @@ router.put('/condition/:dept_id', async (req, res, next) => {
         let awksql = `select awk.dept_id, awk.mm_id, awk.item_id, awk.subitem_id, awk.unit_id, awk.aawak_type_id, awk.year,json_group_array(awk.month) as arr_months, json_group_array(awk.t_qty) as arr_sum_aawak, json_group_array(jwk.used) as arr_sum_used, json_group_array(jwk.other) as arr_sum_jawak, 
         sl.list_name_hin, sl.list_name_eng,
         unit.unit_short, unit.unit_full from mn_awk_type_wise awk
-        left join mn_jwk_aj_type jwk on awk.month = jwk.month AND awk.year = jwk.year AND awk.dept_id = jwk.dept_id AND awk.mm_id = jwk.mm_id AND awk.item_id = jwk.item_id AND awk.subitem_id = jwk.subitem_id AND awk.unit_id = jwk.unit_id AND awk.aawak_type_id = jwk.aawak_type_id 
+        left join mn_jwk_aj_type jwk on awk.month = jwk.month AND awk.year = jwk.year AND awk.dept_id = jwk.dept_id AND awk.mm_id = jwk.mm_id AND awk.item_id = jwk.item_id AND ((awk.subitem_id IS NULL AND jwk.subitem_id IS NULL) OR awk.subitem_id = jwk.subitem_id) AND awk.unit_id = jwk.unit_id AND awk.aawak_type_id = jwk.aawak_type_id 
         left join support_list sl on sl._id = awk.aawak_type_id
         left join unit on unit._id = awk.unit_id ${awkCondition}        
         group by awk.year, awk.dept_id, awk.mm_id, awk.item_id, awk.subitem_id, awk.unit_id, awk.aawak_type_id`;

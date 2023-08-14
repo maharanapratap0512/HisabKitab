@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, ValidatorFn, ValidationErrors } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, ValidatorFn, ValidationErrors, FormArray } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
@@ -39,6 +39,8 @@ export class ProductEntryComponent implements OnInit {
   categories: any = [];
   categoryAll: any = [];
   settings: any = {};
+  product_code: any = null;
+  sr_num: any = null;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -58,7 +60,7 @@ export class ProductEntryComponent implements OnInit {
       purchase_date: [null],
       purchase_from: [null],
       purchased_by: [null],
-      code_sr_num: [null, Validators.required],
+      // code_sr_num: [null, Validators.required],
       product_detail: [null],
       item_id: [null, Validators.required],
       subitem_id: [null],
@@ -69,9 +71,10 @@ export class ProductEntryComponent implements OnInit {
       accessories: [null],
       nimitt_id: [null],
       isbill: false,
-      products: [[]]
+      products: [[]],
+      voucher_no: [null]
     });
-    
+
     this.settings = this.auth.webUser.settings;
   }
 
@@ -126,9 +129,11 @@ export class ProductEntryComponent implements OnInit {
         isbill: changes.getData.currentValue.isbill,
         nimitt_id: changes.getData.currentValue.nimitt_id,
         products: changes.getData.currentValue.products ? changes.getData.currentValue.products : [],
+        voucher_no: changes.getData.currentValue.voucher_no,
+
       });
-      this.sr_numChanged({ target: { value: changes.getData.currentValue.sr_num } });
-      this.codeChanged({ target: { value: changes.getData.currentValue.product_code } });
+      // this.sr_numChanged({ target: { value: changes.getData.currentValue.sr_num } });
+      // this.codeChanged({ target: { value: changes.getData.currentValue.product_code } });
       this.imagepath = (changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images : null)
     }
   }
@@ -169,7 +174,7 @@ export class ProductEntryComponent implements OnInit {
   }
 
   productFormSubmit() {
-    if (this.productForm.valid) {
+    if (this.productForm.valid && this.productForm.value.products.length) {
       this.isLoader = true;
       this.http.post(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, this.productForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
@@ -199,29 +204,8 @@ export class ProductEntryComponent implements OnInit {
         _id: this.getData._id
       }
       body.set = {
-        mm_id: this.productForm.value.mm_id,
-        purchased_by: this.productForm.value.purchased_by,
-        purchase_date: this.productForm.value.purchase_date,
-        item_id: this.productForm.value.item_id,
-        unit_id: this.productForm.value.unit_id,
-        subitem_id: this.productForm.value.subitem_id,
-        product_code: this.productForm.value.product_code,
-        company_name: this.productForm.value.company_name,
-        model_name: this.productForm.value.model_name,
-        sr_num: this.productForm.value.sr_num,
-        condition_id: this.productForm.value.condition_id,
-        price: this.productForm.value.price,
-        product_detail: this.productForm.value.product_detail,
-        accessories: this.productForm.value.accessories,
-        purchase_from: this.productForm.value.purchase_from,
-        warranty_period: this.productForm.value.warranty_period,
-        dept_id: this.productForm.value.dept_id,
-        warranty_from: this.productForm.value.warranty_from,
-        nimitt_id: this.productForm.value.nimitt_id,
-        document: this.productForm.value.document,
-        isbill: this.productForm.value.isbill
+        ...this.productForm.value
       };
-      // console.log("body", body);
 
       this.http.put(this.api.getUrl('PRODUCT'), body).subscribe((data: any) => {
         if (data && data['success']) {
@@ -260,7 +244,17 @@ export class ProductEntryComponent implements OnInit {
     this.productForm.controls['sr_num'].updateValueAndValidity();
   }
 
-  productAdd(){
+  productAdd() {
+    this.productForm.value.products.push({ product_code: this.product_code, sr_num: this.sr_num });
+    console.log("this.productForm.value", this.productForm.value);
+    this.product_code = null;
+    this.sr_num = null;
+  }
+
+
+  deleteItem(index: number): void {
+    this.productForm.value.products.splice(index, 1);
+    // console.log("this.productForm.value.products.splice(index, 1);", this.productForm.value.products.splice(index, 1));
 
   }
 

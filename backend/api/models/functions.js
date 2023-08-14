@@ -1,6 +1,6 @@
 const DBContex = require('./DBContex');
 class Functions extends DBContex {
-   DBContex;
+   
    constructor() {
       super();
       const begin = this.db.prepare('BEGIN');
@@ -115,10 +115,8 @@ class Functions extends DBContex {
    async getLastVoucherNo(tblname) {
       // return new Promise(async(resolve, reject)=>{
       try {
-         let row = this.db.prepare(`select max(voucher_no) from ${tblname}`).get();
-
-         //   resolve(row.voucher_num || 0);
-         return row.voucher_num || 0;
+         let row = this.db.prepare(`select max(voucher_no) as v_no from ${tblname}`).get();
+         return row.v_no || 0;
       }
       catch (err) {
          return 0;
