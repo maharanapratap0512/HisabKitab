@@ -474,12 +474,12 @@ const jawak = {
         `insert into jawak(
         date, mm_id, pkt_num, pbk_id, jawak_mm_id, item_id, usage_category_id,
         subitem_id, product_id, item_detail, condition_id, qty, jawak_type_id,
-        unit_id, description, nimitt_id, company_name, aawak_ref_id, dept_id,
+        unit_id, description, nimitt_id, company_name, aawak_ref_id, dept_id, is_xl,
         active)
     values (
         @date, @mm_id, @pkt_num, @pbk_id, @jawak_mm_id, @item_id, @usage_category_id,
         @subitem_id, @product_id, @item_detail, @condition_id, @qty, @jawak_type_id,
-        @unit_id, @description, @nimitt_id, @company_name, @aawak_ref_id, @dept_id,
+        @unit_id, @description, @nimitt_id, @company_name, @aawak_ref_id, @dept_id, @is_xl,
         @active)`
     , update:
         `update jawak set 
@@ -502,6 +502,7 @@ const jawak = {
         company_name=@company_name,
         aawak_ref_id=@aawak_ref_id,
         dept_id=@dept_id,
+        is_xl=@is_xl,
         updated_at=datetime('now','localtime')`
     , update_active:
         `update jawak set
@@ -538,18 +539,19 @@ const aawak = {
         company_name=@company_name,
         isbill=@isbill,
         document=@document,
+        is_xl=@is_xl,
         updated_at=datetime('now','localtime')`
     , insert:
         `insert into aawak (
             date, mm_id, pkt_num, pbk_id, aawak_mm_id, item_id, subitem_id, usage_category_id,
             product_id, item_detail, condition_id, qty, rate, actual_amt, 
             aawak_type_id, unit_id, description, nimitt_id, dept_id, company_name, 
-            isbill, remaining_qty, document, active)
+            isbill, remaining_qty, document, is_xl, active)
         values (
             @date, @mm_id, @pkt_num, @pbk_id, @aawak_mm_id, @item_id, @subitem_id, @usage_category_id,
             @product_id, @item_detail, @condition_id, @qty, @rate, @actual_amt, 
             @aawak_type_id, @unit_id, @description, @nimitt_id, @dept_id, @company_name, 
-            @isbill, @qty, @document, @active)`
+            @isbill, @qty, @document, @is_xl, @active)`
     , select:
         `select * from aawak ?`
     , select_full:
@@ -1109,10 +1111,11 @@ const product = {
         `select * from product ?`
     , select_full:
         `select product.*,
-        json_group_array(json_object( '_id',product._id,'product_code',product_code,'sr_num',sr_num)) as products,
+        CASE WHEN product_code IS NULL AND sr_num IS NULL THEN NULL ELSE json_group_array(json_object( '_id',product._id,'product_code',product_code,'sr_num',sr_num)) END as products,
         mm.mm_hin,mm.mm_eng,mm.mm_code, 
         item.item_hin,item.item_eng,item.item_code, item.item_roman,
         subitem_list.subitem_hin,subitem_list.subitem_eng, subitem_list.subitem_roman,
+        unit.unit_short, unit.unit_full,
         support_list.list_name_hin as condition_hin,support_list.list_name_eng as condition_eng,
         lmm.mm_hin as last_mm_hin, lmm.mm_eng as last_mm_eng, lmm.mm_code as last_mm_code, 
         lc.list_name_hin as last_condition_hin, lc.list_name_eng as last_condition_eng        
@@ -1121,6 +1124,7 @@ const product = {
         left join mm lmm on lmm._id = product.last_mm
         left join item on item._id = product.item_id
         left join subitem on subitem._id = product.subitem_id
+        left join unit on unit._id = product.unit_id
         left join subitem_list on subitem_list._id = subitem.subitem_list_id
         left join support_list on support_list._id = product.condition_id
         left join support_list lc on lc._id = product.last_condition ?
@@ -1158,11 +1162,11 @@ const product = {
         `insert into product (
         mm_id, purchased_by, purchase_date, item_id, subitem_id, unit_id, product_code, company_name,
         model_name, sr_num, condition_id, price, product_detail, accessories, purchase_from,
-        warranty_period, dept_id, warranty_from, document, isbill, voucher_no, active)
+        warranty_period, dept_id, warranty_from, document, isbill, voucher_no, qty, active)
     values (
         @mm_id, @purchased_by, @purchase_date, @item_id, @subitem_id, @unit_id, @product_code, @company_name,
         @model_name, @sr_num, @condition_id, @price, @product_detail, @accessories, @purchase_from,
-        @warranty_period, @dept_id, @warranty_from, @document, @isbill, @voucher_no, @active)`
+        @warranty_period, @dept_id, @warranty_from, @document, @isbill, @voucher_no, @qty, @active)`
     , update:
         `update product set 
         mm_id=@mm_id,
@@ -1186,11 +1190,12 @@ const product = {
         document=@document,
         isbill=@isbill,
         voucher_no=@voucher_no,
+        qty=@qty,
         updated_at=datetime('now','localtime')`
     , order:
         `product._id desc`
     , grpByVoucher:
-        `select voucher_no, json_group_array(json_object( '_id',_id,'product_code',product_code,'sr_num',sr_num)) as productGroup,* from product group by voucher_no`
+        `select voucher_no, json_group_array(json_object( '_id',_id,'product_code',product_code,'sr_num',sr_num)) as productGroup, sum(qty) as qty, * from product group by voucher_no`
 }
 
 const state = {
@@ -1775,14 +1780,23 @@ const import_history = {
         left join state st on mm.state_id = st._id        
         left join department dept on dept._id = import_history.dept_id ? group by mm_id, year`
     , insert:
-        `insert or replace into import_history (mm_id, month, year, dept_id)
-        values (@mm_id, @month, @year, @dept_id)`
+        `insert or replace into import_history (mm_id, month, year, dept_id, success_count, fail_count, import_count)
+        values (@mm_id, @month, @year, @dept_id, @success_count, @fail_count, @import_count)`
     , update:
         `update import_history set  
         mm_id = @mm_id, 
         month = @month, 
         year = @year,
-        updated_at = @updated_at`
+        success_count = @success_count,
+        fail_count = @fail_count,
+        import_count = @import_count,
+        updated_at = (strftime('%Y-%m-%d %H:%M:%f', datetime('now', 'localtime')))`
+    , update_add_count:
+        `update import_history set  
+        success_count = success_count + @success_count,
+        fail_count = fail_count + @fail_count,
+        import_count = import_count + @import_count,
+        updated_at = (strftime('%Y-%m-%d %H:%M:%f', datetime('now', 'localtime'))) where mm_id = @mm_id AND month = @month AND year = @year AND dept_id = @dept_id`
     , order:
         ``,
     delete: `delete from import_history`,

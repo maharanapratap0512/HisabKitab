@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const e = require('express');
 const DBContex = require('../models/DBContex');
 const Fn = require('../models/functions');
 const DB = new DBContex();
@@ -64,6 +65,26 @@ router.put('/:dept_id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+// get only unique products
+router.put('/unique/:dept_id', async (req, res, next) => {
+    try {
+        let conditionString = ` 1=1 AND (product.product_code IS NOT NULL OR product.sr_num IS NOT NULL) ${req.body._id ? ` AND product._id = ${req.body._id}` : ``} ${req.body.item_id ? ` AND product.item_id = ${req.body.item_id}` : ``}`;
+        // let conditionString = ` 1=1 ${req.body._id ? `product._id = ${req.body._id}` : ``} ${typeof req.body.item_id == "string" || typeof requnique.body.item_id == "number" ? ` AND product.item_id = (${req.body.item_id})` : ``} ${req.body.item_id.length > 0 ? ` AND product.item_id IN (${req.body.item_id})` : ``}`;
+        // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
+        await DB.getList('product', { full: req.body.full ? true : false, dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
+            for (let i in resolve.data) {
+                resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
+                // resolve.data[i].tracking = (resolve.data[i].tracking != "[null]" ? JSON.parse(resolve.data[i].tracking) : {});
+            }
+            res.json({
+                success: true,
+                result: resolve.data || [],
+                total_count: resolve.total_count
+            });
+        });
+    } catch (err) { next(err) };
+});
+
 
 // post product
 router.post('/:dept_id', async (req, res, next) => {
@@ -76,13 +97,19 @@ router.post('/:dept_id', async (req, res, next) => {
             req.body.voucher_no = voucher;
 
             Fn.begin()
-            for (let i of req.body.products) {
-                req.body.product_code = i.product_code
-                req.body.sr_num = i.sr_num
-                // console.log(req.body);
-                // delete newObj.products;
+            if (req.body.products.length) {
+                for (let i of req.body.products) {
+                    req.body.product_code = i.product_code
+                    req.body.sr_num = i.sr_num
+                    await DB.insert('product', req.body, req.params.dept_id, false).then((data) => {
+                    }, (err) => {
+                        throw err;
+                    });
+                }
+            } else {
+                req.body.product_code = null
+                req.body.sr_num = null
                 await DB.insert('product', req.body, req.params.dept_id, false).then((data) => {
-
                 }, (err) => {
                     throw err;
                 });
@@ -100,7 +127,7 @@ router.post('/:dept_id', async (req, res, next) => {
                     result: resolve.data || [],
                     total_count: resolve.total_count
                 });
-            }, (err)=>{
+            }, (err) => {
                 throw err;
             });
 
@@ -125,30 +152,32 @@ router.put('/', async (req, res, next) => {
             req.body.set.isbill = req.body.set.isbill ? 1 : 0;
             let updtArr = [];
             Fn.begin();
-            for (let i of req.body.set.products) {
-                req.body.set.product_code = i.product_code
-                req.body.set.sr_num = i.sr_num
+            if (req.body.set.products.length) {
+                for (let i of req.body.set.products) {
+                    req.body.set.product_code = i.product_code
+                    req.body.set.sr_num = i.sr_num
 
-                if (i._id) {
-                    await DB.update('product', req.body.set, i._id).then(async (data) => {
-                        // data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
-                        // data.tracking = (data.tracking != "[null]" ? JSON.parse(data.tracking) : {});
-                        // updtArr.push(data);
-                    },
-                        (err) => {
+                    if (i._id) {
+                        await DB.update('product', req.body.set, i._id).then(async (data) => {
+                        }, (err) => {
                             throw err;
                         });
+                    }
+                    else {
+                        // console.log(req.body);
+                        await DB.insert('product', req.body.set, req.body.set.dept_id, false).then((data) => {
+                        }, (err) => {
+                            throw err;
+                        });
+                    }
                 }
-                else {
-                    // console.log(req.body);
-                    await DB.insert('product', req.body.set, req.body.set.dept_id, false).then((data) => {
-                        // data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
-                        // data.tracking = (data.tracking != "[null]" ? JSON.parse(data.tracking) : {});
-                        // updtArr.push(data);
-                    }, (err) => {
-                        throw err;
-                    });
-                }
+            } else {
+                req.body.set.product_code = null
+                req.body.set.sr_num = null
+                await DB.update('product', req.body.set, req.body.query._id).then(async (data) => {
+                }, (err) => {
+                    throw err;
+                });
             }
             //get product
             await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: `product.voucher_no = ${req.body.set.voucher_no}` }).then(async (resolve) => {
@@ -162,7 +191,7 @@ router.put('/', async (req, res, next) => {
                     result: resolve.data || [],
                     total_count: resolve.total_count
                 });
-            }, (err)=>{
+            }, (err) => {
                 throw err;
             });
         }

@@ -160,7 +160,12 @@
 
         </div>
 
-        <div class="table-responsive mt-4" *ngIf="product">
+        <div class="row mt-4" *ngIf="!product || (!product.product_code && !product.sr_num)">
+            <div class="alert alert-warning bg-light text-dark" role="alert">
+                <strong>Sorry! </strong> Tracking currently not possible for this products.
+            </div>
+        </div>
+        <div class="table-responsive mt-4" *ngIf="product && (product.product_code || product.sr_num)">
             <table class="table table-bordered table-centered mb-0">
                 <thead class="table-light">
                     <tr>

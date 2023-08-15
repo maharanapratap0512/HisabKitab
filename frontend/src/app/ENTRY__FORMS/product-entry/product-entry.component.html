@@ -221,32 +221,30 @@
                </div>
             </div>
 
-            <div class="col-md-2 mb-3" *ngIf="settings.product.document">
-               <div class="form-group">
-                  <label class="form-label">Image</label>
-                  <a onclick="$('#productEntryComponent > #addImages').modal('show')" (click)="showModal='Add Image'"
-                     class="form-control" style="cursor: pointer;">
-                     <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
-                     <div *ngIf="imagepath && imagepath.length > 0">
-                        <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image" class="rounded m-1"
-                           height="48" />
-                        x {{imagepath.length}}
-                     </div>
-                     <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
-                  </a>
-               </div>
-            </div>
-
-            <div class="col-md-4 mb-3" style="border: 1px solid grey; border-radius:5px;">
+            <div class="col-md-6 mb-3" style="border: 1px solid grey; border-radius:5px;">
                <div class="form-group">
                   <label class="form-label">Product Code</label>
                   <div class="d-flex justify-content-between">
+                     <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Quantity" formControlName="qty"
+                           [ngClass]="{'validation':productForm.get('qty')?.errors && (productForm.get('qty')?.touched || productForm.get ('qty')?.dirty)}" [readonly]="productForm.value.products.length">
+                        <span class="input-group-text ml-1 border border-secondary"
+                           style="padding: 0px; min-width: 40%;background: #252932;">
+                           <ng-select class="custom" style="width: 100%;" placeholder="Unit" [clearable]="true"
+                              [virtualScroll]="true" formControlName="unit_id"
+                              [ngClass]="{'validation':productForm.get('unit_id')?.errors && (productForm.get('unit_id')?.touched || productForm.get ('unit_id')?.dirty)}" [readonly]="productForm.value.products.length">
+                              <ng-option selected="selected" disabled value="">Unit</ng-option>
+                              <ng-option *ngFor="let item of units" [value]="item._id">{{item.unit_short}}</ng-option>
+                           </ng-select>
+                        </span>
+                     </div>
+                     <span class="m-1">OR</span>
                      <input type="text" class="form-control" placeholder="Product Code" [(ngModel)]="product_code"
                         [ngModelOptions]="{ standalone: true }" #product_codeInput="ngModel"
-                        [ngClass]="{'validation':!productForm.value.products.length && (!product_code && !sr_num) && product_codeInput.touched}">
+                        [ngClass]="{'validation':!productForm.value.qty || (!productForm.value.products.length && (!product_code && !sr_num) && product_codeInput.touched)}">
                      <input type="text" class="form-control mx-1" placeholder="S/R Number" [(ngModel)]="sr_num"
                         [ngModelOptions]="{ standalone: true }" #sr_numInput="ngModel"
-                        [ngClass]="{'validation':!productForm.value.products.length  && (!product_code && !sr_num) && sr_numInput.touched}">
+                        [ngClass]="{'validation':!productForm.value.qty || (!productForm.value.products.length  && (!product_code && !sr_num) && sr_numInput.touched)}">
                      <button class="btn btn-sm btn-outline-primary" [disabled]="!product_code && !sr_num"
                         (click)="productAdd()">Add</button>
                   </div>
@@ -266,6 +264,22 @@
                         </tr>
                      </table>
                   </div>
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3" *ngIf="settings.product.document">
+               <div class="form-group">
+                  <label class="form-label">Image</label>
+                  <a onclick="$('#productEntryComponent > #addImages').modal('show')" (click)="showModal='Add Image'"
+                     class="form-control" style="cursor: pointer;">
+                     <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
+                     <div *ngIf="imagepath && imagepath.length > 0">
+                        <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image" class="rounded m-1"
+                           height="48" />
+                        x {{imagepath.length}}
+                     </div>
+                     <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
+                  </a>
                </div>
             </div>
 

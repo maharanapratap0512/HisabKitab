@@ -83,7 +83,7 @@
                         </tr>
                      </thead>
                      <tbody>
-                        <ng-container *ngFor="let data of productData | filter:term; let i=index">
+                        <ng-container *ngFor="let data of productData | search:term; let i=index">
                            <!-- <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
                               [attr.aria-controls]="'#collapse-' + i" class="main-row"> -->
                            <tr>
@@ -114,9 +114,12 @@
                                  {{data.last_condition_hin ? data.last_condition_hin : data.condition_hin}} <br />
                                  {{data.last_date ? data.last_date : data.purchase_date}}
                               </td>
-                              <td>
+                              <td *ngIf="data.products.length <= 0">
+                                 {{data.qty}} {{data.unit_short}}
+                              </td>
+                              <td *ngIf="data.products.length">
                                  <ng-container *ngFor="let p of data.products; let j=index">
-                                   {{j+1}}. {{p.sr_num?p.sr_num:'N/A'}} -- {{p.product_code?p.product_code:'N/A'}}<br>
+                                    {{j+1}}. {{p.sr_num?p.sr_num:'N/A'}} -- {{p.product_code?p.product_code:'N/A'}}<br>
                                  </ng-container>
                               </td>
                               <td>{{data.purchase_date}}</td>

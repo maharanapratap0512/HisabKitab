@@ -385,14 +385,9 @@
                   out of {{importData.length}} </div>
             </div>
             <div class="row mt-1">
-               <div class="col-md-3 mb-3">
+               <!-- <div class="col-md-3 mb-3">
                   <div class="form-group">
-                     <label class="form-label">MM</label>
-                     <!-- <a type="button" style="padding: 1px 6px !important;"
-                           class="btn btn-outline-primary float-end"
-                           onclick="$('#subitemComponent > #showModal').modal('show')"
-                           (click)="showModal = 'Add Item'">+
-                           Add</a> -->
+                     <label class="form-label">MM</label>                    
                      <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="false"
                         [virtualScroll]="true" formControlName="mm_id"
                         [ngClass]="{'validation':importForm.get('mm_id')?.errors && (importForm.get('mm_id')?.touched || importForm.get ('mm_id')?.dirty)}">
@@ -421,7 +416,7 @@
                      </ng-option>
                      <ng-option *ngFor="let item of months" [value]="item.m">{{item.m}} : {{item.name}}</ng-option>
                   </ng-select>
-               </div>
+               </div> -->
                <div class="col-md-2 mb-3">
                   <div class="form-check form-switch">
                      <input type="checkbox" class="form-check-input" formControlName="autoUpdate">

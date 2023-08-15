@@ -79,6 +79,7 @@ export class AawakEntryComponent implements OnInit {
 		remaining_qty: null,
 		isbill: null,
 		document: null,
+		is_xl: 0,
 		jawak_detail: []
 	}
 	// jwkArr: any = [];
@@ -159,6 +160,7 @@ export class AawakEntryComponent implements OnInit {
 			this.awkfg.company_name = changes.getData.currentValue.company_name ? changes.getData.currentValue.company_name : null
 			this.awkfg.isbill = changes.getData.currentValue.isbill ? changes.getData.currentValue.isbill : false;
 			this.awkfg.document = changes.getData.currentValue.document ? changes.getData.currentValue.document : []
+			this.awkfg.is_xl = changes.getData.currentValue.is_xl ? changes.getData.currentValue.is_xl : 0
 			this.awkfg.jawak_detail = changes.getData.currentValue.jawak_detail ? changes.getData.currentValue.jawak_detail : []
 
 			this.selDept_id = changes.getData.currentValue.dept_id;
@@ -235,6 +237,7 @@ export class AawakEntryComponent implements OnInit {
 			jawak_type_hin: (this.jtype ? this.jtype.list_name_hin : (jwk_type ? jwk_type.list_name_hin : null)),
 			unit_id: this.awkfg.unit_id,
 			dept_id: this.awkfg.dept_id,
+			is_xl: 0,
 			jawak_mm_hin: (this.jmm ? this.jmm.mm_hin : ''),
 			nimitt_hin: (this.jnimitt ? this.jnimitt.nimitt_hin : ''),
 			nimitt_state_hin: (this.jnimitt ? this.jnimitt.state_hin : ''),
@@ -725,7 +728,7 @@ export class AawakEntryComponent implements OnInit {
 			}
 
 		}
-		this.http.put(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, body).subscribe((data: any) => {
+		this.http.put(this.api.getUrl('PRODUCT') + 'unique/' + this.auth.webUser.dept_id, body).subscribe((data: any) => {
 			if (data['result']) {
 				// this.productsAll = data['result'];
 				this.products = data['result'];

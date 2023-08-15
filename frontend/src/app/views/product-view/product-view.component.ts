@@ -59,7 +59,7 @@ export class ProductViewComponent implements OnInit {
       product_id: [this.product._id],
       orderBy: `date desc`
     }
-    this.http.put(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id, body).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, body).subscribe((data: any) => {
       if (data['result']) {
         this.product.tracking_detail = [];
         for (let i in data['result']) {

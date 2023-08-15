@@ -64,7 +64,7 @@ export class ProductEntryComponent implements OnInit {
       product_detail: [null],
       item_id: [null, Validators.required],
       subitem_id: [null],
-      unit_id: [1],
+      unit_id: [1, Validators.required],
       mm_id: [null, Validators.required],
       document: [[]],
       dept_id: [this.auth.webUser.dept_id],
@@ -72,7 +72,8 @@ export class ProductEntryComponent implements OnInit {
       nimitt_id: [null],
       isbill: false,
       products: [[]],
-      voucher_no: [null]
+      voucher_no: [null],
+      qty: [null, Validators.required],
     });
 
     this.settings = this.auth.webUser.settings;
@@ -130,6 +131,7 @@ export class ProductEntryComponent implements OnInit {
         nimitt_id: changes.getData.currentValue.nimitt_id,
         products: changes.getData.currentValue.products ? changes.getData.currentValue.products : [],
         voucher_no: changes.getData.currentValue.voucher_no,
+        qty: changes.getData.currentValue.qty,
 
       });
       // this.sr_numChanged({ target: { value: changes.getData.currentValue.sr_num } });
@@ -174,7 +176,7 @@ export class ProductEntryComponent implements OnInit {
   }
 
   productFormSubmit() {
-    if (this.productForm.valid && this.productForm.value.products.length) {
+    if (this.productForm.valid) {
       this.isLoader = true;
       this.http.post(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, this.productForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
@@ -235,6 +237,7 @@ export class ProductEntryComponent implements OnInit {
     }
     this.productForm.controls['product_code'].updateValueAndValidity();
   }
+
   codeChanged(ev: any) {
     if (ev.target.value) {
       this.productForm.controls['sr_num'].clearValidators();
@@ -246,6 +249,10 @@ export class ProductEntryComponent implements OnInit {
 
   productAdd() {
     this.productForm.value.products.push({ product_code: this.product_code, sr_num: this.sr_num });
+    this.productForm.patchValue({
+      qty: this.productForm.value.products.length,
+      unit_id: 1
+    })
     console.log("this.productForm.value", this.productForm.value);
     this.product_code = null;
     this.sr_num = null;
@@ -264,10 +271,9 @@ export class ProductEntryComponent implements OnInit {
       $('#productEntryComponent > #showModal').modal('hide');
       this.showModal = '';
       // this.mms.unshift(ev);
-      this.productForm.patchValue(
-        {
-          mm_id: ev._id
-        });
+      this.productForm.patchValue({
+        mm_id: ev._id
+      });
       this.isLoader = false;
     }
     else {

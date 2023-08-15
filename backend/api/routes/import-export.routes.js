@@ -190,11 +190,13 @@ router.put('/process', async (req, res, next) => {
     if (req.body.data) {
         try {
             let awkData = req.body.data;
-            if (awkData.awk_id && req.body.autoUpdate) {
+            if (req.body.data.awk_id) {
+                req.body.data.ignored = true;
+                awkData.ignored = true;
             } else {
                 await Fn.begin();
                 let awkObj = {
-                    date: awkData.date, mm_id: awkData.mm_id, pkt_num: awkData.pkt_num, pbk_id: awkData.pbk_id, aawak_mm_id: awkData.aj_mm_id, item_id: awkData.item_id, subitem_id: awkData.subitem_id, product_id: awkData.product_id, item_detail: awkData.item_detail, condition_id: awkData.condition_id, qty: awkData.qty, rate: awkData.rate, actual_amt: awkData.actual_amt, aawak_type_id: awkData.aj_type_id, unit_id: awkData.unit_id, description: awkData.description, nimitt_id: awkData.nimitt_id, dept_id: awkData.dept_id, company_name: awkData.company_name, isbill: awkData.isbill, document: null, usage_category_id: awkData.usage_category_id, usage_category: awkData.usage_category,
+                    date: awkData.date, mm_id: awkData.mm_id, pkt_num: awkData.pkt_num, pbk_id: awkData.pbk_id, aawak_mm_id: awkData.aj_mm_id, item_id: awkData.item_id, subitem_id: awkData.subitem_id, product_id: awkData.product_id, item_detail: awkData.item_detail, condition_id: awkData.condition_id, qty: awkData.qty, rate: awkData.rate, actual_amt: awkData.actual_amt, aawak_type_id: awkData.aj_type_id, unit_id: awkData.unit_id, description: awkData.description, nimitt_id: awkData.nimitt_id, dept_id: awkData.dept_id, company_name: awkData.company_name, isbill: awkData.isbill, document: null, usage_category_id: awkData.usage_category_id, usage_category: awkData.usage_category, is_xl: 1,
                 };
                 await Fn.insertAJ(awkObj, 'aawak').then(async (resolve) => {
                     awkData.awk_id = resolve;
@@ -207,10 +209,10 @@ router.put('/process', async (req, res, next) => {
             for (let i in awkData.jawak_detail) {
                 await Fn.begin();
                 let jwkObj = {
-                    date: awkData.jawak_detail[i].date ? awkData.jawak_detail[i].date : awkData.date, mm_id: awkData.mm_id, pkt_num: awkData.jawak_detail[i].pkt_num, pbk_id: awkData.jawak_detail[i].pbk_id ? awkData.jawak_detail[i].pbk_id : null, jawak_mm_id: awkData.jawak_detail[i].aj_mm_id, item_id: awkData.item_id, subitem_id: awkData.subitem_id, product_id: awkData.product_id, item_detail: null, condition_id: awkData.condition_id, qty: awkData.jawak_detail[i].qty, jawak_type_id: awkData.jawak_detail[i].aj_type_id, unit_id: awkData.unit_id, description: awkData.jawak_detail[i].description, nimitt_id: awkData.jawak_detail[i].nimitt_id, company_name: awkData.company_name, aawak_ref_id: awkData.awk_id, dept_id: awkData.dept_id, usage_category_id: awkData.jawak_detail[i].usage_category_id,
+                    date: awkData.jawak_detail[i].date ? awkData.jawak_detail[i].date : awkData.date, mm_id: awkData.mm_id, pkt_num: awkData.jawak_detail[i].pkt_num, pbk_id: awkData.jawak_detail[i].pbk_id ? awkData.jawak_detail[i].pbk_id : null, jawak_mm_id: awkData.jawak_detail[i].aj_mm_id, item_id: awkData.item_id, subitem_id: awkData.subitem_id, product_id: awkData.product_id, item_detail: null, condition_id: awkData.condition_id, qty: awkData.jawak_detail[i].qty, jawak_type_id: awkData.jawak_detail[i].aj_type_id, unit_id: awkData.unit_id, description: awkData.jawak_detail[i].description, nimitt_id: awkData.jawak_detail[i].nimitt_id, company_name: awkData.company_name, aawak_ref_id: awkData.awk_id, dept_id: awkData.dept_id, usage_category_id: awkData.jawak_detail[i].usage_category_id, is_xl: 1,
                 }
                 await Fn.insertAJ(jwkObj, 'jawak').then(async (jwkResult) => {
-                    awkData.jawak_detail[i].jwk_id = jwkResult;
+                    awkData.jawak_detail[i]._id = jwkResult;
                     await Fn.commit();
                 }, async (err) => {
                     console.log(err);
@@ -243,7 +245,13 @@ router.put('/finish', async (req, res, next) => {
     if (req.body.history) {
         try {
             await Fn.begin();
-            await DB.insert('import_history', req.body.history, null, false);
+            for (let data of req.body.history) {
+                await DB.runQuery('import_history', 'update_add_count', { obj: data }).then(async (result) => {
+                    if (!result.changes) {
+                        await DB.insert('import_history', data, null, false);
+                    }
+                });
+            }
             await DB.runQuery('temp_import', 'delete');
             await Fn.commit();
             res.json({

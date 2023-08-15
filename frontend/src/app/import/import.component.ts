@@ -57,8 +57,10 @@ export class ImportComponent implements OnInit {
   years: any = [];
   months: any = [];
   failImport: any = [];
+  importHistory: any = [];
   import$ = new Subject();
   processedCount: any = 0;
+  ignoredCount: any = 0;
   progressStyle: string = "width: 0%";
   loaderStatus: string = 'मैं आत्मा शांत स्वरूप हूँ ।';
   constructor(private fb: FormBuilder,
@@ -89,10 +91,13 @@ export class ImportComponent implements OnInit {
     this.settings = this.auth.webUser.settings;
 
     this.importForm = this.fb.group({
-      mm_id: [null, Validators.required],
-      month: [null, Validators.required],
-      year: [null, Validators.required],
+      mm_id: [null],
+      month: [null],
+      year: [null],
       dept_id: [this.auth.webUser.dept_id],
+      success_count: [0],
+      fail_count: [0],
+      import_count: [1],
       autoUpdate: [false]
     });
 
@@ -273,12 +278,17 @@ export class ImportComponent implements OnInit {
 
   async importFinal() {
     this.processedCount = 0;
+    this.ignoredCount = 0;
     if (this.importForm.valid) {
 
       this.import$.subscribe((result: any) => {
         if (result.success && result.data) {
+          if (!result.data.ignored) {
+            this.addToHistory(result.data);
+          }
           let errJwk = [];
           for (let jwk of result.data.jawak_detail) {
+            this.addToHistory({...jwk, mm_id: result.data.mm_id});
             if (jwk.error) {
               errJwk.push(jwk)
             }
@@ -287,7 +297,7 @@ export class ImportComponent implements OnInit {
             this.failImport.push({ ...result.data, jawak_detail: errJwk });
           }
         } else {
-          this.failImport.push(result.data ? result.data : this.importData[this.processedCount]);          
+          this.failImport.push(result.data ? result.data : this.importData[this.processedCount]);
         }
         this.processedCount++;
         this.progressStyle = "width:" + (this.processedCount * 100) / this.importData.length + "%;";
@@ -303,7 +313,7 @@ export class ImportComponent implements OnInit {
             confirmButtonText: 'Finish'
           }).then((result) => {
             if (result.isConfirmed) {
-              this.http.put(this.api.getUrl('IMPORTEXPORT') + 'finish', { history: this.importForm.value }).subscribe((data: any) => {
+              this.http.put(this.api.getUrl('IMPORTEXPORT') + 'finish', { history: Object.values(this.importHistory) }).subscribe((data: any) => {
                 if (this.failImport.length > 0) {
                   console.log(this.failImport);
                   let failExcelData: any = [];
@@ -399,6 +409,27 @@ export class ImportComponent implements OnInit {
     }
   }
 
+  addToHistory(data: any) {
+    const date = new Date(data.date);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    const uniqueKey = (year * 10000) + (month * 100) + data.mm_id;
+
+    if (!this.importHistory[uniqueKey]) {
+      this.importHistory[uniqueKey] = {
+        month: month,
+        year: year,
+        mm_id: data.mm_id,
+        dept_id: this.auth.webUser.dept_id,
+        fail_count: 0,
+        success_count: 0,
+        import_count: 1
+      };
+    }
+    data.error ? this.importHistory[uniqueKey].fail_count++ : this.importHistory[uniqueKey].success_count++;
+
+  }
 
   clearTempImport() {
     Swal.fire({

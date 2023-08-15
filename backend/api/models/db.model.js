@@ -1680,6 +1680,7 @@ class dbModal {
           END;`,
       cat_roman: `ALTER table category add column category_roman varchar(50);`,
       alt_prdct: `ALTER TABLE product add column voucher_no int`,
+      alt_prdct: `ALTER TABLE product add column qty decimal(10, 2) default 1`,
       alt_prdct_xl: `ALTER TABLE product add column is_xl tinyint(1) default false`,
       alt_awk: `ALTER TABLE aawak add column voucher_no int`,
       alt_awk_xl: `ALTER TABLE aawak add column is_xl tinyint(1) default false`,
@@ -1725,6 +1726,7 @@ class dbModal {
       )`,
       add_success_ih:`alter table import_history add column success_count int default 0`,
       add_fail_ih:`alter table import_history add column fail_count int default 0`,
+      add_icount_ih:`alter table import_history add column import_count int default 1`,
     },
 
     /* TODO cleanup task 

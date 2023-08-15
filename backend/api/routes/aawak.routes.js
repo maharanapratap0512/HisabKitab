@@ -86,7 +86,6 @@ router.post('/new/:dept_id', async (req, res, next) => {
                     for (let i in req.body.jawak_detail) {
                         req.body.jawak_detail[i].aawak_ref_id = resolve;
                         await Fn.insertAJ(req.body.jawak_detail[i], 'jawak').then(async (jwkResult) => {
-
                         }, (err) => {
                             throw err;
                         })
@@ -117,7 +116,7 @@ router.post('/new/:dept_id', async (req, res, next) => {
             });
         }
         catch (err) {
-            Fn.rollback();
+            Fn.rollback();;
             return next(err);
         }
     }
@@ -210,7 +209,11 @@ router.put('/new', async (req, res, next) => {
                     await DB.getList('jawak', { conditionString: ` aawak_ref_id = ${oldAwk._id}` }).then(async (jwkdata) => {
                         if (jwkdata.data) {
                             for (let jwk of jwkdata.data) {
-                                await Fn.updateAJ({ ...jwk, condition_id: req.body.set.condition_id }, 'jawak', jwk);
+                                await Fn.updateAJ({ ...jwk, condition_id: req.body.set.condition_id }, 'jawak', jwk).then((data) => {
+                                }, (err) => {
+                                    console.log('jwk', err);
+                                    throw err;
+                                });
                             }
                         }
                     }, (err) => {

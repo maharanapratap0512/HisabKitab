@@ -35,7 +35,7 @@ export class ProductComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService,
-    private excelExportService:ExcelExportService
+    private excelExportService: ExcelExportService
   ) {
     this.settings = this.auth.webUser.settings.product;
   }
@@ -47,7 +47,7 @@ export class ProductComponent implements OnInit {
   }
 
   getProductData() {
-    this.isLoader = true; 
+    this.isLoader = true;
     this.http.get(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id).subscribe((data) => {
       if (data['result'] && data['success']) {
         this.productDataAll = data['result'];
@@ -74,9 +74,11 @@ export class ProductComponent implements OnInit {
 
   editProductResponse(ev: any) {
     this.isLoader = true;
+    console.log(ev);
+
     if (ev.length) {
       this.closeModal();
-      this.productData.splice(this.productData.indexOf(this.editData), 1, ev);
+      this.productData.splice(this.productData.indexOf(this.editData), 1, ev[0]);
       this.isLoader = false;
     }
     else {
@@ -104,30 +106,62 @@ export class ProductComponent implements OnInit {
   exportToExcel() {
     let excelData = [];
     for (let i in this.productData) {
-      excelData.push({
-        No: i,
-        "अभी कहा है": this.productData[i].last_mm_hin ? this.productData[i].last_mm_hin : this.productData[i].mm_hin,
-        "कब से है": this.productData[i].last_date ? this.productData[i].last_date : this.productData[i].purchase_date,
-        "अभी की स्थिति": this.productData[i].last_condition_hin ? this.productData[i].last_condition_hin : this.productData[i].condition_hin,
-        "Sr No": this.productData[i].sr_num ? this.productData[i].sr_num : '',
-        "Pr Code": this.productData[i].product_code ? this.productData[i].product_code : '',
-        "तारीख": this.productData[i].purchase_date ? this.productData[i].purchase_date : '',
-        "मि.म.": this.productData[i].mm_hin,
-        "आइटम": this.productData[i].item_hin,
-        "सबआइटम": this.productData[i].subitem_hin ? this.productData[i].subitem_hin : '',
-        "कंपनी": this.productData[i].company_name ? this.productData[i].company_name : '',
-        "मोडेल": this.productData[i].model_name ? this.productData[i].model_name : '',
-        "कन्डिशन": this.productData[i].condition_hin,
-        "रेट": this.productData[i].price ? this.productData[i].price : 0,
-        "वॉरन्टी समय": this.productData[i].warranty_period ? this.productData[i].warranty_period : '',
-        "वॉरन्टी कहाँ से ?": this.productData[i].warranty_from ? this.productData[i].warranty_from : '',
-        "कहाँ से खरीदा": this.productData[i].purchase_from ? this.productData[i].purchase_from : '',
-        "किसके थ्रू": this.productData[i].purchased_by ? this.productData[i].purchased_by : '',
-        "डेटाइल माहिती": this.productData[i].product_detail ? this.productData[i].product_detail : '',
-        "साथ मे क्या2 आया": this.productData[i].accessories ? this.productData[i].accessories : '',
-        "निमित्त": this.productData[i].nimitt_hin ? this.productData[i].nimitt_hin : ''
+      if (this.productData[i].products.length) {
+        for (let j in this.productData[i].products) {
+          excelData.push({
+            No: i,
+            "अभी कहा है": this.productData[i].last_mm_hin ? this.productData[i].last_mm_hin : this.productData[i].mm_hin,
+            "कब से है": this.productData[i].last_date ? this.productData[i].last_date : this.productData[i].purchase_date,
+            "अभी की स्थिति": this.productData[i].last_condition_hin ? this.productData[i].last_condition_hin : this.productData[i].condition_hin,
+            "Sr No": this.productData[i].sr_num ? this.productData[i].sr_num : '',
+            "Pr Code": this.productData[i].product_code ? this.productData[i].product_code : '',
+            "तारीख": this.productData[i].purchase_date ? this.productData[i].purchase_date : '',
+            "मि.म.": this.productData[i].mm_hin,
+            "आइटम": this.productData[i].item_hin,
+            "सबआइटम": this.productData[i].subitem_hin ? this.productData[i].subitem_hin : '',
+            "संख्या": this.productData[i].qty,
+            "यूनिट": this.productData[i].unit_short,
+            "कंपनी": this.productData[i].company_name ? this.productData[i].company_name : '',
+            "मोडेल": this.productData[i].model_name ? this.productData[i].model_name : '',
+            "कन्डिशन": this.productData[i].condition_hin,
+            "रेट": this.productData[i].price ? this.productData[i].price : 0,
+            "वॉरन्टी समय": this.productData[i].warranty_period ? this.productData[i].warranty_period : '',
+            "वॉरन्टी कहाँ से ?": this.productData[i].warranty_from ? this.productData[i].warranty_from : '',
+            "कहाँ से खरीदा": this.productData[i].purchase_from ? this.productData[i].purchase_from : '',
+            "किसके थ्रू": this.productData[i].purchased_by ? this.productData[i].purchased_by : '',
+            "डेटाइल माहिती": this.productData[i].product_detail ? this.productData[i].product_detail : '',
+            "साथ मे क्या2 आया": this.productData[i].accessories ? this.productData[i].accessories : '',
+            "निमित्त": this.productData[i].nimitt_hin ? this.productData[i].nimitt_hin : ''
+          });
+        }
+      } else {
+        excelData.push({
+          No: i,
+          "अभी कहा है": this.productData[i].last_mm_hin ? this.productData[i].last_mm_hin : this.productData[i].mm_hin,
+          "कब से है": this.productData[i].last_date ? this.productData[i].last_date : this.productData[i].purchase_date,
+          "अभी की स्थिति": this.productData[i].last_condition_hin ? this.productData[i].last_condition_hin : this.productData[i].condition_hin,
+          "Sr No": '-',
+          "Pr Code": '-',
+          "तारीख": this.productData[i].purchase_date ? this.productData[i].purchase_date : '',
+          "मि.म.": this.productData[i].mm_hin,
+          "आइटम": this.productData[i].item_hin,
+          "सबआइटम": this.productData[i].subitem_hin ? this.productData[i].subitem_hin : '',
+          "संख्या": this.productData[i].qty,
+          "यूनिट": this.productData[i].unit_short,
+          "कंपनी": this.productData[i].company_name ? this.productData[i].company_name : '',
+          "मोडेल": this.productData[i].model_name ? this.productData[i].model_name : '',
+          "कन्डिशन": this.productData[i].condition_hin,
+          "रेट": this.productData[i].price ? this.productData[i].price : 0,
+          "वॉरन्टी समय": this.productData[i].warranty_period ? this.productData[i].warranty_period : '',
+          "वॉरन्टी कहाँ से ?": this.productData[i].warranty_from ? this.productData[i].warranty_from : '',
+          "कहाँ से खरीदा": this.productData[i].purchase_from ? this.productData[i].purchase_from : '',
+          "किसके थ्रू": this.productData[i].purchased_by ? this.productData[i].purchased_by : '',
+          "डेटाइल माहिती": this.productData[i].product_detail ? this.productData[i].product_detail : '',
+          "साथ मे क्या2 आया": this.productData[i].accessories ? this.productData[i].accessories : '',
+          "निमित्त": this.productData[i].nimitt_hin ? this.productData[i].nimitt_hin : ''
 
-      });
+        });
+      }
     }
     let date = new Date();
     this.excelExportService.exportAsExcelFile(excelData, "product_list_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());

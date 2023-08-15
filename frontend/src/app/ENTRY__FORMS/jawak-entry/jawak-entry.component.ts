@@ -73,6 +73,7 @@ export class JawakEntryComponent implements OnInit {
       description: [null],
       aawak_ref_id: [null],
       nimitt_id: [null],
+      is_xl: [null],
       dept_id: [this.auth.webUser.dept_id]
     });
 
@@ -118,6 +119,7 @@ export class JawakEntryComponent implements OnInit {
         aawak_ref_id: changes.getData.currentValue.aawak_ref_id,
         nimitt_id: changes.getData.currentValue.nimitt_id,
         dept_id: changes.getData.currentValue.dept_id,
+        is_xl: changes.getData.currentValue.is_xl ? changes.getData.currentValue.is_xl : 0,
       });
       this.unit_short = changes.getData.currentValue.unit_short;
       setTimeout(() => {
@@ -150,6 +152,7 @@ export class JawakEntryComponent implements OnInit {
         aawak_ref_id: (this.aawakRef._id ? this.aawakRef._id : null),
         nimitt_id: this.aawakRef.nimitt_id ? this.aawakRef.nimitt_id : null,
         dept_id: this.aawakRef.dept_id,
+        is_xl: 0,
       });
     }
 
@@ -333,6 +336,7 @@ export class JawakEntryComponent implements OnInit {
         aawak_ref_id: this.jawakForm.value.aawak_ref_id,
         nimitt_id: this.jawakForm.value.nimitt_id,
         dept_id: this.jawakForm.value.dept_id,
+        is_xl: this.jawakForm.value.is_xl,
       };
       this.http.put(this.api.getUrl('JAWAK') + 'new/', body).subscribe((data: any) => {
         if (data && data['success']) {
