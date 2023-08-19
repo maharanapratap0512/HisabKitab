@@ -1,6 +1,6 @@
 const DBContex = require('./DBContex');
 class Functions extends DBContex {
-   
+
    constructor() {
       super();
       const begin = this.db.prepare('BEGIN');
@@ -27,7 +27,6 @@ class Functions extends DBContex {
             let insResult = stmtInsert.run(obj);
             if (insResult.changes == 1 && insResult.lastInsertRowid) {
                let bachat = await this.getBachatFromAJ(obj);
-               console.log(bachat);
                let bachatResult;
                if (bachat._id) {
                   bachatResult = stmtUpdateBachat.run(obj);
@@ -61,7 +60,7 @@ class Functions extends DBContex {
             obj.year = objDate.getFullYear();
 
             let objOldDate = new Date(objOld.date);
-            objOld.month = objOldDate.getMonth();
+            objOld.month = objOldDate.getMonth() + 1;
             objOld.year = objOldDate.getFullYear();
 
             obj.document = JSON.stringify(obj.document ? obj.document : {});
@@ -70,9 +69,7 @@ class Functions extends DBContex {
             let updtResult = stmtUpdate.run(obj);
             if (updtResult.changes == 1) {
                stmtDeleteBachat.run(objOld);
-               // let bachatUpdate = await this.getBachatFromAJ(obj);
                let bachatUpdate = stmtUpdateBachat.run(obj);
-               console.log(bachatUpdate);
                if (!bachatUpdate.changes) {
                   bachatUpdate = stmtInsertBachat.run(obj);
                }

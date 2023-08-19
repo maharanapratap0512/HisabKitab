@@ -220,6 +220,15 @@ router.put('/new', async (req, res, next) => {
                         throw err;
                     });
                 }
+                for (let i = 0; i < req.body.set.jawak_detail.length; i++) {
+                    if (!req.body.set.jawak_detail[i]._id) {
+                        req.body.set.jawak_detail[i].aawak_ref_id = oldAwk._id;
+                        await Fn.insertAJ(req.body.set.jawak_detail[i], 'jawak').then(async (jwkResult) => {
+                        }, (err) => {
+                            throw err;
+                        })
+                    }
+                }
 
                 await DB.getList('aawak', { full: true, conditionString: ` aawak._id = ${req.body.set._id}` }).then(async (data) => {
                     for (let i in data.data) {

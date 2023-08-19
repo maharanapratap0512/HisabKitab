@@ -504,12 +504,10 @@ export class ExcelExportService {
   generateReportExcel(json: any[], excelFileName: string, options: any = {}): void {
     let workbook = new Workbook();
     var worksheet = workbook.addWorksheet('Sheet1');
-    console.log(json);
-    console.log(options);
+
     let monthCount = options.months.length;
     let headers = Object.keys(json[0]).filter(key => !key.includes("arr_"));
-    console.log(Object.keys(json));
-    console.log(headers);
+
     let headerCount = headers.length;
     const headerStyle: any = { type: 'pattern', pattern: 'solid', fgColor: { argb: '96C8FB' }, bgColor: { argb: '96C8FB' } };
     const errorStyle: any = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC7CE' }, bgColor: { argb: 'FD0101' } };
@@ -522,7 +520,8 @@ export class ExcelExportService {
 
     // Title
     worksheet.mergeCells([1, 1, 1, headerCount + (monthCount * 4)]);
-    worksheet.getCell('A1').value = 'रिपोर्ट ' + options.months[0].name + "-" + options.year + " से " + options.months[monthCount - 1].name + "-" + options.year;
+    let reportTitle = (excelFileName ? excelFileName + ' का ' : '') + 'सार रिपोर्ट ' + options.months[0].name + "-" + options.year + " से " + options.months[monthCount - 1].name + "-" + options.year;
+    worksheet.getCell('A1').value = reportTitle;
     worksheet.getRow(1).font = { name: 'Corbel', family: 4, size: 20, };
     worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
 
@@ -601,7 +600,7 @@ export class ExcelExportService {
       }
     });
 
-    let fileName = excelFileName + '_' + options.year + ".xlsx";
+    let fileName = reportTitle + ".xlsx";
     const excelBuffer: any = workbook.xlsx.writeBuffer();
     workbook.xlsx.writeBuffer()
       .then(function (buffer: any) {

@@ -82,9 +82,9 @@ export class BachatNewComponent implements OnInit {
       this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
     });
-    this.filterBody.year = 2023;
-    this.filterBody.months = [5, 3, 1];
-    this.filter();
+    // this.filterBody.year = 2023;
+    // this.filterBody.months = [5, 3, 1];
+    // this.filter();
   }
 
   getBase64Images() {
@@ -352,11 +352,15 @@ export class BachatNewComponent implements OnInit {
       }
       bchtData.push(bachatRow);
     }
-    let option:any = {};
+    let option: any = {};
     option.months = this.monthsSel;
     option.year = this.filterBody.year;
-    // let date = new Date();
-    this.excelExportService.generateReportExcel(bchtData,'test', option);
+
+    let mm: any = null;
+    if (this.filterBody.mm_id) {
+      mm = this.mms.find((m: { _id: any; }) => m._id == this.filterBody.mm_id)
+    }
+    this.excelExportService.generateReportExcel(bchtData, (mm ? mm.mm_hin : null), option);
     this.isLoader = false;
   }
 
@@ -405,7 +409,7 @@ export class BachatNewComponent implements OnInit {
 
   filterFormSubmit(formdata: any) {
     if (formdata) {
-      console.log("formdata", formdata);
+
     }
     else {
       this.toastr.error('All Fields are Empty.');
@@ -485,10 +489,8 @@ export class BachatNewComponent implements OnInit {
           this.http.post(this.api.getUrl('COMMENT') + this.auth.webUser.dept_id, data).subscribe(async (res: any) => {
             this.toastr.success("comment added : " + res.result.comment);
             if (sindex >= 0) {
-              console.log("sindex", this.bachatData[index][this.bachatData[index].currentReport][sindex]);
               this.bachatData[index][this.bachatData[index].currentReport][sindex].arr_comment[month] = res.result.comment;
               this.bachatData[index][this.bachatData[index].currentReport][sindex].arr_comment_id[month] = res.result._id;
-              console.log("sindex", this.bachatData[index][this.bachatData[index].currentReport][sindex]);
             } else {
               this.bachatData[index].arr_comment[month] = res.result.comment;
               this.bachatData[index].arr_comment_id[month] = res.result._id;
