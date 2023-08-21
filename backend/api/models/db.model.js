@@ -1679,7 +1679,7 @@ class dbModal {
             insert into department_config(dept_id, config_key, config_value, active) values(NEW._id, 'mm', json('[]'), NEW.active),(NEW._id, 'item', json('[]'), NEW.active),(NEW._id, 'category', json('[]'), NEW.active), (NEW._id, 'subitem', json('[]'), NEW.active), (NEW._id, 'subitem_list', json('[]'), NEW.active),(NEW._id, 'pbk', json('[]'), NEW.active),(NEW._id, 'department', json('[]'), NEW.active),(NEW._id, 'aj_type', json('[]'), NEW.active), (NEW._id, 'settings', json('{}'), NEW.active), (NEW._id, 'nimitt', json('[]'), NEW.active);
           END;`,
       cat_roman: `ALTER table category add column category_roman varchar(50);`,
-      alt_prdct: `ALTER TABLE product add column voucher_no int`,
+      alt_prdct_v: `ALTER TABLE product add column voucher_no int`,
       alt_prdct: `ALTER TABLE product add column qty decimal(10, 2) default 1`,
       alt_prdct_xl: `ALTER TABLE product add column is_xl tinyint(1) default false`,
       alt_awk: `ALTER TABLE aawak add column voucher_no int`,
