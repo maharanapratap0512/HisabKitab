@@ -27,7 +27,7 @@ class DBContex {
     tbl_from_supp_list = [
         'jawak_type',
         'aawak_type',
-        'condition'
+        // 'condition'
     ]
     supp_list = [
         // 'mm_type',
@@ -146,8 +146,8 @@ class DBContex {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
 
-                // if (tblname == "product")
-                //     console.log(sql);
+                if (tblname == "dictionary")
+                    console.log(sql);
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {
@@ -256,6 +256,7 @@ class DBContex {
     async updateMany(tblname, obj, conditionString = null, get = true) {
         return new Promise(async (resolve, reject) => {
             try {
+                console.log("db", obj);
                 let key = Object.keys(obj);
                 let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update;
                 sql += (conditionString ? ` where ${conditionString}` : '');

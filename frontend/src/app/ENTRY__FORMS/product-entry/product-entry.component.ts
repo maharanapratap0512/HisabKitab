@@ -87,7 +87,7 @@ export class ProductEntryComponent implements OnInit {
       this.categories = result.category && this.auth.webUser.dept_id > 2 ? result.category : [];
       this.departments = result.department ? result.department : [];
       this.conditions = result.condition ? result.condition : [];
-      this.subitems = result.subitem ? result.subitem : [];
+      // this.subitems = result.subitem ? result.subitem : [];
       this.units = result.unit ? result.unit : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
@@ -106,6 +106,9 @@ export class ProductEntryComponent implements OnInit {
     if (changes.getData && changes.getData.currentValue) {
       this.getData = changes.getData.currentValue;
       console.log(this.getData);
+
+      this.deptSelected(changes.getData.currentValue.dept_id)
+      // this.itemSelected(changes.getData.currentValue.item_id)
 
       this.productForm.patchValue({
         mm_id: changes.getData.currentValue.mm_id,
@@ -134,6 +137,7 @@ export class ProductEntryComponent implements OnInit {
         qty: changes.getData.currentValue.qty,
 
       });
+
       // this.sr_numChanged({ target: { value: changes.getData.currentValue.sr_num } });
       // this.codeChanged({ target: { value: changes.getData.currentValue.product_code } });
       this.imagepath = (changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images : null)

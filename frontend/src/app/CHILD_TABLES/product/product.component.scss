@@ -15,9 +15,22 @@
    background: #025b0282;
 }
 
-.imageCount{
+.imageCount {
    position: absolute;
    background-color: #0000003d;
    font-size: small;
    margin: 3px;
+}
+
+.file {
+   position: relative;
+   overflow: hidden;
+}
+
+.inputtag {
+   position: absolute;
+   // font-size: 50px;
+   opacity: 0;
+   right: 0;
+   top: 0;
 }

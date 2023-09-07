@@ -20,7 +20,7 @@
                            <i class="dripicons-plus h4 icon-mx-2"> </i>Add Product
                         </button>
                      </div>
-                     <div class="col-4">
+                     <div class="col-3">
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
@@ -32,8 +32,13 @@
                               class="uil-search-plus h4 icon-mx-2"></i> Advance Search
                         </button>
                      </div>
-                     <div class="col-2">
-                        <button type="button" class="btn btn-outline-success" (click)="exportToExcel()"> Export To Excel
+                     <div class="col-3 d-flex">
+                        <button type="button" class="btn btn-success" (click)="openModal('excel_import')"
+                           style="font-weight: 700 !important;">
+                           <i class="uil uil-arrow-to-bottom"></i> Excel Import
+                        </button>
+                        <button type="button" class="btn btn-outline-success mx-2" (click)="exportToExcel()"> Export To
+                           Excel
                         </button>
                      </div>
                      <div class="col-2">
@@ -174,6 +179,8 @@
                [getData]="editData" [isEdit]="true"></app-product-entry>
 
             <app-product-view *ngIf="showModal == 'View Product'" [getData]="editData"></app-product-view>
+
+            <app-excel-import *ngIf='showModal == "excel_import"' importType="product"></app-excel-import>
 
          </div>
          <div class="modal-footer">

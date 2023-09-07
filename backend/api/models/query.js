@@ -1162,11 +1162,11 @@ const product = {
         `insert into product (
         mm_id, purchased_by, purchase_date, item_id, subitem_id, unit_id, product_code, company_name,
         model_name, sr_num, condition_id, price, product_detail, accessories, purchase_from,
-        warranty_period, dept_id, warranty_from, document, isbill, voucher_no, qty, active)
+        warranty_period, dept_id, warranty_from, document, isbill, is_xl, voucher_no, qty, active)
     values (
         @mm_id, @purchased_by, @purchase_date, @item_id, @subitem_id, @unit_id, @product_code, @company_name,
         @model_name, @sr_num, @condition_id, @price, @product_detail, @accessories, @purchase_from,
-        @warranty_period, @dept_id, @warranty_from, @document, @isbill, @voucher_no, @qty, @active)`
+        @warranty_period, @dept_id, @warranty_from, @document, @isbill, @is_xl, @voucher_no, @qty, @active)`
     , update:
         `update product set 
         mm_id=@mm_id,
@@ -1189,7 +1189,7 @@ const product = {
         warranty_from=@warranty_from,
         document=@document,
         isbill=@isbill,
-        voucher_no=@voucher_no,
+        is_xl=@is_xl,
         qty=@qty,
         updated_at=datetime('now','localtime')`
     , order:
@@ -1831,8 +1831,8 @@ const import_history = {
 
 const dictionary = {
     insert: `insert or ignore into dictionary(type, name, extra_note, id, id2) values(@type, @name, @extra_note, @id, @id2)`,
-    select: `select * from dictionary`,
-    select_full: `select * from dictionary`,
+    select: `select * from dictionary ?`,
+    select_full: `select * from dictionary ?`,
     update: `update dictionary set 
         type = @type, 
         name = @name,
@@ -1937,7 +1937,8 @@ const unit = {
 }
 
 const conditions = {
-    vehicle_duplicate: `gadi_num = @gadi_num`
+    vehicle_duplicate: `gadi_num = @gadi_num`,
+    product_duplicate: `(product_code IS NOT NULL AND product_code = @product_code) OR (sr_num IS NOT NULL AND sr_num = @sr_num)`
 }
 
 genDeptDB = {

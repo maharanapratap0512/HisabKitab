@@ -121,6 +121,18 @@ class Functions extends DBContex {
       // });
    }
 
+   async getLastBunchNo(tblname) {
+      // return new Promise(async(resolve, reject)=>{
+      try {
+         let row = this.db.prepare(`select max(bunch_no) as b_no from ${tblname}`).get();
+         return row.v_no || 0;
+      }
+      catch (err) {
+         return 0;
+      }
+      // });
+   }
+
    convertToLower(data, fieldList = null) {
       if (fieldList && fieldList.length > 0) {
          for (let i in data) {
@@ -177,7 +189,7 @@ class Functions extends DBContex {
    async getCategories(dept_id = null) {
 
       return await this.getList('category', { dept_id: dept_id }).then(async (resolve) => {
-         return this.convertToLower(resolve.data || [], ['category_hin', 'category_eng']);
+         return this.convertToLower(resolve.data || [], ['category_hin', 'category_eng', 'category_roman']);
       }, (err) => {
          return [];
       });
@@ -193,16 +205,16 @@ class Functions extends DBContex {
    async getitems(dept_id = null) {
 
       return await this.getList('item', { dept_id: dept_id }).then(async (resolve) => {
-         return this.convertToLower(resolve.data || [], ['item_hin', 'item_eng', 'item_code']);
+         return this.convertToLower(resolve.data || [], ['item_hin', 'item_eng', 'item_roman', 'item_code']);
       }, (err) => {
          return [];
       });
    }
    async getSubitems(dept_id = null) {
 
-      return await this.getList('subitem', { dept_id: dept_id }).then(async (resolve) => {
-         return resolve.data || [];
-         // return this.convertToLower(resolve.data || []);
+      return await this.getList('subitem', { dept_id: dept_id, full: true }).then(async (resolve) => {
+         // return resolve.data || [];
+         return this.convertToLower(resolve.data || [], ['subitem_hin', 'subitem_eng', 'subitem_roman']);
       }, (err) => {
          return [];
       });
@@ -210,14 +222,14 @@ class Functions extends DBContex {
    async getSubiemList(dept_id = null) {
 
       return await this.getList('subitem_list', { dept_id: dept_id }).then(async (resolve) => {
-         return this.convertToLower(resolve.data || [], ['subitem_hin', 'subitem_eng']);
+         return this.convertToLower(resolve.data || [], ['subitem_hin', 'subitem_eng', 'subitem_roman']);
       }, (err) => {
          return [];
       });
    }
    async getSupportList(dept_id = null) {
       return await this.getList('support_list', { dept_id: dept_id }).then(async (resolve) => {
-         return this.convertToLower(resolve.data || [], ['list_name_hin', 'list_name_eng']);
+         return this.convertToLower(resolve.data || [], ['list_name_hin', 'list_name_eng', 'list_name_roman']);
       }, (err) => {
          return [];
       });
@@ -245,7 +257,7 @@ class Functions extends DBContex {
    }
    async getPbks(dept_id = null) {
       return await this.getList('pbk', { dept_id: dept_id }).then(async (resolve) => {
-         return this.convertToLower(resolve.data || [], ['nimitt_hin', 'nimitt_eng', 'gender', 'relation', 'relative_name']);
+         return this.convertToLower(resolve.data || [], ['pbk_hin', 'pbk_eng', 'gender', 'relation', 'relative_name']);
       }, (err) => {
          return [];
       });
@@ -253,7 +265,7 @@ class Functions extends DBContex {
 
    async getDictionary(dict_type) {
       return await this.getList('dictionary', { conditionString: `type = '${dict_type}'` }).then(async (resolve) => {
-         return resolve.data || [];
+         return this.convertToLower(resolve.data || [], ['name', 'extra_note']);
       }, (err) => {
          return [];
       });
@@ -279,7 +291,7 @@ class Functions extends DBContex {
 
    async insertExcelData(type, data, dept_id = null) {
       return await this.insert(type.name, data, dept_id).then((result) => {
-         // console.log('insert', result);
+         console.log('insert', result);
          return result;
       })
    }
@@ -290,7 +302,6 @@ class Functions extends DBContex {
          return result;
       })
    }
-
 
    ExcelDateToJSDate = (intDate) => {
       return new Date((Math.floor(intDate - 25569) * 86400) * 1000);

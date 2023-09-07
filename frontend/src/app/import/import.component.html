@@ -149,7 +149,7 @@
                      <td [ngClass]="{'marked': !data.aj_type_id}">
                         {{data.aj_type?data.aj_type:'-'}}
                      </td>
-                     <td>{{data.isbill?'true':'false'}}</td>
+                     <td>{{data.isbill?'है':'नहीं'}}</td>
                      <td [ngClass]="{'marked': data.nimitt && !data.nimitt_id}">
                         {{data.nimitt?data.nimitt:'-'}}
                      </td>
@@ -505,7 +505,7 @@
                      <td [ngClass]="{'marked': !data.aj_type_id}">
                         {{data.aj_type_hin}}
                      </td>
-                     <td>{{data.isbill?'true':'false'}}</td>
+                     <td>{{data.isbill?'है':'नहीं'}}</td>
                      <td [ngClass]="{'marked': data.nimitt && !data.nimitt_id}">
                         {{data.nimitt_hin}} ({{data.nimitt_state_hin}})
                      </td>

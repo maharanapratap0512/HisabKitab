@@ -202,8 +202,10 @@
          <div class="modal-body">
             <app-vehicle-entry *ngIf="showModal == 'Add Vehicle'" [mode]="mode"
                (response)='addVehicleResponse($event)'></app-vehicle-entry>
+
             <app-vehicle-entry *ngIf="showModal == 'Edit Vehicle'" (response)='editVehicleResponse($event)'
                [getData]="editData" [mode]="mode" [isEdit]="true"></app-vehicle-entry>
+               
             <app-excel-import *ngIf="showModal == 'Excel Import'" importType="vehicle"></app-excel-import>
          </div>
          <div class="modal-footer">

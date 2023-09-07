@@ -8,6 +8,7 @@ import { AuthService } from '../services/auth.service';
 import { GlobalService } from '../services/global.service';
 import { HttpService } from '../services/http.service';
 import Swal from 'sweetalert2';
+import { ExcelExportService } from '../services/excel-export.service';
 
 @Component({
   selector: 'app-excel-import',
@@ -19,6 +20,7 @@ export class ExcelImportComponent implements OnInit {
   // importType: any;
   isLoader: any = false;
   items: any = [];
+  cat: any = null;
   products: any = [];
   productsAll: any = [];
   itemAll: any = [];
@@ -50,12 +52,13 @@ export class ExcelImportComponent implements OnInit {
   settings: any;
   constructor(
     public EIService: ExcelImportService,
+    public excelExportService:ExcelExportService,
     private http: HttpService,
     private api: ApiService,
     private gs: GlobalService,
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
-    public auth: AuthService
+    public auth: AuthService,
   ) {
     this.gs.observeList().subscribe(result => {
       this.itemAll = result.itemmix ? result.itemmix : [];
@@ -119,6 +122,7 @@ export class ExcelImportComponent implements OnInit {
         const data = reader.result;
         workBooks = XLSX.read(data, { type: 'binary' });
         this.excelArr = XLSX.utils.sheet_to_json(workBooks.Sheets[workBooks.SheetNames[0]], { header: 1 });
+        this.headerChanged(0)
         this.isLoader = false;
         ev = null
       }
@@ -169,7 +173,7 @@ export class ExcelImportComponent implements OnInit {
           //verify header found in excel and excel columns index saved in config?
           if (this.headerConfig[j].index) {
             //assign excel data to matched object key and prepare whole row object
-            row[this.headerConfig[j].name] = this.excelArr[i][this.headerConfig[j].index];
+            row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index];
           }
         }
         // push object into array.
@@ -223,6 +227,7 @@ export class ExcelImportComponent implements OnInit {
       for (let j in conf) {
         if (this.excelArrObj[i][conf[j].name] == data.value) {
           this.excelArrObj[i][conf[j].ref_field] = data.id;
+          this.excelArrObj[i][conf[j].ref_data] = data[conf[j].ref_data];
         }
       }
     }
@@ -241,7 +246,7 @@ export class ExcelImportComponent implements OnInit {
       } else {
         this.http.put(this.api.getUrl('EXCELIMPORT') + 'final/' + this.auth.webUser.dept_id, { importType: this.importType, headerList: this.headerList, excelData: this.excelArrObj[i] }).subscribe((res: any) => {
           switch (res.result.status) {
-            case 'inserted': this.newInsertedData.push(res.result.data)
+            case 'inserted': this.newInsertedData.push(res.result.data.newData)
               break;
             case 'update': this.willUpdateData.push(res.result.data)
               break;
@@ -260,7 +265,7 @@ export class ExcelImportComponent implements OnInit {
     for (let j in this.headerList) {
       if (this.headerList[j].not_null && !data[this.headerList[j].name]) {
         return true;
-      } else if (this.headerList[j].ref_table && data[this.headerList[j].name] && !data[this.headerList[j].ref_field]) {
+      } else if (this.headerList[j].ref_table && (data[this.headerList[j].name] && !data[this.headerList[j].ref_field])) {
         return true;
       }
     }
@@ -287,6 +292,39 @@ export class ExcelImportComponent implements OnInit {
         return h.ref_data ? h.ref_data : h.name;
       }
     });
+  }
+
+  itemSelected(ev: any) {
+    if (ev) {
+      let item = this.items.find((i: { _id: any; }) => i._id == ev);
+
+      if (this.cat) {
+        this.subitems = item.subitems.filter((s: { categories: any; }) => s.categories.includes(this.cat));
+      }
+      else {
+        this.subitems = item.subitems;
+      }
+    }
+    else {
+      this.subitems = [];
+    }
+  }
+
+  catSelected(ev: any) {
+    if (ev) {
+      this.cat = ev;
+      this.items = this.itemAll.filter((i: { category_id: any, categories: any }) => i.category_id == ev || i.categories.includes(ev));
+    }
+    else {
+      this.cat = null;
+      this.items = this.itemAll;
+    }
+  }
+
+  exportToExcel() {        
+    let date = new Date();
+    
+    this.excelExportService.exportAsExcelFile(this.rejectedData, this.importType.name + '_rejected_excel_import_data_' + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
   }
 
 }

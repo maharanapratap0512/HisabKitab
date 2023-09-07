@@ -1728,6 +1728,13 @@ class dbModal {
       add_fail_ih:`alter table import_history add column fail_count int default 0`,
       add_icount_ih:`alter table import_history add column import_count int default 1`,
     },
+    // version 16
+    /*
+      => 
+    */
+    {
+      add_bunch_no: `alter table product add column bunch_no int`,        
+    }
 
     /* TODO cleanup task 
       1. remove table - closing.

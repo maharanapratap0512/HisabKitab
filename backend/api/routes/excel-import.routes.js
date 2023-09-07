@@ -152,16 +152,18 @@ router.put('/verify/:dept_id', async (req, res, next) => {
         let fn = new ExcelFunctions(refTableList, req.params.dept_id);
         for (let i in req.body.excelData) {
             for (let j in req.body.config) {
+                let data = req.body.excelData[i][req.body.config[j].name];
                 if (req.body.config[j].type == 'date') {
-                    req.body.excelData[i][req.body.config[j].name] = fn.setDateFormat(req.body.excelData[i][req.body.config[j].name]);
+                    data = fn.setDateFormat(data);
                 }
                 if (req.body.config[j].type == 'unix_date') {
-                    req.body.excelData[i][req.body.config[j].name] = fn.setDateFormat(req.body.excelData[i][req.body.config[j].name]);
+                    data = fn.setDateFormat(data);
                 }
-                if (req.body.config[j].ref_table) {
+                if (req.body.config[j].ref_table && (req.body.config[j].not_null || data)) {
                     let id = null;
-                    let name = req.body.excelData[i][req.body.config[j].name].trim().toLowerCase();
+                    let name = data.trim().toLowerCase();
                     req.body.excelData[i][req.body.config[j].name] = name;
+
                     switch (req.body.config[j].ref_table) {
                         case 'mm': id = await fn.matchMMs(name);
                             break;
@@ -181,10 +183,13 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                             break;
                         case 'pbk': id = await fn.matchPbk(name);
                             break;
-
+                        case 'item': id = await fn.matchItem(name);
+                            break;
+                        case 'condition': id = await fn.matchSupportList(name, 'condition');
+                            break;
                         default:
 
-                    }                    
+                    }
                     req.body.excelData[i][req.body.config[j].ref_field] = id;
                 }
             }
@@ -195,7 +200,7 @@ router.put('/verify/:dept_id', async (req, res, next) => {
             correctionList: fn.correctionList
         });
 
-    } catch (err) { console.log(err);next(err) };
+    } catch (err) { console.log(err); next(err) };
 });
 
 //  verify all and insert

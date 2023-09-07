@@ -1023,7 +1023,7 @@ export class AawakComponent implements OnInit {
                 break;
               case "bill":
                 if (this.settings.aawak.isbill) {
-                  if ([true, 'true', 'yes', 1].includes((typeof exceldata[i][j] == "string" ? exceldata[i][j].trim().toLowerCase() : exceldata[i][j]))) {
+                  if ([true, 'true', 'yes', 1, 'है', 'हाँ', 'hai', 'ha'].includes((typeof exceldata[i][j] == "string" ? exceldata[i][j].trim().toLowerCase() : exceldata[i][j]))) {
                     obj.isbill = 1;
                   }
                   else {

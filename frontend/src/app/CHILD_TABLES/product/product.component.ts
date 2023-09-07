@@ -105,16 +105,17 @@ export class ProductComponent implements OnInit {
 
   exportToExcel() {
     let excelData = [];
+    let srNo = 1;
     for (let i in this.productData) {
       if (this.productData[i].products.length) {
         for (let j in this.productData[i].products) {
           excelData.push({
-            No: i,
+            No: srNo++,
             "अभी कहा है": this.productData[i].last_mm_hin ? this.productData[i].last_mm_hin : this.productData[i].mm_hin,
             "कब से है": this.productData[i].last_date ? this.productData[i].last_date : this.productData[i].purchase_date,
             "अभी की स्थिति": this.productData[i].last_condition_hin ? this.productData[i].last_condition_hin : this.productData[i].condition_hin,
-            "Sr No": this.productData[i].sr_num ? this.productData[i].sr_num : '',
-            "Pr Code": this.productData[i].product_code ? this.productData[i].product_code : '',
+            "Sr No": this.productData[i].products[j].sr_num ? this.productData[i].products[j].sr_num : '',
+            "Pr Code": this.productData[i].products[j].product_code ? this.productData[i].products[j].product_code : '',
             "तारीख": this.productData[i].purchase_date ? this.productData[i].purchase_date : '',
             "मि.म.": this.productData[i].mm_hin,
             "आइटम": this.productData[i].item_hin,
@@ -136,7 +137,7 @@ export class ProductComponent implements OnInit {
         }
       } else {
         excelData.push({
-          No: i,
+          No: srNo++,
           "अभी कहा है": this.productData[i].last_mm_hin ? this.productData[i].last_mm_hin : this.productData[i].mm_hin,
           "कब से है": this.productData[i].last_date ? this.productData[i].last_date : this.productData[i].purchase_date,
           "अभी की स्थिति": this.productData[i].last_condition_hin ? this.productData[i].last_condition_hin : this.productData[i].condition_hin,
@@ -165,6 +166,9 @@ export class ProductComponent implements OnInit {
     }
     let date = new Date();
     this.excelExportService.exportAsExcelFile(excelData, "product_list_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
+  }
+
+  excelImport(ev: any) {
 
   }
 
