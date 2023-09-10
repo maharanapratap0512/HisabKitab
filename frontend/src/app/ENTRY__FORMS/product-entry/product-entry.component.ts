@@ -80,7 +80,7 @@ export class ProductEntryComponent implements OnInit {
     });
 
     this.productFormMain = this.fb.group({
-      purchase_date: [null],      
+      purchase_date: [null],
       purchased_by: [null],
       mm_id: [null, Validators.required],
       dept_id: [this.auth.webUser.dept_id],
@@ -252,13 +252,24 @@ export class ProductEntryComponent implements OnInit {
   }
 
   bunchProductSubmit() {
-    console.log("index",this.itemForms.controls.length-1);
-    
-    this.itemForms.removeAt(this.itemForms.controls.length-1)
+    console.log("index", this.itemForms.controls.length - 1);
+
+    // this.itemForms.removeAt(this.itemForms.controls.length-1)
     // this.itemForms.controls.pop()
     // this.productFormMain.value.items.pop();
-    console.log(this.productFormMain);
-    
+    // this.itemForms.controls.splice(this.itemForms.controls.length - 1, 1);
+
+     // Get the length of the FormArray.
+     const length = this.itemForms.controls.length;
+
+     // Get the index of the last form control in the FormArray.
+     const lastIndex = length - 1;
+ 
+     // Remove the form control at the specified index.
+     this.itemForms.removeAt(lastIndex);
+
+    console.log("this.itemForms", this.itemForms);
+
     if (this.productFormMain.valid) {
       this.isLoader = true;
       this.http.post(this.api.getUrl('PRODUCT') + 'bunch/' + this.auth.webUser.dept_id, this.productFormMain.value).subscribe((data: any) => {
