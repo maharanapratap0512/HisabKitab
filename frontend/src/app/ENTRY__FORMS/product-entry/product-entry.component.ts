@@ -20,6 +20,9 @@ export class ProductEntryComponent implements OnInit {
   @Input() isEdit: any;
   @Output() response = new EventEmitter();
   productForm: FormGroup;
+  productFormMain: FormGroup;
+  // productFormSub: FormGroup;
+  productFormArr: any;
   allList: any = {};
   mms: any = [];
   viewData: any = [];
@@ -76,21 +79,90 @@ export class ProductEntryComponent implements OnInit {
       qty: [null, Validators.required],
     });
 
+    this.productFormMain = this.fb.group({
+      purchase_date: [null],      
+      purchased_by: [null],
+      mm_id: [null, Validators.required],
+      dept_id: [this.auth.webUser.dept_id],
+      nimitt_id: [null],
+      items: fb.array([]),
+      bunch_no: [null]
+    });
+
     this.settings = this.auth.webUser.settings;
+
+    this.productFormMain.valueChanges.subscribe(changes => {
+      let status = true;
+      for (let itForm of this.itemForms.controls) {
+        if (!itForm.valid) {
+          status = false;
+          break;
+        }
+      }
+
+      if (status) {
+        this.itemForms.push(fb.group({
+          model_name: [null],
+          company_name: [null],
+          price: [null],
+          condition_id: [null, Validators.required],
+          warranty_period: [null],
+          warranty_from: [null],
+          product_detail: [null],
+          item_id: [null, Validators.required],
+          subitem_id: [null],
+          unit_id: [1, Validators.required],
+          purchase_from: [null],
+          document: [[]],
+          accessories: [null],
+          isbill: false,
+          voucher_no: [null],
+          qty: [null, Validators.required],
+          products: [[]]
+        }));
+      }
+    });
+
+    console.log("date", gs.date.getDate() + '-' + (gs.date.getMonth() + 1).toString().padStart(2, "0") + '-' + gs.date.getFullYear());
+
+
+    this.productFormMain.patchValue({
+      purchase_date: gs.dateString
+    })
+
+
+  }
+
+  get itemForms() {
+    return this.productFormMain.controls["items"] as FormArray<FormGroup>;
   }
 
   ngOnInit(): void {
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
-      this.items = result.itemmix && this.auth.webUser.dept_id > 2 ? result.itemmix : [];
-      this.itemAll = result.itemmix && this.auth.webUser.dept_id > 2 ? result.itemmix : [];
-      this.categories = result.category && this.auth.webUser.dept_id > 2 ? result.category : [];
+      this.items = result.itemmix ? result.itemmix : [];
+      this.itemAll = result.itemmix ? result.itemmix : [];
+      this.categories = result.category ? result.category : [];
       this.departments = result.department ? result.department : [];
       this.conditions = result.condition ? result.condition : [];
       // this.subitems = result.subitem ? result.subitem : [];
       this.units = result.unit ? result.unit : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
+
+    // console.log(this.productFormArr);
+
+
+    // this.productFormArr.valueChanges.subscribe((changes: SimpleChanges) => {
+
+    //   console.log(this.productFormArr);
+
+    //   let length = this.productFormArr.controls.length;
+    //   if (this.productFormArr.controls[length - 1].valid) {
+    //     this.productFormArr.push(this.productForm);
+    //   }
+
+    // })
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -179,6 +251,36 @@ export class ProductEntryComponent implements OnInit {
     }
   }
 
+  bunchProductSubmit() {
+    console.log("index",this.itemForms.controls.length-1);
+    
+    this.itemForms.removeAt(this.itemForms.controls.length-1)
+    // this.itemForms.controls.pop()
+    // this.productFormMain.value.items.pop();
+    console.log(this.productFormMain);
+    
+    if (this.productFormMain.valid) {
+      this.isLoader = true;
+      this.http.post(this.api.getUrl('PRODUCT') + 'bunch/' + this.auth.webUser.dept_id, this.productFormMain.value).subscribe((data: any) => {
+        if (data['result'] && data['success']) {
+          this.productForm.reset({ active: true });
+          this.isLoader = false;
+          this.toastr.success("Product Added Successfully.")
+          this.response.emit(data['result']);
+        } else {
+          this.toastr.error(data['message']);
+          this.isLoader = false;
+        }
+      }, err => {
+        this.toastr.error(err['error']);
+        this.isLoader = false;
+      });
+    }
+    else {
+      this.gs.validationFireOnSubmit(this.productForm);
+    }
+  }
+
   productFormSubmit() {
     if (this.productForm.valid) {
       this.isLoader = true;
@@ -263,10 +365,59 @@ export class ProductEntryComponent implements OnInit {
   }
 
 
-  deleteItem(index: number): void {
+  deleteProduct(index: number): void {
     this.productForm.value.products.splice(index, 1);
-    // console.log("this.productForm.value.products.splice(index, 1);", this.productForm.value.products.splice(index, 1));
+    if (this.productForm.value.products.length > 0) {
+      this.productForm.patchValue({
+        qty: this.productForm.value.products.length,
+      });
+    } else {
+      this.productForm.patchValue({
+        qty: this.productForm.value.products.length,
+        unit_id: null
+      });
+    }
+  }
 
+  deleteProductAll(): void {
+    this.productForm.patchValue({
+      products: [],
+      qty: null,
+      unit_id: null
+    });
+  }
+
+  productAddNew(i: any) {
+    this.itemForms.controls[i].value.products.push({ product_code: this.product_code, sr_num: this.sr_num });
+    this.itemForms.controls[i].patchValue({
+      qty: this.itemForms.controls[i].value.products.length,
+      unit_id: 1
+    })
+    // console.log("this.itemForms.controls[i].value", this.itemForms.controls[i].value);
+    this.product_code = null;
+    this.sr_num = null;
+  }
+
+  deleteProductNew(i: any, index: number): void {
+    this.itemForms.controls[i].value.products.splice(index, 1);
+    if (this.itemForms.controls[i].value.products.length > 0) {
+      this.itemForms.controls[i].patchValue({
+        qty: this.itemForms.controls[i].value.products.length,
+      });
+    } else {
+      this.itemForms.controls[i].patchValue({
+        qty: this.itemForms.controls[i].value.products.length,
+        unit_id: null
+      });
+    }
+  }
+
+  deleteProductAllNew(i: any): void {
+    this.itemForms.controls[i].patchValue({
+      products: [],
+      qty: null,
+      unit_id: null
+    });
   }
 
   mmAddResponse(ev: any) {

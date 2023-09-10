@@ -143,6 +143,64 @@ router.post('/:dept_id', async (req, res, next) => {
     }
 });
 
+// post product bunch
+router.post('/bunch/:dept_id', async (req, res, next) => {
+    if (req.body) {        
+        try {
+            console.log(req.body);
+            // req.body.document = req.body.document ? JSON.stringify(req.body.document) : null;
+            // req.body.isbill = req.body.isbill ? 1 : 0;
+            // let dataArr = [];
+            // let voucher = await Fn.getLastVoucherNo('product') + 1;
+            // req.body.voucher_no = voucher;
+
+            // Fn.begin()
+            // if (req.body.products.length) {
+            //     for (let i of req.body.products) {
+            //         req.body.product_code = i.product_code
+            //         req.body.sr_num = i.sr_num
+            //         await DB.insert('product', req.body, req.params.dept_id, false).then((data) => {
+            //         }, (err) => {
+            //             throw err;
+            //         });
+            //     }
+            // } else {
+            //     req.body.product_code = null
+            //     req.body.sr_num = null
+            //     await DB.insert('product', req.body, req.params.dept_id, false).then((data) => {
+            //     }, (err) => {
+            //         throw err;
+            //     });
+            // }
+
+            //get product
+            // await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: `product.voucher_no = ${voucher}`, orderBy: 'product._id desc', limit: 100 }).then(async (resolve) => {
+            //     for (let i in resolve.data) {
+            //         resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
+            //         resolve.data[i].products = (resolve.data[i].products ? JSON.parse(resolve.data[i].products) : []);
+            //     }
+            //     Fn.commit()
+            //     res.json({
+            //         success: true,
+            //         result: resolve.data || [],
+            //         total_count: resolve.total_count
+            //     });
+            // }, (err) => {
+            //     throw err;
+            // });
+
+        }
+        catch (err) {
+            // console.log(err);
+            Fn.rollback();
+            next(err)
+        };
+    }
+    else {
+        return next(new Error('Please fill required fields.'))
+    }
+});
+
 
 // update product
 router.put('/', async (req, res, next) => {

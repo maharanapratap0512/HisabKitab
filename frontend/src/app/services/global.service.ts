@@ -19,6 +19,7 @@ export class GlobalService {
   exceptionDept: any = [1, 5];
   // getList$ = new Subject();
   date = new Date();
+  dateString = this.date.getFullYear() + '-' + (this.date.getMonth() + 1).toString().padStart(2, "0") + '-' + this.date.getDate().toString().padStart(2, "0")
   years: any = [];
   months: any = [
     { m: 1, name: 'January' },
