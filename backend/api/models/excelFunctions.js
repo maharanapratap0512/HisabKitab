@@ -20,6 +20,7 @@ class ExcelFunctions {
    jsonKey = ['document']
    booleanKey = ['is_xl', 'isbill']
    voucherTables = ['product']
+   bunchTables = ['product']
    vehicle_form = {
       mm_id: null,
       vehicle_type: null,
@@ -66,6 +67,8 @@ class ExcelFunctions {
       isbill: false,
       qty: null,
       is_xl: false,
+      bunch_no: null,
+      voucher_no: null,
    }
    constructor(list, dept_id = null) {
       // this.DBContex = require('./DBContex');
@@ -409,6 +412,9 @@ class ExcelFunctions {
          let fdata = await this.setFormData(this[type.name + '_form'], data);
          if (this.voucherTables.includes(type.name)) {
             fdata.voucher_no = await this.Fn.getLastVoucherNo(type.name) + 1;
+         }
+         if (this.bunchTables.includes(type.name)) {
+            fdata.bunch_no = await this.Fn.getLastBunchNo(type.name) + 1;
          }
          let insResult = await this.Fn.insertExcelData(type, fdata, this.dept_id);
          status = 'inserted';

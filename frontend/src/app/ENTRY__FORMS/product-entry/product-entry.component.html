@@ -11,15 +11,15 @@
 
       <ul class="nav nav-pills bg-nav-pills nav-justified mb-3">
          <li class="nav-item">
-            <a href="#bunch-entry" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0 active">
+            <a href="#single-entry" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0 active">
                <i class="mdi mdi-account-circle font-18"></i>
-               <span class="d-none d-lg-block">Bunch Entry</span>
+               <span class="d-none d-lg-block">Single Entry</span>
             </a>
          </li>
          <li class="nav-item">
-            <a href="#single-entry" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
+            <a href="#bunch-entry" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
                <i class="mdi mdi-truck-fast font-18"></i>
-               <span class="d-none d-lg-block">Single Entry</span>
+               <span class="d-none d-lg-block">Bunch Entry</span>
             </a>
          </li>
       </ul>
@@ -27,238 +27,8 @@
 
       <div class="tab-content">
 
-         <!-- Bunch Entry-->
-         <div class="tab-pane active show" id="bunch-entry">
-            <form [formGroup]="productFormMain">
-
-               <!-- main row -->
-               <div class="row">
-                  <div class="col-md-2 mb-3" *ngIf="settings.product.purchase_date">
-                     <div class="form-group">
-                        <label class="form-label">Purchase Date</label>
-                        <input type="date" class="form-control" placeholder="Purchase Date"
-                           formControlName="purchase_date"
-                           [ngClass]="{'validation':productFormMain.get('purchase_date')?.errors && (productFormMain.get('purchase_date')?.touched || productFormMain.get ('purchase_date')?.dirty)}">
-                     </div>
-                  </div>
-
-                  <div class="col-md-3 mb-3">
-                     <div class="form-group">
-                        <label class="form-label">MM</label>
-                        <a type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
-                           class="btn btn-outline-primary float-end"
-                           onclick="$('#productEntryComponent > #showModal').modal('show')"
-                           (click)="showModal = 'Add MM'">
-                           + Add
-                        </a>
-                        <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="false"
-                           [virtualScroll]="true" formControlName="mm_id"
-                           [ngClass]="{'validation':productFormMain.get('mm_id')?.errors}">
-                           <ng-option selected="selected" disabled value="">MM</ng-option>
-                           <ng-option *ngFor="let item of mms" [value]="item._id">
-                              {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code?' : '+item.mm_code:''}}</ng-option>
-                        </ng-select>
-                     </div>
-                  </div>
-
-                  <div class="col-md-3 mb-3" *ngIf="settings.product.purchased_by">
-                     <div class="form-group">
-                        <label class="form-label">Purchased By</label>
-                        <input type="text" class="form-control" placeholder="Purchased By"
-                           formControlName="purchased_by"
-                           [ngClass]="{'validation':productFormMain.get('purchased_by')?.errors && (productFormMain.get('purchased_by')?.touched || productFormMain.get ('purchased_by')?.dirty)}">
-                     </div>
-                  </div>
-
-                  <div class="col-md-2 mb-3" *ngIf="settings.product.nimitt_id">
-                     <div class="form-group">
-                        <label class="form-label">Nimitt</label>
-                        <a type="button" *ngIf="settings.nimitt.add" style="padding: 1px 6px !important;"
-                           class="btn btn-outline-primary float-end"
-                           onclick="$('#productEntryComponent > #showModal').modal('show')"
-                           (click)="showModal='Add Nimitt'">+
-                           Add</a>
-                        <ng-select class="custom" style="width: 100%;" placeholder="Select Nimitt" [clearable]="false"
-                           [virtualScroll]="true" formControlName="nimitt_id"
-                           [ngClass]="{'validation':productFormMain.get('nimitt_id')?.errors && (productFormMain.get('nimitt_id')?.touched || productFormMain.get ('nimitt_id')?.dirty)}">
-                           <ng-option selected="selected" disabled value="">Select Nimitt</ng-option>
-                           <ng-option *ngFor="let item of nimitts" [value]="item._id">
-                              {{item.nimitt_hin}} : {{item.nimitt_eng}} ({{item.state_hin}})</ng-option>
-                        </ng-select>
-                     </div>
-                  </div>
-
-                  <div class="col-md-2 mb-3">
-                     <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!this.isEdit"
-                        (click)="bunchProductSubmit()">Submit</button>
-                  </div>
-               </div>
-
-               <!-- items table row -->
-               <div class="row">
-                  <div class="card card-body" style="overflow: auto; font-size: smaller;">
-                     <table class="table-bordered" style="width: max-content;">
-                        <tr>
-                           <th>Sr No</th>
-                           <th>Item</th>
-                           <th>Subitem</th>
-                           <th>Company</th>
-                           <th>Modal</th>
-                           <th>Condition</th>
-                           <th>Price</th>
-                           <th>Product Code / Sr No / Quantity</th>
-                           <th>Quantity</th>
-                           <th>Purchase From</th>
-                           <th>Warranty Period</th>
-                           <th>Warranty From</th>
-                           <th>Accessories</th>
-                           <th>Product Detail</th>
-                           <th>Image</th>
-                        </tr>
-                        <ng-container *ngFor="let pdForm of itemForms.controls; let i = index;">
-                           <tr [formGroup]="pdForm">
-                              <td>{{i+1}}</td>
-                              <td>
-                                 <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Item"
-                                    [clearable]="false" [virtualScroll]="true" formControlName="item_id"
-                                    (change)="itemSelected($event)" [selectOnTab]="true"
-                                    [ngClass]="{'validation':pdForm.get('item_id')?.errors}">
-                                    <ng-option selected="selected" disabled value="">Select Item</ng-option>
-                                    <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
-                                       {{item.item_eng}} : {{item.item_code}}</ng-option>
-                                 </ng-select>
-                              </td>
-                              <td>
-                                 <ng-select class="custom-sm" style="width: 100%;" placeholder="Select SubitemList"
-                                    [clearable]="false" [virtualScroll]="true" formControlName="subitem_id"
-                                    (change)="subitemSelected($event)"
-                                    [ngClass]="{'validation':pdForm.get('subitem_id')?.errors}">
-                                    <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
-                                    <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}} :
-                                       {{item.subitem_eng}}</ng-option>
-                                 </ng-select>
-                              </td>
-                              <td>
-                                 <input type="text" class="form-control-sm" placeholder="Company Name"
-                                    formControlName="company_name"
-                                    [ngClass]="{'validation':pdForm.get('company_name')?.errors}">
-                              </td>
-                              <td>
-                                 <input type="text" class="form-control-sm" placeholder="Model Name"
-                                    formControlName="model_name"
-                                    [ngClass]="{'validation':pdForm.get('model_name')?.errors}">
-                              </td>
-                              <td>
-                                 <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Condition"
-                                    [clearable]="false" [virtualScroll]="true" formControlName="condition_id"
-                                    [ngClass]="{'validation':pdForm.get('condition_id')?.errors}">
-                                    <ng-option selected="selected" disabled value="">Select Condition </ng-option>
-                                    <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}}
-                                       :
-                                       {{item.list_name_eng}}</ng-option>
-                                 </ng-select>
-                              </td>
-                              <td>
-                                 <input type="number" class="form-control-sm" placeholder="Price"
-                                    formControlName="price" [ngClass]="{'validation':pdForm.get('price')?.errors}">
-                              </td>
-                              <td>
-                                 <div class="d-flex justify-content-between" style="font-size: 12px;">
-                                    <input type="text" class="form-control-sm" placeholder="Product Code"
-                                       [(ngModel)]="product_code" [ngModelOptions]="{ standalone: true }"
-                                       #product_codeInput="ngModel"
-                                       [ngClass]="{'validation':!pdForm.value.qty || (!pdForm.value.products.length && (!product_code && !sr_num) && product_codeInput.touched)}">
-                                    <input type="text" class="form-control-sm mx-1" placeholder="S/R Number"
-                                       [(ngModel)]="sr_num" [ngModelOptions]="{ standalone: true }"
-                                       #sr_numInput="ngModel"
-                                       [ngClass]="{'validation':!pdForm.value.qty || (!pdForm.value.products.length  && (!product_code && !sr_num) && sr_numInput.touched)}">
-                                    <button class="btn btn-sm btn-outline-primary" [disabled]="!product_code && !sr_num"
-                                       (click)="productAddNew(i)">Add</button>
-                                 </div>
-                                 <div class="mt-1" *ngIf="pdForm.value.products.length">
-                                    <table style="table-layout: fixed;">
-                                       <thead>
-                                          <th style="width: 10%;">No.</th>
-                                          <th style="width: 40%;">Product Code</th>
-                                          <th style="width: 50%;">Serial No</th>
-                                          <th style="width: 5%;" (click)="deleteProductAllNew(i)">X</th>
-                                       </thead>
-                                       <tr *ngFor="let pd of pdForm.value.products, let j = index;">
-                                          <th>{{j+1}}</th>
-                                          <td>{{pd.product_code?pd.product_code:'-'}}</td>
-                                          <td>{{pd.sr_num?pd.sr_num:'-'}}</td>
-                                          <td style="cursor: pointer;" (click)="deleteProductNew(i, j)">x</td>
-                                       </tr>
-                                    </table>
-                                 </div>
-                              </td>
-                              <td>
-                                 <div class="input-group">
-                                    <input type="text" class="form-control form-control-sm" placeholder="Quantity"
-                                       formControlName="qty" [ngClass]="{'validation':pdForm.get('qty')?.errors}"
-                                       [readonly]="pdForm.value.products.length">
-                                    <span class="input-group-text ml-1 border border-secondary"
-                                       style="padding: 0px; min-width: 40%;background: #252932;">
-                                       <ng-select class="custom-sm" style="width: 100%;" placeholder="Unit"
-                                          [clearable]="true" [virtualScroll]="true" formControlName="unit_id"
-                                          [ngClass]="{'validation':pdForm.get('unit_id')?.errors}"
-                                          [readonly]="pdForm.value.products.length">
-                                          <ng-option selected="selected" disabled value="">Unit</ng-option>
-                                          <ng-option *ngFor="let item of units"
-                                             [value]="item._id">{{item.unit_short}}</ng-option>
-                                       </ng-select>
-                                    </span>
-                                 </div>
-                              </td>
-                              <td>
-                                 <input type="text" class="form-control" placeholder="Purchase From"
-                                    formControlName="purchase_from"
-                                    [ngClass]="{'validation':productForm.get('purchase_from')?.errors}">
-
-                              </td>
-                              <td>
-                                 <input type="number" class="form-control-sm" placeholder="ex. 6,12,24 (Month)"
-                                    formControlName="warranty_period"
-                                    [ngClass]="{'validation':pdForm.get('warranty_period')?.errors}">
-                              </td>
-                              <td>
-                                 <input type="text" class="form-control-sm" placeholder="Warranty From"
-                                    formControlName="warranty_from"
-                                    [ngClass]="{'validation':pdForm.get('warranty_from')?.errors}">
-                              </td>
-                              <td>
-                                 <textarea type="text" class="form-control-sm" placeholder="Accessories"
-                                    formControlName="accessories"
-                                    [ngClass]="{'validation':pdForm.get('accessories')?.errors}"></textarea>
-                              </td>
-                              <td>
-                                 <textarea class="form-control-sm" placeholder="Product Details"
-                                    formControlName="product_detail"
-                                    [ngClass]="{'validation':pdForm.get('product_detail')?.errors}"></textarea>
-                              </td>
-                              <td>
-                                 <a onclick="$('#productEntryComponent > #addImages').modal('show')"
-                                    (click)="showModal='Add Image'" class="form-control-sm" style="cursor: pointer;">
-                                    <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
-                                    <div *ngIf="imagepath && imagepath.length > 0">
-                                       <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image"
-                                          class="rounded m-1" height="48" />
-                                       x {{imagepath.length}}
-                                    </div>
-                                    <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
-                                 </a>
-                              </td>
-                           </tr>
-                        </ng-container>
-                     </table>
-                  </div>
-               </div>
-            </form>
-         </div>
-         <!-- End Bunch Entry Content-->
-
          <!-- Single Entry-->
-         <div class="tab-pane" id="single-entry">
+         <div class="tab-pane active" id="single-entry">
             <form [formGroup]="productForm">
                <!-- traditional single entry form -->
                <div class="row">
@@ -531,6 +301,273 @@
             </form>
          </div>
          <!-- End Single Entry Content-->
+
+         <!-- Bunch Entry-->
+         <div class="tab-pane show" id="bunch-entry" *ngIf="!isEdit">
+            <form [formGroup]="productFormMain">
+
+               <!-- main row -->
+               <div class="row">
+                  <div class="col-md-2 mb-3" *ngIf="settings.product.purchase_date">
+                     <div class="form-group">
+                        <label class="form-label">Purchase Date</label>
+                        <input type="date" class="form-control" placeholder="Purchase Date"
+                           formControlName="purchase_date"
+                           [ngClass]="{'validation':productFormMain.get('purchase_date')?.errors && (productFormMain.get('purchase_date')?.touched || productFormMain.get ('purchase_date')?.dirty)}">
+                     </div>
+                  </div>
+
+                  <div class="col-md-3 mb-3">
+                     <div class="form-group">
+                        <label class="form-label">MM</label>
+                        <a type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
+                           class="btn btn-outline-primary float-end"
+                           onclick="$('#productEntryComponent > #showModal').modal('show')"
+                           (click)="showModal = 'Add MM'">
+                           + Add
+                        </a>
+                        <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="false"
+                           [virtualScroll]="true" formControlName="mm_id"
+                           [ngClass]="{'validation':productFormMain.get('mm_id')?.errors}">
+                           <ng-option selected="selected" disabled value="">MM</ng-option>
+                           <ng-option *ngFor="let item of mms" [value]="item._id">
+                              {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code?' : '+item.mm_code:''}}</ng-option>
+                        </ng-select>
+                     </div>
+                  </div>
+
+                  <div class="col-md-3 mb-3" *ngIf="settings.product.purchased_by">
+                     <div class="form-group">
+                        <label class="form-label">Purchased By</label>
+                        <input type="text" class="form-control" placeholder="Purchased By"
+                           formControlName="purchased_by"
+                           [ngClass]="{'validation':productFormMain.get('purchased_by')?.errors && (productFormMain.get('purchased_by')?.touched || productFormMain.get ('purchased_by')?.dirty)}">
+                     </div>
+                  </div>
+
+                  <div class="col-md-2 mb-3" *ngIf="settings.product.nimitt_id">
+                     <div class="form-group">
+                        <label class="form-label">Nimitt</label>
+                        <a type="button" *ngIf="settings.nimitt.add" style="padding: 1px 6px !important;"
+                           class="btn btn-outline-primary float-end"
+                           onclick="$('#productEntryComponent > #showModal').modal('show')"
+                           (click)="showModal='Add Nimitt'">+
+                           Add</a>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Nimitt" [clearable]="false"
+                           [virtualScroll]="true" formControlName="nimitt_id"
+                           [ngClass]="{'validation':productFormMain.get('nimitt_id')?.errors && (productFormMain.get('nimitt_id')?.touched || productFormMain.get ('nimitt_id')?.dirty)}">
+                           <ng-option selected="selected" disabled value="">Select Nimitt</ng-option>
+                           <ng-option *ngFor="let item of nimitts" [value]="item._id">
+                              {{item.nimitt_hin}} : {{item.nimitt_eng}} ({{item.state_hin}})</ng-option>
+                        </ng-select>
+                     </div>
+                  </div>
+
+                  <div class="col-md-2 mb-3">
+                     <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!this.isEdit"
+                        (click)="bunchProductSubmit()">Submit</button>
+                  </div>
+               </div>
+
+               <!-- items table row -->
+               <div class="row">
+                  <div class="card card-body" style="overflow: auto; font-size: smaller;">
+                     <table class="table-bordered" style="width: max-content;">
+                        <tr>
+                           <th>Sr No</th>
+                           <th>Item</th>
+                           <th>Subitem</th>
+                           <th>Company</th>
+                           <th>Modal</th>
+                           <th>Condition</th>
+                           <th>Price</th>
+                           <th>Product Code / Sr No / Quantity</th>
+                           <th>Quantity</th>
+                           <th>Purchase From</th>
+                           <th>Warranty Period</th>
+                           <th>Warranty From</th>
+                           <th>Accessories</th>
+                           <th>Product Detail</th>
+                           <th>Image</th>
+                        </tr>
+                        <ng-container *ngFor="let pdForm of itemForms.controls; let i = index;">
+                           <tr [formGroup]="pdForm">
+                              <td>{{i+1}}</td>
+                              <td>
+                                 <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Item"
+                                    [clearable]="false" [virtualScroll]="true" formControlName="item_id"
+                                    (change)="itemSelected($event)" [selectOnTab]="true"
+                                    [ngClass]="{'validation':pdForm.get('item_id')?.errors}">
+                                    <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                                    <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                                       {{item.item_eng}} : {{item.item_code}}</ng-option>
+                                 </ng-select>
+                              </td>
+                              <td>
+                                 <ng-select class="custom-sm" style="width: 100%;" placeholder="Select SubitemList"
+                                    [clearable]="false" [virtualScroll]="true" formControlName="subitem_id"
+                                    (change)="subitemSelected($event)"
+                                    [ngClass]="{'validation':pdForm.get('subitem_id')?.errors}">
+                                    <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
+                                    <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}} :
+                                       {{item.subitem_eng}}</ng-option>
+                                 </ng-select>
+                              </td>
+                              <td>
+                                 <input type="text" class="form-control-sm" placeholder="Company Name"
+                                    formControlName="company_name"
+                                    [ngClass]="{'validation':pdForm.get('company_name')?.errors}">
+                              </td>
+                              <td>
+                                 <input type="text" class="form-control-sm" placeholder="Model Name"
+                                    formControlName="model_name"
+                                    [ngClass]="{'validation':pdForm.get('model_name')?.errors}">
+                              </td>
+                              <td>
+                                 <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Condition"
+                                    [clearable]="false" [virtualScroll]="true" formControlName="condition_id"
+                                    [ngClass]="{'validation':pdForm.get('condition_id')?.errors}">
+                                    <ng-option selected="selected" disabled value="">Select Condition </ng-option>
+                                    <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}}
+                                       :
+                                       {{item.list_name_eng}}</ng-option>
+                                 </ng-select>
+                              </td>
+                              <td>
+                                 <input type="number" class="form-control-sm" placeholder="Price"
+                                    formControlName="price" [ngClass]="{'validation':pdForm.get('price')?.errors}">
+                              </td>
+                              <td>
+                                 <div class="d-flex justify-content-between" style="font-size: 12px;">
+                                    <input type="text" class="form-control-sm" placeholder="Product Code"
+                                       [(ngModel)]="product_code" [ngModelOptions]="{ standalone: true }"
+                                       #product_codeInput="ngModel"
+                                       [ngClass]="{'validation':!pdForm.value.qty || (!pdForm.value.products.length && (!product_code && !sr_num) && product_codeInput.touched)}">
+                                    <input type="text" class="form-control-sm mx-1" placeholder="S/R Number"
+                                       [(ngModel)]="sr_num" [ngModelOptions]="{ standalone: true }"
+                                       #sr_numInput="ngModel"
+                                       [ngClass]="{'validation':!pdForm.value.qty || (!pdForm.value.products.length  && (!product_code && !sr_num) && sr_numInput.touched)}">
+                                    <button class="btn btn-sm btn-outline-primary" [disabled]="!product_code && !sr_num"
+                                       (click)="productAddNew(i)">Add</button>
+                                 </div>
+                                 <div class="mt-1" *ngIf="pdForm.value.products.length">
+                                    <table style="table-layout: fixed;">
+                                       <thead>
+                                          <th style="width: 10%;">No.</th>
+                                          <th style="width: 40%;">Product Code</th>
+                                          <th style="width: 50%;">Serial No</th>
+                                          <th style="width: 5%;" (click)="deleteProductAllNew(i)">X</th>
+                                       </thead>
+                                       <tr *ngFor="let pd of pdForm.value.products, let j = index;">
+                                          <th>{{j+1}}</th>
+                                          <td>{{pd.product_code?pd.product_code:'-'}}</td>
+                                          <td>{{pd.sr_num?pd.sr_num:'-'}}</td>
+                                          <td style="cursor: pointer;" (click)="deleteProductNew(i, j)">x</td>
+                                       </tr>
+                                    </table>
+                                 </div>
+                              </td>
+                              <td>
+                                 <div class="input-group">
+                                    <input type="text" class="form-control form-control-sm" placeholder="Quantity"
+                                       formControlName="qty" [ngClass]="{'validation':pdForm.get('qty')?.errors}"
+                                       [readonly]="pdForm.value.products.length">
+                                    <span class="input-group-text ml-1 border border-secondary"
+                                       style="padding: 0px; min-width: 40%;background: #252932;">
+                                       <ng-select class="custom-sm" style="width: 100%;" placeholder="Unit"
+                                          [clearable]="true" [virtualScroll]="true" formControlName="unit_id"
+                                          [ngClass]="{'validation':pdForm.get('unit_id')?.errors}"
+                                          [readonly]="pdForm.value.products.length">
+                                          <ng-option selected="selected" disabled value="">Unit</ng-option>
+                                          <ng-option *ngFor="let item of units"
+                                             [value]="item._id">{{item.unit_short}}</ng-option>
+                                       </ng-select>
+                                    </span>
+                                 </div>
+                              </td>
+                              <td>
+                                 <input type="text" class="form-control" placeholder="Purchase From"
+                                    formControlName="purchase_from"
+                                    [ngClass]="{'validation':productForm.get('purchase_from')?.errors}">
+
+                              </td>
+                              <td>
+                                 <input type="number" class="form-control-sm" placeholder="ex. 6,12,24 (Month)"
+                                    formControlName="warranty_period"
+                                    [ngClass]="{'validation':pdForm.get('warranty_period')?.errors}">
+                              </td>
+                              <td>
+                                 <input type="text" class="form-control-sm" placeholder="Warranty From"
+                                    formControlName="warranty_from"
+                                    [ngClass]="{'validation':pdForm.get('warranty_from')?.errors}">
+                              </td>
+                              <td>
+                                 <textarea type="text" class="form-control-sm" placeholder="Accessories"
+                                    formControlName="accessories"
+                                    [ngClass]="{'validation':pdForm.get('accessories')?.errors}"></textarea>
+                              </td>
+                              <td>
+                                 <textarea class="form-control-sm" placeholder="Product Details"
+                                    formControlName="product_detail"
+                                    [ngClass]="{'validation':pdForm.get('product_detail')?.errors}"></textarea>
+                              </td>
+                              <td>
+                                 <a onclick="$('#productEntryComponent > #addImages').modal('show')"
+                                    (click)="showModal='Add Image'" class="form-control-sm" style="cursor: pointer;">
+                                    <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
+                                    <div *ngIf="imagepath && imagepath.length > 0">
+                                       <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image"
+                                          class="rounded m-1" height="48" />
+                                       x {{imagepath.length}}
+                                    </div>
+                                    <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
+                                 </a>
+                              </td>
+                           </tr>
+                        </ng-container>
+                     </table>
+                  </div>
+               </div>
+            </form>
+         </div>
+         <div class="tab-pane show" id="bunch-entry" *ngIf="isEdit">
+            <div class="row justify-content-center">
+               <div class="col-xl-10">
+
+                   <div class="text-center">
+                       <img src="assets/images/maintenance.svg" height="140" alt="File not found Image">
+                       <h3 class="mt-4">Site is Under Maintenance</h3>
+                       <p class="text-muted">We're making the system more awesome. We'll be back shortly.</p>
+
+                       <!-- <div class="row mt-5">
+                           <div class="col-md-4">
+                               <div class="text-center mt-3 ps-1 pe-1">
+                                   <i class="dripicons-jewel bg-primary maintenance-icon text-white mb-2"></i>
+                                   <h5 class="text-uppercase">Why is the Site Down?</h5>
+                                   <p class="text-muted">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration.</p>
+                               </div>
+                           </div> 
+                           <div class="col-md-4">
+                               <div class="text-center mt-3 ps-1 pe-1">
+                                   <i class="dripicons-clock bg-primary maintenance-icon text-white mb-2"></i>
+                                   <h5 class="text-uppercase">What is the Downtime?</h5>
+                                   <p class="text-muted">Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical but the majority.</p>
+                               </div>
+                           </div> 
+                           <div class="col-md-4">
+                               <div class="text-center mt-3 ps-1 pe-1">
+                                   <i class="dripicons-question bg-primary maintenance-icon text-white mb-2"></i>
+                                   <h5 class="text-uppercase">Do you need Support?</h5>
+                                   <p class="text-muted">If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embar.. <a href="mailto:#" class="text-muted fw-bold">no-reply@domain.com</a></p>
+                               </div>
+                           </div> 
+                       </div> -->
+                   </div> <!-- end /.text-center-->
+
+               </div> <!-- end col -->
+           </div>
+         </div>
+         <!-- End Bunch Entry Content-->         
 
       </div>
 

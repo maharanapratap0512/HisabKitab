@@ -22,7 +22,7 @@ export class ProductEntryComponent implements OnInit {
   productForm: FormGroup;
   productFormMain: FormGroup;
   // productFormSub: FormGroup;
-  productFormArr: any;
+  itemForms: FormArray<FormGroup>;
   allList: any = {};
   mms: any = [];
   viewData: any = [];
@@ -74,8 +74,10 @@ export class ProductEntryComponent implements OnInit {
       accessories: [null],
       nimitt_id: [null],
       isbill: false,
+      is_xl: false,
       products: [[]],
       voucher_no: [null],
+      bunch_no: [null],
       qty: [null, Validators.required],
     });
 
@@ -85,13 +87,34 @@ export class ProductEntryComponent implements OnInit {
       mm_id: [null, Validators.required],
       dept_id: [this.auth.webUser.dept_id],
       nimitt_id: [null],
-      items: fb.array([]),
-      bunch_no: [null]
+      items: [[]],
+      bunch_no: [null],
     });
 
     this.settings = this.auth.webUser.settings;
+    this.itemForms = fb.array([fb.group({
+      model_name: [null],
+      company_name: [null],
+      price: [null],
+      condition_id: [null, Validators.required],
+      warranty_period: [null],
+      warranty_from: [null],
+      product_detail: [null],
+      item_id: [null, Validators.required],
+      subitem_id: [null],
+      unit_id: [1, Validators.required],
+      purchase_from: [null],
+      document: [[]],
+      accessories: [null],
+      isbill: false,
+      is_xl: false,
+      voucher_no: [null],
+      bunch_no: [null],
+      qty: [null, Validators.required],
+      products: [[]]
+    })]);
 
-    this.productFormMain.valueChanges.subscribe(changes => {
+    this.itemForms.valueChanges.subscribe(changes => {
       let status = true;
       for (let itForm of this.itemForms.controls) {
         if (!itForm.valid) {
@@ -116,14 +139,14 @@ export class ProductEntryComponent implements OnInit {
           document: [[]],
           accessories: [null],
           isbill: false,
+          is_xl: false,
           voucher_no: [null],
+          bunch_no: [null],
           qty: [null, Validators.required],
           products: [[]]
         }));
       }
     });
-
-    console.log("date", gs.date.getDate() + '-' + (gs.date.getMonth() + 1).toString().padStart(2, "0") + '-' + gs.date.getFullYear());
 
 
     this.productFormMain.patchValue({
@@ -131,10 +154,6 @@ export class ProductEntryComponent implements OnInit {
     })
 
 
-  }
-
-  get itemForms() {
-    return this.productFormMain.controls["items"] as FormArray<FormGroup>;
   }
 
   ngOnInit(): void {
@@ -152,17 +171,6 @@ export class ProductEntryComponent implements OnInit {
 
     // console.log(this.productFormArr);
 
-
-    // this.productFormArr.valueChanges.subscribe((changes: SimpleChanges) => {
-
-    //   console.log(this.productFormArr);
-
-    //   let length = this.productFormArr.controls.length;
-    //   if (this.productFormArr.controls[length - 1].valid) {
-    //     this.productFormArr.push(this.productForm);
-    //   }
-
-    // })
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -203,9 +211,11 @@ export class ProductEntryComponent implements OnInit {
         document: changes.getData.currentValue.document,
         warranty_from: changes.getData.currentValue.warranty_from,
         isbill: changes.getData.currentValue.isbill,
+        is_xl: changes.getData.currentValue.is_xl,
         nimitt_id: changes.getData.currentValue.nimitt_id,
         products: changes.getData.currentValue.products ? changes.getData.currentValue.products : [],
         voucher_no: changes.getData.currentValue.voucher_no,
+        bunch_no: changes.getData.currentValue.bunch_no,
         qty: changes.getData.currentValue.qty,
 
       });
@@ -252,25 +262,16 @@ export class ProductEntryComponent implements OnInit {
   }
 
   bunchProductSubmit() {
-    console.log("index", this.itemForms.controls.length - 1);
+    this.productFormMain.value.items = []
+    for (let i = 0; i < this.itemForms.controls.length; i++) {
+      if (this.itemForms.controls[i].valid) {
+        this.productFormMain.value.items.push(this.itemForms.controls[i].value);
+      } else {
+        this.itemForms.controls.splice(i, 1);
+      }
+    }
 
-    // this.itemForms.removeAt(this.itemForms.controls.length-1)
-    // this.itemForms.controls.pop()
-    // this.productFormMain.value.items.pop();
-    // this.itemForms.controls.splice(this.itemForms.controls.length - 1, 1);
-
-     // Get the length of the FormArray.
-     const length = this.itemForms.controls.length;
-
-     // Get the index of the last form control in the FormArray.
-     const lastIndex = length - 1;
- 
-     // Remove the form control at the specified index.
-     this.itemForms.removeAt(lastIndex);
-
-    console.log("this.itemForms", this.itemForms);
-
-    if (this.productFormMain.valid) {
+    if (this.productFormMain.valid && this.productFormMain.value.items.length > 0) {
       this.isLoader = true;
       this.http.post(this.api.getUrl('PRODUCT') + 'bunch/' + this.auth.webUser.dept_id, this.productFormMain.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {

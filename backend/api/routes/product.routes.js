@@ -92,9 +92,12 @@ router.post('/:dept_id', async (req, res, next) => {
         try {
             req.body.document = req.body.document ? JSON.stringify(req.body.document) : null;
             req.body.isbill = req.body.isbill ? 1 : 0;
+            req.body.is_xl = req.body.is_xl ? 1 : 0;
             let dataArr = [];
-            let voucher = await Fn.getLastVoucherNo('product') + 1;
-            req.body.voucher_no = voucher;
+            let bunch_no = await Fn.getLastBunchNo('product') + 1;
+            req.body.bunch_no = bunch_no;
+            let voucher_no = await Fn.getLastVoucherNo('product') + 1;
+            req.body.voucher_no = voucher_no;
 
             Fn.begin()
             if (req.body.products.length) {
@@ -116,7 +119,7 @@ router.post('/:dept_id', async (req, res, next) => {
             }
 
             //get product
-            await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: `product.voucher_no = ${voucher}`, orderBy: 'product._id desc', limit: 100 }).then(async (resolve) => {
+            await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: `product.voucher_no = ${voucher_no}`, orderBy: 'product._id desc', limit: 100 }).then(async (resolve) => {
                 for (let i in resolve.data) {
                     resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
                     resolve.data[i].products = (resolve.data[i].products ? JSON.parse(resolve.data[i].products) : []);
@@ -145,49 +148,57 @@ router.post('/:dept_id', async (req, res, next) => {
 
 // post product bunch
 router.post('/bunch/:dept_id', async (req, res, next) => {
-    if (req.body) {        
+    if (req.body) {
         try {
-            console.log(req.body);
-            // req.body.document = req.body.document ? JSON.stringify(req.body.document) : null;
-            // req.body.isbill = req.body.isbill ? 1 : 0;
-            // let dataArr = [];
-            // let voucher = await Fn.getLastVoucherNo('product') + 1;
-            // req.body.voucher_no = voucher;
+            Fn.begin();
+            let bunch_no = await Fn.getLastBunchNo('product') + 1;
+            for (let prdct of req.body.items) {
+                prdct.dept_id = req.body.dept_id;
+                prdct.mm_id = req.body.mm_id;
+                prdct.nimitt_id = req.body.nimitt_id;
+                prdct.purchase_date = req.body.purchase_date;
+                prdct.purchased_by = req.body.purchased_by;
+                prdct.document = JSON.stringify(prdct.document ? prdct.document : []);
+                prdct.isbill = prdct.isbill ? 1 : 0;
+                prdct.is_xl = prdct.is_xl ? 1 : 0;
+                prdct.bunch_no = bunch_no;
+                let voucher_no = await Fn.getLastVoucherNo('product') + 1;
+                prdct.voucher_no = voucher_no;
 
-            // Fn.begin()
-            // if (req.body.products.length) {
-            //     for (let i of req.body.products) {
-            //         req.body.product_code = i.product_code
-            //         req.body.sr_num = i.sr_num
-            //         await DB.insert('product', req.body, req.params.dept_id, false).then((data) => {
-            //         }, (err) => {
-            //             throw err;
-            //         });
-            //     }
-            // } else {
-            //     req.body.product_code = null
-            //     req.body.sr_num = null
-            //     await DB.insert('product', req.body, req.params.dept_id, false).then((data) => {
-            //     }, (err) => {
-            //         throw err;
-            //     });
-            // }
+                if (prdct.products.length) {
+                    for (let i of prdct.products) {
+                        prdct.product_code = i.product_code
+                        prdct.sr_num = i.sr_num
+                        await DB.insert('product', prdct, req.params.dept_id, false).then((data) => {
+                        }, (err) => {
+                            throw err;
+                        });
+                    }
+                } else {
+                    prdct.product_code = null
+                    prdct.sr_num = null
+                    await DB.insert('product', prdct, req.params.dept_id, false).then((data) => {
+                    }, (err) => {
+                        throw err;
+                    });
+                }
+            }
 
             //get product
-            // await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: `product.voucher_no = ${voucher}`, orderBy: 'product._id desc', limit: 100 }).then(async (resolve) => {
-            //     for (let i in resolve.data) {
-            //         resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
-            //         resolve.data[i].products = (resolve.data[i].products ? JSON.parse(resolve.data[i].products) : []);
-            //     }
-            //     Fn.commit()
-            //     res.json({
-            //         success: true,
-            //         result: resolve.data || [],
-            //         total_count: resolve.total_count
-            //     });
-            // }, (err) => {
-            //     throw err;
-            // });
+            await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: `product.bunch_no = ${bunch_no}`, orderBy: 'product._id desc', limit: 100 }).then(async (resolve) => {
+                for (let i in resolve.data) {
+                    resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
+                    resolve.data[i].products = (resolve.data[i].products ? JSON.parse(resolve.data[i].products) : []);
+                }
+                Fn.commit()
+                res.json({
+                    success: true,
+                    result: resolve.data || [],
+                    total_count: resolve.total_count
+                });
+            }, (err) => {
+                throw err;
+            });
 
         }
         catch (err) {
@@ -208,6 +219,7 @@ router.put('/', async (req, res, next) => {
         try {
             req.body.set.document = req.body.set.document ? JSON.stringify(req.body.set.document) : null;
             req.body.set.isbill = req.body.set.isbill ? 1 : 0;
+            // req.body.set.isbill = req.body.set.isbill ? 1 : 0;
             let updtArr = [];
             Fn.begin();
             if (req.body.set.products.length) {

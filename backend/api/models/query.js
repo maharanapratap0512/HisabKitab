@@ -1162,11 +1162,11 @@ const product = {
         `insert into product (
         mm_id, purchased_by, purchase_date, item_id, subitem_id, unit_id, product_code, company_name,
         model_name, sr_num, condition_id, price, product_detail, accessories, purchase_from,
-        warranty_period, dept_id, warranty_from, document, isbill, is_xl, voucher_no, qty, active)
+        warranty_period, dept_id, warranty_from, document, isbill, is_xl, voucher_no, bunch_no, qty, active)
     values (
         @mm_id, @purchased_by, @purchase_date, @item_id, @subitem_id, @unit_id, @product_code, @company_name,
         @model_name, @sr_num, @condition_id, @price, @product_detail, @accessories, @purchase_from,
-        @warranty_period, @dept_id, @warranty_from, @document, @isbill, @is_xl, @voucher_no, @qty, @active)`
+        @warranty_period, @dept_id, @warranty_from, @document, @isbill, @is_xl, @voucher_no, @bunch_no, @qty, @active)`
     , update:
         `update product set 
         mm_id=@mm_id,
@@ -1191,10 +1191,14 @@ const product = {
         isbill=@isbill,
         is_xl=@is_xl,
         qty=@qty,
+        bunch_no=@bunch_no,
+        voucher_no=@voucher_no,
         updated_at=datetime('now','localtime')`
     , order:
         `product._id desc`
     , grpByVoucher:
+        `select voucher_no, json_group_array(json_object( '_id',_id,'product_code',product_code,'sr_num',sr_num)) as productGroup, sum(qty) as qty, * from product group by voucher_no`
+    , grpByBunch:
         `select voucher_no, json_group_array(json_object( '_id',_id,'product_code',product_code,'sr_num',sr_num)) as productGroup, sum(qty) as qty, * from product group by voucher_no`
 }
 
