@@ -7,3 +7,10 @@ td>input {
     font-size: 0.75rem;
 }
 
+.ng-dropdown-panel {
+    position: initial !important;
+}
+
+.ng-dropdown-panel.ng-select-bottom {
+    position: inherit;
+}

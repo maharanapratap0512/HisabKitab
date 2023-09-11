@@ -2300,7 +2300,7 @@ progress {
 }
 
 .table-bordered>:not(caption)>* {
-   border-width: 1px 0
+   border-width: 1px 1px;
 }
 
 .table-bordered>:not(caption)>*>* {
@@ -2669,7 +2669,7 @@ progress {
    border-radius: .2rem;
    color: #e3eaef;
    background-color: #252932;
-   border: 1px solid #252932;   
+   border: 1px solid #252932;
    /* background-color: #404954;
    border: 1px solid #4a525d; */
    display: block;
@@ -22470,6 +22470,8 @@ Not supports in Firefox and IE */
 
 .custom-import .ng-dropdown-panel {
    position: initial !important;
+   width: 200px;
+   display: block;
 }
 
 .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {

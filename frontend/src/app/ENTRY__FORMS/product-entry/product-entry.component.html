@@ -371,45 +371,46 @@
 
                <!-- items table row -->
                <div class="row">
-                  <div class="card card-body" style="overflow: auto; font-size: smaller;">
-                     <table class="table-bordered" style="width: max-content;">
-                        <tr>
-                           <th>Sr No</th>
-                           <th>Item</th>
-                           <th>Subitem</th>
-                           <th>Company</th>
-                           <th>Modal</th>
-                           <th>Condition</th>
-                           <th>Price</th>
-                           <th>Product Code / Sr No / Quantity</th>
-                           <th>Quantity</th>
-                           <th>Purchase From</th>
-                           <th>Warranty Period</th>
-                           <th>Warranty From</th>
-                           <th>Accessories</th>
-                           <th>Product Detail</th>
-                           <th>Image</th>
-                        </tr>
+                  <div class="card card-body" style="font-size: smaller; overflow-x: scroll;">
+                     <table class="table table-bordered border-primary table-centered mb-0" style="width: max-content;">
+                        <thead>
+                           <tr>
+                              <th>Sr No</th>
+                              <th>Item</th>
+                              <th>Subitem</th>
+                              <th>Company</th>
+                              <th>Modal</th>
+                              <th>Condition</th>
+                              <th>Price</th>
+                              <th>Product Code / Sr No / Quantity</th>
+                              <th>Quantity</th>
+                              <th>Purchase From</th>
+                              <th>Warranty Period</th>
+                              <th>Warranty From</th>
+                              <th>Accessories</th>
+                              <th>Product Detail</th>
+                              <th>Image</th>
+                           </tr>
+                        </thead>
                         <ng-container *ngFor="let pdForm of itemForms.controls; let i = index;">
                            <tr [formGroup]="pdForm">
-                              <td>{{i+1}}</td>
+                              <td class="text-center">{{i+1}}</td>
                               <td>
-                                 <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Item"
-                                    [clearable]="false" [virtualScroll]="true" formControlName="item_id"
-                                    (change)="itemSelected($event)" [selectOnTab]="true"
+                                 <ng-select class="custom-sm custom-import" style="width: 100%;"
+                                    placeholder="Select Item" [clearable]="false" [virtualScroll]="true"
+                                    formControlName="item_id" (change)="itemSelected($event)" [selectOnTab]="true"
                                     [ngClass]="{'validation':pdForm.get('item_id')?.errors}">
-                                    <ng-option selected="selected" disabled value="">Select Item</ng-option>
                                     <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
                                        {{item.item_eng}} : {{item.item_code}}</ng-option>
                                  </ng-select>
                               </td>
                               <td>
-                                 <ng-select class="custom-sm" style="width: 100%;" placeholder="Select SubitemList"
-                                    [clearable]="false" [virtualScroll]="true" formControlName="subitem_id"
-                                    (change)="subitemSelected($event)"
+                                 <ng-select class="custom-sm custom-import" style="width: 100%;"
+                                    placeholder="Select SubitemList" [clearable]="false" [virtualScroll]="true"
+                                    formControlName="subitem_id" (change)="subitemSelected($event)"
                                     [ngClass]="{'validation':pdForm.get('subitem_id')?.errors}">
-                                    <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
-                                    <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}} :
+                                    <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}}
+                                       :
                                        {{item.subitem_eng}}</ng-option>
                                  </ng-select>
                               </td>
@@ -424,8 +425,9 @@
                                     [ngClass]="{'validation':pdForm.get('model_name')?.errors}">
                               </td>
                               <td>
-                                 <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Condition"
-                                    [clearable]="false" [virtualScroll]="true" formControlName="condition_id"
+                                 <ng-select class="custom-sm custom-import" style="width: 100%;"
+                                    placeholder="Select Condition" [clearable]="false" [virtualScroll]="true"
+                                    formControlName="condition_id"
                                     [ngClass]="{'validation':pdForm.get('condition_id')?.errors}">
                                     <ng-option selected="selected" disabled value="">Select Condition </ng-option>
                                     <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}}
@@ -456,7 +458,8 @@
                                           <th style="width: 10%;">No.</th>
                                           <th style="width: 40%;">Product Code</th>
                                           <th style="width: 50%;">Serial No</th>
-                                          <th style="width: 5%;" (click)="deleteProductAllNew(i)">X</th>
+                                          <th style="width: 5%; cursor: pointer;" (click)="deleteProductAllNew(i)">X
+                                          </th>
                                        </thead>
                                        <tr *ngFor="let pd of pdForm.value.products, let j = index;">
                                           <th>{{j+1}}</th>
@@ -474,11 +477,11 @@
                                        [readonly]="pdForm.value.products.length">
                                     <span class="input-group-text ml-1 border border-secondary"
                                        style="padding: 0px; min-width: 40%;background: #252932;">
-                                       <ng-select class="custom-sm" style="width: 100%;" placeholder="Unit"
-                                          [clearable]="true" [virtualScroll]="true" formControlName="unit_id"
+                                       <ng-select class="custom-sm custom-import" style="width: 100%;"
+                                          placeholder="Unit" [clearable]="true" [virtualScroll]="true"
+                                          formControlName="unit_id"
                                           [ngClass]="{'validation':pdForm.get('unit_id')?.errors}"
                                           [readonly]="pdForm.value.products.length">
-                                          <ng-option selected="selected" disabled value="">Unit</ng-option>
                                           <ng-option *ngFor="let item of units"
                                              [value]="item._id">{{item.unit_short}}</ng-option>
                                        </ng-select>
@@ -534,12 +537,12 @@
             <div class="row justify-content-center">
                <div class="col-xl-10">
 
-                   <div class="text-center">
-                       <img src="assets/images/maintenance.svg" height="140" alt="File not found Image">
-                       <h3 class="mt-4">Site is Under Maintenance</h3>
-                       <p class="text-muted">We're making the system more awesome. We'll be back shortly.</p>
+                  <div class="text-center">
+                     <img src="assets/images/maintenance.svg" height="140" alt="File not found Image">
+                     <h3 class="mt-4">Site is Under Maintenance</h3>
+                     <p class="text-muted">We're making the system more awesome. We'll be back shortly.</p>
 
-                       <!-- <div class="row mt-5">
+                     <!-- <div class="row mt-5">
                            <div class="col-md-4">
                                <div class="text-center mt-3 ps-1 pe-1">
                                    <i class="dripicons-jewel bg-primary maintenance-icon text-white mb-2"></i>
@@ -562,12 +565,12 @@
                                </div>
                            </div> 
                        </div> -->
-                   </div> <!-- end /.text-center-->
+                  </div> <!-- end /.text-center-->
 
                </div> <!-- end col -->
-           </div>
+            </div>
          </div>
-         <!-- End Bunch Entry Content-->         
+         <!-- End Bunch Entry Content-->
 
       </div>
 

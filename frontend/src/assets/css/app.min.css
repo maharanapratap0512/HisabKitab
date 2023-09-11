@@ -2292,7 +2292,7 @@ progress {
 }
 
 .table-bordered>:not(caption)>* {
-   border-width: 1px 0
+   border-width: 1px 1px
 }
 
 .table-bordered>:not(caption)>*>* {
@@ -22333,6 +22333,12 @@ Not supports in Firefox and IE */
    border: 1px solid #dee2e6;
    color: #6c757d;
    background-color: #fff;
+}
+
+.custom-import .ng-dropdown-panel {
+   position: initial !important;
+   width: 200px;
+   display: block;
 }
 
 .ng-select.custom .ng-select-container {
