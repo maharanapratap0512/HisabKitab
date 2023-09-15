@@ -1117,6 +1117,7 @@ const product = {
         subitem_list.subitem_hin,subitem_list.subitem_eng, subitem_list.subitem_roman,
         unit.unit_short, unit.unit_full,
         support_list.list_name_hin as condition_hin,support_list.list_name_eng as condition_eng,
+        at.list_name_hin as aawak_type_hin, at.list_name_eng as aawak_type_eng,
         lmm.mm_hin as last_mm_hin, lmm.mm_eng as last_mm_eng, lmm.mm_code as last_mm_code, 
         lc.list_name_hin as last_condition_hin, lc.list_name_eng as last_condition_eng        
         from product 
@@ -1127,6 +1128,7 @@ const product = {
         left join unit on unit._id = product.unit_id
         left join subitem_list on subitem_list._id = subitem.subitem_list_id
         left join support_list on support_list._id = product.condition_id
+        left join support_list at on at._id = product.aawak_type_id
         left join support_list lc on lc._id = product.last_condition ?
         group by voucher_no
      limit @limit offset @offset`
@@ -1161,11 +1163,11 @@ const product = {
     , insert:
         `insert into product (
         mm_id, purchased_by, purchase_date, item_id, subitem_id, unit_id, product_code, company_name,
-        model_name, sr_num, condition_id, price, product_detail, accessories, purchase_from,
+        model_name, sr_num, condition_id, price, product_detail, accessories, purchase_from, aawak_type_id,
         warranty_period, dept_id, warranty_from, document, isbill, is_xl, voucher_no, bunch_no, qty, active)
     values (
         @mm_id, @purchased_by, @purchase_date, @item_id, @subitem_id, @unit_id, @product_code, @company_name,
-        @model_name, @sr_num, @condition_id, @price, @product_detail, @accessories, @purchase_from,
+        @model_name, @sr_num, @condition_id, @price, @product_detail, @accessories, @purchase_from, @aawak_type_id,
         @warranty_period, @dept_id, @warranty_from, @document, @isbill, @is_xl, @voucher_no, @bunch_no, @qty, @active)`
     , update:
         `update product set 
@@ -1193,6 +1195,7 @@ const product = {
         qty=@qty,
         bunch_no=@bunch_no,
         voucher_no=@voucher_no,
+        aawak_type_id=@aawak_type_id,
         updated_at=datetime('now','localtime')`
     , order:
         `product._id desc`

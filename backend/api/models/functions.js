@@ -125,7 +125,7 @@ class Functions extends DBContex {
       // return new Promise(async(resolve, reject)=>{
       try {
          let row = this.db.prepare(`select max(bunch_no) as b_no from ${tblname}`).get();
-         return row.v_no || 0;
+         return row.b_no || 0;
       }
       catch (err) {
          return 0;

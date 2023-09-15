@@ -44,6 +44,7 @@ export class ExcelImportService {
       { col_name: 'subitem', name: 'subitem', alt_names: ["subitem_name", "subitem name", "सबआइटम", "सबआइटम का नाम"], not_null: false, ref_table: 'subitem', ref_field: 'subitem_id', ref_data: 'subitem_hin' },
       { col_name: 'qty', name: 'qty', alt_names: ["quantity", "संख्या"], not_null: true },
       { col_name: 'unit', name: 'unit', alt_names: ["यूनिट"], not_null: true, ref_table: 'unit', ref_field: 'unit_id', ref_data: 'unit_short'  },
+      { col_name: 'aawak_type', name: 'aawak_type', alt_names: ["आवक टाइप"], not_null: true, ref_table: 'aawak_type', ref_field: 'aawak_type_id', ref_data: 'list_name_hin'  },
       { col_name: 'company_name', name: 'company', alt_names: ["company_name", "कंपनी", "company", "company name"], not_null: false },
       { col_name: 'modal_name', name: 'modal', alt_names: ["modal_name", "modal name", "मोडेल"], not_null: false },
       { col_name: 'condition', name: 'condition', alt_names: ["कन्डिशन"], not_null: true,  ref_table: 'condition', ref_field: 'condition_id', ref_data: 'list_name_hin' },

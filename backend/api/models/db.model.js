@@ -1734,7 +1734,15 @@ class dbModal {
     */
     {
       add_bunch_no: `alter table product add column bunch_no int`,        
-    }
+    },
+    // version 17
+    /*
+      => 
+    */
+    {
+      add_awk_type_pd: `alter table product add column aawak_type_id int references support_list(_id)`,        
+      add_awk_autopd: `alter table aawak add column is_auto_pd tinyint(1) default 0`,        
+    },
 
     /* TODO cleanup task 
       1. remove table - closing.

@@ -222,6 +222,12 @@ router.put('/', async (req, res, next) => {
             // req.body.set.isbill = req.body.set.isbill ? 1 : 0;
             let updtArr = [];
             Fn.begin();
+            if(!req.body.set.voucher_no){
+                req.body.set.voucher_no = await Fn.getLastVoucherNo('product') + 1;
+            }
+            if(!req.body.set.bunch_no){
+                req.body.set.bunch_no = await Fn.getLastBunchNo('product') + 1;
+            }
             if (req.body.set.products.length) {
                 for (let i of req.body.set.products) {
                     req.body.set.product_code = i.product_code

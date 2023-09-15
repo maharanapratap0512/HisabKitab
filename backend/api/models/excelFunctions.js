@@ -18,7 +18,7 @@ class ExcelFunctions {
    Fn;
    dept_id;
    jsonKey = ['document']
-   booleanKey = ['is_xl', 'isbill']
+   booleanKey = ['is_xl', 'isbill', 'is_auto_pd']
    voucherTables = ['product']
    bunchTables = ['product']
    vehicle_form = {
@@ -69,6 +69,7 @@ class ExcelFunctions {
       is_xl: false,
       bunch_no: null,
       voucher_no: null,
+      aawak_type_id: null,
    }
    constructor(list, dept_id = null) {
       // this.DBContex = require('./DBContex');

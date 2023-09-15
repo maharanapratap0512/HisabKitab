@@ -80,6 +80,7 @@ export class AawakEntryComponent implements OnInit {
 		isbill: null,
 		document: null,
 		is_xl: 0,
+		is_auto_pd: 0,
 		jawak_detail: []
 	}
 	// jwkArr: any = [];
@@ -161,6 +162,7 @@ export class AawakEntryComponent implements OnInit {
 			this.awkfg.isbill = changes.getData.currentValue.isbill ? changes.getData.currentValue.isbill : false;
 			this.awkfg.document = changes.getData.currentValue.document ? changes.getData.currentValue.document : []
 			this.awkfg.is_xl = changes.getData.currentValue.is_xl ? changes.getData.currentValue.is_xl : 0
+			this.awkfg.is_auto_pd = changes.getData.currentValue.is_auto_pd ? changes.getData.currentValue.is_auto_pd : 0
 			this.awkfg.jawak_detail = changes.getData.currentValue.jawak_detail ? changes.getData.currentValue.jawak_detail : []
 
 			this.selDept_id = changes.getData.currentValue.dept_id;
@@ -268,7 +270,7 @@ export class AawakEntryComponent implements OnInit {
 				if (result.isConfirmed) {
 					this.isLoader = true;
 					this.http.delete(this.api.getUrl('JAWAK') + '/' + id).subscribe((data: any) => {
-						if (data['success']) {
+						if (data['success']) {	
 							this.isLoader = false;
 							this.awkfg.jawak_detail.splice(i, 1);
 							// this.jwkArr.splice(i, 1);

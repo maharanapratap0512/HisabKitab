@@ -6,6 +6,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
+import Swal from 'sweetalert2';
 declare var $: any;
 
 @Component({
@@ -33,6 +34,7 @@ export class ProductEntryComponent implements OnInit {
   imagepath: any;
   departments: any = [];
   conditions: any = [];
+  aawak_types: any = [];
   subitems: any = [];
   items: any = [];
   itemAll: any = [];
@@ -58,6 +60,7 @@ export class ProductEntryComponent implements OnInit {
       company_name: [null],
       price: [null],
       condition_id: [null, Validators.required],
+      aawak_type_id: [null, Validators.required],
       warranty_period: [null],
       warranty_from: [null],
       purchase_date: [null],
@@ -97,6 +100,7 @@ export class ProductEntryComponent implements OnInit {
       company_name: [null],
       price: [null],
       condition_id: [null, Validators.required],
+      aawak_type_id: [null, Validators.required],
       warranty_period: [null],
       warranty_from: [null],
       product_detail: [null],
@@ -129,6 +133,7 @@ export class ProductEntryComponent implements OnInit {
           company_name: [null],
           price: [null],
           condition_id: [null, Validators.required],
+          aawak_type_id: [null, Validators.required],
           warranty_period: [null],
           warranty_from: [null],
           product_detail: [null],
@@ -164,6 +169,7 @@ export class ProductEntryComponent implements OnInit {
       this.categories = result.category ? result.category : [];
       this.departments = result.department ? result.department : [];
       this.conditions = result.condition ? result.condition : [];
+      this.aawak_types = result.aawak_type ? result.aawak_type : [];
       // this.subitems = result.subitem ? result.subitem : [];
       this.units = result.unit ? result.unit : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
@@ -180,6 +186,7 @@ export class ProductEntryComponent implements OnInit {
         this.items = result.itemmix ? result.itemmix : [];
         this.nimitts = result.nimitt ? result.nimitt : [];
         this.conditions = result.condition ? result.condition : [];
+        this.aawak_types = result.aawak_type ? result.aawak_type : [];
         this.categories = result.category ? result.category : [];
       });
     }
@@ -202,6 +209,7 @@ export class ProductEntryComponent implements OnInit {
         model_name: changes.getData.currentValue.model_name,
         sr_num: changes.getData.currentValue.sr_num,
         condition_id: changes.getData.currentValue.condition_id,
+        aawak_type_id: changes.getData.currentValue.aawak_type_id,
         price: changes.getData.currentValue.price,
         product_detail: changes.getData.currentValue.product_detail,
         accessories: changes.getData.currentValue.accessories,
@@ -220,8 +228,6 @@ export class ProductEntryComponent implements OnInit {
 
       });
 
-      // this.sr_numChanged({ target: { value: changes.getData.currentValue.sr_num } });
-      // this.codeChanged({ target: { value: changes.getData.currentValue.product_code } });
       this.imagepath = (changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images : null)
     }
   }
@@ -377,17 +383,49 @@ export class ProductEntryComponent implements OnInit {
   }
 
 
-  deleteProduct(index: number): void {
-    this.productForm.value.products.splice(index, 1);
-    if (this.productForm.value.products.length > 0) {
-      this.productForm.patchValue({
-        qty: this.productForm.value.products.length,
-      });
-    } else {
-      this.productForm.patchValue({
-        qty: this.productForm.value.products.length,
-        unit_id: null
-      });
+  deleteProduct(index: number, id: any): void {
+    if (index) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.isLoader = true;
+          if (id) {
+            this.http.delete(this.api.getUrl('PRODUCT') + '/' + id).subscribe((data: any) => {
+              if (data['success']) {
+                this.isLoader = false;
+                this.productForm.value.products.splice(index, 1);
+                this.toastr.success('Deleted Successfully');
+              }
+              else {
+                this.toastr.error(data['message']);
+              }
+            });
+          } else {
+            this.productForm.value.products.splice(index, 1);
+            this.toastr.success('Deleted Successfully');
+          }
+
+          // updating up unit and qty after delete.
+          if (this.productForm.value.products.length > 0) {
+            this.productForm.patchValue({
+              qty: this.productForm.value.products.length,
+            });
+          } else {
+            this.productForm.patchValue({
+              qty: this.productForm.value.products.length,
+              unit_id: null
+            });
+          }
+          this.isLoader = false;
+        }
+      })
     }
   }
 
