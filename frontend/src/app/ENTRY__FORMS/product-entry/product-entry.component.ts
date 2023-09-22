@@ -79,9 +79,11 @@ export class ProductEntryComponent implements OnInit {
       isbill: false,
       is_xl: false,
       products: [[]],
+      awk_id: [null],
       voucher_no: [null],
       bunch_no: [null],
       qty: [null, Validators.required],
+      auto_awk: [true],
     });
 
     this.productFormMain = this.fb.group({
@@ -92,6 +94,7 @@ export class ProductEntryComponent implements OnInit {
       nimitt_id: [null],
       items: [[]],
       bunch_no: [null],
+      auto_awk: [true],
     });
 
     this.settings = this.auth.webUser.settings;
@@ -115,7 +118,8 @@ export class ProductEntryComponent implements OnInit {
       voucher_no: [null],
       bunch_no: [null],
       qty: [null, Validators.required],
-      products: [[]]
+      products: [[]],
+      awk_id: [null],
     })]);
 
     this.itemForms.valueChanges.subscribe(changes => {
@@ -148,13 +152,17 @@ export class ProductEntryComponent implements OnInit {
           voucher_no: [null],
           bunch_no: [null],
           qty: [null, Validators.required],
-          products: [[]]
+          products: [[]],
+          awk_id: [null],
         }));
       }
     });
 
 
     this.productFormMain.patchValue({
+      purchase_date: gs.dateString
+    })
+    this.productForm.patchValue({
       purchase_date: gs.dateString
     })
 
@@ -225,6 +233,7 @@ export class ProductEntryComponent implements OnInit {
         voucher_no: changes.getData.currentValue.voucher_no,
         bunch_no: changes.getData.currentValue.bunch_no,
         qty: changes.getData.currentValue.qty,
+        awk_id: changes.getData.currentValue.awk_id,
 
       });
 

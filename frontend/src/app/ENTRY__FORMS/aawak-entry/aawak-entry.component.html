@@ -48,7 +48,134 @@
 
 
          <!-- Aawak Entry Form Start from here -->
-         <div class="row">
+         <div class="row" *ngIf="awkfg.is_auto_pd">
+            <div class="col-md-12">
+               <div class="alert alert-warning bg-light text-dark" role="alert">
+                  <strong>Sorry! </strong> ये प्रोडक्ट एंट्री के दौरान ऑटोमैटिक एंट्री हुआ है, इसलिए इसमे सबकुछ चेंज नहीं कर सकते है। 
+               </div>
+            </div>
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.pkt_num">
+               <div class="form-group">
+                  <label class="form-label">Pkt No.</label>
+                  <input type="text" class="form-control" placeholder="पर्ची न." [(ngModel)]="awkfg.pkt_num"
+                     name="pkt_num" #pkt_num="ngModel">
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+               <label for="example-date" class="form-label">Date</label>
+               <input class="form-control" id="example-date" type="date" [(ngModel)]="awkfg.date" name="date"
+                  #date="ngModel" (focusout)="dateChange()"
+                  [ngClass]="{'validation' : (date?.touched || f.submitted) && date.errors?.['required']}" required>
+            </div>
+
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.nimitt_id">
+               <div class="form-group">
+                  <label class="form-label">Nimitt</label>
+                  <a type="button" *ngIf="settings.nimitt.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
+                     onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Nimitt'">+
+                     Add</a>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Nimitt" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.nimitt_id" name="nimitt_id" #nimitt_id="ngModel">
+                     <ng-option selected="selected" disabled value="">Select Nimitt</ng-option>
+                     <ng-option *ngFor="let item of nimitts" [value]="item._id">
+                        {{item.nimitt_hin}} : {{item.nimitt_eng}} ({{item.state_hin}})
+                     </ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3" *ngIf="settings.aawak.pbk_id">
+               <div class="form-group">
+                  <label class="form-label">Sewadhari</label>
+                  <a type="button" *ngIf="settings.pbk.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
+                     onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add PBK'">
+                     + PBK
+                  </a>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Filter PBK by State" [clearable]="true" F
+                     [virtualScroll]="true" (change)="stateSelected($event)">
+                     <ng-option selected="selected" disabled value="">Select State to Filter Pbk
+                     </ng-option>
+                     <ng-option *ngFor="let item of states" [value]="item._id">
+                        {{item.state_hin}} : {{item.state_eng}}
+                     </ng-option>
+                  </ng-select>
+                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Roll no. or Pbk name"
+                     [clearable]="true" [virtualScroll]="true" [(ngModel)]="awkfg.pbk_id" name="pbk_id"
+                     #pbk_id="ngModel"
+                     [ngClass]="{ 'validation': (pbk_id?.touched || f.submitted) && pbk_id.errors?.['required']}"
+                     [required]="awkfg.aawak_mm_id === null">
+                     <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
+                     </ng-option>
+                     <ng-option *ngFor="let item of pbks" [value]="item._id">
+                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :
+                        {{item.relative_name}}
+                     </ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <div class="col-md-1 mb-3" *ngIf="settings.aawak.isbill">
+               <div class="form-group">
+                  <label class="form-label">बिल है?</label>
+                  <div class="form-check form-switch">
+                     <input type="checkbox" class="form-check-input" [(ngModel)]="awkfg.isbill"
+                        [ngModelOptions]="{standalone: true}">
+                  </div>
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.document">
+               <div class="form-group">
+                  <!-- <label class="form-label">Image</label> -->
+                  <a onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
+                     class="form-control" style="cursor: pointer;">
+                     <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
+                     <div *ngIf="imagepath && imagepath.length > 0">
+                        <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image" class="rounded m-1"
+                           height="48" />
+                        x {{imagepath.length}}
+                     </div>
+                     <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
+                  </a>
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3" *ngIf="settings.aawak.item_detail">
+               <div class="form-group">
+                  <label class="form-label">Item Details</label>
+                  <textarea class="form-control" placeholder="Item Details" [(ngModel)]="awkfg.item_detail"
+                     name="item_detail" #item_detail="ngModel"></textarea>
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3" *ngIf="settings.aawak.description">
+               <div class="form-group">
+                  <label class="form-label">Description</label>
+                  <textarea class="form-control" placeholder="विवरण" [(ngModel)]="awkfg.description" name="description"
+                     #description="ngModel"></textarea>
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label text-warning">जावक सेक्शन भरने के बाद बटन क्लिक करे।</label>
+                  <button class="form-control btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                     (click)="aawakFormSubmit(f)">Submit</button>
+                  <button class=" form-control btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                     (click)="aawakFormUpdate(f)">Update</button>
+                  <!-- <button class="btn btn-light submit mx-3" type="button" (click)="mmForm.reset()">clear</button> -->
+               </div>
+            </div>
+
+         </div>
+
+
+
+         <!-- Aawak Entry Form Start from here -->
+         <div class="row" *ngIf="!awkfg.is_auto_pd">
             <div class="col-md-2 mb-3" *ngIf="settings.aawak.pkt_num">
                <div class="form-group">
                   <label class="form-label">Pkt No.</label>
@@ -193,14 +320,16 @@
                      [ngClass]="{ 'validation': (item_id?.touched || f.submitted) && item_id.errors?.['required']}"
                      required>
                      <ng-option selected="selected" disabled value="">Select Item</ng-option>
-                     <ng-option *ngFor="let item of items | filterByDate:awkfg.date" [value]="item._id">{{item.item_hin}} :
+                     <ng-option *ngFor="let item of items | filterByDate:awkfg.date"
+                        [value]="item._id">{{item.item_hin}} :
                         {{item.item_eng}} : {{item.item_code}}</ng-option>
                   </ng-select>
                   <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
                      [clearable]="true" [virtualScroll]="true" [(ngModel)]="awkfg.subitem_id" name="subitem_id"
                      #subitem_id="ngModel" [readonly]="isEdit">
                      <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
-                     <ng-option *ngFor="let item of subitems | filterByDate:awkfg.date" [value]="item._id">{{item.subitem_hin}} :
+                     <ng-option *ngFor="let item of subitems | filterByDate:awkfg.date"
+                        [value]="item._id">{{item.subitem_hin}} :
                         {{item.subitem_eng}}</ng-option>
                   </ng-select>
                </div>
@@ -332,11 +461,12 @@
                      class="form-control" style="cursor: pointer;">
                      <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
                      <div *ngIf="imagepath && imagepath.length > 0">
-                        <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image" class="rounded m-1" height="48" /> 
+                        <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image" class="rounded m-1"
+                           height="48" />
                         x {{imagepath.length}}
                      </div>
                      <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
-                  </a>                  
+                  </a>
                </div>
             </div>
 
@@ -445,7 +575,7 @@
                      </div> -->
                   </div>
                   <button type="button"
-                     [disabled]="(jmm === null && jnimitt === null) || date === null || jqty === null"
+                     [disabled]="(jmm === null && jnimitt === null) || jdate === null || jqty === null"
                      class="btn btn-primary mt-3" (click)="add_jwk()">+ Add</button>
                   <div class="mt-3 p-2" style="max-height: 200px;;overflow-y: auto;">
                      <div class="row mb-2 border-secondary border-bottom"

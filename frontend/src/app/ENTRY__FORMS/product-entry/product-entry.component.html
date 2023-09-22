@@ -306,8 +306,12 @@
                   </div>
 
                   <div class="col-md-2 mb-3">
-                     <button class="btn btn-primary submit mx-3" type="submit" *ngIf="!this.isEdit"
+                     <button class="btn btn-primary mt-3 mx-3" type="submit" *ngIf="!this.isEdit"
                         (click)="productFormSubmit()">Submit</button>
+                     <div class="form-check form-checkbox-primary" *ngIf="!isEdit">
+                        <input type="checkbox" class="form-check-input" id="chkAutoAwk" formControlName="auto_awk">
+                        <label class="form-check-label" for="chkAutoAwk">Auto Aawak</label>
+                     </div>
                      <button class="btn btn-warning submit mx-3" type="submit" *ngIf="this.isEdit"
                         (click)="productFormUpdate()">Update</button>
                      <!-- <button class="btn btn-light submit" type="button" (click)="productForm.reset()">Clear</button> -->
@@ -381,9 +385,9 @@
 
                   <div class="col-md-2 mb-3">
                      <button class="btn btn-primary mx-3" type="submit" *ngIf="!this.isEdit"
-                     (click)="bunchProductSubmit()">Submit</button>
+                        (click)="bunchProductSubmit()">Submit</button>
                      <div class="form-check form-checkbox-primary">
-                        <input type="checkbox" class="form-check-input" id="chkAutoAwk" checked>
+                        <input type="checkbox" class="form-check-input" id="chkAutoAwk" formControlName="auto_awk">
                         <label class="form-check-label" for="chkAutoAwk">Auto Aawak</label>
                      </div>
                   </div>

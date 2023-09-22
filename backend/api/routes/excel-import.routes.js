@@ -187,6 +187,8 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                             break;
                         case 'condition': id = await fn.matchSupportList(name, 'condition');
                             break;
+                        case 'aawak_type': id = await fn.matchSupportList(name, 'aawak_type');
+                            break;
                         default:
 
                     }

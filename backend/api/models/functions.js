@@ -3,6 +3,7 @@ class Functions extends DBContex {
 
    constructor() {
       super();
+      // const tbInterface = require('../models/table_interface');
       const begin = this.db.prepare('BEGIN');
       const commit = this.db.prepare('COMMIT');
       const rollback = this.db.prepare('ROLLBACK');
@@ -25,6 +26,7 @@ class Functions extends DBContex {
             obj.isbill = obj.isbill ? 1 : 0;
             obj.active = 1;
             let insResult = stmtInsert.run(obj);
+            console.log(insResult);
             if (insResult.changes == 1 && insResult.lastInsertRowid) {
                let bachat = await this.getBachatFromAJ(obj);
                let bachatResult;
@@ -63,7 +65,7 @@ class Functions extends DBContex {
             objOld.month = objOldDate.getMonth() + 1;
             objOld.year = objOldDate.getFullYear();
 
-            obj.document = JSON.stringify(obj.document ? obj.document : {});
+            obj.document = JSON.stringify(obj.document && typeof obj.document != 'string' ? obj.document : {});
             obj.isbill = obj.isbill ? 1 : 0;
 
             let updtResult = stmtUpdate.run(obj);
@@ -91,18 +93,127 @@ class Functions extends DBContex {
             let stmtUpdateBachat = this.db.prepare(this.query.bachat_new['update_' + type + '_del']);
             let stmtDelete = this.db.prepare(this.query[type].delete)
             let obj = await this.getById(type, id);
-            let objDate = new Date(obj.date);
-            obj.month = objDate.getMonth() + 1;
-            obj.year = objDate.getFullYear();
-            console.log(obj);
-            let delResult = stmtDelete.run({ _id: id });
-            if (delResult.changes == 1) {
-               stmtUpdateBachat.run(obj);
-               resolve(true);
+            if (obj) {
+               let objDate = new Date(obj.date);
+               obj.month = objDate.getMonth() + 1;
+               obj.year = objDate.getFullYear();
+               console.log(obj);
+               let delResult = stmtDelete.run({ _id: id });
+               if (delResult.changes == 1) {
+                  stmtUpdateBachat.run(obj);
+                  resolve(delResult.changes);
+               } else {
+                  resolve(0);
+               }
             } else {
-               reject(new Error('no any entry deleted.'));
+               resolve(0)
             }
 
+
+         } catch (err) {
+            reject(err);
+         }
+      });
+   }
+
+   async insertProduct(obj, voucher_no = null, bunch_no = null) {
+      return new Promise(async (resolve, reject) => {
+         try {
+
+            obj.document = obj.document && typeof obj.document != 'string' ? JSON.stringify(obj.document) : JSON.stringify({});
+            obj.isbill = obj.isbill ? 1 : 0;
+            obj.is_xl = obj.is_xl ? 1 : 0;
+            obj.auto_awk = obj.auto_awk ? 1 : 0;
+
+            obj.bunch_no = bunch_no ? bunch_no : await this.getLastBunchNo('product') + 1;
+            obj.voucher_no = voucher_no ? voucher_no : await this.getLastVoucherNo('product') + 1;
+            let result = await this.db.prepare(this.query.product.insert).run(obj);
+            obj._id = result.lastInsertRowid;
+
+            if (obj.auto_awk) {
+               let awk = this.tbInterface.getAawakFromProduct(obj);
+               awk.is_auto_pd = 1;
+               // let awkResult = await this.db.prepare(this.query.aawak.insert).run(awk);
+               console.log("awk", awk);
+               obj.awk_id = await this.insertAJ(awk, 'aawak');
+               console.log("pd", obj);
+               let updtResult = await this.db.prepare(this.query.product.update_auto_pd).run({ _id: obj._id, awk_id: obj.awk_id });
+               console.log("update pd", updtResult);
+            }
+
+            resolve(obj);
+         } catch (err) {
+            reject(err);
+         }
+      });
+   }
+
+   async updateProduct(obj) {
+      return new Promise(async (resolve, reject) => {
+         try {
+
+            obj.document = obj.document && typeof obj.document != 'string' ? JSON.stringify(obj.document) : JSON.stringify({});
+            obj.isbill = obj.isbill ? 1 : 0;
+            obj.is_xl = obj.is_xl ? 1 : 0;
+            obj.auto_awk = obj.auto_awk ? 1 : 0;
+            if (!obj.voucher_no) {
+               obj.voucher_no = await this.getLastVoucherNo('product') + 1;
+            }
+            if (!obj.bunch_no) {
+               obj.bunch_no = await this.getLastBunchNo('product') + 1;
+            }
+
+            // obj.bunch_no = bunch_no ? bunch_no : await this.getLastBunchNo('product') + 1;
+            // obj.voucher_no = voucher_no ? voucher_no : await this.getLastVoucherNo('product') + 1;
+            let sql = this.query.product.update + ` where product._id = ${obj._id} `
+            let result = await this.db.prepare(sql).run(obj);
+
+            if (obj.awk_id && result.changes > 0) {
+               let awkOld = await this.getById('aawak', obj.awk_id);
+               let awkNew = this.tbInterface.getAawakFromProduct(obj, awkOld);
+               let awkResult = await this.updateAJ(awkNew, 'aawak', awkOld);
+            }
+
+            resolve(obj);
+         } catch (err) {
+            reject(err);
+         }
+      });
+   }
+
+   async deleteProduct(id) {
+      return new Promise(async (resolve, reject) => {
+         try {
+            await this.getList('aawak', { conditionString: `aawak.product_id = ${id} AND aawak.is_auto_pd <> 1` }).then(async (result) => {
+               if (result.total_count > 1) {
+                  throw new Error('foriegn key violation');
+               } else {
+                  let product = await this.getById('product', id);
+                  console.log(product);
+                  if (product.awk_id); {
+                     await this.deleteAJ(product.awk_id, 'aawak');
+                  }
+                  await this.db.prepare(`delete from product where _id = ${id}`).run();
+               }
+            });
+
+            resolve(true);
+         } catch (err) {
+            reject(err);
+         }
+      });
+   }
+
+   async deleteProductVoucher(voucher_no) {
+      return new Promise(async (resolve, reject) => {
+         try {
+            await this.getList('product', { conditionString: `product.voucher_no = ${voucher_no}` }).then(async (pResult) => {
+               for (let pd of pResult.data) {
+                  await this.deleteProduct(pd._id);
+               }
+            });
+
+            resolve(true);
          } catch (err) {
             reject(err);
          }
@@ -290,17 +401,34 @@ class Functions extends DBContex {
    }
 
    async insertExcelData(type, data, dept_id = null) {
-      return await this.insert(type.name, data, dept_id).then((result) => {
-         console.log('insert', result);
-         return result;
-      })
+      switch (type) {
+         case 'product': data.dept_id = dept_id ? dept_id : data.dept_id;
+            return await this.insertProduct(data).then((result) => {
+               console.log('insert', result);
+               return result;
+            })
+            break;
+         default: return await this.insert(type.name, data, dept_id).then((result) => {
+            console.log('insert', result);
+            return result;
+         })
+      }
    }
 
    async updateExcelData(type, data, dept_id = null) {
-      return await this.updateMany(type.name, data, this.query.conditions[type.name + '_duplicate'], false).then((result) => {
-         // console.log('update', result);
-         return result;
-      })
+      switch (type) {
+         case 'product':
+            return await this.updateProduct(type.name, data, this.query.conditions[type.name + '_duplicate'], false).then((result) => {
+               // console.log('update', result);
+               return result;
+            });
+            break;
+         default:
+            return await this.updateMany(type.name, data, this.query.conditions[type.name + '_duplicate'], false).then((result) => {
+               // console.log('update', result);
+               return result;
+            });
+      }
    }
 
    ExcelDateToJSDate = (intDate) => {

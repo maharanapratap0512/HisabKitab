@@ -172,7 +172,7 @@ export class ProductComponent implements OnInit {
 
   }
 
-  delete(i: any, id: any) {
+  delete(i: any, voucher_no: any) {
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -184,7 +184,7 @@ export class ProductComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.isLoader = true;
-        this.http.delete(this.api.getUrl('PRODUCT') + '/' + id).subscribe((data: any) => {
+        this.http.delete(this.api.getUrl('PRODUCT') + '/voucher/' + voucher_no).subscribe((data: any) => {
           if (data['success']) {
             this.isLoader = false;
             this.productData.splice(i, 1);
@@ -195,6 +195,9 @@ export class ProductComponent implements OnInit {
             this.toastr.error(data['message']);
             this.isLoader = false;
           }
+        }, (err) => {
+          this.toastr.error(err['error']);
+          this.isLoader = false;
         });
       }
     })

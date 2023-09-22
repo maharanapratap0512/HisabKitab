@@ -540,18 +540,19 @@ const aawak = {
         isbill=@isbill,
         document=@document,
         is_xl=@is_xl,
+        is_auto_pd=@is_auto_pd,
         updated_at=datetime('now','localtime')`
     , insert:
         `insert into aawak (
             date, mm_id, pkt_num, pbk_id, aawak_mm_id, item_id, subitem_id, usage_category_id,
             product_id, item_detail, condition_id, qty, rate, actual_amt, 
             aawak_type_id, unit_id, description, nimitt_id, dept_id, company_name, 
-            isbill, remaining_qty, document, is_xl, active)
+            isbill, remaining_qty, document, is_xl, active, is_auto_pd)
         values (
             @date, @mm_id, @pkt_num, @pbk_id, @aawak_mm_id, @item_id, @subitem_id, @usage_category_id,
             @product_id, @item_detail, @condition_id, @qty, @rate, @actual_amt, 
             @aawak_type_id, @unit_id, @description, @nimitt_id, @dept_id, @company_name, 
-            @isbill, @qty, @document, @is_xl, @active)`
+            @isbill, @qty, @document, @is_xl, @active, @is_auto_pd)`
     , select:
         `select * from aawak ?`
     , select_full:
@@ -1111,7 +1112,7 @@ const product = {
         `select * from product ?`
     , select_full:
         `select product.*,
-        CASE WHEN product_code IS NULL AND sr_num IS NULL THEN NULL ELSE json_group_array(json_object( '_id',product._id,'product_code',product_code,'sr_num',sr_num)) END as products,
+        CASE WHEN product_code IS NULL AND sr_num IS NULL THEN NULL ELSE json_group_array(json_object( '_id',product._id,'product_code',product_code,'sr_num',sr_num,'awk_id',awk_id)) END as products,
         mm.mm_hin,mm.mm_eng,mm.mm_code, 
         item.item_hin,item.item_eng,item.item_code, item.item_roman,
         subitem_list.subitem_hin,subitem_list.subitem_eng, subitem_list.subitem_roman,
@@ -1164,11 +1165,11 @@ const product = {
         `insert into product (
         mm_id, purchased_by, purchase_date, item_id, subitem_id, unit_id, product_code, company_name,
         model_name, sr_num, condition_id, price, product_detail, accessories, purchase_from, aawak_type_id,
-        warranty_period, dept_id, warranty_from, document, isbill, is_xl, voucher_no, bunch_no, qty, active)
+        warranty_period, dept_id, warranty_from, document, isbill, is_xl, voucher_no, bunch_no, qty, active, awk_id)
     values (
         @mm_id, @purchased_by, @purchase_date, @item_id, @subitem_id, @unit_id, @product_code, @company_name,
         @model_name, @sr_num, @condition_id, @price, @product_detail, @accessories, @purchase_from, @aawak_type_id,
-        @warranty_period, @dept_id, @warranty_from, @document, @isbill, @is_xl, @voucher_no, @bunch_no, @qty, @active)`
+        @warranty_period, @dept_id, @warranty_from, @document, @isbill, @is_xl, @voucher_no, @bunch_no, @qty, @active, @awk_id)`
     , update:
         `update product set 
         mm_id=@mm_id,
@@ -1196,13 +1197,18 @@ const product = {
         bunch_no=@bunch_no,
         voucher_no=@voucher_no,
         aawak_type_id=@aawak_type_id,
+        awk_id=@awk_id,
         updated_at=datetime('now','localtime')`
+    , update_auto_pd:
+        `update product set
+        awk_id = @awk_id
+        where _id = @_id`
     , order:
         `product._id desc`
     , grpByVoucher:
-        `select voucher_no, json_group_array(json_object( '_id',_id,'product_code',product_code,'sr_num',sr_num)) as productGroup, sum(qty) as qty, * from product group by voucher_no`
+        `select voucher_no, json_group_array(json_object( '_id',_id,'product_code',product_code,'sr_num',sr_num,'awk_id',awk_id)) as productGroup, sum(qty) as qty, * from product group by voucher_no`
     , grpByBunch:
-        `select voucher_no, json_group_array(json_object( '_id',_id,'product_code',product_code,'sr_num',sr_num)) as productGroup, sum(qty) as qty, * from product group by voucher_no`
+        `select voucher_no, json_group_array(json_object( '_id',_id,'product_code',product_code,'sr_num',sr_num,'awk_id',awk_id)) as productGroup, sum(qty) as qty, * from product group by voucher_no`
 }
 
 const state = {

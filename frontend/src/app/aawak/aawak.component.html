@@ -343,14 +343,14 @@
                      <tbody>
                         <ng-container
                            *ngFor="let data of aawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
-                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
+                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i" [ngClass]="{'auto':data.is_auto_pd, 'xl':data.is_xl}"
                               aria-expanded="true" [attr.aria-controls]="'collapseExample-'+i" class="main-row">
                               <td>{{itemsPerPage * (page-1) + i+1}}</td>
                               <td>
                                  <div class="d-flex justify-content-between mb-1">
                                     <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
                                           class="uil uil-pen"></i></button><br>
-                                    <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                    <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)" *ngIf="!data.is_auto_pd"><i
                                           class="uil-trash"></i></button>
                                  </div>
                                  <div class="d-flex justify-content-between mb-1">

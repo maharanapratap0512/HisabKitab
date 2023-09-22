@@ -2,6 +2,7 @@ const router = require('express').Router();
 const e = require('express');
 const DBContex = require('../models/DBContex');
 const Fn = require('../models/functions');
+const tbInterface = require('../models/table_interface');
 const DB = new DBContex();
 
 
@@ -90,21 +91,17 @@ router.put('/unique/:dept_id', async (req, res, next) => {
 router.post('/:dept_id', async (req, res, next) => {
     if (req.body) {
         try {
-            req.body.document = req.body.document ? JSON.stringify(req.body.document) : null;
-            req.body.isbill = req.body.isbill ? 1 : 0;
-            req.body.is_xl = req.body.is_xl ? 1 : 0;
-            let dataArr = [];
-            let bunch_no = await Fn.getLastBunchNo('product') + 1;
-            req.body.bunch_no = bunch_no;
-            let voucher_no = await Fn.getLastVoucherNo('product') + 1;
-            req.body.voucher_no = voucher_no;
-
+            let product = null;
+            req.body.active = req.params.dept_id == 1 ? 1 : 0;
             Fn.begin()
             if (req.body.products.length) {
+                req.body.qty = 1;
                 for (let i of req.body.products) {
                     req.body.product_code = i.product_code
                     req.body.sr_num = i.sr_num
-                    await DB.insert('product', req.body, req.params.dept_id, false).then((data) => {
+                    req.body.qty = 1;
+                    await Fn.insertProduct(req.body, req.body.voucher_no).then((data) => {
+                        product = data;
                     }, (err) => {
                         throw err;
                     });
@@ -112,14 +109,17 @@ router.post('/:dept_id', async (req, res, next) => {
             } else {
                 req.body.product_code = null
                 req.body.sr_num = null
-                await DB.insert('product', req.body, req.params.dept_id, false).then((data) => {
+
+                await Fn.insertProduct(req.body).then((data) => {
+                    product = data;
                 }, (err) => {
                     throw err;
                 });
+
             }
 
             //get product
-            await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: `product.voucher_no = ${voucher_no}`, orderBy: 'product._id desc', limit: 100 }).then(async (resolve) => {
+            await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: `product.voucher_no = ${product.voucher_no}`, orderBy: 'product._id desc', limit: 100 }).then(async (resolve) => {
                 for (let i in resolve.data) {
                     resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
                     resolve.data[i].products = (resolve.data[i].products ? JSON.parse(resolve.data[i].products) : []);
@@ -151,6 +151,7 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
     if (req.body) {
         try {
             Fn.begin();
+            let product = null;
             let bunch_no = await Fn.getLastBunchNo('product') + 1;
             for (let prdct of req.body.items) {
                 prdct.dept_id = req.body.dept_id;
@@ -161,15 +162,16 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
                 prdct.document = JSON.stringify(prdct.document ? prdct.document : []);
                 prdct.isbill = prdct.isbill ? 1 : 0;
                 prdct.is_xl = prdct.is_xl ? 1 : 0;
-                prdct.bunch_no = bunch_no;
-                let voucher_no = await Fn.getLastVoucherNo('product') + 1;
-                prdct.voucher_no = voucher_no;
+                prdct.active = req.params.dept_id == 1 ? 1 : 0;
+                prdct.auto_awk = req.body.auto_awk;
 
                 if (prdct.products.length) {
                     for (let i of prdct.products) {
                         prdct.product_code = i.product_code
                         prdct.sr_num = i.sr_num
-                        await DB.insert('product', prdct, req.params.dept_id, false).then((data) => {
+                        prdct.qty = 1;
+                        await Fn.insertProduct(prdct, prdct.voucher_no, bunch_no).then((data) => {
+                            product = data;
                         }, (err) => {
                             throw err;
                         });
@@ -177,7 +179,9 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
                 } else {
                     prdct.product_code = null
                     prdct.sr_num = null
-                    await DB.insert('product', prdct, req.params.dept_id, false).then((data) => {
+
+                    await Fn.insertProduct(prdct, null, bunch_no).then((data) => {
+                        product = data;
                     }, (err) => {
                         throw err;
                     });
@@ -185,7 +189,7 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
             }
 
             //get product
-            await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: `product.bunch_no = ${bunch_no}`, orderBy: 'product._id desc', limit: 100 }).then(async (resolve) => {
+            await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: `product.bunch_no = ${product.bunch_no}`, orderBy: 'product._id desc', limit: 100 }).then(async (resolve) => {
                 for (let i in resolve.data) {
                     resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
                     resolve.data[i].products = (resolve.data[i].products ? JSON.parse(resolve.data[i].products) : []);
@@ -217,46 +221,42 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
 router.put('/', async (req, res, next) => {
     if (req.body.set && req.body.query) {
         try {
-            req.body.set.document = req.body.set.document ? JSON.stringify(req.body.set.document) : null;
-            req.body.set.isbill = req.body.set.isbill ? 1 : 0;
-            // req.body.set.isbill = req.body.set.isbill ? 1 : 0;
-            let updtArr = [];
             Fn.begin();
-            if(!req.body.set.voucher_no){
-                req.body.set.voucher_no = await Fn.getLastVoucherNo('product') + 1;
-            }
-            if(!req.body.set.bunch_no){
-                req.body.set.bunch_no = await Fn.getLastBunchNo('product') + 1;
-            }
-            if (req.body.set.products.length) {
-                for (let i of req.body.set.products) {
-                    req.body.set.product_code = i.product_code
-                    req.body.set.sr_num = i.sr_num
+            let product = req.body.set;
+            product._id = req.body.query._id;
+            if (product.products.length) {
+                for (let i of product.products) {
+                    product._id = i._id;
+                    product.awk_id = i.awk_id;
+                    product.product_code = i.product_code
+                    product.sr_num = i.sr_num
+                    product.qty = 1;
 
                     if (i._id) {
-                        await DB.update('product', req.body.set, i._id).then(async (data) => {
+                        await Fn.updateProduct(product).then(async (data) => {
                         }, (err) => {
                             throw err;
                         });
                     }
                     else {
+                        product.active = 1
                         // console.log(req.body);
-                        await DB.insert('product', req.body.set, req.body.set.dept_id, false).then((data) => {
+                        await Fn.insertProduct(product, product.voucher_no, product.bunch_no).then((data) => {
                         }, (err) => {
                             throw err;
                         });
                     }
                 }
             } else {
-                req.body.set.product_code = null
-                req.body.set.sr_num = null
-                await DB.update('product', req.body.set, req.body.query._id).then(async (data) => {
+                product.product_code = null
+                product.sr_num = null
+                await Fn.updateProduct(product).then(async (data) => {
                 }, (err) => {
                     throw err;
                 });
             }
             //get product
-            await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: `product.voucher_no = ${req.body.set.voucher_no}` }).then(async (resolve) => {
+            await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: `product.voucher_no = ${product.voucher_no}` }).then(async (resolve) => {
                 for (let i in resolve.data) {
                     resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
                     resolve.data[i].products = (resolve.data[i].products ? JSON.parse(resolve.data[i].products) : []);
@@ -284,19 +284,52 @@ router.put('/', async (req, res, next) => {
 
 // delete product
 router.delete('/:id', async (req, res, next) => {
-    try {
-        if (req.params.id) {
-            await DB.delete('product', req.params.id).then((data) => {
+    if (req.params.id) {
+        try {
+            Fn.begin()
+            await Fn.deleteProduct(req.params.id).then((data) => {
+                Fn.commit();
                 res.json({
                     success: true,
                     result: data
                 });
+            }, (err) => {
+                throw err;
             })
         }
-        else {
-            return next(new Error('Id not found.'))
+        catch (err) {
+            Fn.rollback();
+            return next(err)
+        };
+    } else {
+        return next(new Error('Id not found.'))
+    }
+});
+
+
+
+// delete product voucher
+router.delete('/voucher/:voucher_no', async (req, res, next) => {
+    if (req.params.voucher_no) {
+        try {
+            Fn.begin()
+            await Fn.deleteProductVoucher(req.params.voucher_no).then((data) => {
+                Fn.commit();
+                res.json({
+                    success: true,
+                    result: data
+                });
+            }, (err) => {
+                throw err;
+            })
         }
-    } catch (err) { next(err) };
+        catch (err) {
+            Fn.rollback();
+            return next(err)
+        };
+    } else {
+        return next(new Error('Id not found.'))
+    }
 });
 
 

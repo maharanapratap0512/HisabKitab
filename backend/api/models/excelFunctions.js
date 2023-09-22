@@ -70,6 +70,7 @@ class ExcelFunctions {
       bunch_no: null,
       voucher_no: null,
       aawak_type_id: null,
+      awk_id: null,
    }
    constructor(list, dept_id = null) {
       // this.DBContex = require('./DBContex');

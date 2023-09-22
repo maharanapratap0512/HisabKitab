@@ -56,6 +56,7 @@ class DBContex {
         return new Promise(async (resolve, reject) => {
             try {
                 let sql = this.query[object][key];
+                console.log(sql, options);
                 const result = this.db.prepare(sql).run(options.obj ? options.obj : {});
                 resolve(result);
             }
@@ -234,8 +235,8 @@ class DBContex {
                 sql += ` where ${tblname}._id = ${id} `
                 obj.active = obj.active ? 1 : 0;
 
-                // console.log("updt obj_____", obj);
-                // console.log("updt obj_____", sql);
+                console.log("updt obj_____", obj);
+                console.log("updt obj_____", sql);
                 const result = this.db.prepare(sql).run(obj);
                 // console.log("updt result_____", result);
 
@@ -287,7 +288,7 @@ class DBContex {
     async delete(tblname, id) {
         return new Promise(async (resolve, reject) => {
             try {
-                const result = await this.db.prepare(`delete from ${tblname} where _id = ${id} `).run();
+                const result = this.db.prepare(`delete from ${tblname} where _id = ${id} `).run();
                 return resolve(result);
             }
             catch (err) { console.log(err); reject(err) }
