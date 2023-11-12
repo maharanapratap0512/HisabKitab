@@ -129,13 +129,13 @@ import { AuthService } from './services/auth.service';
     VehicleComponent,
     VehicleEntryComponent,
     FilterByDatePipe,
-    SearchPipe,
     ExcelImportComponent,
     ClosingComponent,
     BachatNewComponent,
     AdminDashboardComponent,
-
+    SearchPipe,
   ],
+  
   imports: [
     BrowserModule,
     DropDownTreeModule,
