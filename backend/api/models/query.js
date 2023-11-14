@@ -1114,6 +1114,8 @@ const product = {
         `select product.*,
         CASE WHEN product_code IS NULL AND sr_num IS NULL THEN NULL ELSE json_group_array(json_object( '_id',product._id,'product_code',product_code,'sr_num',sr_num,'awk_id',awk_id)) END as products,
         mm.mm_hin,mm.mm_eng,mm.mm_code, 
+        nt.roll_no, nt.nimitt_hin, nt.nimitt_eng, nt.gender, nt.relative_name, nt.state_id, 
+        ntst.state_hin as nimitt_state_hin, ntst.state_eng as nimitt_state_eng,
         item.item_hin,item.item_eng,item.item_code, item.item_roman,
         subitem_list.subitem_hin,subitem_list.subitem_eng, subitem_list.subitem_roman,
         unit.unit_short, unit.unit_full,
@@ -1128,6 +1130,8 @@ const product = {
         left join subitem on subitem._id = product.subitem_id
         left join unit on unit._id = product.unit_id
         left join subitem_list on subitem_list._id = subitem.subitem_list_id
+        left join nimitt nt on product.nimitt_id = nt._id
+        left join state ntst on nt.state_id = ntst._id
         left join support_list on support_list._id = product.condition_id
         left join support_list at on at._id = product.aawak_type_id
         left join support_list lc on lc._id = product.last_condition ?
@@ -1163,11 +1167,11 @@ const product = {
         left join support_list lc on lc._id = product.last_condition ? group by product._id # limit @limit offset @offset`
     , insert:
         `insert into product (
-        mm_id, purchased_by, purchase_date, item_id, subitem_id, unit_id, product_code, company_name,
+        mm_id, purchased_by, purchase_date, item_id, subitem_id, unit_id, product_code, company_name, nimitt_id,
         model_name, sr_num, condition_id, price, product_detail, accessories, purchase_from, aawak_type_id,
         warranty_period, dept_id, warranty_from, document, isbill, is_xl, voucher_no, bunch_no, qty, active, awk_id)
     values (
-        @mm_id, @purchased_by, @purchase_date, @item_id, @subitem_id, @unit_id, @product_code, @company_name,
+        @mm_id, @purchased_by, @purchase_date, @item_id, @subitem_id, @unit_id, @product_code, @company_name, @nimitt_id,
         @model_name, @sr_num, @condition_id, @price, @product_detail, @accessories, @purchase_from, @aawak_type_id,
         @warranty_period, @dept_id, @warranty_from, @document, @isbill, @is_xl, @voucher_no, @bunch_no, @qty, @active, @awk_id)`
     , update:
@@ -1180,6 +1184,7 @@ const product = {
         unit_id=@unit_id,
         product_code=@product_code,
         company_name=@company_name,
+        nimitt_id=@nimitt_id,
         model_name=@model_name,
         sr_num=@sr_num,
         condition_id=@condition_id,
