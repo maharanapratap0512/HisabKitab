@@ -55,10 +55,10 @@ export class AawakComponent implements OnInit {
   baseurl: any;
   departments: any = [];
   filterBody: any = {
-    type:'aawak',
+    type: 'aawak',
     pbk_id: [],
-    month:null,
-    year:null,
+    month: null,
+    year: null,
     mm_id: [],
     aj_mm_id: [],
     aawak_type_id: [],
@@ -132,10 +132,6 @@ export class AawakComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
-    this.getaawakData();
-    this.getProductData();
-    this.gs.checkTempImport();
-    this.getDictionary();
 
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
@@ -151,6 +147,11 @@ export class AawakComponent implements OnInit {
       this.categories = result.category ? result.category : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
+
+    this.getaawakData();
+    this.getProductData();
+    this.gs.checkTempImport();
+    this.getDictionary();
     this.baseurl = this.api.getUrl('BASE');
   }
 
@@ -177,7 +178,7 @@ export class AawakComponent implements OnInit {
           this.aawakAll[i].categories_eng = '';
           if (this.aawakAll[i].subitem_categories && this.aawakAll[i].subitem_categories.length > 0) {
             // console.log(this.aawakAll[i].subitem_categories, this.categories);
-            
+
             for (let j in this.categories) {
               if (this.aawakAll[i].subitem_categories.includes(this.categories[j]._id)) {
                 this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
@@ -186,7 +187,7 @@ export class AawakComponent implements OnInit {
             }
           } else {
             // console.log(this.aawakAll[i].item_categories, this.categories);
-            
+
             for (let j in this.categories) {
               if (this.aawakAll[i].item_categories.includes(this.categories[j]._id)) {
                 this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
@@ -195,6 +196,8 @@ export class AawakComponent implements OnInit {
             }
           }
         }
+        // console.log(this.aawakData);
+
         this.aawakData = this.aawakAll;
         this.total_count = data['total_count'];
         this.isLoader = false;
@@ -211,7 +214,7 @@ export class AawakComponent implements OnInit {
 
   getAawakPage(page: any = null) {
     if (page) {
-      this.pageNo = page; 
+      this.pageNo = page;
       this.getFilteredData();
     }
   }
@@ -219,20 +222,41 @@ export class AawakComponent implements OnInit {
   getFilteredData(pageNo: any = null) {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
-    console.log(this.filterBody);
     this.filterBody.pageNo = this.pageNo;
-    console.log(this.filterBody);
     this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
-        this.aawakData = data['result'];
         this.aawakAll = data['result'];
+        for (let i in this.aawakAll) {
+          this.aawakAll[i].categories_hin = '';
+          this.aawakAll[i].categories_eng = '';
+          if (this.aawakAll[i].subitem_categories && this.aawakAll[i].subitem_categories.length > 0) {
+            // console.log(this.aawakAll[i].subitem_categories, this.categories);
+
+            for (let j in this.categories) {
+              if (this.aawakAll[i].subitem_categories.includes(this.categories[j]._id)) {
+                this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                this.aawakAll[i].categories_eng += this.categories[j].category_eng + ', ';
+              }
+            }
+          } else {
+            // console.log(this.aawakAll[i].item_categories, this.categories);
+
+            for (let j in this.categories) {
+              if (this.aawakAll[i].item_categories.includes(this.categories[j]._id)) {
+                this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                this.aawakAll[i].categories_eng += this.categories[j].category_eng + ', ';
+              }
+            }
+          }
+        }
+        this.aawakData = this.aawakAll;
         this.total_count = data['total_count'];
         this.isLoader = false;
       }
       this.isLoader = false;
     });
   }
-  
+
 
   getFilteredAawakData() {
     this.filterBody.type = 'aawak';
