@@ -12,14 +12,12 @@ import { ExcelExportService } from '../services/excel-export.service';
 import { observable, Observable, of, Subject } from 'rxjs';
 declare var $: any;
 import 'tslib';
-import { FilterService, FilterSettingsModel, GridComponent, IFilter, PageSettingsModel, SortService, ToolbarItems, VirtualScrollService, DetailRowService, RowDataBoundEventArgs } from '@syncfusion/ej2-angular-grids';
-import { DropDownListComponent } from '@syncfusion/ej2-angular-dropdowns';
 
 @Component({
   selector: 'app-reports',
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.scss'],
-  providers: [SortService, FilterService, VirtualScrollService, DetailRowService]
+  providers: []
 })
 export class ReportsComponent implements OnInit {
 
@@ -56,15 +54,6 @@ export class ReportsComponent implements OnInit {
     { name: 'United States', code: 'US' }
 ];
 
-  // syncfusion support 
-  @ViewChild('Grid') grid!: GridComponent
-  // @ViewChild('ChildGrid') childGrid!: GridComponent
-  public filterOption!: FilterSettingsModel;
-  public toolbarOptions!: ToolbarItems[];
-
-  // public fields: object = { text: 'Id', value: 'id' };
-  public filter!: IFilter;
-  public qtyFilter!: IFilter;
   public height = '220px';
   public childGrid: any;
   public pageSettings: any;
@@ -93,15 +82,7 @@ export class ReportsComponent implements OnInit {
     });
     this.settings = this.auth.webUser.settings;
     // this.reportLoader = true; 
-    this.filterOption = { type: 'CheckBox' }
     this.pageSettings = { pageSize: 50 };
-    this.filter = {
-      type: 'CheckBox'
-    };
-    this.qtyFilter = {
-      type: 'Menu'
-    };
-    this.toolbarOptions = ['Search'];
 
     // this.filterBody = {
     //   month: 11,
@@ -195,30 +176,6 @@ export class ReportsComponent implements OnInit {
       }
     });
 
-  }
-
-  rowDataBound(args: RowDataBoundEventArgs) {
-
-    let rowIndexAttr = args.row?.getAttribute('aria-rowIndex');
-    let rowIndex = rowIndexAttr ? parseInt(rowIndexAttr) : 0;
-    let currentPageNumber: any = this.grid.pageSettings.currentPage;
-    let pageSize: any = this.grid.pageSettings.pageSize;
-    let startIndex = (currentPageNumber - 1) * pageSize;
-    let cell = args.row?.querySelector('.e-rowcell');
-
-    if (cell) {
-      cell.innerHTML = (startIndex + rowIndex).toString();
-    }
-  }
-
-  public onChildRowRendering(args: RowDataBoundEventArgs): void {
-    let rowIndexAttr = args.row?.getAttribute('aria-rowIndex');
-    let rowIndex = rowIndexAttr ? parseInt(rowIndexAttr) : 0;
-    let cell = args.row?.querySelector('.e-rowcell');
-
-    if (cell) {
-      cell.innerHTML = (rowIndex).toString();
-    }
   }
 
 }

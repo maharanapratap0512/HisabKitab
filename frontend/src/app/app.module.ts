@@ -9,9 +9,6 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FileSaverModule } from 'ngx-filesaver';
 import { NgxSpinnerModule } from 'ngx-spinner';
-import { DropDownTreeModule, MultiSelectModule, CheckBoxSelectionService, DropDownListAllModule } from '@syncfusion/ej2-angular-dropdowns';
-import { GridModule, PageService, SortService, FilterService, FreezeService, ToolbarService, AggregateService } from '@syncfusion/ej2-angular-grids';
-import { CheckBoxModule } from '@syncfusion/ej2-angular-buttons';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -60,7 +57,6 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { ImportComponent } from './import/import.component';
 import { NimittComponent } from './CHILD_TABLES/nimitt/nimitt.component';
 import { NimittEntryComponent } from './ENTRY__FORMS/nimitt-entry/nimitt-entry.component';
-import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { UpdateDetailComponent } from './layout/update-detail/update-detail.component';
 import { ProductTransferEntryComponent } from './ENTRY__FORMS/product-transfer-entry/product-transfer-entry.component';
 import { ReportsComponent } from './reports/reports.component';
@@ -135,10 +131,9 @@ import { AuthService } from './services/auth.service';
     AdminDashboardComponent,
     SearchPipe,
   ],
-  
+
   imports: [
     BrowserModule,
-    DropDownTreeModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
@@ -156,14 +151,9 @@ import { AuthService } from './services/auth.service';
     FileSaverModule,
     NgxSpinnerModule,
     NgxPaginationModule,
-    AutocompleteLibModule,
-    GridModule,
-    MultiSelectModule,
-    CheckBoxModule,
-    DropDownListAllModule,
 
   ],
-  providers: [GlobalService, PageService, SortService, FilterService, FreezeService, CheckBoxSelectionService, ToolbarService, AggregateService, AuthService],
+  providers: [GlobalService, AuthService],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
