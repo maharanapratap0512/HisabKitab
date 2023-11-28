@@ -222,9 +222,9 @@
                                  <div class="form-group">
                                     <label class="form-label">Aawak MM</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Aawak MM"
-                                       [clearable]="true" [virtualScroll]="true" name="aawak_mm_id" [multiple]="true"
-                                       [closeOnSelect]="false" [(ngModel)]="filterBody.aawak_mm_id"
-                                       #aawak_mm_id="ngModel">
+                                       [clearable]="true" [virtualScroll]="true" name="aj_mm_id" [multiple]="true"
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.aj_mm_id"
+                                       #aj_mm_id="ngModel">
                                        <ng-option *ngFor="let item of mms" [value]="item._id">
                                           {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
                                     </ng-select>

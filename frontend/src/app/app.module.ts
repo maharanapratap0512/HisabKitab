@@ -8,7 +8,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FileSaverModule } from 'ngx-filesaver';
-import { NgxSpinnerModule } from 'ngx-spinner';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -70,6 +69,7 @@ import { BachatNewComponent } from './bachat-new/bachat-new.component';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 import { SearchPipe } from './pipe/search.pipe';
 import { AuthService } from './services/auth.service';
+import { NgxSpinnerModule } from 'ngx-spinner';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
