@@ -135,6 +135,7 @@ export class AawakEntryComponent implements OnInit {
 					this.itemsAll = result.itemmix ? result.itemmix : [];
 					this.items = result.itemmix ? result.itemmix : [];
 					this.categories = result.category ? result.category : [];
+					this.units = result.unit ? result.unit : [];
 				});
 			}
 			this.getData = changes.getData.currentValue;
@@ -660,7 +661,8 @@ export class AawakEntryComponent implements OnInit {
 				// this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
 				this.awkfg.subitem_id = this.subitems[0]._id;
 			}
-			this.awkfg.unit_id = item.unit_id;
+			if(!this.isEdit)
+				this.awkfg.unit_id = item.unit_id;
 		}
 		else {
 			this.subitems = [];
@@ -673,7 +675,8 @@ export class AawakEntryComponent implements OnInit {
 		if (ev) {
 			let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
 			this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
-			this.awkfg.unit_id = subitem.unit_id;
+			if(!this.isEdit)
+				this.awkfg.unit_id = subitem.unit_id;
 		}
 		else {
 			this.products = this.productsAll;

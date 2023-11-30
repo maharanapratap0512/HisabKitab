@@ -223,8 +223,7 @@
                                     <label class="form-label">Aawak MM</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Aawak MM"
                                        [clearable]="true" [virtualScroll]="true" name="aj_mm_id" [multiple]="true"
-                                       [closeOnSelect]="false" [(ngModel)]="filterBody.aj_mm_id"
-                                       #aj_mm_id="ngModel">
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.aj_mm_id" #aj_mm_id="ngModel">
                                        <ng-option *ngFor="let item of mms" [value]="item._id">
                                           {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
                                     </ng-select>
@@ -310,11 +309,24 @@
                </div>
             </div>
 
-            <div class="row" *ngIf="aawakData.length">
-               <pagination-controls class="pagi text-end" (pageChange)="getAawakPage(page = $event)" [autoHide]="true">
-               </pagination-controls>
+            <div class="row">
+
                <div class="card-body" style="overflow: auto;">
-                  <table id="datatable-buttons" class="table table-hover dt-responsive" #TABLE>
+                  <div class="row">
+                     <div class="col-4 pt-2">
+                        <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}" (click)="yearClick(null)">All</span>
+                        <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearClick(y)"
+                           [ngClass]="{'badge-outline-secondary':filterBody.year == y}">
+                           {{y}}
+                        </span>
+                     </div>
+                     <div class="col-8" *ngIf="aawakData.length">
+                        <pagination-controls class="pagi text-end" (pageChange)="getAawakPage(page = $event)"
+                           [autoHide]="true">
+                        </pagination-controls>
+                     </div>
+                  </div>
+                  <table id="datatable-buttons" class="table table-hover dt-responsive" #TABLE *ngIf="aawakData.length">
                      <thead>
                         <tr>
                            <th style="width: 40px;">No.</th>
@@ -343,15 +355,16 @@
                      <tbody>
                         <ng-container
                            *ngFor="let data of aawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
-                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i" [ngClass]="{'auto':data.is_auto_pd, 'xl':data.is_xl}"
-                              aria-expanded="true" [attr.aria-controls]="'collapseExample-'+i" class="main-row">
+                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
+                              [ngClass]="{'auto':data.is_auto_pd, 'xl':data.is_xl}" aria-expanded="true"
+                              [attr.aria-controls]="'collapseExample-'+i" class="main-row">
                               <td>{{itemsPerPage * (page-1) + i+1}}</td>
                               <td>
                                  <div class="d-flex justify-content-between mb-1">
                                     <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
                                           class="uil uil-pen"></i></button><br>
-                                    <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)" *ngIf="!data.is_auto_pd"><i
-                                          class="uil-trash"></i></button>
+                                    <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"
+                                       *ngIf="!data.is_auto_pd"><i class="uil-trash"></i></button>
                                  </div>
                                  <div class="d-flex justify-content-between mb-1">
                                     <!-- <button class="btn btn-sm btn-warning w-100" type="button"
@@ -464,7 +477,7 @@
                   </table>
                </div>
                <pagination-controls class="pagi text-center" (pageChange)="getaawakData(page = $event)"
-                  [autoHide]="true">
+                  [autoHide]="true" *ngIf="aawakData.length">
                </pagination-controls>
             </div>
 

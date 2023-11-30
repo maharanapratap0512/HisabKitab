@@ -212,6 +212,12 @@ export class AawakComponent implements OnInit {
     });
   }
 
+  yearClick(year:any){
+    this.filterBody.year = year;
+    this.pageNo = 0;
+    this.getFilteredData();
+  }
+
   getAawakPage(page: any = null) {
     if (page) {
       this.pageNo = page;
