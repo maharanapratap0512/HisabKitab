@@ -344,10 +344,10 @@
                     <div class="form-group">
                         <label class="form-label">Quantity</label>
                         <div class="input-group">
-                            <input type="number" class="form-control" placeholder="{{'i.e. 10 '+ unit_short }}"
+                            <input type="number" class="form-control" placeholder="{{'i.e. 10 '+ jawakForm.value.unit_short }}"
                                 formControlName="qty"
                                 [ngClass]="{'validation':jawakForm.get('qty')?.errors && (jawakForm.get('qty')?.touched || jawakForm.get ('qty')?.dirty)}">
-                            <span class="input-group-text">{{unit_short}}</span>
+                            <div class="input-group-text">{{jawakForm.value.unit_short}}</div>
                         </div>
                     </div>
                 </div>

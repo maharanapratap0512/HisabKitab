@@ -17,6 +17,12 @@ declare var $: any;
 })
 export class ProductComponent implements OnInit {
 
+  page = 1;
+  pageNo: any = 0;
+  itemsPerPage = 100;
+  currentPage: any;
+  totalItems: any;
+
   isLoader: boolean = false;
   term: any;
   showModal: string = '';
@@ -26,6 +32,10 @@ export class ProductComponent implements OnInit {
   total_count: any = 0;;
   baseurl: any;
   settings: any = {};
+  filterBody: any = {
+    year: null,
+    pageNo: 0
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -42,13 +52,27 @@ export class ProductComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
-    this.getProductData();
+    this.getFilteredData();
     this.baseurl = this.api.getUrl('BASE');
   }
 
-  getProductData() {
+  yearClick(year: any) {
+    this.filterBody.year = year;
+    this.getFilteredData(0);
+  }
+
+  getProductPage(page: any = null) {
+    if (page) {
+      this.pageNo = page;
+      this.getFilteredData();
+    }
+  }
+
+
+  getFilteredData(page: any = null) {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id).subscribe((data) => {
+    this.filterBody.pageNo = page ? page : this.pageNo;
+    this.http.put(this.api.getUrl('PRODUCT') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.productDataAll = data['result'];
         this.productData = data['result'];

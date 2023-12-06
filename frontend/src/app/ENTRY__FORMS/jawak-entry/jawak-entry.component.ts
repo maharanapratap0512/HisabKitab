@@ -31,7 +31,6 @@ export class JawakEntryComponent implements OnInit {
   imagebase: any = [];
   imagepath: any;
   departments: any = [];
-  unit_short: any = "";
   conditions: any = [];
   subitems: any = [];
   items: any = [];
@@ -70,6 +69,7 @@ export class JawakEntryComponent implements OnInit {
       qty: [null, Validators.required],
       jawak_type_id: [null, Validators.required],
       unit_id: [null, Validators.required],
+      unit_short:'',
       description: [null],
       aawak_ref_id: [null],
       nimitt_id: [null],
@@ -120,8 +120,10 @@ export class JawakEntryComponent implements OnInit {
         nimitt_id: changes.getData.currentValue.nimitt_id,
         dept_id: changes.getData.currentValue.dept_id,
         is_xl: changes.getData.currentValue.is_xl ? changes.getData.currentValue.is_xl : 0,
+        unit_short: changes.getData.currentValue.unit_short
       });
-      this.unit_short = changes.getData.currentValue.unit_short;
+
+
       setTimeout(() => {
         this.itemSelected(changes.getData.currentValue.item_id);
         if (changes.getData.currentValue.subitem_id) {
@@ -136,7 +138,6 @@ export class JawakEntryComponent implements OnInit {
     }
     if (changes.aawakRef && changes.aawakRef.currentValue) {
       this.aawakRef = changes.aawakRef.currentValue;
-      this.unit_short = this.aawakRef.unit_short;
       this.jawakForm.patchValue({
         date: this.aawakRef.date,
         mm_id: this.aawakRef.mm_id,
@@ -153,6 +154,7 @@ export class JawakEntryComponent implements OnInit {
         nimitt_id: this.aawakRef.nimitt_id ? this.aawakRef.nimitt_id : null,
         dept_id: this.aawakRef.dept_id,
         is_xl: 0,
+        unit_short: this.aawakRef.unit_short
       });
     }
 
@@ -213,12 +215,13 @@ export class JawakEntryComponent implements OnInit {
       this.cat = null;
       this.items = this.gs.Lists.item;
     }
-    this.unit_short = null;
+
     this.jawakForm.patchValue({
       item_id: null,
       subitem_id: null,
       unit_id: null,
-      product_id: null
+      product_id: null,
+      unit_short: null
     })
   }
 
@@ -238,18 +241,22 @@ export class JawakEntryComponent implements OnInit {
         } else {
           this.jawakForm.setControl('subitem_id', this.fb.control(null));
         }
-        this.unit_short = item.unit_short;
-        this.jawakForm.patchValue({
-          unit_id: item.unit_id
-        });
+        if(!this.isEdit){
+          this.jawakForm.patchValue({
+            unit_id: item.unit_id,
+            unit_short: item.unit_short
+          });
+        }
       }
     }
     else {
       this.subitems = [];
-      this.unit_short = null;
-      this.jawakForm.patchValue({
-        unit_id: null
-      });
+      if (!this.isEdit) {
+        this.jawakForm.patchValue({
+          unit_id: null,
+          unit_short: null
+        });
+      }
     }
   }
 
@@ -258,10 +265,12 @@ export class JawakEntryComponent implements OnInit {
       let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
       if (subitem) {
         this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
-        this.jawakForm.patchValue({
-          unit_id: subitem.unit_id,
-        });
-        this.unit_short = subitem.unit_short ? subitem.unit_short : null;
+        if(!this.isEdit){
+          this.jawakForm.patchValue({
+            unit_id: subitem.unit_id,
+            unit_short: subitem.unit_short ? subitem.unit_short : null
+          });
+        }
       }
 
     }

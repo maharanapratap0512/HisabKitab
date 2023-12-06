@@ -285,7 +285,7 @@ export class DataViewComponent implements OnInit {
         field: ["item_hin", "subitem_hin", "item_eng", "subitem_eng"]
       }, {
         title: "Qty",
-        field: ["qty"]
+        field: ["qty", "unit_short"]
       }, {
         title: "Item Detail",
         field: ["item_detail"]

@@ -28,6 +28,7 @@ router.get('/', async (req, res, next) => {
 // get product
 router.get('/:dept_id', async (req, res, next) => {
     try {
+
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
         await DB.getList('product', { full: true, dept_id: req.params.dept_id, orderBy: 'product._id desc', limit: 100 }).then(async (resolve) => {
             for (let i in resolve.data) {
@@ -49,19 +50,28 @@ router.get('/:dept_id', async (req, res, next) => {
 // get Filter product by dept_id
 router.put('/:dept_id', async (req, res, next) => {
     try {
-        let conditionString = ` 1=1 ${req.body._id ? ` AND product._id = ${req.body._id}` : ``} ${req.body.item_id ? ` AND product.item_id = ${req.body.item_id}` : ``}`;
+        let limit = 100, offset = null, page = 1;
+        if (req.body.pageNo && req.body.pageNo > 0) {
+            offset = (req.body.pageNo - 1) * limit;
+            page = req.body.pageNo;
+        }
+
+        let conditionString = ` 1=1 ${req.body._id ? ` AND product._id = ${req.body._id}` : ``} ${req.body.year ? ` AND strftime('%Y', product.purchase_date) = '${req.body.year}'` : ''}`;
         // let conditionString = ` 1=1 ${req.body._id ? `product._id = ${req.body._id}` : ``} ${typeof req.body.item_id == "string" || typeof req.body.item_id == "number" ? ` AND product.item_id = (${req.body.item_id})` : ``} ${req.body.item_id.length > 0 ? ` AND product.item_id IN (${req.body.item_id})` : ``}`;
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
-        await DB.getList('product', { full: req.body.full ? true : false, dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
+        await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: 'product._id desc', limit: limit, offset: offset }).then(async (resolve) => {
             for (let i in resolve.data) {
                 resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : {});
-                // resolve.data[i].tracking = (resolve.data[i].tracking != "[null]" ? JSON.parse(resolve.data[i].tracking) : {});
+                resolve.data[i].products = (resolve.data[i].products ? JSON.parse(resolve.data[i].products) : []);
             }
+
             res.json({
                 success: true,
                 result: resolve.data || [],
-                total_count: resolve.total_count
+                total_count: resolve.total_count,
+                pageNo: page
             });
+
         });
     } catch (err) { next(err) };
 });
