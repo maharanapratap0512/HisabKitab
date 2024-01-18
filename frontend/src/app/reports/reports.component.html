@@ -8,266 +8,55 @@
                <div class="card-header">Generate Reports (Under Construction)</div>
                <div class="card-body">
                   <div class="row">
-                     <!-- Month and Year -->
-                     <div class="col-md-3 mb-2">
+                     <div class="col-md-2 mb-2">
                         <div class="form-group">
-                           
-                           <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Month"
-                              [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month" name="month"
-                              required>
+                           <label class="form-label">Year</label>
+                           <ng-select class="custom" style="width: 100%;" placeholder="Select Year" [clearable]="true"
+                              [virtualScroll]="true" [(ngModel)]="filterBody.year" name="year"
+                              (change)="months = gs.yearChangedGetMonth($event)">
+                              <ng-option selected="selected" disabled value="">Select Year
+                              </ng-option>
+                              <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
+                           </ng-select>
+                        </div>
+                     </div>
+                     <div class="col-md-2 mb-2">
+                        <div class="form-group">
+                           <label class="form-label">Month</label>
+                           <ng-select class="custom" style="width: 100%;" placeholder="Select Month" [clearable]="true"
+                              [virtualScroll]="true" [(ngModel)]="filterBody.months" name="month" [multiple]="true"
+                              [ngModalOptions]="{standalone: true}">
                               <ng-option selected="selected" disabled value="">Select Month
                               </ng-option>
-                              <ng-option *ngFor="let item of months" [value]="item.m">{{item.m}} :
-                                 {{item.name}}
-                              </ng-option>
+                              <ng-option *ngFor="let item of months" [value]="item.m">{{item.name}}</ng-option>
                            </ng-select>
                         </div>
                      </div>
-
-                     <!-- state for aawak filter -->
-                     <!-- <div class="col-md-3 mb-3">
+                     <div class="col-md-2 mb-2">
                         <div class="form-group">
-                           <label class="form-label">State for Pbk</label>
-                           <ng-select class="custom" style="width: 100%;" placeholder="Filter PBK by State"
-                              [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)">
-                              <ng-option selected="selected" disabled value="">Select State to Filter Pbk
+                           <label class="form-label">MM Type</label>
+                           <ng-select class="custom" style="width: 100%;" placeholder="Select MM Type" [clearable]="true"
+                              [virtualScroll]="true" [(ngModel)]="filterBody.mm_type" name="month" [multiple]="true"
+                              [ngModalOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">Select MM Type
                               </ng-option>
-                              <ng-option *ngFor="let item of states" [value]="item._id">
-                                 {{item.state_hin}} : {{item.state_eng}}
-                              </ng-option>
+                              <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_eng}} : {{item.dept_code   }}</ng-option>
                            </ng-select>
                         </div>
-                     </div> -->
-
-                     <!-- pbk -->
-                     <div class="col-md-3 mb-3">
+                     </div>
+                     <div class="col-md-2 mb-2 mt-3">
                         <div class="form-group">
-                           <label class="form-label">Sewadhari</label>
-                           <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Roll no. or Pbk name"
-                              [clearable]="false" [virtualScroll]="true" [(ngModel)]="filterBody.pbk_id" name="pbk_id">
-                              <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
-                              </ng-option>
-                              <ng-option *ngFor="let item of pbks" [value]="item._id">
-                                 {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} :
-                                 {{item.relation}} :
-                                 {{item.relative_name}}
-                              </ng-option>
-                           </ng-select>
+                           <label class="form-label"></label>
+                           <button class="btn btn-primary form-control" (click)="searchReports()">Generate Reports</button>
                         </div>
                      </div>
-
-                     <!-- MM -->
-                     <div class="col-md-3 mb-3">
-                        <div class="form-group">
-                           <label class="form-label">MM</label>
-                           <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
-                              [virtualScroll]="true" name="mm_id" [(ngModel)]="filterBody.mm_id">
-                              <ng-option *ngFor="let item of mms" [value]="item._id">
-                                 {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
-                           </ng-select>
-                        </div>
-                     </div>
-
-
-                     <div class="col-md-2 mt-3 mb-3">
-                        <button class="btn btn-primary" (click)="searchReport()">Search</button>
-                     </div>
-
-
                   </div>
                </div>
             </div>
-            <!-- TODO test this report -->
-            <!-- reports  -->
-            <div class="row" *ngIf="reportData.length > 0">
-               <ngx-spinner *ngIf="reportLoader" size="small" color="#fff" type="ball-scale" [fullScreen]="false">
-                  <p class="loading">Loading...</p>
-               </ngx-spinner>
-
-               <div class="card-body" style="overflow: auto;">
-                  <pagination-controls class="pagi text-end" (pageChange)="page = $event" [autoHide]="true">
-                  </pagination-controls>
-                  <table id="datatable-buttons" class="table table-hover dt-responsive" #TABLE>
-                     <thead>
-                        <tr>
-                           <th style="width: 40px;">No.</th>
-                           <th style="width: 150px;">MM</th>
-                           <th style="width: 150px;">Category</th>
-                           <th style="width: 150px;">Item</th>
-                           <th style="width: 150px;">Unit</th>
-                           <th style="width: 150px;">पिछला बचत</th>
-                           <th style="width: 150px;">bachat</th>
-                           <th style="width: 100px;" *ngFor="let cnd of conditions">{{cnd.list_name_eng}}</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        <ng-container
-                           *ngFor="let data of reportData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
-                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-'+i" aria-expanded="false"
-                              [attr.aria-controls]="'collapse-'+i" class="main-row">
-                              <td>{{itemsPerPage * (page-1) + i+1}}</td>
-                              <td>
-                                 {{data.mm_hin}} - {{data.mm_code}}<br />
-                                 {{data.mm_eng}}
-                              </td>
-                              <td>
-                                 {{data.categories_hin}} <br />
-                                 {{data.categories_eng}}
-                              </td>
-                              <td>
-                                 {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
-                                 {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
-                              </td>
-                              <td>
-                                 {{data.unit_short}}
-                              </td>
-                              <td>
-                                 {{data.p_bachat}}
-                              </td>
-                              <td>
-                                 {{data.bachat}}
-                              </td>
-                              <td *ngFor="let cnd of conditions">
-                                 {{data[cnd.list_name_eng]}}
-                              </td>
-                           </tr>
-                           <ng-container *ngIf="data.awk.length > 0 || data.jwk.length > 0">
-                              <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse ribbon-box"
-                                 aria-labelledby="headingOne">
-                                 <td colspan="8">
-                                    <div class="row">
-                                       <div class="col-6">
-                                          <table style="width: 99.7%;table-layout: fixed;" *ngIf="data.awk.length > 0">
-                                             <tbody>
-                                                <tr>
-                                                   <th>Sr No.</th>
-                                                   <th>Aawak Type</th>
-                                                   <th>Aawak Quantity</th>
-                                                </tr>
-                                                <tr *ngFor="let bcht of data.awk; let j = index;">
-                                                   <td style="width: 75px;">
-                                                      <i class="uil-corner-down-right"></i>
-                                                      <span class="mx-1">{{j+1}} </span>
-                                                   </td>
-                                                   <td> {{bcht.aawak_type_eng ? bcht.aawak_type_eng : ''}}</td>
-                                                   <td> {{bcht.awk_qty ? (bcht.awk_qty + " " + data.unit_short) : '' }}
-                                                   </td>
-                                                </tr>
-                                             </tbody>
-                                             <tfoot style="border-top: 2px dashed;">
-                                                <th>#</th>
-                                                <th>Total Aawak</th>
-                                                <th>{{data.total_awk_qty + " " + data.unit_short}}</th>
-                                             </tfoot>
-                                          </table>
-                                       </div>
-                                       <div class="col-6">
-                                          <table style="width: 99.7%;table-layout: fixed;" *ngIf="data.jwk.length > 0">
-                                             <tbody>
-                                                <tr>
-                                                   <th>Sr No.</th>
-                                                   <th>Jawak Type</th>
-                                                   <th>Jawak Quantity</th>
-                                                </tr>
-                                                <tr *ngFor="let bcht of data.jwk; let j = index;">
-                                                   <td style="width: 75px;">
-                                                      <i class="uil-corner-down-right"></i>
-                                                      <span class="mx-1">{{j+1}} </span>
-                                                   </td>
-                                                   <td> {{bcht.jawak_type_eng ? bcht.jawak_type_eng : ''}}</td>
-                                                   <td> {{bcht.jwk_qty ? (bcht.jwk_qty + " " + data.unit_short) : '' }}
-                                                   </td>
-                                                </tr>
-                                             </tbody>
-                                             <tfoot style="border-top: 2px dashed;">
-                                                <th>#</th>
-                                                <th>Total Jawak</th>
-                                                <th>{{data.total_jwk_qty}}</th>
-                                             </tfoot>
-                                          </table>
-                                       </div>
-                                    </div>
-                                 </td>
-                              </tr>
-
-                           </ng-container>
-                        </ng-container>
-                     </tbody>
-                  </table>
-               </div>
-
-            </div>
-
-            <!-- <ejs-grid id="Grid" #Grid [dataSource]='reportData' [toolbar]='toolbarOptions' [allowFiltering]='true'
-                  [allowPaging]='true' [allowSorting]="true" width="auto" [filterSettings]='filterOption'
-                  [pageSettings]="pageSettings" height="500px" [childGrid]="childGrid"
-                  (rowDataBound)='rowDataBound($event)' allowTextWrap="true">
-                  <e-columns>
-                      <e-column field='_id' headerText='ID' width=50 visible="false"></e-column> 
-                     <e-column headerText='Sr.No' width='60' textAlign='Right'>
-                     </e-column>
-                     <e-column field="state_eng" [filter]='filter' headerText='State' width=120>
-                        <ng-template #template let-data>
-                           {{data.state_hin}} <br />
-                           {{data.state_eng}}
-                        </ng-template>
-                     </e-column>
-                     <e-column field='mm_eng' [filter]='filter' headerText='MM' width=120>
-                        <ng-template #template let-data>
-                           {{data.mm_hin}} <br />
-                           {{data.mm_eng}}
-                        </ng-template>
-                     </e-column>
-                     <e-column field='categories_eng' [filter]='filter' headerText='Category' width=150></e-column>
-                     <e-column field='item_eng' [filter]='filter' headerText='Item' width=180>
-                        <ng-template #template let-data>
-                           {{data.item_hin}} <br />
-                           {{data.item_eng}}
-                        </ng-template>
-                     </e-column>
-                     <e-column field='subitem_eng' [filter]='filter' headerText='Subitem' width=150>
-                        <ng-template #template let-data>
-                           {{data.subitem_hin}} <br />
-                           {{data.subitem_eng}}
-                        </ng-template>
-                     </e-column>
-                     <e-column field='unit_short' [filter]='filter' headerText='Unit' width=100></e-column>
-                     <ng-container *ngFor="let cnd of conditions">
-                        <e-column [field]="cnd.list_name_eng" [filter]="qtyFilter" [headerText]="cnd.list_name_eng"
-                           width="100">
-                           <ng-template #template let-data>
-                              <span>{{data[cnd.list_name_eng]}}</span>
-                           </ng-template>
-                        </e-column>
-                     </ng-container>
-                  </e-columns>
-               </ejs-grid> -->
 
          </div>
 
 
-      </div>
-   </div>
-</div>
-
-
-<!-- Modal -->
-<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
-   aria-hidden="true">
-   <div class="modal-dialog" style="width: 90%;">
-      <div class="modal-content">
-         <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
-            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
-               aria-label="Close"></button>
-         </div>
-         <div class="modal-body">
-
-         </div>
-         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" style="width: 120px;"
-               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
-         </div>
       </div>
    </div>
 </div>

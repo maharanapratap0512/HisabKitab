@@ -618,12 +618,13 @@ export class AawakComponent implements OnInit {
         filename += mm.mm_hin + "_";
       }
     }
-    // console.log(filename);
+    // console.log(this.auth.webUser.path + `\\` + filename + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
 
-    this.excelExportService.generateExcel(json, filename + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+    this.excelExportService.generateExcel(json, filename + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
     // this.excelExportService.exportAsExcelFile(json, 'AawakJawak');
     // this.excelExportService.exportAsExcelFile(this.el.nativeElement, 'AawakJawak');
   }
+
 
   aawakDeptSelected(ev: any) {
     if (ev) {

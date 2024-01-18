@@ -26,6 +26,9 @@ import { NimittComponent } from './CHILD_TABLES/nimitt/nimitt.component';
 import { ReportsComponent } from './reports/reports.component';
 import { VehicleComponent } from './vehicle/vehicle.component';
 import { BachatNewComponent } from './bachat-new/bachat-new.component';
+import { ReportAwkTypeSaarComponent } from './reports/report-awk-type-saar/report-awk-type-saar.component';
+import { ReportJwkTypeSaarComponent } from './reports/report-jwk-type-saar/report-jwk-type-saar.component';
+import { ReportStoreStockComponent } from './reports/report-store-stock/report-store-stock.component';
 
 const routes: Routes = [
    {
@@ -57,6 +60,10 @@ const routes: Routes = [
          { path: "nimitt", component: NimittComponent },
          { path: "report", component: ReportsComponent},
          { path: "vehicle", component: VehicleComponent},
+         
+         { path: "report-at", component: ReportAwkTypeSaarComponent},
+         { path: "report-jt", component: ReportJwkTypeSaarComponent},
+         { path: "report-str-stk", component: ReportStoreStockComponent},
 
          { path: "files", component: FilesViewComponent },
          { path: "import_export", component: ImportExportComponent },

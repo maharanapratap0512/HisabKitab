@@ -281,6 +281,34 @@ class Functions extends DBContex {
       return result;
    }
 
+   sortAndFillMonthsString(arrMonth = [1, 12]) {
+
+      // Step 1: Sort month in accending order.
+      arrMonth.sort((a, b) => a - b);
+
+      // Step 2: Find the minimum and maximum values
+      const minMonth = arrMonth[0];
+      const maxMonth = arrMonth[arrMonth.length - 1];
+
+      // Step 3: Create a new array for the result
+      const result = [];
+
+      // Step 4: Iterate from the minimum value to the maximum value
+      for (let month = minMonth; month <= maxMonth; month++) {
+         result.push(month.toString().padStart(2, '0'));
+      }
+
+      return result;
+   }
+
+   join(array) {
+      let str = ``;
+      for (let i of array) {
+         str += `'${i}',`;
+      }
+      return str.slice(0, -1);
+   }
+
    async getMMs(dept_id = null) {
 
       return await this.getList('mm', { dept_id: dept_id }).then(async (resolve) => {

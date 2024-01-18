@@ -1,5 +1,7 @@
 const router = require('express').Router();
 const DBContex = require('../models/DBContex');
+const path = require('path');
+const fs = require('fs');
 const DB = new DBContex();
 
 
@@ -128,6 +130,12 @@ router.put('/login', async (req, res, next) => {
                     // });
                     result.total_count = response.total_count;
                     result.settings = result.settings ? JSON.parse(result.settings) : {};
+                    let exFilePath = path.resolve(__dirname + '/../../../../Documents/')
+                    if (!fs.existsSync(exFilePath)) {
+                        fs.mkdirSync(exFilePath, { recursive: true });
+                    }
+                    
+                    // result.path = exFilePath
                     res.json(result || {});
                 } else {
                     res.json({})

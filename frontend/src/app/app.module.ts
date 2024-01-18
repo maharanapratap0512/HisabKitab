@@ -70,6 +70,9 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
 import { SearchPipe } from './pipe/search.pipe';
 import { AuthService } from './services/auth.service';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import { ReportAwkTypeSaarComponent } from './reports/report-awk-type-saar/report-awk-type-saar.component';
+import { ReportJwkTypeSaarComponent } from './reports/report-jwk-type-saar/report-jwk-type-saar.component';
+import { ReportStoreStockComponent } from './reports/report-store-stock/report-store-stock.component';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -130,6 +133,9 @@ import { NgxSpinnerModule } from 'ngx-spinner';
     BachatNewComponent,
     AdminDashboardComponent,
     SearchPipe,
+    ReportAwkTypeSaarComponent,
+    ReportJwkTypeSaarComponent,
+    ReportStoreStockComponent,
   ],
 
   imports: [

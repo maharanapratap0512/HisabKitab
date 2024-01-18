@@ -239,10 +239,24 @@
                         <i class="uil-layer-group me-1"></i>Department
                      </a>
                   </li>
-                  <li class="nav-item">
+                  <!-- <li class="nav-item">
                      <a class="nav-link" routerLinkActive="active" routerLink="report" role="button">
                         <i class="uil-layer-group me-1"></i>Reports
                      </a>
+                  </li> -->
+                  <li class="nav-item dropdown">
+                     <a class="nav-link dropdown-toggle arrow-none" id="topnav-apps" role="button"
+                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="uil-apps me-1"></i>Reports <div class="arrow-down"></div>
+                     </a>
+                     <div class="dropdown-menu" aria-labelledby="topnav-apps">
+                        <a class="dropdown-item" routerLinkActive="active" routerLink="report-at">Report Awk Type Saar</a>
+                        <a class="dropdown-item" routerLinkActive="active" routerLink="report-jt">Report Jwk Type Saar</a>
+                        <a class="dropdown-item" routerLinkActive="active" routerLink="report-str-stk">Store Report Stock</a>
+                        <!-- <a class="dropdown-item" routerLinkActive="active" routerLink="report-urs">City</a>
+                        <a class="dropdown-item" routerLinkActive="active" routerLink="report-nps">State</a>
+                        <a class="dropdown-item" routerLinkActive="active" routerLink="report-np">Country</a> -->
+                     </div>
                   </li>
                   <li class="nav-item" *ngIf="settings.point.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="point" role="button">

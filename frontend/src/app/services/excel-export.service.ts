@@ -1,3 +1,5 @@
+
+
 import { Injectable } from '@angular/core';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
@@ -16,6 +18,27 @@ export class ExcelExportService {
 
   constructor(public auth: AuthService,
     public gs: GlobalService) { }
+
+  // async promptForDownload(data: Blob, fileName: string) {
+  //   const options = {
+  //     types: [{ accept: 'application/octet-stream' }],
+  //   };
+
+  //   return window.showSaveFilePicker()
+  //     .then((handle: any) => {
+  //       // this.writeFile(handle, data, fileName)
+  //       console.log(handle);
+
+  //     });
+  // }
+
+  // private async writeFile(handle: FileSystemDirectoryHandle, data: Blob, fileName: string): Promise<FileSystemDirectoryEntry> {
+  //   const writer = await handle.createWriter();
+  //   const blobWriter = writer.write(data);
+  //   await blobWriter.promise;
+  //   writer.close();
+  //   return handle.getFile(fileName);
+  // }
 
   public exportAsExcelFile(json: any[], excelFileName: string): void {
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json);
@@ -41,7 +64,7 @@ export class ExcelExportService {
       type: EXCEL_TYPE
     });
     if (fileName && fileName.trim() == '') {
-      FileSaver.saveAs(data, 'HK_export_' + new Date().getTime() + EXCEL_EXTENSION);
+      FileSaver.saveAs(data, `HK_export_` + new Date().getTime() + EXCEL_EXTENSION);
     } else {
       FileSaver.saveAs(data, fileName + EXCEL_EXTENSION);
     }

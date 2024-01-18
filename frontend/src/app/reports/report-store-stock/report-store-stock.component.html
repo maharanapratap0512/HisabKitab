@@ -1,0 +1,116 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color: white"> {{loadingStatus}} </p>
+</ngx-spinner>
+
+<!-- Begin page -->
+<div class="wrapper">
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="card-header">Report Store Stock Saar (Under Construction)</div>
+                    <div class="card-body">
+                        <div class="row mb-2 mt-3">
+
+                            <div class="col-md-3">
+                                <ng-select class="custom" style="width: 100%;" placeholder="Select Store"
+                                    [clearable]="true" [multiple]="true" [virtualScroll]="true"
+                                    (change)="searchReports()" [(ngModel)]="filterBody.mm_id"
+                                    [ngModelOptions]="{standalone: true}"
+                                    [ngClass]="{'validation': !filterBody.mm_id || filterBody.mm_id.length < 1}">
+                                    <ng-option *ngFor="let item of stores" [value]="item._id">
+                                        {{item.mm_hin}} : {{item.mm_code}} : {{item.mm_eng}}</ng-option>
+                                </ng-select>
+                            </div>
+                            <div class="col-md-3">
+                                <ng-select class="custom" style="width: 100%;" placeholder="Select Condition"
+                                    [clearable]="true" [multiple]="true" [virtualScroll]="true"
+                                    (change)="searchReports()" [(ngModel)]="filterBody.condition"
+                                    [ngModelOptions]="{standalone: true}"
+                                    [ngClass]="{'validation': !filterBody.condition || filterBody.condition.length < 1}">
+                                    <ng-option *ngFor="let item of conditions" [value]="item.list_name_eng">
+                                        {{item.list_name_hin}} : {{item.list_name_eng}}</ng-option>
+                                </ng-select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="form-label"></label>
+                                    <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                                        data-bs-toggle="dropdown" aria-expanded="false"> Export Data </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" (click)="exportToExcelHin()">To Excel (Hin)</a>
+                                        <a class="dropdown-item" (click)="exportToExcelEng()">To Excel (Eng)</a>
+                                        <a class="dropdown-item" (click)="exportToPDF()">To PDF (Eng)</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-2 mt-3">
+                                <button type="button" style="font-weight: 700 !important;"
+                                    class="btn btn-light w-100">Total
+                                    Count : {{reportData.length}}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" *ngIf="reportData.length">
+                    <div class=" d-flex justify-content-center">
+                        <h3>{{reportHeading}}</h3>
+                    </div>
+                    <div class="card-body" style="overflow: auto;">
+                        <div class="row mb-2">
+                            <div class="col-5">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                                        name="search">
+                                </div>
+                            </div>
+                        </div>
+                        <table id="tbl" #tbl class="table dt-responsive">
+                            <thead>
+                                <tr>
+                                    <td style="width: 70px;">No.</td>
+                                    <td style="width: 100px;">Department</td>
+                                    <td>Category</td>
+                                    <td>Item</td>
+                                    <ng-container *ngFor="let cn of filterBody.condition;">
+                                        <td>{{cn}}</td>
+                                    </ng-container>
+
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <ng-container *ngFor="let data of reportData | search: term; let i = index;">
+                                    <tr>
+                                        <td style="width: 70px;">{{i+1}}</td>
+                                        <td style="width: 100px;">{{data.dept_hin}} : {{data.dept_code}}</td>
+                                        <td>{{data.categories_eng ? data.categories_eng : data.categories_hin}}</td>
+                                        <td>
+                                            {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}}<br />
+                                            {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
+                                        </td>
+                                        <ng-container *ngFor="let cn of filterBody.condition;">
+                                            <td>
+                                                <span [ngClass]="{'error': data[cn] < 0}">
+                                                    {{data[cn]}} {{data.unit_short}}
+                                                </span>
+                                            </td>
+                                        </ng-container>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+</div>
