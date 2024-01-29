@@ -390,7 +390,7 @@
                         style="padding: 0px; min-width: 40%;background: #252932;">
                         <ng-select class="custom" style="width: 100%;" placeholder="Unit" [clearable]="true"
                            [virtualScroll]="true" [(ngModel)]="awkfg.unit_id" name="unit_id" #unit_id="ngModel"
-                           [readonly]="isEdit || awkfg.product_id">
+                           [readonly]=" awkfg.product_id">
                            <ng-option selected="selected" disabled value="">Unit</ng-option>
                            <ng-option *ngFor="let item of units" [value]="item._id">{{item.unit_short}}</ng-option>
                         </ng-select>
