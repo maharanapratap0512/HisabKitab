@@ -1,8 +1,12 @@
-const http = require('http');
+
+const express = require('express');
 const app = require('./app');
-const port = 2018;
-// let allowedDomains = ['http://localhost:1976'];
+const http = require('http');
+const cors = require('cors')
+const port = process.argv[2] || 4000;
 
 const server = http.createServer(app);
 
-server.listen(port, console.log('Server listening at port: ' + port));
+server.listen(port, () => {
+   console.log('Running server on port ' + port);
+});

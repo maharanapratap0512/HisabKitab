@@ -1,9 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from 'src/app/services/http.service';
+import { Location } from '@angular/common';
 
 // const base_url = 'http://192.168.43.63:1976/api';
-const base_url = 'http://localhost:2018/api/';
+// const base_url = 'http://localhost:2018/api/';
 // const base_url = '/api';
+
+const host = window.location.host;
+const base_port = getPortFromHost(host) - 1000;
+const base_url = `http://localhost:${base_port}/api/`;
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +16,9 @@ const base_url = 'http://localhost:2018/api/';
 
 export class ApiService {
 
-  constructor() { }
+  constructor(
+    private location: Location
+  ) { }
 
   URLS: any = {
     BASE: base_url,
@@ -63,12 +70,17 @@ export class ApiService {
     REPORTAJ: base_url + 'reports/aj/',
     IMPORTHISTORY: base_url + 'import_history/',
     VEHICLE: base_url + 'vehicle/',
-    COMMENT: base_url+ 'comment/'
-    
+    COMMENT: base_url + 'comment/'
+
   };
 
   getUrl(key: string): string {
     return this.URLS[key];
   }
 
+}
+
+function getPortFromHost(host: string): number {
+  const match = host.match(/:(\d+)/);
+  return match ? +match[1] : 1000;
 }
