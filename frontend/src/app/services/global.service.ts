@@ -16,7 +16,7 @@ export class GlobalService {
   Lists: any = null;
   Config: any = {};
   importPending: any = false;
-  exceptionDept: any = [1, 5];
+  exceptionDept: any = [1];
   // getList$ = new Subject();
   date = new Date();
   dateString = this.date.getFullYear() + '-' + (this.date.getMonth() + 1).toString().padStart(2, "0") + '-' + this.date.getDate().toString().padStart(2, "0")

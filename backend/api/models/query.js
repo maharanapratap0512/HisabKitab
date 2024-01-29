@@ -1966,7 +1966,7 @@ genDeptDB = {
 
     updateDept: `update department set settings = (select settings from mainDB.department dp where dp._id = department._id) where department._id in (select json_each.value from mainDB.department_config, json_each(config_value) where dept_id = @dept_id AND config_key='department')`,
 
-    insertDeptConfig: `insert into department_config(_id, dept_id, config_key, config_value, active, created_at, updated_at) select _id, dept_id, config_key, '[]', active, created_at, updated_at from mainDB.department_config`,
+    // insertDeptConfig: `insert into department_config(_id, dept_id, config_key, config_value, active, created_at, updated_at) select _id, dept_id, config_key, '[]', active, created_at, updated_at from mainDB.department_config`,
 
     // insertDept: `insert into department select * from mainDB.department dept where (select dpc.config_value from mainDB.department_config dpc where dpc.dept_id = ? AND dpc.config_key = 'department') LIKE '%,'|| dept._id||',%'`,
 
@@ -1974,7 +1974,7 @@ genDeptDB = {
 
     country: `insert into country select * from mainDB.country`,
     state: `insert into state select * from mainDB.state`,
-    dictionary: `insert into dictionary select * from dictionary`,
+    // dictionary: `insert into dictionary select * from dictionary`,
     delete_s_list: `delete from support_list`,
     // support_list: `insert into support_list select * from mainDB.support_list where list_type NOT IN ('aawak_type', 'jawak_type') OR support_list._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='aj_type')`,
     support_list: `insert into support_list select * from mainDB.support_list`,
@@ -1998,14 +1998,14 @@ genDeptDB = {
 
     nimitt: `insert into nimitt select * from mainDB.nimitt where nimitt._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='nimitt')`,
 
-    product: `insert into product select * from mainDB.product where dept_id = @dept_id`,
-    aawak: `insert into aawak select * from mainDB.aawak where dept_id = @dept_id`,
-    jawak: `insert into jawak select * from mainDB.jawak where dept_id = @dept_id`,
-    bachat_new: `insert into bachat_new select * from mainDB.bachat_new where dept_id = @dept_id`,
+    // product: `insert into product select * from mainDB.product where dept_id = @dept_id`,
+    // aawak: `insert into aawak select * from mainDB.aawak where dept_id = @dept_id`,
+    // jawak: `insert into jaw/ak select * from mainDB.jawak where dept_id = @dept_id`,
+    // bachat_new: `insert into bachat_new select * from mainDB.bachat_new where dept_id = @dept_id`,
     vehicle: `insert into vehicle select * from mainDB.vehicle`,
     vehicle_document: `insert or ignore into vehicle_document select * from mainDB.vehicle_document`,
 
-    import_history: `insert into import_history select * from mainDB.import_history where dept_id = @dept_id`,
+    // import_history: `insert into import_history select * from mainDB.import_history where dept_id = @dept_id`,
     dictionary: `insert into dictionary select * from mainDB.dictionary`,
 
     // bachat: `insert into bachat select * from mainDB.bachat where dept_id = ?`,

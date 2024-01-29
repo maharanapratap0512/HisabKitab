@@ -7,7 +7,7 @@
       <form #f="ngForm">
 
          <!-- Aawak Readonly Fields while editing -->
-         <div class="row" *ngIf="isEdit">
+         <div class="row" *ngIf="false">
             <div class="card card-body">
                <div class="row">
                   <div class="col-4">
@@ -47,11 +47,12 @@
          </div>
 
 
-         <!-- Aawak Entry Form Start from here -->
+         <!-- AUto insert aawak by product Aawak Entry Form Start from here -->
          <div class="row" *ngIf="awkfg.is_auto_pd">
             <div class="col-md-12">
                <div class="alert alert-warning bg-light text-dark" role="alert">
-                  <strong>Sorry! </strong> ये प्रोडक्ट एंट्री के दौरान ऑटोमैटिक एंट्री हुआ है, इसलिए इसमे सबकुछ चेंज नहीं कर सकते है। 
+                  <strong>Sorry! </strong> ये प्रोडक्ट एंट्री के दौरान ऑटोमैटिक एंट्री हुआ है, इसलिए इसमे सबकुछ चेंज
+                  नहीं कर सकते है।
                </div>
             </div>
             <div class="col-md-2 mb-3" *ngIf="settings.aawak.pkt_num">
@@ -191,7 +192,7 @@
                   [ngClass]="{'validation' : (date?.touched || f.submitted) && date.errors?.['required']}" required>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="!isEdit">
+            <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label"> MM</label>
                   <a type="button" *ngIf="settings.mm.add" style="padding: 1px 6px !important;"
@@ -277,7 +278,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="!isEdit">
+            <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label text-success">Filter Items By</label>
                   <!-- <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -300,7 +301,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3" *ngIf="!isEdit">
+            <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Item & Subitem</label>
                   <div class="float-end" *ngIf="settings.item.add">
@@ -316,7 +317,7 @@
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.item_id" name="item_id" #item_id="ngModel"
-                     (change)="itemSelected($event)" [readonly]="isEdit"
+                     (change)="itemSelected($event)"
                      [ngClass]="{ 'validation': (item_id?.touched || f.submitted) && item_id.errors?.['required']}"
                      required>
                      <ng-option selected="selected" disabled value="">Select Item</ng-option>
@@ -326,7 +327,7 @@
                   </ng-select>
                   <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
                      [clearable]="true" [virtualScroll]="true" [(ngModel)]="awkfg.subitem_id" name="subitem_id"
-                     #subitem_id="ngModel" [readonly]="isEdit">
+                     #subitem_id="ngModel">
                      <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
                      <ng-option *ngFor="let item of subitems | filterByDate:awkfg.date"
                         [value]="item._id">{{item.subitem_hin}} :
@@ -348,8 +349,7 @@
                   </div>
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Product" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.product_id" name="product_id" #product_id="ngModel"
-                     (change)="productSelected($event)" [readonly]="isEdit"
-                     *ngIf="!isEdit && settings.aawak.product_id">
+                     (change)="productSelected($event)" *ngIf="settings.aawak.product_id">
                      <ng-option selected="selected" disabled value="">Select Product</ng-option>
                      <ng-option *ngFor="let item of products" [value]="item._id">
                         {{item.product_code ? item.product_code : ''}} : {{item.sr_num ? item.sr_num : ''}}

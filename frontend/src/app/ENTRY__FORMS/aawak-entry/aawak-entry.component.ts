@@ -687,6 +687,8 @@ export class AawakEntryComponent implements OnInit {
 		this.isCondition = true;
 		let product = this.products.find((p: { _id: any; }) => p._id == ev);
 		this.awkfg.condition_id = product ? product.condition_id : null;
+		this.awkfg.item_id = product.item_id;
+		this.awkfg.subitem_id = product.subitem_id;
 		this.awkfg.qty = 1;
 		this.awkfg.unit_id = 1;
 		this.awkfg.rate = product.price ? product.price : null;
