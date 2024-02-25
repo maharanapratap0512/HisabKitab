@@ -17,25 +17,13 @@ class Functions extends DBContex {
       return new Promise(async (resolve, reject) => {
          try {
             let stmtInsert = this.db.prepare(this.query[type].insert);
-            let stmtInsertBachat = this.db.prepare(this.query.bachat_new['insert_' + type + '_ins']);
-            let stmtUpdateBachat = this.db.prepare(this.query.bachat_new['update_' + type + '_ins']);
-            let objDate = new Date(obj.date);
-            obj.month = objDate.getMonth() + 1;
-            obj.year = objDate.getFullYear();
             obj.document = JSON.stringify(obj.document ? obj.document : {});
             obj.isbill = obj.isbill ? 1 : 0;
             obj.active = 1;
             let insResult = stmtInsert.run(obj);
-            console.log(insResult);
             if (insResult.changes == 1 && insResult.lastInsertRowid) {
-               let bachat = await this.getBachatFromAJ(obj);
-               let bachatResult;
-               if (bachat._id) {
-                  bachatResult = stmtUpdateBachat.run(obj);
-               }
-               else {
-                  bachatResult = stmtInsertBachat.run(obj);
-               }
+               obj._id = insResult.lastInsertRowid;
+               await this.updateBachatFromAJInsert(obj, type);
                resolve(insResult.lastInsertRowid);
             } else {
                reject(new Error('no any records are inserted'));
@@ -51,30 +39,17 @@ class Functions extends DBContex {
       return new Promise(async (resolve, reject) => {
          try {
             let stmtUpdate = this.db.prepare(this.query[type].update + ` where ${type}._id = ${obj._id}`);
-            let stmtInsertBachat = this.db.prepare(this.query.bachat_new['insert_' + type + '_ins']);
-            let stmtUpdateBachat = this.db.prepare(this.query.bachat_new['update_' + type + '_ins']);
-            let stmtDeleteBachat = this.db.prepare(this.query.bachat_new['update_' + type + '_del']);
-            if (!objOld) {
-               objOld = await this.getById(type, obj._id);
-            }
-            let objDate = new Date(obj.date);
-            obj.month = objDate.getMonth() + 1;
-            obj.year = objDate.getFullYear();
-
-            let objOldDate = new Date(objOld.date);
-            objOld.month = objOldDate.getMonth() + 1;
-            objOld.year = objOldDate.getFullYear();
 
             obj.document = JSON.stringify(obj.document && typeof obj.document != 'string' ? obj.document : {});
             obj.isbill = obj.isbill ? 1 : 0;
 
+            if (!objOld) {
+               objOld = await this.getById(type, obj._id);
+           }
+
             let updtResult = stmtUpdate.run(obj);
             if (updtResult.changes == 1) {
-               stmtDeleteBachat.run(objOld);
-               let bachatUpdate = stmtUpdateBachat.run(obj);
-               if (!bachatUpdate.changes) {
-                  bachatUpdate = stmtInsertBachat.run(obj);
-               }
+               await this.updateBachatFromAJUpdate(obj, type, objOld);
                resolve(true);
             } else {
                reject(new Error('no any records are updated.'));
@@ -90,17 +65,12 @@ class Functions extends DBContex {
    async deleteAJ(id, type) {
       return new Promise(async (resolve, reject) => {
          try {
-            let stmtUpdateBachat = this.db.prepare(this.query.bachat_new['update_' + type + '_del']);
             let stmtDelete = this.db.prepare(this.query[type].delete)
             let obj = await this.getById(type, id);
             if (obj) {
-               let objDate = new Date(obj.date);
-               obj.month = objDate.getMonth() + 1;
-               obj.year = objDate.getFullYear();
-               console.log(obj);
                let delResult = stmtDelete.run({ _id: id });
                if (delResult.changes == 1) {
-                  stmtUpdateBachat.run(obj);
+                  await this.updateBachatFromAJDelete(id, type, obj);
                   resolve(delResult.changes);
                } else {
                   resolve(0);

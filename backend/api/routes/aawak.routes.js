@@ -205,21 +205,31 @@ router.put('/new', async (req, res, next) => {
             // await updateAawak(req.body.set);
             let oldAwk = await DB.getById('aawak', req.body.set._id);
             await Fn.updateAJ(req.body.set, 'aawak', oldAwk).then(async (resolve) => {
-                if (req.body.set.condition_id != oldAwk.condition_id) {
-                    await DB.getList('jawak', { conditionString: ` aawak_ref_id = ${oldAwk._id}` }).then(async (jwkdata) => {
-                        if (jwkdata.data) {
-                            for (let jwk of jwkdata.data) {
-                                await Fn.updateAJ({ ...jwk, condition_id: req.body.set.condition_id }, 'jawak', jwk).then((data) => {
-                                }, (err) => {
-                                    console.log('jwk', err);
-                                    throw err;
-                                });
+                await DB.getList('jawak', { conditionString: ` aawak_ref_id = ${oldAwk._id}` }).then(async (jwkdata) => {
+                    if (jwkdata.data) {
+                        for (let jwk of jwkdata.data) {
+                            let jwkNew = {
+                                ...jwk,
+                                condition_id: req.body.set.condition_id,
+                                mm_id: req.body.set.mm_id,
+                                item_id: req.body.set.item_id,
+                                subitem_id: req.body.set.subitem_id,
+                                product_id: req.body.set.product_id,
+                                condition_id: req.body.set.condition_id,
+                                unit_id: req.body.set.unit_id,
+                                dept_id: req.body.set.dept_id,
                             }
+                            await Fn.updateAJ(jwkNew, 'jawak', jwk).then((data) => {
+                            }, (err) => {
+                                console.log('jwk', err);
+                                throw err;
+                            });
                         }
-                    }, (err) => {
-                        throw err;
-                    });
-                }
+                    }
+                }, (err) => {
+                    throw err;
+                });
+
                 for (let i = 0; i < req.body.set.jawak_detail.length; i++) {
                     if (!req.body.set.jawak_detail[i]._id) {
                         req.body.set.jawak_detail[i].aawak_ref_id = oldAwk._id;

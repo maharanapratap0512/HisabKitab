@@ -591,7 +591,9 @@ const aawak = {
 
 const bachat = {
     select:
-        `select * from bachat ?`
+        `select * from bachat ?`,
+    select_exists:
+        `select * from bachat where dept_id = @dept_id AND mm_id = @mm_id AND item_id = @item_id AND unit_id = @unit_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0)`
     , select_full:
         `select bachat.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng,      
@@ -655,6 +657,61 @@ const bachat = {
             @dept_id,
             @Repairing,
             @active)`
+    , insert_aawak_ins:
+        `insert into bachat(mm_id, item_id, subitem_id, Stock, New, Old, Defective, Repairing, Scrap, unit_id, dept_id) 
+        values(@mm_id, @item_id, @subitem_id, @qty, (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END), (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), @unit_id, @dept_id);`
+    , update_aawak_ins:
+        `update bachat set 
+        Stock = Stock + @qty,
+        New = New + (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END),
+        Old = Old + (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END),
+        Defective = Defective + (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END),
+        Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END),
+        Scrap = Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END)
+        where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id`
+    , update_byid_aawak_ins:
+        `update bachat set 
+        Stock = Stock + @qty,
+        New = New + (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END),
+        Old = Old + (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END),
+        Defective = Defective + (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END),
+        Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END),
+        Scrap = Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END)
+        where _id = @_id`
+    , update_aawak_del:
+        `update bachat set
+        Stock = Stock - @qty,
+        New = New - (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END),
+        Old = Old - (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END),
+        Defective = Defective - (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END),
+        Repairing = Repairing - (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END),
+        Scrap = Scrap - (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END)
+        where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id;`
+    , insert_jawak_ins:
+        `insert into bachat (
+            mm_id, item_id, subitem_id, dept_id, Used, bachat, unit_id)
+        values(
+            @mm_id, @item_id, @subitem_id, @dept_id, (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END), 0 - @qty, @unit_id);`
+    , update_jawak_ins:
+        `update bachat set 
+        Stock = Stock - @qty,
+        Used = Used + (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END),
+        New = New - (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END),
+        Old = Old - (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END),
+        Defective = Defective - (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END),
+        Repairing = Repairing - (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END),
+        Scrap = Scrap - (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END)
+        where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id;`
+    , update_jawak_del:
+        `update bachat set
+        Stock = Stock + @qty,
+        Used = Used - (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END),
+        New = New + (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END),
+        Old = Old + (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END),
+        Defective = Defective + (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END),
+        Repairing = Repairing + (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END),
+        Scrap = Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END)
+        where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id;`
     , update:
         `update bachat set
         mm_id=@mm_id,
@@ -678,7 +735,8 @@ const bachat_new = {
     select:
         `select * from bachat_new ?`
     , select_exists:
-        `select * from bachat_new where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
+        `select * from bachat_new 
+        where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(@condition_id, 0) = IFNULL(condition_id, 0)`
     // , select_exists: `select strftime('%m', @date)`
     , select_full:
         `select bachat_new.*,
@@ -1174,6 +1232,32 @@ const product = {
         @mm_id, @purchased_by, @purchase_date, @item_id, @subitem_id, @unit_id, @product_code, @company_name, @nimitt_id,
         @model_name, @sr_num, @condition_id, @price, @product_detail, @accessories, @purchase_from, @aawak_type_id,
         @warranty_period, @dept_id, @warranty_from, @document, @isbill, @is_xl, @voucher_no, @bunch_no, @qty, @active, @awk_id)`
+    , update_aawak_ins:
+        `update product set 
+        last_date = @date,
+        last_mm = @mm_id,
+        last_condition = @condition_id,
+        last_entry_type = 'awk',
+        last_ref_id = @_id
+        where _id = @product_id AND (last_date IS NULL OR last_date <= @date);`
+    , update_jawak_ins:
+        `update product set 
+        last_date = @date,
+        last_mm = @jawak_mm_id,
+        last_condition = @condition_id,
+        last_entry_type = 'jwk',
+        last_ref_id = @_id
+        where _id = @product_id AND (last_date IS NULL OR last_date <= @date);`
+    , update_aawak_del:
+        `update product set 
+        last_entry_type = 'deleted',
+        last_ref_id = null
+        where _id = @product_id AND last_entry_type = 'awk' AND last_ref_id = @_id;`
+    , update_jawak_del:
+        `update product set 
+        last_entry_type = 'deleted',
+        last_ref_id = null
+        where _id = @product_id AND last_entry_type = 'jwk' AND last_ref_id = @_id;`
     , update:
         `update product set 
         mm_id=@mm_id,

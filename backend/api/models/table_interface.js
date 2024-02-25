@@ -15,6 +15,21 @@ class TableInterface {
       used_jawak: 0,
       bachat: 0
    }
+   bachat = {
+      _id: null,
+      mm_id: null,
+      item_id: null,
+      subitem_id: null,
+      unit_id: null,
+      dept_id: null,
+      Stock: 0,
+      Used: 0,
+      New: 0,
+      Old: 0,
+      Defective: 0,
+      Scrap: 0,
+      Repairing: 0,
+   }
 
    aawak = {
       pkt_num: null,

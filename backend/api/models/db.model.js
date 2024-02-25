@@ -1337,7 +1337,7 @@ class dbModal {
           last_condition = NEW.condition_id,
           last_entry_type = 'awk',
           last_ref_id = NEW._id
-          where _id = NEW.product_id AND(last_date IS NULL OR last_date <= NEW.date);
+          where _id = NEW.product_id AND (last_date IS NULL OR last_date <= NEW.date);
 
         END; `,
       awk_ins_bcht_updt:
@@ -1445,15 +1445,15 @@ class dbModal {
           AFTER DELETE ON "aawak" 
           FOR EACH ROW
           BEGIN
-            update bachat set
-            Stock = Stock - OLD.qty,
-            New = New - (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
-            Old = Old - (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
-            Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
-            Repairing = Repairing - (CASE WHEN(select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
-            Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
-            where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND IFNULL(subitem_id, 0) = IFNULL(OLD.subitem_id, 0) AND unit_id = OLD.unit_id;
-
+          update bachat set
+          Stock = Stock - OLD.qty,
+          New = New - (CASE WHEN OLD.condition_id = 33 THEN OLD.qty ELSE 0 END),
+          Old = Old - (CASE WHEN OLD.condition_id = 34 THEN OLD.qty ELSE 0 END),
+          Defective = Defective - (CASE WHEN OLD.condition_id = 35 THEN OLD.qty ELSE 0 END),
+          Repairing = Repairing - (CASE WHEN(select list_name_eng from support_list where _id = OLD.condition_id) LIKE '%Repairing%' THEN OLD.qty ELSE 0 END),
+          Scrap = Scrap - (CASE WHEN OLD.condition_id = 36 THEN OLD.qty ELSE 0 END)
+          where mm_id = OLD.mm_id AND item_id = OLD.item_id AND dept_id = OLD.dept_id AND IFNULL(subitem_id, 0) = IFNULL(OLD.subitem_id, 0) AND unit_id = OLD.unit_id;
+            
             update product set 
             last_entry_type = 'deleted',
             last_ref_id = null
@@ -1724,9 +1724,9 @@ class dbModal {
         comment text,
         updated_at timestamp default (UNIXEPOCH('now', 'localtime'))
       )`,
-      add_success_ih:`alter table import_history add column success_count int default 0`,
-      add_fail_ih:`alter table import_history add column fail_count int default 0`,
-      add_icount_ih:`alter table import_history add column import_count int default 1`,
+      add_success_ih: `alter table import_history add column success_count int default 0`,
+      add_fail_ih: `alter table import_history add column fail_count int default 0`,
+      add_icount_ih: `alter table import_history add column import_count int default 1`,
     },
     // version 16
     /*
@@ -1734,11 +1734,33 @@ class dbModal {
       => Aawak: new Column Added - is_auto_pd
     */
     {
-      add_bunch_no: `alter table product add column bunch_no int`,     
-      add_awk_type_pd: `alter table product add column aawak_type_id int references support_list(_id)`,        
-      add_awk_autopd: `alter table aawak add column is_auto_pd tinyint(1) default 0`,        
-      add_prdct_awk_id: `alter table product add column awk_id integer`,               
+      add_bunch_no: `alter table product add column bunch_no int`,
+      add_awk_type_pd: `alter table product add column aawak_type_id int references support_list(_id)`,
+      add_awk_autopd: `alter table aawak add column is_auto_pd tinyint(1) default 0`,
+      add_prdct_awk_id: `alter table product add column awk_id integer`,
 
+    },
+    // version 17
+    /*
+      => recreating all triggers of awak jawak update on old bachat
+    */
+    {
+      awk_ins_bcht_ins:
+        `DROP TRIGGER IF exists "awk_ins_bcht_ins";`,
+      awk_ins_bcht_updt:
+        `DROP TRIGGER IF exists "awk_ins_bcht_updt";`,
+      awk_updt_bcht_updt:
+        `DROP TRIGGER IF EXISTS "awk_updt_bcht_updt"`,
+
+      drop_jwk_ins_bcht_updt:
+        `DROP TRIGGER IF exists "jwk_ins_bcht_updt" `,
+      drop_jwk_updt_bcht_updt:
+        `DROP TRIGGER IF exists "jwk_updt_bcht_updt"`,
+
+      drop_awk_del_bcht_updt:
+        `DROP TRIGGER IF EXISTS "awk_del_bcht_updt"`,
+      drop_jwk_del_bcht_updt:
+        `DROP TRIGGER IF exists "jwk_del_bcht_updt" `,
     },
 
     /* TODO cleanup task 

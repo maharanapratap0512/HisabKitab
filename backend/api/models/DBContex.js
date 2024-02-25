@@ -410,10 +410,11 @@ class DBContex {
         });
     }
 
-    async getBachatFromAJ(AJobj) {
+    // type - 'aawak', 'jawak'
+    async getBachatFromAJ(AJobj, type) {
         let ajDate = new Date(AJobj.date);
         let bachatObj = {
-            ...this.tbInterface.bachat_new,
+            ...this.tbInterface[type],
             month: ajDate.getMonth() + 1,
             year: ajDate.getFullYear(),
             mm_id: AJobj.mm_id,
@@ -423,58 +424,52 @@ class DBContex {
             dept_id: AJobj.dept_id,
             condition_id: AJobj.condition_id
         };
-        let bachat = await this.db.prepare(this.query.bachat_new.select_exists).get(bachatObj);
-        console.log(bachat);
+        let bachat = await this.db.prepare(this.query[type].select_exists).get(bachatObj);
         return bachat || bachatObj;
     }
 
-
-    async updateBachatFromAJInsert(AJobj, operation) {
-        let bachat = await this.getBachatFromAJ(AJobj)
-        switch (operation.toLowerCase()) {
-            case 'aawak':
-                bachat.total_aawak += parseInt(AJobj.qty);
-                bachat.bachat += parseInt(AJobj.qty);
-                break;
-
-            case 'jawak':
-                if (AJobj.jawak_type_id == 27)
-                    bachat.used_jawak += parseInt(AJobj.qty);
-                else
-                    bachat.jawak += parseInt(AJobj.qty);
-                bachat.bachat -= parseInt(AJobj.qty);
-                break;
-
-        }
+    // AJtype = 'aawawk', 'jawak'
+    async updateBachatFromAJInsert(obj, AJtype) {
+        let objDate = new Date(obj.date);
+        obj.month = objDate.getMonth() + 1;
+        obj.year = objDate.getFullYear();
+        let bachat = await this.getBachatFromAJ(obj, 'bachat');
         if (bachat._id) {
-            this.db.prepare(this.query.bachat_new.update_auto).run({ ...bachat });
-        } else {
-            this.db.prepare(this.query.bachat_new.insert).run({ ...bachat });
+            let bcht = this.db.prepare(this.query.bachat['update_' + AJtype + '_ins']).run(obj);
+        }
+        else {
+            let bcht = this.db.prepare(this.query.bachat['insert_' + AJtype + '_ins']).run(obj);
+        }
+        let bachatNew = await this.getBachatFromAJ(obj, 'bachat_new');
+        if (bachatNew._id) {
+            let bchtN = this.db.prepare(this.query.bachat_new['update_' + AJtype + '_ins']).run(obj);
+        }
+        else {
+            let bchtN = this.db.prepare(this.query.bachat_new['insert_' + AJtype + '_ins']).run(obj);
+        }
+        this.db.prepare(this.query.product['update_' + AJtype + '_ins']).run(obj);
+        return;
+    }
+
+    // AJtype = 'aawawk', 'jawak'
+    async updateBachatFromAJDelete(id, AJtype, obj = null) {
+        if (!obj) {
+            obj = await this.getById(AJtype, id);
+        }
+        if (obj) {
+            let objDate = new Date(obj.date);
+            obj.month = objDate.getMonth() + 1;
+            obj.year = objDate.getFullYear();
+            this.db.prepare(this.query.bachat['update_' + AJtype + '_del']).run(obj)
+            this.db.prepare(this.query.bachat_new['update_' + AJtype + '_del']).run(obj);
+            this.db.prepare(this.query.product['update_' + AJtype + '_del']).run(obj);
+            return;
         }
     }
 
-    async updateBachatFromAJDelete(AJobj, operation) {
-        let ajDate = new Date(AJobj.date);
-        AJobj.month = ajDate.getMonth();
-        AJobj.year = ajDate.getFullYear();
-        let sql = null;
-        switch (operation.toLowerCase()) {
-            case 'aawak':
-                sql = this.query.bachat_new.update_awk_del;
-                break
-            case 'jawak':
-                sql = this.query.bachat_new.update_jwk_del;
-                break
-
-        }
-        let res = this.db.prepare(sql).run(AJobj);
-    }
-
-    async updateBachatFromAJUpdate(AJobj, operation) {
-        let AJobjOld = await this.getById(operation.toLowerCase(), AJobj._id);
-        console.log("AJobjOld", AJobjOld);
-        await this.updateBachatFromAJDelete(AJobjOld, operation.toLowerCase())
-        await this.updateBachatFromAJInsert(AJobj, operation.toLowerCase());
+    async updateBachatFromAJUpdate(AJobj, AJtype, AJobjOld = null) {
+        await this.updateBachatFromAJDelete(AJobj._id, AJtype.toLowerCase(), AJobjOld);
+        await this.updateBachatFromAJInsert(AJobj, AJtype.toLowerCase());
 
     }
 

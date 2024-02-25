@@ -120,13 +120,15 @@ export class JawakComponent implements OnInit {
           'MM': result[i].mm_id ? result[i].mm_hin : '-',
           'Item': result[i].item_id ? result[i].item_hin : '-',
           'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
+          'Condition': result[i].condition_id ? result[i].condition_hin : '-',
           'Company': result[i].company_name ? result[i].company_name : '-',
           'Jawak MM': result[i].jawak_mm_id ? result[i].jawak_mm_hin : '-',
-          'Jawak Detail': result[i].description ? result[i].description : '-',
           'Kisko Diya': result[i].nimitt_id ? result[i].nimitt_hin + '(' + result[i].nimitt_state_hin + ')' : '-',
-          'Jawak Type': result[i].jawak_type_id ? result[i].jawak_type_hin : '-',
           'Qty': result[i].qty ? result[i].qty : '-',
-          'Unit': result[i].unit_id ? result[i].unit_short : '-'
+          'Unit': result[i].unit_id ? result[i].unit_short : '-',
+          'Jawak Type': result[i].jawak_type_id ? result[i].jawak_type_hin : '-',
+          'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
+          'Jawak Detail': result[i].description ? result[i].description : '-',
         });
       }
 
