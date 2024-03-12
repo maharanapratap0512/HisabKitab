@@ -697,8 +697,6 @@ export class ExcelExportService {
 
       // writing data
       let rowNum = 4;
-      let arrName = '';
-      let arrCommentName = '';
       for (let i = 0; i < json.length; i++) {
 
         for (let j = 0; j < headerCount; j++) {
@@ -706,27 +704,34 @@ export class ExcelExportService {
         }
         console.log("row", json[i]);
 
-        for (let j = 0; j < conditions.length; j++) {
-          arrName = 'arr' + conditions[j].list_name_eng;
-          arrCommentName = 'arr_comment_' + conditions[j].list_name_eng;
-          setTimeout(() => {
-            if (json[i][arrName]) {
-              console.log("arr" + conditions[j].list_name_eng, json[i][arrName]);
-              for (let k = 0; k < monthCount; k++) {
-                const cell1 = worksheet.getCell(rowNum, headerCount + (k * conditions.length) + j + 1);
-                cell1.value = "k"
-                console.log(cell1);
-
-
-                if (json[i][arrCommentName][k]) {
-                  cell1.note = json[i][arrCommentName][k];
-                }
-                if (json[i][arrName][k] < 0) {
-                  cell1.fill = errorStyle;
-                }
+        for (let j = 0; j < monthCount; j++) {
+          for (let k = 0; k < conditions.length; k++) {
+            console.log("json[i].conditionReport", json[i].conditionReport);
+            
+            for (let crow of json[i].conditionReport) {
+              if (conditions[k].list_name_eng == crow.list_name_eng) {
+                worksheet.getCell(rowNum, headerCount + (j * conditions.length) + k + 1).value = crow.arr_sum_bachat[k];
+              } else {
+                worksheet.getCell(rowNum, headerCount + (j * conditions.length) + k + 1).value = 0;
               }
             }
-          }, 50);
+          }
+          // if (json[i][arrName]) {
+
+          //   for (let k = 0; k < monthCount; k++) {
+          //     const cell1 = worksheet.getCell(rowNum, headerCount + (k * conditions.length) + j + 1);
+          //     cell1.value = "k"
+          //     console.log(cell1);
+
+
+          //     if (json[i][arrCommentName][k]) {
+          //       cell1.note = json[i][arrCommentName][k];
+          //     }
+          //     if (json[i][arrName][k] < 0) {
+          //       cell1.fill = errorStyle;
+          //     }
+          //   }
+          // }
         }
         rowNum++;
       }
@@ -738,17 +743,14 @@ export class ExcelExportService {
         }
       });
 
-      setTimeout(() => {
-        let fileName = reportTitle + ".xlsx";
-        const excelBuffer: any = workbook.xlsx.writeBuffer();
-        workbook.xlsx.writeBuffer()
-          .then(function (buffer: any) {
-            // done buffering
-            const data: Blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            FileSaver.saveAs(data, fileName);
-          });
-      }, (json.length * 50) + 50);
-
+      let fileName = reportTitle + ".xlsx";
+      const excelBuffer: any = workbook.xlsx.writeBuffer();
+      workbook.xlsx.writeBuffer()
+        .then(function (buffer: any) {
+          // done buffering
+          const data: Blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          FileSaver.saveAs(data, fileName);
+        });
     }
   }
 

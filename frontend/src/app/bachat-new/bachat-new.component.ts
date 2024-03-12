@@ -383,11 +383,7 @@ export class BachatNewComponent implements OnInit {
 
       this.http.put(this.api.getUrl('BACHATNEW') + 'condition/' + this.auth.webUser.dept_id, this.bachatData[i]).subscribe(async (data: any) => {
         if (data['result'] && data['success']) {
-          for (let crow of data['result']) {
-            bachatRow['arr' + crow.list_name_eng] = crow.arr_sum_bachat; 
-            bachatRow['arr_comment_' + crow.list_name_eng] = crow.arr_comment; 
-
-          }
+          bachatRow.conditionReport = data['result']
         }
       });
 
@@ -403,9 +399,11 @@ export class BachatNewComponent implements OnInit {
     }
 
     console.log("bachat", bchtData);
-    
-    this.excelExportService.generateConditionWiseReport(bchtData, this.conditions, (mm ? mm.mm_hin : "report"), option);
-    this.isLoader = false;
+    if(this.bachatData.length>1){
+
+      this.excelExportService.generateConditionWiseReport(bchtData, this.conditions, (mm ? mm.mm_hin : "report"), option);
+      this.isLoader = false;
+    }
   }
 
 
