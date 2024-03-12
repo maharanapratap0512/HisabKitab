@@ -194,7 +194,7 @@ router.put('/condition/:dept_id', async (req, res, next) => {
             // conditionQuery2 += `${req.body.state_id ? ` where mm.state_id = ${req.body.state_id}` : ``} `;
 
         }
-        months = Fn.sortAndFillMonths(req.body.months);
+        months = Fn.sortAndFillMonths(req.body.months || req.body.arr_months);
         conditionQuery1 += ` AND month in (${months.join(',')}) AND year = '${req.body.year}'`
         awkCondition += ` AND awk.month in (${months.join(',')}) AND awk.year = '${req.body.year}'`
 

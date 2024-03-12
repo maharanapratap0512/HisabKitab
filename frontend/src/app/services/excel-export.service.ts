@@ -6,6 +6,7 @@ import * as XLSX from 'xlsx';
 import { Workbook } from 'exceljs';
 import { AuthService } from './auth.service';
 import { GlobalService } from './global.service';
+import { log } from 'console';
 
 
 const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
@@ -41,6 +42,8 @@ export class ExcelExportService {
   // }
 
   public exportAsExcelFile(json: any[], excelFileName: string): void {
+    console.log("excel json", json);
+
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json);
     console.log('worksheet', worksheet);
     const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
@@ -631,6 +634,122 @@ export class ExcelExportService {
         const data: Blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         FileSaver.saveAs(data, fileName);
       });
+  }
+
+
+  generateConditionWiseReport(json: any[], conditions: any[], excelFileName: string, options: any = {}): void {
+    if (json.length > 0 && conditions.length > 0) {
+      let workbook = new Workbook();
+      var worksheet = workbook.addWorksheet('Sheet1');
+
+      let monthCount = options.months.length;
+      let headers = Object.keys(json[0]).filter(key => !key.includes("arr_"));
+
+      let headerCount = headers.length;
+      const headerStyle: any = { type: 'pattern', pattern: 'solid', fgColor: { argb: '96C8FB' }, bgColor: { argb: '96C8FB' } };
+      const errorStyle: any = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC7CE' }, bgColor: { argb: 'FD0101' } };
+      const headerBorder: any = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      }
+
+      // Title
+      worksheet.mergeCells([1, 1, 1, headerCount + (monthCount * conditions.length)]);
+      let reportTitle = (excelFileName ? excelFileName + ' का ' : '') + 'कंडीशन अनुसार सार रिपोर्ट ' + options.months[0].name + "-" + options.year + " से " + options.months[monthCount - 1].name + "-" + options.year;
+      worksheet.getCell('A1').value = reportTitle;
+      worksheet.getRow(1).font = { name: 'Corbel', family: 4, size: 20, };
+      worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+
+      // Header
+      for (let i = 0; i < headerCount; i++) {
+        worksheet.mergeCells([2, i + 1, 3, i + 1]);
+        worksheet.getCell(2, i + 1).value = headers[i];
+        worksheet.getCell(2, i + 1).fill = headerStyle;
+        worksheet.getRow(2).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      }
+
+      // SubHeader  
+      let startCell = headerCount + 1;
+      for (let i = 0; i < monthCount; i++) {
+
+        worksheet.mergeCells([2, startCell, 2, startCell + conditions.length - 1]);
+
+        worksheet.getCell(2, startCell).value = options.months[i].name + "-" + options.year;
+        // worksheet.getCell(2, startCell).fill = headerStyle;
+        worksheet.getRow(2).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+
+        for (let c = 0; c < conditions.length; c++) {
+          worksheet.getCell(3, startCell + c).value = conditions[c].list_name_hin;
+        }
+        worksheet.getRow(3).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+        startCell = startCell + conditions.length;
+      }
+
+
+      worksheet.getRows(2, 2)?.forEach(row => {
+        row.eachCell(cell => {
+          cell.fill = headerStyle;
+          cell.border = headerBorder;
+        });
+      });
+
+      // writing data
+      let rowNum = 4;
+      let arrName = '';
+      let arrCommentName = '';
+      for (let i = 0; i < json.length; i++) {
+
+        for (let j = 0; j < headerCount; j++) {
+          worksheet.getCell(rowNum, j + 1).value = json[i][headers[j]];
+        }
+        console.log("row", json[i]);
+
+        for (let j = 0; j < conditions.length; j++) {
+          arrName = 'arr' + conditions[j].list_name_eng;
+          arrCommentName = 'arr_comment_' + conditions[j].list_name_eng;
+          setTimeout(() => {
+            if (json[i][arrName]) {
+              console.log("arr" + conditions[j].list_name_eng, json[i][arrName]);
+              for (let k = 0; k < monthCount; k++) {
+                const cell1 = worksheet.getCell(rowNum, headerCount + (k * conditions.length) + j + 1);
+                cell1.value = "k"
+                console.log(cell1);
+
+
+                if (json[i][arrCommentName][k]) {
+                  cell1.note = json[i][arrCommentName][k];
+                }
+                if (json[i][arrName][k] < 0) {
+                  cell1.fill = errorStyle;
+                }
+              }
+            }
+          }, 50);
+        }
+        rowNum++;
+      }
+
+      worksheet.getRows(4, rowNum)?.forEach(row => {
+        for (let i = headerCount; i < row.cellCount + 4; i++) {
+          row.getCell(i).border = { right: { style: 'double' } };
+          i = i + 3;
+        }
+      });
+
+      setTimeout(() => {
+        let fileName = reportTitle + ".xlsx";
+        const excelBuffer: any = workbook.xlsx.writeBuffer();
+        workbook.xlsx.writeBuffer()
+          .then(function (buffer: any) {
+            // done buffering
+            const data: Blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            FileSaver.saveAs(data, fileName);
+          });
+      }, (json.length * 50) + 50);
+
+    }
   }
 
 

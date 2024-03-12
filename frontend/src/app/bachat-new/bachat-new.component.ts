@@ -82,9 +82,10 @@ export class BachatNewComponent implements OnInit {
       this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
     });
-    // this.filterBody.year = 2023;
-    // this.filterBody.months = [5, 3, 1];
-    // this.filter();
+    this.filterBody.year = 2024;
+    this.gs.yearChangedGetMonth(2024);
+    this.filterBody.months = [ 3, 1];
+    this.filter();
   }
 
   getBase64Images() {
@@ -361,6 +362,49 @@ export class BachatNewComponent implements OnInit {
       mm = this.mms.find((m: { _id: any; }) => m._id == this.filterBody.mm_id)
     }
     this.excelExportService.generateReportExcel(bchtData, (mm ? mm.mm_hin : null), option);
+    this.isLoader = false;
+  }
+
+  excelExportMonthlyConditionWise() {
+    this.isLoader = true;
+    let bchtData: any = [];
+    for (let i = 0; i < this.bachatData.length; i++) {
+
+      let bachatRow: any = {
+        'No.': i + 1,
+        'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
+        'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
+        'MM': this.bachatData[i].mm_hin,
+        'Category': this.bachatData[i].categories_eng ? this.bachatData[i].categories_eng : this.bachatData[i].categories_hin,
+        'Item': this.bachatData[i].item_hin,
+        'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
+        'unit': this.bachatData[i].unit_short,
+      }
+
+      this.http.put(this.api.getUrl('BACHATNEW') + 'condition/' + this.auth.webUser.dept_id, this.bachatData[i]).subscribe(async (data: any) => {
+        if (data['result'] && data['success']) {
+          for (let crow of data['result']) {
+            bachatRow['arr' + crow.list_name_eng] = crow.arr_sum_bachat; 
+            bachatRow['arr_comment_' + crow.list_name_eng] = crow.arr_comment; 
+
+          }
+        }
+      });
+
+      bchtData.push(bachatRow);
+    }
+    let option: any = {};
+    option.months = this.monthsSel;
+    option.year = this.filterBody.year;
+
+    let mm: any = null;
+    if (this.filterBody.mm_id) {
+      mm = this.mms.find((m: { _id: any; }) => m._id == this.filterBody.mm_id)
+    }
+
+    console.log("bachat", bchtData);
+    
+    this.excelExportService.generateConditionWiseReport(bchtData, this.conditions, (mm ? mm.mm_hin : "report"), option);
     this.isLoader = false;
   }
 
