@@ -2040,7 +2040,8 @@ const unit = {
 
 const conditions = {
     vehicle_duplicate: `gadi_num = @gadi_num`,
-    product_duplicate: `(product_code IS NOT NULL AND product_code = @product_code) OR (sr_num IS NOT NULL AND sr_num = @sr_num)`
+    product_duplicate: `(product_code IS NOT NULL AND product_code = @product_code) OR (sr_num IS NOT NULL AND sr_num = @sr_num)`,
+    pbk_duplicate: `roll_no = @roll_no OR (pbk_hin = @pbk_hin AND gender = @gender AND state_id = @state_id)`,
 }
 
 genDeptDB = {

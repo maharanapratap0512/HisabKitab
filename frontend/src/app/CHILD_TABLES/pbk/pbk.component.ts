@@ -10,7 +10,7 @@ import * as XLSX from 'xlsx';
 import { AuthService } from 'src/app/services/auth.service';
 import { observable, Observable, Subject } from 'rxjs';
 import { ExcelExportService } from 'src/app/services/excel-export.service';
-import { DOCUMENT } from '@angular/common'; 
+import { DOCUMENT } from '@angular/common';
 declare var $: any;
 
 @Component({
@@ -159,12 +159,40 @@ export class PbkComponent implements OnInit {
   // }
 
 
+  openModal(type: any) {
+    this.showModal = type;
+    $('#showModal').modal('show');
+  }
+
+  closeModal() {
+    this.showModal = ''
+    $('#showModal').modal('hide');
+  }
+
   export() {
-    // this.excelExportService.exportAsExcelFile(this.pbkData, 'PBKs');
-    let tbl = document.getElementById('tblPbk');
-    console.log("tbl", tbl);
-    
-    // this.excelExportService.exportTblToExcelFile(tbl, 'PBKs');
+    let rows: any = [];
+    for (let i in this.pbkData) {
+      rows.push({
+        "roll no": this.pbkData[i].roll_no,
+        "pbk hin": this.pbkData[i].pbk_hin,
+        "pbk eng": this.pbkData[i].pbk_eng,
+        "relation": this.pbkData[i].relation,
+        "relative name": this.pbkData[i].relative_name,
+        "gender": this.pbkData[i].gender,
+        "birth_date": this.pbkData[i].birth_date,
+        "age": this.pbkData[i].age,
+        "address": this.pbkData[i].address,
+        "townarea": this.pbkData[i].townarea,
+        "state": this.pbkData[i].state_hin,
+        "city": this.pbkData[i].city_hin,
+        "mobile no": this.pbkData[i].mo_no,
+        "alt mobile no": this.pbkData[i].alt_mo_no,
+        "daily class mm": this.pbkData[i].mm_hin,
+        "भट्ठी कब किया?": this.pbkData[i].bhatti_date,
+      })
+    }
+
+    this.excelExportService.exportAsExcelFile(rows, 'PBKs');
   }
 
   addPbkResponse(ev: any) {

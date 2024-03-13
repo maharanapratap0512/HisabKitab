@@ -15,12 +15,12 @@
                <div class="card-body" style="overflow: auto;">
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
-                        <button class="btn btn-primary w-100" *ngIf="settings.add" onclick="$('#showModal').modal('show')"
-                           (click)="showModal = 'Add PBK'">
+                        <button class="btn btn-primary w-100" *ngIf="settings.add"
+                           onclick="$('#showModal').modal('show')" (click)="showModal = 'Add PBK'">
                            <i class="dripicons-plus h4 icon-mx-2"> </i>Add PBK
                         </button>
                      </div>
-                     <div class="col-4">
+                     <div class="col-3">
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
@@ -33,9 +33,13 @@
                         </button>
                      </div>
 
-                     <div class="col-2">
-                        <button class="btn btn-success w-100" (click)="export()">
-                           Export PBK
+                     <div class="col-3 d-flex">
+                        <button type="button" class="btn btn-success" (click)="openModal('excel_import')"
+                           style="font-weight: 700 !important;">
+                           <i class="uil uil-arrow-to-bottom"></i> Excel Import
+                        </button>
+                        <button type="button" class="btn btn-outline-success mx-2" (click)="export()"> Export To
+                           Excel
                         </button>
                      </div>
 
@@ -168,21 +172,21 @@
                               {{itemsPerPage * (page - 1) + (i+1)}}<br>
                               <span style="font-size: x-large;position: relative;line-height: 28px; cursor:pointer;"
                                  (click)="protectionToggle(data._id, data.active)">
-                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
-                                    title="Protected" class="uil-shield-check text-warning"></i>
-                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
-                                    title="Unprotected" class="uil-shield-slash text-danger"></i>
+                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && data.active"
+                                    data-toggle="tooltip" title="Protected" class="uil-shield-check text-warning"></i>
+                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && !data.active"
+                                    data-toggle="tooltip" title="Unprotected" class="uil-shield-slash text-danger"></i>
                               </span>
                            </td>
                            <td>
                               <button *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) || !data.active"
                                  class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button><br>
-                              <button *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) || !data.active" class="btn btn-sm btn-danger"
-                                 type="button" (click)="delete(i,data._id)">
+                              <button *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) || !data.active"
+                                 class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)">
                                  <i class="uil-trash"></i></button>
-                              <span *ngIf="!gs.exceptionDept.includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
-                                 title="Protected" class="text-warning mx-1"
+                              <span *ngIf="!gs.exceptionDept.includes(auth.webUser.dept_id) && data.active"
+                                 data-toggle="tooltip" title="Protected" class="text-warning mx-1"
                                  style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                  <i class="uil-shield-check"></i>
                               </span>
@@ -236,7 +240,7 @@
       <div class="modal-content">
          <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
-            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
+            <button type="button" (click)="closeModal()" class="btn-close"
                aria-label="Close"></button>
          </div>
          <div class="modal-body">
@@ -246,10 +250,12 @@
             <!-- Edit PBK -->
             <app-pbk-entry *ngIf="showModal == 'Edit PBK'" (response)='editPbkResponse($event)' [getData]="editData"
                [isEdit]="true"></app-pbk-entry>
+
+            <app-excel-import *ngIf='showModal == "excel_import"' importType="pbk"></app-excel-import>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"
-               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+               (click)="closeModal()">Close</button>
          </div>
       </div>
    </div>

@@ -1425,7 +1425,10 @@ export class DepartmentComponent implements OnInit {
   saveDeptSettings() {
 
     let dept_id = this.dept_id || this.auth.webUser.dept_id;
+    console.log(this.settings);
+    
     if (this.settings.department.settings) {
+      // this.settingsAll.department.settings = true;
       // this.deptConf.settings.config_value = this.settingsAll;
       let body = {
         query: { _id: dept_id },

@@ -257,12 +257,12 @@ class DBContex {
     async updateMany(tblname, obj, conditionString = null, get = true) {
         return new Promise(async (resolve, reject) => {
             try {
-                console.log("db", obj);
+                // console.log("db", obj);
                 let key = Object.keys(obj);
                 let sql = key[0] == 'active' ? this.query[tblname].update_active : this.query[tblname].update;
                 sql += (conditionString ? ` where ${conditionString}` : '');
                 obj.active = obj.active ? 1 : 0;
-                console.log(sql);
+                // console.log(sql);
                 const result = await this.db.prepare(sql).run(obj);
                 // console.log("updt result_____", result);
 
