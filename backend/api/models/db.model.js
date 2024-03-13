@@ -1742,7 +1742,7 @@ class dbModal {
     },
     // version 17
     /*
-      => recreating all triggers of awak jawak update on old bachat
+      => drop all triggers of awak jawak update on old bachat this features now transfer in node js transaction. 
     */
     {
       awk_ins_bcht_ins:

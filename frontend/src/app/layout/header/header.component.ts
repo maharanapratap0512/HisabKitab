@@ -89,7 +89,7 @@ export class HeaderComponent implements OnInit {
     const config = $("body").data("layout-config");
     config.darkMode = ev.target.checked;
     console.log("darkMode", config);
-    
+
     $(document.body).attr("data-layout-config", JSON.stringify(config));
     // $(document.body)  .data("layout-config", config);
     // $("body").toggleClass("dark-mode");
@@ -458,13 +458,15 @@ export class HeaderComponent implements OnInit {
     this.http.put(this.api.getUrl('DEPT'), body).subscribe(async (data: any) => {
       if (data.success) {
 
+        this.toastr.success("settings import successfully");
         if (data.result._id == this.auth.webUser.dept_id) {
           this.auth.webUser.settings = data.result.settings;
+
+          this.auth.setWebUser(this.auth.webUser);
+          setTimeout(() => {
+            window.location.reload()
+          }, 500);
         }
-        this.toastr.success("settings import successfully");
-        setTimeout(() => {
-          window.location.reload()
-        }, 500);
       }
     });
   }

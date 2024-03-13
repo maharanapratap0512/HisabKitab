@@ -1386,6 +1386,8 @@ export class DepartmentComponent implements OnInit {
   exportDeptSettings = async () => {
     this.isLoader = true;
     let date = new Date();
+    if (!this.dept_id)
+      this.dept_id = this.auth.webUser.dept_id
     let dept = await this.departments.find((d: { _id: any; }) => d._id == this.dept_id);
     console.log(dept)
     this.dataZip = new JSZip();
@@ -1441,10 +1443,11 @@ export class DepartmentComponent implements OnInit {
         if (data && data['success']) {
           if (dept_id == this.auth.webUser.dept_id) {
             this.auth.webUser.settings = this.settingsAll;
-            for (let i in this.gs.Lists.department) {
-              if (this.gs.Lists.department[i]._id == dept_id) {
-                this.gs.Lists.department[i].settings = this.settingsAll;
-              }
+            this.auth.setWebUser(this.auth.webUser);
+          }
+          for (let i in this.gs.Lists.department) {
+            if (this.gs.Lists.department[i]._id == dept_id) {
+              this.gs.Lists.department[i].settings = this.settingsAll;
             }
           }
           this.toastr.success('Department Settings Updated Successfully.');
