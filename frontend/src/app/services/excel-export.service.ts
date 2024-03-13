@@ -639,6 +639,12 @@ export class ExcelExportService {
 
   generateConditionWiseReport(json: any[], conditions: any[], excelFileName: string, options: any = {}): void {
     if (json.length > 0 && conditions.length > 0) {
+      if (!conditions.includes((c: { condition_eng: null; }) => c.condition_eng == null)) {
+        conditions.push({
+          list_name_hin: "N/A",
+          list_name_eng: "-"
+        })
+      }
       let workbook = new Workbook();
       var worksheet = workbook.addWorksheet('Sheet1');
 
@@ -703,16 +709,22 @@ export class ExcelExportService {
           worksheet.getCell(rowNum, j + 1).value = json[i][headers[j]];
         }
         console.log("row", json[i]);
+        console.log("json[i].arr_conditionReport", json[i].arr_conditionReport);
 
         for (let j = 0; j < monthCount; j++) {
           for (let k = 0; k < conditions.length; k++) {
-            console.log("json[i].conditionReport", json[i].conditionReport);
-            
-            for (let crow of json[i].conditionReport) {
-              if (conditions[k].list_name_eng == crow.list_name_eng) {
-                worksheet.getCell(rowNum, headerCount + (j * conditions.length) + k + 1).value = crow.arr_sum_bachat[k];
-              } else {
-                worksheet.getCell(rowNum, headerCount + (j * conditions.length) + k + 1).value = 0;
+            if (Array.isArray(json[i].arr_conditionReport)) {
+              for (let crow of json[i].arr_conditionReport) {
+                console.log("conditions[k].list_name_eng", conditions[k].list_name_eng);
+                console.log("crow.list_name_eng", crow.list_name_eng);
+
+                if (conditions[k].list_name_eng == crow.list_name_eng || (crow.list_name_eng == null && conditions[k].list_name_eng == '-')) {
+                  console.log("iffffffffff", crow.arr_sum_bachat[k]);
+
+                  worksheet.getCell(rowNum, headerCount + (j * conditions.length) + k + 1).value = crow.arr_sum_bachat[k];
+                } else {
+                  worksheet.getCell(rowNum, headerCount + (j * conditions.length) + k + 1).value = 0;
+                }
               }
             }
           }
@@ -737,9 +749,9 @@ export class ExcelExportService {
       }
 
       worksheet.getRows(4, rowNum)?.forEach(row => {
-        for (let i = headerCount; i < row.cellCount + 4; i++) {
+        for (let i = headerCount; i < row.cellCount + (conditions.length - 1); i++) {
           row.getCell(i).border = { right: { style: 'double' } };
-          i = i + 3;
+          i = i + (conditions.length - 1);
         }
       });
 

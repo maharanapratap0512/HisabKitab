@@ -84,7 +84,7 @@ export class BachatNewComponent implements OnInit {
     });
     this.filterBody.year = 2024;
     this.gs.yearChangedGetMonth(2024);
-    this.filterBody.months = [ 3, 1];
+    this.filterBody.months = [3, 1];
     this.filter();
   }
 
@@ -365,7 +365,7 @@ export class BachatNewComponent implements OnInit {
     this.isLoader = false;
   }
 
-  excelExportMonthlyConditionWise() {
+  async excelExportMonthlyConditionWise() {
     this.isLoader = true;
     let bchtData: any = [];
     for (let i = 0; i < this.bachatData.length; i++) {
@@ -381,10 +381,13 @@ export class BachatNewComponent implements OnInit {
         'unit': this.bachatData[i].unit_short,
       }
 
-      this.http.put(this.api.getUrl('BACHATNEW') + 'condition/' + this.auth.webUser.dept_id, this.bachatData[i]).subscribe(async (data: any) => {
-        if (data['result'] && data['success']) {
-          bachatRow.conditionReport = data['result']
-        }
+      await new Promise<void>((resolve, reject) => {
+        this.http.put(this.api.getUrl('BACHATNEW') + 'condition/' + this.auth.webUser.dept_id, this.bachatData[i]).subscribe(async (data: any) => {
+          if (data['result'] && data['success']) {
+            bachatRow.arr_conditionReport = data['result'];
+          }
+          resolve(); // Resolve the promise when the HTTP request is complete
+        });
       });
 
       bchtData.push(bachatRow);
@@ -399,11 +402,9 @@ export class BachatNewComponent implements OnInit {
     }
 
     console.log("bachat", bchtData);
-    if(this.bachatData.length>1){
 
-      this.excelExportService.generateConditionWiseReport(bchtData, this.conditions, (mm ? mm.mm_hin : "report"), option);
-      this.isLoader = false;
-    }
+    this.excelExportService.generateConditionWiseReport(bchtData, this.conditions, (mm ? mm.mm_hin : "report"), option);
+    this.isLoader = false;
   }
 
 
