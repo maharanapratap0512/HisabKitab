@@ -641,6 +641,7 @@ export class ExcelExportService {
     if (json.length > 0 && conditions.length > 0) {
       if (!conditions.includes((c: { condition_eng: null; }) => c.condition_eng == null)) {
         conditions.push({
+          _id: null,
           list_name_hin: "N/A",
           list_name_eng: "-"
         })
@@ -708,42 +709,27 @@ export class ExcelExportService {
         for (let j = 0; j < headerCount; j++) {
           worksheet.getCell(rowNum, j + 1).value = json[i][headers[j]];
         }
-        console.log("row", json[i]);
-        console.log("json[i].arr_conditionReport", json[i].arr_conditionReport);
 
         for (let j = 0; j < monthCount; j++) {
           for (let k = 0; k < conditions.length; k++) {
             if (Array.isArray(json[i].arr_conditionReport)) {
+              let value = 0;
+              const cell1 = worksheet.getCell(rowNum, headerCount + (j * conditions.length) + k + 1);
               for (let crow of json[i].arr_conditionReport) {
-                console.log("conditions[k].list_name_eng", conditions[k].list_name_eng);
-                console.log("crow.list_name_eng", crow.list_name_eng);
-
-                if (conditions[k].list_name_eng == crow.list_name_eng || (crow.list_name_eng == null && conditions[k].list_name_eng == '-')) {
-                  console.log("iffffffffff", crow.arr_sum_bachat[k]);
-
-                  worksheet.getCell(rowNum, headerCount + (j * conditions.length) + k + 1).value = crow.arr_sum_bachat[k];
-                } else {
-                  worksheet.getCell(rowNum, headerCount + (j * conditions.length) + k + 1).value = 0;
+                if (crow.condition_id == conditions[k]._id || (crow.condition_id == null && conditions[k]._id == null)) {
+                  value = crow.arr_sum_bachat[j];
+                  break;
                 }
+                if (crow.arr_comment[j]) {
+                  cell1.note = crow.arr_comment[j];
+                }
+              }
+              cell1.value = value;
+              if (value < 0) {
+                cell1.fill = errorStyle;
               }
             }
           }
-          // if (json[i][arrName]) {
-
-          //   for (let k = 0; k < monthCount; k++) {
-          //     const cell1 = worksheet.getCell(rowNum, headerCount + (k * conditions.length) + j + 1);
-          //     cell1.value = "k"
-          //     console.log(cell1);
-
-
-          //     if (json[i][arrCommentName][k]) {
-          //       cell1.note = json[i][arrCommentName][k];
-          //     }
-          //     if (json[i][arrName][k] < 0) {
-          //       cell1.fill = errorStyle;
-          //     }
-          //   }
-          // }
         }
         rowNum++;
       }

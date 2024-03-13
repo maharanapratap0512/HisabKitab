@@ -246,6 +246,9 @@ export class DepartmentComponent implements OnInit {
   }
 
   async deptSelected(ev: any) {
+    if (!ev) {
+      ev = this.auth.webUser.dept_id;
+    }
     let getdept = await this.departments.find((d: { _id: any; }) => d._id == ev);
 
     if (getdept && getdept.settings) {
@@ -1426,7 +1429,7 @@ export class DepartmentComponent implements OnInit {
 
     let dept_id = this.dept_id || this.auth.webUser.dept_id;
     console.log(this.settings);
-    
+
     if (this.settings.department.settings) {
       // this.settingsAll.department.settings = true;
       // this.deptConf.settings.config_value = this.settingsAll;
