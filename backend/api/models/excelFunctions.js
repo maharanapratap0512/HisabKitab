@@ -72,6 +72,27 @@ class ExcelFunctions {
       aawak_type_id: null,
       awk_id: null,
    }
+   pbk_form = {
+      roll_no: null,
+      pbk_eng: null,
+      pbk_hin: null,
+      relation: null,
+      relative_name: null,
+      relative_ref: null,
+      gender: null,
+      age: null,
+      birth_date: null,
+      status: null,
+      townarea: null,
+      address: null,
+      city_id: null,
+      state_id: null,
+      mo_no: null,
+      alt_mo_no: null,
+      class_mm_id: null,
+      bhatti_date: null,
+      document: null
+   }
    constructor(list, dept_id = null) {
       // this.DBContex = require('./DBContex');
       // this.DB = new this.DBContex(); 
@@ -116,6 +137,7 @@ class ExcelFunctions {
                break;
             case 'support_list':
             case 'condition':
+            case 'gender':
                this.support_list = this.Fn.getSupportList(dept_id);
                break;
             default:
@@ -371,7 +393,7 @@ class ExcelFunctions {
       return null;
    }
 
-   async matchSupportList(data, listType) {
+   async matchSupportList(data, listType, returnFieldName = '_id') {
       if (this.support_list instanceof Promise) {
          this.support_list = await this.support_list.then((data) => { return data })
       }
@@ -383,7 +405,7 @@ class ExcelFunctions {
       if (!this.checkedButNotFound(data, listType)) {
          for (let i in slist) {
             if ([slist[i].list_name_hin, slist[i].list_name_eng, slist[i].list_name_roman].includes(data)) {
-               return slist[i]._id;
+               return slist[i][returnFieldName];
             }
          }
          for (let i in slistDict) {
@@ -400,7 +422,8 @@ class ExcelFunctions {
 
    async verifyAndInsert(type, data, headerList) {
       let status;
-      let duplicate = await this.Fn.checkDuplication(type, data);
+      let fdata = await this.setFormData(this[type.name + '_form'], data);
+      let duplicate = await this.Fn.checkDuplication(type, fdata);
       if (duplicate) {
          let fullDuplicate = await this.checkFullDuplication(duplicate, data, headerList);
          if (fullDuplicate.found) {
@@ -410,8 +433,7 @@ class ExcelFunctions {
             data.duplicate = fullDuplicate.list
          }
       }
-      else {
-         let fdata = await this.setFormData(this[type.name + '_form'], data);
+      else { 
          if (this.voucherTables.includes(type.name)) {
             fdata.voucher_no = await this.Fn.getLastVoucherNo(type.name) + 1;
          }
@@ -476,7 +498,7 @@ class ExcelFunctions {
                }
             }
 
-            if (typeof listData != 'undefined' && listData != exData) {
+            if (typeof exData != 'undefined' && listData != exData) {
                changes = true;
                break;
             }
