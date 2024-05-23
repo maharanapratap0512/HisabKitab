@@ -212,7 +212,7 @@ export class AawakComponent implements OnInit {
     });
   }
 
-  yearClick(year:any){
+  yearClick(year: any) {
     this.filterBody.year = year;
     this.pageNo = 0;
     this.getFilteredData();
@@ -296,6 +296,10 @@ export class AawakComponent implements OnInit {
       // console.log("exportAJdata", result);
       for (let i = 0; i < result.length; i++) {
         let jawakArray = [];
+        let jwkFooter: any = {
+          'Qty': 0,
+          'Amount': 0
+        };
         for (let j in result[i].jawak_detail) {
           jawakArray.push({
             'Date': result[i].jawak_detail[j].date ? result[i].jawak_detail[j].date : '-',
@@ -307,8 +311,14 @@ export class AawakComponent implements OnInit {
             'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
             'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
             'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
+            'Rate': result[i].jawak_detail[j].rate ? result[i].jawak_detail[j].rate : '-',
+            'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
+            'Kaha Repaired/Becha': result[i].jawak_detail[j].sell_repair_place ? result[i].jawak_detail[j].sell_repair_place : '-',
+            'Parchi Kaha': result[i].jawak_detail[j].parchi_place ? result[i].jawak_detail[j].parchi_place : '-',
             // 'Bachat': bachat
           });
+          // jwkFooter['Qty'] += result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : 0;
+          jwkFooter['Amount'] += result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : 0;
         }
         jawakArray.push({
           'Date': '',
@@ -320,6 +330,10 @@ export class AawakComponent implements OnInit {
           'Jawak Type': '',
           'Qty': result[i].remaining_qty ? result[i].remaining_qty : 0,
           'Unit': result[i].unit_id ? result[i].unit_short : '',
+          'Rate': 'Total',
+          'Amount': jwkFooter['Amount'],
+          'Kaha Repaired/Becha': '',
+          'Parchi Kaha': '',
         });
         let awkObj: any = {
           'No': i + 1,
@@ -383,6 +397,7 @@ export class AawakComponent implements OnInit {
       }
     });
   }
+
   exportPendingData() {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
@@ -476,12 +491,26 @@ export class AawakComponent implements OnInit {
     this.pageNo = 0;
     this.allAJData = [];
     this.exportAJdata$ = new Subject();
+    let footerRow: any = {
+      'No.': '*',
+      'Pkt No': 'Total',
+      'Aawak MM': 0,
+      'Qty': 0,
+      'Amount': 0,
+    }; // Object to store totals for footer
+    let uniqueMM = new Set();
+    let uniqueAawakMM = new Set();
+    let uniqueUnit = new Set();
 
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
       // console.log("exportAJdata", result);
       for (let i = 0; i < result.length; i++) {
+        uniqueMM.add(result[i].mm_id);
+        uniqueAawakMM.add(result[i].aawak_mm_id);
+        uniqueUnit.add(result[i].unit_id);
+
         let awkObj: any = {
           'No': i + 1,
           'Date': result[i].date ? result[i].date : '-',
@@ -529,6 +558,10 @@ export class AawakComponent implements OnInit {
           'Description': result[i].description ? result[i].description : '-',
           // 'बचत':result[i].remaining_qty ? result[i].remaining_qty : 0,      
         };
+
+        footerRow['Qty'] += result[i].qty ? result[i].qty : 0;
+        footerRow['Amount'] += result[i].actual_amt ? result[i].actual_amt : 0;
+
         this.allAJData.push(awkObj);
       }
 
@@ -536,6 +569,12 @@ export class AawakComponent implements OnInit {
         this.getMoreAJ();
       }
       else {
+
+        footerRow['MM'] = uniqueMM.size + 'MMs';
+        footerRow['Aawak MM'] = uniqueAawakMM.size + 'MMs';
+        footerRow['Unit'] = uniqueUnit.size + 'Units';
+        this.allAJData.push(footerRow);
+
         let date = new Date();;
         this.excelExportService.exportAsExcelFile(this.allAJData, "Aawak_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
         this.isLoader = false;
@@ -549,31 +588,52 @@ export class AawakComponent implements OnInit {
     this.awkCount = 0;
     this.allAJData = [];
     this.exportAJdata$ = new Subject();
+    let footerRow: any = {
+      'No.': '*',
+      'Pkt No': 'Total',
+      'Aawak MM': 0,
+      'Qty': 0,
+      'Amount': 0,
+    }; // Object to store totals for footer
+    let uniqueMM = new Set();
+    let uniqueJawakMM = new Set();
+    let uniqueUnit = new Set();
 
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
       for (let i = 0; i < result.length; i++) {
+        uniqueMM.add(result[i].mm_id);
 
         let awkObj = {
+          'MM': result[i].mm_hin,
           'Item': result[i].item_id ? result[i].item_hin : '-',
           'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
           'Company': result[i].company_name ? result[i].company_name : '-',
         };
 
         for (let j in result[i].jawak_detail) {
+          uniqueJawakMM.add(result[i].jawak_detail[j].jawak_mm_id);
+          uniqueUnit.add(result[i].jawak_detail[j].unit_id);
+
           this.allAJData.push({
             'Date': result[i].jawak_detail[j].date ? result[i].jawak_detail[j].date : '-',
             'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
             ...awkObj,
             'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
             'Jawak Category': result[i].jawak_detail[j].usage_category_id ? result[i].jawak_detail[j].category_hin : '-',
-            'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
             'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
             'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
             'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
-            'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-'
+            'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
+            'Rate': result[i].jawak_detail[j].rate ? result[i].jawak_detail[j].rate : '-',
+            'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
+            'Kaha Repaired/Becha': result[i].jawak_detail[j].sell_repair_place ? result[i].jawak_detail[j].sell_repair_place : '-',
+            'Parchi Kaha': result[i].jawak_detail[j].parchi_place ? result[i].jawak_detail[j].parchi_place : '-',
+            'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
           });
+          footerRow['Qty'] += result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : 0;
+          footerRow['Amount'] += result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : 0;
         }
       }
       this.awkCount += result.length;
@@ -582,6 +642,10 @@ export class AawakComponent implements OnInit {
         this.getMoreAJ();
       }
       else {
+        footerRow['MM'] = uniqueMM.size + ' MMs';
+        footerRow['Unit'] = uniqueUnit.size + ' Units';
+        footerRow['Jawak MM'] = uniqueJawakMM.size + ' Mms';
+        this.allAJData.push(footerRow)
         let date = new Date();
         this.excelExportService.exportAsExcelFile(this.allAJData, "Jawak_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
         this.isLoader = false;
@@ -1157,6 +1221,27 @@ export class AawakComponent implements OnInit {
               case "qty":
               case "quantity": jwkobj.qty = exceldata[i][j];
                 break;
+              case "price":
+              case "rate": jwkobj.rate = exceldata[i][j];
+                break;
+              case "amt":
+              case "amount":
+              case "actual amt":
+              case "actual_amt": jwkobj.actual_amt = exceldata[i][j];
+                break;
+              case "parchi place":
+              case "parchi_place":
+              case "parchi kaha shown":
+              case "parchi_kaha_shown": jwkobj.parchi_place = exceldata[i][j];
+                break;
+              case "repair_place":
+              case "repair place":
+              case "sell_place":
+              case "sell place":
+              case "kaha repair karaya":
+              case "kaha repair":
+              case "kaha becha": jwkobj.sell_repair_place = exceldata[i][j];
+                break;
               case "pkt no":
               case "pkt num":
               case "pkt_num":
@@ -1185,6 +1270,12 @@ export class AawakComponent implements OnInit {
         }
         // console.log(obj);
 
+        // auto calculate rate and amount based on coresponding values for aawak.
+        if (obj.qty && obj.rate && !obj.actual_amt) {
+          obj.actual_amt = (obj.qty * obj.rate).toFixed(2);
+        } else if (obj.qty && obj.actual_amt && !obj.rate) {
+          obj.rate = (obj.actual_amt / obj.qty).toFixed(2);
+        }
 
         // finalJson.push(obj);
         // check for required Fields in aawak object
@@ -1199,12 +1290,16 @@ export class AawakComponent implements OnInit {
         // finalJson[finalJson.length - 1].jawak_detail.push(jwkobj);
         if (jwkobj.qty && (jwkobj.aj_mm || jwkobj.nimitt)) {
 
+          // auto calculate rate and amount based on coresponding values for jawak.
+          if (jwkobj.qty && jwkobj.rate && !jwkobj.actual_amt) {
+            jwkobj.actual_amt = (jwkobj.qty * jwkobj.rate).toFixed(2);
+          } else if (jwkobj.qty && jwkobj.actual_amt && !jwkobj.rate) {
+            jwkobj.rate = (jwkobj.actual_amt / jwkobj.qty).toFixed(2);
+          }
           finalJson[finalJson.length - 1].jawak_detail.push(jwkobj);
-          // jwkPush = true;
         }
         else {
           console.log("err", finalJson[finalJson.length - 1]);
-          // jwkPush = false;
         }
 
       }

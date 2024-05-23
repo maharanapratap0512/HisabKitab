@@ -67,10 +67,14 @@ export class JawakEntryComponent implements OnInit {
       condition_id: [null],
       company_name: [null],
       qty: [null, Validators.required],
+      rate: [null],
+      actual_amt: [null],
       jawak_type_id: [null, Validators.required],
       unit_id: [null, Validators.required],
-      unit_short:'',
+      unit_short: '',
       description: [null],
+      parchi_place: [null],
+      sell_repair_place: [null],
       aawak_ref_id: [null],
       nimitt_id: [null],
       is_xl: [null],
@@ -112,10 +116,14 @@ export class JawakEntryComponent implements OnInit {
         product_id: changes.getData.currentValue.product_id,
         condition_id: changes.getData.currentValue.condition_id,
         qty: changes.getData.currentValue.qty,
+        rate: changes.getData.currentValue.rate,
+        actual_amt: changes.getData.currentValue.actual_amt,
         company_name: changes.getData.currentValue.company_name,
         jawak_type_id: changes.getData.currentValue.jawak_type_id,
         unit_id: changes.getData.currentValue.unit_id,
         description: changes.getData.currentValue.description,
+        parchi_place: changes.getData.currentValue.parchi_place,
+        sell_repair_place: changes.getData.currentValue.sell_repair_place,
         aawak_ref_id: changes.getData.currentValue.aawak_ref_id,
         nimitt_id: changes.getData.currentValue.nimitt_id,
         dept_id: changes.getData.currentValue.dept_id,
@@ -148,8 +156,12 @@ export class JawakEntryComponent implements OnInit {
         condition_id: this.aawakRef.condition_id,
         company_name: this.aawakRef.company_name,
         qty: this.aawakRef.remaining_qty ? this.aawakRef.remaining_qty : this.aawakRef.Stock,
+        rate: this.aawakRef.rate ? this.aawakRef.rate : null,
+        actual_amt: this.aawakRef.actual_amt ? this.aawakRef.actual_amt : null,
         unit_id: this.aawakRef.unit_id,
         description: this.aawakRef.description,
+        parchi_place: this.aawakRef.parchi_place,
+        sell_repair_place: this.aawakRef.sell_repair_place,
         aawak_ref_id: (this.aawakRef._id ? this.aawakRef._id : null),
         nimitt_id: this.aawakRef.nimitt_id ? this.aawakRef.nimitt_id : null,
         dept_id: this.aawakRef.dept_id,
@@ -241,7 +253,7 @@ export class JawakEntryComponent implements OnInit {
         } else {
           this.jawakForm.setControl('subitem_id', this.fb.control(null));
         }
-        if(!this.isEdit){
+        if (!this.isEdit) {
           this.jawakForm.patchValue({
             unit_id: item.unit_id,
             unit_short: item.unit_short
@@ -265,7 +277,7 @@ export class JawakEntryComponent implements OnInit {
       let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
       if (subitem) {
         this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
-        if(!this.isEdit){
+        if (!this.isEdit) {
           this.jawakForm.patchValue({
             unit_id: subitem.unit_id,
             unit_short: subitem.unit_short ? subitem.unit_short : null
@@ -325,27 +337,8 @@ export class JawakEntryComponent implements OnInit {
         _id: this.getData._id
       }
       body.set = {
+        ...this.jawakForm.value,
         _id: this.getData._id,
-        date: this.jawakForm.value.date,
-        mm_id: this.jawakForm.value.mm_id,
-        pkt_num: this.jawakForm.value.pkt_num,
-        jawak_mm_id: this.jawakForm.value.jawak_mm_id,
-        pbk_id: this.jawakForm.value.pbk_id,
-        item_id: this.jawakForm.value.item_id,
-        subitem_id: this.jawakForm.value.subitem_id,
-        usage_category_id: this.jawakForm.value.usage_category_id,
-        item_detail: this.jawakForm.value.item_detail,
-        product_id: this.jawakForm.value.product_id,
-        condition_id: this.jawakForm.value.condition_id,
-        company_name: this.jawakForm.value.company_name,
-        qty: this.jawakForm.value.qty,
-        jawak_type_id: this.jawakForm.value.jawak_type_id,
-        unit_id: this.jawakForm.value.unit_id,
-        description: this.jawakForm.value.description,
-        aawak_ref_id: this.jawakForm.value.aawak_ref_id,
-        nimitt_id: this.jawakForm.value.nimitt_id,
-        dept_id: this.jawakForm.value.dept_id,
-        is_xl: this.jawakForm.value.is_xl,
       };
       this.http.put(this.api.getUrl('JAWAK') + 'new/', body).subscribe((data: any) => {
         if (data && data['success']) {
@@ -365,6 +358,51 @@ export class JawakEntryComponent implements OnInit {
     }
     else {
       this.gs.validationFireOnSubmit(this.jawakForm);
+    }
+  }
+
+  qtyclick() {
+    if (this.jawakForm.value.qty && this.jawakForm.value.rate) {
+      let actual_amt = this.jawakForm.value.qty * this.jawakForm.value.rate
+      this.jawakForm.patchValue({
+        actual_amt: actual_amt.toFixed(2)
+      });
+    }
+    else if (this.jawakForm.value.qty && this.jawakForm.value.amnt) {
+      let rate = this.jawakForm.value.amnt / this.jawakForm.value.qty
+      this.jawakForm.patchValue({
+        rate: rate.toFixed(2)
+      });
+    }
+  }
+
+  rateclick() {
+    if (!this.jawakForm.value.actual_amt && this.jawakForm.value.qty && this.jawakForm.value.rate) {
+      let actual_amt = this.jawakForm.value.qty * this.jawakForm.value.rate;
+      this.jawakForm.patchValue({
+        actual_amt: actual_amt.toFixed(2)
+      });
+    }
+    else if (!this.jawakForm.value.actual_amt && this.jawakForm.value.rate && this.jawakForm.value.amnt) {
+      let quantity = this.jawakForm.value.amnt / this.jawakForm.value.rate;
+      this.jawakForm.patchValue({
+        qty: quantity.toFixed(2)
+      });
+    }
+  }
+
+  amntclick() {
+    if (!this.jawakForm.value.rate && this.jawakForm.value.qty && this.jawakForm.value.actual_amt) {
+      let rate = this.jawakForm.value.actual_amt / this.jawakForm.value.qty
+      this.jawakForm.patchValue({
+        rate: rate.toFixed(2)
+      });
+    }
+    else if (!this.jawakForm.value.qty && this.jawakForm.value.rate && this.jawakForm.value.actual_amt) {
+      let quantity = this.jawakForm.value.actual_amt / this.jawakForm.value.rate
+      this.jawakForm.patchValue({
+        qty: quantity.toFixed(2)
+      });
     }
   }
 

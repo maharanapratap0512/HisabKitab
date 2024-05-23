@@ -52,11 +52,20 @@ export class NimittComponent implements OnInit {
     });
   }
 
+  openModal(type: any) {
+    this.showModal = type;
+    $('#showModal').modal('show');
+  }
+
+  closeModal() {
+    this.showModal = ''
+    $('#showModal').modal('hide');
+  }
+
   addNimittResponse(ev: any) {
     if (ev) {
       this.isLoader = true;
-      $('#showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal();
       this.nimittData.unshift(ev);
       this.isLoader = false;
     }
@@ -68,8 +77,7 @@ export class NimittComponent implements OnInit {
   editNimittResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      $('#showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal();
       this.nimittData.splice(this.nimittData.indexOf(this.editData), 1, ev);
       this.isLoader = false;
     }
@@ -80,8 +88,7 @@ export class NimittComponent implements OnInit {
 
   edit(data: any) {
     this.editData = data;
-    this.showModal = 'Edit Nimitt'
-    $('#showModal').modal('show');
+    this.openModal('Edit Nimitt');
   }
 
   delete(i: any, id: any) {
@@ -119,10 +126,9 @@ export class NimittComponent implements OnInit {
     for (let i = 0; i < this.nimittData.length; i++) {
       nimittD.push({
         "Sr No": i + 1,
-        "_id": this.nimittData[i]._id,
         "Roll No": this.nimittData[i].roll_no,
-        "MM Hin": this.nimittData[i].nimitt_hin,
-        "MM Eng": this.nimittData[i].nimitt_eng,
+        "Nimmit Hin": this.nimittData[i].nimitt_hin,
+        "Nimmit Eng": this.nimittData[i].nimitt_eng,
         "Gender": this.nimittData[i].gender,
         "Father Name": this.nimittData[i].relative_name,
         "Townarea": this.nimittData[i].townarea,

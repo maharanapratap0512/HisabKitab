@@ -17,7 +17,7 @@ class ExcelFunctions {
    // DBContex;
    Fn;
    dept_id;
-   jsonKey = ['document']
+   jsonKey = ['document', 'categories']
    booleanKey = ['is_xl', 'isbill', 'is_auto_pd']
    voucherTables = ['product']
    bunchTables = ['product']
@@ -93,10 +93,52 @@ class ExcelFunctions {
       bhatti_date: null,
       document: null
    }
+   nimitt_form = {
+      roll_no: null,
+      nimitt_eng: null,
+      nimitt_hin: null,
+      relative_name: null,
+      gender: null,
+      townarea: null,
+      state_id: null,
+      document: null,
+      active: 1
+   }
+   subitem_list_form = {
+      subitem_eng: null,
+      subitem_hin: null,
+      subitem_roman: null,
+      active: 1
+   }
+   item_form = {
+      item_hin: null,
+      item_eng: null,
+      item_roman: null,
+      item_code: null,
+      unit_id: null,
+      categories: [],
+      extra_note: null,
+      restrict_month: null,
+      restrict_year: null,
+      min_rate: 0,
+      max_rate: 0,
+      document: []
+   }
+   subitem_form = {
+      subitem_list_id: null,
+      unit_id: null,
+      item_id: null,
+      categories: [],
+      extra_note: null,
+      document: null,
+      restrict_month: null,
+      restrict_year: null,
+      min_rate: 0,
+      max_rate: 0,
+   }
    constructor(list, dept_id = null) {
       // this.DBContex = require('./DBContex');
       // this.DB = new this.DBContex(); 
-      console.log("constructor", list);
       this.dept_id = dept_id;
       this.Fn = require('./functions');
       for (let i in list) {
@@ -202,6 +244,16 @@ class ExcelFunctions {
          this.correctionList.push({ type: 'category', value: data });
       }
       return null;
+   }
+
+   async matchCategories(data) {
+      let arr = [];
+      if (data) {
+         for (let cat of data) {
+            arr.push(await this.matchCategory(cat.trim().toLowerCase()));
+         }
+      }
+      return arr;
    }
 
    async matchCountry(data) {
@@ -356,7 +408,7 @@ class ExcelFunctions {
       // console.log("start matching", this.subitem_list);
       if (!this.checkedButNotFound(data, 'subitem_list')) {
          for (let i in this.subitem_list) {
-            if ([this.subitem[i].subitem_hin, this.subitem[i].subitem_eng, this.subitem[i].subitem_roman].includes(data)) {
+            if ([this.subitem_list[i].subitem_hin, this.subitem_list[i].subitem_eng, this.subitem_list[i].subitem_roman].includes(data)) {
                return this.subitem_list[i]._id;
             }
          }
@@ -433,7 +485,7 @@ class ExcelFunctions {
             data.duplicate = fullDuplicate.list
          }
       }
-      else { 
+      else {
          if (this.voucherTables.includes(type.name)) {
             fdata.voucher_no = await this.Fn.getLastVoucherNo(type.name) + 1;
          }

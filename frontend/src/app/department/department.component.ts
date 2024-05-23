@@ -209,8 +209,10 @@ export class DepartmentComponent implements OnInit {
       },
       report: {
         visible: true,
-        pbk: false,
-        product: false
+        report_at: false,
+        report_jt: false,
+        report_str_stk: false,
+        report_kh: false
       }
     }
 
@@ -1388,16 +1390,24 @@ export class DepartmentComponent implements OnInit {
     let date = new Date();
     if (!this.dept_id)
       this.dept_id = this.auth.webUser.dept_id
-    let dept = await this.departments.find((d: { _id: any; }) => d._id == this.dept_id);
-    console.log(dept)
-    this.dataZip = new JSZip();
-    this.dataZip.file("settings.json", JSON.stringify(dept));
 
-    this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
-      FileSaver.saveAs(content, dept.dept_eng + "_settings_update_" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + ".zip");
+    this.http.get(this.api.getUrl('DEPT') + "by_id/" + this.dept_id).subscribe(async (data) => {
+      if (data['result'] && data['success']) {
+        this.dataZip = new JSZip();
+        this.dataZip.file("settings.json", JSON.stringify(data.result));
+        this.dataZip.generateAsync({ type: "blob" }).then(function (content: Blob) {
+          FileSaver.saveAs(content, data.result.dept_eng + "_settings_update_" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + ".zip");
+        });
+        this.toastr.success("Updated Settings downloaded for '" + data.result.dept_eng + "'");
+        this.isLoader = false;
+      } else {
+        this.toastr.error("Something Went Wrong.");
+        this.isLoader = false;
+      }
+    }, (err) => {
+      this.toastr.error("Something Went Wrong.");
+      this.isLoader = false;
     });
-    this.toastr.success("Updated Settings downloaded for '" + dept.dept_eng + "'");
-    this.isLoader = false;
   }
 
   exportLists = async () => {
@@ -1430,10 +1440,12 @@ export class DepartmentComponent implements OnInit {
   saveDeptSettings() {
 
     let dept_id = this.dept_id || this.auth.webUser.dept_id;
-    console.log(this.settings);
 
     if (this.settings.department.settings) {
-      // this.settingsAll.department.settings = true;
+      if(dept_id != 1){
+        this.settingsAll.department.settings = false;
+        this.settingsAll.department.add = false;
+      }
       // this.deptConf.settings.config_value = this.settingsAll;
       let body = {
         query: { _id: dept_id },

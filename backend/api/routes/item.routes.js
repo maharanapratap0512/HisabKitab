@@ -23,6 +23,7 @@ router.get('/:dept_id', async (req, res, next) => {
         await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id }).then((resolve) => {
             let subitem_count = 0;
             for (let i = 0; i < resolve.data.length; i++) {
+                console.log(resolve.data[i]._id);
                 resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
                 resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
                 resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);

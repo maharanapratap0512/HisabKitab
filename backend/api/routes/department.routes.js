@@ -39,6 +39,20 @@ router.get('/:dept_id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+// get department by Id
+router.get('/by_id/:dept_id', async (req, res, next) => {
+    try {
+        await DB.getById('department', req.params.dept_id).then(async (resolve) => {
+            resolve.settings = JSON.parse(resolve.settings ? resolve.settings : {})
+            res.json({
+                success: true,
+                result: resolve,
+            });
+        });
+
+    } catch (err) { next(err) };
+});
+
 
 // post department 
 router.post('/', async (req, res, next) => {
@@ -134,7 +148,7 @@ router.put('/login', async (req, res, next) => {
                     if (!fs.existsSync(exFilePath)) {
                         fs.mkdirSync(exFilePath, { recursive: true });
                     }
-                    
+
                     // result.path = exFilePath
                     res.json(result || {});
                 } else {

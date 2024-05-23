@@ -17,6 +17,7 @@ export class AuthService {
       { key: 'aawak', title: 'Aawak', detail: '' },
       { key: 'jawak', title: 'Jawak', detail: '' },
       { key: 'bachat', title: 'Bachat', detail: '' },
+      { key: 'vehicle', title: 'Vehicle', detail: '', add: true },
       { key: 'report', title: 'Report', detail: '', },
       { key: 'product', title: 'Product', detail: 'Can be tranced between All MM', add: true },
       { key: 'mm', title: 'MM', detail: '', add: true },
@@ -112,7 +113,12 @@ export class AuthService {
     ],
     bachat: [],
     category: [],
-    report: [],
+    report: [
+      { colName: 'report_at', title: 'Aawak Type Saar' },
+      { colName: 'report_jt', title: 'Jawak Type Saar' },
+      { colName: 'report_str_stk', title: 'Store Stock' },
+      { colName: 'report_kh', title: 'Khet Saar' },
+    ],
     point: []
 
   }

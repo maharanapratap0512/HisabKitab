@@ -29,6 +29,7 @@ import { BachatNewComponent } from './bachat-new/bachat-new.component';
 import { ReportAwkTypeSaarComponent } from './reports/report-awk-type-saar/report-awk-type-saar.component';
 import { ReportJwkTypeSaarComponent } from './reports/report-jwk-type-saar/report-jwk-type-saar.component';
 import { ReportStoreStockComponent } from './reports/report-store-stock/report-store-stock.component';
+import { ReportKhSaarComponent } from './reports/report-kh-saar/report-kh-saar.component';
 
 const routes: Routes = [
    {
@@ -58,12 +59,13 @@ const routes: Routes = [
          { path: "department", component: DepartmentComponent },
          { path: "point", component: PointComponent },
          { path: "nimitt", component: NimittComponent },
-         { path: "report", component: ReportsComponent},
-         { path: "vehicle", component: VehicleComponent},
-         
-         { path: "report-at", component: ReportAwkTypeSaarComponent},
-         { path: "report-jt", component: ReportJwkTypeSaarComponent},
-         { path: "report-str-stk", component: ReportStoreStockComponent},
+         { path: "report", component: ReportsComponent },
+         { path: "vehicle", component: VehicleComponent },
+
+         { path: "report-at", component: ReportAwkTypeSaarComponent },
+         { path: "report-jt", component: ReportJwkTypeSaarComponent },
+         { path: "report-str-stk", component: ReportStoreStockComponent },
+         { path: "report-kh-saar", component: ReportKhSaarComponent },
 
          { path: "files", component: FilesViewComponent },
          { path: "import_export", component: ImportExportComponent },

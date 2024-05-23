@@ -266,6 +266,8 @@
                            <th style="width: 100px;">Quantity</th>
                            <th style="width: 120px;">Jawak Type</th>
                            <th style="width: 120px;">Jawak Category</th>
+                           <th style="width: 120px;">parchi Kaha Shown</th>
+                           <th style="width: 120px;">Kaha Repaired / Becha</th>
                            <th style="width: 200px;" *ngIf="settings.item_detail">Item Detail</th>
                            <th style="width: 200px;" *ngIf="settings.description">Description</th>
                            <th style="width: 100px;" *ngIf="settings.nimitt_id">Nimitt</th>
@@ -310,12 +312,15 @@
                               {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
                            </td>
                            <td>
-                              {{data.qty}} {{data.unit_short}}
+                              {{data.qty}} {{data.unit_short}} <br />
+                              {{data.rate ? '@'+data.rate + ' = '+ data.actual_amt : ''}}
                            </td>
                            <td>{{data.jawak_type_hin}}<br />
                               {{data.jawak_type_eng}}</td>
                            <td>{{data.usage_category_id ? data.category_hin : ''}}<br />
                               {{data.category_eng}}</td>
+                           <td>{{data.parchi_place ? data.parchi_place: ''}}</td>
+                           <td>{{data.sell_repair_place ? data.sell_repair_place: ''}}</td>
                            <td *ngIf="settings.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
                            <td *ngIf="settings.description">{{data.description?data.description:'-'}}</td>
                            <td *ngIf="settings.nimitt_id">{{data.nimitt_id?data.nimitt_hin:'-'}}</td>

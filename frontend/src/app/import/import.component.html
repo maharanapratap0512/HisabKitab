@@ -160,7 +160,7 @@
                   <ng-container *ngIf="data.jawak_detail.length > 0">
                      <tr class="ribbon-box">
                         <td style="border: none;"></td>
-                        <td colspan="12" class="sub-row">
+                        <td colspan="13" class="sub-row">
                            <table class="card-body" style="width: 99.7%;table-layout: fixed;">
                               <tr>
                                  <th>No.</th>
@@ -171,6 +171,10 @@
                                  <th>Description</th>
                                  <th>जवाक प्रकार</th>
                                  <th>परिमाण</th>
+                                 <th>Rate</th>
+                                 <th>Amount</th>
+                                 <th>पर्ची प्लेस</th>
+                                 <th>कहाँ रिपेर/बेचा</th>
                                  <th>जवाक केटेगरी</th>
                                  <th style="width:0px;">
                                     <div class="ribbon ribbon-secondary text-light float-end"> Destribution
@@ -189,8 +193,14 @@
                                  <td>{{jwk.description}}</td>
                                  <td [ngClass]="{'marked': !jwk.aj_type_id}">{{jwk.aj_type}}</td>
                                  <td [ngClass]="{'marked': !jwk.qty || !data.unit_id}">{{jwk.qty}} {{data.unit}}</td>
+                                 <td>{{jwk.rate}}</td>
+                                 <td>{{jwk.actual_amt}}</td>
+                                 <td>{{jwk.parchi_place ? jwk.parchi_place : ''}}</td>
+                                 <td>{{jwk.sell_repair_place ? jwk.sell_repair_place : ''}}</td>
                                  <td [ngClass]="{'marked': jwk.usage_category && !data.usage_category_id}">
                                     {{jwk.usage_category}}</td>
+                                 <td></td>
+
                               </tr>
                            </table>
                         </td>
@@ -387,7 +397,8 @@
                         {{processedCount}}
                         out of {{importData.length}} </div>
                   </div>
-                  <span class="text-warning">ऑरेंज बॉर्डर वाली आवक एंट्री पहले से हो चुकी होगी, इसलिए स्किप कर दी जाएगी, सिर्फ जावक एंट्री इन्सर्ट की जाएगी।  </span>
+                  <span class="text-warning">ऑरेंज बॉर्डर वाली आवक एंट्री पहले से हो चुकी होगी, इसलिए स्किप कर दी जाएगी,
+                     सिर्फ जावक एंट्री इन्सर्ट की जाएगी। </span>
                </div>
                <div class="col-md-2 mb-2">
                   <button class="w-100 btn btn-primary" type="submit" (click)="importFinal()">Import Data</button>
@@ -516,7 +527,7 @@
                   <ng-container *ngIf="data.jawak_detail.length > 0">
                      <tr class="ribbon-box">
                         <td style="border: none;"></td>
-                        <td colspan="12" class="sub-row">
+                        <td colspan="13" class="sub-row">
                            <table class="card-body" style="width: 99.7%;table-layout: fixed;">
                               <tr>
                                  <th>No.</th>
@@ -527,6 +538,10 @@
                                  <th>Description</th>
                                  <th>जवाक प्रकार</th>
                                  <th>परिमाण</th>
+                                 <th>rate</th>
+                                 <th>amount</th>
+                                 <th>पर्ची प्लेस</th>
+                                 <th>कहा रिपेर/सेल</th>
                                  <th>जवाक केटेगरी</th>
                                  <th style="width:0px;">
                                     <div class="ribbon ribbon-secondary text-light float-end"> Destribution
@@ -549,8 +564,13 @@
                                  <td [ngClass]="{'marked': !jwk.qty || !data.unit_id}">{{jwk.qty}}
                                     {{data.unit_short?data.unit_short:'-'}}
                                  </td>
+                                 <td>{{jwk.rate ? jwk.rate : '-'}}</td>
+                                 <td>{{jwk.actual_amt ? jwk.actual_amt : '-'}}</td>
+                                 <td>{{jwk.parchi_place ? jwk.parchi_place : '-'}}</td>
+                                 <td>{{jwk.sell_repair_place ? jwk.sell_repair_place : '-'}}</td>
                                  <td [ngClass]="{'marked': jwk.usage_category && !data.usage_category_id}">
                                     {{jwk.usage_category}}</td>
+                                 <td></td>
                               </tr>
                            </table>
                         </td>

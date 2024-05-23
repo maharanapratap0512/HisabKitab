@@ -344,8 +344,9 @@
                     <div class="form-group">
                         <label class="form-label">Quantity</label>
                         <div class="input-group">
-                            <input type="number" class="form-control" placeholder="{{'i.e. 10 '+ jawakForm.value.unit_short }}"
-                                formControlName="qty"
+                            <input type="number" class="form-control"
+                                placeholder="{{'i.e. 10 '+ jawakForm.value.unit_short }}" formControlName="qty"
+                                (focusout)="qtyclick()"
                                 [ngClass]="{'validation':jawakForm.get('qty')?.errors && (jawakForm.get('qty')?.touched || jawakForm.get ('qty')?.dirty)}">
                             <div class="input-group-text">{{jawakForm.value.unit_short}}</div>
                         </div>
@@ -386,11 +387,62 @@
                     </div>
                 </div>
 
+                <ng-container *ngIf="jawakForm.value.jawak_type_id == 45">
+                    <div class="col-md-2 mb-3">
+                        <div class="form-group">
+                            <label class="form-label">Rate</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Rate" formControlName="rate"
+                                    name="rate" (focusout)="rateclick()">
+                                <span class="input-group-text"> = {{(jawakForm.value.qty *
+                                    jawakForm.value.rate).toFixed(2)}}</span>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+                        <div class="form-group">
+                            <label class="form-label">Amount</label>
+                            <input type="text" class="form-control" placeholder="Amount" formControlName="actual_amt"
+                                name="actual_amt" (focusout)="amntclick()">
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+                        <div class="form-group">
+                            <label class="form-label">Parchi Place</label>
+                            <input type="text" class="form-control" placeholder="parchi place"
+                                formControlName="parchi_place"
+                                [ngClass]="{'validation':jawakForm.get('parchi_place')?.errors && (jawakForm.get('parchi_place')?.touched || jawakForm.get ('parchi_place')?.dirty)}">
+                        </div>
+                    </div>
+
+                </ng-container>
+
+                <div class="col-md-2 mb-3" *ngIf="jawakForm.value.jawak_type_id == 45">
+                    <div class="form-group">
+                        <label class="form-label">Kisko Becha</label>
+                        <input type="text" class="form-control" placeholder="Kisko Becha"
+                            formControlName="sell_repair_place"
+                            [ngClass]="{'validation':jawakForm.get('sell_repair_place')?.errors && (jawakForm.get('sell_repair_place')?.touched || jawakForm.get ('sell_repair_place')?.dirty)}">
+                    </div>
+                </div>
+
+                <div class="col-md-2 mb-3" *ngIf="jawakForm.value.jawak_type_id == 47">
+                    <div class="form-group">
+                        <label class="form-label">Repair From</label>
+                        <input type="text" class="form-control" placeholder="Repair From"
+                            formControlName="sell_repair_place"
+                            [ngClass]="{'validation':jawakForm.get('sell_repair_place')?.errors && (jawakForm.get('sell_repair_place')?.touched || jawakForm.get ('sell_repair_place')?.dirty)}">
+                    </div>
+                </div>
+
                 <div class="col-md-2 mb-3">
                     <div class="form-group">
                         <label class="form-label">Jawak Category</label>
-                        <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
-                            [clearable]="true" [virtualScroll]="true" formControlName="usage_category_id"
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="true"
+                            [virtualScroll]="true" formControlName="usage_category_id"
                             [ngClass]="{'validation':jawakForm.get('usage_category_id')?.errors && (jawakForm.get('usage_')?.touched || jawakForm.get ('usage_category_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Category</ng-option>
                             <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :

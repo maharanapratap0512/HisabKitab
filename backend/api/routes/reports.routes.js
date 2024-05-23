@@ -240,7 +240,7 @@ router.put('/report_store_stock/:dept_id', async (req, res, next) => {
             havingString += havingString == `` ? `${cn} <> 0` : ` OR ${cn} <> 0`;
         }
         let sql = `select bachat.*, sum(New) as New, sum(Old) as Old, 
-        sum(Defective) as Defective, sum(Repairing) as Repairing, sum(Scrap) as Scrap,
+        sum(Defective) as Defective, sum(Repairing) as UR, sum(Scrap) as Scrap,
         it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
         sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
         unit.unit_short, unit.unit_full,
@@ -252,12 +252,79 @@ router.put('/report_store_stock/:dept_id', async (req, res, next) => {
         left join unit on unit._id = bachat.unit_id
         left join department on department._id = bachat.dept_id where ${conditionString} 
         group by bachat.dept_id, bachat.item_id, bachat.subitem_id, bachat.unit_id 
-        ${havingString.trim() != ``? `having ${havingString}` : ``}`;
+        ${havingString.trim() != `` ? `having ${havingString}` : ``}`;
         console.log(sql);
         let stmt = DB.db.prepare(sql);
 
         res.json({
             result: stmt.all(),
+            success: true
+        })
+    } catch (err) {
+        console.log(err);
+        next(err)
+    };
+});
+
+
+// by Khet Saar 
+router.put('/report_khet_saar/:dept_id', async (req, res, next) => {
+    try {
+
+        let conditionStringCommon = ` aawak.dept_id = ${req.params.dept_id} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month.toString().padStart(2, '0')}'` : ``}`;
+        let conditionString = `${conditionStringCommon} AND aawak_mm_id in (${req.body.mm_id.join(',')})`;
+        let sql = `select s_awk.*, JSON_GROUP_ARRAY(sum_qty) as arr_sum_qty, JSON_GROUP_ARRAY(s_awk.unit_id) as arr_unit_id,
+        JSON_GROUP_ARRAY(unit_short) as arr_unit_short, sum(sum_amt) as total_amt,
+        dept.dept_hin, dept.dept_eng, dept.dept_code,
+        mm.mm_hin, mm.mm_eng, mm.state_id as mm_state_id
+        from (select dept_id, aawak_mm_id, item_id, subitem_id, unit_id, avg(rate) as avg_rate, sum(actual_amt) as sum_amt, sum(qty) as sum_qty from aawak 
+        where ${conditionString} 
+        group by aawak.dept_id, aawak.aawak_mm_id, aawak.unit_id) s_awk
+        left join mm on mm._id = s_awk.aawak_mm_id 
+        left join unit on unit._id = s_awk.unit_id
+        left join department dept on dept._id = s_awk.dept_id 
+        group by s_awk.dept_id, s_awk.aawak_mm_id`;
+        console.log(sql);
+        let kh_saar = DB.db.prepare(sql).all();
+
+
+        for (let i in kh_saar) {
+            for (let key of Object.keys(kh_saar[i])) {
+                if (key.includes('arr')) {
+                    kh_saar[i][key] = kh_saar[i][key] ? JSON.parse(kh_saar[i][key]) : []
+                }
+            }
+
+            let conditionString = `${conditionStringCommon} AND aawak.aawak_mm_id = ${kh_saar[i].aawak_mm_id}`;
+            sql = `select aawak.*, avg(rate) as avg_rate, sum(actual_amt) as sum_amt, sum(qty) as sum_qty,
+            dept.dept_hin, dept.dept_eng, dept.dept_code,
+            mm.mm_hin, mm.mm_eng, mm.state_id as mm_state_id,
+            it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
+            sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+            unit.unit_short, unit.unit_full
+            from aawak 
+            left join mm on mm._id = aawak.aawak_mm_id 
+            left join item it on it._id = aawak.item_id 
+            left join subitem sit on sit._id = aawak.subitem_id
+            left join subitem_list sitl on sitl._id = sit.subitem_list_id
+            left join unit on unit._id = aawak.unit_id
+            left join department dept on dept._id = aawak.dept_id where ${conditionString}
+            group by aawak.dept_id, aawak.item_id, aawak.subitem_id, aawak.unit_id`;
+
+            let itemData = await DB.db.prepare(sql).all();
+
+            for (let j in itemData) {
+                for (let key of Object.keys(itemData[j])) {
+                    if (key.includes('arr')) {
+                        itemData[j][key] = itemData[j][key] ? JSON.parse(itemData[j][key]) : []
+                    }
+                }
+            }
+            kh_saar[i].itemData = itemData;
+        }
+
+        res.json({
+            result: kh_saar,
             success: true
         })
     } catch (err) {

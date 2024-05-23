@@ -45,12 +45,14 @@ export class ExcelExportService {
     console.log("excel json", json);
 
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json);
-    console.log('worksheet', worksheet);
     const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+
     const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     //const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
     this.saveAsExcelFile(excelBuffer, excelFileName);
   }
+
+
 
   public exportTblToExcelFile(table: any, excelFileName: string): void {
 
@@ -639,7 +641,7 @@ export class ExcelExportService {
 
   generateConditionWiseReport(json: any[], conditions: any[], excelFileName: string, options: any = {}): void {
     if (json.length > 0 && conditions.length > 0) {
-      if (!conditions.includes((c: { condition_eng: null; }) => c.condition_eng == null)) {
+      if (!conditions.includes((c: { _id: any; }) => c._id == null)) {
         conditions.push({
           _id: null,
           list_name_hin: "N/A",
@@ -663,9 +665,9 @@ export class ExcelExportService {
       }
 
       // Title
-      worksheet.mergeCells([1, 1, 1, headerCount + (monthCount * conditions.length)]);
+      worksheet.mergeCells([1, 1, 1, headerCount + (monthCount * (conditions.length + 1))]);
       let reportTitle = (excelFileName ? excelFileName + ' का ' : '') + 'कंडीशन अनुसार सार रिपोर्ट ' + options.months[0].name + "-" + options.year + " से " + options.months[monthCount - 1].name + "-" + options.year;
-      worksheet.getCell('A1').value = reportTitle;
+      worksheet.getCell('A1').value = reportTitle;;
       worksheet.getRow(1).font = { name: 'Corbel', family: 4, size: 20, };
       worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
 
@@ -681,17 +683,19 @@ export class ExcelExportService {
       let startCell = headerCount + 1;
       for (let i = 0; i < monthCount; i++) {
 
-        worksheet.mergeCells([2, startCell, 2, startCell + conditions.length - 1]);
+        worksheet.mergeCells([2, startCell, 2, startCell + conditions.length]);
 
         worksheet.getCell(2, startCell).value = options.months[i].name + "-" + options.year;
         // worksheet.getCell(2, startCell).fill = headerStyle;
         worksheet.getRow(2).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
 
-        for (let c = 0; c < conditions.length; c++) {
+        let c = 0;
+        for (c = 0; c < conditions.length; c++) {
           worksheet.getCell(3, startCell + c).value = conditions[c].list_name_hin;
         }
+        worksheet.getCell(3, startCell + c).value = "Total Bachat";
         worksheet.getRow(3).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-        startCell = startCell + conditions.length;
+        startCell = startCell + conditions.length + 1;
       }
 
 
@@ -710,18 +714,22 @@ export class ExcelExportService {
           worksheet.getCell(rowNum, j + 1).value = json[i][headers[j]];
         }
 
+        // loop through total number of available months
         for (let j = 0; j < monthCount; j++) {
-          for (let k = 0; k < conditions.length; k++) {
+          let k = 0;
+          // loop through all available conditions
+          for (k = 0; k < conditions.length; k++) {
             if (Array.isArray(json[i].arr_conditionReport)) {
               let value = 0;
-              const cell1 = worksheet.getCell(rowNum, headerCount + (j * conditions.length) + k + 1);
+              // finding position of cell depending on month, condition number. (consider total bachat added for every month).
+              const cell1 = worksheet.getCell(rowNum, headerCount + (j * (conditions.length + 1)) + k + 1);
               for (let crow of json[i].arr_conditionReport) {
                 if (crow.condition_id == conditions[k]._id || (crow.condition_id == null && conditions[k]._id == null)) {
                   value = crow.arr_sum_bachat[j];
+                  if (crow.arr_comment[j]) {
+                    cell1.note = crow.arr_comment[j];
+                  }
                   break;
-                }
-                if (crow.arr_comment[j]) {
-                  cell1.note = crow.arr_comment[j];
                 }
               }
               cell1.value = value;
@@ -730,14 +738,21 @@ export class ExcelExportService {
               }
             }
           }
+          // writing total bachat of month.
+          const cellBachat = worksheet.getCell(rowNum, headerCount + (j * (conditions.length + 1)) + k + 1);
+          cellBachat.value = json[i].arr_sum_bachat[j];
+          if (json[i].arr_sum_bachat[j] < 0) {
+            cellBachat.fill = errorStyle;
+          }
         }
+
         rowNum++;
       }
 
+      // creating partition border after every month.
       worksheet.getRows(4, rowNum)?.forEach(row => {
-        for (let i = headerCount; i < row.cellCount + (conditions.length - 1); i++) {
+        for (let i = headerCount; i <= row.cellCount; (i = i + conditions.length + 1)) {
           row.getCell(i).border = { right: { style: 'double' } };
-          i = i + (conditions.length - 1);
         }
       });
 

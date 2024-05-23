@@ -45,7 +45,7 @@ class Functions extends DBContex {
 
             if (!objOld) {
                objOld = await this.getById(type, obj._id);
-           }
+            }
 
             let updtResult = stmtUpdate.run(obj);
             if (updtResult.changes == 1) {
@@ -218,13 +218,13 @@ class Functions extends DBContex {
       if (fieldList && fieldList.length > 0) {
          for (let i in data) {
             for (let field of fieldList) {
-               data[i][field] = data[i][field] ? data[i][field].toLowerCase() : null;
+               data[i][field] = data[i][field] ? data[i][field].trim().toLowerCase() : null;
             }
          }
       } else {
          for (let i in data) {
             for (let key of Object.keys(data[i])) {
-               data[i][key] = data[i][key] ? data[i][key].toLowerCase() : null;
+               data[i][key] = data[i][key] ? data[i][key].trim().toLowerCase() : null;
             }
          }
       }
@@ -419,12 +419,16 @@ class Functions extends DBContex {
             return await this.updateProduct(type.name, data, this.query.conditions[type.name + '_duplicate'], false).then((result) => {
                // console.log('update', result);
                return result;
+            }, (reject) => {
+               return reject;
             });
             break;
          default:
             return await this.updateMany(type.name, data, this.query.conditions[type.name + '_duplicate'], false).then((result) => {
                // console.log('update', result);
                return result;
+            }, (reject) => {
+               return reject;
             });
       }
    }

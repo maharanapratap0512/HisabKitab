@@ -15,8 +15,8 @@
                <div class="card-body" style="overflow: auto;">
                   <div class="row justify-content-between">
                      <div class="col-2">
-                        <button class="btn btn-primary w-100" *ngIf="settings.nimitt.add" onclick="$('#showModal').modal('show')"
-                           (click)="showModal = 'Add Nimitt'">
+                        <button class="btn btn-primary w-100" *ngIf="settings.nimitt.add"
+                           (click)="openModal('Add Nimitt')">
                            <i class="dripicons-plus h4 icon-mx-2"> </i>Add Nimitt
                         </button>
                      </div>
@@ -26,8 +26,14 @@
                               name="search">
                         </div>
                      </div>
-                     <div class="col-2">
-                        <button class="btn btn-outline-success" (click)="exportToExcel()">Export To Excel</button>
+                     <div class="col-3 d-flex">
+                        <button type="button" class="btn btn-success" (click)="openModal('excel_import')"
+                           style="font-weight: 700 !important;">
+                           <i class="uil uil-arrow-to-bottom"></i> Excel Import
+                        </button>
+                        <button type="button" class="btn btn-outline-success mx-2" (click)="exportToExcel()"> Export To
+                           Excel
+                        </button>
                      </div>
                      <div class="col-2">
                         <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
@@ -61,10 +67,10 @@
                               <span class="mx-1"
                                  style="font-size: x-large;position: relative;line-height: 28px;cursor: pointer;"
                                  (click)="protectionToggle(data._id, data.active)">
-                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
-                                    title="Protected" class="uil-shield-check text-warning"></i>
-                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
-                                    title="Unprotected" class="uil-shield-slash text-danger"></i>
+                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && data.active"
+                                    data-toggle="tooltip" title="Protected" class="uil-shield-check text-warning"></i>
+                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && !data.active"
+                                    data-toggle="tooltip" title="Unprotected" class="uil-shield-slash text-danger"></i>
                               </span>
                            </td>
                            <td>
@@ -74,8 +80,8 @@
                                  <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                        class="uil-trash"></i></button>
                               </div>
-                              <span *ngIf="!gs.exceptionDept.includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
-                                 title="Protected" class="text-warning mx-1"
+                              <span *ngIf="!gs.exceptionDept.includes(auth.webUser.dept_id) && data.active"
+                                 data-toggle="tooltip" title="Protected" class="text-warning mx-1"
                                  style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                  <i class="uil-shield-check"></i>
                               </span>
@@ -107,7 +113,7 @@
       <div class="modal-content">
          <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
-            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
+            <button type="button" (click)="closeModal()" class="btn-close"
                aria-label="Close"></button>
          </div>
          <div class="modal-body">
@@ -115,10 +121,11 @@
             </app-nimitt-entry>
             <app-nimitt-entry *ngIf="showModal == 'Edit Nimitt'" (response)='editNimittResponse($event)'
                [getData]="editData" [isEdit]="true"></app-nimitt-entry>
+            <app-excel-import *ngIf='showModal == "excel_import"' importType="nimitt"></app-excel-import>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"
-               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+               (click)="closeModal()">Close</button>
          </div>
       </div>
    </div>

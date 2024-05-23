@@ -30,7 +30,7 @@ export class JawakComponent implements OnInit {
   jawakData: any = [];
   editData: any = {};
   mms: any = [];
-  months:any = [];
+  months: any = [];
   viewData: any = [];
   items: any = [];
   units: any = [];
@@ -50,8 +50,8 @@ export class JawakComponent implements OnInit {
   allJwkData: any = [];
   jwkCount: any = 0;
   filterBody: any = {
-    month:null,
-    year:null,
+    month: null,
+    year: null,
     pbk_id: [],
     mm_id: [],
     jawak_mm_id: [],
@@ -108,12 +108,25 @@ export class JawakComponent implements OnInit {
     this.jwkCount = 0;
     this.allJwkData = [];
     this.exportJwkdata$ = new Subject();
+    let footerRow: any = {
+      'Date': '*',
+      'Pkt No': 'Total',
+      'Jawak MM': 0,
+      'Qty': 0,
+      'Amount': 0,
+    }; // Object to store totals for footer
+    let uniqueMM = new Set();
+    let uniqueJawakMM = new Set();
+    let uniqueUnit = new Set();
 
     this.getMoreAJ();
 
     this.exportJwkdata$.subscribe(async (result: any) => {
       for (let i = 0; i < result.length; i++) {
-        
+        uniqueMM.add(result[i].mm_id);
+        uniqueJawakMM.add(result[i].jawak_mm_id);
+        uniqueUnit.add(result[i].unit_id);
+
         this.allJwkData.push({
           'Date': result[i].date ? result[i].date : '-',
           'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
@@ -126,16 +139,27 @@ export class JawakComponent implements OnInit {
           'Kisko Diya': result[i].nimitt_id ? result[i].nimitt_hin + '(' + result[i].nimitt_state_hin + ')' : '-',
           'Qty': result[i].qty ? result[i].qty : '-',
           'Unit': result[i].unit_id ? result[i].unit_short : '-',
+          'Rate': result[i].rate ? result[i].rate : '-',
+          'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
           'Jawak Type': result[i].jawak_type_id ? result[i].jawak_type_hin : '-',
+          'kaha Becha/Repaired': result[i].sell_repair_place ? result[i].sell_repair_place : '-',
+          'kaha parchi shown': result[i].parchi_place ? result[i].parchi_place : '-',
           'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
           'Jawak Detail': result[i].description ? result[i].description : '-',
         });
-      }
 
+        footerRow['Qty'] += result[i].qty ? result[i].qty : 0;
+        footerRow['Amount'] += result[i].actual_amt ? result[i].actual_amt : 0;
+      }
+      
       if (this.allJwkData.length < this.total_count) {
         this.getMoreAJ();
       }
       else {
+        footerRow['MM'] = uniqueMM.size + ' MMs';
+        footerRow['Unit'] = uniqueUnit.size + ' Units';
+        footerRow['Jawak MM'] = uniqueJawakMM.size + ' Mms';
+        this.allJwkData.push(footerRow)
         let date = new Date();
         this.excelExportService.exportAsExcelFile(this.allJwkData, "Jawak_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
         this.isLoader = false;

@@ -147,7 +147,7 @@ class DBContex {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
 
-                // if (tblname == "dictionary")
+                // if (tblname == "department")
                 //     console.log(sql);
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
@@ -235,8 +235,8 @@ class DBContex {
                 sql += ` where ${tblname}._id = ${id} `
                 obj.active = obj.active ? 1 : 0;
 
-                console.log("updt obj_____", obj);
-                console.log("updt obj_____", sql);
+                // console.log("updt obj_____", obj);
+                // console.log("updt obj_____", sql);
                 const result = this.db.prepare(sql).run(obj);
                 // console.log("updt result_____", result);
 

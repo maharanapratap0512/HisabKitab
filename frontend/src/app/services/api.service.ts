@@ -67,6 +67,7 @@ export class ApiService {
     REPORT_AT: base_url + 'reports/awk_type_saar/',
     REPORT_JT: base_url + 'reports/jwk_type_saar/',
     REPORT_STR_STK: base_url + 'reports/report_store_stock/',
+    REPORT_KH: base_url + 'reports/report_khet_saar/',
     REPORTAJ: base_url + 'reports/aj/',
     IMPORTHISTORY: base_url + 'import_history/',
     VEHICLE: base_url + 'vehicle/',

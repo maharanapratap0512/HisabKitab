@@ -32,10 +32,16 @@
             <label class="form-check-label" for="isHeader2">has 2 header row</label>
          </div> -->
       </div>
-      <div class="col-md-2"></div>
-      <div class="col-md-2">
+      <!-- <div class="col-md-2"></div> -->
+      <div class="col-md-4">
          <button class="btn btn-primary" (click)="setExcelToObjectArray()" *ngIf="stepNo == 1">आगे बढ़े</button>
-         <button class="btn btn-primary" (click)="verifyExcelData()" *ngIf="stepNo == 2">आगे बढ़े</button>
+         <button class="btn btn-primary mx-1" (click)="verifyExcelData()" *ngIf="stepNo == 2">आगे बढ़े</button>
+         <button class="btn btn-outline-success btn-lg btn-rounded mx-1" *ngIf="stepNo == 3"
+            (click)="finalImport()">इम्पोर्ट करे।</button>
+         <button class="btn btn-outline-warning btn-lg btn-rounded mx-1" (click)="updateData()"
+            *ngIf="stepNo == 4 && willUpdateData.length">अपडेट करे।</button>
+         <button class="btn btn-info mx-1" (click)="finish()" *ngIf="stepNo > 3">बंध करे। </button>
+         <button class="btn btn-danger mx-1" *ngIf="stepNo < 5" (click)="finish()">skip</button>
          <!-- <span class="text-warning" *ngIf="!nextButton">Dark वाले सारे कॉलम इक्सेल फाइल मे होने जरूरी है। </span> -->
       </div>
 
@@ -50,17 +56,34 @@
    </div>
 </div>
 
+<div class="progress mb-1" *ngIf="!processing">
+   <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" aria-valuenow="75"
+      aria-valuemin="0" aria-valuemax="100" [style]="progressStyle">
+      {{processedCount}}
+      out of {{excelArrObj.length}} </div>
+</div>
+
+<div class="progress mb-1" *ngIf="processing">
+   <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow="75"
+      aria-valuemin="0" aria-valuemax="100" [style]="progressStyle">
+      {{processedCount}}
+      out of {{willUpdateData.length}} </div>
+</div>
+
 <!-- step 1 : select header row -->
 <div class="row" *ngIf="stepNo <= 1 && excelArr && excelArr.length > 0">
    <div class="card card-body" style="overflow: auto;">
       <h4 class="card-title">Select Header row जिस लाइन मे हेडिंग हो उस लाइन से सामने का चेकबॉक्स सिलेक्ट करे। </h4>
+      <pagination-controls class="pagi text-end" (pageChange)="page1=$event" [autoHide]="true">
+      </pagination-controls>
       <table class="table-hover dt-responsive">
          <thead>
             <td>Header</td>
             <td *ngIf="secondHeader">Sub Header</td>
          </thead>
          <tbody>
-            <tr *ngFor="let row of excelArr; let i=index;">
+            <tr
+               *ngFor="let row of excelArr | paginate:{itemsPerPage:itemsPerPage,currentPage:page1,totalItems:excelArr.length};; let i=index;">
                <td>
                   <div class="form-check">
                      <input type="radio" id="{{'Header'+i}}" [(ngModel)]="header1" [ngModelOptions]="{standalone: true}"
@@ -87,6 +110,8 @@
    <div class="card-body" style="overflow: auto;">
       <h4 class="card-title">इक्सेल डाटा वेरफाइ करे, और फिर आगे बढ़े। </h4>
       <div class="row" style="overflow: auto;">
+         <pagination-controls class="pagi text-end" (pageChange)="page2=$event" [autoHide]="true">
+         </pagination-controls>
          <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
             <thead>
                <tr>
@@ -96,7 +121,8 @@
                </tr>
             </thead>
             <tbody>
-               <tr *ngFor="let data of excelArrObj; let i=index;">
+               <tr
+                  *ngFor="let data of excelArrObj | paginate:{itemsPerPage:itemsPerPage,currentPage:page2,totalItems:excelArrObj.length}; let i=index;">
                   <td *ngFor="let header of headerList">
                      {{data[header.name]}}
                   </td>
@@ -113,20 +139,22 @@
    <button class="btn btn-outline-success btn-lg btn-rounded w-50" (click)="finalImport()">इम्पोर्ट करे।</button>
    <button class="btn btn-outline-warning btn-lg btn-rounded w-50" (click)="updateData()"
       *ngIf="willUpdateData.length">अपडेट करे।</button>
+
    <ul class="nav nav-pills bg-nav-pills mt-2">
       <!-- <li class="nav-item">
             <button class="btn btn-danger" (click)="clearTempImport()">Clear Data</button>
          </li> -->
       <li class="nav-item">
-         <a href="#exceldata" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
+         <a href="#exceldata" data-bs-toggle="tab" aria-expanded="true" class="nav-link mx-1 btn-info text-info active">
             Excel Data
-            <span class="translate-middle bell badge rounded-pill bg-danger">
+            <span class="translate-middle bell badge rounded-pill bg-info">
                {{excelArrObj.length}}
             </span>
          </a>
       </li>
       <li class="nav-item" *ngIf="unmatchedData.length > 0">
-         <a href="#correction" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0 active">
+         <a href="#correction" data-bs-toggle="tab" aria-expanded="false"
+            class="nav-link mx-1 btn-primary text-primary">
             Make Correction
             <!-- <span class="translate-middle bell badge rounded-pill bg-danger">
                   {{tempdata.length}}
@@ -134,33 +162,41 @@
          </a>
       </li>
       <li class="nav-item" *ngIf="newInsertedData.length">
-         <a href="#insert" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+         <a href="#insert" data-bs-toggle="tab" aria-expanded="false" class="nav-link mx-1 btn-success text-success">
             New Insert
-            <span class="translate-middle bell badge rounded-pill" style="background-color: #bf7d40;">
+            <span class="translate-middle bell badge rounded-pill bg-success">
                {{newInsertedData.length}}
             </span>
          </a>
       </li>
       <li class="nav-item" *ngIf="willUpdateData.length">
-         <a href="#update" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+         <a href="#update" data-bs-toggle="tab" aria-expanded="false" class="nav-link mx-1 btn-warning text-warning">
             Update Available
-            <span class="translate-middle bell badge rounded-pill" style="background-color: #bf7d40;">
+            <span class="translate-middle bell badge rounded-pill bg-warning">
                {{willUpdateData.length}}
             </span>
          </a>
       </li>
+      <li class="nav-item" *ngIf="updateFailData.length">
+         <a href="#updatefail" data-bs-toggle="tab" aria-expanded="false" class="nav-link mx-1 btn-danger text-danger">
+            Update Rejected
+            <span class="translate-middle bell badge rounded-pill bg-danger">
+               {{updateFailData.length}}
+            </span>
+         </a>
+      </li>
       <li class="nav-item" *ngIf="duplicateDate.length">
-         <a href="#duplicate" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+         <a href="#duplicate" data-bs-toggle="tab" aria-expanded="false" class="nav-link mx-1 btn-info text-info">
             Duplicate
-            <span class="translate-middle bell badge rounded-pill" style="background-color: #bf7d40;">
+            <span class="translate-middle bell badge rounded-pill bg-info">
                {{duplicateDate.length}}
             </span>
          </a>
       </li>
       <li class="nav-item" *ngIf="rejectedData.length">
-         <a href="#rejected" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+         <a href="#rejected" data-bs-toggle="tab" aria-expanded="false" class="nav-link mx-1 btn-danger text-danger">
             Rejected
-            <span class="translate-middle bell badge rounded-pill" style="background-color: #da2534;">
+            <span class="translate-middle bell badge rounded-pill bg-danger">
                {{rejectedData.length}}
             </span>
          </a>
@@ -170,8 +206,11 @@
 
    <div class="tab-content">
       <!-- exceldata -->
-      <div class="tab-pane" id="exceldata">
+      <div class="tab-pane active" id="exceldata">
          <div class="row" style="overflow: auto;">
+            <pagination-controls id="excelPagi" class="pagi text-end" (pageChange)="page_excel = $event"
+               [autoHide]="true">
+            </pagination-controls>
             <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
                <thead>
                   <tr>
@@ -181,12 +220,13 @@
                   </tr>
                </thead>
                <tbody>
-                  <tr *ngFor="let data of excelArrObj; let i=index;">
+                  <tr
+                     *ngFor="let data of excelArrObj | paginate:{id:'excelPagi', itemsPerPage:itemsPerPage,currentPage:page_excel,totalItems:excelArrObj.length}; let i=index;">
                      <td *ngFor="let header of headerList"
                         [ngClass]="{'marked': (header.not_null && !data[header.name]) || (header.ref_field && data[header.name] && !data[header.ref_field]) }">
                         <span [ngClass]="{'line-through': data[header.ref_data]}">
                            {{data[header.name]}}
-                        </span> <br />                        
+                        </span> <br />
                         <span *ngIf="data[header.ref_data]">
                            {{data[header.ref_data]}}
                         </span>
@@ -200,6 +240,9 @@
       <!-- correction -->
       <div class="tab-pane p-4 show active" id="correction" style="overflow: auto;">
          <div class="row" *ngIf="unmatchedData.length > 0">
+            <pagination-controls id="unmatchedPagi" class="pagi text-end" (pageChange)="page_unmatched=$event"
+               [autoHide]="true">
+            </pagination-controls>
             <table id="datatable-buttons" class="table table-hover dt-responsive">
                <thead>
                   <tr>
@@ -212,9 +255,9 @@
                   </tr>
                </thead>
                <tbody>
-                  <tr *ngFor="let data of unmatchedData; let i=index;"
+                  <tr *ngFor="let data of unmatchedData | paginate:{id:'unmatchedPagi', itemsPerPage:25,currentPage:page_unmatched,totalItems:unmatchedData.length}; let i=index;"
                      [ngClass]="{'ignored':data.ignore, 'success':data.done}">
-                     <td>{{i+1}}</td>
+                     <td>{{((page_unmatched-1) * 25) + i+1}}</td>
                      <td> {{data.type}} </td>
                      <td> {{data.value}} </td>
                      <td>
@@ -229,9 +272,31 @@
                                  {{item.mm_code}}</ng-option>
                            </ng-select>
 
+                           <!-- category dropdown -->
+                           <div class="col-4">
+                              <ng-select *ngIf="data.type == 'category'" class="custom custom-import"
+                                 placeholder="Select Category" [virtualScroll]="true" [(ngModel)]="data.id"
+                                 [ngModelOptions]="{standalone: true}">
+                                 <ng-option selected="selected" disabled value="">-- Select Category --</ng-option>
+                                 <ng-option *ngFor="let item of categories" [value]="item._id">
+                                    {{item.category_hin}}:{{item.category_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+
+                           <!-- subitem_list dropdown -->
+                           <div class="col-4">
+                              <ng-select *ngIf="data.type == 'subitem_list'" class="custom custom-import"
+                                 placeholder="Select Subitem List" [virtualScroll]="true" [(ngModel)]="data.id"
+                                 [ngModelOptions]="{standalone: true}">
+                                 <ng-option selected="selected" disabled value="">-- Select Subitem List --</ng-option>
+                                 <ng-option *ngFor="let item of subitem_lists" [value]="item._id">
+                                    {{item.subitem_hin}}:{{item.subitem_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+
                            <!-- item dropdown -->
                            <div class="col-4">
-                              <ng-select *ngIf="data.type == 'item' || data.type == 'category'" class="custom custom-import"
+                              <ng-select *ngIf="data.type == 'item'" class="custom custom-import"
                                  placeholder="Select Category" [virtualScroll]="true" (change)="catSelected($event)">
                                  <ng-option selected="selected" disabled value="">-- Select Category --</ng-option>
                                  <ng-option *ngFor="let item of categories" [value]="item._id">
@@ -239,7 +304,7 @@
                               </ng-select>
                            </div>
                            <!-- item dropdown -->
-                           <div class="col-4">                              
+                           <div class="col-4">
                               <ng-select *ngIf="data.type == 'item'" class="custom custom-import"
                                  placeholder="Select Item" [virtualScroll]="true" [(ngModel)]="data.id"
                                  [ngModelOptions]="{standalone: true}" (change)="itemSelected($event)">
@@ -323,6 +388,43 @@
                                  {{item.unit_short}}:{{item.unit_full}}</ng-option>
                            </ng-select>
 
+                           <!-- gender dropdown -->
+                           <ng-select *ngIf="data.type == 'gender'" class="custom custom-import"
+                              placeholder="Select Gender" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Gender --</ng-option>
+                              <ng-option *ngFor="let item of genders" [value]="item.list_name_eng">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                           </ng-select>
+
+                           <!-- relation dropdown -->
+                           <ng-select *ngIf="data.type == 'relation'" class="custom custom-import"
+                              placeholder="Select Relation" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Relation --</ng-option>
+                              <ng-option *ngFor="let item of relations" [value]="item.list_name_eng">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                           </ng-select>
+
+                           <!-- state dropdown -->
+                           <ng-select *ngIf="data.type == 'state'" class="custom custom-import"
+                              placeholder="Select State" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select State --</ng-option>
+                              <ng-option *ngFor="let item of states"
+                                 [value]="item._id">{{item.state_hin}}:{{item.state_eng}}
+                              </ng-option>
+                           </ng-select>
+
+                           <!-- city dropdown -->
+                           <ng-select *ngIf="data.type == 'city'" class="custom custom-import" placeholder="Select City"
+                              [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select City --</ng-option>
+                              <ng-option *ngFor="let item of cities"
+                                 [value]="item._id">{{item.city_hin}}:{{item.city_eng}}
+                              </ng-option>
+                           </ng-select>
+
                         </div>
                      </td>
                      <td class="text-center">
@@ -330,7 +432,7 @@
                            [ngModelOptions]="{standalone: true}" [disabled]="data.type=='product'">
                      </td>
                      <td>
-                        <button *ngIf="!data.id" class="btn btn-warning"
+                        <button *ngIf="!data.id && !data.ignore" class="btn btn-warning"
                            (click)="ignoreCorrection(data, i)">Ignore</button>
                         <button *ngIf="data.id" class="btn btn-success"
                            (click)="correctionSubmit(data, i)">Correct</button>
@@ -350,6 +452,8 @@
       <!-- insert -->
       <div class="tab-pane p-4" id="insert">
          <div class="row" style="overflow: auto;">
+            <pagination-controls id="insertPagi" class="pagi text-end" (pageChange)="page_in=$event" [autoHide]="true">
+            </pagination-controls>
             <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
                <thead>
                   <tr>
@@ -359,7 +463,8 @@
                   </tr>
                </thead>
                <tbody>
-                  <tr *ngFor="let data of newInsertedData; let i = index;">
+                  <tr
+                     *ngFor="let data of newInsertedData | paginate:{id:'insertPagi', itemsPerPage:itemsPerPage,currentPage:page_in,totalItems:newInsertedData.length}; let i = index;">
                      <td *ngFor="let header of swHeaderList">
                         {{data[header]}}
                      </td>
@@ -372,6 +477,8 @@
       <!-- update -->
       <div class="tab-pane p-4" id="update">
          <div class="row" style="overflow: auto;">
+            <pagination-controls id="updatePagi" class="pagi text-end" (pageChange)="page_up=$event" [autoHide]="true">
+            </pagination-controls>
             <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
                <thead>
                   <tr>
@@ -381,7 +488,8 @@
                   </tr>
                </thead>
                <tbody>
-                  <tr *ngFor="let data of willUpdateData; let i = index;" [ngClass]="{'success':data.status}">
+                  <tr *ngFor="let data of willUpdateData | paginate:{id:'updatePagi', itemsPerPage:itemsPerPage,currentPage:page_up,totalItems:willUpdateData.length}; let i = index;"
+                     [ngClass]="{'success':data.status}">
                      <td *ngFor="let header of headerList">
                         {{data[header.name]}}
                      </td>
@@ -394,6 +502,9 @@
       <!-- duplicate -->
       <div class="tab-pane p-4" id="duplicate">
          <div class="row" style="overflow: auto;">
+            <pagination-controls id="duplicatePagi" class="pagi text-end" (pageChange)="page_dp=$event"
+               [autoHide]="true">
+            </pagination-controls>
             <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
                <thead>
                   <tr>
@@ -403,7 +514,8 @@
                   </tr>
                </thead>
                <tbody>
-                  <tr *ngFor="let data of duplicateDate; let i = index;">
+                  <tr
+                     *ngFor="let data of duplicateDate | paginate:{id:'duplicatePagi', itemsPerPage:itemsPerPage,currentPage:page_dp,totalItems:duplicateDate.length}; let i = index;">
                      <td *ngFor="let header of headerList">
                         {{data[header.name]}}
                      </td>
@@ -420,6 +532,9 @@
             </button>
          </div>
          <div class="row" style="overflow: auto;">
+            <pagination-controls id="rejectedPagi" class="pagi text-end" (pageChange)="page_rj=$event"
+               [autoHide]="true">
+            </pagination-controls>
             <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
                <thead>
                   <tr>
@@ -429,7 +544,40 @@
                   </tr>
                </thead>
                <tbody>
-                  <tr *ngFor="let data of rejectedData; let i = index;">
+                  <tr
+                     *ngFor="let data of rejectedData | paginate:{id:'rejectedPagi', itemsPerPage:itemsPerPage,currentPage:page_rj,totalItems:rejectedData.length}; let i = index;">
+                     <td *ngFor="let header of headerList"
+                        [ngClass]="{'marked': (header.not_null && !data[header.name]) || (header.ref_field && data[header.name] && !data[header.ref_field])}">
+                        {{data[header.name]}}
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+      </div>
+
+
+      <!-- updatefail -->
+      <div class="tab-pane p-4" id="updatefail">
+         <!-- <div class="row">
+            <button type="button" class="btn btn-outline-info " (click)="exportToExcel()"> Export Rejected Data
+            </button>
+         </div> -->
+         <div class="row" style="overflow: auto;">
+            <pagination-controls id="updateFailPagi" class="pagi text-end" (pageChange)="page_rj=$event"
+               [autoHide]="true">
+            </pagination-controls>
+            <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
+               <thead>
+                  <tr>
+                     <th *ngFor="let header of headerList">
+                        {{header.name}}
+                     </th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr
+                     *ngFor="let data of updateFailData | paginate:{id:'updateFailPagi', itemsPerPage:itemsPerPage,currentPage:page_rj,totalItems:updateFailData.length}; let i = index;">
                      <td *ngFor="let header of headerList"
                         [ngClass]="{'marked': (header.not_null && !data[header.name]) || (header.ref_field && data[header.name] && !data[header.ref_field])}">
                         {{data[header.name]}}

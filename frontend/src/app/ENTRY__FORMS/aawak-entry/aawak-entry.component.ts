@@ -589,8 +589,8 @@ export class AawakEntryComponent implements OnInit {
 			let actual_amt = this.awkfg.qty * this.awkfg.rate
 			this.awkfg.actual_amt = actual_amt.toFixed(2);
 		}
-		else if (this.awkfg.qty && this.awkfg.amnt) {
-			let rate = this.awkfg.amnt / this.awkfg.qty
+		else if (this.awkfg.qty && this.awkfg.actual_amt) {
+			let rate = this.awkfg.actual_amt / this.awkfg.qty
 			this.awkfg.rate = rate.toFixed(2);
 		}
 		this.jqty = this.awkfg.qty;
@@ -601,8 +601,8 @@ export class AawakEntryComponent implements OnInit {
 			let actual_amt = this.awkfg.qty * this.awkfg.rate;
 			this.awkfg.actual_amt = actual_amt.toFixed(2)
 		}
-		else if (!this.awkfg.actual_amt && this.awkfg.rate && this.awkfg.amnt) {
-			let quantity = this.awkfg.amnt / this.awkfg.rate;
+		else if (!this.awkfg.actual_amt && this.awkfg.rate && this.awkfg.actual_amt) {
+			let quantity = this.awkfg.actual_amt / this.awkfg.rate;
 			this.awkfg.qty = quantity.toFixed(2)
 		}
 	}

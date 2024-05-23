@@ -89,7 +89,7 @@ export class BachatComponent implements OnInit {
       if (data['result'] && data['success']) {
 
         this.bachatAll = data['result'];
-        this.total_count = data['total_count'];        
+        this.total_count = data['total_count'];
         this.bachatData = this.bachatAll;
         this.isLoader = false;
       }
@@ -99,7 +99,7 @@ export class BachatComponent implements OnInit {
 
   openImageModal() {
     $('#showImageModal').modal('show');
-  }  
+  }
 
   showImages(list: any) {
     this.imagesToShow = [];
@@ -201,7 +201,24 @@ export class BachatComponent implements OnInit {
   excelExport() {
     this.isLoader = true;
     let bchtData: any = [];
+    let footerRow: any = {
+      'No.': '*',
+      'State': 'Total',
+      'Used': 0,
+      'New': 0,
+      'Old': 0,
+      'In Repair': 0,
+      'Defective': 0,
+      'Scrap': 0,
+      'Total Stock': 0,
+    }; // Object to store totals for footer
+    let uniqueMM = new Set();
+    let uniqueUnit = new Set();
+
     for (let i = 0; i < this.bachatData.length; i++) {
+      uniqueMM.add(this.bachatData[i].mm_id);
+      uniqueUnit.add(this.bachatData[i].unit_id);
+
       bchtData.push({
         'No.': i + 1,
         'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
@@ -218,7 +235,20 @@ export class BachatComponent implements OnInit {
         'Total Stock': this.bachatData[i].Stock ? this.bachatData[i].Stock : '-',
         'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-'
       });
+      footerRow['Used'] += this.bachatData[i].Used ? this.bachatData[i].Used : 0;
+      footerRow['New'] += this.bachatData[i].New ? this.bachatData[i].New : 0;
+      footerRow['Old'] += this.bachatData[i].Old ? this.bachatData[i].Old : 0;
+      footerRow['In Repair'] += this.bachatData[i].Repairing ? this.bachatData[i].Repairing : 0;
+      footerRow['Defective'] += this.bachatData[i].Defective ? this.bachatData[i].Defective : 0;
+      footerRow['Scrap'] += this.bachatData[i].Scrap ? this.bachatData[i].Scrap : 0;
+      footerRow['Total Stock'] += this.bachatData[i].Stock ? this.bachatData[i].Stock : 0;
     }
+
+    // Add a footer row with condition totals
+    footerRow['MM'] = uniqueMM.size + ' MMs'
+    footerRow['Unit'] = uniqueUnit.size + ' Units'
+    bchtData.push(footerRow);
+    
     let date = new Date();
     this.excelExportService.exportAsExcelFile(bchtData, "Jawak_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
     this.isLoader = false;

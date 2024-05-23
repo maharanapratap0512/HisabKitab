@@ -149,6 +149,9 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                 refTableList.push(req.body.config[i].ref_table);
             }
         }
+        if (req.body.importType == "subitem") {
+
+        }
         let fn = new ExcelFunctions(refTableList, req.params.dept_id);
         for (let i in req.body.excelData) {
             for (let j in req.body.config) {
@@ -160,8 +163,12 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                     data = fn.setDateFormat(data);
                 }
                 if (req.body.config[j].ref_table && (req.body.config[j].not_null || data)) {
-                    let id = null;
-                    let name = data.trim().toLowerCase();
+                    let id = null, name;
+                    if (req.body.config[j].type != "array") {
+                        name = data.trim().toLowerCase();
+                    } else {
+                        name = data;
+                    }
                     req.body.excelData[i][req.body.config[j].name] = name;
 
                     switch (req.body.config[j].ref_table) {
@@ -173,7 +180,13 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                             break;
                         case 'city': id = await fn.matchCity(name);
                             break;
-                        case 'category': id = await fn.matchCategory(name);
+                        case 'category':
+                            // console.log(name);
+                            if (req.body.config[j].type == "array") {
+                                id = await fn.matchCategories(name);
+                            } else {
+                                id = await fn.matchCategory(name);
+                            }
                             break;
                         case 'unit': id = await fn.matchUnit(name);
                             break;
@@ -226,10 +239,17 @@ router.put('/update/:dept_id', async (req, res, next) => {
     try {
         let fn = new ExcelFunctions([], req.params.dept_id);
         let result = await fn.updateExcelData(req.body.importType, req.body.excelData);
-        res.json({
-            success: true,
-            result: result
-        })
+        if (result.changes) {
+            res.json({
+                success: true,
+                result: result
+            })
+        } else {
+            res.json({
+                success: false,
+                result: result
+            })
+        }
     } catch (err) { next(err) };
 });
 

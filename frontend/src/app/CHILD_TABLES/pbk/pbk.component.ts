@@ -198,8 +198,7 @@ export class PbkComponent implements OnInit {
   addPbkResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      $('#showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal()
       this.pbkData.unshift(ev);
       this.isLoader = false;
     }
@@ -212,8 +211,7 @@ export class PbkComponent implements OnInit {
   editPbkResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      $('#showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal()
       this.pbkData.splice(this.pbkData.indexOf(this.editData), 1, ev);
       this.isLoader = false;
     }
@@ -225,8 +223,7 @@ export class PbkComponent implements OnInit {
 
   edit(data: any) {
     this.editData = data;
-    this.showModal = 'Edit PBK'
-    $('#showModal').modal('show');
+    this.openModal('Edit PBK');
   }
 
   delete(i: any, id: any) {

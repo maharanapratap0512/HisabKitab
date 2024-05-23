@@ -19,6 +19,8 @@ declare var $: any;
 })
 export class ItemComponent implements OnInit {
 
+  importType: any;
+  excelFile: any;
   page = 1;
   itemsPerPage = 100;
   currentPage: any;
@@ -32,8 +34,8 @@ export class ItemComponent implements OnInit {
   itemData: any = [];
   categories: any = [];
   subitem_lists: any = [];
-  total_count: any = 0;;
-  si_total_count: any = 0;;
+  total_count: any = 0;
+  si_total_count: any = 0;
   subitemData: any = [];
   conditionObj: any = {};
   baseurl: any;
@@ -60,14 +62,11 @@ export class ItemComponent implements OnInit {
     });
     this.baseurl = this.api.getUrl('BASE');
     this.settings = this.auth.webUser.settings.item;
-    
-    // this.showModal = 'Add Item'
-    // $('#showModal').modal('show')
+
   }
 
   FilterActive() {
     this.itemData = this.itemDataAll.filter((i: { active: any; }) => !i.active)
-
   }
 
   getItemData(pageNo: any) {
@@ -94,20 +93,36 @@ export class ItemComponent implements OnInit {
         No: counter++,
         "Item Hin": this.itemData[i].item_hin.trim(),
         "Item Eng": this.itemData[i].item_eng,
+        "Item Roman": this.itemData[i].item_roman,
+        "Item Code": this.itemData[i].item_code,
         "Subitem Hin": null,
         "Subitem Eng": null,
+        "Subitem Roman": null,
         "Categories": this.itemData[i].categories_hin.join(", "),
-        "Unit": this.itemData[i].unit_short
+        "Unit": this.itemData[i].unit_short,
+        "Extra Note": this.itemData[i].extra_note,
+        "Min Rate": this.itemData[i].min_rate,
+        "Max Rate": this.itemData[i].max_rate,
+        "Restrict Month": this.itemData[i].restrict_month,
+        "Restrict Year": this.itemData[i].restrict_year,
       });
       for (let j in this.itemData[i].subitems) {
         item.push({
           No: counter++,
-          "Item Hin": this.itemData[i].item_hin,
-          "Item Eng": this.itemData[i].item_eng,
+          "Item Hin": null,
+          "Item Eng": null,
+          "Item Roman": null,
+          "Item Code": null,
           "Subitem Hin": this.itemData[i].subitems[j].subitem_hin,
           "Subitem Eng": this.itemData[i].subitems[j].subitem_eng,
+          "Subitem Roman": this.itemData[i].subitems[j].subitem_roman,
           "Categories": this.itemData[i].subitems[j].categories_hin.join(", "),
-          "Unit": this.itemData[i].subitems[j].unit_short
+          "Unit": this.itemData[i].subitems[j].unit_short,
+          "Extra Note": this.itemData[i].subitems[j].extra_note,
+          "Min Rate": this.itemData[i].subitems[j].min_rate,
+          "Max Rate": this.itemData[i].subitems[j].max_rate,
+          "Restrict Month": this.itemData[i].subitems[j].restrict_month,
+          "Restrict Year": this.itemData[i].subitems[j].restrict_year,
         });
       }
     }
@@ -119,14 +134,50 @@ export class ItemComponent implements OnInit {
 
   }
 
+  openModal(type: any) {
+    this.showModal = type;
+    $('#showModal').modal('show');
+  }
+
   closeModal() {
     if (this.auto_close) {
       $('#showModal').modal('hide');
       this.showModal = '';
-    } else {
-
     }
   }
+
+  excelImport(ev: any) {
+    if (ev) {
+      this.excelFile = ev;
+      this.importResponse(null);
+    }
+    ev = null;
+  }
+
+  importResponse(iType: any) {
+    switch (iType) {
+      case 'subitem_list':
+        this.importType = 'item';
+        this.openModal('ei_item');
+        break;
+
+      case 'item':
+        this.importType = 'subitem';
+        this.openModal('ei_subitem');
+        break;
+
+      case 'subitem':
+        this.importType = '';
+        this.closeModal();
+        break;
+
+      default:
+        this.importType = 'subitem_list';
+        this.openModal('ei_subitem_list');
+    }
+  }
+
+
 
   lockItem(i: any, id: any) {
     this.app.appModal$ = new Subject();
@@ -182,9 +233,9 @@ export class ItemComponent implements OnInit {
 
   viewProduct(data: any) {
     this.editData = data;
-    this.showModal = 'View Product'
-    $('#showModal').modal('show');
+    this.openModal('View Product');
   }
+
   catSelected(ev: any) {
     if (ev) {
       this.conditionObj.categories = ev;
@@ -213,8 +264,7 @@ export class ItemComponent implements OnInit {
       categories: item.categories,
       unit_id: item.unit_id
     }
-    this.showModal = 'Add Subitem From Item';
-    $('#showModal').modal('show');
+    this.openModal('Add Subitem From Item');
   }
 
   cloneWithSubitem(item: any) {
@@ -223,8 +273,7 @@ export class ItemComponent implements OnInit {
       unit_id: item.unit_id,
       subitems: item.subitems
     }
-    this.showModal = 'Clone Item';
-    $('#showModal').modal('show');
+    this.openModal('Clone Item');
   }
 
   cloneItemResponse(ev: any) {
@@ -326,13 +375,12 @@ export class ItemComponent implements OnInit {
   edit(data: any, type: any = null) {
     if (type == 'subitem') {
       this.editData = data;
-      this.showModal = 'Edit Subitem'
+      this.openModal('Edit Subitem');
     }
     else {
       this.editData = data;
-      this.showModal = 'Edit Item'
+      this.openModal('Edit Item');
     }
-    $('#showModal').modal('show');
   }
 
   delete(i: any, id: any) {

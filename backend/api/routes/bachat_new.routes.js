@@ -199,7 +199,8 @@ router.put('/condition/:dept_id', async (req, res, next) => {
         awkCondition += ` AND awk.month in (${months.join(',')}) AND awk.year = '${req.body.year}'`
 
         // let sql = DB.query.bachat_new.select_all.replace('?', conditionQuery1).replace('#', conditionQuery2);
-        let sql = `select bcht.*,
+        let sql = `
+            select bcht.*,
             JSON_GROUP_ARRAY(bcht.month) as arr_months, 
             JSON_GROUP_ARRAY(bcht.t_a) as arr_sum_aawak, 
             JSON_GROUP_ARRAY(bcht.t_j) as arr_sum_jawak, 
@@ -222,7 +223,7 @@ router.put('/condition/:dept_id', async (req, res, next) => {
             left join department dept on dept._id = bcht.dept_id
             group by bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id;`
 
-        // console.log(sql);
+        console.log(sql);
         let stmt = DB.db.prepare(sql);
 
         for (let row of stmt.iterate({ order: 'updated_at desc' })) {

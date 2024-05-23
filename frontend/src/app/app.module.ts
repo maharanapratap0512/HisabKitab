@@ -73,6 +73,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { ReportAwkTypeSaarComponent } from './reports/report-awk-type-saar/report-awk-type-saar.component';
 import { ReportJwkTypeSaarComponent } from './reports/report-jwk-type-saar/report-jwk-type-saar.component';
 import { ReportStoreStockComponent } from './reports/report-store-stock/report-store-stock.component';
+import { ReportKhSaarComponent } from './reports/report-kh-saar/report-kh-saar.component';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -136,6 +137,7 @@ import { ReportStoreStockComponent } from './reports/report-store-stock/report-s
     ReportAwkTypeSaarComponent,
     ReportJwkTypeSaarComponent,
     ReportStoreStockComponent,
+    ReportKhSaarComponent,
   ],
 
   imports: [

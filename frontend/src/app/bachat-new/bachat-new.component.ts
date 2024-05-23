@@ -82,10 +82,10 @@ export class BachatNewComponent implements OnInit {
       this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
     });
-    this.filterBody.year = 2024;
-    this.gs.yearChangedGetMonth(2024);
-    this.filterBody.months = [3, 1];
-    this.filter();
+    // this.filterBody.year = 2024;
+    // this.gs.yearChangedGetMonth(2024);
+    // this.filterBody.months = [3, 1];
+    // this.filter();
   }
 
   getBase64Images() {
@@ -236,7 +236,14 @@ export class BachatNewComponent implements OnInit {
   excelExportBachatOnly() {
     this.isLoader = true;
     let bchtData: any = [];
+    let conditionTotals: any = {}; // Object to store condition totals
+    let uniqueMM = new Set();
+    let uniqueUnit = new Set();
+    let wholeTotal = 0;
+
     for (let i = 0; i < this.bachatData.length; i++) {
+      uniqueMM.add(this.bachatData[i].mm_id);
+      uniqueUnit.add(this.bachatData[i].unit_id);
 
       let bachatRow: any = {
         'No.': i + 1,
@@ -248,18 +255,35 @@ export class BachatNewComponent implements OnInit {
         'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
         'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-',
       }
+
       for (let j in this.conditions) {
         let qty = '0';
         for (let k in this.bachatData[i].arr_condition_id) {
           if (this.conditions[j]._id == this.bachatData[i].arr_condition_id[k]) {
             qty = this.bachatData[i].arr_sum_bachat[k] ? this.bachatData[i].arr_sum_bachat[k] : 0;
+            conditionTotals[this.conditions[j].list_name_hin] = (conditionTotals[this.conditions[j].list_name_hin] || 0) + parseFloat(qty); // Update or initialize condition total
           }
         }
         bachatRow[this.conditions[j].list_name_hin] = qty;
       }
       bachatRow['टोटल बचत'] = this.bachatData[i].total_bachat_all ? this.bachatData[i].total_bachat_all : 0;
+      wholeTotal += bachatRow['टोटल बचत'];
       bchtData.push(bachatRow);
     }
+
+    // Add a footer row with condition totals
+    const footerRow: any = {};
+    footerRow['No.'] = '*';
+    footerRow['State'] = 'Total'
+    footerRow['MM'] = uniqueMM.size + ' MMs'
+    footerRow['Unit'] = uniqueUnit.size + ' Units'
+    footerRow['टोटल बचत'] = wholeTotal;
+    for (const condition in this.conditions) {
+      footerRow[this.conditions[condition].list_name_hin] = conditionTotals[this.conditions[condition].list_name_hin] || 0;
+    }
+    bchtData.push(footerRow);
+
+
     let date = new Date();
     this.excelExportService.exportAsExcelFile(bchtData, "Bachat_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
     this.isLoader = false;
@@ -307,7 +331,20 @@ export class BachatNewComponent implements OnInit {
   excelExportSaar() {
     this.isLoader = true;
     let bchtData: any = [];
+    let footerRow: any = {
+      'No.': '*',
+      'State': 'Total',
+      'टोटल आवक': 0,
+      'घर मे यूज': 0,
+      'टोटल जावक': 0,
+      'बचत': 0,
+    }; // Object to store totals for footer
+    let uniqueMM = new Set();
+    let uniqueUnit = new Set();
+
     for (let i = 0; i < this.bachatData.length; i++) {
+      uniqueMM.add(this.bachatData[i].mm_id);
+      uniqueUnit.add(this.bachatData[i].unit_id);
 
       let bachatRow: any = {
         'No.': i + 1,
@@ -323,8 +360,21 @@ export class BachatNewComponent implements OnInit {
         'बचत': this.bachatData[i].total_bachat_all ? this.bachatData[i].total_bachat_all : 0,
         'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-',
       }
+
+      footerRow['टोटल आवक'] += bachatRow['टोटल आवक'];
+      footerRow['घर मे यूज'] += bachatRow['घर मे यूज'];
+      footerRow['टोटल जावक'] += bachatRow['टोटल जावक'];
+      footerRow['बचत'] += bachatRow['बचत'];
+
       bchtData.push(bachatRow);
     }
+
+    // Add a footer row with condition totals
+    footerRow['MM'] = uniqueMM.size + ' MMs'
+    footerRow['Unit'] = uniqueUnit.size + ' Units'
+    bchtData.push(footerRow);
+
+
     let date = new Date();
     this.excelExportService.exportAsExcelFile(bchtData, "Bachat_Full_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
     this.isLoader = false;
@@ -379,6 +429,8 @@ export class BachatNewComponent implements OnInit {
         'Item': this.bachatData[i].item_hin,
         'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
         'unit': this.bachatData[i].unit_short,
+        'पिछला बचत': this.bachatData[i].past_bachat ? this.bachatData[i].past_bachat : 0,
+        'arr_sum_bachat': this.bachatData[i].arr_sum_bachat,
       }
 
       await new Promise<void>((resolve, reject) => {

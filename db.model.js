@@ -1766,7 +1766,7 @@ class dbModal {
     // creating new table : updates
     {
       drop_updates: `drop table if exists updates`,
-      updates: `create table updates(
+      updates:`create table updates(
         _id integer primary key AUTOINCREMENT,
         sr_num interger not null,
         date date not null,
@@ -1778,38 +1778,6 @@ class dbModal {
         updated tinyint(1) default 0,
         seen tinyint(1) default 0
       )`
-    },
-    // version 19
-    // jawak new column added : rate, actual_amt, sell_repair_place, parchi_place. 
-    // new table: Repairing_info.
-    {
-      jawak_rate:`alter table jawak add column rate decimal(10,2) default 0`,
-      jawak_amt:`alter table jawak add column actual_amt decimal(10,2) default 0`,
-      jawak_sell_repair_place:`alter table jawak add column sell_repair_place varchar(250)`,
-      jawak_parchi_place:`alter table jawak add column parchi_place varchar(100)`,
-      repairing_info: `create table repairing_info(
-        _id integer primary key AUTOINCREMENT,
-        date_sent date not null,
-        date_recieved date not null,
-        mm_id integer references mm(_id),
-        item_id integer references item(_id),
-        subitem_id integer references subitem(_id),
-        product_code integer references product(_id),
-        repair_from varchar(25), 
-        repairer_info text,
-        problem text,
-        solution text,
-        used_parts text,
-        parts_cost decimal(10,2),
-        repairing_cost decimal(10,2),
-        actual_spent_amt decimal(10,2),
-        warranty_info varchar(250),
-        awk_ref_id integer references aawak(_id),
-        jwk_ref_id integer references jawak(_id),
-        created_at timestamp default (datetime('now', 'localtime')),
-        updated_at timestamp default (datetime('now', 'localtime'))
-      )`,
-      // repair_from - home, shop, repairer_info - shop address / bhai name
     },
 
     /* TODO cleanup task 

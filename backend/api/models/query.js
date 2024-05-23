@@ -473,13 +473,13 @@ const jawak = {
     , insert:
         `insert into jawak(
         date, mm_id, pkt_num, pbk_id, jawak_mm_id, item_id, usage_category_id,
-        subitem_id, product_id, item_detail, condition_id, qty, jawak_type_id,
-        unit_id, description, nimitt_id, company_name, aawak_ref_id, dept_id, is_xl,
+        subitem_id, product_id, item_detail, condition_id, qty, rate, actual_amt, jawak_type_id,
+        unit_id, description, sell_repair_place, parchi_place, nimitt_id, company_name, aawak_ref_id, dept_id, is_xl,
         active)
     values (
         @date, @mm_id, @pkt_num, @pbk_id, @jawak_mm_id, @item_id, @usage_category_id,
-        @subitem_id, @product_id, @item_detail, @condition_id, @qty, @jawak_type_id,
-        @unit_id, @description, @nimitt_id, @company_name, @aawak_ref_id, @dept_id, @is_xl,
+        @subitem_id, @product_id, @item_detail, @condition_id, @qty, @rate, @actual_amt, @jawak_type_id,
+        @unit_id, @description, @sell_repair_place, @parchi_place, @nimitt_id, @company_name, @aawak_ref_id, @dept_id, @is_xl,
         @active)`
     , update:
         `update jawak set 
@@ -495,9 +495,13 @@ const jawak = {
         item_detail=@item_detail,
         condition_id=@condition_id,
         qty=@qty,
+        rate=@rate,
+        actual_amt=@actual_amt,
         jawak_type_id=@jawak_type_id,
         unit_id=@unit_id,
         description=@description,
+        sell_repair_place=@sell_repair_place,
+        parchi_place=@parchi_place,
         nimitt_id=@nimitt_id,
         company_name=@company_name,
         aawak_ref_id=@aawak_ref_id,
@@ -2042,6 +2046,10 @@ const conditions = {
     vehicle_duplicate: `gadi_num = @gadi_num`,
     product_duplicate: `(product_code IS NOT NULL AND product_code = @product_code) OR (sr_num IS NOT NULL AND sr_num = @sr_num)`,
     pbk_duplicate: `roll_no = @roll_no OR (pbk_hin = @pbk_hin AND gender = @gender AND state_id = @state_id)`,
+    nimitt_duplicate: `roll_no = @roll_no OR (nimitt_hin = @nimitt_hin AND gender = @gender AND state_id = @state_id)`,
+    subitem_list_duplicate: `subitem_hin = @subitem_hin OR (subitem_eng IS NOT NULL AND subitem_eng = @subitem_eng) OR (subitem_roman IS NOT NULL AND subitem_roman = @subitem_roman)`,
+    item_duplicate: `item_hin = @item_hin OR (item_eng IS NOT NULL AND item_eng = @item_eng) OR (item_roman IS NOT NULL AND item_roman = @item_roman) OR (item_code IS NOT NULL AND item_code = @item_code)`,
+    subitem_duplicate: `item_id = @item_id AND subitem_list_id = @subitem_list_id `,
 }
 
 genDeptDB = {

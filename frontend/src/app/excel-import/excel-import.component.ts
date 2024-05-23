@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ExcelImportService } from '../services/excel-import.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import * as XLSX from 'xlsx';
@@ -9,6 +9,7 @@ import { GlobalService } from '../services/global.service';
 import { HttpService } from '../services/http.service';
 import Swal from 'sweetalert2';
 import { ExcelExportService } from '../services/excel-export.service';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-excel-import',
@@ -17,7 +18,24 @@ import { ExcelExportService } from '../services/excel-export.service';
 })
 export class ExcelImportComponent implements OnInit {
   @Input() importType: any;
-  // importType: any;
+  @Input() stepNo: any = 0;
+  @Input() excelFile: any;
+  @Output() response = new EventEmitter();
+  itemsPerPage = 100;
+  page1: any = 1;
+  page2: any = 1;
+  page_excel: any = 1;
+  page_in: any = 1;
+  page_up: any = 1;
+  page_dp: any = 1;
+  page_rj: any = 1;
+  page_unmatched: any = 1;
+  processedCount: any = 0;
+  processing: any = false;
+  progressStyle: string = "width: 0%";
+  import$ = new Subject();
+  update$ = new Subject();
+
   isLoader: any = false;
   items: any = [];
   cat: any = null;
@@ -25,10 +43,14 @@ export class ExcelImportComponent implements OnInit {
   productsAll: any = [];
   itemAll: any = [];
   subitems: any = [];
+  subitem_lists: any = [];
   units: any = [];
   states: any = [];
+  cities: any = [];
   mms: any = [];
   conditions: any = [];
+  genders: any = [];
+  relations: any = [];
   categories: any = [];
   pbks: any = [];
   aawak_types: any = [];
@@ -42,17 +64,17 @@ export class ExcelImportComponent implements OnInit {
   secondHeader: any = false;
   header1: any = 0;
   header2: any = null;
-  stepNo: any = 0;
   excelData: any = [];
   unmatchedData: any = [];
   newInsertedData: any = [];
   duplicateDate: any = [];
   willUpdateData: any = [];
+  updateFailData: any = [];
   rejectedData: any = [];
   settings: any;
   constructor(
     public EIService: ExcelImportService,
-    public excelExportService:ExcelExportService,
+    public excelExportService: ExcelExportService,
     private http: HttpService,
     private api: ApiService,
     private gs: GlobalService,
@@ -64,10 +86,14 @@ export class ExcelImportComponent implements OnInit {
       this.itemAll = result.itemmix ? result.itemmix : [];
       this.items = result.itemmix ? result.itemmix : [];
       this.categories = result.category ? result.category : [];
+      this.subitem_lists = result.subitem_list ? result.subitem_list : [];
       this.units = result.unit ? result.unit : [];
       this.states = result.state ? result.state : [];
+      this.cities = result.city ? result.city : [];
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];
+      this.genders = result.gender ? result.gender : [];
+      this.relations = result.relation ? result.relation : [];
       // this.departments = result.department ? result.department : [];
       this.pbks = result.pbk ? result.pbk : [];
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
@@ -88,22 +114,23 @@ export class ExcelImportComponent implements OnInit {
       }
     }
 
+    if (this.excelFile) {
+      this.excelImport(this.excelFile)
+    }
+
   }
 
   ngOnChange(changes: SimpleChanges) {
     console.log(changes);
-    // if (changes.importType.currentValue) {
+    if (changes.excelFile) {
+      this.excelImport(changes.excelFile)
+    }
+  }
 
-    //   for(let i in this.EIService.importList){
-    //     if(this.EIService.importList[i].name == changes.importType.currentValue){
-    //       console.log(this.EIService.importList[i]);
 
-    //       this.importType = this.EIService.importList[i];
-    //       this.importTypeChanged(this.EIService.importList[i]);
-    //       break;
-    //     }
-    //   }
-    // }
+  finish() {
+    this.import$.complete();
+    this.response.emit(true);
   }
 
   importTypeChanged(ev: any) {
@@ -173,12 +200,24 @@ export class ExcelImportComponent implements OnInit {
           //verify header found in excel and excel columns index saved in config?
           if (this.headerConfig[j].index) {
             //assign excel data to matched object key and prepare whole row object
-            row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index];
+            if (this.headerConfig[j].type == "array") {
+              row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index].split(",");
+            } else {
+              row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index];
+            }
           }
         }
         // push object into array.
         this.excelArrObj.push(row);
       }
+    }
+
+    if (this.importType.name == 'subitem_list') {
+      this.excelArrObj = this.excelArrObj.filter((e: { subitem_hin: string | null; }) => e.subitem_hin)
+    } else if (this.importType.name == 'item') {
+      this.excelArrObj = this.excelArrObj.filter((e: { subitem_hin: string | null; }) => !e.subitem_hin)
+    } else if (this.importType.name == 'subitem') {
+      this.excelArrObj = this.excelArrObj.filter((e: { subitem_hin: string | null; }) => e.subitem_hin)
     }
     this.stepNo = 2;
     this.isLoader = false;
@@ -186,7 +225,7 @@ export class ExcelImportComponent implements OnInit {
 
   verifyExcelData() {
     this.isLoader = true;
-    this.http.put(this.api.getUrl('EXCELIMPORT') + 'verify/' + this.auth.webUser.dept_id, { excelData: this.excelArrObj, config: this.headerConfig }).subscribe((res: any) => {
+    this.http.put(this.api.getUrl('EXCELIMPORT') + 'verify/' + this.auth.webUser.dept_id, { importType: this.importType, excelData: this.excelArrObj, config: this.headerConfig, itemConfig: this.EIService.config.item }).subscribe((res: any) => {
       if (res && res.excelData) {
         this.excelArrObj = res.excelData;
         this.unmatchedData = res.correctionList;
@@ -222,16 +261,33 @@ export class ExcelImportComponent implements OnInit {
 
   correctionSubmit(data: any, index: any) {
     let conf = this.headerList.filter((h: { ref_table: any; }) => h.ref_table == data.type);
+    console.log("data", data, "conf", conf);
+    console.log(this.excelArrObj);
+
 
     for (let i in this.excelArrObj) {
       for (let j in conf) {
         if (this.excelArrObj[i][conf[j].name] == data.value) {
           this.excelArrObj[i][conf[j].ref_field] = data.id;
-          this.excelArrObj[i][conf[j].ref_data] = data[conf[j].ref_data];
         }
       }
     }
     this.unmatchedData[index].done = true;
+    this.unmatchedData[index].ignore = false;
+  }
+
+  async processImport(i: number = 0) {
+    if (await this.verifyForRejection(this.excelArrObj[i])) {
+      this.rejectedData.push(this.excelArrObj[i]);
+      this.import$.next(0);
+    } else {
+      this.http.put(this.api.getUrl('EXCELIMPORT') + 'final/' + this.auth.webUser.dept_id, { importType: this.importType, headerList: this.headerList, excelData: this.excelArrObj[i] }).subscribe((res: any) => {
+        this.import$.next(res);
+      }, (err: any) => {
+        this.rejectedData.push(this.excelArrObj[i]);
+        this.import$.next(0);
+      });
+    }
   }
 
   async finalImport() {
@@ -240,24 +296,34 @@ export class ExcelImportComponent implements OnInit {
     this.duplicateDate = []
     this.rejectedData = []
     this.swHeaderList = this.getSwHeaderList();
-    for (let i in this.excelArrObj) {
-      if (await this.verifyForRejection(this.excelArrObj[i])) {
-        this.rejectedData.push(this.excelArrObj[i]);
-      } else {
-        this.http.put(this.api.getUrl('EXCELIMPORT') + 'final/' + this.auth.webUser.dept_id, { importType: this.importType, headerList: this.headerList, excelData: this.excelArrObj[i] }).subscribe((res: any) => {
-          switch (res.result.status) {
-            case 'inserted': this.newInsertedData.push(res.result.data.newData)
-              break;
-            case 'update': this.willUpdateData.push(res.result.data)
-              break;
-            case 'duplicate': this.duplicateDate.push(res.result.data)
-              break;
-            default: this.rejectedData.push(res.result.data)
-          }
+    this.processedCount = 0;
 
-        });
+    this.import$.subscribe((res: any) => {
+      this.processedCount++;
+      this.progressStyle = "width:" + (this.processedCount * 100) / this.excelArrObj.length + "%;";
+      if (res) {
+        switch (res.result.status) {
+          case 'inserted': this.newInsertedData.push(res.result.data.newData)
+            break;
+          case 'update': this.willUpdateData.push(res.result.data)
+            break;
+          case 'duplicate': this.duplicateDate.push(res.result.data)
+            break;
+          default: this.rejectedData.push(res.result.data)
+        }
       }
-    }
+
+      if (this.excelArrObj.length > this.processedCount) {
+        this.processImport(this.processedCount);
+      } else {
+        this.import$.complete();
+        this.stepNo = 4;
+        this.toastr.success("import complete. test your result")
+      }
+
+    });
+
+    await this.processImport();
 
   }
 
@@ -265,6 +331,10 @@ export class ExcelImportComponent implements OnInit {
     for (let j in this.headerList) {
       if (this.headerList[j].not_null && !data[this.headerList[j].name]) {
         return true;
+      } else if (this.headerList[j].ref_table && this.headerList[j].type == "array" && (data[this.headerList[j].name] && data[this.headerList[j].ref_field])) {
+        if (data[this.headerList[j].ref_field].includes(null)) {
+          return true;
+        }
       } else if (this.headerList[j].ref_table && (data[this.headerList[j].name] && !data[this.headerList[j].ref_field])) {
         return true;
       }
@@ -272,14 +342,39 @@ export class ExcelImportComponent implements OnInit {
     return false;
   }
 
-  updateData() {
-    for (let i in this.willUpdateData) {
-      this.http.put(this.api.getUrl('EXCELIMPORT') + 'update/' + this.auth.webUser.dept_id, { importType: this.importType, headerList: this.headerList, excelData: this.willUpdateData[i] }).subscribe((res: any) => {
-        console.log(res);
+  processUpdate(i: number = 0) {
+    this.http.put(this.api.getUrl('EXCELIMPORT') + 'update/' + this.auth.webUser.dept_id, { importType: this.importType, headerList: this.headerList, excelData: this.willUpdateData[i] }).subscribe((res: any) => {
+      if (res.success) {
         this.willUpdateData[i].status = true;
+      } else {
+        this.updateFailData.push(this.willUpdateData[i]);
+      }
+      this.update$.next(res);
+    }, (err) => {
+      this.updateFailData.push(this.willUpdateData[i]);
+      this.update$.next(0);
+    });
+  }
 
-      });
-    }
+  updateData() {
+    this.processedCount = 0;
+    this.progressStyle = "width: 0%";
+    this.processing = true;
+
+    this.update$.subscribe((res: any) => {
+      this.processedCount++;
+      this.progressStyle = "background-color: #ffbc00 !important; width:" + (this.processedCount * 100) / this.willUpdateData.length + "%;";
+
+      if (this.willUpdateData.length > this.processedCount) {
+        this.processUpdate(this.processedCount);
+      } else {
+        this.update$.complete();
+        this.stepNo = 5;
+        this.toastr.success("Update complete, check your result");
+      }
+    })
+
+    this.processUpdate();
   }
 
   getHeaderList() {
@@ -321,9 +416,9 @@ export class ExcelImportComponent implements OnInit {
     }
   }
 
-  exportToExcel() {        
+  exportToExcel() {
     let date = new Date();
-    
+
     this.excelExportService.exportAsExcelFile(this.rejectedData, this.importType.name + '_rejected_excel_import_data_' + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
   }
 

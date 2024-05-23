@@ -11,7 +11,7 @@
             </span>
             <span class="hk mx-2"><strong><u>HISAB KITAB</u></strong>
             </span>
-            <span>(v16)</span>
+            <span>(v19.0)</span>
          </a>
          <!-- <a routerLink="dashboard" class="topnav-logo">
             <span class="topnav-logo-lg">
@@ -244,18 +244,16 @@
                         <i class="uil-layer-group me-1"></i>Reports
                      </a>
                   </li> -->
-                  <li class="nav-item dropdown">
+                  <li class="nav-item dropdown" *ngIf="settings.report.visible">
                      <a class="nav-link dropdown-toggle arrow-none" id="topnav-apps" role="button"
                         data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="uil-apps me-1"></i>Reports <div class="arrow-down"></div>
                      </a>
                      <div class="dropdown-menu" aria-labelledby="topnav-apps">
-                        <a class="dropdown-item" routerLinkActive="active" routerLink="report-at">Report Awk Type Saar</a>
-                        <a class="dropdown-item" routerLinkActive="active" routerLink="report-jt">Report Jwk Type Saar</a>
-                        <a class="dropdown-item" routerLinkActive="active" routerLink="report-str-stk">Store Report Stock</a>
-                        <!-- <a class="dropdown-item" routerLinkActive="active" routerLink="report-urs">City</a>
-                        <a class="dropdown-item" routerLinkActive="active" routerLink="report-nps">State</a>
-                        <a class="dropdown-item" routerLinkActive="active" routerLink="report-np">Country</a> -->
+                        <a class="dropdown-item" *ngIf="settings.report.report_at" routerLinkActive="active" routerLink="report-at">Aawak Type Saar</a>
+                        <a class="dropdown-item" *ngIf="settings.report.report_jt" routerLinkActive="active" routerLink="report-jt">Jawak Type Saar</a>
+                        <a class="dropdown-item" *ngIf="settings.report.report_str_stk" routerLinkActive="active" routerLink="report-str-stk">Store Stock</a>
+                        <a class="dropdown-item" *ngIf="settings.report.report_kh" routerLinkActive="active" routerLink="report-kh-saar">Khet Saar</a>
                      </div>
                   </li>
                   <li class="nav-item" *ngIf="settings.point.visible">
