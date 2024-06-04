@@ -1365,7 +1365,8 @@ const subitem = {
     select:
         `select * from subitem ?`
     , select_full:
-        `select subitem.*, json_group_array(cat.category_hin) as categories_hin,
+        `select subitem.*, json_group_array(cat.category_hin) as categories_hin, 
+        json_group_array(cat.category_eng) as categories_eng,
         unit.unit_full, unit.unit_short, 
         item.item_eng, item.item_hin, 
         subitem_list.subitem_eng, subitem_list.subitem_hin, subitem_list.subitem_roman
@@ -1373,7 +1374,7 @@ const subitem = {
         left join category cat on cat._id = json_each.value
         left join unit on unit._id = subitem.unit_id
         left join item on  item._id = subitem.item_id
-        left join subitem_list on  subitem_list._id = subitem.subitem_list_id ? group by subitem._id limit @limit offset @offset`
+        left join subitem_list on subitem_list._id = subitem.subitem_list_id ? group by subitem._id # limit @limit offset @offset`
     , insert:
         `insert into subitem (
         item_id,

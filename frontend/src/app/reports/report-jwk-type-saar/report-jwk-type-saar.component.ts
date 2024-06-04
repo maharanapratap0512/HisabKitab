@@ -93,7 +93,7 @@ export class ReportJwkTypeSaarComponent {
     let doc: any = new jsPDF();
 
     // add the font to jsPDF
-    doc.addFileToVFS("MangalFont.ttf", this.gs.aksharFont);
+    // doc.addFileToVFS("MangalFont.ttf", this.gs.aksharFont);
     doc.addFont("MangalFont.ttf", "MangalFont", "normal");
     doc.setFont("MangalFont");
 

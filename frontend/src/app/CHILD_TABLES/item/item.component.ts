@@ -41,6 +41,7 @@ export class ItemComponent implements OnInit {
   baseurl: any;
   settings: any = {};
   auto_close: any = true;
+  del_permitted_date = new Date('2024-06-10');
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
@@ -62,7 +63,6 @@ export class ItemComponent implements OnInit {
     });
     this.baseurl = this.api.getUrl('BASE');
     this.settings = this.auth.webUser.settings.item;
-
   }
 
   FilterActive() {

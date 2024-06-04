@@ -24,10 +24,12 @@ router.get('/', async (req, res, next) => {
 // get subitem 
 router.get('/:dept_id', async (req, res, next) => {
     try {
-        await DB.getList('subitem', { full: true, dept_id: req.params.dept_id }).then((resolve) => {
+        await DB.getList('subitem', { full: true, dept_id: req.params.dept_id, orderBy: "updated_at desc" }).then((resolve) => {
             for (let i = 0; i < resolve.data.length; i++) {
                 resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
-                resolve.data[i].categories = resolve.data[i].categories ? JSON.parse(resolve[i].categories) : [];
+                resolve.data[i].categories = resolve.data[i].categories ? JSON.parse(resolve.data[i].categories) : [];
+                resolve.data[i].categories_hin = resolve.data[i].categories_hin ? JSON.parse(resolve.data[i].categories_hin) : [];
+                resolve.data[i].categories_eng = resolve.data[i].categories_eng ? JSON.parse(resolve.data[i].categories_eng) : [];
             }
             res.json({
                 success: true,

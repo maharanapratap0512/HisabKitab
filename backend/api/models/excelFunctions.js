@@ -501,7 +501,6 @@ class ExcelFunctions {
 
    async updateExcelData(type, data) {
       return await this.Fn.updateExcelData(type, await this.setFormData(this[type.name + '_form'], data), this.dept_id);
-
    }
 
    async setFormData(formObj, data) {

@@ -116,14 +116,14 @@ export class JawakEntryComponent implements OnInit {
         product_id: changes.getData.currentValue.product_id,
         condition_id: changes.getData.currentValue.condition_id,
         qty: changes.getData.currentValue.qty,
-        rate: changes.getData.currentValue.rate,
-        actual_amt: changes.getData.currentValue.actual_amt,
+        rate: changes.getData.currentValue.rate ? changes.getData.currentValue.rate : null,
+        actual_amt: changes.getData.currentValue.actual_amt ? changes.getData.currentValue.actual_amt : null,
         company_name: changes.getData.currentValue.company_name,
         jawak_type_id: changes.getData.currentValue.jawak_type_id,
         unit_id: changes.getData.currentValue.unit_id,
         description: changes.getData.currentValue.description,
-        parchi_place: changes.getData.currentValue.parchi_place,
-        sell_repair_place: changes.getData.currentValue.sell_repair_place,
+        parchi_place: changes.getData.currentValue.parchi_place ? changes.getData.currentValue.parchi_place : null,
+        sell_repair_place: changes.getData.currentValue.sell_repair_place ? changes.getData.currentValue.sell_repair_place : null,
         aawak_ref_id: changes.getData.currentValue.aawak_ref_id,
         nimitt_id: changes.getData.currentValue.nimitt_id,
         dept_id: changes.getData.currentValue.dept_id,
@@ -160,8 +160,8 @@ export class JawakEntryComponent implements OnInit {
         actual_amt: this.aawakRef.actual_amt ? this.aawakRef.actual_amt : null,
         unit_id: this.aawakRef.unit_id,
         description: this.aawakRef.description,
-        parchi_place: this.aawakRef.parchi_place,
-        sell_repair_place: this.aawakRef.sell_repair_place,
+        parchi_place: this.aawakRef.parchi_place ? this.aawakRef.parchi_place : null,
+        sell_repair_place: this.aawakRef.sell_repair_place ? this.aawakRef.sell_repair_place : null,
         aawak_ref_id: (this.aawakRef._id ? this.aawakRef._id : null),
         nimitt_id: this.aawakRef.nimitt_id ? this.aawakRef.nimitt_id : null,
         dept_id: this.aawakRef.dept_id,
@@ -300,7 +300,7 @@ export class JawakEntryComponent implements OnInit {
   }
 
   jawakFormSubmit() {
-    console.log("clicked");
+    // console.log("clicked", this.jawakForm.value);
 
     if (this.jawakForm.valid) {
       console.log("form valid");
@@ -311,7 +311,7 @@ export class JawakEntryComponent implements OnInit {
           this.gs.Lists.pbk.unshift(data['result'])
           this.jawakForm.reset({ active: true });
           this.isLoader = false;
-          this.toastr.success("PBK Added Successfully.")
+          this.toastr.success("Jawak Added Successfully.")
           this.response.emit(data['result']);
         } else {
           this.toastr.error(data['message']);

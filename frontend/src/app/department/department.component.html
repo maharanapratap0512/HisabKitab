@@ -134,14 +134,14 @@
                   </span>
                 </span>
               </a>
-              <!-- <a class="nav-link" id="v-pills-subitem-tab" data-bs-toggle="pill" href="#v-pills-subitem"
-                                role="tab" aria-controls="v-pills-subitem" aria-selected="false" >
-                                <i class="mdi mdi-settings-outline d-md-none d-block"></i>
-                                <span class="d-none d-md-block">Subitem
-                                    <span class="badge bg-primary rounded-pill float-end">{{(deptConf.subitem &&
-                                        deptConf.subitem.config_value) ? deptConf.subitem.config_value.length: ''}}</span>
-                                </span>
-                            </a> -->
+              <a class="nav-link" id="v-pills-subitem-tab" data-bs-toggle="pill" href="#v-pills-subitem" role="tab"
+                aria-controls="v-pills-subitem" aria-selected="false">
+                <i class="mdi mdi-settings-outline d-md-none d-block"></i>
+                <span class="d-none d-md-block">Subitem
+                  <span class="badge bg-primary rounded-pill float-end">{{(deptConf.subitem &&
+                    deptConf.subitem.config_value) ? deptConf.subitem.config_value.length: 0}}</span>
+                </span>
+              </a>
               <a class="nav-link" id="v-pills-ajtypes-tab" data-bs-toggle="pill" href="#v-pills-ajtypes" role="tab"
                 aria-controls="v-pills-ajtypes" aria-selected="false" *ngIf="dept_id">
                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
@@ -210,7 +210,8 @@
                               <div class="row p-1 ps-3" style="width: 99.7%;">
                                 <div class="col-2 col-md-2 col-sm-4 ps-0" *ngFor="let cntrl of settingsUI[row.key]">
                                   <div class="form-check form-switch">
-                                    <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll[row.key][cntrl.colName]"
+                                    <input type="checkbox" class="form-check-input"
+                                      [(ngModel)]="settingsAll[row.key][cntrl.colName]"
                                       [ngModelOptions]="{standalone: true}">
                                     <label class="form-check-label" for="customSwitch2">{{cntrl.title}}</label>
                                   </div>
@@ -1836,7 +1837,7 @@
                         <td>{{data.subitem_hin}}</td>
                         <td>{{data.subitem_eng}}</td>
                         <td>{{data.item_code}}</td>
-                        <td>{{data.category_hin}} : {{data.category_eng}}</td>
+                        <td>{{data.categories_hin ? data.categories_hin : '' }}</td>
                         <td>{{data.unit_short}} : {{data.unit_full}}</td>
                         <td>{{data.extra_note}}</td>
                       </tr>

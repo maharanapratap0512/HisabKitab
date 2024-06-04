@@ -216,7 +216,7 @@ export class DepartmentComponent implements OnInit {
       }
     }
 
-    this.deptSelected(this.auth.webUser.dept_id);
+    this.deptSelected(null);
 
     this.applySettings(this.auth.webUser.settings);
 
@@ -248,6 +248,8 @@ export class DepartmentComponent implements OnInit {
   }
 
   async deptSelected(ev: any) {
+    this.isLoader = true;
+    this.deptConf = {};
     if (!ev) {
       ev = this.auth.webUser.dept_id;
     }
@@ -257,7 +259,6 @@ export class DepartmentComponent implements OnInit {
       this.applySettings(getdept.settings);
     }
 
-    this.isLoader = true;
     this.http.get(this.api.getUrl('DEPTCONFIG') + ev).subscribe((data) => {
       if (data['result'] && data['success']) {
         for (let i of data['result']) {
@@ -271,6 +272,7 @@ export class DepartmentComponent implements OnInit {
         this.loadMM();
         this.loadCategory();
         this.loadItemMix();
+        this.loadSubitems();
         // console.log(this.deptConf);
 
         this.isLoader = false;
@@ -1018,7 +1020,7 @@ export class DepartmentComponent implements OnInit {
 
   subitemCatSelected(ev: any) {
     if (ev) {
-      this.subitems = this.subitemsAll.filter((i: { category_id: any; }) => i.category_id == ev);
+      this.subitems = this.subitemsAll.filter((i: { categoryies: any; }) => i.categoryies.includes(ev));
       this.selSubitem = false;
       // console.log("all",this.subitemsAll);
       // console.log("mm",this.subitems);
@@ -1221,15 +1223,22 @@ export class DepartmentComponent implements OnInit {
   //     }
   //   });
   // }
-  // loadSubitems() {
-  //   this.http.get(this.api.getUrl('SUBITEM') + 1).subscribe((data) => {
-  //     if (data['result'] && data['success']) {
+  loadSubitems() {
+    this.http.get(this.api.getUrl('SUBITEM') + 1).subscribe((data) => {
+      if (data['result'] && data['success']) {
+        if (this.deptConf.subitem && this.deptConf.subitem.config_value) {
+          for (let i in data['result']) {
+            if (this.deptConf.subitem.config_value.includes(data['result'][i]._id)) {
+              data['result'][i].chk = true;
+            }
+          }
+        }
+        this.subitems = data['result'];
+        this.subitemsAll = data['result'];
+      }
+    });
+  }
 
-  //       this.subitems = data['result'];
-  //       this.subitemsAll = data['result'];
-  //     }
-  //   });
-  // }
   loadAJTypes() {
     this.http.get(this.api.getUrl('AJTYPE') + 1).subscribe((data) => {
       if (data['result'] && data['success']) {
@@ -1314,9 +1323,9 @@ export class DepartmentComponent implements OnInit {
     }
   }
 
-  itemmixRowClicked(i: any, chk: boolean, id: any) {
+  itemmixRowClicked(i: any, chk: boolean, id: any, recall: boolean = false) {
 
-    if (this.termItemmix) {
+    if (this.termItemmix || recall) {
       i = this.itemmix.findIndex((i: { _id: any; }) => i._id == id);
     }
     if (chk) {
@@ -1324,8 +1333,9 @@ export class DepartmentComponent implements OnInit {
       this.itemmix[i].chk = false;
       for (let j in this.itemmix[i].subitems) {
         if (this.itemmix[i].subitems[j].chk) {
-          this.itemmix[i].subitems[j].chk = false;
-          this.deptConf.subitem.config_value.splice(this.deptConf.subitem.config_value.indexOf(this.itemmix[i].subitems[j]._id), 1)
+          // this.itemmix[i].subitems[j].chk = false;
+          // this.deptConf.subitem.config_value.splice(this.deptConf.subitem.config_value.indexOf(this.itemmix[i].subitems[j]._id), 1)
+          this.subitemmixRowClicked(i, j, chk, id, this.itemmix[i].subitems[j]._id);
         }
       }
     }
@@ -1335,9 +1345,9 @@ export class DepartmentComponent implements OnInit {
     }
   }
 
-  subitemmixRowClicked(itemIndex: any, subitemIndex: any, chk: boolean, itemId: any, subitemId: any,) {
+  subitemmixRowClicked(itemIndex: any, subitemIndex: any, chk: boolean, itemId: any, subitemId: any, recall: boolean = false) {
 
-    if (this.termItemmix) {
+    if (this.termItemmix || recall) {
       itemIndex = this.itemmix.findIndex((i: { _id: any; }) => i._id == itemId);
       subitemIndex = this.itemmix[itemIndex].subitems.findIndex((s: { _id: any; }) => s._id == subitemId);
 
@@ -1353,22 +1363,17 @@ export class DepartmentComponent implements OnInit {
         this.itemmix[itemIndex].chk = true;
         this.deptConf.item.config_value.push(this.itemmix[itemIndex]._id)
       }
-
     }
+    this.subitems[this.subitems.findIndex((i: { _id: any; }) => i._id == subitemId)].chk = !chk;
   }
 
   subitemRowClicked(i: any, chk: boolean, id: any) {
     if (this.termSubitem) {
       i = this.subitems.findIndex((i: { _id: any; }) => i._id == id);
     }
-    if (chk) {
-      this.deptConf.subitem.config_value.splice(this.deptConf.subitem.config_value.indexOf(this.subitems[i]._id), 1);
-      this.subitems[i].chk = false;
-    }
-    else {
-      this.deptConf.subitem.config_value.push(this.subitems[i]._id);
-      this.subitems[i].chk = true;
-    }
+    this.subitems[i].chk = !chk;
+    this.subitemmixRowClicked(0, 0, chk, this.subitems[i].item_id, id, true);
+
   }
 
   ajtypeRowClicked(i: any, chk: boolean, id: any) {
@@ -1442,10 +1447,11 @@ export class DepartmentComponent implements OnInit {
     let dept_id = this.dept_id || this.auth.webUser.dept_id;
 
     if (this.settings.department.settings) {
-      if(dept_id != 1){
+      if (dept_id != 1) {
         this.settingsAll.department.settings = false;
         this.settingsAll.department.add = false;
       }
+
       // this.deptConf.settings.config_value = this.settingsAll;
       let body = {
         query: { _id: dept_id },
@@ -1466,7 +1472,6 @@ export class DepartmentComponent implements OnInit {
         }
       });
     }
-
     this.http.put(this.api.getUrl('DEPTCONFSAVE'), this.deptConf).subscribe((data: any) => {
       if (data && data['success']) {
         // this.isLoader = false;
