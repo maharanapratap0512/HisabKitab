@@ -1,3 +1,4 @@
+
 import { Component } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import jsPDF from 'jspdf';
@@ -11,11 +12,11 @@ import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 
 @Component({
-  selector: 'app-report-kh-saar',
-  templateUrl: './report-kh-saar.component.html',
-  styleUrls: ['./report-kh-saar.component.scss']
+  selector: 'app-report-kh-itemwise',
+  templateUrl: './report-kh-itemwise.component.html',
+  styleUrls: ['./report-kh-itemwise.component.scss']
 })
-export class ReportKhSaarComponent {
+export class ReportKhItemwiseComponent {
   isLoader: any = false;
   loadingStatus: any = 'मैं आत्मा शांत स्वरूप हूँ ।';
   reportHeading: any = '';
@@ -24,6 +25,8 @@ export class ReportKhSaarComponent {
   months: any = [];
   monthsSel: any = [];
   khets: any = [];
+  items: any = [];
+  subitems: any = [];
   mms: any = [];
   conditions: any = [];
   categories: any = [];
@@ -45,6 +48,7 @@ export class ReportKhSaarComponent {
     this.spinner.show();
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
+      this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
       this.categories = result.category ? result.category : [];
 
@@ -60,8 +64,9 @@ export class ReportKhSaarComponent {
 
   setHeading() {
     this.reportHeading = ''
-    for (let mm of this.reportData) {
-      this.reportHeading += mm.mm_hin + ",";
+    this.reportHeading += this.reportData[0].item_hin + ",";
+    for (let item of this.reportData) {
+      this.reportHeading += item.subitem_hin + ", ";
     }
     if (this.filterBody.year && this.filterBody.month) {
       this.reportHeading += ' का ' + this.filterBody.year + '-' + this.months[this.filterBody.month - 1].name_hin + " का आवक"
@@ -72,35 +77,46 @@ export class ReportKhSaarComponent {
     }
   }
 
+  itemSelected(ev: any) {
+    if (ev) {
+      let item = this.items.find((i: { _id: any; }) => i._id == ev);
+      if (item) {
+        this.subitems = item.subitems;
+      }
+    } else {
+      this.subitems = [];
+      this.filterBody.subitem_id = null;
+    }
+  }
+
   searchReports() {
-    if (this.filterBody.mm_id.length > 0) {
+    if (this.filterBody.item_id) {
 
       this.loadingStatus = 'Generating Report....'
       this.isLoader = true;
-      this.http.put(this.api.getUrl('REPORT_KH') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+      this.http.put(this.api.getUrl('REPORT_KH_IW') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
         if (data.success) {
           this.reportData = data.result;
           this.setHeading();
           for (let i in this.reportData) {
-            for (let k in this.reportData[i].itemData) {
-              this.reportData[i].itemData[k].categories_hin = '';
-              this.reportData[i].itemData[k].categories_eng = '';
-              if (this.reportData[i].itemData[k].arr_subitem_categories && this.reportData[i].itemData[k].arr_subitem_categories.length > 0) {
-                for (let j in this.categories) {
-                  if (this.reportData[i].itemData[k].arr_subitem_categories.includes(this.categories[j]._id)) {
-                    this.reportData[i].itemData[k].categories_hin += this.categories[j].category_hin + ', ';
-                    this.reportData[i].itemData[k].categories_eng += this.categories[j].category_eng + ', ';
-                  }
-                }
-              } else {
-                for (let j in this.categories) {
-
-                  if (this.reportData[i].itemData[k].arr_item_categories.includes(this.categories[j]._id)) {
-                    this.reportData[i].itemData[k].categories_hin += this.categories[j].category_hin + ', ';
-                    this.reportData[i].itemData[k].categories_eng += this.categories[j].category_eng + ', ';
-                  }
+            this.reportData[i].categories_hin = '';
+            this.reportData[i].categories_eng = '';
+            if (this.reportData[i].arr_subitem_categories && this.reportData[i].arr_subitem_categories.length > 0) {
+              for (let j in this.categories) {
+                if (this.reportData[i].arr_subitem_categories.includes(this.categories[j]._id)) {
+                  this.reportData[i].categories_hin += this.categories[j].category_hin + ', ';
+                  this.reportData[i].categories_eng += this.categories[j].category_eng + ', ';
                 }
               }
+            } else {
+              for (let j in this.categories) {
+
+                if (this.reportData[i].arr_item_categories.includes(this.categories[j]._id)) {
+                  this.reportData[i].categories_hin += this.categories[j].category_hin + ', ';
+                  this.reportData[i].categories_eng += this.categories[j].category_eng + ', ';
+                }
+              }
+
             }
           }
           this.isLoader = false;
@@ -112,7 +128,7 @@ export class ReportKhSaarComponent {
 
       });
     } else {
-      this.toastr.error('कम से कम एक खेत को चुनना अनिवार्य है। ')
+      this.toastr.error('कम से कम एक आइटम को चुनना अनिवार्य है। ')
     }
   }
 
@@ -123,31 +139,32 @@ export class ReportKhSaarComponent {
       textEncoding: 'utf-8'
     });
 
-
     let data: any = [];
     let count = 1;
     for (let i in this.reportData) {
-      for (let j in this.reportData[i].itemData) {
+      for (let j in this.reportData[i].khetData) {
         let row: any = {
           sr_no: count++,
-          dept_code: this.reportData[i].itemData[j].dept_code,
-          khet_name: this.reportData[i].mm_eng,
-          categories_eng: this.reportData[i].itemData[j].categories_eng,
-          item_eng: this.reportData[i].itemData[j].item_eng,
-          subitem_eng: this.reportData[i].itemData[j].subitem_eng,
-          unit_short: this.reportData[i].itemData[j].unit_short,
-          sum_qty: this.reportData[i].itemData[j].sum_qty,
-          sum_amt: this.reportData[i].itemData[j].sum_amt,
+          dept_code: this.reportData[i].dept_code,
+          categories_eng: this.reportData[i].categories_eng,
+          item_eng: this.reportData[i].item_eng,
+          subitem_eng: this.reportData[i].subitem_eng,
+          state: this.reportData[i].khetData[j].state_eng,
+          khet_name: this.reportData[i].khetData[j].mm_eng,
+          unit_short: this.reportData[i].khetData[j].unit_short,
+          sum_qty: this.reportData[i].khetData[j].sum_qty,
+          sum_amt: this.reportData[i].khetData[j].sum_amt,
         };
         data.push(row)
       }
       let row: any = {
         sr_no: '#',
         dept_code: '---',
-        khet_name: this.reportData[i].mm_eng,
-        categories_eng: '-----',
-        item_eng: '-----',
-        subitem_eng: '--TOTAL--',
+        categories_eng: this.reportData[i].categories_eng,
+        item_eng: this.reportData[i].item_eng,
+        subitem_eng: this.reportData[i].subitem_eng,
+        state: '-----',
+        khet_name: '--TOTAL--',
         unit_short: '-----',
         sum_qty: '-----',
         sum_amt: (this.reportData[i].total_amt ? this.reportData[i].total_amt : 0) + ' INR',
@@ -157,14 +174,16 @@ export class ReportKhSaarComponent {
     let columns = [
       { header: 'Sr No', dataKey: 'sr_no' },
       { header: 'Dept', dataKey: 'dept_code' },
-      { header: 'Khet Name', dataKey: 'khet_name' },
       { header: 'Category', dataKey: 'categories_eng' },
       { header: 'Item', dataKey: 'item_eng' },
       { header: 'Subitem', dataKey: 'subitem_eng' },
+      { header: 'State', dataKey: 'state' },
+      { header: 'Khet Name', dataKey: 'khet_name' },
       { header: 'Unit', dataKey: 'unit_short' },
       { header: 'Qty', dataKey: 'sum_qty' },
       { header: 'Amount', dataKey: 'sum_amt' },
     ];
+    console.log(data);
 
     autoTable(doc, {
       // columnStyles: { europe: { halign: 'center' } }, // European countries centered
@@ -179,27 +198,29 @@ export class ReportKhSaarComponent {
     let data: any = [];
     let count = 1;
     for (let i in this.reportData) {
-      for (let j in this.reportData[i].itemData) {
+      for (let j in this.reportData[i].khetData) {
         let row: any = {
           sr_no: count++,
-          dept_code: this.reportData[i].itemData[j].dept_code,
-          khet_name: this.reportData[i].mm_hin,
-          categories_hin: this.reportData[i].itemData[j].categories_hin,
-          item_hin: this.reportData[i].itemData[j].item_hin,
-          subitem_hin: this.reportData[i].itemData[j].subitem_hin,
-          unit_short: this.reportData[i].itemData[j].unit_short,
-          sum_qty: this.reportData[i].itemData[j].sum_qty,
-          sum_amt: this.reportData[i].itemData[j].sum_amt,
+          dept_code: this.reportData[i].dept_code,
+          categories_hin: this.reportData[i].categories_hin,
+          item_hin: this.reportData[i].item_hin,
+          subitem_hin: this.reportData[i].subitem_hin,
+          state: this.reportData[i].khetData[j].state_hin,
+          khet_name: this.reportData[i].khetData[j].mm_hin,
+          unit_short: this.reportData[i].khetData[j].unit_short,
+          sum_qty: this.reportData[i].khetData[j].sum_qty,
+          sum_amt: this.reportData[i].khetData[j].sum_amt,
         };
         data.push(row)
       }
       let row: any = {
         sr_no: '#',
         dept_code: '---',
-        khet_name: this.reportData[i].mm_hin,
-        categories_hin: '-----',
-        item_hin: '-----',
-        subitem_hin: '--TOTAL--',
+        categories_hin: this.reportData[i].categories_hin,
+        item_hin: this.reportData[i].item_hin,
+        subitem_hin: this.reportData[i].subitem_hin,
+        state: '-----',
+        khet_name: '--TOTAL--',
         unit_short: '-----',
         sum_qty: '-----',
         sum_amt: (this.reportData[i].total_amt ? this.reportData[i].total_amt : 0) + ' INR',
@@ -213,27 +234,29 @@ export class ReportKhSaarComponent {
     let data: any = [];
     let count = 1;
     for (let i in this.reportData) {
-      for (let j in this.reportData[i].itemData) {
+      for (let j in this.reportData[i].khetData) {
         let row: any = {
           sr_no: count++,
-          dept_code: this.reportData[i].itemData[j].dept_code,
-          khet_name: this.reportData[i].mm_eng,
-          categories_eng: this.reportData[i].itemData[j].categories_eng,
-          item_eng: this.reportData[i].itemData[j].item_eng,
-          subitem_eng: this.reportData[i].itemData[j].subitem_eng,
-          unit_short: this.reportData[i].itemData[j].unit_short,
-          sum_qty: this.reportData[i].itemData[j].sum_qty,
-          sum_amt: this.reportData[i].itemData[j].sum_amt,
+          dept_code: this.reportData[i].dept_code,
+          categories_eng: this.reportData[i].categories_eng,
+          item_eng: this.reportData[i].item_eng,
+          subitem_eng: this.reportData[i].subitem_eng,
+          state: this.reportData[i].khetData[j].state_eng,
+          khet_name: this.reportData[i].khetData[j].mm_eng,
+          unit_short: this.reportData[i].khetData[j].unit_short,
+          sum_qty: this.reportData[i].khetData[j].sum_qty,
+          sum_amt: this.reportData[i].khetData[j].sum_amt,
         };
         data.push(row)
       }
       let row: any = {
         sr_no: '#',
         dept_code: '---',
-        khet_name: this.reportData[i].mm_eng,
-        categories_eng: '-----',
-        item_eng: '-----',
-        subitem_eng: '--TOTAL--',
+        categories_eng: this.reportData[i].categories_eng,
+        item_eng: this.reportData[i].item_eng,
+        subitem_eng: this.reportData[i].subitem_eng,
+        state: '-----',
+        khet_name: '--TOTAL--',
         unit_short: '-----',
         sum_qty: '-----',
         sum_amt: (this.reportData[i].total_amt ? this.reportData[i].total_amt : 0) + ' INR',

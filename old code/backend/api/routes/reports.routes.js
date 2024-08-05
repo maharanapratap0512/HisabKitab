@@ -296,7 +296,7 @@ router.put('/report_khet_saar/:dept_id', async (req, res, next) => {
             }
 
             let conditionString = `${conditionStringCommon} AND aawak.aawak_mm_id = ${kh_saar[i].aawak_mm_id}`;
-            sql = `select aawak.*, round(avg(rate), 2) as avg_rate, round(sum(actual_amt), 2) as sum_amt, round(sum(qty), 2) as sum_qty,
+            sql = `select aawak.*, avg(rate) as avg_rate, sum(actual_amt) as sum_amt, sum(qty) as sum_qty,
             dept.dept_hin, dept.dept_eng, dept.dept_code,
             mm.mm_hin, mm.mm_eng, mm.state_id as mm_state_id,
             it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
@@ -321,136 +321,6 @@ router.put('/report_khet_saar/:dept_id', async (req, res, next) => {
                 }
             }
             kh_saar[i].itemData = itemData;
-        }
-
-        res.json({
-            result: kh_saar,
-            success: true
-        })
-    } catch (err) {
-        console.log(err);
-        next(err)
-    };
-});
-
-// by Khet item wise 
-router.put('/report_khet_itemwise/:dept_id', async (req, res, next) => {
-    try {
-        let khets = DB.db.prepare('select _id from mm where dept_id = 4').all();
-        let khetIDs = khets.map(m => m._id);
-        console.log(khetIDs);
-
-        let conditionStringCommon = `aawak.aawak_mm_id in (${khetIDs.join(',')}) AND aawak.dept_id = ${req.params.dept_id} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month.toString().padStart(2, '0')}'` : ``}`;
-        let conditionString = `${conditionStringCommon} AND item_id = ${req.body.item_id} ${req.body.subitem_id && subitem_id.length > 0 ? ` AND subitem_id in ${req.body.subitem_id.join(',')}` : ''}`;
-        let sql = `select s_awk.*, JSON_GROUP_ARRAY(sum_qty) as arr_sum_qty, JSON_GROUP_ARRAY(s_awk.unit_id) as arr_unit_id,
-        JSON_GROUP_ARRAY(unit_short) as arr_unit_short, sum(sum_amt) as total_amt,
-        dept.dept_hin, dept.dept_eng, dept.dept_code,
-        item.item_hin, item.item_eng, item.categories as arr_item_categories,
-        sl.subitem_hin, sl.subitem_eng, subitem.categories as arr_subitem_categories
-        from (select dept_id, aawak_mm_id, item_id, subitem_id, unit_id, avg(rate) as avg_rate, sum(actual_amt) as sum_amt, sum(qty) as sum_qty from aawak 
-        where ${conditionString} 
-        group by aawak.dept_id, aawak.item_id, aawak.subitem_id, aawak.unit_id) s_awk
-        left join item on item._id = s_awk.item_id 
-        left join subitem on subitem._id = s_awk.subitem_id 
-        left join subitem_list sl on sl._id = subitem.subitem_list_id
-        left join unit on unit._id = s_awk.unit_id
-        left join department dept on dept._id = s_awk.dept_id 
-        group by s_awk.dept_id, s_awk.item_id, s_awk.subitem_id`;
-        console.log(sql);
-        let kh_saar = DB.db.prepare(sql).all();
-
-
-        for (let i in kh_saar) {
-            for (let key of Object.keys(kh_saar[i])) {
-                if (key.includes('arr')) {
-                    kh_saar[i][key] = kh_saar[i][key] ? JSON.parse(kh_saar[i][key]) : []
-                }
-            }
-
-            let conditionString = `${conditionStringCommon} AND aawak.item_id = ${kh_saar[i].item_id} AND IFNULL(aawak.subitem_id, 0) = IFNULL(${kh_saar[i].subitem_id}, 0)`;
-            sql = `select aawak.*, round(avg(rate), 2) as avg_rate, round(sum(actual_amt), 2) as sum_amt, round(sum(qty), 2) as sum_qty,
-            dept.dept_hin, dept.dept_eng, dept.dept_code,
-            mm.mm_hin, mm.mm_eng, mm.state_id,
-            state.state_hin, state.state_eng,
-            unit.unit_short, unit.unit_full
-            from aawak 
-            left join mm on mm._id = aawak.aawak_mm_id 
-            left join state on state._id = mm.state_id
-            left join unit on unit._id = aawak.unit_id
-            left join department dept on dept._id = aawak.dept_id where ${conditionString}
-            group by aawak.dept_id, aawak.item_id, aawak.subitem_id, aawak.aawak_mm_id, aawak.unit_id`;
-
-            let khetData = await DB.db.prepare(sql).all();
-
-            for (let j in khetData) {
-                for (let key of Object.keys(khetData[j])) {
-                    if (key.includes('arr')) {
-                        khetData[j][key] = khetData[j][key] ? JSON.parse(khetData[j][key]) : []
-                    }
-                }
-            }
-            kh_saar[i].khetData = khetData;
-        }
-
-        res.json({
-            result: kh_saar,
-            success: true
-        })
-    } catch (err) {
-        console.log(err);
-        next(err)
-    };
-});
-
-// by Khet aawak jawak saar
-router.put('/report_khet_ajsaar/:dept_id', async (req, res, next) => {
-    try {
-
-        let conditionStringCommon = `aawak.aawak_mm_id = ${req.body.mm_id} AND aawak.dept_id = ${req.params.dept_id} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month.toString().padStart(2, '0')}'` : ``}`;
-        let conditionString = `${conditionStringCommon} ${req.body.item_id && req.body.item_id.length > 0 ? ` AND item_id = ${req.body.item_id}` : ''} ${req.body.subitem_id && subitem_id.length > 0 ? ` AND subitem_id in ${req.body.subitem_id.join(',')}` : ''}`;
-        let sql = `select s_awk.*, JSON_GROUP_ARRAY(sum_qty) as arr_sum_qty, JSON_GROUP_ARRAY(s_awk.unit_id) as arr_unit_id,
-        JSON_GROUP_ARRAY(unit_short) as arr_unit_short, sum(sum_amt) as total_amt, JSON_GROUP_ARRAY(s_awk._ids) as arr_awk_ids,
-        dept.dept_hin, dept.dept_eng, dept.dept_code,
-        item.item_hin, item.item_eng, item.categories as arr_item_categories,
-        sl.subitem_hin, sl.subitem_eng, subitem.categories as arr_subitem_categories
-        from (select dept_id, aawak_mm_id, item_id, subitem_id, unit_id, avg(rate) as avg_rate, sum(actual_amt) as sum_amt, sum(qty) as sum_qty, GROUP_CONCAT(_id) as _ids from aawak 
-        where ${conditionString} 
-        group by aawak.dept_id, aawak.item_id, aawak.subitem_id, aawak.unit_id) s_awk
-        left join item on item._id = s_awk.item_id 
-        left join subitem on subitem._id = s_awk.subitem_id 
-        left join subitem_list sl on sl._id = subitem.subitem_list_id
-        left join unit on unit._id = s_awk.unit_id
-        left join department dept on dept._id = s_awk.dept_id 
-        group by s_awk.dept_id, s_awk.item_id, s_awk.subitem_id`;
-        let kh_saar = DB.db.prepare(sql).all();
-
-        for (let i in kh_saar) {
-            for (let key of Object.keys(kh_saar[i])) {
-                if (key.includes('arr')) {
-                    kh_saar[i][key] = kh_saar[i][key] ? JSON.parse(kh_saar[i][key]) : []
-                }
-            }
-
-            sql = `select round(sum(qty), 2) as sum_qty,
-            mm.mm_hin, mm.mm_eng, mm.state_id,
-            state.state_hin, state.state_eng,
-            unit.unit_short, unit.unit_full
-            from jawak 
-            left join mm on mm._id = jawak.jawak_mm_id 
-            left join state on state._id = mm.state_id
-            left join unit on unit._id = jawak.unit_id
-            left join department dept on dept._id = jawak.dept_id where aawak_ref_id in (${kh_saar[i].arr_awk_ids.join(',')})
-            group by jawak.jawak_mm_id, jawak.unit_id`;
-            let jawakData = await DB.db.prepare(sql).all();
-
-            // for (let j in khetData) {
-            //     for (let key of Object.keys(khetData[j])) {
-            //         if (key.includes('arr')) {
-            //             khetData[j][key] = khetData[j][key] ? JSON.parse(khetData[j][key]) : []
-            //         }
-            //     }
-            // }
-            kh_saar[i].jawakData = jawakData;
         }
 
         res.json({

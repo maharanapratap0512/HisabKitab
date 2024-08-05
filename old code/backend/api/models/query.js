@@ -531,7 +531,7 @@ const aawak = {
         product_id=@product_id,
         item_detail=@item_detail,
         condition_id=@condition_id,
-        remaining_qty=round(remaining_qty + (@qty - qty), 2),
+        remaining_qty=remaining_qty + (@qty - qty),
         qty=@qty,
         rate=@rate,
         actual_amt=@actual_amt,
@@ -666,55 +666,55 @@ const bachat = {
         values(@mm_id, @item_id, @subitem_id, @qty, (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END), (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), @unit_id, @dept_id);`
     , update_aawak_ins:
         `update bachat set 
-        Stock = round(Stock + @qty, 2),
-        New = round(New + (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END), 2),
-        Old = round(Old + (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), 2),
-        Defective = round(Defective + (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), 2),
-        Repairing = round(Repairing + (CASE WHEN (select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), 2),
-        Scrap = round(Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2)
+        Stock = Stock + @qty,
+        New = New + (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END),
+        Old = Old + (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END),
+        Defective = Defective + (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END),
+        Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END),
+        Scrap = Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END)
         where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id`
     , update_byid_aawak_ins:
         `update bachat set 
-        Stock = round(Stock + @qty, 2),
-        New = round(New + (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END), 2),
-        Old = round(Old + (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), 2),
-        Defective = round(Defective + (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), 2),
-        Repairing = round(Repairing + (CASE WHEN (select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), 2),
-        Scrap = round(Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2)
+        Stock = Stock + @qty,
+        New = New + (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END),
+        Old = Old + (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END),
+        Defective = Defective + (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END),
+        Repairing = Repairing + (CASE WHEN (select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END),
+        Scrap = Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END)
         where _id = @_id`
     , update_aawak_del:
         `update bachat set
-        Stock = round(Stock - @qty, 2),
-        New = round(New - (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END), 2),
-        Old = round(Old - (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), 2),
-        Defective = round(Defective - (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), 2),
-        Repairing = round(Repairing - (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), 2),
-        Scrap = round(Scrap - (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2)
+        Stock = Stock - @qty,
+        New = New - (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END),
+        Old = Old - (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END),
+        Defective = Defective - (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END),
+        Repairing = Repairing - (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END),
+        Scrap = Scrap - (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END)
         where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id;`
     , insert_jawak_ins:
         `insert into bachat (
             mm_id, item_id, subitem_id, dept_id, Used, bachat, unit_id)
         values(
-            @mm_id, @item_id, @subitem_id, @dept_id, round((CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END),2), round(0 - @qty, 2), @unit_id);`
+            @mm_id, @item_id, @subitem_id, @dept_id, (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END), 0 - @qty, @unit_id);`
     , update_jawak_ins:
         `update bachat set 
-        Stock = round(Stock - @qty, 2),
-        Used = round(Used + (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END), 2),
-        New = round(New - (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END), 2),
-        Old = round(Old - (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), 2),
-        Defective = round(Defective - (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), 2),
-        Repairing = round(Repairing - (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), 2),
-        Scrap = round(Scrap - (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2)
+        Stock = Stock - @qty,
+        Used = Used + (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END),
+        New = New - (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END),
+        Old = Old - (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END),
+        Defective = Defective - (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END),
+        Repairing = Repairing - (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END),
+        Scrap = Scrap - (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END)
         where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id;`
     , update_jawak_del:
         `update bachat set
-        Stock = round(Stock + @qty, 2),
-        Used = round(Used - (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END), 2),
-        New = round(New + (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END), 2),
-        Old = round(Old + (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), 2),
-        Defective = round(Defective + (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), 2),
-        Repairing = round(Repairing + (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), 2),
-        Scrap = round(Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2)
+        Stock = Stock + @qty,
+        Used = Used - (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END),
+        New = New + (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END),
+        Old = Old + (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END),
+        Defective = Defective + (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END),
+        Repairing = Repairing + (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END),
+        Scrap = Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END)
         where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id;`
     , update:
         `update bachat set
@@ -792,20 +792,20 @@ const bachat_new = {
     , update_aawak_ins:
         `update bachat_new
         set
-            total_aawak = round(total_aawak + @qty, 2),
-            bachat = round(bachat + @qty, 2)
+            total_aawak = total_aawak + @qty,
+            bachat = bachat + @qty
         where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , update_byid_aawak_ins:
         `update bachat_new
         set
-            total_aawak = round(total_aawak + @qty, 2),
-            bachat = round(bachat + @qty, 2)
+            total_aawak = total_aawak + @qty,
+            bachat = bachat + @qty
         where _id = @_id`
     , update_aawak_del:
         `update bachat_new
         set
-            total_aawak = round(total_aawak - @qty, 2),
-            bachat = round(bachat - @qty, 2)
+            total_aawak = total_aawak - @qty,
+            bachat = bachat - @qty
         where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , insert_jawak_ins:
         `insert into bachat_new (
@@ -815,16 +815,16 @@ const bachat_new = {
     , update_jawak_ins:
         `update bachat_new
         set
-            jawak = round((CASE WHEN @jawak_type_id <> 27 THEN jawak + @qty ELSE jawak END), 2),
-            used_jawak = round((CASE WHEN @jawak_type_id = 27 THEN used_jawak + @qty ELSE used_jawak END), 2),
-            bachat = round(bachat - @qty, 2)
+            jawak = (CASE WHEN @jawak_type_id <> 27 THEN jawak + @qty ELSE jawak END),
+            used_jawak = (CASE WHEN @jawak_type_id = 27 THEN used_jawak + @qty ELSE used_jawak END),
+            bachat = bachat - @qty
         where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , update_jawak_del:
         `update bachat_new
         set
-            jawak = round((CASE WHEN @jawak_type_id <> 27 THEN jawak - @qty ELSE jawak END), 2),
-            used_jawak = round((CASE WHEN @jawak_type_id = 27 THEN used_jawak - @qty ELSE used_jawak END), 2),
-            bachat = round(bachat + @qty, 2)
+            jawak = (CASE WHEN @jawak_type_id <> 27 THEN jawak - @qty ELSE jawak END),
+            used_jawak = (CASE WHEN @jawak_type_id = 27 THEN used_jawak - @qty ELSE used_jawak END),
+            bachat = bachat + @qty
         where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , update:
         `update bachat_new set
@@ -1064,15 +1064,6 @@ const pbk = {
             @roll_no, @pbk_hin, @pbk_eng, @gender, @relation, @relative_name, @relative_ref,
             @birth_date, @age, @status, @address, @townarea, @state_id, @city_id,
             @mo_no, @alt_mo_no, @class_mm_id, @bhatti_date, @document, @active)`
-    , insert_ignore:
-        `insert into pbk (
-            _id, roll_no, pbk_hin, pbk_eng, gender, relation, relative_name, relative_ref,
-            birth_date, age, status, address, townarea, state_id, city_id,
-            mo_no, alt_mo_no, class_mm_id, bhatti_date, document, active)
-        values (
-            @_id, @roll_no, @pbk_hin, @pbk_eng, @gender, @relation, @relative_name, @relative_ref,
-            @birth_date, @age, @status, @address, @townarea, @state_id, @city_id,
-            @mo_no, @alt_mo_no, @class_mm_id, @bhatti_date, @document, @active)`
     , update:
         `update pbk set 
         roll_no=@roll_no,
@@ -1095,28 +1086,6 @@ const pbk = {
         bhatti_date=@bhatti_date,
         document=@document,
         updated_at=datetime('now','localtime')`
-    , import_update:
-        `update pbk set 
-        roll_no = @roll_no,
-        pbk_hin=@pbk_hin,
-        pbk_eng=@pbk_eng,
-        gender=@gender,
-        relation=@relation,
-        relative_name=@relative_name,
-        relative_ref=@relative_ref,
-        birth_date=@birth_date,
-        age=@age,
-        status=@status,
-        address=@address,
-        townarea=@townarea,
-        state_id=@state_id,
-        city_id=@city_id,
-        mo_no=@mo_no,
-        alt_mo_no=@alt_mo_no,
-        class_mm_id=@class_mm_id,
-        bhatti_date=@bhatti_date,
-        document=@document,
-        updated_at=@updated_at where (_id = @_id OR roll_no = @roll_no)`
     , update_active:
         `update pbk set
         active=@active,

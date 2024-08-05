@@ -11,7 +11,7 @@
             </span>
             <span class="hk mx-2"><strong><u>HISAB KITAB</u></strong>
             </span>
-            <span>(v19.0)</span>
+            <span>(v20.1)</span>
          </a>
          <!-- <a routerLink="dashboard" class="topnav-logo">
             <span class="topnav-logo-lg">
@@ -254,6 +254,8 @@
                         <a class="dropdown-item" *ngIf="settings.report.report_jt" routerLinkActive="active" routerLink="report-jt">Jawak Type Saar</a>
                         <a class="dropdown-item" *ngIf="settings.report.report_str_stk" routerLinkActive="active" routerLink="report-str-stk">Store Stock</a>
                         <a class="dropdown-item" *ngIf="settings.report.report_kh" routerLinkActive="active" routerLink="report-kh-saar">Khet Saar</a>
+                        <a class="dropdown-item" *ngIf="settings.report.report_kh" routerLinkActive="active" routerLink="report-kh-itemwise">Khet Saar (Item Wise)</a>
+                        <a class="dropdown-item" *ngIf="settings.report.report_kh" routerLinkActive="active" routerLink="report-kh-ajsaar">Khet AJ saar</a>
                      </div>
                   </li>
                   <li class="nav-item" *ngIf="settings.point.visible">

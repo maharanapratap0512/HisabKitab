@@ -1,0 +1,21 @@
+{
+  "name": "yagna-software",
+  "version": "1.0.0",
+  "description": "yagna data entry",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Shivbaba",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^7.6.2",
+    "body-parser": "^1.20.0",
+    "express": "^4.18.1",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.3"
+  }
+}

@@ -1,0 +1,171 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color: white"> {{loadingStatus}} </p>
+</ngx-spinner>
+
+<!-- Begin page -->
+<div class="wrapper">
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+
+                <div class="row">
+                    <!-- <div class="card-header">Report Khet Saar (Under Construction)</div> -->
+                    <div class="card-body">
+                        <div class="row mb-2 mt-3">
+                            <div class="col-md-2 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Year</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Year"
+                                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.year"
+                                        name="year" (change)="months = gs.yearChangedGetMonth($event)">
+                                        <ng-option selected="selected" disabled value="">Select Year
+                                        </ng-option>
+                                        <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Month</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Month"
+                                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month     "
+                                        name="month" [multiple]="false" [ngModalOptions]="{standalone: true}">
+                                        <ng-option selected="selected" disabled value="">Select Month
+                                        </ng-option>
+                                        <ng-option *ngFor="let item of months"
+                                            [value]="item.m">{{item.name}}</ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Khet</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Khet"
+                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
+                                        [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}"
+                                        [ngClass]="{'validation': !filterBody.mm_id || filterBody.mm_id.length < 1}">
+                                        <ng-option *ngFor="let item of khets" [value]="item._id">
+                                            {{item.mm_hin}} : {{item.mm_code}} : {{item.mm_eng}}</ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Item</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                        [clearable]="true" [multiple]="true" [virtualScroll]="true"
+                                        [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}"
+                                        (change)="itemSelected($event)">
+                                        <ng-option *ngFor="let item of items" [value]="item._id">
+                                            {{item.item_hin}} : {{item.item_eng}}</ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Subitem</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Subitem"
+                                        [clearable]="true" [multiple]="true" [virtualScroll]="true"
+                                        [(ngModel)]="filterBody.subitem_id" [ngModelOptions]="{standalone: true}">
+                                        <ng-option *ngFor="let item of subitems" [value]="item._id">
+                                            {{item.subitem_hin}} : {{item.subitem_eng}}</ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-2 mt-3">
+                                <div class="form-group">
+                                    <label class="form-label"></label>
+                                    <button class="btn btn-primary form-control" (click)="searchReports()">Generate
+                                        Saar</button>
+                                </div>
+                            </div>
+
+                            <!-- <div class="col-md-2 mb-2 mt-3">
+                                <button type="button" style="font-weight: 700 !important;"
+                                    class="btn btn-light w-100">Total
+                                    Count : {{reportData.length}}
+                                </button>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" *ngIf="reportData.length">
+                    <div class=" d-flex justify-content-center">
+                        <h3>{{reportHeading}}</h3>
+                    </div>
+                    <div class="card-body" style="overflow: auto;">
+                        <div class="row mb-2">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                                        name="search">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="form-label"></label>
+                                    <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                                        data-bs-toggle="dropdown" aria-expanded="false"> Export Data </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" (click)="exportToExcelHin()">To Excel (Hin)</a>
+                                        <a class="dropdown-item" (click)="exportToExcelEng()">To Excel (Eng)</a>
+                                        <a class="dropdown-item" (click)="exportToPDF()">To PDF (Eng)</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <ng-container *ngFor="let data of reportData | search: term; let i = index;">
+                            <div class="col-4 col-md-4 col-sm-12">
+                                <div class="row align-items-center">
+                                    <div class="border border-primary ribbon-box">
+                                        <div class="ribbon-two ribbon-two-primary"><span>{{i+1}}</span></div>
+                                    </div>
+                                    <div class="titlebar d-flex align-items-center justify-content-between ">
+                                        <div class="item">
+                                            {{data.subitem_hin}} {{data.item_hin}} <br />
+                                            {{data.subitem_eng}} {{data.item_eng}}
+                                        </div>
+                                        <div class="qty">
+                                            <span *ngFor="let qty of data.arr_sum_qty; let u = index;" class="mx-2">
+                                                => {{qty}} {{data.arr_unit_short[u]}} <br />
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="card-text">
+                                        <table *ngIf="data.jawakData.length > 0"
+                                            class="table-bordered dt-responsive w-100 mb-4">
+                                            <tr class="fs-4 border-info text-center">
+                                                <th>No.</th>
+                                                <th>State</th>
+                                                <th>Khet Name</th>
+                                                <th>Qty</th>
+                                            </tr>
+                                            <tr *ngFor="let idata of data.jawakData | search: term; let j = index;">
+                                                <td>{{j+1}}</td>
+                                                <td>{{idata.state_id ? idata.state_hin : idata.state_eng}}</td>
+                                                <td>
+                                                    {{idata.mm_hin}} : {{idata.mm_eng}} : {{idata.mm_code}}
+                                                </td>
+                                                <td>{{idata.sum_qty}} {{idata.unit_short}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </ng-container>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+</div>

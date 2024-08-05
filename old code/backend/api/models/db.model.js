@@ -1783,10 +1783,10 @@ class dbModal {
     // jawak new column added : rate, actual_amt, sell_repair_place, parchi_place. 
     // new table: Repairing_info.
     {
-      jawak_rate: `alter table jawak add column rate decimal(10,2) default 0`,
-      jawak_amt: `alter table jawak add column actual_amt decimal(10,2) default 0`,
-      jawak_sell_repair_place: `alter table jawak add column sell_repair_place varchar(250)`,
-      jawak_parchi_place: `alter table jawak add column parchi_place varchar(100)`,
+      jawak_rate:`alter table jawak add column rate decimal(10,2) default 0`,
+      jawak_amt:`alter table jawak add column actual_amt decimal(10,2) default 0`,
+      jawak_sell_repair_place:`alter table jawak add column sell_repair_place varchar(250)`,
+      jawak_parchi_place:`alter table jawak add column parchi_place varchar(100)`,
       repairing_info: `create table repairing_info(
         _id integer primary key AUTOINCREMENT,
         date_sent date not null,
@@ -1812,34 +1812,6 @@ class dbModal {
       // repair_from - home, shop, repairer_info - shop address / bhai name
     },
 
-    // version 20
-    // update jwk trigger at round to 2 decimal point.
-    {
-      jwk_del_updt_ref_awk_del: `DROP TRIGGER "jwk_del_updt_ref_awk"`,
-      jwk_del_updt_ref_awk: `CREATE TRIGGER "jwk_del_updt_ref_awk" 
-      AFTER DELETE ON "jawak" 
-      FOR EACH ROW
-      When OLD.aawak_ref_id IS NOT NULL
-      BEGIN
-        update aawak set remaining_qty = round(remaining_qty + OLD.qty, 2) where _id = OLD.aawak_ref_id;     
-      END`,
-      jwk_ins_avk_ref_updt_del: `DROP TRIGGER "jwk_ins_avk_ref_updt"`,
-      jwk_ins_avk_ref_updt: `CREATE TRIGGER "jwk_ins_avk_ref_updt"
-      AFTER INSERT ON "jawak"
-      FOR EACH ROW
-      when NEW.aawak_ref_id is not NULL
-      BEGIN
-          update aawak set remaining_qty = round(remaining_qty - NEW.qty, 2) where _id = NEW.aawak_ref_id;
-      END`,
-      jwk_updt_avk_ref_updt_del: `DROP TRIGGER "jwk_updt_avk_ref_updt"`,
-      jwk_updt_avk_ref_updt: `CREATE TRIGGER "jwk_updt_avk_ref_updt"
-          AFTER UPDATE ON "jawak"
-          FOR EACH ROW
-          when OLD.aawak_ref_id is not NULL
-          BEGIN
-              update aawak set remaining_qty = round(remaining_qty - (NEW.qty - OLD.qty), 2) where _id = OLD.aawak_ref_id;
-          END`
-    },
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.

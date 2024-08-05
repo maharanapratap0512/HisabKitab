@@ -552,6 +552,11 @@ export class HeaderComponent implements OnInit {
         await this.http.get(this.api.getUrl(API)).subscribe((res: any) => {
           let result: any = { changes: [], found: [], columns: [] }
 
+          if(API == 'DEPTCONFIG'){
+            console.log(res, "old");
+            console.log(this.importResult[i], "new");
+            
+          }
           for (let j in res.result) {
             for (let k = 0; k < this.importResult[i].data.length; k++) {
               if (res.result[j]._id == this.importResult[i].data[k]._id) {

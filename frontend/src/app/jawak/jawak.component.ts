@@ -128,7 +128,7 @@ export class JawakComponent implements OnInit {
         uniqueUnit.add(result[i].unit_id);
 
         this.allJwkData.push({
-          'Date': result[i].date ? result[i].date : '-',
+          'Date': result[i].date ? this.gs.formatDisplayDate(result[i].date) : '-',
           'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
           'MM': result[i].mm_id ? result[i].mm_hin : '-',
           'Item': result[i].item_id ? result[i].item_hin : '-',
