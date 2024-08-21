@@ -2,6 +2,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
 import autoTable from 'jspdf-autotable';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
@@ -63,17 +64,17 @@ export class ReportKhItemwiseComponent {
   }
 
   setHeading() {
-    this.reportHeading = ''
-    this.reportHeading += this.reportData[0].item_hin + ",";
-    for (let item of this.reportData) {
-      this.reportHeading += item.subitem_hin + ", ";
-    }
+    this.reportHeading = 'खेत से '
+    // this.reportHeading += this.reportData[0].item_hin + ",";
+    // for (let item of this.reportData) {
+    //   this.reportHeading += item.subitem_hin + ", ";
+    // }
     if (this.filterBody.year && this.filterBody.month) {
-      this.reportHeading += ' का ' + this.filterBody.year + '-' + this.months[this.filterBody.month - 1].name_hin + " का आवक"
+      this.reportHeading += this.filterBody.year + '-' + this.months[this.filterBody.month - 1].name_hin + " का आवक"
     } else if (this.filterBody.year) {
-      this.reportHeading += ' का ' + this.filterBody.year + " का आवक"
+      this.reportHeading += this.filterBody.year + " का आवक"
     } else {
-      this.reportHeading += ' का अब तक का आवक';
+      this.reportHeading += ' अब तक का आवक';
     }
   }
 
@@ -90,7 +91,6 @@ export class ReportKhItemwiseComponent {
   }
 
   searchReports() {
-    if (this.filterBody.item_id) {
 
       this.loadingStatus = 'Generating Report....'
       this.isLoader = true;
@@ -127,9 +127,6 @@ export class ReportKhItemwiseComponent {
         this.toastr.error(err.message)
 
       });
-    } else {
-      this.toastr.error('कम से कम एक आइटम को चुनना अनिवार्य है। ')
-    }
   }
 
   exportToPDF() {

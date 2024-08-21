@@ -314,7 +314,8 @@
                <div class="card-body" style="overflow: auto;">
                   <div class="row">
                      <div class="col-4 pt-2">
-                        <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}" (click)="yearClick(null)">All</span>
+                        <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
+                           (click)="yearClick(null)">All</span>
                         <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearClick(y)"
                            [ngClass]="{'badge-outline-secondary':filterBody.year == y}">
                            {{y}}
@@ -329,7 +330,11 @@
                   <table id="datatable-buttons" class="table table-hover dt-responsive" #TABLE *ngIf="aawakData.length">
                      <thead>
                         <tr>
-                           <th style="width: 40px;">No.</th>
+                           <th style="width: 50px;">
+                              No.
+                              <input type="checkbox" id="hl_all" data-switch="none" (change)="hlFilter($event.target)" />
+                              <label for="hl_all" class="chk-sm"></label>
+                           </th>
                            <th style="width: 110px;">Manage</th>
                            <th style="width: 70px;" *ngIf="settings.aawak.pkt_num">Pkt No.</th>
                            <th style="width: 101px;">Date</th>
@@ -356,9 +361,14 @@
                         <ng-container
                            *ngFor="let data of aawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
-                              [ngClass]="{'auto':data.is_auto_pd, 'xl':data.is_xl}" aria-expanded="true"
+                              [ngClass]="{'auto':data.is_auto_pd, 'xl':data.is_xl, 'hl':data.hl}" aria-expanded="true"
                               [attr.aria-controls]="'collapseExample-'+i" class="main-row">
-                              <td>{{itemsPerPage * (page-1) + i+1}}</td>
+                              <td>
+                                 {{itemsPerPage * (page-1) + i+1}}
+                                 <input type="checkbox" [(ngModel)]="data.hl" id="{{'hl_'+data._id}}" data-switch="none"
+                                    (change)="hlChanged(data)" />
+                                 <label for="{{'hl_'+data._id}}" class="chk-sm"></label>
+                              </td>
                               <td>
                                  <div class="d-flex justify-content-between mb-1">
                                     <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i

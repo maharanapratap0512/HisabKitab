@@ -543,6 +543,7 @@ const aawak = {
         company_name=@company_name,
         isbill=@isbill,
         document=@document,
+        hl=@hl,
         is_xl=@is_xl,
         is_auto_pd=@is_auto_pd,
         updated_at=datetime('now','localtime')`
@@ -551,12 +552,12 @@ const aawak = {
             date, mm_id, pkt_num, pbk_id, aawak_mm_id, item_id, subitem_id, usage_category_id,
             product_id, item_detail, condition_id, qty, rate, actual_amt, 
             aawak_type_id, unit_id, description, nimitt_id, dept_id, company_name, 
-            isbill, remaining_qty, document, is_xl, active, is_auto_pd)
+            isbill, remaining_qty, document, hl, is_xl, active, is_auto_pd)
         values (
             @date, @mm_id, @pkt_num, @pbk_id, @aawak_mm_id, @item_id, @subitem_id, @usage_category_id,
             @product_id, @item_detail, @condition_id, @qty, @rate, @actual_amt, 
             @aawak_type_id, @unit_id, @description, @nimitt_id, @dept_id, @company_name, 
-            @isbill, @qty, @document, @is_xl, @active, @is_auto_pd)`
+            @isbill, @qty, @document, @hl, @is_xl, @active, @is_auto_pd)`
     , select:
         `select * from aawak ?`
     , select_full:

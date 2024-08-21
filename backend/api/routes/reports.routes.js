@@ -341,7 +341,7 @@ router.put('/report_khet_itemwise/:dept_id', async (req, res, next) => {
         console.log(khetIDs);
 
         let conditionStringCommon = `aawak.aawak_mm_id in (${khetIDs.join(',')}) AND aawak.dept_id = ${req.params.dept_id} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month.toString().padStart(2, '0')}'` : ``}`;
-        let conditionString = `${conditionStringCommon} AND item_id = ${req.body.item_id} ${req.body.subitem_id && subitem_id.length > 0 ? ` AND subitem_id in ${req.body.subitem_id.join(',')}` : ''}`;
+        let conditionString = `${conditionStringCommon} ${req.body.item_id && req.body.item_id.length > 0 ? ` AND item_id in (${req.body.item_id.join(',')})` : ''}  ${req.body.subitem_id && subitem_id.length > 0 ? ` AND subitem_id in (${req.body.subitem_id.join(',')})` : ''}`;
         let sql = `select s_awk.*, JSON_GROUP_ARRAY(sum_qty) as arr_sum_qty, JSON_GROUP_ARRAY(s_awk.unit_id) as arr_unit_id,
         JSON_GROUP_ARRAY(unit_short) as arr_unit_short, sum(sum_amt) as total_amt,
         dept.dept_hin, dept.dept_eng, dept.dept_code,

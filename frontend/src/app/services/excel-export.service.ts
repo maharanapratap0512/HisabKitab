@@ -83,8 +83,6 @@ export class ExcelExportService {
 
 
 
-
-
   // public exportAsExcelFile(el: HTMLElement, excelFileName: string): void {
   //   const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(el);
   //   const wb: XLSX.WorkBook = XLSX.utils.book_new();

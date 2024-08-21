@@ -42,6 +42,7 @@ class Functions extends DBContex {
 
             obj.document = JSON.stringify(obj.document && typeof obj.document != 'string' ? obj.document : {});
             obj.isbill = obj.isbill ? 1 : 0;
+            obj.hl = obj.hl ? 1 : 0;
 
             if (!objOld) {
                objOld = await this.getById(type, obj._id);

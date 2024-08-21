@@ -80,6 +80,7 @@ export class AawakEntryComponent implements OnInit {
 		isbill: null,
 		document: null,
 		is_xl: 0,
+		hl:0,
 		is_auto_pd: 0,
 		jawak_detail: []
 	}
@@ -163,6 +164,7 @@ export class AawakEntryComponent implements OnInit {
 			this.awkfg.isbill = changes.getData.currentValue.isbill ? changes.getData.currentValue.isbill : false;
 			this.awkfg.document = changes.getData.currentValue.document ? changes.getData.currentValue.document : []
 			this.awkfg.is_xl = changes.getData.currentValue.is_xl ? changes.getData.currentValue.is_xl : 0
+			this.awkfg.hl = changes.getData.currentValue.hl ? changes.getData.currentValue.hl : 0
 			this.awkfg.is_auto_pd = changes.getData.currentValue.is_auto_pd ? changes.getData.currentValue.is_auto_pd : 0
 			this.awkfg.jawak_detail = changes.getData.currentValue.jawak_detail ? changes.getData.currentValue.jawak_detail : []
 
@@ -241,6 +243,7 @@ export class AawakEntryComponent implements OnInit {
 			unit_id: this.awkfg.unit_id,
 			dept_id: this.awkfg.dept_id,
 			is_xl: 0,
+			hl: 0,
 			jawak_mm_hin: (this.jmm ? this.jmm.mm_hin : ''),
 			nimitt_hin: (this.jnimitt ? this.jnimitt.nimitt_hin : ''),
 			nimitt_state_hin: (this.jnimitt ? this.jnimitt.state_hin : ''),
@@ -248,7 +251,6 @@ export class AawakEntryComponent implements OnInit {
 
 		this.awkfg.jawak_detail.push(jwkfg);
 		console.log("addjawak", this.awkfg);
-
 
 		// this.jwkArr.push(jwkfg2);
 		this.jmm = null;

@@ -769,6 +769,26 @@ export class AawakComponent implements OnInit {
   //   }
   // }
 
+  hlChanged(awk: any) {
+    let body = { query: {}, set: {} };
+    body.query = { _id: awk._id };
+    body.set = { ...awk };
+    this.http.put(this.api.getUrl('AAWAK') + 'new/', body).subscribe((data: any) => {
+      if (data.success) {
+        this.aawakData.splice(this.aawakData.indexOf((a: { _id: any; }) => a._id == data.result[0]._id), data.result[0])
+      }
+    });
+  }
+
+  hlFilter(ev: any) {
+    if (ev.checked) {
+      this.aawakData = this.aawakData.filter((a: { hl: boolean; }) => a.hl == true)
+    } else {
+      this.aawakData = this.aawakAll;
+    }
+
+  }
+
   addJawak(data: any) {
     this.editData = data;
     this.showModal = "Add Jawak";
@@ -955,6 +975,7 @@ export class AawakComponent implements OnInit {
           aj_type_id: null,
           nimitt: null,
           nimitt_id: null,
+          hl: null,
           dept: this.auth.webUser.dept_eng,
           dept_id: this.auth.webUser.dept_id,
           jawak_detail: []
@@ -1145,6 +1166,15 @@ export class AawakComponent implements OnInit {
               case "description":
               case "desc":
                 obj.description = exceldata[i][j];
+                break;
+              case "hl":
+              case "highlight":
+                if ([true, 'true', 'yes', 1, 'हाँ', 'ha'].includes((typeof exceldata[i][j] == "string" ? exceldata[i][j].trim().toLowerCase() : exceldata[i][j]))) {
+                  obj.hl = 1;
+                }
+                else {
+                  obj.hl = 0;
+                }
                 break;
               case "dept":
                 // case "department": obj.dept = exceldata[i][j];

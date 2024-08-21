@@ -17,10 +17,9 @@
                                 <div class="form-group">
                                     <label class="form-label">Item</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
-                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
+                                        [clearable]="true" [multiple]="true" [virtualScroll]="true"
                                         [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}"
-                                        (change)="itemSelected($event)"
-                                        [ngClass]="{'validation': !filterBody.item_id || filterBody.item_id.length < 1}">
+                                        (change)="itemSelected($event)">
                                         <ng-option *ngFor="let item of items" [value]="item._id">
                                             {{item.item_hin}} : {{item.item_eng}}</ng-option>
                                     </ng-select>

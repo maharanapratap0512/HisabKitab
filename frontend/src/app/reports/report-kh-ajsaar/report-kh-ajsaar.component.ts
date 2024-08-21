@@ -51,7 +51,6 @@ export class ReportKhAjsaarComponent {
       this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
       this.categories = result.category ? result.category : [];
-
       this.khets = this.mms.filter((m: { dept_id: any; }) => m.dept_id == 4);
       // this.filterBody.condition = this.conditions.map((c: { list_name_eng: any; }) => c.list_name_eng)
       // this.filterBody.mm_id = this.khets.map((s: { _id: any; }) => s._id)
@@ -148,7 +147,7 @@ export class ReportKhAjsaarComponent {
           item_eng: this.reportData[i].item_eng,
           subitem_eng: this.reportData[i].subitem_eng,
           state: '',
-          khet_name: '',
+          mm_name: '',
           sum_qty: this.reportData[i].arr_sum_qty[q],
           unit_short: this.reportData[i].arr_unit_short[q]
         });
@@ -161,7 +160,7 @@ export class ReportKhAjsaarComponent {
           item_eng: '',
           subitem_eng: '',
           state: this.reportData[i].jawakData[j].state_eng,
-          khet_name: this.reportData[i].jawakData[j].mm_eng,
+          mm_name: this.reportData[i].jawakData[j].mm_eng,
           sum_qty: this.reportData[i].jawakData[j].sum_qty,
           unit_short: this.reportData[i].jawakData[j].unit_short,
         };
@@ -174,7 +173,7 @@ export class ReportKhAjsaarComponent {
         item_eng: '--------',
         subitem_eng: '-----',
         state: '-----',
-        khet_name: '--------',
+        mm_name: '--------',
         sum_qty: '-----',
         unit_short: '###',
       };
@@ -187,7 +186,7 @@ export class ReportKhAjsaarComponent {
       { header: 'Item', dataKey: 'item_eng' },
       { header: 'Subitem', dataKey: 'subitem_eng' },
       { header: 'State', dataKey: 'state' },
-      { header: 'Khet Name', dataKey: 'khet_name' },
+      { header: 'MM Name', dataKey: 'mm_name' },
       { header: 'Qty', dataKey: 'sum_qty' },
       { header: 'Unit', dataKey: 'unit_short' },
     ];
@@ -214,7 +213,7 @@ export class ReportKhAjsaarComponent {
           item_hin: this.reportData[i].item_hin,
           subitem_hin: this.reportData[i].subitem_hin,
           state: '',
-          khet_name: '',
+          mm_name: '',
           sum_qty: this.reportData[i].arr_sum_qty[q],
           unit_short: this.reportData[i].arr_unit_short[q]
         });
@@ -227,7 +226,7 @@ export class ReportKhAjsaarComponent {
           item_hin: '',
           subitem_hin: '',
           state: this.reportData[i].jawakData[j].state_hin,
-          khet_name: this.reportData[i].jawakData[j].mm_hin,
+          mm_name: this.reportData[i].jawakData[j].mm_hin,
           sum_qty: this.reportData[i].jawakData[j].sum_qty,
           unit_short: this.reportData[i].jawakData[j].unit_short,
         };
@@ -240,7 +239,7 @@ export class ReportKhAjsaarComponent {
         item_hin: '--------',
         subitem_hin: '-----',
         state: '-----',
-        khet_name: '--------',
+        mm_name: '--------',
         sum_qty: '-----',
         unit_short: '###',
       };
@@ -262,7 +261,7 @@ export class ReportKhAjsaarComponent {
           item_eng: this.reportData[i].item_eng,
           subitem_eng: this.reportData[i].subitem_eng,
           state: '',
-          khet_name: '',
+          mm_name: '',
           sum_qty: this.reportData[i].arr_sum_qty[q],
           unit_short: this.reportData[i].arr_unit_short[q]
         });
@@ -275,7 +274,7 @@ export class ReportKhAjsaarComponent {
           item_eng: '',
           subitem_eng: '',
           state: this.reportData[i].jawakData[j].state_eng,
-          khet_name: this.reportData[i].jawakData[j].mm_eng,
+          mm_name: this.reportData[i].jawakData[j].mm_eng,
           sum_qty: this.reportData[i].jawakData[j].sum_qty,
           unit_short: this.reportData[i].jawakData[j].unit_short,
         };
@@ -288,7 +287,7 @@ export class ReportKhAjsaarComponent {
         item_eng: '--------',
         subitem_eng: '-----',
         state: '-----',
-        khet_name: '--------',
+        mm_name: '--------',
         sum_qty: '-----',
         unit_short: '###',
       };
