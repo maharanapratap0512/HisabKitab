@@ -17,13 +17,16 @@
          </ng-select>
          <!-- </div> -->
       </div>
-      <div class="col-md-3">
+      <div class="col-md-3" *ngIf="headerConfig && headerConfig.length">
          <button *ngIf="importType" class="file btn btn-success" style="font-weight: 700 !important;">
             <i class="uil uil-arrow-to-bottom"></i> Select Excel File
             <input type="file" class="inputtag"
                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                (change)="excelImport($event)" />
          </button>
+      </div>
+      <div class="col-md-3" *ngIf="importType && (!headerConfig || !headerConfig.length)">
+         <span class="text-danger fs-4">Excel Import is not supported.</span>
       </div>
       <div class="col-md-3">
          <!-- <div class="form-check form-switch">
@@ -49,10 +52,11 @@
    <!-- row for header listing -->
    <div class="row mt-2" style="display: block;" *ngIf="importType">
       <b>Comulns List : </b>
-      <span *ngFor="let col of headerConfig"
+      <span *ngFor="let col of headerConfig" [title]="col.alt_names.join(',  ') + ' are also supported.'"
          [ngClass]="{'fw-bold fs-5':col.not_null,'badge-outline-danger':col.not_null && !col.found, 'badge-outline-success': col.not_null && col.found, 'text-success': col.found}">{{col.name}}
          <i class="mdi mdi-check-circle fs-4" *ngIf="col.found"></i>
       </span> <span class="text-warning">(Highlighted headers are compulsory.)</span>
+      <span class="text-warning">(Hover over header to see alternate supported headers.)</span>
    </div>
 </div>
 

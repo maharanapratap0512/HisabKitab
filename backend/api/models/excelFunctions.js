@@ -136,6 +136,18 @@ class ExcelFunctions {
       min_rate: 0,
       max_rate: 0,
    }
+   support_list_form = {
+      list_type: null,
+      list_name_eng: null,
+      list_name_hin: null,
+      list_name_roman: null,
+      active: 1
+   }
+   category_form = {
+      category_eng: null,
+      category_hin: null,
+      category_roman: null
+   }
    constructor(list, dept_id = null) {
       // this.DBContex = require('./DBContex');
       // this.DB = new this.DBContex(); 

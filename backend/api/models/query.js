@@ -2083,6 +2083,8 @@ const conditions = {
     subitem_list_duplicate: `subitem_hin = @subitem_hin OR (subitem_eng IS NOT NULL AND subitem_eng = @subitem_eng) OR (subitem_roman IS NOT NULL AND subitem_roman = @subitem_roman)`,
     item_duplicate: `item_hin = @item_hin OR (item_eng IS NOT NULL AND item_eng = @item_eng) OR (item_roman IS NOT NULL AND item_roman = @item_roman) OR (item_code IS NOT NULL AND item_code = @item_code)`,
     subitem_duplicate: `item_id = @item_id AND subitem_list_id = @subitem_list_id `,
+    support_list_duplicate: `list_type = @list_type AND list_name_eng = @list_name_eng `,
+    category_duplicate: `category_eng = @category_eng OR category_hin = @category_hin `,
 }
 
 genDeptDB = {
