@@ -364,20 +364,14 @@
                   </ng-select>
                </div>
             </div>
-            <!-- <div class="col-md-3 mb-3">
+
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.company_name">
                <div class="form-group">
-                  <label class="form-label"></label>
-                  <input type="text" *ngIf="settings.aawak.company_name" class="form-control" placeholder="Company Name"
+                  <label class="form-label">Company Name</label>
+                  <input type="text" class="form-control" placeholder="Company Name"
                      [(ngModel)]="awkfg.company_name" name="company_name" #actual_amt="ngModel">
-                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition" [clearable]="true"
-                     [virtualScroll]="true" [(ngModel)]="awkfg.condition_id" name="condition_id" #condition_id="ngModel"
-                     *ngIf="settings.aawak.condition_id">
-                     <ng-option selected="selected" disabled value="">Select Condition</ng-option>
-                     <ng-option *ngFor="let item of conditions" [value]="item._id">{{item.list_name_hin}} :
-                        {{item.list_name_eng}} </ng-option>
-                  </ng-select>
                </div>
-            </div> -->
+            </div>
 
             <div class="col-md-2 mb-3" [ngClass]="{'readOnly':awkfg.product_id}">
                <div class="form-group">
@@ -456,7 +450,7 @@
 
             <div class="col-md-2 mb-3" *ngIf="settings.aawak.document">
                <div class="form-group">
-                  <!-- <label class="form-label">Image</label> -->
+                  <label class="form-label">Image</label>
                   <a onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
                      class="form-control" style="cursor: pointer;">
                      <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>

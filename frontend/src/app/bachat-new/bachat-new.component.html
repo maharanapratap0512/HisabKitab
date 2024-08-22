@@ -158,7 +158,14 @@
                            <td>Total Aawak</td>
                            <td>Used</td>
                            <td>Other Jawak</td>
-                           <td>Bachat</td>
+                           <td>
+                              Bachat <br />
+                              <div class="form-check mb-2">
+                                 <input type="checkbox" class="form-check-input" id="customCheckcolor1"
+                                    (change)="hideBachatZero($event.target)">
+                                 <label class="form-check-label fs-6" for="customCheckcolor1">Hide 0</label>
+                              </div>
+                           </td>
                         </tr>
                         <ng-container *ngIf="monthsSel.length > 0">
                            <tr>

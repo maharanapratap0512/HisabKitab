@@ -20,6 +20,7 @@ class Functions extends DBContex {
             obj.document = JSON.stringify(obj.document ? obj.document : {});
             obj.isbill = obj.isbill ? 1 : 0;
             obj.active = 1;
+            obj.hl = obj.hl ? 1 : 0;
             let insResult = stmtInsert.run(obj);
             if (insResult.changes == 1 && insResult.lastInsertRowid) {
                obj._id = insResult.lastInsertRowid;

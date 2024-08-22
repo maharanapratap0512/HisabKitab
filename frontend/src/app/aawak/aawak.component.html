@@ -200,28 +200,42 @@
 
                               <div class="col-md-2 mb-3">
                                  <div class="form-group">
-                                    <label class="form-label">Pkt No.</label>
-                                    <input type="text" class="form-control" placeholder="Pkt No."
+                                    <label class="form-label">Date & Pkt No</label>
+                                    <input type="date" class="form-control" [(ngModel)]="filterBody.date" name="date">
+                                    <input type="text" class="form-control mt-1" placeholder="Pkt No."
                                        [(ngModel)]="filterBody.pkt_num" name="pkt_num">
                                  </div>
                               </div>
 
                               <div class="col-md-2 mb-3">
                                  <div class="form-group">
-                                    <label class="form-label">MM</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
-                                       [virtualScroll]="true" name="mm_id" [multiple]="true" [closeOnSelect]="false"
-                                       [(ngModel)]="filterBody.mm_id" #mm_id="ngModel">
+                                    <label class="form-label">State & MM</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select State"
+                                       [clearable]="true" [virtualScroll]="true" name="mm_state" [multiple]="true"
+                                       [closeOnSelect]="true" [(ngModel)]="filterBody.mm_states" #state="ngModel">
+                                       <ng-option *ngFor="let item of states" [value]="item._id">
+                                          {{item.state_hin}} : {{item.state_eng}}</ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="MM"
+                                       [clearable]="true" [virtualScroll]="true" name="mm_id" [multiple]="true"
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.mm_id" #mm_id="ngModel">
                                        <ng-option *ngFor="let item of mms" [value]="item._id">
                                           {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
                                     </ng-select>
+
                                  </div>
                               </div>
 
                               <div class="col-md-2 mb-3">
                                  <div class="form-group">
-                                    <label class="form-label">Aawak MM</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Aawak MM"
+                                    <label class="form-label">State & AJ MM</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select State"
+                                       [clearable]="true" [virtualScroll]="true" name="awk_mm_states" [multiple]="true"
+                                       [closeOnSelect]="true" [(ngModel)]="filterBody.awk_mm_states" #state="ngModel">
+                                       <ng-option *ngFor="let item of states" [value]="item._id">
+                                          {{item.state_hin}} : {{item.state_eng}}</ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Aawak MM"
                                        [clearable]="true" [virtualScroll]="true" name="aj_mm_id" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.aj_mm_id" #aj_mm_id="ngModel">
                                        <ng-option *ngFor="let item of mms" [value]="item._id">
@@ -230,9 +244,10 @@
                                  </div>
                               </div>
 
+
                               <div class="col-md-2 mb-3">
                                  <div class="form-group">
-                                    <label class="form-label">Aawak Type</label>
+                                    <label class="form-label">Aawak & Jawak Type</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Aawak Type"
                                        [clearable]="false" [virtualScroll]="true" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.aawak_type_id"
@@ -243,13 +258,7 @@
                                           {{item.list_name_hin}} : {{item.list_name_eng}}
                                        </ng-option>
                                     </ng-select>
-                                 </div>
-                              </div>
-
-                              <div class="col-md-2 mb-3">
-                                 <div class="form-group">
-                                    <label class="form-label">Jawak Type</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Aawak Type"
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Aawak Type"
                                        [clearable]="false" [virtualScroll]="true" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.jawak_type_id"
                                        name="jawak_type_id">
@@ -289,6 +298,7 @@
                                  type:'aawak',
                                  month:null,
                                  year:null,
+                                 date:null,
                                  pbk_id: [],
                                  mm_id: [],
                                  aj_mm_id: [],
@@ -332,7 +342,8 @@
                         <tr>
                            <th style="width: 50px;">
                               No.
-                              <input type="checkbox" id="hl_all" data-switch="none" (change)="hlFilter($event.target)" />
+                              <input type="checkbox" id="hl_all" data-switch="none"
+                                 (change)="hlFilter($event.target)" />
                               <label for="hl_all" class="chk-sm"></label>
                            </th>
                            <th style="width: 110px;">Manage</th>
@@ -438,9 +449,9 @@
                               <td *ngIf="settings.aawak.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
                               <td *ngIf="settings.aawak.isbill">{{data.isbill ? 'हाँ' : 'नहीं'}} </td>
                               <td *ngIf="settings.aawak.document">
-                                 <img *ngIf="data.document && data.document.images"
+                                 <img *ngIf="data.document && data.document.images" (click)="showImages(data)"
                                     [src]="baseurl + data.document.images[0]" height="50px"
-                                    style="border-radius: 10px;">
+                                    style="cursor: pointer; border-radius: 10px;">
                               </td>
                               <td *ngIf="settings.aawak.description">{{data.description?data.description:'-'}}</td>
                            </tr>
@@ -534,6 +545,8 @@
 
             <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
                [aawakRef]="editData"></app-jawak-entry>
+
+            <app-product-view *ngIf="showModal == 'Show Images'" [aawak]="editData"></app-product-view>
 
             <app-data-view *ngIf="showModal == 'Show Jawak'" [getData]="viewData" Type="jawak"></app-data-view>
          </div>

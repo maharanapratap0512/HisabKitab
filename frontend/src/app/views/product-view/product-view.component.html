@@ -160,7 +160,7 @@
 
         </div>
 
-        <div class="row mt-4" *ngIf="!product || (!product.product_code && !product.sr_num)">
+        <div class="row mt-4" *ngIf="(product && !product.product_code && !product.sr_num)">
             <div class="alert alert-warning bg-light text-dark" role="alert">
                 <strong>Sorry! </strong> Tracking currently not possible for this products.
             </div>
@@ -284,5 +284,27 @@
         </div>
 
 
+        <!-- aawak -->
+        <div class="row" *ngIf="aawak">
+            <div class="col-lg-2"></div>
+            <div class="col-lg-8" style="border-right: 0.5px #4c5763 dashed ;">
+
+                <!-- Item image -->
+                <div class="m-1 p-1" style="height:400px;border: 0.5px #3c454f solid;">
+                    <a class=" text-center mb-4">
+                        <img [src]="baseUrl + aawak.image" class="img-fluid" style="height: 100%;width: 100%;
+                        object-fit: contain;" alt="item-img" />
+                    </a>
+                </div>
+
+                <div class="d-lg-flex d-none" style="overflow-x:auto;" *ngIf="aawak.document && aawak.document.images">
+                    <a *ngFor="let img of aawak.document.images; let i = index;" href="javascript: void(0);"
+                        (click)="aawak.image = img">
+                        <img [src]="baseUrl + img" class="img-fluid img-thumbnail mx-1 p-1 h-100"
+                            style="max-width: 75px; object-fit: cover;" alt="item-img + {{i}}" />
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-2"></div>
+        </div>
     </div>
-</div>

@@ -20,6 +20,7 @@ export class ProductViewComponent implements OnInit {
   renameFileName: any;
   @Input() getData: any;
   @Input() item: any;
+  @Input() aawak: any;
   @Output() response = new EventEmitter();
 
   constructor(
@@ -40,13 +41,18 @@ export class ProductViewComponent implements OnInit {
     }
     if (changes.item && changes.item.currentValue) {
       this.item = changes.item.currentValue
+    
+    }
+    if (changes.aawak && changes.aawak.currentValue) {
+      this.aawak = changes.aawak.currentValue
     }
 
     if (this.product && this.product.document && this.product.document.images && this.product.document.images.length > 0) {
       this.product.image = this.product.document.images[0];
-    }
-    else if (this.item && this.item.document && this.item.document.images && this.item.document.images.length > 0) {
+    } else if (this.item && this.item.document && this.item.document.images && this.item.document.images.length > 0) {
       this.item.image = this.item.document.images[0];
+    } else if (this.aawak && this.aawak.document && this.aawak.document.images && this.aawak.document.images.length > 0) {
+      this.aawak.image = this.aawak.document.images[0];
     }
   }
 

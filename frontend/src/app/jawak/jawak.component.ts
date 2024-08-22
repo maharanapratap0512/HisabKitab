@@ -50,6 +50,7 @@ export class JawakComponent implements OnInit {
   allJwkData: any = [];
   jwkCount: any = 0;
   filterBody: any = {
+    date: null,
     month: null,
     year: null,
     pbk_id: [],
@@ -151,7 +152,7 @@ export class JawakComponent implements OnInit {
         footerRow['Qty'] += result[i].qty ? result[i].qty : 0;
         footerRow['Amount'] += result[i].actual_amt ? result[i].actual_amt : 0;
       }
-      
+
       if (this.allJwkData.length < this.total_count) {
         this.getMoreAJ();
       }
@@ -186,6 +187,14 @@ export class JawakComponent implements OnInit {
   getJawakData(pageNo: any) {
     this.isLoader = true;
     this.filterBody.pageNo = pageNo;
+    // AUTO select all mm if mm not selected and state selected for mm.
+    if (!this.filterBody.mm_id.length && this.filterBody.mm_states) {
+      this.filterBody.mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.mm_states.includes(m.state_id)).map((mm: { _id: any; }) => mm._id);
+    }
+    // AUTO select all jawak mm if jawak mm not selected and jawak state selected for jawak mm.
+    if (!this.filterBody.jawak_mm_id.length && this.filterBody.jwk_mm_states) {
+      this.filterBody.jawak_mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.jwk_mm_states.includes(m.state_id)).map((mm: { _id: any; }) => mm._id);
+    }
     this.http.put(this.api.getUrl('JAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.jawakData = data['result'];

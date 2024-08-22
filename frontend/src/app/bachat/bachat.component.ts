@@ -250,7 +250,7 @@ export class BachatComponent implements OnInit {
     bchtData.push(footerRow);
     
     let date = new Date();
-    this.excelExportService.exportAsExcelFile(bchtData, "Jawak_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
+    this.excelExportService.exportAsExcelFile(bchtData, "bachat_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
     this.isLoader = false;
   }
 

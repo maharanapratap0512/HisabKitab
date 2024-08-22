@@ -156,20 +156,27 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-2 mb-3" *ngIf="settings.pkt_num">
+                              <div class="col-md-2 mb-3">
                                  <div class="form-group">
-                                    <label class="form-label">Pkt No.</label>
-                                    <input type="text" class="form-control" placeholder="Pkt No."
+                                    <label class="form-label">Date & Pkt No</label>
+                                    <input type="date" class="form-control" [(ngModel)]="filterBody.date" name="date">
+                                    <input type="text" class="form-control mt-1" placeholder="Pkt No."
                                        [(ngModel)]="filterBody.pkt_num" name="pkt_num">
                                  </div>
                               </div>
 
                               <div class="col-md-3 mb-3">
                                  <div class="form-group">
-                                    <label class="form-label">MM</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
-                                       [virtualScroll]="true" name="mm_id" [multiple]="true" [closeOnSelect]="false"
-                                       [(ngModel)]="filterBody.mm_id" #mm_id="ngModel">
+                                    <label class="form-label">State & MM</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select State"
+                                       [clearable]="true" [virtualScroll]="true" name="mm_states" [multiple]="true"
+                                       [closeOnSelect]="true" [(ngModel)]="filterBody.mm_states" #state="ngModel">
+                                       <ng-option *ngFor="let item of states" [value]="item._id">
+                                          {{item.state_hin}} : {{item.state_eng}}</ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="MM"
+                                       [clearable]="true" [virtualScroll]="true" name="mm_id" [multiple]="true"
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.mm_id" #mm_id="ngModel">
                                        <ng-option *ngFor="let item of mms" [value]="item._id">
                                           {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
                                     </ng-select>
@@ -178,8 +185,14 @@
 
                               <div class="col-md-3 mb-3">
                                  <div class="form-group">
-                                    <label class="form-label">Jawak MM</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Jawak MM"
+                                    <label class="form-label">State & Jawak MM</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select State"
+                                       [clearable]="true" [virtualScroll]="true" name="jwk_mm_states" [multiple]="true"
+                                       [closeOnSelect]="true" [(ngModel)]="filterBody.jwk_mm_states" #state="ngModel">
+                                       <ng-option *ngFor="let item of states" [value]="item._id">
+                                          {{item.state_hin}} : {{item.state_eng}}</ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1 " style="width: 100%;" placeholder="Jawak MM"
                                        [clearable]="true" [virtualScroll]="true" name="jawak_mm_id" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.jawak_mm_id"
                                        #jawak_mm_id="ngModel">
@@ -224,6 +237,9 @@
                                     (click)="getJawakData(1)">Submit</button>
 
                                  <button class="btn btn-outline-secondary submit mx-2" type="button" (click)="filterBody = {
+                                       date:null,
+                                       month: null,
+                                       year: null,
                                        pbk_id: [],
                                        mm_id: [],
                                        jawak_mm_id: [],

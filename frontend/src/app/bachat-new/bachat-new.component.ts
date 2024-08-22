@@ -511,6 +511,14 @@ export class BachatNewComponent implements OnInit {
     }
   }
 
+  hideBachatZero(ev: any) {
+    if (ev.checked) {
+      this.bachatData = this.bachatData.filter((b: { total_bachat_all: any; }) => b.total_bachat_all)
+    } else {
+      this.filter();
+    }
+  }
+
 
   rowClicked(row: any, i: any) {
     row.months = this.filterBody.months;

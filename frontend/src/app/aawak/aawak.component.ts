@@ -59,6 +59,7 @@ export class AawakComponent implements OnInit {
     pbk_id: [],
     month: null,
     year: null,
+    date: null,
     mm_id: [],
     aj_mm_id: [],
     aawak_type_id: [],
@@ -229,6 +230,14 @@ export class AawakComponent implements OnInit {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
     this.filterBody.pageNo = this.pageNo;
+    // AUTO select all mm if mm not selected and state selected for mm.
+    if (!this.filterBody.mm_id.length && this.filterBody.mm_states) {      
+      this.filterBody.mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.mm_states.includes(m.state_id)).map((mm: { _id: any; })=>mm._id);
+    }
+    // AUTO select all aawak mm if aawak mm not selected and aawak state selected for aawak mm.
+    if (!this.filterBody.aj_mm_id.length && this.filterBody.awk_mm_states) {      
+      this.filterBody.aj_mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.awk_mm_states.includes(m.state_id)).map((mm: { _id: any; })=>mm._id);
+    }
     this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.aawakAll = data['result'];
@@ -1360,6 +1369,11 @@ export class AawakComponent implements OnInit {
       this.gs.checkTempImport();
       this.getaawakData();
     }
+  }
+
+  showImages(data: any) {
+    this.editData = data;
+    this.openModal('Show Images');
   }
 }
 
