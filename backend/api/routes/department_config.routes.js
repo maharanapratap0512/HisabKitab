@@ -42,14 +42,30 @@ router.put('/save', async (req, res, next) => {
                     config_key: value.config_key,
                     config_value: JSON.stringify(value.config_value)
                 };
-                await DB.update('department_config', newObj, value._id).then((data) => {
-                    if (!data) {
-                        req.body[key].success = false;
-                    }
-                    req.body[key].success = true;
-                    data.config_value = JSON.parse(data.config_value)
-                    req.body[key] = data;
-                });
+                if (value._id) {
+                    await DB.update('department_config', newObj, value._id).then((data) => {
+                        if (!data) {
+                            req.body[key].success = false;
+                        } else {
+                            data.config_value = JSON.parse(data.config_value)
+                            req.body[key] = data;
+                            req.body[key].success = true;
+                        }
+                    });
+                } else {
+                    newObj.dept_id = value.dept_id;
+                    newObj.config_key = newObj.config_key ? newObj.config_key : key;
+                    await DB.insert('department_config', newObj).then((data) => {
+                        if (!data) {
+                            req.body[key].success = false;
+                        } else {
+                            data.config_value = JSON.parse(data.config_value)
+                            req.body[key] = data;
+                            req.body[key].success = true;
+                            console.log(data);
+                        }
+                    })
+                }
             }
             res.json({
                 success: true,

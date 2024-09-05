@@ -393,13 +393,15 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
                         }
 
                         if (data[i].status == 3) {
-                            DB.delete(tblname, data[i]._id).then((del_res) => {
-                                if (del_res) {
-                                    delete_entries.push(data[i]);
-                                }
-                            }, (err) => {
-                                console.log(err);
-                            });
+                            if(tblname != 'department_config'){
+                                DB.delete(tblname, data[i]._id).then((del_res) => {
+                                    if (del_res) {
+                                        delete_entries.push(data[i]);
+                                    }
+                                }, (err) => {
+                                    console.log(err);
+                                });
+                            }
 
                         }
                         else if (data[i].status == 2) {

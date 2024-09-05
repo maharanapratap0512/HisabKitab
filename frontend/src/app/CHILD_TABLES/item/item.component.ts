@@ -105,6 +105,7 @@ export class ItemComponent implements OnInit {
         "Max Rate": this.itemData[i].max_rate,
         "Restrict Month": this.itemData[i].restrict_month,
         "Restrict Year": this.itemData[i].restrict_year,
+        "document": this.itemData[i].doccument,
       });
       for (let j in this.itemData[i].subitems) {
         item.push({
@@ -123,6 +124,7 @@ export class ItemComponent implements OnInit {
           "Max Rate": this.itemData[i].subitems[j].max_rate,
           "Restrict Month": this.itemData[i].subitems[j].restrict_month,
           "Restrict Year": this.itemData[i].subitems[j].restrict_year,
+          "documment": this.itemData[i].subitems[j].document,
         });
       }
     }
@@ -130,7 +132,8 @@ export class ItemComponent implements OnInit {
     let date = new Date();
     console.log(date);
 
-    this.excelExportService.exportAsExcelFile(item, "item_list-" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
+    // this.excelExportService.exportAsExcelFile(item, "item_list-" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
+    this.excelExportService.exportWithImages(item, "item_list-" + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear(), 'item');
 
   }
 

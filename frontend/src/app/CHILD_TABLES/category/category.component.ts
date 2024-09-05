@@ -25,6 +25,7 @@ export class CategoryComponent implements OnInit {
   categoryData: any = [];
   total_count: any = 0;
   settings: any = {};
+  excelFile: any;
 
   constructor(
     private http: HttpService,
@@ -55,11 +56,19 @@ export class CategoryComponent implements OnInit {
     });
   }
 
+  openModal(type: any) {
+    this.showModal = type;
+    $('#showModal').modal('show');
+  }
+  closeModal() {
+    $('#showModal').modal('hide');
+    this.showModal = '';
+  }
+
   addCategoryResponse(ev: any) {
     if (ev) {
       this.isLoader = true;
-      $('#showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal();
       this.categoryData.unshift(ev);
       this.isLoader = false;
     }
@@ -71,8 +80,7 @@ export class CategoryComponent implements OnInit {
   editCategoryResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      $('#showModal').modal('hide');
-      this.showModal = '';
+      this.closeModal();
       this.categoryData.splice(this.categoryData.indexOf(this.editData), 1, ev);
       this.isLoader = false;
     }
@@ -103,43 +111,18 @@ export class CategoryComponent implements OnInit {
   }
 
   excelImport(ev: any) {
-    let workBooks: any = null;
-    const reader = new FileReader();
-    const file = ev.target.files[0];
-    reader.onload = (event) => {
-      this.isLoader = true;
-      const data = reader.result;
-      workBooks = XLSX.read(data, { type: 'binary' });
-      console.log(workBooks);
+    this.excelFile = ev;
+    this.openModal('ei_category')
+  }
 
-      let jsonData: any = [];
-      jsonData = XLSX.utils.sheet_to_json(workBooks.Sheets[workBooks.SheetNames[0]]);
-      // this.jsonData = workBooks.SheetNames.reduce((initial: any, name: any) => {
-      //   const sheet = workBooks.Sheets[name];
-      //   initial[name] = XLSX.utils.sheet_to_json(sheet);
-      //   return initial;
-      // }, {});
-      this.http.put(this.api.getUrl('CATEGORY') + 'import', jsonData).subscribe((data: any) => {
-        if (data['result'] && data['success']) {
-          console.log(data);
-
-          this.isLoader = false;
-        }
-        this.isLoader = false;
-      });
-
-    }
-
-
-    reader.readAsBinaryString(file);
-    ev = '';
-
+  importResponse(type:any){
+    this.closeModal();
+    this.getCategoryData();
   }
 
   edit(data: any) {
     this.editData = data;
-    this.showModal = 'Edit Category'
-    $('#showModal').modal('show');
+    this.openModal('Edit Category');
   }
 
   delete(i: any, id: any) {

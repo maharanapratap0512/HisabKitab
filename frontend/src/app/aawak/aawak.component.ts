@@ -231,12 +231,12 @@ export class AawakComponent implements OnInit {
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
     this.filterBody.pageNo = this.pageNo;
     // AUTO select all mm if mm not selected and state selected for mm.
-    if (!this.filterBody.mm_id.length && this.filterBody.mm_states) {      
-      this.filterBody.mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.mm_states.includes(m.state_id)).map((mm: { _id: any; })=>mm._id);
+    if (!this.filterBody.mm_id.length && this.filterBody.mm_states) {
+      this.filterBody.mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.mm_states.includes(m.state_id)).map((mm: { _id: any; }) => mm._id);
     }
     // AUTO select all aawak mm if aawak mm not selected and aawak state selected for aawak mm.
-    if (!this.filterBody.aj_mm_id.length && this.filterBody.awk_mm_states) {      
-      this.filterBody.aj_mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.awk_mm_states.includes(m.state_id)).map((mm: { _id: any; })=>mm._id);
+    if (!this.filterBody.aj_mm_id.length && this.filterBody.awk_mm_states) {
+      this.filterBody.aj_mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.awk_mm_states.includes(m.state_id)).map((mm: { _id: any; }) => mm._id);
     }
     this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
@@ -1011,6 +1011,7 @@ export class AawakComponent implements OnInit {
                 obj.awk_id = exceldata[i][j];
                 break;
               case "mm": obj.mm = exceldata[i][j];
+
                 let getmm = this.mms.find((m: any) => [m.mm_hin, m.mm_eng, m.mm_code].includes(obj.mm));
                 if (getmm) {
                   obj.mm_id = getmm._id;
@@ -1137,8 +1138,8 @@ export class AawakComponent implements OnInit {
               case "actual amt":
               case "actual_amt": obj.actual_amt = exceldata[i][j];
                 break;
-              case "unit": obj.unit = exceldata[i][j];
-                let getunit = this.units.find((u: any) => [u.unit_short, u.unit_full.toLowerCase()].includes(obj.unit.toLowerCase()));
+              case "unit": obj.unit = exceldata[i][j] ? exceldata[i][j].toLowerCase() : exceldata[i][j];
+                let getunit = this.units.find((u: any) => [u.unit_short, u.unit_full.toLowerCase()].includes(obj.unit));
                 if (getunit) {
                   obj.unit_id = getunit._id;
                 } else {
@@ -1338,7 +1339,7 @@ export class AawakComponent implements OnInit {
           finalJson[finalJson.length - 1].jawak_detail.push(jwkobj);
         }
         else {
-          console.log("err", finalJson[finalJson.length - 1]);
+          // console.log("err", finalJson[finalJson.length - 1]);
         }
 
       }
@@ -1362,7 +1363,7 @@ export class AawakComponent implements OnInit {
   }
 
   importResponse(ev: any) {
-    console.log("respose", ev);
+    // console.log("respose", ev);
 
     if (ev) {
       this.closeModal();

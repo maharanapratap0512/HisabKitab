@@ -1947,8 +1947,11 @@ class dbModal {
   }
 
 }
-
+// for sewa
 let dbmodal = new dbModal(path.resolve(__dirname, '../../../../Data/Database.db'))
+
+// for khatti
+// let dbmodal = new dbModal(path.resolve(__dirname, '../../../../Data/Khatti/Database.db'))
 module.exports = { dbModal, dbmodal }
 
 

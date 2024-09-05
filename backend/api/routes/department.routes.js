@@ -134,7 +134,7 @@ router.put('/settings', async (req, res, next) => {
 //login to department
 router.put('/login', async (req, res, next) => {
     try {
-        if (req.body.dept_id && req.body.dept_id != 4 && req.body.password) {
+        if (req.body.dept_id && req.body.password) {
             let condition = ` _id = ${req.body.dept_id} AND password = '${req.body.password}' `;
             let result = {};
             await DB.getList('department', { conditionString: condition }).then(async (response) => {

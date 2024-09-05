@@ -7,6 +7,7 @@ class DBContex {
     db;
     fs;
     path;
+    exclude_depts = ['1', '5'];
     tbl_need_dept_config = [
         'item',
         'pbk',
@@ -111,7 +112,7 @@ class DBContex {
 
 
                 if (this.tbl_need_dept_config.includes(tblname)) {
-                    conditionQuery = (!options.dept_id || options.dept_id == 1) ? null : ` ${tblname}._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='${tblname}')`;
+                    conditionQuery = (!options.dept_id || this.exclude_depts.includes(options.dept_id)) ? null : ` ${tblname}._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='${tblname}')`;
                 }
                 else if (this.tbl_with_dept_id.includes(tblname)) {
                     conditionQuery = (options.dept_id ? `(${tblname}.dept_id = ${options.dept_id})` : null)
@@ -120,12 +121,12 @@ class DBContex {
                     sql = `select * from support_list ?`;
                     conditionQuery = `list_type = '${tblname}'`
                     if (this.tbl_from_supp_list.includes(tblname)) {
-                        conditionQuery += (!options.dept_id || options.dept_id == 1) ? '' : ` AND support_list._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='aj_type')`;
+                        conditionQuery += (!options.dept_id || this.exclude_depts.includes(options.dept_id)) ? '' : ` AND support_list._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='aj_type')`;
                     }
                 }
                 else if (tblname == "itemmix") {
-                    conditionQuery = (!options.dept_id || options.dept_id == 1) ? null : ` item._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='item')`;
-                    sconditionQuery = (!options.dept_id || options.dept_id == 1) ? null : ` subitem._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='subitem')`;
+                    conditionQuery = (!options.dept_id || this.exclude_depts.includes(options.dept_id)) ? null : ` item._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='item')`;
+                    sconditionQuery = (!options.dept_id || this.exclude_depts.includes(options.dept_id)) ? null : ` subitem._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='subitem')`;
                     sconditionQuery = options.sconditionString ? (sconditionQuery ? `${sconditionQuery} AND ` : '') + options.sconditionString : sconditionQuery
                 }
 
@@ -147,8 +148,8 @@ class DBContex {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
 
-                if (tblname == "subitem")
-                    console.log(sql);
+                // if (tblname == "subitem")
+                    // console.log(sql);
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {

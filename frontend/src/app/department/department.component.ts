@@ -1258,6 +1258,8 @@ export class DepartmentComponent implements OnInit {
     if (this.termMM) {
       i = this.mms.findIndex((i: { _id: any; }) => i._id == id);
     }
+    // this add mm in deptConf if it not exists.
+    this.setConfigObject('mm');
     if (chk) {
       this.deptConf.mm.config_value.splice(this.deptConf.mm.config_value.indexOf(this.mms[i]._id), 1);
       this.mms[i].chk = false;
@@ -1273,6 +1275,8 @@ export class DepartmentComponent implements OnInit {
     if (this.termPbk) {
       i = this.pbks.findIndex((i: { _id: any; }) => i._id == id);
     }
+    // this add 'pbk' in deptConf if it not exists.
+    this.setConfigObject('pbk');
     if (chk) {
       this.deptConf.pbk.config_value.splice(this.deptConf.pbk.config_value.indexOf(this.pbks[i]._id), 1);
       this.pbks[i].chk = false;
@@ -1286,6 +1290,8 @@ export class DepartmentComponent implements OnInit {
     if (this.termDept) {
       i = this.department.findIndex((i: { _id: any; }) => i._id == id);
     }
+    // this add 'department' in deptConf if it not exists.
+    this.setConfigObject('department');
     if (chk) {
       this.deptConf.department.config_value.splice(this.deptConf.department.config_value.indexOf(this.department[i]._id), 1);
       this.department[i].chk = false;
@@ -1299,6 +1305,8 @@ export class DepartmentComponent implements OnInit {
     if (this.termCat) {
       i = this.categories.findIndex((i: { _id: any; }) => i._id == id);
     }
+    // this add 'category' in deptConf if it not exists.
+    this.setConfigObject('category');
     if (chk) {
       this.deptConf.category.config_value.splice(this.deptConf.category.config_value.indexOf(this.categories[i]._id), 1);
       this.categories[i].chk = false;
@@ -1313,6 +1321,8 @@ export class DepartmentComponent implements OnInit {
     if (this.termItem) {
       i = this.items.findIndex((i: { _id: any; }) => i._id == id);
     }
+    // this add 'item' in deptConf if it not exists.
+    this.setConfigObject('item');
     if (chk) {
       this.deptConf.item.config_value.splice(this.deptConf.item.config_value.indexOf(this.items[i]._id), 1);
       this.items[i].chk = false;
@@ -1328,6 +1338,8 @@ export class DepartmentComponent implements OnInit {
     if (this.termItemmix || recall) {
       i = this.itemmix.findIndex((i: { _id: any; }) => i._id == id);
     }
+    // this add 'item' in deptConf if it not exists.
+    this.setConfigObject('item');
     if (chk) {
       this.deptConf.item.config_value.splice(this.deptConf.item.config_value.indexOf(this.itemmix[i]._id), 1);
       this.itemmix[i].chk = false;
@@ -1352,6 +1364,8 @@ export class DepartmentComponent implements OnInit {
       subitemIndex = this.itemmix[itemIndex].subitems.findIndex((s: { _id: any; }) => s._id == subitemId);
 
     }
+    // this add 'subitem' in deptConf if it not exists.
+    this.setConfigObject('subitem');
     if (chk) {
       this.deptConf.subitem.config_value.splice(this.deptConf.subitem.config_value.indexOf(this.itemmix[itemIndex].subitems[subitemIndex]._id), 1);
       this.itemmix[itemIndex].subitems[subitemIndex].chk = false;
@@ -1380,6 +1394,8 @@ export class DepartmentComponent implements OnInit {
     if (this.termAJType) {
       i = this.ajtypes.findIndex((i: { _id: any; }) => i._id == id);
     }
+    // this add 'aj_type' in deptConf if it not exists.
+    this.setConfigObject('aj_type');
     if (chk) {
       this.deptConf.aj_type.config_value.splice(this.deptConf.aj_type.config_value.indexOf(this.ajtypes[i]._id), 1);
       this.ajtypes[i].chk = false;
@@ -1447,7 +1463,7 @@ export class DepartmentComponent implements OnInit {
     let dept_id = this.dept_id || this.auth.webUser.dept_id;
 
     if (this.settings.department.settings) {
-      if (dept_id != 1) {
+      if (![1, 5].includes(dept_id)) {
         this.settingsAll.department.settings = false;
         this.settingsAll.department.add = false;
       }
@@ -1484,7 +1500,18 @@ export class DepartmentComponent implements OnInit {
 
   }
 
+  setConfigObject(type: string) {
+    // Check if the type exists in deptConf
+    if (!this.deptConf[type]) {
+      // If it doesn't exist, create it and initialize config_value as an empty array
+      this.deptConf[type] = { config_value: [], dept_id: this.dept_id };
+    }
+  }
+
   selection(type: any, _id: any) {
+    // this add type in deptConf if it not exists.
+    this.setConfigObject(type);
+    // Now push the _id into the config_value array
     this.deptConf[type].config_value.push(_id);
     return;
   }

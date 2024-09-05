@@ -35,8 +35,7 @@
                      <div class="col-3">
                         <div class="d-flex justify-content-between">
                            <button class="btn btn-outline-success" (click)="exportToExcel()">Export To Excel</button>
-                           <button class="file btn btn-success"
-                              style="font-weight: 700 !important;">
+                           <button class="file btn btn-success" style="font-weight: 700 !important;">
                               <i class="uil uil-arrow-to-bottom"></i> Import
                               <input type="file" class="inputtag"
                                  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
@@ -72,10 +71,10 @@
                               <span class="mx-1"
                                  style="font-size: x-large;position: relative;line-height: 28px;cursor: pointer;"
                                  (click)="protectionToggle(data._id, data.active)">
-                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
-                                    title="Protected" class="uil-shield-check text-warning"></i>
-                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
-                                    title="Unprotected" class="uil-shield-slash text-danger"></i>
+                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && data.active"
+                                    data-toggle="tooltip" title="Protected" class="uil-shield-check text-warning"></i>
+                                 <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && !data.active"
+                                    data-toggle="tooltip" title="Unprotected" class="uil-shield-slash text-danger"></i>
                               </span>
                            </td>
                            <td>
@@ -85,8 +84,8 @@
                                  <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                        class="uil-trash"></i></button>
                               </div>
-                              <span *ngIf="!gs.exceptionDept.includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
-                                 title="Protected" class="text-warning mx-1"
+                              <span *ngIf="!gs.exceptionDept.includes(auth.webUser.dept_id) && data.active"
+                                 data-toggle="tooltip" title="Protected" class="text-warning mx-1"
                                  style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                  <i class="uil-shield-check"></i>
                               </span>
@@ -122,6 +121,8 @@
             </app-category-entry>
             <app-category-entry *ngIf="showModal == 'Edit Category'" (response)='editCategoryResponse($event)'
                [getData]="editData" [isEdit]="true"></app-category-entry>
+            <app-excel-import *ngIf='showModal == "ei_category"' importType="category" [excelFile]="excelFile"
+               (response)="importResponse('category')"></app-excel-import>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"

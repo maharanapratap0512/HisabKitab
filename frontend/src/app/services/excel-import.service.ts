@@ -135,7 +135,8 @@ export class ExcelImportService {
     ],
     category: [
       { col_name: 'category_eng', name: 'category_eng', alt_names: ['category eng'], not_null: false },
-      { col_name: 'category_hin', name: 'category_hin', alt_names: ['category hin'], not_null: true }
+      { col_name: 'category_hin', name: 'category_hin', alt_names: ['category hin'], not_null: true },
+      { col_name: 'category_roman', name: 'category_roman', alt_names: ['category roman'], not_null: false },
     ]
 
   }
