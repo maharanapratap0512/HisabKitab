@@ -5404,9 +5404,10 @@ fieldset:disabled .btn {
    flex-direction: column;
    min-width: 0;
    word-wrap: break-word;
-   background-color: #fff;
+   /* background-color: #fff; */
+   background-color: #f9f4ff;
    background-clip: border-box;
-   border: 1px solid #eef2f7;
+   border: 1px solid #f9f4ff;
    border-radius: .25rem
 }
 
@@ -5441,7 +5442,11 @@ fieldset:disabled .btn {
    -webkit-box-flex: 1;
    -ms-flex: 1 1 auto;
    flex: 1 1 auto;
-   padding: 1.5rem 1.5rem
+   padding: 1.5rem 1.5rem;
+   background-color: #f9f4ff;
+   background-clip: border-box;
+   border: 1px solid #f9f4ff;
+   border-radius: .25rem;
 }
 
 .card-title {
@@ -6713,7 +6718,8 @@ fieldset:disabled .btn {
    padding: 1rem 1rem;
    border-bottom: 1px solid #dee2e6;
    border-top-left-radius: calc(.2rem - 1px);
-   border-top-right-radius: calc(.2rem - 1px)
+   border-top-right-radius: calc(.2rem - 1px);
+   background-color: #cfb0ff;
 }
 
 .modal-header .btn-close {
@@ -6731,7 +6737,8 @@ fieldset:disabled .btn {
    -webkit-box-flex: 1;
    -ms-flex: 1 1 auto;
    flex: 1 1 auto;
-   padding: 1rem
+   padding: 1rem;
+   background-color: #ebddfd;
 }
 
 .modal-footer {
@@ -6751,7 +6758,8 @@ fieldset:disabled .btn {
    padding: .75rem;
    border-top: 1px solid #dee2e6;
    border-bottom-right-radius: calc(.2rem - 1px);
-   border-bottom-left-radius: calc(.2rem - 1px)
+   border-bottom-left-radius: calc(.2rem - 1px);
+   background-color: #dccaf8;
 }
 
 .modal-footer>* {
@@ -14668,7 +14676,7 @@ body[data-leftbar-theme=dark][data-leftbar-compact-mode=condensed] .side-nav .si
 
 .navbar-custom {
    padding: 0 24px;
-   background-color: #cfb0ff;
+   background-color: #ffffff;
    -webkit-box-shadow: 0 0 35px 0 rgba(154, 161, 171, .15);
    box-shadow: 0 0 35px 0 rgba(154, 161, 171, .15);
    min-height: 70px;
@@ -22377,6 +22385,12 @@ Not supports in Firefox and IE */
 .btn-info-custom {
    background-color: transparent !important;
    color: #323b47 !important;
+}
+
+.btn-primary-custom {
+   background-color: #dccaf8 !important;
+   color: #40007f !important;
+   border-color: #4400a4 !important;
 }
 
 .nav-item .active {
