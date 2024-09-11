@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { FormControl, FormGroup, ValidationErrors } from '@angular/forms';
 import { HttpService } from 'src/app/services/http.service';
 import { ApiService } from 'src/app/services/api.service';
-import { Observable, observable, Subject } from 'rxjs';
+import { Observable, observable, of, Subject } from 'rxjs';
 import { async } from '@angular/core/testing';
 import { getLocaleMonthNames } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
@@ -50,21 +50,9 @@ export class GlobalService {
     for (let yr = date.getFullYear(); yr >= 2021; yr--) {
       this.years.push(yr);
     }
+
     // this.getList();
   }
-
-  // validationFireOnSubmit(fg: FormGroup) {
-  // Object.keys(fg.controls).forEach(key => {
-  //   const control = fg.get(key);
-  //   const controlErrors: ValidationErrors = fg.get(key).errors;
-  //   if (controlErrors != null) {
-  //     Object.keys(controlErrors).forEach(keyError => {
-  //       control.markAsDirty({ onlySelf: true });
-  //       control.markAsTouched({ onlySelf: true });
-  //     });
-  //   }
-  // });
-  // }
 
   validationFireOnSubmit(formGroup: FormGroup) {
     Object.keys(formGroup.controls).forEach(field => {

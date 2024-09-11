@@ -11,7 +11,7 @@
             </span>
             <span class="hk mx-2"><strong><u>HISAB KITAB</u></strong>
             </span>
-            <span>(v20.2)</span>
+            <span>(v20.3)</span>
          </a>
          <!-- <a routerLink="dashboard" class="topnav-logo">
             <span class="topnav-logo-lg">
@@ -70,6 +70,14 @@
                   <i class="dripicons-gear noti-icon"></i>
                </a>
             </li>
+
+            <li class="notification-list mx-2">
+               <a class="nav-link" (click)="themeService.toggleDarkMode()">
+                  <i class="uil noti-icon"
+                     [ngClass]="{'uil-sun': auth.webUser.settings.darkMode, 'uil-moon': !auth.webUser.settings.darkMode}"></i>
+               </a>
+            </li>
+
             <li class="notification-list text-center">
                <!-- <a class="nav-link dropdown-toggle nav-user arrow-none me-0" data-bs-toggle="dropdown" role="button"
             aria-haspopup="false" aria-expanded="false"> -->
@@ -250,12 +258,18 @@
                         <i class="uil-apps me-1"></i>Reports <div class="arrow-down"></div>
                      </a>
                      <div class="dropdown-menu" aria-labelledby="topnav-apps">
-                        <a class="dropdown-item" *ngIf="settings.report.report_at" routerLinkActive="active" routerLink="report-at">Aawak Type Saar</a>
-                        <a class="dropdown-item" *ngIf="settings.report.report_jt" routerLinkActive="active" routerLink="report-jt">Jawak Type Saar</a>
-                        <a class="dropdown-item" *ngIf="settings.report.report_str_stk" routerLinkActive="active" routerLink="report-str-stk">Store Stock</a>
-                        <a class="dropdown-item" *ngIf="settings.report.report_kh" routerLinkActive="active" routerLink="report-kh-saar">Khet Saar</a>
-                        <a class="dropdown-item" *ngIf="settings.report.report_kh" routerLinkActive="active" routerLink="report-kh-itemwise">Khet Saar (Item Wise)</a>
-                        <a class="dropdown-item" *ngIf="settings.report.report_kh" routerLinkActive="active" routerLink="report-kh-ajsaar">Khet AJ saar</a>
+                        <a class="dropdown-item" *ngIf="settings.report.report_at" routerLinkActive="active"
+                           routerLink="report-at">Aawak Type Saar</a>
+                        <a class="dropdown-item" *ngIf="settings.report.report_jt" routerLinkActive="active"
+                           routerLink="report-jt">Jawak Type Saar</a>
+                        <a class="dropdown-item" *ngIf="settings.report.report_str_stk" routerLinkActive="active"
+                           routerLink="report-str-stk">Store Stock</a>
+                        <a class="dropdown-item" *ngIf="settings.report.report_kh" routerLinkActive="active"
+                           routerLink="report-kh-saar">Khet Saar</a>
+                        <a class="dropdown-item" *ngIf="settings.report.report_kh" routerLinkActive="active"
+                           routerLink="report-kh-itemwise">Khet Saar (Item Wise)</a>
+                        <a class="dropdown-item" *ngIf="settings.report.report_kh" routerLinkActive="active"
+                           routerLink="report-kh-ajsaar">Khet AJ saar</a>
                      </div>
                   </li>
                   <li class="nav-item" *ngIf="settings.point.visible">
@@ -534,13 +548,13 @@
          <hr class="mt-1" />
 
          <div class="form-check form-switch mb-1">
-            <input class="form-check-input" type="checkbox" name="color-scheme-mode" value="light" id="light-mode-check"
+            <input class="form-check-input" type="checkbox" name="color-scheme-mode" value="light" id="light-check"
                checked>
             <label class="form-check-label" for="light-mode-check">Light Mode</label>
          </div>
 
          <div class="form-check form-switch mb-1">
-            <input class="form-check-input" type="checkbox" name="color-scheme-mode" value="dark" id="dark-mode-check" (change)="darkModeToggle($event)">
+            <input class="form-check-input" type="checkbox" name="color-scheme-mode" value="dark" id="dark-check">
             <label class="form-check-label" for="dark-mode-check">Dark Mode</label>
          </div>
 

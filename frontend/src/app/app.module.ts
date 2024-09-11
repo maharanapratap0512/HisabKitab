@@ -76,6 +76,7 @@ import { ReportStoreStockComponent } from './reports/report-store-stock/report-s
 import { ReportKhSaarComponent } from './reports/report-kh-saar/report-kh-saar.component';
 import { ReportKhItemwiseComponent } from './reports/report-kh-itemwise/report-kh-itemwise.component';
 import { ReportKhAjsaarComponent } from './reports/report-kh-ajsaar/report-kh-ajsaar.component';
+import { ThemeService } from './services/theme.service';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -165,7 +166,7 @@ import { ReportKhAjsaarComponent } from './reports/report-kh-ajsaar/report-kh-aj
     NgxPaginationModule,
 
   ],
-  providers: [GlobalService, AuthService],
+  providers: [GlobalService, AuthService, ThemeService],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

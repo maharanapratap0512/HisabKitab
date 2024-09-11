@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnInit, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
 import * as FileSaver from 'file-saver';
 import * as JSZip from 'jszip';
@@ -7,6 +7,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
+import { ThemeService } from 'src/app/services/theme.service';
 import Swal from 'sweetalert2';
 declare var $: any;
 
@@ -15,7 +16,8 @@ declare var $: any;
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements AfterViewInit {
+  htmlElement: any;
   title!: string;
   dataZip: any;
   isShow: boolean = false;
@@ -37,7 +39,10 @@ export class HeaderComponent implements OnInit {
     private gs: GlobalService,
     private router: Router,
     private toastr: ToastrService,
-    public auth: AuthService,) {
+    public auth: AuthService,
+    private renderer: Renderer2,
+    private elementRef: ElementRef,
+    public themeService: ThemeService) {
   }
   @HostListener('window:scroll')
 
@@ -78,6 +83,22 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
     // console.log(this.auth.webUser);
     this.settings = this.auth.webUser.settings;
+    this.htmlElement = this.elementRef.nativeElement.ownerDocument.documentElement;
+
+    // this.themeService.toggleDarkMode()
+  }
+
+  ngAfterViewInit(): void {
+    // Re-initialize jQuery/app.min.js logic after Angular has rendered the component
+    if ((window as any).jQuery && (window as any).jQuery.App) {
+      console.log("initialized");
+      
+      (window as any).jQuery.App.init();  // Re-initialize app.min.js here
+      
+    } else {
+      console.log("not initialized");
+
+    }
   }
 
   logout() {
@@ -86,11 +107,15 @@ export class HeaderComponent implements OnInit {
   }
 
   darkModeToggle(ev: any) {
-    const config = $("body").data("layout-config");
-    config.darkMode = ev.target.checked;
-    console.log("darkMode", config);
+    // const config = $("body").data("layout-config");
+    // config.darkMode = ev.target.checked;
+    // console.log("darkMode", config);
+    this.renderer.setAttribute(this.htmlElement, 'darkMode', ev.target.checked);
 
-    $(document.body).attr("data-layout-config", JSON.stringify(config));
+    // (window as any).App.activateDarkMode();
+
+    // $(document.body).attr("data-layout-config", JSON.stringify(config));
+
     // $(document.body)  .data("layout-config", config);
     // $("body").toggleClass("dark-mode");
 
@@ -552,10 +577,10 @@ export class HeaderComponent implements OnInit {
         await this.http.get(this.api.getUrl(API)).subscribe((res: any) => {
           let result: any = { changes: [], found: [], columns: [] }
 
-          if(API == 'DEPTCONFIG'){
+          if (API == 'DEPTCONFIG') {
             console.log(res, "old");
             console.log(this.importResult[i], "new");
-            
+
           }
           for (let j in res.result) {
             for (let k = 0; k < this.importResult[i].data.length; k++) {
