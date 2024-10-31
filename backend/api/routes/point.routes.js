@@ -23,7 +23,7 @@ router.get('/random/', async (req, res, next) => {
     try {
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
         await DB.getList('point', { full: true, orderBy: `random()`, limit: 1 }).then(async (resolve) => {
-            console.log(resolve);
+            // console.log(resolve);
             res.json({
                 success: true,
                 result: resolve.data || [],

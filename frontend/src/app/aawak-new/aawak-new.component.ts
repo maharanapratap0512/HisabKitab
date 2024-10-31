@@ -1,3 +1,4 @@
+
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -13,11 +14,12 @@ import { observable, Observable, of, Subject } from 'rxjs';
 declare var $: any;
 
 @Component({
-  selector: 'app-aawak',
-  templateUrl: './aawak.component.html',
-  styleUrls: ['./aawak.component.scss']
+  selector: 'app-aawak-new',
+  templateUrl: './aawak-new.component.html',
+  styleUrls: ['./aawak-new.component.scss']
 })
-export class AawakComponent implements OnInit {
+export class AawakNewComponent implements OnInit {
+
 
   @ViewChild('TABLE') el!: ElementRef<HTMLInputElement>;
   page = 1;
@@ -116,7 +118,6 @@ export class AawakComponent implements OnInit {
   }
   // importPending: any = false;
   dictionary: any = [];
-  itemSubitemMerge: any = false;
   loadingStatus: any = "मैं आत्मा शांत स्वरूप हूँ ।";
   // months: any = [{no:1, name:'January'}]
   constructor(
@@ -173,34 +174,32 @@ export class AawakComponent implements OnInit {
   getaawakData(pageNo: any = null) {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
-    this.http.get(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('AAWAK') + "voucher/" + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.aawakAll = data['result'];
         for (let i in this.aawakAll) {
-          this.aawakAll[i].categories_hin = '';
-          this.aawakAll[i].categories_eng = '';
-          if (this.aawakAll[i].subitem_categories && this.aawakAll[i].subitem_categories.length > 0) {
-            // console.log(this.aawakAll[i].subitem_categories, this.categories);
+          for (let j in this.aawakAll[i].aawaks) {
+            this.aawakAll[i].aawaks[j].categories_hin = '';
+            this.aawakAll[i].aawaks[j].categories_eng = '';
+            if (this.aawakAll[i].aawaks[j].subitem_categories && this.aawakAll[i].aawaks[j].subitem_categories.length > 0) {
+              console.log(this.aawakAll[i].aawaks[j].subitem_categories, this.categories);
 
-            for (let j in this.categories) {
-              if (this.aawakAll[i].subitem_categories.includes(this.categories[j]._id)) {
-                this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.aawakAll[i].categories_eng += this.categories[j].category_eng + ', ';
+              for (let k in this.categories) {
+                if (this.aawakAll[i].aawaks[j].subitem_categories.includes(this.categories[k]._id)) {
+                  this.aawakAll[i].aawaks[j].categories_hin += this.categories[k].category_hin + ', ';
+                  this.aawakAll[i].aawaks[j].categories_eng += this.categories[k].category_eng + ', ';
+                }
               }
-            }
-          } else {
-            // console.log(this.aawakAll[i].item_categories, this.categories);
-
-            for (let j in this.categories) {
-              if (this.aawakAll[i].item_categories.includes(this.categories[j]._id)) {
-                this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.aawakAll[i].categories_eng += this.categories[j].category_eng + ', ';
+            } else {
+              for (let k in this.categories) {
+                if (this.aawakAll[i].aawaks[j].item_categories.includes(this.categories[k]._id)) {
+                  this.aawakAll[i].aawaks[j].categories_hin += this.categories[k].category_hin + ', ';
+                  this.aawakAll[i].aawaks[j].categories_eng += this.categories[k].category_eng + ', ';
+                }
               }
             }
           }
         }
-        // console.log(this.aawakData);
-
         this.aawakData = this.aawakAll;
         this.total_count = data['total_count'];
         this.isLoader = false;
@@ -240,28 +239,27 @@ export class AawakComponent implements OnInit {
     if (!this.filterBody.aj_mm_id.length && this.filterBody.awk_mm_states) {
       this.filterBody.aj_mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.awk_mm_states.includes(m.state_id)).map((mm: { _id: any; }) => mm._id);
     }
-    this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+    this.http.put(this.api.getUrl('AAWAK') + 'voucher/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.aawakAll = data['result'];
         for (let i in this.aawakAll) {
-          this.aawakAll[i].categories_hin = '';
-          this.aawakAll[i].categories_eng = '';
-          if (this.aawakAll[i].subitem_categories && this.aawakAll[i].subitem_categories.length > 0) {
-            // console.log(this.aawakAll[i].subitem_categories, this.categories);
+          for (let j in this.aawakAll[i].aawaks) {
+            this.aawakAll[i].aawaks[j].categories_hin = '';
+            this.aawakAll[i].aawaks[j].categories_eng = '';
+            if (this.aawakAll[i].aawaks[j].subitem_categories && this.aawakAll[i].aawaks[j].subitem_categories.length > 0) {
 
-            for (let j in this.categories) {
-              if (this.aawakAll[i].subitem_categories.includes(this.categories[j]._id)) {
-                this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.aawakAll[i].categories_eng += this.categories[j].category_eng + ', ';
+              for (let k in this.categories) {
+                if (this.aawakAll[i].aawaks[j].subitem_categories.includes(this.categories[k]._id)) {
+                  this.aawakAll[i].aawaks[j].categories_hin += this.categories[k].category_hin + ', ';
+                  this.aawakAll[i].aawaks[j].categories_eng += this.categories[k].category_eng + ', ';
+                }
               }
-            }
-          } else {
-            // console.log(this.aawakAll[i].item_categories, this.categories);
-
-            for (let j in this.categories) {
-              if (this.aawakAll[i].item_categories.includes(this.categories[j]._id)) {
-                this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.aawakAll[i].categories_eng += this.categories[j].category_eng + ', ';
+            } else {
+              for (let k in this.categories) {
+                if (this.aawakAll[i].aawaks[j].item_categories.includes(this.categories[k]._id)) {
+                  this.aawakAll[i].aawaks[j].categories_hin += this.categories[k].category_hin + ', ';
+                  this.aawakAll[i].aawaks[j].categories_eng += this.categories[k].category_eng + ', ';
+                }
               }
             }
           }
@@ -301,7 +299,6 @@ export class AawakComponent implements OnInit {
     this.allAJData = [];
     this.exportAJdata$ = new Subject();
 
-    this.filterBody.orderBy = "aawak.mm_id, item_categories, subitem_categories, aawak.date";
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -376,17 +373,11 @@ export class AawakComponent implements OnInit {
             cat = item.categories_hin.join(', ');
           }
         }
-        awkObj['Category'] = cat;
-        if (this.itemSubitemMerge) {
-          awkObj['Item Hin'] = (result[i].item_id ? result[i].item_hin : '-') + (result[i].subitem_id ? ' : ' + result[i].subitem_hin : '');
-          awkObj['Item Eng'] = (result[i].item_id ? result[i].item_eng : '-') + (result[i].subitem_id ? ' : ' + result[i].subitem_eng : '');
-        } else {
-          awkObj['Item'] = result[i].item_id ? result[i].item_hin : '-'
-          awkObj['Subitem'] = result[i].subitem_id ? result[i].subitem_hin : '-'
-        }
-
         awkObj = {
           ...awkObj,
+          'Category': cat,
+          'Item': result[i].item_id ? result[i].item_hin : '-',
+          'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
           'Product Code': result[i].product_code ? result[i].product_code : '-',
           'Sr No': result[i].sr_num ? result[i].sr_num : '-',
           'Company': result[i].company_name ? result[i].company_name : '-',
@@ -409,7 +400,7 @@ export class AawakComponent implements OnInit {
       }
       else {
         // console.log(this.allAJData);
-        this.filterBody.orderBy = null;
+
         this.export(this.allAJData);
         this.isLoader = false;
       }
@@ -424,7 +415,6 @@ export class AawakComponent implements OnInit {
     this.exportAJdata$ = new Subject();
 
     this.filterBody.remaining_qty = true;
-    this.filterBody.orderBy = "aawak.mm_id, item_categories, subitem_categories, aawak.date";
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -498,7 +488,6 @@ export class AawakComponent implements OnInit {
         this.getMoreAJ();
       }
       else {
-        this.filterBody.orderBy = null;
         this.export(this.allAJData);
         this.isLoader = false;
       }
@@ -522,7 +511,6 @@ export class AawakComponent implements OnInit {
     let uniqueAawakMM = new Set();
     let uniqueUnit = new Set();
 
-    this.filterBody.orderBy = "aawak.mm_id, item_categories, subitem_categories, aawak.date";
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -561,17 +549,11 @@ export class AawakComponent implements OnInit {
             cat = item.categories_hin.join(', ');
           }
         }
-        awkObj['Category'] = cat;
-        if (this.itemSubitemMerge) {
-          awkObj['Item Hin'] = (result[i].item_id ? result[i].item_hin : '-') + (result[i].subitem_id ? ' : ' + result[i].subitem_hin : '');
-          awkObj['Item Eng'] = (result[i].item_id ? result[i].item_eng : '-') + (result[i].subitem_id ? ' : ' + result[i].subitem_eng : '');
-        } else {
-          awkObj['Item'] = result[i].item_id ? result[i].item_hin : '-'
-          awkObj['Subitem'] = result[i].subitem_id ? result[i].subitem_hin : '-'
-        }
-
         awkObj = {
           ...awkObj,
+          'Category': cat,
+          'Item': result[i].item_id ? result[i].item_hin : '-',
+          'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
           'Product Code': result[i].product_code ? result[i].product_code : '-',
           'Sr No': result[i].sr_num ? result[i].sr_num : '-',
           'Company': result[i].company_name ? result[i].company_name : '-',
@@ -596,7 +578,7 @@ export class AawakComponent implements OnInit {
         this.getMoreAJ();
       }
       else {
-        this.filterBody.orderBy = null;
+
         footerRow['MM'] = uniqueMM.size + 'MMs';
         footerRow['Aawak MM'] = uniqueAawakMM.size + 'MMs';
         footerRow['Unit'] = uniqueUnit.size + 'Units';
@@ -626,24 +608,18 @@ export class AawakComponent implements OnInit {
     let uniqueJawakMM = new Set();
     let uniqueUnit = new Set();
 
-    this.filterBody.orderBy = "aawak.mm_id, item_categories, subitem_categories, aawak.date";
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
       for (let i = 0; i < result.length; i++) {
         uniqueMM.add(result[i].mm_id);
 
-        let awkObj: any = {
+        let awkObj = {
           'MM': result[i].mm_hin,
+          'Item': result[i].item_id ? result[i].item_hin : '-',
+          'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
           'Company': result[i].company_name ? result[i].company_name : '-',
         };
-        if (this.itemSubitemMerge) {
-          awkObj['Item Hin'] = (result[i].item_id ? result[i].item_hin : '-') + (result[i].subitem_id ? ' : ' + result[i].subitem_hin : '');
-          awkObj['Item Eng'] = (result[i].item_id ? result[i].item_eng : '-') + (result[i].subitem_id ? ' : ' + result[i].subitem_eng : '');
-        } else {
-          awkObj['Item'] = result[i].item_id ? result[i].item_hin : '-'
-          awkObj['Subitem'] = result[i].subitem_id ? result[i].subitem_hin : '-'
-        }
 
         for (let j in result[i].jawak_detail) {
           uniqueJawakMM.add(result[i].jawak_detail[j].jawak_mm_id);
@@ -675,7 +651,6 @@ export class AawakComponent implements OnInit {
         this.getMoreAJ();
       }
       else {
-        this.filterBody.orderBy = null;
         footerRow['MM'] = uniqueMM.size + ' MMs';
         footerRow['Unit'] = uniqueUnit.size + ' Units';
         footerRow['Jawak MM'] = uniqueJawakMM.size + ' Mms';
@@ -788,11 +763,44 @@ export class AawakComponent implements OnInit {
 
   edit(data: any) {
     this.editData = data;
-    this.showModal = 'Edit Aawak'
-    $('#showModal').modal('show');
+    this.openModal('Edit Aawak');
   }
 
-  delete(i: any, id: any) {
+  delete(i: any, voucher_no: any) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "All aawaks in Bunch will be deleted, You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        let ids = await this.aawakData[i].aawaks.map((a: { _id: any; }) => a._id);
+        console.log(ids);
+
+        if (ids && ids.length > 0) {
+          this.http.delete(this.api.getUrl('AAWAK') + '/voucher/' + JSON.stringify(ids)).subscribe((data: any) => {
+            if (data['success']) {
+              this.isLoader = false;
+              this.aawakData.splice(i, 1);
+              this.total_count -= 1;
+              this.toastr.success('Deleted Successfully');
+            }
+            else {
+              this.toastr.error(data['message']);
+              this.isLoader = false;
+            }
+          });
+        } else {
+          this.toastr.error('Something went wrong.');
+        }
+      }
+    })
+  }
+
+  deleteOne(i: any, j: any, id: any) {
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -801,13 +809,13 @@ export class AawakComponent implements OnInit {
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
+
         this.http.delete(this.api.getUrl('AAWAK') + '/' + id).subscribe((data: any) => {
           if (data['success']) {
             this.isLoader = false;
-            this.aawakData.splice(i, 1);
-            this.total_count -= 1;
+            this.aawakData[i].aawaks.splice(j, 1);
             this.toastr.success('Deleted Successfully');
           }
           else {
@@ -815,6 +823,7 @@ export class AawakComponent implements OnInit {
             this.isLoader = false;
           }
         });
+
       }
     })
   }
@@ -879,9 +888,6 @@ export class AawakComponent implements OnInit {
   openModal(type: any) {
     this.showModal = type;
     $('#showModal').modal('show');
-    // console.log("modal", modal);
-
-    // console.log("this.showModal",this.showModal);
 
   }
 

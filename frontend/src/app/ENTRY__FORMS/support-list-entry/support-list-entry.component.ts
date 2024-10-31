@@ -32,7 +32,9 @@ export class SupportListEntryComponent implements OnInit {
     this.supportListForm = this.fb.group({
       list_type: [null, Validators.required],
       list_name_eng: [null, Validators.required],
-      list_name_hin: [null, Validators.required]
+      list_name_hin: [null, Validators.required],
+      list_name_roman: [null],
+      lock: 0,
     });
   }
 
@@ -50,7 +52,9 @@ export class SupportListEntryComponent implements OnInit {
       this.supportListForm.patchValue({
         list_type: changes.getData.currentValue.list_type,
         list_name_eng: changes.getData.currentValue.list_name_eng,
-        list_name_hin: changes.getData.currentValue.list_name_hin
+        list_name_hin: changes.getData.currentValue.list_name_hin,
+        list_name_roman: changes.getData.currentValue.list_name_roman ? changes.getData.currentValue.list_name_roman : null,
+        lock: changes.getData.currentValue.lock ? changes.getData.currentValue.lock : 0,
       });
     }
   }
@@ -94,7 +98,9 @@ export class SupportListEntryComponent implements OnInit {
       body.set = {
         list_type: this.getData.list_type,
         list_name_eng: this.supportListForm.value.list_name_eng,
-        list_name_hin: this.supportListForm.value.list_name_hin
+        list_name_hin: this.supportListForm.value.list_name_hin,
+        list_name_roman: this.supportListForm.value.list_name_roman,
+        lock: this.supportListForm.value.lock,
       };
       this.http.put(this.api.getUrl('SUPPORTLIST'), body).subscribe((data: any) => {
         if (data && data['success']) {

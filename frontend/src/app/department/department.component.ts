@@ -1466,6 +1466,9 @@ export class DepartmentComponent implements OnInit {
       if (![1, 5].includes(dept_id)) {
         this.settingsAll.department.settings = false;
         this.settingsAll.department.add = false;
+      } else {
+        this.settingsAll.department.settings = true;
+        this.settingsAll.department.add = true;
       }
 
       // this.deptConf.settings.config_value = this.settingsAll;

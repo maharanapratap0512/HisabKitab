@@ -14,7 +14,7 @@ export class ExcelImportService {
     { name: 'subitem', autoUpdate: true },
     { name: 'subitem_list', autoUpdate: true },
     { name: 'product', autoUpdate: true },
-    { name: 'support_list', autoUpdate: true },
+    { name: 'support_list', autoUpdate: true, note: 'list_type should be aawak_type, jawak_type, gender, relation, condition. MUST BE same spelling, lower case.' },
     { name: 'category', autoUpdate: true },
   ];
   config: any = {

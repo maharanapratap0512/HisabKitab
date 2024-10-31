@@ -4,48 +4,8 @@
 </ngx-spinner>
 <div class="row" id="aawakEntryComponent">
    <div class="card-body">
+
       <form #f="ngForm">
-
-         <!-- Aawak Readonly Fields while editing -->
-         <div class="row" *ngIf="false">
-            <div class="card card-body">
-               <div class="row">
-                  <div class="col-4">
-                     <div>
-                        <h5>
-                           <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">Item </span>
-                           <span class="font-12">
-                              {{getData.item_hin}} {{getData.subitem_hin ? ' : ' + getData.subitem_hin :
-                              ''}}
-                           </span>
-                        </h5>
-                     </div>
-                  </div>
-                  <div class="col-4">
-                     <div>
-                        <h5>
-                           <span class="font-14 badge badge-secondary-lighten" style="width: 25%;">MM </span>
-                           <span class="font-12">
-                              {{getData.mm_hin}} - {{getData.mm_eng}}
-                           </span>
-                        </h5>
-                     </div>
-                  </div>
-                  <div class="col-4">
-                     <div>
-                        <h5>
-                           <span class="font-14 badge badge-secondary-lighten" style="width: 30%;">Product
-                           </span>
-                           <span class="font-12">
-                              {{getData.product_code ? getData.product_code : '-'}}
-                           </span>
-                        </h5>
-                     </div>
-                  </div>
-               </div>
-            </div>
-         </div>
-
 
          <!-- AUto insert aawak by product Aawak Entry Form Start from here -->
          <div class="row" *ngIf="awkfg.is_auto_pd">
@@ -174,7 +134,6 @@
          </div>
 
 
-
          <!-- Aawak Entry Form Start from here -->
          <div class="row" *ngIf="!awkfg.is_auto_pd">
             <div class="col-md-2 mb-3" *ngIf="settings.aawak.pkt_num">
@@ -182,6 +141,14 @@
                   <label class="form-label">Pkt No.</label>
                   <input type="text" class="form-control" placeholder="पर्ची न." [(ngModel)]="awkfg.pkt_num"
                      name="pkt_num" #pkt_num="ngModel">
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.lot_no">
+               <div class="form-group">
+                  <label class="form-label">Lot No.</label>
+                  <input type="text" class="form-control" placeholder="लॉट नं." [(ngModel)]="awkfg.lot_no" name="lot_no"
+                     #lot_no="ngModel">
                </div>
             </div>
 
@@ -368,8 +335,8 @@
             <div class="col-md-2 mb-3" *ngIf="settings.aawak.company_name">
                <div class="form-group">
                   <label class="form-label">Company Name</label>
-                  <input type="text" class="form-control" placeholder="Company Name"
-                     [(ngModel)]="awkfg.company_name" name="company_name" #actual_amt="ngModel">
+                  <input type="text" class="form-control" placeholder="Company Name" [(ngModel)]="awkfg.company_name"
+                     name="company_name" #actual_amt="ngModel">
                </div>
             </div>
 
@@ -400,7 +367,6 @@
                      <input type="text" class="form-control" placeholder="Rate" [(ngModel)]="awkfg.rate" name="rate"
                         #rate="ngModel" (focusout)="rateclick()">
                      <span class="input-group-text"> = {{(awkfg.qty * awkfg.rate).toFixed(2)}}</span>
-
                   </div>
                </div>
             </div>
@@ -415,16 +381,29 @@
 
             <div class="col-md-3 mb-3">
                <div class="form-group">
-                  <label class="form-label">Aawak Type</label>
-                  <div class="float-end">
+                  <label class="form-label">Aawak Source & Type</label>
+                  <div class="float-end" *ngIf="settings.aawak.aawak_source_id">
+                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
+                        onclick="$('#aawakEntryComponent > #showModal').modal('show')"
+                        (click)="showModal = 'Add Aawak Source'">
+                        + Source
+                     </a>
                      <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
-                        class="btn btn-sm btn-outline-primary" (click)="setView('aawak_type')"><i
-                           class=" dripicons-view-list"></i></a>
-                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
-                        (click)="openModal('Add Aawak Type')">+
-                        Add</a>
+                        class="btn btn-outline-primary" onclick="$('#aawakEntryComponent > #showModal').modal('show')"
+                        (click)="showModal = 'Add Aawak Type'">
+                        + Type
+                     </a>
                   </div>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Aawak Type" [clearable]="true"
+                  <ng-select class="custom" style="width: 100%;" placeholder="Aawak Source" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.aawak_source_id" name="aawak_source_id"
+                     #aawak_source_id="ngModel">
+                     <ng-option selected="selected" disabled value="">Aawak Source
+                     </ng-option>
+                     <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
+                        {{item.list_name_hin}} : {{item.list_name_eng}}
+                     </ng-option>
+                  </ng-select>
+                  <ng-select class="custom mt-1" style="width: 100%;" placeholder="Aawak Type" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.aawak_type_id" name="aawak_type_id"
                      #aawak_type_id="ngModel"
                      [ngClass]="{ 'validation': (aawak_type_id?.touched || f.submitted) && aawak_type_id.errors?.['required']}"
@@ -438,15 +417,20 @@
                </div>
             </div>
 
-            <div class="col-md-1 mb-3" *ngIf="settings.aawak.isbill">
+            <!-- <div class="col-md-3 mb-3">
                <div class="form-group">
-                  <label class="form-label">बिल है?</label>
-                  <div class="form-check form-switch">
-                     <input type="checkbox" class="form-check-input" [(ngModel)]="awkfg.isbill"
-                        [ngModelOptions]="{standalone: true}">
+                  <label class="form-label">Aawak Type</label>
+                  <div class="float-end">
+                     <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                        class="btn btn-sm btn-outline-primary" (click)="setView('aawak_type')"><i
+                           class=" dripicons-view-list"></i></a>
+                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                        (click)="openModal('Add Aawak Type')">+
+                        Add</a>
                   </div>
+                  
                </div>
-            </div>
+            </div> -->
 
             <div class="col-md-2 mb-3" *ngIf="settings.aawak.document">
                <div class="form-group">
@@ -480,6 +464,26 @@
                </div>
             </div>
 
+            <div class="col-md-1 mb-3" *ngIf="settings.aawak.isbill">
+               <div class="form-group">
+                  <label class="form-label">बिल है?</label>
+                  <div class="form-check form-switch">
+                     <input type="checkbox" class="form-check-input" [(ngModel)]="awkfg.isbill"
+                        [ngModelOptions]="{standalone: true}">
+                  </div>
+               </div>
+            </div>
+
+            <div class="col-md-1 mb-3" *ngIf="settings.aawak.is_variable_qty">
+               <div class="form-group">
+                  <label class="form-label">Variable Qty</label>
+                  <div class="form-check form-switch">
+                     <input type="checkbox" class="form-check-input" [(ngModel)]="awkfg.is_variable_qty"
+                        [ngModelOptions]="{standalone: true}">
+                  </div>
+               </div>
+            </div>
+
             <div class="col-md-1 mb-3">
                <div class="form-group">
                   <label class="form-label">Highlight</label>
@@ -493,9 +497,9 @@
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label text-warning">जावक सेक्शन भरने के बाद बटन क्लिक करे।</label>
-                  <button class="form-control btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                  <button class="form-control btn btn-primary w-50 mx-3" *ngIf="!isEdit" type="submit"
                      (click)="aawakFormSubmit(f)">Submit</button>
-                  <button class=" form-control btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                  <button class=" form-control btn btn-warning w-50 mx-3" *ngIf="isEdit" type="submit"
                      (click)="aawakFormUpdate(f)">Update</button>
                   <!-- <button class="btn btn-light submit mx-3" type="button" (click)="mmForm.reset()">clear</button> -->
                </div>
@@ -533,11 +537,11 @@
                         <div class="form-group">
                            <label class="form-label">किसको दिया</label>
                            <ng-select class="custom" style="width: 100%;" placeholder="Select Person" [clearable]="true"
-                              [virtualScroll]="true" [(ngModel)]="jnimitt" [ngModelOptions]="{standalone: true}">
+                              [virtualScroll]="true" [(ngModel)]="jpbk" [ngModelOptions]="{standalone: true}">
                               <ng-option selected="selected" disabled value="">Select Person</ng-option>
-                              <ng-option *ngFor="let item of nimitts"
-                                 [value]="{id:item._id,nimitt_hin:item.nimitt_hin,state_hin:item.state_hin}">
-                                 {{item.nimitt_hin}}{{item.nimitt_eng ? ' : '+ item.nimitt_eng : ''}}{{' ('+
+                              <ng-option *ngFor="let item of pbks"
+                                 [value]="{id:item._id,roll_no:item.roll_no,pbk_hin:item.pbk_hin,state_hin:item.state_hin}">
+                                 {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
                                  item.state_hin + ')'}}</ng-option>
                            </ng-select>
                         </div>
@@ -578,8 +582,7 @@
                         <label class="form-label">Clear</label>
                      </div> -->
                   </div>
-                  <button type="button"
-                     [disabled]="(jmm === null && jnimitt === null) || jdate === null || jqty === null"
+                  <button type="button" [disabled]="(jmm === null && jpbk === null) || jdate === null || jqty === null"
                      class="btn btn-primary mt-3" (click)="add_jwk()">+ Add</button>
                   <div class="mt-3 p-2" style="max-height: 200px;;overflow-y: auto;">
                      <div class="row mb-2 border-secondary border-bottom"
@@ -587,7 +590,7 @@
                         <div class="col-md-1">{{i+1}}</div>
                         <div class="col-md-2">{{f.date}}</div>
                         <div class="col-md-2">{{f.jawak_mm_hin}}</div>
-                        <div class="col-md-2">{{f.nimitt_hin}} ({{f.nimitt_state_hin}})</div>
+                        <div class="col-md-2">{{f.pbk_hin}} ({{f.pbk_state_hin}})</div>
                         <div class="col-md-1">{{f.qty}}</div>
                         <div class="col-md-2">{{f.jawak_type_hin}}</div>
                         <div class="col-md-1">
@@ -663,6 +666,11 @@
                <!-- Add Aawak Type -->
                <app-support-list-entry *ngIf="showModal == 'Add Aawak Type'" (response)='aawakTypeAddResponse($event)'
                   list_type="aawak_type">
+               </app-support-list-entry>
+
+               <!-- Add Aawak Type -->
+               <app-support-list-entry *ngIf="showModal == 'Add Aawak Source'"
+                  (response)='aawakSourceAddResponse($event)' list_type="aawak_source">
                </app-support-list-entry>
 
                <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)" type="aawak">

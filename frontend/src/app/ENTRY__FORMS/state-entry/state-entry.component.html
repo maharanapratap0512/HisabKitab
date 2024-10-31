@@ -24,10 +24,24 @@
                 </div>
                 <div class="col-md-3 mb-3">
                     <div class="form-group">
+                        <label class="form-label">Zone</label>
+                        <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                            (click)="openModal('add Zone')">+ Add</a>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Zone" [clearable]="false"
+                            [virtualScroll]="true" formControlName="zone_id"
+                            [ngClass]="{'validation':stateForm.get('zone_id')?.errors && (stateForm.get('zone_id')?.touched || stateForm.get ('zone_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Zone</ng-option>
+                            <ng-option *ngFor="let item of zones" [value]="item._id">
+                                {{item.zone_hin}} : {{item.zone_eng}}
+                            </ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
                         <label class="form-label">Country</label>
                         <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
-                            onclick="$('#stateComponent > #addCountry').modal('show')"
-                            (click)="showModal = 'addCountry'">+ Add</a>
+                            (click)="openModal('add Country')">+ Add</a>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Country" [clearable]="false"
                             [virtualScroll]="true" formControlName="country_id"
                             [ngClass]="{'validation':stateForm.get('country_id')?.errors && (stateForm.get('country_id')?.touched || stateForm.get ('country_id')?.dirty)}">
@@ -49,18 +63,20 @@
         </form>
     </div>
 
-    <!-- AddCountry Modal -->
-    <div class="modal fade" id="addCountry" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+    <!-- Modal -->
+    <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" style="width: 90%;">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Country</h5>
-                    <button type="button" class="btn-close" onclick="$('#stateComponent > #addCountry').modal('hide')"
-                        (click)="showModal = ''" aria-label="Close"></button>
+                    <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" *ngIf="showModal == 'addCountry'">
-                    <app-country-entry (response)="countryAddResponse($event)"></app-country-entry>
+                <div class="modal-body">
+                    <app-country-entry *ngIf="showModal == 'add Country'"
+                        (response)="countryAddResponse($event)"></app-country-entry>
+                    <app-zone-entry *ngIf="showModal == 'add Zone'"
+                        (response)="zoneAddResponse($event)"></app-zone-entry>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" style="width: 120px;"

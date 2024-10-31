@@ -32,6 +32,8 @@ import { ReportStoreStockComponent } from './reports/report-store-stock/report-s
 import { ReportKhSaarComponent } from './reports/report-kh-saar/report-kh-saar.component';
 import { ReportKhItemwiseComponent } from './reports/report-kh-itemwise/report-kh-itemwise.component';
 import { ReportKhAjsaarComponent } from './reports/report-kh-ajsaar/report-kh-ajsaar.component';
+import { DataViewComponent } from './views/data-view/data-view.component';
+import { AawakNewComponent } from './aawak-new/aawak-new.component';
 
 const routes: Routes = [
    {
@@ -48,6 +50,7 @@ const routes: Routes = [
 
          { path: "dashboard", component: DashboardComponent },
          { path: "aawak", component: AawakComponent },
+         { path: "aawakN", component: AawakNewComponent },
          { path: "jawak", component: JawakComponent },
          { path: "bachat", component: BachatComponent },
          { path: "bachat_new", component: BachatNewComponent },
@@ -63,6 +66,7 @@ const routes: Routes = [
          { path: "nimitt", component: NimittComponent },
          { path: "report", component: ReportsComponent },
          { path: "vehicle", component: VehicleComponent },
+         { path: "view/:type", component: DataViewComponent },
 
          { path: "report-at", component: ReportAwkTypeSaarComponent },
          { path: "report-jt", component: ReportJwkTypeSaarComponent },

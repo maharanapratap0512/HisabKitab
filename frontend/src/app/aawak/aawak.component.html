@@ -15,9 +15,17 @@
                <div class="card-body">
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
-                        <button class="btn btn-primary w-100" (click)="openModal('Add Aawak')">
+                        <button *ngIf="!bunch_entry" class="btn btn-primary w-100" (click)="openModal('Add Aawak')">
                            <i class="dripicons-plus h4 icon-mx-2"> </i> Aawak
                         </button>
+                        <button *ngIf="bunch_entry" class="btn btn-primary w-100"
+                           (click)="openModal('Add Bunch Aawak')">
+                           <i class="dripicons-plus h4 icon-mx-2"> </i> Aawak
+                        </button>
+                        <div class="form-check form-checkbox-primary">
+                           <input type="checkbox" class="form-check-input" id="chkAutoAwk" [(ngModel)]="bunch_entry">
+                           <label class="form-check-label" for="chkAutoAwk">Bunch Entry</label>
+                        </div>
                      </div>
                      <div class="col-3">
                         <div class="form-group">
@@ -39,30 +47,36 @@
                         </ng-select>
                      </div> -->
                      <div class="col-3 d-flex">
-                        <button *ngIf="!gs.importPending" class="file btn btn-success"
-                           style="font-weight: 700 !important;">
-                           <i class="uil uil-arrow-to-bottom"></i> Import Aawak
-                           <input type="file" class="inputtag"
-                              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                              (change)="excelImport($event)" />
-                        </button>
-                        <button *ngIf="gs.importPending" class="file btn btn-success" (click)="openModal('import')"
-                           style="font-weight: 700 !important;">
-                           <i class="uil uil-arrow-to-bottom"></i> Import Aawak
-                        </button>
-
-                        <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
-                           data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
-                        <div class="dropdown-menu">
-                           <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
-                           <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
-                           <a class="dropdown-item" (click)="exportJawakData()">Jawak Only</a>
-                           <a class="dropdown-item" (click)="exportPendingData()">Pending Destribution</a>
+                        <div>
+                           <button *ngIf="!gs.importPending" class="file btn btn-success"
+                              style="font-weight: 700 !important;">
+                              <i class="uil uil-arrow-to-bottom"></i> Import Aawak
+                              <input type="file" class="inputtag"
+                                 accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                 (change)="excelImport($event)" />
+                           </button>
+                           <button *ngIf="gs.importPending" class="file btn btn-success" (click)="openModal('import')"
+                              style="font-weight: 700 !important;">
+                              <i class="uil uil-arrow-to-bottom"></i> Import Aawak
+                           </button>
+                           <div></div>
                         </div>
-                        <!-- <button class="btn btn-success mx-3" style="font-weight: 700 !important;"
-                           (click)="exportAJdataData()">
-                           <i class=" uil-top-arrow-from-top"></i> Export Aawak
-                        </button> -->
+
+                        <div>
+                           <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                              data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
+                           <div class="dropdown-menu">
+                              <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
+                              <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
+                              <a class="dropdown-item" (click)="exportJawakData()">Jawak Only</a>
+                              <a class="dropdown-item" (click)="exportPendingData()">Pending Destribution</a>
+                           </div>
+                           <div class="form-check form-checkbox-primary ms-1">
+                              <input type="checkbox" class="form-check-input" id="chkMergeIS" [(ngModel)]="itemSubitemMerge">
+                              <label class="form-check-label" for="chkMergeIS">Merge Item-Subitem</label>
+                           </div>
+                        </div>
+
                      </div>
 
                      <div class="col-2">
@@ -360,7 +374,7 @@
                            <th style="width: 100px;" *ngIf="settings.aawak.company_name">Company</th>
                            <th style="width: 100px;">Qty</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.actual_amt">Actual Amt</th>
-                           <th style="width: 120px;">Usage Category</th>
+                           <th style="width: 120px;">Usage List</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.nimitt_id">Nimitt</th>
                            <th style="width: 200px;" *ngIf="settings.aawak.item_detail">Item Detail</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.isbill">IsBill</th>
@@ -537,6 +551,9 @@
             <!-- <p>Hello Modal</p> -->
             <app-aawak-entry *ngIf='showModal == "Add Aawak"' [getData]="aawakDraft"
                (response)='addAawakResponse($event)'></app-aawak-entry>
+
+            <app-aawak-entry-new *ngIf='showModal == "Add Bunch Aawak"'
+               (response)='addAawakBunchResponse($event)'></app-aawak-entry-new>
 
             <app-import *ngIf='showModal == "import"' (response)='importResponse($event)'></app-import>
 

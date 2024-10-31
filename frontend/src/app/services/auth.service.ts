@@ -63,6 +63,7 @@ export class AuthService {
     ],
     aawak: [
       { colName: 'pkt_num', title: 'Pkt Num' },
+      { colName: 'lot_no', title: 'Lot No' },
       { colName: 'filter_by_state', title: 'Filter PBK' },
       { colName: 'pbk_id', title: 'PBK / Sewadhari' },
       { colName: 'nimitt_id', title: 'Nimitt' },
@@ -73,21 +74,33 @@ export class AuthService {
       { colName: 'condition_id', title: 'Condition' },
       { colName: 'rate', title: 'Rate / Price' },
       { colName: 'actual_amt', title: 'Act. Amount' },
+      { colName: 'aawak_source_id', title: 'Aawak Source' },
+      { colName: 'usage_list_id', title: 'Usage List' },
       { colName: 'item_detail', title: 'Item Detail' },
       { colName: 'description', title: 'Description' },
       { colName: 'isbill', title: 'बिल है?' },
+      { colName: 'is_variable_qty', title: 'Variable Qty' },
+      { colName: 'is_process', title: 'Processed Aawak' },
       { colName: 'document', title: 'Image' },
       { colName: 'jawak', title: 'Jawak Section' }
     ],
     jawak: [
       { colName: 'pkt_num', title: 'Pkt Num' },
-      { colName: 'nimitt_id', title: 'Person' },
+      { colName: 'Lot_no', title: 'Lot No' },
+      { colName: 'date_sent', title: 'Date Sent' },
+      { colName: 'nimitt_id', title: 'Nimitt' },
       { colName: 'filter_by_state', title: 'Filter PBK' },
       { colName: 'pbk_id', title: 'PBK / Sewadhari' },
       { colName: 'product_id', title: 'Product' },
+      { colName: 'company_name', title: 'Company' },
       { colName: 'condition_id', title: 'Condition' },
+      { colName: 'aawak_source_id', title: 'Aawak Source' },
+      { colName: 'usage_list_id', title: 'Usage List' },
+      { colName: 'is_process', title: 'For Process' },
       { colName: 'item_detail', title: 'Item Detail' },
-      { colName: 'description', title: 'Description' }
+      { colName: 'description', title: 'Description' },
+      { colName: 'ref_aawak_select', title: 'Referece Aawak Search' },
+
     ],
     nimitt: [
       { colName: 'roll_no', title: 'Roll No' },

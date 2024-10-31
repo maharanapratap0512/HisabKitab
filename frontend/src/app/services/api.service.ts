@@ -39,6 +39,7 @@ export class ApiService {
     PBK: base_url + 'pbks/',
     COUNTRY: base_url + 'countries/',
     STATE: base_url + 'states/',
+    ZONE: base_url + 'zones/',
     CITY: base_url + 'cities/',
     PRODUCT: base_url + 'products/',
     PRDCT_TRNSFR: base_url + 'product_tracking/',

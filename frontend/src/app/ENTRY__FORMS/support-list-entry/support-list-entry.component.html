@@ -9,9 +9,15 @@
                   <ng-select class="custom" style="width: 100%;" placeholder="Select List Type" [clearable]="false"
                      [virtualScroll]="true" formControlName="list_type" [disabled]="true">
                      <ng-option selected="selected" disabled value="">List Type</ng-option>
-                     <ng-option selected="selected" value="mm_type">MM Type</ng-option>
-                     <ng-option selected="selected" value="gender">Gender</ng-option>
-                     <ng-option selected="selected" value="relation">Relation</ng-option>
+                     <ng-option value="mm_type">MM Type</ng-option>
+                     <ng-option value="gender">Gender</ng-option>
+                     <ng-option value="relation">Relation</ng-option>
+                     <ng-option value="status">Status</ng-option>
+                     <ng-option value="aawak_type">Aawak Type</ng-option>
+                     <ng-option value="aawak_source">Aawak Source</ng-option>
+                     <ng-option value="jawak_type">Jawak Type</ng-option>
+                     <ng-option value="usage_list">Usage List</ng-option>
+                     <ng-option value="condition">Condition</ng-option>
                      <!-- <ng-option selected="selected" value="Other Kumar"></ng-option> -->
                   </ng-select>
 
@@ -29,6 +35,13 @@
                   <label class="form-label">Name (Eng)</label>
                   <input type="text" class="form-control" placeholder="Name (Eng)" formControlName="list_name_eng"
                      [ngClass]="{'validation':supportListForm.get('list_name_eng')?.errors && (supportListForm.get('list_name_eng')?.touched || supportListForm.get ('list_name_eng')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Name (Roman)</label>
+                  <input type="text" class="form-control" placeholder="Name (Roman)" formControlName="list_name_roman"
+                     [ngClass]="{'validation':supportListForm.get('list_name_roman')?.errors && (supportListForm.get('list_name_roman')?.touched || supportListForm.get ('list_name_roman')?.dirty)}">
                </div>
             </div>
             <div class="col-md-3 mb-3">

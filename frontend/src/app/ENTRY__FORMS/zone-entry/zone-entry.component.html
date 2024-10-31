@@ -1,0 +1,69 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
+</ngx-spinner>
+<div class="row" id="zoneComponent">
+    <div class="card-body">
+        <form [formGroup]="zoneForm">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Zone Name (Hin)</label>
+                        <input type="text" class="form-control" placeholder="zone Name (Hin)" formControlName="zone_hin"
+                            [ngClass]="{'validation':zoneForm.get('zone_hin')?.errors && (zoneForm.get('zone_hin')?.touched || zoneForm.get ('zone_hin')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Zone Name (Eng)</label>
+                        <input type="text" class="form-control" placeholder="zone Name (Eng)" formControlName="zone_eng"
+                            [ngClass]="{'validation':zoneForm.get('zone_eng')?.errors && (zoneForm.get('zone_eng')?.touched || zoneForm.get ('zone_eng')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Country</label>
+                        <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                            (click)="openModal('addCountry')">+ Add</a>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Country" [clearable]="false"
+                            [virtualScroll]="true" formControlName="country_id"
+                            [ngClass]="{'validation':zoneForm.get('country_id')?.errors && (zoneForm.get('country_id')?.touched || zoneForm.get ('country_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select Country</ng-option>
+                            <ng-option *ngFor="let item of countries" [value]="item._id">
+                                {{item.country_hin}} : {{item.country_eng}}
+                            </ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                        (click)="zoneFormSubmit()">Submit</button>
+                    <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                        (click)="zoneFormUpdate()">Update</button>
+                    <!-- <button class="btn btn-light submit mx-3" type="button" (click)="zoneForm.reset()">Clear</button> -->
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- AddCountry Modal -->
+    <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add Country</h5>
+                    <button type="button" class="btn-close"
+                        (click)="closeModal()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" *ngIf="showModal == 'addCountry'">
+                    <app-country-entry (response)="countryAddResponse($event)"></app-country-entry>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

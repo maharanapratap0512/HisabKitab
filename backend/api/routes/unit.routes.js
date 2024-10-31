@@ -5,7 +5,7 @@ const DB = new DBContex();
 
 
 // get unit all
-router.get('/', async (req, res, next) => {
+router.get('/:dept_id?', async (req, res, next) => {
     try {
         await DB.getList('unit').then((resolve) => {
             res.json({

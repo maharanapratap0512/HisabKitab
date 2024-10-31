@@ -21,6 +21,7 @@ export class ThemeService implements OnInit {
     document.body.style.visibility = 'hidden';
     lightTheme.disabled = this.auth.webUser.settings.darkMode;
     darkTheme.disabled = !this.auth.webUser.settings.darkMode;
+    document.body.setAttribute('data-leftbar-theme', 'light');
     document.body.style.visibility = 'visible';
   }
 

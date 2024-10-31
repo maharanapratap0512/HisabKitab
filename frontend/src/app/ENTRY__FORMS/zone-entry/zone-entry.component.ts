@@ -9,18 +9,17 @@ import { HttpService } from 'src/app/services/http.service';
 declare var $: any;
 
 @Component({
-  selector: 'app-state-entry',
-  templateUrl: './state-entry.component.html',
-  styleUrls: ['./state-entry.component.scss']
+  selector: 'app-zone-entry',
+  templateUrl: './zone-entry.component.html',
+  styleUrls: ['./zone-entry.component.scss']
 })
-export class StateEntryComponent implements OnInit {
+export class ZoneEntryComponent implements OnInit {
 
   @Input() getData: any;
   @Input() isEdit: any;
   @Output() response = new EventEmitter();
-  stateForm: FormGroup;
+  zoneForm: FormGroup;
   countries: any = [];
-  zones: any = [];
   isLoader: boolean = false;
   showModal: string = '';
 
@@ -32,10 +31,9 @@ export class StateEntryComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public auth: AuthService
   ) {
-    this.stateForm = this.fb.group({
-      state_eng: [null, Validators.required],
-      state_hin: [null, Validators.required],
-      zone_id: [null],
+    this.zoneForm = this.fb.group({
+      zone_eng: [null, Validators.required],
+      zone_hin: [null, Validators.required],
       country_id: [null, Validators.required]
     });
   }
@@ -44,41 +42,40 @@ export class StateEntryComponent implements OnInit {
     this.spinner.show();
     this.gs.observeList().subscribe(result => {
       this.countries = result.country ? result.country : [];
-      this.zones = result.zone ? result.zone : [];
     });
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log("state-changes", changes);
+    console.log("zone-changes", changes);
     if (changes.getData.currentValue) {
-      this.stateForm.patchValue({
-        state_eng: changes.getData.currentValue.state_eng,
-        state_hin: changes.getData.currentValue.state_hin,
-        zone_id: changes.getData.currentValue.zone_id ? changes.getData.currentValue.zone_id : null,
-        country_id: changes.getData.currentValue.country_id,
+      this.zoneForm.patchValue({
+        zone_eng: changes.getData.currentValue.zone_eng,
+        zone_hin: changes.getData.currentValue.zone_hin,
+        country_id: changes.getData.currentValue.country_id
       });
     }
   }
 
   openModal(type: any) {
     this.showModal = type;
-    $('#stateComponent > #showModal').modal('show');
+    $('#zoneComponent > #showModal').modal('show');
   }
 
   closeModal() {
     this.showModal = ''
-    $('#stateComponent > #showModal').modal('hide');
+    $('#zoneComponent > #showModal').modal('hide');
   }
 
-  stateFormSubmit() {
-    if (this.stateForm.valid) {
+  zoneFormSubmit() {
+    if (this.zoneForm.valid) {
       this.isLoader = true;
-      this.http.post(this.api.getUrl('STATE'), this.stateForm.value).subscribe((data: any) => {
+      this.http.post(this.api.getUrl('ZONE'), this.zoneForm.value).subscribe((data: any) => {
+        console.log('clicked');
         if (data['result'] && data['success']) {
-          this.gs.Lists.state.unshift(data['result'])
-          this.stateForm.reset({ active: true });
+          this.gs.Lists.zone.unshift(data['result'])
+          this.zoneForm.reset({ active: true });
           this.isLoader = false;
-          this.toastr.success('STATE added successfully.')
+          this.toastr.success('ZONE added successfully.')
           this.response.emit(data['result']);
         } else {
           this.toastr.error(data['message']);
@@ -90,26 +87,26 @@ export class StateEntryComponent implements OnInit {
       });
     }
     else {
-      this.gs.validationFireOnSubmit(this.stateForm);
+      this.gs.validationFireOnSubmit(this.zoneForm);
     }
   }
 
-  stateFormUpdate() {
-    if (this.stateForm.valid) {
+  zoneFormUpdate() {
+    if (this.zoneForm.valid) {
       this.isLoader = true;
       let body = { query: {}, set: {} };
       body.query = {
         _id: this.getData._id
       }
       body.set = {
-        ...this.stateForm.value
+        ...this.zoneForm.value
       };
-      this.http.put(this.api.getUrl('STATE'), body).subscribe((data: any) => {
+      this.http.put(this.api.getUrl('ZONE'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          this.gs.Lists.state.splice(this.gs.Lists.state.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result'])
-          this.stateForm.reset();
+          this.gs.Lists.zone.splice(this.gs.Lists.zone.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result'])
+          this.zoneForm.reset();
           this.isLoader = false;
-          this.toastr.success('STATE Updated successfully.')
+          this.toastr.success('ZONE Updated successfully.')
           this.response.emit(data['result']);
         } else {
           this.toastr.error(data['message']);
@@ -121,33 +118,18 @@ export class StateEntryComponent implements OnInit {
       });
     }
     else {
-      this.gs.validationFireOnSubmit(this.stateForm);
+      this.gs.validationFireOnSubmit(this.zoneForm);
     }
   }
 
-
-  zoneAddResponse(ev: any) {
-    if (ev._id) {
-      this.isLoader = true;
-      this.closeModal();
-      this.stateForm.patchValue({
-        zone_id: ev._id
-      });
-    }
-    else {
-      console.log("message", ev);
-
-    }
-    this.isLoader = false;
-  }
 
   countryAddResponse(ev: any) {
     if (ev._id) {
       this.isLoader = true;
-      this.closeModal();
-      this.stateForm.patchValue({
+      this.zoneForm.patchValue({
         country_id: ev._id
       });
+      this.closeModal();
     }
     else {
       console.log("message", ev);

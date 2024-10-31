@@ -77,6 +77,10 @@ import { ReportKhSaarComponent } from './reports/report-kh-saar/report-kh-saar.c
 import { ReportKhItemwiseComponent } from './reports/report-kh-itemwise/report-kh-itemwise.component';
 import { ReportKhAjsaarComponent } from './reports/report-kh-ajsaar/report-kh-ajsaar.component';
 import { ThemeService } from './services/theme.service';
+import { ZoneEntryComponent } from './ENTRY__FORMS/zone-entry/zone-entry.component';
+import { AawakEntryNewComponent } from './ENTRY__FORMS/aawak-entry-new/aawak-entry-new.component';
+import { AutocompleteLibModule } from 'angular-ng-autocomplete';
+import { AawakNewComponent } from './aawak-new/aawak-new.component';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -143,6 +147,9 @@ import { ThemeService } from './services/theme.service';
     ReportKhSaarComponent,
     ReportKhItemwiseComponent,
     ReportKhAjsaarComponent,
+    ZoneEntryComponent,
+    AawakEntryNewComponent,
+    AawakNewComponent,
   ],
 
   imports: [
@@ -164,7 +171,7 @@ import { ThemeService } from './services/theme.service';
     FileSaverModule,
     NgxSpinnerModule,
     NgxPaginationModule,
-
+    AutocompleteLibModule
   ],
   providers: [GlobalService, AuthService, ThemeService],
   bootstrap: [AppComponent],

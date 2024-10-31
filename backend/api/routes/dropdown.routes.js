@@ -44,32 +44,23 @@ router.get('/all/:dept_id', async (req, res, next) => {
                 }
                 lists.itemmix = { data: resolve.data, total_count: resolve.total_count }
             });
-            //old code
-            // await DB.getList('itemmix', { full: true, dept_id: req.params.dept_id}).then((resolve) => {
-            //     let subitem_count = 0;
-            //     for (let i = 0; i < resolve.data.length; i++) {
 
-            //         resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
-            //         resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
-            //         subitem_count += resolve.data[i].subitems.length;
-            //     }
-            //     lists.itemmix = { data: resolve.data, total_count:resolve.total_count}
-            // });
             lists.department = await DB.getList('department') || []
-            lists.mm = await DB.getList('mm', { dept_id: req.params.dept_id }) || []
+            lists.departmen_config = await DB.getList('department_config', { dept_id: req.params.dept_id }) || []
+            lists.mm = await DB.getList('mm', { full: true, dept_id: req.params.dept_id }) || []
             lists.pbk = await DB.getList('pbk', { dept_id: req.params.dept_id }) || []
             lists.nimitt = await DB.getList('nimitt', { full: true, dept_id: req.params.dept_id }) || []
             lists.state = await DB.getList('state', { dept_id: req.params.dept_id }) || []
-            // lists.item= await DB.getList('item', {dept_id:req.params.dept_id}) || []
-            // lists.subitem= await DB.getList('subitem', {dept_id:req.params.dept_id}) || []
+            lists.zone = await DB.getList('zone', { dept_id: req.params.dept_id }) || []
             lists.subitem_list = await DB.getList('subitem_list', { dept_id: req.params.dept_id }) || []
-            lists.departmen_config = await DB.getList('department_config', { dept_id: req.params.dept_id }) || []
             lists.unit = await DB.getList('unit', { dept_id: req.params.dept_id }) || []
             lists.gender = await DB.getList('gender', { dept_id: req.params.dept_id }) || []
             lists.relation = await DB.getList('relation', { dept_id: req.params.dept_id }) || []
             lists.aawak_type = await DB.getList('aawak_type', { dept_id: req.params.dept_id }) || []
             lists.jawak_type = await DB.getList('jawak_type', { dept_id: req.params.dept_id }) || []
             lists.condition = await DB.getList('condition', { dept_id: req.params.dept_id }) || []
+            lists.usage_list = await DB.getList('usage_list', { dept_id: req.params.dept_id }) || []
+            lists.aawak_source = await DB.getList('aawak_source', { dept_id: req.params.dept_id }) || []
             res.json({
                 success: true,
                 result: lists
@@ -81,6 +72,17 @@ router.get('/all/:dept_id', async (req, res, next) => {
                 result: lists
             })
         }
+    } catch (err) { next(err) };
+});
+
+//get as per department Done.
+router.get('/lot_no/:dept_id', async (req, res, next) => {
+    try {
+        let lot_nos = await DB.db.prepare(`select distinct lot_no, item_id, subitem_id, aawak_source_id, aawak_type_id, qty, unit_id, rate, actual_amt, condition_id from aawak where dept_id = ${req.params.dept_id} AND lot_no IS NOT NULL`).all();
+        res.json({
+            success: true,
+            result: lot_nos
+        })
     } catch (err) { next(err) };
 });
 

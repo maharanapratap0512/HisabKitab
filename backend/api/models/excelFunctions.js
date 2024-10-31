@@ -4,6 +4,7 @@ class ExcelFunctions {
    city = null;
    country = null;
    state = null;
+   zone = null;
    item = null;
    subitem = null;
    subitem_list = null;
@@ -174,6 +175,9 @@ class ExcelFunctions {
             case 'state':
                this.state = this.Fn.getStates(dept_id);
                break;
+            case 'zone':
+               this.zone = this.Fn.getZones(dept_id);
+               break;
             case 'country':
                this.country = this.Fn.getCountries(dept_id);
                break;
@@ -312,6 +316,29 @@ class ExcelFunctions {
             }
          }
          this.correctionList.push({ type: 'state', value: data });
+      }
+      return null;
+   }
+
+   async matchZone(data) {
+      if (this.zone instanceof Promise) {
+         this.zone = await this.zone.then((data) => { return data })
+      }
+      if (this.dict.zone instanceof Promise) {
+         this.dict.zone = await this.dict.zone.then((data) => { return data });
+      }
+      if (!this.checkedButNotFound(data, 'zone')) {
+         for (let i in this.zone) {
+            if ([this.zone[i].zone_hin, this.zone[i].zone_eng].includes(data)) {
+               return this.zone[i]._id;
+            }
+         }
+         // for (let i in this.dict.zone) {
+         //    if (this.dict.zone[i].name == data) {
+         //       return this.dict.zone[i].id;
+         //    }
+         // }
+         this.correctionList.push({ type: 'zone', value: data });
       }
       return null;
    }

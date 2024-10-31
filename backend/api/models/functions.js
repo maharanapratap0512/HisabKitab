@@ -21,6 +21,10 @@ class Functions extends DBContex {
             obj.isbill = obj.isbill ? 1 : 0;
             obj.active = 1;
             obj.hl = obj.hl ? 1 : 0;
+            obj.is_auto_pd = obj.is_auto_pd ? 1 : 0;
+            obj.is_auto = obj.is_auto ? 1 : 0;
+            obj.is_variable_qty = obj.is_variable_qty ? 1 : 0;
+            obj.is_proccess = obj.is_proccess ? 1 : 0;
             let insResult = stmtInsert.run(obj);
             if (insResult.changes == 1 && insResult.lastInsertRowid) {
                obj._id = insResult.lastInsertRowid;
@@ -44,11 +48,15 @@ class Functions extends DBContex {
             obj.document = JSON.stringify(obj.document && typeof obj.document != 'string' ? obj.document : {});
             obj.isbill = obj.isbill ? 1 : 0;
             obj.hl = obj.hl ? 1 : 0;
+            obj.is_auto_pd = obj.is_auto_pd ? 1 : 0;
+            obj.is_auto = obj.is_auto ? 1 : 0;
+            obj.is_variable_qty = obj.is_variable_qty ? 1 : 0;
+            obj.is_proccess = obj.is_proccess ? 1 : 0;
 
             if (!objOld) {
                objOld = await this.getById(type, obj._id);
             }
-
+            // console.log(obj);
             let updtResult = stmtUpdate.run(obj);
             if (updtResult.changes == 1) {
                await this.updateBachatFromAJUpdate(obj, type, objOld);
@@ -105,10 +113,7 @@ class Functions extends DBContex {
             if (obj.auto_awk) {
                let awk = this.tbInterface.getAawakFromProduct(obj);
                awk.is_auto_pd = 1;
-               // let awkResult = await this.db.prepare(this.query.aawak.insert).run(awk);
-               console.log("awk", awk);
                obj.awk_id = await this.insertAJ(awk, 'aawak');
-               console.log("pd", obj);
                let updtResult = await this.db.prepare(this.query.product.update_auto_pd).run({ _id: obj._id, awk_id: obj.awk_id });
                console.log("update pd", updtResult);
             }
@@ -135,8 +140,6 @@ class Functions extends DBContex {
                obj.bunch_no = await this.getLastBunchNo('product') + 1;
             }
 
-            // obj.bunch_no = bunch_no ? bunch_no : await this.getLastBunchNo('product') + 1;
-            // obj.voucher_no = voucher_no ? voucher_no : await this.getLastVoucherNo('product') + 1;
             let sql = this.query.product.update + ` where product._id = ${obj._id} `
             let result = await this.db.prepare(sql).run(obj);
 
@@ -161,7 +164,6 @@ class Functions extends DBContex {
                   throw new Error('foriegn key violation');
                } else {
                   let product = await this.getById('product', id);
-                  console.log(product);
                   if (product.awk_id); {
                      await this.deleteAJ(product.awk_id, 'aawak');
                   }
@@ -193,7 +195,6 @@ class Functions extends DBContex {
    }
 
    async getLastVoucherNo(tblname) {
-      // return new Promise(async(resolve, reject)=>{
       try {
          let row = this.db.prepare(`select max(voucher_no) as v_no from ${tblname}`).get();
          return row.v_no || 0;
@@ -201,7 +202,6 @@ class Functions extends DBContex {
       catch (err) {
          return 0;
       }
-      // });
    }
 
    async getLastBunchNo(tblname) {
@@ -293,6 +293,14 @@ class Functions extends DBContex {
 
       return await this.getList('state').then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['state_hin', 'state_eng']);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getZones(dept_id = null) {
+
+      return await this.getList('zone').then(async (resolve) => {
+         return this.convertToLower(resolve.data || [], ['zone_hin', 'zone_eng']);
       }, (err) => {
          return [];
       });

@@ -23,6 +23,7 @@ app.use((req, res, next) => {
 // Routes
 const mmRoutes = require('./api/routes/mm.routes');
 const stateRoutes = require('./api/routes/state.routes');
+const zoneRoutes = require('./api/routes/zone.routes');
 const unitRoutes = require('./api/routes/unit.routes');
 const cityRoutes = require('./api/routes/city.routes');
 const categoryRoutes = require('./api/routes/category.routes');
@@ -57,6 +58,7 @@ const commentRoutes = require('./api/routes/report_comment.routes');
 // // Routes - Binding
 app.use('/api/mms', mmRoutes);
 app.use('/api/states', stateRoutes);
+app.use('/api/zones', zoneRoutes);
 app.use('/api/units', unitRoutes);
 app.use('/api/cities', cityRoutes);
 app.use('/api/categories', categoryRoutes);

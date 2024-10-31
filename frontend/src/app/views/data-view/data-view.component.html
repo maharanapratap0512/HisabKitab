@@ -1,23 +1,34 @@
 <div class="row" id="dataViewComponent">
     <div class="card-body">
-        <div class="row">
-            <div class="col-12 px-2" style="margin-bottom: 10px;">
-                <div class="float-start col-4">
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                            name="search">
-                    </div>
-                </div>
-
-                <div class="float-end">
-                    <!-- <button type="button" style="font-weight: 700 !important;" class="btn btn-primary mx-3"
-                         (click)="mmtype()">Set MM Type = MM</button> -->
-                    <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total Count :
-                        {{records.length}} </button>
+        <div class="row" style="margin-bottom: 10px;">
+            <div class="col-2">
+                <button class="btn btn-primary w-100" (click)="add()">
+                    <i class="dripicons-plus h4 icon-mx-2"> </i>Add {{Type}}
+                </button>
+            </div>
+            <div class="col-5">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term" name="search">
                 </div>
             </div>
+            <div class="col-3 d-flex">
+                <button type="button" class="btn btn-success" (click)="openModal('excel_import')"
+                    style="font-weight: 700 !important;">
+                    <i class="uil uil-arrow-to-bottom"></i> Excel Import
+                </button>
+                <button type="button" class="btn btn-outline-success mx-2" (click)="exportToExcel()"> Export To
+                    Excel
+                </button>
+            </div>
+
+            <div class="col-2" *ngIf="records">
+                <!-- <button type="button" style="font-weight: 700 !important;" class="btn btn-primary mx-3"
+                         (click)="mmtype()">Set MM Type = MM</button> -->
+                <button type="button" style="font-weight: 700 !important;" class="btn btn-light">Total Count :
+                    {{records.length}} </button>
+            </div>
         </div>
-        <div class="row p-2" style="overflow-y: auto; max-height: 26vw;">
+        <div class="row p-2" style="overflow-y: auto; max-height: 30vw;">
             <table id="datatable-buttons" class="table table-hover dt-responsive" style="width:98%;">
                 <thead>
                     <tr>
@@ -39,24 +50,24 @@
                             </div>
                         </td>
                         <td>
-                            <button *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) || Type=='jawak'"
+                            <button *ngIf="(!data.lock && gs.exceptionDept.includes(auth.webUser.dept_id)) || Type=='jawak'"
                                 class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button>
-                            <button *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) || Type=='jawak'"
+                            <button *ngIf="(!data.lock && gs.exceptionDept.includes(auth.webUser.dept_id)) || Type=='jawak'"
                                 class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                     class="uil-trash"></i></button>
-                            <span *ngIf="!gs.exceptionDept.includes(auth.webUser.dept_id) && Type!='jawak'" data-toggle="tooltip"
-                                title="Protected" class="text-warning mx-1"
+                            <span *ngIf="data.lock || (!gs.exceptionDept.includes(auth.webUser.dept_id) && Type!='jawak')"
+                                data-toggle="tooltip" title="Protected" class="text-warning mx-1"
                                 style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                 <i class="uil-shield-check"></i>
                             </span>
                         </td>
                         <td *ngFor="let row of fields">
-                            <ng-container *ngFor="let col of row.field;let z = index">
-                                <span *ngIf="z != row.field.length-1">
+                            <ng-container *ngFor="let col of row.columns;let z = index">
+                                <span *ngIf="z != row.columns.length-1">
                                     {{data[col] ? data[col] + ' : ' : ''}}
                                 </span>
-                                <span *ngIf="z == row.field.length-1">
+                                <span *ngIf="z == row.columns.length-1">
                                     {{(data[col] ? data[col]: '')}}
                                 </span>
                                 <br *ngIf="z != 0 && z%2==0" />
@@ -80,63 +91,82 @@
                 </div>
                 <div class="modal-body">
                     <!-- edit mm -->
-                    <app-mm-entry *ngIf="showModal == 'Edit mm'" (response)='editResponse($event)' [getData]="editData"
-                        [isEdit]="true"></app-mm-entry>
-                    <!-- edit country -->
-                    <app-country-entry *ngIf="showModal == 'Edit country'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true">
+                    <app-mm-entry *ngIf="showModal == 'mm'" (response)='editResponse($event)' [getData]="editData"
+                        [isEdit]="isEdit"></app-mm-entry>
+                    <!-- country -->
+                    <app-country-entry *ngIf="showModal == 'country'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit">
                     </app-country-entry>
-                    <!-- edit state -->
-                    <app-state-entry *ngIf="showModal == 'Edit state'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true">
+                    <!-- state -->
+                    <app-state-entry *ngIf="showModal == 'state'" (response)='editResponse($event)' [getData]="editData"
+                        [isEdit]="isEdit">
                     </app-state-entry>
-                    <!-- edit category -->
-                    <app-category-entry *ngIf="showModal == 'Edit category'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true">
+                    <!-- zone -->
+                    <app-zone-entry *ngIf="showModal == 'zone'" (response)='editResponse($event)' [getData]="editData"
+                        [isEdit]="isEdit">
+                    </app-zone-entry>
+                    <!-- category -->
+                    <app-category-entry *ngIf="showModal == 'category'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit">
                     </app-category-entry>
-                    <!-- edit unit -->
-                    <app-unit-entry *ngIf="showModal == 'Edit unit'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true">
+                    <!-- unit -->
+                    <app-unit-entry *ngIf="showModal == 'unit'" (response)='editResponse($event)' [getData]="editData"
+                        [isEdit]="isEdit">
                     </app-unit-entry>
-                    <!-- edit department -->
-                    <app-department-entry *ngIf="showModal == 'Edit department'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true">
+                    <!-- department -->
+                    <app-department-entry *ngIf="showModal == 'department'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit">
                     </app-department-entry>
-                    <app-subitem-list-entry *ngIf="showModal == 'Edit subitem_list'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true">
+                    <app-subitem-list-entry *ngIf="showModal == 'subitem_list'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit">
                     </app-subitem-list-entry>
-                    <!-- edit jawak -->
-                    <app-jawak-entry *ngIf="showModal == 'Edit jawak'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true">
+                    <!-- jawak -->
+                    <app-jawak-entry *ngIf="showModal == 'jawak'" (response)='editResponse($event)' [getData]="editData"
+                        [isEdit]="isEdit">
                     </app-jawak-entry>
-                    <!-- edit gender -->
-                    <app-support-list-entry *ngIf="showModal == 'Edit gender'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true" list_type="gender">
+                    <!-- support_list -->
+                    <app-support-list-entry *ngIf="showModal == 'support_list'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit" [list_type]="Type">
                     </app-support-list-entry>
-                    <!-- edit mm_type -->
-                    <app-support-list-entry *ngIf="showModal == 'Edit mm_type'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true" list_type="mm_type">
+                    <!-- gender -->
+                    <app-support-list-entry *ngIf="showModal == 'gender'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit" list_type="gender">
                     </app-support-list-entry>
-                    <!-- edit relation -->
-                    <app-support-list-entry *ngIf="showModal == 'Edit relation'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true" list_type="relation">
+                    <!-- mm_type -->
+                    <app-support-list-entry *ngIf="showModal == 'mm_type'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit" list_type="mm_type">
                     </app-support-list-entry>
-                    <!-- edit status -->
-                    <app-support-list-entry *ngIf="showModal == 'Edit status'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true" list_type="status">
+                    <!-- relation -->
+                    <app-support-list-entry *ngIf="showModal == 'relation'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit" list_type="relation">
                     </app-support-list-entry>
-                    <!-- edit aawak_type -->
-                    <app-support-list-entry *ngIf="showModal == 'Edit aawak_type'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true" list_type="aawak_type">
+                    <!-- status -->
+                    <app-support-list-entry *ngIf="showModal == 'status'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit" list_type="status">
                     </app-support-list-entry>
-                    <!-- edit jawak_type -->
-                    <app-support-list-entry *ngIf="showModal == 'Edit jawak_type'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true" list_type="jawak_type">
+                    <!-- aawak_type -->
+                    <app-support-list-entry *ngIf="showModal == 'aawak_type'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit" list_type="aawak_type">
                     </app-support-list-entry>
-                    <!-- edit condition -->
-                    <app-support-list-entry *ngIf="showModal == 'Edit condition'" (response)='editResponse($event)'
-                        [getData]="editData" [isEdit]="true" list_type="condition">
+                    <!-- jawak_type -->
+                    <app-support-list-entry *ngIf="showModal == 'jawak_type'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit" list_type="jawak_type">
                     </app-support-list-entry>
+                    <!-- condition -->
+                    <app-support-list-entry *ngIf="showModal == 'condition'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit" list_type="condition">
+                    </app-support-list-entry>
+                    <!-- aawak_source -->
+                    <app-support-list-entry *ngIf="showModal == 'aawak_source'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit" list_type="aawak_source">
+                    </app-support-list-entry>
+                    <!-- usage_list -->
+                    <app-support-list-entry *ngIf="showModal == 'usage_list'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit" list_type="usage_list">
+                    </app-support-list-entry>
+
+                    <!-- excel import -->
+                    <app-excel-import *ngIf='showModal == "excel_import"' [importType]="importType"></app-excel-import>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" style="width: 120px;"

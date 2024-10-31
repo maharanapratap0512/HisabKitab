@@ -55,8 +55,15 @@
       <span *ngFor="let col of headerConfig" [title]="col.alt_names.join(',  ') + ' are also supported.'"
          [ngClass]="{'fw-bold fs-5':col.not_null,'badge-outline-danger':col.not_null && !col.found, 'badge-outline-success': col.not_null && col.found, 'text-success': col.found}">{{col.name}}
          <i class="mdi mdi-check-circle fs-4" *ngIf="col.found"></i>
-      </span> <span class="text-warning">(Highlighted headers are compulsory.)</span>
-      <span class="text-warning">(Hover over header to see alternate supported headers.)</span>
+      </span>
+   </div>
+
+   <!-- row for Note -->
+   <div class="row mt-2" style="display: block;" *ngIf="importType">
+      <b>Note : </b>
+      <span class="text-warning">(Highlighted headers are compulsory.)</span> <br />
+      <span class="text-warning">(Hover over header to see alternate supported headers.)</span> <br />
+      <span class="text-danger" *ngIf="importType.note">{{importType.note}}</span>
    </div>
 </div>
 

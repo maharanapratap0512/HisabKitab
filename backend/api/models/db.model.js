@@ -1840,6 +1840,103 @@ class dbModal {
               update aawak set remaining_qty = round(remaining_qty - (NEW.qty - OLD.qty), 2) where _id = OLD.aawak_ref_id;
           END`
     },
+    // VERSION 21
+    // => New Table - Zone
+    {
+      del_zone: `drop table if exists zone`,
+      zone: `create table if not exists zone(
+          _id integer UNIQUE primary key AUTOINCREMENT,
+          zone_hin varchar(100) not null,
+          zone_eng varchar(100) null, 
+          country_id integer not null REFERENCES country(_id),
+          created_at timestamp default (datetime('now', 'localtime')),
+          updated_at timestamp default (datetime('now', 'localtime')),
+          active tinyint default 1,    
+          UNIQUE(zone_hin, country_id),
+          UNIQUE(zone_eng, country_id)
+        );`,
+      del_repairing_info: `drop table if exists repairing_info`,
+      // repair_from - home, shop, repairer_info - shop address / bhai name
+      repairing_info: `create table if not exists repairing_info(
+        _id integer primary key AUTOINCREMENT,
+        date date not null,
+        jwk_date date null,
+        mm_id integer references mm(_id),
+        jwk_mm_id integer references mm(_id),
+        item_id integer references item(_id),
+        subitem_id integer references subitem(_id),
+        product_code integer references product(_id),
+        srv_code varchar(100),
+        repair_from varchar(25), 
+        repairer_info text,
+        problem_detail text,
+        solution_detail text,
+        qty decimal(10) not null,
+        unit_id integer references unnit(_id),
+        used_parts text,
+        parts_cost decimal(10,2),
+        repairing_cost decimal(10,2),
+        actual_spent_amt decimal(10,2),
+        warranty_info varchar(250),
+        document json,
+        awk_ref_id integer references aawak(_id),
+        jwk_ref_id integer references jawak(_id),
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      state_zone_id: 'alter table state add column zone_id integer REFERENCES zone(_id)',
+      // lock items can't be allowed to delete.
+      add_lock_support_list: `alter table support_list add column lock tinyint(1) default 0`,
+      lock_support_list_1: `update support_list set lock = 1 where _id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 27, 30, 33, 34, 35, 36, 42, 43, 45, 47)`,
+      add_difference_bachat: `alter table bachat add column difference decimal(10,2) default 0`,
+      add_difference_bachat_new: `alter table bachat_new add column difference decimal(10,2) default 0`,
+      add_aawak_source_aawak: `alter table aawak add column aawak_source_id integer references support_list(_id)`,
+      add_lot_no_aawak: `alter table aawak add column lot_no varchar(25)`,
+      // is_auto indicate automatic aawak entry done through jawak entry.
+      add_is_auto_aawak: `alter table aawak add column is_auto tinyint(1) default 0`,
+      // is_variable_qty indicates qty not calculated yet, add jawak qty every time in aawak qty.
+      add_is_variable_qty_aawak: `alter table aawak add column is_variable_qty tinyint(1) default 0`,
+      // is_process indicates aawak coming after processing something else.
+      add_is_process_aawak: `alter table aawak add column is_process tinyint(1) default 0`,
+      add_aawak_source_jawak: `alter table jawak add column aawak_source_id integer references support_list(_id)`,
+      add_lot_no_jawak: `alter table jawak add column lot_no varchar(25)`,
+      // date indicates date_packed and new column date_sent.
+      add_date_sent_jawak: `alter table jawak add column date_sent date`,
+      // is_process indicates jawak for processing and processed item recieved as is_process true.
+      add_is_process_jawak: `alter table jawak add column is_process tinyint(1) default 0`,
+      // shows what aawak comed from proccess of which jawak. jawak=>processed=>aawaks.
+      rel_jawak_processed_aawak: `create table if not exists rel_jawak_processed_aawak (
+        _id integer primary key AUTOINCREMENT,
+        jawak_id integer references jawak(_id),
+        aawak_id integer references aawak(_id),
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      // how aawak connected to jawak, destribution of every aawak. aawaks=>jawaks.
+      rel_aawak_jawak: `create table if not exists rel_aawak_jawak (
+        _id integer primary key AUTOINCREMENT,
+        aawak_id integer references aawak(_id),
+        jawak_id integer references jawak(_id),
+        split_qty decimal(10, 2),
+        is_split tinyint(1) default 0,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      // add new awk columns temp_import
+      add_it_lot_no: `alter table temp_import add column lot_no varchar(25)`,
+      add_it_usage_list: `alter table temp_import add column usage_list varchar(50)`,
+      add_it_usage_list_id: `alter table temp_import add column usage_list_id integer`,
+      add_it_aawak_source: `alter table temp_import add column aawak_source varchar(50)`,
+      add_it_aawak_source_id: `alter table temp_import add column aawak_source_id integer`,
+      // drop usage_category_id, beccause it now become usaeg_list_id.
+      drop_it_usage_category_id: `alter table temp_import drop column usage_category_id`,
+      drop_aawak_usage_category_id: `alter table aawak drop column usage_category_id`,
+      drop_jawak_usage_category_id: `alter table jawak drop column usage_category_id`,
+      // mm_type addition in mm table
+      add_mm_type: `alter table mm add column mm_type varchar(50)`,
+      update_mm_date: `UPDATE mm SET mm_type = (SELECT dept_eng FROM department WHERE department._id = mm.dept_id);`
+
+    }
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.

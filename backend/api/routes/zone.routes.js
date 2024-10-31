@@ -3,24 +3,10 @@ const DBContex = require('../models/DBContex');
 const DB = new DBContex();
 
 
-
-// get state
-router.get('/', async (req, res, next) => {
+// get zone by dept
+router.get('/:dept_id?', async (req, res, next) => {
     try {
-        await DB.getList('state').then((resolve) => {
-            res.json({
-                success: true,
-                result: resolve.data || [],
-                total_count: (resolve.total_count ? resolve.total_count : 0),
-            });
-        });
-    } catch (err) { next(err) };
-});
-
-// get state by dept
-router.get('/:dept_id', async (req, res, next) => {
-    try {
-        await DB.getList('state', { full: true }).then((resolve) => {
+        await DB.getList('zone', { full: true }).then((resolve) => {
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -31,11 +17,11 @@ router.get('/:dept_id', async (req, res, next) => {
 });
 
 
-// post state 
+// post zone 
 router.post('/', async (req, res, next) => {
     try {
-        if (req.body && req.body.state_hin) {
-            await DB.insert('state', req.body).then(async (data) => {
+        if (req.body && req.body.zone_hin) {
+            await DB.insert('zone', req.body).then(async (data) => {
                 res.json({
                     success: true,
                     result: data || []
@@ -49,11 +35,11 @@ router.post('/', async (req, res, next) => {
 });
 
 
-// update state 
+// update zone 
 router.put('/', async (req, res, next) => {
     try {
         if (req.body.set && req.body.query) {
-            await DB.update('state', req.body.set, req.body.query._id).then(async (data) => {
+            await DB.update('zone', req.body.set, req.body.query._id).then(async (data) => {
                 res.json({
                     success: true,
                     result: data || []
@@ -67,11 +53,11 @@ router.put('/', async (req, res, next) => {
 });
 
 
-// delete state 
+// delete zone 
 router.delete('/:id', async (req, res, next) => {
     try {
         if (req.params.id) {
-            await DB.delete('state', req.params.id).then((data) => {
+            await DB.delete('zone', req.params.id).then((data) => {
                 res.json({
                     success: true,
                     result: data

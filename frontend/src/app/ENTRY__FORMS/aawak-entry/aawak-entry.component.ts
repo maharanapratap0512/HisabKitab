@@ -41,6 +41,7 @@ export class AawakEntryComponent implements OnInit {
 	subitemsAll: any = [];
 	pbks: any = [];
 	aawak_types: any = [];
+	aawak_sources: any = [];
 	jawak_types: any = [];
 	products: any = [];
 	categories: any = [];
@@ -48,7 +49,7 @@ export class AawakEntryComponent implements OnInit {
 	productsAll: any = [];
 	jmm: any = null;
 	jqty: any = null;
-	jnimitt: any = null;
+	jpbk: any = null;
 	jdate: any = null;
 	jtype: any = null;
 	nimitts: any = [];
@@ -57,15 +58,18 @@ export class AawakEntryComponent implements OnInit {
 	selDept_id: any;
 	awkfg: any = {
 		pkt_num: null,
+		lot_no: null,
+		voucher_no:null,
 		date: null,
 		mm_id: null,
 		aawak_mm_id: null,
 		dept_id: this.auth.webUser.dept_id,
 		pbk_id: null,
 		aawak_type_id: null,
+		aawak_source_id: null,
 		item_id: null,
 		subitem_id: null,
-		usage_category_id: null,
+		usage_list_id: null,
 		company_name: null,
 		product_id: null,
 		unit_id: null,
@@ -82,6 +86,9 @@ export class AawakEntryComponent implements OnInit {
 		is_xl: 0,
 		hl:0,
 		is_auto_pd: 0,
+		is_auto: 0,
+		is_variable_qty: 0,
+		is_process: 0,
 		jawak_detail: []
 	}
 	// jwkArr: any = [];
@@ -141,15 +148,17 @@ export class AawakEntryComponent implements OnInit {
 			}
 			this.getData = changes.getData.currentValue;
 			this.awkfg.pkt_num = changes.getData.currentValue.pkt_num ? changes.getData.currentValue.pkt_num : null
+			this.awkfg.lot_no = changes.getData.currentValue.lot_no ? changes.getData.currentValue.lot_no : null
 			this.awkfg.date = changes.getData.currentValue.date
 			this.awkfg.mm_id = changes.getData.currentValue.mm_id
 			this.awkfg.aawak_mm_id = changes.getData.currentValue.aawak_mm_id ? changes.getData.currentValue.aawak_mm_id : null
 			this.awkfg.dept_id = this.auth.webUser.dept_id
 			this.awkfg.pbk_id = changes.getData.currentValue.pbk_id ? changes.getData.currentValue.pbk_id : null
 			this.awkfg.aawak_type_id = changes.getData.currentValue.aawak_type_id
+			this.awkfg.aawak_source_id = changes.getData.currentValue.aawak_source_id
 			this.awkfg.item_id = changes.getData.currentValue.item_id
 			this.awkfg.subitem_id = changes.getData.currentValue.subitem_id ? changes.getData.currentValue.subitem_id : null
-			this.awkfg.usage_category_id = changes.getData.currentValue.usage_category_id ? changes.getData.currentValue.usage_category_id : null
+			this.awkfg.usage_list_id = changes.getData.currentValue.usage_list_id ? changes.getData.currentValue.usage_list_id : null
 			this.awkfg.product_id = changes.getData.currentValue.product_id ? changes.getData.currentValue.product_id : null
 			this.awkfg.unit_id = changes.getData.currentValue.unit_id
 			this.awkfg.condition_id = changes.getData.currentValue.condition_id ? changes.getData.currentValue.condition_id : null
@@ -166,12 +175,14 @@ export class AawakEntryComponent implements OnInit {
 			this.awkfg.is_xl = changes.getData.currentValue.is_xl ? changes.getData.currentValue.is_xl : 0
 			this.awkfg.hl = changes.getData.currentValue.hl ? changes.getData.currentValue.hl : 0
 			this.awkfg.is_auto_pd = changes.getData.currentValue.is_auto_pd ? changes.getData.currentValue.is_auto_pd : 0
+			this.awkfg.is_auto = changes.getData.currentValue.is_auto ? changes.getData.currentValue.is_auto : 0
+			this.awkfg.is_variable_qty = changes.getData.currentValue.is_variable_qty ? changes.getData.currentValue.is_variable_qty : 0
+			this.awkfg.is_process = changes.getData.currentValue.is_process ? changes.getData.currentValue.is_process : 0
 			this.awkfg.jawak_detail = changes.getData.currentValue.jawak_detail ? changes.getData.currentValue.jawak_detail : []
 
 			this.selDept_id = changes.getData.currentValue.dept_id;
 			this.oldQty = changes.getData.currentValue.qty;
 			this.imagepath = ((this.awkfg.document && this.awkfg.document.images && this.awkfg.document.images.length > 0) ? this.awkfg.document.images[0] : null);
-			console.log(this.awkfg);
 
 			this.itemSelected(changes.getData.currentValue.item_id);
 		}
@@ -224,20 +235,22 @@ export class AawakEntryComponent implements OnInit {
 
 		let jwkfg: any = {
 			jawak_mm_id: (this.jmm ? this.jmm.id : null),
-			nimitt_id: (this.jnimitt ? this.jnimitt.id : null),
+			nimitt_id: this.awkfg.nimitt_id,
 			qty: this.jqty,
 			date: this.jdate,
+			date_sent: this.jdate,
 			pkt_num: null,
 			mm_id: this.awkfg.mm_id,
-			pbk_id: null,
+			pbk_id: (this.jpbk ? this.jpbk.id : null),
 			item_id: this.awkfg.item_id,
 			subitem_id: this.awkfg.subitem_id,
-			usage_category_id: null,
+			usage_list_id: null,
 			item_detail: null,
 			description: null,
 			company_name: null,
 			product_id: this.awkfg.product_id,
 			condition_id: this.awkfg.condition_id,
+			aawak_source_id: this.awkfg.aawak_source_id,
 			jawak_type_id: (this.jtype ? this.jtype.id : (jwk_type ? jwk_type._id : null)),
 			jawak_type_hin: (this.jtype ? this.jtype.list_name_hin : (jwk_type ? jwk_type.list_name_hin : null)),
 			unit_id: this.awkfg.unit_id,
@@ -245,8 +258,9 @@ export class AawakEntryComponent implements OnInit {
 			is_xl: 0,
 			hl: 0,
 			jawak_mm_hin: (this.jmm ? this.jmm.mm_hin : ''),
-			nimitt_hin: (this.jnimitt ? this.jnimitt.nimitt_hin : ''),
-			nimitt_state_hin: (this.jnimitt ? this.jnimitt.state_hin : ''),
+			pbk_hin: (this.jpbk ? this.jpbk.pbk_hin : ''),
+			pbk_state_hin: (this.jpbk ? this.jpbk.state_hin : ''),
+			pbk_roll_no: (this.jpbk ? this.jpbk.roll_no : ''),
 		}
 
 		this.awkfg.jawak_detail.push(jwkfg);
@@ -255,7 +269,7 @@ export class AawakEntryComponent implements OnInit {
 		// this.jwkArr.push(jwkfg2);
 		this.jmm = null;
 		this.jqty = null;
-		this.jnimitt = null;
+		this.jpbk = null;
 		this.jtype = null;
 	}
 
@@ -299,7 +313,7 @@ export class AawakEntryComponent implements OnInit {
 	}
 
 	closeModal() {
-		// this.showModal = '';
+		this.showModal = '';
 		$('#aawakEntryComponent > #showModal').modal('hide')
 	}
 
@@ -325,7 +339,7 @@ export class AawakEntryComponent implements OnInit {
 				if (data['result'] && data['success']) {
 					this.jmm = null;
 					this.jqty = null;
-					this.jnimitt = null;
+					this.jpbk = null;
 					this.jtype = null;
 					this.imagepath = null;
 					this.isLoader = false;
@@ -367,7 +381,7 @@ export class AawakEntryComponent implements OnInit {
 				if (data && data['success']) {
 					this.jmm = null;
 					this.jqty = null;
-					this.jnimitt = null;
+					this.jpbk = null;
 					this.imagepath = null;
 					this.isLoader = false;
 					this.toastr.success('Aawak Updated Successfully.');
@@ -391,8 +405,7 @@ export class AawakEntryComponent implements OnInit {
 	stateAddResponse(ev: any) {
 		this.isLoader = true;
 		if (ev._id) {
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			// this.states.unshift(ev);
 			this.awkfg.state_id = ev._id;
 			this.isLoader = false;
@@ -406,8 +419,7 @@ export class AawakEntryComponent implements OnInit {
 	departmentAddResponse(ev: any) {
 		this.isLoader = true;
 		if (ev._id) {
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			// this.departments.unshift(ev);
 			this.awkfg.dept_id = ev._id;
 			this.isLoader = false;
@@ -421,8 +433,7 @@ export class AawakEntryComponent implements OnInit {
 	mmAddResponse(ev: any) {
 		this.isLoader = true;
 		if (ev._id) {
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			// this.mms.unshift(ev);
 			this.awkfg.mm_id = ev._id;
 			this.isLoader = false;
@@ -436,8 +447,7 @@ export class AawakEntryComponent implements OnInit {
 	itemAddResponse(ev: any) {
 		this.isLoader = true;
 		if (ev._id) {
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			// this.subitems.unshift(ev);
 			this.awkfg.item_id = ev._id;
 			this.isLoader = false;
@@ -450,8 +460,7 @@ export class AawakEntryComponent implements OnInit {
 	nimittAddResponse(ev: any) {
 		this.isLoader = true;
 		if (ev._id) {
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			// this.states.unshift(ev);
 			this.awkfg.nimitt_id = ev._id;
 			this.isLoader = false;
@@ -465,8 +474,7 @@ export class AawakEntryComponent implements OnInit {
 	subitemAddResponse(ev: any) {
 		this.isLoader = true;
 		if (ev._id) {
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			// this.subitems.unshift(ev);
 			this.awkfg.subitem_id = ev._id;
 			this.isLoader = false;
@@ -480,8 +488,7 @@ export class AawakEntryComponent implements OnInit {
 	conditionAddResponse(ev: any) {
 		this.isLoader = true;
 		if (ev._id) {
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			// this.conditions.unshift(ev);
 			this.awkfg.condition_id = ev._id;
 			this.isLoader = false;
@@ -495,8 +502,7 @@ export class AawakEntryComponent implements OnInit {
 	unitAddResponse(ev: any) {
 		if (ev._id) {
 			this.isLoader = true;
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			// this.units.unshift(ev);
 			this.awkfg.unit_i = ev._id;
 			this.isLoader = false;
@@ -510,8 +516,7 @@ export class AawakEntryComponent implements OnInit {
 	ammAddResponse(ev: any) {
 		if (ev._id) {
 			this.isLoader = true;
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			this.awkfg.aawak_mm_id = ev._id;
 			this.isLoader = false;
 		}
@@ -524,8 +529,7 @@ export class AawakEntryComponent implements OnInit {
 	pbkAddResponse(ev: any) {
 		if (ev._id) {
 			this.isLoader = true;
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			this.awkfg.pbk_id = ev._id;
 			this.isLoader = false;
 		}
@@ -538,8 +542,7 @@ export class AawakEntryComponent implements OnInit {
 	productAddResponse(ev: any) {
 		if (ev._id) {
 			this.isLoader = true;
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			this.awkfg.product_id = ev._id;
 			this.isLoader = false;
 		}
@@ -552,9 +555,21 @@ export class AawakEntryComponent implements OnInit {
 	aawakTypeAddResponse(ev: any) {
 		if (ev._id) {
 			this.isLoader = true;
-			$('#aawakEntryComponent > #showModal').modal('hide');
-			this.showModal = '';
+			this.closeModal();
 			this.awkfg.aawak_type_id = ev._id;
+			this.isLoader = false;
+		}
+		else {
+			this.isLoader = false;
+			console.log("err", ev);
+		}
+	}
+
+	aawakSourceAddResponse(ev: any) {
+		if (ev._id) {
+			this.isLoader = true;
+			this.closeModal();
+			this.awkfg.aawak_source_id = ev._id;
 			this.isLoader = false;
 		}
 		else {
@@ -581,6 +596,10 @@ export class AawakEntryComponent implements OnInit {
 				break;
 			case 'aawak_type':
 				this.viewData = this.gs.Lists.aawak_type;
+				$('#aawakEntryComponent > #dataView').modal('show');
+				break;
+			case 'aawak_source':
+				this.viewData = this.gs.Lists.aawak_source;
 				$('#aawakEntryComponent > #dataView').modal('show');
 				break;
 		}

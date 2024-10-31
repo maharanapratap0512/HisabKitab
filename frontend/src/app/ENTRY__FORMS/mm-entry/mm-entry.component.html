@@ -42,6 +42,13 @@
                             [ngClass]="{'validation':mmForm.get('mm_code')?.errors && (mmForm.get('mm_code')?.touched || mmForm.get ('mm_code')?.dirty)}">
                     </div>
                 </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">MM Type</label>
+                        <input type="text" class="form-control" placeholder="MM Type" formControlName="mm_type"
+                            [ngClass]="{'validation':mmForm.get('mm_type')?.errors && (mmForm.get('mm_type')?.touched || mmForm.get ('mm_type')?.dirty)}">
+                    </div>
+                </div>
                 <div class="col-md-3 mb-3" *ngIf="!parentMM">
                     <div class="form-group">
                         <label class="form-label">MM State</label>

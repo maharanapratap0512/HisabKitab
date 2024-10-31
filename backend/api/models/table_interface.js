@@ -33,15 +33,19 @@ class TableInterface {
 
    aawak = {
       pkt_num: null,
+      lot_no: null,
+      voucher_no: null,
       date: null,
+      date_sent: null,
       mm_id: null,
       aawak_mm_id: null,
       dept_id: null,
       pbk_id: null,
       aawak_type_id: null,
+      aawak_source_id: null,
       item_id: null,
       subitem_id: null,
-      usage_category_id: null,
+      usage_list_id: null,
       company_name: null,
       product_id: null,
       unit_id: null,
@@ -57,6 +61,10 @@ class TableInterface {
       document: null,
       is_xl: 0,
       is_auto_pd: 0,
+      hl:0,
+      is_auto:0,
+      is_process:0,
+      is_variable_qty:0,
    }
 
    getAawakFromProduct(product, oldAawak = null) {

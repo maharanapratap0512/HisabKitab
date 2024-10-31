@@ -28,16 +28,19 @@ class DBContex {
     tbl_from_supp_list = [
         'jawak_type',
         'aawak_type',
-        // 'condition'
+        'condition',
+        'usage_list',
     ]
     supp_list = [
-        // 'mm_type',
+        'mm_type',
         'gender',
         'relation',
         'condition',
         // 'status',
         'aawak_type',
-        'jawak_type'
+        'jawak_type',
+        'usage_list',
+        'aawak_source'
     ];
 
     constructor() {
@@ -71,6 +74,8 @@ class DBContex {
         return new Promise(async (resolve, reject) => {
             try {
                 let sql = this.query[object][key];
+                sql = sql.replace('?', (options.conditionString ? ` where ${options.conditionString}` : ''));
+                console.log(sql);
                 const result = this.db.prepare(sql).all(options.obj ? options.obj : {});
                 resolve(result);
             }
@@ -129,6 +134,9 @@ class DBContex {
                     sconditionQuery = (!options.dept_id || this.exclude_depts.includes(options.dept_id)) ? null : ` subitem._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='subitem')`;
                     sconditionQuery = options.sconditionString ? (sconditionQuery ? `${sconditionQuery} AND ` : '') + options.sconditionString : sconditionQuery
                 }
+                else if (tblname == 'aawak_voucher') {
+                    conditionQuery = (options.dept_id ? `(aawak.dept_id = ${options.dept_id})` : null);
+                }
 
                 conditionQuery = options.conditionString ? (conditionQuery ? `${conditionQuery} AND ` : '') + options.conditionString : conditionQuery
 
@@ -140,7 +148,7 @@ class DBContex {
                     sql = sql.replace('#', (order ? ` order by ${order}` : ``));
                     // console.log(sql);
                 }
-                else if (["itemmix", "item", "subitem", "product"].includes(tblname)) {
+                else if (["itemmix", "item", "subitem", "product", "aawak_voucher"].includes(tblname)) {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : ''));
                     sql = sql.replace('#', (order ? ` order by ${order}` : ``));
                 }
@@ -148,12 +156,12 @@ class DBContex {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));
                 }
 
-                // if (tblname == "subitem")
-                    // console.log(sql);
+                // if (tblname == "aawak_voucher")
+                //     console.log(sql);
 
                 const result = await this.db.prepare(sql).all({ limit: options.limit ? options.limit : -1, offset: options.offset ? options.offset : -1 });
                 this.getCount(tblname, conditionQuery).then((res) => {
-                    resolve({ data: result, total_count: res.total_count });
+                    resolve({ data: result, total_count: res ? res.total_count : 0 });
                 });
             }
             catch (err) {
@@ -316,25 +324,15 @@ class DBContex {
                 if (this.supp_list.includes(tblname)) {
                     tblname = `support_list`;
                 }
-                if (tblname == "itemmix") {
-                    // sql = this.query[tblname].count.replace('?', (conditionString && conditionString.trim() != '' ? ` where ${conditionString} ` : ``));
-                    sql = this.query[tblname].count.replace('?', '');
+                if (tblname == "itemmix" || tblname == "aawak_voucher") {
+                    sql = this.query[tblname].count.replace('?', (conditionString && conditionString.trim() != '' ? ` where ${conditionString} ` : ``));
                     sql = sql.replace('#', '');
                 }
                 else {
                     sql =
                         `select count(*) as total_count from ${tblname} ` + (conditionString && conditionString.trim() != '' ? ` where ${conditionString} ` : ``)
                 }
-                // console.log("sql count", sql);
-                if (tblname == 'itemmix') {
-                    // console.log("sql", sql);
-                    // console.log("stmt", stmt);
-                }
                 const stmt = await this.db.prepare(sql).get();
-                if (tblname == 'itemmix') {
-
-                    // console.log("stmt", stmt);
-                }
                 resolve(stmt);
             }
             catch (err) { reject(err) }
@@ -344,19 +342,15 @@ class DBContex {
     async deleteExists(filepath) {
         return new Promise((resolve, reject) => {
             try {
-                console.log("delete out", filepath);
                 this.fs.unlink(filepath, (err) => {
                     if (err) {
                         // console.log(err);
                     }
-                    // console.log("delete in", filepath);
                     resolve();
                 });
-
             }
             catch (ex) {
                 reject(ex);
-                // console.log(ex);
             }
         })
     }
@@ -381,14 +375,7 @@ class DBContex {
                     // 
                     let exporting = exportDB.transaction(() => {
                         exportDB.prepare(`attach '${this.path.resolve(this.DBFolder, 'Database.db')}' as mainDB;`).run();
-
                         for (let key of Object.keys(this.query.genDeptDB)) {
-                            // console.log(key);
-                            if (key == "point") {
-                                // console.log("point", exportDB.prepare(`select * from point`).all());
-                                // console.log("this.query.genDeptDB[key]", this.query.genDeptDB[key]);
-                            }
-                            // console.log(this.query.genDeptDB[key]);
                             let result = exportDB.prepare(this.query.genDeptDB[key]).run({ dept_id: dept_id });
                         }
                     });

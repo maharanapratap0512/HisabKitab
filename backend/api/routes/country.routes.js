@@ -5,7 +5,7 @@ const DB = new DBContex();
 
 
 // get country all
-router.get('/', async (req, res, next) => {
+router.get('/:id?', async (req, res, next) => {
     await DB.getList('country').then(async (data) => {
         res.json({
             success: true,
