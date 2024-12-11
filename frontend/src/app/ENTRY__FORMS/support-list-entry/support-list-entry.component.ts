@@ -60,7 +60,6 @@ export class SupportListEntryComponent implements OnInit {
   }
 
   supportListFormSubmit() {
-    console.log("submited");
 
     if (this.supportListForm.valid) {
       this.isLoader = true;

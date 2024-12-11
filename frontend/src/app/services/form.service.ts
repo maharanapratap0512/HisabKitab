@@ -17,6 +17,7 @@ export class FormService {
     public auth: AuthService,) {
 
     this.aawakForm = {
+      lot_no: null,
       item_id: null,
       subitem_id: null,
       product_id: null,

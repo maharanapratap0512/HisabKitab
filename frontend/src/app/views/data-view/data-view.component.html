@@ -50,13 +50,20 @@
                             </div>
                         </td>
                         <td>
-                            <button *ngIf="(!data.lock && gs.exceptionDept.includes(auth.webUser.dept_id)) || Type=='jawak'"
+                            <ng-container *ngIf="Type=='jawak'">
+                                <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                                        class="uil uil-pen"></i></button>
+                                <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                        class="uil-trash"></i></button>
+                            </ng-container>
+                            <button *ngIf="!data.lock && (!settings || (settings && settings.edit))"
                                 class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button>
-                            <button *ngIf="(!data.lock && gs.exceptionDept.includes(auth.webUser.dept_id)) || Type=='jawak'"
+                            <button *ngIf="!data.lock && (!settings || (settings && settings.edit))"
                                 class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                     class="uil-trash"></i></button>
-                            <span *ngIf="data.lock || (!gs.exceptionDept.includes(auth.webUser.dept_id) && Type!='jawak')"
+                            <span
+                                *ngIf="(data.lock || (settings && !settings.edit && !settings.delete) && Type!='jawak')"
                                 data-toggle="tooltip" title="Protected" class="text-warning mx-1"
                                 style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                 <i class="uil-shield-check"></i>

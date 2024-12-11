@@ -28,14 +28,13 @@ export class DepartmentComponent implements OnInit {
   termItem: any = null;
   termItemmix: any = null;
   termSubitem: any = null;
-  termAJType: any = null;
+  termSpList: any = null;
   selMM: any = true;
   selPbk: any = true;
   selCat: any = true;
   selItem: any = true;
   selItemmix: any = true;
   selSubitem: any = true;
-  selAJType: any = true;
   showModal: string = '';
   departments: any = [];
   deptConf: any = {};
@@ -55,7 +54,7 @@ export class DepartmentComponent implements OnInit {
   subitems: any = [];
   countries: any = [];
   subitemsAll: any = [];
-  ajtypes: any = [];
+  splists: any = [];
   support_lists: any = [];
   subitem_lists: any = [];
   viewData: any = [];
@@ -203,6 +202,7 @@ export class DepartmentComponent implements OnInit {
         visible: false,
         add: false,
         settings: false,
+        manage: false,
       },
       point: {
         visible: false
@@ -264,15 +264,14 @@ export class DepartmentComponent implements OnInit {
         for (let i of data['result']) {
           this.deptConf[i.config_key] = i;
         }
-        if (this.dept_id) {
-          this.loadPBK();
-          this.loadAJTypes();
-          this.loadDepartment();
-        }
+        this.loadPBK();
+        this.loadSpLists();
+        this.loadDepartment();
         this.loadMM();
         this.loadCategory();
         this.loadItemMix();
         this.loadSubitems();
+        this.loadCondition();
         // console.log(this.deptConf);
 
         this.isLoader = false;
@@ -1239,17 +1238,31 @@ export class DepartmentComponent implements OnInit {
     });
   }
 
-  loadAJTypes() {
-    this.http.get(this.api.getUrl('AJTYPE') + 1).subscribe((data) => {
+  loadSpLists() {
+    this.http.get(this.api.getUrl('SPLIST') + 1).subscribe((data) => {
       if (data['result'] && data['success']) {
-        if (this.deptConf.aj_type && this.deptConf.aj_type.config_value) {
+        if (this.deptConf.support_list && this.deptConf.support_list.config_value) {
           for (let i in data['result']) {
-            if (this.deptConf.aj_type.config_value.includes(data['result'][i]._id)) {
+            if (this.deptConf.support_list.config_value.includes(data['result'][i]._id)) {
               data['result'][i].chk = true;
             }
           }
         }
-        this.ajtypes = data['result'];
+        this.splists = data['result'];
+      }
+    });
+  }
+  loadCondition() {
+    this.http.get(this.api.getUrl('SPLIST') + 1).subscribe((data) => {
+      if (data['result'] && data['success']) {
+        if (this.deptConf.support_list && this.deptConf.support_list.config_value) {
+          for (let i in data['result']) {
+            if (this.deptConf.support_list.config_value.includes(data['result'][i]._id)) {
+              data['result'][i].chk = true;
+            }
+          }
+        }
+        this.splists = data['result'];
       }
     });
   }
@@ -1390,19 +1403,19 @@ export class DepartmentComponent implements OnInit {
 
   }
 
-  ajtypeRowClicked(i: any, chk: boolean, id: any) {
-    if (this.termAJType) {
-      i = this.ajtypes.findIndex((i: { _id: any; }) => i._id == id);
+  splistRowClicked(i: any, chk: boolean, id: any) {
+    if (this.termSpList) {
+      i = this.splists.findIndex((i: { _id: any; }) => i._id == id);
     }
-    // this add 'aj_type' in deptConf if it not exists.
-    this.setConfigObject('aj_type');
+    // this add 'support_list' in deptConf if it not exists.
+    this.setConfigObject('support_list');
     if (chk) {
-      this.deptConf.aj_type.config_value.splice(this.deptConf.aj_type.config_value.indexOf(this.ajtypes[i]._id), 1);
-      this.ajtypes[i].chk = false;
+      this.deptConf.support_list.config_value.splice(this.deptConf.support_list.config_value.indexOf(this.splists[i]._id), 1);
+      this.splists[i].chk = false;
     }
     else {
-      this.deptConf.aj_type.config_value.push(this.ajtypes[i]._id);
-      this.ajtypes[i].chk = true;
+      this.deptConf.support_list.config_value.push(this.splists[i]._id);
+      this.splists[i].chk = true;
     }
   }
 
@@ -1509,6 +1522,9 @@ export class DepartmentComponent implements OnInit {
       // If it doesn't exist, create it and initialize config_value as an empty array
       this.deptConf[type] = { config_value: [], dept_id: this.dept_id };
     }
+    if(!this.deptConf[type].config_value){
+      this.deptConf[type].config_value = []
+    }
   }
 
   selection(type: any, _id: any) {
@@ -1613,8 +1629,8 @@ export class DepartmentComponent implements OnInit {
           }
         });
         break;
-      case 'aj_type':
-        this.ajtypes.map((i: { _id: any, chk: boolean; }) => {
+      case 'support_list':
+        this.splists.map((i: { _id: any, chk: boolean; }) => {
           if (!i.chk && chk) {
             this.selection(type, i._id);
             i.chk = true;

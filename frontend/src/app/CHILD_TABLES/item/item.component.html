@@ -93,7 +93,7 @@
                      <thead>
                         <tr>
                            <th style="width: 50px;" (click)="FilterActive()">No.</th>
-                           <th style="width: 210px;">Manage</th>
+                           <th style="width: 250px;">Manage</th>
                            <th style="width: 100px;" *ngIf="settings.document">Image</th>
                            <th style="width: 150px;">Item Hin</th>
                            <th style="width: 150px;" *ngIf="settings.item_eng">Item Eng</th>
@@ -125,23 +125,26 @@
                                  </span> -->
                               </td>
                               <td>
-                                 <div *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id)">
+                                 <div>
                                     <button class="btn btn-sm btn-outline-success" type="button"
-                                       (click)="addSubitem(data)"><i class="uil uil-plus"></i></button>
+                                       (click)="addSubitem(data)" *ngIf="settings.add"><i
+                                          class="uil uil-plus"></i></button>
                                     <button class="btn btn-sm btn-outline-info ml-1" type="button"
-                                       (click)="cloneWithSubitem(data)"><i class="uil uil-copy"></i></button>
-                                    <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)">
+                                       (click)="cloneWithSubitem(data)" *ngIf="settings.add"><i
+                                          class="uil uil-copy"></i></button>
+                                    <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"
+                                       *ngIf="settings.edit">
                                        <i class=" uil uil-pen"></i>
                                     </button>
-                                    <ng-container *ngIf="gs.date > del_permitted_date">
+                                    <ng-container *ngIf="settings.edit">
                                        <button *ngIf="!data.restrict_year" class="btn btn-sm btn-outline-warning"
                                           type="button" (click)="lockItem(i,data._id)"><i
                                              class="uil-unlock-alt"></i></button>
                                        <button *ngIf="data.restrict_year" class="btn btn-sm btn-warning" type="button"
                                           (click)="unlockItem(i,data._id)"><i class="uil-lock-alt"></i></button>
                                     </ng-container>
-                                    <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"
-                                       *ngIf="gs.date <= del_permitted_date">
+                                    <button class="btn btn-sm btn-outline-danger" type="button"
+                                       (click)="delete(i,data._id)" *ngIf="settings.delete">
                                        <i class="uil-trash"></i>
                                     </button>
                                  </div>
@@ -204,23 +207,21 @@
                                                 <span class="mx-1">{{j+1}}</span>
                                              </td>
                                              <td style="width: 135px;">
-                                                <div *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id)">
-                                                   <button class="btn btn-sm btn-primary mx-1" type="button"
-                                                      (click)="edit(si, 'subitem')">
-                                                      <i class=" uil uil-pen"></i>
-                                                   </button>
-                                                   <button *ngIf="!si.restrict_year"
-                                                      class="btn btn-sm btn-outline-warning" type="button"
-                                                      (click)="lockSubitem(i, j, si._id)"><i
-                                                         class="uil-unlock-alt"></i></button>
-                                                   <button *ngIf="si.restrict_year" class="btn btn-sm btn-warning"
-                                                      type="button" (click)="unlockSubitem(i, j, si._id)"><i
-                                                         class="uil-lock-alt"></i></button>
-                                                   <button *ngIf="gs.date <= del_permitted_date"
-                                                      class="btn btn-sm btn-danger" type="button"
-                                                      (click)="deleteSubitem(i, j,si._id)">
-                                                      <i class="uil-trash"></i></button>
-                                                </div>
+                                                <button class="btn btn-sm btn-primary mx-1" type="button"
+                                                   (click)="edit(si, 'subitem')" *ngIf="settings.edit">
+                                                   <i class=" uil uil-pen"></i>
+                                                </button>
+                                                <button *ngIf="!si.restrict_year && settings.edit"
+                                                   class="btn btn-sm btn-outline-warning" type="button"
+                                                   (click)="lockSubitem(i, j, si._id)"><i
+                                                      class="uil-unlock-alt"></i></button>
+                                                <button *ngIf="si.restrict_year && settings.edit"
+                                                   class="btn btn-sm btn-warning" type="button"
+                                                   (click)="unlockSubitem(i, j, si._id)"><i
+                                                      class="uil-lock-alt"></i></button>
+                                                <button *ngIf="settings.delete" class="btn btn-sm btn-outline-danger"
+                                                   type="button" (click)="deleteSubitem(i, j,si._id)">
+                                                   <i class="uil-trash"></i></button>
                                                 <div *ngIf="si.restrict_year" class="lock-date text-warning">
                                                    {{si.restrict_month}}/{{si.restrict_year}} से लॉक।
                                                 </div>

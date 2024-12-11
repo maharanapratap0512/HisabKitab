@@ -57,6 +57,7 @@ router.get('/all/:dept_id', async (req, res, next) => {
             lists.gender = await DB.getList('gender', { dept_id: req.params.dept_id }) || []
             lists.relation = await DB.getList('relation', { dept_id: req.params.dept_id }) || []
             lists.aawak_type = await DB.getList('aawak_type', { dept_id: req.params.dept_id }) || []
+            lists.mm_type = await DB.getList('mm_type', { dept_id: req.params.dept_id }) || []
             lists.jawak_type = await DB.getList('jawak_type', { dept_id: req.params.dept_id }) || []
             lists.condition = await DB.getList('condition', { dept_id: req.params.dept_id }) || []
             lists.usage_list = await DB.getList('usage_list', { dept_id: req.params.dept_id }) || []

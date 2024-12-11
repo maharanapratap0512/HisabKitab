@@ -14,18 +14,19 @@ export class AuthService {
   // settings: any = {};
   settingsUI = {
     pageList: [
+      { key: 'department', title: 'Department', detail: '', add: true, edit: true, delete: true },
       { key: 'aawak', title: 'Aawak', detail: '' },
       { key: 'jawak', title: 'Jawak', detail: '' },
       { key: 'bachat', title: 'Bachat', detail: '' },
-      { key: 'vehicle', title: 'Vehicle', detail: '', add: true },
+      { key: 'vehicle', title: 'Vehicle', detail: '', add: true, edit: true, delete: true },
       { key: 'report', title: 'Report', detail: '', },
-      { key: 'product', title: 'Product', detail: 'Can be tranced between All MM', add: true },
-      { key: 'mm', title: 'MM', detail: '', add: true },
-      { key: 'category', title: 'Category', detail: '', add: true },
-      { key: 'item', title: 'Item & Subitem', detail: '', add: true },
-      { key: 'nimitt', title: 'Nimitt', detail: '', add: true },
-      { key: 'pbk', title: 'PBK / Sewadhari', detail: '', add: true },
-      { key: 'city', title: 'City', detail: '', add: true },
+      { key: 'product', title: 'Product', detail: 'Can be tranced between All MM', add: true, edit: true, delete: true },
+      { key: 'mm', title: 'MM', detail: '', add: true, edit: true, delete: true },
+      { key: 'category', title: 'Category', detail: '', add: true, edit: true, delete: true },
+      { key: 'item', title: 'Item & Subitem', detail: '', add: true, edit: true, delete: true },
+      { key: 'nimitt', title: 'Nimitt', detail: '', add: true, edit: true, delete: true },
+      { key: 'pbk', title: 'PBK / Sewadhari', detail: '', add: true, edit: true, delete: true },
+      { key: 'city', title: 'City', detail: '', add: true, edit: true, delete: true },
       { key: 'point', title: 'Point', detail: '', },
       // { key: 'department', title: 'Department', detail: '' },
     ],
@@ -60,6 +61,10 @@ export class AuthService {
       { colName: 'nimitt_id', title: 'Nimitt' },
       { colName: 'product_detail', title: 'Product Detail' },
       { colName: 'document', title: 'Images' },
+    ],
+    department: [
+      { colName: 'manage', title: 'DB Generate' },
+      { colName: 'settings', title: 'Software Settings' },
     ],
     aawak: [
       { colName: 'pkt_num', title: 'Pkt Num' },

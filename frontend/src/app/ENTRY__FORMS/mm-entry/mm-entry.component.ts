@@ -22,7 +22,7 @@ export class MmEntryComponent implements OnInit {
   states: any = [];
   nimitts: any = [];
   mms: any = [];
-  departments: any = [];
+  mm_types: any = [];
   showModal: string = ''
   isLoader: boolean = false;
   viewType: any;
@@ -46,6 +46,7 @@ export class MmEntryComponent implements OnInit {
       dept_id: [2, Validators.required],
       state_id: [null, Validators.required],
       opening_date: [null],
+      mm_closed: [null],
       nimitt_id: [null],
       restrict_month: [null],
       restrict_year: [null],
@@ -56,7 +57,7 @@ export class MmEntryComponent implements OnInit {
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.states = result.state ? result.state : [];
-      this.departments = result.department ? result.department : [];
+      this.mm_types = result.mm_type ? result.mm_type : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
   }
@@ -82,6 +83,7 @@ export class MmEntryComponent implements OnInit {
         dept_id: changes.getData.currentValue.dept_id,
         state_id: changes.getData.currentValue.state_id,
         opening_date: changes.getData.currentValue.opening_date,
+        mm_closed: changes.getData.currentValue.mm_closed,
         nimitt_id: changes.getData.currentValue.nimitt_id,
         restrict_month: changes.getData.currentValue.restrict_month ? changes.getData.currentValue.restrict_month : null,
         restrict_year: changes.getData.currentValue.restrict_year ? changes.getData.currentValue.restrict_year : null,
@@ -131,6 +133,7 @@ export class MmEntryComponent implements OnInit {
         dept_id: this.mmForm.value.dept_id,
         state_id: this.mmForm.value.state_id,
         opening_date: this.mmForm.value.opening_date,
+        mm_closed: this.mmForm.value.mm_closed,
         nimitt_id: this.mmForm.value.nimitt_id,
         restrict_month: this.mmForm.value.restrict_month ? this.mmForm.value.restrict_month : null,
         restrict_year: this.mmForm.value.restrict_year ? this.mmForm.value.restrict_year : null,
@@ -183,12 +186,12 @@ export class MmEntryComponent implements OnInit {
     }
   }
 
-  departmentAddResponse(ev: any) {
+  mmTypeAddResponse(ev: any) {
     this.isLoader = true;
     if (ev._id) {
       $('#mmEntryComponent > #showModal').modal('hide');
       this.showModal = '';
-      this.mmForm.patchValue({ dept_id: ev._id });
+      this.mmForm.patchValue({ mm_type: ev.list_name_eng });
       this.isLoader = false;
     }
     else {
@@ -200,8 +203,8 @@ export class MmEntryComponent implements OnInit {
   setView(type: string) {
     this.viewType = type;
     switch (type) {
-      case 'Department':
-        this.viewData = this.gs.Lists.department;
+      case 'mm_type':
+        this.viewData = this.gs.Lists.mm_type;
         $('#mmEntryComponent > #dataView').modal('show');
         break;
     }

@@ -12,7 +12,7 @@
         <!-- First Row -->
         <!-- Add Button, Search Field, Filter button, Total Count -->
         <div class="row my-2">
-          <div class="col-3 mb-2">
+          <div class="col-3 mb-2" *ngIf="settings.department.manage">
 
             <label class="form-label">Select Department</label>
             <div class="float-end" *ngIf="settings.department.add">
@@ -90,7 +90,7 @@
                 </span>
               </a>
               <a class="nav-link" id="v-pills-pbk-tab" data-bs-toggle="pill" href="#v-pills-pbk" role="tab"
-                aria-controls="v-pills-pbk" aria-selected="false" *ngIf="dept_id">
+                aria-controls="v-pills-pbk" aria-selected="false">
                 <i class="mdi mdi-account-circle d-md-none d-block"></i>
                 <span class="d-none d-md-block">PBK / Sewadhari
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.pbk &&
@@ -99,7 +99,7 @@
                 </span>
               </a>
               <a class="nav-link" id="v-pills-dept-tab" data-bs-toggle="pill" href="#v-pills-dept" role="tab"
-                aria-controls="v-pills-dept" aria-selected="false" *ngIf="dept_id">
+                aria-controls="v-pills-dept" aria-selected="false">
                 <i class="mdi mdi-account-circle d-md-none d-block"></i>
                 <span class="d-none d-md-block">Departments
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.department &&
@@ -142,10 +142,10 @@
                     deptConf.subitem.config_value) ? deptConf.subitem.config_value.length: 0}}</span>
                 </span>
               </a>
-              <a class="nav-link" id="v-pills-ajtypes-tab" data-bs-toggle="pill" href="#v-pills-ajtypes" role="tab"
-                aria-controls="v-pills-ajtypes" aria-selected="false" *ngIf="dept_id">
+              <a class="nav-link" id="v-pills-sp-lists-tab" data-bs-toggle="pill" href="#v-pills-sp-lists" role="tab"
+                aria-controls="v-pills-sp-lists" aria-selected="false">
                 <i class="mdi mdi-settings-outline d-md-none d-block"></i>
-                <span class="d-none d-md-block">Aawak/Jawak Types
+                <span class="d-none d-md-block">Small Lists
                   <span class="badge bg-primary rounded-pill float-end">{{(deptConf.aj_type &&
                     deptConf.aj_type.config_value) ? deptConf.aj_type.config_value.length: ''}}</span>
                 </span>
@@ -161,6 +161,7 @@
           <div class="col-md-10">
             <div class="tab-content card card-body" id="v-pills-tabContent">
 
+              <!-- Software Setting Tab -->
               <div class="tab-pane fade" id="v-pills-settingNew" role="tabpanel"
                 aria-labelledby="v-pills-settingNew-tab"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;">
@@ -181,7 +182,7 @@
                           <th style="width: 40px;">Page Visibility</th>
                           <th style="width: 101px;">Page</th>
                           <th style="width: 150px;">Detail</th>
-                          <th style="width: 75px;">New Entry</th>
+                          <th style="width: 125px;">Manage</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -197,9 +198,22 @@
                             <td>{{row.title}}</td>
                             <td>{{row.detail}}</td>
                             <td>
-                              <div class="form-check form-switch" *ngIf="row.add">
-                                <input type="checkbox" class="form-check-input" [(ngModel)]="settingsAll[row.key].add"
-                                  [ngModelOptions]="{standalone: true}">
+                              <div class="d-flex">
+                                <div class="form-check" *ngIf="row.add">
+                                  <input type="checkbox" class="form-check-input" id="chkAdd"
+                                    [(ngModel)]="settingsAll[row.key].add" [ngModelOptions]="{standalone: true}">
+                                  <label class="form-check-label" for="chkAdd">Add</label>
+                                </div>
+                                <div class="form-check form-checkbox-warning mx-2" *ngIf="row.edit">
+                                  <input type="checkbox" class="form-check-input" id="chkEdit"
+                                    [(ngModel)]="settingsAll[row.key].edit" [ngModelOptions]="{standalone: true}">
+                                  <label class="form-check-label" for="chkEdit">Edit</label>
+                                </div>
+                                <div class="form-check form-checkbox-danger" *ngIf="row.delete">
+                                  <input type="checkbox" class="form-check-input" id="chkDelete"
+                                    [(ngModel)]="settingsAll[row.key].delete" [ngModelOptions]="{standalone: true}">
+                                  <label class="form-check-label" for="chkDelete">Delete</label>
+                                </div>
                               </div>
                             </td>
                           </tr>
@@ -299,7 +313,7 @@
 
 
               <!-- Pbk Tab -->
-              <div class="tab-pane fade" id="v-pills-pbk" role="tabpanel" *ngIf="dept_id"
+              <div class="tab-pane fade" id="v-pills-pbk" role="tabpanel"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                 aria-labelledby="v-pills-profile-tab">
                 <div class="row">
@@ -377,7 +391,7 @@
               </div>
 
               <!-- Department Tab -->
-              <div class="tab-pane fade" id="v-pills-dept" role="tabpanel" *ngIf="dept_id"
+              <div class="tab-pane fade" id="v-pills-dept" role="tabpanel"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
                 aria-labelledby="v-pills-dept-tab">
                 <div class="row">
@@ -711,25 +725,25 @@
 
 
 
-              <!-- AJtype tab -->
-              <div class="tab-pane fade" id="v-pills-ajtypes" role="tabpanel" *ngIf="dept_id"
+              <!-- SpList tab -->
+              <div class="tab-pane fade" id="v-pills-sp-lists" role="tabpanel"
                 style="max-height: 600px; overflow-y: auto; font-size: small !important; font-weight: normal !important;"
-                aria-labelledby="v-pills-settings-tab">
+                aria-labelledby="v-pills-sp-lists-tab">
                 <div class="row">
                   <div class="col-4">
                     <div class="form-group">
-                      <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="termAJType"
+                      <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="termSpList"
                         name="search">
                     </div>
                   </div>
-                  <div class="col-2" *ngIf="!termAJType">
+                  <div class="col-2" *ngIf="!termSpList">
                     <button type="button" class="btn btn-outline-success"
-                      (click)="toggleSelectionAll('aj_type', true)">+
+                      (click)="toggleSelectionAll('support_list', true)">+
                       Select All</button>
                   </div>
                   <div class="col-2" *ngIf="!termMM">
                     <button type="button" class="btn btn-outline-success"
-                      (click)="toggleSelectionAll('aj_type', false)">+
+                      (click)="toggleSelectionAll('support_list', false)">+
                       Deselect All</button>
                   </div>
                 </div>
@@ -744,8 +758,8 @@
                       </tr>
                     </thead>
                     <tbody style="max-height: 500px; overflow-y: auto;">
-                      <tr *ngFor="let data of ajtypes | search:termAJType; let i=index"
-                        [ngClass]="{'highlight': data.chk == true}" (click)="ajtypeRowClicked(i, data.chk, data._id)">
+                      <tr *ngFor="let data of splists | search:termSpList; let i=index"
+                        [ngClass]="{'highlight': data.chk == true}" (click)="splistRowClicked(i, data.chk, data._id)">
                         <td>{{i+1}}</td>
                         <td>{{data.list_type}}</td>
                         <td>{{data.list_name_hin}}</td>

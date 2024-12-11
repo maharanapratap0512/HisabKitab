@@ -7,14 +7,15 @@ class DBContex {
     db;
     fs;
     path;
-    exclude_depts = ['1', '5'];
+    exclude_depts = ['1'];
     tbl_need_dept_config = [
         'item',
         'pbk',
         'mm',
         'subitem',
         'category',
-        'department'
+        'department',
+        'support_list'
     ];
     tbl_with_dept_id = [
         'aawak',
@@ -30,13 +31,13 @@ class DBContex {
         'aawak_type',
         'condition',
         'usage_list',
+        'aawak_source',
     ]
     supp_list = [
         'mm_type',
         'gender',
         'relation',
         'condition',
-        // 'status',
         'aawak_type',
         'jawak_type',
         'usage_list',
@@ -126,7 +127,7 @@ class DBContex {
                     sql = `select * from support_list ?`;
                     conditionQuery = `list_type = '${tblname}'`
                     if (this.tbl_from_supp_list.includes(tblname)) {
-                        conditionQuery += (!options.dept_id || this.exclude_depts.includes(options.dept_id)) ? '' : ` AND support_list._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='aj_type')`;
+                        conditionQuery += (!options.dept_id || this.exclude_depts.includes(options.dept_id)) ? '' : ` AND support_list._id in (select json_each.value from department_config, json_each(config_value) where dept_id = ${options.dept_id} AND config_key='support_list')`;
                     }
                 }
                 else if (tblname == "itemmix") {
@@ -184,19 +185,16 @@ class DBContex {
                 let getres = [];
                 // if inserted success
                 if (result.changes == 1 && result.lastInsertRowid) {
-                    if (this.tbl_need_dept_config.includes(tblname)) {
+                    if (tblname == "support_list") {
+                        if (obj.list_type && this.tbl_from_supp_list.includes(obj.list_type)) {
+                            let q = this.query.department_config.update_config_value;
+                            let p = { tblname: tblname, dept_id: dept_id, new_id: result.lastInsertRowid.toString() }
+                            let t = this.db.prepare(q).run(p);
+                        }
+                    } else if (this.tbl_need_dept_config.includes(tblname)) {
                         let q = this.query.department_config.update_config_value;
                         let p = { tblname: tblname, dept_id: dept_id, new_id: result.lastInsertRowid.toString() }
                         let t = this.db.prepare(q).run(p);
-                    }
-                    else if (tblname == "support_list") {
-                        // console.log("support_list");
-                        if (obj.list_type && this.tbl_from_supp_list.includes(obj.list_type)) {
-                            // console.log("aj_type");
-                            let q = this.query.department_config.update_config_value;
-                            let p = { tblname: "aj_type", dept_id: dept_id, new_id: result.lastInsertRowid.toString() }
-                            let t = this.db.prepare(q).run(p);
-                        }
                     }
                     if (get) {
                         let sql = this.query[tblname].select_full.replace('?', ` where ${tblname}._id = ${result.lastInsertRowid} `).replace('#', ``);

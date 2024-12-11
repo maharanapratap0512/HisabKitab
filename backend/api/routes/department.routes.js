@@ -148,7 +148,6 @@ router.put('/login', async (req, res, next) => {
                     if (!fs.existsSync(exFilePath)) {
                         fs.mkdirSync(exFilePath, { recursive: true });
                     }
-
                     // result.path = exFilePath
                     res.json(result || {});
                 } else {

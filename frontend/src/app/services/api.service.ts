@@ -50,7 +50,7 @@ export class ApiService {
     CATEGORY: base_url + 'categories/',
     UNIT: base_url + 'units/',
     SUPPORTLIST: base_url + 'supportlists/',
-    AJTYPE: base_url + 'supportlists/ajtypes/',
+    SPLIST: base_url + 'supportlists/splists/',
     DEPT: base_url + 'departments/',
     DEPT_SETTINGS: base_url + 'departments/settings/',
     EXPORTFULL: base_url + 'departments/dbfull/',

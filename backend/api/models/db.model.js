@@ -1934,9 +1934,12 @@ class dbModal {
       drop_jawak_usage_category_id: `alter table jawak drop column usage_category_id`,
       // mm_type addition in mm table
       add_mm_type: `alter table mm add column mm_type varchar(50)`,
-      update_mm_date: `UPDATE mm SET mm_type = (SELECT dept_eng FROM department WHERE department._id = mm.dept_id);`
+      update_mm_date: `UPDATE mm SET mm_type = (SELECT dept_eng FROM department WHERE department._id = mm.dept_id);`,
+      insert_mm_tye: `Insert into support_list(list_type, list_name_hin, list_name_eng, lock) values('mm_type', 'मिनी मधुबन', 'MM', 1), ('mm_type', 'खेत', 'Khet', 1), ('mm_type', 'स्टोर', 'Store', 1)`,
+      add_mm_closed_mm: `alter table mm add column mm_closed date`,
+      update_dept_config_aj_type: `update department_config set config_key = 'support_list' where config_key = 'aj_type'`,
 
-    }
+    },
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.

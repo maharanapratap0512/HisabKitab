@@ -725,25 +725,16 @@ export class AawakNewComponent implements OnInit {
   }
 
   addAawakBunchResponse(ev: any) {
-    console.log(ev);
 
     if (ev.length > 0 && ev[0].voucher_no) {
       this.isLoader = true;
-      let aawaks = ev[0].aawaks;
-      delete ev[0].aawaks;
-      for (let i in aawaks) {
-        this.aawakData.unshift({
-          ...aawaks[i],
-          ...ev[0]
-        });
-      }
-      console.log(this.aawakData);
+      this.aawakData.unshift(ev[0]);
 
       this.closeModal();
       this.isLoader = false;
     }
     else {
-      this.aawakDraft = ev[0];
+      // this.aawakDraft = ev[0];
       this.toastr.info("Saved in Draft.");
     }
   }

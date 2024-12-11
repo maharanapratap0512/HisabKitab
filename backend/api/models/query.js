@@ -339,7 +339,7 @@ const department_config = {
         config_key=@config_key,
         config_value=@config_value,
         updated_at=datetime('now','localtime')`
-    , update_config_value: `update department_config set config_value = json_set(config_value,'$['||json_array_length(config_value)||']',@new_id)where dept_id = @dept_id AND config_key=@tblname`
+    , update_config_value: `update department_config set config_value = json_set(config_value,'$['||json_array_length(config_value)||']',@new_id) where dept_id = @dept_id AND config_key=@tblname`
     , update_config_value_old:
         `update department_config set config_value = CASE WHEN(config_value = '') THEN ',' ELSE config_value END || @new_id || ',' where dept_id = @dept_id AND config_key = @tblname`,
     verify_config_id:
@@ -972,7 +972,7 @@ const mm = {
         `select mm.*,
         st.state_hin, st.state_eng, 
         pm.mm_hin as parent_mm_hin, pm.mm_eng as parent_mm_eng, pm.mm_code as parent_mm_code, 
-        nm.nimitt_hin, nm.nimitt_eng, 
+        nm.nimitt_hin, nm.nimitt_eng, nm.gender as nimitt_gender,
         nst.state_hin as nimitt_state_hin, nst.state_eng as nimitt_state_eng,
         dept.dept_hin, dept.dept_eng, dept.dept_code 
         from mm
@@ -985,10 +985,10 @@ const mm = {
     , insert:
         `insert into mm (
             mm_hin, mm_eng, mm_code, mm_type, dept_id, state_id,
-            parent_mm_id, opening_date, nimitt_id, restrict_month, restrict_year, active)
+            parent_mm_id, opening_date, mm_closed, nimitt_id, restrict_month, restrict_year, active)
         values (
             @mm_hin, @mm_eng,  @mm_code, @mm_type, @dept_id, @state_id,
-            @parent_mm_id, @opening_date, @nimitt_id, @restrict_month, @restrict_year, @active)`
+            @parent_mm_id, @opening_date, @mm_closed, @nimitt_id, @restrict_month, @restrict_year, @active)`
     , insert_ignore:
         `insert or ignore into mm (
             _id,
@@ -1000,6 +1000,7 @@ const mm = {
             state_id,
             parent_mm_id,
             opening_date,
+            mm_closed,
             nimitt_id,
             restrict_month,
             restrict_year,
@@ -1016,6 +1017,7 @@ const mm = {
             @state_id,
             @parent_mm_id,
             @opening_date,
+            @mm_closed,
             @nimitt_id,
             @restrict_month,
             @restrict_year,
@@ -1032,6 +1034,7 @@ const mm = {
         state_id=@state_id,
         parent_mm_id=@parent_mm_id,
         opening_date=@opening_date,
+        mm_closed=@mm_closed,
         nimitt_id=@nimitt_id,
         restrict_month=@restrict_month,
         restrict_year=@restrict_year,
@@ -1047,6 +1050,7 @@ const mm = {
         state_id=@state_id,
         parent_mm_id=@parent_mm_id,
         opening_date=@opening_date,
+        mm_closed=@mm_closed,
         nimitt_id=@nimitt_id,
         restrict_month=@restrict_month,
         restrict_year=@restrict_year,

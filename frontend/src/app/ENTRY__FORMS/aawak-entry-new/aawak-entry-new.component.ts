@@ -96,6 +96,13 @@ export class AawakEntryNewComponent implements OnInit {
     }
   }
 
+  ngOnDestroy(): void {
+    if(this.isEdit){
+      this.fs.reset();
+    }
+    
+  }
+
   selectEvent(ev: any, index: any) {
     if (ev.lot_no) {
       this.fs.aawakFormMain.aawaks[index].item_id = ev.item_id;
@@ -191,7 +198,7 @@ export class AawakEntryNewComponent implements OnInit {
       this.toastr.error('Form is not valid');
       this.isLoader = false;
     }
-    
+
   }
 
   stateSelected(ev: any) {
@@ -225,8 +232,8 @@ export class AawakEntryNewComponent implements OnInit {
     if (ev) {
       let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
       this.products = this.products.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
-      if (!this.isEdit)
-        this.fs.aawakFormMain.aawaks[i].unit_id = subitem.unit_id;
+      if (!this.isEdit && subitem)
+        this.fs.aawakFormMain.aawaks[i].unit_id = subitem.unit_id; 
     }
     else {
       if (this.fs.aawakFormMain.aawaks[i].item_id) {

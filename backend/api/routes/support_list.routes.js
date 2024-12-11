@@ -18,22 +18,17 @@ router.get('/', async (req, res, next) => {
 });
 
 
-// get support_list ajtypes
-router.get('/ajtypes/:dept_id', async (req, res, next) => {
+// get support_list 'jawak_type', 'aawak_type', 'condition', 'usage_list', 'aawak_source' by dept_id.
+router.get('/splists/:dept_id', async (req, res, next) => {
     try {
-        let aj = [];
-        await DB.getList('aawak_type', { dept_id: req.params.dept_id }).then((response) => {
-            aj.push(...response.data);
+        let conditionString = `list_type in ('jawak_type', 'aawak_type', 'condition', 'usage_list', 'aawak_source')`;
+        await DB.getList('support_list', { dept_id: req.params.dept_id,  conditionString: conditionString, order:'list_type' }).then((response) => {
+            res.json({
+                success: true,
+                result: response.data
+            });
         });
 
-        await DB.getList('jawak_type', { dept_id: req.params.dept_id }).then((response) => {
-            aj.push(...response.data);
-        });
-
-        res.json({
-            success: true,
-            result: aj
-        });
     } catch (err) { next(err) };
 });
 

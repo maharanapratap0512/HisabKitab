@@ -116,7 +116,7 @@
 
             <!-- items table row -->
             <div class="row">
-                <div class="card card-body" style="font-size: smaller; overflow-x: scroll;">
+                <div class="card card-body" style="font-size: smaller; overflow-x: scroll; padding-bottom: 250px;">
                     <table class="table table-bordered border-primary table-centered mb-0" style="width: max-content;">
                         <thead>
                             <tr>
@@ -176,7 +176,7 @@
                                     </td>
                                     <td>
                                         <ng-select class=" custom-sm" style="width: 100%;" placeholder="Select Item"
-                                            [clearable]="false" [virtualScroll]="true" [(ngModel)]="awkForm.item_id"
+                                            [clearable]="true" [virtualScroll]="true" [(ngModel)]="awkForm.item_id"
                                             name="item_id" #item_id="ngModel" (change)="itemSelected($event, i)"
                                             [selectOnTab]="true"
                                             [ngClass]="{'validation' : (item_id?.touched || fMain.submitted) && item_id.errors?.['required']}"
@@ -187,7 +187,7 @@
                                     </td>
                                     <td>
                                         <ng-select class="custom-sm" style="width: 100%;"
-                                            placeholder="Select SubitemList" [clearable]="false" [virtualScroll]="true"
+                                            placeholder="Select SubitemList" [clearable]="true" [virtualScroll]="true"
                                             [(ngModel)]="awkForm.subitem_id" name="subitem_id" #subitem_id="ngModel"
                                             (change)="subitemSelected($event, i)" [selectOnTab]="true">
                                             <ng-option *ngFor="let item of awkForm.subitems"

@@ -30,6 +30,7 @@ export class DataViewComponent implements OnInit {
   editData: any;
   showModal: string = "";
   importType: string = '';
+  settings: any = null;
 
 
   constructor(private fb: FormBuilder,
@@ -45,10 +46,12 @@ export class DataViewComponent implements OnInit {
   ngOnInit(): void {
     // this.Type = this.route.snapshot.paramMap.get('type');
     this.route.paramMap.subscribe(params => {
-      this.Type = params.get('type');
-      this.importType = '';
-      this.records = null;
-      this.configureType();
+      if (params.get('type')) {
+        this.Type = params.get('type');
+        this.importType = '';
+        this.records = null;
+        this.configureType();
+      }
     });
   }
 
@@ -61,12 +64,16 @@ export class DataViewComponent implements OnInit {
       this.Type = changes.Type.currentValue;
       this.configureType();
     }
+    console.log(this.records, this.Type);
+
   }
 
   configureType() {
+    this.settings = null;
     switch (this.Type) {
       case 'mm': this.setMMFields();
         this.apiName = 'MM';
+        this.settings = this.auth.webUser.settings.mm;
         break;
       case 'country': this.setCountryFields();
         this.apiName = 'COUNTRY';
@@ -79,6 +86,7 @@ export class DataViewComponent implements OnInit {
         break;
       case 'category': this.setCategoryFields();
         this.apiName = 'CATEGORY';
+        this.settings = this.auth.webUser.settings.category;
         break;
       case 'unit': this.setUnitFields();
         this.apiName = 'UNIT';
@@ -99,6 +107,7 @@ export class DataViewComponent implements OnInit {
         this.apiName = 'SUBITEMLIST';
         break;
       case 'department': this.setDepartmentFields();
+        this.settings = this.auth.webUser.settings.department;
         this.apiName = 'DEPARTMENT';
         break;
       case 'jawak': this.setJawakFields();
@@ -111,6 +120,9 @@ export class DataViewComponent implements OnInit {
     if (!this.records) {
       this.getDataFromDB();
     }
+
+    console.log(this.settings);
+    
   }
 
   getDataFromDB() {
