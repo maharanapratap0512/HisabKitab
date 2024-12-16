@@ -81,6 +81,8 @@ import { ZoneEntryComponent } from './ENTRY__FORMS/zone-entry/zone-entry.compone
 import { AawakEntryNewComponent } from './ENTRY__FORMS/aawak-entry-new/aawak-entry-new.component';
 import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { AawakNewComponent } from './aawak-new/aawak-new.component';
+import { RepairingEntryComponent } from './entry__forms/repairing-entry/repairing-entry.component';
+import { RepairingComponent } from './repairing/repairing.component';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -150,6 +152,8 @@ import { AawakNewComponent } from './aawak-new/aawak-new.component';
     ZoneEntryComponent,
     AawakEntryNewComponent,
     AawakNewComponent,
+    RepairingEntryComponent,
+    RepairingComponent,
   ],
 
   imports: [

@@ -21,6 +21,7 @@ export class AuthService {
       { key: 'vehicle', title: 'Vehicle', detail: '', add: true, edit: true, delete: true },
       { key: 'report', title: 'Report', detail: '', },
       { key: 'product', title: 'Product', detail: 'Can be tranced between All MM', add: true, edit: true, delete: true },
+      { key: 'repairing', title: 'Repairing', detail: '', add: true, edit: true, delete: true },
       { key: 'mm', title: 'MM', detail: '', add: true, edit: true, delete: true },
       { key: 'category', title: 'Category', detail: '', add: true, edit: true, delete: true },
       { key: 'item', title: 'Item & Subitem', detail: '', add: true, edit: true, delete: true },
@@ -28,6 +29,7 @@ export class AuthService {
       { key: 'pbk', title: 'PBK / Sewadhari', detail: '', add: true, edit: true, delete: true },
       { key: 'city', title: 'City', detail: '', add: true, edit: true, delete: true },
       { key: 'point', title: 'Point', detail: '', },
+      { key: 'support_list', title: 'Small Lists', detail: 'Aawak Type, Jawak Type, Aawak Source, Condition, Usage_list, MM Type, Gender, Relation etc...', add: true, edit: true, delete: true },
       // { key: 'department', title: 'Department', detail: '' },
     ],
     pbk: [
@@ -105,7 +107,29 @@ export class AuthService {
       { colName: 'item_detail', title: 'Item Detail' },
       { colName: 'description', title: 'Description' },
       { colName: 'ref_aawak_select', title: 'Referece Aawak Search' },
-
+      { colName: 'auto_awk', title: 'Automatic Aawak' },
+      
+    ],
+    repairing: [
+      { colName: 'jwk_date', title: 'Jawak Date' },
+      { colName: 'mm_id', title: 'MM' },
+      { colName: 'jwk_mm_id', title: 'Jawak MM' },
+      { colName: 'product_code', title: 'Product' },
+      { colName: 'srv_code', title: 'srv Code' },
+      { colName: 'srv_code', title: 'srv Code' },
+      { colName: 'repair_from', title: 'Repair From' },
+      { colName: 'repairer_info', title: 'Repairer Info' },
+      { colName: 'problem_detail', title: 'Problem Detail' },
+      { colName: 'solution_detail', title: 'Solution Detail' },
+      { colName: 'used_parts', title: 'Used Parts' },
+      { colName: 'parts_cost', title: 'Parts Cost' },
+      { colName: 'repairing_cost', title: 'Repairing Cost' },
+      { colName: 'actual_spent_amt', title: 'Actual Amount Spent' },
+      { colName: 'warranty_info', title: 'Warranty Info' },
+      { colName: 'document', title: 'document' },
+      { colName: 'awk_ref_id', title: 'Aawak' },
+      { colName: 'jwk_ref_id', title: 'Jawak' },
+      
     ],
     nimitt: [
       { colName: 'roll_no', title: 'Roll No' },
@@ -114,10 +138,13 @@ export class AuthService {
       { colName: 'townarea', title: 'Townarea' },
     ],
     mm: [
+      { colName: 'parent_mm_id', title: 'Parent MM' },
       { colName: 'mm_eng', title: 'Name (Eng)' },
       { colName: 'mm_roman', title: 'Name (Roman)' },
       { colName: 'mm_code', title: 'MM Code' },
-      { colName: 'parent_mm_id', title: 'Parent MM' },
+      { colName: 'opening_date', title: 'Openning Date' },
+      { colName: 'nimitt_id', title: 'Nimitt' },
+      { colName: 'closing_date', title: 'Closing Date' },
     ],
     item: [
       { colName: 'item_eng', title: 'Name (Eng)' },
@@ -130,7 +157,14 @@ export class AuthService {
       { colName: 'subitem_roman', title: 'Subitem (Roman)' },
     ],
     bachat: [],
-    category: [],
+    category: [
+      { colName: 'category_eng', title: 'Name (Eng)' },
+      { colName: 'category_roman', title: 'Name (Roman)' },
+    ],
+    support_list: [
+      { colName: 'list_name_hin', title: 'Name (Eng)' },
+      { colName: 'list_name_roman', title: 'Name (Roman)' },
+    ],
     report: [
       { colName: 'report_at', title: 'Aawak Type Saar' },
       { colName: 'report_jt', title: 'Jawak Type Saar' },

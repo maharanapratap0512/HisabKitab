@@ -218,7 +218,7 @@
                             </td>
                           </tr>
                           <tr class="collapse show ribbon-box" [attr.id]="'[row.key]_row'"
-                            *ngIf="settingsAll[row.key].visible && (settingsUI[row.key] && settingsUI[row.key].length > 0)">
+                            *ngIf="settingsAll[row.key] && settingsAll[row.key].visible && (settingsUI[row.key] && settingsUI[row.key].length > 0)">
                             <!-- <td style="border: none;"></td> -->
                             <td colspan="5" class="sub-row">
                               <div class="row p-1 ps-3" style="width: 99.7%;">

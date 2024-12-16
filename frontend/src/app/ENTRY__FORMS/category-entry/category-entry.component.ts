@@ -19,6 +19,7 @@ export class CategoryEntryComponent implements OnInit {
   @Input() isVisible: any;
   categoryForm: FormGroup;
   isLoader: boolean = false;
+  settings:any = null;
 
   constructor(
     private fb: FormBuilder,
@@ -28,6 +29,8 @@ export class CategoryEntryComponent implements OnInit {
     private toastr: ToastrService,
     public auth: AuthService
   ) {
+
+    this.settings = auth.webUser.settings.category;
     this.categoryForm = this.fb.group({
       category_eng: [null, Validators.required],
       category_hin: [null, Validators.required],

@@ -32,6 +32,7 @@ class DBContex {
         'condition',
         'usage_list',
         'aawak_source',
+        'mm_type'
     ]
     supp_list = [
         'mm_type',
@@ -188,12 +189,12 @@ class DBContex {
                     if (tblname == "support_list") {
                         if (obj.list_type && this.tbl_from_supp_list.includes(obj.list_type)) {
                             let q = this.query.department_config.update_config_value;
-                            let p = { tblname: tblname, dept_id: dept_id, new_id: result.lastInsertRowid.toString() }
+                            let p = { tblname: tblname, dept_id: dept_id, new_id: result.lastInsertRowid }
                             let t = this.db.prepare(q).run(p);
                         }
                     } else if (this.tbl_need_dept_config.includes(tblname)) {
                         let q = this.query.department_config.update_config_value;
-                        let p = { tblname: tblname, dept_id: dept_id, new_id: result.lastInsertRowid.toString() }
+                        let p = { tblname: tblname, dept_id: dept_id, new_id: result.lastInsertRowid }
                         let t = this.db.prepare(q).run(p);
                     }
                     if (get) {

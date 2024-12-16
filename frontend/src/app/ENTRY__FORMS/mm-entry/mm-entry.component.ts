@@ -28,6 +28,7 @@ export class MmEntryComponent implements OnInit {
   viewType: any;
   parentMM: any;
   viewData: any = [];
+  settings: any = {};
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -37,6 +38,7 @@ export class MmEntryComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public auth: AuthService
   ) {
+    this.settings = auth.webUser.settings.mm;
     this.mmForm = this.fb.group({
       mm_eng: [null],
       mm_hin: [null, Validators.required],

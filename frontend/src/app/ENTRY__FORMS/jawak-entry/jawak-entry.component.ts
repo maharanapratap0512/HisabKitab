@@ -53,6 +53,7 @@ export class JawakEntryComponent implements OnInit {
     public auth: AuthService,
     private spinner: NgxSpinnerService
   ) {
+    this.settings = this.auth.webUser.settings;
     this.jawakForm = this.fb.group({
       date: [null, Validators.required],
       mm_id: [null, Validators.required],
@@ -78,7 +79,8 @@ export class JawakEntryComponent implements OnInit {
       aawak_ref_id: [null],
       nimitt_id: [null],
       is_xl: [null],
-      dept_id: [this.auth.webUser.dept_id]
+      dept_id: [this.auth.webUser.dept_id],
+      auto_awk: [this.settings.jawak.auto_awk]
     });
 
     this.gs.observeList().subscribe(result => {
@@ -92,7 +94,7 @@ export class JawakEntryComponent implements OnInit {
       this.states = result.state ? result.state : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
-    this.settings = this.auth.webUser.settings;
+
   }
 
   async ngOnInit(): Promise<void> {

@@ -160,7 +160,9 @@ export class FormService {
   valid() {
     for (let i in this.aawakFormMain.aawaks) {
       if (!(this.aawakFormMain.aawaks[i].item_id && this.aawakFormMain.aawaks[i].qty && this.aawakFormMain.aawaks[i].unit_id && this.aawakFormMain.aawaks[i].aawak_type_id)) {
-        this.aawakFormMain.aawaks.splice(i, 1);
+        if (this.aawakFormMain.aawaks.length > 1) {
+          this.aawakFormMain.aawaks.splice(i, 1);
+        }
       }
     }
 

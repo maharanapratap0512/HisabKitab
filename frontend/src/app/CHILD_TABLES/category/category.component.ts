@@ -41,7 +41,7 @@ export class CategoryComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.getCategoryData();
-    this.settings = this.auth.webUser.settings;
+    this.settings = this.auth.webUser.settings.category;
   }
 
   getCategoryData() {

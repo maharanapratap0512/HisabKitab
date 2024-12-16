@@ -194,6 +194,10 @@ export class DepartmentComponent implements OnInit {
         visible: false,
         add: false,
       },
+      repairing:{
+        visible: false,
+        add: false
+      },
       city: {
         visible: false,
         add: false,
@@ -206,6 +210,9 @@ export class DepartmentComponent implements OnInit {
       },
       point: {
         visible: false
+      },
+      support_list: {
+        visible: false,
       },
       report: {
         visible: true,
@@ -1471,25 +1478,18 @@ export class DepartmentComponent implements OnInit {
     });
   }
 
-  saveDeptSettings() {
+  async saveDeptSettings() {
 
     let dept_id = this.dept_id || this.auth.webUser.dept_id;
 
     if (this.settings.department.settings) {
-      if (![1, 5].includes(dept_id)) {
-        this.settingsAll.department.settings = false;
-        this.settingsAll.department.add = false;
-      } else {
-        this.settingsAll.department.settings = true;
-        this.settingsAll.department.add = true;
-      }
 
       // this.deptConf.settings.config_value = this.settingsAll;
       let body = {
         query: { _id: dept_id },
         set: { settings: this.settingsAll }
       }
-      this.http.put(this.api.getUrl('DEPT_SETTINGS'), body).subscribe((data: any) => {
+      await this.http.put(this.api.getUrl('DEPT_SETTINGS'), body).subscribe((data: any) => {
         if (data && data['success']) {
           if (dept_id == this.auth.webUser.dept_id) {
             this.auth.webUser.settings = this.settingsAll;
@@ -1507,6 +1507,7 @@ export class DepartmentComponent implements OnInit {
     this.http.put(this.api.getUrl('DEPTCONFSAVE'), this.deptConf).subscribe((data: any) => {
       if (data && data['success']) {
         // this.isLoader = false;
+        // this.getDepartments();
         this.deptSelected(dept_id);
       }
     }, err => {

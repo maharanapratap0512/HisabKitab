@@ -64,7 +64,7 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
             itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` subitems <> '[]'`;
         }
         if (itemCondition.trim() == `` && sitemCondition.trim() == ``) {
-            orderBy = "item._id desc";
+            orderBy = "item._id";
         }
         if (req.body.pageNo && req.body.pageNo > 0) {
             offset = (req.body.pageNo - 1) * limit;

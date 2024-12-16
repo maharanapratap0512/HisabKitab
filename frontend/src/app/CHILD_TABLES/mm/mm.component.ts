@@ -31,8 +31,7 @@ export class MmComponent implements OnInit {
   mmData: any = [];
   mmAll: any = [];
   total_count: any = 0;
-  ;
-  departments: any = [];
+  mm_types: any = [];
   states: any = [];
   temp: any = {};
   settings: any = {};
@@ -53,9 +52,9 @@ export class MmComponent implements OnInit {
     this.getmmData();
     this.gs.observeList().subscribe(result => {
       this.states = result.state ? result.state : [];
-      this.departments = result.department ? result.department : [];
+      this.mm_types = result.mm_type ? result.mm_type : [];
     });
-    this.settings = this.auth.webUser.settings;
+    this.settings = this.auth.webUser.settings.mm;
   }
 
   getmmData() {
@@ -78,10 +77,10 @@ export class MmComponent implements OnInit {
       this.mmData = this.mmAll;
   }
 
-  mmDeptSelected(ev: any) {
+  mmTypeSelected(ev: any) {
 
     if (ev) {
-      this.mmData = this.mmAll.filter((mm: { dept_id: any; }) => mm.dept_id == ev);
+      this.mmData = this.mmAll.filter((mm: { mm_type: any; }) => mm.mm_type == ev);
     }
     else {
       this.mmData = this.mmAll;

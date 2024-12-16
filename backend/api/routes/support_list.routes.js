@@ -21,7 +21,7 @@ router.get('/', async (req, res, next) => {
 // get support_list 'jawak_type', 'aawak_type', 'condition', 'usage_list', 'aawak_source' by dept_id.
 router.get('/splists/:dept_id', async (req, res, next) => {
     try {
-        let conditionString = `list_type in ('jawak_type', 'aawak_type', 'condition', 'usage_list', 'aawak_source')`;
+        let conditionString = `list_type in ('jawak_type', 'aawak_type', 'condition', 'usage_list', 'aawak_source', 'mm_type')`;
         await DB.getList('support_list', { dept_id: req.params.dept_id,  conditionString: conditionString, order:'list_type' }).then((response) => {
             res.json({
                 success: true,

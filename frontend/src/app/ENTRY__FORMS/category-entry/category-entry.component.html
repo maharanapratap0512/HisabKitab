@@ -10,7 +10,7 @@
                             [ngClass]="{'validation':categoryForm.get('category_hin')?.errors && (categoryForm.get('category_hin')?.touched || categoryForm.get ('category_hin')?.dirty)}">
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="settings.category_eng">
                     <div class="form-group">
                         <label class="form-label">Category Name (Eng)</label>
                         <input type="text" class="form-control" placeholder="Category Name (Eng)"
@@ -18,7 +18,7 @@
                             [ngClass]="{'validation':categoryForm.get('category_eng')?.errors && (categoryForm.get('category_eng')?.touched || categoryForm.get ('category_eng')?.dirty)}">
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="settings.category_roman">
                     <div class="form-group">
                         <label class="form-label">Category Name (Roman)</label>
                         <input type="text" class="form-control" placeholder="Category Name (Roman)"

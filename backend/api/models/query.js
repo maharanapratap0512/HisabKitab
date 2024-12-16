@@ -339,7 +339,7 @@ const department_config = {
         config_key=@config_key,
         config_value=@config_value,
         updated_at=datetime('now','localtime')`
-    , update_config_value: `update department_config set config_value = json_set(config_value,'$['||json_array_length(config_value)||']',@new_id) where dept_id = @dept_id AND config_key=@tblname`
+    , update_config_value: `update department_config set config_value = json_set(config_value,'$['||json_array_length(config_value)||']', CAST(@new_id as INTEGER)) where dept_id = @dept_id AND config_key=@tblname`
     , update_config_value_old:
         `update department_config set config_value = CASE WHEN(config_value = '') THEN ',' ELSE config_value END || @new_id || ',' where dept_id = @dept_id AND config_key = @tblname`,
     verify_config_id:
@@ -971,12 +971,16 @@ const mm = {
     , select_full:
         `select mm.*,
         st.state_hin, st.state_eng, 
+        cnt.country_hin, cnt.country_eng, 
+        zn.zone_hin, zn.zone_eng, 
         pm.mm_hin as parent_mm_hin, pm.mm_eng as parent_mm_eng, pm.mm_code as parent_mm_code, 
         nm.nimitt_hin, nm.nimitt_eng, nm.gender as nimitt_gender,
         nst.state_hin as nimitt_state_hin, nst.state_eng as nimitt_state_eng,
         dept.dept_hin, dept.dept_eng, dept.dept_code 
         from mm
         left join state st on st._id = mm.state_id
+        left join zone zn on zn._id = st.zone_id
+        left join country cnt on cnt._id = st.country_id
         left join mm pm on pm._id = mm.parent_mm_id
         left join nimitt nm on nm._id = mm.nimitt_id
         left join state nst on nst._id = nm.state_id

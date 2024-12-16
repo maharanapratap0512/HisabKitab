@@ -71,9 +71,9 @@ export class DataViewComponent implements OnInit {
   configureType() {
     this.settings = null;
     switch (this.Type) {
-      case 'mm': this.setMMFields();
+      case 'mm': this.settings = this.auth.webUser.settings.mm;
+        this.setMMFields();
         this.apiName = 'MM';
-        this.settings = this.auth.webUser.settings.mm;
         break;
       case 'country': this.setCountryFields();
         this.apiName = 'COUNTRY';
@@ -84,9 +84,9 @@ export class DataViewComponent implements OnInit {
       case 'state': this.setStateFields();
         this.apiName = 'STATE';
         break;
-      case 'category': this.setCategoryFields();
+      case 'category': this.settings = this.auth.webUser.settings.category;
+        this.setCategoryFields();
         this.apiName = 'CATEGORY';
-        this.settings = this.auth.webUser.settings.category;
         break;
       case 'unit': this.setUnitFields();
         this.apiName = 'UNIT';
@@ -99,15 +99,17 @@ export class DataViewComponent implements OnInit {
       case 'aawak_source':
       case 'usage_list':
       case 'jawak_type':
-      case 'condition': this.setSupportListFields();
+      case 'condition': this.settings = this.auth.webUser.settings.support_list;
+        this.setSupportListFields();
         this.apiName = 'SUPPORTLIST';
         this.importType = 'support_list'
         break;
-      case 'subitem_list': this.setSubitemListFields();
+      case 'subitem_list': this.settings = this.auth.webUser.settings.item;
+        this.setSubitemListFields();
         this.apiName = 'SUBITEMLIST';
         break;
-      case 'department': this.setDepartmentFields();
-        this.settings = this.auth.webUser.settings.department;
+      case 'department': this.settings = this.auth.webUser.settings.department;
+        this.setDepartmentFields();
         this.apiName = 'DEPARTMENT';
         break;
       case 'jawak': this.setJawakFields();
@@ -121,8 +123,6 @@ export class DataViewComponent implements OnInit {
       this.getDataFromDB();
     }
 
-    console.log(this.settings);
-    
   }
 
   getDataFromDB() {
@@ -241,11 +241,15 @@ export class DataViewComponent implements OnInit {
       }, {
         title: "Name(Eng)",
         columns: ["list_name_eng"]
-      }, {
-        title: "Name(Roman",
-        columns: ["list_name_roman"]
       }
     ]
+    if (this.settings && this.settings.list_name_roman) {
+      this.fields.push({
+        title: "Name(Roman)",
+        columns: ["list_name_roman"]
+      });
+    }
+
   }
 
   setDepartmentFields() {
@@ -268,11 +272,20 @@ export class DataViewComponent implements OnInit {
       {
         title: "Category(Hin)",
         columns: ["category_hin"]
-      }, {
-        title: "Category(Eng)",
-        columns: ["category_eng"]
       }
     ]
+    if (this.settings && this.settings.category_eng) {
+      this.fields.push({
+        title: "Category(Eng)",
+        columns: ["category_eng"]
+      });
+    }
+    if (this.settings && this.settings.category_roman) {
+      this.fields.push({
+        title: "Category(Roman)",
+        columns: ["category_roman"]
+      });
+    }
   }
 
   setCountryFields() {
@@ -304,26 +317,41 @@ export class DataViewComponent implements OnInit {
       {
         title: "MM(Hin)",
         columns: ["mm_hin"]
-      }, {
-        title: "MM(Eng)",
-        columns: ["mm_eng"]
-      }, {
-        title: "MM Code",
-        columns: ["mm_code"]
-      }, {
-        title: "MM Type",
-        columns: ["mm_type"]
-      }, {
-        title: "Parent MM",
-        columns: ["parent_mm_hin", "parent_mm_eng", "parent_mm_code"]
-      }, {
-        title: "State",
-        columns: ["state_hin", "state_eng"]
-      }, {
-        title: "Opening Date",
-        columns: ["opening_date"]
       }
     ]
+    if (this.settings && this.settings.mm_eng) {
+      this.fields.push({
+        title: "MM(Eng)",
+        columns: ["mm_eng"]
+      });
+    }
+    if (this.settings && this.settings.mm_roman) {
+      this.fields.push({
+        title: "MM(Roman)",
+        columns: ["mm_roman"]
+      });
+    }
+    if (this.settings && this.settings.mm_code) {
+      this.fields.push({
+        title: "MM Code",
+        columns: ["mm_code"]
+      });
+    }
+    this.fields.push(...[{
+      title: "MM Type",
+      columns: ["mm_type"]
+    }, {
+      title: "Parent MM",
+      columns: ["parent_mm_hin", "parent_mm_eng", "parent_mm_code"]
+    }, {
+      title: "State",
+      columns: ["state_hin", "state_eng"]
+    }, {
+      title: "Opening Date",
+      columns: ["opening_date"]
+    }]);
+
+
   }
 
   setZoneFields() {
@@ -364,14 +392,20 @@ export class DataViewComponent implements OnInit {
       {
         title: "Subitem(Hin)",
         columns: ["subitem_hin"]
-      }, {
-        title: "Subitem(Eng)",
-        columns: ["subitem_eng"]
-      }, {
-        title: "Subitem(Roman)",
-        columns: ["subitem_roman"]
       }
     ]
+    if (this.settings && this.settings.subitem_eng) {
+      this.fields.push({
+        title: "Subitem(Eng)",
+        columns: ["subitem_eng"]
+      });
+    }
+    if (this.settings && this.settings.subitem_roman) {
+      this.fields.push({
+        title: "Subitem(Roman)",
+        columns: ["subitem_roman"]
+      });
+    }
   }
 
 

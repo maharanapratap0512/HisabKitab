@@ -5,7 +5,7 @@
 <div class="row" id="mmEntryComponent">
     <div class="card-body">
         <form [formGroup]="mmForm">
-            <div class="row">
+            <div class="row" *ngIf="settings.parent_mm_id">
                 <div class="col-md-3 mb-3">
                     <div class="form-group">
                         <label class="form-label">Parent MM</label>
@@ -28,14 +28,14 @@
                             [ngClass]="{'validation':mmForm.get('mm_hin')?.errors && (mmForm.get('mm_hin')?.touched || mmForm.get ('mm_hin')?.dirty)}">
                     </div>
                 </div>
-                <div class="col-md-3 mb-3" *ngIf="!parentMM">
+                <div class="col-md-3 mb-3" *ngIf="!parentMM && settings.mm_eng">
                     <div class="form-group">
                         <label class="form-label">MM(Eng)</label>
                         <input type="text" class="form-control" placeholder="MM(Eng)" formControlName="mm_eng"
                             [ngClass]="{'validation':mmForm.get('mm_eng')?.errors && (mmForm.get('mm_eng')?.touched || mmForm.get ('mm_eng')?.dirty)}">
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-3 mb-3" *ngIf="settings.mm_code">
                     <div class="form-group">
                         <label class="form-label">MM Code</label>
                         <input type="text" class="form-control" placeholder="MM Code" formControlName="mm_code"
@@ -121,12 +121,12 @@
                 </div> -->
 
 
-                <div class="col-md-2 mb-3">
+                <div class="col-md-2 mb-3" *ngIf="settings.opening_date">
                     <label for="date" class="form-label">Opening Date</label>
                     <input class="form-control" id="date" type="date" formControlName="opening_date"
                         [ngClass]="{'validation':mmForm.get('opening_date')?.errors && (mmForm.get('opening_date')?.touched || mmForm.get ('opening_date')?.dirty)}">
                 </div>
-                <div class="col-md-2 mb-3">
+                <div class="col-md-2 mb-3" *ngIf="settings.nimitt_id">
                     <div class="form-group">
                         <label class="form-label">Nimitt</label>
                         <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -147,7 +147,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-2 mb-3">
+                <div class="col-md-2 mb-3" *ngIf="settings.closing_date">
                     <label for="closing_date" class="form-label">Closing Date</label>
                     <input class="form-control" id="closing_date" type="date" formControlName="mm_closed"
                         [ngClass]="{'validation':mmForm.get('mm_closed')?.errors && (mmForm.get('mm_closed')?.touched || mmForm.get ('mm_closed')?.dirty)}">
