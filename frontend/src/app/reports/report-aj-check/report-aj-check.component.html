@@ -1,0 +1,226 @@
+<div class="wrapper">
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="card-header">Report Aawak Jawak Check (Under Construction)</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-2 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Date Range</label>
+                                    <input type="date" class="form-control" [(ngModel)]="filterBody.date_from"
+                                        name="date_from" required>
+                                    <input type="date" class="form-control mt-1" [(ngModel)]="filterBody.date_to"
+                                        name="date_to" required>
+                                </div>
+                            </div>
+                            <!-- <div class="col-md-2 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Date To</label>
+                                    <input type="date" class="form-control" [(ngModel)]="filterBody.date_to"
+                                        name="date_to" required>
+                                </div>
+                            </div> -->
+                            <div class="col-md-2 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label">MM </label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
+                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
+                                        [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}"
+                                        [ngClass]="{'validation': !filterBody.mm_id || filterBody.mm_id.length < 1}">
+                                        <ng-option *ngFor="let item of mms" [value]="item._id">
+                                            {{item.mm_hin}} : {{item.mm_code}} : {{item.mm_eng}}</ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Aawak MM"
+                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
+                                        [(ngModel)]="filterBody.aj_mm_id" [ngModelOptions]="{standalone: true}">
+                                        <ng-option *ngFor="let item of mms" [value]="item._id">
+                                            {{item.mm_hin}} : {{item.mm_code}} : {{item.mm_eng}}</ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Item & Subitem</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
+                                        [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}"
+                                        (change)="itemSelected($event)">
+                                        <ng-option *ngFor="let item of items" [value]="item._id">
+                                            {{item.item_hin}} : {{item.item_eng}}</ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Subitem"
+                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
+                                        [(ngModel)]="filterBody.subitem_id" [ngModelOptions]="{standalone: true}">
+                                        <ng-option *ngFor="let item of subitems" [value]="item._id">
+                                            {{item.subitem_hin}} : {{item.subitem_eng}}</ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Aawak Jawak Type</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Aawak Type"
+                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
+                                        [(ngModel)]="filterBody.aawak_type_id" [ngModelOptions]="{standalone: true}"
+                                        (change)="itemSelected($event)">
+                                        <ng-option *ngFor="let item of aawak_types" [value]="item._id">
+                                            {{item.list_name_hin}} : {{item.list_name_eng}} :
+                                            {{item.list_name_roman}}</ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Jawak Type"
+                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
+                                        [(ngModel)]="filterBody.jawak_type_id" [ngModelOptions]="{standalone: true}">
+                                        <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                            {{item.list_name_hin}} : {{item.list_name_eng}} :
+                                            {{item.list_name_roman}}</ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Conndition & Usage List </label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Condition"
+                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
+                                        [(ngModel)]="filterBody.condition_id" [ngModelOptions]="{standalone: true}"
+                                        (change)="itemSelected($event)">
+                                        <ng-option *ngFor="let item of conditions" [value]="item._id">
+                                            {{item.list_name_hin}} : {{item.list_name_eng}} :
+                                            {{item.list_name_roman}}</ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Usage List"
+                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
+                                        [(ngModel)]="filterBody.usage_list_id" [ngModelOptions]="{standalone: true}">
+                                        <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                            {{item.list_name_hin}} : {{item.list_name_eng}} :
+                                            {{item.list_name_roman}}</ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-1 mb-2 mt-4">
+                                <div class="form-group">
+                                    <label class="form-label"></label>
+                                    <button class="btn btn-primary form-control" (click)="searchReports()">Generate
+                                        Reports</button>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-2 mt-3">
+                                <div class="form-group">
+                                    <label class="form-label"></label>
+                                    <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                                        data-bs-toggle="dropdown" aria-expanded="false"> Export Data </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" (click)="exportToExcelHin()">To Excel (Hin)</a>
+                                        <a class="dropdown-item" (click)="exportToExcelEng()">To Excel (Eng)</a>
+                                        <a class="dropdown-item" (click)="exportToPDF()">To PDF (Eng)</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class="col-md-2 mb-2 mt-3">
+                                <button type="button" style="font-weight: 700 !important;"
+                                    class="btn btn-light w-100">Total
+                                    Count : {{reportData.length}}
+                                </button>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="card-body" style="overflow: auto;">
+                        <div class="row mb-2">
+                            <ul class="nav nav-pills bg-nav-pills nav-justified mb-3">
+                                <li class="nav-item">
+                                    <a href="#aawak-report" data-bs-toggle="tab" aria-expanded="false"
+                                        class="nav-link rounded-0 active">
+                                        <span class="d-none d-lg-block">Aawak Reports</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#jawak-report" data-bs-toggle="tab" aria-expanded="true"
+                                        class="nav-link rounded-0">
+                                        <span class="d-none d-lg-block">Jawak Reports</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="tab-content">
+
+                            <!-- Aawak Report-->
+                            <div class="tab-pane active" id="aawak-report">
+                                <div class="row mb-2">
+                                    <div class="col-5">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="termAawak"
+                                                name="search">
+                                        </div>
+                                    </div>
+                                </div>
+                                <table id="tbl" #tbl class="table dt-responsive">
+                                    <thead>
+                                        <tr>
+                                            <td style="width: 70px;">No.</td>
+                                            <td style="width: 100px;">Department</td>
+                                            <td>Category</td>
+                                            <td>Item</td>
+                                            <td>Aawak Type</td>
+                                            <ng-container *ngIf="monthsSel.length <= 0">
+                                                <td>Total Qty</td>
+                                            </ng-container>
+                                            <ng-container *ngIf="monthsSel.length > 0">
+                                                <th class="center-header" *ngFor="let row of monthsSel">
+                                                    {{row.name + " - " + filterBody.year }}
+                                                </th>
+                                            </ng-container>
+        
+                                        </tr>
+        
+                                    </thead>
+                                    <tbody>
+                                        <ng-container *ngFor="let data of reportData | search: term; let i = index;">
+                                            <tr>
+                                                <td style="width: 70px;">{{i+1}}</td>
+                                                <td style="width: 100px;">{{data.dept_hin}} : {{data.dept_code}}</td>
+                                                <td>{{data.categories_eng ? data.categories_eng : data.categories_hin}}</td>
+                                                <td>
+                                                    {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}}<br />
+                                                    {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
+                                                </td>
+                                                <td>
+                                                    {{data.aawak_type_hin}} {{data.aawak_type_eng ? " : " + data.aawak_type_eng
+                                                    : ""}}
+                                                </td>
+                                                <ng-container *ngIf="monthsSel.length > 0">
+                                                    <ng-container *ngFor="let row of monthsSel; let j = index;">
+                                                        <td>
+                                                            <span [ngClass]="{'error': data.arr_sum_qty[j] < 0}">
+                                                                {{data.arr_sum_qty[j]}} {{data.unit_short}}
+                                                            </span>
+                                                        </td>
+                                                    </ng-container>
+                                                </ng-container>
+                                            </tr>
+                                        </ng-container>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Jawak Report-->
+                            <div class="tab-pane active" id="jawak-report">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+</div>

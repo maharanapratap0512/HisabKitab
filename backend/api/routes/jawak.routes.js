@@ -113,10 +113,17 @@ router.put('/', async (req, res, next) => {
 router.post('/new/:dept_id', async (req, res, next) => {
     try {
         if (req.body) {
-
+            await Fn.begin();
             await Fn.insertAJ(req.body, 'jawak').then(async (resolve) => {
                 if (resolve) {
+                    let awk = {
+                        
+                    }
+                    await Fn.insertAJ().then(async(resolve)=>{
 
+                    }, (reject)=>{
+
+                    });
                     await DB.getById('jawak', resolve, { full: true }).then(async (data) => {
                         res.json({
                             result: data || {},
@@ -132,7 +139,10 @@ router.post('/new/:dept_id', async (req, res, next) => {
                 }
             });
         }
-    } catch (err) { next(err) };
+    } catch (err) {
+        Fn.rollback();
+        next(err)
+    };
 });
 
 // update jawak 
@@ -165,11 +175,11 @@ router.put('/new', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     try {
         if (req.params.id) {
-            
-            await Fn.deleteAJ(req.params.id,'jawak').then((resolve)=>{
+
+            await Fn.deleteAJ(req.params.id, 'jawak').then((resolve) => {
                 res.json({
-                    success:true,
-                    result:resolve
+                    success: true,
+                    result: resolve
                 })
             })
         }

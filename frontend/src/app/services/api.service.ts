@@ -66,6 +66,7 @@ export class ApiService {
     DICT: base_url + 'dictionary/',
     REPORT: base_url + 'reports/',
     REPORT_AT: base_url + 'reports/awk_type_saar/',
+    REPORT_AJ_CH: base_url + 'reports/awk_jwk_check/',
     REPORT_JT: base_url + 'reports/jwk_type_saar/',
     REPORT_STR_STK: base_url + 'reports/report_store_stock/',
     REPORT_KH: base_url + 'reports/report_khet_saar/',

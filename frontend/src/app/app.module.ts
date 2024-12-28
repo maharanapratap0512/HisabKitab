@@ -83,6 +83,8 @@ import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { AawakNewComponent } from './aawak-new/aawak-new.component';
 import { RepairingEntryComponent } from './entry__forms/repairing-entry/repairing-entry.component';
 import { RepairingComponent } from './repairing/repairing.component';
+import { ReportAjCheckComponent } from './reports/report-aj-check/report-aj-check.component';
+import { ReportLotNoComponent } from './reports/report-lot-no/report-lot-no.component';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -154,6 +156,8 @@ import { RepairingComponent } from './repairing/repairing.component';
     AawakNewComponent,
     RepairingEntryComponent,
     RepairingComponent,
+    ReportAjCheckComponent,
+    ReportLotNoComponent,
   ],
 
   imports: [

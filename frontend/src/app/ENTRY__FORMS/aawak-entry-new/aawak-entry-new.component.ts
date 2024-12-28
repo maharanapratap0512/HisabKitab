@@ -34,6 +34,7 @@ export class AawakEntryNewComponent implements OnInit {
   categories: any = [];
   pbks: any = [];
   aawak_types: any = [];
+  usage_lists: any = [];
   aawak_sources: any = [];
   jawak_types: any = [];
   nimitts: any = [];
@@ -63,6 +64,7 @@ export class AawakEntryNewComponent implements OnInit {
       // this.departments = result.department ? result.department : [];
       this.pbks = result.pbk ? result.pbk : [];
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
+      this.usage_lists = result.usage_list ? result.usage_list : [];
       this.aawak_sources = result.aawak_source ? result.aawak_source : [];
       this.jawak_types = result.jawak_type ? result.jawak_type : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
@@ -87,6 +89,7 @@ export class AawakEntryNewComponent implements OnInit {
     }
     if (changes.getData && changes.getData.currentValue) {
       this.fs.aawakFormMain = { ...this.fs.aawakForm, ...changes.getData.currentValue }
+      this.fs.formStatusChanges()
       for (let i in this.fs.aawakFormMain.aawaks) {
         if (this.fs.aawakFormMain.aawaks[i].item_id) {
           this.itemSelected(this.fs.aawakFormMain.aawaks[i].item_id, i);

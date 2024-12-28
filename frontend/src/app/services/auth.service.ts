@@ -166,6 +166,7 @@ export class AuthService {
       { colName: 'list_name_roman', title: 'Name (Roman)' },
     ],
     report: [
+      { colName: 'report_aj_check', title: 'Aawak Jawak Check' },
       { colName: 'report_at', title: 'Aawak Type Saar' },
       { colName: 'report_jt', title: 'Jawak Type Saar' },
       { colName: 'report_str_stk', title: 'Store Stock' },

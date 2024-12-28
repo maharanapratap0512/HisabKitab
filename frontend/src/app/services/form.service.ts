@@ -176,13 +176,13 @@ export class FormService {
 
   reset() {
     this.aawakFormMain = {
-      date: null,
+      date: this.aawakFormMain.date,
       pkt_num: null,
-      mm_id: null,
+      mm_id: this.aawakFormMain.mm_id,
       aawak_mm_id: null,
       pbk_id: null,
       dept_id: this.auth.webUser.dept_id,
-      nimitt_id: null,
+      nimitt_id: this.aawakFormMain.nimitt_id,
       description: null,
       aawaks: [{ ...this.aawakForm }],
       voucher_no: null,
