@@ -605,6 +605,28 @@ const aawak = {
         left join support_list slas on slas._id = aawak.aawak_source_id
         left join nimitt nmt on nmt._id = aawak.nimitt_id
         left join state pst on pst._id = nmt.state_id ? limit @limit offset @offset`
+    , select_lot_no:
+        `select distinct aawak.lot_no, aawak.*, 
+        mm.mm_hin,mm.mm_eng,mm.mm_code,
+        amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
+        pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
+        item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
+        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories,
+        sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
+        unit.unit_short, unit.unit_full,
+        slat.list_name_hin as aawak_type_hin, slat.list_name_eng as aawak_type_eng,
+        slas.list_name_hin as aawak_source_hin, slas.list_name_eng as aawak_source_eng
+        from aawak 
+        left join mm on mm._id = aawak.mm_id
+        left join pbk on pbk._id = aawak.pbk_id
+        left join mm amm on amm._id = aawak.aawak_mm_id
+        left join item on item._id = aawak.item_id
+        left join subitem si on si._id = aawak.subitem_id
+        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join support_list sl on sl._id = aawak.condition_id
+        left join unit on unit._id = aawak.unit_id
+        left join support_list slat on slat._id = aawak.aawak_type_id
+        left join support_list slas on slas._id = aawak.aawak_source_id ?`
     , order:
         `date, aawak_mm_hin, aawak_mm_eng, pkt_num`,
     delete: `delete from aawak where _id = @_id`,
@@ -1163,12 +1185,14 @@ const pbk = {
     select:
         `select * from pbk ?`
     , select_full:
-        `select pbk.*, 
-        state.state_hin,state.state_eng, 
-        city.city_hin,city.city_eng, 
+        `select pbk.*, strftime('%d-%m-%Y', pbk.birth_date) AS birth_date, strftime('%m-%Y', pbk.bhatti_date) AS bhatti_date,
+        state.state_hin, state.state_eng, 
+        cnt.country_hin, cnt.country_eng, 
+        city.city_hin, city.city_eng,
         mm.mm_hin, mm.mm_eng, mm.mm_code
         from pbk 
         left join state on state._id = pbk.state_id
+        left join country cnt on cnt._id = state.country_id
         left join city on city._id = pbk.city_id
         left join mm on mm._id = pbk.class_mm_id ? limit @limit offset @offset`
     , insert:

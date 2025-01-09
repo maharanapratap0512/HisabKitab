@@ -36,7 +36,7 @@ export class ReportAjCheckComponent {
   jawak_types: any = [];
   usage_lists: any = [];
   conditions: any = [];
-
+  settings: any = [];
 
   reportData: any = [];
   aawaks: any = [];
@@ -68,6 +68,8 @@ export class ReportAjCheckComponent {
       this.conditions = result.condition ? result.condition : [];
     });
 
+    this.settings = this.auth.webUser.settings;
+
     // this.filterBody = {
     //   months: [12],
     //   year: 2022
@@ -80,7 +82,8 @@ export class ReportAjCheckComponent {
     this.isLoader = true;
     this.http.put(this.api.getUrl('REPORT_AJ_CH'), this.filterBody).subscribe((data: any) => {
       if (data.success) {
-        this.reportData = data.result;
+        this.aawaks = data.aawaks;
+        this.jawaks = data.jawaks;
 
         for (let i in this.reportData) {
           this.reportData[i].categories_hin = '';
@@ -101,7 +104,7 @@ export class ReportAjCheckComponent {
             }
           }
         }
-        this.isLoader = false;  
+        this.isLoader = false;
       }
     }, (err) => {
       console.log(err);
@@ -123,19 +126,12 @@ export class ReportAjCheckComponent {
     }
   }
 
-  exportToPDF() {
+  exportToPDF(aj: string) {
     let doc: any = new jsPDF();
-
-    // add the font to jsPDF
-    // doc.addFileToVFS("MangalFont.ttf", this.gs.aksharFont);
-    doc.addFont("MangalFont.ttf", "MangalFont", "normal");
-    doc.setFont("MangalFont");
 
     doc.setProperties({
       textEncoding: 'utf-8'
     });
-
-    console.log(doc.getFontList());
 
     let data: any = [];
     for (let i in this.reportData) {
@@ -176,7 +172,88 @@ export class ReportAjCheckComponent {
     doc.save(this.auth.webUser.dept_code + '_आवक_टाइप_सार_' + this.monthsSel[0].name_hin + " से " + this.monthsSel[this.monthsSel.length - 1].name_hin + '-' + this.filterBody.year + '.pdf');
   }
 
-  exportToExcelHin() {
+  exportAawakToExcel() {
+    let data: any = []
+    for (let i in this.aawaks) {
+      let row: any = {
+        "तारीख": this.aawaks[i].date,
+        "लॉट नं.": this.aawaks[i].lot_no,
+        "पैकेट नं.": this.aawaks[i].pkt_num,
+        "कहाँ से आया": this.aawaks[i].aawak_mm_hin,
+        "किसने दिया": (this.aawaks[i].roll_no ? this.aawaks[i].roll_no + ' ' : '') + (this.aawaks[i].pbk_hin ? this.aawaks[i].pbk_hin : ''),
+        "आइटम - सबआइटम": this.aawaks[i].item_hin + (this.aawaks[i].subitem_hin ? '(' + this.aawaks[i].subitem_hin + ')' : ''),
+        "कन्डिशन": this.aawaks[i].condition_hin,
+        "क्वानटिटी": this.aawaks[i].qty,
+        "यूनिट": this.aawaks[i].unit_short,
+        "रेट": this.aawaks[i].rate,
+        "अमाउन्ट": this.aawaks[i].actual_amt,
+        "आवक सोर्स": this.aawaks[i].aawak_source_hin,
+        "आवक टाइप": this.aawaks[i].aawak_type_hin,
+        "उसेज": this.aawaks[i].usage_list_hin,
+        "आइटम डीटेल": this.aawaks[i].item_detail,
+        "डिस्क्रिप्शन": this.aawaks[i].description,
+      };
+      data.push(row)
+    }
+    this.excelExportService.addSheet(data, 'आवक');
+  }
+
+  exportJawakToExcel() {
+    let data: any = []
+    for (let i in this.jawaks) {
+      let row: any = {
+        "तारीख": this.jawaks[i].date,
+        "लॉट नं.": this.jawaks[i].lot_no,
+        "पैकेट नं.": this.jawaks[i].pkt_num,
+        "कहाँ भेजा": this.jawaks[i].jawak_mm_hin,
+        "किसको दिया": (this.jawaks[i].roll_no ? this.jawaks[i].roll_no + ' ' : '') + (this.jawaks[i].pbk_hin ? this.jawaks[i].pbk_hin : ''),
+        "आइटम - सबआइटम": this.jawaks[i].item_hin + (this.jawaks[i].subitem_hin ? '(' + this.jawaks[i].subitem_hin + ')' : ''),
+        "कन्डिशन": this.jawaks[i].condition_hin,
+        "क्वानटिटी": this.jawaks[i].qty,
+        "यूनिट": this.jawaks[i].unit_short,
+        "रेट": this.jawaks[i].rate,
+        "अमाउन्ट": this.jawaks[i].actual_amt,
+        "आवक सोर्स": this.jawaks[i].aawak_source_hin,
+        "जावक टाइप": this.jawaks[i].jawak_type_hin,
+        "उसेज": this.jawaks[i].usage_list_hin,
+        "आइटम डीटेल": this.jawaks[i].item_detail,
+        "डिस्क्रिप्शन": this.jawaks[i].description,
+      };
+      data.push(row)
+    }
+    this.excelExportService.addSheet(data, 'जावक');
+  }
+
+  /**
+    * Export AJ check to exccel
+    * @params aj - indicate aawak, jawak, both.
+    */
+  async exportToExcel(aj: string = 'both') {
+    let title = this.auth.webUser.dept_code || '' + '_आवक_जावक_चेक_';
+    if (this.filterBody.date_from){
+      title += 'तारीख_' + this.filterBody.date_from + '_से_';
+    }
+    if (this.filterBody.date_to){
+      title += this.filterBody.date_to + '_तक_का';
+    }
+      switch (aj) {
+        case 'aawak': await this.exportAawakToExcel();
+          title += '_आवक';
+          break;
+          case 'jawak': await this.exportJawakToExcel();
+          title += '_जावक';
+          break;
+        default:
+          await this.exportAawakToExcel();
+          await this.exportJawakToExcel();
+          title += '_आवक_जावक';
+      }
+
+      this.excelExportService.saveAsExcel(title);
+
+
+  }
+  exportToExcelHin(aj: string) {
     let data: any = []
     for (let i in this.reportData) {
       let row: any = {
@@ -196,7 +273,7 @@ export class ReportAjCheckComponent {
     this.excelExportService.exportAsExcelFile(data, this.auth.webUser.dept_code + '_आवक_टाइप_सार_' + this.monthsSel[0].name_hin + " से " + this.monthsSel[this.monthsSel.length - 1].name_hin + '-' + this.filterBody.year);
   }
 
-  exportToExcelEng() {
+  exportToExcelEng(aj: string) {
     let data: any = []
     for (let i in this.reportData) {
       let row: any = {

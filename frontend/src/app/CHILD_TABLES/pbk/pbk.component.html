@@ -158,7 +158,7 @@
                            <!-- <th style="width: 100px;">Status</th> -->
                            <th style="width: 215px;" *ngIf="settings.address">Address</th>
                            <th style="width: 200px;" *ngIf="settings.townarea">Townarea</th>
-                           <th style="width: 125px;">State</th>
+                           <th style="width: 200px;">State</th>
                            <th style="width: 100px;" *ngIf="settings.city_id">City</th>
                            <th style="width: 115px;" *ngIf="settings.mo_no">Mobile No.</th>
                            <th style="width: 100px;" *ngIf="settings.class_mm_id">Daily Class MM</th>
@@ -207,7 +207,10 @@
                            <!-- <td >{{data.status}}</td> -->
                            <td *ngIf="settings.address">{{data.address?data.address:'-'}}</td>
                            <td *ngIf="settings.townarea">{{data.townarea?data.townarea:'-'}}</td>
-                           <td>{{data.state_hin}} <br> {{data.state_eng}}</td>
+                           <td>
+                              {{data.state_hin}} : {{data.state_eng}} <br />
+                              {{data.country_hin}} : {{data.country_eng}}
+                           </td>
                            <td *ngIf="settings.city_id">{{data.city_hin}} <br> {{data.city_eng}}</td>
                            <!-- <td>{{data.tempaddress}}</td> -->
                            <!-- <td>{{data.district}}</td>
@@ -217,7 +220,7 @@
                               {{data.mm_hin?data.mm_hin :'-'}} <br> {{data.mm_eng?data.mm_eng :''}} <br>
                               {{data.mm_code?data.mm_code:''}}
                            </td>
-                           <td *ngIf="settings.bhatti_date">{{data.bhatti_date | date:'dd-MM-yyyy'}}</td>
+                           <td *ngIf="settings.bhatti_date">{{data.bhatti_date | date:'MM-yyyy'}}</td>
                         </tr>
                      </tbody>
                   </table>

@@ -162,6 +162,7 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                 if (req.body.config[j].type == 'unix_date') {
                     data = fn.setDateFormat(data);
                 }
+                req.body.excelData[i][req.body.config[j].name] = data;
                 if (req.body.config[j].ref_table && (req.body.config[j].not_null || data)) {
                     let id = null, name;
                     if (req.body.config[j].type != "array") {

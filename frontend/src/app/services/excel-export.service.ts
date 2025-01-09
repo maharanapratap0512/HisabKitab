@@ -17,9 +17,39 @@ const EXCEL_EXTENSION = '.xlsx';
 })
 export class ExcelExportService {
 
-  constructor(public auth: AuthService,
-    public gs: GlobalService) { }
+  workbook: XLSX.WorkBook;
 
+  constructor(public auth: AuthService,
+    public gs: GlobalService) {
+    this.workbook = XLSX.utils.book_new()
+  }
+
+
+  /**
+   * Add data to the workbook as a sheet
+   * @param data JSON data to be added
+   * @param sheetName Name of the Excel sheet
+   */
+  public addSheet(data: any[], sheetName: string) {
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(this.workbook, worksheet, sheetName);
+  }
+
+  /**
+   * Save the workbook as an Excel file and reset the workbook
+   * @param fileName Name of the file to save
+   */
+  public saveAsExcel(fileName: string) {
+    if (this.workbook.SheetNames.length === 0) {
+      console.warn('Workbook is empty. No data to export.');
+      return;
+    }
+
+    XLSX.writeFile(this.workbook, `${fileName}.xlsx`);
+
+    // Clear the workbook after saving
+    this.workbook = XLSX.utils.book_new()
+  }
   // async promptForDownload(data: Blob, fileName: string) {
   //   const options = {
   //     types: [{ accept: 'application/octet-stream' }],
@@ -80,7 +110,7 @@ export class ExcelExportService {
     const worksheet = XLSX.utils.json_to_sheet(json);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-      
+
     const workbookBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     const exceljsWorkbook = new Workbook();
     await exceljsWorkbook.xlsx.load(workbookBuffer);

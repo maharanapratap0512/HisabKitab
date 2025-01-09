@@ -356,7 +356,7 @@
                             </div>
                         </div>
 
-                        <table id="datatable-buttons" class="table dt-responsive" #TABLE *ngIf="aawakData.length">
+                        <table id="datatable-buttons" class="table table-sm dt-responsive" #TABLE *ngIf="aawakData.length">
                             <thead>
                                 <tr>
                                     <th style="width: 50px;">
@@ -374,7 +374,6 @@
                                     <th style="width: 250px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
                                     <th style="width: 180px;" *ngIf="settings.aawak.nimitt_id">Nimitt</th>
                                     <th *ngIf="settings.aawak.description">Description</th>
-                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -431,13 +430,12 @@
                                         </td>
                                         <td *ngIf="settings.aawak.description">{{data.description?data.description:'-'}}
                                         </td>
-                                        <td></td>
                                     </tr>
                                     <ng-container *ngIf="data.aawaks && data.aawaks.length > 0">
                                         <tr class="collapse show ribbon-box">
-                                            <td style="border: none;"></td>
+                                            <!-- <td style="border: none;"></td> -->
                                             <td colspan="10" class="sub-row">
-                                                <table class="table-bordered table-hover dt-responsive w-100 mb-4"
+                                                <table class="table-bordered table-hover dt-responsive w-100"
                                                     style="width: 99.7%;table-layout: fixed;">
                                                     <tr class="aawak-header">
                                                         <th>No.</th>

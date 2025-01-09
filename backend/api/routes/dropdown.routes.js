@@ -79,7 +79,8 @@ router.get('/all/:dept_id', async (req, res, next) => {
 //get as per department Done.
 router.get('/lot_no/:dept_id', async (req, res, next) => {
     try {
-        let lot_nos = await DB.db.prepare(`select distinct lot_no, item_id, subitem_id, aawak_source_id, aawak_type_id, qty, unit_id, rate, actual_amt, condition_id from aawak where dept_id = ${req.params.dept_id} AND lot_no IS NOT NULL`).all();
+        let conditionString = `where aawak.dept_id = ${req.params.dept_id} AND lot_no IS NOT NULL order by _id`
+        let lot_nos = await DB.db.prepare(DB.query.aawak.select_lot_no.replace('?', conditionString)).all();
         res.json({
             success: true,
             result: lot_nos

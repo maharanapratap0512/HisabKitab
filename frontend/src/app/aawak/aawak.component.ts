@@ -117,6 +117,7 @@ export class AawakComponent implements OnInit {
   // importPending: any = false;
   dictionary: any = [];
   itemSubitemMerge: any = false;
+  orderBy: any = false;
   loadingStatus: any = "मैं आत्मा शांत स्वरूप हूँ ।";
   // months: any = [{no:1, name:'January'}]
   constructor(
@@ -301,7 +302,7 @@ export class AawakComponent implements OnInit {
     this.allAJData = [];
     this.exportAJdata$ = new Subject();
 
-    this.filterBody.orderBy = "aawak.mm_id, item_categories, subitem_categories, aawak.date";
+    this.filterBody.orderBy = this.orderBy ? "aawak.mm_id, item_categories, subitem_categories, aawak.date" : null;;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -424,7 +425,7 @@ export class AawakComponent implements OnInit {
     this.exportAJdata$ = new Subject();
 
     this.filterBody.remaining_qty = true;
-    this.filterBody.orderBy = "aawak.mm_id, item_categories, subitem_categories, aawak.date";
+    this.filterBody.orderBy = this.orderBy ? "aawak.mm_id, item_categories, subitem_categories, aawak.date" : null;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -522,7 +523,7 @@ export class AawakComponent implements OnInit {
     let uniqueAawakMM = new Set();
     let uniqueUnit = new Set();
 
-    this.filterBody.orderBy = "aawak.mm_id, item_categories, subitem_categories, aawak.date";
+    this.filterBody.orderBy = this.orderBy ? "aawak.mm_id, item_categories, subitem_categories, aawak.date" : null;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -626,7 +627,7 @@ export class AawakComponent implements OnInit {
     let uniqueJawakMM = new Set();
     let uniqueUnit = new Set();
 
-    this.filterBody.orderBy = "aawak.mm_id, item_categories, subitem_categories, aawak.date";
+    this.filterBody.orderBy = this.orderBy ? "aawak.mm_id, item_categories, subitem_categories, aawak.date" : null;;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -815,6 +816,35 @@ export class AawakComponent implements OnInit {
             this.isLoader = false;
           }
         });
+      }
+    })
+  }
+
+  deleteOneJawak(i: any, j: any, id: any) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+
+        this.http.delete(this.api.getUrl('JAWAK') + '/' + id).subscribe((data: any) => {
+          if (data['success']) {
+            this.isLoader = false;
+            this.aawakData[i].remaining_qty += this.aawakData[i].jawak_detail[j].qty;
+            this.aawakData[i].jawak_detail.splice(j, 1);
+            this.toastr.success('Deleted Successfully');
+          }
+          else {
+            this.toastr.error(data['message']);
+            this.isLoader = false;
+          }
+        });
+
       }
     })
   }

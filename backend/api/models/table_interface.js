@@ -61,10 +61,42 @@ class TableInterface {
       document: null,
       is_xl: 0,
       is_auto_pd: 0,
-      hl:0,
-      is_auto:0,
-      is_process:0,
-      is_variable_qty:0,
+      hl: 0,
+      is_auto: 0,
+      is_process: 0,
+      is_variable_qty: 0,
+   }
+
+   jawak = {
+      date: null,
+      date_sent: null,
+      mm_id: null,
+      pkt_num: null,
+      lot_no: null,
+      jawak_mm_id: null,
+      pbk_id: null,
+      item_id: null,
+      subitem_id: null,
+      usage_list_id: null,
+      item_detail: null,
+      product_id: null,
+      condition_id: null,
+      company_name: null,
+      qty: null,
+      rate: null,
+      actual_amt: null,
+      aawak_source_id: null,
+      jawak_type_id: null,
+      unit_id: null,
+      description: null,
+      parchi_place: null,
+      sell_repair_place: null,
+      aawak_ref_id: null,
+      nimitt_id: null,
+      is_xl: null,
+      is_process: null,
+      dept_id: null,
+      auto_awk: 0,
    }
 
    getAawakFromProduct(product, oldAawak = null) {
@@ -77,6 +109,17 @@ class TableInterface {
          price: product.rate,
          aawak_mm_id: product.mm_id,
          item_detail: product.product_detail,
+      }
+   }
+
+   getAawakFromJawak(jwk) {
+      return {
+         ...this.aawak,
+         ...jwk,
+         mm_id: jwk.jawak_mm_id,
+         aawak_mm_id: jwk.mm_id,
+         is_auto: true,
+         hl: true
       }
    }
 

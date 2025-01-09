@@ -115,6 +115,9 @@ export class DataViewComponent implements OnInit {
       case 'jawak': this.setJawakFields();
         this.apiName = 'JAWAK';
         break;
+      case 'lot_no': this.setLotNoFields();
+        this.apiName = 'LIST';
+        break;
     }
     if (!this.importType) {
       this.importType = this.Type;
@@ -131,6 +134,13 @@ export class DataViewComponent implements OnInit {
       this.gs.observeList().subscribe((Lists: any) => {
         this.records = Lists[this.Type] ? Lists[this.Type] : []
       })
+    } else if (this.apiName == 'LIST') {
+      this.http.get(this.api.getUrl(this.apiName) + 'lot_no/' + this.auth.webUser.dept_id).subscribe((data) => {
+        if (data['result'] && data['success']) {
+          this.records = data['result'];
+        }
+        this.isLoader = false;
+      });
     } else {
       this.http.get(this.api.getUrl(this.apiName) + this.auth.webUser.dept_id).subscribe((data) => {
         if (data['result'] && data['success']) {
@@ -438,6 +448,39 @@ export class DataViewComponent implements OnInit {
       }, {
         title: "Nimitt",
         columns: ["nimitt_hin"]
+      }
+    ]
+  }
+
+  setLotNoFields() {
+    this.fields = [
+      {
+        title: "Date",
+        columns: ["date"]
+      }, {
+        title: "Lot No.",
+        columns: ["lot_no"]
+      }, {
+        title: "MM",
+        columns: ["mm_hin"]
+      }, {
+        title: "Aawak MM",
+        columns: ["aawak_mm_hin"]
+      }, {
+        title: "Item - Subitem",
+        columns: ["item_hin", "subitem_hin"]
+      }, {
+        title: "Qty",
+        columns: ["qty", "unit_short"]
+      }, {
+        title: "Rate",
+        columns: ["rate"]
+      }, {
+        title: "Aawak Source",
+        columns: ["aawak_source_hin"]
+      }, {
+        title: "Aawak Type",
+        columns: ["aawak_type_hin"]
       }
     ]
   }

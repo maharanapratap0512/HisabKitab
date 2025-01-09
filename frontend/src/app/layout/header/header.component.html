@@ -12,7 +12,7 @@
             <span class="hk-title">
                <span class="hk mx-2"><strong><u>HISAB KITAB</u></strong>
                </span>
-               <span>(v21.1)</span>
+               <span>(v21.2)</span>
             </span>
          </a>
          <!-- <a routerLink="dashboard" class="topnav-logo">
@@ -237,6 +237,8 @@
                            routerLink="nimitt">Nimitt</a> -->
                         <!-- <a class="dropdown-item" *ngIf="settings.item.visible" routerLinkActive="active"
                            routerLink="item">Item</a> -->
+                        <a class="dropdown-item text-info" *ngIf="settings.aawak.lot_no" routerLinkActive="active"
+                           [routerLink]="['view', 'lot_no']">LOT Nos</a>
                         <a class="dropdown-item" *ngIf="settings.category.visible" routerLinkActive="active"
                            routerLink="category">Category</a>
                         <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'unit']">Unit</a>

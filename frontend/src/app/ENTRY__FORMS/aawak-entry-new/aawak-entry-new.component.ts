@@ -42,6 +42,7 @@ export class AawakEntryNewComponent implements OnInit {
   settings: any = {};
   imagepath: any;
   imageIndex: any = null;
+  lotNoAll: any = [];
   lotNos: any = [];
   keyword: any = 'lot_no';
 
@@ -100,15 +101,16 @@ export class AawakEntryNewComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
-    if(this.isEdit){
+    if (this.isEdit) {
       this.fs.reset();
     }
-    
+
   }
 
   selectEvent(ev: any, index: any) {
     if (ev.lot_no) {
       this.fs.aawakFormMain.aawaks[index].item_id = ev.item_id;
+      this.itemSelected(ev.item_id, index);
       this.fs.aawakFormMain.aawaks[index].subitem_id = ev.subitem_id;
       this.fs.aawakFormMain.aawaks[index].condition_id = ev.condition_id;
       this.fs.aawakFormMain.aawaks[index].aawak_source_id = ev.aawak_source_id;
@@ -141,6 +143,7 @@ export class AawakEntryNewComponent implements OnInit {
 
   getLotNo() {
     this.http.get(this.api.getUrl('LIST') + 'lot_no/' + this.auth.webUser.dept_id).subscribe((data: any) => {
+      this.lotNoAll = data['result'] || [];
       this.lotNos = data['result'] || [];
     })
   }
@@ -216,7 +219,7 @@ export class AawakEntryNewComponent implements OnInit {
   itemSelected(ev: any, i: any) {
     if (ev) {
       let item = this.items.find((i: { _id: any; }) => i._id == ev);
-
+      this.lotNos = this.lotNoAll.filter((l: { item_id: any; }) => l.item_id == ev);
       this.getProductData(ev);
       // this.subitems = item.subitems || [];
       this.fs.aawakFormMain.aawaks[i].subitems = item.subitems || [];
@@ -226,23 +229,29 @@ export class AawakEntryNewComponent implements OnInit {
     }
     else {
       this.subitems = [];
+      this.lotNos = this.lotNoAll;
       this.fs.aawakFormMain.aawaks[i].unit_id = null
       this.fs.aawakFormMain.aawaks[i].subitem_id = null
+      this.fs.aawakFormMain.aawaks[i].lot_no = null;
     }
   }
 
   subitemSelected(ev: any, i: any) {
     if (ev) {
       let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
+      this.lotNos = this.lotNos.filter((l: { subitem_id: any; }) => l.subitem_id == ev);
       this.products = this.products.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
       if (!this.isEdit && subitem)
-        this.fs.aawakFormMain.aawaks[i].unit_id = subitem.unit_id; 
+        this.fs.aawakFormMain.aawaks[i].unit_id = subitem.unit_id;
     }
     else {
       if (this.fs.aawakFormMain.aawaks[i].item_id) {
         this.products = this.getProductData(this.fs.aawakFormMain.aawaks[i].item_id);
+        this.lotNos = this.lotNoAll.filter((l: { item_id: any; }) => l.item_id == this.fs.aawakFormMain.aawaks[i].item_id);
       } else {
         this.products = []
+        this.lotNos = this.lotNoAll;
+        this.fs.aawakFormMain.aawaks[i].lot_no = null;
       }
     }
   }

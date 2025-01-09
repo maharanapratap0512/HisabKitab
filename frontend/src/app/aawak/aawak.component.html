@@ -71,9 +71,15 @@
                               <a class="dropdown-item" (click)="exportJawakData()">Jawak Only</a>
                               <a class="dropdown-item" (click)="exportPendingData()">Pending Destribution</a>
                            </div>
-                           <div class="form-check form-checkbox-primary ms-1">
-                              <input type="checkbox" class="form-check-input" id="chkMergeIS" [(ngModel)]="itemSubitemMerge">
-                              <label class="form-check-label" for="chkMergeIS">Merge Item-Subitem</label>
+                           <div class="d-flex">
+                              <div class="form-check form-checkbox-primary ms-1" title="click to merge item & subitem column">
+                                 <input type="checkbox" class="form-check-input" id="chkMergeIS" [(ngModel)]="itemSubitemMerge">
+                                 <label class="form-check-label" for="chkMergeIS">Merge</label>
+                              </div>
+                              <div class="form-check form-checkbox-primary ms-1" title="click to order by MM & category">
+                                 <input type="checkbox" class="form-check-input" id="chkOrderBy" [(ngModel)]="orderBy">
+                                 <label class="form-check-label" for="chkOrderBy">Sorting</label>
+                              </div>
                            </div>
                         </div>
 
@@ -491,8 +497,9 @@
                                           <td style="width: 80px;">
                                              <i class="uil-corner-down-right"></i>
                                              <span class="mx-1">{{j+1}}</span>
+                                             <i class="uil uil-trash text-danger" (click)="deleteOneJawak(i, j, jwk._id)"></i>
                                           </td>
-                                          <td>{{jwk.date}}</td>
+                                          <td>{{jwk.date | date:'dd-MM-yyyy'}}</td>
                                           <td>{{jwk.jawak_mm_hin}} {{jwk.jawak_mm_code ? "("+jwk.jawak_mm_code+")" :
                                              ''}}</td>
                                           <td>{{jwk.nimitt_hin}} {{jwk.nimitt_state_hin ?

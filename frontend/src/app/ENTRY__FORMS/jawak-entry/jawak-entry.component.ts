@@ -35,10 +35,12 @@ export class JawakEntryComponent implements OnInit {
   subitems: any = [];
   items: any = [];
   jawak_types: any = [];
+  aawak_types: any = [];
   units: any = [];
   nimitts: any = [];
   states: any = [];
   categories: any = [];
+  usage_lists: any = [];
   remaining_qty: any;
   ref_id: any = null;
   cat: any;
@@ -56,13 +58,15 @@ export class JawakEntryComponent implements OnInit {
     this.settings = this.auth.webUser.settings;
     this.jawakForm = this.fb.group({
       date: [null, Validators.required],
+      date_sent: [null],
       mm_id: [null, Validators.required],
       pkt_num: [null],
+      lot_no: [null],
       jawak_mm_id: [null],
       pbk_id: [null],
       item_id: [null, Validators.required],
       subitem_id: [null],
-      usage_category_id: [null],
+      usage_list_id: [null],
       item_detail: [null],
       product_id: [null],
       condition_id: [null],
@@ -70,6 +74,7 @@ export class JawakEntryComponent implements OnInit {
       qty: [null, Validators.required],
       rate: [null],
       actual_amt: [null],
+      aawak_source_id: [null],
       jawak_type_id: [null, Validators.required],
       unit_id: [null, Validators.required],
       unit_short: '',
@@ -79,21 +84,28 @@ export class JawakEntryComponent implements OnInit {
       aawak_ref_id: [null],
       nimitt_id: [null],
       is_xl: [null],
+      is_process: [null],
       dept_id: [this.auth.webUser.dept_id],
-      auto_awk: [this.settings.jawak.auto_awk]
+      auto_awk: [this.settings.jawak.auto_awk],
+      aawak_type_id: [null],
+      aawak_dept_id: [this.auth.webUser.dept_id],
     });
 
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];
       this.jawak_types = result.jawak_type ? result.jawak_type : [];
+      this.aawak_types = result.aawak_type ? result.aawak_type : [];
       this.items = result.itemmix ? result.itemmix : [];
       this.categories = result.category ? result.category : [];
       this.units = result.unit ? result.unit : [];
+      this.usage_lists = result.usage_list ? result.usage_list : [];
       this.pbks = result.pbk ? result.pbk : [];
       this.states = result.state ? result.state : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
+
+    this.getDepartments();
 
   }
 
@@ -107,13 +119,15 @@ export class JawakEntryComponent implements OnInit {
     if (changes.getData && changes.getData.currentValue) {
       this.jawakForm.patchValue({
         date: changes.getData.currentValue.date,
+        date_sent: changes.getData.currentValue.date_sent || null,
         mm_id: changes.getData.currentValue.mm_id,
         pkt_num: changes.getData.currentValue.pkt_num,
+        lot_no: changes.getData.currentValue.lot_no || null,
         jawak_mm_id: changes.getData.currentValue.jawak_mm_id,
         pbk_id: changes.getData.currentValue.pbk_id,
         item_id: changes.getData.currentValue.item_id,
         subitem_id: changes.getData.currentValue.subitem_id,
-        usage_category_id: changes.getData.currentValue.usage_category_id,
+        usage_list_id: changes.getData.currentValue.usage_list_id,
         item_detail: changes.getData.currentValue.item_detail,
         product_id: changes.getData.currentValue.product_id,
         condition_id: changes.getData.currentValue.condition_id,
@@ -122,6 +136,7 @@ export class JawakEntryComponent implements OnInit {
         actual_amt: changes.getData.currentValue.actual_amt ? changes.getData.currentValue.actual_amt : null,
         company_name: changes.getData.currentValue.company_name,
         jawak_type_id: changes.getData.currentValue.jawak_type_id,
+        aawak_source_id: changes.getData.currentValue.aawak_source_id || null,
         unit_id: changes.getData.currentValue.unit_id,
         description: changes.getData.currentValue.description,
         parchi_place: changes.getData.currentValue.parchi_place ? changes.getData.currentValue.parchi_place : null,
@@ -130,6 +145,7 @@ export class JawakEntryComponent implements OnInit {
         nimitt_id: changes.getData.currentValue.nimitt_id,
         dept_id: changes.getData.currentValue.dept_id,
         is_xl: changes.getData.currentValue.is_xl ? changes.getData.currentValue.is_xl : 0,
+        is_process: changes.getData.currentValue.is_process ? changes.getData.currentValue.is_process : 0,
         unit_short: changes.getData.currentValue.unit_short
       });
 
@@ -150,6 +166,8 @@ export class JawakEntryComponent implements OnInit {
       this.aawakRef = changes.aawakRef.currentValue;
       this.jawakForm.patchValue({
         date: this.aawakRef.date,
+        date_sent: this.aawakRef.date,
+        lot_no: this.aawakRef.lot_no,
         mm_id: this.aawakRef.mm_id,
         item_id: this.aawakRef.item_id,
         subitem_id: this.aawakRef.subitem_id,
@@ -161,6 +179,7 @@ export class JawakEntryComponent implements OnInit {
         rate: this.aawakRef.rate ? this.aawakRef.rate : null,
         actual_amt: this.aawakRef.actual_amt ? this.aawakRef.actual_amt : null,
         unit_id: this.aawakRef.unit_id,
+        aawak_source_id: this.aawakRef.aawak_source_id,
         description: this.aawakRef.description,
         parchi_place: this.aawakRef.parchi_place ? this.aawakRef.parchi_place : null,
         sell_repair_place: this.aawakRef.sell_repair_place ? this.aawakRef.sell_repair_place : null,
@@ -172,6 +191,12 @@ export class JawakEntryComponent implements OnInit {
       });
     }
 
+  }
+
+  getDepartments() {
+    this.http.get(this.api.getUrl('DEPT')).subscribe((data: any) => {
+      this.departments = data['result'] || [];
+    })
   }
 
   loadProduct() {

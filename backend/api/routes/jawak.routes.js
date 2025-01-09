@@ -116,15 +116,16 @@ router.post('/new/:dept_id', async (req, res, next) => {
             await Fn.begin();
             await Fn.insertAJ(req.body, 'jawak').then(async (resolve) => {
                 if (resolve) {
-                    let awk = {
-                        
+                    if (req.body.auto_awk) {
+                        let awk = DB.tbInterface.getAawakFromJawak(req.body);
+                        awk.dept_id = req.body.aawak_dept_id;
+                        awk.aawak_type_id = req.body.aawak_type_id;
+                        awk.description = "Automatic Entry from Jawak."
+                        await Fn.insertAJ(awk, 'aawak').then(async (rs) => {
+                        });
                     }
-                    await Fn.insertAJ().then(async(resolve)=>{
-
-                    }, (reject)=>{
-
-                    });
                     await DB.getById('jawak', resolve, { full: true }).then(async (data) => {
+                        await Fn.commit();
                         res.json({
                             result: data || {},
                             success: true

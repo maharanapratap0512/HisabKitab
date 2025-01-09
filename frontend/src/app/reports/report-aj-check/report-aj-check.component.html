@@ -4,7 +4,7 @@
             <div class="container-fluid">
 
                 <div class="row">
-                    <div class="card-header">Report Aawak Jawak Check (Under Construction)</div>
+                    <div class="card-header">Report Aawak Jawak Check (Under Review)</div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-2 mb-2">
@@ -109,18 +109,7 @@
                                         Reports</button>
                                 </div>
                             </div>
-                            <div class="col-md-2 mb-2 mt-3">
-                                <div class="form-group">
-                                    <label class="form-label"></label>
-                                    <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
-                                        data-bs-toggle="dropdown" aria-expanded="false"> Export Data </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" (click)="exportToExcelHin()">To Excel (Hin)</a>
-                                        <a class="dropdown-item" (click)="exportToExcelEng()">To Excel (Eng)</a>
-                                        <a class="dropdown-item" (click)="exportToPDF()">To PDF (Eng)</a>
-                                    </div>
-                                </div>
-                            </div>
+
                             <!-- <div class="col-md-2 mb-2 mt-3">
                                 <button type="button" style="font-weight: 700 !important;"
                                     class="btn btn-light w-100">Total
@@ -133,86 +122,210 @@
 
                 <div class="row">
                     <div class="card-body" style="overflow: auto;">
-                        <div class="row mb-2">
+                        <div class="row mb-2" *ngIf="aawaks.length || jawaks.length">
                             <ul class="nav nav-pills bg-nav-pills nav-justified mb-3">
                                 <li class="nav-item">
                                     <a href="#aawak-report" data-bs-toggle="tab" aria-expanded="false"
                                         class="nav-link rounded-0 active">
-                                        <span class="d-none d-lg-block">Aawak Reports</span>
+                                        <span class="d-none d-lg-block">
+                                            Aawak Reports <span
+                                                class="badge bg-light text-dark">{{aawaks.length}}</span>
+                                        </span>
+
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="#jawak-report" data-bs-toggle="tab" aria-expanded="true"
                                         class="nav-link rounded-0">
-                                        <span class="d-none d-lg-block">Jawak Reports</span>
+                                        <span class="d-none d-lg-block">
+                                            Jawak Reports
+                                            <span class="badge bg-light text-dark">{{jawaks.length}}</span>
+                                        </span>
                                     </a>
                                 </li>
                             </ul>
                         </div>
 
+                        <div class="row mb-2" *ngIf="!aawaks.length && !jawaks.length">
+                            <div class="card card-body">
+                                <div class="row">
+                                    <h3>इस्तमाल करने का तरीका</h3>
+                                    <ul>
+                                        <li>अपने आवश्यकता के अनुसार तारीख, मिनीमधुबन, आइटम-सबआइटम, आवक-जावक टाइप वगेराह
+                                            सिलेक्ट करे। 
+                                            कम से कम एक मिनीमधुबन सिलेक्ट करना अनिवार्य है। जो लाल बॉर्डर मे दिख रहा है।
+                                        </li>
+                                        <li>फिर Generate Report बटन दबाए । नीचे 'Aawak Report' & 'Jawak Report' नाम से
+                                            Tab दिखाई देगी, साथ मे कितनी एंट्री आई है उसका नंबर भी शो होगा। 
+                                            'Aawak Report' & 'Jawak Report' पर क्लिक करने से नीचे टेबल मे वो एंट्रीस
+                                            दिखाई देगी।
+                                        </li>
+                                        <li>टेबल के ऊपर दिए गए सर्च बार के द्वारा आप कोई भी शब्द सर्च कर सकते है, सिर्फ
+                                            लिखने मात्र से सर्च अपने आप होता रहता है। 
+                                            साथ मे रखे Export Data ड्रॉपडाउन के माध्यम से आवक & आवक जावक दोनों को इक्सेल
+                                            मे एक्सपोर्ट कर सकते है ।
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="tab-content">
 
                             <!-- Aawak Report-->
-                            <div class="tab-pane active" id="aawak-report">
+                            <div class="tab-pane active" id="aawak-report" *ngIf="aawaks.length">
                                 <div class="row mb-2">
                                     <div class="col-5">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="termAawak"
-                                                name="search">
+                                            <input type="text" class="form-control" placeholder="Search Here"
+                                                [(ngModel)]="termAawak" name="search">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 mb-2">
+                                        <div class="form-group">
+                                            <label class="form-label"></label>
+                                            <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                                                data-bs-toggle="dropdown" aria-expanded="false"> Export Data </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" (click)="exportToExcel('aawak')">Aawak Only
+                                                    (Hin)</a>
+                                                <a class="dropdown-item" (click)="exportToExcel()">Aawak Jawak Both</a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <table id="tbl" #tbl class="table dt-responsive">
+                                <table id="tbl" #tbl class="table table-sm table-striped table-bordered dt-responsive">
                                     <thead>
                                         <tr>
                                             <td style="width: 70px;">No.</td>
-                                            <td style="width: 100px;">Department</td>
-                                            <td>Category</td>
-                                            <td>Item</td>
+                                            <td style="width: 100px;">Date</td>
+                                            <td *ngIf="settings.aawak.lot_no">Lot No</td>
+                                            <td *ngIf="settings.aawak.pkt_num">Pkt num</td>
+                                            <td>Aawak MM</td>
+                                            <td *ngIf="settings.aawak.pbk_id">Aawak PBK</td>
+                                            <td>Item - Subitem</td>
+                                            <td *ngIf="settings.aawak.condition_id">Condition</td>
+                                            <td>Quantity</td>
+                                            <td *ngIf="settings.aawak.rate">Rate</td>
+                                            <td *ngIf="settings.aawak.actual_amt">Amount</td>
+                                            <td *ngIf="settings.aawak.aawak_source_id">Aawak Source</td>
                                             <td>Aawak Type</td>
-                                            <ng-container *ngIf="monthsSel.length <= 0">
-                                                <td>Total Qty</td>
-                                            </ng-container>
-                                            <ng-container *ngIf="monthsSel.length > 0">
-                                                <th class="center-header" *ngFor="let row of monthsSel">
-                                                    {{row.name + " - " + filterBody.year }}
-                                                </th>
-                                            </ng-container>
-        
+                                            <td *ngIf="settings.aawak.usage_list_id">Usage List</td>
+                                            <td *ngIf="settings.aawak.item_detail">Item Detail</td>
+                                            <td *ngIf="settings.aawak.description">Description</td>
                                         </tr>
-        
+
                                     </thead>
                                     <tbody>
-                                        <ng-container *ngFor="let data of reportData | search: term; let i = index;">
-                                            <tr>
-                                                <td style="width: 70px;">{{i+1}}</td>
-                                                <td style="width: 100px;">{{data.dept_hin}} : {{data.dept_code}}</td>
-                                                <td>{{data.categories_eng ? data.categories_eng : data.categories_hin}}</td>
-                                                <td>
-                                                    {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}}<br />
-                                                    {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
-                                                </td>
-                                                <td>
-                                                    {{data.aawak_type_hin}} {{data.aawak_type_eng ? " : " + data.aawak_type_eng
-                                                    : ""}}
-                                                </td>
-                                                <ng-container *ngIf="monthsSel.length > 0">
-                                                    <ng-container *ngFor="let row of monthsSel; let j = index;">
-                                                        <td>
-                                                            <span [ngClass]="{'error': data.arr_sum_qty[j] < 0}">
-                                                                {{data.arr_sum_qty[j]}} {{data.unit_short}}
-                                                            </span>
-                                                        </td>
-                                                    </ng-container>
-                                                </ng-container>
-                                            </tr>
-                                        </ng-container>
+                                        <tr *ngFor="let data of aawaks | search: termAawak; let i = index;">
+                                            <td>{{i+1}}</td>
+                                            <td>{{data.date | date:'dd-MM-yyyy'}}</td>
+                                            <td *ngIf="settings.aawak.lot_no">{{data.lot_no}}</td>
+                                            <td *ngIf="settings.aawak.pkt_num">{{data.pkt_num ? data.pkt_num : ''}}</td>
+                                            <td>{{data.aawak_mm_id ? data.aawak_mm_hin : ''}}</td>
+                                            <td *ngIf="settings.aawak.pbk_id">{{data.pbk_id ? (data.roll_no ?
+                                                data.roll_no + '-' : '') +
+                                                data.pbk_hin : ''}}</td>
+                                            <td>{{data.item_hin}}
+                                                {{ data.subitem_id ? ' - ' + data.subitem_hin : ''}}
+                                            </td>
+                                            <td *ngIf="settings.aawak.condition_id">{{data.condition_id ?
+                                                data.condition_hin : ''}}</td>
+                                            <td>{{data.qty}} {{data.unit_short}}</td>
+                                            <td *ngIf="settings.aawak.rate">{{data.rate ? data.rate : ''}}</td>
+                                            <td *ngIf="settings.aawak.actual_amt">{{data.actual_amt ? data.actual_amt :
+                                                ''}}</td>
+                                            <td *ngIf="settings.aawak.aawak_source_id">{{data.aawak_source_id ?
+                                                data.aawak_source_hin : ''}}</td>
+                                            <td>{{data.aawak_type_id ? data.aawak_type_hin :
+                                                ''}}</td>
+                                            <td *ngIf="settings.aawak.usage_list_id ">{{data.usage_list_id ?
+                                                data.usage_list_hin : ''}}</td>
+                                            <td *ngIf="settings.aawak.item_detail">{{data.item_detail ? data.item_detail
+                                                : ''}}</td>
+                                            <td *ngIf="settings.aawak.description">{{data.description ? data.description
+                                                : ''}}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
 
                             <!-- Jawak Report-->
-                            <div class="tab-pane active" id="jawak-report">
+                            <div class="tab-pane" id="jawak-report" *ngIf="jawaks.length">
+                                <div class="row mb-2">
+                                    <div class="col-5">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Here"
+                                                [(ngModel)]="termJawak" name="search">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 mb-2">
+                                        <div class="form-group">
+                                            <label class="form-label"></label>
+                                            <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                                                data-bs-toggle="dropdown" aria-expanded="false"> Export Data </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" (click)="exportToExcel('jawak')">Jawak Only
+                                                    (Hin)</a>
+                                                <a class="dropdown-item" (click)="exportToExcel()">Aawak Jawak Both</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <table id="tbl" #tbl class="table table-sm table-striped table-bordered dt-responsive">
+                                    <thead>
+                                        <tr>
+                                            <td style="width: 70px;">No.</td>
+                                            <td style="width: 100px;">Date</td>
+                                            <td *ngIf="settings.jawak.lot_no">Lot No</td>
+                                            <td *ngIf="settings.jawak.pkt_num">Pkt num</td>
+                                            <td>Jawak MM</td>
+                                            <td *ngIf="settings.jawak.pbk_id">Jawak PBK</td>
+                                            <td>Item - Subitem</td>
+                                            <td *ngIf="settings.jawak.condition_id">Condition</td>
+                                            <td>Quantity</td>
+                                            <td *ngIf="settings.jawak.rate">Rate</td>
+                                            <td *ngIf="settings.jawak.actual_amt">Amount</td>
+                                            <td *ngIf="settings.jawak.aawak_source_id">Aawak Source</td>
+                                            <td>Jawak Type</td>
+                                            <td *ngIf="settings.jawak.usage_list_id">Usage List</td>
+                                            <td *ngIf="settings.jawak.item_detail">Item Detail</td>
+                                            <td *ngIf="settings.jawak.description">Description</td>
+                                        </tr>
+
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let data of jawaks | search: termJawak; let i = index;">
+                                            <td>{{i+1}}</td>
+                                            <td>{{data.date | date:'dd-MM-yyyy'}}</td>
+                                            <td *ngIf="settings.jawak.lot_no">{{data.lot_no}}</td>
+                                            <td *ngIf="settings.jawak.pkt_num">{{data.pkt_num ? data.pkt_num : ''}}</td>
+                                            <td>{{data.jawak_mm_id ? data.jawak_mm_hin : ''}}</td>
+                                            <td *ngIf="settings.jawak.pbk_id">{{data.pbk_id ? data.roll_no + '-' +
+                                                data.pbk_hin : ''}}</td>
+                                            <td>{{data.item_hin}}
+                                                {{ data.subitem_id ? + ' - ' + data.subitem_hin : ''}}
+                                            </td>
+                                            <td *ngIf="settings.jawak.condition_id">{{data.condition_id ?
+                                                data.condition_hin : ''}}</td>
+                                            <td>{{data.qty}} {{data.unit_short}}</td>
+                                            <td *ngIf="settings.jawak.rate">{{data.rate ? data.rate : ''}}</td>
+                                            <td *ngIf="settings.jawak.actual_amt">{{data.actual_amt ? data.actual_amt :
+                                                ''}}</td>
+                                            <td *ngIf="settings.jawak.aawak_source_id">{{data.aawak_source_id ?
+                                                data.aawak_source_hin : ''}}</td>
+                                            <td>{{data.jawak_type_id ? data.jawak_type_hin :
+                                                ''}}</td>
+                                            <td *ngIf="settings.jawak.usage_list_id ">{{data.usage_list_id ?
+                                                data.usage_list_hin : ''}}</td>
+                                            <td *ngIf="settings.jawak.item_detail">{{data.item_detail ? data.item_detail
+                                                : ''}}</td>
+                                            <td *ngIf="settings.jawak.description">{{data.description ? data.description
+                                                : ''}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

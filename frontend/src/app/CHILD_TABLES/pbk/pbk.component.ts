@@ -184,6 +184,7 @@ export class PbkComponent implements OnInit {
         "address": this.pbkData[i].address,
         "townarea": this.pbkData[i].townarea,
         "state": this.pbkData[i].state_hin,
+        "country": this.pbkData[i].country_hin,
         "city": this.pbkData[i].city_hin,
         "mobile no": this.pbkData[i].mo_no,
         "alt mobile no": this.pbkData[i].alt_mo_no,
