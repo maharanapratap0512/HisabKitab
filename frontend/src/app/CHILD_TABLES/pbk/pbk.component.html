@@ -184,8 +184,8 @@
                               <button *ngIf="settings.delete" class="btn btn-sm btn-danger" type="button"
                                  (click)="delete(i,data._id)">
                                  <i class="uil-trash"></i></button>
-                              <span *ngIf="!settings.edit && !settings.delete"
-                                 data-toggle="tooltip" title="Protected" class="text-warning mx-1"
+                              <span *ngIf="!settings.edit && !settings.delete" data-toggle="tooltip" title="Protected"
+                                 class="text-warning mx-1"
                                  style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                  <i class="uil-shield-check"></i>
                               </span>
@@ -201,7 +201,7 @@
                            <td *ngIf="settings.relation || settings.relative_name">
                               {{data.relation}}<br>{{data.relative_name}}</td>
                            <td>{{data.gender}}</td>
-                           <td *ngIf="settings.birth_date"> {{data.birth_date | date:'dd-MM-yyyy'}}
+                           <td *ngIf="settings.birth_date"> {{data.birth_date ? data.birth_date : ''}}
                               <br>{{data.age?'Age : '+data.age:'-'}}
                            </td>
                            <!-- <td >{{data.status}}</td> -->
@@ -220,7 +220,9 @@
                               {{data.mm_hin?data.mm_hin :'-'}} <br> {{data.mm_eng?data.mm_eng :''}} <br>
                               {{data.mm_code?data.mm_code:''}}
                            </td>
-                           <td *ngIf="settings.bhatti_date">{{data.bhatti_date | date:'MM-yyyy'}}</td>
+                           <td *ngIf="settings.bhatti_date">{{data.bhatti_date ? data.bhatti_date:
+                              ''}}
+                           </td>
                         </tr>
                      </tbody>
                   </table>
