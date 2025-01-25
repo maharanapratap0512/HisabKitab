@@ -263,17 +263,21 @@ export class ExcelExportService {
       }
 
       if (jwklength > 1) {
-        worksheet.mergeCells((rowNum - jwklength + 2), 1, rowNum, awkendcell);
-        worksheet.getCell((rowNum - jwklength + 2), 1).value = '-';
+        for (let i = 0; i < awkendcell; i++) {
+          worksheet.mergeCells((rowNum - jwklength + 1), 1 + i, rowNum, 1 + i);
+        }
+        worksheet.mergeCells((rowNum - jwklength + 1), jwkendcell, rowNum, jwkendcell);
       }
 
+      worksheet.getCell(rowNum, jwkendcell).font = {
+        name: 'Arial Black',
+        color: { argb: 'FFFF0000' },
+        family: 2,
+        size: 12
+      };
+
       for (let i = 0; i < jwkendcell; i++) {
-        worksheet.getCell(rowNum, awkendcell + 1 + i).font = {
-          name: 'Arial Black',
-          color: { argb: 'FFFF0000' },
-          family: 2,
-          size: 12
-        };
+
       }
     });
 

@@ -328,26 +328,12 @@ export class AawakComponent implements OnInit {
             'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
             'Kaha Repaired/Becha': result[i].jawak_detail[j].sell_repair_place ? result[i].jawak_detail[j].sell_repair_place : '-',
             'Parchi Kaha': result[i].jawak_detail[j].parchi_place ? result[i].jawak_detail[j].parchi_place : '-',
+            'Bachat': (result[i].remaining_qty ? result[i].remaining_qty : 0) + '-' + (result[i].unit_id ? result[i].unit_short : '-'),
             // 'Bachat': bachat
           });
           // jwkFooter['Qty'] += result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : 0;
           jwkFooter['Amount'] += result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : 0;
         }
-        jawakArray.push({
-          'Date': '-',
-          'Pkt No': '-',
-          'Jawak MM': '-',
-          'Jawak Category': '-',
-          'Jawak Detail': '-',
-          'Kisko Diya': 'बचत =>',
-          'Jawak Type': '-',
-          'Qty': result[i].remaining_qty ? result[i].remaining_qty : 0,
-          'Unit': result[i].unit_id ? result[i].unit_short : '-',
-          'Rate': 'Total',
-          'Amount': jwkFooter['Amount'],
-          'Kaha Repaired/Becha': '-',
-          'Parchi Kaha': '-',
-        });
         let awkObj: any = {
           'No': i + 1,
           'Date': result[i].date ? this.gs.formatDisplayDate(result[i].date) : '-',
@@ -432,17 +418,31 @@ export class AawakComponent implements OnInit {
 
       for (let i = 0; i < result.length; i++) {
         let jawakArray = [];
-        jawakArray.push({
-          'Date': '-',
-          'Pkt No': '-',
-          'Jawak MM': '-',
-          'Jawak Category': '-',
-          'Jawak Detail': '-',
-          'Kisko Diya': 'बचत =>',
-          'Jawak Type': '-',
-          'Qty': result[i].remaining_qty ? result[i].remaining_qty : 0,
-          'Unit': result[i].unit_id ? result[i].unit_short : '-',
-        });
+        let jwkFooter: any = {
+          'Qty': 0,
+          'Amount': 0
+        };
+        for (let j in result[i].jawak_detail) {
+          jawakArray.push({
+            'Date': result[i].jawak_detail[j].date ? this.gs.formatDisplayDate(result[i].jawak_detail[j].date) : '-',
+            'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
+            'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
+            'Jawak Category': result[i].jawak_detail[j].usage_category_id ? result[i].jawak_detail[j].category_hin : '-',
+            'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
+            'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
+            'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
+            'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+            'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
+            'Rate': result[i].jawak_detail[j].rate ? result[i].jawak_detail[j].rate : '-',
+            'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
+            'Kaha Repaired/Becha': result[i].jawak_detail[j].sell_repair_place ? result[i].jawak_detail[j].sell_repair_place : '-',
+            'Parchi Kaha': result[i].jawak_detail[j].parchi_place ? result[i].jawak_detail[j].parchi_place : '-',
+            'Bachat': (result[i].remaining_qty ? result[i].remaining_qty : 0) + '-' + (result[i].unit_id ? result[i].unit_short : '-'),
+            // 'Bachat': bachat
+          });
+          // jwkFooter['Qty'] += result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : 0;
+          jwkFooter['Amount'] += result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : 0;
+        }
         let awkObj: any = {
           '_id': result[i]._id,
           'No': i + 1,
