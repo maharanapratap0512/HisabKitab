@@ -302,7 +302,7 @@ export class AawakComponent implements OnInit {
     this.allAJData = [];
     this.exportAJdata$ = new Subject();
 
-    this.filterBody.orderBy = this.orderBy ? "aawak.zone_hin, aawak.mm_hin, item_categories, subitem_categories, item_hin, aawak.date" : null;
+    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm.mm_hin, item_categories, subitem_categories, item_hin, aawak.date" : null;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
