@@ -3,34 +3,34 @@
     padding: 2px 0px 10px 0px;
 }
 
-.main-row {
-    margin-bottom: 1rem;
-    padding-left: 60px;
-    background-color: #2c2c2c;
-    border-top: 2px solid #4caf50;
-}
+// .main-row {
+//     margin-bottom: 1rem;
+//     padding-left: 60px;
+//     background-color: #2c2c2c;
+//     border-top: 2px solid #4caf50;
+// }
 
 
-.main-row:hover {
-    --bs-table-accent-bg: rgba(170, 170, 170, 0.1);
-    /* --bs-table-accent-bg: var(--bs-table-hover-bg); */
-    color: white;
-    transition: transform 0.2s ease;
-    transform: scale(100.5%);
-}
+// .main-row:hover {
+//     --bs-table-accent-bg: rgba(170, 170, 170, 0.1);
+//     /* --bs-table-accent-bg: var(--bs-table-hover-bg); */
+//     color: white;
+//     transition: transform 0.2s ease;
+//     transform: scale(100.5%);
+// }
 
 .aawak-header {
     border-bottom: #4caf50;
 }
 
-.aawak-row:hover {
-    background-color: rgba(170, 170, 170, 0.1);
-    /* --bs-table-accent-bg: var(--bs-table-hover-bg); */
-    color: white;
-    transition: transform 0.2s ease;
-    transform: scale(100.5%);
-    cursor: help;
-}
+// .aawak-row:hover {
+//     background-color: rgba(170, 170, 170, 0.1);
+//     /* --bs-table-accent-bg: var(--bs-table-hover-bg); */
+//     color: white;
+//     transition: transform 0.2s ease;
+//     transform: scale(100.5%);
+//     cursor: help;
+// }
 
 uil-pen:hover {
     color: #38839a !important;
@@ -74,6 +74,7 @@ uil-trash:hover {
     padding-top: 0.3rem;
     font-size: smaller;
     cursor: pointer;
+    margin-bottom: 1rem;
 }
 
 .chk-sm {

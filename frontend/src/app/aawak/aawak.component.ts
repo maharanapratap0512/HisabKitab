@@ -1103,7 +1103,8 @@ export class AawakComponent implements OnInit {
                 break;
               case "pkt no":
               case "pkt num":
-              case "pkt_num":
+              case "parchi":
+              case "Parchi no.":
               case "pkt": obj.pkt_num = exceldata[i][j] ? exceldata[i][j].toString() : exceldata[i][j];
                 break;
               case "roll no":
