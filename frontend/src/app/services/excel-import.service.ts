@@ -16,6 +16,7 @@ export class ExcelImportService {
     { name: 'product', autoUpdate: true },
     { name: 'support_list', autoUpdate: true, note: 'list_type should be aawak_type, jawak_type, gender, relation, condition. MUST BE same spelling, lower case.' },
     { name: 'category', autoUpdate: true },
+    { name: 'district', autoUpdate: true },
   ];
   config: any = {
     vehicle: [
@@ -137,7 +138,12 @@ export class ExcelImportService {
       { col_name: 'category_eng', name: 'category_eng', alt_names: ['category eng'], not_null: false },
       { col_name: 'category_hin', name: 'category_hin', alt_names: ['category hin'], not_null: true },
       { col_name: 'category_roman', name: 'category_roman', alt_names: ['category roman'], not_null: false },
-    ]
+    ],
+    district: [
+      { col_name: 'district_hin', name: 'district_hin', alt_names: ["district hin", "namehin"], not_null: true, },
+      { col_name: 'district_eng', name: 'district_eng', alt_names: ["district eng", "nameeng"], not_null: true, },
+      { col_name: 'state', name: 'state', alt_names: ["स्टेट", "राज्य"], not_null: true, ref_table: 'state', ref_field: 'state_id', ref_data: 'state_hin' },
+    ],
 
   }
   constructor() { }

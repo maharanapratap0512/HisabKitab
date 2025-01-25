@@ -393,7 +393,7 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
                         }
 
                         if (data[i].status == 3) {
-                            if(tblname != 'department_config'){
+                            if (tblname != 'department_config') {
                                 DB.delete(tblname, data[i]._id).then((del_res) => {
                                     if (del_res) {
                                         delete_entries.push(data[i]);
@@ -481,7 +481,9 @@ router.post('/', async (req, res, next) => {
                 }
                 req.body[i].jawak_detail = (req.body[i].jawak_detail ? JSON.stringify(req.body[i].jawak_detail) : JSON.stringify([]))
 
-                let result = await DB.insert('temp_import', req.body[i], null, false);
+                let obj = { ...DB.tbInterface.temp_import, ...req.body[i] }
+
+                let result = await DB.insert('temp_import', obj, null, false);
             }
             await DB.getCount('temp_import').then(async (resolve) => {
                 res.json({
