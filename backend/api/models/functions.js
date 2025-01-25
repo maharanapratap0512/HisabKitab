@@ -298,6 +298,14 @@ class Functions extends DBContex {
          return [];
       });
    }
+   async getDistricts(dept_id = null) {
+
+      return await this.getList('district').then(async (resolve) => {
+         return this.convertToLower(resolve.data || [], ['district_hin', 'district_eng']);
+      }, (err) => {
+         return [];
+      });
+   }
    async getZones(dept_id = null) {
 
       return await this.getList('zone').then(async (resolve) => {

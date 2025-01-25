@@ -27,6 +27,7 @@ export class AuthService {
       { key: 'item', title: 'Item & Subitem', detail: '', add: true, edit: true, delete: true },
       { key: 'nimitt', title: 'Nimitt', detail: '', add: true, edit: true, delete: true },
       { key: 'pbk', title: 'PBK / Sewadhari', detail: '', add: true, edit: true, delete: true },
+      { key: 'district', title: 'District', detail: '', add: true, edit: true, delete: true },
       { key: 'city', title: 'City', detail: '', add: true, edit: true, delete: true },
       { key: 'point', title: 'Point', detail: '', },
       { key: 'support_list', title: 'Small Lists', detail: 'Aawak Type, Jawak Type, Aawak Source, Condition, Usage_list, MM Type, Gender, Relation etc...', add: true, edit: true, delete: true },
@@ -41,6 +42,7 @@ export class AuthService {
       { colName: 'age', title: 'Age' },
       { colName: 'address', title: 'Address' },
       { colName: 'townarea', title: 'Townarea' },
+      { colName: 'district_id', title: 'District' },
       { colName: 'city_id', title: 'City' },
       { colName: 'mo_no', title: 'Mobile No.' },
       { colName: 'alt_mo_no', title: 'Alt. Mo. No.' },
@@ -48,6 +50,7 @@ export class AuthService {
       { colName: 'bhatti_date', title: 'Bhatti Date' },
       { colName: 'document', title: 'Image' }
     ],
+    district: [],
     product: [
       { colName: 'purchase_date', title: 'Purchase Date' },
       { colName: 'purchased_by', title: 'Purchase By' },
@@ -108,7 +111,7 @@ export class AuthService {
       { colName: 'description', title: 'Description' },
       { colName: 'ref_aawak_select', title: 'Referece Aawak Search' },
       { colName: 'auto_awk', title: 'Automatic Aawak' },
-      
+
     ],
     repairing: [
       { colName: 'jwk_date', title: 'Jawak Date' },
@@ -129,7 +132,7 @@ export class AuthService {
       { colName: 'document', title: 'document' },
       { colName: 'awk_ref_id', title: 'Aawak' },
       { colName: 'jwk_ref_id', title: 'Jawak' },
-      
+
     ],
     nimitt: [
       { colName: 'roll_no', title: 'Roll No' },

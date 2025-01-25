@@ -159,6 +159,7 @@
                            <th style="width: 215px;" *ngIf="settings.address">Address</th>
                            <th style="width: 200px;" *ngIf="settings.townarea">Townarea</th>
                            <th style="width: 200px;">State</th>
+                           <th style="width: 100px;" *ngIf="settings.district_id">District</th>
                            <th style="width: 100px;" *ngIf="settings.city_id">City</th>
                            <th style="width: 115px;" *ngIf="settings.mo_no">Mobile No.</th>
                            <th style="width: 100px;" *ngIf="settings.class_mm_id">Daily Class MM</th>
@@ -211,6 +212,7 @@
                               {{data.state_hin}} : {{data.state_eng}} <br />
                               {{data.country_hin}} : {{data.country_eng}}
                            </td>
+                           <td *ngIf="settings.district_id">{{data.district_hin}} <br> {{data.district_eng}}</td>
                            <td *ngIf="settings.city_id">{{data.city_hin}} <br> {{data.city_eng}}</td>
                            <!-- <td>{{data.tempaddress}}</td> -->
                            <!-- <td>{{data.district}}</td>

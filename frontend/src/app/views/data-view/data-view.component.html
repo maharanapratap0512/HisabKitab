@@ -112,6 +112,10 @@
                     <app-zone-entry *ngIf="showModal == 'zone'" (response)='editResponse($event)' [getData]="editData"
                         [isEdit]="isEdit">
                     </app-zone-entry>
+                    <!-- district -->
+                    <app-district-entry *ngIf="showModal == 'district'" (response)='editResponse($event)' [getData]="editData"
+                        [isEdit]="isEdit">
+                    </app-district-entry>
                     <!-- category -->
                     <app-category-entry *ngIf="showModal == 'category'" (response)='editResponse($event)'
                         [getData]="editData" [isEdit]="isEdit">

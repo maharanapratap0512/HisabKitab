@@ -156,6 +156,22 @@
                      [ngClass]="{'validation':pbkForm.get('townarea')?.errors && (pbkForm.get('townarea')?.touched || pbkForm.get ('townarea')?.dirty)}">
                </div>
             </div>
+            <div class="col-md-3 mb-3" *ngIf="settings.pbk.district_id">
+               <div class="form-group">
+                  <label class="form-label">District</label>
+                  <a type="button" *ngIf="settings.district.add" style="padding: 1px 6px !important;"
+                     class="btn btn-outline-primary float-end"
+                     onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add District'">+
+                     Add</a>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select District" [clearable]="false"
+                     [virtualScroll]="true" formControlName="district_id"
+                     [ngClass]="{'validation':pbkForm.get('district_id')?.errors && (pbkForm.get('district_id')?.touched || pbkForm.get ('district_id')?.dirty)}">
+                     <ng-option selected="selected" disabled value="">Select District</ng-option>
+                     <ng-option *ngFor="let item of districts" [value]="item._id">{{item.district_hin}} :
+                        {{item.district_eng}} ( {{item.state_hin}} )</ng-option>
+                  </ng-select>
+               </div>
+            </div>
             <div class="col-md-3 mb-3" *ngIf="settings.pbk.city_id">
                <div class="form-group">
                   <label class="form-label">City</label>
@@ -269,6 +285,10 @@
                <!-- Add State  -->
                <app-state-entry *ngIf="showModal == 'Add State'" (response)="StateAddResponse($event)">
                </app-state-entry>
+
+               <!-- Add District  -->
+               <app-district-entry *ngIf="showModal == 'Add District'" (response)="districtAddResponse($event)">
+               </app-district-entry>
 
                <!-- Add City  -->
                <app-city-entry *ngIf="showModal == 'Add City'" (response)="cityAddResponse($event)"></app-city-entry>

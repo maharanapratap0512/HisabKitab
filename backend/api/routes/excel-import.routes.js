@@ -185,6 +185,8 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                             break;
                         case 'state': id = await fn.matchState(name);
                             break;
+                        case 'district': id = await fn.matchDistrict(name);
+                            break;
                         case 'city': id = await fn.matchCity(name);
                             break;
                         case 'category':

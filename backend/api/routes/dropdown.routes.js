@@ -52,6 +52,7 @@ router.get('/all/:dept_id', async (req, res, next) => {
             lists.nimitt = await DB.getList('nimitt', { full: true, dept_id: req.params.dept_id }) || []
             lists.state = await DB.getList('state', { dept_id: req.params.dept_id }) || []
             lists.zone = await DB.getList('zone', { dept_id: req.params.dept_id }) || []
+            lists.district = await DB.getList('district', { full:true, dept_id: req.params.dept_id }) || []
             lists.subitem_list = await DB.getList('subitem_list', { dept_id: req.params.dept_id }) || []
             lists.unit = await DB.getList('unit', { dept_id: req.params.dept_id }) || []
             lists.gender = await DB.getList('gender', { dept_id: req.params.dept_id }) || []

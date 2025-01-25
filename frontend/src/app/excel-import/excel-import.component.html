@@ -427,6 +427,16 @@
                               </ng-option>
                            </ng-select>
 
+                           <!-- district dropdown -->
+                           <ng-select *ngIf="data.type == 'district'" class="custom custom-import"
+                              placeholder="Select District" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select District --</ng-option>
+                              <ng-option *ngFor="let item of districts"
+                                 [value]="item._id">{{item.district_hin}}:{{item.district_eng}} ( {{item.state_hin}} )
+                              </ng-option>
+                           </ng-select>
+
                            <!-- city dropdown -->
                            <ng-select *ngIf="data.type == 'city'" class="custom custom-import" placeholder="Select City"
                               [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">

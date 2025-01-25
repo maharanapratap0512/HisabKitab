@@ -1191,10 +1191,12 @@ const pbk = {
     , select_full:
         `select pbk.*, strftime('%d-%m-%Y', pbk.birth_date) AS birth_date, strftime('%m-%Y', pbk.bhatti_date) AS bhatti_date,
         state.state_hin, state.state_eng, 
+        dst.district_hin, dst.district_eng, 
         cnt.country_hin, cnt.country_eng, 
         city.city_hin, city.city_eng,
         mm.mm_hin, mm.mm_eng, mm.mm_code
         from pbk 
+        left join district dst on dst._id = pbk.district_id
         left join state on state._id = pbk.state_id
         left join country cnt on cnt._id = state.country_id
         left join city on city._id = pbk.city_id
@@ -1202,20 +1204,20 @@ const pbk = {
     , insert:
         `insert into pbk (
             roll_no, pbk_hin, pbk_eng, gender, relation, relative_name, relative_ref,
-            birth_date, age, status, address, townarea, state_id, city_id,
+            birth_date, age, status, address, townarea, state_id, district_id, city_id,
             mo_no, alt_mo_no, class_mm_id, bhatti_date, document, active)
         values (
             @roll_no, @pbk_hin, @pbk_eng, @gender, @relation, @relative_name, @relative_ref,
-            @birth_date, @age, @status, @address, @townarea, @state_id, @city_id,
+            @birth_date, @age, @status, @address, @townarea, @state_id, @district_id, @city_id,
             @mo_no, @alt_mo_no, @class_mm_id, @bhatti_date, @document, @active)`
     , insert_ignore:
         `insert into pbk (
             _id, roll_no, pbk_hin, pbk_eng, gender, relation, relative_name, relative_ref,
-            birth_date, age, status, address, townarea, state_id, city_id,
+            birth_date, age, status, address, townarea, state_id, district_id, city_id,
             mo_no, alt_mo_no, class_mm_id, bhatti_date, document, active)
         values (
             @_id, @roll_no, @pbk_hin, @pbk_eng, @gender, @relation, @relative_name, @relative_ref,
-            @birth_date, @age, @status, @address, @townarea, @state_id, @city_id,
+            @birth_date, @age, @status, @address, @townarea, @state_id, @district_id, @city_id,
             @mo_no, @alt_mo_no, @class_mm_id, @bhatti_date, @document, @active)`
     , update:
         `update pbk set 
@@ -1232,6 +1234,7 @@ const pbk = {
         address=@address,
         townarea=@townarea,
         state_id=@state_id,
+        district_id=@district_id,
         city_id=@city_id,
         mo_no=@mo_no,
         alt_mo_no=@alt_mo_no,
@@ -1254,6 +1257,7 @@ const pbk = {
         address=@address,
         townarea=@townarea,
         state_id=@state_id,
+        district_id=@district_id,
         city_id=@city_id,
         mo_no=@mo_no,
         alt_mo_no=@alt_mo_no,
@@ -1599,6 +1603,64 @@ const zone = {
         updated_at=datetime('now','localtime')`
     , order:
         `zone_hin, zone_eng`
+}
+
+const district = {
+    select:
+        `select * from district ?`
+    , select_full:
+        `select district.*, 
+        st.state_hin, st.state_eng,
+        cnt.country_hin, cnt.country_eng from district 
+        left join state st on st._id = district.state_id
+        left join country cnt on cnt._id = st.country_id  ? limit @limit offset @offset`
+    , insert:
+        `insert into district (
+            district_hin,
+            district_eng,
+            state_id,
+            active)
+        values (
+            @district_hin,
+            @district_eng,
+            @state_id,
+            @active)`
+    , insert_ignore:
+        `insert or ignore into district (
+            _id,
+            district_hin,
+            district_eng,
+            state_id,
+            created_at,
+            updated_at,
+            active) 
+        values (
+            @_id,
+            @district_hin,
+            @district_eng,
+            @state_id,
+            @created_at,
+            @updated_at,
+            @active)`
+    , import_update:
+        `update district set 
+        district_hin=@district_hin,
+        district_eng=@district_eng,
+        state_id=@state_id,
+        created_at=@created_at,
+        updated_at=@updated_at where _id = @_id`
+    , update:
+        `update district set 
+        district_hin=@district_hin,
+        district_eng=@district_eng,
+        state_id=@state_id,
+        updated_at=datetime('now','localtime')`
+    , update_active:
+        `update district set
+        active=@active,
+        updated_at=datetime('now','localtime')`
+    , order:
+        `district_hin, district_eng`
 }
 
 const subitem = {
@@ -2311,6 +2373,7 @@ const conditions = {
     subitem_duplicate: `item_id = @item_id AND subitem_list_id = @subitem_list_id `,
     support_list_duplicate: `list_type = @list_type AND list_name_eng = @list_name_eng `,
     category_duplicate: `category_eng = @category_eng OR category_hin = @category_hin `,
+    district_duplicate: `(district_eng = @district_eng OR district_hin = @district_hin) AND state_id = @state_id`,
 }
 
 genDeptDB = {
@@ -2402,5 +2465,5 @@ const test = {
 }
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, aawak_voucher, bachat, jawak, mm, nimitt, pbk, point, product, zone, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, report_comment
+    country, city, category, department, department_config, item, itemmix, aawak, aawak_voucher, bachat, jawak, mm, nimitt, pbk, point, product, zone, district, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, report_comment
 };

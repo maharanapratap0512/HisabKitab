@@ -46,6 +46,7 @@ export class ExcelImportComponent implements OnInit {
   subitem_lists: any = [];
   units: any = [];
   states: any = [];
+  districts: any = [];
   cities: any = [];
   mms: any = [];
   conditions: any = [];
@@ -89,6 +90,7 @@ export class ExcelImportComponent implements OnInit {
       this.subitem_lists = result.subitem_list ? result.subitem_list : [];
       this.units = result.unit ? result.unit : [];
       this.states = result.state ? result.state : [];
+      this.districts = result.district ? result.district : [];
       this.cities = result.city ? result.city : [];
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];

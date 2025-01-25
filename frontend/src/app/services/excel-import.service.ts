@@ -75,6 +75,7 @@ export class ExcelImportService {
       { col_name: 'age', name: 'age', alt_names: ["उम्र"], not_null: false },
       { col_name: 'address', name: 'address', alt_names: ["पता"], not_null: false },
       { col_name: 'townarea', name: 'townarea', alt_names: ["town area", "town_area", "गाव", "village"], not_null: false },
+      { col_name: 'district', name: 'district', alt_names: ["district_hin", "district_eng", "जिला", "district hin", "district eng"], not_null: false, ref_table: 'district', ref_field: 'district_id', ref_data: 'district_hin' },
       { col_name: 'city', name: 'city', alt_names: ["city_hin", "city_eng", "शहर"], not_null: false, ref_table: 'city', ref_field: 'city_id', ref_data: 'city_hin' },
       { col_name: 'mo_no', name: 'mo_no', alt_names: ["mobile no", "mobile number", "mo no", "mobileno"], not_null: false },
       { col_name: 'alt_mo_no', name: 'alt_mo_no', alt_names: ["alternative mobile no", "alternative mobile number", "alt mo no", "alt mobile no"], not_null: false },

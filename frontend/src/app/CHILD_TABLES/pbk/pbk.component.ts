@@ -183,6 +183,7 @@ export class PbkComponent implements OnInit {
         "age": this.pbkData[i].age,
         "address": this.pbkData[i].address,
         "townarea": this.pbkData[i].townarea,
+        "district": this.pbkData[i].district_hin,
         "state": this.pbkData[i].state_hin,
         "country": this.pbkData[i].country_hin,
         "city": this.pbkData[i].city_hin,

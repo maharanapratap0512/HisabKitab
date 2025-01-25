@@ -202,6 +202,10 @@ export class DepartmentComponent implements OnInit {
         visible: false,
         add: false,
       },
+      district: {
+        visible: false,
+        add: false,
+      },
       department: {
         visible: false,
         add: false,

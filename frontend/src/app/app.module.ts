@@ -85,6 +85,7 @@ import { RepairingEntryComponent } from './entry__forms/repairing-entry/repairin
 import { RepairingComponent } from './repairing/repairing.component';
 import { ReportAjCheckComponent } from './reports/report-aj-check/report-aj-check.component';
 import { ReportLotNoComponent } from './reports/report-lot-no/report-lot-no.component';
+import { DistrictEntryComponent } from './ENTRY__FORMS/district-entry/district-entry.component';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -158,6 +159,7 @@ import { ReportLotNoComponent } from './reports/report-lot-no/report-lot-no.comp
     RepairingComponent,
     ReportAjCheckComponent,
     ReportLotNoComponent,
+    DistrictEntryComponent,
   ],
 
   imports: [

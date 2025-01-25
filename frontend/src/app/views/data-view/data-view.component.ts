@@ -81,6 +81,9 @@ export class DataViewComponent implements OnInit {
       case 'zone': this.setZoneFields();
         this.apiName = 'ZONE';
         break;
+      case 'district': this.setDistrictFields();
+        this.apiName = 'DISTRICT';
+        break;
       case 'state': this.setStateFields();
         this.apiName = 'STATE';
         break;
@@ -372,6 +375,24 @@ export class DataViewComponent implements OnInit {
       }, {
         title: "Zone(Eng)",
         columns: ["zone_eng"]
+      }, {
+        title: "Country",
+        columns: ["country_hin", "country_eng"]
+      }
+    ]
+  }
+
+  setDistrictFields() {
+    this.fields = [
+      {
+        title: "District(Hin)",
+        columns: ["district_hin"]
+      }, {
+        title: "District(Eng)",
+        columns: ["district_eng"]
+      }, {
+        title: "State",
+        columns: ["state_hin", "state_eng"]
       }, {
         title: "Country",
         columns: ["country_hin", "country_eng"]

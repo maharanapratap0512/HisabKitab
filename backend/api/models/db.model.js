@@ -1947,19 +1947,20 @@ class dbModal {
      * adding district_id col in pbk.
      * 
      */
-    // {
-    //   district: `create table if not exist district (
-    //       _id integer UNIQUE primary key AUTOINCREMENT,
-    //       district_hin varchar(100) not null,
-    //       district_eng varchar(100) null, 
-    //       state_id integer not null REFERENCES state(_id),
-    //       created_at timestamp default (datetime('now', 'localtime')),
-    //       updated_at timestamp default (datetime('now', 'localtime')),
-    //       active tinyint default 1,    
-    //       UNIQUE(district_hin, state_id),
-    //       UNIQUE(district_eng, state_id)
-    //     )`
-    // },
+    {
+      district: `create table if not exists district (
+          _id integer UNIQUE primary key AUTOINCREMENT,
+          district_hin varchar(100) not null,
+          district_eng varchar(100) null, 
+          state_id integer not null REFERENCES state(_id),
+          created_at timestamp default (datetime('now', 'localtime')),
+          updated_at timestamp default (datetime('now', 'localtime')),
+          active tinyint default 1,    
+          UNIQUE(district_hin, state_id),
+          UNIQUE(district_eng, state_id)
+        )`,
+      pbk: `alter table pbk add column district_id integer references district(_id)`
+    },
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.

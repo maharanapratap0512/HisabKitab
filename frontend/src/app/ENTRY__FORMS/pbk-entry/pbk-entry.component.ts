@@ -20,6 +20,7 @@ export class PbkEntryComponent implements OnInit {
   pbkForm: FormGroup;
   allList: any = {};
   states: any = [];
+  districts: any = [];
   relative2: boolean = false;
   cities: any = [];
   mms: any = [];
@@ -54,6 +55,7 @@ export class PbkEntryComponent implements OnInit {
       townarea: [null],
       address: [null],
       city_id: [null],
+      district_id: [null],
       state_id: [null, Validators.required],
       mo_no: [null],
       alt_mo_no: [null],
@@ -67,6 +69,7 @@ export class PbkEntryComponent implements OnInit {
   ngOnInit(): void {
     this.gs.observeList().subscribe(result => {
       this.states = result.state ? result.state : [];
+      this.districts = result.district ? result.district : [];
       this.cities = result.cities ? result.cities : []
       this.mms = result.mm ? result.mm : [];
       this.genders = result.gender ? result.gender : [];
@@ -93,6 +96,7 @@ export class PbkEntryComponent implements OnInit {
         townarea: changes.getData.currentValue.townarea,
         address: changes.getData.currentValue.address,
         city_id: changes.getData.currentValue.city_id,
+        district_id: changes.getData.currentValue.district_id,
         state_id: changes.getData.currentValue.state_id,
         mo_no: changes.getData.currentValue.mo_no,
         alt_mo_no: changes.getData.currentValue.alt_mo_no,
@@ -108,6 +112,10 @@ export class PbkEntryComponent implements OnInit {
   setView(type: string) {
     this.viewType = type;
     switch (type) {
+      case 'District':
+        this.viewData = this.gs.Lists.district;
+        $('#pbkEntryComponent > #dataView').modal('show');
+        break;
       case 'Relation':
         this.viewData = this.gs.Lists.relation;
         $('#pbkEntryComponent > #dataView').modal('show');
@@ -172,25 +180,7 @@ export class PbkEntryComponent implements OnInit {
         _id: this.getData._id
       }
       body.set = {
-        roll_no: this.pbkForm.value.roll_no,
-        pbk_eng: this.pbkForm.value.pbk_eng,
-        pbk_hin: this.pbkForm.value.pbk_hin,
-        relation: this.pbkForm.value.relation,
-        relative_name: this.pbkForm.value.relative_name,
-        relative_ref: this.pbkForm.value.relative_ref,
-        status: this.pbkForm.value.status,
-        gender: this.pbkForm.value.gender,
-        age: this.pbkForm.value.age,
-        birth_date: this.pbkForm.value.birth_date,
-        townarea: this.pbkForm.value.townarea,
-        address: this.pbkForm.value.address,
-        city_id: this.pbkForm.value.city_id,
-        state_id: this.pbkForm.value.state_id,
-        mo_no: this.pbkForm.value.mo_no,
-        alt_mo_no: this.pbkForm.value.alt_mo_no,
-        class_mm_id: this.pbkForm.value.class_mm_id,
-        bhatti_date: this.pbkForm.value.bhatti_date,
-        document: this.pbkForm.value.document,
+        ...this.pbkForm.value
       };
       this.http.put(this.api.getUrl('PBK'), body).subscribe((data: any) => {
         if (data && data['success']) {
@@ -217,6 +207,7 @@ export class PbkEntryComponent implements OnInit {
     if (event) {
       this.isLoader = true;
       this.cities = this.gs.Lists.city.filter((c: { state_id: any; }) => c.state_id == event);
+      this.districts = this.gs.Lists.district.filter((d: { state_id: any; }) => d.state_id == event);
       this.isLoader = false;
     }
   }
@@ -271,6 +262,25 @@ export class PbkEntryComponent implements OnInit {
       this.pbkForm.patchValue(
         {
           city_id: ev._id,
+          state_id: ev.state_id
+        });
+    }
+    else {
+      console.log("message", ev);
+
+    }
+    this.isLoader = false;
+  }
+
+  districtAddResponse(ev: any) {
+    if (ev._id) {
+      this.isLoader = true;
+      $('#pbkEntryComponent > #showModal').modal('hide');
+      this.showModal = '';
+      // this.cities.unshift(ev);
+      this.pbkForm.patchValue(
+        {
+          district_id: ev._id,
           state_id: ev.state_id
         });
     }

@@ -88,6 +88,7 @@ class ExcelFunctions {
       address: null,
       city_id: null,
       state_id: null,
+      district_id: null,
       mo_no: null,
       alt_mo_no: null,
       class_mm_id: null,
@@ -149,6 +150,11 @@ class ExcelFunctions {
       category_hin: null,
       category_roman: null
    }
+   district_form = {
+      district_eng: null,
+      district_hin: null,
+      state_id: null
+   }
    constructor(list, dept_id = null) {
       // this.DBContex = require('./DBContex');
       // this.DB = new this.DBContex(); 
@@ -174,6 +180,9 @@ class ExcelFunctions {
                break;
             case 'state':
                this.state = this.Fn.getStates(dept_id);
+               break;
+            case 'district':
+               this.district = this.Fn.getDistricts(dept_id);
                break;
             case 'zone':
                this.zone = this.Fn.getZones(dept_id);
@@ -316,6 +325,30 @@ class ExcelFunctions {
             }
          }
          this.correctionList.push({ type: 'state', value: data });
+      }
+      return null;
+   }
+
+   async matchDistrict(data) {
+      if (this.district instanceof Promise) {
+         this.district = await this.district.then((data) => { return data })
+      }
+      if (this.dict.district instanceof Promise) {
+         this.dict.district = await this.dict.district.then((data) => { return data });
+      }
+      // console.log("start matching", this.state);
+      if (!this.checkedButNotFound(data, 'district')) {
+         for (let i in this.district) {
+            if ([this.district[i].district_hin, this.district[i].district_eng].includes(data)) {
+               return this.district[i]._id;
+            }
+         }
+         for (let i in this.dict.district) {
+            if (this.dict.district[i].name == data) {
+               return this.dict.district[i].id;
+            }
+         }
+         this.correctionList.push({ type: 'district', value: data });
       }
       return null;
    }
