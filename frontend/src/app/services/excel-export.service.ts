@@ -276,9 +276,6 @@ export class ExcelExportService {
         size: 12
       };
 
-      for (let i = 0; i < jwkendcell; i++) {
-
-      }
     });
 
 
