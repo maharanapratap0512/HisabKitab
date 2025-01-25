@@ -1948,7 +1948,17 @@ class dbModal {
      * 
      */
     // {
-    //   district: ``
+    //   district: `create table if not exist district (
+    //       _id integer UNIQUE primary key AUTOINCREMENT,
+    //       district_hin varchar(100) not null,
+    //       district_eng varchar(100) null, 
+    //       state_id integer not null REFERENCES state(_id),
+    //       created_at timestamp default (datetime('now', 'localtime')),
+    //       updated_at timestamp default (datetime('now', 'localtime')),
+    //       active tinyint default 1,    
+    //       UNIQUE(district_hin, state_id),
+    //       UNIQUE(district_eng, state_id)
+    //     )`
     // },
     /* TODO cleanup task 
       1. remove table - closing.

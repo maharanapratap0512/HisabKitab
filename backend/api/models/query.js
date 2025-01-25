@@ -580,7 +580,7 @@ const aawak = {
         mst.state_hin as mm_state_hin, mst.state_eng as mm_state_eng,
         zn.zone_hin as mm_zone_hin, zn.zone_eng as mm_zone_eng,
         amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
-        pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
+        pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name, pbk.address, pbk.mo_no,
         item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
         sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories,
         slul.list_name_hin as usage_list_hin, slul.list_name_eng as usage_list_eng, slul.list_name_roman as usage_list_roman,

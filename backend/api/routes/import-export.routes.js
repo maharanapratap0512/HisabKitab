@@ -269,6 +269,7 @@ router.put('/finish', async (req, res, next) => {
         try {
             await Fn.begin();
             for (let data of req.body.history) {
+                console.log(data);
                 await DB.runQuery('import_history', 'update_add_count', { obj: data }).then(async (result) => {
                     if (!result.changes) {
                         await DB.insert('import_history', data, null, false);

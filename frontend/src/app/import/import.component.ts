@@ -288,7 +288,7 @@ export class ImportComponent implements OnInit {
           }
           let errJwk = [];
           for (let jwk of result.data.jawak_detail) {
-            this.addToHistory({...jwk, mm_id: result.data.mm_id});
+            this.addToHistory({...jwk, date: (jwk.date ? jwk.date : result.data.date), mm_id: result.data.mm_id });
             if (jwk.error) {
               errJwk.push(jwk)
             }
@@ -418,7 +418,7 @@ export class ImportComponent implements OnInit {
 
     if (!this.importHistory[uniqueKey]) {
       this.importHistory[uniqueKey] = {
-        month: month,
+        month: month + 1,
         year: year,
         mm_id: data.mm_id,
         dept_id: this.auth.webUser.dept_id,
