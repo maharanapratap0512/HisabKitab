@@ -334,19 +334,19 @@ export class AawakComponent implements OnInit {
           jwkFooter['Amount'] += result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : 0;
         }
         jawakArray.push({
-          'Date': '',
-          'Pkt No': '',
-          'Jawak MM': '',
-          'Jawak Category': '',
-          'Jawak Detail': '',
+          'Date': '-',
+          'Pkt No': '-',
+          'Jawak MM': '-',
+          'Jawak Category': '-',
+          'Jawak Detail': '-',
           'Kisko Diya': 'बचत =>',
-          'Jawak Type': '',
+          'Jawak Type': '-',
           'Qty': result[i].remaining_qty ? result[i].remaining_qty : 0,
-          'Unit': result[i].unit_id ? result[i].unit_short : '',
+          'Unit': result[i].unit_id ? result[i].unit_short : '-',
           'Rate': 'Total',
           'Amount': jwkFooter['Amount'],
-          'Kaha Repaired/Becha': '',
-          'Parchi Kaha': '',
+          'Kaha Repaired/Becha': '-',
+          'Parchi Kaha': '-',
         });
         let awkObj: any = {
           'No': i + 1,
@@ -433,15 +433,15 @@ export class AawakComponent implements OnInit {
       for (let i = 0; i < result.length; i++) {
         let jawakArray = [];
         jawakArray.push({
-          'Date': '',
-          'Pkt No': '',
-          'Jawak MM': '',
-          'Jawak Category': '',
-          'Jawak Detail': '',
+          'Date': '-',
+          'Pkt No': '-',
+          'Jawak MM': '-',
+          'Jawak Category': '-',
+          'Jawak Detail': '-',
           'Kisko Diya': 'बचत =>',
-          'Jawak Type': '',
+          'Jawak Type': '-',
           'Qty': result[i].remaining_qty ? result[i].remaining_qty : 0,
-          'Unit': result[i].unit_id ? result[i].unit_short : '',
+          'Unit': result[i].unit_id ? result[i].unit_short : '-',
         });
         let awkObj: any = {
           '_id': result[i]._id,
@@ -1104,7 +1104,7 @@ export class AawakComponent implements OnInit {
               case "pkt no":
               case "pkt num":
               case "parchi":
-              case "Parchi no.":
+              case "parchi no.":
               case "pkt": obj.pkt_num = exceldata[i][j] ? exceldata[i][j].toString() : exceldata[i][j];
                 break;
               case "roll no":

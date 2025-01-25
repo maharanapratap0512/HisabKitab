@@ -190,6 +190,8 @@ export class ExcelExportService {
     /*SUBTITLE*/
     let endCell = 1;
     let startCell = 1;
+    let awkendcell = 0;
+    let jwkendcell = 0;
     for (let i = 0; i < Subtitle.length; i++) {
       endCell += (i == 0 ? (Object.keys(json[0]).length - Subtitle.length) : Object.keys(json[0][Subtitle[i]][0]).length);
 
@@ -200,8 +202,11 @@ export class ExcelExportService {
         //adding fields to header
       };
       startCell = endCell + 1;
+      if (i == 0) {
+        awkendcell = endCell;
+      }
       if (i > 0) {
-
+        jwkendcell = endCell;
         for (let key of Object.keys(json[0][Subtitle[i]][0])) {
           Header.push({ Header: key, key: Subtitle[i].substring(0, 1) + '_' + key });
         }
@@ -236,34 +241,40 @@ export class ExcelExportService {
       //   }
       // }      
       // worksheet.addRow(json[i]);
-
-      // rowNum += 1;
+      let jwklength = 0;
       for (let j = 0; j < Subtitle.length; j++) {
-        
+
         if (j > 0) {
-          json[i][Subtitle[j]].forEach(function (subrow: any, si:number) {
+          json[i][Subtitle[j]].forEach(function (subrow: any, si: number) {
 
             let row: any = {};
             for (let key of Object.keys(subrow)) {
               row[Subtitle[j].substring(0, 1) + '_' + key] = subrow[key];
             }
-            if(si==0){
-              worksheet.addRow({...json[i], ...row})
-            }else{
+            if (si == 0) {
+              worksheet.addRow({ ...json[i], ...row })
+            } else {
               worksheet.addRow(row);
             }
             rowNum++;
+            jwklength++;
           });
         }
       }
-      worksheet.getRow(rowNum).font = {
-        name: 'Arial Black',
-        color: { argb: 'FFFF0000' },
-        family: 2,
-        size: 12
-      };
-      worksheet.addRow({})
-      rowNum++;
+
+      if (jwklength > 1) {
+        worksheet.mergeCells((rowNum - jwklength + 2), 1, rowNum, awkendcell);
+        worksheet.getCell((rowNum - jwklength + 2), 1).value = '-';
+      }
+
+      for (let i = 0; i < jwkendcell; i++) {
+        worksheet.getCell(rowNum, awkendcell + 1 + i).font = {
+          name: 'Arial Black',
+          color: { argb: 'FFFF0000' },
+          family: 2,
+          size: 12
+        };
+      }
     });
 
 
