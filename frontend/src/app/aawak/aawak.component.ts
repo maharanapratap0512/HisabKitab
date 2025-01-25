@@ -494,7 +494,6 @@ export class AawakComponent implements OnInit {
         }
       }
 
-
       if (this.allAJData.length < this.total_count) {
         this.getMoreAJ();
       }
@@ -519,84 +518,186 @@ export class AawakComponent implements OnInit {
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
+      if (this.auth.webUser.dept_id == 1) {
+        for (let i = 0; i < result.length; i++) {
+          let jawakArray = [];
+          if (result[i].jawak_detail.length) {
+            for (let j in result[i].jawak_detail) {
+              jawakArray.push({
+                'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
+                'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
+                'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
+                'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+                'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
+                'Bachat': (result[i].remaining_qty ? result[i].remaining_qty : 0) + '-' + (result[i].unit_id ? result[i].unit_short : '-'),
+              });
+            }
+          } else {
+            jawakArray.push({
+              'Jawak MM': '-',
+              'Kisko Diya': '-',
+              'Jawak Type': '-',
+              'Qty': '-',
+              'Unit': '-',
+              'Bachat': '-',
+            });
+          }
 
-      for (let i = 0; i < result.length; i++) {
-        let jawakArray = [];
-        let jwkFooter: any = {
-          'Qty': 0,
-          'Amount': 0
-        };
-        for (let j in result[i].jawak_detail) {
-          jawakArray.push({
-            'Date': result[i].jawak_detail[j].date ? this.gs.formatDisplayDate(result[i].jawak_detail[j].date) : '-',
-            'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
-            'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
-            'Jawak Category': result[i].jawak_detail[j].usage_category_id ? result[i].jawak_detail[j].category_hin : '-',
-            'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
-            'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
-            'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
-            'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
-            'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
-            'Rate': result[i].jawak_detail[j].rate ? result[i].jawak_detail[j].rate : '-',
-            'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
-            'Kaha Repaired/Becha': result[i].jawak_detail[j].sell_repair_place ? result[i].jawak_detail[j].sell_repair_place : '-',
-            'Parchi Kaha': result[i].jawak_detail[j].parchi_place ? result[i].jawak_detail[j].parchi_place : '-',
-            'Bachat': (result[i].remaining_qty ? result[i].remaining_qty : 0) + '-' + (result[i].unit_id ? result[i].unit_short : '-'),
-            // 'Bachat': bachat
-          });
-          // jwkFooter['Qty'] += result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : 0;
-          jwkFooter['Amount'] += result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : 0;
-        }
-        let awkObj: any = {
-          '_id': result[i]._id,
-          'No': i + 1,
-          'Date': result[i].date ? this.gs.formatDisplayDate(result[i].date) : '-',
-          'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
-          'MM': result[i].mm_hin,
-          'Aawak MM': result[i].aawak_mm_id ? result[i].aawak_mm_hin : '-',
-        };
-        if (this.settings.aawak.pbk_id) {
-          awkObj['Roll No'] = result[i].roll_no ? result[i].roll_no : '-';
-          awkObj.Pbk = result[i].pbk_hin ? result[i].pbk_hin : '-';
-          awkObj.Relation = result[i].relation ? result[i].relation : '-';
-          awkObj.Relative = result[i].relative_name ? result[i].relative_name : '-';
-        }
+          let awkObj: any = {
+            '_id': result[i]._id,
+            'No': i + 1,
+            'Date': result[i].date ? this.gs.formatDisplayDate(result[i].date) : '-',
+            'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
+            'MM': result[i].mm_hin,
+            'Aawak MM': result[i].aawak_mm_id ? result[i].aawak_mm_hin : '-',
+          };
+          if (this.settings.aawak.pbk_id) {
+            awkObj['Roll No'] = result[i].roll_no ? result[i].roll_no : '-';
+            awkObj.Pbk = result[i].pbk_hin ? result[i].pbk_hin : '-';
+            awkObj.Relation = result[i].relation ? result[i].relation : '-';
+            awkObj.Relative = result[i].relative_name ? result[i].relative_name : '-';
+            awkObj.Address = result[i].address ? result[i].address : '-';
+            awkObj.Mo_No = result[i].mo_no ? result[i].mo_no : '-';
+          }
 
-        let cat = '';
-        let item = this.gs.Lists.itemmix.find((it: { _id: any; }) => it._id == result[i].item_id);
-        if (item) {
-          if (result[i].subitem_id) {
-            let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
-            if (subitem) {
-              cat = subitem.categories_hin.join(', ');
-            } else {
+          let cat = '';
+          let item = this.gs.Lists.itemmix.find((it: { _id: any; }) => it._id == result[i].item_id);
+          if (item) {
+            if (result[i].subitem_id) {
+              let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
+              if (subitem) {
+                cat = subitem.categories_hin.join(', ');
+              } else {
+                cat = item.categories_hin.join(', ');
+              }
+            }
+            else {
               cat = item.categories_hin.join(', ');
             }
           }
-          else {
-            cat = item.categories_hin.join(', ');
+          awkObj['Category'] = cat;
+          if (this.itemSubitemMerge) {
+            awkObj['Item Hin'] = (result[i].item_id ? result[i].item_hin : '-') + (result[i].subitem_id ? ' : ' + result[i].subitem_hin : '');
+            awkObj['Item Eng'] = (result[i].item_id ? result[i].item_eng : '-') + (result[i].subitem_id ? ' : ' + result[i].subitem_eng : '');
+          } else {
+            awkObj['Item'] = result[i].item_id ? result[i].item_hin : '-'
+            awkObj['Subitem'] = result[i].subitem_id ? result[i].subitem_hin : '-'
           }
+
+          awkObj = {
+            ...awkObj,
+            'Department': result[i].dept_hin ? result[i].dept_hin : '-',
+            'Qty': result[i].qty ? result[i].qty : '-',
+            'Unit': result[i].unit_id ? result[i].unit_short : '-',
+            'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
+            'Aawak Type': result[i].aawak_type_id ? result[i].aawak_type_hin : '-',
+            'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
+            'Jawak Detail': jawakArray,
+          };
+          this.allAJData.push(awkObj);
         }
-        awkObj = {
-          ...awkObj,
-          'Category': cat,
-          'Item': result[i].item_id ? result[i].item_hin : '-',
-          'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
-          'Product Code': result[i].product_code ? result[i].product_code : '-',
-          'Sr No': result[i].sr_num ? result[i].sr_num : '-',
-          'Company': result[i].company_name ? result[i].company_name : '-',
-          'Condition': result[i].condition_id ? result[i].condition_hin : '-',
-          'Bill': result[i].isbill ? 'है' : '-',
-          'Qty': result[i].qty ? result[i].qty : '-',
-          'Unit': result[i].unit_id ? result[i].unit_short : '-',
-          'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
-          'Aawak Type': result[i].aawak_type_id ? result[i].aawak_type_hin : '-',
-          'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
-          'Description': result[i].description ? result[i].description : '-',
-          // 'बचत':result[i].remaining_qty ? result[i].remaining_qty : 0,       
-          'Jawak Detail': jawakArray,
-        };
-        this.allAJData.push(awkObj);
+      } else {
+        for (let i = 0; i < result.length; i++) {
+          let jawakArray = [];
+          let jwkFooter: any = {
+            'Qty': 0,
+            'Amount': 0
+          };
+
+          if (result[i].jawak_detail.length) {
+            for (let j in result[i].jawak_detail) {
+              jawakArray.push({
+                'Date': result[i].jawak_detail[j].date ? this.gs.formatDisplayDate(result[i].jawak_detail[j].date) : '-',
+                'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
+                'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
+                'Jawak Category': result[i].jawak_detail[j].usage_category_id ? result[i].jawak_detail[j].category_hin : '-',
+                'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
+                'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
+                'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
+                'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+                'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
+                'Rate': result[i].jawak_detail[j].rate ? result[i].jawak_detail[j].rate : '-',
+                'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
+                'Kaha Repaired/Becha': result[i].jawak_detail[j].sell_repair_place ? result[i].jawak_detail[j].sell_repair_place : '-',
+                'Parchi Kaha': result[i].jawak_detail[j].parchi_place ? result[i].jawak_detail[j].parchi_place : '-',
+                'Bachat': (result[i].remaining_qty ? result[i].remaining_qty : 0) + '-' + (result[i].unit_id ? result[i].unit_short : '-'),
+              });
+              // jwkFooter['Qty'] += result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : 0;
+              jwkFooter['Amount'] += result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : 0;
+            }
+          } else {
+            jawakArray.push({
+              'Date': '-',
+              'Pkt No': '-',
+              'Jawak MM': '-',
+              'Jawak Category': '-',
+              'Jawak Detail': '-',
+              'Kisko Diya': '-',
+              'Jawak Type': '-',
+              'Qty': '-',
+              'Unit': '-',
+              'Rate': '-',
+              'Amount': '-',
+              'Kaha Repaired/Becha': '-',
+              'Parchi Kaha': '-',
+              'Bachat': '-',
+            });
+            // jwkFooter['Qty'] += result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : 0;
+            // jwkFooter['Amount'] += '-';
+          }
+
+
+          let awkObj: any = {
+            '_id': result[i]._id,
+            'No': i + 1,
+            'Date': result[i].date ? this.gs.formatDisplayDate(result[i].date) : '-',
+            'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
+            'MM': result[i].mm_hin,
+            'Aawak MM': result[i].aawak_mm_id ? result[i].aawak_mm_hin : '-',
+          };
+          if (this.settings.aawak.pbk_id) {
+            awkObj['Roll No'] = result[i].roll_no ? result[i].roll_no : '-';
+            awkObj.Pbk = result[i].pbk_hin ? result[i].pbk_hin : '-';
+            awkObj.Relation = result[i].relation ? result[i].relation : '-';
+            awkObj.Relative = result[i].relative_name ? result[i].relative_name : '-';
+          }
+
+          let cat = '';
+          let item = this.gs.Lists.itemmix.find((it: { _id: any; }) => it._id == result[i].item_id);
+          if (item) {
+            if (result[i].subitem_id) {
+              let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
+              if (subitem) {
+                cat = subitem.categories_hin.join(', ');
+              } else {
+                cat = item.categories_hin.join(', ');
+              }
+            }
+            else {
+              cat = item.categories_hin.join(', ');
+            }
+          }
+          awkObj = {
+            ...awkObj,
+            'Category': cat,
+            'Item': result[i].item_id ? result[i].item_hin : '-',
+            'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
+            'Product Code': result[i].product_code ? result[i].product_code : '-',
+            'Sr No': result[i].sr_num ? result[i].sr_num : '-',
+            'Company': result[i].company_name ? result[i].company_name : '-',
+            'Condition': result[i].condition_id ? result[i].condition_hin : '-',
+            'Bill': result[i].isbill ? 'है' : '-',
+            'Qty': result[i].qty ? result[i].qty : '-',
+            'Unit': result[i].unit_id ? result[i].unit_short : '-',
+            'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
+            'Aawak Type': result[i].aawak_type_id ? result[i].aawak_type_hin : '-',
+            'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
+            'Description': result[i].description ? result[i].description : '-',
+            // 'बचत':result[i].remaining_qty ? result[i].remaining_qty : 0,       
+            'Jawak Detail': jawakArray,
+          };
+          this.allAJData.push(awkObj);
+        }
       }
 
       if (this.allAJData.length < this.export_total_count) {
@@ -713,6 +814,7 @@ export class AawakComponent implements OnInit {
       }
     });
   }
+
   exportJawakData() {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";

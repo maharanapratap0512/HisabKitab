@@ -166,13 +166,9 @@ export class ExcelExportService {
     let colCount = Object.keys(json[0]).length;
     let Subtitle = ['Aawak Detail'];
     let Header = [];
-    console.log();
-    
-    for (let key of Object.keys(json[0])) {
-      console.log("log", json[0][key], json[0][key].length);
-      
-      if (typeof json[0][key] == "object" && json[0][key].length > 0) {
 
+    for (let key of Object.keys(json[0])) {
+      if (typeof json[0][key] == "object" && json[0][key].length > 0) {
         colCount += Object.keys(json[0][key][0]).length;
         Subtitle.push(key);
       }
@@ -180,7 +176,6 @@ export class ExcelExportService {
         Header.push({ Header: key, key: key });
       }
     }
-
 
     /*TITLE*/
     worksheet.mergeCells([1, 1, 1, colCount - Subtitle.length + 1]);
@@ -211,14 +206,11 @@ export class ExcelExportService {
       }
       if (i > 0) {
         jwkendcell = endCell;
-        console.log("jwkendcell111111", jwkendcell);
         for (let key of Object.keys(json[0][Subtitle[i]][0])) {
           Header.push({ Header: key, key: Subtitle[i].substring(0, 1) + '_' + key });
         }
       }
-
     }
-
     worksheet.getRow(2).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
 
     /*Column headers*/
@@ -274,19 +266,13 @@ export class ExcelExportService {
         worksheet.mergeCells((rowNum - jwklength + 1), jwkendcell, rowNum, jwkendcell);
       }
 
-      console.log(json);
-      console.log("awkendcell", awkendcell);
-      console.log("jwkendcell", jwkendcell);
-      
       worksheet.getCell(rowNum, jwkendcell).font = {
         name: 'Arial Black',
         color: { argb: 'FFFF0000' },
         family: 2,
         size: 12
       };
-
     });
-
 
     worksheet.eachRow({ includeEmpty: true }, function (row, rowNumber) {
       row.eachCell({ includeEmpty: false }, function (cell, colNumber) {
@@ -562,7 +548,6 @@ export class ExcelExportService {
         FileSaver.saveAs(data, fileName);
       });
   }
-
 
   generateConditionWiseReport(json: any[], conditions: any[], excelFileName: string, options: any = {}): void {
     if (json.length > 0 && conditions.length > 0) {
