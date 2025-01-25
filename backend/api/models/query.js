@@ -577,6 +577,8 @@ const aawak = {
     , select_full:
         `select aawak.*, 
         mm.mm_hin,mm.mm_eng,mm.mm_code,
+        mst.state_hin as mm_state_hin, mst.state_eng as mm_state_eng,
+        zn.zone_hin as mm_zone_hin, zn.zone_eng as mm_zone_eng,
         amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
         item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
@@ -591,6 +593,8 @@ const aawak = {
         nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, pst.state_hin as nimitt_state_hin, pst.state_eng as nimitt_state_eng
         from aawak 
         left join mm on mm._id = aawak.mm_id
+        left join state mst on mst._id = mm.state_id
+        left join zone zn on zn._id = mst.zone_id
         left join pbk on pbk._id = aawak.pbk_id
         left join mm amm on amm._id = aawak.aawak_mm_id
         left join item on item._id = aawak.item_id
