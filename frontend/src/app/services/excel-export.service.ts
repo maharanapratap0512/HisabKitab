@@ -235,19 +235,23 @@ export class ExcelExportService {
       //     json[i][Subtitle[j]].shift();
       //   }
       // }      
-      worksheet.addRow(json[i]);
+      // worksheet.addRow(json[i]);
 
-      rowNum += 1;
+      // rowNum += 1;
       for (let j = 0; j < Subtitle.length; j++) {
-
+        
         if (j > 0) {
-          json[i][Subtitle[j]].forEach(function (subrow: any) {
+          json[i][Subtitle[j]].forEach(function (subrow: any, si:number) {
 
             let row: any = {};
             for (let key of Object.keys(subrow)) {
               row[Subtitle[j].substring(0, 1) + '_' + key] = subrow[key];
             }
-            worksheet.addRow(row);
+            if(si==0){
+              worksheet.addRow({...json[i], ...row})
+            }else{
+              worksheet.addRow(row);
+            }
             rowNum++;
           });
         }

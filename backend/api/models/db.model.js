@@ -1940,6 +1940,12 @@ class dbModal {
       update_dept_config_aj_type: `update department_config set config_key = 'support_list' where config_key = 'aj_type'`,
 
     },
+
+    /**
+     * VERSION 22
+     * adding new table called district.
+     * adding district_id col in pbk.
+     */
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.

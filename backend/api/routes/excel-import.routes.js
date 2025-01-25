@@ -156,7 +156,13 @@ router.put('/verify/:dept_id', async (req, res, next) => {
         for (let i in req.body.excelData) {
             for (let j in req.body.config) {
                 let data = req.body.excelData[i][req.body.config[j].name];
-                if (req.body.config[j].type == 'date') {
+                if (req.body.config[j].type == 'date' && req.body.config[j].col_name == 'bhatti_date') {
+                    if (typeof data == "number" && (data > 1970 && data < 2036)) {
+                        data = data+'-01-01';
+                    }
+                    data = fn.setDateFormat(data);
+
+                } else if (req.body.config[j].type == 'date') {
                     data = fn.setDateFormat(data);
                 }
                 if (req.body.config[j].type == 'unix_date') {
@@ -263,7 +269,6 @@ router.post('/', async (req, res, next) => {
                 }
                 else if (typeof req.body[i].date == "number") {
                     req.body[i].date = Fn.ExcelDateToJSDate(req.body[i].date).toISOString().split('T')[0];
-                    // console.log("Exceldate", date);
                 }
                 req.body[i].type = 'awk';
                 req.body[i].pbk = ((req.body[i].pbk && (req.body[i].pbk.roll_no || req.body[i].pbk.pbk || req.body[i].pbk.relation || req.body[i].pbk.relative)) ? JSON.stringify(req.body[i].pbk) : null);
