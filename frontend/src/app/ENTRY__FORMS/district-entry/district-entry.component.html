@@ -1,0 +1,68 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
+</ngx-spinner>
+<div class="row" id="districtComponent">
+    <div class="card-body">
+        <form [formGroup]="districtForm">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Zone Name (Hin)</label>
+                        <input type="text" class="form-control" placeholder="District Name (Hin)" formControlName="district_hin"
+                            [ngClass]="{'validation':districtForm.get('district_hin')?.errors && (districtForm.get('district_hin')?.touched || districtForm.get ('district_hin')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Zone Name (Eng)</label>
+                        <input type="text" class="form-control" placeholder="District Name (Eng)" formControlName="district_eng"
+                            [ngClass]="{'validation':districtForm.get('district_eng')?.errors && (districtForm.get('district_eng')?.touched || districtForm.get ('district_eng')?.dirty)}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">State</label>
+                        <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
+                            (click)="openModal('addState')">+ Add</a>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select State" [clearable]="false"
+                            [virtualScroll]="true" formControlName="state_id"
+                            [ngClass]="{'validation':districtForm.get('state_id')?.errors && (districtForm.get('state_id')?.touched || districtForm.get ('state_id')?.dirty)}">
+                            <ng-option selected="selected" disabled value="">Select State</ng-option>
+                            <ng-option *ngFor="let item of states" [value]="item._id">
+                                {{item.state_hin}} : {{item.state_eng}}
+                            </ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
+                        (click)="districtFormSubmit()">Submit</button>
+                    <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"
+                        (click)="districtFormUpdate()">Update</button>
+                    <!-- <button class="btn btn-light submit mx-3" type="button" (click)="districtForm.reset()">Clear</button> -->
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Add Modal -->
+    <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add State</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" *ngIf="showModal == 'addState'">
+                    <app-state-entry (response)="stateAddResponse($event)"></app-state-entry>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
