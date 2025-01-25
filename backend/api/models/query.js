@@ -2072,13 +2072,13 @@ const temp_import = {
         left join state pst on pst._id = nmt.state_id ? limit @limit offset @offset`
     , insert:
         `insert into temp_import (
-        awk_id, type, date, date_sent, lot_no, pkt_num, item_detail, qty, rate, actual_amt, 
+        awk_id, type, date, lot_no, pkt_num, item_detail, qty, rate, actual_amt, 
         usage_list_id, usage_list, company_name, description, isbill, document, mm, mm_id, pbk,
         pbk_id, aj_mm, aj_mm_id, item, item_id, subitem, subitem_id,
         product, product_id, condition, condition_id, unit, unit_id, aj_type,
         aj_type_id, aawak_source, aawak_source_id, nimitt, nimitt_id, dept, dept_id, jawak_detail)
     values (
-        @awk_id, @type, @date, @date_sent, @lot_no, @pkt_num, @item_detail, @qty, @rate, @actual_amt, 
+        @awk_id, @type, @date, @lot_no, @pkt_num, @item_detail, @qty, @rate, @actual_amt, 
         @usage_list_id, @usage_list, @company_name, @description, @isbill, @document, @mm, @mm_id, @pbk,
         @pbk_id, @aj_mm, @aj_mm_id, @item, @item_id, @subitem, @subitem_id,
         @product, @product_id, @condition, @condition_id, @unit, @unit_id, @aj_type,
@@ -2088,7 +2088,6 @@ const temp_import = {
         awk_id=@awk_id,
         type=@type,
         date=@date,
-        date_sent=@date_sent,
         lot_no=@lot_no,
         pkt_num=@pkt_num,
         item_detail=@item_detail,

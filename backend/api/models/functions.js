@@ -17,6 +17,7 @@ class Functions extends DBContex {
       return new Promise(async (resolve, reject) => {
          try {
             let stmtInsert = this.db.prepare(this.query[type].insert);
+            obj = { ...this.tbInterface.aawak, ...obj }
             obj.document = JSON.stringify(obj.document ? obj.document : {});
             obj.isbill = obj.isbill ? 1 : 0;
             obj.active = 1;

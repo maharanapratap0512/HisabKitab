@@ -1945,7 +1945,11 @@ class dbModal {
      * VERSION 22
      * adding new table called district.
      * adding district_id col in pbk.
+     * 
      */
+    // {
+    //   district: ``
+    // },
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.
@@ -2011,6 +2015,7 @@ class dbModal {
             this.db.pragma(`user_version = ${this.migrationLength}`);
 
             console.log("database updated to `version` ", this.migrationLength);
+
           }
 
         }
