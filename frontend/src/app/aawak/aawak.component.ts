@@ -302,7 +302,7 @@ export class AawakComponent implements OnInit {
     this.allAJData = [];
     this.exportAJdata$ = new Subject();
 
-    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm.mm_hin, item_categories, subitem_categories, item_hin, subitem_hin, aawak.date" : null;
+    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, item_categories, subitem_categories, item_hin, subitem_hin, aawak.date" : null;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -440,6 +440,8 @@ export class AawakComponent implements OnInit {
             'No': i + 1,
             'Date': result[i].date ? this.gs.formatDisplayDate(result[i].date) : '-',
             'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
+            'Zone': result[i].zone_hin ? result[i].zone_hin : '-',
+            'State': result[i].mm_state_hin ? result[i].mm_state_hin : '-',
             'MM': result[i].mm_hin,
             'Aawak MM': result[i].aawak_mm_id ? result[i].aawak_mm_hin : '-',
           };
@@ -514,7 +516,7 @@ export class AawakComponent implements OnInit {
     this.exportAJdata$ = new Subject();
 
     this.filterBody.remaining_qty = true;
-    this.filterBody.orderBy = this.orderBy ? "aawak.mm_id, item_categories, subitem_categories, aawak.date" : null;
+    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, item_categories, subitem_categories, item_hin, subitem_hin, aawak.date" : null;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -652,6 +654,8 @@ export class AawakComponent implements OnInit {
             'No': i + 1,
             'Date': result[i].date ? this.gs.formatDisplayDate(result[i].date) : '-',
             'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
+            'Zone': result[i].zone_hin ? result[i].zone_hin : '-',
+            'State': result[i].mm_state_hin ? result[i].mm_state_hin : '-',
             'MM': result[i].mm_hin,
             'Aawak MM': result[i].aawak_mm_id ? result[i].aawak_mm_hin : '-',
           };
@@ -728,7 +732,7 @@ export class AawakComponent implements OnInit {
     let uniqueAawakMM = new Set();
     let uniqueUnit = new Set();
 
-    this.filterBody.orderBy = this.orderBy ? "aawak.mm_id, item_categories, subitem_categories, aawak.date" : null;
+    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, item_categories, subitem_categories, item_hin, subitem_hin, aawak.date" : null;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -833,7 +837,7 @@ export class AawakComponent implements OnInit {
     let uniqueJawakMM = new Set();
     let uniqueUnit = new Set();
 
-    this.filterBody.orderBy = this.orderBy ? "aawak.mm_id, item_categories, subitem_categories, aawak.date" : null;;
+    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, item_categories, subitem_categories, item_hin, subitem_hin, aawak.date" : null;;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {

@@ -1959,7 +1959,16 @@ class dbModal {
           UNIQUE(district_hin, state_id),
           UNIQUE(district_eng, state_id)
         )`,
-      pbk: `alter table pbk add column district_id integer references district(_id)`
+      pbk: `alter table pbk add column district_id integer references district(_id)`,
+      bachat_new_add_pb: `ALTER TABLE bachat_new ADD COLUMN past_bachat INTEGER DEFAULT 0`,
+      update_past_bachat : `update bachat_new 
+        set past_bachat = IFNULL((select sum(bn.bachat) as past_bachat
+        from bachat_new bn where 
+        bn.dept_id = bachat_new.dept_id AND bn.mm_id = bachat_new.mm_id AND
+        bn.item_id = bachat_new.item_id AND bn.unit_id = bachat_new.unit_id AND
+        IFNULL(bn.subitem_id, 0) = IFNULL(bachat_new.subitem_id, 0) AND 
+        IFNULL(bn.condition_id, 0) = IFNULL(bachat_new.condition_id, 0) AND
+        (bn.year < bachat_new.year OR (bn.year = bachat_new.year AND bn.month < bachat_new.month)) ), 0 )`,
     },
     /* TODO cleanup task 
       1. remove table - closing.

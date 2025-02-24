@@ -264,7 +264,7 @@
                                        [ngClass]="{'cell-highlight':data.showTooltip[m]}">
                                        <div class="cell-content"
                                           [ngClass]="{'error': data.arr_sum_bachat[m] < 0, 'stock':data.arr_sum_bachat[m] > 0}">
-                                          {{data.arr_sum_bachat[m]}}</div>
+                                          {{data.arr_sum_bachat[m] + data.arr_past_bachat[m]}}</div>
                                        <div [ngClass]="{'comment-indicator':data.arr_comment[m]}">
                                        </div>
                                        <div class="comment-tooltip"

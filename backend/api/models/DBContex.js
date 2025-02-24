@@ -434,6 +434,7 @@ class DBContex {
         else {
             let bchtN = this.db.prepare(this.query.bachat_new['insert_' + AJtype + '_ins']).run(obj);
         }
+        this.db.prepare(this.query.bachat_new.update_past_bachat).run({ ...obj, qty: (AJtype == 'jawak' ? -obj.qty : obj.qty) });
         this.db.prepare(this.query.product['update_' + AJtype + '_ins']).run(obj);
         return;
     }
@@ -450,6 +451,7 @@ class DBContex {
             this.db.prepare(this.query.bachat['update_' + AJtype + '_del']).run(obj)
             this.db.prepare(this.query.bachat_new['update_' + AJtype + '_del']).run(obj);
             this.db.prepare(this.query.product['update_' + AJtype + '_del']).run(obj);
+            this.db.prepare(this.query.bachat_new.update_past_bachat).run({ ...obj, qty: (AJtype == 'aawak' ? -obj.qty : obj.qty) });
             return;
         }
     }

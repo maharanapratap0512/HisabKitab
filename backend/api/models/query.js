@@ -957,6 +957,12 @@ const bachat_new = {
             used_jawak = round((CASE WHEN @jawak_type_id = 27 THEN used_jawak - @qty ELSE used_jawak END), 2),
             bachat = round(bachat + @qty, 2)
         where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
+    , update_past_bachat:
+        `update bachat_new
+        set
+            past_bachat = past_bachat + @qty
+            where (year > @year OR (year = @year AND month > @month)) AND 
+            dept_id = @dept_id AND mm_id = @mm_id AND item_id = @item_id AND unit_id = @unit_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)`
     , update:
         `update bachat_new set
         month=@month,
