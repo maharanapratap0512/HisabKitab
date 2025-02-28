@@ -374,48 +374,37 @@ export class ExcelExportService {
     let rowNum = 3;
     json.forEach(function (item, i) {
 
-      worksheet.addRow(json[i]);
-      if (awkErrorCol) {
-        worksheet.getCell(rowNum, awkErrorCol).font = {
-          name: 'Arial Black',
-          color: { argb: 'FFFF0000' },
-          family: 2,
-          size: 12
-        }
-      }
-      if (jwkErrorCol) {
-        worksheet.getCell(rowNum, jwkErrorCol).font = {
-          name: 'Arial Black',
-          color: { argb: 'FFFF0000' },
-          family: 2,
-          size: 12
-        }
-      }
-      rowNum += 1;
-      for (let j = 0; j < Subtitle.length; j++) {
+      if (Subtitle.length > 1) {
+        json[i][Subtitle[1]].forEach(function (subrow: any, si: any) {
 
-        if (j > 0) {
-          json[i][Subtitle[j]].forEach(function (subrow: any) {
-
-            let row: any = {};
-            for (let key of Object.keys(subrow)) {
-              row[Subtitle[j].substring(0, 1) + '_' + key] = subrow[key];
-            }
+          let row: any = {};
+          for (let key of Object.keys(subrow)) {
+            row[Subtitle[1].substring(0, 1) + '_' + key] = subrow[key];
+          }
+          if (si == 0) {
+            worksheet.addRow({ ...json[i], ...row });
+          } else {
             worksheet.addRow(row);
-            if (jwkErrorCol) {
-              worksheet.getCell(rowNum, jwkErrorCol).font = {
-                name: 'Arial Black',
-                color: { argb: 'FFFF0000' },
-                family: 2,
-                size: 12
-              }
+          }
+          if (awkErrorCol) {
+            worksheet.getCell(rowNum, awkErrorCol).font = {
+              name: 'Arial Black',
+              color: { argb: 'FFFF0000' },
+              family: 2,
+              size: 12
             }
-            rowNum++;
-          });
-        }
+          }
+          if (jwkErrorCol) {
+            worksheet.getCell(rowNum, jwkErrorCol).font = {
+              name: 'Arial Black',
+              color: { argb: 'FFFF0000' },
+              family: 2,
+              size: 12
+            }
+          }
+          rowNum++;
+        });
       }
-      worksheet.addRow({})
-      rowNum++;
     });
 
 

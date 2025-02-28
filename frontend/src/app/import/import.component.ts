@@ -269,8 +269,11 @@ export class ImportComponent implements OnInit {
   }
 
   async processImport(i: number) {
-    await this.http.put(this.api.getUrl('IMPORTEXPORT') + 'process', { data: this.importData[i], autoUpdate: this.importForm.value.autoUpdate }).subscribe((data: any) => {
+    await this.http.put(this.api.getUrl('IMPORTEXPORT') + 'process', { data: this.importData[i], autoUpdate: this.importForm.value.autoUpdate }).subscribe(async(data: any) => {
       this.import$.next(data);
+      if(this.importData.length > i+1){
+        await this.processImport(i+1);
+      }
     }, (err) => {
       this.import$.next({ success: false });
     });
@@ -397,8 +400,8 @@ export class ImportComponent implements OnInit {
       });
 
 
-      for (let i = 0; i < this.importData.length; i++) {
-        await this.processImport(i);
+      if(this.importData.length > 0){
+        await this.processImport(0);
       }
 
       let valid = this.importData.filter((i: { valid: boolean, jawak_detail: any[]; }) => i.valid == false && i.jawak_detail.filter((j: { valid: Boolean; }) => j.valid == false).length == 0);

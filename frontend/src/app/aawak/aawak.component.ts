@@ -1301,10 +1301,10 @@ export class AawakComponent implements OnInit {
                 break;
               case "mm": obj.mm = exceldata[i][j];
 
-                let getmm = this.mms.find((m: any) => [m.mm_hin, m.mm_eng, m.mm_code].includes(obj.mm));
+                let getmm = this.mms.find((m: any) => [m.mm_hin?.trim(), m.mm_eng?.trim(), m.mm_code].includes(obj.mm));
                 if (getmm) {
                   obj.mm_id = getmm._id;
-                } else {
+                } else {                  
                   let dictmm = this.dictionary.find((d: any) => d.type == "mm" && d.name == obj.mm);
                   obj.mm_id = dictmm ? dictmm.id : null;
                 }
@@ -1346,7 +1346,7 @@ export class AawakComponent implements OnInit {
                 }
                 break;
               case "item": obj.item = exceldata[i][j];
-                let getitem = this.items.find((i: any) => [i.item_hin.trim(), i.item_eng, i.item_code].includes(obj.item));
+                let getitem = this.items.find((i: any) => [i.item_hin.trim(), i.item_eng?.trim(), i.item_code?.trim()].includes(obj.item));
                 if (getitem) {
                   obj.item_id = getitem._id;
                 } else {
@@ -1357,7 +1357,7 @@ export class AawakComponent implements OnInit {
               case "subitem": obj.subitem = exceldata[i][j];
                 if (obj.item_id) {
                   let getitem = this.items.find((i: any) => i._id == obj.item_id);
-                  let getsubitem = getitem.subitems.find((m: any) => [m.subitem_hin.trim(), m.subitem_eng, m.subitem_code].includes(obj.subitem));
+                  let getsubitem = getitem.subitems.find((m: any) => [m.subitem_hin?.trim(), m.subitem_eng?.trim(), m.subitem_code].includes(obj.subitem));
                   obj.subitem_id = getsubitem ? getsubitem._id : null;
                 }
                 break;
@@ -1384,7 +1384,7 @@ export class AawakComponent implements OnInit {
               case "condition":
                 if (this.settings.aawak.condition_id) {
                   obj.condition = exceldata[i][j];
-                  let getcondition = this.conditions.find((c: any) => [c.list_name_hin, c.list_name_eng].includes(obj.condition));
+                  let getcondition = this.conditions.find((c: any) => [c.list_name_hin?.trim(), c.list_name_eng?.trim()].includes(obj.condition));
                   if (getcondition) {
                     obj.condition_id = getcondition._id;
                   } else {
@@ -1397,7 +1397,7 @@ export class AawakComponent implements OnInit {
               case "aawak_mm":
               case "awk_mm":
               case "awk mm": obj.aj_mm = exceldata[i][j];
-                let getawkmm = this.mms.find((m: any) => [m.mm_hin, m.mm_eng, m.mm_code].includes(obj.aj_mm));
+                let getawkmm = this.mms.find((m: any) => [m.mm_hin?.trim(), m.mm_eng?.trim(), m.mm_code?.trim()].includes(obj.aj_mm));
                 if (getawkmm) {
                   obj.aj_mm_id = getawkmm._id;
                 } else {
@@ -1409,7 +1409,7 @@ export class AawakComponent implements OnInit {
               case "awk type":
               case "awk_type":
               case "aawak_type": obj.aj_type = exceldata[i][j];
-                let getaawak_type = this.aawak_types.find((c: any) => [c.list_name_hin, c.list_name_eng].includes(obj.aj_type));
+                let getaawak_type = this.aawak_types.find((c: any) => [c.list_name_hin?.trim(), c.list_name_eng?.trim()].includes(obj.aj_type));
                 if (getaawak_type) {
                   obj.aj_type_id = getaawak_type._id;
                 } else {
@@ -1495,7 +1495,7 @@ export class AawakComponent implements OnInit {
               case "jwk_mm":
               case "jawak_mm":
               case "jawak mm": jwkobj.aj_mm = exceldata[i][j];
-                let getmm = this.mms.find((m: any) => [m.mm_hin, m.mm_eng, m.mm_code].includes(jwkobj.aj_mm));
+                let getmm = this.mms.find((m: any) => [m.mm_hin?.trim(), m.mm_eng?.trim(), m.mm_code?.trim()].includes(jwkobj.aj_mm));
                 if (getmm) {
                   jwkobj.aj_mm_id = getmm._id;
                   jwkobj.aj_mm_hin = getmm.mm_hin;
@@ -1526,7 +1526,7 @@ export class AawakComponent implements OnInit {
               case "usage_category":
               case "usage category":
                 jwkobj.usage_category = exceldata[i][j];
-                let getcategory = this.categories.find((c: { category_hin: any; category_eng: any; }) => [c.category_hin, c.category_eng].includes(exceldata[i][j]));
+                let getcategory = this.categories.find((c: { category_hin: any; category_eng: any; }) => [c.category_hin?.trim(), c.category_eng?.trim()].includes(exceldata[i][j]));
                 if (getcategory) {
                   jwkobj.usage_category_id = getcategory._id;
                   jwkobj.usage_category_hin = getcategory.category_hin;
@@ -1539,7 +1539,7 @@ export class AawakComponent implements OnInit {
               case "jwk type":
               case "jawak_type":
               case "jawak type": jwkobj.aj_type = exceldata[i][j];
-                let getjawak_type = this.jawak_types.find((c: any) => [c.list_name_hin, c.list_name_eng].includes(jwkobj.aj_type));
+                let getjawak_type = this.jawak_types.find((c: any) => [c.list_name_hin?.trim(), c.list_name_eng?.trim()].includes(jwkobj.aj_type));
                 if (getjawak_type) {
                   jwkobj.aj_type_id = getjawak_type._id;
                   jwkobj.aj_type_hin = getjawak_type.list_name_hin;

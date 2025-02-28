@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpInterceptor, HttpParams
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { throwError, Observable } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap, timeout } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -89,6 +89,7 @@ export class HttpService {
       }),
     };
     return this.http.put(url, body, httpOptions).pipe(
+      timeout(900000), // Add the timeout here
       tap(val => {
         catchError(this.handleError);
       })

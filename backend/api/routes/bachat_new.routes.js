@@ -131,9 +131,10 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                             row.past_bachat = row.arr_past_bachat[i];
                         } else {
                             row.arr_past_bachat[i] = row.bachat + row.past_bachat;
+                            row.past_bachat = row.bachat + row.past_bachat;
                         }
                     } else {
-                        row.arr_past_bachat[i] = row.arr_past_bachat[i] == null ? row.arr_past_bachat[i - 1] || 0 : 0;
+                        row.arr_past_bachat[i] = row.arr_past_bachat[i] == null ? (row.arr_past_bachat[i - 1] || 0) + row.arr_sum_bachat[i - 1] : 0;
                     }
                 }
 

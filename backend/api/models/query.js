@@ -912,14 +912,22 @@ const bachat_new = {
 
     , insert:
         `insert into bachat_new (
-            month, year, mm_id, item_id, subitem_id, condition_id, dept_id, total_aawak, jawak, used_jawak, bachat, unit_id)
+            month, year, mm_id, item_id, subitem_id, condition_id, dept_id, total_aawak, jawak, used_jawak, bachat, unit_id, past_bachat)
         values(
-            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, @total_aawak, @jawak, @used_jawak, @bachat, @unit_id);`
+            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, @total_aawak, @jawak, @used_jawak, @bachat, @unit_id,
+            IFNULL((select IFNULL(past_bachat, 0) + IFNULL(bachat, 0) from bachat_new 
+            where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND unit_id = @unit_id 
+            AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)
+            AND ((year = @year AND month < @month) OR year < @year) order by year desc, month desc limit 1), 0));`
     , insert_aawak_ins:
         `insert into bachat_new (
-            month, year, mm_id, item_id, subitem_id, condition_id, dept_id, total_aawak, bachat, unit_id)
+            month, year, mm_id, item_id, subitem_id, condition_id, dept_id, total_aawak, bachat, unit_id, past_bachat)
         values(
-            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, @qty, @qty, @unit_id);`
+            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, @qty, @qty, @unit_id, 
+            IFNULL((select IFNULL(past_bachat, 0) + IFNULL(bachat, 0) from bachat_new 
+            where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND unit_id = @unit_id 
+            AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)
+            AND ((year = @year AND month < @month) OR year < @year) order by year desc, month desc limit 1), 0));`
     , update_aawak_ins:
         `update bachat_new
         set
@@ -940,9 +948,13 @@ const bachat_new = {
         where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , insert_jawak_ins:
         `insert into bachat_new (
-            month, year, mm_id, item_id, subitem_id, condition_id, dept_id, jawak, used_jawak, bachat, unit_id)
+            month, year, mm_id, item_id, subitem_id, condition_id, dept_id, jawak, used_jawak, bachat, unit_id, past_bachat)
         values(
-            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, (CASE WHEN @jawak_type_id <> 27 THEN @qty ELSE 0 END), (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END), 0 - @qty, @unit_id);`
+            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, (CASE WHEN @jawak_type_id <> 27 THEN @qty ELSE 0 END), (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END), 0 - @qty, @unit_id,
+            IFNULL((select IFNULL(past_bachat, 0) + IFNULL(bachat, 0) from bachat_new 
+            where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND unit_id = @unit_id 
+            AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)
+            AND ((year = @year AND month < @month) OR year < @year) order by year desc, month desc limit 1), 0));`
     , update_jawak_ins:
         `update bachat_new
         set
