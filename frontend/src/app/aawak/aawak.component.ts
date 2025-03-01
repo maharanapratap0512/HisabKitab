@@ -1357,7 +1357,7 @@ export class AawakComponent implements OnInit {
               case "subitem": obj.subitem = exceldata[i][j];
                 if (obj.item_id) {
                   let getitem = this.items.find((i: any) => i._id == obj.item_id);
-                  let getsubitem = getitem.subitems.find((m: any) => [m.subitem_hin?.trim(), m.subitem_eng?.trim(), m.subitem_code].includes(obj.subitem));
+                  let getsubitem = getitem?.subitems.find((m: any) => [m.subitem_hin?.trim(), m.subitem_eng?.trim(), m.subitem_code].includes(obj.subitem));
                   obj.subitem_id = getsubitem ? getsubitem._id : null;
                 }
                 break;
