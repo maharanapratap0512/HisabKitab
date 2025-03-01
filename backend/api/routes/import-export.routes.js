@@ -264,31 +264,87 @@ router.put('/process', async (req, res, next) => {
     }
 });
 
+// router.put('/finish', async (req, res, next) => {
+//     if (req.body.history) {
+//         try {
+//             await Fn.begin();
+//             for (let data of req.body.history) {
+//                 console.log(data);
+//                 await DB.runQuery('import_history', 'update_add_count', { obj: data }).then(async (result) => {
+//                     if (!result.changes) {
+//                         await DB.insert('import_history', data, null, false);
+//                     }
+//                 });
+//             }
+//             await DB.runQuery('temp_import', 'delete');
+//             await Fn.commit();
+//             res.json({
+//                 success: true
+//             })
+//         } catch (err) {
+//             await Fn.rollback();
+//             return next(err);
+//         }
+//     } else {
+//         return next(new Error('please provide import history data.'))
+//     }
+// });
+
+
 router.put('/finish', async (req, res, next) => {
-    if (req.body.history) {
-        try {
-            await Fn.begin();
-            for (let data of req.body.history) {
-                console.log(data);
-                await DB.runQuery('import_history', 'update_add_count', { obj: data }).then(async (result) => {
-                    if (!result.changes) {
-                        await DB.insert('import_history', data, null, false);
-                    }
-                });
+    if (!req.body.history) {
+        return next(new Error('Please provide import history data.'));
+    }
+
+    try {
+        await Fn.begin();
+        
+        // Process all updates in parallel
+        const updatePromises = req.body.history.map(async (data) => {
+            const result = await DB.runQuery('import_history', 'update_add_count', { obj: data });
+            if (!result.changes) {
+                await DB.insert('import_history', data, null, false);
             }
-            await DB.runQuery('temp_import', 'delete');
-            await Fn.commit();
-            res.json({
-                success: true
-            })
-        } catch (err) {
-            await Fn.rollback();
-            return next(err);
-        }
-    } else {
-        return next(new Error('please provide import history data.'))
+        });
+
+        await Promise.all(updatePromises);
+        
+        // Execute cleanup in sequence after updates
+        await DB.runQuery('temp_import', 'delete');
+        await Fn.commit();
+        
+        res.json({ success: true });
+    } catch (err) {
+        await Fn.rollback();
+        next(err);
     }
 });
+
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
 
 //get all updated list
 router.put('/updates/:dept_id', async (req, res, next) => {

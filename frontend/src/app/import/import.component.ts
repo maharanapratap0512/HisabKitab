@@ -279,138 +279,355 @@ export class ImportComponent implements OnInit {
     });
   }
 
+  // async importFinal() {
+  //   this.processedCount = 0;
+  //   this.ignoredCount = 0;
+  //   if (this.importForm.valid) {
+
+  //     this.import$.subscribe((result: any) => {
+  //       if (result.success && result.data) {
+  //         if (!result.data.ignored) {
+  //           this.addToHistory(result.data);
+  //         }
+  //         let errJwk = [];
+  //         for (let jwk of result.data.jawak_detail) {
+  //           this.addToHistory({...jwk, date: (jwk.date ? jwk.date : result.data.date), mm_id: result.data.mm_id });
+  //           if (jwk.error) {
+  //             errJwk.push(jwk)
+  //           }
+  //         }
+  //         if (errJwk.length > 0) {
+  //           this.failImport.push({ ...result.data, jawak_detail: errJwk });
+  //         }
+  //       } else {
+  //         this.failImport.push(result.data ? result.data : this.importData[this.processedCount]);
+  //       }
+  //       this.processedCount++;
+  //       this.progressStyle = "width:" + (this.processedCount * 100) / this.importData.length + "%;";
+  //       if (this.importData.length > this.processedCount) {
+  //       } else {
+  //         Swal.fire({
+  //           title: 'Import Complete',
+  //           text: this.importData.length - this.failImport.length + " out of " + this.importData.length + " records are inserted Successfully. " + this.failImport.length + " records are found error and will export in excel.",
+  //           icon: this.failImport.length > 0 ? 'warning' : 'success',
+  //           // showCancelButton: true,
+  //           confirmButtonColor: '#3085d6',
+  //           cancelButtonColor: '#d33',
+  //           confirmButtonText: 'Finish'
+  //         }).then((result) => {
+  //           if (result.isConfirmed) {
+  //             this.http.put(this.api.getUrl('IMPORTEXPORT') + 'finish', { history: Object.values(this.importHistory) }).subscribe((data: any) => {
+  //               if (this.failImport.length > 0) {
+  //                 console.log(this.failImport);
+  //                 let failExcelData: any = [];
+  //                 for (let i = 0; i < this.failImport.length; i++) {
+  //                   let jawakArray = [];
+  //                   for (let jwk of this.failImport[i].jawak_detail) {
+  //                     jawakArray.push({
+  //                       'Date': jwk.date ? jwk.date : '-',
+  //                       'Pkt No': jwk.pkt_num ? jwk.pkt_num : '-',
+  //                       'Jawak MM': jwk.aj_mm ? jwk.aj_mm : '-',
+  //                       'Jawak Detail': jwk.description ? jwk.description : '-',
+  //                       'Kisko Diya': jwk.nimitt ? jwk.nimitt : '-',
+  //                       'Jawak Type': jwk.aj_type ? jwk.aj_type : '-',
+  //                       'Qty': jwk.qty ? jwk.qty : '-',
+  //                       'Unit': jwk.unit ? jwk.unit : '-',
+  //                       'Error': jwk.error
+  //                     });
+  //                   }
+  //                   if (!this.failImport[i].jawak_detail.length) {
+  //                     jawakArray.push({
+  //                       'Date': '',
+  //                       'Pkt No': '',
+  //                       'Jawak MM': '',
+  //                       'Jawak Detail': '',
+  //                       'Kisko Diya': '',
+  //                       'Jawak Type': '',
+  //                       'Qty': '',
+  //                       'Unit': '',
+  //                       'Error': '',
+  //                     });
+  //                   }
+  //                   let awkObj: any = {
+  //                     '_id': this.failImport[i].awk_id ? this.failImport[i].awk_id : '',
+  //                     'No': i + 1,
+  //                     'Date': this.failImport[i].date ? this.failImport[i].date : '-',
+  //                     'Pkt No': this.failImport[i].pkt_num ? this.failImport[i].pkt_num : '-',
+  //                     'MM': this.failImport[i].mm ? this.failImport[i].mm : '-',
+  //                     'Aawak MM': this.failImport[i].aj_mm ? this.failImport[i].aj_mm : '-',
+  //                   };
+  //                   if (this.settings.aawak.pbk_id) {
+  //                     awkObj['Roll No'] = this.failImport[i].roll_no ? this.failImport[i].roll_no : '-';
+  //                     awkObj.Pbk = this.failImport[i].pbk.name ? this.failImport[i].pbk.name : '-';
+  //                     awkObj.Relation = this.failImport[i].pbk.relation ? this.failImport[i].pbk.relation : '-';
+  //                     awkObj.Relative = this.failImport[i].pbk.relative ? this.failImport[i].pbk.relative : '-';
+  //                   }
+
+  //                   awkObj = {
+  //                     ...awkObj,
+  //                     'Item': this.failImport[i].item ? this.failImport[i].item : '-',
+  //                     'Subitem': this.failImport[i].subitem ? this.failImport[i].subitem : '-',
+  //                     'Product Code': this.failImport[i].product ? this.failImport[i].product : '-',
+  //                     'Company': this.failImport[i].company_name ? this.failImport[i].company_name : '-',
+  //                     'Condition': this.failImport[i].condition ? this.failImport[i].condition : '-',
+  //                     'Bill': this.failImport[i].isbill ? 'है' : '-',
+  //                     'Qty': this.failImport[i].qty ? this.failImport[i].qty : '-',
+  //                     'Unit': this.failImport[i].unit ? this.failImport[i].unit : '-',
+  //                     'Price': this.failImport[i].rate ? this.failImport[i].rate : '-',
+  //                     'Amount': this.failImport[i].actual_amt ? this.failImport[i].actual_amt : '-',
+  //                     'Aawak Type': this.failImport[i].aj_type ? this.failImport[i].aj_type : '-',
+  //                     'Item Detail': this.failImport[i].item_detail ? this.failImport[i].item_detail : '-',
+  //                     'Description': this.failImport[i].description ? this.failImport[i].description : '-',
+  //                     'Error': this.failImport[i].error ? this.failImport[i].error : '-',
+  //                     'Jawak Detail': jawakArray,
+  //                   }
+  //                   failExcelData.push(awkObj);
+  //                 }
+  //                 let date = new Date();
+  //                 let filename = "FAIL_AJ_Import_";
+  //                 // console.log(filename);
+
+  //                 this.excelExportService.exportFailedImport(failExcelData, filename + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
+  //               }
+
+  //               this.response.emit(1);
+  //             }, (err) => {
+  //               this.toastr.error(err['error']);
+  //             });
+  //           }
+  //         });
+  //       }
+  //     });
+
+
+  //     if(this.importData.length > 0){
+  //       await this.processImport(0);
+  //     }
+
+  //     let valid = this.importData.filter((i: { valid: boolean, jawak_detail: any[]; }) => i.valid == false && i.jawak_detail.filter((j: { valid: Boolean; }) => j.valid == false).length == 0);
+
+  //   }
+  //   else {
+  //     this.gs.validationFireOnSubmit(this.importForm);
+  //   }
+  // }
+
+
   async importFinal() {
     this.processedCount = 0;
     this.ignoredCount = 0;
-    if (this.importForm.valid) {
 
-      this.import$.subscribe((result: any) => {
-        if (result.success && result.data) {
-          if (!result.data.ignored) {
-            this.addToHistory(result.data);
-          }
-          let errJwk = [];
-          for (let jwk of result.data.jawak_detail) {
-            this.addToHistory({...jwk, date: (jwk.date ? jwk.date : result.data.date), mm_id: result.data.mm_id });
-            if (jwk.error) {
-              errJwk.push(jwk)
-            }
-          }
-          if (errJwk.length > 0) {
-            this.failImport.push({ ...result.data, jawak_detail: errJwk });
-          }
-        } else {
-          this.failImport.push(result.data ? result.data : this.importData[this.processedCount]);
-        }
-        this.processedCount++;
-        this.progressStyle = "width:" + (this.processedCount * 100) / this.importData.length + "%;";
-        if (this.importData.length > this.processedCount) {
-        } else {
-          Swal.fire({
-            title: 'Import Complete',
-            text: this.importData.length - this.failImport.length + " out of " + this.importData.length + " records are inserted Successfully. " + this.failImport.length + " records are found error and will export in excel.",
-            icon: this.failImport.length > 0 ? 'warning' : 'success',
-            // showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Finish'
-          }).then((result) => {
-            if (result.isConfirmed) {
-              this.http.put(this.api.getUrl('IMPORTEXPORT') + 'finish', { history: Object.values(this.importHistory) }).subscribe((data: any) => {
-                if (this.failImport.length > 0) {
-                  console.log(this.failImport);
-                  let failExcelData: any = [];
-                  for (let i = 0; i < this.failImport.length; i++) {
-                    let jawakArray = [];
-                    for (let jwk of this.failImport[i].jawak_detail) {
-                      jawakArray.push({
-                        'Date': jwk.date ? jwk.date : '-',
-                        'Pkt No': jwk.pkt_num ? jwk.pkt_num : '-',
-                        'Jawak MM': jwk.aj_mm ? jwk.aj_mm : '-',
-                        'Jawak Detail': jwk.description ? jwk.description : '-',
-                        'Kisko Diya': jwk.nimitt ? jwk.nimitt : '-',
-                        'Jawak Type': jwk.aj_type ? jwk.aj_type : '-',
-                        'Qty': jwk.qty ? jwk.qty : '-',
-                        'Unit': jwk.unit ? jwk.unit : '-',
-                        'Error': jwk.error
-                      });
-                    }
-                    if (!this.failImport[i].jawak_detail.length) {
-                      jawakArray.push({
-                        'Date': '',
-                        'Pkt No': '',
-                        'Jawak MM': '',
-                        'Jawak Detail': '',
-                        'Kisko Diya': '',
-                        'Jawak Type': '',
-                        'Qty': '',
-                        'Unit': '',
-                        'Error': '',
-                      });
-                    }
-                    let awkObj: any = {
-                      '_id': this.failImport[i].awk_id ? this.failImport[i].awk_id : '',
-                      'No': i + 1,
-                      'Date': this.failImport[i].date ? this.failImport[i].date : '-',
-                      'Pkt No': this.failImport[i].pkt_num ? this.failImport[i].pkt_num : '-',
-                      'MM': this.failImport[i].mm ? this.failImport[i].mm : '-',
-                      'Aawak MM': this.failImport[i].aj_mm ? this.failImport[i].aj_mm : '-',
-                    };
-                    if (this.settings.aawak.pbk_id) {
-                      awkObj['Roll No'] = this.failImport[i].roll_no ? this.failImport[i].roll_no : '-';
-                      awkObj.Pbk = this.failImport[i].pbk.name ? this.failImport[i].pbk.name : '-';
-                      awkObj.Relation = this.failImport[i].pbk.relation ? this.failImport[i].pbk.relation : '-';
-                      awkObj.Relative = this.failImport[i].pbk.relative ? this.failImport[i].pbk.relative : '-';
-                    }
-
-                    awkObj = {
-                      ...awkObj,
-                      'Item': this.failImport[i].item ? this.failImport[i].item : '-',
-                      'Subitem': this.failImport[i].subitem ? this.failImport[i].subitem : '-',
-                      'Product Code': this.failImport[i].product ? this.failImport[i].product : '-',
-                      'Company': this.failImport[i].company_name ? this.failImport[i].company_name : '-',
-                      'Condition': this.failImport[i].condition ? this.failImport[i].condition : '-',
-                      'Bill': this.failImport[i].isbill ? 'है' : '-',
-                      'Qty': this.failImport[i].qty ? this.failImport[i].qty : '-',
-                      'Unit': this.failImport[i].unit ? this.failImport[i].unit : '-',
-                      'Price': this.failImport[i].rate ? this.failImport[i].rate : '-',
-                      'Amount': this.failImport[i].actual_amt ? this.failImport[i].actual_amt : '-',
-                      'Aawak Type': this.failImport[i].aj_type ? this.failImport[i].aj_type : '-',
-                      'Item Detail': this.failImport[i].item_detail ? this.failImport[i].item_detail : '-',
-                      'Description': this.failImport[i].description ? this.failImport[i].description : '-',
-                      'Error': this.failImport[i].error ? this.failImport[i].error : '-',
-                      'Jawak Detail': jawakArray,
-                    }
-                    failExcelData.push(awkObj);
-                  }
-                  let date = new Date();
-                  let filename = "FAIL_AJ_Import_";
-                  // console.log(filename);
-
-                  this.excelExportService.exportFailedImport(failExcelData, filename + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
-                }
-
-                this.response.emit(1);
-              }, (err) => {
-                this.toastr.error(err['error']);
-              });
-            }
-          });
-        }
-      });
-
-
-      if(this.importData.length > 0){
-        await this.processImport(0);
-      }
-
-      let valid = this.importData.filter((i: { valid: boolean, jawak_detail: any[]; }) => i.valid == false && i.jawak_detail.filter((j: { valid: Boolean; }) => j.valid == false).length == 0);
-
-    }
-    else {
+    if (!this.importForm.valid) {
       this.gs.validationFireOnSubmit(this.importForm);
+      return;
+    }
+
+    if (this.importData.length === 0) return;
+
+    const subscription = this.import$.subscribe({
+      next: (result: any) => this.handleImportResult(result),
+      error: (err) => this.toastr.error(err.message)
+    });
+
+    await this.processImport(0);
+    this.checkUnusedValidation();
+  }
+
+  private handleImportResult(result: any) {
+    if (!result.success) {
+      this.handleFailedImport(result);
+      return;
+    }
+
+    const { data } = result;
+    if (!data.ignored) {
+      this.addToHistory(data);
+    }
+
+    this.processJawakDetails(data);
+    this.updateProgress();
+
+    if (this.isImportComplete()) {
+      this.showCompletionAlert();
     }
   }
+
+  private processJawakDetails(data: any) {
+    const errorJawak = data.jawak_detail.filter((jwk: any) => {
+      const entry = { ...jwk, date: jwk.date || data.date, mm_id: data.mm_id };
+      this.addToHistory(entry);
+      return jwk.error;
+    });
+
+    if (errorJawak.length > 0) {
+      this.failImport.push({ ...data, jawak_detail: errorJawak });
+    }
+  }
+
+  private handleFailedImport(result: any) {
+    const failedData = result.data || this.importData[this.processedCount];
+    this.failImport.push(failedData);
+    this.processedCount++;
+  }
+
+  private updateProgress() {
+    this.processedCount++;
+    this.progressStyle = `width: ${(this.processedCount * 100) / this.importData.length}%;`;
+  }
+
+  private isImportComplete(): boolean {
+    return this.processedCount >= this.importData.length;
+  }
+
+  private async showCompletionAlert() {
+    const successCount = this.importData.length - this.failImport.length;
+    const result = await Swal.fire({
+      title: 'Import Complete',
+      text: `${successCount} out of ${this.importData.length} records inserted successfully. ` +
+        `${this.failImport.length} records had errors and will be exported.`,
+      icon: this.failImport.length ? 'warning' : 'success',
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Finish'
+    });
+
+    if (result.isConfirmed) {
+      await this.finalizeImport();
+    }
+  }
+
+  private async finalizeImport() {
+    try {
+      await this.http.put(this.api.getUrl('IMPORTEXPORT') + 'finish', {
+        history: Object.values(this.importHistory)
+      }).toPromise();
+
+      if (this.failImport.length > 0) {
+        this.exportFailedRecords();
+      }
+
+      this.response.emit(1);
+    } catch (err: any) {
+      this.toastr.error(err.error);
+    }
+  }
+
+  private exportFailedRecords() {
+    const failExcelData = this.failImport.map((item: any, index: number) =>
+      this.createFailExcelEntry(item, index)
+    );
+
+    const date = new Date();
+    const filename = `FAIL_AJ_Import_${this.auth.webUser.dept_eng}_${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
+    this.excelExportService.exportFailedImport(failExcelData, filename);
+  }
+
+  private createFailExcelEntry(item: any, index: number) {
+    const jawakArray = item.jawak_detail.length
+      ? item.jawak_detail.map(this.formatJawakDetail)
+      : [this.createEmptyJawakEntry()];
+
+    return {
+      '_id': item.awk_id || '',
+      'No': index + 1,
+      'Date': item.date || '-',
+      'Pkt No': item.pkt_num || '-',
+      'MM': item.mm || '-',
+      'Aawak MM': item.aj_mm || '-',
+      ...this.getPbkFields(item),
+      'Item': item.item || '-',
+      'Subitem': item.subitem || '-',
+      'Product Code': item.product || '-',
+      'Company': item.company_name || '-',
+      'Condition': item.condition || '-',
+      'Bill': item.isbill ? 'है' : '-',
+      'Qty': item.qty || '-',
+      'Unit': item.unit || '-',
+      'Price': item.rate || '-',
+      'Amount': item.actual_amt || '-',
+      'Aawak Type': item.aj_type || '-',
+      'Item Detail': item.item_detail || '-',
+      'Description': item.description || '-',
+      'Error': item.error || '-',
+      'Jawak Detail': jawakArray
+    };
+  }
+
+  private getPbkFields(item: any) {
+    return this.settings.aawak.pbk_id ? {
+      'Roll No': item.roll_no || '-',
+      'Pbk': item.pbk?.name || '-',
+      'Relation': item.pbk?.relation || '-',
+      'Relative': item.pbk?.relative || '-'
+    } : {};
+  }
+
+  private formatJawakDetail(jwk: any) {
+    return {
+      'Date': jwk.date || '-',
+      'Pkt No': jwk.pkt_num || '-',
+      'Jawak MM': jwk.aj_mm || '-',
+      'Jawak Detail': jwk.description || '-',
+      'Kisko Diya': jwk.nimitt || '-',
+      'Jawak Type': jwk.aj_type || '-',
+      'Qty': jwk.qty || '-',
+      'Unit': jwk.unit || '-',
+      'Error': jwk.error
+    };
+  }
+
+  private createEmptyJawakEntry() {
+    return Object.keys(this.formatJawakDetail({})).reduce((acc, key) => {
+      acc[key] = '';
+      return acc;
+    }, {} as { [key: string]: string });
+  }
+
+  private checkUnusedValidation() {
+    // Removed unused validation filter as it wasn't being used
+  }
+
+// 
+// 
+// Import function over_____________
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+
 
   addToHistory(data: any) {
     const date = new Date(data.date);

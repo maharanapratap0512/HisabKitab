@@ -511,7 +511,8 @@
                      <td>{{data.description?data.description:'-'}}</td>
                      <td [ngClass]="{'marked': !data.qty || !data.unit_id}">{{data.qty?data.qty:'-'}}
                         {{data.unit_short?data.unit_short:'-'}} <br />
-                        @{{data.rate?data.rate:0}} ={{data.actual_amt?data.actual_amt:0}}
+                        &#64;{{data.rate?data.rate:0}} ={{data.actual_amt?data.actual_amt:0}}
+                        <!-- &#64;  ==  '@' in HTML -->
                      </td>
                      <td [ngClass]="{'marked': !data.aj_type_id}">
                         {{data.aj_type_hin}}
