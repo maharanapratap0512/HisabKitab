@@ -84,12 +84,12 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             left join department dept on dept._id = bcht.dept_id ${conditionQuery2}
             group by bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id;`
 
-            // console.log(sql);
+            console.log(sql1);
             let stmtN = DB.db.prepare(sql1);
 
             for (let row of stmtN.iterate({ order: 'updated_at desc' })) {
 
-                console.log(row);
+                // console.log(row);
                 for (let key of Object.keys(row)) {
                     if (key.includes('arr')) {
                         row[key] = row[key] ? JSON.parse(row[key]) : []
@@ -123,7 +123,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                     row.arr_past_bachat = months.map(m => row.arr_months.includes(m) ? row.arr_past_bachat[row.arr_months.indexOf(m)] : null);
                     // row.arr_comment = months.map(m => row.arr_months.includes(m) ? row.arr_comment[row.arr_months.indexOf(m)] : null);
                 }
-                // console.log(row.arr_sum_bachat);
+                console.log(row.arr_sum_bachat);
                 row.arr_months = months;
                 row.showTooltip = {};
 
@@ -135,7 +135,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                             row.past_bachat = row.arr_past_bachat[i];
                         } else {
                             row.arr_past_bachat[i] = row.t_p_b;
-                            row.past_bachat = row.bachat + row.t_p_b;
+                            row.past_bachat = row.t_p_b;
                         }
                     } else {
                         row.arr_past_bachat[i] = row.arr_past_bachat[i] == null ? (row.arr_past_bachat[i - 1] || 0) + row.arr_sum_bachat[i - 1] : 0;
@@ -258,7 +258,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                     bachat.push(row);
                 }
             }
-        } else {
+        } else if (req.body.year) {
             conditionQuery1 += `${req.body.year ? ` AND bn.year = '${req.body.year}'` : ``}`
             let sql = DB.query.bachat_new.select_all.replace('?', conditionQuery1).replace('#', conditionQuery2);
             let stmt = DB.db.prepare(sql);
@@ -269,8 +269,19 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                     }
                 }
                 if (!req.body.category_id || (req.body.category_id && ((row.arr_subitem_categories && row.arr_subitem_categories.includes(req.body.category_id)) || (!row.arr_subitem_categories && row.arr_item_categories.includes(req.body.category_id))))) {
-                    bachat.push(row);
+                    bcht_new.push(row);
                 }
+            }
+        } else {
+            let sql = DB.query.bachat_new.select_all.replace('?', conditionQuery1).replace('#', '');
+            let stmt = DB.db.prepare(sql);
+            for (let row of stmt.iterate({ order: 'updated_at desc' })) {
+                for (let key of Object.keys(row)) {
+                    if (key.includes('arr')) {
+                        row[key] = row[key] ? JSON.parse(row[key]) : []
+                    }
+                }
+                bcht_new.push(row);
             }
         }
         res.json({

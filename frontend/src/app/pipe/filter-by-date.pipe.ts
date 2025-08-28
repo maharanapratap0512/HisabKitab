@@ -16,7 +16,7 @@ export class FilterByDatePipe implements PipeTransform {
     let filterValue = [];
     for (let i in value) {
       // comparing date with lock date.
-      if (!value[i].restrict_year || date < new Date(value[i].restrict_year, value[i].restrict_month-1)) {
+      if (!value[i].restrict_year || date < new Date(value[i].restrict_year, value[i].restrict_month - 1)) {
         filterValue.push(value[i]);
       }
     }

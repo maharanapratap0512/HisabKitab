@@ -27,6 +27,8 @@ export class AawakComponent implements OnInit {
   totalItems: any;
 
   isLoader: boolean = false;
+  isDeleting: boolean = false;
+  toBeDelete: any = [];
   term: any;
   bunch_entry: any = false;
   showModal: string = '';
@@ -116,6 +118,7 @@ export class AawakComponent implements OnInit {
   }
   // importPending: any = false;
   dictionary: any = [];
+  editIndex: any = null;
   itemSubitemMerge: any = false;
   orderBy: any = false;
   loadingStatus: any = "मैं आत्मा शांत स्वरूप हूँ ।";
@@ -999,8 +1002,98 @@ export class AawakComponent implements OnInit {
 
   edit(data: any) {
     this.editData = data;
-    this.showModal = 'Edit Aawak'
-    $('#showModal').modal('show');
+    this.openModal('Edit Aawak');
+  }
+
+  editJawakResponse(ev: any) {
+    if (ev._id > 0) {
+      this.isLoader = true;
+      this.aawakData[this.editIndex.i].jawak_detail.splice(this.editIndex.j, 1, ev);
+      this.aawakData[this.editIndex.i].remaining_qty -= (ev.qty - this.editData.qty)
+      this.editData = null;
+      this.editIndex = null;
+      this.closeModal();
+      this.isLoader = false;
+    }
+    else {
+      // this.toastr.error("Something went Wrong.")
+      // console.log("message", ev);
+    }
+  }
+
+  editJawak(i: any, j: any) {
+    this.editData = this.aawakData[i].jawak_detail[j];
+    this.editIndex = { i: i, j: j };
+    this.openModal('Edit Jawak');
+  }
+
+  deleteSelection(i: any, id: any) {
+    console.log(this.aawakData[i].delete);
+
+    if (this.aawakData[i].delete) {
+      this.toBeDelete.push(id);
+    } else {
+      for (let j in this.toBeDelete) {
+        if (this.toBeDelete[j] == id) {
+          this.toBeDelete.splice(j, 1);
+          break;
+        }
+      }
+    }
+    console.log(this.toBeDelete);
+
+  }
+
+  deleteSelectAll() {
+    if (this.aawakData.length == this.toBeDelete.length) {
+      for (let i in this.aawakData) {
+        this.aawakData[i].delete = false;
+      }
+      this.toBeDelete = [];
+    } else {
+      for (let i in this.aawakData) {
+        this.aawakData[i].delete = true;
+        this.toBeDelete.push(this.aawakData[i]._id);
+      }
+    }
+    console.log(this.toBeDelete);
+
+  }
+
+  deleteMultiple() {
+    if (!this.isDeleting) {
+      this.isDeleting = true;
+    } else {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          let s_count = 0;
+          for (let id of this.toBeDelete) {
+            let res: any = await this.fnDelete(id);
+            console.log(res);
+            if (res) {
+              s_count += 1;
+            }
+            
+          }
+          let msg = s_count + " Deleted Successfully out of " + this.toBeDelete.length;
+          
+          this.toBeDelete = [];
+          this.toastr.error(msg);
+          this.isDeleting = !this.isDeleting;
+        } else {
+          this.isDeleting = !this.isDeleting;
+        }
+      });
+    }
+
   }
 
   delete(i: any, id: any) {
@@ -1028,6 +1121,29 @@ export class AawakComponent implements OnInit {
         });
       }
     })
+  }
+
+  async fnDelete(id: any) {
+    return new Promise((resolve, reject)=>{
+      this.http.delete(this.api.getUrl('AAWAK') + '/' + id).subscribe((data: any) => {
+        if (data['success']) {
+          for (let i in this.aawakData) {
+            if (this.aawakData[i]._id == id) {
+              this.aawakData.splice(i, 1);
+            }
+            this.total_count -= 1;
+          }
+          return resolve(true);
+        }
+        else {
+          this.toastr.error(data['message']);
+          return reject(false);
+        }
+      }, (err) => {
+        return reject(false);
+      });
+    })
+    
   }
 
   deleteOneJawak(i: any, j: any, id: any) {
@@ -1304,7 +1420,7 @@ export class AawakComponent implements OnInit {
                 let getmm = this.mms.find((m: any) => [m.mm_hin?.trim(), m.mm_eng?.trim(), m.mm_code].includes(obj.mm));
                 if (getmm) {
                   obj.mm_id = getmm._id;
-                } else {                  
+                } else {
                   let dictmm = this.dictionary.find((d: any) => d.type == "mm" && d.name == obj.mm);
                   obj.mm_id = dictmm ? dictmm.id : null;
                 }

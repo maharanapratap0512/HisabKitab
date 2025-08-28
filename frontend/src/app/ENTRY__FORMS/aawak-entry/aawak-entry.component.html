@@ -512,6 +512,78 @@
             <div class="col-md-12 mb-3" *ngIf="settings.aawak.jawak.visible">
                <div class=" card card-body">
                   <h5 class="card-title">Jawak Details</h5>
+
+                  <button class="btn btn-sm btn-primary" (click)="addJawak()" *ngIf="f.valid">
+                     <i class="dripicons-plus h4 icon-mx-2"></i> Jawak
+                  </button>
+                  <h5 *ngIf="!f.valid" class="d-flex justify-content-center text-danger">Please Complete Aawak Entry
+                     First</h5>
+                  <table id="tbl" #tbl class="table-sm table-striped table-bordered dt-responsive mt-1">
+                     <thead>
+                        <tr>
+                           <td style="width: 70px;">No.</td>
+                           <td style="width: 100px;">Date</td>
+                           <td *ngIf="settings.jawak.lot_no">Lot No</td>
+                           <td *ngIf="settings.jawak.pkt_num">Pkt num</td>
+                           <td>Jawak MM</td>
+                           <td *ngIf="settings.jawak.pbk_id">Jawak PBK</td>
+                           <td>Item - Subitem</td>
+                           <td *ngIf="settings.jawak.condition_id">Condition</td>
+                           <td>Quantity</td>
+                           <td *ngIf="settings.jawak.rate">Rate</td>
+                           <td *ngIf="settings.jawak.actual_amt">Amount</td>
+                           <td *ngIf="settings.jawak.aawak_source_id">Aawak Source</td>
+                           <td>Jawak Type</td>
+                           <td *ngIf="settings.jawak.usage_list_id">Usage List</td>
+                           <td *ngIf="settings.jawak.item_detail">Item Detail</td>
+                           <td *ngIf="settings.jawak.description">Description</td>
+                        </tr>
+
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let data of awkfg.jawak_detail; let i = index;">
+                           <td>
+                              {{i+1}}
+                              <i class="uil uil-edit-alt mx-1 text-primary" (click)="editJawak(i)"></i>
+                              <i class="uil uil-trash text-danger" (click)="remove(i,data._id)"></i>
+                              
+                           </td>
+                           <td>{{data.date | date:'dd-MM-yyyy'}}</td>
+                           <td *ngIf="settings.jawak.lot_no">{{data.lot_no}}</td>
+                           <td *ngIf="settings.jawak.pkt_num">{{data.pkt_num ? data.pkt_num : ''}}</td>
+                           <td>{{data.jawak_mm_id ? data.jawak_mm_hin : ''}}</td>
+                           <td *ngIf="settings.jawak.pbk_id">{{data.pbk_id ? data.roll_no + '-' +
+                              data.pbk_hin : ''}}</td>
+                           <td>{{data.item_hin}}
+                              {{ data.subitem_id ? + ' - ' + data.subitem_hin : ''}}
+                           </td>
+                           <td *ngIf="settings.jawak.condition_id">{{data.condition_id ?
+                              data.condition_hin : ''}}</td>
+                           <td>{{data.qty}} {{data.unit_short}}</td>
+                           <td *ngIf="settings.jawak.rate">{{data.rate ? data.rate : ''}}</td>
+                           <td *ngIf="settings.jawak.actual_amt">{{data.actual_amt ? data.actual_amt :
+                              ''}}</td>
+                           <td *ngIf="settings.jawak.aawak_source_id">{{data.aawak_source_id ?
+                              data.aawak_source_hin : ''}}</td>
+                           <td>{{data.jawak_type_id ? data.jawak_type_hin :
+                              ''}}</td>
+                           <td *ngIf="settings.jawak.usage_list_id ">{{data.usage_list_id ?
+                              data.usage_list_hin : ''}}</td>
+                           <td *ngIf="settings.jawak.item_detail">{{data.item_detail ? data.item_detail
+                              : ''}}</td>
+                           <td *ngIf="settings.jawak.description">{{data.description ? data.description
+                              : ''}}</td>
+                        </tr>
+                     </tbody>
+                  </table>
+
+               </div>
+            </div>
+
+            <!-- Jawak Details array -->
+            <div class="col-md-12 mb-3" *ngIf="settings.aawak.jawak.visible">
+               <div class=" card card-body">
+                  <h5 class="card-title">Jawak Details</h5>
                   <div class="row">
 
                      <div class="col-md-2 mb-3">
@@ -584,7 +656,8 @@
                   </div>
                   <button type="button" [disabled]="(jmm === null && jpbk === null) || jdate === null || jqty === null"
                      class="btn btn-primary mt-3" (click)="add_jwk()">+ Add</button>
-                  <div class="mt-3 p-2" style="max-height: 200px;;overflow-y: auto;">
+                  <button class="btn btn-sm btn-outline-info" (click)="addJawak()">Add Full Jawak</button>
+                  <div class="mt-3 p-2" style="max-height: 200px;overflow-y: auto;">
                      <div class="row mb-2 border-secondary border-bottom"
                         *ngFor="let f of awkfg.jawak_detail;let i=index">
                         <div class="col-md-1">{{i+1}}</div>
@@ -620,6 +693,14 @@
                   (click)="showModal = ''" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+               <!-- Add jawak  -->
+               <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
+                  [noAPICall]="true" [aawakRef]="editData"></app-jawak-entry>
+
+               <!-- Add jawak  -->
+               <app-jawak-entry *ngIf="showModal == 'Edit Jawak'" (response)='editJawakResponse($event)'
+                  [noAPICall]="true" [isEdit]="true" [getData]="editData"></app-jawak-entry>
+
                <!-- Add State  -->
                <app-state-entry *ngIf="showModal == 'Add State'" (response)="stateAddResponse($event)">
                </app-state-entry>

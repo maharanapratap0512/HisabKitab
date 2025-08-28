@@ -176,12 +176,20 @@ class DBContex {
     async insert(tblname, obj, dept_id = null, get = true) {
         return new Promise(async (resolve, reject) => {
             try {
-                obj.active = dept_id == 1 ? 1 : 0;
-
-                // console.log("insert",result);
+                let sql = ``;
+                obj.active = 1;
+                if (this.tbInterface[tblname]) {
+                    obj = { ...this.tbInterface[tblname], ...obj };
+                    obj.add_by_dept_id = dept_id;
+                    sql = await this.query.queryBuilder.insert(tblname, obj);
+                } else {
+                    sql = this.query[tblname].insert;
+                }
+                let lastID = await this.getLastID(tblname, dept_id);
+                obj._id = lastID ? lastID + 1 : ((dept_id * 100000) + 1);
                 // console.log("insert obj_______", obj);
                 // console.log("sql", this.query[tblname].insert);
-                const result = this.db.prepare(this.query[tblname].insert).run(obj);
+                const result = this.db.prepare(sql).run(obj);
 
                 let getres = [];
                 // if inserted success
@@ -296,6 +304,7 @@ class DBContex {
     async delete(tblname, id) {
         return new Promise(async (resolve, reject) => {
             try {
+                console.log(`delete from ${tblname} where _id = ${id}`);
                 const result = this.db.prepare(`delete from ${tblname} where _id = ${id} `).run();
                 return resolve(result);
             }
@@ -333,6 +342,18 @@ class DBContex {
                 }
                 const stmt = await this.db.prepare(sql).get();
                 resolve(stmt);
+            }
+            catch (err) { reject(err) }
+        })
+    }
+
+    async getLastID(tblname, dept_id = null) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let conditionString = dept_id ? `(_id > ${dept_id * 100000} AND _id < ${(dept_id + 1) * 100000})` : null;
+                let sql = `select max(_id) as last_id from ${tblname}` + (conditionString && conditionString.trim() != '' ? ` where ${conditionString} ` : ``);
+                const stmt = await this.db.prepare(sql).get();
+                resolve(stmt.last_id ? stmt.last_id : null);
             }
             catch (err) { reject(err) }
         })

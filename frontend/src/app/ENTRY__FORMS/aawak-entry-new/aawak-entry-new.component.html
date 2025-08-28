@@ -34,7 +34,7 @@
                             [ngClass]="{ 'validation': (mm_id?.touched || fMain.submitted) && mm_id.errors?.['required']}"
                             required>
                             <ng-option selected="selected" disabled value="">MM</ng-option>
-                            <ng-option *ngFor="let item of mms" [value]="item._id">
+                            <ng-option *ngFor="let item of mms | filterByDate:fs.aawakFormMain.date" [value]="item._id">
                                 {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code?' : '+item.mm_code:''}}</ng-option>
                         </ng-select>
                         <ng-select class="custom mt-1" style="width: 100%;" placeholder="Aawak MM" [clearable]="false"
@@ -43,7 +43,7 @@
                             [ngClass]="{ 'validation': (aawak_mm_id?.touched || fMain.submitted) && aawak_mm_id.errors?.['required']}"
                             [required]="fs.aawakFormMain.pbk_id == null">
                             <ng-option selected="selected" disabled value="">MM</ng-option>
-                            <ng-option *ngFor="let item of mms" [value]="item._id">
+                            <ng-option *ngFor="let item of mms | filterByDate:fs.aawakFormMain.date" [value]="item._id">
                                 {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code?' : '+item.mm_code:''}}</ng-option>
                         </ng-select>
                     </div>
@@ -121,18 +121,18 @@
                         <thead>
                             <tr>
                                 <th>Jawak</th>
-                                <th *ngIf="settings.aawak.lot_no">Lot No</th>
-                                <th>Item<strong class="text-danger">*</strong></th>
-                                <th>Subitem</th>
-                                <th *ngIf="settings.aawak.product_id">Product</th>
-                                <th *ngIf="settings.aawak.condition_id">Condition</th>
+                                <th class="mw-6" *ngIf="settings.aawak.lot_no">Lot No</th>
+                                <th class="mw-10">Item<strong class="text-danger">*</strong></th>
+                                <th class="mw-8">Subitem</th>
+                                <th class="mw-8" *ngIf="settings.aawak.product_id">Product</th>
+                                <th class="mw-6" *ngIf="settings.aawak.condition_id">Condition</th>
                                 <th *ngIf="settings.aawak.company_name">Company</th>
                                 <th>Qty<strong class="text-danger">*</strong></th>
                                 <th>Rate</th>
                                 <th *ngIf="settings.aawak.actual_amt">Amount</th>
-                                <th *ngIf="settings.aawak.aawak_source_id">Aawak Source</th>
-                                <th>Aawak Type<strong class="text-danger">*</strong></th>
-                                <th *ngIf="settings.aawak.usage_list_id">Usage List</th>
+                                <th class="mw-6" *ngIf="settings.aawak.aawak_source_id">Aawak Source</th>
+                                <th class="mw-6">Aawak Type<strong class="text-danger">*</strong></th>
+                                <th class="mw-8" *ngIf="settings.aawak.usage_list_id">Usage List</th>
                                 <th *ngIf="settings.aawak.document">Image</th>
                                 <th *ngIf="settings.aawak.item_detail">Item Detail</th>
                                 <th *ngIf="settings.aawak.isbill">Is Bill</th>
@@ -182,7 +182,8 @@
                                             [selectOnTab]="true"
                                             [ngClass]="{'validation' : (item_id?.touched || fMain.submitted) && item_id.errors?.['required']}"
                                             required>
-                                            <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                                            <ng-option *ngFor="let item of items | filterByDate:fs.aawakFormMain.date"
+                                                [value]="item._id">{{item.item_hin}} :
                                                 {{item.item_eng}} : {{item.item_code}}</ng-option>
                                         </ng-select>
                                     </td>
@@ -191,7 +192,7 @@
                                             placeholder="Select SubitemList" [clearable]="true" [virtualScroll]="true"
                                             [(ngModel)]="awkForm.subitem_id" name="subitem_id" #subitem_id="ngModel"
                                             (change)="subitemSelected($event, i)" [selectOnTab]="true">
-                                            <ng-option *ngFor="let item of awkForm.subitems"
+                                            <ng-option *ngFor="let item of awkForm.subitems | filterByDate:fs.aawakFormMain.date"
                                                 [value]="item._id">{{item.subitem_hin}}
                                                 : {{item.subitem_eng}}</ng-option>
                                         </ng-select>
@@ -268,7 +269,8 @@
                                             <ng-option selected="selected" disabled value="">Aawak Source
                                             </ng-option>
                                             <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
-                                                {{item.list_name_hin}} : {{item.list_name_roman}} : {{item.list_name_eng}}
+                                                {{item.list_name_hin}} : {{item.list_name_roman}} :
+                                                {{item.list_name_eng}}
                                             </ng-option>
                                         </ng-select>
                                     </td>
@@ -282,7 +284,8 @@
                                             <ng-option selected="selected" disabled value="">Aawak Type
                                             </ng-option>
                                             <ng-option *ngFor="let item of aawak_types" [value]="item._id">
-                                                {{item.list_name_hin}} : {{item.list_name_roman}} : {{item.list_name_eng}}
+                                                {{item.list_name_hin}} : {{item.list_name_roman}} :
+                                                {{item.list_name_eng}}
                                             </ng-option>
                                         </ng-select>
                                     </td>
@@ -296,7 +299,8 @@
                                             <ng-option selected="selected" disabled value="">Usage List
                                             </ng-option>
                                             <ng-option *ngFor="let item of usage_lists" [value]="item._id">
-                                                {{item.list_name_hin}} : {{item.list_name_roman}} : {{item.list_name_eng}}
+                                                {{item.list_name_hin}} : {{item.list_name_roman}} :
+                                                {{item.list_name_eng}}
                                             </ng-option>
                                         </ng-select>
                                     </td>

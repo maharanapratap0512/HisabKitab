@@ -63,6 +63,7 @@ import { VehicleComponent } from './vehicle/vehicle.component';
 import { VehicleEntryComponent } from './ENTRY__FORMS/vehicle-entry/vehicle-entry.component';
 
 import { FilterByDatePipe } from './pipe/filter-by-date.pipe';
+import { FilterItemCatPipe } from './pipe/filter-item-cat.pipe';
 import { ExcelImportComponent } from './excel-import/excel-import.component';
 import { ClosingComponent } from './closing/closing.component';
 import { BachatNewComponent } from './bachat-new/bachat-new.component';
@@ -81,11 +82,11 @@ import { ZoneEntryComponent } from './ENTRY__FORMS/zone-entry/zone-entry.compone
 import { AawakEntryNewComponent } from './ENTRY__FORMS/aawak-entry-new/aawak-entry-new.component';
 import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { AawakNewComponent } from './aawak-new/aawak-new.component';
-import { RepairingEntryComponent } from './entry__forms/repairing-entry/repairing-entry.component';
 import { RepairingComponent } from './repairing/repairing.component';
 import { ReportAjCheckComponent } from './reports/report-aj-check/report-aj-check.component';
 import { ReportLotNoComponent } from './reports/report-lot-no/report-lot-no.component';
 import { DistrictEntryComponent } from './ENTRY__FORMS/district-entry/district-entry.component';
+import { FltByCatPipe } from './pipe/flt-by-cat.pipe';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -141,6 +142,7 @@ import { DistrictEntryComponent } from './ENTRY__FORMS/district-entry/district-e
     VehicleComponent,
     VehicleEntryComponent,
     FilterByDatePipe,
+    FilterItemCatPipe,
     ExcelImportComponent,
     ClosingComponent,
     BachatNewComponent,
@@ -155,11 +157,11 @@ import { DistrictEntryComponent } from './ENTRY__FORMS/district-entry/district-e
     ZoneEntryComponent,
     AawakEntryNewComponent,
     AawakNewComponent,
-    RepairingEntryComponent,
     RepairingComponent,
     ReportAjCheckComponent,
     ReportLotNoComponent,
     DistrictEntryComponent,
+    FltByCatPipe,
   ],
 
   imports: [

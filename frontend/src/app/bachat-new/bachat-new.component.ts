@@ -393,6 +393,7 @@ export class BachatNewComponent implements OnInit {
         'Category': this.bachatData[i].categories_eng ? this.bachatData[i].categories_eng : this.bachatData[i].categories_hin,
         'Item': this.bachatData[i].item_hin,
         'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
+        'Condition': this.bachatData[i].condition_id ? this.bachatData[i].condition_hin : '-',
         'unit': this.bachatData[i].unit_short,
         'पिछला बचत': this.bachatData[i].past_bachat ? this.bachatData[i].past_bachat : 0,
         'arr_sum_aawak': this.bachatData[i].arr_sum_aawak ? this.bachatData[i].arr_sum_aawak : [],
@@ -498,6 +499,9 @@ export class BachatNewComponent implements OnInit {
         this.bachatData = this.bachatAll;
         this.isLoader = false;
       }
+      this.isLoader = false;
+    }, (err) => {
+      this.toastr.error('some error occures');
       this.isLoader = false;
     });
   }

@@ -4,8 +4,9 @@ const DBContex = require('../models/DBContex');
 const DB = new DBContex();
 
 
-// get country all
+// get all
 router.get('/:id?', async (req, res, next) => {
+
     await DB.getList('country').then(async (data) => {
         res.json({
             success: true,
@@ -16,11 +17,13 @@ router.get('/:id?', async (req, res, next) => {
 });
 
 
-// post country 
-router.post('/:dept_id', async (req, res, next) => {
+// post table name 
+router.post('/', async (req, res, next) => {
     try {
-        if (req.body && req.body.country_hin) {
-            await DB.insert('country', req.body, req.params.dept_id).then(async (data) => {
+        if (req.body.tbl_name && req.body.data) {
+            let obj = { ...DB.tbInterface[tbl_name], ...data }
+            let sql = DB.query.queryBuilder.insert()
+            await DB.insert('country', req.body).then(async (data) => {
                 res.json({
                     success: true,
                     result: data || {}
@@ -28,7 +31,7 @@ router.post('/:dept_id', async (req, res, next) => {
             });
         }
         else {
-            return next(new Error('Please fill required fields.'))
+            return next(new Error('Please send tbl_name and data object to perform insert'))
         }
     } catch (err) { next(err) };
 });

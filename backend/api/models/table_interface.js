@@ -109,6 +109,16 @@ class TableInterface {
       aawak_source: null
    }
 
+   country = {
+      _id: null,
+      country_hin: null,
+      country_eng: null,
+      add_by_dept_id: null,
+      update_by_dept_id: null,
+      verify: 0,
+      active: 1
+   }
+
    jawak = {
       date: null,
       date_sent: null,

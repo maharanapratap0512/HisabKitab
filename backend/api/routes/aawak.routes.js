@@ -16,9 +16,19 @@ router.post('/new/:dept_id', async (req, res, next) => {
             await Fn.begin();
             await Fn.insertAJ(req.body, 'aawak').then(async (resolve) => {
                 if (resolve) {
-                    for (let i in req.body.jawak_detail) {
-                        req.body.jawak_detail[i].aawak_ref_id = resolve;
-                        await Fn.insertAJ(req.body.jawak_detail[i], 'jawak').then(async (jwkResult) => {
+                    for (let jwk of req.body.jawak_detail) {
+                        jwk.aawak_ref_id = resolve;
+                        await Fn.insertAJ(jwk, 'jawak').then(async (jwkResult) => {
+                            if (jwkResult) {
+                                if (jwk.auto_awk) {
+                                    let awk = DB.tbInterface.getAawakFromJawak(jwk);
+                                    awk.dept_id = jwk.aawak_dept_id;
+                                    awk.aawak_type_id = jwk.aawak_type_id;
+                                    awk.description = "Automatic Entry from Jawak."
+                                    await Fn.insertAJ(awk, 'aawak').then(async (rs) => {
+                                    });
+                                }
+                            }
                         }, (err) => {
                             throw err;
                         })
@@ -356,10 +366,21 @@ router.put('/new', async (req, res, next) => {
                     throw err;
                 });
 
-                for (let i = 0; i < req.body.set.jawak_detail.length; i++) {
-                    if (!req.body.set.jawak_detail[i]._id) {
-                        req.body.set.jawak_detail[i].aawak_ref_id = oldAwk._id;
-                        await Fn.insertAJ(req.body.set.jawak_detail[i], 'jawak').then(async (jwkResult) => {
+                for (let jwk of req.body.set.jawak_detail) {
+                    if (!jwk._id) {
+                        jwk.aawak_ref_id = oldAwk._id;
+                        await Fn.insertAJ(jwk, 'jawak').then(async (jwkResult) => {
+                            if (jwkResult) {
+                                if (jwk.auto_awk) {
+                                    let awk = DB.tbInterface.getAawakFromJawak(jwk);
+                                    awk.dept_id = jwk.aawak_dept_id;
+                                    awk.aawak_type_id = jwk.aawak_type_id;
+                                    awk.description = "Automatic Entry from Jawak."
+                                    console.log(awk);
+                                    await Fn.insertAJ(awk, 'aawak').then(async (rs) => {
+                                    });
+                                }
+                            }
                         }, (err) => {
                             throw err;
                         })

@@ -1,4 +1,17 @@
 // const db = require('../models/db.model').db;
+const queryBuilder = {
+    insert: async (tblname, obj) => {
+        let colnames = ``, values = ``;
+        for(let col in obj){
+            colnames += col + ', ';
+            values += '@'+col+ ', ';
+        }
+        colnames = colnames.slice(0, -2);
+        values = values.slice(0, -2);
+        let sql = `insert into ${tblname}(${colnames}) values(${values})`;
+        return sql;
+    }
+}
 
 const country = {
     select:
@@ -9,16 +22,23 @@ const country = {
         `insert into country (
             country_hin,
             country_eng,
+            add_by_dept_id,
+            verify,
             active) 
         values (
             @country_hin,
             @country_eng,
+            @add_by_dept_id,
+            @verify,
             @active)`
     , insert_ignore:
         `insert or ignore into country (
             _id,
             country_hin,
             country_eng,
+            add_by_dept_id,
+            update_by_dept_id,
+            verify,
             created_at,
             updated_at,
             active) 
@@ -26,6 +46,9 @@ const country = {
             @_id,
             @country_hin,
             @country_eng,
+            @add_by_dept_id,
+            @update_by_dept_id,
+            @verify,
             @created_at,
             @updated_at,
             @active)`
@@ -33,12 +56,17 @@ const country = {
         `update country set 
         country_hin=@country_hin,
         country_eng=@country_eng,
+        add_by_dept_id=@add_by_dept_id,
+        update_by_dept_id=@update_by_dept_id,
+        verify=@verify,
         created_at=@created_at,
         updated_at=@updated_at where _id = @_id`
     , update:
         `update country set 
         country_hin=@country_hin,
         country_eng=@country_eng,
+        update_by_dept_id=@update_by_dept_id,
+        verify=@verify,
         updated_at=datetime('now', 'localtime')`
     , order:
         `country_hin, country_eng`
@@ -2483,5 +2511,5 @@ const test = {
 }
 
 module.exports = {
-    country, city, category, department, department_config, item, itemmix, aawak, aawak_voucher, bachat, jawak, mm, nimitt, pbk, point, product, zone, district, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, report_comment
+    queryBuilder, country, city, category, department, department_config, item, itemmix, aawak, aawak_voucher, bachat, jawak, mm, nimitt, pbk, point, product, zone, district, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, report_comment
 };

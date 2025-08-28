@@ -17,6 +17,7 @@ export class JawakEntryComponent implements OnInit {
   @Input() getData: any;
   @Input() aawakRef: any;
   @Input() isEdit: any;
+  @Input() noAPICall: any = false;
   @Output() response = new EventEmitter();
   jawakForm: FormGroup;
   allList: any = {};
@@ -132,6 +133,7 @@ export class JawakEntryComponent implements OnInit {
         product_id: changes.getData.currentValue.product_id,
         condition_id: changes.getData.currentValue.condition_id,
         qty: changes.getData.currentValue.qty,
+        remaining_qty: changes.getData.currentValue.remaining_qty ? changes.getData.currentValue.remaining_qty : 0,
         rate: changes.getData.currentValue.rate ? changes.getData.currentValue.rate : null,
         actual_amt: changes.getData.currentValue.actual_amt ? changes.getData.currentValue.actual_amt : null,
         company_name: changes.getData.currentValue.company_name,
@@ -146,7 +148,10 @@ export class JawakEntryComponent implements OnInit {
         dept_id: changes.getData.currentValue.dept_id,
         is_xl: changes.getData.currentValue.is_xl ? changes.getData.currentValue.is_xl : 0,
         is_process: changes.getData.currentValue.is_process ? changes.getData.currentValue.is_process : 0,
-        unit_short: changes.getData.currentValue.unit_short
+        unit_short: changes.getData.currentValue.unit_short,
+        auto_awk: changes.getData.currentValue.auto_awk ? changes.getData.currentValue.auto_awk : 0,
+        aawak_type_id: changes.getData.currentValue.aawak_type_id ? changes.getData.currentValue.aawak_type_id : null,
+        aawak_dept_id: changes.getData.currentValue.aawak_dept_id ? changes.getData.currentValue.aawak_dept_id : null
       });
 
 
@@ -176,6 +181,7 @@ export class JawakEntryComponent implements OnInit {
         condition_id: this.aawakRef.condition_id,
         company_name: this.aawakRef.company_name,
         qty: this.aawakRef.remaining_qty ? this.aawakRef.remaining_qty : this.aawakRef.Stock,
+        remaining_qty: this.aawakRef.remaining_qty ? this.aawakRef.remaining_qty : 0,
         rate: this.aawakRef.rate ? this.aawakRef.rate : null,
         actual_amt: this.aawakRef.actual_amt ? this.aawakRef.actual_amt : null,
         unit_id: this.aawakRef.unit_id,
@@ -187,7 +193,8 @@ export class JawakEntryComponent implements OnInit {
         nimitt_id: this.aawakRef.nimitt_id ? this.aawakRef.nimitt_id : null,
         dept_id: this.aawakRef.dept_id,
         is_xl: 0,
-        unit_short: this.aawakRef.unit_short
+        unit_short: this.aawakRef.unit_short,
+        aawak_type_id: this.aawakRef.aawak_type_id ? this.aawakRef.aawak_type_id : null,
       });
     }
 
@@ -331,23 +338,27 @@ export class JawakEntryComponent implements OnInit {
 
     if (this.jawakForm.valid) {
       console.log("form valid");
+      if (this.noAPICall) {
+        this.response.emit(this.jawakForm.value);
+      } else {
+        this.isLoader = true;
+        this.http.post(this.api.getUrl('JAWAK') + 'new/' + this.auth.webUser.dept_id, this.jawakForm.value).subscribe((data: any) => {
+          if (data['result'] && data['success']) {
+            this.gs.Lists.pbk.unshift(data['result'])
+            this.jawakForm.reset({ active: true });
+            this.isLoader = false;
+            this.toastr.success("Jawak Added Successfully.")
+            this.response.emit(data['result']);
+          } else {
+            this.toastr.error(data['message']);
+            this.isLoader = false;
+          }
+        }, err => {
+          this.toastr.error(err['error']);
+          this.isLoader = false;
+        });
+      }
 
-      this.isLoader = true;
-      this.http.post(this.api.getUrl('JAWAK') + 'new/' + this.auth.webUser.dept_id, this.jawakForm.value).subscribe((data: any) => {
-        if (data['result'] && data['success']) {
-          this.gs.Lists.pbk.unshift(data['result'])
-          this.jawakForm.reset({ active: true });
-          this.isLoader = false;
-          this.toastr.success("Jawak Added Successfully.")
-          this.response.emit(data['result']);
-        } else {
-          this.toastr.error(data['message']);
-          this.isLoader = false;
-        }
-      }, err => {
-        this.toastr.error(err['error']);
-        this.isLoader = false;
-      });
     }
     else {
       console.log("form invalid", this.jawakForm);
@@ -358,30 +369,34 @@ export class JawakEntryComponent implements OnInit {
 
   jawakFormUpdate() {
     if (this.jawakForm.valid) {
-      this.isLoader = true;
-      let body = { query: {}, set: {} };
-      body.query = {
-        _id: this.getData._id
-      }
-      body.set = {
-        ...this.jawakForm.value,
-        _id: this.getData._id,
-      };
-      this.http.put(this.api.getUrl('JAWAK') + 'new/', body).subscribe((data: any) => {
-        if (data && data['success']) {
-          // this.gs.Lists.pbk.splice(this.gs.Lists.pbk.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result'])
-          this.jawakForm.reset();
-          this.isLoader = false;
-          this.toastr.success("Jawak Updated Successfully");
-          this.response.emit(data['result']);
-        } else {
-          this.toastr.error(data['message']);
-          this.isLoader = false;
+      if (this.noAPICall && !this.getData._id) {
+        this.response.emit(this.jawakForm.value);
+      } else {
+        this.isLoader = true;
+        let body = { query: {}, set: {} };
+        body.query = {
+          _id: this.getData._id
         }
-      }, err => {
-        this.toastr.error(err['error']);
-        this.isLoader = false;
-      });
+        body.set = {
+          ...this.jawakForm.value,
+          _id: this.getData._id,
+        };
+        this.http.put(this.api.getUrl('JAWAK') + 'new/', body).subscribe((data: any) => {
+          if (data && data['success']) {
+            // this.gs.Lists.pbk.splice(this.gs.Lists.pbk.indexOf((i: { _id: any }) => { i._id == this.getData._id }), 1, data['result'])
+            this.jawakForm.reset();
+            this.isLoader = false;
+            this.toastr.success("Jawak Updated Successfully");
+            this.response.emit(data['result']);
+          } else {
+            this.toastr.error(data['message']);
+            this.isLoader = false;
+          }
+        }, err => {
+          this.toastr.error(err['error']);
+          this.isLoader = false;
+        });
+      }
     }
     else {
       this.gs.validationFireOnSubmit(this.jawakForm);

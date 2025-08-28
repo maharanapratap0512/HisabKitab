@@ -19,6 +19,7 @@ declare var $: any;
 export class DashboardComponent implements OnInit {
 
   isLoader: any = false;
+  page:any = 1;
   termAawak: any;
   term: any;
   termBachat: any;
@@ -54,7 +55,8 @@ export class DashboardComponent implements OnInit {
   settings: any = {};
   filterObj: any = {
     mm_id: null,
-    items: []
+    items: [],
+    category_id: null
   }
   loadingStatus: any = "मैं आत्मा शांत स्वरूप हूँ ।";
   dictionary: any = [];
@@ -69,9 +71,6 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
-    this.getBachat();
-    this.getImportHistory();
-    // this.getPendingAawak();
     this.gs.observeList().subscribe(result => {
       this.mmsAll = result.mm ? result.mm : [];
       this.mms = result.mm ? result.mm : [];
@@ -89,6 +88,9 @@ export class DashboardComponent implements OnInit {
     });
     this.months = this.gs.months;
     this.settings = this.auth.webUser.settings;
+    this.getBachat();
+    this.getImportHistory();
+    // this.getPendingAawak();
   }
 
   getProductData() {
@@ -145,7 +147,30 @@ export class DashboardComponent implements OnInit {
     this.isLoader = true;
     this.http.get(this.api.getUrl('BACHATHOME') + this.auth.webUser.dept_id).subscribe((data: any) => {
       if (data['result'] && data['success']) {
+
         this.bachatDataAll = data['result'];
+        for (let i in this.bachatDataAll) {
+          this.bachatDataAll[i].categories_hin = '';
+          this.bachatDataAll[i].categories_eng = '';
+          if (this.bachatDataAll[i].scategories && this.bachatDataAll[i].scategories.length > 0) {
+
+            for (let j in this.categories) {
+              if (this.bachatDataAll[i].scategories.includes(this.categories[j]._id)) {
+                this.bachatDataAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                this.bachatDataAll[i].categories_eng += this.categories[j].category_eng + ', ';
+              }
+            }
+            // console.log(this.bachatDataAll[i].scategories, this.categories);
+          } else {
+            for (let j in this.categories) {
+              if (this.bachatDataAll[i].icategories.includes(this.categories[j]._id)) {
+                this.bachatDataAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                this.bachatDataAll[i].categories_eng += this.categories[j].category_eng + ', ';
+              }
+            }
+            // console.log(this.bachatDataAll[i].icategories, this.categories);
+          }
+        }
         this.bachatData = this.bachatDataAll;
         this.isLoader = false;
       }

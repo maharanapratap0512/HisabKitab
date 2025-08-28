@@ -1,7 +1,7 @@
 <div class="row" id="jawakEntryComponent">
     <div class="card-body">
         <form [formGroup]="jawakForm">
-            <div class="row" *ngIf="aawakRef">
+            <div class="row" *ngIf="!noAPICall && aawakRef">
                 <div class="card card-body">
                     <div class="row">
                         <div class="col-2">
@@ -225,7 +225,7 @@
 
                 <div class="col-md-3 mb-3" *ngIf="settings.jawak.pbk_id">
                     <div class="form-group">
-                        <label class="form-label">Sewadhari</label>
+                        <label class="form-label">Sewadhari/किसको दिया</label>
                         <a type="button" *ngIf="settings.pbk.add" style="padding: 1px 6px !important;"
                             class="btn btn-outline-primary float-end" (click)="openModal('Add PBK')">
                             + PBK
@@ -349,9 +349,11 @@
                             <input type="number" class="form-control"
                                 placeholder="{{'i.e. 10 '+ jawakForm.value.unit_short }}" formControlName="qty"
                                 (focusout)="qtyclick()"
+                                max="{{aawakRef ? aawakRef.remaining_qty : (getData ? getData.remaining_qty : -1)}}"
                                 [ngClass]="{'validation':jawakForm.get('qty')?.errors && (jawakForm.get('qty')?.touched || jawakForm.get ('qty')?.dirty)}">
                             <div class="input-group-text">{{jawakForm.value.unit_short}}</div>
                         </div>
+                        <span [ngClass]="{'text-danger':jawakForm.get('qty')?.errors}">Remaining Qty : {{(getData ? getData.remaining_qty : (aawakRef ? aawakRef.remaining_qty : 0))}}</span>
                     </div>
                 </div>
 
@@ -470,7 +472,7 @@
                 </div>
 
 
-                <div class="col-md-4 mb-3 d-flex" *ngIf="jawakForm.value.auto_awk">
+                <div class="col-md-4 mb-3 d-flex" *ngIf="jawakForm.value.auto_awk && (!isEdit || !getData._id)">
                     <div class="form-group">
                         <label class="form-label">Auto Aawak Department</label>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Department"
@@ -503,8 +505,12 @@
                             <label class="form-check-label" for="chkAutoAwk">Auto Aawak</label>
                         </div>
                     </ng-container>
-                    <button class="btn btn-warning submit mx-3" type="submit" *ngIf="this.isEdit"
+                    <button class="btn btn-warning mt-3 mx-3" type="submit" *ngIf="this.isEdit"
                         (click)="jawakFormUpdate()">Update</button>
+                    <div class="form-check form-checkbox-primary" *ngIf="getData && !getData._id">
+                        <input type="checkbox" class="form-check-input" id="chkAutoAwk" formControlName="auto_awk">
+                        <label class="form-check-label" for="chkAutoAwk">Auto Aawak</label>
+                    </div>
                     <!-- <button class="btn btn-light submit" type="button" (click)="jawakForm.reset()">Clear</button> -->
                 </div>
 

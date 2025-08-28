@@ -5,6 +5,7 @@ class dbModal {
   // path;
   db;
   query;
+  tbInterface;
   Migrations = [
     // version: 1
     //creating all tables
@@ -1961,7 +1962,7 @@ class dbModal {
         )`,
       pbk: `alter table pbk add column district_id integer references district(_id)`,
       bachat_new_add_pb: `ALTER TABLE bachat_new ADD COLUMN past_bachat INTEGER DEFAULT 0`,
-      update_past_bachat : `update bachat_new 
+      update_past_bachat: `update bachat_new 
         set past_bachat = IFNULL((select sum(bn.bachat) as past_bachat
         from bachat_new bn where 
         bn.dept_id = bachat_new.dept_id AND bn.mm_id = bachat_new.mm_id AND
@@ -1970,6 +1971,81 @@ class dbModal {
         IFNULL(bn.condition_id, 0) = IFNULL(bachat_new.condition_id, 0) AND
         (bn.year < bachat_new.year OR (bn.year = bachat_new.year AND bn.month < bachat_new.month)) ), 0 )`,
     },
+    /**
+     * VERSION 23
+     * Adding add_by_dept_id, update_by_dept_id and verify column to all dictionary tables...
+     * new table added - data_change_log - it stores dictionary related updates for all department.
+     */
+    {
+      // department_add: `alter table department add column add_by_dept_id integer references department(_id)`,
+      department_update: `alter table department add column update_by_dept_id integer references department(_id)`,
+      department_verify: `alter table department add column verify tinyint default 0`,
+      country_add: `alter table country add column add_by_dept_id integer references department(_id)`,
+      country_update: `alter table country add column update_by_dept_id integer references department(_id)`,
+      country_verify: `alter table country add column verify tinyint default 0`,
+      zone_add: `alter table zone add column add_by_dept_id integer references department(_id)`,
+      zone_update: `alter table zone add column update_by_dept_id integer references department(_id)`,
+      zone_verify: `alter table zone add column verify tinyint default 0`,
+      state_add: `alter table state add column add_by_dept_id integer references department(_id)`,
+      state_update: `alter table state add column update_by_dept_id integer references department(_id)`,
+      state_verify: `alter table state add column verify tinyint default 0`,
+      district_add: `alter table district add column add_by_dept_id integer references department(_id)`,
+      district_update: `alter table district add column update_by_dept_id integer references department(_id)`,
+      district_verify: `alter table district add column verify tinyint default 0`,
+      city_add: `alter table city add column add_by_dept_id integer references department(_id)`,
+      city_update: `alter table city add column update_by_dept_id integer references department(_id)`,
+      city_verify: `alter table city add column verify tinyint default 0`,
+      mm_add: `alter table mm add column add_by_dept_id integer references department(_id)`,
+      mm_update: `alter table mm add column update_by_dept_id integer references department(_id)`,
+      mm_verify: `alter table mm add column verify tinyint default 0`,
+      nimitt_add: `alter table nimitt add column add_by_dept_id integer references department(_id)`,
+      nimitt_update: `alter table nimitt add column update_by_dept_id integer references department(_id)`,
+      nimitt_verify: `alter table nimitt add column verify tinyint default 0`,
+      pbk_add: `alter table pbk add column add_by_dept_id integer references department(_id)`,
+      pbk_update: `alter table pbk add column update_by_dept_id integer references department(_id)`,
+      pbk_verify: `alter table pbk add column verify tinyint default 0`,
+      category_add: `alter table category add column add_by_dept_id integer references department(_id)`,
+      category_update: `alter table category add column update_by_dept_id integer references department(_id)`,
+      category_verify: `alter table category add column verify tinyint default 0`,
+      item_add: `alter table item add column add_by_dept_id integer references department(_id)`,
+      item_update: `alter table item add column update_by_dept_id integer references department(_id)`,
+      item_verify: `alter table item add column verify tinyint default 0`,
+      subitem_add: `alter table subitem add column add_by_dept_id integer references department(_id)`,
+      subitem_update: `alter table subitem add column update_by_dept_id integer references department(_id)`,
+      subitem_verify: `alter table subitem add column verify tinyint default 0`,
+      subitem_list_add: `alter table subitem_list add column add_by_dept_id integer references department(_id)`,
+      subitem_list_update: `alter table subitem_list add column update_by_dept_id integer references department(_id)`,
+      subitem_list_verify: `alter table subitem_list add column verify tinyint default 0`,
+      unit_add: `alter table unit add column add_by_dept_id integer references department(_id)`,
+      unit_update: `alter table unit add column update_by_dept_id integer references department(_id)`,
+      unit_verify: `alter table unit add column verify tinyint default 0`,
+      support_list_add: `alter table support_list add column add_by_dept_id integer references department(_id)`,
+      support_list_update: `alter table support_list add column update_by_dept_id integer references department(_id)`,
+      support_list_verify: `alter table support_list add column verify tinyint default 0`,
+      pre_change_log: `create table if not exists pre_change_log (
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        table_name varchar(100) not null,
+        dept_id integer not null references department(_id),
+        action varchar(50) not null, 
+        data_id integer not null,
+        synced tinyint default 0,
+        is_accept tinyint default 0,
+        new_id integer,
+        note text,
+        master_note text,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      final_change_log: `create table if not exists final_change_log (
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        table_name varchar(100) not null,
+        action varchar(50) not null, 
+        data_id integer not null,
+        note text,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`
+    }
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.
@@ -2007,6 +2083,7 @@ class dbModal {
     try {
       const Database = require('better-sqlite3');
       this.query = require('./query');
+      this.tbInterface = require('./table_interface');
       this.migrationLength = this.Migrations.length;
       // path = require('path');
       this.db = new Database(dbPath);
@@ -2048,6 +2125,7 @@ class dbModal {
       // console.log(this.db.pragma(`table_info('aawak')`));
       // console.log(this.db.prepare(`select strftime('%Y-%m', 2022 || '-' || 10 || '-01') < strftime('%Y-%m', @year);`).all({ month: 11, year: '2022-11-01' }));
       this.db.pragma('foreign_keys=OFF');
+      console.log(this.db.pragma('cache_size'));
       this.db.pragma('legacy_alter_table=ON');
       runMigration();
 

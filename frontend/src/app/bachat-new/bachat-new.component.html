@@ -64,7 +64,7 @@
                                     [clearable]="true" [virtualScroll]="true" (change)="filter()"
                                     [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
                                     <ng-option *ngFor="let item of mms" [value]="item._id">
-                                       {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
+                                       {{item.mm_hin}}:{{item.mm_eng}}:{{item.mm_code}}</ng-option>
                                  </ng-select>
                               </div>
                               <div class="col-3">
@@ -80,7 +80,7 @@
                                     [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)"
                                     [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}">
                                     <ng-option *ngFor="let item of items" [value]="item._id">
-                                       {{item.item_hin}}:{{item.item_eng}}</ng-option>
+                                       {{item.item_hin}}:{{item.item_eng}}:{{item.item_code}}</ng-option>
                                  </ng-select>
                               </div>
                               <div class="col-3 mt-2">

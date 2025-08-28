@@ -159,6 +159,8 @@
                         <div class="card card-body">
                            <h5 class="card-title">
                               Stock/Ghar me Use
+                              <span class="position-absolute top-1 start-50 translate-middle badge rounded-pill">
+                                 Total Count - {{bachatData.length?bachatData.length:'0'}} </span>
                            </h5>
 
                            <!-- Filter Row -->
@@ -185,15 +187,6 @@
                                              {{item.category_eng}}</ng-option>
                                        </ng-select>
                                     </div> -->
-                                    <div class="col-3">
-                                       <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
-                                          [clearable]="true" [multiple]="true" [virtualScroll]="true"
-                                          (change)="itemSelected($event)">
-                                          <ng-option selected="selected" disabled value="">Select Item</ng-option>
-                                          <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
-                                             {{item.item_eng}} {{item.item_code ? ' : '+item.item_code: ''}}</ng-option>
-                                       </ng-select>
-                                    </div>
                                     <div class="col-2">
                                        <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
                                           [clearable]="true" [virtualScroll]="true" (change)="mmSelected($event)">
@@ -202,10 +195,23 @@
                                        </ng-select>
                                     </div>
                                     <div class="col-2">
-                                       <button type="button" style="font-weight: 700 !important;"
-                                          class="btn btn-light">Total
-                                          Count : {{bachatData.length?bachatData.length:'0'}} </button>
+                                       <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
+                                          [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterObj.category_id">
+                                          <ng-option *ngFor="let item of categories" [value]="item._id">
+                                             {{item.category_hin}}:{{item.category_eng}}</ng-option>
+                                       </ng-select>
                                     </div>
+                                    <div class="col-3">
+                                       <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                          [clearable]="true" [multiple]="true" [virtualScroll]="true"
+                                          (change)="itemSelected($event)">
+                                          <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                                          <ng-option *ngFor="let item of items | filterItemCat: filterObj.category_id"
+                                             [value]="item._id">{{item.item_hin}} :
+                                             {{item.item_eng}} {{item.item_code ? ' : '+item.item_code: ''}}</ng-option>
+                                       </ng-select>
+                                    </div>
+
                                  </div>
                               </div>
                            </div>
@@ -215,11 +221,17 @@
                            </ngx-spinner>
                            <!-- main table  -->
                            <div class="row p-1" style="overflow-y: auto; max-height: 500px;">
+                              <div class="col-8" *ngIf="bachatData.length">
+                                 <pagination-controls class="pagi text-end" (pageChange)="page = $event"
+                                    [autoHide]="true">
+                                 </pagination-controls>
+                              </div>
                               <table id="datatable-buttons" class="table table-hover dt-responsive">
                                  <thead>
                                     <tr>
                                        <td style="width: 50px;">No.</td>
                                        <td>MM</td>
+                                       <td>Category</td>
                                        <td>Item</td>
                                        <td>Used</td>
                                        <td>Stock</td>
@@ -227,13 +239,17 @@
                                  </thead>
                                  <tbody class="accordion" id="accordionExample">
                                     <ng-container class="accordion-item"
-                                       *ngFor="let data of bachatData | search:termBachat; let i=index">
+                                       *ngFor="let data of bachatData | search:termBachat | fltByCat: filterObj.category_id | paginate: {itemsPerPage: 100,currentPage: page,totalItems: bachatData.length}; let i=index">
                                        <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i"
                                           aria-expanded="true" [attr.aria-controls]="'#collapse-' + i" class="main-row">
                                           <td>{{i+1}}</td>
                                           <td>
                                              {{data.mm_hin}}<br />
                                              {{data.mm_eng}}
+                                          </td>
+                                          <td>
+                                             {{data.categories_hin}}<br />
+                                             {{data.categories_eng}}
                                           </td>
                                           <td>
                                              {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}}

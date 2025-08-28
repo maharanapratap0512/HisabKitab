@@ -42,11 +42,13 @@ export class AawakEntryComponent implements OnInit {
 	pbks: any = [];
 	aawak_types: any = [];
 	aawak_sources: any = [];
+	usage_lists: any = [];
 	jawak_types: any = [];
 	products: any = [];
 	categories: any = [];
 	isCondition: any = false;
 	productsAll: any = [];
+	editData: any = {};
 	jmm: any = null;
 	jqty: any = null;
 	jpbk: any = null;
@@ -59,7 +61,7 @@ export class AawakEntryComponent implements OnInit {
 	awkfg: any = {
 		pkt_num: null,
 		lot_no: null,
-		voucher_no:null,
+		voucher_no: null,
 		date: null,
 		mm_id: null,
 		aawak_mm_id: null,
@@ -84,7 +86,7 @@ export class AawakEntryComponent implements OnInit {
 		isbill: null,
 		document: null,
 		is_xl: 0,
-		hl:0,
+		hl: 0,
 		is_auto_pd: 0,
 		is_auto: 0,
 		is_variable_qty: 0,
@@ -94,6 +96,7 @@ export class AawakEntryComponent implements OnInit {
 	// jwkArr: any = [];
 	settings: any = {};
 	imagepath: any;
+	editIndex: any = null;
 
 	constructor(private fb: FormBuilder,
 		private http: HttpService,
@@ -116,6 +119,7 @@ export class AawakEntryComponent implements OnInit {
 			this.aawak_types = result.aawak_type ? result.aawak_type : [];
 			this.jawak_types = result.jawak_type ? result.jawak_type : [];
 			this.nimitts = result.nimitt ? result.nimitt : [];
+			this.usage_lists = result.usage_list ? result.usage_list : [];
 		});
 		this.settings = this.auth.webUser.settings;
 		this.getDepartments();
@@ -204,7 +208,6 @@ export class AawakEntryComponent implements OnInit {
 			if (jwk_type) {
 				this.jtype = { id: jwk_type._id, list_name_hin: jwk_type.list_name_hin };
 			}
-
 		}
 		else {
 			let jwk_type = this.jawak_types.find((j: { _id: number; }) => j._id == 28);
@@ -213,6 +216,113 @@ export class AawakEntryComponent implements OnInit {
 			}
 		}
 
+	}
+
+	async addJawakResponse(ev: any) {
+		if (ev) {
+			if (ev.jawak_mm_id) {
+				let mm = await this.mms.find((m: { _id: any; }) => m._id == ev.jawak_mm_id);
+				ev.jawak_mm_hin = mm?.mm_hin || null;
+			}
+			if (ev.pbk_id) {
+				let pbk = await this.pbks.find((p: { _id: any; }) => p._id == ev.pbk_id);
+				ev.pbk_hin = pbk.pbk_hin || null;
+				ev.roll_no = pbk.roll_no || null;
+			}
+			if (ev.item_id) {
+				let item = await this.items.find((i: { _id: any; }) => i._id == ev.item_id);
+				ev.item_hin = item.item_hin || null;
+			}
+			if (ev.subitem_id) {
+				let subitem = await this.subitems.find((s: { _id: any; }) => s._id == ev.subitem_id);
+				ev.subitem_hin = subitem.subitem_hin || null;
+			}
+			if (ev.condition_id) {
+				let condition = await this.conditions.find((c: { _id: any; }) => c._id == ev.condition_id);
+				ev.condition_hin = condition.list_name_hin || null;
+			}
+			if (ev.unit_id) {
+				let unit = await this.units.find((u: { _id: any; }) => u._id == ev.unit_id);
+				ev.unit_short = unit.unit_short || null;
+			}
+			if (ev.aawak_source_id) {
+				let aawak_source = await this.aawak_sources.find((a: { _id: any; }) => a._id == ev.aawak_source_id);
+				ev.aawak_source_hin = aawak_source.list_name_hin || null;
+			}
+			if (ev.jawak_type_id) {
+				let jawak_type = await this.jawak_types.find((j: { _id: any; }) => j._id == ev.jawak_type_id);
+				ev.jawak_type_hin = jawak_type.list_name_hin || null;
+			}
+			if (ev.usage_list_id) {
+				let usage_list = await this.usage_lists.find((u: { _id: any; }) => u._id == ev.usage_list_id);
+				ev.usage_list_hin = usage_list.list_name_hin || null;
+			}
+			this.awkfg.jawak_detail.push(ev);
+			this.awkfg.remaining_qty -= ev.qty;
+			this.closeModal();
+		}
+
+	}
+
+	async editJawakResponse(ev: any) {
+		if (ev) {
+			if (!ev._id) {
+				if (ev.jawak_mm_id) {
+					let mm = await this.mms.find((m: { _id: any; }) => m._id == ev.jawak_mm_id);
+					ev.jawak_mm_hin = mm.mm_hin || null;
+				}
+				if (ev.pbk_id) {
+					let pbk = await this.pbks.find((p: { _id: any; }) => p._id == ev.pbk_id);
+					ev.pbk_hin = pbk.pbk_hin || null;
+					ev.roll_no = pbk.roll_no || null;
+				}
+				if (ev.item_id) {
+					let item = await this.items.find((i: { _id: any; }) => i._id == ev.item_id);
+					ev.item_hin = item.item_hin || null;
+				}
+				if (ev.subitem_id) {
+					let subitem = await this.subitems.find((s: { _id: any; }) => s._id == ev.subitem_id);
+					ev.subitem_hin = subitem.subitem_hin || null;
+				}
+				if (ev.condition_id) {
+					let condition = await this.conditions.find((c: { _id: any; }) => c._id == ev.condition_id);
+					ev.condition_hin = condition.list_name_hin || null;
+				}
+				if (ev.unit_id) {
+					let unit = await this.units.find((u: { _id: any; }) => u._id == ev.unit_id);
+					ev.unit_short = unit.unit_short || null;
+				}
+				if (ev.aawak_source_id) {
+					let aawak_source = await this.aawak_sources.find((a: { _id: any; }) => a._id == ev.aawak_source_id);
+					ev.aawak_source_hin = aawak_source.list_name_hin || null;
+				}
+				if (ev.jawak_type_id) {
+					let jawak_type = await this.jawak_types.find((j: { _id: any; }) => j._id == ev.jawak_type_id);
+					ev.jawak_type_hin = jawak_type.list_name_hin || null;
+				}
+				if (ev.usage_list_id) {
+					let usage_list = await this.usage_lists.find((u: { _id: any; }) => u._id == ev.usage_list_id);
+					ev.usage_list_hin = usage_list.list_name_hin || null;
+				}
+			}
+			this.awkfg.jawak_detail.splice(this.editIndex, 1, ev);
+			this.awkfg.remaining_qty -= (ev.qty - this.awkfg.jawak_detail[this.editIndex].qty)
+			this.editIndex = null;
+			this.editData = null;
+			this.closeModal();
+		}
+
+	}
+
+	addJawak() {
+		this.editData = this.awkfg;
+		this.openModal("Add Jawak");
+	}
+
+	editJawak(i: any) {
+		this.editData = this.awkfg.jawak_detail[i];
+		this.editIndex = i;
+		this.openModal("Edit Jawak")
 	}
 
 	add_jwk() {
@@ -287,7 +397,7 @@ export class AawakEntryComponent implements OnInit {
 				if (result.isConfirmed) {
 					this.isLoader = true;
 					this.http.delete(this.api.getUrl('JAWAK') + '/' + id).subscribe((data: any) => {
-						if (data['success']) {	
+						if (data['success']) {
 							this.isLoader = false;
 							this.awkfg.jawak_detail.splice(i, 1);
 							// this.jwkArr.splice(i, 1);
@@ -682,7 +792,7 @@ export class AawakEntryComponent implements OnInit {
 				// this.aawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
 				this.awkfg.subitem_id = this.subitems[0]._id;
 			}
-			if(!this.isEdit)
+			if (!this.isEdit)
 				this.awkfg.unit_id = item.unit_id;
 		}
 		else {
@@ -696,7 +806,7 @@ export class AawakEntryComponent implements OnInit {
 		if (ev) {
 			let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
 			this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
-			if(!this.isEdit)
+			if (!this.isEdit)
 				this.awkfg.unit_id = subitem.unit_id;
 		}
 		else {

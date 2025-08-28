@@ -50,7 +50,7 @@ export class CountryEntryComponent implements OnInit {
   countryFormSubmit() {
     if (this.countryForm.valid) {
       this.isLoader = true;
-      this.http.post(this.api.getUrl('COUNTRY'), this.countryForm.value).subscribe((data: any) => {
+      this.http.post(this.api.getUrl('COUNTRY') + this.auth.webUser.dept_id, this.countryForm.value).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.gs.Lists.country.unshift(data['result']);
           this.countryForm.reset();

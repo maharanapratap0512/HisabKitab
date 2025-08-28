@@ -25,6 +25,55 @@ tbody:before {
   table-layout: fixed;
 }
 
+// 1 * 25px per class increase.
+.mw-1 {
+  min-width: 1.5625rem !important;
+}
+
+.mw-2 {
+  min-width: 3.125rem !important;
+}
+
+.mw-3 {
+  min-width: 4.6875rem !important;
+}
+
+.mw-4 {
+  min-width: 6.25rem !important;
+}
+
+.mw-5 {
+  min-width: 7.8125rem !important;
+}
+
+.mw-6 {
+  min-width: 9.375rem !important;
+}
+
+.mw-7 {
+  min-width: 10.9375rem !important;
+}
+
+.mw-8 {
+  min-width: 12.5rem !important;
+}
+
+.mw-9 {
+  min-width: 14.0625rem !important;
+}
+
+.mw-10 {
+  min-width: 15.625rem !important;
+}
+
+.mw-11 {
+  min-width: 17.1875rem !important;
+}
+
+.mw-12 {
+  min-width: 18.75rem !important;
+}
+
 // .ng-select .custom{
 //     display: block;
 //     width: 100%;
@@ -98,12 +147,12 @@ span.search-icon {
   top: 0;
 }
 
-.icon-mx-1{
+.icon-mx-1 {
   margin-right: .375rem !important;
   margin-left: .375rem !important;
 }
 
-.icon-mx-2{
+.icon-mx-2 {
   margin-left: -0.75rem !important;
   margin-right: 0.75rem !important;
 }
