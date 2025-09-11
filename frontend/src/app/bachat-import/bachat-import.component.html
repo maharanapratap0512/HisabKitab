@@ -1,0 +1,172 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color: white"> {{loadingStatus}} </p>
+</ngx-spinner>
+
+<div class="wrapper">
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row px-2" *ngIf="excelArrObj.length > 0">
+                    <ul class="nav nav-pills bg-nav-pills mt-2">
+                        <!-- <li class="nav-item">
+                              <button class="btn btn-danger" (click)="clearTempImport()">Clear Data</button>
+                           </li> -->
+                        <li class="nav-item">
+                            <a href="#exceldata" data-bs-toggle="tab" aria-expanded="true"
+                                class="nav-link mx-1 btn-info text-info active">
+                                Excel Data
+                                <span class="translate-middle bell badge rounded-pill bg-info">
+                                    {{excelArrObj.length}}
+                                </span>
+                            </a>
+                        </li>
+                        <li class="nav-item" *ngIf="combinedBachat.length > 0">
+                            <a href="#combinedbachat" data-bs-toggle="tab" aria-expanded="false"
+                                class="nav-link mx-1 btn-primary text-primary">
+                                Combined Bachat
+                                <span class="translate-middle bell badge rounded-pill bg-danger">
+                                    {{combinedBachat.length}}
+                                </span>
+                            </a>
+                        </li>
+                        <li class="nav-item" *ngIf="newInsertedAwk.length">
+                            <a href="#insert" data-bs-toggle="tab" aria-expanded="false"
+                                class="nav-link mx-1 btn-success text-success">
+                                New Aawak Insert
+                                <span class="translate-middle bell badge rounded-pill bg-success">
+                                    {{newInsertedAwk.length}}
+                                </span>
+                            </a>
+                        </li>
+                        <li class="nav-item" *ngIf="newInsertedJwk.length">
+                            <a href="#update" data-bs-toggle="tab" aria-expanded="false"
+                                class="nav-link mx-1 btn-warning text-warning">
+                                New Inserted Jawak
+                                <span class="translate-middle bell badge rounded-pill bg-warning">
+                                    {{newInsertedJwk.length}}
+                                </span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item ms-auto" *ngIf="combinedBachat.length">
+                            <a class="btn btn-outline-success text-success btn-sync">
+                                Sync Bachat
+                            </a>
+                        </li>
+                    </ul>
+
+
+                    <div class="tab-content">
+                        <!-- exceldata -->
+                        <div class="tab-pane active" id="exceldata">
+                            <div class="row" style="overflow: auto;">
+                                <pagination-controls id="excelPagi" class="pagi text-end"
+                                    (pageChange)="page_excel = $event" [autoHide]="true">
+                                </pagination-controls>
+                                <table id="datatable-buttons" class="table table-hover dt-responsive"
+                                    style="table-layout: auto;">
+                                    <thead>
+                                        <tr>
+                                            <th>Sn</th>
+                                            <th>Date</th>
+                                            <th>MM</th>
+                                            <th>Item</th>
+                                            <th>Subitem</th>
+                                            <th>Condition</th>
+                                            <th>Qty</th>
+                                            <th>Unit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            *ngFor="let data of excelArrObj | paginate:{id:'excelPagi', itemsPerPage:itemsPerPage,currentPage:page_excel,totalItems:excelArrObj.length}; let i=index;">
+                                            <td>{{data.sn}}</td>
+                                            <td>{{data.date}}</td>
+                                            <td>{{data.mm}}</td>
+                                            <td>{{data.item}}</td>
+                                            <td>{{data.subitem}}</td>
+                                            <td>{{data.condition}}</td>
+                                            <td>{{data.qty}}</td>
+                                            <td>{{data.unit}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
+                        <!-- combinedbachat -->
+                        <div class="tab-pane" id="combinedbachat">
+                            <div class="row" style="overflow: auto;">
+                                <pagination-controls id="combinedPagi" class="pagi text-end"
+                                    (pageChange)="page_combined = $event" [autoHide]="true">
+                                </pagination-controls>
+                                <table id="datatable-buttons" class="table table-hover dt-responsive"
+                                    style="table-layout: auto;">
+                                    <thead>
+                                        <tr>
+                                            <th>Sn</th>
+                                            <th>Date</th>
+                                            <th>MM</th>
+                                            <th>Item</th>
+                                            <th>Subitem</th>
+                                            <th>Condition</th>
+                                            <th>Unit</th>
+                                            <th>Excel Qty
+                                                <div class="form-check mb-2">
+                                                    <input type="checkbox" class="form-check-input"
+                                                        id="customCheckcolor1"
+                                                        (change)="hideZero('qty', $event.target)">
+                                                    <label class="form-check-label fs-6" for="customCheckcolor1">Hide
+                                                        0</label>
+                                                </div>
+                                            </th>
+                                            <th>SW Qty
+                                                <div class="form-check mb-2">
+                                                    <input type="checkbox" class="form-check-input"
+                                                        id="customCheckcolor1"
+                                                        (change)="hideZero('bachat', $event.target)">
+                                                    <label class="form-check-label fs-6" for="customCheckcolor1">Hide
+                                                        0</label>
+                                                </div>
+                                            </th>
+                                            <th>Difference
+                                                <div class="form-check mb-2">
+                                                    <input type="checkbox" class="form-check-input"
+                                                        id="customCheckcolor1"
+                                                        (change)="hideZero('difference', $event.target)">
+                                                    <label class="form-check-label fs-6" for="customCheckcolor1">Hide
+                                                        0</label>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let data of combinedBachat | paginate:{id:'combinedPagi', itemsPerPage:itemsPerPage,currentPage:page_combined,totalItems:combinedBachat.length}; let i=index;"
+                                            [ngClass]="{'excel-row': data.status == 'EXCEL', 'db-row': data.status == 'DB'}">
+                                            <td>{{data.sn}}</td>
+                                            <td>{{data.date}}</td>
+                                            <td>{{data.mm_hin}}</td>
+                                            <td>{{data.item_hin}}</td>
+                                            <td>{{data.subitem_id ? data.subitem_hin : ''}}</td>
+                                            <td>{{data.condition_id ? data.condition_hin : ''}}</td>
+                                            <td>{{data.unit_short}}</td>
+                                            <td>{{data.qty}}</td>
+                                            <td>{{data.bachat}}</td>
+                                            <td [ngClass]="{'marked': data.difference != 0}">{{data.difference}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
