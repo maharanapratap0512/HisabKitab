@@ -168,7 +168,7 @@
                      + Add
                   </a>
                   <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
-                     [virtualScroll]="true" [(ngModel)]="awkfg.mm_id" name="mm_id" #mm_id="ngModel" [readonly]="isEdit"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.mm_id" name="mm_id" #mm_id="ngModel"
                      [ngClass]="{ 'validation': (mm_id?.touched || f.submitted) && mm_id.errors?.['required']}"
                      required>
                      <ng-option selected="selected" disabled value="">MM</ng-option>
@@ -546,7 +546,7 @@
                               {{i+1}}
                               <i class="uil uil-edit-alt mx-1 text-primary" (click)="editJawak(i)"></i>
                               <i class="uil uil-trash text-danger" (click)="remove(i,data._id)"></i>
-                              
+
                            </td>
                            <td>{{data.date | date:'dd-MM-yyyy'}}</td>
                            <td *ngIf="settings.jawak.lot_no">{{data.lot_no}}</td>
