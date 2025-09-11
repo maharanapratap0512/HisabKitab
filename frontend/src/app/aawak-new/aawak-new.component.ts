@@ -52,6 +52,7 @@ export class AawakNewComponent implements OnInit {
   jawak_types: any = [];
   products: any = [];
   categories: any = [];
+  usage_lists: any = [];
   isCondition: any = false;
   productsAll: any = [];
   states: any = [];
@@ -146,6 +147,7 @@ export class AawakNewComponent implements OnInit {
       this.departments = result.department ? result.department : [];
       this.pbks = result.pbk ? result.pbk : [];
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
+      this.usage_lists = result.usage_list ? result.usage_list : [];
       this.jawak_types = result.jawak_type ? result.jawak_type : [];
       this.products = result.product ? result.product : [];
       this.categories = result.category ? result.category : [];
@@ -314,7 +316,7 @@ export class AawakNewComponent implements OnInit {
             'Date': result[i].jawak_detail[j].date ? this.gs.formatDisplayDate(result[i].jawak_detail[j].date) : '-',
             'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
             'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
-            'Jawak Category': result[i].jawak_detail[j].usage_category_id ? result[i].jawak_detail[j].category_hin : '-',
+            'Usage List': result[i].jawak_detail[j].usage_list_id ? result[i].jawak_detail[j].usage_list_hin : '-',
             'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
             'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
             'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
@@ -333,7 +335,7 @@ export class AawakNewComponent implements OnInit {
           'Date': '',
           'Pkt No': '',
           'Jawak MM': '',
-          'Jawak Category': '',
+          'Usage List': '',
           'Jawak Detail': '',
           'Kisko Diya': 'बचत =>',
           'Jawak Type': '',
@@ -425,7 +427,7 @@ export class AawakNewComponent implements OnInit {
           'Date': '',
           'Pkt No': '',
           'Jawak MM': '',
-          'Jawak Category': '',
+          'Usage List': '',
           'Jawak Detail': '',
           'Kisko Diya': 'बचत =>',
           'Jawak Type': '',
@@ -630,7 +632,7 @@ export class AawakNewComponent implements OnInit {
             'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
             ...awkObj,
             'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
-            'Jawak Category': result[i].jawak_detail[j].usage_category_id ? result[i].jawak_detail[j].category_hin : '-',
+            'Usage List': result[i].jawak_detail[j].usage_list_id ? result[i].jawak_detail[j].usage_list_hin : '-',
             'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
             'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
             'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
@@ -1018,8 +1020,8 @@ export class AawakNewComponent implements OnInit {
           item_id: null,
           subitem: null,
           subitem_id: null,
-          usage_category: null,
-          usage_category_id: null,
+          usage_list: null,
+          usage_list_id: null,
           product: null,
           product_id: null,
           condition: null,
@@ -1275,20 +1277,16 @@ export class AawakNewComponent implements OnInit {
                   jwkobj.nimitt_id = dictnimitt ? dictnimitt.id : null;
                 }
                 break;
-              case "jawak category":
-              case "jawak_category":
-              case "jwk category":
-              case "jwk_cateogry":
-              case "usage_category":
-              case "usage category":
-                jwkobj.usage_category = exceldata[i][j];
-                let getcategory = this.categories.find((c: { category_hin: any; category_eng: any; }) => [c.category_hin, c.category_eng].includes(exceldata[i][j]));
-                if (getcategory) {
-                  jwkobj.usage_category_id = getcategory._id;
-                  jwkobj.usage_category_hin = getcategory.category_hin;
+              case "usage list":
+              case "usage_list":
+                jwkobj.usage_list = exceldata[i][j];
+                let getusage_list = this.usage_lists.find((c: { usage_list_hin: any; usage_list_eng: any; }) => [c.usage_list_hin, c.usage_list_eng].includes(exceldata[i][j]));
+                if (getusage_list) {
+                  jwkobj.usage_list_id = getusage_list._id;
+                  jwkobj.usage_list_hin = getusage_list.usage_list_hin;
                 } else {
-                  let dictcategory = this.dictionary.find((d: any) => d.type == "category" && d.name == exceldata[i][j])
-                  jwkobj.usage_category_id = dictcategory ? dictcategory.id : null;
+                  let dictusage_list = this.dictionary.find((d: any) => d.type == "usage_list" && d.name == exceldata[i][j])
+                  jwkobj.usage_list_id = dictusage_list ? dictusage_list.id : null;
                 }
                 break;
               case "jwk_type":

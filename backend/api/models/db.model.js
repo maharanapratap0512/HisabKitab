@@ -1628,7 +1628,7 @@ class dbModal {
     // version 14
     /*
       => add min max rate for items
-      => add usage_category in aawak and jawak.
+      => add   in aawak and jawak.
       => Create bachat_new Table.
      */
     {

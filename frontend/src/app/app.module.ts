@@ -87,6 +87,7 @@ import { ReportAjCheckComponent } from './reports/report-aj-check/report-aj-chec
 import { ReportLotNoComponent } from './reports/report-lot-no/report-lot-no.component';
 import { DistrictEntryComponent } from './ENTRY__FORMS/district-entry/district-entry.component';
 import { FltByCatPipe } from './pipe/flt-by-cat.pipe';
+import { BachatImportComponent } from './bachat-import/bachat-import.component';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -162,6 +163,7 @@ import { FltByCatPipe } from './pipe/flt-by-cat.pipe';
     ReportLotNoComponent,
     DistrictEntryComponent,
     FltByCatPipe,
+    BachatImportComponent,
   ],
 
   imports: [

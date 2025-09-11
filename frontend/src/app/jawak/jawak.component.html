@@ -136,8 +136,8 @@
                                     <label class="form-label">Category & Condition</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
                                        [clearable]="true" [virtualScroll]="true" [multiple]="true"
-                                       [closeOnSelect]="false" [(ngModel)]="filterBody.usage_category_id"
-                                       name="usage_category_id">
+                                       [closeOnSelect]="false" [(ngModel)]="filterBody.usage_list_id"
+                                       name="usage_list_id">
                                        <ng-option selected=" selected" disabled value="">Select Category</ng-option>
                                        <ng-option *ngFor="let item of categories"
                                           [value]="item._id">{{item.category_hin}} :
@@ -248,7 +248,7 @@
                                        item_id: [],
                                        subitem_id: [],
                                        condition_id: [],
-                                       usage_category_id: [],
+                                       usage_list_id: [],
                                        nimitt_id: [],
                                        pkt_num: null
                                      };">Clear All</button>
@@ -281,7 +281,7 @@
                            <th style="width: 150px;" *ngIf="settings.condition_id">Condition</th>
                            <th style="width: 100px;">Quantity</th>
                            <th style="width: 120px;">Jawak Type</th>
-                           <th style="width: 120px;">Jawak Category</th>
+                           <th style="width: 120px;">Usage List</th>
                            <th style="width: 120px;">parchi Kaha Shown</th>
                            <th style="width: 120px;">Kaha Repaired / Becha</th>
                            <th style="width: 200px;" *ngIf="settings.item_detail">Item Detail</th>
@@ -333,7 +333,7 @@
                            </td>
                            <td>{{data.jawak_type_hin}}<br />
                               {{data.jawak_type_eng}}</td>
-                           <td>{{data.usage_category_id ? data.category_hin : ''}}<br />
+                           <td>{{data.usage_list_id ? data.usage_list_hin : ''}}<br />
                               {{data.category_eng}}</td>
                            <td>{{data.parchi_place ? data.parchi_place: ''}}</td>
                            <td>{{data.sell_repair_place ? data.sell_repair_place: ''}}</td>

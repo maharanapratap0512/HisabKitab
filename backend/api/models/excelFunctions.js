@@ -171,9 +171,11 @@ class ExcelFunctions {
                break;
             case 'item':
                this.item = this.Fn.getitems(dept_id);
+               this.subitem = this.Fn.getSubitems(dept_id);
                break;
             case 'subitem':
                this.subitem = this.Fn.getSubitems(dept_id);
+               this.subitem_list = this.Fn.getSubiemList(dept_id);
                break;
             case 'subitem_list':
                this.subitem_list = this.Fn.getSubiemList(dept_id);
@@ -493,6 +495,65 @@ class ExcelFunctions {
       }
       return null;
    }
+
+   async matchItemMix(row) {
+      if (this.item instanceof Promise) {
+         this.item = await this.item.then((data) => { return data })
+      }
+      if (this.subitem instanceof Promise) {
+         this.subitem = await this.subitem.then((data) => { return data })
+      }
+      if (this.dict.item instanceof Promise) {
+         this.dict.item = await this.dict.item.then((data) => { return data });
+      }
+      let data = {
+         item: row.item && typeof row.item == 'string' ? row.item.trim().toLowerCase().normalize('NFC') : row.item,
+         subitem: row.subitem && typeof row.subitem == 'string' ? row.subitem.trim().toLowerCase().normalize('NFC') : row.subitem,
+      }
+
+      if (!this.checkedButNotFound(data, 'item')) {
+         for (let i in this.item) {
+            if ([this.item[i].item_hin, this.item[i].item_eng, this.item[i].item_roman, this.item[i].item_code].includes(data.item)) {
+               row.item_id = this.item[i]._id;
+               if (row.log) {
+                  console.log("item found")
+               }
+               break;
+            }
+         }
+         if (!row.item_id) {
+            for (let i in this.dict.item) {
+               if (this.dict.item[i].name == data.item && this.dict.item[i].extra_note == data.subitem) {
+                  row.item_id = this.dict.item[i].id;
+                  row.subitem_id = this.dict.item[i].id2;
+                  break;
+               }
+            }
+         }
+         if (row.log) {
+            console.log('start subitem search', row.item_id)
+         }
+         if (row.item_id && row.subitem && !row.subitem_id) {
+            for (let i in this.subitem) {
+               if (this.subitem[i].item_id == row.item_id && [this.subitem[i].subitem_hin, this.subitem[i].subitem_eng, this.subitem[i].subitem_roman].includes(data.subitem)) {
+                  row.subitem_id = this.subitem[i]._id;
+                  if (row.log) {
+                     console.log("subitem found");
+                  }
+                  break;
+               }
+            }
+         }
+         if (!row.item_id || (row.item_id && row.subitem && !row.subitem_id)) {
+            if (row.log) {
+               console.log("pushing in correction list")
+            }
+            this.correctionList.push({ type: 'item', value: data, id: row.item_id, id2: row.subitem_id });
+         }
+      }
+      return row;
+   }
+
    async matchItem(data) {
       if (this.item instanceof Promise) {
          this.item = await this.item.then((data) => { return data })

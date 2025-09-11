@@ -72,7 +72,7 @@ router.get('/correction', async (req, res, next) => {
         //jwk_mm        
         correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_mm') as name, 'aj_mm' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_mm_id') IS NULL AND json_extract(json_each.value, '$.aj_mm') IS NOT NULL`).all());
         //category        
-        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.usage_category') as name, 'category' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.usage_category_id') IS NULL AND json_extract(json_each.value, '$.usage_category') IS NOT NULL`).all());
+        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.usage_list') as name, 'category' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.usage_list_id') IS NULL AND json_extract(json_each.value, '$.usage_list') IS NOT NULL`).all());
         // jwk_type
         correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_type') as name, 'jwk_type' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_type_id') IS NULL AND json_extract(json_each.value, '$.aj_type') IS NOT NULL`).all());
         // jwk_nimitt
@@ -108,8 +108,8 @@ router.put('/correction', async (req, res, next) => {
                     case 'nimitt': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.nimitt_id') IS NULL AND json_extract(json_each.value, '$.nimitt') IS NOT NULL ;`);
                         type = 'nimitt';
                         break;
-                    case 'usage_category': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.usage_category_id') IS NULL AND json_extract(json_each.value, '$.usage_category') IS NOT NULL ;`);
-                        type = 'usage_category';
+                    case 'usage_list': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.usage_list_id') IS NULL AND json_extract(json_each.value, '$.usage_list') IS NOT NULL ;`);
+                        type = 'usage_list';
                         break;
                 }
 
@@ -196,7 +196,7 @@ router.put('/process', async (req, res, next) => {
             } else {
                 await Fn.begin();
                 let awkObj = {
-                    date: awkData.date, mm_id: awkData.mm_id, pkt_num: awkData.pkt_num, pbk_id: awkData.pbk_id, aawak_mm_id: awkData.aj_mm_id, item_id: awkData.item_id, subitem_id: awkData.subitem_id, product_id: awkData.product_id, item_detail: awkData.item_detail, condition_id: awkData.condition_id, qty: awkData.qty, rate: awkData.rate, actual_amt: awkData.actual_amt, aawak_type_id: awkData.aj_type_id, unit_id: awkData.unit_id, description: awkData.description, nimitt_id: awkData.nimitt_id, dept_id: awkData.dept_id, company_name: awkData.company_name, isbill: awkData.isbill, document: null, usage_category_id: awkData.usage_category_id, usage_category: awkData.usage_category, is_xl: 1, is_auto_pd: 0
+                    date: awkData.date, mm_id: awkData.mm_id, pkt_num: awkData.pkt_num, pbk_id: awkData.pbk_id, aawak_mm_id: awkData.aj_mm_id, item_id: awkData.item_id, subitem_id: awkData.subitem_id, product_id: awkData.product_id, item_detail: awkData.item_detail, condition_id: awkData.condition_id, qty: awkData.qty, rate: awkData.rate, actual_amt: awkData.actual_amt, aawak_type_id: awkData.aj_type_id, unit_id: awkData.unit_id, description: awkData.description, nimitt_id: awkData.nimitt_id, dept_id: awkData.dept_id, company_name: awkData.company_name, isbill: awkData.isbill, document: null, usage_list_id: awkData.usage_list_id, usage_list: awkData.usage_list, is_xl: 1, is_auto_pd: 0
                 };
                 await Fn.insertAJ(awkObj, 'aawak').then(async (resolve) => {
                     awkData.awk_id = resolve;
@@ -231,7 +231,7 @@ router.put('/process', async (req, res, next) => {
                     company_name: awkData.company_name,
                     aawak_ref_id: awkData.awk_id,
                     dept_id: awkData.dept_id,
-                    usage_category_id: awkData.jawak_detail[i].usage_category_id,
+                    usage_list_id: awkData.jawak_detail[i].usage_list_id,
                     is_xl: 1,
                 }
                 await Fn.insertAJ(jwkObj, 'jawak').then(async (jwkResult) => {

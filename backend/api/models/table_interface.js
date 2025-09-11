@@ -101,7 +101,6 @@ class TableInterface {
       dept: null,
       jawak_detail: null,
       awk_id: null,
-      usage_category: null,
       lot_no: null,
       usage_list: null,
       usage_list_id: null,

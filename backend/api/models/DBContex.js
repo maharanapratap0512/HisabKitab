@@ -178,13 +178,13 @@ class DBContex {
             try {
                 let sql = ``;
                 obj.active = 1;
-                if (this.tbInterface[tblname]) {
-                    obj = { ...this.tbInterface[tblname], ...obj };
-                    obj.add_by_dept_id = dept_id;
-                    sql = await this.query.queryBuilder.insert(tblname, obj);
-                } else {
-                    sql = this.query[tblname].insert;
-                }
+                // if (this.tbInterface[tblname]) {
+                //     obj = { ...this.tbInterface[tblname], ...obj };
+                //     obj.add_by_dept_id = dept_id;
+                //     sql = await this.query.queryBuilder.insert(tblname, obj);
+                // } else {
+                sql = this.query[tblname].insert;
+                // }
                 let lastID = await this.getLastID(tblname, dept_id);
                 obj._id = lastID ? lastID + 1 : ((dept_id * 100000) + 1);
                 // console.log("insert obj_______", obj);

@@ -278,6 +278,7 @@
                                                       <th style="width: 101px;">Date</th>
                                                       <th style="width: 150px;">Aawak Mm</th>
                                                       <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
+                                                      <th style="width: 100px;">Condition</th>
                                                       <th style="width: 120px;">Aawak Type</th>
                                                       <th style="width: 120px;" *ngIf="settings.aawak.company_name">
                                                          Company
@@ -334,6 +335,7 @@
                                                                : ''}}
                                                             </span>
                                                          </td>
+                                                         <td>{{awk.condition_hin}}</td>
                                                          <td>{{awk.aawak_type_hin}}</td>
                                                          <td *ngIf="settings.aawak.company_name">
                                                             {{awk.company_name ? awk.company_name : ''}}

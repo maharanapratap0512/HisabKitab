@@ -10,6 +10,7 @@ import { HttpService } from '../services/http.service';
 import Swal from 'sweetalert2';
 import { ExcelExportService } from '../services/excel-export.service';
 import { Subject } from 'rxjs';
+declare var $: any;
 
 @Component({
   selector: 'app-excel-import',
@@ -21,6 +22,7 @@ export class ExcelImportComponent implements OnInit {
   @Input() stepNo: any = 0;
   @Input() excelFile: any;
   @Output() response = new EventEmitter();
+  showModal: any = ''
   itemsPerPage = 100;
   page1: any = 1;
   page2: any = 1;
@@ -188,6 +190,20 @@ export class ExcelImportComponent implements OnInit {
     }
   }
 
+  openModal(type: String) {
+    this.showModal = type;
+    $('#excelImport > #showModal').modal('show');
+  }
+
+  closeModal() {
+    this.showModal = "";
+    $('#excelImport > #showModal').modal('hide');
+  }
+
+  showBachatResponse(ev: any) {
+    this.response.emit(true);
+  }
+
   setExcelToObjectArray() {
     this.isLoader = true;
     this.headerList = this.getHeaderList();
@@ -217,12 +233,18 @@ export class ExcelImportComponent implements OnInit {
     if (this.importType.name == 'subitem_list') {
       this.excelArrObj = this.excelArrObj.filter((e: { subitem_hin: string | null; }) => e.subitem_hin)
     } else if (this.importType.name == 'item') {
-      this.excelArrObj = this.excelArrObj.filter((e: { subitem_hin: string | null; }) => !e.subitem_hin)
+      this.excelArrObj = this.excelArrObj.filter((e: { item_hin: string | null; }) => e.item_hin)
     } else if (this.importType.name == 'subitem') {
       this.excelArrObj = this.excelArrObj.filter((e: { subitem_hin: string | null; }) => e.subitem_hin)
+    } else if (this.importType.name == 'bachat') {
+      this.excelArrObj = this.excelArrObj.filter((e: { date: any; mm: any; item: any; qty: any; unit: any; }) => e.date && e.mm && e.item && e.qty && e.unit)
     }
     this.stepNo = 2;
     this.isLoader = false;
+  }
+
+  back() {
+    this.stepNo = 2
   }
 
   verifyExcelData() {
@@ -242,6 +264,18 @@ export class ExcelImportComponent implements OnInit {
 
     });
     this.isLoader = false;
+  }
+
+  toggleCorrection(i: any, action: boolean) {
+    this.unmatchedData[i].correction = action;
+    if (action) {
+      if(this.unmatchedData[i].type == 'item' && this.unmatchedData[i].id){
+        this.itemSelected(this.unmatchedData[i].id)
+      }
+    } else {
+      this.items = this.itemAll;
+      this.subitems = [];
+    }
   }
 
   ignoreCorrection(data: any, i: any) {
@@ -266,14 +300,25 @@ export class ExcelImportComponent implements OnInit {
     console.log("data", data, "conf", conf);
     console.log(this.excelArrObj);
 
-
-    for (let i in this.excelArrObj) {
-      for (let j in conf) {
-        if (this.excelArrObj[i][conf[j].name] == data.value) {
-          this.excelArrObj[i][conf[j].ref_field] = data.id;
+    if (data.type == 'item') {
+      for (let i in this.excelArrObj) {
+        for (let j in conf) {
+          if (this.excelArrObj[i].item == data.value.item && this.excelArrObj[i].subitem == data.value.subitem) {
+            this.excelArrObj[i].item_id = data.id;
+            this.excelArrObj[i].subitem_id = data.id2;
+          }
+        }
+      }
+    } else {
+      for (let i in this.excelArrObj) {
+        for (let j in conf) {
+          if (this.excelArrObj[i][conf[j].name] == data.value) {
+            this.excelArrObj[i][conf[j].ref_field] = data.id;
+          }
         }
       }
     }
+
     this.unmatchedData[index].done = true;
     this.unmatchedData[index].ignore = false;
   }

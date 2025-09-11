@@ -2,7 +2,7 @@ const router = require('express').Router();
 const fs = require('fs');
 const DBContex = require('../models/DBContex');
 const ExcelFunctions = require('../models/excelFunctions');
-const { product } = require('../models/query');
+const { product, subitem } = require('../models/query');
 const DB = new DBContex();
 
 
@@ -35,8 +35,8 @@ router.get('/correction', async (req, res, next) => {
         correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_type') as name, 'jwk_type' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_type_id') IS NULL AND json_extract(json_each.value, '$.aj_type') IS NOT NULL`).all());
         // jwk_nimitt
         correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.nimitt') as name, 'nimitt' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.nimitt_id') IS NULL AND json_extract(json_each.value, '$.nimitt') IS NOT NULL`).all());
-        // jwk_usage_category
-        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.usage_category') as name, 'category' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.usage_category_id') IS NULL AND json_extract(json_each.value, '$.usage_category') IS NOT NULL`).all());
+        // jwk_usage_list
+        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.usage_list') as name, 'category' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.usage_list_id') IS NULL AND json_extract(json_each.value, '$.usage_list') IS NOT NULL`).all());
 
         res.json({
             success: true,
@@ -68,8 +68,8 @@ router.put('/correction', async (req, res, next) => {
                     case 'nimitt': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.nimitt_id') IS NULL AND json_extract(json_each.value, '$.nimitt') IS NOT NULL ;`);
                         type = 'nimitt';
                         break;
-                    case 'category': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.usage_category_id') IS NULL AND json_extract(json_each.value, '$.usage_category') IS NOT NULL ;`);
-                        type = 'usage_category';
+                    case 'usage_list': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.usage_list_id') IS NULL AND json_extract(json_each.value, '$.usage_list') IS NOT NULL ;`);
+                        type = 'usage_list';
                         break;
                 }
 
@@ -158,7 +158,7 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                 let data = req.body.excelData[i][req.body.config[j].name];
                 if (req.body.config[j].type == 'date' && req.body.config[j].col_name == 'bhatti_date') {
                     if (typeof data == "number" && (data > 1970 && data < 2036)) {
-                        data = data+'-01-01';
+                        data = data + '-01-01';
                     }
                     data = fn.setDateFormat(data);
 
@@ -170,9 +170,9 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                 }
                 req.body.excelData[i][req.body.config[j].name] = data;
                 if (req.body.config[j].ref_table && (req.body.config[j].not_null || data)) {
-                    let id = null, name;
-                    if (req.body.config[j].type != "array") {
-                        name = data.trim().toLowerCase();
+                    let id = null, subitem_id = null, name;
+                    if (req.body.config[j].type != "array" && typeof data != "number") {
+                        name = data.trim().toLowerCase().normalize('NFC');
                     } else {
                         name = data;
                     }
@@ -205,8 +205,35 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                             break;
                         case 'pbk': id = await fn.matchPbk(name);
                             break;
-                        case 'item': id = await fn.matchItem(name);
+                        case 'item':
+                            if (i == 6) {
+                                req.body.excelData[i].log = true;
+                            }
+                            if (req.body.config[j].type == 'mix')
+                                req.body.excelData[i] = await fn.matchItemMix(req.body.excelData[i]);
+                            else
+                                id = await fn.matchItem(name);
+                            // let subitem = req.body.excelData[i].subitem;
+                            // if (await req.body.config.some(c => c.col_name === 'subitem') && subitem) {
+                            //     console.log("req.body.excelData[i].subitem", req.body.excelData[i].subitem);
+                            //     if (typeof subitem == "string")
+                            //         subitem = req.body.excelData[i].subitem.trim().toLowerCase();
+                            //     subitem_id = await fn.matchSubitem(subitem, id);
+                            // }
                             break;
+                        // case 'subitem': let sl_id = await fn.matchSubitemList(name);
+                        //     console.log("-------", sl_id, name);
+                        //     if (sl_id && req.body.excelData[i].item_id) {
+                        //         let data = {
+                        //             item: req.body.excelData[i].item,
+                        //             item_id: req.body.excelData[i].item_id,
+                        //             subitem: req.body.excelData[i].subitem,
+                        //             subitem_list_id: sl_id
+                        //         }
+                        //         id = await fn.matchSubitem(data);
+                        //         console.log("-------", id, data);
+                        //     }
+                        //     break;
                         case 'condition': id = await fn.matchSupportList(name, 'condition');
                             break;
                         case 'aawak_type': id = await fn.matchSupportList(name, 'aawak_type');
@@ -218,7 +245,7 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                         default:
 
                     }
-                    req.body.excelData[i][req.body.config[j].ref_field] = id;
+                    req.body.excelData[i][req.body.config[j].ref_field] = req.body.excelData[i][req.body.config[j].ref_field] ? req.body.excelData[i][req.body.config[j].ref_field] : id;
                 }
             }
         }
@@ -301,6 +328,59 @@ router.post('/', async (req, res, next) => {
         }
     }
 });
+
+
+router.post('/match_bachat/:dept_id', async (req, res, next) => {
+    if (req.body && req.body.length > 0) {
+        try {
+            let placeholders = [], paramsdata = [];
+            req.body.forEach((data, index) => {
+                placeholders.push(`(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+                paramsdata.push(data.mm_id, data.item_id, data.subitem_id, data.condition_id, data.unit_id, data.qty, data.company_name, data.actual_amt, data.item_detail, data.description, data.nimitt_id);
+            });
+            let sql = `WITH excel_data(mm_id, item_id, subitem_id, condition_id, unit_id, qty, company_name, actual_amt, item_detail, description, nimitt_id) AS (
+                VALUES ${placeholders.join(', ')} ),
+                bcht(_id, mm_id, item_id, subitem_id, condition_id, unit_id, bachat) AS (
+                    select _id, mm_id, item_id, subitem_id, condition_id, unit_id, SUM(bachat) as t_bachat from bachat_new bn
+                    where bn.dept_id = ? group by mm_id, item_id, subitem_id, condition_id, unit_id
+                ) 
+                select cd._id, cd.mm_id, cd.item_id, cd.subitem_id, cd.condition_id, cd.unit_id, cd.qty, cd.bachat, cd.status, cd.qty - cd.bachat as difference,
+                cd.company_name, cd.actual_amt, cd.item_detail, cd.description, cd.nimitt_id,
+                mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
+                it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
+                sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+                slc.list_name_hin as condition_hin, slc.list_name_eng as condition_eng,
+                unit.unit_short, unit.unit_full from 
+                    (SELECT bcht._id, ed.mm_id, ed.item_id, ed.subitem_id, ed.condition_id, ed.unit_id, IFNULL(ed.qty, 0) as qty, IFNULL(bcht.bachat, 0) as bachat, CASE WHEN bcht._id IS NOT NULL THEN 'MATCH' ELSE 'EXCEL' END AS status, ed.company_name, ed.actual_amt, ed.item_detail, ed.description, ed.nimitt_id from excel_data ed
+                    LEFT JOIN bcht on bcht.mm_id = ed.mm_id AND bcht.item_id = ed.item_id AND IFNULL(bcht.subitem_id, 0) = IFNULL(ed.subitem_id, 0) AND IFNULL(bcht.condition_id, 0) = IFNULL(ed.condition_id, 0) AND bcht.unit_id = ed.unit_id
+
+                        UNION ALL
+
+                    select bcht._id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id, 0 AS qty, IFNULL(bcht.bachat, 0) as bachat, 'DB' AS status, null, null, null, null, null from bcht
+                    WHERE NOT EXISTS ( SELECT 1 FROM excel_data ed 
+                        WHERE ed.mm_id = bcht.mm_id AND ed.item_id = bcht.item_id AND IFNULL(ed.subitem_id, 0) = IFNULL(bcht.subitem_id, 0) AND IFNULL(ed.condition_id, 0) = IFNULL(bcht.condition_id, 0) AND ed.unit_id = bcht.unit_id)) as cd
+                LEFT JOIN mm on mm._id = cd.mm_id
+                LEFT JOIN state st on st._id = mm.state_id
+                LEFT JOIN item it on it._id = cd.item_id
+                LEFT JOIN subitem sit on sit._id = cd.subitem_id
+                LEFT JOIN subitem_list sitl on sitl._id = sit.subitem_list_id
+                LEFT JOIN support_list slc on slc._id = cd.condition_id
+                LEFT JOIN unit on unit._id = cd.unit_id order by cd.status DESC`;
+            paramsdata.push(req.params.dept_id)
+            let stmt = DB.db.prepare(sql).all(paramsdata);
+            res.json({
+                success: true,
+                result: stmt
+            })
+        }
+        catch (err) {
+            return next(err);
+        }
+    } else {
+        return next(new Error("no data found, please solve all corrections first."))
+    }
+});
+
 
 
 

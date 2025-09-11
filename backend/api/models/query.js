@@ -780,7 +780,7 @@ const bachat = {
         bachat.unit_id,unit.unit_short, unit.unit_full,             
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         CASE WHEN aawak._id is not null THEN json_group_array(json_object('_id', aawak._id, 'date', aawak.date, 'aawak_mm_id', aawak.aawak_mm_id, 'aawak_mm_hin', amm.mm_hin, 'pkt_num', aawak.pkt_num, 'pbk_id', aawak.pbk_id, 'roll_no', pbk.roll_no, 'pbk_hin', pbk.pbk_hin, 'relation', pbk.relation, 'relative_name', pbk.relative_name, 'item_detail', aawak.item_detail, 'company_name', aawak.company_name, 'condition_id', aawak.condition_id, 'condition_hin', cnd.list_name_hin, 'qty', aawak.qty, 'rate', aawak.rate, 'actual_amt', aawak.actual_amt, 'aawak_type_id', aawak.aawak_type_id, 'aawak_type_hin', awk_type.list_name_hin, 'description', aawak.description, 'remaining_qty', aawak.remaining_qty )) ELSE json('[]') END as aawaks from bachat 
-        left join aawak on aawak.dept_id = bachat.dept_id AND aawak.mm_id = bachat.mm_id AND aawak.item_id = bachat.item_id AND (aawak.subitem_id = bachat.subitem_id OR bachat.subitem_id IS NULL) AND aawak.unit_id = bachat.unit_id AND aawak.remaining_qty <> 0
+        left join aawak on aawak.dept_id = bachat.dept_id AND aawak.mm_id = bachat.mm_id AND aawak.item_id = bachat.item_id AND IFNULL(aawak.subitem_id, 0) = IFNULL(bachat.subitem_id, 0) AND aawak.unit_id = bachat.unit_id AND aawak.remaining_qty <> 0
         left join mm amm on amm._id = aawak.aawak_mm_id
         left join pbk on pbk._id = aawak.pbk_id
         left join support_list cnd on cnd._id = aawak.condition_id
@@ -2336,10 +2336,10 @@ const excel_correction = {
     get_product: `select DISTINCT product as name, 'product' as type, null as id, false as dictionary from temp_import where product IS NOT NULL AND product_id IS NULL`,
     get_nimitt: `select DISTINCT nimitt as name, 'nimitt' as type, null as id, false as dictionary from temp_import where nimitt IS NOT NULL AND nimitt_id IS NULL`,
     get_unit: `select DISTINCT unit as name, 'unit' as type, null as id, false as dictionary from temp_import where unit IS NOT NULL AND unit_id IS NULL`,
-    get_category: `select DISTINCT usage_category as name, 'usage_category' as type, null as id, false as dictionary from temp_import where usage_category IS NOT NULL AND usage_category_id IS NULL`,
+    get_usage_list: `select DISTINCT usage_list as name, 'usage_list' as type, null as id, false as dictionary from temp_import where usage_list IS NOT NULL AND usage_list_id IS NULL`,
 
     update_mm: `update temp_import set mm_id = @id where mm = @name`,
-    update_usage_category: `update temp_import set usage_category_id = @id where usage_category = @name`,
+    update_usage_list: `update temp_import set usage_list_id = @id where usage_list = @name`,
     update_item: `update temp_import set item_id = @id, subitem_id = @id2 where item = @name`,
     update_subitem: `update temp_import set item_id = @id, subitem_id = @id2 where item = @name AND subitem = @extra_note`,
     update_ignore_subitem: `update temp_import set item = item || ' ' || subitem, item_id = @id, subitem_id = @id2, subitem = null where item = @name AND subitem = @extra_note`,

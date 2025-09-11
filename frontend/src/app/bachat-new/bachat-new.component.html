@@ -14,7 +14,7 @@
             <div class="row" *ngIf="bachatData.length">
                <div class="card-body">
                   <div class="row d-flex justify-content-between">
-                     <div class="col-5">
+                     <div class="col-4">
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
@@ -26,7 +26,20 @@
                               class="uil-search-plus h4 icon-mx-2"></i> Advance Search
                         </button>
                      </div>
-                     <div class="col-3">
+                     <div class="col-2">
+                        <button class="file btn btn-success" style="font-weight: 700 !important;">
+                           <i class="uil uil-arrow-to-bottom"></i> Import Bachat
+                           <input type="file" class="inputtag"
+                              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                              (change)="excelImport($event)" />
+                        </button>
+                        <!-- <button *ngIf="gs.importPending" class="file btn btn-success" (click)="openModal('import')"
+                           style="font-weight: 700 !important;">
+                           <i class="uil uil-arrow-to-bottom"></i> Import Aawak
+                        </button> -->
+                     </div>
+
+                     <div class="col-2">
                         <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
                            data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
                         <div class="dropdown-menu">
@@ -123,6 +136,7 @@
                      </ng-select>
                   </div>
                </div>
+
                <div class="col-md-2 mb-2" *ngIf="monthsSel.length > 0">
                   <div class="form-group">
                      <label class="form-label"></label>
@@ -415,24 +429,27 @@
       <div class="modal-content">
          <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
-            <button type="button" onclick="$('#showModal').modal('hide')" (click)="showModal= ''" class="btn-close"
-               aria-label="Close"></button>
+            <button type="button" (click)="closeModal()" class="btn-close" aria-label="Close"></button>
          </div>
          <div class="modal-body">
             <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
                [aawakRef]="editData"></app-jawak-entry>
+
+            <!-- Import Bachat -->
+            <app-excel-import *ngIf='showModal == "import"' importType="bachat" [excelFile]="excelFile"
+               (response)="importResponse($event)"></app-excel-import>
             <!-- <app-aawak-entry *ngIf="showModal == 'Add Aawak'" (response)='addAawakResponse($event)'></app-aawak-entry>
             <app-aawak-entry *ngIf="showModal == 'Edit Aawak'" (response)='editAawakResponse($event)'
                [getData]="editData" [isEdit]="true"></app-aawak-entry> -->
          </div>
          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" style="width: 120px;"
-               onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+            <button type="button" class="btn btn-secondary" style="width: 120px;" (click)="closeModal()">Close</button>
          </div>
       </div>
    </div>
 
 </div>
+
 <!-- ImageModal -->
 <div class="modal fade" id="showImageModal" data-bs-backdrop="static" tabindex="-1"
    aria-labelledby="exampleImageModalLabel" aria-hidden="true">

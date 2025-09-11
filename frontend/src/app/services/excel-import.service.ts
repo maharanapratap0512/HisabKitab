@@ -7,6 +7,7 @@ export class ExcelImportService {
 
   importList: any = [
     { name: 'destribution' },
+    { name: 'bachat', note: 'final bachat list that make through actual counting.' },
     { name: 'pbk', autoUpdate: true },
     { name: 'vehicle', secondHeader: false, autoUpdate: true },
     { name: 'nimitt', autoUpdate: true },
@@ -144,6 +145,21 @@ export class ExcelImportService {
       { col_name: 'district_hin', name: 'district_hin', alt_names: ["district hin", "namehin"], not_null: true, },
       { col_name: 'district_eng', name: 'district_eng', alt_names: ["district eng", "nameeng"], not_null: true, },
       { col_name: 'state', name: 'state', alt_names: ["स्टेट", "राज्य"], not_null: true, ref_table: 'state', ref_field: 'state_id', ref_data: 'state_hin' },
+    ],
+    bachat: [
+      { col_name: 'sn', name: 'sn', alt_names: ["sr no", "sr number", "sr num", "sr_num", "serial no"], not_null: false },
+      { col_name: 'date', name: 'date', alt_names: ["तारीख"], not_null: true },
+      { col_name: 'mm', name: 'mm', alt_names: ["mm_name", "mm name", "मि.म.", "मि म", "मिनी मधुबन"], not_null: true, ref_table: 'mm', ref_field: 'mm_id', ref_data: 'mm_hin' },
+      { col_name: 'item', name: 'item', alt_names: ["item_name", "item name", "आइटम", "आइटम का नाम"], not_null: true, type:'mix', ref_table: 'item', ref_field: 'item_id', ref_data: 'item_hin' },
+      { col_name: 'subitem', name: 'subitem', alt_names: ["subitem_name", "subitem name", "सबआइटम", "सबआइटम का नाम"], not_null: false, ref_table: 'subitem', ref_field: 'subitem_id', ref_data: 'subitem_hin' },
+      { col_name: 'company_name', name: 'company', alt_names: ["company_name", "कंपनी", "company", "company name"], not_null: false },
+      { col_name: 'qty', name: 'qty', alt_names: ["quantity", "संख्या", "number"], not_null: true },
+      { col_name: 'unit', name: 'unit', alt_names: ["यूनिट"], not_null: true, ref_table: 'unit', ref_field: 'unit_id', ref_data: 'unit_short' },
+      { col_name: 'condition', name: 'condition', alt_names: ["कन्डिशन"], not_null: false, ref_table: 'condition', ref_field: 'condition_id', ref_data: 'list_name_hin' },
+      { col_name: 'actual_amt', name: 'amount', alt_names: ["अमाउन्ट", "amt", "amount"], not_null: false },
+      { col_name: 'item_detail', name: 'item_detail', alt_names: ["item detail", "डेटाइल माहिती"], not_null: false },
+      { col_name: 'description', name: 'description', alt_names: ["note", "डिस्क्रिप्शन", "नोट"], not_null: false },
+      { col_name: 'nimmit', name: 'nimmit', alt_names: ["निमित्त"], not_null: false, ref_table: 'nimitt', ref_field: 'nimitt_id', ref_data: 'nimitt_hin' },
     ],
 
   }

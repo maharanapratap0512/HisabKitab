@@ -221,13 +221,13 @@ class Functions extends DBContex {
       if (fieldList && fieldList.length > 0) {
          for (let i in data) {
             for (let field of fieldList) {
-               data[i][field] = data[i][field] ? data[i][field].trim().toLowerCase() : null;
+               data[i][field] = data[i][field] ? data[i][field].trim().toLowerCase().normalize('NFC') : null;
             }
          }
       } else {
          for (let i in data) {
             for (let key of Object.keys(data[i])) {
-               data[i][key] = data[i][key] ? data[i][key].trim().toLowerCase() : null;
+               data[i][key] = data[i][key] ? data[i][key].trim().toLowerCase().normalize('NFC') : null;
             }
          }
       }
@@ -334,6 +334,7 @@ class Functions extends DBContex {
 
       return await this.getList('item', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['item_hin', 'item_eng', 'item_roman', 'item_code']);
+         // return resolve.data || [];
       }, (err) => {
          return [];
       });

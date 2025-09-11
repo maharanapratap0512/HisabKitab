@@ -55,6 +55,7 @@ export class BachatNewComponent implements OnInit {
     { key: 'awk_type_wise', name: 'A/J Type Wise' },
   ]
   subBachatData: any = []
+  excelFile: any = null
 
   constructor(
     private fb: FormBuilder,
@@ -521,6 +522,28 @@ export class BachatNewComponent implements OnInit {
     } else {
       this.filter();
     }
+  }
+
+  openModal(type: string) {
+    this.showModal = type;
+    $('#showModal').modal('show')
+  }
+
+  closeModal() {
+    this.showModal = '';
+    $('#showModal').modal('hide');
+  }
+
+  excelImport(ev: any) {
+    if (ev) {
+      this.excelFile = ev;
+      this.openModal('import');
+    }
+    ev = null;
+  }
+
+  importResponse(ev: any) {
+    
   }
 
 

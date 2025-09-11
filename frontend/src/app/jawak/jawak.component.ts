@@ -60,7 +60,7 @@ export class JawakComponent implements OnInit {
     product_id: [],
     item_id: [],
     subitem_id: [],
-    usage_category_id: [],
+    usage_list_id: [],
     condition_id: [],
     nimitt_id: null,
     pkt_num: null
