@@ -117,6 +117,7 @@ export class AawakEntryComponent implements OnInit {
 			// this.departments = result.department ? result.department : [];
 			this.pbks = result.pbk ? result.pbk : [];
 			this.aawak_types = result.aawak_type ? result.aawak_type : [];
+			this.aawak_sources = result.aawak_source ? result.aawak_source : [];
 			this.jawak_types = result.jawak_type ? result.jawak_type : [];
 			this.nimitts = result.nimitt ? result.nimitt : [];
 			this.usage_lists = result.usage_list ? result.usage_list : [];

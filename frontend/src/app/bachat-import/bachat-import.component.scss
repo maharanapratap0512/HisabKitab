@@ -15,5 +15,8 @@
 }
 
 .btn-sync{
-    box-shadow: 0px 0px 7px 4px #16bc97 !important;
+    // box-shadow: 0px 0px 7px 4px #16bc97 !important;
+    -webkit-box-shadow: 0px 0px 10px 4px #16bc97 !important;
+    -moz-box-shadow: 0px 0px 10px 4px #16bc97 !important;
+    box-shadow: 0px 0px 10px 4px #16bc97 !important;
 }

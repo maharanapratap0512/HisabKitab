@@ -62,7 +62,7 @@ class DBContex {
         return new Promise(async (resolve, reject) => {
             try {
                 let sql = this.query[object][key];
-                console.log(sql, options);
+                // console.log(sql, options);
                 const result = this.db.prepare(sql).run(options.obj ? options.obj : {});
                 resolve(result);
             }
@@ -418,7 +418,7 @@ class DBContex {
         });
     }
 
-    // type - 'aawak', 'jawak'
+    // type - 'bachat', 'bachat_new'
     async getBachatFromAJ(AJobj, type) {
         let ajDate = new Date(AJobj.date);
         let bachatObj = {
@@ -430,7 +430,7 @@ class DBContex {
             subitem_id: AJobj.subitem_id,
             unit_id: AJobj.unit_id,
             dept_id: AJobj.dept_id,
-            condition_id: AJobj.condition_id
+            condition_id: AJobj.condition_id,
         };
         let bachat = await this.db.prepare(this.query[type].select_exists).get(bachatObj);
         return bachat || bachatObj;
@@ -441,7 +441,16 @@ class DBContex {
         let objDate = new Date(obj.date);
         obj.month = objDate.getMonth() + 1;
         obj.year = objDate.getFullYear();
+        obj.difference = 0;
         let bachat = await this.getBachatFromAJ(obj, 'bachat');
+        bachat.difference = Number(bachat.difference);
+        obj.qty = Number(obj.qty);
+        if (AJtype == 'aawak' && obj.aawak_type_id == 42) {
+            obj.difference = bachat.difference + obj.qty;
+        }
+        if (AJtype == 'jawak' && obj.jawak_type_id == 43) {
+            obj.difference = bachat.difference - obj.qty;
+        }
         if (bachat._id) {
             let bcht = this.db.prepare(this.query.bachat['update_' + AJtype + '_ins']).run(obj);
         }
@@ -449,6 +458,13 @@ class DBContex {
             let bcht = this.db.prepare(this.query.bachat['insert_' + AJtype + '_ins']).run(obj);
         }
         let bachatNew = await this.getBachatFromAJ(obj, 'bachat_new');
+        bachatNew.difference = Number(bachatNew.difference)
+        if (AJtype == 'aawak' && obj.aawak_type_id == 42) {
+            obj.difference = bachatNew.difference + obj.qty;
+        }
+        if (AJtype == 'jawak' && obj.jawak_type_id == 43) {
+            obj.difference = bachatNew.difference - obj.qty;
+        }
         if (bachatNew._id) {
             let bchtN = this.db.prepare(this.query.bachat_new['update_' + AJtype + '_ins']).run(obj);
         }
@@ -460,7 +476,7 @@ class DBContex {
         return;
     }
 
-    // AJtype = 'aawawk', 'jawak'
+    // AJtype = 'aawak', 'jawak'
     async updateBachatFromAJDelete(id, AJtype, obj = null) {
         if (!obj) {
             obj = await this.getById(AJtype, id);
@@ -469,7 +485,25 @@ class DBContex {
             let objDate = new Date(obj.date);
             obj.month = objDate.getMonth() + 1;
             obj.year = objDate.getFullYear();
+            obj.difference = 0;
+            let bachat = await this.getBachatFromAJ(obj, 'bachat');
+            bachat.difference = Number(bachat.difference)
+            obj.qty = Number(obj.qty)
+            if (AJtype == 'aawak' && obj.aawak_type_id == 42) {
+                obj.difference = bachat.difference - obj.qty;
+            }
+            if (AJtype == 'jawak' && obj.jawak_type_id == 43) {
+                obj.difference = bachat.difference + obj.qty;
+            }
             this.db.prepare(this.query.bachat['update_' + AJtype + '_del']).run(obj)
+            let bachatNew = await this.getBachatFromAJ(obj, 'bachat_new');
+            bachatNew.difference = Number(bachatNew.difference)
+            if (AJtype == 'aawak' && obj.aawak_type_id == 42) {
+                obj.difference = bachatNew.difference - obj.qty;
+            }
+            if (AJtype == 'jawak' && obj.jawak_type_id == 43) {
+                obj.difference = bachatNew.difference + obj.qty;
+            }
             this.db.prepare(this.query.bachat_new['update_' + AJtype + '_del']).run(obj);
             this.db.prepare(this.query.product['update_' + AJtype + '_del']).run(obj);
             this.db.prepare(this.query.bachat_new.update_past_bachat).run({ ...obj, qty: (AJtype == 'aawak' ? -obj.qty : obj.qty) });

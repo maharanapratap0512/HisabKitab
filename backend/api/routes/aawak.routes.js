@@ -18,12 +18,14 @@ router.post('/new/:dept_id', async (req, res, next) => {
                 if (resolve) {
                     for (let jwk of req.body.jawak_detail) {
                         jwk.aawak_ref_id = resolve;
+                        jwk.aawak_source_id = req.body.aawak_source_id;
                         await Fn.insertAJ(jwk, 'jawak').then(async (jwkResult) => {
                             if (jwkResult) {
                                 if (jwk.auto_awk) {
                                     let awk = DB.tbInterface.getAawakFromJawak(jwk);
                                     awk.dept_id = jwk.aawak_dept_id;
                                     awk.aawak_type_id = jwk.aawak_type_id;
+                                    awk.aawak_source_id = jwk.aawak_source_id;
                                     awk.description = "Automatic Entry from Jawak."
                                     await Fn.insertAJ(awk, 'aawak').then(async (rs) => {
                                     });
@@ -171,6 +173,7 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
                                         subitem_id: aawak.subitem_id,
                                         product_id: aawak.product_id,
                                         condition_id: aawak.condition_id,
+                                        aawak_source_id: aawak.aawak_source_id,
                                         unit_id: aawak.unit_id,
                                         dept_id: aawak.dept_id,
                                     }
@@ -189,6 +192,7 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
                             for (let i = 0; i < aawak.jawak_detail.length; i++) {
                                 if (!aawak.jawak_detail[i]._id) {
                                     aawak.jawak_detail[i].aawak_ref_id = oldAwk._id;
+                                    aawak.jawak_detail[i].aawak_source_id = aawak.aawak_source_id;
                                     await Fn.insertAJ(aawak.jawak_detail[i], 'jawak').then(async (jwkResult) => {
                                     }, (err) => {
                                         throw err;
@@ -352,6 +356,7 @@ router.put('/new', async (req, res, next) => {
                                 subitem_id: req.body.set.subitem_id,
                                 product_id: req.body.set.product_id,
                                 condition_id: req.body.set.condition_id,
+                                aawak_source_id: req.body.set.aawak_source_id,
                                 unit_id: req.body.set.unit_id,
                                 dept_id: req.body.set.dept_id,
                             }
@@ -369,12 +374,14 @@ router.put('/new', async (req, res, next) => {
                 for (let jwk of req.body.set.jawak_detail) {
                     if (!jwk._id) {
                         jwk.aawak_ref_id = oldAwk._id;
+                        jwk.aawak_source_id = req.body.set.aawak_source_id;
                         await Fn.insertAJ(jwk, 'jawak').then(async (jwkResult) => {
                             if (jwkResult) {
                                 if (jwk.auto_awk) {
                                     let awk = DB.tbInterface.getAawakFromJawak(jwk);
                                     awk.dept_id = jwk.aawak_dept_id;
                                     awk.aawak_type_id = jwk.aawak_type_id;
+                                    awk.aawak_source_id = jwk.aawak_source_id;
                                     awk.description = "Automatic Entry from Jawak."
                                     console.log(awk);
                                     await Fn.insertAJ(awk, 'aawak').then(async (rs) => {

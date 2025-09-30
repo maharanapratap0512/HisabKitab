@@ -282,6 +282,20 @@ class Functions extends DBContex {
       return str.slice(0, -1);
    }
 
+   cleanString(str) {
+      return (str || "")
+         .trim()
+         .normalize("NFC")          // normalize Unicode
+         .replace(/\u200B/g, "")    // remove zero-width space
+         .replace(/\u00A0/g, " ")   // remove non-breaking space
+         .replace(/\s+/g, " ")      // collapse multiple spaces
+         .toLowerCase();            // case-insensitive for English
+   };
+
+   async stringCompare(a, b) {
+      return this.cleanString(a) === this.cleanString(b);
+   }
+
    async getMMs(dept_id = null) {
 
       return await this.getList('mm', { dept_id: dept_id }).then(async (resolve) => {

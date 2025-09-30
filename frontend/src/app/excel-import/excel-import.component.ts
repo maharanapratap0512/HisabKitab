@@ -269,7 +269,7 @@ export class ExcelImportComponent implements OnInit {
   toggleCorrection(i: any, action: boolean) {
     this.unmatchedData[i].correction = action;
     if (action) {
-      if(this.unmatchedData[i].type == 'item' && this.unmatchedData[i].id){
+      if (this.unmatchedData[i].type == 'item' && this.unmatchedData[i].id) {
         this.itemSelected(this.unmatchedData[i].id)
       }
     } else {
@@ -297,13 +297,13 @@ export class ExcelImportComponent implements OnInit {
 
   correctionSubmit(data: any, index: any) {
     let conf = this.headerList.filter((h: { ref_table: any; }) => h.ref_table == data.type);
-    console.log("data", data, "conf", conf);
-    console.log(this.excelArrObj);
+    // console.log("data", data, "conf", conf);
+    // console.log(this.excelArrObj);
 
     if (data.type == 'item') {
       for (let i in this.excelArrObj) {
         for (let j in conf) {
-          if (this.excelArrObj[i].item == data.value.item && this.excelArrObj[i].subitem == data.value.subitem) {
+          if (this.excelArrObj[i].item == data.name.item && this.excelArrObj[i].subitem == data.name.subitem) {
             this.excelArrObj[i].item_id = data.id;
             this.excelArrObj[i].subitem_id = data.id2;
           }
@@ -312,7 +312,7 @@ export class ExcelImportComponent implements OnInit {
     } else {
       for (let i in this.excelArrObj) {
         for (let j in conf) {
-          if (this.excelArrObj[i][conf[j].name] == data.value) {
+          if (this.excelArrObj[i][conf[j].name] == data.name) {
             this.excelArrObj[i][conf[j].ref_field] = data.id;
           }
         }
@@ -321,6 +321,15 @@ export class ExcelImportComponent implements OnInit {
 
     this.unmatchedData[index].done = true;
     this.unmatchedData[index].ignore = false;
+    if (data.dictionary) {
+      this.http.post(this.api.getUrl('DICT'), data).subscribe((res: any) => {
+        if (res.success) {
+          this.toastr.success('Added to Dictionary');
+        }
+      }, (err)=>{
+        this.toastr.error('Error Occuring while inserting into Dictionary.')
+      });
+    }
   }
 
   async processImport(i: number = 0) {

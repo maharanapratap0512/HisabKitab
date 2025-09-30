@@ -13,7 +13,8 @@ class TableInterface {
       total_aawak: 0,
       jawak: 0,
       used_jawak: 0,
-      bachat: 0
+      bachat: 0,
+      difference: 0
    }
    bachat = {
       _id: null,
@@ -29,6 +30,7 @@ class TableInterface {
       Defective: 0,
       Scrap: 0,
       Repairing: 0,
+      difference: 0
    }
 
    aawak = {
@@ -150,6 +152,15 @@ class TableInterface {
       auto_awk: 0,
    }
 
+   dictionary = {
+      _id: null,
+      type: null,
+      name: null,
+      extra_note: null,
+      id: null,
+      id2: null
+   }
+
    getAawakFromProduct(product, oldAawak = null) {
       return {
          ...(oldAawak ? oldAawak : this.aawak),
@@ -174,6 +185,33 @@ class TableInterface {
       }
    }
 
+   getAawakFromBachatImport(bcht) {
+      return {
+         ...this.aawak,
+         ...bcht,
+         subitem_id: bcht.subitem_id ? bcht.subitem_id : null,
+         condition_id: bcht.condition_id ? bcht.condition_id : null,
+         qty: Math.abs(bcht.difference),
+         aawak_mm_id: bcht.mm_id,
+         aawak_type_id: 42,
+         is_xl: 1,
+         is_auto: 1,
+      }
+   }
+
+   getJawakFromBachatImport(bcht) {
+      return {
+         ...this.jawak,
+         ...bcht,
+         subitem_id: bcht.subitem_id ? bcht.subitem_id : null,
+         condition_id: bcht.condition_id ? bcht.condition_id : null,
+         qty: Math.abs(bcht.difference),
+         jawak_mm_id: bcht.mm_id,
+         jawak_type_id: 43,
+         is_xl: 1,
+         is_auto: 1,
+      }
+   }
 }
 
 module.exports = new TableInterface();

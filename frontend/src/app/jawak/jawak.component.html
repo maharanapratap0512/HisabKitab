@@ -280,6 +280,7 @@
                            <!-- <th style="width: 200px;" *ngIf="settings.product_id">Product</th> -->
                            <th style="width: 150px;" *ngIf="settings.condition_id">Condition</th>
                            <th style="width: 100px;">Quantity</th>
+                           <th style="width: 120px;">Aawak Source</th>
                            <th style="width: 120px;">Jawak Type</th>
                            <th style="width: 120px;">Usage List</th>
                            <th style="width: 120px;">parchi Kaha Shown</th>
@@ -331,6 +332,8 @@
                               {{data.qty}} {{data.unit_short}} <br />
                               {{data.rate ? '@'+data.rate + ' = '+ data.actual_amt : ''}}
                            </td>
+                           <td>{{data.aawak_source_hin}}<br />
+                              {{data.aawak_source_eng}}</td>
                            <td>{{data.jawak_type_hin}}<br />
                               {{data.jawak_type_eng}}</td>
                            <td>{{data.usage_list_id ? data.usage_list_hin : ''}}<br />

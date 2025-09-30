@@ -22,8 +22,16 @@ router.get('/', async (req, res, next) => {
 // post dictionary 
 router.post('/', async (req, res, next) => {
     try {
-        if (req.body && req.body.type && req.body.name && req.body.real_id) {
-            await DB.insert('dictionary', req.body).then(async (data) => {
+
+        if (req.body && req.body.type && req.body.name && req.body.id) {
+            let obj = {
+                ...DB.tbInterface.dictionary,
+                ...req.body,
+            }
+            if (obj.type == 'pbk') {
+                obj.name = obj.pbk ? JSON.stringify(obj.pbk) : null;
+            }
+            await DB.insert('dictionary', obj).then(async (data) => {
                 res.json({
                     success: true,
                     result: data || {}

@@ -295,9 +295,9 @@
                                  (blur)="toggleCorrection(((page_unmatched-1) * 25) + i, false)" tabindex="0">
                                  <td>{{((page_unmatched-1) * 25) + i+1}}</td>
                                  <td> {{data.type}} </td>
-                                 <td *ngIf="data.type != 'item'"> {{data.value}} </td>
+                                 <td *ngIf="data.type != 'item'"> {{data.name}} </td>
                                  <td *ngIf="data.type == 'item'">
-                                    {{data.value.item}} - {{data.value.subitem}}
+                                    {{data.name.item}} - {{data.name.subitem}}
                                  </td>
                                  <td>
                                     <div class="row" *ngIf="data.correction">

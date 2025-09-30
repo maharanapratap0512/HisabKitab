@@ -189,7 +189,7 @@
                                     </div> -->
                                     <div class="col-2">
                                        <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
-                                          [clearable]="true" [virtualScroll]="true" (change)="mmSelected($event)">
+                                          [clearable]="true" [multiple]="true" [virtualScroll]="true" (change)="mmSelected($event)">
                                           <ng-option *ngFor="let item of mms" [value]="item._id">
                                              {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
                                        </ng-select>

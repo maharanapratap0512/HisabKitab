@@ -320,6 +320,15 @@
                                     {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
                               </ng-select>
 
+                              <!-- aawak type dropdown -->
+                              <ng-select *ngIf="data.type == 'awk_source'" class="custom custom-import"
+                                 placeholder="Select Aawak Source" [virtualScroll]="true" [(ngModel)]="data.id"
+                                 [ngModelOptions]="{standalone: true}">
+                                 <ng-option selected="selected" disabled value="">-- Select Aawak Source --</ng-option>
+                                 <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
+                                    {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                              </ng-select>
+
                               <!-- jawak type dropdown -->
                               <ng-select *ngIf="data.type == 'jwk_type'" class="custom custom-import"
                                  placeholder="Select Jawak Type" [virtualScroll]="true" [(ngModel)]="data.id"

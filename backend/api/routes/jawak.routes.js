@@ -120,6 +120,7 @@ router.post('/new/:dept_id', async (req, res, next) => {
                         let awk = DB.tbInterface.getAawakFromJawak(req.body);
                         awk.dept_id = req.body.aawak_dept_id;
                         awk.aawak_type_id = req.body.aawak_type_id;
+                        awk.aawak_source_id = req.body.aawak_source_id;
                         awk.description = "Automatic Entry from Jawak."
                         await Fn.insertAJ(awk, 'aawak').then(async (rs) => {
                         });

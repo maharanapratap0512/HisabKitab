@@ -72,7 +72,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             dept.dept_code, dept.dept_hin, dept.dept_eng from (select round(sum(total_aawak), 2) as t_a, round(sum(jawak), 2) as t_j, round(sum(used_jawak), 2) as t_u, round(sum(bachat), 2) as t_b, round(sum(past_bachat), 2) as t_p_b, * from 
             (select MAX(printf('%04d-%02d', year, month)) as year_month, * from bachat_new ${conditionQuery3}
             group by mm_id, item_id, subitem_id, unit_id, dept_id, condition_id) bn
-            group by bn.dept_id, bn.mm_id, bn.item_id, bn.subitem_id, bn.condition_id, bn.unit_id, bn.month, bn.year order by bn.year, bn.month) bcht
+            group by bn.dept_id, bn.mm_id, bn.item_id, bn.subitem_id, bn.condition_id, bn.unit_id, bn.year, bn.month order by bn.year, bn.month) bcht
             left join mm on mm._id = bcht.mm_id
             left join state st on st._id = mm.state_id
             left join item it on it._id = bcht.item_id
@@ -82,9 +82,9 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             left join unit on unit._id = bcht.unit_id
             left join report_comment rc on rc.dept_id = bcht.dept_id AND rc.mm_id = bcht.mm_id AND rc.item_id = bcht.item_id AND ((rc.subitem_id IS NULL AND bcht.subitem_id IS NULL) OR rc.subitem_id = bcht.subitem_id) AND rc.unit_id = bcht.unit_id AND rc.month IS NULL AND rc.year = bcht.year AND rc.type_id IS NULL
             left join department dept on dept._id = bcht.dept_id ${conditionQuery2}
-            group by bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id;`
+            group by bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id, bcht.year;`
 
-            console.log(sql1);
+            // console.log(sql1);
             let stmtN = DB.db.prepare(sql1);
 
             for (let row of stmtN.iterate({ order: 'updated_at desc' })) {
@@ -123,7 +123,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                     row.arr_past_bachat = months.map(m => row.arr_months.includes(m) ? row.arr_past_bachat[row.arr_months.indexOf(m)] : null);
                     // row.arr_comment = months.map(m => row.arr_months.includes(m) ? row.arr_comment[row.arr_months.indexOf(m)] : null);
                 }
-                console.log(row.arr_sum_bachat);
+                // console.log(row.arr_sum_bachat);
                 row.arr_months = months;
                 row.showTooltip = {};
 

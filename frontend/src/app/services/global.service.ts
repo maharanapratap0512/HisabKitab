@@ -134,4 +134,18 @@ export class GlobalService {
     }
   }
 
+  stringCompare(a: string, b: string): boolean {
+    const clean = (str: string): string => {
+      return (str || "")
+        .trim()
+        .normalize("NFC")          // normalize Unicode
+        .replace(/\u200B/g, "")    // remove zero-width space
+        .replace(/\u00A0/g, " ")   // remove non-breaking space
+        .replace(/\s+/g, " ")      // collapse multiple spaces
+        .toLowerCase();            // case-insensitive for English
+    };
+  
+    return clean(a) === clean(b);
+  }
+
 }

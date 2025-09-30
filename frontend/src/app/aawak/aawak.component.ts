@@ -49,6 +49,7 @@ export class AawakComponent implements OnInit {
   subitems: any = [];
   pbks: any = [];
   aawak_types: any = [];
+  aawak_sources: any = [];
   usage_lists: any = [];
   jawak_types: any = [];
   products: any = [];
@@ -150,6 +151,7 @@ export class AawakComponent implements OnInit {
       this.departments = result.department ? result.department : [];
       this.pbks = result.pbk ? result.pbk : [];
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
+      this.aawak_sources = result.aawak_source ? result.aawak_source : [];
       this.jawak_types = result.jawak_type ? result.jawak_type : [];
       this.usage_lists = result.usage_list ? result.usage_list : [];
       this.products = result.product ? result.product : [];
@@ -319,7 +321,7 @@ export class AawakComponent implements OnInit {
             for (let j in result[i].jawak_detail) {
               jawakArray.push({
                 'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
-                'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
+                'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
                 'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
                 'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
                 'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
@@ -383,6 +385,7 @@ export class AawakComponent implements OnInit {
             'Qty': result[i].qty ? result[i].qty : '-',
             'Unit': result[i].unit_id ? result[i].unit_short : '-',
             'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
+            'Aawak Source': result[i].aawak_source_id ? result[i].aawak_source_hin : '-',
             'Aawak Type': result[i].aawak_type_id ? result[i].aawak_type_hin : '-',
             'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
             'Jawak Detail': jawakArray,
@@ -405,7 +408,7 @@ export class AawakComponent implements OnInit {
                 'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
                 'Usage List': result[i].jawak_detail[j].usage_list_id ? result[i].jawak_detail[j].usage_list_hin : '-',
                 'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
-                'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
+                'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
                 'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
                 'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
                 'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
@@ -491,6 +494,7 @@ export class AawakComponent implements OnInit {
             'Qty': result[i].qty ? result[i].qty : '-',
             'Unit': result[i].unit_id ? result[i].unit_short : '-',
             'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
+            'Aawak Source': result[i].aawak_source_id ? result[i].aawak_source_hin : '-',
             'Aawak Type': result[i].aawak_type_id ? result[i].aawak_type_hin : '-',
             'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
             'Description': result[i].description ? result[i].description : '-',
@@ -532,7 +536,7 @@ export class AawakComponent implements OnInit {
             for (let j in result[i].jawak_detail) {
               jawakArray.push({
                 'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
-                'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
+                'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
                 'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
                 'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
                 'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
@@ -598,6 +602,7 @@ export class AawakComponent implements OnInit {
             'Unit': result[i].unit_id ? result[i].unit_short : '-',
             'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
             'Aawak Type': result[i].aawak_type_id ? result[i].aawak_type_hin : '-',
+            'Aawak Source': result[i].aawak_source_id ? result[i].aawak_source_hin : '-',
             'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
             'Jawak Detail': jawakArray,
           };
@@ -619,7 +624,7 @@ export class AawakComponent implements OnInit {
                 'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
                 'Usage List': result[i].jawak_detail[j].usage_list_id ? result[i].jawak_detail[j].usage_list_hin : '-',
                 'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
-                'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
+                'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
                 'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
                 'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
                 'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
@@ -796,6 +801,7 @@ export class AawakComponent implements OnInit {
           'Unit': result[i].unit_id ? result[i].unit_short : '-',
           'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
           'Aawak Type': result[i].aawak_type_id ? result[i].aawak_type_hin : '-',
+          'Aawak Source': result[i].aawak_source_id ? result[i].aawak_source_hin : '-',
           'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
           'Description': result[i].description ? result[i].description : '-',
           // 'बचत':result[i].remaining_qty ? result[i].remaining_qty : 0,      
@@ -871,7 +877,7 @@ export class AawakComponent implements OnInit {
             ...awkObj,
             'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
             'Usage List': result[i].jawak_detail[j].usage_list_id ? result[i].jawak_detail[j].usage_list_hin : '-',
-            'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
+            'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
             'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
             'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
             'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
@@ -1389,6 +1395,8 @@ export class AawakComponent implements OnInit {
           unit_id: null,
           aj_type: null,
           aj_type_id: null,
+          awk_source: null,
+          awk_source_id: null,
           nimitt: null,
           nimitt_id: null,
           hl: null,
@@ -1403,7 +1411,7 @@ export class AawakComponent implements OnInit {
         for (let j = 0; j < columns.length; j++) {
           //trim data if type string
           if (typeof exceldata[i][j] == "string") {
-            exceldata[i][j] = exceldata[i][j].trim();
+            exceldata[i][j] = exceldata[i][j].trim().normalize('NFC').toLowerCase();
           }
           // set null if data id '', '-', or empty/undefine
           if (['', '-', undefined].includes(exceldata[i][j])) {
@@ -1419,11 +1427,11 @@ export class AawakComponent implements OnInit {
                 break;
               case "mm": obj.mm = exceldata[i][j];
 
-                let getmm = this.mms.find((m: any) => [m.mm_hin?.trim(), m.mm_eng?.trim(), m.mm_code].includes(obj.mm));
+                let getmm = this.mms.find((m: any) => this.gs.stringCompare(m.mm_hin, obj.mm) || this.gs.stringCompare(m.mm_eng, obj.mm) || this.gs.stringCompare(m.mm_code, obj.mm));
                 if (getmm) {
                   obj.mm_id = getmm._id;
                 } else {
-                  let dictmm = this.dictionary.find((d: any) => d.type == "mm" && d.name == obj.mm);
+                  let dictmm = this.dictionary.find((d: any) => d.type == "mm" && d.name.normalize('NFC') == obj.mm);
                   obj.mm_id = dictmm ? dictmm.id : null;
                 }
                 break;
@@ -1464,18 +1472,18 @@ export class AawakComponent implements OnInit {
                 }
                 break;
               case "item": obj.item = exceldata[i][j];
-                let getitem = this.items.find((i: any) => [i.item_hin.trim(), i.item_eng?.trim(), i.item_code?.trim()].includes(obj.item));
+                let getitem = this.items.find((i: any) => this.gs.stringCompare(i.item_hin, obj.item) || this.gs.stringCompare(i.item_eng, obj.item) || this.gs.stringCompare(i.item_code, obj.item));
                 if (getitem) {
                   obj.item_id = getitem._id;
                 } else {
-                  let dictitem = this.dictionary.find((d: any) => d.type == "item" && d.name == obj.item && !d.extra_note)
+                  let dictitem = this.dictionary.find((d: any) => d.type == "item" && d.name.normalize('NFC') == obj.item && !d.extra_note)
                   obj.item_id = dictitem ? dictitem.id : null;
                 }
                 break;
-              case "subitem": obj.subitem = exceldata[i][j];
+                case "subitem": obj.subitem = exceldata[i][j];
                 if (obj.item_id) {
                   let getitem = this.items.find((i: any) => i._id == obj.item_id);
-                  let getsubitem = getitem?.subitems.find((m: any) => [m.subitem_hin?.trim(), m.subitem_eng?.trim(), m.subitem_code].includes(obj.subitem));
+                  let getsubitem = getitem?.subitems.find((m: any) => this.gs.stringCompare(m.subitem_hin, obj.subitem) || this.gs.stringCompare(m.subitem_eng, obj.subitem) || this.gs.stringCompare(m.subitem_code, obj.subitem));
                   obj.subitem_id = getsubitem ? getsubitem._id : null;
                 }
                 break;
@@ -1515,7 +1523,7 @@ export class AawakComponent implements OnInit {
               case "aawak_mm":
               case "awk_mm":
               case "awk mm": obj.aj_mm = exceldata[i][j];
-                let getawkmm = this.mms.find((m: any) => [m.mm_hin?.trim(), m.mm_eng?.trim(), m.mm_code?.trim()].includes(obj.aj_mm));
+                let getawkmm = this.mms.find((m: any) => this.gs.stringCompare(m.mm_hin, obj.aj_mm) || this.gs.stringCompare(m.mm_eng, obj.aj_mm) || this.gs.stringCompare(m.mm_code, obj.aj_mm));
                 if (getawkmm) {
                   obj.aj_mm_id = getawkmm._id;
                 } else {
@@ -1527,12 +1535,24 @@ export class AawakComponent implements OnInit {
               case "awk type":
               case "awk_type":
               case "aawak_type": obj.aj_type = exceldata[i][j];
-                let getaawak_type = this.aawak_types.find((c: any) => [c.list_name_hin?.trim(), c.list_name_eng?.trim()].includes(obj.aj_type));
+                let getaawak_type = this.aawak_types.find((c: any) => this.gs.stringCompare(c.list_name_hin, obj.aj_type) || this.gs.stringCompare(c.list_name_eng, obj.aj_type));
                 if (getaawak_type) {
                   obj.aj_type_id = getaawak_type._id;
                 } else {
                   let dictaj_type = this.dictionary.find((d: any) => d.type == "awk_type" && d.name == obj.aj_type)
                   obj.aj_type_id = dictaj_type ? dictaj_type.id : null;
+                }
+                break;
+              case "aawak source":
+              case "awk source":
+              case "awk_source":
+              case "aawak_source": obj.awk_source = exceldata[i][j];
+                let getaawak_source = this.aawak_sources.find((c: any) => this.gs.stringCompare(c.list_name_hin, obj.awk_source) || this.gs.stringCompare(c.list_name_eng, obj.awk_source));
+                if (getaawak_source) {
+                  obj.awk_source_id = getaawak_source._id;
+                } else {
+                  let dictawk_source = this.dictionary.find((d: any) => d.type == "awk_source" && d.name == obj.awk_source)
+                  obj.awk_source_id = dictawk_source ? dictawk_source.id : null;
                 }
                 break;
               case "qty":
@@ -1613,7 +1633,7 @@ export class AawakComponent implements OnInit {
               case "jwk_mm":
               case "jawak_mm":
               case "jawak mm": jwkobj.aj_mm = exceldata[i][j];
-                let getmm = this.mms.find((m: any) => [m.mm_hin?.trim(), m.mm_eng?.trim(), m.mm_code?.trim()].includes(jwkobj.aj_mm));
+                let getmm = this.mms.find((m: any) => this.gs.stringCompare(m.mm_hin, jwkobj.aj_mm) || this.gs.stringCompare(m.mm_eng, jwkobj.aj_mm) || this.gs.stringCompare(m.mm_code, jwkobj.aj_mm));;
                 if (getmm) {
                   jwkobj.aj_mm_id = getmm._id;
                   jwkobj.aj_mm_hin = getmm.mm_hin;
@@ -1653,7 +1673,7 @@ export class AawakComponent implements OnInit {
               case "jwk type":
               case "jawak_type":
               case "jawak type": jwkobj.aj_type = exceldata[i][j];
-                let getjawak_type = this.jawak_types.find((c: any) => [c.list_name_hin?.trim(), c.list_name_eng?.trim()].includes(jwkobj.aj_type));
+                let getjawak_type = this.jawak_types.find((c: any) => this.gs.stringCompare(c.list_name_hin, jwkobj.aj_type) || this.gs.stringCompare(c.list_name_eng, jwkobj.aj_type));
                 if (getjawak_type) {
                   jwkobj.aj_type_id = getjawak_type._id;
                   jwkobj.aj_type_hin = getjawak_type.list_name_hin;
