@@ -19,7 +19,9 @@ export class BachatImportComponent {
   @Output() response = new EventEmitter();
   settings: any;
   isLoader: boolean = false;
-  term: any;
+  term_excel: any;
+  term_combined: any;
+  term_db_only: any;
   loadingStatus: any = "मैं आत्मा शांत स्वरूप हूँ ।";
   itemsPerPage = 100;
   page_excel: any = 1;
@@ -242,9 +244,7 @@ export class BachatImportComponent {
 
   exportRejected() {
     let date = new Date();
-
     this.excelExportService.exportAsExcelFile(this.rejected, 'Bachat_import_rejected_data_' + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
-
   }
 
 }

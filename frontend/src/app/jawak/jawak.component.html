@@ -263,12 +263,30 @@
 
             <!-- Jawak Table -->
             <div class="row" *ngIf="jawakData.length">
-               <pagination-controls class="pagi text-end" (pageChange)="getJawakData(page=$event)" [autoHide]="true">
-               </pagination-controls>
                <div class="card-body" style="overflow: auto;">
+
+                  <div class="row">
+                     <div class="col-4 pt-2">
+                        <span class="badge year-box"
+                           [ngClass]="{'badge-outline-danger':!isDeleting, 'bg-danger': isDeleting}"
+                           (click)="deleteMultiple()"
+                           title="Click for multiple delete selection & click same again to perform delete.">Delete Multiple</span>
+                     </div>
+                     <div class="col-8" *ngIf="jawakData.length">
+                        <pagination-controls class="pagi text-end" (pageChange)="getJawakData(page=$event)"
+                           [autoHide]="true">
+                        </pagination-controls>
+                     </div>
+                  </div>
                   <table id="datatable-buttons" class="table table-hover dt-responsive">
                      <thead>
                         <tr>
+                           <th style="width: 25px;" *ngIf="isDeleting">
+                              <div class="form-check form-checkbox-danger mb-2">
+                                 <input type="checkbox" class="form-check-input" id="customCheckcolor5"
+                                    (change)="deleteSelectAll()">
+                              </div>
+                           </th>
                            <th style="width: 40px;">No.</th>
                            <th style="width: 80px;">Manage</th>
                            <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">MM</th>
@@ -293,6 +311,13 @@
                      <tbody>
                         <tr
                            *ngFor="let data of jawakData | search:term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
+                           <td *ngIf="isDeleting">
+                              <div class="form-check form-checkbox-danger mb-2">
+                                 <input type="checkbox" [(ngModel)]="data.delete" class="form-check-input"
+                                    (change)="deleteSelection(i, data._id)">
+                                 <!-- <label class="form-check-label" for="customCheckcolor5">Danger Checkbox</label> -->
+                              </div>
+                           </td>
                            <td>{{itemsPerPage * (page-1) + i+1}}</td>
                            <td>
                               <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i

@@ -74,38 +74,51 @@
                     <div class="tab-content">
                         <!-- exceldata -->
                         <div class="tab-pane show active" id="exceldata">
-                            <div class="row" style="overflow: auto;">
-                                <pagination-controls id="excelPagi" class="pagi text-end"
-                                    (pageChange)="page_excel = $event" [autoHide]="true">
-                                </pagination-controls>
-                                <table id="datatable-buttons" class="table table-hover dt-responsive"
-                                    style="table-layout: auto;">
-                                    <thead>
-                                        <tr>
-                                            <th>Sn</th>
-                                            <th>Date</th>
-                                            <th>MM</th>
-                                            <th>Item</th>
-                                            <th>Subitem</th>
-                                            <th>Condition</th>
-                                            <th>Qty</th>
-                                            <th>Unit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr
-                                            *ngFor="let data of excelArrObj | paginate:{id:'excelPagi', itemsPerPage:itemsPerPage,currentPage:page_excel,totalItems:excelArrObj.length}; let i=index;">
-                                            <td>{{data.sn}}</td>
-                                            <td>{{data.date}}</td>
-                                            <td>{{data.mm}}</td>
-                                            <td>{{data.item}}</td>
-                                            <td>{{data.subitem}}</td>
-                                            <td>{{data.condition}}</td>
-                                            <td>{{data.qty}}</td>
-                                            <td>{{data.unit}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div class="row" style="overflow: hidden; flex-direction: column;">
+                                <div class="row my-1 sticky-header">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Here"
+                                                [(ngModel)]="term_excel">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <pagination-controls id="excelPagi" class="pagi text-end"
+                                            (pageChange)="page_excel = $event" [autoHide]="true">
+                                        </pagination-controls>
+                                    </div>
+                                </div>
+                                <div class="table-container">
+                                    <table id="datatable-buttons"
+                                        class="table table-hover dt-responsive table-sticky-header"
+                                        style="table-layout: auto;">
+                                        <thead>
+                                            <tr>
+                                                <th>Sn</th>
+                                                <th>Date</th>
+                                                <th>MM</th>
+                                                <th>Item</th>
+                                                <th>Subitem</th>
+                                                <th>Condition</th>
+                                                <th>Qty</th>
+                                                <th>Unit</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let data of excelArrObj | search: term_excel | paginate:{id:'excelPagi', itemsPerPage:itemsPerPage,currentPage:page_excel,totalItems:excelArrObj.length}; let i=index;">
+                                                <td>{{data.sn}}</td>
+                                                <td>{{data.date}}</td>
+                                                <td>{{data.mm}}</td>
+                                                <td>{{data.item}}</td>
+                                                <td>{{data.subitem}}</td>
+                                                <td>{{data.condition}}</td>
+                                                <td>{{data.qty}}</td>
+                                                <td>{{data.unit}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
@@ -142,67 +155,84 @@
                                 </div>
                             </div>
 
-                            <div class="row" style="overflow: auto;">
+                            <div class="row" style="overflow: hidden; flex-direction: column;">
 
-                                <pagination-controls id="combinedPagi" class="pagi text-end"
-                                    (pageChange)="page_combined = $event" [autoHide]="true">
-                                </pagination-controls>
-                                <table id="datatable-buttons" class="table table-hover dt-responsive"
-                                    style="table-layout: auto;">
-                                    <thead>
-                                        <tr>
-                                            <th>Sn</th>
-                                            <th>Date</th>
-                                            <th>MM</th>
-                                            <th>Item</th>
-                                            <th>Subitem</th>
-                                            <th>Condition</th>
-                                            <th>Unit</th>
-                                            <th>Excel Qty
-                                                <div class="form-check mb-2">
-                                                    <input type="checkbox" class="form-check-input"
-                                                        id="customCheckcolor1"
-                                                        (change)="hideZero('qty', $event.target)">
-                                                    <label class="form-check-label fs-6" for="customCheckcolor1">Hide
-                                                        0</label>
-                                                </div>
-                                            </th>
-                                            <th>SW Qty
-                                                <div class="form-check mb-2">
-                                                    <input type="checkbox" class="form-check-input"
-                                                        id="customCheckcolor1"
-                                                        (change)="hideZero('bachat', $event.target)">
-                                                    <label class="form-check-label fs-6" for="customCheckcolor1">Hide
-                                                        0</label>
-                                                </div>
-                                            </th>
-                                            <th>Difference
-                                                <div class="form-check mb-2">
-                                                    <input type="checkbox" class="form-check-input"
-                                                        id="customCheckcolor1"
-                                                        (change)="hideZero('difference', $event.target)">
-                                                    <label class="form-check-label fs-6" for="customCheckcolor1">Hide
-                                                        0</label>
-                                                </div>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr *ngFor="let data of combinedBachat | paginate:{id:'combinedPagi', itemsPerPage:itemsPerPage,currentPage:page_combined,totalItems:combinedBachat.length}; let i=index;"
-                                            [ngClass]="{'excel-row': data.status == 'EXCEL', 'db-row': data.status == 'DB'}">
-                                            <td>{{data.sn}}</td>
-                                            <td>{{data.date}}</td>
-                                            <td>{{data.mm_hin}}</td>
-                                            <td>{{data.item_hin}}</td>
-                                            <td>{{data.subitem_id ? data.subitem_hin : ''}}</td>
-                                            <td>{{data.condition_id ? data.condition_hin : ''}}</td>
-                                            <td>{{data.unit_short}}</td>
-                                            <td>{{data.qty}}</td>
-                                            <td>{{data.bachat}}</td>
-                                            <td [ngClass]="{'marked': data.difference != 0}">{{data.difference}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="row my-1">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Here"
+                                                [(ngModel)]="term_combined">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <pagination-controls id="combinedPagi" class="pagi text-end"
+                                            (pageChange)="page_combined = $event" [autoHide]="true">
+                                        </pagination-controls>
+                                    </div>
+                                </div>
+                                <div class="table-container">
+                                    <table id="datatable-buttons"
+                                        class="table table-hover dt-responsive table-sticky-header"
+                                        style="table-layout: auto;">
+                                        <thead>
+                                            <tr>
+                                                <th>Sn</th>
+                                                <th>Date</th>
+                                                <th>MM</th>
+                                                <th>Item</th>
+                                                <th>Subitem</th>
+                                                <th>Condition</th>
+                                                <th>Unit</th>
+                                                <th>Excel Qty
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input"
+                                                            id="customCheckcolor1"
+                                                            (change)="hideZero('qty', $event.target)">
+                                                        <label class="form-check-label fs-6"
+                                                            for="customCheckcolor1">Hide
+                                                            0</label>
+                                                    </div>
+                                                </th>
+                                                <th>SW Qty
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input"
+                                                            id="customCheckcolor1"
+                                                            (change)="hideZero('bachat', $event.target)">
+                                                        <label class="form-check-label fs-6"
+                                                            for="customCheckcolor1">Hide
+                                                            0</label>
+                                                    </div>
+                                                </th>
+                                                <th>Difference
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input"
+                                                            id="customCheckcolor1"
+                                                            (change)="hideZero('difference', $event.target)">
+                                                        <label class="form-check-label fs-6"
+                                                            for="customCheckcolor1">Hide
+                                                            0</label>
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let data of combinedBachat | search: term_combined | paginate:{id:'combinedPagi', itemsPerPage:itemsPerPage,currentPage:page_combined,totalItems:combinedBachat.length}; let i=index;"
+                                                [ngClass]="{'excel-row': data.status == 'EXCEL', 'db-row': data.status == 'DB'}">
+                                                <td>{{data.sn}}</td>
+                                                <td>{{data.date}}</td>
+                                                <td>{{data.mm_hin}}</td>
+                                                <td>{{data.item_hin}}</td>
+                                                <td>{{data.subitem_id ? data.subitem_hin : ''}}</td>
+                                                <td>{{data.condition_id ? data.condition_hin : ''}}</td>
+                                                <td>{{data.unit_short}}</td>
+                                                <td>{{data.qty}}</td>
+                                                <td>{{data.bachat}}</td>
+                                                <td [ngClass]="{'marked': data.difference != 0}">{{data.difference}}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
@@ -233,53 +263,66 @@
                                 </div>
                             </div>
 
-                            <div class="row" style="overflow: auto;">
+                            <div class="row" style="overflow: hidden; flex-direction: column;">
 
-                                <pagination-controls id="dbOnlyPagi" class="pagi text-end"
-                                    (pageChange)="page_db_only = $event" [autoHide]="true">
-                                </pagination-controls>
-                                <table id="datatable-buttons" class="table table-hover dt-responsive"
-                                    style="table-layout: auto;">
-                                    <thead>
-                                        <tr>
-                                            <th>
-                                                <div class="form-check mb-2">
-                                                    <input type="checkbox" class="form-check-input" id="selectAll"
-                                                        [(ngModel)]="selectAll" (click)="toggleSelectAll()">
-                                                    <label class="form-check-label fs-6" for="selectAll">Select
-                                                        All</label>
-                                                </div>
-                                            </th>
-                                            <th>MM</th>
-                                            <th>Item</th>
-                                            <th>Subitem</th>
-                                            <th>Condition</th>
-                                            <th>Unit</th>
-                                            <th>Excel Qty</th>
-                                            <th>SW Qty</th>
-                                            <th>Difference</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr
-                                            *ngFor="let data of DBOnlyBachatAll | paginate:{id:'dbOnlyPagi', itemsPerPage:itemsPerPage,currentPage:page_db_only,totalItems:DBOnlyBachat.length}; let i=index;">
-                                            <td>
-                                                <div class="form-check mb-2">
-                                                    <input type="checkbox" class="form-check-input"
-                                                        [(ngModel)]="data.selected">
-                                                </div>
-                                            </td>
-                                            <td>{{data.mm_hin}}</td>
-                                            <td>{{data.item_hin}}</td>
-                                            <td>{{data.subitem_id ? data.subitem_hin : ''}}</td>
-                                            <td>{{data.condition_id ? data.condition_hin : ''}}</td>
-                                            <td>{{data.unit_short}}</td>
-                                            <td>{{data.qty}}</td>
-                                            <td>{{data.bachat}}</td>
-                                            <td>{{data.difference}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="row my-1">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Here"
+                                                [(ngModel)]="term_db_only">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <pagination-controls id="dbOnlyPagi" class="pagi text-end"
+                                            (pageChange)="page_db_only = $event" [autoHide]="true">
+                                        </pagination-controls>
+                                    </div>
+                                </div>
+                                <div class="table-container">
+                                    <table id="datatable-buttons"
+                                        class="table table-hover dt-responsive table-sticky-header"
+                                        style="table-layout: auto;">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input" id="selectAll"
+                                                            [(ngModel)]="selectAll" (click)="toggleSelectAll()">
+                                                        <label class="form-check-label fs-6" for="selectAll">Select
+                                                            All</label>
+                                                    </div>
+                                                </th>
+                                                <th>MM</th>
+                                                <th>Item</th>
+                                                <th>Subitem</th>
+                                                <th>Condition</th>
+                                                <th>Unit</th>
+                                                <th>Excel Qty</th>
+                                                <th>SW Qty</th>
+                                                <th>Difference</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let data of DBOnlyBachatAll | search: term_db_only | paginate:{id:'dbOnlyPagi', itemsPerPage:itemsPerPage,currentPage:page_db_only,totalItems:DBOnlyBachat.length}; let i=index;">
+                                                <td>
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input"
+                                                            [(ngModel)]="data.selected">
+                                                    </div>
+                                                </td>
+                                                <td>{{data.mm_hin}}</td>
+                                                <td>{{data.item_hin}}</td>
+                                                <td>{{data.subitem_id ? data.subitem_hin : ''}}</td>
+                                                <td>{{data.condition_id ? data.condition_hin : ''}}</td>
+                                                <td>{{data.unit_short}}</td>
+                                                <td>{{data.qty}}</td>
+                                                <td>{{data.bachat}}</td>
+                                                <td>{{data.difference}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
@@ -455,7 +498,7 @@
                                         Export to excel
                                     </button>
                                 </div>
-                                
+
                             </div>
 
                             <div class="row" style="overflow: auto;">
@@ -475,13 +518,10 @@
                                             <th>Condition</th>
                                             <th>Unit</th>
                                             <th>Excel Qty
-                                                
                                             </th>
                                             <th>SW Qty
-                                                
                                             </th>
                                             <th>Difference
-                                                
                                             </th>
                                         </tr>
                                     </thead>

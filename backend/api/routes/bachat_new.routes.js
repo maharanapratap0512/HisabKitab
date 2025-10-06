@@ -69,7 +69,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
             slcn.list_name_hin as condition_hin, slcn.list_name_eng as condition_eng,
             unit.unit_short, unit.unit_full,
-            dept.dept_code, dept.dept_hin, dept.dept_eng from (select round(sum(total_aawak), 2) as t_a, round(sum(jawak), 2) as t_j, round(sum(used_jawak), 2) as t_u, round(sum(bachat), 2) as t_b, round(sum(past_bachat), 2) as t_p_b, * from 
+            dept.dept_code, dept.dept_hin, dept.dept_eng from (select round(sum(total_aawak), 2) as t_a, round(sum(jawak), 2) as t_j, round(sum(used_jawak), 2) as t_u, round(sum(bachat), 2) as t_b, * from 
             (select MAX(printf('%04d-%02d', year, month)) as year_month, * from bachat_new ${conditionQuery3}
             group by mm_id, item_id, subitem_id, unit_id, dept_id, condition_id) bn
             group by bn.dept_id, bn.mm_id, bn.item_id, bn.subitem_id, bn.condition_id, bn.unit_id, bn.year, bn.month order by bn.year, bn.month) bcht
@@ -96,6 +96,10 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                     }
                 }
 
+                if (row._id == 20201) {
+                    console.log(row);
+                }
+
                 let crow = Fn.db.prepare(`select *, JSON_GROUP_ARRAY(_id) as arr_comment_id, JSON_GROUP_ARRAY(comment) as arr_comment, JSON_GROUP_ARRAY(month) as arr_months from report_comment where month in (${months.join(',')}) AND year = ${row.year} AND dept_id = ${row.dept_id} AND mm_id = ${row.mm_id} AND item_id = ${row.item_id} AND unit_id = ${row.unit_id} AND report_type = 'full_saar' AND row_type = 'main_row' AND ((subitem_id IS NULL AND ${row.subitem_id} IS NULL) OR subitem_id = ${row.subitem_id}) group by item_id`).get({ ...row, months: months.join(',') })
                 if (crow) {
                     // console.log(crow);
@@ -113,8 +117,9 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                 row.arr_comment_id = months.map(m => crow.arr_months.includes(m) ? crow.arr_comment_id[crow.arr_months.indexOf(m)] : null);
 
 
-                if (row.max_year == req.body.year) {
+                if (row.year_month >= req.body.year + '-' + String(months[0]).padStart(2, '0')) {
 
+                    // console.log(months);
                     // fill 0 to months that are in range but not in row
                     row.arr_sum_aawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_aawak[row.arr_months.indexOf(m)] : 0);
                     row.arr_sum_jawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_jawak[row.arr_months.indexOf(m)] : 0);
@@ -127,18 +132,17 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                 row.arr_months = months;
                 row.showTooltip = {};
 
-
+                if(row._id == 20201){
+                    console.log(row);
+                }
                 // add pichla bachat of previos month to all months bachat.
                 for (let i = 0; i < row.arr_sum_bachat.length; i++) {
                     if (i == 0) {
-                        if (row.year == req.body.year && months.includes(row.month)) {
-                            row.past_bachat = row.arr_past_bachat[i];
-                        } else {
-                            row.arr_past_bachat[i] = row.t_p_b;
-                            row.past_bachat = row.t_p_b;
+                        if (row.arr_past_bachat[0] == null) {
+                            row.arr_past_bachat = row.past_bachat || 0;
                         }
                     } else {
-                        row.arr_past_bachat[i] = row.arr_past_bachat[i] == null ? (row.arr_past_bachat[i - 1] || 0) + row.arr_sum_bachat[i - 1] : 0;
+                        row.arr_past_bachat[i] = row.arr_past_bachat[i] == null ? (row.arr_past_bachat[i - 1] + row.arr_sum_bachat[i - 1] || 0) : row.arr_past_bachat[i];
                     }
                     row.arr_sum_bachat[i] = Number((row.arr_sum_bachat[i] + row.arr_past_bachat[i]).toFixed(2));
                 }

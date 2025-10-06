@@ -24,6 +24,9 @@ export class JawakComponent implements OnInit {
   totalItems: any;
 
   isLoader: boolean = false;
+  isDeleting: boolean = false;
+  toBeDelete: any = [];
+
   term: any;
   showModal: String = '';
   total_count: any = 0;
@@ -266,6 +269,99 @@ export class JawakComponent implements OnInit {
         });
       }
     })
+  }
+
+  deleteSelection(i: any, id: any) {
+    console.log(this.jawakData[i].delete);
+
+    if (this.jawakData[i].delete) {
+      this.toBeDelete.push(id);
+    } else {
+      for (let j in this.toBeDelete) {
+        if (this.toBeDelete[j] == id) {
+          this.toBeDelete.splice(j, 1);
+          break;
+        }
+      }
+    }
+    console.log(this.toBeDelete);
+
+  }
+
+  deleteSelectAll() {
+    if (this.jawakData.length == this.toBeDelete.length) {
+      for (let i in this.jawakData) {
+        this.jawakData[i].delete = false;
+      }
+      this.toBeDelete = [];
+    } else {
+      for (let i in this.jawakData) {
+        this.jawakData[i].delete = true;
+        this.toBeDelete.push(this.jawakData[i]._id);
+      }
+    }
+    console.log(this.toBeDelete);
+
+  }
+
+
+  deleteMultiple() {
+    if (!this.isDeleting) {
+      this.isDeleting = true;
+    } else {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          let s_count = 0;
+          for (let id of this.toBeDelete) {
+            let res: any = await this.fnDelete(id);
+            console.log(res);
+            if (res) {
+              s_count += 1;
+            }
+
+          }
+          let msg = s_count + " Deleted Successfully out of " + this.toBeDelete.length;
+
+          this.toBeDelete = [];
+          this.toastr.error(msg);
+          this.isDeleting = !this.isDeleting;
+        } else {
+          this.isDeleting = !this.isDeleting;
+        }
+      });
+    }
+
+  }
+
+  async fnDelete(id: any) {
+    return new Promise((resolve, reject) => {
+      this.http.delete(this.api.getUrl('JAWAK') + id).subscribe((data: any) => {
+        if (data['success']) {
+          for (let i in this.jawakData) {
+            if (this.jawakData[i]._id == id) {
+              this.jawakData.splice(i, 1);
+            }
+            this.total_count -= 1;
+          }
+          return resolve(true);
+        }
+        else {
+          this.toastr.error(data['message']);
+          return reject(false);
+        }
+      }, (err) => {
+        return reject(false);
+      });
+    })
+
   }
 
   stateSelected(ev: any) {

@@ -207,7 +207,7 @@
                      <tbody class="accordion" id="accordionExample">
                         <ng-container *ngFor="let data of bachatData | search:term; let i=index" class="accordion-item">
                            <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
-                              [attr.aria-controls]="'#collapse-' + i" class="main-row" (click)="rowClicked(data, i)">
+                              [attr.aria-controls]="'#collapse-' + i" (click)="rowClicked(data, i)">
                               <!-- <td>
                                  <div> 
                                     <img [src]="data.image" class="img-fluid img-thumbnail mx-1 p-1 h-100" *ngIf="data.image"
