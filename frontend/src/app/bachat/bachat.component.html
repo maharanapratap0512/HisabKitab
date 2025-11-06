@@ -101,6 +101,7 @@
                            <td *ngIf="settings.defective">Defective</td>
                            <td *ngIf="settings.scrap">Scrap</td>
                            <td>Stock</td>
+                           <td>Difference</td>
                            <td>Jawak</td>
                         </tr>
                      </thead>
@@ -169,6 +170,11 @@
                               <td>
                                  <span class="px-1" [ngClass]="{'error': data.Stock < 0, 'stock':data.Stock > 0}">
                                     {{data.Stock ? data.Stock + " " + data.unit_short : "-"}}
+                                 </span>
+                              </td>
+                              <td>
+                                 <span class="px-1" [ngClass]="{'error': data.difference != 0}">
+                                    {{data.difference ? data.difference + " " + data.unit_short : "-"}}
                                  </span>
                               </td>
                               <td>

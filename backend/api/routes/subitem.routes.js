@@ -40,6 +40,34 @@ router.get('/:dept_id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+// filter subitem 
+router.put('/:dept_id', async (req, res, next) => {
+    try {
+
+        let conditionString = '', conditions = [];
+        if (req.body.item_id && req.body.item_id.length > 0)
+            conditions.push(`subitem.item_id in (${req.body.item_id.join(',')})`)
+        if (req.body.subitem_list_id && req.body.subitem_list_id.length > 0)
+            conditions.push(`subitem.subitem_list_id in (${req.body.subitem_list_id.join(',')})`)
+
+        conditionString = conditions.length > 0 ? `(${conditions.join(' OR ')})` : `1=1`;
+
+        await DB.getList('subitem', { full: true, conditionString: conditionString, dept_id: req.params.dept_id, orderBy: "updated_at desc" }).then((resolve) => {
+            for (let i = 0; i < resolve.data.length; i++) {
+                resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
+                resolve.data[i].categories = resolve.data[i].categories ? JSON.parse(resolve.data[i].categories) : [];
+                resolve.data[i].categories_hin = resolve.data[i].categories_hin ? JSON.parse(resolve.data[i].categories_hin) : [];
+                resolve.data[i].categories_eng = resolve.data[i].categories_eng ? JSON.parse(resolve.data[i].categories_eng) : [];
+            }
+            res.json({
+                success: true,
+                result: resolve.data || [],
+                total_count: resolve.total_count
+            });
+        });
+    } catch (err) { next(err) };
+});
+
 
 
 // post subitem 

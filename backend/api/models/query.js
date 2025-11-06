@@ -2,9 +2,9 @@
 const queryBuilder = {
     insert: async (tblname, obj) => {
         let colnames = ``, values = ``;
-        for(let col in obj){
+        for (let col in obj) {
             colnames += col + ', ';
-            values += '@'+col+ ', ';
+            values += '@' + col + ', ';
         }
         colnames = colnames.slice(0, -2);
         values = values.slice(0, -2);
@@ -472,7 +472,8 @@ const jawak = {
         `select * from jawak ?`
     , select_full:
         `select jawak.*,
-        amm.mm_hin,amm.mm_eng,amm.mm_code,
+        amm.mm_hin,amm.mm_eng,amm.mm_code, amm.state_id as mm_state_id, mst.state_hin as mm_state_hin, mst.state_eng as mm_state_eng, 
+        mst.zone_id as mm_zone_id, zn.zone_hin as mm_zone_hin, zn.zone_eng as mm_zone_eng,
         jmm.mm_hin as jawak_mm_hin, jmm.mm_eng as jawak_mm_eng, jmm.mm_code as jawak_mm_code,
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.state_id as pbk_state_id, pst.state_hin as pbk_state_hin, pst.state_eng as pbk_state_eng,
         it.item_hin, it.item_eng, it.item_code, it.item_roman,
@@ -486,6 +487,8 @@ const jawak = {
         nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, nst.state_hin as nimitt_state_hin, nst.state_eng as nimitt_state_eng
         from jawak
         left join mm amm on amm._id = jawak.mm_id 
+        left join state mst on mst._id = amm.state_id
+        left join zone zn on zn._id = mst.zone_id
         left join pbk on pbk._id = jawak.pbk_id
         left join state pst on pst._id = pbk.state_id
         left join mm jmm on jmm._id = jawak.jawak_mm_id
@@ -605,8 +608,8 @@ const aawak = {
     , select_full:
         `select aawak.*, 
         mm.mm_hin,mm.mm_eng,mm.mm_code,
-        mst.state_hin as mm_state_hin, mst.state_eng as mm_state_eng,
-        zn.zone_hin as mm_zone_hin, zn.zone_eng as mm_zone_eng,
+        mm.state_id as mm_state_id, mst.state_hin as mm_state_hin, mst.state_eng as mm_state_eng,
+        mst.zone_id as mm_zone_id, zn.zone_hin as mm_zone_hin, zn.zone_eng as mm_zone_eng,
         amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name, pbk.address, pbk.mo_no,
         item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
@@ -759,7 +762,7 @@ const bachat = {
         `select * from bachat where dept_id = @dept_id AND mm_id = @mm_id AND item_id = @item_id AND unit_id = @unit_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0)`
     , select_full:
         `select bachat.*,
-        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng,      
+        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng, st.zone_id, zn.zone_hin, zn.zone_eng,   
         it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as icategories, it.document as idocument,
         sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as scategories, si.document as sdocument,
         bachat.unit_id,unit.unit_short, unit.unit_full,             
@@ -771,10 +774,11 @@ const bachat = {
         left join subitem_list sil on sil._id = si.subitem_list_id
         left join unit on unit._id = bachat.unit_id   
         left join state st on st._id = mm.state_id
+        left join zone zn on zn._id = st.zone_id
         left join department dept on dept._id = bachat.dept_id ? limit @limit offset @offset`
     ,
     with_pending_aawak: `select bachat.*,
-        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id,     
+        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng, st.zone_id, zn.zone_hin, zn.zone_eng,
         it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as icategories,
         sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as scategories,
         bachat.unit_id,unit.unit_short, unit.unit_full,             
@@ -786,6 +790,8 @@ const bachat = {
         left join support_list cnd on cnd._id = aawak.condition_id
         left join support_list awk_type on awk_type._id = aawak.aawak_type_id
         left join mm on mm._id = bachat.mm_id
+        left join state st on st._id = mm.state_id
+        left join zone zn on zn._id = st.zone_id
         left join item it on it._id = bachat.item_id
         left join subitem si on si._id = bachat.subitem_id
         left join subitem_list sil on sil._id = si.subitem_list_id
@@ -911,7 +917,7 @@ const bachat_new = {
     // , select_exists: `select strftime('%m', @date)`
     , select_full:
         `select bachat_new.*,
-        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng,      
+        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng, st.zone_id, zn.zone_hin, zn.zone_eng,     
         it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as icategories, it.document as idocument,
         sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as scategories, si.document as sdocument,
         bachat_new.unit_id,unit.unit_short, unit.unit_full,             
@@ -924,16 +930,17 @@ const bachat_new = {
         left join subitem_list sil on sil._id = si.subitem_list_id
         left join unit on unit._id = bachat_new.unit_id   
         left join state st on st._id = mm.state_id
+        left join zone zn on zn._id = st.zone_id
         left join support_list slc on slc._id = bachat_new.condition_id
         left join department dept on dept._id = bachat_new.dept_id ? limit @limit offset @offset`
     , select_all:
-        `select bcht.*, json_group_array(list_name_hin) as arr_condition_hin, json_group_array(condition_id) as arr_condition_id, json_group_array(sum_aawak) as arr_sum_aawak, json_group_array(sum_used) as arr_sum_used, json_group_array(sum_jawak) as arr_sum_jawak, json_group_array(sum_bachat) as arr_sum_bachat, sum(sum_aawak) as total_aawak_all, sum(sum_jawak) as total_jawak_all, sum(sum_used) as total_used_all, sum(sum_bachat) as total_bachat_all,
+        `select bcht.*, json_group_array(list_name_hin) as arr_condition_hin, json_group_array(condition_id) as arr_condition_id, json_group_array(sum_aawak) as arr_sum_aawak, json_group_array(sum_used) as arr_sum_used, json_group_array(sum_jawak) as arr_sum_jawak, json_group_array(sum_bachat) as arr_sum_bachat, json_group_array(sum_difference) as arr_sum_difference, sum(sum_aawak) as total_aawak_all, sum(sum_jawak) as total_jawak_all, sum(sum_used) as total_used_all, sum(sum_bachat) as total_bachat_all, sum(sum_difference) as total_difference_all,
         mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
         it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
         sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
         unit.unit_short, unit.unit_full,
         dept.dept_code, dept.dept_hin, dept.dept_eng
-        from (select sum(total_aawak) as sum_aawak, sum(used_jawak) as sum_used, sum(jawak) as sum_jawak, sum(bachat) as sum_bachat, bn.*,
+        from (select sum(total_aawak) as sum_aawak, sum(used_jawak) as sum_used, sum(jawak) as sum_jawak, sum(bachat) as sum_bachat, sum(difference) as sum_difference, bn.*,
             sl.list_name_hin, sl.list_name_eng from bachat_new bn
             left join support_list sl on sl._id = bn.condition_id ?
             group by mm_id, item_id, subitem_id, unit_id, condition_id) bcht 
@@ -2317,7 +2324,36 @@ const import_history = {
 const dictionary = {
     insert: `insert or ignore into dictionary(type, name, extra_note, id, id2) values(@type, @name, @extra_note, @id, @id2)`,
     select: `select * from dictionary ?`,
-    select_full: `select * from dictionary ?`,
+    select_full:
+        `select dict.*,
+        CASE WHEN dict.type in ('awk_type', 'jwk_type', 'condition' ) THEN spl.list_name_hin || ' : ' || spl.list_name_eng 
+        WHEN dict.type = 'aj_mm' THEN mm.mm_hin || ' : ' || mm.mm_eng
+        WHEN dict.type = 'state' THEN state.state_hin || ' : ' || state.state_eng
+        WHEN dict.type = 'district' THEN district.district_hin || ' : ' || district.district_eng
+        WHEN dict.type = 'zone' THEN zone.zone_hin || ' : ' || zone.zone_eng
+        WHEN dict.type = 'city' THEN city.city_hin || ' : ' || city.city_eng
+        WHEN dict.type = 'category' THEN ct.category_hin || ' : ' || ct.category_eng
+        WHEN dict.type = 'unit' THEN unit.unit_short || ' : ' || unit.unit_full
+        WHEN dict.type = 'subitem_list' THEN sl.subitem_hin || ' : ' || sl.subitem_eng
+        WHEN dict.type = 'item' THEN item.item_hin || ' : ' || item.item_eng
+        ELSE NULL END as original_name,
+        CASE WHEN dict.type = 'item' THEN sil.subitem_hin || ' : ' || sil.subitem_eng
+        ELSE NULL END as sub_name
+         from dictionary dict
+        left join mm on dict.type = 'aj_mm' AND mm._id = dict.id
+        left join support_list spl on dict.type in ('awk_type', 'jwk_type', 'condition' ) AND spl._id = dict.id
+        left join state on dict.type = 'state' AND state._id = dict.id
+        left join district on dict.type = 'district' AND district._id = dict.id
+        left join zone on dict.type = 'zone' AND zone._id = dict.id
+        left join city on dict.type = 'city' AND city._id = dict.id
+        left join category ct on dict.type = 'category' AND ct._id = dict.id
+        left join unit on dict.type = 'unit' AND unit._id = dict.id
+        left join subitem_list sl on dict.type = 'subitem_list' AND sl._id = dict.id
+        left join item on dict.type = 'item' AND item._id = dict.id
+        left join subitem on dict.type = 'item' AND subitem._id = dict.id2
+        left join subitem_list sil on dict.type = 'item' AND sil._id = subitem.subitem_list_id
+         ?
+        `,
     update: `update dictionary set 
         type = @type, 
         name = @name,

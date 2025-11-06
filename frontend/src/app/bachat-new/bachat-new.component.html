@@ -158,259 +158,287 @@
             </div>
 
             <div class="row" *ngIf="bachatData.length">
-               <div class="card-body" style="overflow: auto;">
+               <div class="card-body" style="overflow: auto; flex-direction: column;">
                   <h4 class="card-title">Click Row to See More Details.</h4>
-                  <table id="datatable-buttons" class="table dt-responsive">
-                     <thead>
-                        <tr *ngIf="monthsSel.length <= 0">
-                           <!-- <td>Image</td> -->
-                           <td style="width: 70px;">No.</td>
-                           <td style="width: 100px;">Department</td>
-                           <td style="width: 180px;">M M </td>
-                           <td>Category</td>
-                           <td>Item</td>
-                           <td>Total Aawak</td>
-                           <td>Used</td>
-                           <td>Other Jawak</td>
-                           <td>
-                              Bachat <br />
-                              <div class="form-check mb-2">
-                                 <input type="checkbox" class="form-check-input" id="customCheckcolor1"
-                                    (change)="hideBachatZero($event.target)">
-                                 <label class="form-check-label fs-6" for="customCheckcolor1">Hide 0</label>
-                              </div>
-                           </td>
-                        </tr>
-                        <ng-container *ngIf="monthsSel.length > 0">
-                           <tr>
-                              <td rowspan="2" style="width: 70px;">No.</td>
-                              <td rowspan="2" style="width: 100px;">Department</td>
-                              <td rowspan="2" style="width: 180px;">Mini_Madhuban</td>
-                              <td rowspan="2">Category</td>
-                              <td rowspan="2">Item_Subitem_Name</td>
-                              <td rowspan="2" *ngIf="monthsSel.length > 0">Condition</td>
-                              <td rowspan="2">पिछला बचत</td>
-                              <th colspan="4" class="center-header partition" *ngFor="let row of monthsSel">{{ row.name
-                                 +
-                                 " - " + filterBody.year }}</th>
-                           </tr>
-                           <tr>
-                              <ng-container *ngFor="let row of monthsSel">
-                                 <td class="partition">Total Aawak</td>
-                                 <td>Used</td>
-                                 <td>Other Jawak</td>
-                                 <td>Bachat</td>
-                              </ng-container>
-                           </tr>
-                        </ng-container>
-                     </thead>
-                     <tbody class="accordion" id="accordionExample">
-                        <ng-container *ngFor="let data of bachatData | search:term; let i=index" class="accordion-item">
-                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i" aria-expanded="true"
-                              [attr.aria-controls]="'#collapse-' + i" (click)="rowClicked(data, i)">
-                              <!-- <td>
-                                 <div> 
-                                    <img [src]="data.image" class="img-fluid img-thumbnail mx-1 p-1 h-100" *ngIf="data.image"
-                                    style="max-width: 75px; object-fit: cover;" alt="item-img + {{i}}"  />
+                  <div class="table-container">
+                     <table id="datatable-buttons" class="table table-hover table-sticky-header dt-responsive">
+                        <thead>
+                           <tr *ngIf="monthsSel.length <= 0">
+                              <!-- <td>Image</td> -->
+                              <td style="width: 70px;">No.</td>
+                              <td style="width: 100px;">Department</td>
+                              <td style="width: 180px;">M M </td>
+                              <td>Category</td>
+                              <td>Item</td>
+                              <td>Total Aawak</td>
+                              <td>Used</td>
+                              <td>Other Jawak</td>
+                              <td>
+                                 Bachat <br />
+                                 <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input" id="customCheckcolor1"
+                                       (change)="hideBachatZero($event.target)">
+                                    <label class="form-check-label fs-6" for="customCheckcolor1">Hide 0</label>
                                  </div>
-                              </td> -->
-                              <td>{{i+1}}</td>
-                              <td>
-                                 {{data.dept_hin}} {{data.dept_code ? "(" + data.dept_code + ")" : ''}}
                               </td>
                               <td>
-                                 {{data.mm_hin}} ({{data.state_hin}})<br />
-                                 {{data.mm_eng}} ({{data.state_eng}})
+                                 Difference <br />
+                                 <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input" id="customCheckcolor2"
+                                       (change)="hideDifferenceZero($event.target)">
+                                    <label class="form-check-label fs-6" for="customCheckcolor2">Hide 0</label>
+                                 </div>
                               </td>
-                              <td>
-                                 {{data.categories_eng ? data.categories_eng : data.categories_hin}}
-                              <td>
-                                 {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}} <br />
-                                 {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
-                              </td>
-                              <ng-container *ngIf="monthsSel.length <= 0">
-                                 <td>
-                                    <span [ngClass]="{'error': data.total_aawak_all < 0}">
-                                       {{data.total_aawak_all + " " + data.unit_short}}
-                                    </span>
-                                 </td>
-                                 <td>
-                                    <span [ngClass]="{'error': data.total_used_all < 0}">
-                                       {{data.total_used_all + " " + data.unit_short}}
-                                    </span>
-                                 </td>
-                                 <td>
-                                    <span [ngClass]="{'error': data.total_jawak_all < 0}">
-                                       {{data.total_jawak_all + " "+ data.unit_short}}
-                                    </span>
-                                 </td>
-                                 <td>
-                                    <span class="px-1"
-                                       [ngClass]="{'error': data.total_bachat_all < 0, 'stock':data.total_bachat_all > 0}">
-                                       {{data.total_bachat_all + " " + data.unit_short}}
-                                    </span>
-                                 </td>
-                              </ng-container>
-                              <ng-container *ngIf="monthsSel.length > 0">
-                                 <td>
-                                    {{data.condition_hin ? data.condition_hin : 'N/A'}} <br />
-                                    {{data.condition_eng ? data.condition_eng : 'N/A'}}
-                                 </td>
-                                 <td>{{data.past_bachat + " " + data.unit_short}}</td>
-
-                                 <ng-container *ngFor="let row of monthsSel; let m = index;">
-                                    <td (mouseenter)="data.showTooltip[m] = true"
-                                       (mouseleave)="data.showTooltip[m] = false"
-                                       (click)="editComment(i, m, data, 'main_row')" class="partition comment"
-                                       [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
-                                          [ngClass]="{'error': data.arr_sum_aawak[m] < 0}">{{data.arr_sum_aawak[m]}}</span>
-                                    </td>
-                                    <td (mouseenter)="data.showTooltip[m] = true"
-                                       (mouseleave)="data.showTooltip[m] = false"
-                                       (click)="editComment(i, m, data, 'main_row')" class="comment"
-                                       [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
-                                          [ngClass]="{'error': data.arr_sum_used[m] < 0}">{{data.arr_sum_used[m]}}</span>
-                                    </td>
-                                    <td (mouseenter)="data.showTooltip[m] = true"
-                                       (mouseleave)="data.showTooltip[m] = false"
-                                       (click)="editComment(i, m, data, 'main_row')" class="comment"
-                                       [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
-                                          [ngClass]="{'error': data.arr_sum_jawak[m] < 0}">{{data.arr_sum_jawak[m]}}</span>
-                                    </td>
-                                    <td (mouseenter)="data.showTooltip[m] = true"
-                                       (mouseleave)="data.showTooltip[m] = false"
-                                       (click)="editComment(i, m, data, 'main_row')" class="comment-cell"
-                                       [ngClass]="{'cell-highlight':data.showTooltip[m]}">
-                                       <div class="cell-content"
-                                          [ngClass]="{'error': data.arr_sum_bachat[m] < 0, 'stock':data.arr_sum_bachat[m] > 0}">
-                                          {{data.arr_sum_bachat[m]}}</div>
-                                       <div [ngClass]="{'comment-indicator':data.arr_comment[m]}">
-                                       </div>
-                                       <div class="comment-tooltip"
-                                          [hidden]="!data.showTooltip[m] || !data.arr_comment[m]">
-                                          {{data.arr_comment[m]}}
-                                          <!-- <textarea [(ngModel)]="data.arr_comment[m]" (blur)="toggleEditMode(i, m)"
-                                             (input)="handleInputChange(i, m)"></textarea> -->
-                                          <!-- <span [hidden]="data.editMode && data.editMode[m]" [class.changed]="data.commentChanged && data.commentChanged[m]">{{
-                                             data.arr_comment[m] }}</span>
-                                          <textarea [hidden]="!data.editMode || !data.editMode[m]" [(ngModel)]="data.arr_comment[m]"
-                                             (blur)="toggleEditMode(i, m)" (input)="handleInputChange(i, m)"></textarea> -->
-
-                                       </div>
-                                    </td>
-                                 </ng-container>
-
-                              </ng-container>
                            </tr>
-                           <ng-container *ngIf="monthsSel.length <= 0 && data.arr_condition_id.length > 0">
-                              <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse ribbon-box"
-                                 aria-labelledby="headingOne">
-                                 <td colspan="3" style="border: none;"></td>
-                                 <td colspan="6" class="sub-row">
-                                    <table class="" style="width: 99.7%;table-layout: fixed;">
-                                       <!-- <thead>
-                                          <td>C</td>
-                                       </thead> -->
-                                       <tbody>
-                                          <tr *ngFor="let bcht of data.arr_condition_hin; let j = index;">
-                                             <td style="width: 75px;">
-                                                <i class="uil-corner-down-right"></i>
-                                                <span class="mx-1">{{j+1}} </span>
-                                             </td>
-                                             <td><span [ngClass]="{'error': bcht < 0}"> {{bcht}}</span></td>
-                                             <td><span [ngClass]="{'error': data.arr_sum_aawak[j] < 0}">
-                                                   {{data.arr_sum_aawak[j] + " " + data.unit_short }}</span></td>
-                                             <td><span [ngClass]="{'error': data.arr_sum_used[j] < 0}">
-                                                   {{data.arr_sum_used[j] + " " + data.unit_short }}</span></td>
-                                             <td><span [ngClass]="{'error': data.arr_sum_jawak[j] < 0}">
-                                                   {{data.arr_sum_jawak[j] + " " + data.unit_short }}</span></td>
-                                             <td>
-                                                <span class="px-1"
-                                                   [ngClass]="{'error': data.arr_sum_bachat[j] < 0, 'stock':data.arr_sum_bachat[j] > 0}">
-                                                   {{data.arr_sum_bachat[j] + " " + data.unit_short}}
-                                                </span>
-                                             </td>
-                                          </tr>
-                                       </tbody>
-                                    </table>
-                                 </td>
+                           <ng-container *ngIf="monthsSel.length > 0">
+                              <tr>
+                                 <td rowspan="2" style="width: 70px;">No.</td>
+                                 <td rowspan="2" style="width: 100px;">Department</td>
+                                 <td rowspan="2" style="width: 180px;">Mini_Madhuban</td>
+                                 <td rowspan="2">Category</td>
+                                 <td rowspan="2">Item_Subitem_Name</td>
+                                 <td rowspan="2" *ngIf="monthsSel.length > 0">Condition</td>
+                                 <td rowspan="2">पिछला बचत</td>
+                                 <th colspan="5" class="center-header partition" *ngFor="let row of monthsSel">{{
+                                    row.name
+                                    +
+                                    " - " + filterBody.year }}</th>
                               </tr>
-
+                              <tr>
+                                 <ng-container *ngFor="let row of monthsSel">
+                                    <td class="partition">Total Aawak</td>
+                                    <td>Used</td>
+                                    <td>Other Jawak</td>
+                                    <td>Bachat</td>
+                                    <td>Difference</td>
+                                 </ng-container>
+                              </tr>
                            </ng-container>
-                           <!-- [attr.id]="'collapse-' + i" -->
-                           <ng-container *ngIf="monthsSel.length > 0 && data.subReport">
-                              <tr *ngFor="let sdata of data[data.currentReport]; let j = index;"
-                                 class="accordion-collapse collapse ribbon-box show" aria-labelledby="headingOne">
-                                 <ng-container *ngIf="j == 0">
-                                    <td colspan="3" [attr.rowspan]="data[data.currentReport].length"
-                                       style="border: none;">
-                                       <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
-                                          aria-orientation="vertical">
-                                          <ng-container *ngFor="let op of operationList;">
-                                             <a class="nav-link"
-                                                [ngClass]="{'active': data.currentReport == op.key, 'no-data': !data[op.key] || data[op.key].length < 1}"
-                                                (click)="operationClick(op.key, i)">
-                                                <i class="mdi mdi-home-variant d-md-none d-block"></i>
-                                                <span class="d-none d-md-block">{{op.name}}</span>
-                                             </a>
-                                          </ng-container>
-                                       </div>
+                        </thead>
+                        <tbody class="accordion" id="accordionExample">
+                           <ng-container *ngFor="let data of bachatData | search:term; let i=index"
+                              class="accordion-item">
+                              <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i"
+                                 aria-expanded="true" [attr.aria-controls]="'#collapse-' + i"
+                                 (click)="rowClicked(data, i)">
+                                 <!-- <td>
+                                    <div> 
+                                       <img [src]="data.image" class="img-fluid img-thumbnail mx-1 p-1 h-100" *ngIf="data.image"
+                                       style="max-width: 75px; object-fit: cover;" alt="item-img + {{i}}"  />
+                                    </div>
+                                 </td> -->
+                                 <td>{{i+1}}</td>
+                                 <td>
+                                    {{data.dept_hin}} {{data.dept_code ? "(" + data.dept_code + ")" : ''}}
+                                 </td>
+                                 <td>
+                                    {{data.mm_hin}} ({{data.state_hin}})<br />
+                                    {{data.mm_eng}} ({{data.state_eng}})
+                                 </td>
+                                 <td>
+                                    {{data.categories_eng ? data.categories_eng : data.categories_hin}}
+                                 <td>
+                                    {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}} <br />
+                                    {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
+                                 </td>
+                                 <ng-container *ngIf="monthsSel.length <= 0">
+                                    <td>
+                                       <span [ngClass]="{'error': data.total_aawak_all < 0}">
+                                          {{data.total_aawak_all + " " + data.unit_short}}
+                                       </span>
+                                    </td>
+                                    <td>
+                                       <span [ngClass]="{'error': data.total_used_all < 0}">
+                                          {{data.total_used_all + " " + data.unit_short}}
+                                       </span>
+                                    </td>
+                                    <td>
+                                       <span [ngClass]="{'error': data.total_jawak_all < 0}">
+                                          {{data.total_jawak_all + " "+ data.unit_short}}
+                                       </span>
+                                    </td>
+                                    <td>
+                                       <span class="px-1"
+                                          [ngClass]="{'error': data.total_bachat_all < 0, 'stock':data.total_bachat_all > 0}">
+                                          {{data.total_bachat_all + " " + data.unit_short}}
+                                       </span>
+                                    </td>
+                                    <td>
+                                       <span class="px-1" [ngClass]="{'error': data.total_difference_all != 0}">
+                                          {{data.total_difference_all ? data.total_difference_all + " " +
+                                          data.unit_short :
+                                          '--'}}
+                                       </span>
                                     </td>
                                  </ng-container>
-                                 <td>{{j+1}}</td>
-                                 <td>
-                                    {{(sdata.list_name_hin ? sdata.list_name_hin : 'N/A')}}
-                                    {{(sdata.list_name_eng ? " : " + sdata.list_name_eng : '')}}
-                                 </td>
                                  <ng-container *ngIf="monthsSel.length > 0">
-                                    <td>{{sdata.past_bachat ? sdata.past_bachat : 0 + " " + sdata.unit_short}}</td>
-                                    <ng-container *ngFor="let row of monthsSel; let m = index;">
-                                       <td (mouseenter)="sdata.showTooltip[m] = true"
-                                          (mouseleave)="sdata.showTooltip[m] = false"
-                                          (click)="editComment(i, m, sdata, data.currentReport, j)"
-                                          class="partition comment" [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
-                                          {{sdata.arr_sum_aawak[m] ? sdata.arr_sum_aawak[m] : '-'}}
-                                       </td>
-                                       <td (mouseenter)="sdata.showTooltip[m] = true"
-                                          (mouseleave)="sdata.showTooltip[m] = false"
-                                          (click)="editComment(i, m, sdata, data.currentReport, j)" class="comment"
-                                          [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
-                                          <span [ngClass]="{'error': sdata.arr_sum_used[m] < 0}">
-                                             {{sdata.arr_sum_used[m] ? sdata.arr_sum_used[m] : '-'}}
-                                          </span>
-                                       </td>
-                                       <td (mouseenter)="sdata.showTooltip[m] = true"
-                                          (mouseleave)="sdata.showTooltip[m] = false"
-                                          (click)="editComment(i, m, sdata, data.currentReport, j)" class="comment"
-                                          [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
-                                          <span [ngClass]="{'error': sdata.arr_sum_jawak[m] < 0}">
-                                             {{sdata.arr_sum_jawak[m] ? sdata.arr_sum_jawak[m] : '-'}}
-                                          </span>
-                                       </td>
-                                       <td (mouseenter)="sdata.showTooltip[m] = true"
-                                          (mouseleave)="sdata.showTooltip[m] = false"
-                                          (click)="editComment(i, m, sdata, data.currentReport, j)" class="comment-cell"
-                                          [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
+                                    <td>
+                                       {{data.condition_hin ? data.condition_hin : 'N/A'}} <br />
+                                       {{data.condition_eng ? data.condition_eng : 'N/A'}}
+                                    </td>
+                                    <td>{{data.past_bachat + " " + data.unit_short}}</td>
 
+                                    <ng-container *ngFor="let row of monthsSel; let m = index;">
+                                       <td (mouseenter)="data.showTooltip[m] = true"
+                                          (mouseleave)="data.showTooltip[m] = false"
+                                          (click)="editComment(i, m, data, 'main_row')" class="partition comment"
+                                          [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
+                                             [ngClass]="{'error': data.arr_sum_aawak[m] < 0}">{{data.arr_sum_aawak[m]}}</span>
+                                       </td>
+                                       <td (mouseenter)="data.showTooltip[m] = true"
+                                          (mouseleave)="data.showTooltip[m] = false"
+                                          (click)="editComment(i, m, data, 'main_row')" class="comment"
+                                          [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
+                                             [ngClass]="{'error': data.arr_sum_used[m] < 0}">{{data.arr_sum_used[m]}}</span>
+                                       </td>
+                                       <td (mouseenter)="data.showTooltip[m] = true"
+                                          (mouseleave)="data.showTooltip[m] = false"
+                                          (click)="editComment(i, m, data, 'main_row')" class="comment"
+                                          [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
+                                             [ngClass]="{'error': data.arr_sum_jawak[m] < 0}">{{data.arr_sum_jawak[m]}}</span>
+                                       </td>
+                                       <td (mouseenter)="data.showTooltip[m] = true"
+                                          (mouseleave)="data.showTooltip[m] = false"
+                                          (click)="editComment(i, m, data, 'main_row')" class="comment"
+                                          [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
+                                             [ngClass]="{'error': data.arr_sum_bachat[m] < 0, 'stock':data.arr_sum_bachat[m] > 0}">{{data.arr_sum_bachat[m]}}</span>
+                                       </td>
+                                       <td (mouseenter)="data.showTooltip[m] = true"
+                                          (mouseleave)="data.showTooltip[m] = false"
+                                          (click)="editComment(i, m, data, 'main_row')" class="comment-cell"
+                                          [ngClass]="{'cell-highlight':data.showTooltip[m]}">
                                           <div class="cell-content"
-                                             [ngClass]="{'error': sdata.arr_sum_bachat[m] < 0, 'stock':sdata.arr_sum_bachat[m] > 0}">
-                                             {{sdata.arr_sum_bachat[m] ? sdata.arr_sum_bachat[m] : '-'}}</div>
-                                          <div [ngClass]="{'comment-indicator':sdata.arr_comment[m]}">
+                                             [ngClass]="{'error': data.arr_difference_bachat && data.arr_difference_bachat[m] != 0}">
+                                             {{data.arr_difference_bachat ? data.arr_difference_bachat[m] : ''}}</div>
+                                          <div [ngClass]="{'comment-indicator':data.arr_comment[m]}">
                                           </div>
                                           <div class="comment-tooltip"
-                                             [hidden]="!sdata.showTooltip[m] || !sdata.arr_comment[m]">
-                                             {{sdata.arr_comment[m]}}
-                                          </div>
+                                             [hidden]="!data.showTooltip[m] || !data.arr_comment[m]">
+                                             {{data.arr_comment[m]}}
+                                             <!-- <textarea [(ngModel)]="data.arr_comment[m]" (blur)="toggleEditMode(i, m)"
+                                                (input)="handleInputChange(i, m)"></textarea> -->
+                                             <!-- <span [hidden]="data.editMode && data.editMode[m]" [class.changed]="data.commentChanged && data.commentChanged[m]">{{
+                                                data.arr_comment[m] }}</span>
+                                             <textarea [hidden]="!data.editMode || !data.editMode[m]" [(ngModel)]="data.arr_comment[m]"
+                                                (blur)="toggleEditMode(i, m)" (input)="handleInputChange(i, m)"></textarea> -->
 
+                                          </div>
                                        </td>
                                     </ng-container>
+
                                  </ng-container>
                               </tr>
-                           </ng-container>
+                              <ng-container *ngIf="monthsSel.length <= 0 && data.arr_condition_id.length > 0">
+                                 <tr [attr.id]="'collapse-' + i" class="accordion-collapse collapse ribbon-box"
+                                    aria-labelledby="headingOne">
+                                    <td colspan="3" style="border: none;"></td>
+                                    <td colspan="6" class="sub-row">
+                                       <table class="" style="width: 99.7%;table-layout: fixed;">
+                                          <!-- <thead>
+                                             <td>C</td>
+                                          </thead> -->
+                                          <tbody>
+                                             <tr *ngFor="let bcht of data.arr_condition_hin; let j = index;">
+                                                <td style="width: 75px;">
+                                                   <i class="uil-corner-down-right"></i>
+                                                   <span class="mx-1">{{j+1}} </span>
+                                                </td>
+                                                <td><span [ngClass]="{'error': bcht < 0}"> {{bcht}}</span></td>
+                                                <td><span [ngClass]="{'error': data.arr_sum_aawak[j] < 0}">
+                                                      {{data.arr_sum_aawak[j] + " " + data.unit_short }}</span></td>
+                                                <td><span [ngClass]="{'error': data.arr_sum_used[j] < 0}">
+                                                      {{data.arr_sum_used[j] + " " + data.unit_short }}</span></td>
+                                                <td><span [ngClass]="{'error': data.arr_sum_jawak[j] < 0}">
+                                                      {{data.arr_sum_jawak[j] + " " + data.unit_short }}</span></td>
+                                                <td>
+                                                   <span class="px-1"
+                                                      [ngClass]="{'error': data.arr_sum_bachat[j] < 0, 'stock':data.arr_sum_bachat[j] > 0}">
+                                                      {{data.arr_sum_bachat[j] + " " + data.unit_short}}
+                                                   </span>
+                                                </td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </td>
+                                 </tr>
 
-                        </ng-container>
-                     </tbody>
-                  </table>
+                              </ng-container>
+                              <!-- [attr.id]="'collapse-' + i" -->
+                              <ng-container *ngIf="monthsSel.length > 0 && data.subReport">
+                                 <tr *ngFor="let sdata of data[data.currentReport]; let j = index;"
+                                    class="accordion-collapse collapse ribbon-box show" aria-labelledby="headingOne">
+                                    <ng-container *ngIf="j == 0">
+                                       <td colspan="3" [attr.rowspan]="data[data.currentReport].length"
+                                          style="border: none;">
+                                          <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
+                                             aria-orientation="vertical">
+                                             <ng-container *ngFor="let op of operationList;">
+                                                <a class="nav-link"
+                                                   [ngClass]="{'active': data.currentReport == op.key, 'no-data': !data[op.key] || data[op.key].length < 1}"
+                                                   (click)="operationClick(op.key, i)">
+                                                   <i class="mdi mdi-home-variant d-md-none d-block"></i>
+                                                   <span class="d-none d-md-block">{{op.name}}</span>
+                                                </a>
+                                             </ng-container>
+                                          </div>
+                                       </td>
+                                    </ng-container>
+                                    <td>{{j+1}}</td>
+                                    <td>
+                                       {{(sdata.list_name_hin ? sdata.list_name_hin : 'N/A')}}
+                                       {{(sdata.list_name_eng ? " : " + sdata.list_name_eng : '')}}
+                                    </td>
+                                    <ng-container *ngIf="monthsSel.length > 0">
+                                       <td>{{sdata.past_bachat ? sdata.past_bachat : 0 + " " + sdata.unit_short}}</td>
+                                       <ng-container *ngFor="let row of monthsSel; let m = index;">
+                                          <td (mouseenter)="sdata.showTooltip[m] = true"
+                                             (mouseleave)="sdata.showTooltip[m] = false"
+                                             (click)="editComment(i, m, sdata, data.currentReport, j)"
+                                             class="partition comment"
+                                             [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
+                                             {{sdata.arr_sum_aawak[m] ? sdata.arr_sum_aawak[m] : '-'}}
+                                          </td>
+                                          <td (mouseenter)="sdata.showTooltip[m] = true"
+                                             (mouseleave)="sdata.showTooltip[m] = false"
+                                             (click)="editComment(i, m, sdata, data.currentReport, j)" class="comment"
+                                             [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
+                                             <span [ngClass]="{'error': sdata.arr_sum_used[m] < 0}">
+                                                {{sdata.arr_sum_used[m] ? sdata.arr_sum_used[m] : '-'}}
+                                             </span>
+                                          </td>
+                                          <td (mouseenter)="sdata.showTooltip[m] = true"
+                                             (mouseleave)="sdata.showTooltip[m] = false"
+                                             (click)="editComment(i, m, sdata, data.currentReport, j)" class="comment"
+                                             [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
+                                             <span [ngClass]="{'error': sdata.arr_sum_jawak[m] < 0}">
+                                                {{sdata.arr_sum_jawak[m] ? sdata.arr_sum_jawak[m] : '-'}}
+                                             </span>
+                                          </td>
+                                          <td (mouseenter)="sdata.showTooltip[m] = true"
+                                             (mouseleave)="sdata.showTooltip[m] = false"
+                                             (click)="editComment(i, m, sdata, data.currentReport, j)"
+                                             class="comment-cell" [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
+
+                                             <div class="cell-content"
+                                                [ngClass]="{'error': sdata.arr_sum_bachat[m] < 0, 'stock':sdata.arr_sum_bachat[m] > 0}">
+                                                {{sdata.arr_sum_bachat[m] ? sdata.arr_sum_bachat[m] : '-'}}</div>
+                                             <div [ngClass]="{'comment-indicator':sdata.arr_comment[m]}">
+                                             </div>
+                                             <div class="comment-tooltip"
+                                                [hidden]="!sdata.showTooltip[m] || !sdata.arr_comment[m]">
+                                                {{sdata.arr_comment[m]}}
+                                             </div>
+
+                                          </td>
+                                       </ng-container>
+                                    </ng-container>
+                                 </tr>
+                              </ng-container>
+
+                           </ng-container>
+                        </tbody>
+                     </table>
+                  </div>
                </div>
             </div>
 

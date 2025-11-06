@@ -524,6 +524,14 @@ export class BachatNewComponent implements OnInit {
     }
   }
 
+  hideDifferenceZero(ev: any) {
+    if (ev.checked) {
+      this.bachatData = this.bachatData.filter((b: { total_difference_all: any; }) => b.total_difference_all)
+    } else {
+      this.filter();
+    }
+  }
+
   openModal(type: string) {
     this.showModal = type;
     $('#showModal').modal('show')

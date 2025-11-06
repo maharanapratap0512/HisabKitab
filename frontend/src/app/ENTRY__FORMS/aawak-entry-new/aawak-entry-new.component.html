@@ -116,8 +116,9 @@
 
             <!-- items table row -->
             <div class="row">
-                <div class="card card-body" style="font-size: smaller; overflow-x: scroll; padding-bottom: 250px;">
-                    <table class="table table-bordered border-primary table-centered mb-0" style="width: max-content;">
+                <div class="card card-body" style="font-size: smaller; overflow-x: scroll; padding-bottom: 250px;"
+                    appHorizontalScrollWithArrows>
+                    <table class="table table-bordered table-centered mb-0" style="width: max-content;">
                         <thead>
                             <tr>
                                 <th>Jawak</th>
@@ -142,14 +143,16 @@
                         </thead>
                         <tbody>
                             <ng-container *ngFor="let awkForm of fs.aawakFormMain.aawaks; let i = index;">
-                                <tr ngModelGroup="{{i}}" #rowForm="ngModelGroup">
+                                <tr ngModelGroup="{{i}}" #rowForm="ngModelGroup"
+                                    [appContextMenu]="getContextMenuItems(awkForm)"
+                                    [contextMenuData]="{ i: i, hl: awkForm.hl }"
+                                    [ngClass]="{'hl': awkForm.hl}">
                                     <td class="text-center">
                                         <div class="d-flex justify-content-between">
                                             <div>{{i+1}}</div>
-                                            <button class="btn btn-sm btn-warning me-1" (click)="addJawak(i)"
-                                                title="Add Jawak">
-                                                <i class="mdi mdi-plus noti-icon"></i>
-                                            </button>
+
+                                            <i class="mdi mdi-plus i-outline-warning" title="Add Jawak"
+                                                (click)="addJawak(i)"></i>
                                             <!-- <button class="btn btn-sm btn-outline-warning" (click)="showJawak(data, i)">
                                                 <i class="dripicons-view-list noti-icon"></i>
                                             </button> -->
@@ -192,7 +195,8 @@
                                             placeholder="Select SubitemList" [clearable]="true" [virtualScroll]="true"
                                             [(ngModel)]="awkForm.subitem_id" name="subitem_id" #subitem_id="ngModel"
                                             (change)="subitemSelected($event, i)" [selectOnTab]="true">
-                                            <ng-option *ngFor="let item of awkForm.subitems | filterByDate:fs.aawakFormMain.date"
+                                            <ng-option
+                                                *ngFor="let item of awkForm.subitems | filterByDate:fs.aawakFormMain.date"
                                                 [value]="item._id">{{item.subitem_hin}}
                                                 : {{item.subitem_eng}}</ng-option>
                                         </ng-select>

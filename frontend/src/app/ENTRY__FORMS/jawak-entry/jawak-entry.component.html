@@ -353,7 +353,8 @@
                                 [ngClass]="{'validation':jawakForm.get('qty')?.errors && (jawakForm.get('qty')?.touched || jawakForm.get ('qty')?.dirty)}">
                             <div class="input-group-text">{{jawakForm.value.unit_short}}</div>
                         </div>
-                        <span [ngClass]="{'text-danger':jawakForm.get('qty')?.errors}">Remaining Qty : {{(getData ? getData.remaining_qty : (aawakRef ? aawakRef.remaining_qty : 0))}}</span>
+                        <span [ngClass]="{'text-danger':jawakForm.get('qty')?.errors}">Remaining Qty : {{(getData ?
+                            getData.remaining_qty : (aawakRef ? aawakRef.remaining_qty : 0))}}</span>
                     </div>
                 </div>
 
@@ -472,6 +473,26 @@
                 </div>
 
 
+                <div class="col-md-4 mb-3 d-flex" *ngIf="jawakForm.value.auto_reawk && (!isEdit || !getData._id)">
+                    <div class="form-group">
+                        <label class="form-label">Auto Re-Aawak Date</label>
+                        <input type="date" class="form-control" placeholder="Date" formControlName="aawak_date"
+                            [ngClass]="{'validation':jawakForm.get('aawak_date')?.errors && (jawakForm.get('aawak_date')?.touched || jawakForm.get ('aawak_date')?.dirty)}"
+                            [required]="jawakForm.value.auto_reawk">
+                    </div>
+                    <div class="form-group mx-2">
+                        <label class="form-label">Auto Re-Aawak Type</label>
+                        <ng-select class="custom" style="width: 100%;" placeholder="Select Aawak Type"
+                            [clearable]="true" [virtualScroll]="true" formControlName="re_aawak_type_id"
+                            [ngClass]="{'validation':jawakForm.get('re_aawak_type_id')?.errors && (jawakForm.get('re_aawak_type_id')?.touched || jawakForm.get ('re_aawak_type_id')?.dirty)}"
+                            [required]="jawakForm.value.auto_reawk">
+                            <ng-option selected="selected" disabled value="">Select Aawak Type</ng-option>
+                            <ng-option *ngFor="let item of aawak_types" [value]="item._id">{{item.list_name_hin}} :
+                                {{item.list_name_eng}}</ng-option>
+                        </ng-select>
+                    </div>
+                </div>
+
                 <div class="col-md-4 mb-3 d-flex" *ngIf="jawakForm.value.auto_awk && (!isEdit || !getData._id)">
                     <div class="form-group">
                         <label class="form-label">Auto Aawak Department</label>
@@ -496,15 +517,22 @@
                     </div>
                 </div>
 
-                <div class="col-md-2 mb-3">
-                    <ng-container *ngIf="!this.isEdit">
-                        <button class="btn btn-primary mt-3 mx-3" type="submit"
-                            (click)="jawakFormSubmit()">Submit</button>
-                        <div class="form-check form-checkbox-primary">
-                            <input type="checkbox" class="form-check-input" id="chkAutoAwk" formControlName="auto_awk">
-                            <label class="form-check-label" for="chkAutoAwk">Auto Aawak</label>
+                <div class="col-md-3 mb-3">
+                    <div class="d-flex justify-content-between mt-3" *ngIf="!this.isEdit">
+                        <div>
+                            <div class="form-check form-checkbox-primary">
+                                <input type="checkbox" class="form-check-input" id="chkAutoAwk"
+                                    formControlName="auto_awk">
+                                <label class="form-check-label" for="chkAutoAwk">Auto Aawak</label>
+                            </div>
+                            <div class="form-check form-checkbox-primary">
+                                <input type="checkbox" class="form-check-input" id="chkAutoReAwk"
+                                    formControlName="auto_reawk">
+                                <label class="form-check-label" for="chkAutoReAwk">Auto Re-Aawak</label>
+                            </div>
                         </div>
-                    </ng-container>
+                        <button class="btn btn-primary mx-3" type="submit" (click)="jawakFormSubmit()">Submit</button>
+                    </div>
                     <button class="btn btn-warning mt-3 mx-3" type="submit" *ngIf="this.isEdit"
                         (click)="jawakFormUpdate()">Update</button>
                     <div class="form-check form-checkbox-primary" *ngIf="getData && !getData._id">
@@ -514,6 +542,12 @@
                     <!-- <button class="btn btn-light submit" type="button" (click)="jawakForm.reset()">Clear</button> -->
                 </div>
 
+            </div>
+            <div class="row">
+                <span class="text-info"> <strong>ऑटो आवक : </strong> भेजे गए मि.म. माना जावक मि.म. मे ऑटोमैटिक आवक
+                    एंट्री होगी, फलाना मि.म. से सामान आया । </span> <br />
+                <span class="text-info"><strong>ऑटो रि-आवक : </strong> सोर्स मि.म. माना खुद के ही मि.म. मे ऑटोमैटिक आवक
+                    एंट्री होगी, फलाना मि.म. भेजा गया सामान इस तारीख को वापस आया । </span> <br />
             </div>
         </form>
     </div>

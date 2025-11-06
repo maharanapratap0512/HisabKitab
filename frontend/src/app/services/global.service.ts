@@ -17,6 +17,7 @@ export class GlobalService {
   Config: any = {};
   importPending: any = false;
   exceptionDept: any = [1, 5];
+  menuCriteria: any = {};
   // getList$ = new Subject();
   date = new Date();
   dateString = this.date.getFullYear() + '-' + (this.date.getMonth() + 1).toString().padStart(2, "0") + '-' + this.date.getDate().toString().padStart(2, "0")
@@ -144,7 +145,7 @@ export class GlobalService {
         .replace(/\s+/g, " ")      // collapse multiple spaces
         .toLowerCase();            // case-insensitive for English
     };
-  
+
     return clean(a) === clean(b);
   }
 

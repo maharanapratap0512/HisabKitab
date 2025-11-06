@@ -27,6 +27,7 @@ export class MmComponent implements OnInit {
   isLoader: boolean = false;
   term: any;
   showModal: string = '';
+  delID: any = null;
   editData: any = {};
   mmData: any = [];
   mmAll: any = [];
@@ -179,7 +180,27 @@ export class MmComponent implements OnInit {
       this.isLoader = false;
     });
   }
-  delete(i: any, id: any) {
+
+  openModal(type: any) {
+    this.showModal = type;
+    $('#showModal').modal('show');
+  }
+
+  closeModal() {
+    $('#showModal').modal('hide');
+    this.showModal = '';
+  }
+
+  delete(id: any) {
+    this.delID = id;
+    this.openModal('delete');
+  }
+
+  deleteResponse(ev: any) {
+    this.toastr.success("deleted Successfully.");
+  }
+
+  deleteOld(i: any, id: any) {
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",

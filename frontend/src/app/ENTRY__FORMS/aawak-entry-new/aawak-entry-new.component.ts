@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChil
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { debounceTime } from 'rxjs';
+import { ContextMenuItem } from 'src/app/SHARED/context-menu.directive';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormService } from 'src/app/services/form.service';
@@ -45,6 +46,9 @@ export class AawakEntryNewComponent implements OnInit {
   lotNoAll: any = [];
   lotNos: any = [];
   keyword: any = 'lot_no';
+
+  contextMenuItems: ContextMenuItem[] = [
+  ];
 
 
   constructor(private http: HttpService,
@@ -105,6 +109,22 @@ export class AawakEntryNewComponent implements OnInit {
       this.fs.reset();
     }
 
+  }
+
+  getContextMenuItems(row: any): ContextMenuItem[] {
+    return [
+      {
+        label: row.hl ? 'Un-Highlight' : 'Highlight',
+        icon: row.hl ? 'uil uil-eye-slash' : 'uil uil-eye',
+        action: (data) => this.toggleHighlight(data)
+      }
+    ]
+  }
+  
+  toggleHighlight(row: any) {
+    console.log("clicked highlight", row);
+
+    this.fs.aawakFormMain.aawaks[row.i].hl = !row.hl;
   }
 
   selectEvent(ev: any, index: any) {

@@ -2046,34 +2046,7 @@ class dbModal {
         updated_at timestamp default (datetime('now', 'localtime'))
       )`
     },
-    // {
-    //   bachat_import: `create table if not exists bachat_import
-    //     (
-    //       date date, 
-    //       sn varchar(50), 
-    //       dept_id integer,
-    //       dept varchar(250),
-    //       mm_id integer, 
-    //       mm varchar(250),
-    //       item_id integer, 
-    //       item varchar(250),
-    //       subitem_id integer, 
-    //       subitem varchar(250),
-    //       condition_id integer, 
-    //       condition varchar(250),
-    //       unit_id integer, 
-    //       unit varchar(250),
-    //       qty decimal(10, 2), 
-    //       company_name varchar(100), 
-    //       actual_amt decimal(10,2), 
-    //       item_detail text, 
-    //       description text, 
-    //       nimitt_id integer,
-    //       usage_list text,
-    //       usage_list_id integer,
-    //       nimitt varchar(250)
-    //     )`
-    // }
+    
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.

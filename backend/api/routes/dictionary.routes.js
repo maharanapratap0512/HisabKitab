@@ -8,7 +8,20 @@ const DB = new DBContex();
 /// get dictionary 
 router.get('/', async (req, res, next) => {
     try {
-        await DB.getList('dictionary').then(async (data) => {
+        await DB.getList('dictionary', { full: true }).then(async (data) => {
+            res.json({
+                success: true,
+                result: data.data || [],
+                total_count: (data.total_count ? data.total_count : 0),
+            });
+        });
+    } catch (err) { next(err) };
+});
+
+/// get dictionary 
+router.get('/:id', async (req, res, next) => {
+    try {
+        await DB.getList('dictionary', { full: true }).then(async (data) => {
             res.json({
                 success: true,
                 result: data.data || [],

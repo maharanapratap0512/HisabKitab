@@ -63,7 +63,7 @@ router.get('/:dept_id', async (req, res, next) => {
     let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
     // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
     await DB.getList('bachat', { full: true, dept_id: req.params.dept_id, conditionString: conditionString }).then((resolve) => {
-        for(let i in resolve.data){
+        for (let i in resolve.data) {
             resolve.data[i].icategories = resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []
             resolve.data[i].scategories = resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : null
             resolve.data[i].idocument = resolve.data[i].idocument ? JSON.parse(resolve.data[i].idocument) : []
@@ -101,8 +101,37 @@ router.get('/:dept_id', async (req, res, next) => {
 //     }
 // });
 
+// delete multiple bachat 
+router.delete('/many/:dept_id', async (req, res, next) => {
+    try {
+        if (req.body) {
+            let conditions = [];
+            // conditions.push(`dept_id = ${req.params.dept_id}`)
+            if (req.body.mm_id && req.body.mm_id.length > 0)
+                conditions.push(`mm_id in (${req.body.mm_id.join(',')})`)
+            if (req.body.item_id && req.body.item_id.length > 0)
+                conditions.push(`item_id in (${req.body.item_id.join(',')})`)
+            if (req.body.subitem_id && req.body.subitem_id.length > 0)
+                conditions.push(`subitem_id in (${req.body.subitem_id.join(',')})`)
+            if (req.body.unit_id && req.body.unit_id.length > 0)
+                conditions.push(`unit_id in (${req.body.unit_id.join(',')})`)
+            if (req.body.dept_id && req.body.dept_id.length > 0)
+                conditions.push(`dept_id in (${req.body.dept_id.join(',')})`)
+            let conditionString = conditions.length > 0 ? conditions.join(' AND ') : ``;
+            await DB.deleteMany('bachat', conditionString).then((data) => {
+                res.json({
+                    success: true,
+                    result: data
+                });
+            })
+        }
+        else {
+            return next(new Error('Id not Found.'))
+        }
+    } catch (err) { next(err) };
+});
 
-// category delete
+// bachat delete
 router.delete('/:id', async (req, res, next) => {
     if (req.params.id) {
         // let condition = '_id = ' + req.params.id;
@@ -118,6 +147,8 @@ router.delete('/:id', async (req, res, next) => {
     }
 
 });
+
+
 
 
 module.exports = router;

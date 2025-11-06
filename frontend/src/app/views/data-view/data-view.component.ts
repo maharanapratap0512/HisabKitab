@@ -25,12 +25,15 @@ export class DataViewComponent implements OnInit {
   isLoader: boolean = false;
   fields: any = [];
   records: any;
+  recordsAll: any;
   apiName: any;
   term: any;
   editData: any;
   showModal: string = "";
   importType: string = '';
   settings: any = null;
+
+  dictTypes: any = null;
 
 
   constructor(private fb: FormBuilder,
@@ -65,8 +68,8 @@ export class DataViewComponent implements OnInit {
       this.configureType();
     }
     console.log(this.records, this.Type);
-
   }
+
 
   configureType() {
     this.settings = null;
@@ -121,6 +124,9 @@ export class DataViewComponent implements OnInit {
       case 'lot_no': this.setLotNoFields();
         this.apiName = 'LIST';
         break;
+      case 'dict': this.setDictFields();
+        this.apiName = 'DICT';
+        break;
     }
     if (!this.importType) {
       this.importType = this.Type;
@@ -147,12 +153,24 @@ export class DataViewComponent implements OnInit {
     } else {
       this.http.get(this.api.getUrl(this.apiName) + this.auth.webUser.dept_id).subscribe((data) => {
         if (data['result'] && data['success']) {
-          this.records = data['result'];
+          this.recordsAll = data['result'];
+          this.records = this.recordsAll;
+          // console.log("hi", new Set(this.recordsAll.map((item: { type: any; }) => item.type)));
+          this.dictTypes = [...new Set(this.recordsAll.map((item: { type: any; }) => item.type))]
         }
         this.isLoader = false;
       });
     }
     this.isLoader = false;
+  }
+
+  filterDictionary(ev: any) {
+    if (ev) {
+      this.records = this.recordsAll.filter((r: { type: any; }) => r.type == ev);
+    } else {
+      this.records = this.recordsAll
+    }
+
   }
 
   closeModal() {
@@ -262,6 +280,28 @@ export class DataViewComponent implements OnInit {
         columns: ["list_name_roman"]
       });
     }
+
+  }
+
+  setDictFields() {
+    this.fields = [
+      {
+        title: "Type",
+        columns: ["type"]
+      }, {
+        title: "name",
+        columns: ["name"]
+      }, {
+        title: "Extra Note",
+        columns: ["extra_note"]
+      }, {
+        title: "Original Name",
+        columns: ["original_name"]
+      }, {
+        title: "Sub Name",
+        columns: ["sub_name"]
+      }
+    ]
 
   }
 

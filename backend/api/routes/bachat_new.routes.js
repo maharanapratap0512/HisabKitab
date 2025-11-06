@@ -132,7 +132,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                 row.arr_months = months;
                 row.showTooltip = {};
 
-                if(row._id == 20201){
+                if (row._id == 20201) {
                     console.log(row);
                 }
                 // add pichla bachat of previos month to all months bachat.
@@ -621,6 +621,38 @@ router.delete('/:id', async (req, res, next) => {
         }
         else {
             return next(new Error('Id not Found.'))
+        }
+    } catch (err) { next(err) };
+});
+
+// delete multiple bachat_new 
+router.delete('/many/:dept_id', async (req, res, next) => {
+    try {
+        if (req.body) {
+            let conditions = [];
+            // conditions.push(`dept_id = ${req.params.dept_id}`)
+            if (req.body.mm_id && req.body.mm_id.length > 0)
+                conditions.push(`mm_id in (${req.body.mm_id.join(',')})`)
+            if (req.body.item_id && req.body.item_id.length > 0)
+                conditions.push(`item_id in (${req.body.item_id.join(',')})`)
+            if (req.body.subitem_id && req.body.subitem_id.length > 0)
+                conditions.push(`subitem_id in (${req.body.subitem_id.join(',')})`)
+            if (req.body.unit_id && req.body.unit_id.length > 0)
+                conditions.push(`unit_id in (${req.body.unit_id.join(',')})`)
+            if (req.body.dept_id && req.body.dept_id.length > 0)
+                conditions.push(`dept_id in (${req.body.dept_id.join(',')})`)
+            if (req.body.condition_id && req.body.condition_id.length > 0)
+                conditions.push(`condition_id in (${req.body.condition_id.join(',')})`)
+            let conditionString = conditions.length > 0 ? conditions.join(' AND ') : ``;
+            await DB.deleteMany('bachat_new', conditionString).then((data) => {
+                res.json({
+                    success: true,
+                    result: data
+                });
+            })
+        }
+        else {
+            return next(new Error('Body not Found.'))
         }
     } catch (err) { next(err) };
 });

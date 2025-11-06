@@ -12,7 +12,7 @@
             <span class="hk-title">
                <span class="hk mx-2"><strong><u>HISAB KITAB</u></strong>
                </span>
-               <span>(v23.2)</span>
+               <span>(v23.4)</span>
             </span>
          </a>
          <!-- <a routerLink="dashboard" class="topnav-logo">
@@ -239,15 +239,17 @@
                            routerLink="item">Item</a> -->
                         <a class="dropdown-item text-info" *ngIf="settings.aawak.lot_no" routerLinkActive="active"
                            [routerLink]="['view', 'lot_no']">LOT Nos</a>
+                        <a class="dropdown-item" routerLinkActive="active"
+                           [routerLink]="['view', 'dict']">Dictionary</a>
                         <a class="dropdown-item" *ngIf="settings.category.visible" routerLinkActive="active"
                            routerLink="category">Category</a>
                         <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'unit']">Unit</a>
                         <!-- <a class="dropdown-item" *ngIf="settings.mm.visible" routerLinkActive="active"
                            routerLink="mm">MM</a> -->
-                           <a class="dropdown-item text-warning" routerLinkActive="active"
-                              [routerLink]="['view', 'district']">District</a>
+                        <a class="dropdown-item" routerLinkActive="active"
+                           [routerLink]="['view', 'district']">District</a>
                         <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'state']">State</a>
-                        <a class="dropdown-item text-warning" routerLinkActive="active"
+                        <a class="dropdown-item" routerLinkActive="active"
                            [routerLink]="['view', 'zone']">Zone</a>
                         <a class="dropdown-item" routerLinkActive="active"
                            [routerLink]="['view', 'country']">Country</a>
@@ -257,11 +259,11 @@
                            [routerLink]="['view', 'subitem_list']">Subitem List</a>
                         <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'aawak_type']">Aawak
                            Type</a>
-                        <a class="dropdown-item text-warning" routerLinkActive="active"
+                        <a class="dropdown-item" routerLinkActive="active"
                            [routerLink]="['view', 'aawak_source']">Aawak Source</a>
                         <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'jawak_type']">Jawak
                            Type</a>
-                        <a class="dropdown-item text-warning" routerLinkActive="active"
+                        <a class="dropdown-item" routerLinkActive="active"
                            [routerLink]="['view', 'usage_list']">Usage List</a>
                         <a class="dropdown-item" routerLinkActive="active"
                            [routerLink]="['view', 'condition']">Condition</a>
@@ -624,11 +626,14 @@
          <h5 class="mt-3">Important Flags</h5>
          <hr class="mt-1" />
 
-         <div class="form-check form-switch mb-1">
-            <input class="form-check-input" type="checkbox" name="color-scheme-mode" value="light" id="light-check"
-               checked>
+         <!-- <div class="form-check form-switch mb-1">
+            <input class="form-check-input" type="checkbox" id="light-check" checked>
             <label class="form-check-label" for="light-mode-check">Auto Aawak Default</label>
          </div>
+         <div class="form-check form-switch mb-1">
+            <input class="form-check-input" type="checkbox" id="light-check" checked>
+            <label class="form-check-label" for="light-mode-check">Auto Aawak Default</label>
+         </div> -->
 
 
          <!-- Width -->

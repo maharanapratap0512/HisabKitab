@@ -154,11 +154,15 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
         req.body.dept_id = req.params.dept_id;
         try {
             await Fn.begin();
+            if (!req.body.voucher_no) {
+                req.body.voucher_no = await Fn.getLastVoucherNo('aawak') + 1;
+            }
             for (let awk of req.body.aawaks) {
                 let aawak = {
                     ...req.body,
                     ...awk,
                 }
+
                 if (aawak._id) {
                     let oldAwk = await DB.getById('aawak', aawak._id);
                     await Fn.updateAJ(aawak, 'aawak', oldAwk).then(async (resolve) => {
@@ -433,7 +437,7 @@ router.put('/new', async (req, res, next) => {
 router.put('/filter/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = 100, offset = null, page = 1, conditionString, jwkIds;
     if (req.body.type == 'jawak') {
-        let jwkConditionString = `1=1 ${req.body.date ? ` AND date = '${req.body.date}'` : ''} ${req.body.year ? ` AND strftime('%Y', jawak.date) = '${req.body.year}'` : ''} ${req.body.month ? ` AND strftime('%m', jawak.date) = '${req.body.month.toString().padStart(2, '0')}'` : ''} ${req.body.mm_id && req.body.mm_id.length > 0 ? ` AND jawak.mm_id in (${req.body.mm_id.join(',')})` : ''} ${req.body.condition_id && req.body.condition_id.length > 0 ? ` AND jawak.condition_id in (${req.body.condition_id.join(',')})` : ''} ${req.body.item_id && req.body.item_id.length > 0 ? ` AND jawak.item_id in (${req.body.item_id.join(',')})` : ''} ${req.body.aj_mm_id && req.body.aj_mm_id.length > 0 ? ` AND jawak.jawak_mm_id in (${req.body.aj_mm_id.join(',')})` : ''} ${req.body.jawak_type_id && req.body.jawak_type_id.length > 0 ? ` AND jawak.jawak_type_id in (${req.body.jawak_type_id.join(',')})` : ''} ${req.body.pbk_id && req.body.pbk_id.length > 0 ? ` AND jawak.pbk_id in (${req.body.pbk_id.join(',')})` : ''} ${req.body.subitem_id && req.body.subitem_id.length > 0 ? ` AND jawak.subitem_id in (${req.body.subitem_id.join(',')})` : ''} ${req.body.product_id && req.body.product_id.length > 0 ? ` AND jawak.product_id in (${req.body.product_id.join(',')})` : ''} ${(req.body.nimitt_id && req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND jawak.nimitt_id in ${req.body.nimitt_id.join(',')}` : ''} ${req.body.pkt_num ? ` AND jawak.pkt_num = ${req.body.pkt_num}` : ''} ${req.body.usage_list_id && req.body.usage_list_id.length > 0 ? ` AND jawak.usage_list_id in (${req.body.usage_list_id.join(',')})` : ''}`
+        let jwkConditionString = `1=1 ${req.body.date ? ` AND date = '${req.body.date}'` : ''} ${req.body.year ? ` AND strftime('%Y', jawak.date) = '${req.body.year}'` : ''} ${req.body.month ? ` AND strftime('%m', jawak.date) = '${req.body.month.toString().padStart(2, '0')}'` : ''} ${req.body.mm_id && req.body.mm_id.length > 0 ? ` AND jawak.mm_id in (${req.body.mm_id.join(',')})` : ''} ${req.body.zone_id && req.body.zone_id.length > 0 ? ` AND mm_zone_id in (${req.body.zone_id.join(',')})` : ''} ${req.body.condition_id && req.body.condition_id.length > 0 ? ` AND jawak.condition_id in (${req.body.condition_id.join(',')})` : ''} ${req.body.item_id && req.body.item_id.length > 0 ? ` AND jawak.item_id in (${req.body.item_id.join(',')})` : ''} ${req.body.aj_mm_id && req.body.aj_mm_id.length > 0 ? ` AND jawak.jawak_mm_id in (${req.body.aj_mm_id.join(',')})` : ''} ${req.body.jawak_type_id && req.body.jawak_type_id.length > 0 ? ` AND jawak.jawak_type_id in (${req.body.jawak_type_id.join(',')})` : ''} ${req.body.pbk_id && req.body.pbk_id.length > 0 ? ` AND jawak.pbk_id in (${req.body.pbk_id.join(',')})` : ''} ${req.body.subitem_id && req.body.subitem_id.length > 0 ? ` AND jawak.subitem_id in (${req.body.subitem_id.join(',')})` : ''} ${req.body.product_id && req.body.product_id.length > 0 ? ` AND jawak.product_id in (${req.body.product_id.join(',')})` : ''} ${(req.body.nimitt_id && req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND jawak.nimitt_id in ${req.body.nimitt_id.join(',')}` : ''} ${req.body.pkt_num ? ` AND jawak.pkt_num = ${req.body.pkt_num}` : ''} ${req.body.usage_list_id && req.body.usage_list_id.length > 0 ? ` AND jawak.usage_list_id in (${req.body.usage_list_id.join(',')})` : ''}`
 
         jwkIds = await DB.db.prepare(`select _id from jawak where ${jwkConditionString}`).all();
         if (jwkIds && jwkIds.length > 0) {
@@ -443,7 +447,31 @@ router.put('/filter/:dept_id', async (req, res, next) => {
         conditionString = ` aawak._id in (select aawak_ref_id from jawak where jawak._id in (${jwkIds}))`;
 
     } else {
-        conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.date ? ` AND date = '${req.body.date}'` : ''} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month}'` : ``} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.aj_mm_id && req.body.aj_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aj_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = '${req.body.pkt_num}'` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``} ${req.body.remaining_qty ? `AND remaining_qty <> 0` : ``}`;
+        if (req.body.or) {
+            let conditions = [];
+            if (req.body.mm_id && req.body.mm_id.length > 0)
+                conditions.push(`aawak.mm_id in (${req.body.mm_id.join(',')})`)
+            if (req.body.aj_mm_id && req.body.aj_mm_id.length > 0)
+                conditions.push(`aawak.aawak_mm_id in (${req.body.aj_mm_id.join(',')})`)
+            if (req.body.pbk_id && req.body.pbk_id.length > 0)
+                conditions.push(`aawak.pbk_id in (${req.body.pbk_id.join(',')})`)
+            if (req.body.item_id && req.body.item_id.length > 0)
+                conditions.push(`aawak.item_id in (${req.body.item_id.join(',')})`)
+            if (req.body.subitem_id && req.body.subitem_id.length > 0)
+                conditions.push(`aawak.subitem_id in (${req.body.subitem_id.join(',')})`)
+            if (req.body.aawak_type_id && req.body.aawak_type_id.length > 0)
+                conditions.push(`aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})`)
+            if (req.body.product_id && req.body.product_id.length > 0)
+                conditions.push(`aawak.product_id in (${req.body.product_id.join(',')})`)
+            if (req.body.condition_id && req.body.condition_id.length > 0)
+                conditions.push(`aawak.condition_id in (${req.body.condition_id.join(',')})`)
+            if (req.body.nimitt_id && req.body.nimitt_id.length > 0)
+                conditions.push(`aawak.nimitt_id in (${req.body.nimitt_id.join(',')})`)
+
+            conditionString = conditions.length > 0 ? `(${conditions.join(' OR ')})` : `1=1`;
+        } else {
+            conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.date ? ` AND date = '${req.body.date}'` : ''} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month}'` : ``} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.zone_id && req.body.zone_id.length > 0) ? ` AND mm_zone_id in (${req.body.zone_id.join(',')})` : ``} ${(req.body.aj_mm_id && req.body.aj_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aj_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = '${req.body.pkt_num}'` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``} ${req.body.remaining_qty ? `AND remaining_qty <> 0` : ``}`;
+        }
 
     }
 

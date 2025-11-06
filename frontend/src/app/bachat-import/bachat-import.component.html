@@ -21,7 +21,7 @@
                                 </span>
                             </a>
                         </li>
-                        <li class="nav-item" *ngIf="combinedBachat.length > 0">
+                        <li class="nav-item" *ngIf="DBOnlyBachatAll.length > 0">
                             <a href="#combinedbachat" data-bs-toggle="tab" aria-expanded="false"
                                 class="nav-link mx-1 btn-primary text-primary">
                                 Combined Bachat
@@ -30,7 +30,7 @@
                                 </span>
                             </a>
                         </li>
-                        <li class="nav-item" *ngIf="DBOnlyBachat.length > 0">
+                        <li class="nav-item" *ngIf="DBOnlyBachatAll.length > 0">
                             <a href="#DBOnlyBachat" data-bs-toggle="tab" aria-expanded="false"
                                 class="nav-link mx-1 btn-primary text-primary">
                                 DB Only Bachat
@@ -158,13 +158,33 @@
                             <div class="row" style="overflow: hidden; flex-direction: column;">
 
                                 <div class="row my-1">
-                                    <div class="col-6">
+                                    <div class="col-4">
                                         <div class="form-group">
                                             <input type="text" class="form-control" placeholder="Search Here"
                                                 [(ngModel)]="term_combined">
                                         </div>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-2">
+                                        <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
+                                            [clearable]="true" [virtualScroll]="true" [multiple]="true"
+                                            (change)="filter('combinedBachat')" [(ngModel)]="filterObj.mm_id"
+                                            [ngModelOptions]="{standalone: true}">
+                                            <ng-option selected="selected" disabled value="">MM</ng-option>
+                                            <ng-option *ngFor="let item of mms" [value]="item._id">
+                                                {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                        </ng-select>
+                                    </div>
+                                    <div class="col-2">
+                                        <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                            [clearable]="true" [virtualScroll]="true" [multiple]="true"
+                                            [(ngModel)]="filterObj.item_id" (change)="filter('combinedBachat')"
+                                            [ngModelOptions]="{standalone: true}">
+                                            <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                                            <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                                                {{item.item_eng}} : {{item.item_code}}</ng-option>
+                                        </ng-select>
+                                    </div>
+                                    <div class="col-4">
                                         <pagination-controls id="combinedPagi" class="pagi text-end"
                                             (pageChange)="page_combined = $event" [autoHide]="true">
                                         </pagination-controls>
@@ -241,7 +261,7 @@
 
                             <div class="row mt-2" style="overflow: auto;">
                                 <div class="col-2">
-                                    <button class="btn btn-outline-success" *ngIf="DBOnlyBachatAll.length"
+                                    <button class="btn btn-outline-success" *ngIf="DBOnlyBachat.length"
                                         (click)="resetBachat()">
                                         Reset Selected Bachat
                                     </button>
@@ -266,13 +286,33 @@
                             <div class="row" style="overflow: hidden; flex-direction: column;">
 
                                 <div class="row my-1">
-                                    <div class="col-6">
+                                    <div class="col-4">
                                         <div class="form-group">
                                             <input type="text" class="form-control" placeholder="Search Here"
                                                 [(ngModel)]="term_db_only">
                                         </div>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-2">
+                                        <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
+                                            [clearable]="true" [virtualScroll]="true" [multiple]="true"
+                                            (change)="filter('DBOnlyBachat')" [(ngModel)]="filterObj.mm_id"
+                                            [ngModelOptions]="{standalone: true}">
+                                            <ng-option selected="selected" disabled value="">MM</ng-option>
+                                            <ng-option *ngFor="let item of mms" [value]="item._id">
+                                                {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                        </ng-select>
+                                    </div>
+                                    <div class="col-2">
+                                        <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                            [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterObj.item_id"
+                                            [multiple]="true" (change)="filter('DBOnlyBachat')"
+                                            [ngModelOptions]="{standalone: true}">
+                                            <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                                            <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                                                {{item.item_eng}} : {{item.item_code}}</ng-option>
+                                        </ng-select>
+                                    </div>
+                                    <div class="col-4">
                                         <pagination-controls id="dbOnlyPagi" class="pagi text-end"
                                             (pageChange)="page_db_only = $event" [autoHide]="true">
                                         </pagination-controls>
@@ -304,7 +344,7 @@
                                         </thead>
                                         <tbody>
                                             <tr
-                                                *ngFor="let data of DBOnlyBachatAll | search: term_db_only | paginate:{id:'dbOnlyPagi', itemsPerPage:itemsPerPage,currentPage:page_db_only,totalItems:DBOnlyBachat.length}; let i=index;">
+                                                *ngFor="let data of DBOnlyBachat | search: term_db_only | paginate:{id:'dbOnlyPagi', itemsPerPage:itemsPerPage,currentPage:page_db_only,totalItems:DBOnlyBachat.length}; let i=index;">
                                                 <td>
                                                     <div class="form-check mb-2">
                                                         <input type="checkbox" class="form-check-input"

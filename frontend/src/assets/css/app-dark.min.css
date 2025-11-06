@@ -2316,6 +2316,25 @@ progress {
    box-shadow: 0px -1px 5px 1px #39afd1 !important;
 }
 
+.table-container {
+   overflow-y: auto;
+   max-height: 80vh;
+   /* you can adjust or remove */
+}
+
+.table-sticky-header>thead {
+   position: sticky;
+   top: 0;
+   z-index: 2;
+
+}
+
+.sticky-header {
+   position: sticky;
+   top: 0;
+   z-index: 3;
+}
+
 .table>:not(:last-child)>:last-child>* {
    border-bottom-color: #4c5460
 }

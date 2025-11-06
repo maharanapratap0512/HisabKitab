@@ -30,6 +30,8 @@ export class BachatImportComponent {
   page_awk: any = 1;
   page_jwk: any = 1;
   page_rejected: any = 1;
+  items: any = [];
+  mms: any = [];
 
   combinedBachat: any = [];
   combinedBachatAll: any = [];
@@ -65,7 +67,8 @@ export class BachatImportComponent {
     public auth: AuthService,
   ) {
     this.gs.observeList().subscribe(result => {
-      // this.itemAll = result.itemmix ? result.itemmix : [];
+      this.items = result.itemmix ? result.itemmix : [];
+      this.mms = result.mm ? result.mm : [];
     });
     this.settings = this.auth.webUser.settings;
   }
@@ -111,17 +114,30 @@ export class BachatImportComponent {
   filterZeros() {
     this.combinedBachat = this.combinedBachatAll.filter((item: any) => {
       for (let [key, value] of Object.entries(this.filterObj)) {
-        if (value && item[key] == 0) {
+        if (['qty', 'bachat', 'difference'].includes(key) && value && item[key] == 0) {
           return false;
         }
       }
       return true;
     });
+    this.filter('combinedBachat');
   }
 
   toggleSelectAll() {
-    for (let i in this.DBOnlyBachatAll) {
-      this.DBOnlyBachatAll[i].selected = !this.selectAll;
+    for (let i in this.DBOnlyBachat) {
+      this.DBOnlyBachat[i].selected = !this.selectAll;
+    }
+  }
+
+  filter(arr: string) {
+    if (["combinedBachat", "DBOnlyBachat"].includes(arr)) {
+      (this as any)[arr] = (this as any)[arr + 'All'];
+      if (this.filterObj.mm_id && this.filterObj.mm_id.length > 0) {
+        (this as any)[arr] = (this as any)[arr + 'All'].filter((row: { mm_id: any; }) => this.filterObj.mm_id.includes(row.mm_id));
+      }
+      if (this.filterObj.item_id && this.filterObj.item_id.length > 0) {
+        (this as any)[arr] = (this as any)[arr + 'All'].filter((row: { item_id: any; }) => this.filterObj.item_id.includes(row.item_id));
+      }
     }
   }
 
@@ -141,7 +157,7 @@ export class BachatImportComponent {
   async syncBachat() {
     this.processedCount = 0;
     this.processing = true;
-    this.combinedBachat = this.combinedBachatAll.filter((c: { difference: number }) => c.difference != 0);
+    this.combinedBachat = this.combinedBachat.filter((c: { difference: number }) => c.difference != 0);
 
     this.import$.subscribe((res: any) => {
 
@@ -178,7 +194,7 @@ export class BachatImportComponent {
       this.importReset$.next(res);
     }, (err: any) => {
       this.rejected.push(this.DBOnlyBachat[i]);
-      this.rejectedStyle = "width:" + (this.rejected.length * 100) / this.DBOnlyBachatAll.length + "%;";
+      this.rejectedStyle = "width:" + (this.rejected.length * 100) / this.DBOnlyBachat.length + "%;";
       this.importReset$.next(0);
     });
 
@@ -186,7 +202,7 @@ export class BachatImportComponent {
 
 
   async resetBachat() {
-    this.DBOnlyBachat = this.DBOnlyBachatAll.filter((c: { selected: any }) => c.selected);
+    // this.DBOnlyBachat = this.DBOnlyBachatAll.filter((c: { selected: any }) => c.selected);
 
     if (this.DBOnlyBachat.length > 0) {
 
@@ -213,10 +229,10 @@ export class BachatImportComponent {
               switch (res.status) {
                 case 'jawak':
                 case 'aawak': this.resetSucceed.push(...res.result)
-                  this.succeedStyle = "width:" + (this.resetSucceed.length * 100) / this.DBOnlyBachatAll.length + "%;";
+                  this.succeedStyle = "width:" + (this.resetSucceed.length * 100) / this.DBOnlyBachat.length + "%;";
                   break;
                 default: this.rejectedReset.push(this.DBOnlyBachat[this.processedCount]);
-                  this.rejectedResetStyle = "width:" + (this.rejectedReset.length * 100) / this.DBOnlyBachatAll.length + "%;";
+                  this.rejectedResetStyle = "width:" + (this.rejectedReset.length * 100) / this.DBOnlyBachat.length + "%;";
               }
             }
             this.processedCount++;

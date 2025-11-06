@@ -47,6 +47,7 @@ export class JawakComponent implements OnInit {
   isCondition: any = false;
   productsAll: any = [];
   states: any = [];
+  zones: any = [];
   departments: any = [];
   pageNo: any = 0;
   exportJwkdata$ = new Subject();
@@ -58,6 +59,7 @@ export class JawakComponent implements OnInit {
     year: null,
     pbk_id: [],
     mm_id: [],
+    zone_id: [],
     jawak_mm_id: [],
     jawak_type_id: [],
     product_id: [],
@@ -97,6 +99,7 @@ export class JawakComponent implements OnInit {
       this.units = result.unit ? result.unit : [];
       this.pbks = result.pbk ? result.pbk : [];
       this.states = result.state ? result.state : [];
+      this.zones = result.zone ? result.zone : [];
     });
   }
 

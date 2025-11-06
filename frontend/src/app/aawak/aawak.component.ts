@@ -57,6 +57,7 @@ export class AawakComponent implements OnInit {
   isCondition: any = false;
   productsAll: any = [];
   states: any = [];
+  zones: any = [];
   baseurl: any;
   departments: any = [];
   filterBody: any = {
@@ -66,6 +67,7 @@ export class AawakComponent implements OnInit {
     year: null,
     date: null,
     mm_id: [],
+    zone_id: [],
     aj_mm_id: [],
     aawak_type_id: [],
     jawak_type_id: [],
@@ -142,11 +144,13 @@ export class AawakComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
 
+
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.items = result.itemmix ? result.itemmix : [];
       this.units = result.unit ? result.unit : [];
       this.states = result.state ? result.state : [];
+      this.zones = result.zone ? result.zone : [];
       this.conditions = result.condition ? result.condition : [];
       this.departments = result.department ? result.department : [];
       this.pbks = result.pbk ? result.pbk : [];
@@ -165,6 +169,7 @@ export class AawakComponent implements OnInit {
     this.getDictionary();
     this.baseurl = this.api.getUrl('BASE');
   }
+
 
   getProductData() {
     this.isLoader = true
@@ -1089,10 +1094,10 @@ export class AawakComponent implements OnInit {
             if (res) {
               s_count += 1;
             }
-            
+
           }
           let msg = s_count + " Deleted Successfully out of " + this.toBeDelete.length;
-          
+
           this.toBeDelete = [];
           this.toastr.error(msg);
           this.isDeleting = !this.isDeleting;
@@ -1132,7 +1137,7 @@ export class AawakComponent implements OnInit {
   }
 
   async fnDelete(id: any) {
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
       this.http.delete(this.api.getUrl('AAWAK') + '/' + id).subscribe((data: any) => {
         if (data['success']) {
           for (let i in this.aawakData) {
@@ -1151,7 +1156,7 @@ export class AawakComponent implements OnInit {
         return reject(false);
       });
     })
-    
+
   }
 
   deleteOneJawak(i: any, j: any, id: any) {
@@ -1480,7 +1485,7 @@ export class AawakComponent implements OnInit {
                   obj.item_id = dictitem ? dictitem.id : null;
                 }
                 break;
-                case "subitem": obj.subitem = exceldata[i][j];
+              case "subitem": obj.subitem = exceldata[i][j];
                 if (obj.item_id) {
                   let getitem = this.items.find((i: any) => i._id == obj.item_id);
                   let getsubitem = getitem?.subitems.find((m: any) => this.gs.stringCompare(m.subitem_hin, obj.subitem) || this.gs.stringCompare(m.subitem_eng, obj.subitem) || this.gs.stringCompare(m.subitem_code, obj.subitem));

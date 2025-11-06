@@ -1,0 +1,16 @@
+<div style="position: relative; display: inline-block;">
+    <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+        class="btn btn-outline-secondary" (click)="togglePopover($event)">
+        <i [class]="isActive ? 'uil uil-check' : 'uil uil-filter'"></i>
+    </button>
+
+    <div class="filter-backdrop" *ngIf="isOpen" (click)="closePopover()"></div>
+
+    <div class="filter-popover" *ngIf="isOpen">
+        <ng-content></ng-content>
+
+        <button type="button" class="btn btn-sm btn-light w-100 mt-2" (click)="onClear()" *ngIf="showClearButton">
+            <i class="uil uil-times-circle"></i> Clear Filters
+        </button>
+    </div>
+</div>
