@@ -595,47 +595,7 @@ export class ImportComponent implements OnInit {
     // Removed unused validation filter as it wasn't being used
   }
 
-// 
-// 
-// Import function over_____________
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
+
 
 
   addToHistory(data: any) {

@@ -135,18 +135,40 @@ export class GlobalService {
     }
   }
 
-  stringCompare(a: string, b: string): boolean {
-    const clean = (str: string): string => {
-      return (str || "")
-        .trim()
-        .normalize("NFC")          // normalize Unicode
-        .replace(/\u200B/g, "")    // remove zero-width space
-        .replace(/\u00A0/g, " ")   // remove non-breaking space
-        .replace(/\s+/g, " ")      // collapse multiple spaces
-        .toLowerCase();            // case-insensitive for English
-    };
+  cleanString(str: string): string {
+    return (str || "")
+      .trim()
+      .normalize("NFC")          // normalize Unicode
+      .replace(/\u200B/g, "")    // remove zero-width space
+      .replace(/\u00A0/g, " ")   // remove non-breaking space
+      .replace(/\s+/g, " ")      // collapse multiple spaces
+      .toLowerCase();            // case-insensitive for English
+  };
 
-    return clean(a) === clean(b);
+  stringCompare(a: string, b: string): boolean {
+    return this.cleanString(a) === this.cleanString(b);
+  }
+
+  cleanValue(value: any): any {
+    // Handle null/undefined first
+    if (value === null || value === undefined) {
+      return null;
+    }
+
+    // If it's a string, clean it
+    if (typeof value === "string") {
+      const cleaned = this.cleanString(value);
+
+      // Return null for empty or '-'
+      if (cleaned === '' || cleaned === '-') {
+        return null;
+      }
+
+      return cleaned;
+    }
+
+    // For numbers, dates, booleans - return as is
+    return value;
   }
 
 }

@@ -248,124 +248,114 @@
                         </td>
                         <td *ngIf="data.type != 'pbk'">{{data.name}} - {{data.extra_note ? data.extra_note : ''}} </td>
                         <td>
-                           <div class="row">
-                              <!-- mm dropdown -->
-                              <ng-select *ngIf="data.type == 'mm' || data.type == 'aj_mm'" class="custom custom-import"
-                                 placeholder="Select MM" [virtualScroll]="true" [(ngModel)]="data.id"
-                                 [ngModelOptions]="{standalone: true}">
-                                 <ng-option selected="selected" disabled value="">-- Select MM --</ng-option>
-                                 <ng-option *ngFor="let item of mms" [value]="item._id">{{item.mm_hin}}:{{item.mm_eng}}
-                                    :
-                                    {{item.mm_code}}</ng-option>
-                              </ng-select>
+                           <!-- mm dropdown -->
+                           <ng-select *ngIf="data.type == 'mm' || data.type == 'aj_mm'" class="custom custom-import"
+                              placeholder="Select MM" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select MM --</ng-option>
+                              <ng-option *ngFor="let item of mms" [value]="item._id">{{item.mm_hin}}:{{item.mm_eng}}
+                                 :
+                                 {{item.mm_code}}</ng-option>
+                           </ng-select>
 
+                           <!-- item dropdown -->
+                           <div class="d-flex justify-content-center" *ngIf="data.type == 'item' || data.type == 'category'">
+                              <ng-select class="custom custom-import" placeholder="Select Category"
+                                 [virtualScroll]="true" (change)="catSelected($event, data.type)">
+                                 <ng-option selected="selected" disabled value="">-- Select Category --</ng-option>
+                                 <ng-option *ngFor="let item of categories" [value]="item._id">
+                                    {{item.category_hin}}:{{item.category_eng}}</ng-option>
+                              </ng-select>
                               <!-- item dropdown -->
-                              <div class="col-4">
-                                 <ng-select *ngIf="data.type == 'item' || data.type == 'category'"
-                                    class="custom custom-import" placeholder="Select Category" [virtualScroll]="true"
-                                    (change)="catSelected($event, data.type)">
-                                    <ng-option selected="selected" disabled value="">-- Select Category --</ng-option>
-                                    <ng-option *ngFor="let item of categories" [value]="item._id">
-                                       {{item.category_hin}}:{{item.category_eng}}</ng-option>
-                                 </ng-select>
-                              </div>
-                              <!-- item dropdown -->
-                              <div class="col-4">
-                                 <ng-select *ngIf="data.type == 'item'" class="custom custom-import"
-                                    placeholder="Select Item" [virtualScroll]="true" [(ngModel)]="data.id"
-                                    [ngModelOptions]="{standalone: true}" (change)="itemSelected($event)">
-                                    <ng-option selected="selected" disabled value="">-- Select Item --</ng-option>
-                                    <ng-option *ngFor="let item of items" [value]="item._id">
-                                       {{item.item_hin}}:{{item.item_eng}}</ng-option>
-                                 </ng-select>
-                              </div>
+                              <ng-select *ngIf="data.type == 'item'" class="custom custom-import" placeholder="Select Item" [virtualScroll]="true"
+                                 [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}"
+                                 (change)="itemSelected($event)">
+                                 <ng-option selected="selected" disabled value="">-- Select Item --</ng-option>
+                                 <ng-option *ngFor="let item of items" [value]="item._id">
+                                    {{item.item_hin}}:{{item.item_eng}}</ng-option>
+                              </ng-select>
                               <!-- subitem dropdown -->
-                              <div class="col-4">
-                                 <ng-select *ngIf="data.type == 'item'" class="custom custom-import"
-                                    placeholder="Select Subitem" [virtualScroll]="true" [(ngModel)]="data.id2"
-                                    [ngModelOptions]="{standalone: true}">
-                                    <ng-option selected="selected" disabled value="">-- Select Subitem --</ng-option>
-                                    <ng-option *ngFor="let item of subitems" [value]="item._id">
-                                       {{item.subitem_hin}}:{{item.subitem_eng}}</ng-option>
-                                 </ng-select>
-                              </div>
-
-                              <!-- product dropdown -->
-                              <div class="col-4">
-                                 <ng-select *ngIf="data.type == 'product'" class="custom custom-import"
-                                    placeholder="Select Product" [virtualScroll]="true" [(ngModel)]="data.id"
-                                    [ngModelOptions]="{standalone: true}">
-                                    <ng-option selected="selected" disabled value="">-- Select Product --</ng-option>
-                                    <ng-option *ngFor="let item of products" [value]="item._id">
-                                       {{item.product_code}}:{{item.sr_num}}</ng-option>
-                                 </ng-select>
-                              </div>
-
-                              <!-- pbk dropdown -->
-                              <ng-select *ngIf="data.type == 'pbk'" class="custom custom-import"
-                                 placeholder="Select Pbk" [virtualScroll]="true" [(ngModel)]="data.pbk_id"
-                                 [ngModelOptions]="{standalone: true}">
-                                 <ng-option selected="selected" disabled value="">-- Select Pbk --</ng-option>
-                                 <ng-option *ngFor="let item of pbks" [value]="item._id">
-                                    {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :
-                                    {{item.relative_name}}</ng-option>
+                              <ng-select *ngIf="data.type == 'item'" class="custom custom-import" placeholder="Select Subitem"
+                                 [virtualScroll]="true" [(ngModel)]="data.id2" [ngModelOptions]="{standalone: true}">
+                                 <ng-option selected="selected" disabled value="">-- Select Subitem --</ng-option>
+                                 <ng-option *ngFor="let item of subitems" [value]="item._id">
+                                    {{item.subitem_hin}}:{{item.subitem_eng}}</ng-option>
                               </ng-select>
-
-                              <!-- aawak type dropdown -->
-                              <ng-select *ngIf="data.type == 'awk_type'" class="custom custom-import"
-                                 placeholder="Select Aawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
-                                 [ngModelOptions]="{standalone: true}">
-                                 <ng-option selected="selected" disabled value="">-- Select Aawak Type --</ng-option>
-                                 <ng-option *ngFor="let item of aawak_types" [value]="item._id">
-                                    {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
-                              </ng-select>
-
-                              <!-- aawak type dropdown -->
-                              <ng-select *ngIf="data.type == 'awk_source'" class="custom custom-import"
-                                 placeholder="Select Aawak Source" [virtualScroll]="true" [(ngModel)]="data.id"
-                                 [ngModelOptions]="{standalone: true}">
-                                 <ng-option selected="selected" disabled value="">-- Select Aawak Source --</ng-option>
-                                 <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
-                                    {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
-                              </ng-select>
-
-                              <!-- jawak type dropdown -->
-                              <ng-select *ngIf="data.type == 'jwk_type'" class="custom custom-import"
-                                 placeholder="Select Jawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
-                                 [ngModelOptions]="{standalone: true}">
-                                 <ng-option selected="selected" disabled value="">-- Select Jawak Type --</ng-option>
-                                 <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                    {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
-                              </ng-select>
-
-                              <!-- Condition dropdown -->
-                              <ng-select *ngIf="data.type == 'condition'" class="custom custom-import"
-                                 placeholder="Select Condition" [virtualScroll]="true" [(ngModel)]="data.id"
-                                 [ngModelOptions]="{standalone: true}">
-                                 <ng-option selected="selected" disabled value="">-- Select Condition --</ng-option>
-                                 <ng-option *ngFor="let item of conditions" [value]="item._id">
-                                    {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
-                              </ng-select>
-
-                              <!-- Nimitt dropdown -->
-                              <ng-select *ngIf="data.type == 'nimitt'" class="custom custom-import"
-                                 placeholder="Select Nimitt" [virtualScroll]="true" [(ngModel)]="data.id"
-                                 [ngModelOptions]="{standalone: true}">
-                                 <ng-option selected="selected" disabled value="">-- Select Nimitt --</ng-option>
-                                 <ng-option *ngFor="let item of nimitts" [value]="item._id">
-                                    {{item.nimitt_hin}}:{{item.nimitt_eng}} ({{item.state_hin}})</ng-option>
-                              </ng-select>
-
-                              <!-- Unit dropdown -->
-                              <ng-select *ngIf="data.type == 'unit'" class="custom custom-import"
-                                 placeholder="Select Unit" [virtualScroll]="true" [(ngModel)]="data.id"
-                                 [ngModelOptions]="{standalone: true}">
-                                 <ng-option selected="selected" disabled value="">-- Select Unit --</ng-option>
-                                 <ng-option *ngFor="let item of units" [value]="item._id">
-                                    {{item.unit_short}}:{{item.unit_full}}</ng-option>
-                              </ng-select>
-
                            </div>
+
+                           <!-- product dropdown -->
+                           <div class="col-4">
+                              <ng-select *ngIf="data.type == 'product'" class="custom custom-import"
+                                 placeholder="Select Product" [virtualScroll]="true" [(ngModel)]="data.id"
+                                 [ngModelOptions]="{standalone: true}">
+                                 <ng-option selected="selected" disabled value="">-- Select Product --</ng-option>
+                                 <ng-option *ngFor="let item of products" [value]="item._id">
+                                    {{item.product_code}}:{{item.sr_num}}</ng-option>
+                              </ng-select>
+                           </div>
+
+                           <!-- pbk dropdown -->
+                           <ng-select *ngIf="data.type == 'pbk'" class="custom custom-import" placeholder="Select Pbk"
+                              [virtualScroll]="true" [(ngModel)]="data.pbk_id" [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Pbk --</ng-option>
+                              <ng-option *ngFor="let item of pbks" [value]="item._id">
+                                 {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :
+                                 {{item.relative_name}}</ng-option>
+                           </ng-select>
+
+                           <!-- aawak type dropdown -->
+                           <ng-select *ngIf="data.type == 'awk_type'" class="custom custom-import"
+                              placeholder="Select Aawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Aawak Type --</ng-option>
+                              <ng-option *ngFor="let item of aawak_types" [value]="item._id">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                           </ng-select>
+
+                           <!-- aawak type dropdown -->
+                           <ng-select *ngIf="data.type == 'awk_source'" class="custom custom-import"
+                              placeholder="Select Aawak Source" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Aawak Source --</ng-option>
+                              <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                           </ng-select>
+
+                           <!-- jawak type dropdown -->
+                           <ng-select *ngIf="data.type == 'jwk_type'" class="custom custom-import"
+                              placeholder="Select Jawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Jawak Type --</ng-option>
+                              <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                           </ng-select>
+
+                           <!-- Condition dropdown -->
+                           <ng-select *ngIf="data.type == 'condition'" class="custom custom-import"
+                              placeholder="Select Condition" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Condition --</ng-option>
+                              <ng-option *ngFor="let item of conditions" [value]="item._id">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                           </ng-select>
+
+                           <!-- Nimitt dropdown -->
+                           <ng-select *ngIf="data.type == 'nimitt'" class="custom custom-import"
+                              placeholder="Select Nimitt" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Nimitt --</ng-option>
+                              <ng-option *ngFor="let item of nimitts" [value]="item._id">
+                                 {{item.nimitt_hin}}:{{item.nimitt_eng}} ({{item.state_hin}})</ng-option>
+                           </ng-select>
+
+                           <!-- Unit dropdown -->
+                           <ng-select *ngIf="data.type == 'unit'" class="custom custom-import" placeholder="Select Unit"
+                              [virtualScroll]="true" [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
+                              <ng-option selected="selected" disabled value="">-- Select Unit --</ng-option>
+                              <ng-option *ngFor="let item of units" [value]="item._id">
+                                 {{item.unit_short}}:{{item.unit_full}}</ng-option>
+                           </ng-select>
+
                         </td>
                         <td><input type="checkbox" class="form-check-input" [(ngModel)]="data.dictionary"
                               [ngModelOptions]="{standalone: true}" [disabled]="data.type=='product'"> </td>

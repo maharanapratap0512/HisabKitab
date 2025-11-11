@@ -2045,8 +2045,65 @@ class dbModal {
         created_at timestamp default (datetime('now', 'localtime')),
         updated_at timestamp default (datetime('now', 'localtime'))
       )`
-    },
-    
+    }, {
+      aawak_add_reg_pg_np: `alter table aawak add column reg_pg_no varchar(10)`,
+      jawak_add_reg_pg_np: `alter table jawak add column reg_pg_no varchar(10)`,
+      create_aawak_enz: `create table if not exists aawak_enzyme(
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        aawak_id integer not null references aawak(_id),
+        container_aawak_source_id integer references support_list(_id),
+        container_enz_no varchawr(25),
+        container_capacity  integer references support_list(_id),
+        container_qty decimal(7,2),
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      create_jawak_enz: `create table if not exists jawak_enzyme(
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        jawak_id integer not null references jawak(_id),
+        container_capacity  integer references support_list(_id),
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      create_usage_report: `create table if not exists usage_report(
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        jawak_id integer not null references jawak(_id),
+        date date,
+        reporter varchar(100),
+        usage_type integer references support_list(_id),
+        fayda text,
+        nuksan text,
+        rating int,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      create_enzyme_preparation: `create table if not exists enzyme_preparation(
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        date date,
+        mm_id integer references mm(_id),
+        enz_no varchar(25),
+        container_capacity integer references support_list(_id),
+        container_aawak_source integer references support_list(_id),
+        all_materials text,
+        total_qty decimal(7,2),
+        material_rate decimal(7,2),
+        material_amount decimal(7,2),
+        gud_qty decimal(7,2),
+        gud_rate decimal(7,2),
+        gud_amount decimal(7,2),
+        water_qty decimal(7,2),
+        water_rate decimal(7,2),
+        water_amount decimal(7,2),
+        total_amount decimal(7,2),
+        enz_status integer references support_list(_id),
+        opening_date date,
+        total_produced decimal(7,2),
+        packaging_container_detail text,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`,
+    }
+
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.

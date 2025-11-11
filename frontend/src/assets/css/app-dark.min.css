@@ -61,7 +61,7 @@ body {
 
 
 
-/* my custom css */
+/* Auto Complete dialog Darkmode css */
 
 .ng-autocomplete {}
 
@@ -84,6 +84,12 @@ body {
 .autocomplete-container .suggestions-container ul li a {
    background-color: #252932 !important;
    color: #fff !important;
+}
+
+.autocomplete-container .not-found {
+   background-color: #40434b !important;
+   color: #8e8e8e !important;
+   border-color: #40434b !important;
 }
 
 /* end of my css */

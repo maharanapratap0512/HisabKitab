@@ -7,7 +7,7 @@ export class ExcelImportService {
 
   importList: any = [
     { name: 'destribution' },
-    { name: 'bachat', note: 'final bachat list that make through actual counting.' },
+    { name: 'bachat', note: 'final bachat list that make through actual counting. Here ignore Marking on qty 0.' },
     { name: 'pbk', autoUpdate: true },
     { name: 'vehicle', secondHeader: false, autoUpdate: true },
     { name: 'nimitt', autoUpdate: true },

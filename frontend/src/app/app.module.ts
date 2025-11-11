@@ -92,6 +92,8 @@ import { DeleteComponent } from './views/delete/delete.component';
 import { PopoverFilterComponent } from './SHARED/popover-filter/popover-filter.component';
 import { HorizontalScrollWithArrowsDirective } from './SHARED/horizontal-scroll-with-arrows.directive';
 import { ContextMenuDirective } from './SHARED/context-menu.directive';
+import { JawakEntryNewComponent } from './ENTRY__FORMS/jawak-entry-new/jawak-entry-new.component';
+import { JawakNewComponent } from './jawak-new/jawak-new.component';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -172,6 +174,8 @@ import { ContextMenuDirective } from './SHARED/context-menu.directive';
     PopoverFilterComponent,
     HorizontalScrollWithArrowsDirective,
     ContextMenuDirective,
+    JawakEntryNewComponent,
+    JawakNewComponent,
   ],
 
   imports: [

@@ -221,7 +221,7 @@ export class ExcelImportComponent implements OnInit {
             if (this.headerConfig[j].type == "array") {
               row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index].split(",");
             } else {
-              row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index];
+              row[this.headerConfig[j].col_name] = this.gs.cleanValue(this.excelArr[i][this.headerConfig[j].index]);
             }
           }
         }
@@ -237,7 +237,7 @@ export class ExcelImportComponent implements OnInit {
     } else if (this.importType.name == 'subitem') {
       this.excelArrObj = this.excelArrObj.filter((e: { subitem_hin: string | null; }) => e.subitem_hin)
     } else if (this.importType.name == 'bachat') {
-      this.excelArrObj = this.excelArrObj.filter((e: { date: any; mm: any; item: any; qty: any; unit: any; }) => e.date && e.mm && e.item && e.qty && e.unit)
+      this.excelArrObj = this.excelArrObj.filter((e: { date: any; mm: any; item: any; qty: any; unit: any; }) => e.date && e.mm && e.item && e.qty != null && e.unit)
     }
     this.stepNo = 2;
     this.isLoader = false;
@@ -326,7 +326,7 @@ export class ExcelImportComponent implements OnInit {
         if (res.success) {
           this.toastr.success('Added to Dictionary');
         }
-      }, (err)=>{
+      }, (err) => {
         this.toastr.error('Error Occuring while inserting into Dictionary.')
       });
     }

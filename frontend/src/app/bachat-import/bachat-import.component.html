@@ -158,7 +158,7 @@
                             <div class="row" style="overflow: hidden; flex-direction: column;">
 
                                 <div class="row my-1">
-                                    <div class="col-4">
+                                    <div class="col-3">
                                         <div class="form-group">
                                             <input type="text" class="form-control" placeholder="Search Here"
                                                 [(ngModel)]="term_combined">
@@ -183,6 +183,11 @@
                                             <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
                                                 {{item.item_eng}} : {{item.item_code}}</ng-option>
                                         </ng-select>
+                                    </div>
+                                    <div class="col-1">
+                                        <button class="btn btn-sm btn-success" title="export to excel" (click)="exportCombinedData()">
+                                            <i class="uil uil-export"></i>
+                                        </button>
                                     </div>
                                     <div class="col-4">
                                         <pagination-controls id="combinedPagi" class="pagi text-end"

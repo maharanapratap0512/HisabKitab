@@ -78,7 +78,7 @@ export class BachatImportComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.excelArrObj && changes.excelArrObj.currentValue) {
-      this.excelArrObj = changes.excelArrObj.currentValue.filter((ex: { date: any; mm_id: any; item_id: any; subitem_id: any, subitem: any, unit_id: any; qty: any; }) => ex.date && ex.mm_id && ex.item_id && ex.unit_id && ex.qty && ((ex.subitem && ex.subitem_id) || !ex.subitem));
+      this.excelArrObj = changes.excelArrObj.currentValue.filter((ex: { date: any; mm_id: any; item_id: any; subitem_id: any, subitem: any, unit_id: any; qty: any; }) => ex.date && ex.mm_id && ex.item_id && ex.unit_id && ex.qty != null && ((ex.subitem && ex.subitem_id) || !ex.subitem));
     }
 
     this.getLatestBachatData();
@@ -108,20 +108,20 @@ export class BachatImportComponent {
     } else {
       this.filterObj[key] = false;
     }
-    this.filterZeros();
-  }
-
-  filterZeros() {
-    this.combinedBachat = this.combinedBachatAll.filter((item: any) => {
-      for (let [key, value] of Object.entries(this.filterObj)) {
-        if (['qty', 'bachat', 'difference'].includes(key) && value && item[key] == 0) {
-          return false;
-        }
-      }
-      return true;
-    });
     this.filter('combinedBachat');
   }
+
+  // filterZeros() {
+  //   this.combinedBachat = this.combinedBachatAll.filter((item: any) => {
+  //     for (let [key, value] of Object.entries(this.filterObj)) {
+  //       if (['qty', 'bachat', 'difference'].includes(key) && value && item[key] == 0) {
+  //         return false;
+  //       }
+  //     }
+  //     return true;
+  //   });
+  //   this.filter('combinedBachat');
+  // }
 
   toggleSelectAll() {
     for (let i in this.DBOnlyBachat) {
@@ -137,6 +137,17 @@ export class BachatImportComponent {
       }
       if (this.filterObj.item_id && this.filterObj.item_id.length > 0) {
         (this as any)[arr] = (this as any)[arr + 'All'].filter((row: { item_id: any; }) => this.filterObj.item_id.includes(row.item_id));
+      }
+
+      if (arr == 'combinedBachat') {
+        this.combinedBachat = this.combinedBachat.filter((item: any) => {
+          for (let [key, value] of Object.entries(this.filterObj)) {
+            if (['qty', 'bachat', 'difference'].includes(key) && value && item[key] == 0) {
+              return false;
+            }
+          }
+          return true;
+        });
       }
     }
   }
@@ -261,6 +272,26 @@ export class BachatImportComponent {
   exportRejected() {
     let date = new Date();
     this.excelExportService.exportAsExcelFile(this.rejected, 'Bachat_import_rejected_data_' + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
+  }
+
+  exportCombinedData() {
+    let date = new Date();
+    let exportData = []
+    for(let i in this.combinedBachat){
+      exportData.push({
+        "Sn No": this.combinedBachat[i].sn,
+        "Date": this.combinedBachat[i].date,
+        "MM": this.combinedBachat[i].mm_hin,
+        "Item": this.combinedBachat[i].item_hin,
+        "Subitem": this.combinedBachat[i].subitem_hin || '',
+        "Condition": this.combinedBachat[i].condition_hin || '',
+        "Unit": this.combinedBachat[i].unit_short,
+        "Qty": this.combinedBachat[i].qty,
+        "Bachat": this.combinedBachat[i].bachat,
+        "Difference": this.combinedBachat[i].difference,
+      });
+    }
+    this.excelExportService.exportAsExcelFile(exportData, 'Bachat_import_combined_bachat_' + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
   }
 
 }
