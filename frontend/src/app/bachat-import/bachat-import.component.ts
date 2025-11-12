@@ -49,7 +49,7 @@ export class BachatImportComponent {
   succeedStyle: string = "width: 0%";
   import$ = new Subject();
   importReset$ = new Subject();
-  selectAll: boolean = false;
+  selectAll: any = {};
 
 
   processedCount: any = 0;
@@ -123,10 +123,17 @@ export class BachatImportComponent {
   //   this.filter('combinedBachat');
   // }
 
-  toggleSelectAll() {
-    for (let i in this.DBOnlyBachat) {
-      this.DBOnlyBachat[i].selected = !this.selectAll;
+  toggleSelectAll(arr: string) {
+    if (["combinedBachat", "DBOnlyBachat"].includes(arr)) {
+      for (let i in (this as any)[arr]) {
+        (this as any)[arr][i].selected = !this.selectAll[arr];
+      }
     }
+  }
+
+  resetFilter(arr: string) {
+    this.filterObj = {}
+    this.filter(arr);
   }
 
   filter(arr: string) {
@@ -168,7 +175,7 @@ export class BachatImportComponent {
   async syncBachat() {
     this.processedCount = 0;
     this.processing = true;
-    this.combinedBachat = this.combinedBachat.filter((c: { difference: number }) => c.difference != 0);
+    this.combinedBachat = this.combinedBachat.filter((c: { selected: any, difference: number }) => c.selected && c.difference != 0);
 
     this.import$.subscribe((res: any) => {
 
@@ -196,7 +203,11 @@ export class BachatImportComponent {
 
     });
 
-    await this.processSync();
+    if (this.combinedBachat.length > 0) {
+      await this.processSync();
+    } else {
+      this.toastr.info('No data with difference was found.')
+    }
   }
 
   async processReset(i: number = 0) {
@@ -213,7 +224,7 @@ export class BachatImportComponent {
 
 
   async resetBachat() {
-    // this.DBOnlyBachat = this.DBOnlyBachatAll.filter((c: { selected: any }) => c.selected);
+    this.DBOnlyBachat = this.DBOnlyBachat.filter((c: { selected: any }) => c.selected);
 
     if (this.DBOnlyBachat.length > 0) {
 
@@ -277,7 +288,7 @@ export class BachatImportComponent {
   exportCombinedData() {
     let date = new Date();
     let exportData = []
-    for(let i in this.combinedBachat){
+    for (let i in this.combinedBachat) {
       exportData.push({
         "Sn No": this.combinedBachat[i].sn,
         "Date": this.combinedBachat[i].date,
@@ -286,12 +297,30 @@ export class BachatImportComponent {
         "Subitem": this.combinedBachat[i].subitem_hin || '',
         "Condition": this.combinedBachat[i].condition_hin || '',
         "Unit": this.combinedBachat[i].unit_short,
-        "Qty": this.combinedBachat[i].qty,
-        "Bachat": this.combinedBachat[i].bachat,
+        "Excel Qty": this.combinedBachat[i].qty,
+        "SW Bachat": this.combinedBachat[i].bachat,
         "Difference": this.combinedBachat[i].difference,
       });
     }
     this.excelExportService.exportAsExcelFile(exportData, 'Bachat_import_combined_bachat_' + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
+  }
+
+  exportDBOnlyData() {
+    let date = new Date();
+    let exportData = []
+    for (let i in this.DBOnlyBachat) {
+      exportData.push({
+        "MM": this.DBOnlyBachat[i].mm_hin,
+        "Item": this.DBOnlyBachat[i].item_hin,
+        "Subitem": this.DBOnlyBachat[i].subitem_hin || '',
+        "Condition": this.DBOnlyBachat[i].condition_hin || '',
+        "Unit": this.DBOnlyBachat[i].unit_short,
+        "Excel Qty": this.DBOnlyBachat[i].qty,
+        "SW Bachat": this.DBOnlyBachat[i].bachat,
+        "Difference": this.DBOnlyBachat[i].difference,
+      });
+    }
+    this.excelExportService.exportAsExcelFile(exportData, 'Bachat_import_db_only_bachat_' + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear());
   }
 
 }

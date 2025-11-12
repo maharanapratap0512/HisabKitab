@@ -132,6 +132,10 @@
                                         (click)="syncBachat()">
                                         Sync Bachat
                                     </button>
+                                    <button class="btn btn-outline-info" *ngIf="!combinedBachat.length"
+                                        (click)="resetFilter('combinedBachat')">
+                                        Refresh
+                                    </button>
                                 </div>
 
                                 <div class="col-10">
@@ -185,7 +189,8 @@
                                         </ng-select>
                                     </div>
                                     <div class="col-1">
-                                        <button class="btn btn-sm btn-success" title="export to excel" (click)="exportCombinedData()">
+                                        <button class="btn btn-sm btn-success" title="export to excel"
+                                            (click)="exportCombinedData()">
                                             <i class="uil uil-export"></i>
                                         </button>
                                     </div>
@@ -201,6 +206,15 @@
                                         style="table-layout: auto;">
                                         <thead>
                                             <tr>
+                                                <th>
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input" id="selectAllCB"
+                                                            [(ngModel)]="selectAll.combinedBachat"
+                                                            (click)="toggleSelectAll('combinedBachat')">
+                                                        <label class="form-check-label fs-6" for="selectAll">Select
+                                                            All</label>
+                                                    </div>
+                                                </th>
                                                 <th>Sn</th>
                                                 <th>Date</th>
                                                 <th>MM</th>
@@ -243,7 +257,13 @@
                                         <tbody>
                                             <tr *ngFor="let data of combinedBachat | search: term_combined | paginate:{id:'combinedPagi', itemsPerPage:itemsPerPage,currentPage:page_combined,totalItems:combinedBachat.length}; let i=index;"
                                                 [ngClass]="{'excel-row': data.status == 'EXCEL', 'db-row': data.status == 'DB'}">
-                                                <td>{{data.sn}}</td>
+                                                <td>
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input"
+                                                            [(ngModel)]="data.selected">
+                                                    </div>
+                                                </td>
+                                                <td>{{data.sn ? data.sn : ''}}</td>
                                                 <td>{{data.date}}</td>
                                                 <td>{{data.mm_hin}}</td>
                                                 <td>{{data.item_hin}}</td>
@@ -317,7 +337,13 @@
                                                 {{item.item_eng}} : {{item.item_code}}</ng-option>
                                         </ng-select>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-1">
+                                        <button class="btn btn-sm btn-success" title="export to excel"
+                                            (click)="exportDBOnlyData()">
+                                            <i class="uil uil-export"></i>
+                                        </button>
+                                    </div>
+                                    <div class="col-3">
                                         <pagination-controls id="dbOnlyPagi" class="pagi text-end"
                                             (pageChange)="page_db_only = $event" [autoHide]="true">
                                         </pagination-controls>
@@ -332,7 +358,8 @@
                                                 <th>
                                                     <div class="form-check mb-2">
                                                         <input type="checkbox" class="form-check-input" id="selectAll"
-                                                            [(ngModel)]="selectAll" (click)="toggleSelectAll()">
+                                                            [(ngModel)]="selectAll.DBOnlyBachat"
+                                                            (click)="toggleSelectAll('DBOnlyBachat')">
                                                         <label class="form-check-label fs-6" for="selectAll">Select
                                                             All</label>
                                                     </div>
@@ -571,8 +598,8 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr *ngFor="let data of rejected | paginate:{id:'rejectedPagi', itemsPerPage:itemsPerPage,currentPage:page_rejected,totalItems:rejected.length}; let i=index;"
-                                            [ngClass]="{'excel-row': data.status == 'EXCEL', 'db-row': data.status == 'DB'}">
+                                        <tr
+                                            *ngFor="let data of rejected | paginate:{id:'rejectedPagi', itemsPerPage:itemsPerPage,currentPage:page_rejected,totalItems:rejected.length}; let i=index;">
                                             <td>{{data.sn}}</td>
                                             <td>{{data.date}}</td>
                                             <td>{{data.mm_hin}}</td>
