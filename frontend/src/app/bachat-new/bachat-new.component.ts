@@ -39,15 +39,18 @@ export class BachatNewComponent implements OnInit {
     category_id: null,
     item_id: null,
     subitem_id: null,
-    year: null,
-    months: []
+    from_year: null,
+    from_month: null,
+    to_year: null,
+    to_month: null,
   };
   images: any = [];
   imageNames: any = [];
   settings: any = {};
   imagesToShow: any = [];
   currentImage: any;
-  months: any = [];
+  monthsFrom: any = [];
+  monthsTo: any = [];
   monthsSel: any = []
   clickOperation: any = 1;
   operationList: any = [

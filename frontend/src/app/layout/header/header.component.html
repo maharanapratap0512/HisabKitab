@@ -12,7 +12,7 @@
             <span class="hk-title">
                <span class="hk mx-2"><strong><u>HISAB KITAB</u></strong>
                </span>
-               <span>(v23.5)</span>
+               <span>(v25 Beta)</span>
             </span>
          </a>
          <!-- <a routerLink="dashboard" class="topnav-logo">
@@ -41,19 +41,29 @@
                   Jawak
                </a>
             </li>
-            <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.product.visible">
+            <li class="notification-list mx-1" style="line-height: 68px;" title="Home Made Products">
+               <a class="btn btn-primary btn-primary-custom lh-xl" routerLinkActive="active" routerLink="hmp">
+                  HMP
+               </a>
+            </li>
+            <!-- <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.product.visible">
                <a class="btn btn-primary btn-primary-custom lh-xl" routerLinkActive="active" routerLink="product">
                   Product
                </a>
-            </li>
+            </li> -->
             <!-- <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.bachat.visible">
                <a class="btn btn-primary btn-primary-custom lh-xl" routerLinkActive="active" routerLink="bachat">
                   Bachat
                </a>
             </li> -->
+            <li class="notification-list mx-1" style="line-height: 68px;" title="Pbk Closing">
+               <a class="btn btn-primary btn-primary-custom lh-xl" routerLinkActive="active" routerLink="pbk_closing">
+                  PBK 
+               </a>
+            </li>
             <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.bachat.visible">
                <a class="btn btn-primary btn-primary-custom lh-xl" routerLinkActive="active" routerLink="bachat_new">
-                  Bachat New
+                  Bachat
                </a>
             </li>
             <li class="notification-list mx-1" style="line-height: 68px;"
@@ -336,6 +346,11 @@
                   <li class="nav-item" *ngIf="settings.point.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="point" role="button">
                         <i class="uil-layer-group me-1"></i>Points
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link" routerLinkActive="active" routerLink="mysql" role="button">
+                        <i class="uil-layer-group me-1"></i>MySQL
                      </a>
                   </li>
 

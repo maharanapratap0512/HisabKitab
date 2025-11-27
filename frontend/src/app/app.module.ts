@@ -94,6 +94,9 @@ import { HorizontalScrollWithArrowsDirective } from './SHARED/horizontal-scroll-
 import { ContextMenuDirective } from './SHARED/context-menu.directive';
 import { JawakEntryNewComponent } from './ENTRY__FORMS/jawak-entry-new/jawak-entry-new.component';
 import { JawakNewComponent } from './jawak-new/jawak-new.component';
+import { MysqlComponent } from './MySQL/mysql.component';
+import { HmpComponent } from './hmp/hmp.component';
+import { PbkClosingComponent } from './pbk-closing/pbk-closing.component';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -176,6 +179,9 @@ import { JawakNewComponent } from './jawak-new/jawak-new.component';
     ContextMenuDirective,
     JawakEntryNewComponent,
     JawakNewComponent,
+    MysqlComponent,
+    HmpComponent,
+    PbkClosingComponent,
   ],
 
   imports: [

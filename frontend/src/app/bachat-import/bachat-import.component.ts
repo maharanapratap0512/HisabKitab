@@ -78,7 +78,7 @@ export class BachatImportComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.excelArrObj && changes.excelArrObj.currentValue) {
-      this.excelArrObj = changes.excelArrObj.currentValue.filter((ex: { date: any; mm_id: any; item_id: any; subitem_id: any, subitem: any, unit_id: any; qty: any; }) => ex.date && ex.mm_id && ex.item_id && ex.unit_id && ex.qty != null && ((ex.subitem && ex.subitem_id) || !ex.subitem));
+      this.excelArrObj = changes.excelArrObj.currentValue.filter((ex: { date: any; mm_id: any; item_id: any; subitem_id: any, subitem: any, subitem_corrected: any, unit_id: any; qty: any; }) => ex.date && ex.mm_id && ex.item_id && ex.unit_id && ex.qty != null && ((ex.subitem && ex.subitem_id) || !ex.subitem || ex.subitem_corrected));
     }
 
     this.getLatestBachatData();

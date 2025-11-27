@@ -1058,6 +1058,66 @@ const bachat_new = {
         `year, month, mm.mm_hin, item_hin, subitem_hin, unit.unit_short`
 }
 
+const pbk_bachat = {
+    select: `select * from pbk_bachat ?`,
+    select_full: `select pbk_bachat.*,
+      pbk.pbk_hin, pbk.pbk_eng, pbk.roll_no,
+      it.item_hin, it.item_eng, it.item_code, it.item_roman,
+      sil.subitem_hin, sil.subitem_eng, sil.subitem_roman,
+      unit.unit_short, unit.unit_full,
+      sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
+      dept.dept_code, dept.dept_hin, dept.dept_eng
+      from pbk_bachat
+      left join pbk on pbk._id = pbk_bachat.pbk_id
+      left join item it on it._id = pbk_bachat.item_id
+      left join subitem si on si._id = pbk_bachat.subitem_id
+      left join subitem_list sil on sil._id = si.subitem_list_id
+      left join unit on unit._id = pbk_bachat.unit_id
+      left join support_list sl on sl._id = pbk_bachat.condition_id
+      left join department dept on dept._id = pbk_bachat.dept_id ? limit @limit offset @offset`,
+    insert: `insert into pbk_bachat (
+      pbk_id, item_id, subitem_id, unit_id, condition_id, qty, dept_id, active)
+    values (
+      @pbk_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @dept_id, @active)`,
+    update: `update pbk_bachat set
+      qty = @qty,
+      updated_at = datetime('now', 'localtime')
+      where pbk_id = @pbk_id AND item_id = @item_id AND unit_id = @unit_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)`,
+    update_qty: `update pbk_bachat set qty = qty + @qty, updated_at = datetime('now', 'localtime') where pbk_id = @pbk_id AND item_id = @item_id AND unit_id = @unit_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)`,
+    order: `pbk.pbk_hin, item_hin, subitem_hin, unit.unit_short`
+}
+
+const pbk_closing = {
+    select: `select * from pbk_closing ?`,
+    select_full: `select pbk_closing.*,
+      pbk.pbk_hin, pbk.pbk_eng, pbk.roll_no,
+      it.item_hin, it.item_eng, it.item_code, it.item_roman,
+      sil.subitem_hin, sil.subitem_eng, sil.subitem_roman,
+      unit.unit_short, unit.unit_full,
+      sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
+      dept.dept_code, dept.dept_hin, dept.dept_eng
+      from pbk_closing
+      left join pbk on pbk._id = pbk_closing.pbk_id
+      left join item it on it._id = pbk_closing.item_id
+      left join subitem si on si._id = pbk_closing.subitem_id
+      left join subitem_list sil on sil._id = si.subitem_list_id
+      left join unit on unit._id = pbk_closing.unit_id
+      left join support_list sl on sl._id = pbk_closing.condition_id
+      left join department dept on dept._id = pbk_closing.dept_id ? limit @limit offset @offset`,
+    insert: `insert into pbk_closing (
+      pbk_id, date, item_id, subitem_id, unit_id, condition_id, qty, sw_bachat, difference, active, hl, is_xl)
+    values (
+      @pbk_id, @date, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @sw_bachat, @difference, @active, @hl, @is_xl)`,
+    update: `update pbk_closing set
+      qty = @qty,
+      sw_bachat = @sw_bachat,
+      difference = @difference,
+      updated_at = datetime('now', 'localtime')
+      where _id = @_id`,
+    order: `date desc, pbk.pbk_hin, item_hin, subitem_hin, unit.unit_short`
+}
+
+
 const mm = {
     select:
         `select * from mm ?`
@@ -1414,6 +1474,119 @@ const point = {
     , order:
         `point_hin,point_eng`
 }
+
+// hmp stands to Home Made Products
+const hmp_recipe = {
+    select: `select pr.*, d.dept_name from hmp_recipe pr left join department d on pr.dept_id = d._id where pr.active = 1 @`,
+    select_full: `select pr.*, d.dept_name from hmp_recipe pr left join department d on pr.dept_id = d._id where pr.active = 1 @`,
+    insert: `insert into hmp_recipe (recipe_name, recipe_code, description, dept_id) values (@recipe_name, @recipe_code, @description, @dept_id)`,
+    update: `update hmp_recipe set recipe_name = @recipe_name, recipe_code = @recipe_code, description = @description, dept_id = @dept_id, updated_at = datetime('now', 'localtime') where _id = @_id`,
+    delete: `update hmp_recipe set active = 0 where _id = @_id`
+}
+
+const hmp_recipe_input = {
+    select: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name
+             from hmp_recipe_input pri
+             left join item i on pri.item_id = i._id
+             left join unit u on pri.unit_id = u._id
+             left join subitem s on pri.subitem_id = s._id
+             left join support_list sl on pri.condition_id = sl._id
+             where pri.active = 1 @`,
+    select_by_recipe: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name
+                       from hmp_recipe_input pri
+                       left join item i on pri.item_id = i._id
+                       left join unit u on pri.unit_id = u._id
+                       left join subitem s on pri.subitem_id = s._id
+                       left join support_list sl on pri.condition_id = sl._id
+                       where pri.active = 1 and pri.recipe_id = @recipe_id`,
+    insert: `insert into hmp_recipe_input (recipe_id, item_id, subitem_id, unit_id, condition_id, qty) values (@recipe_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty)`,
+    update: `update hmp_recipe_input set item_id = @item_id, subitem_id = @subitem_id, unit_id = @unit_id, condition_id = @condition_id, qty = @qty where _id = @_id`,
+    delete: `update hmp_recipe_input set active = 0 where _id = @_id`
+}
+
+const hmp_recipe_output = {
+    select: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name
+             from hmp_recipe_output pro
+             left join item i on pro.item_id = i._id
+             left join unit u on pro.unit_id = u._id
+             left join subitem s on pro.subitem_id = s._id
+             left join support_list sl on pro.condition_id = sl._id
+             where pro.active = 1 @`,
+    select_by_recipe: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name
+                       from hmp_recipe_output pro
+                       left join item i on pro.item_id = i._id
+                       left join unit u on pro.unit_id = u._id
+                       left join subitem s on pro.subitem_id = s._id
+                       left join support_list sl on pro.condition_id = sl._id
+                       where pro.active = 1 and pro.recipe_id = @recipe_id`,
+    insert: `insert into hmp_recipe_output (recipe_id, item_id, subitem_id, unit_id, condition_id, qty) values (@recipe_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty)`,
+    update: `update hmp_recipe_output set item_id = @item_id, subitem_id = @subitem_id, unit_id = @unit_id, condition_id = @condition_id, qty = @qty where _id = @_id`,
+    delete: `update hmp_recipe_output set active = 0 where _id = @_id`
+}
+
+const hmp_batch = {
+    select: `select pb.*, pr.recipe_name, m.mm_name, d.dept_name from hmp_batch pb 
+             left join mm m on pb.mm_id = m._id 
+             left join department d on pb.dept_id = d._id 
+             where pb.active = 1`,
+    select_full: `select pb.*, pr.recipe_name, m.mm_name, d.dept_name from hmp_batch pb 
+                  left join hmp_recipe pr on pb.recipe_id = pr._id 
+                  left join mm m on pb.mm_id = m._id 
+                  left join department d on pb.dept_id = d._id 
+                  where pb.active = 1`,
+    insert: `insert into hmp_batch (batch_no, recipe_id, date, mm_id, status, notes, dept_id) 
+            values (@batch_no, @recipe_id, @date, @mm_id, @status, @notes, @dept_id)`,
+    update: `update hmp_batch set batch_no = @batch_no, recipe_id = @recipe_id, date = @date, mm_id = @mm_id, status = @status, notes = @notes, dept_id = @dept_id, updated_at = @updated_atatetime('now', 'localtime') where _id = @_id`,
+    // update_totals: `update hmp_batch set total_input_qty = ?, total_output_qty = ?, hmp_loss = ? where _id = ?`,
+    delete: `update hmp_batch set active = 0 where _id = @_id`
+}
+
+const hmp_batch_input = {
+    select: `select pbi.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name 
+             from hmp_batch_input pbi 
+             left join hmp_batch pb on pbi.batch_id = pb._id 
+             left join item i on pbi.item_id = i._id 
+             left join unit u on pbi.unit_id = u._id 
+             left join subitem s on pbi.subitem_id = s._id 
+             left join support_list sl on pbi.condition_id = sl._id 
+             where pbi.active = 1`,
+    select_by_batch: `select pbi.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name 
+                      from hmp_batch_input pbi 
+                      left join item i on pbi.item_id = i._id 
+                      left join unit u on pbi.unit_id = u._id 
+                      left join subitem s on pbi.subitem_id = s._id 
+                      left join support_list sl on pbi.condition_id = sl._id 
+                      where pbi.active = 1 and pbi.batch_id = ?`,
+    insert: `insert into hmp_batch_input (batch_id, item_id, subitem_id, unit_id, condition_id, qty, rate, amount, lot_no, jawak_ref_id) 
+            values (@batch_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @rate, @amount, @lot_no, @jawak_ref_i)`,
+    update: `update hmp_batch_input set item_id = @item_id, subitem_id = @subitem_id, unit_id = @unit_id, condition_id = @condition_id, qty = @qty, rate = @rate, amount = @amount, lot_no = @lot_no, jawak_ref_id = @jawak_ref_id where _id = @_id`,
+    delete: `update hmp_batch_input set active = 0 where _id = @_id`
+}
+
+const hmp_batch_output = {
+    select: `select pbo.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
+             from hmp_batch_output pbo 
+             left join hmp_batch pb on pbo.batch_id = pb._id 
+             left join item i on pbo.item_id = i._id 
+             left join unit u on pbo.unit_id = u._id 
+             left join subitem s on pbo.subitem_id = s._id 
+             left join support_list sl on pbo.condition_id = sl._id 
+             left join support_list slt on pbo.hmp_type = slt._id 
+             where pbo.active = 1`,
+    select_by_batch: `select pbo.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
+                from hmp_batch_output pbo 
+                left join item i on pbo.item_id = i._id 
+                left join unit u on pbo.unit_id = u._id 
+                left join subitem s on pbo.subitem_id = s._id 
+                left join support_list slt on pbo.hmp_type = slt._id 
+                left join support_list sl on pbo.condition_id = sl._id 
+                where pbo.active = 1 and pbo.batch_id = @batch_id`,
+    insert: `insert into hmp_batch_output (batch_id, item_id, subitem_id, unit_id, condition_id, qty, rate, amount, lot_no, batch_product_code, aawak_ref_id) 
+            values (@batch_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @rate, @amount, @lot_no, @batch_product_code, @aawak_ref_id)`,
+    update: `update hmp_batch_output set item_id = @item_id, subitem_id = @subitem_id, unit_id = @unit_id, condition_id = @condition_id, qty = @qty, rate = @rate, amount = @amount, lot_no = @lot_no, batch_product_code = @batch_product_code, aawak_ref_id = @aawak_ref_id where _id = @_id`,
+    delete: `update hmp_batch_output set active = 0 where _id = @_id`
+}
+
 
 const product = {
     select:
@@ -2561,5 +2734,6 @@ const test = {
 }
 
 module.exports = {
-    queryBuilder, country, city, category, department, department_config, item, itemmix, aawak, aawak_voucher, bachat, jawak, mm, nimitt, pbk, point, product, zone, district, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, report_comment
+    queryBuilder, country, city, category, department, department_config, item, itemmix, aawak, aawak_voucher, bachat, pbk_bachat, pbk_closing, jawak, mm, nimitt, pbk, point, product, zone, district, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, report_comment,
+    hmp_recipe, hmp_recipe_input, hmp_recipe_output, hmp_batch, hmp_batch_input, hmp_batch_output,
 };

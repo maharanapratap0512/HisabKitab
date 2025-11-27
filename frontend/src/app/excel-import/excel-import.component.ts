@@ -268,12 +268,31 @@ export class ExcelImportComponent implements OnInit {
 
   toggleCorrection(i: any, action: boolean) {
     this.unmatchedData[i].correction = action;
+
     if (action) {
-      if (this.unmatchedData[i].type == 'item' && this.unmatchedData[i].id) {
-        this.itemSelected(this.unmatchedData[i].id)
+      if (this.unmatchedData[i].type == 'item' && this.unmatchedData[i].item) {
+        this.itemSelected(this.unmatchedData[i].item);
+      } else if (this.unmatchedData[i].type == 'item' && this.unmatchedData[i].id) {
+        let item = this.items.find((it: { _id: any; }) => it._id == this.unmatchedData[i].id);
+        this.unmatchedData[i].item = item;
+        this.itemSelected(this.unmatchedData[i].item);
       }
     } else {
       this.items = this.itemAll;
+      this.subitems = [];
+    }
+  }
+
+  itemSelected(ev: any) {
+    if (ev) {
+      if (this.cat) {
+        this.subitems = ev.subitems.filter((s: { categories: any; }) => s.categories.includes(this.cat));
+      }
+      else {
+        this.subitems = ev.subitems;
+      }
+    }
+    else {
       this.subitems = [];
     }
   }
@@ -302,11 +321,18 @@ export class ExcelImportComponent implements OnInit {
 
     if (data.type == 'item') {
       for (let i in this.excelArrObj) {
-        for (let j in conf) {
-          if (this.excelArrObj[i].item == data.name.item && this.excelArrObj[i].subitem == data.name.subitem) {
-            this.excelArrObj[i].item_id = data.id;
-            this.excelArrObj[i].subitem_id = data.id2;
+        if (this.excelArrObj[i].item == data.name.item && this.excelArrObj[i].subitem == data.name.subitem) {
+          if (this.excelArrObj[i].item_id != data.item._id) {
+            this.excelArrObj[i].item_id = data.item._id;
+            this.excelArrObj[i].item_hin = data.item.item_hin;
           }
+          this.excelArrObj[i].subitem_corrected = true;
+          this.excelArrObj[i].subitem_hin = '-';
+          if (data.subitem) {
+            this.excelArrObj[i].subitem_id = data.subitem._id;
+            this.excelArrObj[i].subitem_hin = data.subitem.subitem_hin;
+          }
+
         }
       }
     } else {
@@ -391,7 +417,7 @@ export class ExcelImportComponent implements OnInit {
         if (data[this.headerList[j].ref_field].includes(null)) {
           return true;
         }
-      } else if (this.headerList[j].ref_table && (data[this.headerList[j].name] && !data[this.headerList[j].ref_field])) {
+      } else if (this.headerList[j].ref_table && ((data[this.headerList[j].name] && !data[this.headerList[j].ref_field]) || data[this.headerList[j].name + '_corrected'])) {
         return true;
       }
     }
@@ -445,21 +471,6 @@ export class ExcelImportComponent implements OnInit {
     });
   }
 
-  itemSelected(ev: any) {
-    if (ev) {
-      let item = this.items.find((i: { _id: any; }) => i._id == ev);
-
-      if (this.cat) {
-        this.subitems = item.subitems.filter((s: { categories: any; }) => s.categories.includes(this.cat));
-      }
-      else {
-        this.subitems = item.subitems;
-      }
-    }
-    else {
-      this.subitems = [];
-    }
-  }
 
   catSelected(ev: any) {
     if (ev) {

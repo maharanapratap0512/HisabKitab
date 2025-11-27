@@ -1,0 +1,99 @@
+<div class="row">
+    <div class="card-body">
+        <form [formGroup]="form">
+            <div class="row">
+                <div [class]="'col-md-' + (field.colspan || 3) + ' mb-3'"
+                     *ngFor="let field of config.fields"
+                     [hidden]="!isFieldVisible(field)">
+
+                    <!-- Text Input -->
+                    <div class="form-group" *ngIf="field.type === 'text'">
+                        <label class="form-label">{{ field.label }}</label>
+                        <input [type]="field.type"
+                               class="form-control"
+                               [placeholder]="field.placeholder || field.label"
+                               [formControlName]="field.key"
+                               [ngClass]="{'validation': form.get(field.key)?.errors && (form.get(field.key)?.touched || form.get(field.key)?.dirty)}">
+                    </div>
+
+                    <!-- Number Input -->
+                    <div class="form-group" *ngIf="field.type === 'number'">
+                        <label class="form-label">{{ field.label }}</label>
+                        <input type="number"
+                               class="form-control"
+                               [placeholder]="field.placeholder || field.label"
+                               [formControlName]="field.key"
+                               [ngClass]="{'validation': form.get(field.key)?.errors && (form.get(field.key)?.touched || form.get(field.key)?.dirty)}">
+                    </div>
+
+                    <!-- Date Input -->
+                    <div class="form-group" *ngIf="field.type === 'date'">
+                        <label class="form-label">{{ field.label }}</label>
+                        <input type="date"
+                               class="form-control"
+                               [placeholder]="field.placeholder || field.label"
+                               [formControlName]="field.key"
+                               [ngClass]="{'validation': form.get(field.key)?.errors && (form.get(field.key)?.touched || form.get(field.key)?.dirty)}">
+                    </div>
+
+                    <!-- Textarea -->
+                    <div class="form-group" *ngIf="field.type === 'textarea'">
+                        <label class="form-label">{{ field.label }}</label>
+                        <textarea class="form-control"
+                                  [placeholder]="field.placeholder || field.label"
+                                  [formControlName]="field.key"
+                                  [ngClass]="{'validation': form.get(field.key)?.errors && (form.get(field.key)?.touched || form.get(field.key)?.dirty)}"></textarea>
+                    </div>
+
+                    <!-- Select Dropdown -->
+                    <div class="form-group" *ngIf="field.type === 'select'">
+                        <label class="form-label">{{ field.label }}</label>
+                        <ng-select class="custom"
+                                   style="width: 100%;"
+                                   [placeholder]="field.placeholder || 'Select ' + field.label"
+                                   [clearable]="true"
+                                   [virtualScroll]="true"
+                                   [formControlName]="field.key"
+                                   [ngClass]="{'validation': form.get(field.key)?.errors && (form.get(field.key)?.touched || form.get(field.key)?.dirty)}">
+                            <ng-option selected="selected" disabled value="">
+                                {{ field.placeholder || 'Select ' + field.label }}
+                            </ng-option>
+                            <ng-option *ngFor="let item of getFilteredOptions(field)"
+                                       [value]="item[field.optionValue || '_id']">
+                                {{ item[field.optionLabel || 'name'] }}
+                            </ng-option>
+                        </ng-select>
+                    </div>
+
+                    <!-- Checkbox -->
+                    <div class="form-group" *ngIf="field.type === 'checkbox'">
+                        <div class="form-check mb-2">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   [formControlName]="field.key" />
+                            <label class="form-check-label">{{ field.label }}</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="col-md-3 mb-3">
+                    <button class="btn btn-primary submit mx-3"
+                            *ngIf="!isEdit"
+                            type="submit"
+                            (click)="onSubmit()"
+                            [disabled]="isLoader">
+                        {{ config.submitButton.create }}
+                    </button>
+                    <button class="btn btn-warning submit mx-3"
+                            *ngIf="isEdit"
+                            type="submit"
+                            (click)="onSubmit()"
+                            [disabled]="isLoader">
+                        {{ config.submitButton.update }}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

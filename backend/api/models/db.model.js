@@ -2045,7 +2045,9 @@ class dbModal {
         created_at timestamp default (datetime('now', 'localtime')),
         updated_at timestamp default (datetime('now', 'localtime'))
       )`
-    }, {
+    },
+    // Version : 24 For Enzyme Department 
+    {
       aawak_add_reg_pg_np: `alter table aawak add column reg_pg_no varchar(10)`,
       jawak_add_reg_pg_np: `alter table jawak add column reg_pg_no varchar(10)`,
       create_aawak_enz: `create table if not exists aawak_enzyme(
@@ -2101,8 +2103,128 @@ class dbModal {
         packaging_container_detail text,
         created_at timestamp default (datetime('now', 'localtime')),
         updated_at timestamp default (datetime('now', 'localtime'))
+      )`
+    },
+    // version 25
+    // New tables for pbk bachat tracking
+    {
+      pbk_bachat: `create table if not exists pbk_bachat(
+        _id integer primary key AUTOINCREMENT,
+        pbk_id integer not null references pbk(_id),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),
+        condition_id integer null references support_list(_id),
+        qty decimal(10,2) default 0,
+        dept_id integer not null references department(_id),
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime')),
+        unique(pbk_id, item_id, subitem_id, unit_id, condition_id, dept_id)
       )`,
+      pbk_closing: `create table if not exists pbk_closing(
+        _id integer primary key AUTOINCREMENT,
+        pbk_id integer not null references pbk(_id),
+        date date not null,
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),
+        condition_id integer null references support_list(_id),
+        qty decimal(10,2) not null,
+        sw_bachat decimal(10,2) not null,
+        difference decimal(10,2) not null,
+        active tinyint default 1,
+        hl tinyint default 0,
+        is_xl tinyint default 0,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`,
+         
+      // Home Made Products related processing and tracking
+      hmp_recipe: `create table if not exists hmp_recipe(
+        _id integer primary key AUTOINCREMENT,
+        recipe_name varchar(200) not null,
+        recipe_code varchar(50) unique,
+        description text,
+        dept_id integer not null references department(_id),
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      
+      hmp_recipe_input: `create table if not exists hmp_recipe_input(
+        _id integer primary key AUTOINCREMENT,
+        recipe_id integer not null references hmp_recipe(_id),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),
+        condition_id integer null references support_list(_id),
+        qty decimal(10,2) not null,
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      
+      hmp_recipe_output: `create table if not exists hmp_recipe_output(
+        _id integer primary key AUTOINCREMENT,
+        recipe_id integer not null references hmp_recipe(_id),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),
+        condition_id integer null references support_list(_id),
+        qty decimal(10,2) not null,
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      
+      hmp_batch: `create table if not exists hmp_batch(
+        _id integer primary key AUTOINCREMENT,
+        recipe_id integer not null references hmp_recipe(_id),
+        batch_no varchar(50) unique not null,
+        date date not null,
+        mm_id integer not null references mm(_id),
+        status varchar(20) default 'pending',
+        notes text,
+        dept_id integer not null references department(_id),
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      
+      hmp_batch_input: `create table if not exists hmp_batch_input(
+        _id integer primary key AUTOINCREMENT,
+        batch_id integer not null references hmp_batch(_id),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),
+        condition_id integer null references support_list(_id),
+        qty decimal(10,2) not null,
+        rate decimal(10,2) not null,
+        amount decimal(10,2) not null,
+        lot_no varchar(50),
+        jawak_ref_id integer references jawak(_id),
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      
+      hmp_batch_output: `create table if not exists hmp_batch_output(
+        _id integer primary key AUTOINCREMENT,
+        batch_id integer not null references hmp_batch(_id),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),
+        condition_id integer null references support_list(_id),
+        qty decimal(10,2) not null,
+        rate decimal(10,2) not null,
+        amount decimal(10,2) not null,
+        lot_no varchar(50),
+        hmp_code varchar(50),
+        hmp_type integer null references support_list(_id),
+        aawak_ref_id integer references aawak(_id),
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime'))
+      )`
     }
+
 
     /* TODO cleanup task 
       1. remove table - closing.

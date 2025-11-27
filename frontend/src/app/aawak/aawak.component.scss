@@ -21,11 +21,13 @@
 }
 
 .auto {
-   background-color: #00586a82;
+   border-left: 4px solid #00586a;
+   background-color: rgba(0, 88, 106, 0.1);
 }
 
 .xl {
-   background-color: rgb(97 243 131 / 40%);
+   border-left: 4px solid #61f383;
+   background-color: rgba(97, 243, 131, 0.1);
 }
 
 // .hl {
