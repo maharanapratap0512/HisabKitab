@@ -182,7 +182,6 @@ export class DataViewComponent implements OnInit {
   }
 
   editResponse(ev: any) {
-
     if (ev._id) {
       if (this.isEdit) {
         for (let i in this.records) {
@@ -502,6 +501,21 @@ export class DataViewComponent implements OnInit {
       }, {
         title: "Aawak Type",
         columns: ["aawak_type_hin"]
+      }
+    ]
+  }
+
+  setDictionaryFields() {
+    this.fields = [
+      {
+        title: "Excle Name",
+        columns: ["name"]
+      }, {
+        title: "Actual Name",
+        columns: ["act_name"]
+      }, {
+        title: "Extra Note",
+        columns: ["extra_note"]
       }
     ]
   }
