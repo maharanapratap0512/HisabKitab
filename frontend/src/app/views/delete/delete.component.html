@@ -1,0 +1,105 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color: white"> {{loaderStatus}} </p>
+</ngx-spinner>
+
+<div class="row" id="{{'deleteComponent'+Type}}">
+
+    <div class="card-body">
+        <div class="row" style="margin-bottom: 10px;">
+
+            <ng-container *ngIf="!canDelete">
+                <div class="col-6">
+                    <div class="d-flex flex-wrap gap-2 rounded">
+                        <ng-container *ngFor="let table of relatedTables">
+                            <button class="btn" (click)="configureFields(table)"
+                                [ngClass]="{'btn-primary': selectedTable === table, 'btn-outline-primary': selectedTable != table}"
+                                *ngIf="relatedData[table] && relatedData[table].length > 0">
+                                {{table}}
+                                <span class="translate-middle bell badge rounded-pill bg-info">
+                                    {{relatedData[table+'_count']}}
+                                </span>
+                            </button>
+                        </ng-container>
+                    </div>
+                </div>
+                <div class="col-4 text-warning">
+                    &lt;= इस टेबल मे मौजूद डाटा को एडिट या डिलीट करने के बाद ही {{Type}} को डिलीट कर सकते है। </div>
+                <div class="col-2">
+                    <button class="btn btn-outline-info" (click)="getRelatedData()">
+                        <i class="uil uil-refresh"></i>Refresh
+                    </button>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="canDelete">
+                <div class="col-4 text-warning">
+                    Are You Sure? इसे वापस नहीं लाया जा सकता, क्या आप डिलीट करना चाहते है? </div>
+                <div class="col-2">
+                    <button class="btn btn-outline-danger" (click)="finalDelete()">
+                        <i class="uil uil-trash"></i>Confirm Delete
+                    </button>
+                </div>
+            </ng-container>
+
+        </div>
+        <div class="row p-2" style="overflow-y: auto; max-height: 30vw;" *ngIf="!canDelete">
+            <table id="datatable-buttons" class="table table-hover dt-responsive" style="width:98%;">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">No.</th>
+                        <th style="width: 150px;">Manage</th>
+                        <th *ngFor="let row of fields">
+                            {{row.title}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let data of relatedData[selectedTable] | search:term; let i=index"
+                        [ngClass]="{'highlight': data.hl == true}">
+                        <td>{{i+1}} </td>
+                        <td>
+                            <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                                    class="uil uil-pen"></i></button>
+                            <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                    class="uil-trash"></i></button>
+                        </td>
+                        <td *ngFor="let row of fields">
+                            <ng-container *ngFor="let col of row.columns;let z = index">
+                                <span *ngIf="z != row.columns.length-1">
+                                    {{data[col] ? data[col] + ' : ' : ''}}
+                                </span>
+                                <span *ngIf="z == row.columns.length-1">
+                                    {{(data[col] ? data[col]: '')}}
+                                </span>
+                                <br *ngIf="z != 0 && z%2==0" />
+                            </ng-container>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- edit Modal -->
+    <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+                    <button type="button" (click)="closeModal()" class="btn-close" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <app-delete *ngIf='showModal == "delete_subitem"' [Type]="deleteModel.Type" [ID]="deleteModel.ID"
+                        (response)="deleteResponse($event)"></app-delete>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        (click)="closeModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

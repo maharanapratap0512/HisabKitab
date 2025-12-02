@@ -1,0 +1,224 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">MySQL Database Connector</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Connection Form -->
+                    <form [formGroup]="connectionForm" *ngIf="!isConnected">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="host">Host</label>
+                                    <input type="text" class="form-control" id="host" formControlName="host"
+                                        [class.is-invalid]="connectionForm.get('host')?.invalid && connectionForm.get('host')?.touched">
+                                    <div class="invalid-feedback">Host is required</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="user">Username</label>
+                                    <input type="text" class="form-control" id="user" formControlName="user"
+                                        [class.is-invalid]="connectionForm.get('user')?.invalid && connectionForm.get('user')?.touched">
+                                    <div class="invalid-feedback">Username is required</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" class="form-control" id="password" formControlName="password"
+                                        [class.is-invalid]="connectionForm.get('password')?.invalid && connectionForm.get('password')?.touched">
+                                    <div class="invalid-feedback">Password is required</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="port">Port</label>
+                                    <input type="text" class="form-control" id="port" formControlName="port"
+                                        [class.is-invalid]="connectionForm.get('port')?.invalid && connectionForm.get('port')?.touched">
+                                    <div class="invalid-feedback">Valid port number is required</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-secondary mr-2" (click)="testConnection()"
+                                    [disabled]="isLoading || connectionForm.invalid">
+                                    <i class="fas fa-plug" *ngIf="!isLoading"></i>
+                                    <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+                                    Test Connection
+                                </button>
+                                <button type="button" class="btn btn-primary" (click)="connect()"
+                                    [disabled]="isLoading || connectionForm.invalid">
+                                    <i class="fas fa-database" *ngIf="!isLoading"></i>
+                                    <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+                                    Connect
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Connected State -->
+                    <div *ngIf="isConnected">
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            Connected to MySQL Server
+                            <button type="button" class="btn btn-sm btn-outline-danger float-right"
+                                (click)="disconnect()">
+                                <i class="fas fa-times"></i> Disconnect
+                            </button>
+                        </div>
+
+                        <!-- Database Selection -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="database">Select Database</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Database"
+                                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="selectedDatabase"
+                                        (change)="onDatabaseChange()">
+                                        <ng-option selected="selected" disabled value="">Select Database</ng-option>
+                                        <ng-option *ngFor="let db of databases" [value]="db">{{db}}</ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
+                            <div class="col-md-6" *ngIf="selectedDatabase">
+                                <div class="form-group">
+                                    <label for="procedure">Select Stored Procedure</label>
+                                    <ng-select id="procedure" class="custom" style="width: 100%;"
+                                        placeholder="Select Database" [clearable]="true" [virtualScroll]="true"
+                                        [(ngModel)]="selectedProcedure" (change)="onProcedureChange()">
+                                        <ng-option selected="selected" disabled value="">Select Stored Procedure</ng-option>
+                                        <ng-option *ngFor="let item of procedures"
+                                            [value]="item.procedure_name">{{item.procedure_name}}</ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Parameter Input Section -->
+                        <div class="row" *ngIf="selectedProcedureData && selectedProcedureData.parameters && selectedProcedureData.parameters.length > 0">
+                            <div class="col-12">
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-cogs"></i>
+                                            Procedure Parameters
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6" *ngFor="let param of selectedProcedureData.parameters">
+                                                <div class="form-group">
+                                                    <label for="param-{{param.name}}">
+                                                        {{param.name}} 
+                                                        <small class="text-muted">({{param.mode}} {{param.type}})</small>
+                                                    </label>
+                                                    
+                                                    <!-- String/Text inputs -->
+                                                    <input *ngIf="isTextType(param.type)" 
+                                                           type="text" 
+                                                           class="form-control" 
+                                                           id="param-{{param.name}}"
+                                                           [(ngModel)]="parameterValues[param.name]"
+                                                           [placeholder]="param.type">
+                                                    
+                                                    <!-- Number inputs -->
+                                                    <input *ngIf="isNumberType(param.type)" 
+                                                           type="number" 
+                                                           class="form-control" 
+                                                           id="param-{{param.name}}"
+                                                           [(ngModel)]="parameterValues[param.name]">
+                                                    
+                                                    <!-- Date inputs -->
+                                                    <input *ngIf="isDateType(param.type)" 
+                                                           type="date" 
+                                                           class="form-control" 
+                                                           id="param-{{param.name}}"
+                                                           [(ngModel)]="parameterValues[param.name]">
+                                                    
+                                                    <!-- Boolean inputs -->
+                                                    <div class="form-check" *ngIf="isBooleanType(param.type)">
+                                                        <input class="form-check-input" 
+                                                               type="checkbox" 
+                                                               id="param-{{param.name}}"
+                                                               [(ngModel)]="parameterValues[param.name]">
+                                                        <label class="form-check-label" for="param-{{param.name}}">
+                                                            {{param.name}}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Execute Button -->
+                        <div class="row" *ngIf="selectedProcedure">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-success" (click)="executeProcedure()"
+                                    [disabled]="isLoading">
+                                    <i class="fas fa-play" *ngIf="!isLoading"></i>
+                                    <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+                                    Execute Procedure
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div class="alert alert-danger mt-3" *ngIf="errorMessage">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {{errorMessage}}
+                    </div>
+
+                    <!-- Loading Overlay -->
+                    <div class="text-center mt-3" *ngIf="isLoading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="row mt-4" *ngIf="procedureResults.length > 0">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title">
+                        <i class="fas fa-table"></i>
+                        Procedure Results: {{selectedProcedure}}
+                        <span class="badge badge-info ml-2">{{procedureResults.length}} rows</span>
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" horizontalScrollWithArrows>
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="sticky-header">
+                                <tr>
+                                    <th *ngFor="let col of tableColumns" class="text-nowrap">
+                                        {{col.name}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let row of procedureResults">
+                                    <td *ngFor="let col of tableColumns" class="text-nowrap">
+                                        {{row[col.name]}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

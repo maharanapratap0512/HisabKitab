@@ -7,7 +7,7 @@ export class ExcelImportService {
 
   importList: any = [
     { name: 'destribution' },
-    { name: 'bachat', note: 'final bachat list that make through actual counting.' },
+    { name: 'bachat', note: 'final bachat list that make through actual counting. Here ignore Marking on qty 0.' },
     { name: 'pbk', autoUpdate: true },
     { name: 'vehicle', secondHeader: false, autoUpdate: true },
     { name: 'nimitt', autoUpdate: true },
@@ -148,7 +148,7 @@ export class ExcelImportService {
     ],
     bachat: [
       { col_name: 'sn', name: 'sn', alt_names: ["sr no", "sr number", "sr num", "sr_num", "serial no"], not_null: false },
-      { col_name: 'date', name: 'date', alt_names: ["तारीख"], not_null: true },
+      { col_name: 'date', name: 'date', type:'date', alt_names: ["तारीख"], not_null: true },
       { col_name: 'mm', name: 'mm', alt_names: ["mm_name", "mm name", "मि.म.", "मि म", "मिनी मधुबन"], not_null: true, ref_table: 'mm', ref_field: 'mm_id', ref_data: 'mm_hin' },
       { col_name: 'item', name: 'item', alt_names: ["item_name", "item name", "आइटम", "आइटम का नाम"], not_null: true, type:'mix', ref_table: 'item', ref_field: 'item_id', ref_data: 'item_hin' },
       { col_name: 'subitem', name: 'subitem', alt_names: ["subitem_name", "subitem name", "सबआइटम", "सबआइटम का नाम"], not_null: false, ref_table: 'subitem', ref_field: 'subitem_id', ref_data: 'subitem_hin' },

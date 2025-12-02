@@ -1,10 +1,17 @@
 <div class="row" id="dataViewComponent">
     <div class="card-body">
         <div class="row" style="margin-bottom: 10px;">
-            <div class="col-2">
+            <div class="col-2" *ngIf="Type != 'dict'">
                 <button class="btn btn-primary w-100" (click)="add()">
                     <i class="dripicons-plus h4 icon-mx-2"> </i>Add {{Type}}
                 </button>
+            </div>
+            <div class="col-2" *ngIf="Type == 'dict'">
+                <ng-select class="custom" style="width: 100%;" placeholder="Select Dictionary Type" [clearable]="true"
+                    [virtualScroll]="true" (change)="filterDictionary($event)">
+                    <ng-option selected="selected" disabled value="">Select Dictionary Type</ng-option>
+                    <ng-option *ngFor="let item of dictTypes" [value]="item">{{item}}</ng-option>
+                </ng-select>
             </div>
             <div class="col-5">
                 <div class="form-group">
@@ -51,12 +58,12 @@
                         </td>
                         <td>
                             <ng-container *ngIf="Type=='jawak'">
-                                <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
-                                        class="uil uil-pen"></i></button>
+                                <button class="btn btn-sm btn-primary mx-1" type="button"
+                                    (click)="edit(data)"><i class="uil uil-pen"></i></button>
                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                         class="uil-trash"></i></button>
                             </ng-container>
-                            <button *ngIf="!data.lock && (!settings || (settings && settings.edit))"
+                            <button *ngIf="!data.lock && (!settings || (settings && settings.edit)) && Type!='dict'"
                                 class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button>
                             <button *ngIf="!data.lock && (!settings || (settings && settings.edit))"
@@ -113,8 +120,8 @@
                         [isEdit]="isEdit">
                     </app-zone-entry>
                     <!-- district -->
-                    <app-district-entry *ngIf="showModal == 'district'" (response)='editResponse($event)' [getData]="editData"
-                        [isEdit]="isEdit">
+                    <app-district-entry *ngIf="showModal == 'district'" (response)='editResponse($event)'
+                        [getData]="editData" [isEdit]="isEdit">
                     </app-district-entry>
                     <!-- category -->
                     <app-category-entry *ngIf="showModal == 'category'" (response)='editResponse($event)'

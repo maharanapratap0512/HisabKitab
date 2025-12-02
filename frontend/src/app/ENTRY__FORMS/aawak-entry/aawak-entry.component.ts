@@ -117,6 +117,7 @@ export class AawakEntryComponent implements OnInit {
 			// this.departments = result.department ? result.department : [];
 			this.pbks = result.pbk ? result.pbk : [];
 			this.aawak_types = result.aawak_type ? result.aawak_type : [];
+			this.aawak_sources = result.aawak_source ? result.aawak_source : [];
 			this.jawak_types = result.jawak_type ? result.jawak_type : [];
 			this.nimitts = result.nimitt ? result.nimitt : [];
 			this.usage_lists = result.usage_list ? result.usage_list : [];
@@ -427,6 +428,13 @@ export class AawakEntryComponent implements OnInit {
 		$('#aawakEntryComponent > #showModal').modal('hide')
 	}
 
+	clearItemFilters() {
+		this.selDept_id = null;
+		this.cat = null;
+		this.items = this.itemAll;
+		this.categories = this.categoryAll;
+	}
+
 	imagesSelectResponse(ev: any) {
 		if (ev) {
 			this.isLoader = true;
@@ -455,7 +463,7 @@ export class AawakEntryComponent implements OnInit {
 					this.isLoader = false;
 					this.toastr.success('Aawak Added Successfully.');
 					awkform.resetForm({
-						parchi_no: this.awkfg.parchi_no,
+						pkt_num: this.awkfg.pkt_num,
 						pbk_id: this.awkfg.pbk_id,
 						date: this.awkfg.date,
 						mm_id: this.awkfg.mm_id,

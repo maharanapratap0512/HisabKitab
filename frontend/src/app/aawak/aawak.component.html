@@ -106,7 +106,7 @@
             </div>
 
             <!-- fliter collapse -->
-            <div class="collapse" id="collapseExample">
+            <div class="collapse" id="collapseExample">  
                <div class="card card-body">
                   <div class="row">
                      <div class="card-body">
@@ -296,14 +296,22 @@
 
                               <div class="col-md-2 mb-3">
                                  <div class="form-group">
-                                    <label class="form-label">Nimitt</label>
+                                    <label class="form-label">Nimitt & Zone</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Nimitt"
-                                       [clearable]="false" [virtualScroll]="true" [multiple]="true"
+                                       [clearable]="true" [virtualScroll]="true" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.nimitt_id" name="nimitt_id">
                                        <ng-option selected="selected" disabled value="">Nimitt
                                        </ng-option>
                                        <ng-option *ngFor="let item of nimitts" [value]="item._id">
                                           {{item.nimitt_hin}} : {{item.nimitt_eng}} ({{item.state_hin}})
+                                       </ng-option>
+                                    </ng-select>
+                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Zone"
+                                       [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.zone_id"
+                                       [multiple]="true" [closeOnSelect]="false" name="zone_id">
+                                       <ng-option selected="selected" disabled value="">Select Zone</ng-option>
+                                       <ng-option *ngFor="let item of zones" [value]="item._id">
+                                          {{item.zone_hin}} : {{item.zone_eng}}
                                        </ng-option>
                                     </ng-select>
                                  </div>
@@ -324,6 +332,7 @@
                                  date:null,
                                  pbk_id: [],
                                  mm_id: [],
+                                 zone_id: [],
                                  aj_mm_id: [],
                                  aawak_type_id: [],
                                  jawak_type_id: [],
@@ -344,12 +353,13 @@
 
             <div class="row">
 
-               <div class="card-body" style="overflow: auto;">
+               <div class="card-body" style="overflow: auto; flex-direction: column;">
                   <div class="row">
                      <div class="col-4 pt-2">
                         <span class="badge year-box"
                            [ngClass]="{'badge-outline-danger':!isDeleting, 'bg-danger': isDeleting}"
-                           (click)="deleteMultiple()" title="Click for multiple delete selection & click same again to perform delete.">Delete</span>
+                           (click)="deleteMultiple()"
+                           title="Click for multiple delete selection & click same again to perform delete.">Delete</span>
                         <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
                            (click)="yearClick(null)">All</span>
                         <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearClick(y)"
@@ -363,187 +373,194 @@
                         </pagination-controls>
                      </div>
                   </div>
-                  <table id="datatable-buttons" class="table table-hover dt-responsive" #TABLE *ngIf="aawakData.length">
-                     <thead>
-                        <tr>
-                           <th style="width: 25px;" *ngIf="isDeleting">
-                              <div class="form-check form-checkbox-danger mb-2">
-                                 <input type="checkbox" class="form-check-input" id="customCheckcolor5" (change)="deleteSelectAll()">
-                                 <!-- <label class="form-check-label" for="customCheckcolor5">Danger Checkbox</label> -->
-                              </div>
-                           </th>
-                           <th style="width: 50px;">
-                              No.
-                              <input type="checkbox" id="hl_all" data-switch="none"
-                                 (change)="hlFilter($event.target)" />
-                              <label for="hl_all" class="chk-sm"></label>
-                           </th>
-                           <th style="width: 110px;">
-                              Manage
-                           </th>
-                           <th style="width: 70px;" *ngIf="settings.aawak.pkt_num">Pkt No.</th>
-                           <th style="width: 101px;">Date</th>
-                           <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
-                           <th style="width: 150px;">Aawak Mm</th>
-                           <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
-                           <th style="width: 150px;">Aawak Type</th>
-                           <th style="width: 150px;">Category</th>
-                           <th style="width: 180px;">Item - Subitem</th>
-                           <th style="width: 150px;" *ngIf="settings.aawak.condition_id || settings.aawak.product_id">
-                              Product</th>
-                           <th style="width: 100px;" *ngIf="settings.aawak.company_name">Company</th>
-                           <th style="width: 100px;">Qty</th>
-                           <th style="width: 100px;" *ngIf="settings.aawak.actual_amt">Actual Amt</th>
-                           <th style="width: 120px;">Usage List</th>
-                           <th style="width: 100px;" *ngIf="settings.aawak.nimitt_id">Nimitt</th>
-                           <th style="width: 200px;" *ngIf="settings.aawak.item_detail">Item Detail</th>
-                           <th style="width: 100px;" *ngIf="settings.aawak.isbill">IsBill</th>
-                           <th style="width: 100px;" *ngIf="settings.aawak.document">Images</th>
-                           <th style="width: 200px;" *ngIf="settings.aawak.description">Description</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        <ng-container
-                           *ngFor="let data of aawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
-                           <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
-                              [ngClass]="{'auto':data.is_auto_pd, 'xl':data.is_xl, 'hl':data.hl}" aria-expanded="true"
-                              [attr.aria-controls]="'collapseExample-'+i" class="main-row">
-                              <td *ngIf="isDeleting">
+                  <div class="table-container" appHorizontalScrollWithArrows>
+                     <table id="datatable-buttons" class="table table-hover dt-responsive table-sticky-header" #TABLE
+                        *ngIf="aawakData.length">
+                        <thead>
+                           <tr>
+                              <th style="width: 25px;" *ngIf="isDeleting">
                                  <div class="form-check form-checkbox-danger mb-2">
-                                    <input type="checkbox" [(ngModel)]="data.delete" class="form-check-input"
-                                       (change)="deleteSelection(i, data._id)">
-                                    <!-- <label class="form-check-label" for="customCheckcolor5">Danger Checkbox</label> -->
+                                    <input type="checkbox" class="form-check-input" id="customCheckcolor5"
+                                       (change)="deleteSelectAll()">
                                  </div>
-                              </td>
-                              <td>
-                                 {{itemsPerPage * (page-1) + i+1}}
-                                 <input type="checkbox" [(ngModel)]="data.hl" id="{{'hl_'+data._id}}" data-switch="none"
-                                    (change)="hlChanged(data)" />
-                                 <label for="{{'hl_'+data._id}}" class="chk-sm"></label>
-                              </td>
-                              <td>
-                                 <div class="d-flex justify-content-between mb-1">
-                                    <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
-                                          class="uil uil-pen"></i></button><br>
-                                    <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"
-                                       *ngIf="!data.is_auto_pd"><i class="uil-trash"></i></button>
-                                 </div>
-                                 <div class="d-flex justify-content-between mb-1">
-                                    <!-- <button class="btn btn-sm btn-warning w-100" type="button"
-                                    (click)="jawak(data)">Jawak</button> -->
-                                    <button *ngIf="data.remaining_qty > 0" class="btn btn-sm btn-warning"
-                                       (click)="addJawak(data)">
-                                       <i class="mdi mdi-plus noti-icon"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-warning" (click)="showJawak(data._id)">
-                                       <i class="dripicons-view-list noti-icon"></i>
-                                    </button>
-                                 </div>
-                              </td>
-
-                              <td *ngIf="settings.aawak.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
-                              <td>{{data.date | date:'dd-MM-yyyy'}}</td>
-                              <td *ngIf="auth.webUser.dept_id != 2">
-                                 {{data.mm_hin}} - {{data.mm_code}}<br />
-                                 {{data.mm_eng}}
-                              </td>
-                              <td>
-                                 {{data.aawak_mm_id ? data.aawak_mm_hin+' - '+data.aawak_mm_code:'-'}}<br />
-                                 {{data.aawak_mm_eng?data.aawak_mm_eng:''}}
-                              </td>
-                              <td *ngIf="settings.aawak.pbk_id">
-                                 <span *ngIf="!data.pbk_id">-</span>
-                                 {{data.roll_no ? data.roll_no : '___'}} - {{data.pbk_hin}} <br />
-                                 {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
-                              </td>
-                              <td>{{data.aawak_type_id?data.aawak_type_hin:''}} <br />
-                                 {{data.aawak_type_eng ? data.aawak_type_eng:''}}</td>
-                              <td>
-                                 {{data.categories_hin}} <br />
-                                 {{data.categories_eng}}
-                              </td>
-                              <td>
-                                 {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
-                                 {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
-                              </td>
-                              <td *ngIf="settings.aawak.condition_id || settings.aawak.product_id">
-                                 {{data.product_id ? (data.product_code ? data.product_code : '') + " : " + (data.sr_num
-                                 ? data.sr_num : '') : ''}} <br />
-                                 {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
-                              </td>
-                              <td *ngIf="settings.aawak.company_name">
-                                 {{data.company_name ? data.company_name : ''}}
-                              </td>
-                              <td>
-                                 {{data.qty}} {{data.unit_short}} <br />
-                                 <span style="font-weight:bold; color: red;" *ngIf="data.remaining_qty != 0">
-                                    बचत: {{data.remaining_qty}}
-                                 </span>
-                              </td>
-                              <td>@ {{data.rate?data.rate:'-'}} <br>
-                                 = {{data.actual_amt?data.actual_amt:'-'}}</td>
-                              <td>{{data.usage_list_id ? data.uisage_list_hin : ''}}</td>
-                              <td *ngIf="settings.aawak.nimitt_id">
-                                 {{data.nimitt_id?data.nimitt_hin:'-'}}<br />
-                                 {{data.nimitt_id? '(' + data.nimitt_state_hin + ')': ''}}
-                              </td>
-                              <td *ngIf="settings.aawak.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
-                              <td *ngIf="settings.aawak.isbill">{{data.isbill ? 'हाँ' : 'नहीं'}} </td>
-                              <td *ngIf="settings.aawak.document">
-                                 <img *ngIf="data.document && data.document.images" (click)="showImages(data)"
-                                    [src]="baseurl + data.document.images[0]" height="50px"
-                                    style="cursor: pointer; border-radius: 10px;">
-                              </td>
-                              <td *ngIf="settings.aawak.description">{{data.description?data.description:'-'}}</td>
+                              </th>
+                              <th style="width: 50px;">
+                                 No.
+                                 <input type="checkbox" id="hl_all" data-switch="none"
+                                    (change)="hlFilter($event.target)" />
+                                 <label for="hl_all" class="chk-sm"></label>
+                              </th>
+                              <th style="width: 110px;">
+                                 Manage
+                              </th>
+                              <th style="width: 70px;" *ngIf="settings.aawak.pkt_num">Pkt No.</th>
+                              <th style="width: 101px;">Date</th>
+                              <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
+                              <th style="width: 150px;">Aawak Mm</th>
+                              <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
+                              <th style="width: 180px;">Aawak Type / Source</th>
+                              <th style="width: 150px;">Category</th>
+                              <th style="width: 180px;">Item - Subitem</th>
+                              <th style="width: 150px;"
+                                 *ngIf="settings.aawak.condition_id || settings.aawak.product_id">
+                                 Product</th>
+                              <th style="width: 100px;" *ngIf="settings.aawak.company_name">Company</th>
+                              <th style="width: 100px;">Qty</th>
+                              <th style="width: 100px;" *ngIf="settings.aawak.actual_amt">Actual Amt</th>
+                              <th style="width: 120px;" *ngIf="settings.aawak.usage_list_id">Usage List</th>
+                              <th style="width: 100px;" *ngIf="settings.aawak.nimitt_id">Nimitt</th>
+                              <th style="width: 200px;" *ngIf="settings.aawak.item_detail">Item Detail</th>
+                              <th style="width: 100px;" *ngIf="settings.aawak.isbill">IsBill</th>
+                              <th style="width: 100px;" *ngIf="settings.aawak.document">Images</th>
+                              <th style="width: 200px;" *ngIf="settings.aawak.description">Description</th>
                            </tr>
-                           <ng-container *ngIf="data.jawak_detail.length > 0">
-                              <tr class="collapse show ribbon-box">
-                                 <td style="border: none;"></td>
-                                 <td colspan="10" class="sub-row">
-                                    <table class="card-body" style="width: 99.7%;table-layout: fixed;">
-                                       <tr>
-                                          <th>No.</th>
-                                          <th>Date</th>
-                                          <th>कहा भेजा</th>
-                                          <th>किसको दिया</th>
-                                          <th>जावक प्रकार</th>
-                                          <th>जावक केटेगरी</th>
-                                          <th>परिमाण</th>
-                                          <th style="width:0px;">
-                                             <div class="ribbon ribbon-secondary text-light float-end"> Destribution
-                                             </div>
-                                          </th>
-                                       </tr>
-                                       <tr *ngFor="let jwk of data.jawak_detail; let j = index;">
-                                          <td style="width: 80px;">
-                                             <i class="uil-corner-down-right"></i>
-                                             <span class="mx-1">{{j+1}}</span>
-                                             <i class="uil uil-edit-alt mx-1 text-primary"
-                                                (click)="editJawak(i, j)"></i>
-                                             <i class="uil uil-trash text-danger"
-                                                (click)="deleteOneJawak(i, j, jwk._id)"></i>
-                                          </td>
-                                          <td>{{jwk.date | date:'dd-MM-yyyy'}}</td>
-                                          <td>{{jwk.jawak_mm_hin}} {{jwk.jawak_mm_code ? "("+jwk.jawak_mm_code+")" :
-                                             ''}}</td>
-                                          <td>
-                                             <span *ngIf="jwk.pbk_id">
-                                                {{jwk.roll_no ? jwk.roll_no : '___'}} - {{jwk.pbk_hin}} <br />
-                                             </span>
-                                          </td>
-                                          <td>{{jwk.jawak_type_hin}}{{jwk.jawak_type_eng ? " : "+jwk.jawak_type_eng :
-                                             ''}}</td>
-                                          <td>{{jwk.category_hin}}{{jwk.category_eng ? " : "+jwk.category_eng :
-                                             ''}}</td>
-                                          <td>{{jwk.qty}} {{jwk.unit_short}}</td>
-                                       </tr>
-                                    </table>
+                        </thead>
+                        <tbody>
+                           <ng-container
+                              *ngFor="let data of aawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
+                              <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
+                                 [ngClass]="{'auto':data.is_auto_pd, 'xl':data.is_xl, 'hl':data.hl}"
+                                 aria-expanded="true" [attr.aria-controls]="'collapseExample-'+i" class="main-row">
+                                 <td *ngIf="isDeleting">
+                                    <div class="form-check form-checkbox-danger mb-2">
+                                       <input type="checkbox" [(ngModel)]="data.delete" class="form-check-input"
+                                          (change)="deleteSelection(i, data._id)">
+                                       <!-- <label class="form-check-label" for="customCheckcolor5">Danger Checkbox</label> -->
+                                    </div>
                                  </td>
+                                 <td>
+                                    {{itemsPerPage * (page-1) + i+1}}
+                                    <input type="checkbox" [(ngModel)]="data.hl" id="{{'hl_'+data._id}}"
+                                       data-switch="none" (change)="hlChanged(data)" />
+                                    <label for="{{'hl_'+data._id}}" class="chk-sm"></label>
+                                 </td>
+                                 <td>
+                                    <div class="d-flex justify-content-between mb-1">
+                                       <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
+                                             class="uil uil-pen"></i></button><br>
+                                       <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"
+                                          *ngIf="!data.is_auto_pd"><i class="uil-trash"></i></button>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                       <!-- <button class="btn btn-sm btn-warning w-100" type="button"
+                                       (click)="jawak(data)">Jawak</button> -->
+                                       <button *ngIf="data.remaining_qty > 0" class="btn btn-sm btn-warning"
+                                          (click)="addJawak(data)">
+                                          <i class="mdi mdi-plus noti-icon"></i>
+                                       </button>
+                                       <button class="btn btn-sm btn-outline-warning" (click)="showJawak(data._id)">
+                                          <i class="dripicons-view-list noti-icon"></i>
+                                       </button>
+                                    </div>
+                                 </td>
+
+                                 <td *ngIf="settings.aawak.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
+                                 <td>{{data.date | date:'dd-MM-yyyy'}}</td>
+                                 <td *ngIf="auth.webUser.dept_id != 2">
+                                    {{data.mm_hin}} - {{data.mm_code}}<br />
+                                    {{data.mm_eng}}
+                                 </td>
+                                 <td>
+                                    {{data.aawak_mm_id ? data.aawak_mm_hin+' - '+data.aawak_mm_code:'-'}}<br />
+                                    {{data.aawak_mm_eng?data.aawak_mm_eng:''}}
+                                 </td>
+                                 <td *ngIf="settings.aawak.pbk_id">
+                                    <span *ngIf="!data.pbk_id">-</span>
+                                    {{data.roll_no ? data.roll_no : '___'}} - {{data.pbk_hin}} <br />
+                                    {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
+                                 </td>
+                                 <td>{{data.aawak_type_id?data.aawak_type_hin:''}} /
+                                    {{data.aawak_source_id?data.aawak_source_hin:''}} <br />
+                                    {{data.aawak_type_eng ? data.aawak_type_eng:''}} / {{data.aawak_source_eng ?
+                                    data.aawak_source_eng:''}} </td>
+                                 <td>
+                                    {{data.categories_hin}} <br />
+                                    {{data.categories_eng}}
+                                 </td>
+                                 <td>
+                                    {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
+                                    {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
+                                 </td>
+                                 <td *ngIf="settings.aawak.condition_id || settings.aawak.product_id">
+                                    {{data.product_id ? (data.product_code ? data.product_code : '') + " : " +
+                                    (data.sr_num
+                                    ? data.sr_num : '') : ''}} <br />
+                                    {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
+                                 </td>
+                                 <td *ngIf="settings.aawak.company_name">
+                                    {{data.company_name ? data.company_name : ''}}
+                                 </td>
+                                 <td>
+                                    {{data.qty}} {{data.unit_short}} <br />
+                                    <span style="font-weight:bold; color: red;" *ngIf="data.remaining_qty != 0">
+                                       बचत: {{data.remaining_qty}}
+                                    </span>
+                                 </td>
+                                 <td *ngIf="settings.aawak.actual_amt">@ {{data.rate?data.rate:'-'}} <br>
+                                    = {{data.actual_amt?data.actual_amt:'-'}}</td>
+                                 <td *ngIf="settings.aawak.usage_list_id">{{data.usage_list_id ? data.usage_list_hin : ''}}</td>
+                                 <td *ngIf="settings.aawak.nimitt_id">
+                                    {{data.nimitt_id?data.nimitt_hin:'-'}}<br />
+                                    {{data.nimitt_id? '(' + data.nimitt_state_hin + ')': ''}}
+                                 </td>
+                                 <td *ngIf="settings.aawak.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
+                                 <td *ngIf="settings.aawak.isbill">{{data.isbill ? 'हाँ' : 'नहीं'}} </td>
+                                 <td *ngIf="settings.aawak.document">
+                                    <img *ngIf="data.document && data.document.images" (click)="showImages(data)"
+                                       [src]="baseurl + data.document.images[0]" height="50px"
+                                       style="cursor: pointer; border-radius: 10px;">
+                                 </td>
+                                 <td *ngIf="settings.aawak.description">{{data.description?data.description:'-'}}</td>
                               </tr>
+                              <ng-container *ngIf="data.jawak_detail.length > 0">
+                                 <tr class="collapse show ribbon-box">
+                                    <td style="border: none;"></td>
+                                    <td colspan="10" class="sub-row">
+                                       <table class="card-body" style="width: 99.7%;table-layout: fixed;">
+                                          <tr>
+                                             <th>No.</th>
+                                             <th>Date</th>
+                                             <th>कहा भेजा</th>
+                                             <th>किसको दिया</th>
+                                             <th>जावक प्रकार</th>
+                                             <th>जावक केटेगरी</th>
+                                             <th>परिमाण</th>
+                                             <th style="width:0px;">
+                                                <div class="ribbon ribbon-secondary text-light float-end"> Destribution
+                                                </div>
+                                             </th>
+                                          </tr>
+                                          <tr *ngFor="let jwk of data.jawak_detail; let j = index;">
+                                             <td style="width: 80px;">
+                                                <i class="uil-corner-down-right"></i>
+                                                <span class="mx-1">{{j+1}}</span>
+                                                <i class="uil uil-edit-alt mx-1 text-primary"
+                                                   (click)="editJawak(i, j)"></i>
+                                                <i class="uil uil-trash text-danger"
+                                                   (click)="deleteOneJawak(i, j, jwk._id)"></i>
+                                             </td>
+                                             <td>{{jwk.date | date:'dd-MM-yyyy'}}</td>
+                                             <td>{{jwk.jawak_mm_hin}} {{jwk.jawak_mm_code ? "("+jwk.jawak_mm_code+")" :
+                                                ''}}</td>
+                                             <td>
+                                                <span *ngIf="jwk.pbk_id">
+                                                   {{jwk.roll_no ? jwk.roll_no : '___'}} - {{jwk.pbk_hin}} <br />
+                                                </span>
+                                             </td>
+                                             <td>{{jwk.jawak_type_hin}}{{jwk.jawak_type_eng ? " : "+jwk.jawak_type_eng :
+                                                ''}}</td>
+                                             <td>{{jwk.category_hin}}{{jwk.category_eng ? " : "+jwk.category_eng :
+                                                ''}}</td>
+                                             <td>{{jwk.qty}} {{jwk.unit_short}}</td>
+                                          </tr>
+                                       </table>
+                                    </td>
+                                 </tr>
+                              </ng-container>
                            </ng-container>
-                        </ng-container>
-                     </tbody>
-                  </table>
+                        </tbody>
+                     </table>
+                  </div>
                </div>
                <pagination-controls class="pagi text-center" (pageChange)="getaawakData(page = $event)"
                   [autoHide]="true" *ngIf="aawakData.length">

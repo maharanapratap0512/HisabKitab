@@ -54,7 +54,7 @@ export class DashboardComponent implements OnInit {
   mmAwk: any;
   settings: any = {};
   filterObj: any = {
-    mm_id: null,
+    mm_id: [],
     items: [],
     category_id: null
   }
@@ -180,11 +180,11 @@ export class DashboardComponent implements OnInit {
 
   filterBachat() {
 
-    if (this.filterObj.mm_id && this.filterObj.items.length > 0) {
-      this.bachatData = this.bachatDataAll.filter((b: { mm_id: any, item_id: any; }) => b.mm_id == this.filterObj.mm_id && this.filterObj.items.includes(b.item_id));
+    if (this.filterObj.mm_id.length > 0 && this.filterObj.items.length > 0) {
+      this.bachatData = this.bachatDataAll.filter((b: { mm_id: any, item_id: any; }) => this.filterObj.mm_id.includes(b.mm_id) && this.filterObj.items.includes(b.item_id));
     }
-    else if (this.filterObj.mm_id) {
-      this.bachatData = this.bachatDataAll.filter((b: { mm_id: any; }) => b.mm_id == this.filterObj.mm_id);
+    else if (this.filterObj.mm_id.length > 0) {
+      this.bachatData = this.bachatDataAll.filter((b: { mm_id: any; }) => this.filterObj.mm_id.includes(b.mm_id));
     }
     else if (this.filterObj.items.length > 0) {
       this.bachatData = this.bachatDataAll.filter((b: { item_id: any; }) => this.filterObj.items.includes(b.item_id));

@@ -30,6 +30,8 @@ export class ItemComponent implements OnInit {
   term: any;
   showModal: string = '';
   editData: any = {};
+  delType: any = null;
+  delID: any = null;
   itemDataAll: any = [];
   itemData: any = [];
   categories: any = [];
@@ -386,7 +388,21 @@ export class ItemComponent implements OnInit {
     }
   }
 
-  delete(i: any, id: any) {
+  deleteItem(id: any) {
+    this.delID = id;
+    this.delType = 'item';
+    this.openModal('delete_item');
+  }
+
+  deleteResponse(ev: any) {
+    // this.toastr.success("deleted Successfully.");
+    if (ev) {
+      this.closeModal();
+      this.getItemData(this.conditionObj.pageNo || 1)
+    }
+  }
+
+  deleteOld(i: any, id: any) {
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",

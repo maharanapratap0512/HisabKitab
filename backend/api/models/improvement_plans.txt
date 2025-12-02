@@ -1,0 +1,4 @@
+1. Use upsert for bachat calculation.
+    for this we need to replace optional field null to 0. for accurate unique matching.
+
+2. 

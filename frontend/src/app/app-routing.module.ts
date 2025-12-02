@@ -35,6 +35,9 @@ import { ReportKhAjsaarComponent } from './reports/report-kh-ajsaar/report-kh-aj
 import { DataViewComponent } from './views/data-view/data-view.component';
 import { AawakNewComponent } from './aawak-new/aawak-new.component';
 import { ReportAjCheckComponent } from './reports/report-aj-check/report-aj-check.component';
+import { MysqlComponent } from './MySQL/mysql.component';
+import { HmpComponent } from './hmp/hmp.component';
+import { PbkClosingComponent } from './pbk-closing/pbk-closing.component';
 
 const routes: Routes = [
    {
@@ -55,6 +58,8 @@ const routes: Routes = [
          { path: "jawak", component: JawakComponent },
          { path: "bachat", component: BachatComponent },
          { path: "bachat_new", component: BachatNewComponent },
+         { path: "hmp", component: HmpComponent },
+         { path: "pbk_closing", component: PbkClosingComponent },
          { path: "pbk", component: PbkComponent },
          { path: "mm", component: MmComponent },
          { path: "category", component: CategoryComponent },
@@ -79,6 +84,7 @@ const routes: Routes = [
 
          { path: "files", component: FilesViewComponent },
          { path: "import_export", component: ImportExportComponent },
+         { path: "mysql", component: MysqlComponent },
       ]
    }
 ];

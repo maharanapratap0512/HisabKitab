@@ -111,6 +111,7 @@ export class AuthService {
       { colName: 'description', title: 'Description' },
       { colName: 'ref_aawak_select', title: 'Referece Aawak Search' },
       { colName: 'auto_awk', title: 'Automatic Aawak' },
+      { colName: 'auto_reawk', title: 'Automatic Re-aawak' },
 
     ],
     repairing: [

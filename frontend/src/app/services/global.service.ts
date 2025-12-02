@@ -17,6 +17,7 @@ export class GlobalService {
   Config: any = {};
   importPending: any = false;
   exceptionDept: any = [1, 5];
+  menuCriteria: any = {};
   // getList$ = new Subject();
   date = new Date();
   dateString = this.date.getFullYear() + '-' + (this.date.getMonth() + 1).toString().padStart(2, "0") + '-' + this.date.getDate().toString().padStart(2, "0")
@@ -132,6 +133,42 @@ export class GlobalService {
     } else {
       return []
     }
+  }
+
+  cleanString(str: string): string {
+    return (str || "")
+      .trim()
+      .normalize("NFC")          // normalize Unicode
+      .replace(/\u200B/g, "")    // remove zero-width space
+      .replace(/\u00A0/g, " ")   // remove non-breaking space
+      .replace(/\s+/g, " ")      // collapse multiple spaces
+      .toLowerCase();            // case-insensitive for English
+  };
+
+  stringCompare(a: string, b: string): boolean {
+    return this.cleanString(a) === this.cleanString(b);
+  }
+
+  cleanValue(value: any): any {
+    // Handle null/undefined first
+    if (value === null || value === undefined) {
+      return null;
+    }
+
+    // If it's a string, clean it
+    if (typeof value === "string") {
+      const cleaned = this.cleanString(value);
+
+      // Return null for empty or '-'
+      if (cleaned === '' || cleaned === '-') {
+        return null;
+      }
+
+      return cleaned;
+    }
+
+    // For numbers, dates, booleans - return as is
+    return value;
   }
 
 }

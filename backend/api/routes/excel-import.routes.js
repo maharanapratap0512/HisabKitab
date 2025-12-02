@@ -3,6 +3,7 @@ const fs = require('fs');
 const DBContex = require('../models/DBContex');
 const ExcelFunctions = require('../models/excelFunctions');
 const { product, subitem } = require('../models/query');
+const Fn = require('../models/functions');
 const DB = new DBContex();
 
 
@@ -335,42 +336,94 @@ router.post('/match_bachat/:dept_id', async (req, res, next) => {
         try {
             let placeholders = [], paramsdata = [];
             req.body.forEach((data, index) => {
-                placeholders.push(`(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-                paramsdata.push(data.mm_id, data.item_id, data.subitem_id, data.condition_id, data.unit_id, data.qty, data.company_name, data.actual_amt, data.item_detail, data.description, data.nimitt_id);
+                placeholders.push(`(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+                paramsdata.push(data.date, data.sn, req.params.dept_id, data.mm_id, data.item_id, data.subitem_id ? data.subitem_id : 0, data.condition_id ? data.condition_id : 0, data.unit_id, data.qty, data.company_name, data.actual_amt, data.item_detail, data.description, data.nimitt_id);
             });
-            let sql = `WITH excel_data(mm_id, item_id, subitem_id, condition_id, unit_id, qty, company_name, actual_amt, item_detail, description, nimitt_id) AS (
-                VALUES ${placeholders.join(', ')} ),
-                bcht(_id, mm_id, item_id, subitem_id, condition_id, unit_id, bachat) AS (
-                    select _id, mm_id, item_id, subitem_id, condition_id, unit_id, SUM(bachat) as t_bachat from bachat_new bn
+
+            // DB.db.prepare('delete from bachat_import').run();
+            DB.db.prepare('drop table if exists bachat_import; ').run();
+
+            let sql1 = `create table if not exists bachat_import
+                (
+                    _id integer primary key,
+                    date date, 
+                    sn varchar(50), 
+                    dept_id integer,
+                    mm_id integer, 
+                    item_id integer, 
+                    subitem_id integer default 0, 
+                    condition_id integer default 0, 
+                    unit_id integer, 
+                    qty decimal(10, 2), 
+                    company_name varchar(100), 
+                    actual_amt decimal(10,2), 
+                    item_detail text, 
+                    description text, 
+                    nimitt_id integer,
+                    usage_list_id integer,
+                    UNIQUE(dept_id, mm_id, item_id, unit_id, subitem_id, condition_id)
+                )`;
+            await DB.db.prepare(sql1).run();
+            sql1 = `insert into bachat_import(date, sn, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, qty, company_name, actual_amt, item_detail, description, nimitt_id) 
+                VALUES ${placeholders.join(', ')} ON CONFLICT(dept_id, mm_id, item_id, subitem_id, condition_id, unit_id) 
+                DO UPDATE SET qty = qty + excluded.qty;`
+            await DB.db.prepare(sql1).run(paramsdata);
+
+
+            let sql = `WITH
+                bcht(_id, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, bachat) AS (
+                    select _id, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, SUM(bachat) as t_bachat from bachat_new bn
                     where bn.dept_id = ? group by mm_id, item_id, subitem_id, condition_id, unit_id
                 ) 
-                select cd._id, cd.mm_id, cd.item_id, cd.subitem_id, cd.condition_id, cd.unit_id, cd.qty, cd.bachat, cd.status, cd.qty - cd.bachat as difference,
-                cd.company_name, cd.actual_amt, cd.item_detail, cd.description, cd.nimitt_id,
+                select bcht._id, bi.date, bi.sn, bi.dept_id, bi.mm_id, bi.item_id, bi.subitem_id, bi.condition_id, bi.unit_id, IFNULL(bi.qty, 0) as qty, IFNULL(bcht.bachat, 0) as bachat, CASE WHEN bcht._id IS NOT NULL THEN 'MATCH' ELSE 'EXCEL' END AS status, IFNULL(bi.qty, 0) - IFNULL(bcht.bachat, 0) as difference,
+                bi.company_name, bi.actual_amt, bi.item_detail, bi.description, bi.nimitt_id,
                 mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
                 it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
                 sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
                 slc.list_name_hin as condition_hin, slc.list_name_eng as condition_eng,
-                unit.unit_short, unit.unit_full from 
-                    (SELECT bcht._id, ed.mm_id, ed.item_id, ed.subitem_id, ed.condition_id, ed.unit_id, IFNULL(ed.qty, 0) as qty, IFNULL(bcht.bachat, 0) as bachat, CASE WHEN bcht._id IS NOT NULL THEN 'MATCH' ELSE 'EXCEL' END AS status, ed.company_name, ed.actual_amt, ed.item_detail, ed.description, ed.nimitt_id from excel_data ed
-                    LEFT JOIN bcht on bcht.mm_id = ed.mm_id AND bcht.item_id = ed.item_id AND IFNULL(bcht.subitem_id, 0) = IFNULL(ed.subitem_id, 0) AND IFNULL(bcht.condition_id, 0) = IFNULL(ed.condition_id, 0) AND bcht.unit_id = ed.unit_id
-
-                        UNION ALL
-
-                    select bcht._id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id, 0 AS qty, IFNULL(bcht.bachat, 0) as bachat, 'DB' AS status, null, null, null, null, null from bcht
-                    WHERE NOT EXISTS ( SELECT 1 FROM excel_data ed 
-                        WHERE ed.mm_id = bcht.mm_id AND ed.item_id = bcht.item_id AND IFNULL(ed.subitem_id, 0) = IFNULL(bcht.subitem_id, 0) AND IFNULL(ed.condition_id, 0) = IFNULL(bcht.condition_id, 0) AND ed.unit_id = bcht.unit_id)) as cd
-                LEFT JOIN mm on mm._id = cd.mm_id
+                dept.dept_hin, dept.dept_eng, dept.dept_code,
+                unit.unit_short, unit.unit_full from bachat_import bi
+                LEFT JOIN bcht on bcht.mm_id = bi.mm_id AND bcht.item_id = bi.item_id AND IFNULL(bcht.subitem_id, 0) = IFNULL(bi.subitem_id, 0) AND IFNULL(bcht.condition_id, 0) = IFNULL(bi.condition_id, 0) AND bcht.unit_id = bi.unit_id
+                LEFT JOIN mm on mm._id = bi.mm_id
                 LEFT JOIN state st on st._id = mm.state_id
-                LEFT JOIN item it on it._id = cd.item_id
-                LEFT JOIN subitem sit on sit._id = cd.subitem_id
+                LEFT JOIN item it on it._id = bi.item_id
+                LEFT JOIN subitem sit on sit._id = bi.subitem_id
                 LEFT JOIN subitem_list sitl on sitl._id = sit.subitem_list_id
-                LEFT JOIN support_list slc on slc._id = cd.condition_id
-                LEFT JOIN unit on unit._id = cd.unit_id order by cd.status DESC`;
-            paramsdata.push(req.params.dept_id)
-            let stmt = DB.db.prepare(sql).all(paramsdata);
+                LEFT JOIN support_list slc on slc._id = bi.condition_id
+                LEFT JOIN department dept on dept._id = bi.dept_id
+                LEFT JOIN unit on unit._id = bi.unit_id order by status DESC`;
+
+            let stmt = DB.db.prepare(sql).all(req.params.dept_id);
+
+
+            let sqlDB = `WITH
+                bcht(_id, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, bachat) AS (
+                    select _id, dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, SUM(bachat) as t_bachat from bachat_new bn
+                    where bn.dept_id = ? group by mm_id, item_id, subitem_id, condition_id, unit_id HAVING t_bachat <> 0
+                ) 
+                select bcht._id, bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id, 0 AS qty, IFNULL(bcht.bachat, 0) as bachat, 'DB' AS status, 0 - IFNULL(bcht.bachat, 0) as difference, 
+                mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
+                it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
+                sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+                slc.list_name_hin as condition_hin, slc.list_name_eng as condition_eng,
+                dept.dept_hin, dept.dept_eng, dept.dept_code,
+                unit.unit_short, unit.unit_full from bcht 
+                LEFT JOIN mm on mm._id = bcht.mm_id
+                LEFT JOIN state st on st._id = mm.state_id
+                LEFT JOIN item it on it._id = bcht.item_id
+                LEFT JOIN subitem sit on sit._id = bcht.subitem_id
+                LEFT JOIN subitem_list sitl on sitl._id = sit.subitem_list_id
+                LEFT JOIN support_list slc on slc._id = bcht.condition_id
+                LEFT JOIN department dept on dept._id = bcht.dept_id
+                LEFT JOIN unit on unit._id = bcht.unit_id
+                WHERE NOT EXISTS ( SELECT 1 FROM bachat_import bi 
+                        WHERE bi.mm_id = bcht.mm_id AND bi.item_id = bcht.item_id AND IFNULL(bi.subitem_id, 0) = IFNULL(bcht.subitem_id, 0) AND IFNULL(bi.condition_id, 0) = IFNULL(bcht.condition_id, 0) AND bi.unit_id = bcht.unit_id)`;
+            let stmtDB = DB.db.prepare(sqlDB).all(req.params.dept_id);
+
             res.json({
                 success: true,
-                result: stmt
+                resultED: stmt,
+                resultDB: stmtDB,
             })
         }
         catch (err) {
@@ -380,6 +433,78 @@ router.post('/match_bachat/:dept_id', async (req, res, next) => {
         return next(new Error("no data found, please solve all corrections first."))
     }
 });
+
+
+router.put('/final_bachat/:dept_id', async (req, res, next) => {
+    if (req.body) {
+        try {
+            await Fn.begin();
+            let obj, op, result;
+            if (req.body.difference > 0) {
+                // do aawak entry
+                op = 'aawak';
+                obj = DB.tbInterface.getAawakFromBachatImport(req.body);
+                await Fn.insertAJ(obj, 'aawak').then(async (rs) => {
+                    await DB.getList('aawak', { full: true, conditionString: ` aawak._id = ${rs}` }).then(async (data) => {
+                        for (let i in data.data) {
+                            data.data[i].document = (data.data[i].document ? JSON.parse(data.data[i].document) : {});
+                            data.data[i].isbill = data.data[i].isbill ? true : false;
+                        }
+                        result = data.data
+                    });
+                });
+
+            } else if (req.body.difference < 0) {
+                // do jawak entry
+                op = 'jawak'
+                obj = DB.tbInterface.getJawakFromBachatImport(req.body);
+                let jwkQty = obj.qty;
+                let newIds = [], conditionString = `remaining_qty <> 0 AND mm_id = ${obj.mm_id} AND item_id = ${obj.item_id} AND IFNULL(subitem_id, 0) = IFNULL(${obj.subitem_id}, 0) AND IFNULL(condition_id, 0) = IFNULL(${obj.condition_id}, 0) AND unit_id = ${obj.unit_id}`
+                await DB.getList('aawak', { conditionString: conditionString, order: ` date desc` }).then(async (data) => {
+                    for (let i in data.data) {
+                        obj.aawak_ref_id = data.data[i]._id;
+                        if (jwkQty > data.data[i].remaining_qty) {
+                            obj.qty = data.data[i].remaining_qty;
+                            jwkQty = jwkQty - obj.qty;
+                        }
+                        await Fn.insertAJ(obj, 'jawak').then(async (rs) => {
+                            newIds.push(rs);
+                        });
+                        obj.qty = jwkQty;
+                    }
+                    await DB.getList('aawak', { full: true, conditionString: ` aawak._id in (${newIds.join(',')})` }).then(async (data) => {
+                        for (let i in data.data) {
+                            data.data[i].document = (data.data[i].document ? JSON.parse(data.data[i].document) : {});
+                            data.data[i].isbill = data.data[i].isbill ? true : false;
+                        }
+                        result = data.data
+                    });
+                    result = data.data
+                });
+            } else {
+
+            }
+            await Fn.commit();
+            res.json({
+                success: true,
+                status: op,
+                result: result
+            });
+        }
+        catch (err) {
+            // console.log(err.message);
+            await Fn.rollback();
+            res.json({
+                success: false,
+                error: err.message,
+            })
+        }
+
+    } else {
+        return next(new Error("no data found, please solve all corrections first."))
+    }
+});
+
 
 
 

@@ -221,7 +221,7 @@ export class ExcelImportComponent implements OnInit {
             if (this.headerConfig[j].type == "array") {
               row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index].split(",");
             } else {
-              row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index];
+              row[this.headerConfig[j].col_name] = this.gs.cleanValue(this.excelArr[i][this.headerConfig[j].index]);
             }
           }
         }
@@ -237,7 +237,7 @@ export class ExcelImportComponent implements OnInit {
     } else if (this.importType.name == 'subitem') {
       this.excelArrObj = this.excelArrObj.filter((e: { subitem_hin: string | null; }) => e.subitem_hin)
     } else if (this.importType.name == 'bachat') {
-      this.excelArrObj = this.excelArrObj.filter((e: { date: any; mm: any; item: any; qty: any; unit: any; }) => e.date && e.mm && e.item && e.qty && e.unit)
+      this.excelArrObj = this.excelArrObj.filter((e: { date: any; mm: any; item: any; qty: any; unit: any; }) => e.date && e.mm && e.item && e.qty != null && e.unit)
     }
     this.stepNo = 2;
     this.isLoader = false;
@@ -268,12 +268,31 @@ export class ExcelImportComponent implements OnInit {
 
   toggleCorrection(i: any, action: boolean) {
     this.unmatchedData[i].correction = action;
+
     if (action) {
-      if(this.unmatchedData[i].type == 'item' && this.unmatchedData[i].id){
-        this.itemSelected(this.unmatchedData[i].id)
+      if (this.unmatchedData[i].type == 'item' && this.unmatchedData[i].item) {
+        this.itemSelected(this.unmatchedData[i].item);
+      } else if (this.unmatchedData[i].type == 'item' && this.unmatchedData[i].id) {
+        let item = this.items.find((it: { _id: any; }) => it._id == this.unmatchedData[i].id);
+        this.unmatchedData[i].item = item;
+        this.itemSelected(this.unmatchedData[i].item);
       }
     } else {
       this.items = this.itemAll;
+      this.subitems = [];
+    }
+  }
+
+  itemSelected(ev: any) {
+    if (ev) {
+      if (this.cat) {
+        this.subitems = ev.subitems.filter((s: { categories: any; }) => s.categories.includes(this.cat));
+      }
+      else {
+        this.subitems = ev.subitems;
+      }
+    }
+    else {
       this.subitems = [];
     }
   }
@@ -297,22 +316,29 @@ export class ExcelImportComponent implements OnInit {
 
   correctionSubmit(data: any, index: any) {
     let conf = this.headerList.filter((h: { ref_table: any; }) => h.ref_table == data.type);
-    console.log("data", data, "conf", conf);
-    console.log(this.excelArrObj);
+    // console.log("data", data, "conf", conf);
+    // console.log(this.excelArrObj);
 
     if (data.type == 'item') {
       for (let i in this.excelArrObj) {
-        for (let j in conf) {
-          if (this.excelArrObj[i].item == data.value.item && this.excelArrObj[i].subitem == data.value.subitem) {
-            this.excelArrObj[i].item_id = data.id;
-            this.excelArrObj[i].subitem_id = data.id2;
+        if (this.excelArrObj[i].item == data.name.item && this.excelArrObj[i].subitem == data.name.subitem) {
+          if (this.excelArrObj[i].item_id != data.item._id) {
+            this.excelArrObj[i].item_id = data.item._id;
+            this.excelArrObj[i].item_hin = data.item.item_hin;
           }
+          this.excelArrObj[i].subitem_corrected = true;
+          this.excelArrObj[i].subitem_hin = '-';
+          if (data.subitem) {
+            this.excelArrObj[i].subitem_id = data.subitem._id;
+            this.excelArrObj[i].subitem_hin = data.subitem.subitem_hin;
+          }
+
         }
       }
     } else {
       for (let i in this.excelArrObj) {
         for (let j in conf) {
-          if (this.excelArrObj[i][conf[j].name] == data.value) {
+          if (this.excelArrObj[i][conf[j].name] == data.name) {
             this.excelArrObj[i][conf[j].ref_field] = data.id;
           }
         }
@@ -321,6 +347,15 @@ export class ExcelImportComponent implements OnInit {
 
     this.unmatchedData[index].done = true;
     this.unmatchedData[index].ignore = false;
+    if (data.dictionary) {
+      this.http.post(this.api.getUrl('DICT'), data).subscribe((res: any) => {
+        if (res.success) {
+          this.toastr.success('Added to Dictionary');
+        }
+      }, (err) => {
+        this.toastr.error('Error Occuring while inserting into Dictionary.')
+      });
+    }
   }
 
   async processImport(i: number = 0) {
@@ -382,7 +417,7 @@ export class ExcelImportComponent implements OnInit {
         if (data[this.headerList[j].ref_field].includes(null)) {
           return true;
         }
-      } else if (this.headerList[j].ref_table && (data[this.headerList[j].name] && !data[this.headerList[j].ref_field])) {
+      } else if (this.headerList[j].ref_table && ((data[this.headerList[j].name] && !data[this.headerList[j].ref_field]) || data[this.headerList[j].name + '_corrected'])) {
         return true;
       }
     }
@@ -436,21 +471,6 @@ export class ExcelImportComponent implements OnInit {
     });
   }
 
-  itemSelected(ev: any) {
-    if (ev) {
-      let item = this.items.find((i: { _id: any; }) => i._id == ev);
-
-      if (this.cat) {
-        this.subitems = item.subitems.filter((s: { categories: any; }) => s.categories.includes(this.cat));
-      }
-      else {
-        this.subitems = item.subitems;
-      }
-    }
-    else {
-      this.subitems = [];
-    }
-  }
 
   catSelected(ev: any) {
     if (ev) {

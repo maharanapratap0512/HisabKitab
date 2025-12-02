@@ -8,7 +8,20 @@ const DB = new DBContex();
 /// get dictionary 
 router.get('/', async (req, res, next) => {
     try {
-        await DB.getList('dictionary').then(async (data) => {
+        await DB.getList('dictionary', { full: true }).then(async (data) => {
+            res.json({
+                success: true,
+                result: data.data || [],
+                total_count: (data.total_count ? data.total_count : 0),
+            });
+        });
+    } catch (err) { next(err) };
+});
+
+/// get dictionary 
+router.get('/:id', async (req, res, next) => {
+    try {
+        await DB.getList('dictionary', { full: true }).then(async (data) => {
             res.json({
                 success: true,
                 result: data.data || [],
@@ -22,8 +35,16 @@ router.get('/', async (req, res, next) => {
 // post dictionary 
 router.post('/', async (req, res, next) => {
     try {
-        if (req.body && req.body.type && req.body.name && req.body.real_id) {
-            await DB.insert('dictionary', req.body).then(async (data) => {
+
+        if (req.body && req.body.type && req.body.name && req.body.id) {
+            let obj = {
+                ...DB.tbInterface.dictionary,
+                ...req.body,
+            }
+            if (obj.type == 'pbk') {
+                obj.name = obj.pbk ? JSON.stringify(obj.pbk) : null;
+            }
+            await DB.insert('dictionary', obj).then(async (data) => {
                 res.json({
                     success: true,
                     result: data || {}

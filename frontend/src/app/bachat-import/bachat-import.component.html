@@ -21,7 +21,7 @@
                                 </span>
                             </a>
                         </li>
-                        <li class="nav-item" *ngIf="combinedBachat.length > 0">
+                        <li class="nav-item" *ngIf="DBOnlyBachatAll.length > 0">
                             <a href="#combinedbachat" data-bs-toggle="tab" aria-expanded="false"
                                 class="nav-link mx-1 btn-primary text-primary">
                                 Combined Bachat
@@ -30,8 +30,18 @@
                                 </span>
                             </a>
                         </li>
+                        <li class="nav-item" *ngIf="DBOnlyBachatAll.length > 0">
+                            <a href="#DBOnlyBachat" data-bs-toggle="tab" aria-expanded="false"
+                                class="nav-link mx-1 btn-primary text-primary">
+                                DB Only Bachat
+                                <span class="translate-middle bell badge rounded-pill bg-danger">
+                                    {{DBOnlyBachat.length}}
+                                </span>
+                            </a>
+                        </li>
+
                         <li class="nav-item" *ngIf="newInsertedAwk.length">
-                            <a href="#insert" data-bs-toggle="tab" aria-expanded="false"
+                            <a href="#insAwk" data-bs-toggle="tab" aria-expanded="false"
                                 class="nav-link mx-1 btn-success text-success">
                                 New Aawak Insert
                                 <span class="translate-middle bell badge rounded-pill bg-success">
@@ -40,7 +50,7 @@
                             </a>
                         </li>
                         <li class="nav-item" *ngIf="newInsertedJwk.length">
-                            <a href="#update" data-bs-toggle="tab" aria-expanded="false"
+                            <a href="#insJwk" data-bs-toggle="tab" aria-expanded="false"
                                 class="nav-link mx-1 btn-warning text-warning">
                                 New Inserted Jawak
                                 <span class="translate-middle bell badge rounded-pill bg-warning">
@@ -48,58 +58,524 @@
                                 </span>
                             </a>
                         </li>
-
-                        <li class="nav-item ms-auto" *ngIf="combinedBachat.length">
-                            <a class="btn btn-outline-success text-success btn-sync">
-                                Sync Bachat
+                        <li class="nav-item" *ngIf="rejected.length">
+                            <a href="#rejected" data-bs-toggle="tab" aria-expanded="false"
+                                class="nav-link mx-1 btn-warning text-warning">
+                                Rejected
+                                <span class="translate-middle bell badge rounded-pill bg-warning">
+                                    {{rejected.length}}
+                                </span>
                             </a>
                         </li>
+
                     </ul>
 
 
                     <div class="tab-content">
                         <!-- exceldata -->
-                        <div class="tab-pane active" id="exceldata">
-                            <div class="row" style="overflow: auto;">
-                                <pagination-controls id="excelPagi" class="pagi text-end"
-                                    (pageChange)="page_excel = $event" [autoHide]="true">
-                                </pagination-controls>
-                                <table id="datatable-buttons" class="table table-hover dt-responsive"
-                                    style="table-layout: auto;">
-                                    <thead>
-                                        <tr>
-                                            <th>Sn</th>
-                                            <th>Date</th>
-                                            <th>MM</th>
-                                            <th>Item</th>
-                                            <th>Subitem</th>
-                                            <th>Condition</th>
-                                            <th>Qty</th>
-                                            <th>Unit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr
-                                            *ngFor="let data of excelArrObj | paginate:{id:'excelPagi', itemsPerPage:itemsPerPage,currentPage:page_excel,totalItems:excelArrObj.length}; let i=index;">
-                                            <td>{{data.sn}}</td>
-                                            <td>{{data.date}}</td>
-                                            <td>{{data.mm}}</td>
-                                            <td>{{data.item}}</td>
-                                            <td>{{data.subitem}}</td>
-                                            <td>{{data.condition}}</td>
-                                            <td>{{data.qty}}</td>
-                                            <td>{{data.unit}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <div class="tab-pane show active" id="exceldata">
+                            <div class="row" style="overflow: hidden; flex-direction: column;">
+                                <div class="row my-1 sticky-header">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Here"
+                                                [(ngModel)]="term_excel">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <pagination-controls id="excelPagi" class="pagi text-end"
+                                            (pageChange)="page_excel = $event" [autoHide]="true">
+                                        </pagination-controls>
+                                    </div>
+                                </div>
+                                <div class="table-container">
+                                    <table id="datatable-buttons"
+                                        class="table table-hover dt-responsive table-sticky-header"
+                                        style="table-layout: auto;">
+                                        <thead>
+                                            <tr>
+                                                <th>Sn</th>
+                                                <th>Date</th>
+                                                <th>MM</th>
+                                                <th>Item</th>
+                                                <th>Subitem</th>
+                                                <th>Condition</th>
+                                                <th>Qty</th>
+                                                <th>Unit</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let data of excelArrObj | search: term_excel | paginate:{id:'excelPagi', itemsPerPage:itemsPerPage,currentPage:page_excel,totalItems:excelArrObj.length}; let i=index;">
+                                                <td>{{data.sn}}</td>
+                                                <td>{{data.date}}</td>
+                                                <td>{{data.mm}}</td>
+                                                <td>{{data.item_hin ? data.item_hin : data.item}}</td>
+                                                <td>{{data.subitem_hin ? data.subitem_hin : data.subitem}}</td>
+                                                <td>{{data.condition}}</td>
+                                                <td>{{data.qty}}</td>
+                                                <td>{{data.unit}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
 
                         <!-- combinedbachat -->
                         <div class="tab-pane" id="combinedbachat">
+
+                            <div class="row mt-2" style="overflow: auto;">
+                                <div class="col-2">
+                                    <button class="btn btn-outline-success" *ngIf="combinedBachat.length"
+                                        (click)="syncBachat()">
+                                        Sync Bachat
+                                    </button>
+                                    <button class="btn btn-outline-info" *ngIf="!combinedBachat.length"
+                                        (click)="resetFilter('combinedBachat')">
+                                        Refresh
+                                    </button>
+                                </div>
+
+                                <div class="col-10">
+                                    <div class="progress" *ngIf="processing">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                            role="progressbar" [style]="insertAwkStyle"> Aawak :
+                                            {{newInsertedAwk.length}}
+                                        </div>
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-info"
+                                            role="progressbar" [style]="insertJwkStyle"> Jawak :
+                                            {{newInsertedJwk.length}}
+                                        </div>
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger"
+                                            role="progressbar" [style]="rejectedStyle"> Error : {{rejected.length}}
+                                        </div>
+                                    </div>
+                                    <span class="text-warning">
+                                        'Sync Bachat' बटन दबाने से ऑटोमैटिक आवक-जावक एंट्री होगी, और सभी इटेम्स की बचत
+                                        इक्सेल शीट के बराबर कर डि जाएगी।
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="row" style="overflow: hidden; flex-direction: column;">
+
+                                <div class="row my-1">
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Here"
+                                                [(ngModel)]="term_combined">
+                                        </div>
+                                    </div>
+                                    <div class="col-2">
+                                        <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
+                                            [clearable]="true" [virtualScroll]="true" [multiple]="true"
+                                            (change)="filter('combinedBachat')" [(ngModel)]="filterObj.mm_id"
+                                            [ngModelOptions]="{standalone: true}">
+                                            <ng-option selected="selected" disabled value="">MM</ng-option>
+                                            <ng-option *ngFor="let item of mms" [value]="item._id">
+                                                {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                        </ng-select>
+                                    </div>
+                                    <div class="col-2">
+                                        <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                            [clearable]="true" [virtualScroll]="true" [multiple]="true"
+                                            [(ngModel)]="filterObj.item_id" (change)="filter('combinedBachat')"
+                                            [ngModelOptions]="{standalone: true}">
+                                            <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                                            <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                                                {{item.item_eng}} : {{item.item_code}}</ng-option>
+                                        </ng-select>
+                                    </div>
+                                    <div class="col-1">
+                                        <button class="btn btn-sm btn-success" title="export to excel"
+                                            (click)="exportCombinedData()">
+                                            <i class="uil uil-export"></i>
+                                        </button>
+                                    </div>
+                                    <div class="col-4">
+                                        <pagination-controls id="combinedPagi" class="pagi text-end"
+                                            (pageChange)="page_combined = $event" [autoHide]="true">
+                                        </pagination-controls>
+                                    </div>
+                                </div>
+                                <div class="table-container">
+                                    <table id="datatable-buttons"
+                                        class="table table-hover dt-responsive table-sticky-header"
+                                        style="table-layout: auto;">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input" id="selectAllCB"
+                                                            [(ngModel)]="selectAll.combinedBachat"
+                                                            (click)="toggleSelectAll('combinedBachat')">
+                                                        <label class="form-check-label fs-6" for="selectAll">Select
+                                                            All</label>
+                                                    </div>
+                                                </th>
+                                                <th>Sn</th>
+                                                <th>Date</th>
+                                                <th>MM</th>
+                                                <th>Item</th>
+                                                <th>Subitem</th>
+                                                <th>Condition</th>
+                                                <th>Unit</th>
+                                                <th>Excel Qty
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input"
+                                                            id="customCheckcolor1"
+                                                            (change)="hideZero('qty', $event.target)">
+                                                        <label class="form-check-label fs-6"
+                                                            for="customCheckcolor1">Hide
+                                                            0</label>
+                                                    </div>
+                                                </th>
+                                                <th>SW Qty
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input"
+                                                            id="customCheckcolor1"
+                                                            (change)="hideZero('bachat', $event.target)">
+                                                        <label class="form-check-label fs-6"
+                                                            for="customCheckcolor1">Hide
+                                                            0</label>
+                                                    </div>
+                                                </th>
+                                                <th>Difference
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input"
+                                                            id="customCheckcolor1"
+                                                            (change)="hideZero('difference', $event.target)">
+                                                        <label class="form-check-label fs-6"
+                                                            for="customCheckcolor1">Hide
+                                                            0</label>
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let data of combinedBachat | search: term_combined | paginate:{id:'combinedPagi', itemsPerPage:itemsPerPage,currentPage:page_combined,totalItems:combinedBachat.length}; let i=index;"
+                                                [ngClass]="{'excel-row': data.status == 'EXCEL', 'db-row': data.status == 'DB'}">
+                                                <td>
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input"
+                                                            [(ngModel)]="data.selected">
+                                                    </div>
+                                                </td>
+                                                <td>{{data.sn ? data.sn : ''}}</td>
+                                                <td>{{data.date}}</td>
+                                                <td>{{data.mm_hin}}</td>
+                                                <td>{{data.item_hin}}</td>
+                                                <td>{{data.subitem_id ? data.subitem_hin : ''}}</td>
+                                                <td>{{data.condition_id ? data.condition_hin : ''}}</td>
+                                                <td>{{data.unit_short}}</td>
+                                                <td>{{data.qty}}</td>
+                                                <td>{{data.bachat}}</td>
+                                                <td [ngClass]="{'marked': data.difference != 0}">{{data.difference}}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DBOnlyBachat -->
+                        <div class="tab-pane" id="DBOnlyBachat">
+
+                            <div class="row mt-2" style="overflow: auto;">
+                                <div class="col-2">
+                                    <button class="btn btn-outline-success" *ngIf="DBOnlyBachat.length"
+                                        (click)="resetBachat()">
+                                        Reset Selected Bachat
+                                    </button>
+                                </div>
+
+                                <div class="col-10">
+                                    <div class="progress" *ngIf="processingReset">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                            role="progressbar" [style]="succeedStyle"> Success :
+                                            {{resetSucceed.length}}
+                                        </div>
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger"
+                                            role="progressbar" [style]="rejectedResetStyle"> Error : {{rejected.length}}
+                                        </div>
+                                    </div>
+                                    <span class="text-warning">
+                                        'Reset Selected Bachat' बटन दबाने से सेलेक्टेड सभी इटेम्स की बचत 0 कर दी जाएगी।
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="row" style="overflow: hidden; flex-direction: column;">
+
+                                <div class="row my-1">
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Here"
+                                                [(ngModel)]="term_db_only">
+                                        </div>
+                                    </div>
+                                    <div class="col-2">
+                                        <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
+                                            [clearable]="true" [virtualScroll]="true" [multiple]="true"
+                                            (change)="filter('DBOnlyBachat')" [(ngModel)]="filterObj.mm_id"
+                                            [ngModelOptions]="{standalone: true}">
+                                            <ng-option selected="selected" disabled value="">MM</ng-option>
+                                            <ng-option *ngFor="let item of mms" [value]="item._id">
+                                                {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                        </ng-select>
+                                    </div>
+                                    <div class="col-2">
+                                        <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                            [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterObj.item_id"
+                                            [multiple]="true" (change)="filter('DBOnlyBachat')"
+                                            [ngModelOptions]="{standalone: true}">
+                                            <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                                            <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
+                                                {{item.item_eng}} : {{item.item_code}}</ng-option>
+                                        </ng-select>
+                                    </div>
+                                    <div class="col-1">
+                                        <button class="btn btn-sm btn-success" title="export to excel"
+                                            (click)="exportDBOnlyData()">
+                                            <i class="uil uil-export"></i>
+                                        </button>
+                                    </div>
+                                    <div class="col-3">
+                                        <pagination-controls id="dbOnlyPagi" class="pagi text-end"
+                                            (pageChange)="page_db_only = $event" [autoHide]="true">
+                                        </pagination-controls>
+                                    </div>
+                                </div>
+                                <div class="table-container">
+                                    <table id="datatable-buttons"
+                                        class="table table-hover dt-responsive table-sticky-header"
+                                        style="table-layout: auto;">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input" id="selectAll"
+                                                            [(ngModel)]="selectAll.DBOnlyBachat"
+                                                            (click)="toggleSelectAll('DBOnlyBachat')">
+                                                        <label class="form-check-label fs-6" for="selectAll">Select
+                                                            All</label>
+                                                    </div>
+                                                </th>
+                                                <th>MM</th>
+                                                <th>Item</th>
+                                                <th>Subitem</th>
+                                                <th>Condition</th>
+                                                <th>Unit</th>
+                                                <th>Excel Qty</th>
+                                                <th>SW Qty</th>
+                                                <th>Difference</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                *ngFor="let data of DBOnlyBachat | search: term_db_only | paginate:{id:'dbOnlyPagi', itemsPerPage:itemsPerPage,currentPage:page_db_only,totalItems:DBOnlyBachat.length}; let i=index;">
+                                                <td>
+                                                    <div class="form-check mb-2">
+                                                        <input type="checkbox" class="form-check-input"
+                                                            [(ngModel)]="data.selected">
+                                                    </div>
+                                                </td>
+                                                <td>{{data.mm_hin}}</td>
+                                                <td>{{data.item_hin}}</td>
+                                                <td>{{data.subitem_id ? data.subitem_hin : ''}}</td>
+                                                <td>{{data.condition_id ? data.condition_hin : ''}}</td>
+                                                <td>{{data.unit_short}}</td>
+                                                <td>{{data.qty}}</td>
+                                                <td>{{data.bachat}}</td>
+                                                <td>{{data.difference}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- new inserted aawak -->
+                        <div class="tab-pane" id="insAwk">
                             <div class="row" style="overflow: auto;">
-                                <pagination-controls id="combinedPagi" class="pagi text-end"
+                                <pagination-controls id="NIAPagination" class="pagi text-end"
+                                    (pageChange)="page_awk = $event" [autoHide]="true">
+                                </pagination-controls>
+                                <table id="datatable-buttons" class="table table-hover dt-responsive">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">No.</th>
+                                            <th style="width: 80px;">Pkt No.</th>
+                                            <th style="width: 80px;">Date</th>
+                                            <th style="width: 100px;">MM</th>
+                                            <th style="width: 100px;">Aawak MM</th>
+                                            <th style="width: 100px;">Item</th>
+                                            <th style="width: 100px;">Company</th>
+                                            <th style="width: 100px;" *ngIf="settings.aawak.condition_id">Condition</th>
+                                            <th style="width: 250px;">Item Details</th>
+                                            <th style="width: 250px;">Description</th>
+                                            <th style="width: 70px;">Quantity</th>
+                                            <th style="width: 80px;">Aawak Type</th>
+                                            <th style="width: 80px;">Nimitt</th>
+                                            <th style="width: 80px;">Dept</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <ng-container
+                                            *ngFor="let data of newInsertedAwk | paginate: {id:'NIAPagination', itemsPerPage: 100,currentPage: page_awk,totalItems: newInsertedAwk.length}; let i=index">
+                                            <tr>
+                                                <td>{{100 * (page_awk - 1) + (i+1)}}</td>
+                                                <td>{{data.pkt_num ? data.pkt_num : '-'}} </td>
+                                                <td>{{data.date?(data.date |
+                                                    date:'dd-MM-yyyy'):'-'}}
+                                                </td>
+                                                <td>
+                                                    {{data.mm_hin}} <br /> {{data.mm_code}}
+                                                </td>
+                                                <td>
+                                                    {{data.aawak_mm_hin}} <br /> {{data.aawak_mm_code}}
+                                                </td>
+                                                <td>
+                                                    {{data.item_hin}} - {{data.subitem_hin}}
+                                                </td>
+                                                <td>
+                                                    {{data.company_name?data.company_name:'-'}}
+                                                </td>
+                                                <td>
+                                                    {{data.condition_hin?data.condition_hin:'-'}}
+                                                </td>
+                                                <td>{{data.item_detail?data.item_detail:'-'}}</td>
+                                                <td>{{data.description?data.description:'-'}}</td>
+                                                <td>
+                                                    {{data.qty?data.qty:'-'}}
+                                                    {{data.unit_short?data.unit_short:'-'}} <br />
+                                                    &#64;{{data.rate?data.rate:0}}
+                                                    ={{data.actual_amt?data.actual_amt:0}}
+                                                    <!-- &#64;  ==  '@' in HTML -->
+                                                </td>
+                                                <td>
+                                                    {{data.aawak_type_hin}}
+                                                </td>
+                                                <td>
+                                                    {{data.nimitt_hin}} ({{data.nimitt_state_hin}})
+                                                </td>
+                                                <td>
+                                                    {{data.dept_id?data.dept_hin:'-'}}
+                                                </td>
+                                            </tr>
+                                        </ng-container>
+                                    </tbody>
+                                    <tfoot>
+                                        <td colspan="8">
+                                            <pagination-controls id="NIAPagination" class="pagi text-center"
+                                                (pageChange)="page_awk = $event" [autoHide]="true">
+                                            </pagination-controls>
+                                        </td>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- new inserted jawak -->
+                        <div class="tab-pane" id="insJwk">
+                            <div class="row" style="overflow: auto;">
+                                <pagination-controls id="NIJPagination" class="pagi text-end"
+                                    (pageChange)="page_jwk = $event" [autoHide]="true">
+                                </pagination-controls>
+                                <table id="datatable-buttons" class="table table-hover dt-responsive">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">No.</th>
+                                            <th style="width: 80px;">Pkt No.</th>
+                                            <th style="width: 80px;">Date</th>
+                                            <th style="width: 100px;">MM</th>
+                                            <th style="width: 100px;">Aawak MM</th>
+                                            <th style="width: 100px;">Item</th>
+                                            <th style="width: 100px;">Company</th>
+                                            <th style="width: 100px;" *ngIf="settings.aawak.condition_id">Condition</th>
+                                            <th style="width: 250px;">Item Details</th>
+                                            <th style="width: 250px;">Description</th>
+                                            <th style="width: 70px;">Quantity</th>
+                                            <th style="width: 80px;">Aawak Type</th>
+                                            <th style="width: 80px;">Nimitt</th>
+                                            <th style="width: 80px;">Dept</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <ng-container
+                                            *ngFor="let data of newInsertedAwk | paginate: {id:'NIJPagination', itemsPerPage: 100,currentPage: page_jwk,totalItems: newInsertedAwk.length}; let i=index">
+                                            <tr>
+                                                <td>{{100 * (page_jwk - 1) + (i+1)}}</td>
+                                                <td>{{data.pkt_num ? data.pkt_num : '-'}} </td>
+                                                <td>{{data.date?(data.date |
+                                                    date:'dd-MM-yyyy'):'-'}}
+                                                </td>
+                                                <td>
+                                                    {{data.mm_hin}} <br /> {{data.mm_code}}
+                                                </td>
+                                                <td>
+                                                    {{data.jawak_mm_hin}} <br /> {{data.jawak_mm_code}}
+                                                </td>
+                                                <td>
+                                                    {{data.item_hin}} - {{data.subitem_hin}}
+                                                </td>
+                                                <td>
+                                                    {{data.company_name?data.company_name:'-'}}
+                                                </td>
+                                                <td>
+                                                    {{data.condition_hin?data.condition_hin:'-'}}
+                                                </td>
+                                                <td>{{data.item_detail?data.item_detail:'-'}}</td>
+                                                <td>{{data.description?data.description:'-'}}</td>
+                                                <td>
+                                                    {{data.qty?data.qty:'-'}}
+                                                    {{data.unit_short?data.unit_short:'-'}} <br />
+                                                    &#64;{{data.rate?data.rate:0}}
+                                                    ={{data.actual_amt?data.actual_amt:0}}
+                                                    <!-- &#64;  ==  '@' in HTML -->
+                                                </td>
+                                                <td>
+                                                    {{data.jawak_type_hin}}
+                                                </td>
+                                                <td>
+                                                    {{data.nimitt_hin}} ({{data.nimitt_state_hin}})
+                                                </td>
+                                                <td>
+                                                    {{data.dept_id?data.dept_hin:'-'}}
+                                                </td>
+                                            </tr>
+                                        </ng-container>
+                                    </tbody>
+                                    <tfoot>
+                                        <td colspan="8">
+                                            <pagination-controls id="NIJPagination" class="pagi text-center"
+                                                (pageChange)="page_jwk = $event" [autoHide]="true">
+                                            </pagination-controls>
+                                        </td>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- rejected -->
+                        <div class="tab-pane" id="rejected">
+
+                            <div class="row mt-2" style="overflow: auto;">
+                                <div class="col-2">
+                                    <button class="btn btn-outline-success" *ngIf="rejected.length"
+                                        (click)="exportRejected()">
+                                        Export to excel
+                                    </button>
+                                </div>
+
+                            </div>
+
+                            <div class="row" style="overflow: auto;">
+
+                                <pagination-controls id="rejectedPagi" class="pagi text-end"
                                     (pageChange)="page_combined = $event" [autoHide]="true">
                                 </pagination-controls>
                                 <table id="datatable-buttons" class="table table-hover dt-responsive"
@@ -114,37 +590,16 @@
                                             <th>Condition</th>
                                             <th>Unit</th>
                                             <th>Excel Qty
-                                                <div class="form-check mb-2">
-                                                    <input type="checkbox" class="form-check-input"
-                                                        id="customCheckcolor1"
-                                                        (change)="hideZero('qty', $event.target)">
-                                                    <label class="form-check-label fs-6" for="customCheckcolor1">Hide
-                                                        0</label>
-                                                </div>
                                             </th>
                                             <th>SW Qty
-                                                <div class="form-check mb-2">
-                                                    <input type="checkbox" class="form-check-input"
-                                                        id="customCheckcolor1"
-                                                        (change)="hideZero('bachat', $event.target)">
-                                                    <label class="form-check-label fs-6" for="customCheckcolor1">Hide
-                                                        0</label>
-                                                </div>
                                             </th>
                                             <th>Difference
-                                                <div class="form-check mb-2">
-                                                    <input type="checkbox" class="form-check-input"
-                                                        id="customCheckcolor1"
-                                                        (change)="hideZero('difference', $event.target)">
-                                                    <label class="form-check-label fs-6" for="customCheckcolor1">Hide
-                                                        0</label>
-                                                </div>
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr *ngFor="let data of combinedBachat | paginate:{id:'combinedPagi', itemsPerPage:itemsPerPage,currentPage:page_combined,totalItems:combinedBachat.length}; let i=index;"
-                                            [ngClass]="{'excel-row': data.status == 'EXCEL', 'db-row': data.status == 'DB'}">
+                                        <tr
+                                            *ngFor="let data of rejected | paginate:{id:'rejectedPagi', itemsPerPage:itemsPerPage,currentPage:page_rejected,totalItems:rejected.length}; let i=index;">
                                             <td>{{data.sn}}</td>
                                             <td>{{data.date}}</td>
                                             <td>{{data.mm_hin}}</td>
@@ -154,14 +609,12 @@
                                             <td>{{data.unit_short}}</td>
                                             <td>{{data.qty}}</td>
                                             <td>{{data.bachat}}</td>
-                                            <td [ngClass]="{'marked': data.difference != 0}">{{data.difference}}</td>
+                                            <td>{{data.difference}}</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-
-                        
 
                     </div>
 

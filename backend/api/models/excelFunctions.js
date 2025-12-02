@@ -217,7 +217,7 @@ class ExcelFunctions {
    checkedButNotFound(data, listType) {
       let found = false;
       for (let i in this.correctionList) {
-         if (this.correctionList[i].type == listType && this.correctionList[i].value == data) {
+         if (this.correctionList[i].type == listType && this.correctionList[i].name == data) {
             found = true;
             break;
          }
@@ -244,7 +244,7 @@ class ExcelFunctions {
                return this.dict.mm[i].id;
             }
          }
-         this.correctionList.push({ type: 'mm', value: data });
+         this.correctionList.push({ type: 'mm', name: data });
       }
       return null;
    }
@@ -268,7 +268,7 @@ class ExcelFunctions {
                return this.dict.category[i].id;
             }
          }
-         this.correctionList.push({ type: 'category', value: data });
+         this.correctionList.push({ type: 'category', name: data });
       }
       return null;
    }
@@ -302,7 +302,7 @@ class ExcelFunctions {
                return this.dict.country[i].id;
             }
          }
-         this.correctionList.push({ type: 'country', value: data });
+         this.correctionList.push({ type: 'country', name: data });
       }
       return null;
    }
@@ -326,7 +326,7 @@ class ExcelFunctions {
                return this.dict.state[i].id;
             }
          }
-         this.correctionList.push({ type: 'state', value: data });
+         this.correctionList.push({ type: 'state', name: data });
       }
       return null;
    }
@@ -350,7 +350,7 @@ class ExcelFunctions {
                return this.dict.district[i].id;
             }
          }
-         this.correctionList.push({ type: 'district', value: data });
+         this.correctionList.push({ type: 'district', name: data });
       }
       return null;
    }
@@ -373,7 +373,7 @@ class ExcelFunctions {
          //       return this.dict.zone[i].id;
          //    }
          // }
-         this.correctionList.push({ type: 'zone', value: data });
+         this.correctionList.push({ type: 'zone', name: data });
       }
       return null;
    }
@@ -397,7 +397,7 @@ class ExcelFunctions {
                return this.dict.city[i].id;
             }
          }
-         this.correctionList.push({ type: 'city', value: data });
+         this.correctionList.push({ type: 'city', name: data });
       }
       return null;
    }
@@ -421,7 +421,7 @@ class ExcelFunctions {
                return this.dict.unit[i].id;
             }
          }
-         this.correctionList.push({ type: 'unit', value: data });
+         this.correctionList.push({ type: 'unit', name: data });
       }
       return null;
    }
@@ -445,7 +445,7 @@ class ExcelFunctions {
          //       return this.dict.nimitt[i].id;
          //    }
          // }
-         this.correctionList.push({ type: 'nimitt', value: data });
+         this.correctionList.push({ type: 'nimitt', name: data });
       }
       return null;
    }
@@ -468,7 +468,7 @@ class ExcelFunctions {
          //       return this.dict.pbk[i].id;
          //    }
          // }
-         this.correctionList.push({ type: 'pbk', value: data });
+         this.correctionList.push({ type: 'pbk', name: data });
       }
       return null;
    }
@@ -491,7 +491,7 @@ class ExcelFunctions {
                return this.dict.subitem_list[i].id;
             }
          }
-         this.correctionList.push({ type: 'subitem_list', value: data });
+         this.correctionList.push({ type: 'subitem_list', name: data });
       }
       return null;
    }
@@ -548,7 +548,7 @@ class ExcelFunctions {
             if (row.log) {
                console.log("pushing in correction list")
             }
-            this.correctionList.push({ type: 'item', value: data, id: row.item_id, id2: row.subitem_id });
+            this.correctionList.push({ type: 'item', name: data, id: row.item_id, id2: row.subitem_id });
          }
       }
       return row;
@@ -573,7 +573,7 @@ class ExcelFunctions {
                return this.dict.item[i].id;
             }
          }
-         this.correctionList.push({ type: 'item', value: data });
+         this.correctionList.push({ type: 'item', name: data });
       }
       return null;
    }
@@ -598,7 +598,7 @@ class ExcelFunctions {
                return slistDict[i].id;
             }
          }
-         this.correctionList.push({ type: listType, value: data });
+         this.correctionList.push({ type: listType, name: data });
       }
       return null;
    }

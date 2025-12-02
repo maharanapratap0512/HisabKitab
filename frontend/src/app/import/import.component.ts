@@ -43,6 +43,7 @@ export class ImportComponent implements OnInit {
   categories: any = [];
   pbks: any = [];
   aawak_types: any = [];
+  aawak_sources: any = [];
   jawak_types: any = [];
   nimitts: any = [];
   settings: any = [];
@@ -85,6 +86,7 @@ export class ImportComponent implements OnInit {
       // this.departments = result.department ? result.department : [];
       this.pbks = result.pbk ? result.pbk : [];
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
+      this.aawak_sources = result.aawak_source ? result.aawak_source : [];
       this.jawak_types = result.jawak_type ? result.jawak_type : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
@@ -167,6 +169,12 @@ export class ImportComponent implements OnInit {
               let getaj_type = this.jawak_types.find((m: { _id: any; }) => m._id == this.importData[i].jawak_detail[j].aj_type_id);
               if (getaj_type) {
                 this.importData[i].jawak_detail[j].aj_type_hin = getaj_type.list_name_hin;
+              }
+            }
+            if (this.importData[i].jawak_detail[j].awk_source_id && !this.importData[i].jawak_detail[j].awk_source_hin) {
+              let getawk_source = this.jawak_types.find((m: { _id: any; }) => m._id == this.importData[i].jawak_detail[j].awk_source_id);
+              if (getawk_source) {
+                this.importData[i].jawak_detail[j].awk_source_hin = getawk_source.list_name_hin;
               }
             }
             if (this.importData[i].jawak_detail[j].unit_id && !this.importData[i].jawak_detail[j].unit_short) {
@@ -545,6 +553,7 @@ export class ImportComponent implements OnInit {
       'Price': item.rate || '-',
       'Amount': item.actual_amt || '-',
       'Aawak Type': item.aj_type || '-',
+      'Aawak Source': item.awk_source || '-',
       'Item Detail': item.item_detail || '-',
       'Description': item.description || '-',
       'Error': item.error || '-',
@@ -586,47 +595,7 @@ export class ImportComponent implements OnInit {
     // Removed unused validation filter as it wasn't being used
   }
 
-// 
-// 
-// Import function over_____________
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
+
 
 
   addToHistory(data: any) {

@@ -38,7 +38,8 @@
                         <ng-select class="custom w-100" style="width: 100%;" placeholder="Filter MM Type"
                            [clearable]="true" [virtualScroll]="true" (change)="mmTypeSelected($event)">
                            <!-- <ng-option selected="selected" disabled value="">Select MM Type</ng-option> -->
-                           <ng-option *ngFor="let item of mm_types" [value]="item.list_name_eng">{{item.list_name_eng}} :
+                           <ng-option *ngFor="let item of mm_types" [value]="item.list_name_eng">{{item.list_name_eng}}
+                              :
                               {{item.list_name_hin}}</ng-option>
                         </ng-select>
                      </div>
@@ -99,12 +100,12 @@
                                     (click)="unlockMM(i,data._id)"><i class="uil-lock-alt"></i></button>
                               </ng-container>
                               <button *ngIf="settings.delete" class="btn btn-sm btn-danger" type="button"
-                                 (click)="delete(i,data._id)"><i class="uil-trash"></i></button>
+                                 (click)="delete(data._id)"><i class="uil-trash"></i></button>
                               <div *ngIf="data.restrict_year" class="lock-date text-warning">
                                  {{data.restrict_month}}/{{data.restrict_year}} से लॉक।
                               </div>
-                              <span *ngIf="!settings.edit && !settings.delete" data-toggle="tooltip"
-                                 title="Protected" class="text-warning mx-1"
+                              <span *ngIf="!settings.edit && !settings.delete" data-toggle="tooltip" title="Protected"
+                                 class="text-warning mx-1"
                                  style="font-size: xx-large;cursor: pointer;line-height: 0px;">
                                  <i class="uil-shield-check"></i>
                               </span>
@@ -117,7 +118,8 @@
                               {{data.parent_mm_id ? data.parent_mm_hin + ' : ' + data.parent_mm_eng + ' : ' +
                               data.parent_mm_code:'-'}}
                            </td>
-                           <td>{{data.state_hin}} : {{data.state_eng}} ({{data.country_hin}} : {{data.country_eng}})</td>
+                           <td>{{data.state_hin}} : {{data.state_eng}} ({{data.country_hin}} : {{data.country_eng}})
+                           </td>
                            <td *ngIf="settings.opening_date">{{data.opening_date | date: 'dd-MM-yyyy'}}</td>
                            <td [ngClass]="{'mata': data.nimitt_gender == 'Mata'}" *ngIf="settings.nimitt_id">
                               {{data.nimitt_id ? data.nimitt_hin + ' ('+ data.state_hin + ')':'-'}}
@@ -153,6 +155,8 @@
             <app-mm-entry *ngIf="showModal == 'Add MM'" (response)='addMMResponse($event)'></app-mm-entry>
             <app-mm-entry *ngIf="showModal == 'Edit MM'" (response)='editMMResponse($event)' [getData]="editData"
                [isEdit]="true"></app-mm-entry>
+            <app-delete *ngIf='showModal == "delete"' Type="mm" [ID]="delID"
+               (response)="deleteResponse($event)"></app-delete>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"

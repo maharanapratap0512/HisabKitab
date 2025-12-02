@@ -39,8 +39,223 @@ router.get('/:dept_id', async (req, res, next) => {
     } catch (err) { console.log(err); next(err) };
 });
 
-// get filtered bachat_new 
+// Helper function to generate months between from and to dates
+function generateMonthsBetween(fromYear, fromMonth, toYear, toMonth) {
+    const months = [];
+    let currentYear = fromYear;
+    let currentMonth = fromMonth;
+
+    while (currentYear < toYear || (currentYear === toYear && currentMonth <= toMonth)) {
+        months.push(currentMonth);
+        currentMonth++;
+        if (currentMonth > 12) {
+            currentMonth = 1;
+            currentYear++;
+        }
+    }
+    return months;
+}
+
+// Optimized get filtered bachat_new with date range support using pure SQL approach
 router.put('/filter/:dept_id', async (req, res, next) => {
+    try {
+        let bachat = [], bcht_new = [], months = [];
+        let conditionQuery1 = `where bn.dept_id = ${req.params.dept_id}`;
+        let conditionQuery2 = ``;
+
+        if (req.body) {
+            conditionQuery1 += `${req.body.mm_id ? ` AND bn.mm_id = ${req.body.mm_id}` : ``} ${req.body.item_id ? ` AND bn.item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND bn.subitem_id = ${req.body.subitem_id}` : ``}`
+            conditionQuery2 += `${req.body.state_id ? ` where mm.state_id = ${req.body.state_id}` : ``} `;
+        }
+
+        // Handle date range using optimized SQL approach
+        if (req.body.from_year && req.body.from_month && req.body.to_year && req.body.to_month) {
+            months = generateMonthsBetween(parseInt(req.body.from_year), parseInt(req.body.from_month), parseInt(req.body.to_year), parseInt(req.body.to_month));
+
+            // Build date values CTE dynamically
+            const dateValues = months.map((month, index) => {
+                const year = req.body.from_year + Math.floor((req.body.from_month + index - 1) / 12);
+                const actualMonth = ((req.body.from_month + index - 1) % 12) + 1;
+                return `SELECT ${actualMonth} as month, ${year} as year`;
+            }).join(' UNION ');
+
+            // Build the optimized SQL query using the new pure SQL approach
+            let sql = `
+                WITH date_values AS (${dateValues}),
+                combinations AS (
+                    SELECT DISTINCT mm_id, item_id, subitem_id, unit_id
+                    FROM bachat_new
+                    WHERE dept_id = ${req.params.dept_id}
+                    ${req.body.mm_id ? ` AND mm_id = ${req.body.mm_id}` : ``}
+                    ${req.body.item_id ? ` AND item_id = ${req.body.item_id}` : ``}
+                    ${req.body.subitem_id ? ` AND subitem_id = ${req.body.subitem_id}` : ``}
+                ),
+                all_combinations AS (
+                    SELECT c.mm_id, c.item_id, c.subitem_id, c.unit_id, d.month, d.year
+                    FROM combinations c
+                    CROSS JOIN date_values d
+                    ORDER BY c.mm_id, c.item_id, d.year, d.month
+                ),
+                bachat_data AS (
+                    SELECT month, year, mm_id, item_id, subitem_id, unit_id,
+                           ROUND(SUM(total_aawak), 2) as total_aawak,
+                           ROUND(SUM(jawak), 2) as jawak,
+                           ROUND(SUM(used_jawak), 2) as used_jawak,
+                           ROUND(SUM(bachat), 2) as bachat,
+                           ROUND(SUM(past_bachat), 2) as past_bachat,
+                           ROUND(SUM(difference), 2) as difference
+                    FROM bachat_new
+                    WHERE dept_id = ${req.params.dept_id}
+                    ${req.body.mm_id ? ` AND mm_id = ${req.body.mm_id}` : ``}
+                    ${req.body.item_id ? ` AND item_id = ${req.body.item_id}` : ``}
+                    ${req.body.subitem_id ? ` AND subitem_id = ${req.body.subitem_id}` : ``}
+                    GROUP BY month, year, mm_id, item_id, subitem_id, unit_id
+                ),
+                aggregated_data AS (
+                    SELECT ac.mm_id, ac.item_id, ac.subitem_id, ac.unit_id,
+                           JSON_GROUP_ARRAY(ac.year) as years,
+                           JSON_GROUP_ARRAY(ac.month) as months,
+                           JSON_GROUP_ARRAY(COALESCE(bd.total_aawak, 0)) as total_aawak,
+                           JSON_GROUP_ARRAY(COALESCE(bd.jawak, 0)) as jawak,
+                           JSON_GROUP_ARRAY(COALESCE(bd.bachat, 0)) as bachat,
+                           JSON_GROUP_ARRAY(COALESCE(bd.past_bachat, 0)) as past_bachat,
+                           JSON_GROUP_ARRAY(COALESCE(bd.difference, 0)) as difference
+                    FROM all_combinations ac
+                    LEFT JOIN bachat_data bd ON ac.month = bd.month AND ac.year = bd.year AND ac.mm_id = bd.mm_id AND ac.item_id = bd.item_id AND ((ac.subitem_id IS NULL AND bd.subitem_id IS NULL) OR ac.subitem_id = bd.subitem_id) AND ac.unit_id = bd.unit_id
+                    GROUP BY ac.mm_id, ac.item_id, ac.subitem_id, ac.unit_id
+                    ORDER BY ac.mm_id, ac.item_id
+                )
+                SELECT ad.*,
+                       mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
+                       it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
+                       sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+                       unit.unit_short, unit.unit_full,
+                       dept.dept_code, dept.dept_hin, dept.dept_eng
+                FROM aggregated_data ad
+                LEFT JOIN mm on mm._id = ad.mm_id
+                LEFT JOIN state st on st._id = mm.state_id
+                LEFT JOIN item it on it._id = ad.item_id
+                LEFT JOIN subitem sit on sit._id = ad.subitem_id
+                LEFT JOIN subitem_list sitl on sitl._id = sit.subitem_list_id
+                LEFT JOIN unit on unit._id = ad.unit_id
+                LEFT JOIN department dept on dept._id = ${req.params.dept_id}
+                ${conditionQuery2}
+                ORDER BY ad.mm_id, ad.item_id`;
+
+            let stmt = DB.db.prepare(sql);
+
+            for (let row of stmt.iterate({ order: 'updated_at desc' })) {
+                // Parse JSON arrays
+                row.years = row.years ? JSON.parse(row.years) : [];
+                row.months = row.months ? JSON.parse(row.months) : [];
+                row.total_aawak = row.total_aawak ? JSON.parse(row.total_aawak) : [];
+                row.jawak = row.jawak ? JSON.parse(row.jawak) : [];
+                row.bachat = row.bachat ? JSON.parse(row.bachat) : [];
+                row.past_bachat = row.past_bachat ? JSON.parse(row.past_bachat) : [];
+                row.difference = row.difference ? JSON.parse(row.difference) : [];
+
+                // Rename arrays to match frontend expectations
+                row.arr_months = row.months;
+                row.arr_sum_aawak = row.total_aawak;
+                row.arr_sum_jawak = row.jawak;
+                row.arr_sum_bachat = row.bachat;
+                row.arr_past_bachat = row.past_bachat;
+
+                // Calculate cumulative bachat across the entire date range
+                let cumulativePastBachat = 0;
+                for (let i = 0; i < row.arr_sum_bachat.length; i++) {
+                    if (i === 0) {
+                        // For the first month, use the past bachat value
+                        cumulativePastBachat = row.arr_past_bachat[i] || 0;
+                    } else {
+                        // For subsequent months, accumulate
+                        cumulativePastBachat = (row.arr_past_bachat[i] !== null ? row.arr_past_bachat[i] : cumulativePastBachat + row.arr_sum_bachat[i - 1]);
+                    }
+                    row.arr_sum_bachat[i] = Number((row.arr_sum_bachat[i] + cumulativePastBachat).toFixed(2));
+                }
+
+                // Handle comments for each year in the range
+                const uniqueYears = [...new Set(row.years)];
+                let allComments = [];
+                let allCommentIds = [];
+
+                for (let year of uniqueYears) {
+                    let crow = Fn.db.prepare(`select *, JSON_GROUP_ARRAY(_id) as arr_comment_id, JSON_GROUP_ARRAY(comment) as arr_comment, JSON_GROUP_ARRAY(month) as arr_months from report_comment where month in (${months.join(',')}) AND year = ${year} AND dept_id = ${req.params.dept_id} AND mm_id = ${row.mm_id} AND item_id = ${row.item_id} AND unit_id = ${row.unit_id} AND report_type = 'full_saar' AND row_type = 'main_row' AND ((subitem_id IS NULL AND ${row.subitem_id} IS NULL) OR subitem_id = ${row.subitem_id}) group by item_id`).get({ ...row, months: months.join(',') })
+                    if (crow) {
+                        crow.arr_months = crow.arr_months ? JSON.parse(crow.arr_months) : []
+                        crow.arr_comment = crow.arr_comment ? JSON.parse(crow.arr_comment) : []
+                        crow.arr_comment_id = crow.arr_comment_id ? JSON.parse(crow.arr_comment_id) : []
+                    } else {
+                        crow = {
+                            arr_comment: [],
+                            arr_comment_id: [],
+                            arr_months: []
+                        }
+                    }
+                    allComments.push(...crow.arr_comment);
+                    allCommentIds.push(...crow.arr_comment_id);
+                }
+
+                // Map comments to months
+                row.arr_comment = months.map(m => {
+                    const commentIndex = allComments.findIndex((comment, index) => allCommentIds[index] && index < allComments.length);
+                    return commentIndex !== -1 ? allComments[commentIndex] : null;
+                });
+                row.arr_comment_id = months.map(m => {
+                    const commentIndex = allCommentIds.findIndex((id, index) => id && index < allCommentIds.length);
+                    return commentIndex !== -1 ? allCommentIds[commentIndex] : null;
+                });
+
+                row.showTooltip = {};
+
+                // Filter row based on category
+                if (!req.body.category_id || (req.body.category_id && ((row.arr_subitem_categories && row.arr_subitem_categories.includes(req.body.category_id)) || (!row.arr_subitem_categories && row.arr_item_categories.includes(req.body.category_id))))) {
+                    bcht_new.push(row);
+                }
+            }
+
+            // For the "last" array (cumulative view), we can reuse the same data but with different processing
+            bachat = bcht_new.map(row => ({ ...row }));
+
+        } else if (req.body.year) {
+            // Fallback for old single year logic
+            conditionQuery1 += `${req.body.year ? ` AND bn.year = '${req.body.year}'` : ``}`
+            let sql = DB.query.bachat_new.select_all.replace('?', conditionQuery1).replace('#', conditionQuery2);
+            let stmt = DB.db.prepare(sql);
+            for (let row of stmt.iterate({ order: 'updated_at desc' })) {
+                for (let key of Object.keys(row)) {
+                    if (key.includes('arr')) {
+                        row[key] = row[key] ? JSON.parse(row[key]) : []
+                    }
+                }
+                if (!req.body.category_id || (req.body.category_id && ((row.arr_subitem_categories && row.arr_subitem_categories.includes(req.body.category_id)) || (!row.arr_subitem_categories && row.arr_item_categories.includes(req.body.category_id))))) {
+                    bcht_new.push(row);
+                }
+            }
+        } else {
+            let sql = DB.query.bachat_new.select_all.replace('?', conditionQuery1).replace('#', '');
+            let stmt = DB.db.prepare(sql);
+            for (let row of stmt.iterate({ order: 'updated_at desc' })) {
+                for (let key of Object.keys(row)) {
+                    if (key.includes('arr')) {
+                        row[key] = row[key] ? JSON.parse(row[key]) : []
+                    }
+                }
+                bcht_new.push(row);
+            }
+        }
+
+        res.json({
+            success: true,
+            last: bachat,
+            result: bcht_new,
+            months: months
+        })
+    } catch (err) { console.log(err); next(err) };
+});
+
+// old get filtered bachat_new 
+router.put('/filter_old/:dept_id', async (req, res, next) => {
     try {
         let bachat = [], bcht_new = [], months = [];
         let conditionQuery1 = `where bn.dept_id = ${req.params.dept_id}`;
@@ -69,10 +284,10 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
             slcn.list_name_hin as condition_hin, slcn.list_name_eng as condition_eng,
             unit.unit_short, unit.unit_full,
-            dept.dept_code, dept.dept_hin, dept.dept_eng from (select round(sum(total_aawak), 2) as t_a, round(sum(jawak), 2) as t_j, round(sum(used_jawak), 2) as t_u, round(sum(bachat), 2) as t_b, round(sum(past_bachat), 2) as t_p_b, * from 
+            dept.dept_code, dept.dept_hin, dept.dept_eng from (select round(sum(total_aawak), 2) as t_a, round(sum(jawak), 2) as t_j, round(sum(used_jawak), 2) as t_u, round(sum(bachat), 2) as t_b, * from 
             (select MAX(printf('%04d-%02d', year, month)) as year_month, * from bachat_new ${conditionQuery3}
             group by mm_id, item_id, subitem_id, unit_id, dept_id, condition_id) bn
-            group by bn.dept_id, bn.mm_id, bn.item_id, bn.subitem_id, bn.condition_id, bn.unit_id, bn.month, bn.year order by bn.year, bn.month) bcht
+            group by bn.dept_id, bn.mm_id, bn.item_id, bn.subitem_id, bn.condition_id, bn.unit_id, bn.year, bn.month order by bn.year, bn.month) bcht
             left join mm on mm._id = bcht.mm_id
             left join state st on st._id = mm.state_id
             left join item it on it._id = bcht.item_id
@@ -82,9 +297,9 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             left join unit on unit._id = bcht.unit_id
             left join report_comment rc on rc.dept_id = bcht.dept_id AND rc.mm_id = bcht.mm_id AND rc.item_id = bcht.item_id AND ((rc.subitem_id IS NULL AND bcht.subitem_id IS NULL) OR rc.subitem_id = bcht.subitem_id) AND rc.unit_id = bcht.unit_id AND rc.month IS NULL AND rc.year = bcht.year AND rc.type_id IS NULL
             left join department dept on dept._id = bcht.dept_id ${conditionQuery2}
-            group by bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id;`
+            group by bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id, bcht.year;`
 
-            console.log(sql1);
+            // console.log(sql1);
             let stmtN = DB.db.prepare(sql1);
 
             for (let row of stmtN.iterate({ order: 'updated_at desc' })) {
@@ -94,6 +309,10 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                     if (key.includes('arr')) {
                         row[key] = row[key] ? JSON.parse(row[key]) : []
                     }
+                }
+
+                if (row._id == 20201) {
+                    console.log(row);
                 }
 
                 let crow = Fn.db.prepare(`select *, JSON_GROUP_ARRAY(_id) as arr_comment_id, JSON_GROUP_ARRAY(comment) as arr_comment, JSON_GROUP_ARRAY(month) as arr_months from report_comment where month in (${months.join(',')}) AND year = ${row.year} AND dept_id = ${row.dept_id} AND mm_id = ${row.mm_id} AND item_id = ${row.item_id} AND unit_id = ${row.unit_id} AND report_type = 'full_saar' AND row_type = 'main_row' AND ((subitem_id IS NULL AND ${row.subitem_id} IS NULL) OR subitem_id = ${row.subitem_id}) group by item_id`).get({ ...row, months: months.join(',') })
@@ -113,8 +332,9 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                 row.arr_comment_id = months.map(m => crow.arr_months.includes(m) ? crow.arr_comment_id[crow.arr_months.indexOf(m)] : null);
 
 
-                if (row.max_year == req.body.year) {
+                if (row.year_month >= req.body.year + '-' + String(months[0]).padStart(2, '0')) {
 
+                    // console.log(months);
                     // fill 0 to months that are in range but not in row
                     row.arr_sum_aawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_aawak[row.arr_months.indexOf(m)] : 0);
                     row.arr_sum_jawak = months.map(m => row.arr_months.includes(m) ? row.arr_sum_jawak[row.arr_months.indexOf(m)] : 0);
@@ -123,22 +343,21 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                     row.arr_past_bachat = months.map(m => row.arr_months.includes(m) ? row.arr_past_bachat[row.arr_months.indexOf(m)] : null);
                     // row.arr_comment = months.map(m => row.arr_months.includes(m) ? row.arr_comment[row.arr_months.indexOf(m)] : null);
                 }
-                console.log(row.arr_sum_bachat);
+                // console.log(row.arr_sum_bachat);
                 row.arr_months = months;
                 row.showTooltip = {};
 
-
+                if (row._id == 20201) {
+                    console.log(row);
+                }
                 // add pichla bachat of previos month to all months bachat.
                 for (let i = 0; i < row.arr_sum_bachat.length; i++) {
                     if (i == 0) {
-                        if (row.year == req.body.year && months.includes(row.month)) {
-                            row.past_bachat = row.arr_past_bachat[i];
-                        } else {
-                            row.arr_past_bachat[i] = row.t_p_b;
-                            row.past_bachat = row.t_p_b;
+                        if (row.arr_past_bachat[0] == null) {
+                            row.arr_past_bachat = row.past_bachat || 0;
                         }
                     } else {
-                        row.arr_past_bachat[i] = row.arr_past_bachat[i] == null ? (row.arr_past_bachat[i - 1] || 0) + row.arr_sum_bachat[i - 1] : 0;
+                        row.arr_past_bachat[i] = row.arr_past_bachat[i] == null ? (row.arr_past_bachat[i - 1] + row.arr_sum_bachat[i - 1] || 0) : row.arr_past_bachat[i];
                     }
                     row.arr_sum_bachat[i] = Number((row.arr_sum_bachat[i] + row.arr_past_bachat[i]).toFixed(2));
                 }
@@ -617,6 +836,38 @@ router.delete('/:id', async (req, res, next) => {
         }
         else {
             return next(new Error('Id not Found.'))
+        }
+    } catch (err) { next(err) };
+});
+
+// delete multiple bachat_new 
+router.delete('/many/:dept_id', async (req, res, next) => {
+    try {
+        if (req.body) {
+            let conditions = [];
+            // conditions.push(`dept_id = ${req.params.dept_id}`)
+            if (req.body.mm_id && req.body.mm_id.length > 0)
+                conditions.push(`mm_id in (${req.body.mm_id.join(',')})`)
+            if (req.body.item_id && req.body.item_id.length > 0)
+                conditions.push(`item_id in (${req.body.item_id.join(',')})`)
+            if (req.body.subitem_id && req.body.subitem_id.length > 0)
+                conditions.push(`subitem_id in (${req.body.subitem_id.join(',')})`)
+            if (req.body.unit_id && req.body.unit_id.length > 0)
+                conditions.push(`unit_id in (${req.body.unit_id.join(',')})`)
+            if (req.body.dept_id && req.body.dept_id.length > 0)
+                conditions.push(`dept_id in (${req.body.dept_id.join(',')})`)
+            if (req.body.condition_id && req.body.condition_id.length > 0)
+                conditions.push(`condition_id in (${req.body.condition_id.join(',')})`)
+            let conditionString = conditions.length > 0 ? conditions.join(' AND ') : ``;
+            await DB.deleteMany('bachat_new', conditionString).then((data) => {
+                res.json({
+                    success: true,
+                    result: data
+                });
+            })
+        }
+        else {
+            return next(new Error('Body not Found.'))
         }
     } catch (err) { next(err) };
 });

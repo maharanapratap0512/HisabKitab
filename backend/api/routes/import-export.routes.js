@@ -489,7 +489,7 @@ router.put('/update_apply/:dept_id', async (req, res, next) => {
                     })
                 }
                 catch (ex) {
-                    console.log(ex, data[i]);
+                    // console.log(ex, data[i]);
                     return next(ex);
                 }
             });

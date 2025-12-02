@@ -2,9 +2,9 @@
 const queryBuilder = {
     insert: async (tblname, obj) => {
         let colnames = ``, values = ``;
-        for(let col in obj){
+        for (let col in obj) {
             colnames += col + ', ';
-            values += '@'+col+ ', ';
+            values += '@' + col + ', ';
         }
         colnames = colnames.slice(0, -2);
         values = values.slice(0, -2);
@@ -472,7 +472,8 @@ const jawak = {
         `select * from jawak ?`
     , select_full:
         `select jawak.*,
-        amm.mm_hin,amm.mm_eng,amm.mm_code,
+        amm.mm_hin,amm.mm_eng,amm.mm_code, amm.state_id as mm_state_id, mst.state_hin as mm_state_hin, mst.state_eng as mm_state_eng, 
+        mst.zone_id as mm_zone_id, zn.zone_hin as mm_zone_hin, zn.zone_eng as mm_zone_eng,
         jmm.mm_hin as jawak_mm_hin, jmm.mm_eng as jawak_mm_eng, jmm.mm_code as jawak_mm_code,
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.state_id as pbk_state_id, pst.state_hin as pbk_state_hin, pst.state_eng as pbk_state_eng,
         it.item_hin, it.item_eng, it.item_code, it.item_roman,
@@ -486,6 +487,8 @@ const jawak = {
         nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, nst.state_hin as nimitt_state_hin, nst.state_eng as nimitt_state_eng
         from jawak
         left join mm amm on amm._id = jawak.mm_id 
+        left join state mst on mst._id = amm.state_id
+        left join zone zn on zn._id = mst.zone_id
         left join pbk on pbk._id = jawak.pbk_id
         left join state pst on pst._id = pbk.state_id
         left join mm jmm on jmm._id = jawak.jawak_mm_id
@@ -496,7 +499,7 @@ const jawak = {
         left join support_list sl on sl._id = jawak.condition_id 
         left join support_list slul on slul._id = jawak.usage_list_id
         left join support_list jsl on jsl._id = jawak.jawak_type_id
-        left join support_list jslas on jsl._id = jawak.aawak_source_id
+        left join support_list jslas on jslas._id = jawak.aawak_source_id
         left join unit on unit._id = jawak.unit_id
         left join department dept on dept._id = jawak.dept_id
         left join nimitt nmt on nmt._id = jawak.nimitt_id
@@ -531,7 +534,7 @@ const jawak = {
         rate=@rate,
         actual_amt=@actual_amt,
         jawak_type_id=@jawak_type_id,
-        aawak_source_id=@usage_list_id,
+        aawak_source_id=@aawak_source_id,
         unit_id=@unit_id,
         description=@description,
         sell_repair_place=@sell_repair_place,
@@ -605,8 +608,8 @@ const aawak = {
     , select_full:
         `select aawak.*, 
         mm.mm_hin,mm.mm_eng,mm.mm_code,
-        mst.state_hin as mm_state_hin, mst.state_eng as mm_state_eng,
-        zn.zone_hin as mm_zone_hin, zn.zone_eng as mm_zone_eng,
+        mm.state_id as mm_state_id, mst.state_hin as mm_state_hin, mst.state_eng as mm_state_eng,
+        mst.zone_id as mm_zone_id, zn.zone_hin as mm_zone_hin, zn.zone_eng as mm_zone_eng,
         amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name, pbk.address, pbk.mo_no,
         item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
@@ -759,7 +762,7 @@ const bachat = {
         `select * from bachat where dept_id = @dept_id AND mm_id = @mm_id AND item_id = @item_id AND unit_id = @unit_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0)`
     , select_full:
         `select bachat.*,
-        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng,      
+        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng, st.zone_id, zn.zone_hin, zn.zone_eng,   
         it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as icategories, it.document as idocument,
         sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as scategories, si.document as sdocument,
         bachat.unit_id,unit.unit_short, unit.unit_full,             
@@ -771,10 +774,11 @@ const bachat = {
         left join subitem_list sil on sil._id = si.subitem_list_id
         left join unit on unit._id = bachat.unit_id   
         left join state st on st._id = mm.state_id
+        left join zone zn on zn._id = st.zone_id
         left join department dept on dept._id = bachat.dept_id ? limit @limit offset @offset`
     ,
     with_pending_aawak: `select bachat.*,
-        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id,     
+        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng, st.zone_id, zn.zone_hin, zn.zone_eng,
         it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as icategories,
         sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as scategories,
         bachat.unit_id,unit.unit_short, unit.unit_full,             
@@ -786,6 +790,8 @@ const bachat = {
         left join support_list cnd on cnd._id = aawak.condition_id
         left join support_list awk_type on awk_type._id = aawak.aawak_type_id
         left join mm on mm._id = bachat.mm_id
+        left join state st on st._id = mm.state_id
+        left join zone zn on zn._id = st.zone_id
         left join item it on it._id = bachat.item_id
         left join subitem si on si._id = bachat.subitem_id
         left join subitem_list sil on sil._id = si.subitem_list_id
@@ -805,6 +811,7 @@ const bachat = {
             unit_id,
             dept_id,
             Repairing,
+            difference,
             active)
         values (
             @mm_id,
@@ -819,10 +826,11 @@ const bachat = {
             @unit_id,
             @dept_id,
             @Repairing,
+            @difference,
             @active)`
     , insert_aawak_ins:
-        `insert into bachat(mm_id, item_id, subitem_id, Stock, New, Old, Defective, Repairing, Scrap, unit_id, dept_id) 
-        values(@mm_id, @item_id, @subitem_id, @qty, (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END), (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), @unit_id, @dept_id);`
+        `insert into bachat(mm_id, item_id, subitem_id, Stock, New, Old, Defective, Repairing, Scrap, difference, unit_id, dept_id) 
+        values(@mm_id, @item_id, @subitem_id, @qty, (CASE WHEN @condition_id = 33 THEN @qty ELSE 0 END), (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), @difference, @unit_id, @dept_id);`
     , update_aawak_ins:
         `update bachat set 
         Stock = round(Stock + @qty, 2),
@@ -830,7 +838,8 @@ const bachat = {
         Old = round(Old + (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), 2),
         Defective = round(Defective + (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), 2),
         Repairing = round(Repairing + (CASE WHEN (select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), 2),
-        Scrap = round(Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2)
+        Scrap = round(Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2),
+        difference = @difference
         where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id`
     , update_byid_aawak_ins:
         `update bachat set 
@@ -839,7 +848,8 @@ const bachat = {
         Old = round(Old + (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), 2),
         Defective = round(Defective + (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), 2),
         Repairing = round(Repairing + (CASE WHEN (select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), 2),
-        Scrap = round(Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2)
+        Scrap = round(Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2),
+        difference = @difference
         where _id = @_id`
     , update_aawak_del:
         `update bachat set
@@ -848,13 +858,14 @@ const bachat = {
         Old = round(Old - (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), 2),
         Defective = round(Defective - (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), 2),
         Repairing = round(Repairing - (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), 2),
-        Scrap = round(Scrap - (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2)
+        Scrap = round(Scrap - (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2),
+        difference = @difference
         where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id;`
     , insert_jawak_ins:
         `insert into bachat (
-            mm_id, item_id, subitem_id, dept_id, Used, bachat, unit_id)
+            mm_id, item_id, subitem_id, dept_id, Used, bachat, difference, unit_id)
         values(
-            @mm_id, @item_id, @subitem_id, @dept_id, round((CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END),2), round(0 - @qty, 2), @unit_id);`
+            @mm_id, @item_id, @subitem_id, @dept_id, round((CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END),2), round(0 - @qty, 2), @difference, @unit_id);`
     , update_jawak_ins:
         `update bachat set 
         Stock = round(Stock - @qty, 2),
@@ -863,7 +874,8 @@ const bachat = {
         Old = round(Old - (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), 2),
         Defective = round(Defective - (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), 2),
         Repairing = round(Repairing - (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), 2),
-        Scrap = round(Scrap - (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2)
+        Scrap = round(Scrap - (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2),
+        difference = @difference
         where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id;`
     , update_jawak_del:
         `update bachat set
@@ -873,7 +885,8 @@ const bachat = {
         Old = round(Old + (CASE WHEN @condition_id = 34 THEN @qty ELSE 0 END), 2),
         Defective = round(Defective + (CASE WHEN @condition_id = 35 THEN @qty ELSE 0 END), 2),
         Repairing = round(Repairing + (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN @qty ELSE 0 END), 2),
-        Scrap = round(Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2)
+        Scrap = round(Scrap + (CASE WHEN @condition_id = 36 THEN @qty ELSE 0 END), 2),
+        difference = @difference
         where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id;`
     , update:
         `update bachat set
@@ -889,6 +902,7 @@ const bachat = {
         unit_id=@unit_id,
         dept_id=@dept_id,
         Repairing=@Repairing,
+        difference = @difference,
         updated_at=datetime('now','localtime')`
     , order:
         `mm.mm_hin, mm.mm_eng, item_hin, subitem_hin, item_eng, subitem_eng, unit.unit_short`
@@ -903,7 +917,7 @@ const bachat_new = {
     // , select_exists: `select strftime('%m', @date)`
     , select_full:
         `select bachat_new.*,
-        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng,      
+        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng, st.zone_id, zn.zone_hin, zn.zone_eng,     
         it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as icategories, it.document as idocument,
         sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as scategories, si.document as sdocument,
         bachat_new.unit_id,unit.unit_short, unit.unit_full,             
@@ -916,16 +930,17 @@ const bachat_new = {
         left join subitem_list sil on sil._id = si.subitem_list_id
         left join unit on unit._id = bachat_new.unit_id   
         left join state st on st._id = mm.state_id
+        left join zone zn on zn._id = st.zone_id
         left join support_list slc on slc._id = bachat_new.condition_id
         left join department dept on dept._id = bachat_new.dept_id ? limit @limit offset @offset`
     , select_all:
-        `select bcht.*, json_group_array(list_name_hin) as arr_condition_hin, json_group_array(condition_id) as arr_condition_id, json_group_array(sum_aawak) as arr_sum_aawak, json_group_array(sum_used) as arr_sum_used, json_group_array(sum_jawak) as arr_sum_jawak, json_group_array(sum_bachat) as arr_sum_bachat, sum(sum_aawak) as total_aawak_all, sum(sum_jawak) as total_jawak_all, sum(sum_used) as total_used_all, sum(sum_bachat) as total_bachat_all,
+        `select bcht.*, json_group_array(list_name_hin) as arr_condition_hin, json_group_array(condition_id) as arr_condition_id, json_group_array(sum_aawak) as arr_sum_aawak, json_group_array(sum_used) as arr_sum_used, json_group_array(sum_jawak) as arr_sum_jawak, json_group_array(sum_bachat) as arr_sum_bachat, json_group_array(sum_difference) as arr_sum_difference, sum(sum_aawak) as total_aawak_all, sum(sum_jawak) as total_jawak_all, sum(sum_used) as total_used_all, sum(sum_bachat) as total_bachat_all, sum(sum_difference) as total_difference_all,
         mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
         it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
         sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
         unit.unit_short, unit.unit_full,
         dept.dept_code, dept.dept_hin, dept.dept_eng
-        from (select sum(total_aawak) as sum_aawak, sum(used_jawak) as sum_used, sum(jawak) as sum_jawak, sum(bachat) as sum_bachat, bn.*,
+        from (select sum(total_aawak) as sum_aawak, sum(used_jawak) as sum_used, sum(jawak) as sum_jawak, sum(bachat) as sum_bachat, sum(difference) as sum_difference, bn.*,
             sl.list_name_hin, sl.list_name_eng from bachat_new bn
             left join support_list sl on sl._id = bn.condition_id ?
             group by mm_id, item_id, subitem_id, unit_id, condition_id) bcht 
@@ -940,27 +955,28 @@ const bachat_new = {
 
     , insert:
         `insert into bachat_new (
-            month, year, mm_id, item_id, subitem_id, condition_id, dept_id, total_aawak, jawak, used_jawak, bachat, unit_id, past_bachat)
+            month, year, mm_id, item_id, subitem_id, condition_id, dept_id, total_aawak, jawak, used_jawak, bachat, unit_id, difference, past_bachat)
         values(
-            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, @total_aawak, @jawak, @used_jawak, @bachat, @unit_id,
-            IFNULL((select IFNULL(past_bachat, 0) + IFNULL(bachat, 0) from bachat_new 
+            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, ROUND(@total_aawak, 2), ROUND(@jawak, 2), ROUND(@used_jawak, 2), ROUND(@bachat, 2), @unit_id, @difference,
+            ROUND(IFNULL((select IFNULL(past_bachat, 0) + IFNULL(bachat, 0) from bachat_new 
             where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND unit_id = @unit_id 
             AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)
-            AND ((year = @year AND month < @month) OR year < @year) order by year desc, month desc limit 1), 0));`
+            AND ((year = @year AND month < @month) OR year < @year) order by year desc, month desc limit 1), 0), 2));`
     , insert_aawak_ins:
         `insert into bachat_new (
-            month, year, mm_id, item_id, subitem_id, condition_id, dept_id, total_aawak, bachat, unit_id, past_bachat)
+            month, year, mm_id, item_id, subitem_id, condition_id, dept_id, total_aawak, bachat, unit_id, difference, past_bachat)
         values(
-            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, @qty, @qty, @unit_id, 
-            IFNULL((select IFNULL(past_bachat, 0) + IFNULL(bachat, 0) from bachat_new 
+            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, ROUND(@qty, 2), ROUND(@qty, 2), @unit_id, @difference,
+            ROUND(IFNULL((select IFNULL(past_bachat, 0) + IFNULL(bachat, 0) from bachat_new 
             where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND unit_id = @unit_id 
             AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)
-            AND ((year = @year AND month < @month) OR year < @year) order by year desc, month desc limit 1), 0));`
+            AND ((year = @year AND month < @month) OR year < @year) order by year desc, month desc limit 1), 0), 2));`
     , update_aawak_ins:
         `update bachat_new
         set
             total_aawak = round(total_aawak + @qty, 2),
-            bachat = round(bachat + @qty, 2)
+            bachat = round(bachat + @qty, 2),
+            difference = @difference
         where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , update_byid_aawak_ins:
         `update bachat_new
@@ -972,13 +988,14 @@ const bachat_new = {
         `update bachat_new
         set
             total_aawak = round(total_aawak - @qty, 2),
-            bachat = round(bachat - @qty, 2)
+            bachat = round(bachat - @qty, 2),
+            difference = @difference
         where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , insert_jawak_ins:
         `insert into bachat_new (
-            month, year, mm_id, item_id, subitem_id, condition_id, dept_id, jawak, used_jawak, bachat, unit_id, past_bachat)
+            month, year, mm_id, item_id, subitem_id, condition_id, dept_id, jawak, used_jawak, bachat, unit_id, difference, past_bachat)
         values(
-            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, (CASE WHEN @jawak_type_id <> 27 THEN @qty ELSE 0 END), (CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END), 0 - @qty, @unit_id,
+            @month, @year, @mm_id, @item_id, @subitem_id, @condition_id, @dept_id, (CASE WHEN @jawak_type_id <> 27 THEN ROUND(@qty, 2) ELSE 0 END), (CASE WHEN @jawak_type_id = 27 THEN ROUND(@qty, 2) ELSE 0 END), ROUND((0 - @qty), 2), @unit_id, @difference,
             IFNULL((select IFNULL(past_bachat, 0) + IFNULL(bachat, 0) from bachat_new 
             where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND unit_id = @unit_id 
             AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)
@@ -988,19 +1005,21 @@ const bachat_new = {
         set
             jawak = round((CASE WHEN @jawak_type_id <> 27 THEN jawak + @qty ELSE jawak END), 2),
             used_jawak = round((CASE WHEN @jawak_type_id = 27 THEN used_jawak + @qty ELSE used_jawak END), 2),
-            bachat = round(bachat - @qty, 2)
+            bachat = round(bachat - @qty, 2),
+            difference = @difference
         where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , update_jawak_del:
         `update bachat_new
         set
             jawak = round((CASE WHEN @jawak_type_id <> 27 THEN jawak - @qty ELSE jawak END), 2),
             used_jawak = round((CASE WHEN @jawak_type_id = 27 THEN used_jawak - @qty ELSE used_jawak END), 2),
-            bachat = round(bachat + @qty, 2)
+            bachat = round(bachat + @qty, 2),
+            difference = @difference
         where dept_id = @dept_id AND mm_id = @mm_id AND month = @month AND year = @year AND item_id = @item_id AND unit_id = @unit_id AND ((@subitem_id IS NULL AND subitem_id IS NULL) OR subitem_id = @subitem_id) AND ((@condition_id IS NULL AND condition_id IS NULL) OR condition_id = @condition_id)`
     , update_past_bachat:
         `update bachat_new
         set
-            past_bachat = past_bachat + @qty
+            past_bachat = ROUND(past_bachat + @qty, 2)
             where (year > @year OR (year = @year AND month > @month)) AND 
             dept_id = @dept_id AND mm_id = @mm_id AND item_id = @item_id AND unit_id = @unit_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)`
     , update:
@@ -1011,12 +1030,13 @@ const bachat_new = {
         item_id=@item_id,
         subitem_id=@subitem_id,
         condition_id=@condition_id,
-        total_aawak=@total_aawak,
-        jawak=@jawak,
-        used_jawak=@used_jawak,
-        bachat=@bachat,
+        total_aawak=ROUND(@total_aawak, 2),
+        jawak=ROUND(@jawak, 2),
+        used_jawak=ROUND(@used_jawak, 2),
+        bachat=ROUND(@bachat, 2),
         unit_id=@unit_id,
         dept_id=@dept_id,
+        difference = @difference,
         updated_at=julianday('now', 'localtime')`
     , update_auto:
         `update bachat_new set
@@ -1026,16 +1046,77 @@ const bachat_new = {
         item_id=@item_id,
         subitem_id=@subitem_id,
         condition_id=@condition_id,
-        total_aawak=@total_aawak,
-        jawak=@jawak,
-        used_jawak=@used_jawak,
-        bachat=@bachat,
+        total_aawak=ROUND(@total_aawak, 2),
+        jawak=ROUND(@jawak, 2),
+        used_jawak=ROUND(@used_jawak, 2),
+        bachat=ROUND(@bachat, 2),
         unit_id=@unit_id,
         dept_id=@dept_id,
+        difference = @difference,
         updated_at=julianday('now', 'localtime') where _id = @_id`
     , order:
         `year, month, mm.mm_hin, item_hin, subitem_hin, unit.unit_short`
 }
+
+const pbk_bachat = {
+    select: `select * from pbk_bachat ?`,
+    select_full: `select pbk_bachat.*,
+      pbk.pbk_hin, pbk.pbk_eng, pbk.roll_no,
+      it.item_hin, it.item_eng, it.item_code, it.item_roman,
+      sil.subitem_hin, sil.subitem_eng, sil.subitem_roman,
+      unit.unit_short, unit.unit_full,
+      sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
+      dept.dept_code, dept.dept_hin, dept.dept_eng
+      from pbk_bachat
+      left join pbk on pbk._id = pbk_bachat.pbk_id
+      left join item it on it._id = pbk_bachat.item_id
+      left join subitem si on si._id = pbk_bachat.subitem_id
+      left join subitem_list sil on sil._id = si.subitem_list_id
+      left join unit on unit._id = pbk_bachat.unit_id
+      left join support_list sl on sl._id = pbk_bachat.condition_id
+      left join department dept on dept._id = pbk_bachat.dept_id ? limit @limit offset @offset`,
+    insert: `insert into pbk_bachat (
+      pbk_id, item_id, subitem_id, unit_id, condition_id, qty, dept_id, active)
+    values (
+      @pbk_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @dept_id, @active)`,
+    update: `update pbk_bachat set
+      qty = @qty,
+      updated_at = datetime('now', 'localtime')
+      where pbk_id = @pbk_id AND item_id = @item_id AND unit_id = @unit_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)`,
+    update_qty: `update pbk_bachat set qty = qty + @qty, updated_at = datetime('now', 'localtime') where pbk_id = @pbk_id AND item_id = @item_id AND unit_id = @unit_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)`,
+    order: `pbk.pbk_hin, item_hin, subitem_hin, unit.unit_short`
+}
+
+const pbk_closing = {
+    select: `select * from pbk_closing ?`,
+    select_full: `select pbk_closing.*,
+      pbk.pbk_hin, pbk.pbk_eng, pbk.roll_no,
+      it.item_hin, it.item_eng, it.item_code, it.item_roman,
+      sil.subitem_hin, sil.subitem_eng, sil.subitem_roman,
+      unit.unit_short, unit.unit_full,
+      sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
+      dept.dept_code, dept.dept_hin, dept.dept_eng
+      from pbk_closing
+      left join pbk on pbk._id = pbk_closing.pbk_id
+      left join item it on it._id = pbk_closing.item_id
+      left join subitem si on si._id = pbk_closing.subitem_id
+      left join subitem_list sil on sil._id = si.subitem_list_id
+      left join unit on unit._id = pbk_closing.unit_id
+      left join support_list sl on sl._id = pbk_closing.condition_id
+      left join department dept on dept._id = pbk_closing.dept_id ? limit @limit offset @offset`,
+    insert: `insert into pbk_closing (
+      pbk_id, date, item_id, subitem_id, unit_id, condition_id, qty, sw_bachat, difference, active, hl, is_xl)
+    values (
+      @pbk_id, @date, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @sw_bachat, @difference, @active, @hl, @is_xl)`,
+    update: `update pbk_closing set
+      qty = @qty,
+      sw_bachat = @sw_bachat,
+      difference = @difference,
+      updated_at = datetime('now', 'localtime')
+      where _id = @_id`,
+    order: `date desc, pbk.pbk_hin, item_hin, subitem_hin, unit.unit_short`
+}
+
 
 const mm = {
     select:
@@ -1393,6 +1474,119 @@ const point = {
     , order:
         `point_hin,point_eng`
 }
+
+// hmp stands to Home Made Products
+const hmp_recipe = {
+    select: `select pr.*, d.dept_name from hmp_recipe pr left join department d on pr.dept_id = d._id where pr.active = 1 @`,
+    select_full: `select pr.*, d.dept_name from hmp_recipe pr left join department d on pr.dept_id = d._id where pr.active = 1 @`,
+    insert: `insert into hmp_recipe (recipe_name, recipe_code, description, dept_id) values (@recipe_name, @recipe_code, @description, @dept_id)`,
+    update: `update hmp_recipe set recipe_name = @recipe_name, recipe_code = @recipe_code, description = @description, dept_id = @dept_id, updated_at = datetime('now', 'localtime') where _id = @_id`,
+    delete: `update hmp_recipe set active = 0 where _id = @_id`
+}
+
+const hmp_recipe_input = {
+    select: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name
+             from hmp_recipe_input pri
+             left join item i on pri.item_id = i._id
+             left join unit u on pri.unit_id = u._id
+             left join subitem s on pri.subitem_id = s._id
+             left join support_list sl on pri.condition_id = sl._id
+             where pri.active = 1 @`,
+    select_by_recipe: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name
+                       from hmp_recipe_input pri
+                       left join item i on pri.item_id = i._id
+                       left join unit u on pri.unit_id = u._id
+                       left join subitem s on pri.subitem_id = s._id
+                       left join support_list sl on pri.condition_id = sl._id
+                       where pri.active = 1 and pri.recipe_id = @recipe_id`,
+    insert: `insert into hmp_recipe_input (recipe_id, item_id, subitem_id, unit_id, condition_id, qty) values (@recipe_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty)`,
+    update: `update hmp_recipe_input set item_id = @item_id, subitem_id = @subitem_id, unit_id = @unit_id, condition_id = @condition_id, qty = @qty where _id = @_id`,
+    delete: `update hmp_recipe_input set active = 0 where _id = @_id`
+}
+
+const hmp_recipe_output = {
+    select: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name
+             from hmp_recipe_output pro
+             left join item i on pro.item_id = i._id
+             left join unit u on pro.unit_id = u._id
+             left join subitem s on pro.subitem_id = s._id
+             left join support_list sl on pro.condition_id = sl._id
+             where pro.active = 1 @`,
+    select_by_recipe: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name
+                       from hmp_recipe_output pro
+                       left join item i on pro.item_id = i._id
+                       left join unit u on pro.unit_id = u._id
+                       left join subitem s on pro.subitem_id = s._id
+                       left join support_list sl on pro.condition_id = sl._id
+                       where pro.active = 1 and pro.recipe_id = @recipe_id`,
+    insert: `insert into hmp_recipe_output (recipe_id, item_id, subitem_id, unit_id, condition_id, qty) values (@recipe_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty)`,
+    update: `update hmp_recipe_output set item_id = @item_id, subitem_id = @subitem_id, unit_id = @unit_id, condition_id = @condition_id, qty = @qty where _id = @_id`,
+    delete: `update hmp_recipe_output set active = 0 where _id = @_id`
+}
+
+const hmp_batch = {
+    select: `select pb.*, pr.recipe_name, m.mm_name, d.dept_name from hmp_batch pb 
+             left join mm m on pb.mm_id = m._id 
+             left join department d on pb.dept_id = d._id 
+             where pb.active = 1`,
+    select_full: `select pb.*, pr.recipe_name, m.mm_name, d.dept_name from hmp_batch pb 
+                  left join hmp_recipe pr on pb.recipe_id = pr._id 
+                  left join mm m on pb.mm_id = m._id 
+                  left join department d on pb.dept_id = d._id 
+                  where pb.active = 1`,
+    insert: `insert into hmp_batch (batch_no, recipe_id, date, mm_id, status, notes, dept_id) 
+            values (@batch_no, @recipe_id, @date, @mm_id, @status, @notes, @dept_id)`,
+    update: `update hmp_batch set batch_no = @batch_no, recipe_id = @recipe_id, date = @date, mm_id = @mm_id, status = @status, notes = @notes, dept_id = @dept_id, updated_at = @updated_atatetime('now', 'localtime') where _id = @_id`,
+    // update_totals: `update hmp_batch set total_input_qty = ?, total_output_qty = ?, hmp_loss = ? where _id = ?`,
+    delete: `update hmp_batch set active = 0 where _id = @_id`
+}
+
+const hmp_batch_input = {
+    select: `select pbi.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name 
+             from hmp_batch_input pbi 
+             left join hmp_batch pb on pbi.batch_id = pb._id 
+             left join item i on pbi.item_id = i._id 
+             left join unit u on pbi.unit_id = u._id 
+             left join subitem s on pbi.subitem_id = s._id 
+             left join support_list sl on pbi.condition_id = sl._id 
+             where pbi.active = 1`,
+    select_by_batch: `select pbi.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name 
+                      from hmp_batch_input pbi 
+                      left join item i on pbi.item_id = i._id 
+                      left join unit u on pbi.unit_id = u._id 
+                      left join subitem s on pbi.subitem_id = s._id 
+                      left join support_list sl on pbi.condition_id = sl._id 
+                      where pbi.active = 1 and pbi.batch_id = ?`,
+    insert: `insert into hmp_batch_input (batch_id, item_id, subitem_id, unit_id, condition_id, qty, rate, amount, lot_no, jawak_ref_id) 
+            values (@batch_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @rate, @amount, @lot_no, @jawak_ref_i)`,
+    update: `update hmp_batch_input set item_id = @item_id, subitem_id = @subitem_id, unit_id = @unit_id, condition_id = @condition_id, qty = @qty, rate = @rate, amount = @amount, lot_no = @lot_no, jawak_ref_id = @jawak_ref_id where _id = @_id`,
+    delete: `update hmp_batch_input set active = 0 where _id = @_id`
+}
+
+const hmp_batch_output = {
+    select: `select pbo.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
+             from hmp_batch_output pbo 
+             left join hmp_batch pb on pbo.batch_id = pb._id 
+             left join item i on pbo.item_id = i._id 
+             left join unit u on pbo.unit_id = u._id 
+             left join subitem s on pbo.subitem_id = s._id 
+             left join support_list sl on pbo.condition_id = sl._id 
+             left join support_list slt on pbo.hmp_type = slt._id 
+             where pbo.active = 1`,
+    select_by_batch: `select pbo.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
+                from hmp_batch_output pbo 
+                left join item i on pbo.item_id = i._id 
+                left join unit u on pbo.unit_id = u._id 
+                left join subitem s on pbo.subitem_id = s._id 
+                left join support_list slt on pbo.hmp_type = slt._id 
+                left join support_list sl on pbo.condition_id = sl._id 
+                where pbo.active = 1 and pbo.batch_id = @batch_id`,
+    insert: `insert into hmp_batch_output (batch_id, item_id, subitem_id, unit_id, condition_id, qty, rate, amount, lot_no, batch_product_code, aawak_ref_id) 
+            values (@batch_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @rate, @amount, @lot_no, @batch_product_code, @aawak_ref_id)`,
+    update: `update hmp_batch_output set item_id = @item_id, subitem_id = @subitem_id, unit_id = @unit_id, condition_id = @condition_id, qty = @qty, rate = @rate, amount = @amount, lot_no = @lot_no, batch_product_code = @batch_product_code, aawak_ref_id = @aawak_ref_id where _id = @_id`,
+    delete: `update hmp_batch_output set active = 0 where _id = @_id`
+}
+
 
 const product = {
     select:
@@ -2303,7 +2497,36 @@ const import_history = {
 const dictionary = {
     insert: `insert or ignore into dictionary(type, name, extra_note, id, id2) values(@type, @name, @extra_note, @id, @id2)`,
     select: `select * from dictionary ?`,
-    select_full: `select * from dictionary ?`,
+    select_full:
+        `select dict.*,
+        CASE WHEN dict.type in ('awk_type', 'jwk_type', 'condition' ) THEN spl.list_name_hin || ' : ' || spl.list_name_eng 
+        WHEN dict.type = 'aj_mm' THEN mm.mm_hin || ' : ' || mm.mm_eng
+        WHEN dict.type = 'state' THEN state.state_hin || ' : ' || state.state_eng
+        WHEN dict.type = 'district' THEN district.district_hin || ' : ' || district.district_eng
+        WHEN dict.type = 'zone' THEN zone.zone_hin || ' : ' || zone.zone_eng
+        WHEN dict.type = 'city' THEN city.city_hin || ' : ' || city.city_eng
+        WHEN dict.type = 'category' THEN ct.category_hin || ' : ' || ct.category_eng
+        WHEN dict.type = 'unit' THEN unit.unit_short || ' : ' || unit.unit_full
+        WHEN dict.type = 'subitem_list' THEN sl.subitem_hin || ' : ' || sl.subitem_eng
+        WHEN dict.type = 'item' THEN item.item_hin || ' : ' || item.item_eng
+        ELSE NULL END as original_name,
+        CASE WHEN dict.type = 'item' THEN sil.subitem_hin || ' : ' || sil.subitem_eng
+        ELSE NULL END as sub_name
+         from dictionary dict
+        left join mm on dict.type = 'aj_mm' AND mm._id = dict.id
+        left join support_list spl on dict.type in ('awk_type', 'jwk_type', 'condition' ) AND spl._id = dict.id
+        left join state on dict.type = 'state' AND state._id = dict.id
+        left join district on dict.type = 'district' AND district._id = dict.id
+        left join zone on dict.type = 'zone' AND zone._id = dict.id
+        left join city on dict.type = 'city' AND city._id = dict.id
+        left join category ct on dict.type = 'category' AND ct._id = dict.id
+        left join unit on dict.type = 'unit' AND unit._id = dict.id
+        left join subitem_list sl on dict.type = 'subitem_list' AND sl._id = dict.id
+        left join item on dict.type = 'item' AND item._id = dict.id
+        left join subitem on dict.type = 'item' AND subitem._id = dict.id2
+        left join subitem_list sil on dict.type = 'item' AND sil._id = subitem.subitem_list_id
+         ?
+        `,
     update: `update dictionary set 
         type = @type, 
         name = @name,
@@ -2511,5 +2734,6 @@ const test = {
 }
 
 module.exports = {
-    queryBuilder, country, city, category, department, department_config, item, itemmix, aawak, aawak_voucher, bachat, jawak, mm, nimitt, pbk, point, product, zone, district, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, report_comment
+    queryBuilder, country, city, category, department, department_config, item, itemmix, aawak, aawak_voucher, bachat, pbk_bachat, pbk_closing, jawak, mm, nimitt, pbk, point, product, zone, district, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, report_comment,
+    hmp_recipe, hmp_recipe_input, hmp_recipe_output, hmp_batch, hmp_batch_input, hmp_batch_output,
 };

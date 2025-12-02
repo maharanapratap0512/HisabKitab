@@ -144,7 +144,7 @@
                                           (click)="unlockItem(i,data._id)"><i class="uil-lock-alt"></i></button>
                                     </ng-container>
                                     <button class="btn btn-sm btn-outline-danger" type="button"
-                                       (click)="delete(i,data._id)" *ngIf="settings.delete">
+                                       (click)="deleteItem(data._id)" *ngIf="settings.delete">
                                        <i class="uil-trash"></i>
                                     </button>
                                  </div>
@@ -207,22 +207,18 @@
                                                 <span class="mx-1">{{j+1}}</span>
                                              </td>
                                              <td style="width: 135px;">
-                                                <button class="btn btn-sm btn-primary mx-1" type="button"
-                                                   (click)="edit(si, 'subitem')" *ngIf="settings.edit">
-                                                   <i class=" uil uil-pen"></i>
-                                                </button>
-                                                <button *ngIf="!si.restrict_year && settings.edit"
-                                                   class="btn btn-sm btn-outline-warning" type="button"
-                                                   (click)="lockSubitem(i, j, si._id)"><i
-                                                      class="uil-unlock-alt"></i></button>
-                                                <button *ngIf="si.restrict_year && settings.edit"
-                                                   class="btn btn-sm btn-warning" type="button"
-                                                   (click)="unlockSubitem(i, j, si._id)"><i
-                                                      class="uil-lock-alt"></i></button>
-                                                <button *ngIf="settings.delete" class="btn btn-sm btn-outline-danger"
-                                                   type="button" (click)="deleteSubitem(i, j,si._id)">
-                                                   <i class="uil-trash"></i></button>
-                                                <div *ngIf="si.restrict_year" class="lock-date text-warning">
+                                                <!-- <button class="btn btn-sm btn-primary mx-1" type="button"> -->
+                                                <i class=" uil uil-pen i-outline-primary me-1"
+                                                   (click)="edit(si, 'subitem')" *ngIf="settings.edit"></i>
+                                                <!-- </button> -->
+                                                <i *ngIf="!si.restrict_year && settings.edit"
+                                                   class="uil-unlock-alt i-outline-warning me-1"
+                                                   (click)="lockSubitem(i, j, si._id)"></i>
+                                                <i  *ngIf="si.restrict_year && settings.edit"
+                                                      class="uil-lock-alt i-warning me-1" (click)="unlockSubitem(i, j, si._id)"></i>
+                                                <i *ngIf="settings.delete" class="uil-trash i-outline-danger me-1"
+                                                   (click)="deleteSubitem(i, j,si._id)"></i>
+                                                <div *ngIf="si.restrict_year" class="lock-date text-warning me-1">
                                                    {{si.restrict_month}}/{{si.restrict_year}} से लॉक।
                                                 </div>
                                              </td>
@@ -305,6 +301,8 @@
                (response)="importResponse('item')"></app-excel-import>
             <app-excel-import *ngIf='showModal == "ei_subitem"' importType="subitem" [excelFile]="excelFile"
                (response)="importResponse('subitem')"></app-excel-import>
+            <app-delete *ngIf='showModal == "delete_item"' [Type]="delType" [ID]="delID"
+               (response)="deleteResponse($event)"></app-delete>
          </div>
          <div class="modal-footer">
             <div class="form-check form-switch">

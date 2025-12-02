@@ -140,7 +140,7 @@
                <div class="form-group">
                   <label class="form-label">Pkt No.</label>
                   <input type="text" class="form-control" placeholder="पर्ची न." [(ngModel)]="awkfg.pkt_num"
-                     name="pkt_num" #pkt_num="ngModel">
+                     name="pkt_num" #pkt_num="ngModel" autocomplete="on">
                </div>
             </div>
 
@@ -245,7 +245,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="false">
                <div class="form-group">
                   <label class="form-label text-success">Filter Items By</label>
                   <!-- <button type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
@@ -272,6 +272,31 @@
                <div class="form-group">
                   <label class="form-label">Item & Subitem</label>
                   <div class="float-end" *ngIf="settings.item.add">
+                     <!-- Filter Button with Popover -->
+                     <app-popover-filter [isActive]="selDept_id != null || cat != null" (clear)="clearItemFilters()">
+                        <div class="mb-2">
+                           <label class="form-label" style="font-size: 0.875rem; margin-bottom: 5px;">Department</label>
+                           <ng-select *ngIf="departments.length > 0" class="custom" style="width: 100%;"
+                              placeholder="Select Department" [clearable]="true" [virtualScroll]="true"
+                              (change)="deptSelected($event)" [ngModelOptions]="{standalone: true}"
+                              [(ngModel)]="selDept_id">
+                              <ng-option *ngFor="let item of departments" [value]="item._id">
+                                 {{item.dept_hin}} : {{item.dept_eng}}{{item.dept_code?' : '+item.dept_code:''}}
+                              </ng-option>
+                           </ng-select>
+                        </div>
+
+                        <div class="mb-2">
+                           <label class="form-label" style="font-size: 0.875rem; margin-bottom: 5px;">Category</label>
+                           <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
+                              [clearable]="true" [virtualScroll]="true" [(ngModel)]="cat" (change)="catSelected($event)"
+                              [ngModelOptions]="{standalone: true}">
+                              <ng-option *ngFor="let item of categories" [value]="item._id">
+                                 {{item.category_hin}} : {{item.category_eng}}
+                              </ng-option>
+                           </ng-select>
+                        </div>
+                     </app-popover-filter>
                      <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
                         onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal = 'Add Item'">
                         + Item
@@ -282,6 +307,7 @@
                         + Subitem
                      </a>
                   </div>
+
                   <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.item_id" name="item_id" #item_id="ngModel"
                      (change)="itemSelected($event)"
@@ -383,6 +409,7 @@
                <div class="form-group">
                   <label class="form-label">Aawak Source & Type</label>
                   <div class="float-end" *ngIf="settings.aawak.aawak_source_id">
+
                      <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary"
                         onclick="$('#aawakEntryComponent > #showModal').modal('show')"
                         (click)="showModal = 'Add Aawak Source'">
@@ -416,6 +443,22 @@
                   </ng-select>
                </div>
             </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Usage List</label>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Usage List" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.usage_list_id" name="usage_list_id"
+                     #usage_list_id="ngModel">
+                     <ng-option selected="selected" disabled value="">Usage List
+                     </ng-option>
+                     <ng-option *ngFor="let item of usage_lists" [value]="item._id">
+                        {{item.list_name_hin}} : {{item.list_name_eng}}
+                     </ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
 
             <!-- <div class="col-md-3 mb-3">
                <div class="form-group">

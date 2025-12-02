@@ -88,8 +88,11 @@ export class JawakEntryComponent implements OnInit {
       is_process: [null],
       dept_id: [this.auth.webUser.dept_id],
       auto_awk: [this.settings.jawak.auto_awk],
+      auto_reawk: [this.settings.jawak.auto_awk],
       aawak_type_id: [null],
       aawak_dept_id: [this.auth.webUser.dept_id],
+      aawak_date: [null],
+      re_aawak_type_id: [null],
     });
 
     this.gs.observeList().subscribe(result => {
@@ -150,8 +153,11 @@ export class JawakEntryComponent implements OnInit {
         is_process: changes.getData.currentValue.is_process ? changes.getData.currentValue.is_process : 0,
         unit_short: changes.getData.currentValue.unit_short,
         auto_awk: changes.getData.currentValue.auto_awk ? changes.getData.currentValue.auto_awk : 0,
+        auto_reawk: changes.getData.currentValue.auto_reawk ? changes.getData.currentValue.auto_reawk : 0,
         aawak_type_id: changes.getData.currentValue.aawak_type_id ? changes.getData.currentValue.aawak_type_id : null,
-        aawak_dept_id: changes.getData.currentValue.aawak_dept_id ? changes.getData.currentValue.aawak_dept_id : null
+        aawak_dept_id: changes.getData.currentValue.aawak_dept_id ? changes.getData.currentValue.aawak_dept_id : null,
+        aawak_date: changes.getData.currentValue.aawak_date ? changes.getData.currentValue.aawak_date : null,
+        re_aawak_type_id: changes.getData.currentValue.re_aawak_type_id ? changes.getData.currentValue.re_aawak_type_id : null,
       });
 
 

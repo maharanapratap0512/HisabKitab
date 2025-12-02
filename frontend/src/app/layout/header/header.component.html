@@ -12,7 +12,7 @@
             <span class="hk-title">
                <span class="hk mx-2"><strong><u>HISAB KITAB</u></strong>
                </span>
-               <span>(v22.0)</span>
+               <span>(v25 Beta)</span>
             </span>
          </a>
          <!-- <a routerLink="dashboard" class="topnav-logo">
@@ -41,19 +41,29 @@
                   Jawak
                </a>
             </li>
-            <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.product.visible">
+            <li class="notification-list mx-1" style="line-height: 68px;" title="Home Made Products">
+               <a class="btn btn-primary btn-primary-custom lh-xl" routerLinkActive="active" routerLink="hmp">
+                  HMP
+               </a>
+            </li>
+            <!-- <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.product.visible">
                <a class="btn btn-primary btn-primary-custom lh-xl" routerLinkActive="active" routerLink="product">
                   Product
                </a>
-            </li>
+            </li> -->
             <!-- <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.bachat.visible">
                <a class="btn btn-primary btn-primary-custom lh-xl" routerLinkActive="active" routerLink="bachat">
                   Bachat
                </a>
             </li> -->
+            <li class="notification-list mx-1" style="line-height: 68px;" title="Pbk Closing">
+               <a class="btn btn-primary btn-primary-custom lh-xl" routerLinkActive="active" routerLink="pbk_closing">
+                  PBK
+               </a>
+            </li>
             <li class="notification-list mx-1" style="line-height: 68px;" *ngIf="settings.bachat.visible">
                <a class="btn btn-primary btn-primary-custom lh-xl" routerLinkActive="active" routerLink="bachat_new">
-                  Bachat New
+                  Bachat
                </a>
             </li>
             <li class="notification-list mx-1" style="line-height: 68px;"
@@ -239,6 +249,8 @@
                            routerLink="item">Item</a> -->
                         <a class="dropdown-item text-info" *ngIf="settings.aawak.lot_no" routerLinkActive="active"
                            [routerLink]="['view', 'lot_no']">LOT Nos</a>
+                        <a class="dropdown-item" routerLinkActive="active"
+                           [routerLink]="['view', 'dict']">Dictionary</a>
                         <a class="dropdown-item" *ngIf="settings.category.visible" routerLinkActive="active"
                            routerLink="category">Category</a>
                         <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'unit']">Unit</a>
@@ -266,18 +278,18 @@
                         </div>
 
                         <a class="dropdown-item" routerLinkActive="active"
-                        [routerLink]="['view', 'word_correction']">Word Correction</a>
+                           [routerLink]="['view', 'word_correction']">Word Correction</a>
 
                         <a class="dropdown-item" routerLinkActive="active"
                            [routerLink]="['view', 'subitem_list']">Subitem List</a>
                         <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'aawak_type']">Aawak
                            Type</a>
-                        <a class="dropdown-item text-warning" routerLinkActive="active"
-                           [routerLink]="['view', 'aawak_source']">Aawak Source</a>
+                        <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'aawak_source']">Aawak
+                           Source</a>
                         <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'jawak_type']">Jawak
                            Type</a>
-                        <a class="dropdown-item text-warning" routerLinkActive="active"
-                           [routerLink]="['view', 'usage_list']">Usage List</a>
+                        <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'usage_list']">Usage
+                           List</a>
                         <a class="dropdown-item" routerLinkActive="active"
                            [routerLink]="['view', 'condition']">Condition</a>
                         <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'mm_type']">MM
@@ -349,6 +361,11 @@
                   <li class="nav-item" *ngIf="settings.point.visible">
                      <a class="nav-link" routerLinkActive="active" routerLink="point" role="button">
                         <i class="uil-layer-group me-1"></i>Points
+                     </a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link" routerLinkActive="active" routerLink="mysql" role="button">
+                        <i class="uil-layer-group me-1"></i>MySQL
                      </a>
                   </li>
 
@@ -639,11 +656,14 @@
          <h5 class="mt-3">Important Flags</h5>
          <hr class="mt-1" />
 
-         <div class="form-check form-switch mb-1">
-            <input class="form-check-input" type="checkbox" name="color-scheme-mode" value="light" id="light-check"
-               checked>
+         <!-- <div class="form-check form-switch mb-1">
+            <input class="form-check-input" type="checkbox" id="light-check" checked>
             <label class="form-check-label" for="light-mode-check">Auto Aawak Default</label>
          </div>
+         <div class="form-check form-switch mb-1">
+            <input class="form-check-input" type="checkbox" id="light-check" checked>
+            <label class="form-check-label" for="light-mode-check">Auto Aawak Default</label>
+         </div> -->
 
 
          <!-- Width -->
