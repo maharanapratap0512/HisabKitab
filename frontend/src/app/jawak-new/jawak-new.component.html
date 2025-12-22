@@ -1,1 +1,322 @@
-<p>jawak-new works!</p>
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color: white"> {{loadingStatus}} </p>
+</ngx-spinner>
+
+<!-- Begin page -->
+<div class="wrapper">
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+
+                <!-- First Row -->
+                <!-- Add Button, Search Field, Total Count -->
+                <div class="row">
+                    <div class="card-body">
+                        <div class="row d-flex justify-content-between">
+                            <div class="col-2">
+                                <button class="btn btn-primary w-100" (click)="openModal('Add Jawak')">
+                                    <i class="dripicons-plus h4 icon-mx-2"> </i> Jawak
+                                </button>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                                        name="search">
+                                </div>
+                            </div>
+                            <div class="col-3 d-flex">
+                                <!-- <button *ngIf="!gs.importPending" class="file btn btn-success"
+                                    style="font-weight: 700 !important;">
+                                    <i class="uil uil-arrow-to-bottom"></i> Import Aawak
+                                    <input type="file" class="inputtag"
+                                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                        (change)="excelImport($event)" />
+                                </button>
+                                <button *ngIf="gs.importPending" class="file btn btn-success"
+                                    (click)="openModal('import')" style="font-weight: 700 !important;">
+                                    <i class="uil uil-arrow-to-bottom"></i> Import Aawak
+                                </button> -->
+
+                                <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                                    data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
+                                <div class="dropdown-menu">
+                                    <!-- <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
+                                    <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
+                                    <a class="dropdown-item" (click)="exportJawakData()">Jawak Only</a>
+                                    <a class="dropdown-item" (click)="exportPendingData()">Pending Destribution</a> -->
+                                </div>
+
+                            </div>
+
+                            <div class="col-2">
+                                <button type="button" style="font-weight: 700 !important;"
+                                    class="btn btn-light w-100">Total
+                                    Count : {{total_count}}
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- year filter and table -->
+                <div class="row">
+
+                    <div class="card-body" style="overflow: auto; flex-direction: column;">
+                        <div class="row">
+                            <div class="col-4 pt-2">
+                                <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
+                                    (click)="yearClick(null)">All</span>
+                                <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearClick(y)"
+                                    [ngClass]="{'badge-outline-secondary':filterBody.year == y}">
+                                    {{y}}
+                                </span>
+                            </div>
+                            <div class="col-8" *ngIf="jawakData.length">
+                                <pagination-controls class="pagi text-end" (pageChange)="getJawakPage(page = $event)"
+                                    [autoHide]="true">
+                                </pagination-controls>
+                            </div>
+                        </div>
+
+
+                        <div class="table-container">
+                            <table class="table table-striped table-hover table-sticky-header jawak-data-table">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th width="3%">#</th>
+                                        <th width="7%">Actions</th>
+                                        <th width="8%">Voucher No</th>
+                                        <th width="8%">Date</th>
+                                        <th width="6%">Pkt No</th>
+                                        <th width="6%">Reg Page</th>
+                                        <th width="12%">From MM</th>
+                                        <th width="12%">To MM</th>
+                                        <th width="14%">Sewadhari</th>
+                                        <th width="10%">Nimitt</th>
+                                        <th width="6%">Items</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <ng-container *ngFor="let row of jawakData; let i = index">
+                                        <!-- Main Voucher Row -->
+                                        <tr class="voucher-row" [class.expanded]="row.expanded"
+                                            (click)="toggleExpand(row)" style="cursor: pointer;">
+                                            <td>{{row.sr_no}}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary me-1" title="Edit"
+                                                    (click)="editJawak(i, row); $event.stopPropagation()">
+                                                    <i class="uil uil-pen"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" title="Delete"
+                                                    (click)="deleteJawak(i, row.sr_no); $event.stopPropagation()">
+                                                    <i class="uil uil-trash"></i>
+                                                </button>
+                                            </td>
+                                            <td><strong>{{row.voucher_no}}</strong></td>
+                                            <td>
+                                                <div class="date-info">
+                                                    <strong>{{row.date | date:'dd/MM/yyyy'}}</strong><br>
+                                                    <small class="text-muted">{{row.date_sent ? 'sent on : ' +
+                                                        (row.date_sent |
+                                                        date:'dd/MM/yyyy') : ''}}</small>
+                                                </div>
+                                            </td>
+                                            <td>{{row.pkt_num || '-'}}</td>
+                                            <td>{{row.reg_pg_no || '-'}}</td>
+                                            <td>
+                                                <div class="location-info">
+                                                    <small class="text-muted">{{row.mm_eng}}</small><br>
+                                                    <span class="hindi-text">{{row.mm_hin}}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="location-info">
+                                                    <small class="text-muted">{{row.jawak_mm_eng}}</small><br>
+                                                    <span class="hindi-text">{{row.jawak_mm_hin}}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div *ngIf="row.pbk_hin" class="pbk-info">
+                                                    <small>{{row.roll_no || 'N/A'}}</small><br>
+                                                    <span class="hindi-text">{{row.pbk_hin}}</span>
+                                                </div>
+                                                <span *ngIf="!row.pbk_hin">-</span>
+                                            </td>
+                                            <td>
+                                                <div *ngIf="row.nimitt_hin" class="nimitt-info">
+                                                    <small class="text-muted">{{row.nimitt_eng}}</small><br>
+                                                    <span class="hindi-text">{{row.nimitt_hin}}</span>
+                                                </div>
+                                                <span *ngIf="!row.nimitt_hin">-</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-secondary">{{row.jawaks?.length || 0}}
+                                                    items</span>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Expanded Items Table -->
+                                        <tr *ngIf="row.expanded" class="items-row">
+                                            <td colspan="11" class="p-0">
+                                                <div class="items-container" appHorizontalScrollWithArrows>
+                                                    <table class="table table-sm mb-0 items-table">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th style="width: 3vw;">Sr.</th>
+                                                                <th style="width: 6vw;">Actions</th>
+                                                                <th style="width: 8vw;">Lot No</th>
+                                                                <th style="width: 15vw;">Item</th>
+                                                                <th style="width: 12vw;">Sub Item</th>
+                                                                <th style="width: 10vw;">Product</th>
+                                                                <th style="width: 8vw;">Condition</th>
+                                                                <th style="width: 12vw;">Company</th>
+                                                                <th style="width: 10vw;">Qty & Unit</th>
+                                                                <th style="width: 12vw;">Rate & Amount</th>
+                                                                <th style="width: 12vw;">Aawak Source</th>
+                                                                <th style="width: 15vw;">Jawak Type</th>
+                                                                <th style="width: 12vw;">Usage List</th>
+                                                                <th style="width: 10vw;">Container</th>
+                                                                <th style="width: 18vw;">Usage Report</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr *ngFor="let item of row.jawaks; let j = index">
+                                                                <td>{{j + 1}}</td>
+                                                                <td>
+                                                                    <button class="btn btn-xs btn-danger"
+                                                                        title="Delete Item"
+                                                                        (click)="deleteOne(i, j, item._id)">
+                                                                        <i class="uil uil-times"></i>
+                                                                    </button>
+                                                                </td>
+                                                                <td>{{item.lot_no || '-'}}</td>
+                                                                <td>
+                                                                    <div class="item-info">
+                                                                        <strong>{{item.item_eng}}</strong><br>
+                                                                        <small
+                                                                            class="hindi-text">{{item.item_hin}}</small>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="item-info" *ngIf="item.subitem_eng">
+                                                                        <span>{{item.subitem_eng}}</span><br>
+                                                                        <small
+                                                                            class="hindi-text">{{item.subitem_hin}}</small>
+                                                                    </div>
+                                                                    <span *ngIf="!item.subitem_eng">-</span>
+                                                                </td>
+                                                                <td>{{item.product_code || '-'}}</td>
+                                                                <td>
+                                                                    <span class="badge"
+                                                                        [class.badge-warning]="item.condition_eng === 'Old'"
+                                                                        [class.badge-success]="item.condition_eng === 'New'">
+                                                                        {{item.condition_eng}}
+                                                                    </span>
+                                                                </td>
+                                                                <td>{{item.company_name || '-'}}</td>
+                                                                <td><strong>{{item.qty}} {{item.unit_short}}</strong>
+                                                                </td>
+                                                                <td>
+                                                                    <span *ngIf="item.rate">@{{item.rate}} =
+                                                                        {{item.actual_amt}}</span>
+                                                                    <span *ngIf="!item.rate">-</span>
+                                                                </td>
+                                                                <td>
+                                                                    <small class="text-muted">{{item.aawak_source_eng ||
+                                                                        '-'}}</small> <br />
+                                                                    <span
+                                                                        class="hindi-text">{{item.aawak_source_hin ||
+                                                                            '-'}}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="jawak-type-info">
+                                                                        <small
+                                                                            class="text-muted">{{item.jawak_type_eng}}</small><br>
+                                                                        <span
+                                                                            class="hindi-text">{{item.jawak_type_hin}}</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <small class="text-muted">{{item.usage_list_eng ||
+                                                                        '-'}}</small>
+                                                                </td>
+                                                                <td>
+                                                                    <small
+                                                                        class="text-muted">{{item.enz?.container_capacity
+                                                                        || '-'}}</small>
+                                                                </td>
+                                                                <td>
+                                                                    <div *ngIf="item.usage_report?.date"
+                                                                        class="usage-report-detailed">
+                                                                        <div class="rating-reporter-line">
+                                                                            <span class="star"
+                                                                                *ngFor="let star of [1,2,3,4,5]"
+                                                                                [class.filled]="star <= item.usage_report.rating">★</span>
+                                                                            <span
+                                                                                class="reporter">{{item.usage_report.reporter}}</span>
+                                                                            <small class="date">{{item.usage_report.date
+                                                                                | date:'dd/MM/yyyy'}}</small>
+                                                                        </div>
+                                                                        <div *ngIf="item.usage_report.fayda"
+                                                                            class="text-success">😊
+                                                                            {{item.usage_report.fayda}}</div>
+                                                                        <div *ngIf="item.usage_report.nuksan"
+                                                                            class="text-danger">😢
+                                                                            {{item.usage_report.nuksan}}</div>
+                                                                    </div>
+                                                                    <span *ngIf="!item.usage_report?.date">-</span>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" style="width: 90%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+                <button type="button" (click)="closeModal()" class="btn-close" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <app-jawak-entry-new *ngIf='showModal == "Add Jawak"'
+                    (response)='addJawakBunchResponse($event)'></app-jawak-entry-new>
+
+                <!-- <app-import *ngIf='showModal == "import"' (response)='importResponse($event)'></app-import> -->
+
+                <app-jawak-entry-new *ngIf="showModal == 'Edit Jawak'" (response)='editJawakResponse($event)'
+                    [getData]="editData" [isEdit]="true"></app-jawak-entry-new>
+
+                <!-- <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
+                    [aawakRef]="editData"></app-jawak-entry>
+
+                <app-product-view *ngIf="showModal == 'Show Images'" [aawak]="editData"></app-product-view>
+
+                <app-data-view *ngIf="showModal == 'Show Jawak'" [getData]="viewData" Type="jawak"></app-data-view> -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" style="width: 120px;"
+                    onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

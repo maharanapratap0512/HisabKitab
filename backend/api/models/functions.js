@@ -17,7 +17,7 @@ class Functions extends DBContex {
       return new Promise(async (resolve, reject) => {
          try {
             let stmtInsert = this.db.prepare(this.query[type].insert);
-            obj = { ...this.tbInterface.aawak, ...obj }
+            obj = { ...this.tbInterface[type], ...obj };
             obj.document = JSON.stringify(obj.document ? obj.document : {});
             obj.isbill = obj.isbill ? 1 : 0;
             obj.active = 1;
@@ -30,6 +30,13 @@ class Functions extends DBContex {
             if (insResult.changes == 1 && insResult.lastInsertRowid) {
                obj._id = insResult.lastInsertRowid;
                await this.updateBachatFromAJInsert(obj, type);
+               if (type == 'jawak') {
+                  obj.enz.jawak_id = insResult.lastInsertRowid;
+                  obj.usage_report.jawak_id = insResult.lastInsertRowid;
+                  await this.insertUsageReport(obj.usage_report);
+               }
+               obj.enz.aawak_id = insResult.lastInsertRowid;
+               await this.insertAJEnzyme(obj.enz, type);
                resolve(insResult.lastInsertRowid);
             } else {
                reject(new Error('no any records are inserted'));
@@ -41,11 +48,93 @@ class Functions extends DBContex {
       });
    }
 
+   async insertAJEnzyme(obj, type) {
+      return new Promise(async (resolve, reject) => {
+         try {
+            let doInsert = false;
+            if (type == 'aawak' && (obj.container_aawak_source_id || obj.container_enz_no || obj.container_capacity || obj.container_qty)) {
+               doInsert = true;
+            } else if (type == 'jawak' && (obj.container_capacity)) {
+               doInsert = true;
+            }
+            console.log(obj, type, doInsert);
+            if (doInsert) {
+               let stmtInsert = this.db.prepare(this.query[type + '_enzyme'].insert);
+               await stmtInsert.run(obj);
+            }
+            resolve(true);
+         } catch (ex) {
+            reject(0);
+         }
+      });
+   }
+
+   async deleteAJEnzyme(id, type) {
+      return new Promise(async (resolve, reject) => {
+         try {
+            let stmtDelete = this.db.prepare(this.query[type + '_enzyme'].delete_by_ref);
+            await stmtDelete.run(id);
+            resolve(true);
+         } catch (ex) {
+            reject(ex)
+         }
+      });
+   }
+
+   async updateAJEnzyme(obj, type) {
+      return new Promise(async (resolve, reject) => {
+         try {
+            let stmtUpdate = this.db.prepare(this.query[type + '_enzyme'].update);
+            await stmtUpdate.run(obj);
+            resolve(true);
+         } catch (ex) {
+            reject(ex)
+         }
+      });
+   }
+
+   async insertUsageReport(obj) {
+      return new Promise(async (resolve, reject) => {
+         try {
+            if (obj && (obj.date || obj.reporter || obj.usage_type || obj.fayda || obj.nuksan || obj.rating)) {
+               await this.db.prepare(this.query.usage_report.insert).run(obj);
+            }
+            resolve(true);
+         } catch (ex) {
+            reject(ex);
+         }
+      });
+   }
+
+   async updateUsageReport(obj) {
+      return new Promise(async (resolve, reject) => {
+         try {
+            if (obj._id) {
+               await this.db.prepare(this.query.usage_report.update).run(obj);
+            }
+            resolve(true);
+         } catch (ex) {
+            reject(ex)
+         }
+      });
+   }
+
+   async deleteUsageReportByRef(id) {
+      return new Promise(async (resolve, reject) => {
+         try {
+            await this.db.prepare(this.query.usage_report.delete_by_ref).run(id);;
+            resolve(true);
+         } catch (ex) {
+            reject(ex)
+         }
+      });
+   }
+
    async updateAJ(obj, type, objOld = null) {
       return new Promise(async (resolve, reject) => {
          try {
             let stmtUpdate = this.db.prepare(this.query[type].update + ` where ${type}._id = ${obj._id}`);
-
+            obj = { ...this.tbInterface[type], ...obj };
             obj.document = JSON.stringify(obj.document && typeof obj.document != 'string' ? obj.document : {});
             obj.isbill = obj.isbill ? 1 : 0;
             obj.hl = obj.hl ? 1 : 0;
@@ -57,15 +146,31 @@ class Functions extends DBContex {
             if (!objOld) {
                objOld = await this.getById(type, obj._id);
             }
+
             // console.log(obj);
             let updtResult = stmtUpdate.run(obj);
             if (updtResult.changes == 1) {
                await this.updateBachatFromAJUpdate(obj, type, objOld);
+               if (obj.enz) {
+                  obj.enz[type + '_id'] = obj._id
+                  if (obj.enz._id)
+                     await this.updateAJEnzyme(obj.enz, type);
+                  else
+                     await this.insertAJEnzyme(obj.enz, type);
+               }
+               if (type == 'jawak' && obj.usage_report) {
+                  if (obj.usage_report._id) {
+                     await this.updateUsageReport(obj.usage_report)
+                  } else {
+                     obj.usage_report.jawak_id = obj._id;
+                     await this.insertUsageReport(obj.usage_report);
+                  }
+
+               }
                resolve(true);
             } else {
                reject(new Error('no any records are updated.'));
             }
-
          } catch (err) {
             // throw err;
             reject(err);
@@ -79,6 +184,10 @@ class Functions extends DBContex {
             let stmtDelete = this.db.prepare(this.query[type].delete)
             let obj = await this.getById(type, id);
             if (obj) {
+               await this.deleteAJEnzyme(id, type);
+               if (type == 'jawak') {
+                  await this.deleteUsageReportByRef(id);
+               }
                let delResult = stmtDelete.run({ _id: id });
                if (delResult.changes == 1) {
                   await this.updateBachatFromAJDelete(id, type, obj);
@@ -89,8 +198,6 @@ class Functions extends DBContex {
             } else {
                resolve(0)
             }
-
-
          } catch (err) {
             reject(err);
          }

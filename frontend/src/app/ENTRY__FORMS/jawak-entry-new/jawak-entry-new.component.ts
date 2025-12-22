@@ -21,6 +21,7 @@ export class JawakEntryNewComponent implements OnInit {
   @Input() isEdit: any;
   @Input() getData: any;
   @Output() response = new EventEmitter();
+  aawakLoader: boolean = false;
   isLoader: boolean = false;
   showModal: string = ''
 
@@ -36,6 +37,7 @@ export class JawakEntryNewComponent implements OnInit {
   pbks: any = [];
   aawak_types: any = [];
   usage_lists: any = [];
+  usage_types: any = [];
   aawak_sources: any = [];
   jawak_types: any = [];
   nimitts: any = [];
@@ -46,6 +48,19 @@ export class JawakEntryNewComponent implements OnInit {
   lotNoAll: any = [];
   lotNos: any = [];
   keyword: any = 'lot_no';
+  aawaksAll: any = [];
+  aawaks: any = [];
+  aawakFilter: any = {
+    max_date: null,
+    mm_id: null,
+    item_id: null,
+    subitem_id: null,
+    condition_id: null,
+    unit_id: null,
+    aawak_source_id: null,
+    remaining_qty: true
+  }
+  insertIndex: any = 0;
 
   contextMenuItems: ContextMenuItem[] = [
   ];
@@ -72,8 +87,10 @@ export class JawakEntryNewComponent implements OnInit {
       this.aawak_sources = result.aawak_source ? result.aawak_source : [];
       this.jawak_types = result.jawak_type ? result.jawak_type : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
+      this.usage_types = result.usage_type ? result.usage_type : [];
     });
     this.settings = this.auth.webUser.settings;
+    fs.jawakFormMain.mm_id = this.settings.defaultMM;
     this.getLotNo();
   }
 
@@ -81,22 +98,104 @@ export class JawakEntryNewComponent implements OnInit {
 
     setTimeout(() => {
       if (this.fMain) {
+        this.getRemainingAawakData();
         this.fMain.statusChanges?.pipe(debounceTime(200)).subscribe(() => {
-          this.fs.formStatusChanges()
+          this.fs.jawakFormStatusChanges();
+          this.getRemainingAawakData();
         });
       }
     }, 500);
   }
 
+  async getRemainingAawakData() {
+    this.aawakLoader = true;
+    if (this.aawakFilter.max_date != this.fs.jawakFormMain.date || this.aawakFilter.mm_id != this.fs.jawakFormMain.mm_id) {
+
+      // update filter object
+      this.aawakFilter.max_date = this.fs.jawakFormMain.date
+      this.aawakFilter.mm_id = this.fs.jawakFormMain.mm_id
+      this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, this.aawakFilter).subscribe((data: any) => {
+        if (data['result'] && data['success']) {
+          this.aawaksAll = data['result'];
+          this.aawaks = this.aawaksAll;
+          this.filterAawak();
+        }
+      });
+    } else {
+      this.filterAawak();
+    }
+  }
+
+  filterAawak() {
+    if (this.aawakFilter.item_id != this.fs.jawakFormMain.item_id || this.aawakFilter.subitem_id != this.fs.jawakFormMain.subitem_id || this.aawakFilter.condition_id != this.fs.jawakFormMain.condition_id || this.aawakFilter.unit_id != this.fs.jawakFormMain.unit_id || this.aawakFilter.aawak_source_id != this.fs.jawakFormMain.aawak_source_id) {
+
+      // Update filter values
+      this.aawakFilter.item_id = this.fs.jawakFormMain.item_id;
+      this.aawakFilter.subitem_id = this.fs.jawakFormMain.subitem_id;
+      this.aawakFilter.condition_id = this.fs.jawakFormMain.condition_id;
+      this.aawakFilter.unit_id = this.fs.jawakFormMain.unit_id;
+      this.aawakFilter.aawak_source_id = this.fs.jawakFormMain.aawak_source_id;
+
+      // If all filter values are null, copy full array
+      if (!this.aawakFilter.item_id &&
+        !this.aawakFilter.subitem_id &&
+        !this.aawakFilter.condition_id &&
+        !this.aawakFilter.unit_id &&
+        !this.aawakFilter.aawak_source_id) {
+        this.aawaks = this.aawaksAll;
+      } else {
+        // Filter based on non-null values
+        this.aawaks = this.aawaksAll.filter((aawak: any) => {
+          return (!this.aawakFilter.item_id || aawak.item_id === this.aawakFilter.item_id) &&
+            (!this.aawakFilter.subitem_id || aawak.subitem_id === this.aawakFilter.subitem_id) &&
+            (!this.aawakFilter.condition_id || aawak.condition_id === this.aawakFilter.condition_id) &&
+            (!this.aawakFilter.unit_id || aawak.unit_id === this.aawakFilter.unit_id) &&
+            (!this.aawakFilter.aawak_source_id || aawak.aawak_source_id === this.aawakFilter.aawak_source_id);
+        });
+      }
+    } else {
+      this.aawakLoader = false;
+      return;
+    }
+    this.aawakLoader = false;
+    return;
+  }
+
+  refAawakSelected(awk: any, i: any) {
+    this.fs.jawakFormMain.jawaks[i] = {
+      ...this.fs.jawakFormMain.jawaks[i],
+      aawak_ref_id: awk._id,
+      item_id: awk.item_id,
+      subitem_id: awk.subitem_id,
+      condition_id: awk.condition_id,
+      unit_id: awk.unit_id,
+      aawak_source_id: awk.aawak_source_id,
+      company_name: awk.company_name,
+      rate: awk.rate,
+      remainig_qty: awk.remainig_qty,
+    }
+    this.itemSelected(awk.item_id, i);
+    this.subitemSelected(awk.subitem_id, i);
+
+  }
+
+  clearAawak(i: any) {
+
+  }
+  clearReport(i: any) {
+
+  }
+
+
   ngOnChanges(changes: SimpleChanges) {
     if (changes.isEdit && changes.isEdit.currentValue) {
     }
     if (changes.getData && changes.getData.currentValue) {
-      this.fs.aawakFormMain = { ...this.fs.aawakForm, ...changes.getData.currentValue }
-      this.fs.formStatusChanges()
-      for (let i in this.fs.aawakFormMain.aawaks) {
-        if (this.fs.aawakFormMain.aawaks[i].item_id) {
-          this.itemSelected(this.fs.aawakFormMain.aawaks[i].item_id, i);
+      this.fs.patchFormJawak(changes.getData.currentValue);
+      this.fs.jawakFormStatusChanges()
+      for (let i in this.fs.jawakFormMain.jawaks) {
+        if (this.fs.jawakFormMain.jawaks[i].item_id) {
+          this.itemSelected(this.fs.jawakFormMain.jawaks[i].item_id, i);
         }
       }
 
@@ -105,9 +204,8 @@ export class JawakEntryNewComponent implements OnInit {
 
   ngOnDestroy(): void {
     if (this.isEdit) {
-      this.fs.reset();
+      this.fs.resetJawak();
     }
-
   }
 
   getContextMenuItems(row: any): ContextMenuItem[] {
@@ -119,32 +217,31 @@ export class JawakEntryNewComponent implements OnInit {
       }
     ]
   }
-  
+
   toggleHighlight(row: any) {
     console.log("clicked highlight", row);
-
-    this.fs.aawakFormMain.aawaks[row.i].hl = !row.hl;
+    this.fs.jawakFormMain.jawaks[row.i].hl = !row.hl;
   }
 
   selectEvent(ev: any, index: any) {
     if (ev.lot_no) {
-      this.fs.aawakFormMain.aawaks[index].item_id = ev.item_id;
+      this.fs.jawakFormMain.jawaks[index].item_id = ev.item_id;
       this.itemSelected(ev.item_id, index);
-      this.fs.aawakFormMain.aawaks[index].subitem_id = ev.subitem_id;
-      this.fs.aawakFormMain.aawaks[index].condition_id = ev.condition_id;
-      this.fs.aawakFormMain.aawaks[index].aawak_source_id = ev.aawak_source_id;
-      this.fs.aawakFormMain.aawaks[index].rate = ev.rate;
-      this.fs.aawakFormMain.aawaks[index].unit_id = ev.unit_id;
+      this.fs.jawakFormMain.jawaks[index].subitem_id = ev.subitem_id;
+      this.fs.jawakFormMain.jawaks[index].condition_id = ev.condition_id;
+      this.fs.jawakFormMain.jawaks[index].aawak_source_id = ev.aawak_source_id;
+      this.fs.jawakFormMain.jawaks[index].rate = ev.rate;
+      this.fs.jawakFormMain.jawaks[index].unit_id = ev.unit_id;
     }
 
   }
 
   onChangeSearch(ev: any, index: any) {
-    this.fs.aawakFormMain.aawaks[index].lot_no = ev;
+    this.fs.jawakFormMain.jawaks[index].lot_no = ev;
   }
 
   focusoutLotNo(index: any) {
-    let lot_no = this.lotNos.find((l: any) => l.lot_no == this.fs.aawakFormMain.aawaks[index].lot_no);
+    let lot_no = this.lotNos.find((l: any) => l.lot_no == this.fs.jawakFormMain.jawaks[index].lot_no);
     if (lot_no) {
       this.selectEvent(lot_no, index);
     }
@@ -152,12 +249,12 @@ export class JawakEntryNewComponent implements OnInit {
 
   openModal(type: string) {
     this.showModal = type;
-    $('#bunchAawakEntryComponent > #showModal').modal('show');
+    $('#bunchJawakEntryComponent > #showModal').modal('show');
   }
 
   closeModal() {
     this.showModal = '';
-    $('#bunchAawakEntryComponent > #showModal').modal('hide');
+    $('#bunchJawakEntryComponent > #showModal').modal('hide');
   }
 
   getLotNo() {
@@ -170,56 +267,60 @@ export class JawakEntryNewComponent implements OnInit {
   openImageModal(index: any) {
     this.showModal = 'Add Image';
     this.imageIndex = index;
-    $('#bunchAawakEntryComponent > #addImages').modal('show')
+    $('#bunchJawakEntryComponent > #addImages').modal('show')
   }
 
-  bunchAawakSubmit() {
+  bunchJawakSubmit() {
     this.fs.submit = true;
-    if (this.fs.valid()) {
+    if (this.fs.validJawak()) {
 
       this.isLoader = true;
-      this.http.post(this.api.getUrl('AAWAK') + 'bunch/' + this.auth.webUser.dept_id, this.fs.aawakFormMain).subscribe((data: any) => {
+      this.http.post(this.api.getUrl('JAWAK') + 'bunch/' + this.auth.webUser.dept_id, this.fs.jawakFormMain).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.imagepath = null;
           this.isLoader = false;
-          this.fs.reset();
-          this.toastr.success('Aawak Added Successfully.');
+          this.fs.resetJawak();
+          this.toastr.success('Jawak Added Successfully.');
           this.response.emit(data['result']);
         } else {
           this.toastr.error(data['message']);
           this.isLoader = false;
         }
       }, err => {
+        this.fs.submit = false;
         this.toastr.error(err['error']);
         this.isLoader = false;
       });
     } else {
+      this.fs.submit = false;
       this.toastr.error('Form is not valid');
       this.isLoader = false;
     }
   }
 
-  bunchAawakUpdate() {
+  bunchJawakUpdate() {
     this.fs.submit = true;
-    if (this.fs.valid()) {
+    if (this.fs.validJawak()) {
 
       this.isLoader = true;
-      this.http.put(this.api.getUrl('AAWAK') + 'bunch/' + this.auth.webUser.dept_id, this.fs.aawakFormMain).subscribe((data: any) => {
+      this.http.put(this.api.getUrl('JAWAK') + 'bunch/' + this.auth.webUser.dept_id, this.fs.jawakFormMain).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.imagepath = null;
           this.isLoader = false;
-          this.fs.reset();
-          this.toastr.success('Aawak Updated Successfully.');
+          this.fs.resetJawak();
+          this.toastr.success('Jawak Updated Successfully.');
           this.response.emit(data['result']);
         } else {
           this.toastr.error(data['message']);
           this.isLoader = false;
         }
       }, err => {
+        this.fs.submit = false;
         this.toastr.error(err['error']);
         this.isLoader = false;
       });
     } else {
+      this.fs.submit = false;
       this.toastr.error('Form is not valid');
       this.isLoader = false;
     }
@@ -241,17 +342,17 @@ export class JawakEntryNewComponent implements OnInit {
       this.lotNos = this.lotNoAll.filter((l: { item_id: any; }) => l.item_id == ev);
       this.getProductData(ev);
       // this.subitems = item.subitems || [];
-      this.fs.aawakFormMain.aawaks[i].subitems = item.subitems || [];
+      this.fs.jawakFormMain.jawaks[i].subitems = item.subitems || [];
 
       if (!this.isEdit)
-        this.fs.aawakFormMain.aawaks[i].unit_id = item.unit_id;
+        this.fs.jawakFormMain.jawaks[i].unit_id = item.unit_id;
     }
     else {
       this.subitems = [];
       this.lotNos = this.lotNoAll;
-      this.fs.aawakFormMain.aawaks[i].unit_id = null
-      this.fs.aawakFormMain.aawaks[i].subitem_id = null
-      this.fs.aawakFormMain.aawaks[i].lot_no = null;
+      this.fs.jawakFormMain.jawaks[i].unit_id = null
+      this.fs.jawakFormMain.jawaks[i].subitem_id = null
+      this.fs.jawakFormMain.jawaks[i].lot_no = null;
     }
   }
 
@@ -261,16 +362,16 @@ export class JawakEntryNewComponent implements OnInit {
       this.lotNos = this.lotNos.filter((l: { subitem_id: any; }) => l.subitem_id == ev);
       this.products = this.products.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
       if (!this.isEdit && subitem)
-        this.fs.aawakFormMain.aawaks[i].unit_id = subitem.unit_id;
+        this.fs.jawakFormMain.jawaks[i].unit_id = subitem.unit_id;
     }
     else {
-      if (this.fs.aawakFormMain.aawaks[i].item_id) {
-        this.products = this.getProductData(this.fs.aawakFormMain.aawaks[i].item_id);
-        this.lotNos = this.lotNoAll.filter((l: { item_id: any; }) => l.item_id == this.fs.aawakFormMain.aawaks[i].item_id);
+      if (this.fs.jawakFormMain.jawaks[i].item_id) {
+        this.products = this.getProductData(this.fs.jawakFormMain.jawaks[i].item_id);
+        this.lotNos = this.lotNoAll.filter((l: { item_id: any; }) => l.item_id == this.fs.jawakFormMain.jawaks[i].item_id);
       } else {
         this.products = []
         this.lotNos = this.lotNoAll;
-        this.fs.aawakFormMain.aawaks[i].lot_no = null;
+        this.fs.jawakFormMain.jawaks[i].lot_no = null;
       }
     }
   }
@@ -278,45 +379,45 @@ export class JawakEntryNewComponent implements OnInit {
   productSelected(ev: any, i: any) {
     // this.isCondition = true;
     let product = this.products.find((p: { _id: any; }) => p._id == ev);
-    this.fs.aawakFormMain.aawaks[i].condition_id = product ? product.condition_id : null;
-    this.fs.aawakFormMain.aawaks[i].item_id = product.item_id;
-    this.fs.aawakFormMain.aawaks[i].subitem_id = product.subitem_id;
-    this.fs.aawakFormMain.aawaks[i].qty = 1;
-    this.fs.aawakFormMain.aawaks[i].unit_id = 1;
-    this.fs.aawakFormMain.aawaks[i].rate = product.price ? product.price : null;
+    this.fs.jawakFormMain.jawaks[i].condition_id = product ? product.condition_id : null;
+    this.fs.jawakFormMain.jawaks[i].item_id = product.item_id;
+    this.fs.jawakFormMain.jawaks[i].subitem_id = product.subitem_id;
+    this.fs.jawakFormMain.jawaks[i].qty = 1;
+    this.fs.jawakFormMain.jawaks[i].unit_id = 1;
+    this.fs.jawakFormMain.jawaks[i].rate = product.price ? product.price : null;
     this.rateClick(i);
   }
 
   qtyClick(i: any) {
-    if (this.fs.aawakFormMain.aawaks[i].qty && this.fs.aawakFormMain.aawaks[i].rate) {
-      let actual_amt = this.fs.aawakFormMain.aawaks[i].qty * this.fs.aawakFormMain.aawaks[i].rate
-      this.fs.aawakFormMain.aawaks[i].actual_amt = actual_amt.toFixed(2);
+    if (this.fs.jawakFormMain.jawaks[i].qty && this.fs.jawakFormMain.jawaks[i].rate) {
+      let actual_amt = this.fs.jawakFormMain.jawaks[i].qty * this.fs.jawakFormMain.jawaks[i].rate
+      this.fs.jawakFormMain.jawaks[i].actual_amt = actual_amt.toFixed(2);
     }
-    else if (this.fs.aawakFormMain.aawaks[i].qty && this.fs.aawakFormMain.aawaks[i].actual_amt) {
-      let rate = this.fs.aawakFormMain.aawaks[i].actual_amt / this.fs.aawakFormMain.aawaks[i].qty
-      this.fs.aawakFormMain.aawaks[i].rate = rate.toFixed(2);
+    else if (this.fs.jawakFormMain.jawaks[i].qty && this.fs.jawakFormMain.jawaks[i].actual_amt) {
+      let rate = this.fs.jawakFormMain.jawaks[i].actual_amt / this.fs.jawakFormMain.jawaks[i].qty
+      this.fs.jawakFormMain.jawaks[i].rate = rate.toFixed(2);
     }
   }
 
   rateClick(i: any) {
-    if (!this.fs.aawakFormMain.aawaks[i].actual_amt && this.fs.aawakFormMain.aawaks[i].qty && this.fs.aawakFormMain.aawaks[i].rate) {
-      let actual_amt = this.fs.aawakFormMain.aawaks[i].qty * this.fs.aawakFormMain.aawaks[i].rate;
-      this.fs.aawakFormMain.aawaks[i].actual_amt = actual_amt.toFixed(2)
+    if (!this.fs.jawakFormMain.jawaks[i].actual_amt && this.fs.jawakFormMain.jawaks[i].qty && this.fs.jawakFormMain.jawaks[i].rate) {
+      let actual_amt = this.fs.jawakFormMain.jawaks[i].qty * this.fs.jawakFormMain.jawaks[i].rate;
+      this.fs.jawakFormMain.jawaks[i].actual_amt = actual_amt.toFixed(2)
     }
-    else if (!this.fs.aawakFormMain.aawaks[i].actual_amt && this.fs.aawakFormMain.aawaks[i].rate && this.fs.aawakFormMain.aawaks[i].actual_amt) {
-      let quantity = this.fs.aawakFormMain.aawaks[i].actual_amt / this.fs.aawakFormMain.aawaks[i].rate;
-      this.fs.aawakFormMain.aawaks[i].qty = quantity.toFixed(2)
+    else if (!this.fs.jawakFormMain.jawaks[i].actual_amt && this.fs.jawakFormMain.jawaks[i].rate && this.fs.jawakFormMain.jawaks[i].actual_amt) {
+      let quantity = this.fs.jawakFormMain.jawaks[i].actual_amt / this.fs.jawakFormMain.jawaks[i].rate;
+      this.fs.jawakFormMain.jawaks[i].qty = quantity.toFixed(2)
     }
   }
 
   amntClick(i: any) {
-    if (!this.fs.aawakFormMain.aawaks[i].rate && this.fs.aawakFormMain.aawaks[i].qty && this.fs.aawakFormMain.aawaks[i].actual_amt) {
-      let rate = this.fs.aawakFormMain.aawaks[i].actual_amt / this.fs.aawakFormMain.aawaks[i].qty
-      this.fs.aawakFormMain.aawaks[i].rate = rate.toFixed(2)
+    if (!this.fs.jawakFormMain.jawaks[i].rate && this.fs.jawakFormMain.jawaks[i].qty && this.fs.jawakFormMain.jawaks[i].actual_amt) {
+      let rate = this.fs.jawakFormMain.jawaks[i].actual_amt / this.fs.jawakFormMain.jawaks[i].qty
+      this.fs.jawakFormMain.jawaks[i].rate = rate.toFixed(2)
     }
-    else if (!this.fs.aawakFormMain.aawaks[i].qty && this.fs.aawakFormMain.aawaks[i].rate && this.fs.aawakFormMain.aawaks[i].actual_amt) {
-      let quantity = this.fs.aawakFormMain.aawaks[i].actual_amt / this.fs.aawakFormMain.aawaks[i].rate
-      this.fs.aawakFormMain.aawaks[i].qty = quantity.toFixed(2)
+    else if (!this.fs.jawakFormMain.jawaks[i].qty && this.fs.jawakFormMain.jawaks[i].rate && this.fs.jawakFormMain.jawaks[i].actual_amt) {
+      let quantity = this.fs.jawakFormMain.jawaks[i].actual_amt / this.fs.jawakFormMain.jawaks[i].rate
+      this.fs.jawakFormMain.jawaks[i].qty = quantity.toFixed(2)
     }
   }
 
@@ -325,8 +426,8 @@ export class JawakEntryNewComponent implements OnInit {
     if (ev) {
       this.isLoader = true;
       this.imagepath = ev;
-      this.fs.aawakFormMain.aawaks[this.imageIndex].document = { images: ev }
-      $('#bunchAawakEntryComponent > #addImages').modal('hide');
+      this.fs.jawakFormMain.jawaks[this.imageIndex].document = { images: ev }
+      $('#bunchJawakEntryComponent > #addImages').modal('hide');
       this.showModal = '';
       this.imageIndex = null;
       this.isLoader = false;
@@ -353,5 +454,21 @@ export class JawakEntryNewComponent implements OnInit {
         this.products = data['result'];
       }
     });
+  }
+
+  usageTypeSelected(ev: any, i: any) {
+
+    if (ev == 'add') {
+      console.log(ev, i);
+      this.insertIndex = i;
+      this.openModal('Add Usage Type')
+    }
+  }
+
+  usageTypeAddResponse(ev: any) {
+    if (ev._id) {
+      this.fs.jawakFormMain.jawaks[this.insertIndex].usage_report.usage_type = ev._id;
+      this.closeModal();
+    }
   }
 }

@@ -1,7 +1,8 @@
-<div style="position: relative; display: inline-block;">
+<!-- <div style="position: relative; display: inline-block;">
     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
         class="btn btn-outline-secondary" (click)="togglePopover($event)">
-        <i [class]="isActive ? 'uil uil-check' : 'uil uil-filter'"></i>
+        <i [class]="iconClass"></i>
+        <span *ngIf="label">{{label}}</span>
     </button>
 
     <div class="filter-backdrop" *ngIf="isOpen" (click)="closePopover()"></div>
@@ -10,7 +11,29 @@
         <ng-content></ng-content>
 
         <button type="button" class="btn btn-sm btn-light w-100 mt-2" (click)="onClear()" *ngIf="showClearButton">
-            <i class="uil uil-times-circle"></i> Clear Filters
+            <i class="uil uil-times-circle"></i> {{clearButtonLabel}}
         </button>
+    </div>
+</div> -->
+
+<div style="position: relative; display: inline-block;">
+    <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+        class="btn btn-outline-secondary" (click)="togglePopover($event)">
+        <i [class]="iconClass"></i>
+        <span *ngIf="label">{{label}}</span>
+    </button>
+
+    <div class="popover-container" *ngIf="isOpen">
+        <div class="filter-backdrop" (click)="closePopover()"></div>
+        <div class="filter-popover" [ngStyle]="popoverPosition">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">{{ label }}</h6>
+                <button *ngIf="showClearButton" type="button" class="btn btn-sm btn-outline-secondary"
+                    (click)="onClear()">
+                    {{ clearButtonLabel }}
+                </button>
+            </div>
+            <ng-content></ng-content>
+        </div>
     </div>
 </div>

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { FormControl, FormGroup, ValidationErrors } from '@angular/forms';
 import { HttpService } from 'src/app/services/http.service';
 import { ApiService } from 'src/app/services/api.service';
-import { Observable, observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, shareReplay, tap } from 'rxjs';
 import { async } from '@angular/core/testing';
 import { getLocaleMonthNames } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
@@ -13,6 +13,9 @@ import { AuthService } from './auth.service';
 })
 export class GlobalService {
 
+  private lists$?: Observable<any>;
+
+  isLoader = new BehaviorSubject<boolean>(false);
   Lists: any = null;
   Config: any = {};
   importPending: any = false;
@@ -67,26 +70,53 @@ export class GlobalService {
   }
 
   observeList(): Observable<any> {
-    let data = new Observable<any>(observer => {
-      if (!this.Lists) {
-        this.Lists = {}
-        this.http.get(this.api.URLS['LISTALL'] + '/' + this.auth.webUser.dept_id).subscribe((data) => {
-          if (data['success'] && data['result']) {
-            for (let key of Object.keys(data['result'])) {
-              // console.log('key',data['result'][]);
+    // if Lists already set, just emit it
+    if (this.Lists) {
+      return of(this.Lists);
+    }
 
-              this.Lists[key] = data['result'][key].data;
+    if (!this.lists$) {
+      this.isLoader.next(true);
+      this.lists$ = this.http
+        .get(this.api.URLS['LISTALL'] + '/' + this.auth.webUser.dept_id)
+        .pipe(
+          tap((data: any) => {
+            this.Lists = {};
+            if (data.success && data.result) {
+              for (const key of Object.keys(data.result)) {
+                this.Lists[key] = data.result[key].data;
+              }
             }
-          }
-          observer.next(this.Lists);
-        });
-      }
-      else {
-        observer.next(this.Lists);
-      }
-    });
-    return data;
+            this.isLoader.next(false);
+          }),
+          shareReplay(1) // cache last value for future subscribers
+        );
+    }
+
+    return this.lists$;
   }
+
+  // observeList(): Observable<any> {
+  //   let data = new Observable<any>(observer => {
+  //     if (!this.Lists) {
+  //       this.Lists = {}
+  //       this.http.get(this.api.URLS['LISTALL'] + '/' + this.auth.webUser.dept_id).subscribe((data) => {
+  //         if (data['success'] && data['result']) {
+  //           for (let key of Object.keys(data['result'])) {
+  //             // console.log('key',data['result'][]);
+  //             this.Lists[key] = data['result'][key].data;
+  //           }
+  //         }
+  //         this.isLoader = false;
+  //         observer.next(this.Lists);
+  //       });
+  //     }
+  //     else {
+  //       observer.next(this.Lists);
+  //     }
+  //   });
+  //   return data;
+  // }
 
   formatDisplayDate(d: any) {
     var date = new Date(d)

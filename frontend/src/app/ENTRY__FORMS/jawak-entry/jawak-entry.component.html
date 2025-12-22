@@ -472,6 +472,14 @@
                     </div>
                 </div>
 
+                <div class="col-md-2 mb-3">
+                    <div class="form-group" formGroupName="enz"> 
+                        <label class="form-label">Contaier Capacity</label>
+                        <input type="number" class="form-control" placeholder="capacity" formControlName="container_capacity"
+                            name="container_capacity">
+                    </div>
+                </div>
+
 
                 <div class="col-md-4 mb-3 d-flex" *ngIf="jawakForm.value.auto_reawk && (!isEdit || !getData._id)">
                     <div class="form-group">

@@ -120,7 +120,7 @@ export class AawakEntryNewComponent implements OnInit {
       }
     ]
   }
-  
+
   toggleHighlight(row: any) {
     console.log("clicked highlight", row);
 
@@ -191,10 +191,12 @@ export class AawakEntryNewComponent implements OnInit {
           this.isLoader = false;
         }
       }, err => {
+        this.fs.submit = false;
         this.toastr.error(err['error']);
         this.isLoader = false;
       });
     } else {
+      this.fs.submit = false;
       this.toastr.error('Form is not valid');
       this.isLoader = false;
     }
@@ -217,10 +219,12 @@ export class AawakEntryNewComponent implements OnInit {
           this.isLoader = false;
         }
       }, err => {
+        this.fs.submit = false;
         this.toastr.error(err['error']);
         this.isLoader = false;
       });
     } else {
+      this.fs.submit = false;
       this.toastr.error('Form is not valid');
       this.isLoader = false;
     }

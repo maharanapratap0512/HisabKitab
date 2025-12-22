@@ -6,6 +6,7 @@ import { GlobalService } from './services/global.service';
 import { HttpService } from './services/http.service';
 import { Subject } from 'rxjs';
 import { AuthService } from './services/auth.service';
+import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router } from '@angular/router';
 declare var $: any;
 
 @Component({
@@ -30,10 +31,10 @@ export class AppComponent {
   years: any = [];
   lockMonth: any;
   lockYear: any;
-  darkMode:any = false;
+  darkMode: any = false;
 
   constructor(
-    private toastr: ToastrService,
+    private router: Router,
     private spinner: NgxSpinnerService,
     private api: ApiService,
     public gs: GlobalService,
@@ -43,30 +44,19 @@ export class AppComponent {
   ) {
     this.months = gs.months;
     this.years = gs.years;
+
+    this.gs.isLoader.subscribe(loading => {
+      if (loading) {
+        this.spinner.show('routeSpinner');
+      } else {
+        this.spinner.hide('routeSpinner');
+      }
+    });
   }
 
   ngOnInit(): void {
-    this.spinner.show();
+    // this.spinner.show();
     this.timer();
-
-    // setInterval(() => {
-    //   this.toastr.show("में आत्मा शांत स्वरूप हूँ ।", 'Om Shanti', {
-    //     timeOut: 10000,
-    //     positionClass: 'toast-top-center',
-    //     progressBar: true,
-    //     progressAnimation: 'increasing',
-    //     easing: 'ease-in'
-    //   });
-    //   this.toastr.show("में एक आत्मा हूँ ।", 'Om Shanti', {
-    //     timeOut: 10000,
-    //     positionClass: 'toast-top-center',
-    //     progressBar: true,
-    //     progressAnimation: 'increasing',
-    //     easing: 'ease-in'
-    //   });
-    //   this.spinner.hide();
-    // }, 300000);
-
   }
 
   openModal(name: string) {

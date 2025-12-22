@@ -22,7 +22,8 @@ router.post('/', async (req, res, next) => {
     try {
         if (req.body.tbl_name && req.body.data) {
             let obj = { ...DB.tbInterface[tbl_name], ...data }
-            let sql = DB.query.queryBuilder.insert()
+            let sql = DB.query.queryBuilder.insert(tbl_name);
+            await DB.db.all()
             await DB.insert('country', req.body).then(async (data) => {
                 res.json({
                     success: true,

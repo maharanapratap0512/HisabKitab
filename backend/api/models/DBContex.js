@@ -31,6 +31,7 @@ class DBContex {
         'aawak_type',
         'condition',
         'usage_list',
+        'usage_type',
         'aawak_source',
         'mm_type'
     ]
@@ -42,6 +43,7 @@ class DBContex {
         'aawak_type',
         'jawak_type',
         'usage_list',
+        'usage_type',
         'aawak_source'
     ];
 
@@ -332,7 +334,7 @@ class DBContex {
                 if (this.supp_list.includes(tblname)) {
                     tblname = `support_list`;
                 }
-                if (tblname == "itemmix" || tblname == "aawak_voucher") {
+                if (["itemmix", "aawak_voucher", "jawak_voucher"].includes(tblname)) {
                     sql = this.query[tblname].count.replace('?', (conditionString && conditionString.trim() != '' ? ` where ${conditionString} ` : ``));
                     sql = sql.replace('#', '');
                 }

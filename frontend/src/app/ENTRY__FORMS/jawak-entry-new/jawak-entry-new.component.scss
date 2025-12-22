@@ -1,6 +1,23 @@
 .ng-autocomplete {
-    width:100%;
-    max-width: 600px;
-    display: table;
-    margin: 0 auto;
-  }
+  width: 100%;
+  max-width: 600px;
+  display: table;
+  margin: 0 auto;
+}
+
+.rating {
+  unicode-bidi: bidi-override;
+  text-align: left;
+}
+
+.star {
+  font-size: 1.2vw;
+  color: #ddd;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.star:hover,
+.star.filled {
+  color: #ffd700;
+}

@@ -73,6 +73,7 @@ export class AuthService {
     ],
     aawak: [
       { colName: 'pkt_num', title: 'Pkt Num' },
+      { colName: 'reg_pg_no', title: 'Reg. Page No' },
       { colName: 'lot_no', title: 'Lot No' },
       { colName: 'filter_by_state', title: 'Filter PBK' },
       { colName: 'pbk_id', title: 'PBK / Sewadhari' },
@@ -92,14 +93,15 @@ export class AuthService {
       { colName: 'is_variable_qty', title: 'Variable Qty' },
       { colName: 'is_process', title: 'Processed Aawak' },
       { colName: 'document', title: 'Image' },
+      { colName: 'enz', title: 'Enzyme Container Columns.' },
       { colName: 'jawak', title: 'Jawak Section' }
     ],
     jawak: [
-      { colName: 'pkt_num', title: 'Pkt Num' },
-      { colName: 'Lot_no', title: 'Lot No' },
       { colName: 'date_sent', title: 'Date Sent' },
+      { colName: 'pkt_num', title: 'Pkt Num' },
+      { colName: 'reg_pg_no', title: 'Reg. Page No' },
+      { colName: 'Lot_no', title: 'Lot No' },
       { colName: 'nimitt_id', title: 'Nimitt' },
-      { colName: 'filter_by_state', title: 'Filter PBK' },
       { colName: 'pbk_id', title: 'PBK / Sewadhari' },
       { colName: 'product_id', title: 'Product' },
       { colName: 'company_name', title: 'Company' },
@@ -109,10 +111,11 @@ export class AuthService {
       { colName: 'is_process', title: 'For Process' },
       { colName: 'item_detail', title: 'Item Detail' },
       { colName: 'description', title: 'Description' },
-      { colName: 'ref_aawak_select', title: 'Referece Aawak Search' },
+      { colName: 'aawak_ref_id', title: 'Referece Aawak Search' },
       { colName: 'auto_awk', title: 'Automatic Aawak' },
       { colName: 'auto_reawk', title: 'Automatic Re-aawak' },
-
+      { colName: 'enz', title: 'Enzyme Container Columns.' },
+      { colName: 'usage_report', title: 'Review About Item Usage.' },
     ],
     repairing: [
       { colName: 'jwk_date', title: 'Jawak Date' },

@@ -32,6 +32,8 @@ export class HeaderComponent implements AfterViewInit {
   del_filter: any = {
   }
   affData: any = [];
+  mms: any = []
+  defaultMM: any = 'Select Default MM';
 
   constructor(
     private http: HttpService,
@@ -43,6 +45,12 @@ export class HeaderComponent implements AfterViewInit {
     private renderer: Renderer2,
     private elementRef: ElementRef,
     public themeService: ThemeService) {
+
+    this.settings = this.auth.webUser.settings;
+    this.gs.observeList().subscribe(result => {
+      this.mms = result.mm ? result.mm : [];
+      this.setDefaultMMLabel();
+    });
   }
   @HostListener('window:scroll')
 
@@ -82,29 +90,54 @@ export class HeaderComponent implements AfterViewInit {
 
   ngOnInit(): void {
     // console.log(this.auth.webUser);
-    this.settings = this.auth.webUser.settings;
     this.htmlElement = this.elementRef.nativeElement.ownerDocument.documentElement;
 
     // this.themeService.toggleDarkMode()
+  }
+
+  setDefaultMMLabel(id: any = null) {
+    let mm = null;
+    if (id) {
+      mm = this.mms.find((m: { _id: any; }) => m._id == id);
+    } else if (this.settings?.defaultMM) {
+      mm = this.mms.find((m: { _id: any; }) => m._id == this.settings.defaultMM);
+    }
+    if (mm) {
+      this.defaultMM = mm.mm_hin + (mm.mm_code ? ' : ' + mm.mm_code : '');
+    } else {
+      this.defaultMM = 'Select Default MM';
+    }
   }
 
   ngAfterViewInit(): void {
     // Re-initialize jQuery/app.min.js logic after Angular has rendered the component
     if ((window as any).jQuery && (window as any).jQuery.App) {
       console.log("initialized");
-      
+
       (window as any).jQuery.App.init();  // Re-initialize app.min.js here
-      
+
     } else {
       console.log("not initialized");
 
     }
   }
 
+  defaultMMChanged(ev: any) {
+    if (ev) {
+      this.defaultMM = ev.mm_hin + (ev.mm_code ? ' : ' + ev.mm_code : '');
+      this.auth.webUser.settings.defaultMM = ev._id;
+    } else {
+      this.defaultMM = 'Select Default MM';
+      this.auth.webUser.settings.defaultMM = null;
+    }
+    this.auth.updateSettings();
+  }
+
   logout() {
     this.auth.removewebUser()
     this.router.navigate(['login']);
   }
+
 
   darkModeToggle(ev: any) {
     // const config = $("body").data("layout-config");

@@ -106,7 +106,7 @@
             </div>
 
             <!-- fliter collapse -->
-            <div class="collapse" id="collapseExample">  
+            <div class="collapse" id="collapseExample">
                <div class="card card-body">
                   <div class="row">
                      <div class="card-body">
@@ -413,6 +413,7 @@
                               <th style="width: 100px;" *ngIf="settings.aawak.isbill">IsBill</th>
                               <th style="width: 100px;" *ngIf="settings.aawak.document">Images</th>
                               <th style="width: 200px;" *ngIf="settings.aawak.description">Description</th>
+                              <th style="width: 300px;" *ngIf="settings.aawak.enz">Enzyme Container Detail</th>
                            </tr>
                         </thead>
                         <tbody>
@@ -498,7 +499,8 @@
                                  </td>
                                  <td *ngIf="settings.aawak.actual_amt">@ {{data.rate?data.rate:'-'}} <br>
                                     = {{data.actual_amt?data.actual_amt:'-'}}</td>
-                                 <td *ngIf="settings.aawak.usage_list_id">{{data.usage_list_id ? data.usage_list_hin : ''}}</td>
+                                 <td *ngIf="settings.aawak.usage_list_id">{{data.usage_list_id ? data.usage_list_hin :
+                                    ''}}</td>
                                  <td *ngIf="settings.aawak.nimitt_id">
                                     {{data.nimitt_id?data.nimitt_hin:'-'}}<br />
                                     {{data.nimitt_id? '(' + data.nimitt_state_hin + ')': ''}}
@@ -511,11 +513,29 @@
                                        style="cursor: pointer; border-radius: 10px;">
                                  </td>
                                  <td *ngIf="settings.aawak.description">{{data.description?data.description:'-'}}</td>
+                                 <td *ngIf="settings.aawak.enz">
+                                    <div class="d-flex justify-content-between">
+                                       <div>
+                                          <span class="badge badge-outline-secondary">Awk Src</span>
+                                          {{data.enz.container_aawak_source_id?
+                                          data.enz.container_aawak_source_hin:'-'}} <br />
+                                          <span class="badge badge-outline-secondary">Enz No</span>
+                                          {{data.enz.container_enz_no ? data.enz.container_enz_no : ''}}
+                                       </div>
+                                       <div>
+                                          <span class="badge badge-outline-secondary">Capacity</span>
+                                          {{data.enz.container_capacity? data.enz.container_capacity + " Ltr":'-'}}
+                                          <br />
+                                          <span class="badge badge-outline-secondary">Quantity</span>
+                                          {{data.enz.container_qty ? data.enz.container_qty + "Ltr": ''}}
+                                       </div>
+                                    </div>
+                                 </td>
                               </tr>
                               <ng-container *ngIf="data.jawak_detail.length > 0">
                                  <tr class="collapse show ribbon-box">
                                     <td style="border: none;"></td>
-                                    <td colspan="10" class="sub-row">
+                                    <td colspan="11" class="sub-row">
                                        <table class="card-body" style="width: 99.7%;table-layout: fixed;">
                                           <tr>
                                              <th>No.</th>

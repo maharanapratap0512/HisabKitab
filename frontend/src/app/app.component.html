@@ -1,11 +1,16 @@
+<ngx-spinner name="routeSpinner" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color: #000"> धीरज धर मनुआ धीरज धर ।  </p>
+</ngx-spinner>
+
 <router-outlet></router-outlet>
 
-<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="small" color="#fff" type="ball-scale"
+<!-- <ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="small" color="#fff" type="ball-scale"
    [fullScreen]="true">
    <p style="color: white"> {{point_hin}} </p>
    <button class="btn btn-light" *ngIf="isBtn" (click)="skipBtn()">सेवा जारी रखे</button>
    <button class="btn btn-link px-3" *ngIf="!isBtn">{{sec}} Sec</button>
-</ngx-spinner>
+</ngx-spinner> -->
 
 <div class="modal fade" id="lockModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
    aria-hidden="true">

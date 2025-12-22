@@ -71,6 +71,9 @@ router.put('/filter/:dept_id', async (req, res, next) => {
         console.log(conditionString);
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
         await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then((resolve) => {
+            for (let i in resolve.data) {
+                resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
+            }
             res.json({
                 success: true,
                 pageNo: page,
@@ -81,6 +84,77 @@ router.put('/filter/:dept_id', async (req, res, next) => {
     } catch (err) { next(err) };
 })
 
+//VOUCHER WISE - jawak get by dept + filter + pageNo
+router.put('/voucher/:dept_id', async (req, res, next) => {
+    let orderBy = null, limit = 100, offset = null, page = 1, conditionString, conditions = [];
+
+    if (req.body._id)
+        conditions.push(`jawak._id = ${req.body._id}`)
+    if (req.body.date)
+        conditions.push(`jawak.date = ${req.body.date}`)
+    if (req.body.month)
+        conditions.push(`strftime('%m', jawak.date) = '${req.body.month}'`)
+    if (req.body.year)
+        conditions.push(`strftime('%Y', jawak.date) = '${req.body.year}'`)
+    if (req.body.mm_id && req.body.mm_id.length > 0)
+        conditions.push(`jawak.mm_id in (${req.body.mm_id.join(',')})`)
+    if (req.body.jawak_mm_id && req.body.jawak_mm_id.length > 0)
+        conditions.push(`jawak.jawak_mm_id in (${req.body.jawak_mm_id.join(',')})`)
+    if (req.body.pbk_id && req.body.pbk_id.length > 0)
+        conditions.push(`jawak.pbk_id in (${req.body.pbk_id.join(',')})`)
+    if (req.body.nimitt_id && req.body.nimitt_id.length > 0)
+        conditions.push(`jawak.nimitt_id in (${req.body.nimitt_id.join(',')})`)
+
+    conditionString = conditions.length > 0 ? conditions.join(' AND ') : "1=1"
+
+    if (req.body.orderBy) {
+        orderBy = req.body.orderBy;
+    }
+    else if (conditionString.trim() == `1=1`) {
+        orderBy = "jawak._id desc";
+    }
+
+    if (req.body.pageNo && req.body.pageNo > 0) {
+        offset = (req.body.pageNo - 1) * limit;
+        page = req.body.pageNo;
+    }
+    await DB.getList('jawak_voucher', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, limit: limit, offset: offset }).then(async (resolve) => {
+        for (let i in resolve.data) {
+            resolve.data[i].jawaks = (resolve.data[i].jawaks ? JSON.parse(resolve.data[i].jawaks) : {});
+
+            for (let j in resolve.data[i].jawaks) {
+                resolve.data[i].jawaks[j].document = (resolve.data[i].jawaks[j].document ? JSON.parse(resolve.data[i].jawaks[j].document) : {});
+                resolve.data[i].jawaks[j].item_categories = resolve.data[i].jawaks[j].item_categories ? JSON.parse(resolve.data[i].jawaks[j].item_categories) : [];
+                resolve.data[i].jawaks[j].subitem_categories = resolve.data[i].jawaks[j].subitem_categories ? JSON.parse(resolve.data[i].jawaks[j].subitem_categories) : [];
+                resolve.data[i].jawaks[j].enz = {
+                    '_id': resolve.data[i].jawaks[j].enz_id,
+                    'jawak_id': resolve.data[i].jawaks[j]._id,
+                    'container_capacity': resolve.data[i].jawaks[j].container_capacity,
+                }
+                resolve.data[i].jawaks[j].usage_report = {
+                    '_id': resolve.data[i].jawaks[j].usage_report_id,
+                    'jawak_id': resolve.data[i].jawaks[j]._id,
+                    'date': resolve.data[i].jawaks[j].date,
+                    'reporter': resolve.data[i].jawaks[j].reporter,
+                    'usage_type': resolve.data[i].jawaks[j].usage_type,
+                    'usage_report_hin': resolve.data[i].jawaks[j].list_name_hin,
+                    'fayda': resolve.data[i].jawaks[j].fayda,
+                    'nuksan': resolve.data[i].jawaks[j].nuksan,
+                    'rating': resolve.data[i].jawaks[j].rating
+                }
+            }
+        }
+        res.json({
+            success: true,
+            result: resolve.data || [],
+            pageNo: page,
+            total_count: resolve.total_count
+        });
+    }, (err) => {
+        console.log(err); return next(err)
+    });
+});
+
 
 // get jawak by aawak id
 router.get('/byaawak/:aawak_ref_id', async (req, res, next) => {
@@ -88,6 +162,9 @@ router.get('/byaawak/:aawak_ref_id', async (req, res, next) => {
         let conditionString = ` aawak_ref_id = ${req.params.aawak_ref_id}`;
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
         await DB.getList('jawak', { full: true, conditionString: conditionString }).then((resolve) => {
+            for (let i in resolve.data) {
+                resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
+            }
             res.json({
                 success: true,
                 result: resolve.data || [],
@@ -103,6 +180,7 @@ router.post('/:dept_id', async (req, res, next) => {
     try {
         if (req.body) {
             await DB.insert('jawak', req.body, req.params.dept_id).then((data) => {
+                data.enz = (data.enz ? JSON.parse(data.enz) : {});
                 res.json({
                     success: true,
                     result: data || {}
@@ -121,6 +199,7 @@ router.put('/', async (req, res, next) => {
     try {
         if (req.body.set && req.body.query) {
             await DB.update('jawak', req.body.set, req.body.query._id).then((data) => {
+                data.enz = (data.enz ? JSON.parse(data.enz) : {});
                 res.json({
                     success: true,
                     result: data || []
@@ -161,6 +240,7 @@ router.post('/new/:dept_id', async (req, res, next) => {
                         });
                     }
                     await DB.getById('jawak', resolve, { full: true }).then(async (data) => {
+                        data.enz = (data.enz ? JSON.parse(data.enz) : {});
                         await Fn.commit();
                         res.json({
                             result: data || {},
@@ -186,10 +266,11 @@ router.post('/new/:dept_id', async (req, res, next) => {
 router.put('/new', async (req, res, next) => {
     try {
         if (req.body.set && req.body.query) {
-
+            console.log(req.body.set);
             await Fn.updateAJ(req.body.set, 'jawak').then(async (resolve) => {
                 if (resolve) {
                     let jawak = await DB.getById('jawak', req.body.set._id, { full: true });
+                    jawak.enz = (jawak.enz ? JSON.parse(jawak.enz) : {});
                     res.json({
                         success: true,
                         result: jawak || []
@@ -208,6 +289,148 @@ router.put('/new', async (req, res, next) => {
 });
 
 
+//aawak post with dept
+router.post('/bunch/:dept_id', async (req, res, next) => {
+    if (req.body) {
+        req.body.dept_id = req.params.dept_id;
+        try {
+            await Fn.begin();
+            let voucher_no = await Fn.getLastVoucherNo('jawak') + 1;
+            for (let jwk of req.body.jawaks) {
+                let jawak = {
+                    ...jwk,
+                    ...req.body,
+                    voucher_no: voucher_no,
+                }
+                console.log(jawak);
+                await Fn.insertAJ(jawak, 'jawak').then(async (resolve) => {
+                    console.log(resolve);
+                }, (reject) => {
+                    throw reject;
+                });
+            }
+            await DB.allQuery('jawak', 'select_all_voucher', {
+                conditionString: `jawak.voucher_no = ${voucher_no}`, obj: { limit: -1, offset: -1 }
+            }).then(async (data) => {
+                console.log(data);
+                for (let i in data) {
+                    await DB.allQuery('jawak', 'select_one_voucher', {
+                        obj: { voucher_no: voucher_no }
+                    }).then(async (jawaks) => {
+                        for (let i in jawaks) {
+                            jawaks[i].document = (jawaks[i].document ? JSON.parse(jawaks[i].document) : {});
+                            jawaks[i].enz = (jawaks[i].enz ? JSON.parse(jawaks[i].enz) : {});
+                            jawaks[i].usage_report = (jawaks[i].usage_report ? JSON.parse(jawaks[i].usage_report) : {});
+                            jawaks[i].item_categories = (jawaks[i].item_categories ? JSON.parse(jawaks[i].item_categories) : {});
+                            jawaks[i].subitem_categories = (jawaks[i].subitem_categories ? JSON.parse(jawaks[i].subitem_categories) : {});
+                        }
+                        data[i].jawaks = jawaks;
+                    }, (err) => {
+                        throw err;
+                    });
+                }
+                await Fn.commit();
+                res.json({
+                    result: data,
+                    success: true,
+                });
+            }, (err) => {
+                throw err;
+            });
+
+        }
+        catch (err) {
+            console.log(err);
+            Fn.rollback();;
+            return next(err);
+        }
+    }
+
+    else {
+        return next(new Error('Please fill required fields.'))
+    }
+});
+
+// aawak update
+router.put('/bunch/:dept_id', async (req, res, next) => {
+    if (req.body) {
+        req.body.dept_id = req.params.dept_id;
+        try {
+            await Fn.begin();
+            if (!req.body.voucher_no) {
+                req.body.voucher_no = await Fn.getLastVoucherNo('jawak') + 1;
+            }
+            for (let jwk of req.body.jawaks) {
+                let jawak = {
+                    ...jwk,
+                    ...req.body,
+                }
+
+                if (jawak._id) {
+                    await Fn.updateAJ(jawak, 'jawak').then((data) => {
+                    }, (err) => {
+                        throw err;
+                    });
+                } else {
+                    await Fn.insertAJ(jawak, 'jawak').then(async (resolve) => {
+                    }, (reject) => {
+                        throw reject;
+                    });
+                }
+            }
+
+            let conditionString = `jawak.voucher_no = ${req.body.voucher_no}`;
+            console.log(conditionString);
+            await DB.getList('jawak_voucher', { full: true, dept_id: req.params.dept_id, conditionString: conditionString }).then(async (resolve) => {
+                for (let i in resolve.data) {
+                    resolve.data[i].jawaks = (resolve.data[i].jawaks ? JSON.parse(resolve.data[i].jawaks) : {});
+
+                    for (let j in resolve.data[i].jawaks) {
+                        resolve.data[i].jawaks[j].document = (resolve.data[i].jawaks[j].document ? JSON.parse(resolve.data[i].jawaks[j].document) : {});
+                        resolve.data[i].jawaks[j].item_categories = resolve.data[i].jawaks[j].item_categories ? JSON.parse(resolve.data[i].jawaks[j].item_categories) : [];
+                        resolve.data[i].jawaks[j].subitem_categories = resolve.data[i].jawaks[j].subitem_categories ? JSON.parse(resolve.data[i].jawaks[j].subitem_categories) : [];
+                        resolve.data[i].jawaks[j].enz = {
+                            '_id': resolve.data[i].jawaks[j].enz_id,
+                            'jawak_id': resolve.data[i]._id,
+                            'container_capacity': resolve.data[i].jawaks[j].container_capacity,
+                        }
+                        resolve.data[i].jawaks[j].usage_report = {
+                            '_id': resolve.data[i].jawaks[j].usage_report_id,
+                            'jawak_id': resolve.data[i]._id,
+                            'date': resolve.data[i].jawaks[j].date,
+                            'reporter': resolve.data[i].jawaks[j].reporter,
+                            'usage_type': resolve.data[i].jawaks[j].usage_type,
+                            'usage_report_hin': resolve.data[i].jawaks[j].list_name_hin,
+                            'fayda': resolve.data[i].jawaks[j].fayda,
+                            'nuksan': resolve.data[i].jawaks[j].nuksan,
+                            'rating': resolve.data[i].jawaks[j].rating
+                        }
+
+                    }
+                }
+                await Fn.commit();
+                res.json({
+                    success: true,
+                    result: resolve.data || [],
+                    total_count: resolve.total_count
+                });
+            }, (err) => {
+                console.log(err); return next(err)
+            });
+
+        } catch (err) {
+            await Fn.rollback();
+            return next(err);
+        }
+
+    }
+    else {
+        throw new Error('Id not found.')
+    }
+
+
+});
+
 // jawak delete
 router.delete('/:id', async (req, res, next) => {
     try {
@@ -224,6 +447,32 @@ router.delete('/:id', async (req, res, next) => {
             return next(new Error('Id not found.'))
         }
     } catch (err) { next(err) };
+});
+
+
+// aawak voucher delete
+router.delete('/voucher/:ids', async (req, res, next) => {
+    if (req.params.ids) {
+        try {
+            await Fn.begin();
+            let ids = JSON.parse(req.params.ids);
+            for (let id of ids) {
+                await Fn.deleteAJ(id, 'jawak');
+            }
+            Fn.commit();
+            res.json({
+                success: true,
+            })
+
+        } catch (ex) {
+            await Fn.rollback();
+            return next(ex);
+        }
+    }
+    else {
+        return next(new Error('Id not found.'))
+    }
+
 });
 
 

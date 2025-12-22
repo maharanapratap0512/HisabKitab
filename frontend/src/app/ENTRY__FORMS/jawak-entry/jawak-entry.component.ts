@@ -42,6 +42,7 @@ export class JawakEntryComponent implements OnInit {
   states: any = [];
   categories: any = [];
   usage_lists: any = [];
+  usage_types: any = [];
   remaining_qty: any;
   ref_id: any = null;
   cat: any;
@@ -93,6 +94,10 @@ export class JawakEntryComponent implements OnInit {
       aawak_dept_id: [this.auth.webUser.dept_id],
       aawak_date: [null],
       re_aawak_type_id: [null],
+      enz: this.fb.group({
+        _id: [null],
+        container_capacity: [null]
+      })
     });
 
     this.gs.observeList().subscribe(result => {
@@ -107,6 +112,7 @@ export class JawakEntryComponent implements OnInit {
       this.pbks = result.pbk ? result.pbk : [];
       this.states = result.state ? result.state : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
+      this.usage_types = result.usage_type ? result.usage_type : [];
     });
 
     this.getDepartments();
@@ -160,6 +166,13 @@ export class JawakEntryComponent implements OnInit {
         re_aawak_type_id: changes.getData.currentValue.re_aawak_type_id ? changes.getData.currentValue.re_aawak_type_id : null,
       });
 
+      // Patch jawak_id in enz if editing
+      if (changes.getData.currentValue.enz) {
+        this.jawakForm.get('enz')?.patchValue({
+          _id: changes.getData.currentValue.enz._id,
+          container_capacity: changes.getData.currentValue.enz.container_capacity
+        });
+      }
 
       setTimeout(() => {
         this.itemSelected(changes.getData.currentValue.item_id);

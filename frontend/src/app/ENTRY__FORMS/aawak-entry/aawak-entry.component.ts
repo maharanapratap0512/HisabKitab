@@ -63,7 +63,7 @@ export class AawakEntryComponent implements OnInit {
 		lot_no: null,
 		voucher_no: null,
 		date: null,
-		mm_id: null,
+		mm_id: this.auth.webUser.settings.defaultMM,
 		aawak_mm_id: null,
 		dept_id: this.auth.webUser.dept_id,
 		pbk_id: null,
@@ -91,6 +91,12 @@ export class AawakEntryComponent implements OnInit {
 		is_auto: 0,
 		is_variable_qty: 0,
 		is_process: 0,
+		enz: {
+			container_aawak_source_id: null,
+			container_enz_no: null,
+			container_capacity: null,
+			container_qty: null
+		},
 		jawak_detail: []
 	}
 	// jwkArr: any = [];

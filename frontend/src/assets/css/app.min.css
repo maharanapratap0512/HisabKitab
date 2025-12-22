@@ -2671,7 +2671,7 @@ progress {
 }
 
 .form-control-sm {
-   min-height: calc(1.5em + .56rem + 2px);
+   min-height: calc(1.5em + .56rem + 10px);
    padding: .28rem .8rem;
    font-size: .875rem;
    border-radius: .2rem
@@ -3182,6 +3182,15 @@ textarea.form-control-lg {
 }
 
 .input-group>.form-control,
+.input-group>.form-select {
+   position: relative;
+   -webkit-box-flex: 1;
+   -ms-flex: 1 1 auto;
+   flex: 1 1 auto;
+   width: 1%;
+   min-width: 0
+}
+.input-group>.form-control-sm,
 .input-group>.form-select {
    position: relative;
    -webkit-box-flex: 1;
@@ -22418,4 +22427,113 @@ Not supports in Firefox and IE */
    font-size: larger !important;
    color: #fff !important;
    font-weight: bold;
+}
+
+/* ========================================
+   JAWAK-NEW DATA TABLE STYLES - LIGHT MODE
+   ======================================== */
+
+.jawak-data-table {
+  .voucher-row {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e9ecef;
+    
+    &:hover {
+      background-color: #f8f9fa;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    &.expanded {
+      background-color: #e3f2fd;
+      border-left: 3px solid #727cf5;
+    }
+  }
+  
+  .items-row {
+    background-color: #f8f9fa;
+  }
+  
+  .items-container {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
+  .items-table {
+    thead th {
+      background-color: #f1f3f4;
+      color: #495057;
+      border-bottom: 2px solid #dee2e6;
+    }
+    
+    tbody td {
+      background-color: #ffffff;
+      border-bottom: 1px solid #f1f3f4;
+    }
+  }
+  
+  .item-details-row {
+    background-color: #f8f9fa;
+    
+    .additional-details {
+      background-color: #ffffff;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+    }
+  }
+  
+  .expand-btn {
+    background-color: transparent;
+    border: 1px solid #727cf5;
+    color: #727cf5;
+    
+    &:hover {
+      background-color: #727cf5;
+      color: #ffffff;
+    }
+  }
+  
+  .hindi-text {
+    color: #6c757d;
+  }
+  
+  .badge {
+    &.badge-info {
+      background-color: #17a2b8;
+      color: #ffffff;
+    }
+    
+    &.badge-secondary {
+      background-color: #6c757d;
+      color: #ffffff;
+    }
+    
+    &.badge-warning {
+      background-color: #ffc107;
+      color: #212529;
+    }
+    
+    &.badge-success {
+      background-color: #28a745;
+      color: #ffffff;
+    }
+  }
+  
+  .rating-stars .fa-star {
+    color: #dee2e6;
+    
+    &.filled {
+      color: #ffc107;
+    }
+  }
+}
+
+/* Jawak New Component - Light Theme */
+.hindi-text {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.text-muted {
+  color: rgba(255, 255, 255, 0.95) !important;
 }

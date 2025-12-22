@@ -100,7 +100,7 @@
                                     (click)="unlockMM(i,data._id)"><i class="uil-lock-alt"></i></button>
                               </ng-container>
                               <button *ngIf="settings.delete" class="btn btn-sm btn-danger" type="button"
-                                 (click)="delete(data._id)"><i class="uil-trash"></i></button>
+                              (click)="delete(data._id)"><i class="uil-trash"></i></button>
                               <div *ngIf="data.restrict_year" class="lock-date text-warning">
                                  {{data.restrict_month}}/{{data.restrict_year}} से लॉक।
                               </div>

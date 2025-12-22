@@ -71,7 +71,7 @@ export class ProductEntryComponent implements OnInit {
       item_id: [null, Validators.required],
       subitem_id: [null],
       unit_id: [1, Validators.required],
-      mm_id: [null, Validators.required],
+      mm_id: [auth.webUser.settings.defaultMM, Validators.required],
       document: [[]],
       dept_id: [this.auth.webUser.dept_id],
       accessories: [null],

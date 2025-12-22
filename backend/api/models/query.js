@@ -484,8 +484,14 @@ const jawak = {
         unit.unit_short, unit.unit_full,
         jsl.list_name_hin as jawak_type_hin, jsl.list_name_eng as jawak_type_eng ,
         jslas.list_name_hin as aawak_source_hin, jslas.list_name_eng as aawak_source_eng ,
-        nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, nst.state_hin as nimitt_state_hin, nst.state_eng as nimitt_state_eng
+        nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, nst.state_hin as nimitt_state_hin, nst.state_eng as nimitt_state_eng,
+        JSON_Object('_id', enz._id, 'jawak_id', enz.jawak_id, 'container_capacity', enz.container_capacity) as enz,
+        JSON_Object('_id', ur._id, 'jawak_id', ur.jawak_id, 'date', ur.date, 'reporter', ur.reporter, 'usage_type', ur.usage_type,
+        'usage_report_hin', ut.list_name_hin, 'fayda', ur.fayda, 'nuksan', ur.nuksan, 'rating', ur.rating) as usage_report
         from jawak
+        left join jawak_enzyme enz on enz.jawak_id = jawak._id
+        left join usage_report ur on ur.jawak_id = jawak._id 
+        left join support_list ut on ut._id = ur.usage_type
         left join mm amm on amm._id = jawak.mm_id 
         left join state mst on mst._id = amm.state_id
         left join zone zn on zn._id = mst.zone_id
@@ -506,19 +512,21 @@ const jawak = {
         left join state nst on nst._id = nmt.state_id ? limit @limit offset @offset`
     , insert:
         `insert into jawak(
-        date, date_sent, mm_id, pkt_num, lot_no, pbk_id, jawak_mm_id, item_id, usage_list_id,
+        voucher_no, date, date_sent, reg_pg_no, mm_id, pkt_num, lot_no, pbk_id, jawak_mm_id, item_id, usage_list_id,
         subitem_id, product_id, item_detail, condition_id, qty, rate, actual_amt, jawak_type_id, aawak_source_id,
         unit_id, description, sell_repair_place, parchi_place, nimitt_id, company_name, aawak_ref_id, dept_id, 
         is_xl, hl, is_process, active)
     values (
-        @date, @date_sent, @mm_id, @pkt_num, @lot_no, @pbk_id, @jawak_mm_id, @item_id, @usage_list_id,
+        @voucher_no, @date, @date_sent, @reg_pg_no, @mm_id, @pkt_num, @lot_no, @pbk_id, @jawak_mm_id, @item_id, @usage_list_id,
         @subitem_id, @product_id, @item_detail, @condition_id, @qty, @rate, @actual_amt, @jawak_type_id, @aawak_source_id,
         @unit_id, @description, @sell_repair_place, @parchi_place, @nimitt_id, @company_name, @aawak_ref_id, @dept_id, 
         @is_xl, @hl, @is_process, @active)`
     , update:
         `update jawak set 
+        voucher_no=@voucher_no,
         date=@date,
         date_sent=@date_sent,
+        reg_pg_no=@reg_pg_no,
         mm_id=@mm_id,
         pkt_num=@pkt_num,
         lot_no=@date_sent,
@@ -547,6 +555,50 @@ const jawak = {
         hl=@hl,
         is_process=@is_process,
         updated_at=datetime('now','localtime')`
+    , select_all_voucher:
+        `select jawak.voucher_no, jawak.date, jawak.date_sent, jawak.pkt_num, jawak.reg_pg_no, jawak.mm_id, jawak.jawak_mm_id,
+        jawak.pbk_id, jawak.nimitt_id, jawak.description, jawak.dept_id,
+        mm.mm_hin,mm.mm_eng,mm.mm_code,
+        jmm.mm_hin as jawak_mm_hin, jmm.mm_eng as jawak_mm_eng, jmm.mm_code as jawak_mm_code, 
+        pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name, pbk.state_id as pbk_state_id,
+        pst.state_hin as pbk_state_hin, pst.state_eng as pbk_state_eng,
+        dept.dept_eng, dept.dept_hin, dept.dept_code,
+        nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, nst.state_hin as nimitt_state_hin, nst.state_eng as nimitt_state_eng
+        from jawak 
+        left join mm on mm._id = jawak.mm_id
+        left join pbk on pbk._id = jawak.pbk_id
+        left join state pst on pst._id = pbk.state_id
+        left join mm jmm on jmm._id = jawak.jawak_mm_id
+        left join department dept on dept._id = jawak.dept_id
+        left join nimitt nmt on nmt._id = jawak.nimitt_id
+        left join state nst on nst._id = nmt.state_id ? group by voucher_no limit @limit offset @offset`
+    , select_one_voucher:
+        `select jawak.*, 
+        item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
+        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories,
+        slul.list_name_hin as usage_list_hin, slul.list_name_eng as usage_list_eng, slul.list_name_roman as usage_list_roman,
+        product.sr_num, product.product_code,
+        sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
+        unit.unit_short, unit.unit_full,
+        jsl.list_name_hin as jawak_type_hin, jsl.list_name_eng as jawak_type_eng,
+        jslas.list_name_hin as aawak_source_hin, jslas.list_name_eng as aawak_source_eng,
+        JSON_Object('_id', enz._id, 'jawak_id', enz.jawak_id, 'container_capacity', enz.container_capacity) as enz,
+        JSON_Object('_id', ur._id, 'jawak_id', ur.jawak_id, 'date', ur.date, 'reporter', ur.reporter, 'usage_type', ur.usage_type, 
+        'usage_report_hin', ut.list_name_hin, 'fayda', ur.fayda, 'nuksan', ur.nuksan, 'rating', ur.rating) as usage_report
+        from jawak 
+        left join jawak_enzyme enz on enz.jawak_id = jawak._id
+        left join usage_report ur on ur.jawak_id = jawak._id
+        left join support_list ut on ut._id = ur.usage_type
+        left join item on item._id = jawak.item_id
+        left join subitem si on si._id = jawak.subitem_id
+        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join support_list slul on slul._id = jawak.usage_list_id
+        left join product on product._id = jawak.product_id
+        left join support_list sl on sl._id = jawak.condition_id
+        left join unit on unit._id = jawak.unit_id
+        left join support_list jsl on jsl._id = jawak.jawak_type_id
+        left join support_list jslas on jslas._id = jawak.aawak_source_id where jawak.voucher_no = @voucher_no
+        `
     , update_active:
         `update jawak set
         active=@active,
@@ -554,6 +606,61 @@ const jawak = {
     , order:
         `date, jawak_mm_hin, jawak_mm_eng, pkt_num`
     , delete: `delete from jawak where _id = @_id`,
+}
+
+const jawak_voucher = {
+    select_full:
+        `select jawak.voucher_no, jawak.date, jawak.date_sent, jawak.reg_pg_no, jawak.mm_id, jawak.pkt_num, jawak.pbk_id, jawak.jawak_mm_id, jawak.description,
+        jawak.nimitt_id, jawak.dept_id,
+        mm.mm_hin,mm.mm_eng,mm.mm_code,
+        amm.mm_hin as jawak_mm_hin, amm.mm_eng as jawak_mm_eng, amm.mm_code as jawak_mm_code,
+        pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
+        pbk.state_id as pbk_state_id, pst.state_hin as pbk_state_hin, pst.state_eng as pbk_state_eng,
+        dept.dept_eng, dept.dept_hin, dept.dept_code,
+        nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, nst.state_hin as nimitt_state_hin, nst.state_eng as nimitt_state_eng,
+        json_group_array(json_object(
+            '_id', jawak._id, 'lot_no', jawak.lot_no, 'item_id', jawak.item_id, 'subitem_id', jawak.subitem_id,
+            'product_id', jawak.product_id,'condition_id', jawak.condition_id, 'unit_id', jawak.unit_id,
+            'aawak_source_id', jawak.aawak_source_id, 'jawak_type_id', jawak.jawak_type_id, 'item_detail', jawak.item_detail,
+            'item_hin', item.item_hin, 'item_eng', item.item_eng, 'item_code', item.item_code, 'item_roman', item.item_roman,
+            'item_categories', item.categories, 'subitem_hin', sil.subitem_hin, 'subitem_eng', sil.subitem_eng,
+            'subitem_categories', si.categories, 'sr_num', product.sr_num, 'product_code', product.product_code,
+            'qty', jawak.qty, 'unit_short', unit.unit_short, 'unit_full', unit.unit_full, 'rate', jawak.rate, 'actual_amt', jawak.actual_amt, 
+            'company_name', jawak.company_name, 'sell_repair_place', jawak.sell_repair_place, 'parchi_place', jawak.parchi_place, 
+            'usage_list_id', jawak.usage_list_id, 'usage_list_hin', slul.list_name_hin, 'usage_list_eng', slul.list_name_eng, 'usage_list_roman', slul.list_name_roman,
+            'condition_hin', sl.list_name_hin, 'condition_eng', sl.list_name_eng, 'condition_roman', sl.list_name_roman,
+            'jawak_type_hin', slat.list_name_hin, 'jawak_type_eng', slat.list_name_eng, 'jawak_type_roman', slat.list_name_roman,
+            'aawak_source_hin', slas.list_name_hin, 'aawak_source_eng', slas.list_name_eng, 'aawak_source_roman', slas.list_name_roman,
+            'hl', jawak.hl, 'active', jawak.active, 'is_xl', jawak.is_xl, 'is_process', jawak.is_process,
+            'enz_id', enz._id, 'container_capacity', enz.container_capacity, 'usage_report_id', ur._id, 'date', ur.date, 'reporter', ur.reporter,
+            'usage_type', ur.usage_type, 'usage_report_hin', ut.list_name_hin, 'fayda', ur.fayda, 'nuksan', ur.nuksan, 'rating', ur.rating
+        )) as jawaks
+        from jawak
+        left join jawak_enzyme enz on enz.jawak_id = jawak._id
+        left join usage_report ur on ur.jawak_id = jawak._id
+        left join support_list ut on ut._id = ur.usage_type
+        left join mm on mm._id = jawak.mm_id
+        left join pbk on pbk._id = jawak.pbk_id
+        left join state pst on pst._id = pbk.state_id
+        left join mm amm on amm._id = jawak.jawak_mm_id
+        left join item on item._id = jawak.item_id
+        left join subitem si on si._id = jawak.subitem_id
+        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join support_list slul on slul._id = jawak.usage_list_id
+        left join product on product._id = jawak.product_id
+        left join support_list sl on sl._id = jawak.condition_id
+        left join unit on unit._id = jawak.unit_id
+        left join department dept on dept._id = jawak.dept_id
+        left join support_list slat on slat._id = jawak.jawak_type_id
+        left join support_list slas on slas._id = jawak.aawak_source_id
+        left join nimitt nmt on nmt._id = jawak.nimitt_id
+        left join state nst on nst._id = nmt.state_id ?
+        group by
+            case when jawak.voucher_no is not null then jawak.voucher_no
+            else jawak._id
+        end
+        limit @limit offset @offset`,
+    count: `select count(*) as total_count from jawak ? group by jawak.voucher_no`
 }
 
 const aawak = {
@@ -621,8 +728,12 @@ const aawak = {
         unit.unit_short, unit.unit_full,
         slat.list_name_hin as aawak_type_hin, slat.list_name_eng as aawak_type_eng,
         slas.list_name_hin as aawak_source_hin, slas.list_name_eng as aawak_source_eng,
-        nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, pst.state_hin as nimitt_state_hin, pst.state_eng as nimitt_state_eng
-        from aawak 
+        nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, pst.state_hin as nimitt_state_hin, pst.state_eng as nimitt_state_eng,
+        JSON_Object('_id', enz._id, 'container_aawak_source_id', enz.container_aawak_source_id, 'container_aawak_source_hin', enz_as.list_name_hin,
+            'container_enz_no', enz.container_enz_no, 'container_capacity', enz.container_capacity, 'container_qty', enz.container_qty) as enz
+        from aawak
+        left join aawak_enzyme enz on enz.aawak_id = aawak._id
+        left join support_list enz_as on enz_as._id = enz.container_aawak_source_id
         left join mm on mm._id = aawak.mm_id
         left join state mst on mst._id = mm.state_id
         left join zone zn on zn._id = mst.zone_id
@@ -691,8 +802,12 @@ const aawak = {
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         unit.unit_short, unit.unit_full,
         slat.list_name_hin as aawak_type_hin, slat.list_name_eng as aawak_type_eng,
-        slas.list_name_hin as aawak_source_hin, slas.list_name_eng as aawak_source_eng
+        slas.list_name_hin as aawak_source_hin, slas.list_name_eng as aawak_source_eng,
+        JSON_Object('_id', enz._id, 'container_aawak_source_id', enz.container_aawak_source_id, 'container_aawak_source_hin', enz_as.list_name_hin,
+            'container_enz_no', enz.container_enz_no, 'container_capacity', enz.container_capacity, 'container_qty', enz.container_qty) as enz
         from aawak 
+        left join aawak_enzyme enz on enz.aawak_id = aawak._id
+        left join support_list enz_as on enz_as._id = enz.container_aawak_source_id
         left join item on item._id = aawak.item_id
         left join subitem si on si._id = aawak.subitem_id
         left join subitem_list sil on sil._id = si.subitem_list_id
@@ -709,7 +824,7 @@ const aawak_voucher = {
         `select aawak.voucher_no, aawak.date, aawak.mm_id, aawak.pkt_num, aawak.pbk_id, aawak.aawak_mm_id, aawak.description,
             aawak.nimitt_id, aawak.dept_id,
             mm.mm_hin,mm.mm_eng,mm.mm_code,
-            amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
+            amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code,
             pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
             pbk.state_id as pbk_state_id, pst.state_hin as pbk_state_hin, pst.state_eng as pbk_state_eng,
             dept.dept_eng, dept.dept_hin, dept.dept_code,
@@ -728,9 +843,13 @@ const aawak_voucher = {
                 'aawak_type_hin', slat.list_name_hin, 'aawak_type_eng', slat.list_name_eng, 'aawak_type_roman', slat.list_name_roman,
                 'aawak_source_hin', slas.list_name_hin, 'aawak_source_eng', slas.list_name_eng, 'aawak_source_roman', slas.list_name_roman,
                 'isbill', aawak.isbill, 'document', aawak.document, 'hl', aawak.hl, 'active', aawak.active, 'is_xl', aawak.is_xl,
-                'is_auto_pd', aawak.is_auto_pd, 'is_auto', aawak.is_auto, 'is_variable_qty', aawak.is_variable_qty, 'is_process', aawak.is_process
+                'is_auto_pd', aawak.is_auto_pd, 'is_auto', aawak.is_auto, 'is_variable_qty', aawak.is_variable_qty, 'is_process', aawak.is_process,
+                'enz_id', enz._id, 'container_aawak_source_id', enz.container_aawak_source_id, 'container_aawak_source_hin', enz_as.list_name_hin,
+                'container_enz_no', enz.container_enz_no, 'container_capacity', enz.container_capacity, 'container_qty', enz.container_qty
                  )) as aawaks
-            from aawak 
+            from aawak
+            left join aawak_enzyme enz on enz.aawak_id = aawak._id
+            left join support_list enz_as on enz_as._id = enz.container_aawak_source_id
             left join mm on mm._id = aawak.mm_id
             left join pbk on pbk._id = aawak.pbk_id
             left join state pst on pst._id = pbk.state_id
@@ -746,14 +865,15 @@ const aawak_voucher = {
             left join support_list slat on slat._id = aawak.aawak_type_id
             left join support_list slas on slas._id = aawak.aawak_source_id
             left join nimitt nmt on nmt._id = aawak.nimitt_id
-            left join state nst on nst._id = nmt.state_id ? 
-            group by 
-                case when aawak.voucher_no is not null then aawak.voucher_no 
+            left join state nst on nst._id = nmt.state_id ?
+            group by
+                case when aawak.voucher_no is not null then aawak.voucher_no
                 else aawak._id
-            end 
+            end
             limit @limit offset @offset`,
     count: `select count(*) as total_count from aawak ? group by aawak.voucher_no`
 }
+
 
 const bachat = {
     select:
@@ -862,10 +982,8 @@ const bachat = {
         difference = @difference
         where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id;`
     , insert_jawak_ins:
-        `insert into bachat (
-            mm_id, item_id, subitem_id, dept_id, Used, bachat, difference, unit_id)
-        values(
-            @mm_id, @item_id, @subitem_id, @dept_id, round((CASE WHEN @jawak_type_id = 27 THEN @qty ELSE 0 END),2), round(0 - @qty, 2), @difference, @unit_id);`
+        `insert into bachat(mm_id, item_id, subitem_id, Stock, New, Old, Defective, Repairing, Scrap, difference, unit_id, dept_id) 
+        values(@mm_id, @item_id, @subitem_id, @qty, (CASE WHEN @condition_id = 33 THEN 0-@qty ELSE 0 END), (CASE WHEN @condition_id = 34 THEN 0-@qty ELSE 0 END), (CASE WHEN @condition_id = 35 THEN 0-@qty ELSE 0 END), (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN 0-@qty ELSE 0 END), (CASE WHEN @condition_id = 36 THEN 0-@qty ELSE 0 END), 0-@difference, @unit_id, @dept_id);`
     , update_jawak_ins:
         `update bachat set 
         Stock = round(Stock - @qty, 2),
@@ -2727,6 +2845,76 @@ reports = {
     left join state pst on pst._id = nmt.state_id ?`
 }
 
+const aawak_enzyme = {
+    select: `select * from aawak_enzyme ?`,
+    select_full: `select aawak_enzyme.*,
+        aawak.date, aawak.mm_id, aawak.item_id, aawak.subitem_id, aawak.qty as aawak_qty,
+        sl1.list_name_hin as container_aawak_source_hin, sl1.list_name_eng as container_aawak_source_eng,
+        sl2.list_name_hin as container_capacity_hin, sl2.list_name_eng as container_capacity_eng
+        from aawak_enzyme
+        left join aawak on aawak._id = aawak_enzyme.aawak_id
+        left join support_list sl1 on sl1._id = aawak_enzyme.container_aawak_source_id
+        left join support_list sl2 on sl2._id = aawak_enzyme.container_capacity ? limit @limit offset @offset`,
+    insert: `insert into aawak_enzyme (
+        aawak_id, container_aawak_source_id, container_enz_no, container_capacity, container_qty)
+    values (
+        @aawak_id, @container_aawak_source_id, @container_enz_no, @container_capacity, @container_qty)`,
+    update: `update aawak_enzyme set
+        container_aawak_source_id=@container_aawak_source_id,
+        container_enz_no=@container_enz_no,
+        container_capacity=@container_capacity,
+        container_qty=@container_qty,
+        updated_at=datetime('now','localtime') where _id = @_id`,
+    delete_by_ref: `delete from aawak_enzyme where aawak_id = ?`,
+    order: `aawak_enzyme._id`
+}
+
+const jawak_enzyme = {
+    select: `select * from jawak_enzyme ?`,
+    select_full: `select jawak_enzyme.*,
+        jawak.date, jawak.mm_id, jawak.item_id, jawak.subitem_id, jawak.qty as jawak_qty,
+        sl.list_name_hin as container_capacity_hin, sl.list_name_eng as container_capacity_eng
+        from jawak_enzyme
+        left join jawak on jawak._id = jawak_enzyme.jawak_id
+        left join support_list sl on sl._id = jawak_enzyme.container_capacity ? limit @limit offset @offset`,
+    insert: `insert into jawak_enzyme (
+        jawak_id,
+        container_capacity)
+    values (
+        @jawak_id,
+        @container_capacity)`,
+    update: `update jawak_enzyme set
+        container_capacity=@container_capacity,
+        updated_at=datetime('now','localtime') where _id = @_id`,
+    delete_by_ref: `delete from jawak_enzyme where jawak_id = ?`,
+    order: `jawak_enzyme._id`
+}
+
+const usage_report = {
+    select: `select * from usage_report ?`,
+    select_full: `select usage_report.*,
+        jawak.date, jawak.mm_id, jawak.item_id, jawak.subitem_id, jawak.qty as jawak_qty,
+        sl.list_name_hin as usage_type_hin, sl.list_name_eng as usage_type_eng
+        from usage_report
+        left join jawak on jawak._id = usage_report.jawak_id
+        left join support_list sl on sl._id = usage_report.usage_type ? limit @limit offset @offset`,
+    insert: `insert into usage_report (
+        jawak_id, date, reporter, usage_type, fayda, nuksan, rating)
+    values (
+        @jawak_id, @date, @reporter, @usage_type, @fayda, @nuksan, @rating)`,
+    update: `update usage_report set
+        jawak_id=@jawak_id,
+        date=@date,
+        reporter=@reporter,
+        usage_type=@usage_type,
+        fayda=@fayda,
+        nuksan=@nuksan,
+        rating=@rating,
+        updated_at=datetime('now','localtime') where _id = @_id`,
+    delete_by_ref: `delete from usage_report where jawak_id = ?`,
+    order: `usage_report.date desc`
+}
+
 const test = {
     select: `select * from test ?`,
     select_full: `select * from test ?`,
@@ -2734,6 +2922,9 @@ const test = {
 }
 
 module.exports = {
-    queryBuilder, country, city, category, department, department_config, item, itemmix, aawak, aawak_voucher, bachat, pbk_bachat, pbk_closing, jawak, mm, nimitt, pbk, point, product, zone, district, state, subitem, subitem_list, support_list, temp_import, unit, genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, vehicle, vehicle_document, conditions, test, bachat_new, report_comment,
-    hmp_recipe, hmp_recipe_input, hmp_recipe_output, hmp_batch, hmp_batch_input, hmp_batch_output,
+    queryBuilder, country, city, category, department, department_config, item, itemmix, mm, nimitt, pbk, point, zone, district, state, subitem, subitem_list, support_list, unit, conditions,
+    aawak, aawak_voucher, bachat, pbk_bachat, pbk_closing, jawak, jawak_voucher, bachat_new, temp_import, product, vehicle, vehicle_document, 
+    hmp_recipe, hmp_recipe_input, hmp_recipe_output, hmp_batch, hmp_batch_input, hmp_batch_output, 
+    aawak_enzyme, jawak_enzyme, usage_report,
+    genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, test, report_comment,
 };

@@ -69,6 +69,15 @@ class TableInterface {
       is_variable_qty: 0,
    }
 
+   aawak_enzyme = {
+      _id: null,
+      aawak_id: null,
+      container_aawak_source_id: null,
+      container_enz_no: null,
+      container_capacity: null,
+      container_qty: null,
+   }
+
    temp_import = {
       type: null,
       date: null,
@@ -123,8 +132,9 @@ class TableInterface {
    jawak = {
       date: null,
       date_sent: null,
-      mm_id: null,
       pkt_num: null,
+      reg_pg_no: null,
+      mm_id: null,
       lot_no: null,
       jawak_mm_id: null,
       pbk_id: null,
@@ -150,6 +160,23 @@ class TableInterface {
       is_process: null,
       dept_id: null,
       auto_awk: 0,
+   }
+
+   jawak_enzyme = {
+      _id: null,
+      jawak_id: null,
+      container_capacity: null,
+   }
+
+   usage_report = {
+      _id: null,
+      jawak_id: null,
+      date: null,
+      reporter: null,
+      usage_type_id: null,
+      fayda: null,
+      nuksan: null,
+      rating: null,
    }
 
    dictionary = {

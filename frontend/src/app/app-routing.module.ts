@@ -38,6 +38,9 @@ import { ReportAjCheckComponent } from './reports/report-aj-check/report-aj-chec
 import { MysqlComponent } from './MySQL/mysql.component';
 import { HmpComponent } from './hmp/hmp.component';
 import { PbkClosingComponent } from './pbk-closing/pbk-closing.component';
+import { JawakNewComponent } from './jawak-new/jawak-new.component';
+import { JawakEntryNewComponent } from './ENTRY__FORMS/jawak-entry-new/jawak-entry-new.component';
+import { listsResolver } from './resolver/lists.resolver';
 
 const routes: Routes = [
    {
@@ -56,6 +59,7 @@ const routes: Routes = [
          { path: "aawak", component: AawakComponent },
          { path: "aawakN", component: AawakNewComponent },
          { path: "jawak", component: JawakComponent },
+         { path: "jawakN", component: JawakNewComponent },
          { path: "bachat", component: BachatComponent },
          { path: "bachat_new", component: BachatNewComponent },
          { path: "hmp", component: HmpComponent },
@@ -85,7 +89,10 @@ const routes: Routes = [
          { path: "files", component: FilesViewComponent },
          { path: "import_export", component: ImportExportComponent },
          { path: "mysql", component: MysqlComponent },
-      ]
+      ],
+      resolve:{
+         lists: listsResolver
+      }
    }
 ];
 

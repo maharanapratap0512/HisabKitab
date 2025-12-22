@@ -35,7 +35,7 @@ export class VehicleEntryComponent implements OnInit {
     public auth: AuthService
   ) {
     this.vehForm = this.fb.group({
-      mm_id: [null, Validators.required],
+      mm_id: [auth.webUser.settings.defaultMM, Validators.required],
       vehicle_type: [null],
       gadi_name: [null],
       gadi_num: [null, Validators.required],

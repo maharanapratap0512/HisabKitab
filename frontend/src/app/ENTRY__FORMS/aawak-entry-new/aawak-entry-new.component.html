@@ -139,14 +139,14 @@
                                 <th *ngIf="settings.aawak.isbill">Is Bill</th>
                                 <th *ngIf="settings.aawak.is_variable_qty">Variable Qty</th>
                                 <th *ngIf="settings.aawak.hl">Highlight</th>
+                                <th *ngIf="settings.aawak.enz">Enzyme Container Details</th>
                             </tr>
                         </thead>
                         <tbody>
                             <ng-container *ngFor="let awkForm of fs.aawakFormMain.aawaks; let i = index;">
                                 <tr ngModelGroup="{{i}}" #rowForm="ngModelGroup"
                                     [appContextMenu]="getContextMenuItems(awkForm)"
-                                    [contextMenuData]="{ i: i, hl: awkForm.hl }"
-                                    [ngClass]="{'hl': awkForm.hl}">
+                                    [contextMenuData]="{ i: i, hl: awkForm.hl }" [ngClass]="{'hl': awkForm.hl}">
                                     <td class="text-center">
                                         <div class="d-flex justify-content-between">
                                             <div>{{i+1}}</div>
@@ -298,8 +298,7 @@
                                             [clearable]="true" [virtualScroll]="true"
                                             [(ngModel)]="awkForm.usage_list_id" name="usage_list_id"
                                             #usage_list_id="ngModel" [selectOnTab]="true"
-                                            [ngClass]="{'validation' : (usage_list_id?.touched || fMain.submitted) && usage_list_id.errors?.['required']}"
-                                            required>
+                                            [ngClass]="{'validation' : (usage_list_id?.touched || fMain.submitted) && usage_list_id.errors?.['required']}">
                                             <ng-option selected="selected" disabled value="">Usage List
                                             </ng-option>
                                             <ng-option *ngFor="let item of usage_lists" [value]="item._id">
@@ -347,6 +346,32 @@
                                                 name="hl" #hl="ngModel" />
                                         </div>
 
+                                    </td>
+
+                                    <td *ngIf="settings.aawak.enz">
+                                        <div class="d-flex">
+                                            <ng-select class="custom-sm" style="width: 100%;" placeholder="Aawak Source"
+                                                [clearable]="true" [virtualScroll]="true"
+                                                [(ngModel)]="awkForm.enz.container_aawak_source_id"
+                                                name="container_aawak_source_id" #container_aawak_source_id="ngModel"
+                                                [selectOnTab]="true">
+                                                <ng-option selected="selected" disabled value="">Aawak Source
+                                                </ng-option>
+                                                <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
+                                                    {{item.list_name_hin}} : {{item.list_name_roman}} :
+                                                    {{item.list_name_eng}}
+                                                </ng-option>
+                                            </ng-select>
+                                            <input type="text" class="form-control-sm mx-1" placeholder="Enz No"
+                                                [(ngModel)]="awkForm.enz.container_enz_no" name="container_enz_no"
+                                                #container_enz_no="ngModel">
+                                            <input type="number" class="form-control-sm mx-1" placeholder="Capacity"
+                                                [(ngModel)]="awkForm.enz.container_capacity" name="container_capacity"
+                                                #container_capacity="ngModel">
+                                            <input type="number" class="form-control-sm" placeholder="Container Qty"
+                                                [(ngModel)]="awkForm.enz.container_qty" name="container_qty"
+                                                #container_qty="ngModel">
+                                        </div>
                                     </td>
                                 </tr>
                             </ng-container>

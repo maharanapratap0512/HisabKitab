@@ -273,7 +273,9 @@
                   <label class="form-label">Item & Subitem</label>
                   <div class="float-end" *ngIf="settings.item.add">
                      <!-- Filter Button with Popover -->
-                     <app-popover-filter [isActive]="selDept_id != null || cat != null" (clear)="clearItemFilters()">
+                     <app-popover-filter
+                        [iconClass]="(selDept_id != null || cat != null) ? 'uil uil-check' : 'uil uil-filter'"
+                        (clear)="clearItemFilters()">
                         <div class="mb-2">
                            <label class="form-label" style="font-size: 0.875rem; margin-bottom: 5px;">Department</label>
                            <ng-select *ngIf="departments.length > 0" class="custom" style="width: 100%;"
@@ -534,6 +536,38 @@
                      <input type="checkbox" class="form-check-input" [(ngModel)]="awkfg.hl"
                         [ngModelOptions]="{standalone: true}">
                   </div>
+               </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Container Aawak Source</label>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Container Aawak Source" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.enz.container_aawak_source_id" name="container_aawak_source_id">
+                     <ng-option selected="selected" disabled value="">Select Container Aawak Source</ng-option>
+                     <ng-option *ngFor="let item of aawak_sources" [value]="item._id">{{item.list_name_hin}} : {{item.list_name_eng}}</ng-option>
+                  </ng-select>
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Container Enz No</label>
+                  <input type="text" class="form-control" placeholder="Container Enz No" [(ngModel)]="awkfg.enz.container_enz_no" name="container_enz_no">
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Container Capacity</label>
+                  <input type="number" class="form-control" placeholder="Container Capacity" [(ngModel)]="awkfg.enz.container_capacity" name="container_capacity">
+               </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Container Qty</label>
+                  <input type="number" class="form-control" placeholder="Container Qty" [(ngModel)]="awkfg.enz.container_qty" name="container_qty">
                </div>
             </div>
 

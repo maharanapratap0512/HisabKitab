@@ -15,9 +15,9 @@
                <div class="card-body" style="overflow: auto;">
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
-                        <!-- <button class="btn btn-primary" (click)="openModal('Add Jawak')">
+                        <button class="btn btn-primary" (click)="openModal('Add Jawak')">
                            <i class="dripicons-plus" style="font-size: large;"> </i>Add Jawak
-                        </button> -->
+                        </button>
                      </div>
                      <div class="col-4">
                         <div class="form-group">
@@ -317,6 +317,7 @@
                               <th style="width: 200px;" *ngIf="settings.item_detail">Item Detail</th>
                               <th style="width: 200px;" *ngIf="settings.description">Description</th>
                               <th style="width: 100px;" *ngIf="settings.nimitt_id">Nimitt</th>
+                              <th style="width: 120px;" *ngIf="settings.enz">Container Capacity</th>
                            </tr>
                         </thead>
                         <tbody>
@@ -379,6 +380,7 @@
                               <td *ngIf="settings.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
                               <td *ngIf="settings.description">{{data.description?data.description:'-'}}</td>
                               <td *ngIf="settings.nimitt_id">{{data.nimitt_id?data.nimitt_hin:'-'}}</td>
+                              <td *ngIf="settings.enz">{{data.enz.container_capacity?data.enz.container_capacity + " ltr":'-'}}</td>
                            </tr>
                         </tbody>
                      </table>
@@ -397,17 +399,17 @@
 
 
 
-<!-- Add Aawak Entry Model -->
+<!-- Add Jawak Entry Model -->
 <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
    aria-hidden="true">
-   <div class="modal-dialog" style="width: 90%;">
+   <div class="modal-dialog" style="width: 98%;">
       <div class="modal-content">
          <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
             <button type="button" onclick="$('#showModal').modal('hide')" class="btn-close" aria-label="Close"></button>
          </div>
          <div class="modal-body">
-            <app-jawak-entry (response)='addJawakResponse($event)' *ngIf="showModal == 'Add Jawak'"></app-jawak-entry>
+            <app-jawak-entry-new (response)='addJawakResponse($event)' *ngIf="showModal == 'Add Jawak'"></app-jawak-entry-new>
 
             <app-jawak-entry (response)='editJawakResponse($event)' *ngIf="showModal == 'Edit Jawak'"
                [getData]="editData" isEdit="true">

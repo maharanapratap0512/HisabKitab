@@ -39,6 +39,7 @@ router.post('/new/:dept_id', async (req, res, next) => {
                     await DB.getList('aawak', { full: true, conditionString: ` aawak._id = ${resolve}` }).then(async (data) => {
                         for (let i in data.data) {
                             data.data[i].document = (data.data[i].document ? JSON.parse(data.data[i].document) : {});
+                            data.data[i].enz = (data.data[i].enz ? JSON.parse(data.data[i].enz) : {});
                             data.data[i].isbill = data.data[i].isbill ? true : false;
 
                             let jwkconditionString = ` jawak.aawak_ref_id = ${data.data[i]._id}`;
@@ -110,6 +111,7 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
                     }).then(async (aawaks) => {
                         for (let i in aawaks) {
                             aawaks[i].document = (aawaks[i].document ? JSON.parse(aawaks[i].document) : {});
+                            aawaks[i].enz = (aawaks[i].enz ? JSON.parse(aawaks[i].enz) : {});
                             aawaks[i].item_categories = (aawaks[i].item_categories ? JSON.parse(aawaks[i].item_categories) : {});
                             aawaks[i].subitem_categories = (aawaks[i].subitem_categories ? JSON.parse(aawaks[i].subitem_categories) : {});
                             let jwkconditionString = ` jawak.aawak_ref_id = ${aawaks[i]._id}`;
@@ -237,6 +239,15 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
                         resolve.data[i].aawaks[j].item_categories = resolve.data[i].aawaks[j].item_categories ? JSON.parse(resolve.data[i].aawaks[j].item_categories) : [];
                         resolve.data[i].aawaks[j].subitem_categories = resolve.data[i].aawaks[j].subitem_categories ? JSON.parse(resolve.data[i].aawaks[j].subitem_categories) : [];
                         resolve.data[i].aawaks[j].isbill = resolve.data[i].aawaks[j].isbill ? true : false;
+                        resolve.data[i].aawaks[j].enz = {
+                            '_id': resolve.data[i].aawaks[j].enz_id,
+                            'aawak_id': resolve.data[i].aawaks[j]._id,
+                            'container_aawak_source_id': resolve.data[i].aawaks[j].container_aawak_source_id,
+                            'container_aawak_source_hin': resolve.data[i].aawaks[j].container_aawak_source_hin,
+                            'container_enz_no': resolve.data[i].aawaks[j].container_enz_no,
+                            'container_capacity': resolve.data[i].aawaks[j].container_capacity,
+                            'container_qty': resolve.data[i].aawaks[j].container_qty
+                        }
                         let jwkconditionString = `aawak_ref_id = ${resolve.data[i].aawaks[j]._id}`;
 
                         await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString, orderBy: `jawak._id` }).then((jwkdata) => {
@@ -276,6 +287,7 @@ router.get('/:dept_id', async (req, res, next) => {
     await DB.getList('aawak', { full: true, dept_id: req.params.dept_id, conditionString: null, orderBy: `aawak._id desc`, limit: 100 }).then(async (resolve) => {
         for (let i = 0; i < resolve.data.length; i++) {
             resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
+            resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` jawak.aawak_ref_id = ${resolve.data[i]._id}`;
 
@@ -301,6 +313,7 @@ router.get('/pending/:dept_id', async (req, res, next) => {
     await DB.getList("aawak", { full: true, dept_id: req.params.dept_id, conditionString: conditionString }).then(async (resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
+            resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
 
@@ -324,6 +337,7 @@ router.put('/pending/:dept_id', async (req, res, next) => {
     await DB.getList("aawak", { full: true, dept_id: req.params.dept_id, conditionString: conditionString }).then(async (resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
+            resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
 
@@ -401,6 +415,7 @@ router.put('/new', async (req, res, next) => {
                 await DB.getList('aawak', { full: true, conditionString: ` aawak._id = ${req.body.set._id}` }).then(async (data) => {
                     for (let i in data.data) {
                         data.data[i].document = (data.data[i].document ? JSON.parse(data.data[i].document) : {});
+                        data.data[i].enz = (data.data[i].enz ? JSON.parse(data.data[i].enz) : {});
                         data.data[i].isbill = data.data[i].isbill ? true : false;
 
                         let jwkconditionString = ` jawak.aawak_ref_id = ${data.data[i]._id}`;
@@ -470,7 +485,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
 
             conditionString = conditions.length > 0 ? `(${conditions.join(' OR ')})` : `1=1`;
         } else {
-            conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.date ? ` AND date = '${req.body.date}'` : ''} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month}'` : ``} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.zone_id && req.body.zone_id.length > 0) ? ` AND mm_zone_id in (${req.body.zone_id.join(',')})` : ``} ${(req.body.aj_mm_id && req.body.aj_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aj_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = '${req.body.pkt_num}'` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``} ${req.body.remaining_qty ? `AND remaining_qty <> 0` : ``}`;
+            conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.date ? ` AND date = '${req.body.date}'` : ''} ${req.body.max_date ? ` AND date <= '${req.body.max_date}'` : ''} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month}'` : ``} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.zone_id && req.body.zone_id.length > 0) ? ` AND mm_zone_id in (${req.body.zone_id.join(',')})` : ``} ${(req.body.aj_mm_id && req.body.aj_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aj_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')})` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = '${req.body.pkt_num}'` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``} ${req.body.remaining_qty ? `AND remaining_qty <> 0` : ``}`;
         }
 
     }
@@ -490,6 +505,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
     await DB.getList('aawak', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then(async (resolve) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
+            resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = `${jwkIds && jwkIds.length > 0 ? ` jawak._id in (${jwkIds}) AND ` : ``} aawak_ref_id = ${resolve.data[i]._id}`;
 
@@ -549,6 +565,15 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
                 resolve.data[i].aawaks[j].item_categories = resolve.data[i].aawaks[j].item_categories ? JSON.parse(resolve.data[i].aawaks[j].item_categories) : [];
                 resolve.data[i].aawaks[j].subitem_categories = resolve.data[i].aawaks[j].subitem_categories ? JSON.parse(resolve.data[i].aawaks[j].subitem_categories) : [];
                 resolve.data[i].aawaks[j].isbill = resolve.data[i].aawaks[j].isbill ? true : false;
+                resolve.data[i].aawaks[j].enz = {
+                    '_id': resolve.data[i].aawaks[j].enz_id,
+                    'aawak_id': resolve.data[i].aawaks[j].id,
+                    'container_aawak_source_id': resolve.data[i].aawaks[j].container_aawak_source_id,
+                    'container_aawak_source_hin': resolve.data[i].aawaks[j].container_aawak_source_hin,
+                    'container_enz_no': resolve.data[i].aawaks[j].container_enz_no,
+                    'container_capacity': resolve.data[i].aawaks[j].container_capacity,
+                    'container_qty': resolve.data[i].aawaks[j].container_qty
+                }
                 let jwkconditionString = `${jwkIds && jwkIds.length > 0 ? ` jawak._id in (${jwkIds}) AND ` : ``} aawak_ref_id = ${resolve.data[i].aawaks[j]._id}`;
 
                 await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString, orderBy: `jawak._id` }).then((jwkdata) => {
@@ -587,6 +612,7 @@ router.put('/', async (req, res, next) => {
         await DB.update('aawak', req.body.set, req.body.query._id).then(async (data) => {
             data.jawak_detail = [];
             data.document = (data.document ? JSON.parse(data.document) : {});
+            data.enz = (data.enz ? JSON.parse(data.enz) : {});
             data.isbill = data.isbill ? true : false;
             for (let i = 0; i < jawaks.length; i++) {
                 if (!jawaks[i]._id) {
