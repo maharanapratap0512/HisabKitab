@@ -2106,7 +2106,7 @@ class dbModal {
       )`
     },
     // version 25
-    // New tables for pbk bachat tracking
+    // New tables for pbk bachat tracking and home made products
     {
       pbk_bachat: `create table if not exists pbk_bachat(
         _id integer primary key AUTOINCREMENT,
@@ -2125,6 +2125,7 @@ class dbModal {
       pbk_closing: `create table if not exists pbk_closing(
         _id integer primary key AUTOINCREMENT,
         pbk_id integer not null references pbk(_id),
+        voucher_no integer not null,
         date date not null,
         item_id integer not null references item(_id),
         subitem_id integer null references subitem(_id),

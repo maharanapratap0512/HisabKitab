@@ -138,6 +138,14 @@ export class HeaderComponent implements AfterViewInit {
     this.router.navigate(['login']);
   }
 
+  isRegionActive(): boolean {
+    const url: string = this.router.url || '';
+    return url.includes('/city')
+      || url.includes('/view/zone')
+      || url.includes('/view/district')
+      || url.includes('/view/state')
+      || url.includes('/view/country');
+  }
 
   darkModeToggle(ev: any) {
     // const config = $("body").data("layout-config");
