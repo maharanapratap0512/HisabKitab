@@ -12,6 +12,8 @@ export class FormService {
   aawakForm: any;
   jawakForm: any;
   submit: boolean = false;
+  pbkClosingFormMain: any;
+  pbkClosingForm: any;
   // aawakFormArray: any = [];
 
   constructor(private fb: FormBuilder,
@@ -118,6 +120,27 @@ export class FormService {
     };
     this.jawakFormMain.date = gs.dateString;
     this.aawakFormMain.date = gs.dateString;
+
+    this.pbkClosingForm = {
+      item_id: null,
+      subitem_id: null,
+      unit_id: null,
+      condition_id: null,
+      qty: null,
+      sw_bachat: null,
+      difference: null,
+      hl: 0,
+      is_xl: 0,
+      active: 1
+    };
+
+    this.pbkClosingFormMain = {
+      date: gs.dateString,
+      pbk_id: null,
+      dept_id: auth.webUser.dept_id,
+      pbk_closings: [],
+      voucher_no: null
+    };
   }
 
   patchForm(awkObj: any) {
@@ -153,6 +176,19 @@ export class FormService {
     };
   }
 
+  patchFormPbkClosing(obj: any) {
+    this.pbkClosingFormMain = {
+      date: new Date(obj.date).toISOString().slice(0, 10),
+      pbk_id: obj.pbk_id,
+      dept_id: obj.dept_id,
+      pbk_closings: obj.pbk_closings && obj.pbk_closings.length > 0 ? obj.pbk_closings : [],
+      voucher_no: obj.voucher_no
+    };
+    if (this.pbkClosingFormMain.pbk_closings.length === 0) {
+      this.pbkClosingFormMain.pbk_closings.push(JSON.parse(JSON.stringify(this.pbkClosingForm)));
+    }
+  }
+
   formStatusChanges() {
     let valid = true;
 
@@ -183,6 +219,21 @@ export class FormService {
     }
   }
 
+  pbkClosingFormStatusChanges() {
+    let valid = true;
+
+    for (let form of this.pbkClosingFormMain.pbk_closings) {
+      if (!(form.item_id && form.qty)) { // Basic validation: Item and Qty required
+        valid = false;
+        break;
+      }
+    }
+
+    if (valid && !this.submit) {
+      this.pbkClosingFormMain.pbk_closings.push(JSON.parse(JSON.stringify(this.pbkClosingForm)));
+    }
+  }
+
   valid() {
     for (let i in this.aawakFormMain.aawaks) {
       if (!(this.aawakFormMain.aawaks[i].item_id && this.aawakFormMain.aawaks[i].qty && this.aawakFormMain.aawaks[i].unit_id && this.aawakFormMain.aawaks[i].aawak_type_id)) {
@@ -200,7 +251,7 @@ export class FormService {
   }
 
   validJawak() {
-    this.jawakFormMain.jawaks.splice(this.jawakFormMain.jawaks.length-1, 1);
+    this.jawakFormMain.jawaks.splice(this.jawakFormMain.jawaks.length - 1, 1);
     for (let i in this.jawakFormMain.jawaks) {
       if (!(this.jawakFormMain.jawaks[i].item_id && this.jawakFormMain.jawaks[i].qty && this.jawakFormMain.jawaks[i].unit_id && this.jawakFormMain.jawaks[i].jawak_type_id)) {
         if (this.jawakFormMain.jawaks.length > 1) {
@@ -222,6 +273,31 @@ export class FormService {
       return false;
     }
   }
+
+  validPbkClosing() {
+    // Remove last empty row if invalid
+    if (this.pbkClosingFormMain.pbk_closings.length > 0) {
+      let last = this.pbkClosingFormMain.pbk_closings[this.pbkClosingFormMain.pbk_closings.length - 1];
+      if (!(last.item_id && last.qty)) {
+        this.pbkClosingFormMain.pbk_closings.splice(this.pbkClosingFormMain.pbk_closings.length - 1, 1);
+      }
+    }
+
+    // Validate remaining
+    for (let i in this.pbkClosingFormMain.pbk_closings) {
+      if (!(this.pbkClosingFormMain.pbk_closings[i].item_id && this.pbkClosingFormMain.pbk_closings[i].qty)) {
+        return false;
+      }
+    }
+
+    if (this.pbkClosingFormMain.date && this.pbkClosingFormMain.pbk_id && this.pbkClosingFormMain.pbk_closings.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+
 
 
   reset() {
@@ -254,6 +330,17 @@ export class FormService {
       jawaks: [JSON.parse(JSON.stringify(this.jawakForm))],
       voucher_no: null,
     }
+    this.submit = false;
+  }
+
+  resetPbkClosing() {
+    this.pbkClosingFormMain = {
+      date: this.pbkClosingFormMain.date,
+      pbk_id: this.pbkClosingFormMain.pbk_id,
+      dept_id: this.auth.webUser.dept_id,
+      pbk_closings: [],
+      voucher_no: null
+    };
     this.submit = false;
   }
 

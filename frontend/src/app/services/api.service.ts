@@ -37,6 +37,7 @@ export class ApiService {
     BACHATNEW: base_url + 'bachat_new/',
     BACHATHOME: base_url + 'bachat/home/',
     PBK: base_url + 'pbks/',
+    PBK_CLOSING: base_url + 'pbk_closing/',
     COUNTRY: base_url + 'countries/',
     STATE: base_url + 'states/',
     ZONE: base_url + 'zones/',

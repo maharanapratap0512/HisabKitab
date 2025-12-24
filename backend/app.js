@@ -57,6 +57,9 @@ const vehicleRoutes = require('./api/routes/vehicle.routes');
 const vehicleDocRoutes = require('./api/routes/vehicle_document.routes');
 const commentRoutes = require('./api/routes/report_comment.routes');
 const mysqlRoutes = require('./api/routes/mysql.routes');
+const pbkClosingRoutes = require('./api/routes/pbk_closing.routes');
+const pbkBachatRoutes = require('./api/routes/pbk_bachat.routes');
+
 
 
 // // Routes - Binding
@@ -68,6 +71,8 @@ app.use('/api/units', unitRoutes);
 app.use('/api/cities', cityRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/pbks', pbkRoutes);
+app.use('/api/pbk_bachat', pbkBachatRoutes);
+app.use('/api/pbk_closing', pbkClosingRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/subitems', subitemRoutes);
@@ -85,7 +90,7 @@ app.use('/api/bachat', bachatRoutes);
 app.use('/api/bachat_new', bachatNewRoutes);
 app.use('/api/points', pointRoutes);
 app.use('/api/importexport', importExportRoutes);
-app.use('/api/excelimport', excelImportRoutes); 
+app.use('/api/excelimport', excelImportRoutes);
 app.use('/api/nimitt', nimittRoutes);
 app.use('/api/dictionary', dictionaryRoutes);
 app.use('/api/reports', reportRoutes);

@@ -1201,7 +1201,9 @@ const pbk_bachat = {
       qty = @qty,
       updated_at = datetime('now', 'localtime')
       where pbk_id = @pbk_id AND item_id = @item_id AND unit_id = @unit_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)`,
+    update_by_id: `update pbk_bachat set qty = @qty, updated_at = datetime('now', 'localtime') where _id = @pbk_bachat_id`,
     update_qty: `update pbk_bachat set qty = qty + @qty, updated_at = datetime('now', 'localtime') where pbk_id = @pbk_id AND item_id = @item_id AND unit_id = @unit_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)`,
+    find_bachat_from_closing: `select _id from pbk_bachat where pbk_id = @pbk_id AND item_id = @item_id AND unit_id = @unit_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND IFNULL(condition_id, 0) = IFNULL(@condition_id, 0)`,
     order: `pbk.pbk_hin, item_hin, subitem_hin, unit.unit_short`
 }
 
@@ -1212,20 +1214,20 @@ const pbk_closing = {
       it.item_hin, it.item_eng, it.item_code, it.item_roman,
       sil.subitem_hin, sil.subitem_eng, sil.subitem_roman,
       unit.unit_short, unit.unit_full,
-      sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
-      dept.dept_code, dept.dept_hin, dept.dept_eng
+      st.state_hin, st.state_eng,
+      sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng
       from pbk_closing
       left join pbk on pbk._id = pbk_closing.pbk_id
+      left join state st on st._id = pbk.state_id
       left join item it on it._id = pbk_closing.item_id
       left join subitem si on si._id = pbk_closing.subitem_id
       left join subitem_list sil on sil._id = si.subitem_list_id
       left join unit on unit._id = pbk_closing.unit_id
-      left join support_list sl on sl._id = pbk_closing.condition_id
-      left join department dept on dept._id = pbk_closing.dept_id ? limit @limit offset @offset`,
+      left join support_list sl on sl._id = pbk_closing.condition_id ? limit @limit offset @offset`,
     insert: `insert into pbk_closing (
-      pbk_id, date, item_id, subitem_id, unit_id, condition_id, qty, sw_bachat, difference, active, hl, is_xl)
+      pbk_id, date, item_id, subitem_id, unit_id, condition_id, qty, sw_bachat, difference, voucher_no, active, hl, is_xl, dept_id)
     values (
-      @pbk_id, @date, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @sw_bachat, @difference, @active, @hl, @is_xl)`,
+      @pbk_id, @date, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @sw_bachat, @difference, @voucher_no, @active, @hl, @is_xl, @dept_id)`,
     update: `update pbk_closing set
       qty = @qty,
       sw_bachat = @sw_bachat,
@@ -2923,8 +2925,8 @@ const test = {
 
 module.exports = {
     queryBuilder, country, city, category, department, department_config, item, itemmix, mm, nimitt, pbk, point, zone, district, state, subitem, subitem_list, support_list, unit, conditions,
-    aawak, aawak_voucher, bachat, pbk_bachat, pbk_closing, jawak, jawak_voucher, bachat_new, temp_import, product, vehicle, vehicle_document, 
-    hmp_recipe, hmp_recipe_input, hmp_recipe_output, hmp_batch, hmp_batch_input, hmp_batch_output, 
+    aawak, aawak_voucher, bachat, pbk_bachat, pbk_closing, jawak, jawak_voucher, bachat_new, temp_import, product, vehicle, vehicle_document,
+    hmp_recipe, hmp_recipe_input, hmp_recipe_output, hmp_batch, hmp_batch_input, hmp_batch_output,
     aawak_enzyme, jawak_enzyme, usage_report,
     genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, test, report_comment,
 };

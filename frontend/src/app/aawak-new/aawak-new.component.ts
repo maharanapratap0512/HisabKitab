@@ -184,7 +184,6 @@ export class AawakNewComponent implements OnInit {
             this.aawakAll[i].aawaks[j].categories_hin = '';
             this.aawakAll[i].aawaks[j].categories_eng = '';
             if (this.aawakAll[i].aawaks[j].subitem_categories && this.aawakAll[i].aawaks[j].subitem_categories.length > 0) {
-              console.log(this.aawakAll[i].aawaks[j].subitem_categories, this.categories);
 
               for (let k in this.categories) {
                 if (this.aawakAll[i].aawaks[j].subitem_categories.includes(this.categories[k]._id)) {

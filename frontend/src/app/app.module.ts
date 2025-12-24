@@ -97,6 +97,8 @@ import { JawakNewComponent } from './jawak-new/jawak-new.component';
 import { MysqlComponent } from './MySQL/mysql.component';
 import { HmpComponent } from './hmp/hmp.component';
 import { PbkClosingComponent } from './pbk-closing/pbk-closing.component';
+import { PbkClosingEntryComponent } from './ENTRY__FORMS/pbk-closing-entry/pbk-closing-entry.component';
+import { PbkBachatComponent } from './pbk-bachat/pbk-bachat.component';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -182,6 +184,8 @@ import { PbkClosingComponent } from './pbk-closing/pbk-closing.component';
     MysqlComponent,
     HmpComponent,
     PbkClosingComponent,
+    PbkClosingEntryComponent,
+    PbkBachatComponent,
   ],
 
   imports: [

@@ -40,6 +40,8 @@ import { HmpComponent } from './hmp/hmp.component';
 import { PbkClosingComponent } from './pbk-closing/pbk-closing.component';
 import { JawakNewComponent } from './jawak-new/jawak-new.component';
 import { JawakEntryNewComponent } from './ENTRY__FORMS/jawak-entry-new/jawak-entry-new.component';
+import { PbkClosingEntryComponent } from './ENTRY__FORMS/pbk-closing-entry/pbk-closing-entry.component';
+import { PbkBachatComponent } from './pbk-bachat/pbk-bachat.component';
 import { listsResolver } from './resolver/lists.resolver';
 
 const routes: Routes = [
@@ -64,6 +66,8 @@ const routes: Routes = [
          { path: "bachat_new", component: BachatNewComponent },
          { path: "hmp", component: HmpComponent },
          { path: "pbk_closing", component: PbkClosingComponent },
+         { path: "pbk_closing_entry", component: PbkClosingEntryComponent },
+         { path: "pbk_bachat", component: PbkBachatComponent },
          { path: "pbk", component: PbkComponent },
          { path: "mm", component: MmComponent },
          { path: "category", component: CategoryComponent },
@@ -90,7 +94,7 @@ const routes: Routes = [
          { path: "import_export", component: ImportExportComponent },
          { path: "mysql", component: MysqlComponent },
       ],
-      resolve:{
+      resolve: {
          lists: listsResolver
       }
    }

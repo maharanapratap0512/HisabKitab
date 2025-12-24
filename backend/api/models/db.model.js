@@ -2140,7 +2140,7 @@ class dbModal {
         created_at timestamp default (datetime('now', 'localtime')),
         updated_at timestamp default (datetime('now', 'localtime'))
       )`,
-         
+
       // Home Made Products related processing and tracking
       hmp_recipe: `create table if not exists hmp_recipe(
         _id integer primary key AUTOINCREMENT,
@@ -2152,7 +2152,7 @@ class dbModal {
         created_at timestamp default (datetime('now', 'localtime')),
         updated_at timestamp default (datetime('now', 'localtime'))
       )`,
-      
+
       hmp_recipe_input: `create table if not exists hmp_recipe_input(
         _id integer primary key AUTOINCREMENT,
         recipe_id integer not null references hmp_recipe(_id),
@@ -2164,7 +2164,7 @@ class dbModal {
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))
       )`,
-      
+
       hmp_recipe_output: `create table if not exists hmp_recipe_output(
         _id integer primary key AUTOINCREMENT,
         recipe_id integer not null references hmp_recipe(_id),
@@ -2176,7 +2176,7 @@ class dbModal {
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))
       )`,
-      
+
       hmp_batch: `create table if not exists hmp_batch(
         _id integer primary key AUTOINCREMENT,
         recipe_id integer not null references hmp_recipe(_id),
@@ -2190,7 +2190,7 @@ class dbModal {
         created_at timestamp default (datetime('now', 'localtime')),
         updated_at timestamp default (datetime('now', 'localtime'))
       )`,
-      
+
       hmp_batch_input: `create table if not exists hmp_batch_input(
         _id integer primary key AUTOINCREMENT,
         batch_id integer not null references hmp_batch(_id),
@@ -2206,7 +2206,7 @@ class dbModal {
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))
       )`,
-      
+
       hmp_batch_output: `create table if not exists hmp_batch_output(
         _id integer primary key AUTOINCREMENT,
         batch_id integer not null references hmp_batch(_id),

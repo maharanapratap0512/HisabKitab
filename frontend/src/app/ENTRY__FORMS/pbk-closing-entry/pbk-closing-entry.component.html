@@ -1,0 +1,101 @@
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color: white"> Processing... </p>
+</ngx-spinner>
+
+<div class="row" id="bunchPbkClosingComponent">
+    <div class="card-body">
+        <form #fMain="ngForm">
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-control" [(ngModel)]="fs.pbkClosingFormMain.date" name="date"
+                            required>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="form-label">Select PBK</label>
+                        <ng-select class="custom" style="width: 100%;" [items]="pbks" bindLabel="pbk_hin"
+                            bindValue="_id" [(ngModel)]="fs.pbkClosingFormMain.pbk_id" name="pbk_id"
+                            (change)="pbkSelected()" placeholder="Search PBK" required>
+                            <ng-template ng-option-tmp let-item="item">
+                                {{item.pbk_hin}} : {{item.pbk_eng}} ({{item.roll_no}})
+                            </ng-template>
+                        </ng-select>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary" (click)="submit()">Submit Closing</button>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="fs.pbkClosingFormMain.pbk_closings.length > 0">
+                <div class="card card-body" style="font-size: smaller; overflow: auto; flex-direction: column;">
+                    <div class="table-container" style=" padding-bottom: 250px;" appHorizontalScrollWithArrows>
+                        <table class="table table-bordered table-sticky-header table-centered mb-0"
+                            style="width: max-content;">
+                            <thead>
+                                <tr>
+                                    <th class="mw-10">Item</th>
+                                    <th class="mw-8">Subitem</th>
+                                    <th class="mw-6">Unit</th>
+                                    <th class="mw-6">Condition</th>
+                                    <th class="mw-6">System Qty</th>
+                                    <th class="mw-6">Closing Qty</th>
+                                    <th class="mw-6">Difference</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let row of fs.pbkClosingFormMain.pbk_closings; let i = index">
+                                    <td>
+                                        <ng-select class="custom-sm" style="width: 100%;" [items]="items"
+                                            bindLabel="item_hin" bindValue="_id" [(ngModel)]="row.item_id"
+                                            name="item_{{i}}" [disabled]="row.pbk_bachat_id" [clearable]="false"
+                                            placeholder="Select Item"></ng-select>
+                                    </td>
+                                    <td>
+                                        <ng-select class="custom-sm" style="width: 100%;"
+                                            *ngIf="row.subitem_id || !row.pbk_bachat_id" [items]="items"
+                                            bindLabel="item_hin" bindValue="_id" [(ngModel)]="row.subitem_id"
+                                            name="subitem_{{i}}" [disabled]="true" [clearable]="false">
+                                            (Subitem {{row.subitem_id}})
+                                        </ng-select>
+                                    </td>
+                                    <td>
+                                        <ng-select class="custom-sm" style="width: 100%;" [items]="units"
+                                            bindLabel="unit_short" bindValue="_id" [(ngModel)]="row.unit_id"
+                                            name="unit_{{i}}" [disabled]="row.pbk_bachat_id"
+                                            [clearable]="false"></ng-select>
+                                    </td>
+                                    <td>
+                                        <ng-select class="custom-sm" style="width: 100%;" [items]="conditions"
+                                            bindLabel="list_name_hin" bindValue="_id" [(ngModel)]="row.condition_id"
+                                            name="cond_{{i}}" [disabled]="row.pbk_bachat_id"
+                                            [clearable]="false"></ng-select>
+                                    </td>
+                                    <td class="text-center">{{row.sw_bachat}}</td>
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm" [(ngModel)]="row.qty"
+                                            name="qty_{{i}}" (change)="qtyChanged(i)">
+                                    </td>
+                                    <td class="text-center"
+                                        [ngClass]="{'text-danger': row.difference < 0, 'text-success': row.difference > 0}">
+                                        {{row.difference}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row"
+                *ngIf="fs.pbkClosingFormMain.pbk_id && fs.pbkClosingFormMain.pbk_closings.length === 0 && !isLoader">
+                <div class="col-12 text-center text-muted mt-5">
+                    No bachat records found. Start adding items above.
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

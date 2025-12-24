@@ -239,6 +239,34 @@ class TableInterface {
          is_auto: 1,
       }
    }
+
+   pbk_closing = {
+      pbk_id: null,
+      voucher_no: null,
+      date: null,
+      item_id: null,
+      subitem_id: null,
+      unit_id: null,
+      condition_id: null,
+      qty: null,
+      sw_bachat: null,
+      difference: null,
+      hl: 0,
+      is_xl: 0,
+      active: 1
+   }
+
+   pbk_bachat = {
+      pbk_id: null,
+      item_id: null,
+      subitem_id: null,
+      unit_id: null,
+      condition_id: null,
+      qty: 0,
+      dept_id: null,
+      active: 1
+   }
+
 }
 
 module.exports = new TableInterface();
