@@ -434,6 +434,7 @@ class DBContex {
             dept_id: AJobj.dept_id,
             condition_id: AJobj.condition_id,
         };
+
         let bachat = await this.db.prepare(this.query[type].select_exists).get(bachatObj);
         return bachat || bachatObj;
     }
@@ -445,6 +446,8 @@ class DBContex {
         obj.year = objDate.getFullYear();
         obj.difference = 0;
         let bachat = await this.getBachatFromAJ(obj, 'bachat');
+        console.log(bachat);
+
         bachat.difference = Number(bachat.difference);
         obj.qty = Number(obj.qty);
         if (AJtype == 'aawak' && obj.aawak_type_id == 42) {

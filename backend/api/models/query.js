@@ -1225,9 +1225,9 @@ const pbk_closing = {
       left join unit on unit._id = pbk_closing.unit_id
       left join support_list sl on sl._id = pbk_closing.condition_id ? limit @limit offset @offset`,
     insert: `insert into pbk_closing (
-      pbk_id, date, item_id, subitem_id, unit_id, condition_id, qty, sw_bachat, difference, voucher_no, active, hl, is_xl, dept_id)
+      pbk_id, date, item_id, subitem_id, unit_id, condition_id, qty, sw_bachat, difference, voucher_no, active, hl, is_xl)
     values (
-      @pbk_id, @date, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @sw_bachat, @difference, @voucher_no, @active, @hl, @is_xl, @dept_id)`,
+      @pbk_id, @date, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @sw_bachat, @difference, @voucher_no, @active, @hl, @is_xl)`,
     update: `update pbk_closing set
       qty = @qty,
       sw_bachat = @sw_bachat,

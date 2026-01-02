@@ -3253,7 +3253,22 @@ textarea.form-control-lg {
    min-width: 0
 }
 
+.input-group>.form-control-sm,
+.input-group>.form-select {
+   position: relative;
+   -webkit-box-flex: 1;
+   -ms-flex: 1 1 auto;
+   flex: 1 1 auto;
+   width: 1%;
+   min-width: 0
+}
+
 .input-group>.form-control:focus,
+.input-group>.form-select:focus {
+   z-index: 3
+}
+
+.input-group>.form-control-sm:focus,
 .input-group>.form-select:focus {
    z-index: 3
 }
@@ -3307,6 +3322,15 @@ textarea.form-control-lg {
 
 .input-group-sm>.btn,
 .input-group-sm>.form-control,
+.input-group-sm>.form-select,
+.input-group-sm>.input-group-text {
+   padding: .28rem .8rem;
+   font-size: .875rem;
+   border-radius: .2rem
+}
+
+.input-group-sm>.btn,
+.input-group-sm>.form-control-sm,
 .input-group-sm>.form-select,
 .input-group-sm>.input-group-text {
    padding: .28rem .8rem;

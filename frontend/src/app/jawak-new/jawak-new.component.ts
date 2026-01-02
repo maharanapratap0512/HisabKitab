@@ -31,6 +31,7 @@ export class JawakNewComponent implements OnInit {
   total_count: any = 0;
   term: any = '';
   loadingStatus: any = '';
+  viewMode: 'voucher' | 'individual' = 'voucher';
 
   // Datasets
   jawakData: any[] = [];
@@ -42,7 +43,8 @@ export class JawakNewComponent implements OnInit {
   conditions: any = [];
   departments: any = [];
   pbks: any = [];
-  jawaktypes: any = [];
+  jawak_types: any = [];
+  aawak_sources: any = [];
   products: any = [];
   categories: any = [];
   usagelists: any = [];
@@ -67,6 +69,7 @@ export class JawakNewComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.settings = this.auth.webUser.settings;
+    this.viewMode = this.settings.jawak.view_mode || 'voucher';
     this.gs.observeList().subscribe((result: any) => {
       this.mms = result.mm || [];
       this.items = result.itemmix || [];
@@ -75,14 +78,16 @@ export class JawakNewComponent implements OnInit {
       this.conditions = result.condition || [];
       this.departments = result.department || [];
       this.pbks = result.pbk || [];
-      this.jawaktypes = result.jawaktype || [];
+      this.jawak_types = result.jawak_type || [];
+      this.aawak_sources = result.aawak_source || [];
       this.usagelists = result.usagelist || [];
       this.products = result.product || [];
       this.categories = result.category || [];
       this.nimitts = result.nimitt || [];
       this.isLoader = true;
     });
-    this.getJawakData();
+    this.filterBody.mm_id = this.settings.defaultMM ? [this.settings.defaultMM] : [];
+    this.getFilteredData();
   }
 
   getJawakData(): void {
@@ -124,6 +129,12 @@ export class JawakNewComponent implements OnInit {
       });
   }
 
+  changeView(mode: 'voucher' | 'individual') {
+    this.viewMode = mode;
+    this.auth.webUser.settings.jawak.view_mode = mode;
+    this.auth.updateSettings()
+  }
+
   getJawakPage(page: any = null) {
     if (page) {
       this.pageNo = page;
@@ -134,6 +145,34 @@ export class JawakNewComponent implements OnInit {
   yearClick(year: any) {
     this.filterBody.year = year;
     this.pageNo = 0;
+    this.getFilteredData();
+  }
+
+  onHeaderFilterChange() {
+    this.pageNo = 1;
+
+    // Handle Item-Subitem mixed selection
+    if (this.filterBody.item_subitem_mix) {
+      const item_ids: any[] = [];
+      const subitem_ids: any[] = [];
+
+      this.filterBody.item_subitem_mix.forEach((val: string) => {
+        const parts = val.split(':');
+        const itemId = parts[0];
+        const subitemId = parts[1];
+
+        if (itemId && !item_ids.includes(itemId)) {
+          item_ids.push(itemId);
+        }
+        if (subitemId && !subitem_ids.includes(subitemId)) {
+          subitem_ids.push(subitemId);
+        }
+      });
+
+      this.filterBody.item_id = item_ids;
+      this.filterBody.subitem_id = subitem_ids;
+    }
+
     this.getFilteredData();
   }
 
@@ -175,7 +214,7 @@ export class JawakNewComponent implements OnInit {
             }
           }
         }
-        this.jawakData = this.jawakAll;
+        this.jawakData = [...this.jawakAll];
         this.total_count = data['total_count'];
         this.isLoader = false;
       }

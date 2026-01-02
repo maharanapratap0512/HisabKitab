@@ -34,6 +34,7 @@ class TableInterface {
    }
 
    aawak = {
+      _id: null,
       pkt_num: null,
       lot_no: null,
       voucher_no: null,
@@ -67,7 +68,66 @@ class TableInterface {
       is_auto: 0,
       is_process: 0,
       is_variable_qty: 0,
+      enz: {}
    }
+
+   jawak = {
+      _id: null,
+      date: null,
+      date_sent: null,
+      pkt_num: null,
+      reg_pg_no: null,
+      voucher_no: null,
+      mm_id: null,
+      lot_no: null,
+      jawak_mm_id: null,
+      pbk_id: null,
+      item_id: null,
+      subitem_id: null,
+      usage_list_id: null,
+      item_detail: null,
+      product_id: null,
+      condition_id: null,
+      company_name: null,
+      qty: null,
+      rate: null,
+      actual_amt: null,
+      aawak_source_id: null,
+      jawak_type_id: null,
+      unit_id: null,
+      description: null,
+      parchi_place: null,
+      sell_repair_place: null,
+      aawak_ref_id: null,
+      nimitt_id: null,
+      is_xl: null,
+      is_process: null,
+      dept_id: null,
+      auto_awk: 0,
+      hl: 0,
+      enz: {},
+      usage_report: {},
+
+
+   }
+
+   jawak_enzyme = {
+      _id: null,
+      jawak_id: null,
+      container_capacity: null,
+   }
+
+   usage_report = {
+      _id: null,
+      jawak_id: null,
+      date: null,
+      reporter: null,
+      usage_type_id: null,
+      fayda: null,
+      nuksan: null,
+      rating: null,
+   }
+
 
    aawak_enzyme = {
       _id: null,
@@ -127,56 +187,6 @@ class TableInterface {
       update_by_dept_id: null,
       verify: 0,
       active: 1
-   }
-
-   jawak = {
-      date: null,
-      date_sent: null,
-      pkt_num: null,
-      reg_pg_no: null,
-      mm_id: null,
-      lot_no: null,
-      jawak_mm_id: null,
-      pbk_id: null,
-      item_id: null,
-      subitem_id: null,
-      usage_list_id: null,
-      item_detail: null,
-      product_id: null,
-      condition_id: null,
-      company_name: null,
-      qty: null,
-      rate: null,
-      actual_amt: null,
-      aawak_source_id: null,
-      jawak_type_id: null,
-      unit_id: null,
-      description: null,
-      parchi_place: null,
-      sell_repair_place: null,
-      aawak_ref_id: null,
-      nimitt_id: null,
-      is_xl: null,
-      is_process: null,
-      dept_id: null,
-      auto_awk: 0,
-   }
-
-   jawak_enzyme = {
-      _id: null,
-      jawak_id: null,
-      container_capacity: null,
-   }
-
-   usage_report = {
-      _id: null,
-      jawak_id: null,
-      date: null,
-      reporter: null,
-      usage_type_id: null,
-      fayda: null,
-      nuksan: null,
-      rating: null,
    }
 
    dictionary = {

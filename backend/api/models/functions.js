@@ -35,8 +35,9 @@ class Functions extends DBContex {
                   obj.enz.jawak_id = insResult.lastInsertRowid;
                   obj.usage_report.jawak_id = insResult.lastInsertRowid;
                   await this.insertUsageReport(obj.usage_report);
+               } else if (type == 'aawak') {
+                  obj.enz.aawak_id = insResult.lastInsertRowid;
                }
-               obj.enz.aawak_id = insResult.lastInsertRowid;
                await this.insertAJEnzyme(obj.enz, type);
                resolve(insResult.lastInsertRowid);
             } else {
@@ -58,7 +59,7 @@ class Functions extends DBContex {
             } else if (type == 'jawak' && (obj.container_capacity)) {
                doInsert = true;
             }
-            console.log(obj, type, doInsert);
+            // console.log(obj, type, doInsert);
             if (doInsert) {
                let stmtInsert = this.db.prepare(this.query[type + '_enzyme'].insert);
                await stmtInsert.run(obj);
@@ -161,10 +162,10 @@ class Functions extends DBContex {
                      await this.insertAJEnzyme(obj.enz, type);
                }
                if (type == 'jawak' && obj.usage_report) {
+                  obj.usage_report.jawak_id = obj._id;
                   if (obj.usage_report._id) {
                      await this.updateUsageReport(obj.usage_report)
                   } else {
-                     obj.usage_report.jawak_id = obj._id;
                      await this.insertUsageReport(obj.usage_report);
                   }
 

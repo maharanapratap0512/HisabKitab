@@ -161,30 +161,48 @@ export class JawakEntryNewComponent implements OnInit {
     return;
   }
 
-  refAawakSelected(awk: any, i: any) {
-    this.fs.jawakFormMain.jawaks[i] = {
-      ...this.fs.jawakFormMain.jawaks[i],
-      aawak_ref_id: awk._id,
-      item_id: awk.item_id,
-      subitem_id: awk.subitem_id,
-      condition_id: awk.condition_id,
-      unit_id: awk.unit_id,
-      aawak_source_id: awk.aawak_source_id,
-      company_name: awk.company_name,
-      rate: awk.rate,
-      remainig_qty: awk.remainig_qty,
+  async refAawakSelected(awk_id: any, i: any) {
+    if (awk_id) {
+      let awk = await this.aawaks.find((a: any) => a._id == awk_id);
+      this.fs.jawakFormMain.jawaks[i] = {
+        ...this.fs.jawakFormMain.jawaks[i],
+        item_id: awk.item_id,
+        subitem_id: awk.subitem_id,
+        condition_id: awk.condition_id,
+        unit_id: awk.unit_id,
+        aawak_source_id: awk.aawak_source_id,
+        company_name: awk.company_name,
+        rate: typeof awk.rate == 'number' ? awk.rate : 0,
+        remaining_qty: awk.remaining_qty,
+      }
+      this.itemSubitemSelected(awk.item_id + ':' + awk.subitem_id, i);
+    } else {
+      this.clearAawak(i);
     }
-    this.itemSelected(awk.item_id, i);
-    this.subitemSelected(awk.subitem_id, i);
 
   }
 
   clearAawak(i: any) {
-
+    this.fs.jawakFormMain.jawaks[i] = {
+      ...this.fs.jawakFormMain.jawaks[i],
+      aawak_ref_id: null,
+      item_subitem_id: null,
+      item_id: null,
+      subitem_id: null,
+      condition_id: null,
+      unit_id: null,
+      aawak_source_id: null,
+      company_name: null,
+      rate: null,
+      remaining_qty: null,
+    }
+    this.itemSubitemSelected(null, i);
   }
+
   clearReport(i: any) {
 
   }
+
 
 
   ngOnChanges(changes: SimpleChanges) {
@@ -195,7 +213,7 @@ export class JawakEntryNewComponent implements OnInit {
       this.fs.jawakFormStatusChanges()
       for (let i in this.fs.jawakFormMain.jawaks) {
         if (this.fs.jawakFormMain.jawaks[i].item_id) {
-          this.itemSelected(this.fs.jawakFormMain.jawaks[i].item_id, i);
+          this.itemSubitemSelected(this.fs.jawakFormMain.jawaks[i].item_id + ':' + this.fs.jawakFormMain.jawaks[i].subitem_id, i);
         }
       }
 
@@ -226,8 +244,7 @@ export class JawakEntryNewComponent implements OnInit {
   selectEvent(ev: any, index: any) {
     if (ev.lot_no) {
       this.fs.jawakFormMain.jawaks[index].item_id = ev.item_id;
-      this.itemSelected(ev.item_id, index);
-      this.fs.jawakFormMain.jawaks[index].subitem_id = ev.subitem_id;
+      this.itemSubitemSelected(ev.item_id + ':' + ev.subitem_id, index);
       this.fs.jawakFormMain.jawaks[index].condition_id = ev.condition_id;
       this.fs.jawakFormMain.jawaks[index].aawak_source_id = ev.aawak_source_id;
       this.fs.jawakFormMain.jawaks[index].rate = ev.rate;
@@ -336,15 +353,23 @@ export class JawakEntryNewComponent implements OnInit {
     }
   }
 
-  itemSelected(ev: any, i: any) {
+  itemSubitemSelected(ev: any, i: any) {
     if (ev) {
-      let item = this.items.find((i: { _id: any; }) => i._id == ev);
-      this.lotNos = this.lotNoAll.filter((l: { item_id: any; }) => l.item_id == ev);
-      this.getProductData(ev);
-      // this.subitems = item.subitems || [];
-      this.fs.jawakFormMain.jawaks[i].subitems = item.subitems || [];
+      this.fs.jawakFormMain.jawaks[i].item_subitem_id = ev;
+      let item_id = Number.parseInt(ev.split(':')[0]);
+      let subitem_id = ev.split(':')[1] ? Number.parseInt(ev.split(':')[1]) : null;
+      console.log(item_id, subitem_id);
 
-      if (!this.isEdit)
+      let item: any = this.items.find((i: { _id: any; }) => i._id == item_id);
+      let subitem: any = item.subitems.find((i: { _id: any; }) => i._id == subitem_id);
+      this.lotNos = this.lotNoAll.filter((l: { item_id: any; subitem_id: any; }) => l.item_id == item_id && l.subitem_id == subitem_id);
+      this.getProductData(item_id);
+      this.fs.jawakFormMain.jawaks[i].subitems = item.subitems || [];
+      this.fs.jawakFormMain.jawaks[i].subitem_id = subitem_id;
+
+      if (!this.isEdit && subitem)
+        this.fs.jawakFormMain.jawaks[i].unit_id = subitem.unit_id;
+      else if (!this.isEdit)
         this.fs.jawakFormMain.jawaks[i].unit_id = item.unit_id;
     }
     else {

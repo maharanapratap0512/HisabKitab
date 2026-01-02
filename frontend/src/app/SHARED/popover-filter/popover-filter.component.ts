@@ -8,6 +8,7 @@ import { Component, Input, Output, EventEmitter, ElementRef } from '@angular/cor
 export class PopoverFilterComponent {
 
   @Input() iconClass: string = '';
+  @Input() btnOutline: boolean = true;
   @Input() showClearButton: boolean = true;
   @Input() clearButtonLabel: string = 'Clear Filter';
   @Input() label: string = '';

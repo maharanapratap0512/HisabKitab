@@ -23,8 +23,8 @@
                 </div>
                 <input type="date" class="form-control border-0 bg-light" style="width: auto;"
                   [(ngModel)]="filterBody.date" (change)="getClosingData()">
-                <button class="btn btn-primary shadow-sm" (click)="openModal('Add Closing')">
-                  <i class="uil uil-plus me-1"></i> New Entry
+                <button class="btn btn-primary shadow-sm" style="width: 250px;" (click)="openModal('Add Closing')">
+                  <i class="uil uil-plus me-1"></i> Add Closing
                 </button>
               </div>
             </div>
@@ -139,7 +139,7 @@
 <!-- Modal -->
 <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel"
   aria-hidden="true">
-  <div class="modal-dialog modal-xl">
+  <div class="modal-dialog" style="width: 90%;">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="modalLabel">{{showModal}}</h5>

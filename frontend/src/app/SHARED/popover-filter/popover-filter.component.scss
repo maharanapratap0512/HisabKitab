@@ -8,6 +8,24 @@
   min-width: 300px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   margin-top: 5px;
+
+  h6 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 5px;
+  }
+}
+
+button[class*="btn-outline-secondary"] {
+  font-weight: bold;
+  padding: 1px 5px !important;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .filter-backdrop {
@@ -18,27 +36,3 @@
   height: 100%;
   z-index: 1040;
 }
-
-
-
-// .filter-popover {
-//   position: absolute;
-//   z-index: 1050;
-//   background: #2a3042;
-//   border: 1px solid #404954;
-//   border-radius: 4px;
-//   padding: 10px;
-//   min-width: 300px;
-//   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-//   margin-top: 5px;
-//   // right: 0;
-// }
-
-// .filter-backdrop {
-//   position: fixed;
-//   top: 0;
-//   left: 0;
-//   width: 100%;
-//   height: 100%;
-//   z-index: 1040;
-// }

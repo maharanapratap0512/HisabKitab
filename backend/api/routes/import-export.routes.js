@@ -238,7 +238,6 @@ router.put('/process', async (req, res, next) => {
                     awkData.jawak_detail[i]._id = jwkResult;
                     await Fn.commit();
                 }, async (err) => {
-                    console.log(err);
                     await Fn.rollback();
                     awkData.jawak_detail[i].error = err.message;
                 });
@@ -298,7 +297,7 @@ router.put('/finish', async (req, res, next) => {
 
     try {
         await Fn.begin();
-        
+
         // Process all updates in parallel
         const updatePromises = req.body.history.map(async (data) => {
             const result = await DB.runQuery('import_history', 'update_add_count', { obj: data });
@@ -308,11 +307,11 @@ router.put('/finish', async (req, res, next) => {
         });
 
         await Promise.all(updatePromises);
-        
+
         // Execute cleanup in sequence after updates
         await DB.runQuery('temp_import', 'delete');
         await Fn.commit();
-        
+
         res.json({ success: true });
     } catch (err) {
         await Fn.rollback();

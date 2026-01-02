@@ -69,6 +69,7 @@ export class FormService {
     this.jawakForm = {
       aawak_ref_id: null,
       lot_no: null,
+      item_subitem_id: null,
       item_id: null,
       subitem_id: null,
       product_id: null,
@@ -208,7 +209,7 @@ export class FormService {
     let valid = true;
 
     for (let jwkForm of this.jawakFormMain.jawaks) {
-      if (!(jwkForm.item_id && jwkForm.qty && jwkForm.unit_id && jwkForm.jawak_type_id)) {
+      if (!(jwkForm.item_id && jwkForm.qty && jwkForm.unit_id && jwkForm.jawak_type_id && (!jwkForm.aawak_ref_id || (jwkForm.aawak_ref_id && jwkForm.qty <= jwkForm.remaining_qty)))) {
         valid = false;
         break;
       }
@@ -235,11 +236,12 @@ export class FormService {
   }
 
   valid() {
+    if (!this.aawakFormMain.aawaks[this.aawakFormMain.aawaks.length - 1].item_id) {
+      this.aawakFormMain.aawaks.splice(this.aawakFormMain.aawaks.length - 1, 1);
+    }
     for (let i in this.aawakFormMain.aawaks) {
       if (!(this.aawakFormMain.aawaks[i].item_id && this.aawakFormMain.aawaks[i].qty && this.aawakFormMain.aawaks[i].unit_id && this.aawakFormMain.aawaks[i].aawak_type_id)) {
-        if (this.aawakFormMain.aawaks.length > 1) {
-          this.aawakFormMain.aawaks.splice(i, 1);
-        }
+        return false;
       }
     }
 
@@ -251,25 +253,18 @@ export class FormService {
   }
 
   validJawak() {
-    this.jawakFormMain.jawaks.splice(this.jawakFormMain.jawaks.length - 1, 1);
+    if (!this.jawakFormMain.jawaks[this.jawakFormMain.jawaks.length - 1].item_id) {
+      this.jawakFormMain.jawaks.splice(this.jawakFormMain.jawaks.length - 1, 1);
+    }
     for (let i in this.jawakFormMain.jawaks) {
-      if (!(this.jawakFormMain.jawaks[i].item_id && this.jawakFormMain.jawaks[i].qty && this.jawakFormMain.jawaks[i].unit_id && this.jawakFormMain.jawaks[i].jawak_type_id)) {
-        if (this.jawakFormMain.jawaks.length > 1) {
-          this.jawakFormMain.jawaks.splice(i, 1);
-        }
+      if (!(this.jawakFormMain.jawaks[i].item_id && this.jawakFormMain.jawaks[i].qty && (!this.jawakFormMain.jawaks[i].aawak_ref_id || (this.jawakFormMain.jawaks[i].aawak_ref_id && this.jawakFormMain.jawaks[i].qty <= this.jawakFormMain.jawaks[i].remaining_qty)) && this.jawakFormMain.jawaks[i].unit_id && this.jawakFormMain.jawaks[i].jawak_type_id)) {
+        return false;
       }
     }
 
-    console.log(this.jawakFormMain);
-
-
     if (this.jawakFormMain.date && this.jawakFormMain.mm_id && (this.jawakFormMain.jawak_mm_id || this.jawakFormMain.pbk_id) && this.jawakFormMain.jawaks.length > 0) {
-      console.log("true");
-
       return true;
     } else {
-      console.log("false");
-      console.log(this.jawakFormMain.date, this.jawakFormMain.mm_id, (this.jawakFormMain.jawak_mm_id || this.jawakFormMain.pbk_id), this.jawakFormMain.jawaks.length > 0);
       return false;
     }
   }

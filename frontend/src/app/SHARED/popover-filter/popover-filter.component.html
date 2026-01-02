@@ -1,26 +1,8 @@
-<!-- <div style="position: relative; display: inline-block;">
-    <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
-        class="btn btn-outline-secondary" (click)="togglePopover($event)">
-        <i [class]="iconClass"></i>
-        <span *ngIf="label">{{label}}</span>
-    </button>
-
-    <div class="filter-backdrop" *ngIf="isOpen" (click)="closePopover()"></div>
-
-    <div class="filter-popover" *ngIf="isOpen">
-        <ng-content></ng-content>
-
-        <button type="button" class="btn btn-sm btn-light w-100 mt-2" (click)="onClear()" *ngIf="showClearButton">
-            <i class="uil uil-times-circle"></i> {{clearButtonLabel}}
-        </button>
-    </div>
-</div> -->
-
 <div style="position: relative; display: inline-block;">
-    <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
-        class="btn btn-outline-secondary" (click)="togglePopover($event)">
+    <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;" class="btn"
+        [class.btn-outline-secondary]="btnOutline" (click)="togglePopover($event)">
         <i [class]="iconClass"></i>
-        <span *ngIf="label">{{label}}</span>
+        <span *ngIf="label" class="ms-1">{{label}}</span>
     </button>
 
     <div class="popover-container" *ngIf="isOpen">
