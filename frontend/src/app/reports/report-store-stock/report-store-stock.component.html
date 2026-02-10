@@ -70,41 +70,44 @@
                                 </div>
                             </div>
                         </div>
-                        <table id="tbl" #tbl class="table dt-responsive">
-                            <thead>
-                                <tr>
-                                    <td style="width: 70px;">No.</td>
-                                    <td style="width: 100px;">Department</td>
-                                    <td>Category</td>
-                                    <td>Item</td>
-                                    <ng-container *ngFor="let cn of filterBody.condition;">
-                                        <td>{{cn}}</td>
-                                    </ng-container>
-
-                                </tr>
-
-                            </thead>
-                            <tbody>
-                                <ng-container *ngFor="let data of reportData | search: term; let i = index;">
+                        <div class="table-container">
+                            <table id="tbl" #tbl class="table table-sticky-header dt-responsive">
+                                <thead>
                                     <tr>
-                                        <td style="width: 70px;">{{i+1}}</td>
-                                        <td style="width: 100px;">{{data.dept_hin}} : {{data.dept_code}}</td>
-                                        <td>{{data.categories_eng ? data.categories_eng : data.categories_hin}}</td>
-                                        <td>
-                                            {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}}<br />
-                                            {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
-                                        </td>
+                                        <td style="width: 70px;">No.</td>
+                                        <td style="width: 100px;">Department</td>
+                                        <td>Category</td>
+                                        <td>Item</td>
                                         <ng-container *ngFor="let cn of filterBody.condition;">
-                                            <td>
-                                                <span [ngClass]="{'error': data[cn] < 0}">
-                                                    {{data[cn]}} {{data.unit_short}}
-                                                </span>
-                                            </td>
+                                            <td>{{cn}}</td>
                                         </ng-container>
+
                                     </tr>
-                                </ng-container>
-                            </tbody>
-                        </table>
+
+                                </thead>
+                                <tbody>
+                                    <ng-container *ngFor="let data of reportData | search: term; let i = index;">
+                                        <tr>
+                                            <td style="width: 70px;">{{i+1}}</td>
+                                            <td style="width: 100px;">{{data.dept_hin}} : {{data.dept_code}}</td>
+                                            <td>{{data.categories_eng ? data.categories_eng : data.categories_hin}}</td>
+                                            <td>
+                                                {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin :
+                                                ""}}<br />
+                                                {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
+                                            </td>
+                                            <ng-container *ngFor="let cn of filterBody.condition;">
+                                                <td>
+                                                    <span [ngClass]="{'error': data[cn] < 0}">
+                                                        {{data[cn]}} {{data.unit_short}}
+                                                    </span>
+                                                </td>
+                                            </ng-container>
+                                        </tr>
+                                    </ng-container>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 

@@ -54,21 +54,22 @@
 
             <div class="row" *ngIf="categoryData.length">
                <div class="card-body" style="overflow: auto;">
-                  <table id="datatable-buttons" class="table table-hover dt-responsive">
-                     <thead>
-                        <tr>
-                           <th style="width: 80px;">No.</th>
-                           <th>Manage</th>
-                           <th>Category (Hin)</th>
-                           <th *ngIf="settings.category_eng">Category (Eng)</th>
-                           <th *ngIf="settings.category_roman">Category (Roman)</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        <tr *ngFor="let data of categoryData | search:term; let i=index">
-                           <td style="font-size: large;">
-                              {{i+1}}
-                              <!-- <span class="mx-1"
+                  <div class="table-container">
+                     <table id=" datatable-buttons" class="table table-hover table-sticky-header dt-responsive">
+                        <thead>
+                           <tr>
+                              <th style="width: 80px;">No.</th>
+                              <th>Manage</th>
+                              <th>Category (Hin)</th>
+                              <th *ngIf="settings.category_eng">Category (Eng)</th>
+                              <th *ngIf="settings.category_roman">Category (Roman)</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr *ngFor="let data of categoryData | search:term; let i=index">
+                              <td style="font-size: large;">
+                                 {{i+1}}
+                                 <!-- <span class="mx-1"
                                  style="font-size: x-large;position: relative;line-height: 28px;cursor: pointer;"
                                  (click)="protectionToggle(data._id, data.active)">
                                  <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && data.active"
@@ -76,27 +77,28 @@
                                  <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && !data.active"
                                     data-toggle="tooltip" title="Unprotected" class="uil-shield-slash text-danger"></i>
                               </span> -->
-                           </td>
-                           <td>
-                              <div>
-                                 <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"
-                                    *ngIf="settings.edit"><i class="uil uil-pen"></i></button>
-                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"
-                                    *ngIf="settings.delete"><i class="uil-trash"></i></button>
-                              </div>
-                              <span *ngIf="!settings.edit && !settings.delete" data-toggle="tooltip" title="Protected"
-                                 class="text-warning mx-1"
-                                 style="font-size: xx-large;cursor: pointer;line-height: 0px;">
-                                 <i class="uil-shield-check"></i>
-                              </span>
+                              </td>
+                              <td>
+                                 <div>
+                                    <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"
+                                       *ngIf="settings.edit"><i class="uil uil-pen"></i></button>
+                                    <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"
+                                       *ngIf="settings.delete"><i class="uil-trash"></i></button>
+                                 </div>
+                                 <span *ngIf="!settings.edit && !settings.delete" data-toggle="tooltip"
+                                    title="Protected" class="text-warning mx-1"
+                                    style="font-size: xx-large;cursor: pointer;line-height: 0px;">
+                                    <i class="uil-shield-check"></i>
+                                 </span>
 
-                           </td>
-                           <td>{{data.category_hin}}</td>
-                           <td *ngIf="settings.category_eng">{{data.category_eng}}</td>
-                           <td *ngIf="settings.category_roman">{{data.category_roman}}</td>
-                        </tr>
-                     </tbody>
-                  </table>
+                              </td>
+                              <td>{{data.category_hin}}</td>
+                              <td *ngIf="settings.category_eng">{{data.category_eng}}</td>
+                              <td *ngIf="settings.category_roman">{{data.category_roman}}</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
                </div>
             </div>
          </div>

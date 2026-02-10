@@ -143,91 +143,94 @@
                <pagination-controls class="pagi text-end" (pageChange)="getPbkData(page = $event)" [autoHide]="true">
                </pagination-controls>
                <div class="card-body" style="overflow: auto;">
-                  <table id="tblPbk" #TABLE class="table table-hover dt-responsive">
-                     <thead>
-                        <tr>
-                           <th style="width: 80px;">No.</th>
-                           <th style="width: 70px;">Manage</th>
-                           <th style="width: 100px;" *ngIf="settings.document">Image</th>
-                           <th style="width: 85px;" *ngIf="settings.roll_no">Roll No.</th>
-                           <th style="width: 200px;">Name (Hin-Eng)</th>
-                           <th style="width: 200px;" *ngIf="settings.relation || settings.relative_name">Relative Names
-                           </th>
-                           <th style="width: 100px;">Gender</th>
-                           <th style="width: 101px;" *ngIf="settings.birth_date">DOB/Age</th>
-                           <!-- <th style="width: 100px;">Status</th> -->
-                           <th style="width: 215px;" *ngIf="settings.address">Address</th>
-                           <th style="width: 200px;" *ngIf="settings.townarea">Townarea</th>
-                           <th style="width: 200px;">State</th>
-                           <th style="width: 100px;" *ngIf="settings.district_id">District</th>
-                           <th style="width: 100px;" *ngIf="settings.city_id">City</th>
-                           <th style="width: 115px;" *ngIf="settings.mo_no">Mobile No.</th>
-                           <th style="width: 100px;" *ngIf="settings.class_mm_id">Daily Class MM</th>
-                           <th style="width: 101px;" *ngIf="settings.bhatti_date">भट्टी कब की?</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        <tr
-                           *ngFor="let data of pbkData | search:term | paginate: {itemsPerPage: itemsPerPage,currentPage: page,totalItems: total_count}; let i=index; ">
-                           <td style="font-size: large;">
-                              {{itemsPerPage * (page - 1) + (i+1)}}<br>
-                              <!-- <span style="font-size: x-large;position: relative;line-height: 28px; cursor:pointer;"
+                  <div class="table-container">
+                     <table id="tblPbk" #TABLE class="table table-hover table-sticky-header dt-responsive">
+                        <thead>
+                           <tr>
+                              <th style="width: 80px;">No.</th>
+                              <th style="width: 70px;">Manage</th>
+                              <th style="width: 100px;" *ngIf="settings.document">Image</th>
+                              <th style="width: 85px;" *ngIf="settings.roll_no">Roll No.</th>
+                              <th style="width: 200px;">Name (Hin-Eng)</th>
+                              <th style="width: 200px;" *ngIf="settings.relation || settings.relative_name">Relative
+                                 Names
+                              </th>
+                              <th style="width: 100px;">Gender</th>
+                              <th style="width: 101px;" *ngIf="settings.birth_date">DOB/Age</th>
+                              <!-- <th style="width: 100px;">Status</th> -->
+                              <th style="width: 215px;" *ngIf="settings.address">Address</th>
+                              <th style="width: 200px;" *ngIf="settings.townarea">Townarea</th>
+                              <th style="width: 200px;">State</th>
+                              <th style="width: 100px;" *ngIf="settings.district_id">District</th>
+                              <th style="width: 100px;" *ngIf="settings.city_id">City</th>
+                              <th style="width: 115px;" *ngIf="settings.mo_no">Mobile No.</th>
+                              <th style="width: 100px;" *ngIf="settings.class_mm_id">Daily Class MM</th>
+                              <th style="width: 101px;" *ngIf="settings.bhatti_date">भट्टी कब की?</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr
+                              *ngFor="let data of pbkData | search:term | paginate: {itemsPerPage: itemsPerPage,currentPage: page,totalItems: total_count}; let i=index; ">
+                              <td style="font-size: large;">
+                                 {{itemsPerPage * (page - 1) + (i+1)}}<br>
+                                 <!-- <span style="font-size: x-large;position: relative;line-height: 28px; cursor:pointer;"
                                  (click)="protectionToggle(data._id, data.active)">
                                  <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && data.active"
                                     data-toggle="tooltip" title="Protected" class="uil-shield-check text-warning"></i>
                                  <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && !data.active"
                                     data-toggle="tooltip" title="Unprotected" class="uil-shield-slash text-danger"></i>
                               </span> -->
-                           </td>
-                           <td>
-                              <button *ngIf="settings.edit" class="btn btn-sm btn-primary mb-1" type="button"
-                                 (click)="edit(data)"><i class="uil uil-pen"></i></button><br>
-                              <button *ngIf="settings.delete" class="btn btn-sm btn-danger" type="button"
-                                 (click)="delete(i,data._id)">
-                                 <i class="uil-trash"></i></button>
-                              <span *ngIf="!settings.edit && !settings.delete" data-toggle="tooltip" title="Protected"
-                                 class="text-warning mx-1"
-                                 style="font-size: xx-large;cursor: pointer;line-height: 0px;">
-                                 <i class="uil-shield-check"></i>
-                              </span>
-                           </td>
-                           <td *ngIf="settings.document">
-                              <img *ngIf="data.document && data.document.images"
-                                 [src]="baseurl + data.document.images[0]" height="60px"
-                                 style="padding: 5px; border-radius: 15px;">
-                           </td>
-                           <td *ngIf="settings.roll_no" style="color:red">{{data.roll_no ? data.roll_no : '______'}}
-                           </td>
-                           <td>{{data.pbk_hin}} <br> {{data.pbk_eng}}</td>
-                           <td *ngIf="settings.relation || settings.relative_name">
-                              {{data.relation}}<br>{{data.relative_name}}</td>
-                           <td>{{data.gender}}</td>
-                           <td *ngIf="settings.birth_date"> {{data.birth_date ? data.birth_date : ''}}
-                              <br>{{data.age?'Age : '+data.age:'-'}}
-                           </td>
-                           <!-- <td >{{data.status}}</td> -->
-                           <td *ngIf="settings.address">{{data.address?data.address:'-'}}</td>
-                           <td *ngIf="settings.townarea">{{data.townarea?data.townarea:'-'}}</td>
-                           <td>
-                              {{data.state_hin}} : {{data.state_eng}} <br />
-                              {{data.country_hin}} : {{data.country_eng}}
-                           </td>
-                           <td *ngIf="settings.district_id">{{data.district_hin}} <br> {{data.district_eng}}</td>
-                           <td *ngIf="settings.city_id">{{data.city_hin}} <br> {{data.city_eng}}</td>
-                           <!-- <td>{{data.tempaddress}}</td> -->
-                           <!-- <td>{{data.district}}</td>
+                              </td>
+                              <td>
+                                 <button *ngIf="settings.edit" class="btn btn-sm btn-primary mb-1" type="button"
+                                    (click)="edit(data)"><i class="uil uil-pen"></i></button><br>
+                                 <button *ngIf="settings.delete" class="btn btn-sm btn-danger" type="button"
+                                    (click)="delete(i,data._id)">
+                                    <i class="uil-trash"></i></button>
+                                 <span *ngIf="!settings.edit && !settings.delete" data-toggle="tooltip"
+                                    title="Protected" class="text-warning mx-1"
+                                    style="font-size: xx-large;cursor: pointer;line-height: 0px;">
+                                    <i class="uil-shield-check"></i>
+                                 </span>
+                              </td>
+                              <td *ngIf="settings.document">
+                                 <img *ngIf="data.document && data.document.images"
+                                    [src]="baseurl + data.document.images[0]" height="60px"
+                                    style="padding: 5px; border-radius: 15px;">
+                              </td>
+                              <td *ngIf="settings.roll_no" style="color:red">{{data.roll_no ? data.roll_no : '______'}}
+                              </td>
+                              <td>{{data.pbk_hin}} <br> {{data.pbk_eng}}</td>
+                              <td *ngIf="settings.relation || settings.relative_name">
+                                 {{data.relation}}<br>{{data.relative_name}}</td>
+                              <td>{{data.gender}}</td>
+                              <td *ngIf="settings.birth_date"> {{data.birth_date ? data.birth_date : ''}}
+                                 <br>{{data.age?'Age : '+data.age:'-'}}
+                              </td>
+                              <!-- <td >{{data.status}}</td> -->
+                              <td *ngIf="settings.address">{{data.address?data.address:'-'}}</td>
+                              <td *ngIf="settings.townarea">{{data.townarea?data.townarea:'-'}}</td>
+                              <td>
+                                 {{data.state_hin}} : {{data.state_eng}} <br />
+                                 {{data.country_hin}} : {{data.country_eng}}
+                              </td>
+                              <td *ngIf="settings.district_id">{{data.district_hin}} <br> {{data.district_eng}}</td>
+                              <td *ngIf="settings.city_id">{{data.city_hin}} <br> {{data.city_eng}}</td>
+                              <!-- <td>{{data.tempaddress}}</td> -->
+                              <!-- <td>{{data.district}}</td>
                               <td>{{data.country}}</td> -->
-                           <td *ngIf="settings.mo_no">{{data.mo_no?data.mo_no:'-'}}</td>
-                           <td *ngIf="settings.class_mm_id">
-                              {{data.mm_hin?data.mm_hin :'-'}} <br> {{data.mm_eng?data.mm_eng :''}} <br>
-                              {{data.mm_code?data.mm_code:''}}
-                           </td>
-                           <td *ngIf="settings.bhatti_date">{{data.bhatti_date ? data.bhatti_date:
-                              ''}}
-                           </td>
-                        </tr>
-                     </tbody>
-                  </table>
+                              <td *ngIf="settings.mo_no">{{data.mo_no?data.mo_no:'-'}}</td>
+                              <td *ngIf="settings.class_mm_id">
+                                 {{data.mm_hin?data.mm_hin :'-'}} <br> {{data.mm_eng?data.mm_eng :''}} <br>
+                                 {{data.mm_code?data.mm_code:''}}
+                              </td>
+                              <td *ngIf="settings.bhatti_date">{{data.bhatti_date ? data.bhatti_date:
+                                 ''}}
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
                </div>
                <pagination-controls class="pagi text-center" (pageChange)="getPbkData(page = $event)" [autoHide]="true">
                </pagination-controls>

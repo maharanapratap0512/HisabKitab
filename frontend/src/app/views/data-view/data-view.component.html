@@ -36,7 +36,8 @@
             </div>
         </div>
         <div class="row p-2" style="overflow-y: auto; max-height: 30vw;">
-            <table id="datatable-buttons" class="table table-hover dt-responsive" style="width:98%;">
+            <table id="datatable-buttons" class="table table-hover table-sticky-header dt-responsive"
+                style="width:98%;">
                 <thead>
                     <tr>
                         <th style="width: 60px;">No.</th>
@@ -58,8 +59,8 @@
                         </td>
                         <td>
                             <ng-container *ngIf="Type=='jawak'">
-                                <button class="btn btn-sm btn-primary mx-1" type="button"
-                                    (click)="edit(data)"><i class="uil uil-pen"></i></button>
+                                <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
+                                        class="uil uil-pen"></i></button>
                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                         class="uil-trash"></i></button>
                             </ng-container>
