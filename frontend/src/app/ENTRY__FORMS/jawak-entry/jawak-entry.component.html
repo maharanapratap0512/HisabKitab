@@ -473,10 +473,10 @@
                 </div>
 
                 <div class="col-md-2 mb-3">
-                    <div class="form-group" formGroupName="enz"> 
+                    <div class="form-group" formGroupName="enz">
                         <label class="form-label">Contaier Capacity</label>
-                        <input type="number" class="form-control" placeholder="capacity" formControlName="container_capacity"
-                            name="container_capacity">
+                        <input type="number" class="form-control" placeholder="capacity"
+                            formControlName="container_capacity" name="container_capacity">
                     </div>
                 </div>
 
@@ -485,15 +485,13 @@
                     <div class="form-group">
                         <label class="form-label">Auto Re-Aawak Date</label>
                         <input type="date" class="form-control" placeholder="Date" formControlName="aawak_date"
-                            [ngClass]="{'validation':jawakForm.get('aawak_date')?.errors && (jawakForm.get('aawak_date')?.touched || jawakForm.get ('aawak_date')?.dirty)}"
-                            [required]="jawakForm.value.auto_reawk">
+                            [ngClass]="{'validation':jawakForm.get('aawak_date')?.errors && (jawakForm.get('aawak_date')?.touched || jawakForm.get ('aawak_date')?.dirty)}">
                     </div>
                     <div class="form-group mx-2">
                         <label class="form-label">Auto Re-Aawak Type</label>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Aawak Type"
                             [clearable]="true" [virtualScroll]="true" formControlName="re_aawak_type_id"
-                            [ngClass]="{'validation':jawakForm.get('re_aawak_type_id')?.errors && (jawakForm.get('re_aawak_type_id')?.touched || jawakForm.get ('re_aawak_type_id')?.dirty)}"
-                            [required]="jawakForm.value.auto_reawk">
+                            [ngClass]="{'validation':jawakForm.get('re_aawak_type_id')?.errors && (jawakForm.get('re_aawak_type_id')?.touched || jawakForm.get ('re_aawak_type_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Aawak Type</ng-option>
                             <ng-option *ngFor="let item of aawak_types" [value]="item._id">{{item.list_name_hin}} :
                                 {{item.list_name_eng}}</ng-option>
@@ -506,8 +504,7 @@
                         <label class="form-label">Auto Aawak Department</label>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Department"
                             [clearable]="true" [virtualScroll]="true" formControlName="aawak_dept_id"
-                            [ngClass]="{'validation':jawakForm.get('aawak_dept_id')?.errors && (jawakForm.get('aawak_dept_id')?.touched || jawakForm.get ('aawak_dept_id')?.dirty)}"
-                            [required]="jawakForm.value.auto_awk">
+                            [ngClass]="{'validation':jawakForm.get('aawak_dept_id')?.errors && (jawakForm.get('aawak_dept_id')?.touched || jawakForm.get ('aawak_dept_id')?.dirty)}">
                             <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_hin}} :
                                 {{item.dept_eng}}{{item.dept_code?' : '+item.dept_code:''}}</ng-option>
                         </ng-select>
@@ -516,8 +513,7 @@
                         <label class="form-label">Auto Aawak Aawak Type</label>
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Aawak Type"
                             [clearable]="true" [virtualScroll]="true" formControlName="aawak_type_id"
-                            [ngClass]="{'validation':jawakForm.get('aawak_type_id')?.errors && (jawakForm.get('aawak_type_id')?.touched || jawakForm.get ('aawak_type_id')?.dirty)}"
-                            [required]="jawakForm.value.auto_awk">
+                            [ngClass]="{'validation':jawakForm.get('aawak_type_id')?.errors && (jawakForm.get('aawak_type_id')?.touched || jawakForm.get ('aawak_type_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Aawak Type</ng-option>
                             <ng-option *ngFor="let item of aawak_types" [value]="item._id">{{item.list_name_hin}} :
                                 {{item.list_name_eng}}</ng-option>

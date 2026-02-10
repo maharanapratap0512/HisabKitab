@@ -4,4 +4,54 @@
     font-size: smaller;
     cursor: pointer;
     margin-bottom: 1rem;
- }
+}
+
+.rating-stars {
+    .fa-star {
+        color: #ddd;
+        font-size: 0.7rem;
+
+        &.filled {
+            color: #ffc107;
+        }
+    }
+}
+
+.usage-report-detailed {
+    font-size: 0.75rem;
+    line-height: 1.2;
+    max-width: 200px;
+
+    .rating-reporter-line {
+        display: flex;
+        align-items: center;
+        margin-bottom: 3px;
+        gap: 1px;
+
+        .star {
+            font-size: 1.3rem;
+            color: #ddd;
+
+            &.filled {
+                color: #ffd700;
+            }
+        }
+
+        .reporter {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .date {
+            font-size: 0.6rem;
+            color: #999;
+        }
+    }
+
+    .text-success,
+    .text-danger {
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+        word-wrap: break-word;
+    }
+}

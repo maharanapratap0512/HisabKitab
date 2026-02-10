@@ -1597,26 +1597,36 @@ const point = {
 
 // hmp stands to Home Made Products
 const hmp_recipe = {
-    select: `select pr.*, d.dept_name from hmp_recipe pr left join department d on pr.dept_id = d._id where pr.active = 1 @`,
-    select_full: `select pr.*, d.dept_name from hmp_recipe pr left join department d on pr.dept_id = d._id where pr.active = 1 @`,
+    select: `select pr.*, d.dept_hin from hmp_recipe pr left join department d on pr.dept_id = d._id where pr.active = 1`,
+    select_full: `select pr.*, d.dept_hin from hmp_recipe pr left join department d on pr.dept_id = d._id where pr.active = 1 limit @limit offset @offset`,
     insert: `insert into hmp_recipe (recipe_name, recipe_code, description, dept_id) values (@recipe_name, @recipe_code, @description, @dept_id)`,
     update: `update hmp_recipe set recipe_name = @recipe_name, recipe_code = @recipe_code, description = @description, dept_id = @dept_id, updated_at = datetime('now', 'localtime') where _id = @_id`,
     delete: `update hmp_recipe set active = 0 where _id = @_id`
 }
 
 const hmp_recipe_input = {
-    select: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name
+    select: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name
              from hmp_recipe_input pri
              left join item i on pri.item_id = i._id
              left join unit u on pri.unit_id = u._id
              left join subitem s on pri.subitem_id = s._id
+             left join subitem_list sil on s.subitem_list_id = sil._id
              left join support_list sl on pri.condition_id = sl._id
-             where pri.active = 1 @`,
-    select_by_recipe: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name
+             where pri.active = 1`,
+    select_full: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name
+             from hmp_recipe_input pri
+             left join item i on pri.item_id = i._id
+             left join unit u on pri.unit_id = u._id
+             left join subitem s on pri.subitem_id = s._id
+             left join subitem_list sil on s.subitem_list_id = sil._id
+             left join support_list sl on pri.condition_id = sl._id
+             where pri.active = 1 limit @limit offset @offset`,
+    select_by_recipe: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name
                        from hmp_recipe_input pri
                        left join item i on pri.item_id = i._id
                        left join unit u on pri.unit_id = u._id
                        left join subitem s on pri.subitem_id = s._id
+                       left join subitem_list sil on s.subitem_list_id = sil._id
                        left join support_list sl on pri.condition_id = sl._id
                        where pri.active = 1 and pri.recipe_id = @recipe_id`,
     insert: `insert into hmp_recipe_input (recipe_id, item_id, subitem_id, unit_id, condition_id, qty) values (@recipe_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty)`,
@@ -1625,18 +1635,28 @@ const hmp_recipe_input = {
 }
 
 const hmp_recipe_output = {
-    select: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name
+    select: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name
              from hmp_recipe_output pro
              left join item i on pro.item_id = i._id
              left join unit u on pro.unit_id = u._id
              left join subitem s on pro.subitem_id = s._id
+             left join subitem_list sil on s.subitem_list_id = sil._id
              left join support_list sl on pro.condition_id = sl._id
-             where pro.active = 1 @`,
-    select_by_recipe: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name
+             where pro.active = 1`,
+    select_full: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name
+             from hmp_recipe_output pro
+             left join item i on pro.item_id = i._id
+             left join unit u on pro.unit_id = u._id
+             left join subitem s on pro.subitem_id = s._id
+             left join subitem_list sil on s.subitem_list_id = sil._id
+             left join support_list sl on pro.condition_id = sl._id
+             where pro.active = 1 limit @limit offset @offset`,
+    select_by_recipe: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name
                        from hmp_recipe_output pro
                        left join item i on pro.item_id = i._id
                        left join unit u on pro.unit_id = u._id
                        left join subitem s on pro.subitem_id = s._id
+                       left join subitem_list sil on s.subitem_list_id = sil._id
                        left join support_list sl on pro.condition_id = sl._id
                        where pro.active = 1 and pro.recipe_id = @recipe_id`,
     insert: `insert into hmp_recipe_output (recipe_id, item_id, subitem_id, unit_id, condition_id, qty) values (@recipe_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty)`,
@@ -1645,64 +1665,88 @@ const hmp_recipe_output = {
 }
 
 const hmp_batch = {
-    select: `select pb.*, pr.recipe_name, m.mm_name, d.dept_name from hmp_batch pb 
+    select: `select pb.*, pr.recipe_name, m.mm_hin, d.dept_hin from hmp_batch pb 
+             left join hmp_recipe pr on pb.recipe_id = pr._id 
              left join mm m on pb.mm_id = m._id 
              left join department d on pb.dept_id = d._id 
              where pb.active = 1`,
-    select_full: `select pb.*, pr.recipe_name, m.mm_name, d.dept_name from hmp_batch pb 
+    select_full: `select pb.*, pr.recipe_name, m.mm_hin, d.dept_hin from hmp_batch pb 
                   left join hmp_recipe pr on pb.recipe_id = pr._id 
                   left join mm m on pb.mm_id = m._id 
                   left join department d on pb.dept_id = d._id 
-                  where pb.active = 1`,
+                  where pb.active = 1 limit @limit offset @offset`,
     insert: `insert into hmp_batch (batch_no, recipe_id, date, mm_id, status, notes, dept_id) 
             values (@batch_no, @recipe_id, @date, @mm_id, @status, @notes, @dept_id)`,
-    update: `update hmp_batch set batch_no = @batch_no, recipe_id = @recipe_id, date = @date, mm_id = @mm_id, status = @status, notes = @notes, dept_id = @dept_id, updated_at = @updated_atatetime('now', 'localtime') where _id = @_id`,
+    update: `update hmp_batch set batch_no = @batch_no, recipe_id = @recipe_id, date = @date, mm_id = @mm_id, status = @status, notes = @notes, dept_id = @dept_id, updated_at = datetime('now', 'localtime') where _id = @_id`,
     // update_totals: `update hmp_batch set total_input_qty = ?, total_output_qty = ?, hmp_loss = ? where _id = ?`,
     delete: `update hmp_batch set active = 0 where _id = @_id`
 }
 
 const hmp_batch_input = {
-    select: `select pbi.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name 
+    select: `select pbi.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name 
              from hmp_batch_input pbi 
              left join hmp_batch pb on pbi.batch_id = pb._id 
              left join item i on pbi.item_id = i._id 
              left join unit u on pbi.unit_id = u._id 
              left join subitem s on pbi.subitem_id = s._id 
+             left join subitem_list sil on s.subitem_list_id = sil._id
              left join support_list sl on pbi.condition_id = sl._id 
              where pbi.active = 1`,
-    select_by_batch: `select pbi.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name 
+    select_full: `select pbi.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name 
+             from hmp_batch_input pbi 
+             left join hmp_batch pb on pbi.batch_id = pb._id 
+             left join item i on pbi.item_id = i._id 
+             left join unit u on pbi.unit_id = u._id 
+             left join subitem s on pbi.subitem_id = s._id 
+             left join subitem_list sil on s.subitem_list_id = sil._id
+             left join support_list sl on pbi.condition_id = sl._id 
+             where pbi.active = 1 limit @limit offset @offset`,
+    select_by_batch: `select pbi.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name 
                       from hmp_batch_input pbi 
                       left join item i on pbi.item_id = i._id 
                       left join unit u on pbi.unit_id = u._id 
                       left join subitem s on pbi.subitem_id = s._id 
+                      left join subitem_list sil on s.subitem_list_id = sil._id
                       left join support_list sl on pbi.condition_id = sl._id 
                       where pbi.active = 1 and pbi.batch_id = ?`,
     insert: `insert into hmp_batch_input (batch_id, item_id, subitem_id, unit_id, condition_id, qty, rate, amount, lot_no, jawak_ref_id) 
-            values (@batch_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @rate, @amount, @lot_no, @jawak_ref_i)`,
+            values (@batch_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @rate, @amount, @lot_no, @jawak_ref_id)`,
     update: `update hmp_batch_input set item_id = @item_id, subitem_id = @subitem_id, unit_id = @unit_id, condition_id = @condition_id, qty = @qty, rate = @rate, amount = @amount, lot_no = @lot_no, jawak_ref_id = @jawak_ref_id where _id = @_id`,
     delete: `update hmp_batch_input set active = 0 where _id = @_id`
 }
 
 const hmp_batch_output = {
-    select: `select pbo.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
+    select: `select pbo.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
              from hmp_batch_output pbo 
              left join hmp_batch pb on pbo.batch_id = pb._id 
              left join item i on pbo.item_id = i._id 
              left join unit u on pbo.unit_id = u._id 
              left join subitem s on pbo.subitem_id = s._id 
+             left join subitem_list sil on s.subitem_list_id = sil._id
              left join support_list sl on pbo.condition_id = sl._id 
              left join support_list slt on pbo.hmp_type = slt._id 
              where pbo.active = 1`,
-    select_by_batch: `select pbo.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, s.subitem_hin, s.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
+    select_full: `select pbo.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
+             from hmp_batch_output pbo 
+             left join hmp_batch pb on pbo.batch_id = pb._id 
+             left join item i on pbo.item_id = i._id 
+             left join unit u on pbo.unit_id = u._id 
+             left join subitem s on pbo.subitem_id = s._id 
+             left join subitem_list sil on s.subitem_list_id = sil._id
+             left join support_list sl on pbo.condition_id = sl._id 
+             left join support_list slt on pbo.hmp_type = slt._id 
+             where pbo.active = 1 limit @limit offset @offset`,
+    select_by_batch: `select pbo.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
                 from hmp_batch_output pbo 
                 left join item i on pbo.item_id = i._id 
                 left join unit u on pbo.unit_id = u._id 
                 left join subitem s on pbo.subitem_id = s._id 
+                left join subitem_list sil on s.subitem_list_id = sil._id
                 left join support_list slt on pbo.hmp_type = slt._id 
                 left join support_list sl on pbo.condition_id = sl._id 
                 where pbo.active = 1 and pbo.batch_id = @batch_id`,
-    insert: `insert into hmp_batch_output (batch_id, item_id, subitem_id, unit_id, condition_id, qty, rate, amount, lot_no, batch_product_code, aawak_ref_id) 
-            values (@batch_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @rate, @amount, @lot_no, @batch_product_code, @aawak_ref_id)`,
+    insert: `insert into hmp_batch_output (batch_id, item_id, subitem_id, unit_id, condition_id, qty, rate, amount, lot_no, aawak_ref_id) 
+            values (@batch_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty, @rate, @amount, @lot_no, @aawak_ref_id)`,
     update: `update hmp_batch_output set item_id = @item_id, subitem_id = @subitem_id, unit_id = @unit_id, condition_id = @condition_id, qty = @qty, rate = @rate, amount = @amount, lot_no = @lot_no, batch_product_code = @batch_product_code, aawak_ref_id = @aawak_ref_id where _id = @_id`,
     delete: `update hmp_batch_output set active = 0 where _id = @_id`
 }
@@ -2916,6 +2960,8 @@ const usage_report = {
     delete_by_ref: `delete from usage_report where jawak_id = ?`,
     order: `usage_report.date desc`
 }
+
+
 
 const test = {
     select: `select * from test ?`,

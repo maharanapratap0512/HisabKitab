@@ -111,6 +111,44 @@
                </div>
             </div>
 
+
+
+            <div class="row">
+               <div class="col-md-2 mb-2">
+                  <div class="form-group">
+                     <label class="form-label">From Year-Month</label>
+                     <input type="month" class="form-control" [(ngModel)]="filterBody.from_year_month"
+                        name="from_year_month" [ngModelOptions]="{standalone: true}">
+                  </div>
+               </div>
+               <div class="col-md-2 mb-2">
+                  <div class="form-group">
+                     <label class="form-label">To Year-Month</label>
+                     <input type="month" class="form-control" [(ngModel)]="filterBody.to_year_month"
+                        name="to_year_month" [ngModelOptions]="{standalone: true}">
+                  </div>
+               </div>
+
+
+               <div class="col-md-2 mb-2" *ngIf="monthsSel.length > 0">
+                  <div class="form-group">
+                     <label class="form-label"></label>
+                     <button type="button" class="form-control btn btn-outline-success dropdown-toggle mx-2"
+                        data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
+                     <div class="dropdown-menu">
+                        <a class="dropdown-item" (click)="excelExportMonthlyMain()">Main Saar</a>
+                        <a class="dropdown-item" (click)="excelExportMonthlyConditionWise()">Condition Wise</a>
+                     </div>
+                  </div>
+
+               </div>
+               <div class="col-md-2 mb-2">
+                  <div class="form-group">
+                     <label class="form-label">.</label>
+                     <button class="btn btn-primary form-control" (click)="filter()">Submit</button>
+                  </div>
+               </div>
+            </div>
             <div class="row" *ngIf="false">
                <div class="col-md-2 mb-2">
                   <div class="form-group">
@@ -144,7 +182,7 @@
                         (change)="monthsTo = gs.yearChangedGetMonth($event)">
                         <ng-option selected="selected" disabled value="">Select Year
                         </ng-option>
-                        <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
+                        <ng-option *ngFor="let item of getYearTo()" [value]="item">{{item}}</ng-option>
                      </ng-select>
                   </div>
                </div>
@@ -181,13 +219,20 @@
                </div>
             </div>
 
-            <div class="row">
+            <!-- <div class="row">
                Under Maintanace..... Comming soon with new featues.
-            </div>
+            </div> -->
 
             <div class="row" *ngIf="bachatData.length">
                <div class="card-body" style="overflow: auto; flex-direction: column;">
-                  <h4 class="card-title">Click Row to See More Details.</h4>
+                  <div class="row align-items-center">
+                     <div class="col-6">
+                        <h4 class="card-title">Click Row to See More Details.</h4>
+                     </div>
+                     <div class="col-6 text-end">
+                        <pagination-controls (pageChange)="page = $event" [autoHide]="true"></pagination-controls>
+                     </div>
+                  </div>
                   <div class="table-container">
                      <table id="datatable-buttons" class="table table-hover table-sticky-header dt-responsive">
                         <thead>
@@ -195,9 +240,51 @@
                               <!-- <td>Image</td> -->
                               <td style="width: 70px;">No.</td>
                               <td style="width: 100px;">Department</td>
-                              <td style="width: 180px;">M M </td>
-                              <td>Category</td>
-                              <td>Item</td>
+                              <td style="width: 180px;">
+                                 <div class="d-flex justify-content-between align-items-center">
+                                    <span>M M</span>
+                                    <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                       (clear)="filterBody.mm_id = null; onHeaderFilterChange()"
+                                       [isOpen]="!!filterBody.mm_id">
+                                       <ng-select class="custom-sm" style="width: 200px;" placeholder="Select MM"
+                                          [clearable]="true" [virtualScroll]="true" (change)="onHeaderFilterChange()"
+                                          [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
+                                          <ng-option *ngFor="let item of mms" [value]="item._id">
+                                             {{item.mm_hin}} : {{item.mm_eng}}</ng-option>
+                                       </ng-select>
+                                    </app-popover-filter>
+                                 </div>
+                              </td>
+                              <td>
+                                 <div class="d-flex justify-content-between align-items-center">
+                                    <span>Category</span>
+                                    <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                       (clear)="filterBody.category_id = null; onHeaderFilterChange()"
+                                       [isOpen]="!!filterBody.category_id">
+                                       <ng-select class="custom-sm" style="width: 200px;" placeholder="Select Category"
+                                          [clearable]="true" [virtualScroll]="true" (change)="catSelected($event)"
+                                          [(ngModel)]="filterBody.category_id" [ngModelOptions]="{standalone: true}">
+                                          <ng-option *ngFor="let item of categories" [value]="item._id">
+                                             {{item.category_hin}} : {{item.category_eng}}</ng-option>
+                                       </ng-select>
+                                    </app-popover-filter>
+                                 </div>
+                              </td>
+                              <td>
+                                 <div class="d-flex justify-content-between align-items-center">
+                                    <span>Item</span>
+                                    <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                       (clear)="filterBody.item_id = null; onHeaderFilterChange()"
+                                       [isOpen]="!!filterBody.item_id">
+                                       <ng-select class="custom-sm" style="width: 200px;" placeholder="Select Item"
+                                          [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)"
+                                          [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}">
+                                          <ng-option *ngFor="let item of items" [value]="item._id">
+                                             {{item.item_hin}} : {{item.item_eng}}</ng-option>
+                                       </ng-select>
+                                    </app-popover-filter>
+                                 </div>
+                              </td>
                               <td>Total Aawak</td>
                               <td>Used</td>
                               <td>Other Jawak</td>
@@ -222,15 +309,58 @@
                               <tr>
                                  <td rowspan="2" style="width: 70px;">No.</td>
                                  <td rowspan="2" style="width: 100px;">Department</td>
-                                 <td rowspan="2" style="width: 180px;">Mini_Madhuban</td>
-                                 <td rowspan="2">Category</td>
-                                 <td rowspan="2">Item_Subitem_Name</td>
+                                 <td rowspan="2" style="width: 180px;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                       <span>Mini_Madhuban</span>
+                                       <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                          (clear)="filterBody.mm_id = null; onHeaderFilterChange()"
+                                          [isOpen]="!!filterBody.mm_id">
+                                          <ng-select class="custom-sm" style="width: 200px;" placeholder="Select MM"
+                                             [clearable]="true" [virtualScroll]="true" (change)="onHeaderFilterChange()"
+                                             [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
+                                             <ng-option *ngFor="let item of mms" [value]="item._id">
+                                                {{item.mm_hin}} : {{item.mm_eng}}</ng-option>
+                                          </ng-select>
+                                       </app-popover-filter>
+                                    </div>
+                                 </td>
+                                 <td rowspan="2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                       <span>Category</span>
+                                       <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                          (clear)="filterBody.category_id = null; onHeaderFilterChange()"
+                                          [isOpen]="!!filterBody.category_id">
+                                          <ng-select class="custom-sm" style="width: 200px;"
+                                             placeholder="Select Category" [clearable]="true" [virtualScroll]="true"
+                                             (change)="catSelected($event)" [(ngModel)]="filterBody.category_id"
+                                             [ngModelOptions]="{standalone: true}">
+                                             <ng-option *ngFor="let item of categories" [value]="item._id">
+                                                {{item.category_hin}} : {{item.category_eng}}</ng-option>
+                                          </ng-select>
+                                       </app-popover-filter>
+                                    </div>
+                                 </td>
+                                 <td rowspan="2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                       <span>Item_Subitem_Name</span>
+                                       <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                          (clear)="filterBody.item_id = null; onHeaderFilterChange()"
+                                          [isOpen]="!!filterBody.item_id">
+                                          <ng-select class="custom-sm" style="width: 200px;" placeholder="Select Item"
+                                             [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)"
+                                             [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}">
+                                             <ng-option *ngFor="let item of items" [value]="item._id">
+                                                {{item.item_hin}} : {{item.item_eng}}</ng-option>
+                                          </ng-select>
+                                       </app-popover-filter>
+                                    </div>
+                                 </td>
                                  <td rowspan="2" *ngIf="monthsSel.length > 0">Condition</td>
                                  <td rowspan="2">पिछला बचत</td>
                                  <th colspan="5" class="center-header partition" *ngFor="let row of monthsSel">{{
                                     row.name
                                     +
-                                    " - " + filterBody.year }}</th>
+                                    " - " + row.year }}</th>
                               </tr>
                               <tr>
                                  <ng-container *ngFor="let row of monthsSel">
@@ -244,18 +374,19 @@
                            </ng-container>
                         </thead>
                         <tbody class="accordion" id="accordionExample">
-                           <ng-container *ngFor="let data of bachatData | search:term; let i=index"
+                           <ng-container
+                              *ngFor="let data of bachatData | search:term | paginate: { itemsPerPage: itemsPerPage, currentPage: page }; let i=index"
                               class="accordion-item">
                               <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i"
                                  aria-expanded="true" [attr.aria-controls]="'#collapse-' + i"
-                                 (click)="rowClicked(data, i)">
+                                 (click)="rowClicked(data)">
                                  <!-- <td>
                                     <div> 
                                        <img [src]="data.image" class="img-fluid img-thumbnail mx-1 p-1 h-100" *ngIf="data.image"
                                        style="max-width: 75px; object-fit: cover;" alt="item-img + {{i}}"  />
                                     </div>
                                  </td> -->
-                                 <td>{{i+1}}</td>
+                                 <td>{{(page - 1) * itemsPerPage + i + 1}}</td>
                                  <td>
                                     {{data.dept_hin}} {{data.dept_code ? "(" + data.dept_code + ")" : ''}}
                                  </td>
@@ -309,31 +440,31 @@
                                     <ng-container *ngFor="let row of monthsSel; let m = index;">
                                        <td (mouseenter)="data.showTooltip[m] = true"
                                           (mouseleave)="data.showTooltip[m] = false"
-                                          (click)="editComment(i, m, data, 'main_row')" class="partition comment"
+                                          (click)="editComment(m, data, 'main_row')" class="partition comment"
                                           [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
                                              [ngClass]="{'error': data.arr_sum_aawak[m] < 0}">{{data.arr_sum_aawak[m]}}</span>
                                        </td>
                                        <td (mouseenter)="data.showTooltip[m] = true"
                                           (mouseleave)="data.showTooltip[m] = false"
-                                          (click)="editComment(i, m, data, 'main_row')" class="comment"
+                                          (click)="editComment(m, data, 'main_row')" class="comment"
                                           [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
                                              [ngClass]="{'error': data.arr_sum_used[m] < 0}">{{data.arr_sum_used[m]}}</span>
                                        </td>
                                        <td (mouseenter)="data.showTooltip[m] = true"
                                           (mouseleave)="data.showTooltip[m] = false"
-                                          (click)="editComment(i, m, data, 'main_row')" class="comment"
+                                          (click)="editComment(m, data, 'main_row')" class="comment"
                                           [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
                                              [ngClass]="{'error': data.arr_sum_jawak[m] < 0}">{{data.arr_sum_jawak[m]}}</span>
                                        </td>
                                        <td (mouseenter)="data.showTooltip[m] = true"
                                           (mouseleave)="data.showTooltip[m] = false"
-                                          (click)="editComment(i, m, data, 'main_row')" class="comment"
+                                          (click)="editComment(m, data, 'main_row')" class="comment"
                                           [ngClass]="{'cell-highlight':data.showTooltip[m]}"><span
                                              [ngClass]="{'error': data.arr_sum_bachat[m] < 0, 'stock':data.arr_sum_bachat[m] > 0}">{{data.arr_sum_bachat[m]}}</span>
                                        </td>
                                        <td (mouseenter)="data.showTooltip[m] = true"
                                           (mouseleave)="data.showTooltip[m] = false"
-                                          (click)="editComment(i, m, data, 'main_row')" class="comment-cell"
+                                          (click)="editComment(m, data, 'main_row')" class="comment-cell"
                                           [ngClass]="{'cell-highlight':data.showTooltip[m]}">
                                           <div class="cell-content"
                                              [ngClass]="{'error': data.arr_difference_bachat && data.arr_difference_bachat[m] != 0}">
@@ -403,7 +534,7 @@
                                              <ng-container *ngFor="let op of operationList;">
                                                 <a class="nav-link"
                                                    [ngClass]="{'active': data.currentReport == op.key, 'no-data': !data[op.key] || data[op.key].length < 1}"
-                                                   (click)="operationClick(op.key, i)">
+                                                   (click)="operationClick(data, op.key)">
                                                    <i class="mdi mdi-home-variant d-md-none d-block"></i>
                                                    <span class="d-none d-md-block">{{op.name}}</span>
                                                 </a>
@@ -421,14 +552,14 @@
                                        <ng-container *ngFor="let row of monthsSel; let m = index;">
                                           <td (mouseenter)="sdata.showTooltip[m] = true"
                                              (mouseleave)="sdata.showTooltip[m] = false"
-                                             (click)="editComment(i, m, sdata, data.currentReport, j)"
+                                             (click)="editComment(m, sdata, data.currentReport, data)"
                                              class="partition comment"
                                              [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
                                              {{sdata.arr_sum_aawak[m] ? sdata.arr_sum_aawak[m] : '-'}}
                                           </td>
                                           <td (mouseenter)="sdata.showTooltip[m] = true"
                                              (mouseleave)="sdata.showTooltip[m] = false"
-                                             (click)="editComment(i, m, sdata, data.currentReport, j)" class="comment"
+                                             (click)="editComment(m, sdata, data.currentReport, data)" class="comment"
                                              [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
                                              <span [ngClass]="{'error': sdata.arr_sum_used[m] < 0}">
                                                 {{sdata.arr_sum_used[m] ? sdata.arr_sum_used[m] : '-'}}
@@ -436,7 +567,7 @@
                                           </td>
                                           <td (mouseenter)="sdata.showTooltip[m] = true"
                                              (mouseleave)="sdata.showTooltip[m] = false"
-                                             (click)="editComment(i, m, sdata, data.currentReport, j)" class="comment"
+                                             (click)="editComment(m, sdata, data.currentReport, data)" class="comment"
                                              [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
                                              <span [ngClass]="{'error': sdata.arr_sum_jawak[m] < 0}">
                                                 {{sdata.arr_sum_jawak[m] ? sdata.arr_sum_jawak[m] : '-'}}
@@ -444,7 +575,7 @@
                                           </td>
                                           <td (mouseenter)="sdata.showTooltip[m] = true"
                                              (mouseleave)="sdata.showTooltip[m] = false"
-                                             (click)="editComment(i, m, sdata, data.currentReport, j)"
+                                             (click)="editComment(m, sdata, data.currentReport, data)"
                                              class="comment-cell" [ngClass]="{'cell-highlight':sdata.showTooltip[m]}">
 
                                              <div class="cell-content"

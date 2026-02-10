@@ -7,26 +7,86 @@
 <div class="wrapper">
     <div class="content-page">
         <div class="content">
-            <div class="container-fluid">
 
-                <!-- First Row -->
-                <!-- Add Button, Search Field, Total Count -->
-                <div class="row">
-                    <div class="card-body">
-                        <div class="row d-flex justify-content-between">
-                            <div class="col-2">
-                                <button class="btn btn-primary w-100" (click)="openModal('Add Jawak')">
-                                    <i class="dripicons-plus h4 icon-mx-2"> </i> Jawak
-                                </button>
+            <!-- First Row -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card mb-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="page-title mb-0">Jawak Management</h6>
                             </div>
-                            <div class="col-3">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                                        name="search">
-                                </div>
+                            <div class="d-flex gap-2">
+                                <app-popover-filter [btnOutline]="false" iconClass="dripicons-gear" direction="left"
+                                    [showClearButton]="false">
+                                    <ul>
+                                        <li>
+                                            <h5>नया एंट्री फॉर्म</h5>
+                                            <div class="d-flex justify-content-between me-3 fs-6">
+                                                <div class="pl-2 form-check form-radio-info mb-1">
+                                                    <input type="radio" [value]="true"
+                                                        [(ngModel)]="settings.jawak.samePageEntryForm"
+                                                        class="form-check-input" (change)="UISettingsChanged()"
+                                                        name="samePageEntryForm" id="entryInPage">
+                                                    <label class="form-check-label" for="entryInPage">इसी पेज
+                                                        में</label>
+                                                </div>
+                                                <div class="pl-2 form-check form-radio-info mb-1">
+                                                    <input type="radio" [value]="false"
+                                                        [(ngModel)]="settings.jawak.samePageEntryForm"
+                                                        class="form-check-input" (change)="UISettingsChanged()"
+                                                        name="samePageEntryForm" id="entryInModal">
+                                                    <label class="form-check-label" for="entryInModal">मोडल में</label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <h5>डाटा टेबल मोड</h5>
+                                            <div class="d-flex justify-content-between me-3 fs-6">
+                                                <div class="pl-2 form-check form-radio-info mb-1">
+                                                    <input type="radio" [value]="'individual'"
+                                                        [(ngModel)]="settings.jawak.viewMode" class="form-check-input"
+                                                        (change)="UISettingsChanged()" name="viewMode" id="entryInPage">
+                                                    <label class="form-check-label" for="entryInPage">Single</label>
+                                                </div>
+                                                <div class="pl-2 form-check form-radio-info mb-1">
+                                                    <input type="radio" [value]="'voucher'"
+                                                        [(ngModel)]="settings.jawak.viewMode" class="form-check-input"
+                                                        (change)="UISettingsChanged()" name="viewMode"
+                                                        id="entryInModal">
+                                                    <label class="form-check-label" for="entryInModal">Voucher Wise
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </app-popover-filter>
                             </div>
-                            <div class="col-3 d-flex">
-                                <!-- <button *ngIf="!gs.importPending" class="file btn btn-success"
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="settings.jawak.samePageEntryForm">
+                <app-jawak-entry-new (response)='addJawakBunchResponse($event)'></app-jawak-entry-new>
+            </div>
+            <!-- Add Button, Search Field, Total Count -->
+            <div class="row">
+                <div class="card-body">
+                    <div class="row d-flex justify-content-between">
+                        <div class="col-2">
+                            <button class="btn btn-primary w-100" (click)="openModal('Add Jawak')">
+                                <i class="dripicons-plus h4 icon-mx-2"> </i> Jawak
+                            </button>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                                    name="search">
+                            </div>
+                        </div>
+                        <div class="col-3 d-flex">
+                            <!-- <button *ngIf="!gs.importPending" class="file btn btn-success"
                                     style="font-weight: 700 !important;">
                                     <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                                     <input type="file" class="inputtag"
@@ -38,581 +98,578 @@
                                     <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                                 </button> -->
 
-                                <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
-                                    data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
-                                <div class="dropdown-menu">
-                                    <!-- <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
+                            <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                                data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
+                            <div class="dropdown-menu">
+                                <!-- <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
                                     <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
                                     <a class="dropdown-item" (click)="exportJawakData()">Jawak Only</a>
                                     <a class="dropdown-item" (click)="exportPendingData()">Pending Destribution</a> -->
-                                </div>
-
-                            </div>
-
-                            <div class="col-2">
-                                <button type="button" style="font-weight: 700 !important;"
-                                    class="btn btn-light w-100">Total
-                                    Count : {{total_count}}
-                                </button>
                             </div>
 
                         </div>
+
+                        <div class="col-2">
+                            <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
+                                Count : {{total_count}}
+                            </button>
+                        </div>
+
                     </div>
                 </div>
+            </div>
 
 
-                <!-- year filter and table -->
-                <div class="row">
+            <!-- year filter and table -->
+            <div class="row">
 
-                    <div class="card-body" style="overflow: auto; flex-direction: column;">
-                        <div class="row">
-                            <div class="col-4 pt-2">
-                                <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
-                                    (click)="yearClick(null)">All</span>
-                                <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearClick(y)"
-                                    [ngClass]="{'badge-outline-secondary':filterBody.year == y}">
-                                    {{y}}
-                                </span>
-                            </div>
-                            <div class="col-8 d-flex justify-content-end align-items-center" *ngIf="jawakData.length">
-                                <pagination-controls class="pagi text-end" (pageChange)="getJawakPage(page = $event)"
-                                    [autoHide]="true">
-                                </pagination-controls>
-                                <div class="btn-group me-3">
-                                    <button type="button" class="btn btn-sm"
-                                        [ngClass]="viewMode === 'voucher' ? 'btn-primary' : 'btn-outline-primary'"
-                                        (click)="changeView('voucher')" title="Voucher View">
-                                        <i class="uil uil-layers-alt"></i>
-                                    </button>
-                                    <button class="btn btn-sm"
-                                        [ngClass]="viewMode === 'individual' ? 'btn-primary' : 'btn-outline-primary'"
-                                        (click)="changeView('individual')" title="Individual View">
-                                        <i class="uil uil-list-ul"></i>
-                                    </button>
-                                </div>
-                            </div>
+                <div class="card-body" style="overflow: auto; flex-direction: column;">
+                    <div class="row">
+                        <div class="col-4 pt-2">
+                            <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
+                                (click)="yearClick(null)">All</span>
+                            <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearClick(y)"
+                                [ngClass]="{'badge-outline-secondary':filterBody.year == y}">
+                                {{y}}
+                            </span>
                         </div>
+                        <div class="col-8 d-flex justify-content-end align-items-center" *ngIf="jawakData.length">
+                            <pagination-controls class="pagi text-end" (pageChange)="getJawakPage(page = $event)"
+                                [autoHide]="true">
+                            </pagination-controls>
+                            <!-- <div class="btn-group me-3">
+                                <button type="button" class="btn btn-sm"
+                                    [ngClass]="viewMode === 'voucher' ? 'btn-primary' : 'btn-outline-primary'"
+                                    (click)="changeView('voucher')" title="Voucher View">
+                                    <i class="uil uil-layers-alt"></i>
+                                </button>
+                                <button class="btn btn-sm"
+                                    [ngClass]="viewMode === 'individual' ? 'btn-primary' : 'btn-outline-primary'"
+                                    (click)="changeView('individual')" title="Individual View">
+                                    <i class="uil uil-list-ul"></i>
+                                </button>
+                            </div> -->
+                        </div>
+                    </div>
 
 
-                        <!-- Voucher View Table -->
-                        <div class="table-container" *ngIf="viewMode === 'voucher'">
-                            <table class="table table-striped table-hover table-sticky-header jawak-data-table">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th width="3%">#</th>
-                                        <th width="7%">Actions</th>
-                                        <th width="8%">Voucher No</th>
-                                        <th width="8%">Date</th>
-                                        <th width="6%">Pkt No</th>
-                                        <th width="6%">Reg Page</th>
-                                        <th width="12%">From MM</th>
-                                        <th width="12%">To MM</th>
-                                        <th width="14%">Sewadhari</th>
-                                        <th width="10%">Nimitt</th>
-                                        <th width="6%">Items</th>
+                    <!-- Voucher View Table -->
+                    <div class="table-container" *ngIf="settings.jawak.viewMode === 'voucher'">
+                        <table class="table table-striped table-hover table-sticky-header jawak-data-table">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th width="3%">#</th>
+                                    <th width="7%">Actions</th>
+                                    <th width="8%">Voucher No</th>
+                                    <th width="8%">Date</th>
+                                    <th width="6%">Pkt No</th>
+                                    <th width="6%">Reg Page</th>
+                                    <th width="12%">From MM</th>
+                                    <th width="12%">To MM</th>
+                                    <th width="14%">Sewadhari</th>
+                                    <th width="10%">Nimitt</th>
+                                    <th width="6%">Items</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container
+                                    *ngFor="let row of jawakData | search:term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i = index">
+                                    <tr class="voucher-row" [class.expanded]="row.expanded" (click)="toggleExpand(row)"
+                                        style="cursor: pointer;">
+                                        <td>{{row.sr_no}}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary me-1" title="Edit"
+                                                (click)="editJawak(i, row); $event.stopPropagation()">
+                                                <i class="uil uil-pen"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" title="Delete"
+                                                (click)="deleteJawak(i, row.sr_no); $event.stopPropagation()">
+                                                <i class="uil uil-trash"></i>
+                                            </button>
+                                        </td>
+                                        <td><strong>{{row.voucher_no}}</strong></td>
+                                        <td>
+                                            <div class="date-info">
+                                                <strong>{{row.date | date:'dd/MM/yyyy'}}</strong><br>
+                                                <small class="text-muted">{{row.date_sent ? 'sent on : ' +
+                                                    (row.date_sent |
+                                                    date:'dd/MM/yyyy') : ''}}</small>
+                                            </div>
+                                        </td>
+                                        <td>{{row.pkt_num || '-'}}</td>
+                                        <td>{{row.reg_pg_no || '-'}}</td>
+                                        <td>
+                                            <div class="location-info">
+                                                <small class="text-muted">{{row.mm_eng}}</small><br>
+                                                <span class="hindi-text">{{row.mm_hin}}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="location-info">
+                                                <small class="text-muted">{{row.jawak_mm_eng}}</small><br>
+                                                <span class="hindi-text">{{row.jawak_mm_hin}}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div *ngIf="row.pbk_hin" class="pbk-info">
+                                                <small>{{row.roll_no || 'N/A'}}</small><br>
+                                                <span class="hindi-text">{{row.pbk_hin}}</span>
+                                            </div>
+                                            <span *ngIf="!row.pbk_hin">-</span>
+                                        </td>
+                                        <td>
+                                            <div *ngIf="row.nimitt_hin" class="nimitt-info">
+                                                <small class="text-muted">{{row.nimitt_eng}}</small><br>
+                                                <span class="hindi-text">{{row.nimitt_hin}}</span>
+                                            </div>
+                                            <span *ngIf="!row.nimitt_hin">-</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-secondary">{{row.jawaks?.length || 0}}
+                                                items</span>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <ng-container *ngFor="let row of jawakData; let i = index">
-                                        <tr class="voucher-row" [class.expanded]="row.expanded"
-                                            (click)="toggleExpand(row)" style="cursor: pointer;">
-                                            <td>{{row.sr_no}}</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-primary me-1" title="Edit"
-                                                    (click)="editJawak(i, row); $event.stopPropagation()">
-                                                    <i class="uil uil-pen"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-danger" title="Delete"
-                                                    (click)="deleteJawak(i, row.sr_no); $event.stopPropagation()">
-                                                    <i class="uil uil-trash"></i>
-                                                </button>
-                                            </td>
-                                            <td><strong>{{row.voucher_no}}</strong></td>
-                                            <td>
-                                                <div class="date-info">
-                                                    <strong>{{row.date | date:'dd/MM/yyyy'}}</strong><br>
-                                                    <small class="text-muted">{{row.date_sent ? 'sent on : ' +
-                                                        (row.date_sent |
-                                                        date:'dd/MM/yyyy') : ''}}</small>
-                                                </div>
-                                            </td>
-                                            <td>{{row.pkt_num || '-'}}</td>
-                                            <td>{{row.reg_pg_no || '-'}}</td>
-                                            <td>
-                                                <div class="location-info">
-                                                    <small class="text-muted">{{row.mm_eng}}</small><br>
-                                                    <span class="hindi-text">{{row.mm_hin}}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="location-info">
-                                                    <small class="text-muted">{{row.jawak_mm_eng}}</small><br>
-                                                    <span class="hindi-text">{{row.jawak_mm_hin}}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div *ngIf="row.pbk_hin" class="pbk-info">
-                                                    <small>{{row.roll_no || 'N/A'}}</small><br>
-                                                    <span class="hindi-text">{{row.pbk_hin}}</span>
-                                                </div>
-                                                <span *ngIf="!row.pbk_hin">-</span>
-                                            </td>
-                                            <td>
-                                                <div *ngIf="row.nimitt_hin" class="nimitt-info">
-                                                    <small class="text-muted">{{row.nimitt_eng}}</small><br>
-                                                    <span class="hindi-text">{{row.nimitt_hin}}</span>
-                                                </div>
-                                                <span *ngIf="!row.nimitt_hin">-</span>
-                                            </td>
-                                            <td>
-                                                <span class="badge badge-secondary">{{row.jawaks?.length || 0}}
-                                                    items</span>
-                                            </td>
-                                        </tr>
 
-                                        <!-- Expanded Items Table -->
-                                        <tr *ngIf="row.expanded" class="items-row">
-                                            <td colspan="11" class="p-0">
-                                                <div class="items-container" appHorizontalScrollWithArrows>
-                                                    <table class="table table-sm mb-0 items-table">
-                                                        <thead class="table-light">
-                                                            <tr>
-                                                                <th style="width: 3vw;">Sr.</th>
-                                                                <th style="width: 6vw;">Actions</th>
-                                                                <th style="width: 8vw;">Lot No</th>
-                                                                <th style="width: 15vw;">Item</th>
-                                                                <th style="width: 12vw;">Sub Item</th>
-                                                                <th style="width: 10vw;">Product</th>
-                                                                <th style="width: 8vw;">Condition</th>
-                                                                <th style="width: 12vw;">Company</th>
-                                                                <th style="width: 10vw;">Qty & Unit</th>
-                                                                <th style="width: 12vw;">Rate & Amount</th>
-                                                                <th style="width: 12vw;">Aawak Source</th>
-                                                                <th style="width: 15vw;">Jawak Type</th>
-                                                                <th style="width: 12vw;">Usage List</th>
-                                                                <th style="width: 10vw;">Container</th>
-                                                                <th style="width: 18vw;">Usage Report</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr *ngFor="let item of row.jawaks; let j = index">
-                                                                <td>{{j + 1}}</td>
-                                                                <td>
-                                                                    <button class="btn btn-xs btn-danger"
-                                                                        title="Delete Item"
-                                                                        (click)="deleteOne(i, j, item._id)">
-                                                                        <i class="uil uil-times"></i>
-                                                                    </button>
-                                                                </td>
-                                                                <td>{{item.lot_no || '-'}}</td>
-                                                                <td>
-                                                                    <div class="item-info">
-                                                                        <strong>{{item.item_eng}}</strong><br>
-                                                                        <small
-                                                                            class="hindi-text">{{item.item_hin}}</small>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <div class="item-info" *ngIf="item.subitem_eng">
-                                                                        <span>{{item.subitem_eng}}</span><br>
-                                                                        <small
-                                                                            class="hindi-text">{{item.subitem_hin}}</small>
-                                                                    </div>
-                                                                    <span *ngIf="!item.subitem_eng">-</span>
-                                                                </td>
-                                                                <td>{{item.product_code || '-'}}</td>
-                                                                <td>
-                                                                    <span class="badge"
-                                                                        [class.badge-warning]="item.condition_eng === 'Old'"
-                                                                        [class.badge-success]="item.condition_eng === 'New'">
-                                                                        {{item.condition_eng}}
-                                                                    </span>
-                                                                </td>
-                                                                <td>{{item.company_name || '-'}}</td>
-                                                                <td><strong>{{item.qty}} {{item.unit_short}}</strong>
-                                                                </td>
-                                                                <td>
-                                                                    <span *ngIf="item.rate">@{{item.rate}} =
-                                                                        {{item.actual_amt}}</span>
-                                                                    <span *ngIf="!item.rate">-</span>
-                                                                </td>
-                                                                <td>
-                                                                    <small class="text-muted">{{item.aawak_source_eng ||
-                                                                        '-'}}</small> <br />
-                                                                    <span class="hindi-text">{{item.aawak_source_hin ||
-                                                                        '-'}}</span>
-                                                                </td>
-                                                                <td>
-                                                                    <div class="jawak-type-info">
-                                                                        <small
-                                                                            class="text-muted">{{item.jawak_type_eng}}</small><br>
-                                                                        <span
-                                                                            class="hindi-text">{{item.jawak_type_hin}}</span>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <small class="text-muted">{{item.usage_list_eng ||
-                                                                        '-'}}</small>
-                                                                </td>
-                                                                <td>
+                                    <!-- Expanded Items Table -->
+                                    <tr *ngIf="row.expanded" class="items-row">
+                                        <td colspan="11" class="p-0">
+                                            <div class="items-container" appHorizontalScrollWithArrows>
+                                                <table class="table table-sm mb-0 items-table">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th style="width: 3vw;">Sr.</th>
+                                                            <th style="width: 6vw;">Actions</th>
+                                                            <th style="width: 8vw;">Lot No</th>
+                                                            <th style="width: 15vw;">Item</th>
+                                                            <th style="width: 12vw;">Sub Item</th>
+                                                            <th style="width: 10vw;">Product</th>
+                                                            <th style="width: 8vw;">Condition</th>
+                                                            <th style="width: 12vw;">Company</th>
+                                                            <th style="width: 10vw;">Qty & Unit</th>
+                                                            <th style="width: 12vw;">Rate & Amount</th>
+                                                            <th style="width: 12vw;">Aawak Source</th>
+                                                            <th style="width: 15vw;">Jawak Type</th>
+                                                            <th style="width: 12vw;">Usage List</th>
+                                                            <th style="width: 10vw;">Container</th>
+                                                            <th style="width: 18vw;">Usage Report</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr *ngFor="let item of row.jawaks; let j = index">
+                                                            <td>{{j + 1}}</td>
+                                                            <td>
+                                                                <button class="btn btn-xs btn-danger"
+                                                                    title="Delete Item"
+                                                                    (click)="deleteOne(i, j, item._id)">
+                                                                    <i class="uil uil-times"></i>
+                                                                </button>
+                                                            </td>
+                                                            <td>{{item.lot_no || '-'}}</td>
+                                                            <td>
+                                                                <div class="item-info">
+                                                                    <strong>{{item.item_eng}}</strong><br>
+                                                                    <small class="hindi-text">{{item.item_hin}}</small>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="item-info" *ngIf="item.subitem_eng">
+                                                                    <span>{{item.subitem_eng}}</span><br>
                                                                     <small
-                                                                        class="text-muted">{{item.enz?.container_capacity
-                                                                        || '-'}}</small>
-                                                                </td>
-                                                                <td>
-                                                                    <div *ngIf="item.usage_report?.date"
-                                                                        class="usage-report-detailed">
-                                                                        <div class="rating-reporter-line">
-                                                                            <span class="star"
-                                                                                *ngFor="let star of [1,2,3,4,5]"
-                                                                                [class.filled]="star <= item.usage_report.rating">★</span>
-                                                                            <span
-                                                                                class="reporter">{{item.usage_report.reporter}}</span>
-                                                                            <small class="date">{{item.usage_report.date
-                                                                                | date:'dd/MM/yyyy'}}</small>
-                                                                        </div>
-                                                                        <div *ngIf="item.usage_report.fayda"
-                                                                            class="text-success">😊
-                                                                            {{item.usage_report.fayda}}</div>
-                                                                        <div *ngIf="item.usage_report.nuksan"
-                                                                            class="text-danger">😢
-                                                                            {{item.usage_report.nuksan}}</div>
+                                                                        class="hindi-text">{{item.subitem_hin}}</small>
+                                                                </div>
+                                                                <span *ngIf="!item.subitem_eng">-</span>
+                                                            </td>
+                                                            <td>{{item.product_code || '-'}}</td>
+                                                            <td>
+                                                                <span class="badge"
+                                                                    [class.badge-warning]="item.condition_eng === 'Old'"
+                                                                    [class.badge-success]="item.condition_eng === 'New'">
+                                                                    {{item.condition_eng}}
+                                                                </span>
+                                                            </td>
+                                                            <td>{{item.company_name || '-'}}</td>
+                                                            <td><strong>{{item.qty}} {{item.unit_short}}</strong>
+                                                            </td>
+                                                            <td>
+                                                                <span *ngIf="item.rate">@{{item.rate}} =
+                                                                    {{item.actual_amt}}</span>
+                                                                <span *ngIf="!item.rate">-</span>
+                                                            </td>
+                                                            <td>
+                                                                <small class="text-muted">{{item.aawak_source_eng ||
+                                                                    '-'}}</small> <br />
+                                                                <span class="hindi-text">{{item.aawak_source_hin ||
+                                                                    '-'}}</span>
+                                                            </td>
+                                                            <td>
+                                                                <div class="jawak-type-info">
+                                                                    <small
+                                                                        class="text-muted">{{item.jawak_type_eng}}</small><br>
+                                                                    <span
+                                                                        class="hindi-text">{{item.jawak_type_hin}}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <small class="text-muted">{{item.usage_list_eng ||
+                                                                    '-'}}</small>
+                                                            </td>
+                                                            <td>
+                                                                <small class="text-muted">{{item.enz?.container_capacity
+                                                                    || '-'}}</small>
+                                                            </td>
+                                                            <td>
+                                                                <div *ngIf="item.usage_report?.date"
+                                                                    class="usage-report-detailed">
+                                                                    <div class="rating-reporter-line">
+                                                                        <span class="star"
+                                                                            *ngFor="let star of [1,2,3,4,5]"
+                                                                            [class.filled]="star <= item.usage_report.rating">★</span>
+                                                                        <span
+                                                                            class="reporter">{{item.usage_report.reporter}}</span>
+                                                                        <small class="date">{{item.usage_report.date
+                                                                            | date:'dd/MM/yyyy'}}</small>
                                                                     </div>
-                                                                    <span *ngIf="!item.usage_report?.date">-</span>
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </ng-container>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Individual Combined View Table -->
-                        <div class="table-container" *ngIf="viewMode === 'individual'" appHorizontalScrollWithArrows>
-                            <table class="table table-striped table-hover table-sticky-header jawak-data-table">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th class="w-50">#</th>
-                                        <th class="w-80">Actions</th>
-                                        <th class="w-100">
-                                            <div class="d-flex justify-content-between align-items-center px-2 py-1">
-                                                <span>Voucher</span>
-                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    (clear)="filterBody.voucher_no = null; onHeaderFilterChange()"
-                                                    [isOpen]="!!filterBody.voucher_no">
-                                                    <input type="number" class="form-control form-control-sm"
-                                                        [(ngModel)]="filterBody.voucher_no"
-                                                        (change)="onHeaderFilterChange()" placeholder="Voucher No...">
-                                                </app-popover-filter>
+                                                                    <div *ngIf="item.usage_report.fayda"
+                                                                        class="text-success">😊
+                                                                        {{item.usage_report.fayda}}</div>
+                                                                    <div *ngIf="item.usage_report.nuksan"
+                                                                        class="text-danger">😢
+                                                                        {{item.usage_report.nuksan}}</div>
+                                                                </div>
+                                                                <span *ngIf="!item.usage_report?.date">-</span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                        </th>
-                                        <th class="w-100">Date</th>
-                                        <th class="w-100">
-                                            <div class="d-flex justify-content-between align-items-center px-2 py-1">
-                                                <span>Pkt No</span>
-                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    (clear)="filterBody.pkt_num = null; onHeaderFilterChange()"
-                                                    [isOpen]="!!filterBody.pkt_num">
-                                                    <input type="number" class="form-control form-control-sm"
-                                                        [(ngModel)]="filterBody.pkt_num"
-                                                        (change)="onHeaderFilterChange()" placeholder="Pkt No...">
-                                                </app-popover-filter>
-                                            </div>
-                                        </th>
-                                        <th class="w-120">
-                                            <div class="d-flex justify-content-between align-items-center px-2 py-1">
-                                                <span>Reg Page</span>
-                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    (clear)="filterBody.reg_pg_no = null; onHeaderFilterChange()"
-                                                    [isOpen]="!!filterBody.reg_pg_no">
-                                                    <input type="number" class="form-control form-control-sm"
-                                                        [(ngModel)]="filterBody.reg_pg_no"
-                                                        (change)="onHeaderFilterChange()" placeholder="Page No...">
-                                                </app-popover-filter>
-                                            </div>
-                                        </th>
-                                        <!-- <th class="w-200">From MM</th> -->
-                                        <th class="w-200">
-                                            <div class="d-flex justify-content-between align-items-center px-2 py-1">
-                                                <span>Jawak MM</span>
-                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    direction="left"
-                                                    (clear)="filterBody.aj_mm_id = []; onHeaderFilterChange()"
-                                                    [isOpen]="filterBody.aj_mm_id?.length > 0">
-                                                    <ng-select [multiple]="true" placeholder="Select MM"
-                                                        class="custom-sm" dropdownClass="custom-sm"
-                                                        [(ngModel)]="filterBody.aj_mm_id"
-                                                        (change)="onHeaderFilterChange()" style="width: 100%;">
-                                                        <ng-option *ngFor="let item of mms" [value]="item._id">
-                                                            {{item.mm_hin}} : {{item.mm_eng}}
-                                                        </ng-option>
-                                                    </ng-select>
-                                                </app-popover-filter>
-                                            </div>
-                                        </th>
-                                        <th class="w-250">
-                                            <div class="d-flex justify-content-between align-items-center px-2 py-1">
-                                                <span>Sewadhari</span>
-                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    direction="left"
-                                                    (clear)="filterBody.pbk_id = []; onHeaderFilterChange()"
-                                                    [isOpen]="filterBody.pbk_id?.length > 0">
-                                                    <ng-select [multiple]="true" placeholder="Select Sewadhari"
-                                                        class="custom-sm" dropdownClass="custom-sm"
-                                                        [(ngModel)]="filterBody.pbk_id"
-                                                        (change)="onHeaderFilterChange()" style="width: 100%;">
-                                                        <ng-option *ngFor="let item of pbks" [value]="item._id">
-                                                            {{item.pbk_hin}} : {{item.pbk_eng}}
-                                                        </ng-option>
-                                                    </ng-select>
-                                                </app-popover-filter>
-                                            </div>
-                                        </th>
-                                        <th class="w-400">
-                                            <div class="d-flex justify-content-between align-items-center px-2 py-1">
-                                                <span>Item</span>
-                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    direction="left"
-                                                    (clear)="filterBody.item_subitem_mix = []; onHeaderFilterChange()"
-                                                    [isOpen]="filterBody.item_subitem_mix?.length > 0">
-                                                    <ng-select [multiple]="true" placeholder="Select Item"
-                                                        class="custom-sm" dropdownClass="custom-sm"
-                                                        [(ngModel)]="filterBody.item_subitem_mix"
-                                                        (change)="onHeaderFilterChange()" style="width: 500px;">
-                                                        <ng-container *ngFor="let item of items">
-                                                            <ng-option [value]="item._id + ':'">
-                                                                {{item.item_hin}} : {{item.item_eng}} :
-                                                                {{item.item_code}}
-                                                            </ng-option>
-                                                            <ng-option *ngFor="let subitem of item.subitems"
-                                                                [value]="item._id + ':' + subitem._id">
-                                                                {{subitem.subitem_hin}} {{item.item_hin}} :
-                                                                {{subitem.subitem_eng}} {{item.item_eng}} :
-                                                                {{subitem.subitem_code}} {{item.item_code}}
-                                                            </ng-option>
-                                                        </ng-container>
-                                                    </ng-select>
-                                                </app-popover-filter>
-                                            </div>
-                                        </th>
-                                        <th class="w-100">Lot No</th>
-                                        <th class="w-120">Qty</th>
-                                        <th class="w-150">Rate & Amt</th>
-
-                                        <th class="w-120">
-                                            <div class="d-flex justify-content-between align-items-center px-2 py-1">
-                                                <span>Product</span>
-                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    direction="left"
-                                                    (clear)="filterBody.product_id = []; onHeaderFilterChange()"
-                                                    [isOpen]="filterBody.product_id?.length > 0">
-                                                    <ng-select [multiple]="true" placeholder="Select Product"
-                                                        class="custom-sm" dropdownClass="custom-sm"
-                                                        [(ngModel)]="filterBody.product_id"
-                                                        (change)="onHeaderFilterChange()" style="width: 100%;">
-                                                        <ng-option *ngFor="let item of products" [value]="item._id">
-                                                            {{item.product_code}} : {{item.product_eng}}
-                                                        </ng-option>
-                                                    </ng-select>
-                                                </app-popover-filter>
-                                            </div>
-                                        </th>
-                                        <th class="w-120">
-                                            <div class="d-flex justify-content-between align-items-center px-2 py-1">
-                                                <span>Condition</span>
-                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    direction="left"
-                                                    (clear)="filterBody.condition_id = []; onHeaderFilterChange()"
-                                                    [isOpen]="filterBody.condition_id?.length > 0">
-                                                    <ng-select [multiple]="true" placeholder="Select Condition"
-                                                        class="custom-sm" dropdownClass="custom-sm"
-                                                        [(ngModel)]="filterBody.condition_id"
-                                                        (change)="onHeaderFilterChange()" style="width: 100%;">
-                                                        <ng-option *ngFor="let item of conditions" [value]="item._id">
-                                                            {{item.list_name_hin}} : {{item.list_name_eng}}
-                                                        </ng-option>
-                                                    </ng-select>
-                                                </app-popover-filter>
-                                            </div>
-                                        </th>
-                                        <th class="w-150">Company</th>
-                                        <th class="w-180">
-                                            <div class="d-flex justify-content-between align-items-center px-2 py-1">
-                                                <span>Aawak Source</span>
-                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    direction="left"
-                                                    (clear)="filterBody.aawak_source_id = []; onHeaderFilterChange()"
-                                                    [isOpen]="filterBody.aawak_source_id?.length > 0">
-                                                    <ng-select [multiple]="true" placeholder="Select Aawak Source"
-                                                        class="custom-sm" dropdownClass="custom-sm"
-                                                        [(ngModel)]="filterBody.aawak_source_id"
-                                                        (change)="onHeaderFilterChange()" style="width: 100%;">
-                                                        <ng-option *ngFor="let item of aawak_sources"
-                                                            [value]="item._id">
-                                                            {{item.list_name_hin}} : {{item.list_name_eng}}
-                                                        </ng-option>
-                                                    </ng-select>
-                                                </app-popover-filter>
-                                            </div>
-                                        </th>
-                                        <th class="w-180">
-                                            <div class="d-flex justify-content-between align-items-center px-2 py-1">
-                                                <span>Jawak Type</span>
-                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    direction="left"
-                                                    (clear)="filterBody.jawak_type_id = []; onHeaderFilterChange()"
-                                                    [isOpen]="filterBody.jawak_type_id?.length > 0">
-                                                    <ng-select [multiple]="true" placeholder="Select Jawak Type"
-                                                        class="custom-sm" dropdownClass="custom-sm"
-                                                        [(ngModel)]="filterBody.jawak_type_id"
-                                                        (change)="onHeaderFilterChange()" style="width: 100%;">
-                                                        <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                                            {{item.list_name_hin}} : {{item.list_name_eng}}
-                                                        </ng-option>
-                                                    </ng-select>
-                                                </app-popover-filter>
-                                            </div>
-                                        </th>
-                                        <th class="w-180">
-                                            <div class="d-flex justify-content-between align-items-center px-2 py-1">
-                                                <span>Usage</span>
-                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    direction="left"
-                                                    (clear)="filterBody.usage_list_id = []; onHeaderFilterChange()"
-                                                    [isOpen]="filterBody.usage_list_id?.length > 0">
-                                                    <ng-select [multiple]="true" placeholder="Select Usage"
-                                                        class="custom-sm" dropdownClass="custom-sm"
-                                                        [(ngModel)]="filterBody.usage_list_id"
-                                                        (change)="onHeaderFilterChange()" style="width: 100%;">
-                                                        <ng-option *ngFor="let item of usagelists" [value]="item._id">
-                                                            {{item.list_name_hin}} : {{item.list_name_eng}}
-                                                        </ng-option>
-                                                    </ng-select>
-                                                </app-popover-filter>
-                                            </div>
-                                        </th>
-                                        <th class="w-400">Usage Report</th>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <ng-container *ngFor="let row of jawakData; let i = index">
-                                        <tr *ngFor="let item of row.jawaks; let j = index">
-                                            <td class="w-50">{{i + 1}}.{{j + 1}}</td>
-                                            <td class="w-80">
-                                                <button class="btn btn-xs btn-primary" title="Edit Item"
-                                                    (click)="editJawak(i, row)">
-                                                    <i class="uil uil-edit"></i>
-                                                </button>
-                                                <button class="btn btn-xs btn-danger mx-1" title="Delete Item"
-                                                    (click)="deleteOne(i, j, item._id)">
-                                                    <i class="uil uil-trash"></i>
-                                                </button>
-                                            </td>
-                                            <td class="w-100"><strong>#{{row.voucher_no}}</strong></td>
-                                            <td class="w-100">
-                                                <div class="date-info">
-                                                    <strong>{{row.date | date:'dd/MM/yyyy'}}</strong>
-                                                </div>
-                                            </td>
-                                            <td class="w-100">
-                                                <small>{{row.pkt_num || '-'}}</small>
-                                            </td>
-                                            <td class="w-120">
-                                                <small>{{row.reg_pg_no || '-'}}</small>
-                                            </td>
-                                            <!-- <td class="w-200">
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Individual Combined View Table -->
+                    <div class="table-container" *ngIf="settings.jawak.viewMode === 'individual'"
+                        appHorizontalScrollWithArrows>
+                        <table class="table table-striped table-hover table-sticky-header jawak-data-table">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="w-50">#</th>
+                                    <th class="w-80">Actions</th>
+                                    <th class="w-100">
+                                        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                                            <span>Voucher</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                (clear)="filterBody.voucher_no = null; onHeaderFilterChange()"
+                                                [isOpen]="!!filterBody.voucher_no">
+                                                <input type="number" class="form-control form-control-sm"
+                                                    [(ngModel)]="filterBody.voucher_no"
+                                                    (change)="onHeaderFilterChange()" placeholder="Voucher No...">
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th class="w-100">Date</th>
+                                    <th class="w-100">
+                                        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                                            <span>Pkt No</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                (clear)="filterBody.pkt_num = null; onHeaderFilterChange()"
+                                                [isOpen]="!!filterBody.pkt_num">
+                                                <input type="number" class="form-control form-control-sm"
+                                                    [(ngModel)]="filterBody.pkt_num" (change)="onHeaderFilterChange()"
+                                                    placeholder="Pkt No...">
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th class="w-120">
+                                        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                                            <span>Reg Page</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                (clear)="filterBody.reg_pg_no = null; onHeaderFilterChange()"
+                                                [isOpen]="!!filterBody.reg_pg_no">
+                                                <input type="number" class="form-control form-control-sm"
+                                                    [(ngModel)]="filterBody.reg_pg_no" (change)="onHeaderFilterChange()"
+                                                    placeholder="Page No...">
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <!-- <th class="w-200">From MM</th> -->
+                                    <th class="w-200">
+                                        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                                            <span>Jawak MM</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="left"
+                                                (clear)="filterBody.aj_mm_id = []; onHeaderFilterChange()"
+                                                [isOpen]="filterBody.aj_mm_id?.length > 0">
+                                                <ng-select [multiple]="true" placeholder="Select MM" class="custom-sm"
+                                                    dropdownClass="custom-sm" [(ngModel)]="filterBody.aj_mm_id"
+                                                    (change)="onHeaderFilterChange()" style="width: 100%;">
+                                                    <ng-option *ngFor="let item of mms" [value]="item._id">
+                                                        {{item.mm_hin}} : {{item.mm_eng}}
+                                                    </ng-option>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th class="w-250">
+                                        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                                            <span>Sewadhari</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="left"
+                                                (clear)="filterBody.pbk_id = []; onHeaderFilterChange()"
+                                                [isOpen]="filterBody.pbk_id?.length > 0">
+                                                <ng-select [multiple]="true" placeholder="Select Sewadhari"
+                                                    class="custom-sm" dropdownClass="custom-sm"
+                                                    [(ngModel)]="filterBody.pbk_id" (change)="onHeaderFilterChange()"
+                                                    style="width: 100%;">
+                                                    <ng-option *ngFor="let item of pbks" [value]="item._id">
+                                                        {{item.pbk_hin}} : {{item.pbk_eng}}
+                                                    </ng-option>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th class="w-400">
+                                        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                                            <span>Item</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="left"
+                                                (clear)="filterBody.item_subitem_mix = []; onHeaderFilterChange()"
+                                                [isOpen]="filterBody.item_subitem_mix?.length > 0">
+                                                <ng-select [multiple]="true" placeholder="Select Item" class="custom-sm"
+                                                    dropdownClass="custom-sm" [(ngModel)]="filterBody.item_subitem_mix"
+                                                    (change)="onHeaderFilterChange()" style="width: 500px;">
+                                                    <ng-container *ngFor="let item of items">
+                                                        <ng-option [value]="item._id + ':'">
+                                                            {{item.item_hin}} : {{item.item_eng}} :
+                                                            {{item.item_code}}
+                                                        </ng-option>
+                                                        <ng-option *ngFor="let subitem of item.subitems"
+                                                            [value]="item._id + ':' + subitem._id">
+                                                            {{subitem.subitem_hin}} {{item.item_hin}} :
+                                                            {{subitem.subitem_eng}} {{item.item_eng}} :
+                                                            {{subitem.subitem_code}} {{item.item_code}}
+                                                        </ng-option>
+                                                    </ng-container>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th class="w-100">Lot No</th>
+                                    <th class="w-120">Qty</th>
+                                    <th class="w-150">Rate & Amt</th>
+
+                                    <th class="w-120">
+                                        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                                            <span>Product</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="left"
+                                                (clear)="filterBody.product_id = []; onHeaderFilterChange()"
+                                                [isOpen]="filterBody.product_id?.length > 0">
+                                                <ng-select [multiple]="true" placeholder="Select Product"
+                                                    class="custom-sm" dropdownClass="custom-sm"
+                                                    [(ngModel)]="filterBody.product_id"
+                                                    (change)="onHeaderFilterChange()" style="width: 100%;">
+                                                    <ng-option *ngFor="let item of products" [value]="item._id">
+                                                        {{item.product_code}} : {{item.product_eng}}
+                                                    </ng-option>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th class="w-120">
+                                        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                                            <span>Condition</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="left"
+                                                (clear)="filterBody.condition_id = []; onHeaderFilterChange()"
+                                                [isOpen]="filterBody.condition_id?.length > 0">
+                                                <ng-select [multiple]="true" placeholder="Select Condition"
+                                                    class="custom-sm" dropdownClass="custom-sm"
+                                                    [(ngModel)]="filterBody.condition_id"
+                                                    (change)="onHeaderFilterChange()" style="width: 100%;">
+                                                    <ng-option *ngFor="let item of conditions" [value]="item._id">
+                                                        {{item.list_name_hin}} : {{item.list_name_eng}}
+                                                    </ng-option>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th class="w-150">Company</th>
+                                    <th class="w-180">
+                                        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                                            <span>Aawak Source</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="left"
+                                                (clear)="filterBody.aawak_source_id = []; onHeaderFilterChange()"
+                                                [isOpen]="filterBody.aawak_source_id?.length > 0">
+                                                <ng-select [multiple]="true" placeholder="Select Aawak Source"
+                                                    class="custom-sm" dropdownClass="custom-sm"
+                                                    [(ngModel)]="filterBody.aawak_source_id"
+                                                    (change)="onHeaderFilterChange()" style="width: 100%;">
+                                                    <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
+                                                        {{item.list_name_hin}} : {{item.list_name_eng}}
+                                                    </ng-option>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th class="w-180">
+                                        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                                            <span>Jawak Type</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="left"
+                                                (clear)="filterBody.jawak_type_id = []; onHeaderFilterChange()"
+                                                [isOpen]="filterBody.jawak_type_id?.length > 0">
+                                                <ng-select [multiple]="true" placeholder="Select Jawak Type"
+                                                    class="custom-sm" dropdownClass="custom-sm"
+                                                    [(ngModel)]="filterBody.jawak_type_id"
+                                                    (change)="onHeaderFilterChange()" style="width: 100%;">
+                                                    <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                                        {{item.list_name_hin}} : {{item.list_name_eng}}
+                                                    </ng-option>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th class="w-180">
+                                        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                                            <span>Usage</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="left"
+                                                (clear)="filterBody.usage_list_id = []; onHeaderFilterChange()"
+                                                [isOpen]="filterBody.usage_list_id?.length > 0">
+                                                <ng-select [multiple]="true" placeholder="Select Usage"
+                                                    class="custom-sm" dropdownClass="custom-sm"
+                                                    [(ngModel)]="filterBody.usage_list_id"
+                                                    (change)="onHeaderFilterChange()" style="width: 100%;">
+                                                    <ng-option *ngFor="let item of usagelists" [value]="item._id">
+                                                        {{item.list_name_hin}} : {{item.list_name_eng}}
+                                                    </ng-option>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th class="w-400">Usage Report</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container
+                                    *ngFor="let row of jawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i = index">
+                                    <tr *ngFor="let item of row.jawaks; let j = index">
+                                        <td class="w-50">{{i + 1}}.{{j + 1}}</td>
+                                        <td class="w-80">
+                                            <button class="btn btn-xs btn-primary" title="Edit Item"
+                                                (click)="editJawak(i, row)">
+                                                <i class="uil uil-edit"></i>
+                                            </button>
+                                            <button class="btn btn-xs btn-danger mx-1" title="Delete Item"
+                                                (click)="deleteOne(i, j, item._id)">
+                                                <i class="uil uil-trash"></i>
+                                            </button>
+                                        </td>
+                                        <td class="w-100"><strong>#{{row.voucher_no}}</strong></td>
+                                        <td class="w-100">
+                                            <div class="date-info">
+                                                <strong>{{row.date | date:'dd/MM/yyyy'}}</strong>
+                                            </div>
+                                        </td>
+                                        <td class="w-100">
+                                            <small>{{row.pkt_num || '-'}}</small>
+                                        </td>
+                                        <td class="w-120">
+                                            <small>{{row.reg_pg_no || '-'}}</small>
+                                        </td>
+                                        <!-- <td class="w-200">
                                                 <div class="location-info">
                                                     <small class="text-muted">{{row.mm_eng}}</small><br>
                                                     <span class="hindi-text">{{row.mm_hin}}</span>
                                                 </div>
                                             </td> -->
-                                            <td class="w-200">
-                                                <div class="location-info">
-                                                    <small class="text-muted">{{row.jawak_mm_eng}}</small><br>
-                                                    <span class="hindi-text">{{row.jawak_mm_hin}}</span>
-                                                </div>
-                                            </td>
-                                            <td class="w-250">
-                                                <div *ngIf="row.pbk_hin" class="pbk-info">
-                                                    <span class="hindi-text">{{row.pbk_hin}}</span>
-                                                </div>
-                                            </td>
-                                            <td class="w-400">
-                                                <div class="item-info">
-                                                    <strong>{{item.item_eng}}</strong>
-                                                    <span *ngIf="item.subitem_eng"> - {{item.subitem_eng}}</span>
-                                                    <br>
-                                                    <small class="hindi-text">{{item.item_hin}}</small>
-                                                    <small class="hindi-text" *ngIf="item.subitem_hin"> -
-                                                        {{item.subitem_hin}}</small>
-                                                </div>
-                                            </td>
-                                            <td class="w-100">{{item.lot_no || '-'}}</td>
-                                            <td class="w-120"><strong>{{item.qty}} {{item.unit_short}}</strong></td>
-                                            <td class="w-150">
-                                                <span *ngIf="item.rate">@{{item.rate}} = {{item.actual_amt}}</span>
-                                                <span *ngIf="!item.rate">-</span>
-                                            </td>
+                                        <td class="w-200">
+                                            <div class="location-info">
+                                                <small class="text-muted">{{row.jawak_mm_eng}}</small><br>
+                                                <span class="hindi-text">{{row.jawak_mm_hin}}</span>
+                                            </div>
+                                        </td>
+                                        <td class="w-250">
+                                            <div *ngIf="row.pbk_hin" class="pbk-info">
+                                                <span class="hindi-text">{{row.pbk_hin}}</span>
+                                            </div>
+                                        </td>
+                                        <td class="w-400">
+                                            <div class="item-info">
+                                                <strong>{{item.item_eng}}</strong>
+                                                <span *ngIf="item.subitem_eng"> - {{item.subitem_eng}}</span>
+                                                <br>
+                                                <small class="hindi-text">{{item.item_hin}}</small>
+                                                <small class="hindi-text" *ngIf="item.subitem_hin"> -
+                                                    {{item.subitem_hin}}</small>
+                                            </div>
+                                        </td>
+                                        <td class="w-100">{{item.lot_no || '-'}}</td>
+                                        <td class="w-120"><strong>{{item.qty}} {{item.unit_short}}</strong></td>
+                                        <td class="w-150">
+                                            <span *ngIf="item.rate">@{{item.rate}} = {{item.actual_amt}}</span>
+                                            <span *ngIf="!item.rate">-</span>
+                                        </td>
 
-                                            <td class="w-120">{{item.product_code || '-'}}</td>
-                                            <td class="w-120">
-                                                <span class="badge" [class.badge-warning]="item.condition_eng === 'Old'"
-                                                    [class.badge-success]="item.condition_eng === 'New'">
-                                                    {{item.condition_eng}}
-                                                </span>
-                                            </td>
-                                            <td class="w-150">{{item.company_name || '-'}}</td>
-                                            <td class="w-180">
-                                                <div class="source-info">
-                                                    <small class="text-muted">{{item.aawak_source_eng}}</small><br>
-                                                    <span class="hindi-text">{{item.aawak_source_hin}}</span>
+                                        <td class="w-120">{{item.product_code || '-'}}</td>
+                                        <td class="w-120">
+                                            <span class="badge" [class.badge-warning]="item.condition_eng === 'Old'"
+                                                [class.badge-success]="item.condition_eng === 'New'">
+                                                {{item.condition_eng}}
+                                            </span>
+                                        </td>
+                                        <td class="w-150">{{item.company_name || '-'}}</td>
+                                        <td class="w-180">
+                                            <div class="source-info">
+                                                <small class="text-muted">{{item.aawak_source_eng}}</small><br>
+                                                <span class="hindi-text">{{item.aawak_source_hin}}</span>
+                                            </div>
+                                        </td>
+                                        <td class="w-180">
+                                            <div class="jawak-type-info">
+                                                <small class="text-muted">{{item.jawak_type_eng}}</small><br>
+                                                <span class="hindi-text">{{item.jawak_type_hin}}</span>
+                                            </div>
+                                        </td>
+                                        <td class="w-180">
+                                            <div class="usage-info">
+                                                <small class="text-muted">{{item.usage_list_eng}}</small><br>
+                                                <span class="hindi-text">{{item.usage_list_hin}}</span>
+                                            </div>
+                                        </td>
+                                        <td class="w-400">
+                                            <div *ngIf="item.usage_report?.date" class="usage-report-detailed">
+                                                <div class="rating-reporter-line">
+                                                    <span class="star" *ngFor="let star of [1,2,3,4,5]"
+                                                        [class.filled]="star <= item.usage_report.rating">★</span>
+                                                    <span class="reporter">{{item.usage_report.reporter}}</span>
                                                 </div>
-                                            </td>
-                                            <td class="w-180">
-                                                <div class="jawak-type-info">
-                                                    <small class="text-muted">{{item.jawak_type_eng}}</small><br>
-                                                    <span class="hindi-text">{{item.jawak_type_hin}}</span>
-                                                </div>
-                                            </td>
-                                            <td class="w-180">
-                                                <div class="usage-info">
-                                                    <small class="text-muted">{{item.usage_list_eng}}</small><br>
-                                                    <span class="hindi-text">{{item.usage_list_hin}}</span>
-                                                </div>
-                                            </td>
-                                            <td class="w-400">
-                                                <div *ngIf="item.usage_report?.date" class="usage-report-detailed">
-                                                    <div class="rating-reporter-line">
-                                                        <span class="star" *ngFor="let star of [1,2,3,4,5]"
-                                                            [class.filled]="star <= item.usage_report.rating">★</span>
-                                                        <span class="reporter">{{item.usage_report.reporter}}</span>
-                                                    </div>
-                                                    <div *ngIf="item.usage_report.fayda" class="text-success small">
-                                                        😊 {{item.usage_report.fayda}}</div>
-                                                </div>
-                                                <span *ngIf="!item.usage_report?.date">-</span>
-                                            </td>
-                                        </tr>
-                                    </ng-container>
-                                </tbody>
-                            </table>
-                        </div>
+                                                <div *ngIf="item.usage_report.fayda" class="text-success small">
+                                                    😊 {{item.usage_report.fayda}}</div>
+                                            </div>
+                                            <span *ngIf="!item.usage_report?.date">-</span>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 
 
 <!-- Modal -->
-<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+<div class="modal fade" id="jawakPageModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
-    <div class="modal-dialog" style="width: 90%;">
+    <div class="modal-dialog" style="width: 100%;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
@@ -637,7 +694,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" style="width: 120px;"
-                    onclick="$('#showModal').modal('hide')" (click)="showModal= ''">Close</button>
+                    (click)="closeModal()">Close</button>
             </div>
         </div>
     </div>

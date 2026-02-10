@@ -38,37 +38,62 @@
                             style="width: max-content;">
                             <thead>
                                 <tr>
-                                    <th class="mw-10">Item</th>
-                                    <th class="mw-8">Subitem</th>
-                                    <th class="mw-6">Unit</th>
+                                    <th class="mw-15">Item</th>
+                                    <th class="mw-10">मौजूद बचत</th>
                                     <th class="mw-6">Condition</th>
                                     <th class="mw-6">बचत होनी चाहिए</th>
-                                    <th class="mw-6">मौजूद बचत</th>
                                     <th class="mw-6">अंतर ('Rejected')</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr *ngFor="let row of fs.pbkClosingFormMain.pbk_closings; let i = index">
                                     <td>
-                                        <ng-select class="custom-sm" style="width: 100%;" [items]="items"
-                                            bindLabel="item_hin" bindValue="_id" [(ngModel)]="row.item_id"
-                                            name="item_{{i}}" [disabled]="row.pbk_bachat_id" [clearable]="false"
-                                            placeholder="Select Item"></ng-select>
-                                    </td>
-                                    <td>
                                         <ng-select class="custom-sm" style="width: 100%;"
-                                            *ngIf="row.subitem_id || !row.pbk_bachat_id" [items]="items"
-                                            bindLabel="item_hin" bindValue="_id" [(ngModel)]="row.subitem_id"
-                                            name="subitem_{{i}}" [disabled]="true" [clearable]="false">
-                                            (Subitem {{row.subitem_id}})
+                                            placeholder="Select Item Subitem" [clearable]="true" [virtualScroll]="true"
+                                            [(ngModel)]="row.item_subitem_id" name="item_subitem_id_{{i}}"
+                                            #item_subitem_id="ngModel" (change)="itemSubitemSelected($event, i)"
+                                            [ngClass]="{'validation' : (item_subitem_id?.touched || fMain.submitted) && item_subitem_id.errors?.['required']}"
+                                            [selectOnTab]="true" [disabled]="row.pbk_bachat_id" required>
+
+                                            <ng-container
+                                                *ngFor="let item of items | filterByDate:fs.pbkClosingFormMain.date">
+                                                <ng-option [value]="item._id + ':'">
+                                                    {{item.item_hin}} : {{item.item_eng}} : {{item.item_code}}
+                                                </ng-option>
+
+                                                <ng-option
+                                                    *ngFor="let subitem of item.subitems | filterByDate:fs.pbkClosingFormMain.date"
+                                                    [value]="item._id + ':' + subitem._id">
+                                                    {{subitem.subitem_hin}} {{item.item_hin}} :
+                                                    {{subitem.subitem_eng}} {{item.item_eng}} :
+                                                    {{subitem.subitem_code}} {{item.item_code}}
+                                                </ng-option>
+                                            </ng-container>
                                         </ng-select>
                                     </td>
                                     <td>
-                                        <ng-select class="custom-sm" style="width: 100%;" [items]="units"
-                                            bindLabel="unit_short" bindValue="_id" [(ngModel)]="row.unit_id"
-                                            name="unit_{{i}}" [disabled]="row.pbk_bachat_id"
-                                            [clearable]="false"></ng-select>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" placeholder="Quantity"
+                                                [(ngModel)]="row.qty" name="qty_{{i}}" (change)="qtyChanged(i)"
+                                                #qty="ngModel"
+                                                [ngClass]="{'validation' : ((qty?.touched || fMain.submitted) && qty.errors?.['required'])}"
+                                                required>
+                                            <span class="input-group-text ml-1 border border-secondary"
+                                                style="padding: 0px; min-width: 40%;background: #252932;">
+                                                <ng-select class="custom" style="width: 100%;" placeholder="Unit"
+                                                    [clearable]="true" [virtualScroll]="true" [(ngModel)]="row.unit_id"
+                                                    name="unit_id_{{i}}" #unit_id="ngModel"
+                                                    [ngClass]="{'validation' : (unit_id?.touched || fMain.submitted) && unit_id.errors?.['required']}"
+                                                    [selectOnTab]="true" [disabled]="row.pbk_bachat_id" required>
+                                                    <ng-option selected="selected" disabled value="">Unit</ng-option>
+                                                    <ng-option *ngFor="let item of units"
+                                                        [value]="item._id">{{item.unit_short}}</ng-option>
+                                                </ng-select>
+                                            </span>
+                                        </div>
+
                                     </td>
+
                                     <td>
                                         <ng-select class="custom-sm" style="width: 100%;" [items]="conditions"
                                             bindLabel="list_name_hin" bindValue="_id" [(ngModel)]="row.condition_id"
@@ -76,10 +101,6 @@
                                             [clearable]="false"></ng-select>
                                     </td>
                                     <td class="text-center">{{row.sw_bachat}}</td>
-                                    <td>
-                                        <input type="number" class="form-control form-control-sm" [(ngModel)]="row.qty"
-                                            name="qty_{{i}}" (change)="qtyChanged(i)">
-                                    </td>
                                     <td class="text-center"
                                         [ngClass]="{'text-danger': row.difference < 0, 'text-success': row.difference > 0}">
                                         {{row.difference}}

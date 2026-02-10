@@ -13,24 +13,23 @@
                 <div class="col-md-2 mb-3">
                     <div class="form-group">
                         <label class="form-label">Date & Pkt No</label>
-                        <input type="date" class="form-control" placeholder="Date" [(ngModel)]="fs.jawakFormMain.date"
-                            name="date" #date="ngModel" (change)="fs.jawakFormMain.date_sent = $event"
+                        <input type="date" class="form-control" [(ngModel)]="fs.jawakFormMain.date" name="date"
+                            #date="ngModel" (change)="fs.jawakFormMain.date_sent = fs.jawakFormMain.date"
                             [ngClass]="{'validation' : (date?.touched || fMain.submitted) && date.errors?.['required']}"
                             required>
                         <input type="text" class="form-control mt-1" placeholder="Pkt Num"
-                            [(ngModel)]="fs.jawakFormMain.pkt_num" name="pkt_num" #date="ngModel">
+                            [(ngModel)]="fs.jawakFormMain.pkt_num" name="pkt_num" #pkt_num="ngModel">
                     </div>
                 </div>
                 <div class="col-md-2 mb-3" *ngIf="settings.jawak.date_sent || settings.jawak.reg_pg_no">
                     <div class="form-group">
                         <label class="form-label">Date Sent & Reg. Page No</label>
-                        <input *ngIf="settings.jawak.date_sent" type="date" class="form-control" placeholder="Date"
-                            [(ngModel)]="fs.jawakFormMain.date_sent" name="date_sent" #date="ngModel"
-                            (change)="fs.jawakFormMain.date_sent = $event"
-                            [ngClass]="{'validation' : (date?.touched || fMain.submitted) && date.errors?.['required']}">
+                        <input *ngIf="settings.jawak.date_sent" type="date" class="form-control"
+                            [(ngModel)]="fs.jawakFormMain.date_sent" name="date_sent" #date_sent="ngModel"
+                            [ngClass]="{'validation' : (date_sent?.touched || fMain.submitted) && date_sent.errors?.['required']}">
                         <input *ngIf="settings.jawak.reg_pg_no" type="text" class="form-control mt-1"
                             placeholder="Reg Page No" [(ngModel)]="fs.jawakFormMain.reg_pg_no" name="reg_pg_no"
-                            #date="ngModel">
+                            #reg_pg_no="ngModel">
                     </div>
                 </div>
 

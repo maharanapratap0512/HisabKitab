@@ -213,7 +213,7 @@ export class JawakEntryNewComponent implements OnInit {
       this.fs.jawakFormStatusChanges()
       for (let i in this.fs.jawakFormMain.jawaks) {
         if (this.fs.jawakFormMain.jawaks[i].item_id) {
-          this.itemSubitemSelected(this.fs.jawakFormMain.jawaks[i].item_id + ':' + this.fs.jawakFormMain.jawaks[i].subitem_id, i);
+          this.itemSubitemSelected(this.fs.jawakFormMain.jawaks[i].item_id + ':' + (this.fs.jawakFormMain.jawaks[i].subitem_id || ''), i);
         }
       }
 
@@ -244,7 +244,7 @@ export class JawakEntryNewComponent implements OnInit {
   selectEvent(ev: any, index: any) {
     if (ev.lot_no) {
       this.fs.jawakFormMain.jawaks[index].item_id = ev.item_id;
-      this.itemSubitemSelected(ev.item_id + ':' + ev.subitem_id, index);
+      this.itemSubitemSelected(ev.item_id + ':' + (ev.subitem_id || ''), index);
       this.fs.jawakFormMain.jawaks[index].condition_id = ev.condition_id;
       this.fs.jawakFormMain.jawaks[index].aawak_source_id = ev.aawak_source_id;
       this.fs.jawakFormMain.jawaks[index].rate = ev.rate;
@@ -358,14 +358,14 @@ export class JawakEntryNewComponent implements OnInit {
       this.fs.jawakFormMain.jawaks[i].item_subitem_id = ev;
       let item_id = Number.parseInt(ev.split(':')[0]);
       let subitem_id = ev.split(':')[1] ? Number.parseInt(ev.split(':')[1]) : null;
-      console.log(item_id, subitem_id);
+      this.fs.jawakFormMain.jawaks[i].item_id = item_id;
+      this.fs.jawakFormMain.jawaks[i].subitem_id = subitem_id;
 
       let item: any = this.items.find((i: { _id: any; }) => i._id == item_id);
       let subitem: any = item.subitems.find((i: { _id: any; }) => i._id == subitem_id);
       this.lotNos = this.lotNoAll.filter((l: { item_id: any; subitem_id: any; }) => l.item_id == item_id && l.subitem_id == subitem_id);
       this.getProductData(item_id);
       this.fs.jawakFormMain.jawaks[i].subitems = item.subitems || [];
-      this.fs.jawakFormMain.jawaks[i].subitem_id = subitem_id;
 
       if (!this.isEdit && subitem)
         this.fs.jawakFormMain.jawaks[i].unit_id = subitem.unit_id;
@@ -376,6 +376,7 @@ export class JawakEntryNewComponent implements OnInit {
       this.subitems = [];
       this.lotNos = this.lotNoAll;
       this.fs.jawakFormMain.jawaks[i].unit_id = null
+      this.fs.jawakFormMain.jawaks[i].item_id = null
       this.fs.jawakFormMain.jawaks[i].subitem_id = null
       this.fs.jawakFormMain.jawaks[i].lot_no = null;
     }

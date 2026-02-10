@@ -2224,6 +2224,42 @@ class dbModal {
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))
       )`
+    }, {
+      hmp_batch_input_drop: `drop table if exists hmp_batch_input`,
+      hmp_batch_input: `create table if not exists hmp_batch_input(
+        _id integer primary key AUTOINCREMENT,
+        batch_id integer not null references hmp_batch(_id),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),
+        condition_id integer null references support_list(_id),
+        qty decimal(10,2) not null,
+        rate decimal(10,2),
+        amount decimal(10,2),
+        lot_no varchar(50),
+        jawak_ref_id integer references jawak(_id),
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime'))
+        )`,
+
+      hmp_batch_output_drop: `drop table if exists hmp_batch_output`,
+      hmp_batch_output: `create table if not exists hmp_batch_output(
+        _id integer primary key AUTOINCREMENT,
+        batch_id integer not null references hmp_batch(_id),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),
+        condition_id integer null references support_list(_id),
+        qty decimal(10,2) not null,
+        rate decimal(10,2),
+        amount decimal(10,2),
+        lot_no varchar(50),
+        hmp_code varchar(50),
+        hmp_type integer null references support_list(_id),
+        aawak_ref_id integer references aawak(_id),
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime'))
+      )`
     }
 
 
