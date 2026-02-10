@@ -490,7 +490,6 @@ export class BachatNewComponent implements OnInit {
       this.filterBody.to_month = null;
     }
 
-    // Copy one to another if only one side is provided
     if (this.filterBody.from_year && !this.filterBody.to_year) {
       this.filterBody.to_year = this.filterBody.from_year;
       this.filterBody.to_month = this.filterBody.from_month;
@@ -538,6 +537,7 @@ export class BachatNewComponent implements OnInit {
           }
         }
         this.bachatData = this.bachatAll;
+        this.onHeaderFilterChange();
         this.isLoader = false;
       }
       this.isLoader = false;
@@ -549,10 +549,6 @@ export class BachatNewComponent implements OnInit {
 
   getYearTo() {
     return this.filterBody.from_year ? this.gs.years.filter((x: number) => x >= this.filterBody.from_year) : this.gs.years;
-  }
-
-  fromYearMonth(ev: any) {
-    console.log(ev, this.filterBody)
   }
 
   onHeaderFilterChange() {
