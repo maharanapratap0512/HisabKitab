@@ -99,6 +99,7 @@ import { HmpComponent } from './hmp/hmp.component';
 import { PbkClosingComponent } from './pbk-closing/pbk-closing.component';
 import { PbkClosingEntryComponent } from './ENTRY__FORMS/pbk-closing-entry/pbk-closing-entry.component';
 import { PbkBachatComponent } from './pbk-bachat/pbk-bachat.component';
+import { HmpEntryComponent } from './ENTRY__FORMS/hmp-entry/hmp-entry.component';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -186,6 +187,7 @@ import { PbkBachatComponent } from './pbk-bachat/pbk-bachat.component';
     PbkClosingComponent,
     PbkClosingEntryComponent,
     PbkBachatComponent,
+    HmpEntryComponent,
   ],
 
   imports: [

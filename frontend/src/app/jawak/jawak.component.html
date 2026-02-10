@@ -83,7 +83,7 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-3 mb-3" *ngIf="settings.pbk_id">
+                              <div class="col-md-3 mb-3" *ngIf="settings.jawak.pbk_id">
                                  <div class="form-group">
                                     <label class="form-label">Sewadhari</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Filter PBK by State"
@@ -131,7 +131,7 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-3 mb-3" *ngIf="settings.condition_id">
+                              <div class="col-md-3 mb-3" *ngIf="settings.jawak.condition_id">
                                  <div class="form-group">
                                     <label class="form-label">Category & Condition</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
@@ -147,7 +147,7 @@
                                     <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Condition"
                                        [clearable]="false" [virtualScroll]="true" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.condition_id" name="condition_id"
-                                       *ngIf="settings.condition_id">
+                                       *ngIf="settings.jawak.condition_id">
                                        <ng-option selected="selected" disabled value="">Select Condition</ng-option>
                                        <ng-option *ngFor="let item of conditions" [value]="item._id">
                                           {{item.list_name_hin}} :
@@ -226,7 +226,7 @@
                                  </div>
                               </div>
 
-                              <div class="col-md-2 mb-3" *ngIf="settings.nimitt_id">
+                              <div class="col-md-2 mb-3" *ngIf="settings.jawak.nimitt_id">
                                  <div class="form-group">
                                     <label class="form-label">Nimitt</label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Nimitt"
@@ -299,25 +299,25 @@
                                  </div>
                               </th>
                               <th style="width: 40px;">No.</th>
-                              <th style="width: 80px;">Manage</th>
-                              <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">MM</th>
-                              <th style="width: 70px;" *ngIf="settings.pkt_num">Pkt No</th>
+                              <th style="width: 100px;">Manage</th>
+                              <th style="width: 150px;" *ngIf="!settings.defaultMM">MM</th>
+                              <th style="width: 70px;" *ngIf="settings.jawak.pkt_num">Pkt No</th>
                               <th style="width: 101px;">Date</th>
-                              <th style="width: 150px;">Jawak MM</th>
-                              <th style="width: 200px;" *ngIf="settings.pbk_id">PBK</th>
-                              <th style="width: 150px;">Item - Subitem</th>
-                              <!-- <th style="width: 200px;" *ngIf="settings.product_id">Product</th> -->
-                              <th style="width: 150px;" *ngIf="settings.condition_id">Condition</th>
-                              <th style="width: 100px;">Quantity</th>
-                              <th style="width: 120px;">Aawak Source</th>
-                              <th style="width: 120px;">Jawak Type</th>
-                              <th style="width: 120px;">Usage List</th>
-                              <th style="width: 120px;">parchi Kaha Shown</th>
-                              <th style="width: 120px;">Kaha Repaired / Becha</th>
-                              <th style="width: 200px;" *ngIf="settings.item_detail">Item Detail</th>
-                              <th style="width: 200px;" *ngIf="settings.description">Description</th>
-                              <th style="width: 100px;" *ngIf="settings.nimitt_id">Nimitt</th>
-                              <th style="width: 120px;" *ngIf="settings.enz">Container Capacity</th>
+                              <th style="width: 300px;">कहाँ / किसको भेजा </th>
+                              <th style="width: 250px;">Item - Subitem</th>
+                              <!-- <th style="width: 200px;" *ngIf="settings.jawak.product_id">Product</th> -->
+                              <th style="width: 150px;" *ngIf="settings.jawak.condition_id">Condition</th>
+                              <th style="width: 150px;">Quantity</th>
+                              <th style="width: 150px;">Aawak Source</th>
+                              <th style="width: 150px;">Jawak Type</th>
+                              <th style="width: 150px;">Usage List</th>
+                              <th style="width: 150px;">parchi Kaha Shown</th>
+                              <th style="width: 150px;">Kaha Repaired / Becha</th>
+                              <th style="width: 200px;" *ngIf="settings.jawak.item_detail">Item Detail</th>
+                              <th style="width: 200px;" *ngIf="settings.jawak.description">Description</th>
+                              <th style="width: 100px;" *ngIf="settings.jawak.nimitt_id">Nimitt</th>
+                              <th style="width: 120px;" *ngIf="settings.jawak.enz">Container Capacity</th>
+                              <th style="width: 250px;" *ngIf="settings.jawak.usage_report">Usage Report</th>
                            </tr>
                         </thead>
                         <tbody>
@@ -332,37 +332,37 @@
                               </td>
                               <td>{{itemsPerPage * (page-1) + i+1}}</td>
                               <td>
-                                 <button class="btn btn-sm btn-primary mb-1" type="button" (click)="edit(data)"><i
+                                 <button class="btn-xs btn-primary me-1" type="button" (click)="edit(data)"><i
                                        class="uil uil-pen"></i></button>
-                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
+                                 <button class="btn-xs btn-danger" type="button" (click)="delete(i,data._id)"><i
                                        class="uil-trash"></i></button>
                               </td>
-                              <td *ngIf="auth.webUser.dept_id != 2">
+                              <td *ngIf="!settings.defaultMM">
                                  {{data.mm_hin}} {{data.mm_code ? '('+data.mm_code+')': ''}}<br />
                                  {{data.mm_eng}}
                               </td>
-                              <td *ngIf="settings.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
+                              <td *ngIf="settings.jawak.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
                               <td>{{data.date | date:'dd-MM-yyyy'}}</td>
                               <td>
-                                 <span *ngIf="!data.jawak_mm_id">-</span>
-                                 {{data.jawak_mm_hin}}<br />
-                                 {{data.jawak_mm_eng}}
-                              </td>
-                              <td *ngIf="settings.pbk_id">
-                                 <span *ngIf="!data.pbk_id">-</span>
-                                 {{data.pbk_hin}} <br />
-                                 {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
+                                 <span *ngIf="data.pbk_id">
+                                    {{data.pbk_hin}} {{data.relation ? data.relation : ''}} {{data.relative_name ? " -
+                                    "+data.relative_name: ''}}
+                                    <br />
+                                 </span>
+                                 <span *ngIf="data.jawak_mm_id">
+                                    {{data.jawak_mm_hin}} - {{data.jawak_mm_eng}}
+                                 </span>
                               </td>
                               <td>
                                  {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
                                  {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
                               </td>
-                              <!-- <td *ngIf="settings.product_id">
+                              <!-- <td *ngIf="settings.jawak.product_id">
                                  <span *ngIf="!data.product_id">-</span>
                                  {{data.sr_num ? data.sr_num : ''}} <br />
                                  {{data.product_code ? data.product_code : ''}}
                               </td> -->
-                              <td *ngIf="settings.condition_id">
+                              <td *ngIf="settings.jawak.condition_id">
                                  {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
                               </td>
                               <td>
@@ -377,10 +377,28 @@
                                  {{data.category_eng}}</td>
                               <td>{{data.parchi_place ? data.parchi_place: ''}}</td>
                               <td>{{data.sell_repair_place ? data.sell_repair_place: ''}}</td>
-                              <td *ngIf="settings.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
-                              <td *ngIf="settings.description">{{data.description?data.description:'-'}}</td>
-                              <td *ngIf="settings.nimitt_id">{{data.nimitt_id?data.nimitt_hin:'-'}}</td>
-                              <td *ngIf="settings.enz">{{data.enz.container_capacity?data.enz.container_capacity + " ltr":'-'}}</td>
+                              <td *ngIf="settings.jawak.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
+                              <td *ngIf="settings.jawak.description">{{data.description?data.description:'-'}}</td>
+                              <td *ngIf="settings.jawak.nimitt_id">{{data.nimitt_id?data.nimitt_hin:'-'}}</td>
+                              <td *ngIf="settings.jawak.enz">{{data.enz.container_capacity?data.enz.container_capacity +
+                                 "
+                                 ltr":'-'}}</td>
+                              <td>
+                                 <div *ngIf="data.usage_report?.date" class="usage-report-detailed">
+                                    <div class="rating-reporter-line">
+                                       <span class="star" *ngFor="let star of [1,2,3,4,5]"
+                                          [class.filled]="star <= data.usage_report.rating">★</span>
+                                       <span class="reporter">{{data.usage_report.reporter}}</span>
+                                       <small class="date">{{data.usage_report.date
+                                          | date:'dd/MM/yyyy'}}</small>
+                                    </div>
+                                    <div *ngIf="data.usage_report.fayda" class="text-success">😊
+                                       {{data.usage_report.fayda}}</div>
+                                    <div *ngIf="data.usage_report.nuksan" class="text-danger">😢
+                                       {{data.usage_report.nuksan}}</div>
+                                 </div>
+                                 <span *ngIf="!data.usage_report?.date">-</span>
+                              </td>
                            </tr>
                         </tbody>
                      </table>
@@ -409,7 +427,8 @@
             <button type="button" onclick="$('#showModal').modal('hide')" class="btn-close" aria-label="Close"></button>
          </div>
          <div class="modal-body">
-            <app-jawak-entry-new (response)='addJawakResponse($event)' *ngIf="showModal == 'Add Jawak'"></app-jawak-entry-new>
+            <app-jawak-entry-new (response)='addJawakResponse($event)'
+               *ngIf="showModal == 'Add Jawak'"></app-jawak-entry-new>
 
             <app-jawak-entry (response)='editJawakResponse($event)' *ngIf="showModal == 'Edit Jawak'"
                [getData]="editData" isEdit="true">

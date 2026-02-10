@@ -1,55 +1,71 @@
-<div class="under-construction-container">
-  <div class="construction-content">
-    <div class="icon-wrapper">
-      <i class="fas fa-tools construction-icon"></i>
-    </div>
-
-    <div class="coming-soon-badge">Coming Soon</div>
-
-    <h1 class="title">Home Made Products</h1>
-    <h2 class="subtitle">Revolutionizing Product Manufacturing</h2>
-
-    <p class="description">
-      We're working hard to bring you an innovative system for managing home-made product recipes,
-      batch processing, and quality control. This feature will transform how you handle product
-      manufacturing and inventory management.
-    </p>
-
-    <div class="features-list">
-      <div class="feature-item">
-        <i class="fas fa-utensils feature-icon"></i>
-        <span class="feature-text">Recipe Management System</span>
-      </div>
-      <div class="feature-item">
-        <i class="fas fa-industry feature-icon"></i>
-        <span class="feature-text">Batch Production Tracking</span>
-      </div>
-      <div class="feature-item">
-        <i class="fas fa-chart-line feature-icon"></i>
-        <span class="feature-text">Quality Control & Analytics</span>
-      </div>
-      <div class="feature-item">
-        <i class="fas fa-boxes feature-icon"></i>
-        <span class="feature-text">Inventory Integration</span>
-      </div>
-      <div class="feature-item">
-        <i class="fas fa-users feature-icon"></i>
-        <span class="feature-text">Multi-User Collaboration</span>
+<div class="row">
+  <div class="col-12">
+    <div class="page-title-box d-flex align-items-center justify-content-between">
+      <h4 class="mb-0">HMP Batches</h4>
+      <div class="page-title-right">
+        <button class="btn btn-primary btn-sm" (click)="openEntryModal()">+ Add Batch</button>
       </div>
     </div>
+  </div>
+</div>
 
-    <div class="progress-bar">
-      <div class="progress-fill"></div>
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <table class="table table-bordered table-centered mb-0">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Batch No</th>
+              <th>Recipe</th>
+              <th>Status</th>
+              <th>Location</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let batch of batches">
+              <td>{{batch.date | date:'dd-MM-yyyy'}}</td>
+              <td>{{batch.batch_no}}</td>
+              <td>
+                {{batch.recipe_name}}
+                <small class="d-block text-muted">{{batch.recipe_code}}</small>
+              </td>
+              <td>
+                <span class="badge"
+                  [ngClass]="{'bg-success': batch.status === 'completed', 'bg-warning': batch.status === 'pending'}">
+                  {{batch.status}}
+                </span>
+              </td>
+              <td>{{batch.mm_hin}}</td>
+              <td>
+                <button class="btn btn-light btn-sm" (click)="openEntryModal(batch)">
+                  <i class="uil uil-pen"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="batches.length === 0">
+              <td colspan="6" class="text-center">No Batches Found</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+  </div>
+</div>
 
-    <p class="eta-text">Development Progress: 25% Complete</p>
-
-    <div class="contact-info">
-      <h3 class="contact-title">Stay Updated</h3>
-      <p class="contact-text">
-        Want to be notified when this feature launches? Contact our development team
-        or check back regularly for updates on this exciting new functionality.
-      </p>
+<!-- Entry Modal -->
+<div class="modal fade" id="hmpEntryModal" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog" role="document" style="width: 90%;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{isEdit ? 'Edit Packet' : 'New HMP Batch'}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <app-hmp-entry [isEdit]="isEdit" [getData]="selectedBatch" (response)="onBatchSaved($event)"></app-hmp-entry>
+      </div>
     </div>
   </div>
 </div>

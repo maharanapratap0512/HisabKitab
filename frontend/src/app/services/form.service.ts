@@ -123,6 +123,7 @@ export class FormService {
     this.aawakFormMain.date = gs.dateString;
 
     this.pbkClosingForm = {
+      item_subitem_id: null,
       item_id: null,
       subitem_id: null,
       unit_id: null,
@@ -208,8 +209,10 @@ export class FormService {
   jawakFormStatusChanges() {
     let valid = true;
 
+    console.log(this.jawakFormMain);
     for (let jwkForm of this.jawakFormMain.jawaks) {
-      if (!(jwkForm.item_id && jwkForm.qty && jwkForm.unit_id && jwkForm.jawak_type_id && (!jwkForm.aawak_ref_id || (jwkForm.aawak_ref_id && jwkForm.qty <= jwkForm.remaining_qty)))) {
+
+      if (!(jwkForm.item_id && jwkForm.qty && jwkForm.unit_id && jwkForm.jawak_type_id)) {
         valid = false;
         break;
       }
@@ -257,7 +260,7 @@ export class FormService {
       this.jawakFormMain.jawaks.splice(this.jawakFormMain.jawaks.length - 1, 1);
     }
     for (let i in this.jawakFormMain.jawaks) {
-      if (!(this.jawakFormMain.jawaks[i].item_id && this.jawakFormMain.jawaks[i].qty && (!this.jawakFormMain.jawaks[i].aawak_ref_id || (this.jawakFormMain.jawaks[i].aawak_ref_id && this.jawakFormMain.jawaks[i].qty <= this.jawakFormMain.jawaks[i].remaining_qty)) && this.jawakFormMain.jawaks[i].unit_id && this.jawakFormMain.jawaks[i].jawak_type_id)) {
+      if (!(this.jawakFormMain.jawaks[i].item_id && this.jawakFormMain.jawaks[i].qty && this.jawakFormMain.jawaks[i].unit_id && this.jawakFormMain.jawaks[i].jawak_type_id)) {
         return false;
       }
     }

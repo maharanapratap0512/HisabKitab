@@ -46,6 +46,7 @@ const aawakEntryRoutes = require('./api/routes/aawak.routes');
 const jawakEntryRoutes = require('./api/routes/jawak.routes');
 const bachatRoutes = require('./api/routes/bachat.routes');
 const bachatNewRoutes = require('./api/routes/bachat_new.routes');
+const bachatNewOptimizedRoutes = require('./api/routes/bachat_new_optimized.routes');
 const pointRoutes = require('./api/routes/point.routes');
 const importExportRoutes = require('./api/routes/import-export.routes');
 const excelImportRoutes = require('./api/routes/excel-import.routes');
@@ -59,7 +60,7 @@ const commentRoutes = require('./api/routes/report_comment.routes');
 const mysqlRoutes = require('./api/routes/mysql.routes');
 const pbkClosingRoutes = require('./api/routes/pbk_closing.routes');
 const pbkBachatRoutes = require('./api/routes/pbk_bachat.routes');
-
+const hmpRoutes = require('./api/routes/hmp.routes');
 
 
 // // Routes - Binding
@@ -88,6 +89,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/jawak', jawakEntryRoutes);
 app.use('/api/bachat', bachatRoutes);
 app.use('/api/bachat_new', bachatNewRoutes);
+app.use('/api/bachat_new_optimized', bachatNewOptimizedRoutes);
 app.use('/api/points', pointRoutes);
 app.use('/api/importexport', importExportRoutes);
 app.use('/api/excelimport', excelImportRoutes);
@@ -99,6 +101,7 @@ app.use('/api/vehicle', vehicleRoutes);
 app.use('/api/vehicle_document', vehicleDocRoutes);
 app.use('/api/comment', commentRoutes);
 app.use('/api/mysql', mysqlRoutes);
+app.use('/api/hmp', hmpRoutes);
 
 
 

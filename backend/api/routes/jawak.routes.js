@@ -73,6 +73,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
         await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then((resolve) => {
             for (let i in resolve.data) {
                 resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
+                resolve.data[i].usage_report = (resolve.data[i].usage_report ? JSON.parse(resolve.data[i].usage_report) : {});
             }
             res.json({
                 success: true,

@@ -89,7 +89,7 @@ export class JawakEntryComponent implements OnInit {
       is_process: [null],
       dept_id: [this.auth.webUser.dept_id],
       auto_awk: [this.settings.jawak.auto_awk],
-      auto_reawk: [this.settings.jawak.auto_awk],
+      auto_reawk: [this.settings.jawak.auto_reawk],
       aawak_type_id: [null],
       aawak_dept_id: [this.auth.webUser.dept_id],
       aawak_date: [null],
@@ -98,6 +98,30 @@ export class JawakEntryComponent implements OnInit {
         _id: [null],
         container_capacity: [null]
       })
+    });
+
+    this.jawakForm.get('auto_awk')?.valueChanges.subscribe(val => {
+      if (val) {
+        this.jawakForm.get('aawak_dept_id')?.setValidators([Validators.required]);
+        this.jawakForm.get('aawak_type_id')?.setValidators([Validators.required]);
+      } else {
+        this.jawakForm.get('aawak_dept_id')?.clearValidators();
+        this.jawakForm.get('aawak_type_id')?.clearValidators();
+      }
+      this.jawakForm.get('aawak_dept_id')?.updateValueAndValidity();
+      this.jawakForm.get('aawak_type_id')?.updateValueAndValidity();
+    });
+
+    this.jawakForm.get('auto_reawk')?.valueChanges.subscribe(val => {
+      if (val) {
+        this.jawakForm.get('aawak_date')?.setValidators([Validators.required]);
+        this.jawakForm.get('re_aawak_type_id')?.setValidators([Validators.required]);
+      } else {
+        this.jawakForm.get('aawak_date')?.clearValidators();
+        this.jawakForm.get('re_aawak_type_id')?.clearValidators();
+      }
+      this.jawakForm.get('aawak_date')?.updateValueAndValidity();
+      this.jawakForm.get('re_aawak_type_id')?.updateValueAndValidity();
     });
 
     this.gs.observeList().subscribe(result => {
@@ -353,7 +377,7 @@ export class JawakEntryComponent implements OnInit {
   }
 
   jawakFormSubmit() {
-    // console.log("clicked", this.jawakForm.value);
+    console.log("clicked", this.jawakForm.value);
 
     if (this.jawakForm.valid) {
       console.log("form valid");

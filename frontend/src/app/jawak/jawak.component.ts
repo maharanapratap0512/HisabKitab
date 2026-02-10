@@ -84,10 +84,11 @@ export class JawakComponent implements OnInit {
     public auth: AuthService,
     public excelExportService: ExcelExportService
   ) {
-    this.settings = this.auth.webUser.settings.jawak;
+    this.settings = this.auth.webUser.settings;
   }
 
   ngOnInit(): void {
+    this.filterBody.mm_id = this.settings.defaultMM ? [this.settings.defaultMM] : [];
     this.getJawakData(1);
     this.months = this.gs.months;
     this.gs.observeList().subscribe(result => {

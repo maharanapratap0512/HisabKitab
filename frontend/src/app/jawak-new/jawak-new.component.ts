@@ -135,6 +135,11 @@ export class JawakNewComponent implements OnInit {
     this.auth.updateSettings()
   }
 
+  UISettingsChanged() {
+    this.auth.webUser.settings = this.settings;
+    this.auth.updateSettings()
+  }
+
   getJawakPage(page: any = null) {
     if (page) {
       this.pageNo = page;
@@ -223,21 +228,21 @@ export class JawakNewComponent implements OnInit {
   }
 
   editJawak(i: any, data: any): void {
-    this.editData = data;
+    this.editData = { ...data };
     this.editIndex = i;
-    this.fs.patchFormJawak(data);
+    this.fs.patchFormJawak({ ...data });
     this.openModal('Edit Jawak');
   }
 
   closeModal(): void {
     this.showModal = '';
     this.editData = null;
-    $('#showModal').modal('hide');
+    $('#jawakPageModal').modal('hide');
   }
 
   openModal(type: any) {
     this.showModal = type;
-    $('#showModal').modal('show');
+    $('#jawakPageModal').modal('show');
   }
 
   addJawakResponse(ev: any): void {
@@ -266,7 +271,15 @@ export class JawakNewComponent implements OnInit {
   }
 
   addJawakBunchResponse(ev: any) {
-
+    this.isLoader = true;
+    if (ev && ev.length && ev[0].date) {
+      this.jawakData.unshift(ev[0]);
+      this.isLoader = false;
+    } else {
+      this.toastr.info('Saved in Draft.');
+      this.isLoader = false;
+    }
+    this.closeModal();
   }
 
 

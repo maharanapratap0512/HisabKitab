@@ -447,8 +447,8 @@ export class ExcelExportService {
     }
 
     // Title
-    worksheet.mergeCells([1, 1, 1, headerCount + (monthCount * 4)]);
-    let reportTitle = (excelFileName ? excelFileName + ' का ' : '') + 'सार रिपोर्ट ' + options.months[0].name + "-" + options.year + " से " + options.months[monthCount - 1].name + "-" + options.year;
+    worksheet.mergeCells([1, 1, 1, headerCount + (monthCount * 5)]);
+    let reportTitle = (excelFileName ? excelFileName + ' का ' : '') + 'सार रिपोर्ट ' + options.months[0].name + "-" + options.months[0].year + " से " + options.months[monthCount - 1].name + "-" + options.months[monthCount - 1].year;
     worksheet.getCell('A1').value = reportTitle;
     worksheet.getRow(1).font = { name: 'Corbel', family: 4, size: 20, };
     worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
@@ -464,9 +464,9 @@ export class ExcelExportService {
     // SubHeader  
     let startCell = headerCount + 1;
     for (let i = 0; i < monthCount; i++) {
-      worksheet.mergeCells([2, startCell, 2, startCell + 3]);
+      worksheet.mergeCells([2, startCell, 2, startCell + 4]);
 
-      worksheet.getCell(2, startCell).value = options.months[i].name + "-" + options.year;
+      worksheet.getCell(2, startCell).value = options.months[i].name + "-" + options.months[i].year;
       // worksheet.getCell(2, startCell).fill = headerStyle;
       worksheet.getRow(2).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
 
@@ -476,10 +476,11 @@ export class ExcelExportService {
       // worksheet.getCell(3, startCell + 1).fill = headerStyle;
       worksheet.getCell(3, startCell + 2).value = 'Jawak';
       // worksheet.getCell(3, startCell + 2).fill = headerStyle;
-      worksheet.getCell(3, startCell + 3).value = 'Bachat';
+      worksheet.getCell(3, startCell + 3).value = 'Difference';
+      worksheet.getCell(3, startCell + 4).value = 'Bachat';
       // worksheet.getCell(3, startCell + 3).fill = headerStyle;
       worksheet.getRow(3).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-      startCell = startCell + 4;
+      startCell = startCell + 5;
     }
 
 
@@ -497,7 +498,7 @@ export class ExcelExportService {
         worksheet.getCell(rowNum, j + 1).value = json[i][headers[j]];
       }
       for (let j = 0; j < monthCount; j++) {
-        const cell1 = worksheet.getCell(rowNum, headerCount + (j * 4) + 1);
+        const cell1 = worksheet.getCell(rowNum, headerCount + (j * 5) + 1);
         cell1.value = json[i].arr_sum_aawak[j];
         if (json[i].arr_comment[j]) {
           cell1.note = json[i].arr_comment[j]
@@ -505,26 +506,30 @@ export class ExcelExportService {
         if (json[i].arr_sum_aawak[j] < 0) {
           cell1.fill = errorStyle;
         }
-        worksheet.getCell(rowNum, headerCount + (j * 4) + 2).value = json[i].arr_sum_used[j];
+        worksheet.getCell(rowNum, headerCount + (j * 5) + 2).value = json[i].arr_sum_used[j];
         if (json[i].arr_sum_used[j] < 0) {
-          worksheet.getCell(rowNum, headerCount + (j * 4) + 2).fill = errorStyle;
+          worksheet.getCell(rowNum, headerCount + (j * 5) + 2).fill = errorStyle;
         }
-        worksheet.getCell(rowNum, headerCount + (j * 4) + 3).value = json[i].arr_sum_jawak[j];
+        worksheet.getCell(rowNum, headerCount + (j * 5) + 3).value = json[i].arr_sum_jawak[j];
         if (json[i].arr_sum_jawak[j] < 0) {
-          worksheet.getCell(rowNum, headerCount + (j * 4) + 3).fill = errorStyle;
+          worksheet.getCell(rowNum, headerCount + (j * 5) + 3).fill = errorStyle;
         }
-        worksheet.getCell(rowNum, headerCount + (j * 4) + 4).value = json[i].arr_sum_bachat[j];
+        worksheet.getCell(rowNum, headerCount + (j * 5) + 4).value = json[i].arr_difference_bachat[j];
+        if (json[i].arr_difference_bachat[j] < 0) {
+          worksheet.getCell(rowNum, headerCount + (j * 5) + 4).fill = errorStyle;
+        }
+        worksheet.getCell(rowNum, headerCount + (j * 5) + 5).value = json[i].arr_sum_bachat[j];
         if (json[i].arr_sum_bachat[j] < 0) {
-          worksheet.getCell(rowNum, headerCount + (j * 4) + 4).fill = errorStyle;
+          worksheet.getCell(rowNum, headerCount + (j * 5) + 5).fill = errorStyle;
         }
       }
       rowNum++;
     }
 
     worksheet.getRows(4, rowNum)?.forEach(row => {
-      for (let i = headerCount; i < row.cellCount + 4; i++) {
+      for (let i = headerCount; i < row.cellCount + 5; i++) {
         row.getCell(i).border = { right: { style: 'double' } };
-        i = i + 3;
+        i = i + 4;
       }
     });
 

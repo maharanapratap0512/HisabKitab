@@ -690,6 +690,7 @@ class Functions extends DBContex {
       });
    }
 
+
    async syncPBKBachatFromPBKClosing(obj) {
       // Upsert logic for pbk_bachat
       if (obj.pbk_bachat_id) {
@@ -707,6 +708,226 @@ class Functions extends DBContex {
             await this.db.prepare(this.query.pbk_bachat.insert).run(obj);
          }
       }
+   }
+
+   // -------------------------------------------------------------------------
+   // HMP Functions
+   // -------------------------------------------------------------------------
+
+   async insertHMPBatch(batchData, user) {
+      return new Promise(async (resolve, reject) => {
+         try {
+            await this.begin();
+
+            // 1. Handle Recipe Upsert
+            if (batchData.update_recipe || !batchData.recipe_id) {
+               // Check if recipe exists by code or name
+               let existingRecipe = null;
+               if (batchData.recipe_id) {
+                  // If ID provided, maybe just updating details
+                  existingRecipe = await this.getById('hmp_recipe', batchData.recipe_id);
+               } else if (batchData.recipe_code) {
+                  existingRecipe = this.db.prepare(`SELECT * FROM hmp_recipe WHERE recipe_code = ? AND dept_id = ?`).get(batchData.recipe_code, batchData.dept_id);
+               }
+
+               let recipeObj = {
+                  recipe_name: batchData.recipe_name,
+                  recipe_code: batchData.recipe_code, // allow null
+                  description: batchData.recipe_description,
+                  dept_id: batchData.dept_id,
+                  active: 1
+               };
+
+               if (existingRecipe) {
+                  // Update
+                  batchData.recipe_id = existingRecipe._id;
+                  await this.update('hmp_recipe', recipeObj, existingRecipe._id);
+                  // Clear old inputs/outputs to rewrite (simplest approach for now)
+                  this.db.prepare(`DELETE FROM hmp_recipe_input WHERE recipe_id = ?`).run(existingRecipe._id);
+                  this.db.prepare(`DELETE FROM hmp_recipe_output WHERE recipe_id = ?`).run(existingRecipe._id);
+               } else {
+                  // Insert
+                  let res = await this.insert('hmp_recipe', recipeObj, batchData.dept_id);
+                  batchData.recipe_id = res._id;
+               }
+
+               // Insert Recipe Inputs
+               if (batchData.inputs && batchData.inputs.length > 0) {
+                  for (let inp of batchData.inputs) {
+                     if (inp.item_id && inp.qty) {
+                        await this.insert('hmp_recipe_input', {
+                           recipe_id: batchData.recipe_id,
+                           item_id: inp.item_id,
+                           subitem_id: inp.subitem_id,
+                           unit_id: inp.unit_id,
+                           condition_id: inp.condition_id,
+                           qty: inp.qty,
+                           active: 1
+                        }, batchData.dept_id);
+                     }
+                  }
+               }
+               // Insert Recipe Outputs
+               if (batchData.outputs && batchData.outputs.length > 0) {
+                  for (let out of batchData.outputs) {
+                     if (out.item_id && out.qty) {
+                        await this.insert('hmp_recipe_output', {
+                           recipe_id: batchData.recipe_id,
+                           item_id: out.item_id,
+                           subitem_id: out.subitem_id,
+                           unit_id: out.unit_id,
+                           condition_id: out.condition_id,
+                           qty: out.qty,
+                           active: 1
+                        }, batchData.dept_id);
+                     }
+                  }
+               }
+            }
+
+            // 2. Insert Batch
+            if (!batchData.batch_no) {
+               // Auto-generate batch no
+               // Simple logic: HMP-{RecipeCode}-{YYYYMMDD}-{Sequence}
+               // or just incrementing number similar to voucher
+               let lastBatch = this.db.prepare(`SELECT seq FROM sqlite_sequence WHERE name = 'hmp_batch'`).get();
+               let nextId = (lastBatch ? lastBatch.seq : 0) + 1;
+               batchData.batch_no = `BATCH-${nextId}`;
+            }
+
+            let batchObj = {
+               recipe_id: batchData.recipe_id,
+               batch_no: batchData.batch_no,
+               date: batchData.date,
+               mm_id: batchData.mm_id,
+               status: batchData.status || 'pending',
+               notes: batchData.notes,
+               dept_id: batchData.dept_id,
+               active: 1
+            };
+
+            let batchRes = await this.insert('hmp_batch', batchObj, batchData.dept_id);
+            let batchId = batchRes._id;
+
+            // 3. Process Inputs (Consumption -> Jawak)
+            // Fetch a default jawak_type for 'Consumption'
+            let jawakType = this.db.prepare(`SELECT _id FROM support_list WHERE list_name_eng LIKE '%Internal Consumption%' OR list_name_eng LIKE '%Consumption%' LIMIT 1`).get();
+            let jawakTypeId = jawakType ? jawakType._id : null; // If null, user might need to configure or we create one? Assuming exists or optional
+
+            if (batchData.inputs && batchData.inputs.length > 0) {
+               // Create one Jawak Voucher for the whole batch inputs? Or individual?
+               // Usually Jawak is one voucher with multiple items. 
+               // But `insertAJ` takes `obj` which seems to be one item line in `jawak` table (based on schema it has item_id, qty etc directly).
+               // Wait, Jawak table structure: `jawak` table has `voucher_no`.
+               // `insertAJ` inserts into `jawak`.
+               // So we should group inputs into a voucher?
+               // Or just insert separate rows tied to same voucher.
+
+               let voucherNo = await this.getLastVoucherNo('jawak') + 1;
+
+               for (let inp of batchData.inputs) {
+                  if (inp.item_id && inp.qty) {
+                     let jawakObj = {
+                        date: batchData.date,
+                        voucher_no: voucherNo, // Same voucher for all inputs in this batch
+                        mm_id: batchData.mm_id,
+                        // jawak_mm_id: ??? Destination MM? For consumption, maybe null or same? default null
+                        item_id: inp.item_id,
+                        subitem_id: inp.subitem_id,
+                        unit_id: inp.unit_id,
+                        condition_id: inp.condition_id,
+                        qty: inp.qty,
+                        rate: inp.rate || 0,
+                        actual_amt: (inp.qty * (inp.rate || 0)),
+                        jawak_type_id: jawakTypeId,
+                        dept_id: batchData.dept_id,
+                        description: `HMP Consumption Batch: ${batchData.batch_no}`,
+                        active: 1
+                        // user_id, etc.
+                     };
+
+                     // Insert Jawak
+                     // let jawakId = await this.insertAJ(jawakObj, 'jawak'); // this returns ID
+                     let jawakId = null; // this returns ID
+
+                     // Insert Batch Input
+                     await this.insert('hmp_batch_input', {
+                        batch_id: batchId,
+                        item_id: inp.item_id,
+                        subitem_id: inp.subitem_id,
+                        unit_id: inp.unit_id,
+                        condition_id: inp.condition_id,
+                        qty: inp.qty,
+                        rate: inp.rate,
+                        amount: (inp.qty * (inp.rate || 0)),
+                        lot_no: inp.lot_no,
+                        jawak_ref_id: jawakId,
+                        active: 1
+                     }, batchData.dept_id);
+                  }
+               }
+            }
+
+            // 4. Process Outputs (Production -> Aawak)
+            // Fetch a default aawak_type for 'Production'
+            let aawakType = this.db.prepare(`SELECT _id FROM support_list WHERE list_name_eng LIKE '%Production%' LIMIT 1`).get();
+            let aawakTypeId = aawakType ? aawakType._id : null;
+
+            if (batchData.outputs && batchData.outputs.length > 0) {
+               let voucherNo = await this.getLastVoucherNo('aawak') + 1;
+
+               for (let out of batchData.outputs) {
+                  if (out.item_id && out.qty) {
+                     let aawakObj = {
+                        date: batchData.date,
+                        voucher_no: voucherNo,
+                        mm_id: batchData.mm_id, // Location where product is kept
+                        // aawak_source_id: ???
+                        item_id: out.item_id,
+                        subitem_id: out.subitem_id,
+                        unit_id: out.unit_id,
+                        condition_id: out.condition_id,
+                        qty: out.qty,
+                        rate: out.rate || 0,
+                        amount: (out.qty * (out.rate || 0)),
+                        aawak_type_id: aawakTypeId,
+                        dept_id: batchData.dept_id,
+                        description: `HMP Production Batch: ${batchData.batch_no}`,
+                        active: 1
+                     };
+
+                     // Insert Aawak
+                     // let aawakId = await this.insertAJ(aawakObj, 'aawak');
+                     let aawakId = null;
+
+                     // Insert Batch Output
+                     await this.insert('hmp_batch_output', {
+                        batch_id: batchId,
+                        item_id: out.item_id,
+                        subitem_id: out.subitem_id,
+                        unit_id: out.unit_id,
+                        condition_id: out.condition_id,
+                        qty: out.qty,
+                        rate: out.rate,
+                        amount: (out.qty * (out.rate || 0)),
+                        lot_no: out.lot_no,
+                        hmp_code: out.hmp_code,
+                        hmp_type: out.hmp_type,
+                        aawak_ref_id: aawakId,
+                        active: 1
+                     }, batchData.dept_id);
+                  }
+               }
+            }
+
+            await this.commit();
+            resolve({ batch_id: batchId, batch_no: batchData.batch_no });
+
+         } catch (err) {
+            await this.rollback();
+            reject(err);
+         }
+      });
    }
 
 }

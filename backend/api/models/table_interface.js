@@ -39,7 +39,6 @@ class TableInterface {
       lot_no: null,
       voucher_no: null,
       date: null,
-      date_sent: null,
       mm_id: null,
       aawak_mm_id: null,
       dept_id: null,

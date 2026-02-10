@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
@@ -16,7 +16,9 @@ import { debounceTime } from 'rxjs';
 export class PbkClosingEntryComponent implements OnInit {
 
   @ViewChild('fMain') fMain!: NgForm;
-
+  @Input() isEdit: any;
+  @Input() getData: any;
+  @Output() response = new EventEmitter();
   states: any = [];
   pbks: any = [];
   items: any = [];
@@ -69,18 +71,6 @@ export class PbkClosingEntryComponent implements OnInit {
 
   loadPbkBachat() {
     this.isLoader = true;
-    // Using the route we defined/will assume exists or standard pattern. 
-    // Wait, I haven't added `bachat/:pbk_id` route to `pbk_closing.routes.js`. 
-    // I should probably add it OR use a generic way. 
-    // I will use `DB.getList('pbk_bachat', criteria)` wrapper via generic route if exists.
-    // BUT I control `pbk_closing.routes.js`. I should add a specific route to be safe and clean.
-    // I will add the route in the NEXT tool call to backend, or just use `POST /pbk_closing/bachat`? 
-    // The user didn't ask for a new route file for bachat.
-    // I will simply add a route to `pbk_closing.routes.js` to fetch bachat. 
-    // I'll assume for now I'll call `PBK_CLOSING/bachat/...` and I will implement it in backend next step if I missed it.
-    // Actually I missed adding `GET /bachat/:pbk_id` in `pbk_closing.routes.js`. 
-    // I will assume it's there and then go fix the backend file.
-
     this.http.get(this.api.getUrl('PBK_CLOSING') + 'bachat/' + this.fs.pbkClosingFormMain.pbk_id + '?dept_id=' + this.auth.webUser.dept_id)
       .subscribe((data: any) => {
         if (data.success) {
@@ -96,22 +86,23 @@ export class PbkClosingEntryComponent implements OnInit {
   populateForm(bachatList: any[]) {
     this.fs.pbkClosingFormMain.pbk_closings = [];
 
-    for (let b of bachatList) {
+    for (let i = 0; i < bachatList.length; i++) {
+      let b = bachatList[i];
       let form = { ...this.fs.pbkClosingForm };
-      form.item_id = b.item_id;
-      form.subitem_id = b.subitem_id;
-      form.unit_id = b.unit_id;
-      form.condition_id = b.condition_id;
-      form.sw_bachat = b.qty;
-      form.qty = b.qty; // Default to system qty
-      form.difference = 0;
-      form.active = 1;
-      form.pbk_bachat_id = b._id; // Map existing bachat ID for backend optimization
-      // Helper properties for display not saved
-      form._item_id = b.item_id;
-
       this.fs.pbkClosingFormMain.pbk_closings.push(form);
+      this.itemSubitemSelected(b.item_id + ':' + b.subitem_id, i);
+      this.fs.pbkClosingFormMain.pbk_closing[i].unit_id = b.unit_id;
+      this.fs.pbkClosingFormMain.pbk_closing[i].condition_id = b.condition_id;
+      this.fs.pbkClosingFormMain.pbk_closing[i].sw_bachat = b.qty;
+      this.fs.pbkClosingFormMain.pbk_closing[i].qty = b.qty;
+      this.fs.pbkClosingFormMain.pbk_closing[i].difference = 0;
+      this.fs.pbkClosingFormMain.pbk_closing[i].active = 1;
+      this.fs.pbkClosingFormMain.pbk_closing[i].pbk_bachat_id = b._id;
+      this.fs.pbkClosingFormMain.pbk_closing[i]._item_id = b.item_id;
+
+
     }
+
 
     if (this.fs.pbkClosingFormMain.pbk_closings.length === 0) {
       this.fs.pbkClosingFormMain.pbk_closings.push(JSON.parse(JSON.stringify(this.fs.pbkClosingForm)));
@@ -142,6 +133,28 @@ export class PbkClosingEntryComponent implements OnInit {
         });
     } else {
       this.toastr.error('Please fill required fields (Date, PBK) or ensure items exist.');
+    }
+  }
+
+  itemSubitemSelected(ev: any, i: any) {
+    if (ev) {
+      this.fs.pbkClosingFormMain.pbk_closings[i].item_subitem_id = ev;
+      let item_id = Number.parseInt(ev.split(':')[0]);
+      let subitem_id = ev.split(':')[1] ? Number.parseInt(ev.split(':')[1]) : null;
+      this.fs.pbkClosingFormMain.pbk_closings[i].item_id = item_id;
+      this.fs.pbkClosingFormMain.pbk_closings[i].subitem_id = subitem_id;
+
+      let item: any = this.items.find((i: { _id: any; }) => i._id == item_id);
+      let subitem: any = item.subitems.find((i: { _id: any; }) => i._id == subitem_id);
+      // this.lotNos = this.lotNoAll.filter((l: { item_id: any; subitem_id: any; }) => l.item_id == item_id && l.subitem_id == subitem_id);
+
+      if (!this.isEdit && subitem)
+        this.fs.pbkClosingFormMain.pbk_closings[i].unit_id = subitem.unit_id;
+      else if (!this.isEdit)
+        this.fs.pbkClosingFormMain.pbk_closings[i].unit_id = item.unit_id;
+    } else {
+      this.fs.pbkClosingFormMain.pbk_closings[i].item_id = null;
+      this.fs.pbkClosingFormMain.pbk_closings[i].subitem_id = null;
     }
   }
 

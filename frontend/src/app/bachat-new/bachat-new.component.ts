@@ -25,6 +25,11 @@ export class BachatNewComponent implements OnInit {
   editData: any = {};
   bachatData: any = [];
   bachatAll: any = [];
+
+  // Pagination
+  page: number = 1;
+  itemsPerPage: number = 100;
+
   total_count: any = 0;;
   states: any = [];
   mms: any = [];
@@ -190,7 +195,7 @@ export class BachatNewComponent implements OnInit {
     else {
       this.items = this.gs.Lists.itemmix;
     }
-    this.filter();
+    this.onHeaderFilterChange();
   }
 
   itemSelected(ev: any) {
@@ -205,7 +210,7 @@ export class BachatNewComponent implements OnInit {
     } else {
       this.subitems = [];
     }
-    this.filter();
+    this.onHeaderFilterChange();
   }
 
   addJawak(data: any) {
@@ -404,6 +409,7 @@ export class BachatNewComponent implements OnInit {
         'arr_sum_used': this.bachatData[i].arr_sum_used ? this.bachatData[i].arr_sum_used : [],
         'arr_sum_jawak': this.bachatData[i].arr_sum_jawak ? this.bachatData[i].arr_sum_jawak : [],
         'arr_sum_bachat': this.bachatData[i].arr_sum_bachat ? this.bachatData[i].arr_sum_bachat : [],
+        'arr_difference_bachat': this.bachatData[i].arr_difference_bachat ? this.bachatData[i].arr_difference_bachat : [],
         'arr_comment': this.bachatData[i].arr_comment ? this.bachatData[i].arr_comment : [],
       }
       bchtData.push(bachatRow);
@@ -467,14 +473,45 @@ export class BachatNewComponent implements OnInit {
 
   filter() {
     this.isLoader = true;
-    this.http.put(this.api.getUrl('BACHATNEW') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe(async (data: any) => {
+    this.page = 1;
+    if (this.filterBody.from_year_month) {
+      this.filterBody.from_year = this.filterBody.from_year_month.split('-')[0];
+      this.filterBody.from_month = this.filterBody.from_year_month.split('-')[1];
+    } else {
+      this.filterBody.from_year = null;
+      this.filterBody.from_month = null;
+    }
+
+    if (this.filterBody.to_year_month) {
+      this.filterBody.to_year = this.filterBody.to_year_month.split('-')[0];
+      this.filterBody.to_month = this.filterBody.to_year_month.split('-')[1];
+    } else {
+      this.filterBody.to_year = null;
+      this.filterBody.to_month = null;
+    }
+
+    // Copy one to another if only one side is provided
+    if (this.filterBody.from_year && !this.filterBody.to_year) {
+      this.filterBody.to_year = this.filterBody.from_year;
+      this.filterBody.to_month = this.filterBody.from_month;
+    } else if (!this.filterBody.from_year && this.filterBody.to_year) {
+      this.filterBody.from_year = this.filterBody.to_year;
+      this.filterBody.from_month = this.filterBody.to_month;
+    }
+    this.http.put(this.api.getUrl('BACHATNEW_OPTIMIZED') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe(async (data: any) => {
       if (data['result'] && data['success']) {
 
         this.bachatAll = data['result'];
 
-        if (this.filterBody.months.length > 0) {
-          this.monthsSel = this.gs.months.filter((m: { m: any; }) => data['months'].includes(m.m));
-
+        if (data['headers'] && data['headers'].length > 0) {
+          this.monthsSel = data['headers'].map((h: any) => {
+            const mObj = this.gs.months.find((m: any) => m.m == h.month);
+            return {
+              m: h.month,
+              year: h.year,
+              name: mObj ? mObj.name : h.month
+            };
+          });
         }
         else {
           this.monthsSel = []
@@ -510,6 +547,43 @@ export class BachatNewComponent implements OnInit {
     });
   }
 
+  getYearTo() {
+    return this.filterBody.from_year ? this.gs.years.filter((x: number) => x >= this.filterBody.from_year) : this.gs.years;
+  }
+
+  fromYearMonth(ev: any) {
+    console.log(ev, this.filterBody)
+  }
+
+  onHeaderFilterChange() {
+    this.page = 1;
+    this.applyClientSideFilter();
+  }
+
+  applyClientSideFilter() {
+    let filtered = [...this.bachatAll];
+
+    if (this.filterBody.mm_id) {
+      filtered = filtered.filter(row => row.mm_id == this.filterBody.mm_id);
+    }
+
+    if (this.filterBody.category_id) {
+      filtered = filtered.filter(row => {
+        const categories = (row.arr_subitem_categories && row.arr_subitem_categories.length > 0)
+          ? row.arr_subitem_categories
+          : row.arr_item_categories;
+        return categories && categories.includes(this.filterBody.category_id);
+      });
+    }
+
+    if (this.filterBody.item_id) {
+      filtered = filtered.filter(row => row.item_id == this.filterBody.item_id);
+    }
+
+    this.bachatData = filtered;
+    this.total_count = this.bachatData.length;
+  }
+
   filterFormSubmit(formdata: any) {
     if (formdata) {
 
@@ -523,7 +597,7 @@ export class BachatNewComponent implements OnInit {
     if (ev.checked) {
       this.bachatData = this.bachatData.filter((b: { total_bachat_all: any; }) => b.total_bachat_all)
     } else {
-      this.filter();
+      this.applyClientSideFilter();
     }
   }
 
@@ -531,7 +605,7 @@ export class BachatNewComponent implements OnInit {
     if (ev.checked) {
       this.bachatData = this.bachatData.filter((b: { total_difference_all: any; }) => b.total_difference_all)
     } else {
-      this.filter();
+      this.applyClientSideFilter();
     }
   }
 
@@ -554,34 +628,34 @@ export class BachatNewComponent implements OnInit {
   }
 
   importResponse(ev: any) {
-    
+
   }
 
 
-  rowClicked(row: any, i: any) {
+  rowClicked(row: any) {
     row.months = this.filterBody.months;
     this.http.put(this.api.getUrl('BACHATNEW') + 'condition/' + this.auth.webUser.dept_id, row).subscribe(async (data: any) => {
       if (data['result'] && data['success']) {
-        this.bachatData[i].condition_wise = data['result'];
-        this.bachatData[i].awk_type_wise = data['awk'];
+        row.condition_wise = data['result'];
+        row.awk_type_wise = data['awk'];
 
-        if (this.bachatData[i].condition_wise.length > 0 || this.bachatData[i].awk_type_wise.length > 0) {
-          this.bachatData[i].subReport = true;
-          this.bachatData[i].currentReport = 'condition_wise';
+        if (row.condition_wise.length > 0 || row.awk_type_wise.length > 0) {
+          row.subReport = true;
+          row.currentReport = 'condition_wise';
         } else {
-          this.bachatData[i].subReport = false;
+          row.subReport = false;
         }
       }
     });
   }
 
-  operationClick(key: any, i: any) {
-    if (this.bachatData[i][key] && this.bachatData[i][key].length > 0) {
-      this.bachatData[i].currentReport = key;
+  operationClick(row: any, key: any) {
+    if (row[key] && row[key].length > 0) {
+      row.currentReport = key;
     }
   }
 
-  editComment(index: any, month: any, data: any, row_type: any, sindex: any = -1) {
+  editComment(month: any, data: any, row_type: any, parentRow: any = null) {
 
     Swal.fire({
       title: 'Enter Comment',
@@ -591,10 +665,9 @@ export class BachatNewComponent implements OnInit {
       confirmButtonText: 'Save',
       showDenyButton: true,
       denyButtonText: 'Delete',
-      inputValue: data.arr_comment[month]
+      inputValue: data.arr_comment[month] || ''
     }).then((result) => {
       if (result.isConfirmed) {
-        // User clicked the Submit button and provided a name
 
         if (data.arr_comment_id[month]) {
           let body = {
@@ -604,59 +677,49 @@ export class BachatNewComponent implements OnInit {
           this.http.put(this.api.getUrl('COMMENT') + data.arr_comment_id[month], body).subscribe(async (res: any) => {
             if (res.success) {
               this.toastr.success("comment Updated.")
-
-              if (sindex >= 0) {
-                this.bachatData[index][this.bachatData[index].currentReport][sindex].arr_comment[month] = result.value;
-              } else {
-                this.bachatData[index].arr_comment[month] = result.value;
-              }
+              data.arr_comment[month] = result.value;
             }
             else
               this.toastr.error("something went wrong");
           });
 
         } else {
-          data.comment = result.value;
-          data.month = this.monthsSel[month].m;
-          data.report_type = 'full_saar';
-          data.row_type = row_type;
-          if (this.bachatData[index].currentReport == 'awk_type_wise') {
-            data.type_id = data.aawak_type_id;
-          } else if (this.bachatData[index].currentReport == 'condition_wise') {
-            data.type_id = data.condition_id;
+          let postData = { ...data };
+          postData.comment = result.value;
+          postData.month = this.monthsSel[month].m;
+          postData.year = this.monthsSel[month].year;
+          postData.report_type = 'full_saar';
+          postData.row_type = row_type;
+
+          if (parentRow) {
+            if (parentRow.currentReport == 'awk_type_wise') {
+              postData.type_id = data.aawak_type_id;
+            } else if (parentRow.currentReport == 'condition_wise') {
+              postData.type_id = data.condition_id;
+            }
           } else {
-            data.type_id = null;
+            postData.type_id = null;
           }
-          this.http.post(this.api.getUrl('COMMENT') + this.auth.webUser.dept_id, data).subscribe(async (res: any) => {
-            this.toastr.success("comment added : " + res.result.comment);
-            if (sindex >= 0) {
-              this.bachatData[index][this.bachatData[index].currentReport][sindex].arr_comment[month] = res.result.comment;
-              this.bachatData[index][this.bachatData[index].currentReport][sindex].arr_comment_id[month] = res.result._id;
-            } else {
-              this.bachatData[index].arr_comment[month] = res.result.comment;
-              this.bachatData[index].arr_comment_id[month] = res.result._id;
+
+          this.http.post(this.api.getUrl('COMMENT') + this.auth.webUser.dept_id, postData).subscribe(async (res: any) => {
+            if (res.success) {
+              this.toastr.success("comment added : " + res.result.comment);
+              data.arr_comment[month] = res.result.comment;
+              data.arr_comment_id[month] = res.result._id;
             }
           });
         }
       } else if (result.isDenied) {
         if (data.arr_comment_id[month]) {
           this.http.delete(this.api.getUrl('COMMENT') + data.arr_comment_id[month]).subscribe(async (res: any) => {
-            this.toastr.success("comment Deleted");
-            if (sindex >= 0) {
-              this.bachatData[index][this.bachatData[index].currentReport][sindex].arr_comment[month] = null;
-              this.bachatData[index][this.bachatData[index].currentReport][sindex].arr_comment_id[month] = null;
-            } else {
-              this.bachatData[index].arr_comment[month] = null;
-              this.bachatData[index].arr_comment_id[month] = null;
+            if (res.success) {
+              this.toastr.success("comment Deleted.");
+              data.arr_comment[month] = '';
+              data.arr_comment_id[month] = null;
             }
           });
-        } else {
-          this.toastr.warning('There is no any comment exists.')
         }
       }
-    }).catch((error) => {
-      // An error occurred
-      this.toastr.error('Error:', error);
     });
 
   }
