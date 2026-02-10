@@ -89,63 +89,66 @@
                               </div>
                            </div>
                            <!-- main table  -->
-                           <div class="row p-1" style="overflow-y: auto; max-height: 500px;">
-                              <table id="datatable-buttons" class="table table-hover dt-responsive">
-                                 <thead>
-                                    <tr>
-                                       <td>Year</td>
-                                       <td style="width: 50px;">No.</td>
-                                       <td>State</td>
-                                       <td>MM</td>
-                                       <td>Jan</td>
-                                       <td>Feb</td>
-                                       <td>Mar</td>
-                                       <td>Apr</td>
-                                       <td>May</td>
-                                       <td>Jun</td>
-                                       <td>Jul</td>
-                                       <td>Aug</td>
-                                       <td>Sep</td>
-                                       <td>Oct</td>
-                                       <td>Nov</td>
-                                       <td>Dec</td>
-                                    </tr>
-                                 </thead>
-                                 <tbody>
-                                    <!-- <div class="card ribbon-box">
-                                       <div class="card-body">
-                                           <div class="ribbon-two ribbon-two-primary"><span>Primary</span></div>
-                                           <p class="mb-0">Quisque nec turpis at urna dictum luctus. Suspendisse
-                                               convallis dignissim eros at volutpat. In egestas mattis dui. Aliquam
-                                               mattis dictum aliquet. </p>
-                                       </div> 
-                                   </div> -->
-                                    <tr class="ribbon-box"
-                                       *ngFor="let data of historyData | search:termHistory; let i=index">
-                                       <td>
-                                          <div class="ribbon ribbon-secondary text-light"><span>{{data.year}}</span>
-                                          </div>
-                                       </td>
-                                       <td>{{i+1}}</td>
-                                       <td>
-                                          {{data.state_hin}}<br />
-                                          {{data.state_eng}}
-                                       </td>
-                                       <td>
-                                          {{data.mm_hin}}<br />
-                                          {{data.mm_eng}}
-                                       </td>
-                                       <!-- <td>{{data.year}}</td> -->
-                                       <td *ngFor="let m of months">
-                                          <div *ngIf="data['m'+m.m]" style="text-align: center;">
-                                             <i class="uil-check-circle text-success h3"></i> <br>
-                                             <span>{{data['m'+m.m+'_update'] | date:'dd-MM-yyyy'}}</span>
-                                          </div>
-                                       </td>
+                           <div class="row p-1" style="max-height: 500px;">
+                              <div class="table-container">
+                                 <table id="datatable-buttons1"
+                                    class="table table-hover table-sticky-header dt-responsive">
+                                    <thead>
+                                       <tr>
+                                          <td>Year</td>
+                                          <td style="width: 50px;">No.</td>
+                                          <td>State</td>
+                                          <td>MM</td>
+                                          <td>Jan</td>
+                                          <td>Feb</td>
+                                          <td>Mar</td>
+                                          <td>Apr</td>
+                                          <td>May</td>
+                                          <td>Jun</td>
+                                          <td>Jul</td>
+                                          <td>Aug</td>
+                                          <td>Sep</td>
+                                          <td>Oct</td>
+                                          <td>Nov</td>
+                                          <td>Dec</td>
+                                       </tr>
+                                    </thead>
+                                    <tbody>
+                                       <!-- <div class="card ribbon-box">
+                                          <div class="card-body">
+                                              <div class="ribbon-two ribbon-two-primary"><span>Primary</span></div>
+                                              <p class="mb-0">Quisque nec turpis at urna dictum luctus. Suspendisse
+                                                  convallis dignissim eros at volutpat. In egestas mattis dui. Aliquam
+                                                  mattis dictum aliquet. </p>
+                                          </div> 
+                                      </div> -->
+                                       <tr class="ribbon-box"
+                                          *ngFor="let data of historyData | search:termHistory; let i=index">
+                                          <td>
+                                             <div class="ribbon ribbon-secondary text-light"><span>{{data.year}}</span>
+                                             </div>
+                                          </td>
+                                          <td>{{i+1}}</td>
+                                          <td>
+                                             {{data.state_hin}}<br />
+                                             {{data.state_eng}}
+                                          </td>
+                                          <td>
+                                             {{data.mm_hin}}<br />
+                                             {{data.mm_eng}}
+                                          </td>
+                                          <!-- <td>{{data.year}}</td>  -->
+                                          <td *ngFor="let m of months">
+                                             <div *ngIf="data['m'+m.m]" style="text-align: center;">
+                                                <i class="uil-check-circle text-success h3"></i> <br>
+                                                <span>{{data['m'+m.m+'_update'] | date:'dd-MM-yyyy'}}</span>
+                                             </div>
+                                          </td>
 
-                                    </tr>
-                                 </tbody>
-                              </table>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </div>
                            </div>
                         </div>
                      </div>
@@ -189,7 +192,8 @@
                                     </div> -->
                                     <div class="col-2">
                                        <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
-                                          [clearable]="true" [multiple]="true" [virtualScroll]="true" (change)="mmSelected($event)">
+                                          [clearable]="true" [multiple]="true" [virtualScroll]="true"
+                                          (change)="mmSelected($event)">
                                           <ng-option *ngFor="let item of mms" [value]="item._id">
                                              {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
                                        </ng-select>
@@ -226,7 +230,8 @@
                                     [autoHide]="true">
                                  </pagination-controls>
                               </div>
-                              <table id="datatable-buttons" class="table table-hover dt-responsive">
+                              <table id="datatable-buttons1"
+                                 class="table table-hover table-sticky-header dt-responsive">
                                  <thead>
                                     <tr>
                                        <td style="width: 50px;">No.</td>

@@ -59,75 +59,78 @@
                <pagination-controls class="pagi text-end" (pageChange)="page = $event" [autoHide]="true">
                </pagination-controls>
                <div class="card-body">
-                  <table class="table table-hover dt-responsive">
-                     <thead>
-                        <tr>
-                           <th style="width: 60px;">No.</th>
-                           <th style="width: 180px;">
-                              Manage
-                           </th>
-                           <th style="width: 150px;">MM(Hin)</th>
-                           <th style="width: 150px;" *ngIf="settings.mm_eng">MM(Eng)</th>
-                           <th style="width: 100px;" *ngIf="settings.mm_code">MM Code</th>
-                           <th style="width: 100px;">MM Type</th>
-                           <th style="width: 150px;" *ngIf="settings.parent_mm_id">Parent MM</th>
-                           <th style="width: 180px;">MM State</th>
-                           <th style="width: 130px;" *ngIf="settings.opening_date">Opening Date</th>
-                           <th style="width: 200px;" *ngIf="settings.nimitt_id">Nimitt Name</th>
-                           <th style="width: 130px;" *ngIf="settings.closing_date">Closing Date</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        <tr *ngFor="let data of mmData | search:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index"
-                           [ngClass]="{'text-light':data.restrict_year, 'closed': data.mm_closed}">
-                           <td style="font-size: large;">
-                              {{itemsPerPage * (page-1) + i+1}}
-                              <!-- <span class="mx-1" style="font-size: x-large;position: absolute;line-height: 28px;"
+                  <div class="table-container">
+                     <table class="table table-hover table-sticky-header dt-responsive">
+                        <thead>
+                           <tr>
+                              <th style="width: 60px;">No.</th>
+                              <th style="width: 180px;">
+                                 Manage
+                              </th>
+                              <th style="width: 150px;">MM(Hin)</th>
+                              <th style="width: 150px;" *ngIf="settings.mm_eng">MM(Eng)</th>
+                              <th style="width: 100px;" *ngIf="settings.mm_code">MM Code</th>
+                              <th style="width: 100px;">MM Type</th>
+                              <th style="width: 150px;" *ngIf="settings.parent_mm_id">Parent MM</th>
+                              <th style="width: 180px;">MM State</th>
+                              <th style="width: 130px;" *ngIf="settings.opening_date">Opening Date</th>
+                              <th style="width: 200px;" *ngIf="settings.nimitt_id">Nimitt Name</th>
+                              <th style="width: 130px;" *ngIf="settings.closing_date">Closing Date</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr *ngFor="let data of mmData | search:term | paginate: {itemsPerPage: itemsPerPage, currentPage: page}; let i=index"
+                              [ngClass]="{'text-light':data.restrict_year, 'closed': data.mm_closed}">
+                              <td style="font-size: large;">
+                                 {{itemsPerPage * (page-1) + i+1}}
+                                 <!-- <span class="mx-1" style="font-size: x-large;position: absolute;line-height: 28px;"
                                  (click)="protectionToggle(data._id, data.active)">
                                  <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && data.active" data-toggle="tooltip"
                                     title="Protected" class="uil-shield-check text-warning"></i>
                                  <i *ngIf="gs.exceptionDept.includes(auth.webUser.dept_id) && !data.active" data-toggle="tooltip"
                                     title="Unprotected" class="uil-shield-slash text-danger"></i>
                               </span> -->
-                           </td>
-                           <td>
-                              <ng-container *ngIf="settings.edit">
-                                 <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)">
-                                    <i class="uil uil-pen"></i></button>
-                                 <button *ngIf="!data.restrict_year" class="btn btn-sm btn-outline-warning mx-1"
-                                    type="button" (click)="lockMM(i,data._id)"><i class="uil-unlock-alt"></i></button>
-                                 <button *ngIf="data.restrict_year" class="btn btn-sm btn-warning mx-1" type="button"
-                                    (click)="unlockMM(i,data._id)"><i class="uil-lock-alt"></i></button>
-                              </ng-container>
-                              <button *ngIf="settings.delete" class="btn btn-sm btn-danger" type="button"
-                              (click)="delete(data._id)"><i class="uil-trash"></i></button>
-                              <div *ngIf="data.restrict_year" class="lock-date text-warning">
-                                 {{data.restrict_month}}/{{data.restrict_year}} से लॉक।
-                              </div>
-                              <span *ngIf="!settings.edit && !settings.delete" data-toggle="tooltip" title="Protected"
-                                 class="text-warning mx-1"
-                                 style="font-size: xx-large;cursor: pointer;line-height: 0px;">
-                                 <i class="uil-shield-check"></i>
-                              </span>
-                           </td>
-                           <td>{{data.mm_hin}}</td>
-                           <td *ngIf="settings.mm_eng">{{data.mm_eng}}</td>
-                           <td *ngIf="settings.mm_code">{{data.mm_code}}</td>
-                           <td>{{data.mm_type}}</td>
-                           <td *ngIf="settings.parent_mm_id">
-                              {{data.parent_mm_id ? data.parent_mm_hin + ' : ' + data.parent_mm_eng + ' : ' +
-                              data.parent_mm_code:'-'}}
-                           </td>
-                           <td>{{data.state_hin}} : {{data.state_eng}} ({{data.country_hin}} : {{data.country_eng}})
-                           </td>
-                           <td *ngIf="settings.opening_date">{{data.opening_date | date: 'dd-MM-yyyy'}}</td>
-                           <td [ngClass]="{'mata': data.nimitt_gender == 'Mata'}" *ngIf="settings.nimitt_id">
-                              {{data.nimitt_id ? data.nimitt_hin + ' ('+ data.state_hin + ')':'-'}}
-                           </td>
-                           <td *ngIf="settings.closing_date">{{data.mm_closed | date: 'dd-MM-yyyy'}}</td>
-                        </tr>
-                     </tbody>
-                  </table>
+                              </td>
+                              <td>
+                                 <ng-container *ngIf="settings.edit">
+                                    <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)">
+                                       <i class="uil uil-pen"></i></button>
+                                    <button *ngIf="!data.restrict_year" class="btn btn-sm btn-outline-warning mx-1"
+                                       type="button" (click)="lockMM(i,data._id)"><i
+                                          class="uil-unlock-alt"></i></button>
+                                    <button *ngIf="data.restrict_year" class="btn btn-sm btn-warning mx-1" type="button"
+                                       (click)="unlockMM(i,data._id)"><i class="uil-lock-alt"></i></button>
+                                 </ng-container>
+                                 <button *ngIf="settings.delete" class="btn btn-sm btn-danger" type="button"
+                                    (click)="delete(data._id)"><i class="uil-trash"></i></button>
+                                 <div *ngIf="data.restrict_year" class="lock-date text-warning">
+                                    {{data.restrict_month}}/{{data.restrict_year}} से लॉक।
+                                 </div>
+                                 <span *ngIf="!settings.edit && !settings.delete" data-toggle="tooltip"
+                                    title="Protected" class="text-warning mx-1"
+                                    style="font-size: xx-large;cursor: pointer;line-height: 0px;">
+                                    <i class="uil-shield-check"></i>
+                                 </span>
+                              </td>
+                              <td>{{data.mm_hin}}</td>
+                              <td *ngIf="settings.mm_eng">{{data.mm_eng}}</td>
+                              <td *ngIf="settings.mm_code">{{data.mm_code}}</td>
+                              <td>{{data.mm_type}}</td>
+                              <td *ngIf="settings.parent_mm_id">
+                                 {{data.parent_mm_id ? data.parent_mm_hin + ' : ' + data.parent_mm_eng + ' : ' +
+                                 data.parent_mm_code:'-'}}
+                              </td>
+                              <td>{{data.state_hin}} : {{data.state_eng}} ({{data.country_hin}} : {{data.country_eng}})
+                              </td>
+                              <td *ngIf="settings.opening_date">{{data.opening_date | date: 'dd-MM-yyyy'}}</td>
+                              <td [ngClass]="{'mata': data.nimitt_gender == 'Mata'}" *ngIf="settings.nimitt_id">
+                                 {{data.nimitt_id ? data.nimitt_hin + ' ('+ data.state_hin + ')':'-'}}
+                              </td>
+                              <td *ngIf="settings.closing_date">{{data.mm_closed | date: 'dd-MM-yyyy'}}</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
                </div>
                <pagination-controls class="pagi text-center" (pageChange)="page = $event" [autoHide]="true">
                </pagination-controls>

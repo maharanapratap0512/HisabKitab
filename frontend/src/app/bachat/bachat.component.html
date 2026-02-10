@@ -84,118 +84,120 @@
             <div class="row" *ngIf="bachatData.length">
                <div class="card-body" style="overflow: auto;">
                   <h4 class="card-title">Click Row to See Image if available.</h4>
-                  <table id="datatable-buttons" class="table table-hover dt-responsive">
-                     <thead>
-                        <tr>
-                           <!-- <td>Image</td> -->
-                           <td style="width: 70px;">No.</td>
-                           <td>Department</td>
-                           <td>State</td>
-                           <td>MM</td>
-                           <td>Category</td>
-                           <td>Item</td>
-                           <td>Used</td>
-                           <td *ngIf="settings.new">New</td>
-                           <td *ngIf="settings.old">Old</td>
-                           <td *ngIf="settings.repairing">IN Repairing</td>
-                           <td *ngIf="settings.defective">Defective</td>
-                           <td *ngIf="settings.scrap">Scrap</td>
-                           <td>Stock</td>
-                           <td>Difference</td>
-                           <td>Jawak</td>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        <ng-container *ngFor="let data of bachatData | search:term; let i=index">
-                           <tr (click)="setImages(data)">
-                              <!-- <td>
+                  <div class="table-container">
+                     <table id="datatable-buttons" class="table table-hover table-sticky-header dt-responsive">
+                        <thead>
+                           <tr>
+                              <!-- <td>Image</td> -->
+                              <td style="width: 70px;">No.</td>
+                              <td>Department</td>
+                              <td>State</td>
+                              <td>MM</td>
+                              <td>Category</td>
+                              <td>Item</td>
+                              <td>Used</td>
+                              <td *ngIf="settings.new">New</td>
+                              <td *ngIf="settings.old">Old</td>
+                              <td *ngIf="settings.repairing">IN Repairing</td>
+                              <td *ngIf="settings.defective">Defective</td>
+                              <td *ngIf="settings.scrap">Scrap</td>
+                              <td>Stock</td>
+                              <td>Difference</td>
+                              <td>Jawak</td>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <ng-container *ngFor="let data of bachatData | search:term; let i=index">
+                              <tr (click)="setImages(data)">
+                                 <!-- <td>
                                  <div> 
                                     <img [src]="data.image" class="img-fluid img-thumbnail mx-1 p-1 h-100" *ngIf="data.image"
                                     style="max-width: 75px; object-fit: cover;" alt="item-img + {{i}}"  />
                                  </div>
                               </td> -->
-                              <td>{{i+1}}</td>
-                              <td>
-                                 {{data.dept_hin}}<br />
-                                 {{data.dept_eng}}
-                              </td>
-                              <td>
-                                 {{data.state_hin}}<br />
-                                 {{data.state_eng}}
-                              </td>
-                              <td>
-                                 {{data.mm_hin}}<br />
-                                 {{data.mm_eng}}
-                              </td>
-                              <td *ngIf="!data.scat_id">
-                                 {{data.icat_hin}}<br />
-                                 {{data.icat_eng}}
-                              </td>
-                              <td *ngIf="data.scat_id">
-                                 {{data.scat_hin}}<br />
-                                 {{data.scat_eng}}
-                              </td>
-                              <td>
-                                 {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}} <br />
-                                 {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
-                              </td>
-                              <td>
-                                 {{data.Used ? data.Used + " " + data.unit_short : "-"}}
-                              </td>
-                              <td *ngIf="settings.new">
-                                 <span class="px-1" [ngClass]="{'error': data.New < 0}">
-                                    {{data.New ? data.New + " " + data.unit_short : "-"}}
-                                 </span>
-                              </td>
-                              <td *ngIf="settings.old">
-                                 <span class="px-1" [ngClass]="{'error': data.Old < 0}">
-                                    {{data.Old ? data.Old + " " + data.unit_short : "-"}}
-                                 </span>
-                              </td>
-                              <td *ngIf="settings.repairing">
-                                 <span class="px-1" [ngClass]="{'error': data.Repairing < 0}">
-                                    {{data.Repairing ? data.Repairing + " " + data.unit_short : "-"}}
-                                 </span>
-                              </td>
-                              <td *ngIf="settings.defective">
-                                 <span class="px-1" [ngClass]="{'error': data.Defective < 0}">
-                                    {{data.Defective ? data.Defective + " " + data.unit_short : "-"}}
-                                 </span>
-                              </td>
-                              <td *ngIf="settings.scrap">
-                                 <span class="px-1" [ngClass]="{'error': data.Scrap < 0}">
-                                    {{data.Scrap ? data.Scrap + " " + data.unit_short : "-"}}
-                                 </span>
-                              </td>
-                              <td>
-                                 <span class="px-1" [ngClass]="{'error': data.Stock < 0, 'stock':data.Stock > 0}">
-                                    {{data.Stock ? data.Stock + " " + data.unit_short : "-"}}
-                                 </span>
-                              </td>
-                              <td>
-                                 <span class="px-1" [ngClass]="{'error': data.difference != 0}">
-                                    {{data.difference ? data.difference + " " + data.unit_short : "-"}}
-                                 </span>
-                              </td>
-                              <td>
-                                 <!-- <button class="btn btn-sm btn-warning mx-1" (click)="addJawak(data)"
+                                 <td>{{i+1}}</td>
+                                 <td>
+                                    {{data.dept_hin}}<br />
+                                    {{data.dept_eng}}
+                                 </td>
+                                 <td>
+                                    {{data.state_hin}}<br />
+                                    {{data.state_eng}}
+                                 </td>
+                                 <td>
+                                    {{data.mm_hin}}<br />
+                                    {{data.mm_eng}}
+                                 </td>
+                                 <td *ngIf="!data.scat_id">
+                                    {{data.icat_hin}}<br />
+                                    {{data.icat_eng}}
+                                 </td>
+                                 <td *ngIf="data.scat_id">
+                                    {{data.scat_hin}}<br />
+                                    {{data.scat_eng}}
+                                 </td>
+                                 <td>
+                                    {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}} <br />
+                                    {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
+                                 </td>
+                                 <td>
+                                    {{data.Used ? data.Used + " " + data.unit_short : "-"}}
+                                 </td>
+                                 <td *ngIf="settings.new">
+                                    <span class="px-1" [ngClass]="{'error': data.New < 0}">
+                                       {{data.New ? data.New + " " + data.unit_short : "-"}}
+                                    </span>
+                                 </td>
+                                 <td *ngIf="settings.old">
+                                    <span class="px-1" [ngClass]="{'error': data.Old < 0}">
+                                       {{data.Old ? data.Old + " " + data.unit_short : "-"}}
+                                    </span>
+                                 </td>
+                                 <td *ngIf="settings.repairing">
+                                    <span class="px-1" [ngClass]="{'error': data.Repairing < 0}">
+                                       {{data.Repairing ? data.Repairing + " " + data.unit_short : "-"}}
+                                    </span>
+                                 </td>
+                                 <td *ngIf="settings.defective">
+                                    <span class="px-1" [ngClass]="{'error': data.Defective < 0}">
+                                       {{data.Defective ? data.Defective + " " + data.unit_short : "-"}}
+                                    </span>
+                                 </td>
+                                 <td *ngIf="settings.scrap">
+                                    <span class="px-1" [ngClass]="{'error': data.Scrap < 0}">
+                                       {{data.Scrap ? data.Scrap + " " + data.unit_short : "-"}}
+                                    </span>
+                                 </td>
+                                 <td>
+                                    <span class="px-1" [ngClass]="{'error': data.Stock < 0, 'stock':data.Stock > 0}">
+                                       {{data.Stock ? data.Stock + " " + data.unit_short : "-"}}
+                                    </span>
+                                 </td>
+                                 <td>
+                                    <span class="px-1" [ngClass]="{'error': data.difference != 0}">
+                                       {{data.difference ? data.difference + " " + data.unit_short : "-"}}
+                                    </span>
+                                 </td>
+                                 <td>
+                                    <!-- <button class="btn btn-sm btn-warning mx-1" (click)="addJawak(data)"
                                     *ngIf="data.Stock">
                                     <i class="mdi mdi-plus noti-icon"></i> जावक
                                  </button> -->
-                                 <span class="text-success" *ngIf="!data.Stock"
-                                    style="font-size: xx-large;line-height: 0px;">
-                                    <i class="uil-check-circle"></i>
-                                    <!-- <i class="uil-check"></i> -->
-                                 </span>
-                                 <!-- <button class="btn btn-sm btn-primary" (click)="showJawak(data._id)">
+                                    <span class="text-success" *ngIf="!data.Stock"
+                                       style="font-size: xx-large;line-height: 0px;">
+                                       <i class="uil-check-circle"></i>
+                                       <!-- <i class="uil-check"></i> -->
+                                    </span>
+                                    <!-- <button class="btn btn-sm btn-primary" (click)="showJawak(data._id)">
                                     <i class="dripicons-view-list noti-icon"></i>
                                  </button> -->
-                              </td>
+                                 </td>
 
-                           </tr>
-                        </ng-container>
-                     </tbody>
-                  </table>
+                              </tr>
+                           </ng-container>
+                        </tbody>
+                     </table>
+                  </div>
                </div>
             </div>
 

@@ -1,6 +1,6 @@
 <ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
-   [fullScreen]="true">
-   <p style="color: white"> Generating... </p>
+    [fullScreen]="true">
+    <p style="color: white"> Generating... </p>
 </ngx-spinner>
 
 <!-- Begin page -->
@@ -90,53 +90,57 @@
                                 </div>
                             </div>
                         </div>
-                        <table id="tbl" #tbl class="table table-hover dt-responsive">
-                            <thead>
-                                <tr>
-                                    <td style="width: 70px;">No.</td>
-                                    <td style="width: 100px;">Department</td>
-                                    <td>Category</td>
-                                    <td>Item</td>
-                                    <td>Jawak Type</td>
-                                    <ng-container *ngIf="monthsSel.length <= 0">
-                                        <td>Total Qty</td>
-                                    </ng-container>
-                                    <ng-container *ngIf="monthsSel.length > 0">
-                                        <th class="center-header" *ngFor="let row of monthsSel">
-                                            {{row.name + " - " + filterBody.year }}
-                                        </th>
-                                    </ng-container>
-
-                                </tr>
-
-                            </thead>
-                            <tbody>
-                                <ng-container *ngFor="let data of reportData | search: term; let i = index;">
+                        <div class="table-container">
+                            <table id="tbl" #tbl class="table table-sticky-header table-hover dt-responsive">
+                                <thead>
                                     <tr>
-                                        <td style="width: 70px;">{{i+1}}</td>
-                                        <td style="width: 100px;">{{data.dept_hin}} : {{data.dept_code}}</td>
-                                        <td>{{data.categories_eng ? data.categories_eng : data.categories_hin}}</td>
-                                        <td>
-                                            {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}}<br />
-                                            {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
-                                        </td>
-                                        <td>
-                                            {{data.jawak_type_hin}} {{data.jawak_type_eng ? " : " + data.jawak_type_eng
-                                            : ""}}
-                                        </td>
-                                        <ng-container *ngIf="monthsSel.length > 0">
-                                            <ng-container *ngFor="let row of monthsSel; let j = index;">
-                                                <td>
-                                                    <span [ngClass]="{'error': data.arr_sum_qty[j] < 0}">
-                                                        {{data.arr_sum_qty[j]}} {{data.unit_short}}
-                                                    </span>
-                                                </td>
-                                            </ng-container>
+                                        <td style="width: 70px;">No.</td>
+                                        <td style="width: 100px;">Department</td>
+                                        <td>Category</td>
+                                        <td>Item</td>
+                                        <td>Jawak Type</td>
+                                        <ng-container *ngIf="monthsSel.length <= 0">
+                                            <td>Total Qty</td>
                                         </ng-container>
+                                        <ng-container *ngIf="monthsSel.length > 0">
+                                            <th class="center-header" *ngFor="let row of monthsSel">
+                                                {{row.name + " - " + filterBody.year }}
+                                            </th>
+                                        </ng-container>
+
                                     </tr>
-                                </ng-container>
-                            </tbody>
-                        </table>
+
+                                </thead>
+                                <tbody>
+                                    <ng-container *ngFor="let data of reportData | search: term; let i = index;">
+                                        <tr>
+                                            <td style="width: 70px;">{{i+1}}</td>
+                                            <td style="width: 100px;">{{data.dept_hin}} : {{data.dept_code}}</td>
+                                            <td>{{data.categories_eng ? data.categories_eng : data.categories_hin}}</td>
+                                            <td>
+                                                {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin :
+                                                ""}}<br />
+                                                {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
+                                            </td>
+                                            <td>
+                                                {{data.jawak_type_hin}} {{data.jawak_type_eng ? " : " +
+                                                data.jawak_type_eng
+                                                : ""}}
+                                            </td>
+                                            <ng-container *ngIf="monthsSel.length > 0">
+                                                <ng-container *ngFor="let row of monthsSel; let j = index;">
+                                                    <td>
+                                                        <span [ngClass]="{'error': data.arr_sum_qty[j] < 0}">
+                                                            {{data.arr_sum_qty[j]}} {{data.unit_short}}
+                                                        </span>
+                                                    </td>
+                                                </ng-container>
+                                            </ng-container>
+                                        </tr>
+                                    </ng-container>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <h2 class="text-center m-5" *ngIf="!reportData.length">No Data!</h2>
