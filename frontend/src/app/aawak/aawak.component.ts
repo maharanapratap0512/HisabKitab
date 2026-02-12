@@ -10,6 +10,7 @@ import * as XLSX from 'xlsx';
 import { AuthService } from '../services/auth.service';
 import { ExcelExportService } from '../services/excel-export.service';
 import { observable, Observable, of, Subject } from 'rxjs';
+import { SelectionService } from '../services/selection.service';
 declare var $: any;
 
 @Component({
@@ -136,6 +137,7 @@ export class AawakComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public auth: AuthService,
     private excelExportService: ExcelExportService,
+    public selectionService: SelectionService,
   ) {
     this.settings = this.auth.webUser.settings;
     this.currentYear = new Date().getFullYear();
