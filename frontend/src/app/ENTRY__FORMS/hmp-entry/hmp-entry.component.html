@@ -5,7 +5,7 @@
 
 <div class="row material-theme-container" id="hmpEntryComponent">
     <div class="card-body">
-        <form #fHmp="ngForm">
+        <form #f="ngForm">
 
             <!-- Top Section: Batch & Recipe Info -->
             <div class="row mb-3">
@@ -14,14 +14,14 @@
                     <input type="date" class="form-control" [(ngModel)]="fs.hmpBatchForm.date" name="date" required>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Batch No</label>
-                    <input type="text" class="form-control" placeholder="Auto" [(ngModel)]="fs.hmpBatchForm.batch_no"
-                        name="batch_no" readonly>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Location (MM)</label>
-                    <ng-select class="custom" [items]="mms" bindLabel="mm_hin" bindValue="_id"
-                        [(ngModel)]="fs.hmpBatchForm.mm_id" name="mm_id" placeholder="Select Location" required>
+                    <label class="form-label">MM</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
+                        [virtualScroll]="true" [(ngModel)]="fs.hmpBatchForm.mm_id" name="mm_id" #mm_id="ngModel"
+                        [ngClass]="{ 'validation': (mm_id?.touched || f.submitted) && mm_id.errors?.['required']}"
+                        required>
+                        <ng-option selected="selected" disabled value="">MM</ng-option>
+                        <ng-option *ngFor="let item of mms | filterByDate:fs.hmpBatchForm.date" [value]="item._id">
+                            {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
                     </ng-select>
                 </div>
 
@@ -32,6 +32,11 @@
                         [(ngModel)]="fs.hmpBatchForm.recipe_id" name="recipe_id" (change)="onRecipeSelect($event)"
                         [addTag]="true" (add)="onRecipeNameChange($event)" placeholder="Select or Type New Recipe">
                     </ng-select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Description</label>
+                    <input type="text" class="form-control" placeholder="Description"
+                        [(ngModel)]="fs.hmpBatchForm.recipe_description" name="recipe_description">
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
                     <div class="form-check">
@@ -44,48 +49,31 @@
                 </div>
             </div>
 
-            <!-- Recipe Details (Editable if needed) -->
-            <div class="row mb-3"
-                *ngIf="fs.hmpBatchForm.recipe_id || fs.hmpBatchForm.recipe_name || fs.hmpBatchForm.update_recipe">
-                <div class="col-md-3">
-                    <input type="text" class="form-control form-control-sm" placeholder="Recipe Name"
-                        [(ngModel)]="fs.hmpBatchForm.recipe_name" name="recipe_name">
-                </div>
-                <div class="col-md-2">
-                    <input type="text" class="form-control form-control-sm" placeholder="Recipe Code"
-                        [(ngModel)]="fs.hmpBatchForm.recipe_code" name="recipe_code">
-                </div>
-                <div class="col-md-7">
-                    <input type="text" class="form-control form-control-sm" placeholder="Description / Instructions"
-                        [(ngModel)]="fs.hmpBatchForm.recipe_description" name="recipe_description">
-                </div>
-            </div>
-
             <hr>
 
             <!-- Split View: Inputs & Outputs -->
-            <div class="row">
+            <div class="row mb-3">
 
                 <!-- Left: Inputs (Consumption) -->
-                <div class="col-md-6 border-end">
-                    <h5 class="text-secondary">Input Materials (Consumed)</h5>
-                    <div class="table-container" style="max-height: 400px; overflow: auto;">
-                        <table class="table table-sm table-bordered">
-                            <thead class="table-light">
-                                <tr>
-                                    <th width="5%">#</th>
-                                    <!-- <th width="15%">Lot</th> -->
-                                    <th width="35%">Item</th>
-                                    <th width="15%">Qty</th>
-                                    <th width="15%">Rate</th>
-                                    <!-- <th width="15%">Amount</th> -->
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let row of fs.hmpBatchForm.inputs; let i = index">
-                                    <td>{{i+1}}</td>
-                                    <!-- Lot No -->
-                                    <!-- <td>
+                <!-- <div class="col-md-6 border-end"> -->
+                <h5 class="text-secondary">Input Materials (Consumed)</h5>
+                <div class="table-container" style="padding-bottom: 200px; overflow-x: auto; overflow-y: visible;">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="5%">#</th>
+                                <!-- <th width="15%">Lot</th> -->
+                                <th width="35%">Item</th>
+                                <th width="15%">Qty</th>
+                                <th width="15%">Rate</th>
+                                <th width="15%">Condition</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let row of fs.hmpBatchForm.inputs; let i = index">
+                                <td>{{i+1}}</td>
+                                <!-- Lot No -->
+                                <!-- <td>
                                         <div class="ng-autocomplete">
                                             <ng-autocomplete [data]="lotNos" [searchKeyword]="keyword"
                                                 class="form-control-sm" placeholder="lot"
@@ -100,106 +88,119 @@
                                             </ng-template>
                                         </div>
                                     </td> -->
-                                    <!-- Item Dropdown -->
-                                    <td>
-                                        <ng-select class="custom-sm" [clearable]="true" [virtualScroll]="true"
-                                            [(ngModel)]="row.item_subitem_id" name="in_item_{{i}}"
-                                            (change)="itemSubitemSelectedInput($event, i)" placeholder="Item">
-                                            <ng-container *ngFor="let item of items">
-                                                <ng-option [value]="item._id + ':'">{{item.item_hin}}</ng-option>
-                                                <ng-option *ngFor="let sub of item.subitems"
-                                                    [value]="item._id + ':' + sub._id">
-                                                    -- {{sub.subitem_hin}}
-                                                </ng-option>
-                                            </ng-container>
-                                        </ng-select>
-                                    </td>
-                                    <!-- Qty & Unit -->
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <input type="number" class="form-control-sm" [(ngModel)]="row.qty"
-                                                name="in_qty_{{i}}" (change)="calculateAmountInput(i)" style="flex: 1;">
-                                            <ng-select class="custom-sm" [items]="units" bindLabel="unit_short"
-                                                style="flex: 2;" bindValue="_id" [(ngModel)]="row.unit_id"
-                                                name="in_unit_{{i}}" [clearable]="false"></ng-select>
-                                        </div>
-                                    </td>
-                                    <!-- Rate -->
-                                    <td>
-                                        <input type="number" class="form-control form-control-sm" [(ngModel)]="row.rate"
-                                            name="in_rate_{{i}}" (change)="calculateAmountInput(i)">
-                                    </td>
-                                    <!-- Amount -->
-                                    <!-- <td>
-                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="row.amount"
-                                            name="in_amt_{{i}}" readonly>
-                                    </td> -->
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                <!-- Item Dropdown -->
+                                <td>
+                                    <ng-select class="custom-sm" [clearable]="true" [virtualScroll]="true"
+                                        [(ngModel)]="row.item_subitem_id" name="in_item_{{i}}"
+                                        (change)="itemSubitemSelectedInput($event, i)" placeholder="Item">
+                                        <ng-container *ngFor="let item of items">
+                                            <ng-option [value]="item._id + ':'">{{item.item_hin}}</ng-option>
+                                            <ng-option *ngFor="let sub of item.subitems"
+                                                [value]="item._id + ':' + sub._id">
+                                                -- {{sub.subitem_hin}}
+                                            </ng-option>
+                                        </ng-container>
+                                    </ng-select>
+                                </td>
+                                <!-- Qty & Unit -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <input type="number" class="form-control-sm flex-fill" [(ngModel)]="row.qty"
+                                            name="in_qty_{{i}}" (change)="calculateAmountInput(i)">
+                                        <!-- <span> -->
+                                        <ng-select class="custom-sm border mw-3" [items]="units" bindLabel="unit_short"
+                                            bindValue="_id" [(ngModel)]="row.unit_id" name="in_unit_{{i}}"
+                                            [clearable]="false" placeholder="Unit"></ng-select>
+                                        <!-- </span> -->
+                                    </div>
+                                </td>
 
-                <!-- Right: Outputs (Production) -->
-                <div class="col-md-6">
-                    <h5 class="text-primary">Output Products (Produced)</h5>
-                    <div class="table-container" style="max-height: 400px; overflow: auto;">
-                        <table class="table table-sm table-bordered">
-                            <thead class="table-light">
-                                <tr>
-                                    <th width="5%">#</th>
-                                    <th width="35%">Item</th>
-                                    <th width="20%">Qty</th>
-                                    <th width="20%">Rate</th>
-                                    <!-- <th width="20%">Amount</th> -->
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let row of fs.hmpBatchForm.outputs; let i = index">
-                                    <td>{{i+1}}</td>
-                                    <!-- Item Dropdown -->
-                                    <td>
-                                        <ng-select class="custom-sm" [clearable]="true" [virtualScroll]="true"
-                                            [(ngModel)]="row.item_subitem_id" name="out_item_{{i}}"
-                                            (change)="itemSubitemSelectedOutput($event, i)" placeholder="Item">
-                                            <ng-container *ngFor="let item of items">
-                                                <ng-option [value]="item._id + ':'">{{item.item_hin}}</ng-option>
-                                                <ng-option *ngFor="let sub of item.subitems"
-                                                    [value]="item._id + ':' + sub._id">
-                                                    -- {{sub.subitem_hin}}
-                                                </ng-option>
-                                            </ng-container>
-                                        </ng-select>
-                                    </td>
-                                    <!-- Qty & Unit -->
-                                    <td>
-                                        <div class="input-group input-group-sm">
-                                            <input type="number" class="form-control" [(ngModel)]="row.qty"
-                                                name="out_qty_{{i}}" (change)="calculateAmountOutput(i)">
-                                            <span class="input-group-text" style="font-size: 0.7rem;">
-                                                <ng-select class="custom-sm" [items]="units" bindLabel="unit_short"
-                                                    bindValue="_id" [(ngModel)]="row.unit_id" name="out_unit_{{i}}"
-                                                    [clearable]="false"></ng-select>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <!-- Rate -->
-                                    <td>
-                                        <input type="number" class="form-control form-control-sm" [(ngModel)]="row.rate"
-                                            name="out_rate_{{i}}" (change)="calculateAmountOutput(i)">
-                                    </td>
-                                    <!-- Amount -->
-                                    <!-- <td>
-                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="row.amount"
-                                            name="out_amt_{{i}}" readonly>
-                                    </td> -->
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                <!-- Rate -->
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" [(ngModel)]="row.rate"
+                                        name="in_rate_{{i}}" (change)="calculateAmountInput(i)">
+                                </td>
+                                <!-- Condition -->
+                                <td>
+                                    <ng-select class="custom-sm" [items]="conditions" bindLabel="condition_name"
+                                        bindValue="_id" [(ngModel)]="row.condition_id" name="in_condition_{{i}}"
+                                        [clearable]="false" placeholder="Select Condition"></ng-select>
+                                </td>
 
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+            <hr>
+
+            <!-- Right: Outputs (Production) -->
+            <div class="row">
+                <h5 class="text-primary">Output Products (Produced)</h5>
+                <div class="table-container" style="padding-bottom: 200px; overflow-x: auto; overflow-y: visible;">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="5%">#</th>
+                                <th width="35%">Item</th>
+                                <th width="15%">Qty</th>
+                                <th width="15%">Rate</th>
+                                <th width="15%">Condition</th>
+                                <!-- <th width="20%">Amount</th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let row of fs.hmpBatchForm.outputs; let i = index">
+                                <td>{{i+1}}</td>
+                                <!-- Item Dropdown -->
+                                <td>
+                                    <ng-select class="custom-sm" [clearable]="true" [virtualScroll]="true"
+                                        [(ngModel)]="row.item_subitem_id" name="out_item_{{i}}"
+                                        (change)="itemSubitemSelectedOutput($event, i)" placeholder="Item">
+                                        <ng-container *ngFor="let item of items">
+                                            <ng-option [value]="item._id + ':'">{{item.item_hin}}</ng-option>
+                                            <ng-option *ngFor="let sub of item.subitems"
+                                                [value]="item._id + ':' + sub._id">
+                                                -- {{sub.subitem_hin}}
+                                            </ng-option>
+                                        </ng-container>
+                                    </ng-select>
+                                </td>
+                                <!-- Qty & Unit -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <input type="number" class="form-control-sm flex-fill" [(ngModel)]="row.qty"
+                                            name="in_qty_{{i}}" (change)="calculateAmountInput(i)">
+                                        <!-- <span> -->
+                                        <ng-select class="custom-sm border mw-3" [items]="units" bindLabel="unit_short"
+                                            bindValue="_id" [(ngModel)]="row.unit_id" name="in_unit_{{i}}"
+                                            [clearable]="false" placeholder="Unit"></ng-select>
+                                        <!-- </span> -->
+                                    </div>
+                                </td>
+
+
+
+                                <!-- Rate -->
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" [(ngModel)]="row.rate"
+                                        name="out_rate_{{i}}" (change)="calculateAmountOutput(i)">
+                                </td>
+
+                                <!-- Condition -->
+                                <td>
+                                    <ng-select class="custom-sm" [items]="conditions" bindLabel="condition_name"
+                                        bindValue="_id" [(ngModel)]="row.condition_id" name="out_condition_{{i}}"
+                                        [clearable]="false"></ng-select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- </div> -->
 
             <!-- Bottom Actions -->
             <div class="row mt-4">

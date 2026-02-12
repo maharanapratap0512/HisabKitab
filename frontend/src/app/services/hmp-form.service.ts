@@ -98,7 +98,7 @@ export class HmpFormService {
   formStatusChanges() {
     let valid = true;
     for (let form of this.hmpBatchForm.inputs) {
-      if (!(form.item_id && form.qty)) {
+      if (!(form.item_id)) {
         valid = false;
         break;
       }
@@ -109,7 +109,7 @@ export class HmpFormService {
 
     valid = true;
     for (let form of this.hmpBatchForm.outputs) {
-      if (!(form.item_id && form.qty)) {
+      if (!(form.item_id)) {
         valid = false;
         break;
       }

@@ -310,7 +310,7 @@
                      </a>
                   </div>
 
-                  <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="true"
+                  <!-- <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="true"
                      [virtualScroll]="true" [(ngModel)]="awkfg.item_id" name="item_id" #item_id="ngModel"
                      (change)="itemSelected($event)"
                      [ngClass]="{ 'validation': (item_id?.touched || f.submitted) && item_id.errors?.['required']}"
@@ -327,6 +327,26 @@
                      <ng-option *ngFor="let item of subitems | filterByDate:awkfg.date"
                         [value]="item._id">{{item.subitem_hin}} :
                         {{item.subitem_eng}}</ng-option>
+                  </ng-select> -->
+
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="true"
+                     [virtualScroll]="true" [(ngModel)]="awkfg.item_subitem_id" name="item_subitem_id"
+                     #item_subitem_id="ngModel" (change)="itemSubitemSelected($event)"
+                     [ngClass]="{'validation' : (item_subitem_id?.touched || f.submitted) && item_subitem_id.errors?.['required']}"
+                     [selectOnTab]="true" required [showSelectAll]="false" styleMode="material">
+
+                     <ng-container *ngFor="let item of items | filterByDate:awkfg.date">
+                        <ng-option [value]="item._id + ':' + null">
+                           {{item.item_hin}} : {{item.item_eng}} : {{item.item_code}}
+                        </ng-option>
+
+                        <ng-option *ngFor="let subitem of item.subitems | filterByDate:awkfg.date"
+                           [value]="item._id + ':' + subitem._id">
+                           {{subitem.subitem_hin}} {{item.item_hin}} :
+                           {{subitem.subitem_eng}} {{item.item_eng}} :
+                           {{subitem.subitem_code}} {{item.item_code}}
+                        </ng-option>
+                     </ng-container>
                   </ng-select>
                </div>
             </div>
@@ -542,10 +562,12 @@
             <div class="col-md-3 mb-3">
                <div class="form-group">
                   <label class="form-label">Container Aawak Source</label>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Select Container Aawak Source" [clearable]="true"
-                     [virtualScroll]="true" [(ngModel)]="awkfg.enz.container_aawak_source_id" name="container_aawak_source_id">
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select Container Aawak Source"
+                     [clearable]="true" [virtualScroll]="true" [(ngModel)]="awkfg.enz.container_aawak_source_id"
+                     name="container_aawak_source_id">
                      <ng-option selected="selected" disabled value="">Select Container Aawak Source</ng-option>
-                     <ng-option *ngFor="let item of aawak_sources" [value]="item._id">{{item.list_name_hin}} : {{item.list_name_eng}}</ng-option>
+                     <ng-option *ngFor="let item of aawak_sources" [value]="item._id">{{item.list_name_hin}} :
+                        {{item.list_name_eng}}</ng-option>
                   </ng-select>
                </div>
             </div>
@@ -553,21 +575,24 @@
             <div class="col-md-2 mb-3">
                <div class="form-group">
                   <label class="form-label">Container Enz No</label>
-                  <input type="text" class="form-control" placeholder="Container Enz No" [(ngModel)]="awkfg.enz.container_enz_no" name="container_enz_no">
+                  <input type="text" class="form-control" placeholder="Container Enz No"
+                     [(ngModel)]="awkfg.enz.container_enz_no" name="container_enz_no">
                </div>
             </div>
 
             <div class="col-md-2 mb-3">
                <div class="form-group">
                   <label class="form-label">Container Capacity</label>
-                  <input type="number" class="form-control" placeholder="Container Capacity" [(ngModel)]="awkfg.enz.container_capacity" name="container_capacity">
+                  <input type="number" class="form-control" placeholder="Container Capacity"
+                     [(ngModel)]="awkfg.enz.container_capacity" name="container_capacity">
                </div>
             </div>
 
             <div class="col-md-2 mb-3">
                <div class="form-group">
                   <label class="form-label">Container Qty</label>
-                  <input type="number" class="form-control" placeholder="Container Qty" [(ngModel)]="awkfg.enz.container_qty" name="container_qty">
+                  <input type="number" class="form-control" placeholder="Container Qty"
+                     [(ngModel)]="awkfg.enz.container_qty" name="container_qty">
                </div>
             </div>
 
