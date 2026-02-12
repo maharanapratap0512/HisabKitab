@@ -12,7 +12,7 @@
             <span class="hk-title">
                <span class="hk mx-2"><strong><u>HISAB KITAB</u></strong>
                </span>
-               <span>(v25 Beta)</span>
+               <span>(v26 Beta)</span>
             </span>
          </a>
          <!-- <a routerLink="dashboard" class="topnav-logo">
@@ -116,7 +116,8 @@
                   <span class="account-user-name"> {{this.auth.webUser.dept_eng}} -
                      {{this.auth.webUser.dept_code}}</span>
 
-                  <app-popover-filter [label]="defaultMM" clearButtonLabel="Log Out" direction="left" (clear)="logout()" title="Click to Change default MM">
+                  <app-popover-filter [label]="defaultMM" clearButtonLabel="Log Out" direction="left" (clear)="logout()"
+                     title="Click to Change default MM">
                      <ng-select class="custom" style="width: 100%;" placeholder="Default MM" [clearable]="true"
                         [virtualScroll]="true" (change)="defaultMMChanged($event)">
                         <ng-option selected="selected" disabled value="">Default MM</ng-option>
@@ -268,8 +269,7 @@
                         <a class="dropdown-item" routerLinkActive="active"
                            [routerLink]="['view', 'district']">District</a>
                         <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'state']">State</a>
-                        <a class="dropdown-item" routerLinkActive="active"
-                           [routerLink]="['view', 'zone']">Zone</a>
+                        <a class="dropdown-item" routerLinkActive="active" [routerLink]="['view', 'zone']">Zone</a>
                         <a class="dropdown-item" routerLinkActive="active"
                            [routerLink]="['view', 'word_correction']">Word Correction</a>
 

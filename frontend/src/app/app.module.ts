@@ -100,6 +100,8 @@ import { PbkClosingComponent } from './pbk-closing/pbk-closing.component';
 import { PbkClosingEntryComponent } from './ENTRY__FORMS/pbk-closing-entry/pbk-closing-entry.component';
 import { PbkBachatComponent } from './pbk-bachat/pbk-bachat.component';
 import { HmpEntryComponent } from './ENTRY__FORMS/hmp-entry/hmp-entry.component';
+import { SelectionService } from './services/selection.service';
+import { TableSmartCheckboxDirective } from './SHARED/table-smart-checkbox.directive';
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -188,6 +190,7 @@ import { HmpEntryComponent } from './ENTRY__FORMS/hmp-entry/hmp-entry.component'
     PbkClosingEntryComponent,
     PbkBachatComponent,
     HmpEntryComponent,
+    TableSmartCheckboxDirective,
   ],
 
   imports: [
@@ -211,7 +214,7 @@ import { HmpEntryComponent } from './ENTRY__FORMS/hmp-entry/hmp-entry.component'
     NgxPaginationModule,
     AutocompleteLibModule
   ],
-  providers: [GlobalService, AuthService, ThemeService],
+  providers: [GlobalService, AuthService, ThemeService, SelectionService],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
