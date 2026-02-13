@@ -91,6 +91,7 @@ export class BachatNewComponent implements OnInit {
       this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
     });
+    this.filterBody.mm_id = this.auth.webUser.settings.defaultMM;
     // this.filterBody.year = 2024;
     // this.gs.yearChangedGetMonth(2024);
     // this.filterBody.months = [3, 1];
@@ -132,6 +133,7 @@ export class BachatNewComponent implements OnInit {
           }
         }
         this.bachatData = this.bachatAll;
+        this.applyClientSideFilter();
         this.isLoader = false;
       }
       this.isLoader = false;
@@ -497,54 +499,59 @@ export class BachatNewComponent implements OnInit {
       this.filterBody.from_year = this.filterBody.to_year;
       this.filterBody.from_month = this.filterBody.to_month;
     }
-    this.http.put(this.api.getUrl('BACHATNEW_OPTIMIZED') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe(async (data: any) => {
-      if (data['result'] && data['success']) {
 
-        this.bachatAll = data['result'];
+    if (!this.filterBody.to_year_month && !this.filterBody.to_year_month) {
+      this.getbachatData();
+    } else {
+      this.http.put(this.api.getUrl('BACHATNEW_OPTIMIZED') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe(async (data: any) => {
+        if (data['result'] && data['success']) {
 
-        if (data['headers'] && data['headers'].length > 0) {
-          this.monthsSel = data['headers'].map((h: any) => {
-            const mObj = this.gs.months.find((m: any) => m.m == h.month);
-            return {
-              m: h.month,
-              year: h.year,
-              name: mObj ? mObj.name : h.month
-            };
-          });
-        }
-        else {
-          this.monthsSel = []
-        }
+          this.bachatAll = data['result'];
 
-        for (let i in this.bachatAll) {
-          this.bachatAll[i].showTooltip = {};
-          this.bachatAll[i].categories_hin = '';
-          this.bachatAll[i].categories_eng = '';
-          if (this.bachatAll[i].arr_subitem_categories && this.bachatAll[i].arr_subitem_categories.length > 0) {
-            for (let j in this.categories) {
-              if (this.bachatAll[i].arr_subitem_categories.includes(this.categories[j]._id)) {
-                this.bachatAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.bachatAll[i].categories_eng += this.categories[j].category_eng + ', ';
+          if (data['headers'] && data['headers'].length > 0) {
+            this.monthsSel = data['headers'].map((h: any) => {
+              const mObj = this.gs.months.find((m: any) => m.m == h.month);
+              return {
+                m: h.month,
+                year: h.year,
+                name: mObj ? mObj.name : h.month
+              };
+            });
+          }
+          else {
+            this.monthsSel = []
+          }
+
+          for (let i in this.bachatAll) {
+            this.bachatAll[i].showTooltip = {};
+            this.bachatAll[i].categories_hin = '';
+            this.bachatAll[i].categories_eng = '';
+            if (this.bachatAll[i].arr_subitem_categories && this.bachatAll[i].arr_subitem_categories.length > 0) {
+              for (let j in this.categories) {
+                if (this.bachatAll[i].arr_subitem_categories.includes(this.categories[j]._id)) {
+                  this.bachatAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                  this.bachatAll[i].categories_eng += this.categories[j].category_eng + ', ';
+                }
               }
-            }
-          } else {
-            for (let j in this.categories) {
-              if (this.bachatAll[i].arr_item_categories.includes(this.categories[j]._id)) {
-                this.bachatAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.bachatAll[i].categories_eng += this.categories[j].category_eng + ', ';
+            } else {
+              for (let j in this.categories) {
+                if (this.bachatAll[i].arr_item_categories.includes(this.categories[j]._id)) {
+                  this.bachatAll[i].categories_hin += this.categories[j].category_hin + ', ';
+                  this.bachatAll[i].categories_eng += this.categories[j].category_eng + ', ';
+                }
               }
             }
           }
+          this.bachatData = this.bachatAll;
+          this.onHeaderFilterChange();
+          this.isLoader = false;
         }
-        this.bachatData = this.bachatAll;
-        this.onHeaderFilterChange();
         this.isLoader = false;
-      }
-      this.isLoader = false;
-    }, (err) => {
-      this.toastr.error('some error occures');
-      this.isLoader = false;
-    });
+      }, (err) => {
+        this.toastr.error('some error occures');
+        this.isLoader = false;
+      });
+    }
   }
 
   getYearTo() {
