@@ -427,6 +427,10 @@ span.search-icon {
 }
 
 // Global styles for ng-select dropdown panels
+.ng-dropdown-panel {
+  z-index: 9999 !important;
+}
+
 .ng-dropdown-panel.custom-sm {
   font-size: 0.8rem !important;
 

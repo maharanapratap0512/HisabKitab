@@ -25,7 +25,6 @@ export class HmpFormService {
       condition_id: null,
       qty: null,
       rate: null,
-      amount: null,
       lot_no: null,
       jawak_ref_id: null,
       active: 1
@@ -39,24 +38,17 @@ export class HmpFormService {
       condition_id: null,
       qty: null,
       rate: null,
-      amount: null,
       lot_no: null,
-      hmp_code: null,
-      hmp_type: null,
       aawak_ref_id: null,
       active: 1
     };
 
     this.hmpBatchForm = {
       date: gs.dateString,
-      batch_no: null,
       mm_id: auth.webUser.settings.defaultMM,
       recipe_id: null,
       recipe_name: null,
-      recipe_code: null,
       recipe_description: null,
-      status: 'pending',
-      notes: null,
       dept_id: auth.webUser.dept_id,
       inputs: [JSON.parse(JSON.stringify(this.inputFormTemplate))],
       outputs: [JSON.parse(JSON.stringify(this.outputFormTemplate))],
@@ -68,14 +60,10 @@ export class HmpFormService {
   reset() {
     this.hmpBatchForm = {
       date: this.hmpBatchForm.date,
-      batch_no: null,
       mm_id: this.hmpBatchForm.mm_id,
       recipe_id: null,
       recipe_name: null,
-      recipe_code: null,
       recipe_description: null,
-      status: 'pending',
-      notes: null,
       dept_id: this.auth.webUser.dept_id,
       inputs: [JSON.parse(JSON.stringify(this.inputFormTemplate))],
       outputs: [JSON.parse(JSON.stringify(this.outputFormTemplate))],

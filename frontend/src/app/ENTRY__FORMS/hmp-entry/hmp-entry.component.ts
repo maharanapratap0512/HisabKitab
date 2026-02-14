@@ -214,25 +214,11 @@ export class HmpEntryComponent implements OnInit {
 
 
   onSubmit() {
-    this.fs.submit = true;
+    console.log(this.fs.hmpBatchForm);
     if (this.fs.valid()) {
-      this.isLoader = true;
-      this.http.post(this.api.getUrl('HMP') + 'bunch/' + this.auth.webUser.dept_id, this.fs.hmpBatchForm)
-        .subscribe((data: any) => {
-          this.isLoader = false;
-          if (data.success) {
-            this.toastr.success('Batch Saved Successfully');
-            this.response.emit(data.result);
-            this.closeModal();
-          } else {
-            this.toastr.error(data.message || 'Error saving batch');
-          }
-        }, err => {
-          this.isLoader = false;
-          this.toastr.error(err.error?.message || 'Server Error');
-        });
-    } else {
-      this.toastr.error("Please fill required fields (Date, MM, valid Input/Output rows).");
+      this.http.post(this.api.getUrl('HMP') + 'batch', this.fs.hmpBatchForm).subscribe((data: any) => {
+        console.log(data);
+      });
     }
   }
 
