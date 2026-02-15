@@ -84,25 +84,25 @@ export class HmpFormService {
 
   // Logic to auto-add rows if the last row is valid
   formStatusChanges() {
-    let valid = true;
+    let validInput = true;
     for (let form of this.hmpBatchForm.inputs) {
       if (!(form.item_id)) {
-        valid = false;
+        validInput = false;
         break;
       }
     }
-    if (valid) {
+    if (validInput) {
       this.hmpBatchForm.inputs.push(JSON.parse(JSON.stringify(this.inputFormTemplate)));
     }
 
-    valid = true;
+    let validOutput = true;
     for (let form of this.hmpBatchForm.outputs) {
       if (!(form.item_id)) {
-        valid = false;
+        validOutput = false;
         break;
       }
     }
-    if (valid) {
+    if (validOutput) {
       this.hmpBatchForm.outputs.push(JSON.parse(JSON.stringify(this.outputFormTemplate)));
     }
   }
