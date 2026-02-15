@@ -87,3 +87,45 @@
     cursor: not-allowed !important;
   }
 }
+
+
+
+
+// /* 1. The main panel: set to max-content to stop the 1515px stretch */
+// ::ng-deep .ng-dropdown-panel {
+//   width: max-content !important;
+//   min-width: 100% !important;
+//   /* Matches the input width at minimum */
+//   max-width: 90vw !important;
+//   /* Prevents overflowing the screen edge */
+// }
+
+// /* 2. The scroll host: This is likely where your 1515px is coming from */
+// ::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items {
+//   display: inline-block !important;
+//   /* Changes from block to shrink-wrap */
+//   width: max-content !important;
+//   min-width: 100% !important;
+// }
+
+// /* 3. The virtual scroll container */
+// ::ng-deep .ng-dropdown-panel .scrollable-content {
+//   width: max-content !important;
+// }
+
+// /* 4. The individual options: Force them to stay on one line */
+// ::ng-deep .ng-option {
+//   white-space: nowrap !important;
+//   display: block !important;
+//   width: max-content !important;
+//   padding-right: 20px !important;
+//   /* Space for the scrollbar */
+// }
+
+// ::ng-deep .ng-dropdown-panel-items {
+//   display: flex !important;
+//   flex-direction: column !important;
+//   align-items: flex-start !important;
+//   /* Shrink-wraps children */
+//   width: fit-content !important;
+// }

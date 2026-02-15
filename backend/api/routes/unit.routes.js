@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const DBContex = require('../models/DBContex');
+const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 
 
@@ -27,7 +27,7 @@ router.post('/', async (req, res, next) => {
                     success: true,
                     result: data || []
                 });
-            }, (err)=>{
+            }, (err) => {
                 return next(err);
             });
         }

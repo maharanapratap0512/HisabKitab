@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const DBContex = require('../models/DBContex');
+const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 
 
@@ -45,7 +45,7 @@ router.post('/:dept_id', async (req, res, next) => {
         if (req.body && req.body.gadi_num) {
             await DB.insert('vehicle', req.body).then(async (data) => {
                 let time = DB.db.prepare('select UNIXEPOCH() * 1000 as time').get().time;
-                
+
                 res.json({
                     success: true,
                     result: await verifyExpiryDate(data, time) || {}

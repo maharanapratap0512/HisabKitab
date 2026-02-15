@@ -91,7 +91,7 @@ export class BachatNewComponent implements OnInit {
       this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
     });
-    this.filterBody.mm_id = this.auth.webUser.settings.defaultMM;
+    this.filterBody.mm_id = [this.auth.webUser.settings.defaultMM];
     // this.filterBody.year = 2024;
     // this.gs.yearChangedGetMonth(2024);
     // this.filterBody.months = [3, 1];
@@ -493,9 +493,11 @@ export class BachatNewComponent implements OnInit {
     }
 
     if (this.filterBody.from_year && !this.filterBody.to_year) {
+      this.filterBody.to_year_month = this.filterBody.from_year_month;
       this.filterBody.to_year = this.filterBody.from_year;
       this.filterBody.to_month = this.filterBody.from_month;
     } else if (!this.filterBody.from_year && this.filterBody.to_year) {
+      this.filterBody.from_year_month = this.filterBody.to_year_month;
       this.filterBody.from_year = this.filterBody.to_year;
       this.filterBody.from_month = this.filterBody.to_month;
     }
@@ -503,7 +505,7 @@ export class BachatNewComponent implements OnInit {
     if (!this.filterBody.to_year_month && !this.filterBody.to_year_month) {
       this.getbachatData();
     } else {
-      this.http.put(this.api.getUrl('BACHATNEW_OPTIMIZED') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe(async (data: any) => {
+      this.http.put(this.api.getUrl('BACHATNEW') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe(async (data: any) => {
         if (data['result'] && data['success']) {
 
           this.bachatAll = data['result'];
@@ -543,7 +545,7 @@ export class BachatNewComponent implements OnInit {
             }
           }
           this.bachatData = this.bachatAll;
-          this.onHeaderFilterChange();
+          // this.onHeaderFilterChange();
           this.isLoader = false;
         }
         this.isLoader = false;
@@ -566,8 +568,8 @@ export class BachatNewComponent implements OnInit {
   applyClientSideFilter() {
     let filtered = [...this.bachatAll];
 
-    if (this.filterBody.mm_id) {
-      filtered = filtered.filter(row => row.mm_id == this.filterBody.mm_id);
+    if (this.filterBody.mm_id && this.filterBody.mm_id.length > 0) {
+      filtered = filtered.filter(row => this.filterBody.mm_id.includes(row.mm_id));
     }
 
     if (this.filterBody.category_id) {
@@ -579,8 +581,8 @@ export class BachatNewComponent implements OnInit {
       });
     }
 
-    if (this.filterBody.item_id) {
-      filtered = filtered.filter(row => row.item_id == this.filterBody.item_id);
+    if (this.filterBody.item_id && this.filterBody.item_id.length > 0) {
+      filtered = filtered.filter(row => this.filterBody.item_id.includes(row.item_id));
     }
 
     this.bachatData = filtered;

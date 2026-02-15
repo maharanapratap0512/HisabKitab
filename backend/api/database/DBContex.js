@@ -48,9 +48,9 @@ class DBContex {
     ];
 
     constructor() {
-        this.query = require('../models/query');
-        this.dbModal = require('../models/db.model');
-        this.tbInterface = require('../models/table_interface');
+        this.query = require('./query');
+        this.dbModal = require('./db.model');
+        this.tbInterface = require('./table_interface');
         this.path = require('path');
         this.fs = require('fs');
         this.DBFolder = this.path.resolve(__dirname, '../../../../Data');

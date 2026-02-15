@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const DBContex = require('../models/DBContex');
+const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 
 
@@ -35,6 +35,7 @@ router.get('/:dept_id', async (req, res, next) => {
 router.post('/:dept_id', async (req, res, next) => {
     try {
         if (req.body) {
+            req.body.dept_id = req.body.dept_id || req.params.dept_id;
             await DB.insert('report_comment', req.body, req.params.dept_id).then((data) => {
                 res.json({
                     success: true,
@@ -70,7 +71,7 @@ router.put('/', async (req, res, next) => {
 router.put('/:id', async (req, res, next) => {
     try {
         if (req.body && req.params.id) {
-            await DB.runQuery('report_comment', 'update_text',{ obj: {_id: req.params.id, comment: req.body.comment} }).then(async (data) => {
+            await DB.runQuery('report_comment', 'update_text', { obj: { _id: req.params.id, comment: req.body.comment } }).then(async (data) => {
                 res.json({
                     success: (data.changes > 0 ? true : false),
                 });

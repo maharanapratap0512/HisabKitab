@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const DBContex = require('../models/DBContex');
+const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 
 
@@ -22,7 +22,7 @@ router.get('/', async (req, res, next) => {
 router.get('/splists/:dept_id', async (req, res, next) => {
     try {
         let conditionString = `list_type in ('jawak_type', 'aawak_type', 'condition', 'usage_list', 'aawak_source', 'mm_type')`;
-        await DB.getList('support_list', { dept_id: req.params.dept_id,  conditionString: conditionString, order:'list_type' }).then((response) => {
+        await DB.getList('support_list', { dept_id: req.params.dept_id, conditionString: conditionString, order: 'list_type' }).then((response) => {
             res.json({
                 success: true,
                 result: response.data
@@ -37,12 +37,12 @@ router.get('/splists/:dept_id', async (req, res, next) => {
 router.post('/:dept_id', async (req, res, next) => {
     try {
         if (req.body && req.body.list_type && req.body.list_name_eng) {
-            await DB.insert('support_list', req.body, req.params.dept_id).then((data) => {                            
+            await DB.insert('support_list', req.body, req.params.dept_id).then((data) => {
                 res.json({
                     success: true,
                     result: data || {}
                 });
-            },(err)=>{
+            }, (err) => {
                 next(err);
             })
         }

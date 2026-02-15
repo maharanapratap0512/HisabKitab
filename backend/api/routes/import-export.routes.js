@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const fs = require('fs');
-const DBContex = require('../models/DBContex');
-const Fn = require('../models/functions');
-const { product } = require('../models/query');
+const DBContex = require('../database/DBContex');
+const Fn = require('../database/functions');
+const { product } = require('../database/query');
 const DB = new DBContex();
 
 

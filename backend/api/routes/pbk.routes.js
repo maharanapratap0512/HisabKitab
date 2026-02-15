@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const DBContex = require('../models/DBContex');
+const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 
 
@@ -100,7 +100,7 @@ router.put('/', async (req, res, next) => {
             req.body.set.document = (req.body.set.document ? JSON.stringify(req.body.set.document) : null);
             req.body.set.relative_ref = (req.body.set.relative_ref ? JSON.stringify(req.body.set.relative_ref) : null);
             req.body.set.alt_mo_no = (req.body.set.alt_mo_no ? JSON.stringify(req.body.set.alt_mo_no) : null);
-            
+
             await DB.update('pbk', req.body.set, req.body.query._id).then(async (data) => {
                 data.document = (data.document != "[null]" ? JSON.parse(data.document) : {});
                 data.relative_ref = (data.relative_ref != "[null]" ? JSON.parse(data.relative_ref) : []);

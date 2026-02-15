@@ -74,7 +74,7 @@
                               </div>
                               <div class="col-3">
                                  <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
-                                    [clearable]="true" [virtualScroll]="true" (change)="filter()"
+                                    [clearable]="true" [virtualScroll]="true" (change)="filter()" [multiple]="true"
                                     [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
                                     <ng-option *ngFor="let item of mms" [value]="item._id">
                                        {{item.mm_hin}}:{{item.mm_eng}}:{{item.mm_code}}</ng-option>
@@ -90,16 +90,18 @@
                               </div>
                               <div class="col-3">
                                  <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
-                                    [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)"
-                                    [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}">
+                                    [multiple]="true" [clearable]="true" [virtualScroll]="true"
+                                    (change)="itemSelected($event)" [(ngModel)]="filterBody.item_id"
+                                    [ngModelOptions]="{standalone: true}">
                                     <ng-option *ngFor="let item of items" [value]="item._id">
                                        {{item.item_hin}}:{{item.item_eng}}:{{item.item_code}}</ng-option>
                                  </ng-select>
                               </div>
                               <div class="col-3 mt-2">
                                  <ng-select class="custom" style="width: 100%;" placeholder="Select Subitem"
-                                    [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.subitem_id"
-                                    [ngModelOptions]="{standalone: true}" (change)="filter()">
+                                    [multiple]="true" [clearable]="true" [virtualScroll]="true"
+                                    [(ngModel)]="filterBody.subitem_id" [ngModelOptions]="{standalone: true}"
+                                    (change)="filter()">
                                     <ng-option *ngFor="let item of subitems" [value]="item._id">
                                        {{item.subitem_hin}}:{{item.subitem_eng}}</ng-option>
                                  </ng-select>
@@ -244,11 +246,12 @@
                                  <div class="d-flex justify-content-between align-items-center">
                                     <span>M M</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                       (clear)="filterBody.mm_id = null; onHeaderFilterChange()"
-                                       [isOpen]="!!filterBody.mm_id">
+                                       (clear)="filterBody.mm_id = []; onHeaderFilterChange()"
+                                       [isOpen]="!!filterBody.mm_id.length">
                                        <ng-select class="custom-sm" style="width: 200px;" placeholder="Select MM"
-                                          [clearable]="true" [virtualScroll]="true" (change)="onHeaderFilterChange()"
-                                          [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
+                                          [multiple]="true" [clearable]="true" [virtualScroll]="true"
+                                          (change)="onHeaderFilterChange()" [(ngModel)]="filterBody.mm_id"
+                                          [ngModelOptions]="{standalone: true}">
                                           <ng-option *ngFor="let item of mms" [value]="item._id">
                                              {{item.mm_hin}} : {{item.mm_eng}}</ng-option>
                                        </ng-select>
@@ -274,11 +277,12 @@
                                  <div class="d-flex justify-content-between align-items-center">
                                     <span>Item</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                       (clear)="filterBody.item_id = null; onHeaderFilterChange()"
-                                       [isOpen]="!!filterBody.item_id">
+                                       (clear)="filterBody.item_id = []; onHeaderFilterChange()"
+                                       [isOpen]="!!(filterBody.item_id && filterBody.item_id.length)">
                                        <ng-select class="custom-sm" style="width: 200px;" placeholder="Select Item"
-                                          [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)"
-                                          [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}">
+                                          [multiple]="true" [clearable]="true" [virtualScroll]="true"
+                                          (change)="itemSelected($event)" [(ngModel)]="filterBody.item_id"
+                                          [ngModelOptions]="{standalone: true}">
                                           <ng-option *ngFor="let item of items" [value]="item._id">
                                              {{item.item_hin}} : {{item.item_eng}}</ng-option>
                                        </ng-select>
@@ -313,11 +317,12 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                        <span>Mini_Madhuban</span>
                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                          (clear)="filterBody.mm_id = null; onHeaderFilterChange()"
-                                          [isOpen]="!!filterBody.mm_id">
+                                          (clear)="filterBody.mm_id = []; onHeaderFilterChange()"
+                                          [isOpen]="!!(filterBody.mm_id && filterBody.mm_id.length)">
                                           <ng-select class="custom-sm" style="width: 200px;" placeholder="Select MM"
-                                             [clearable]="true" [virtualScroll]="true" (change)="onHeaderFilterChange()"
-                                             [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
+                                             [multiple]="true" [clearable]="true" [virtualScroll]="true"
+                                             (change)="onHeaderFilterChange()" [(ngModel)]="filterBody.mm_id"
+                                             [ngModelOptions]="{standalone: true}">
                                              <ng-option *ngFor="let item of mms" [value]="item._id">
                                                 {{item.mm_hin}} : {{item.mm_eng}}</ng-option>
                                           </ng-select>
@@ -344,11 +349,12 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                        <span>Item_Subitem_Name</span>
                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                          (clear)="filterBody.item_id = null; onHeaderFilterChange()"
-                                          [isOpen]="!!filterBody.item_id">
+                                          (clear)="filterBody.item_id = []; onHeaderFilterChange()"
+                                          [isOpen]="!!(filterBody.item_id && filterBody.item_id.length)">
                                           <ng-select class="custom-sm" style="width: 200px;" placeholder="Select Item"
-                                             [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)"
-                                             [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}">
+                                             [multiple]="true" [clearable]="true" [virtualScroll]="true"
+                                             (change)="itemSelected($event)" [(ngModel)]="filterBody.item_id"
+                                             [ngModelOptions]="{standalone: true}">
                                              <ng-option *ngFor="let item of items" [value]="item._id">
                                                 {{item.item_hin}} : {{item.item_eng}}</ng-option>
                                           </ng-select>
@@ -502,7 +508,8 @@
                                                    <i class="uil-corner-down-right"></i>
                                                    <span class="mx-1">{{j+1}} </span>
                                                 </td>
-                                                <td><span [ngClass]="{'error': bcht < 0}"> {{bcht}}</span></td>
+                                                <td><span [ngClass]="{'error': bcht < 0}"> {{bcht ? bcht :
+                                                      'N/A'}}</span></td>
                                                 <td><span [ngClass]="{'error': data.arr_sum_aawak[j] < 0}">
                                                       {{data.arr_sum_aawak[j] + " " + data.unit_short }}</span></td>
                                                 <td><span [ngClass]="{'error': data.arr_sum_used[j] < 0}">

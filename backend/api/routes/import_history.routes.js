@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const DBContex = require('../models/DBContex');
+const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 
 
@@ -20,8 +20,8 @@ router.get('/', async (req, res, next) => {
 // get import_history 
 router.get('/:dept_id', async (req, res, next) => {
     try {
-        await DB.getList('import_history', {full:true, dept_id: req.params.dept_id }).then(async (resolve) => {
-            for(let i in resolve.data){
+        await DB.getList('import_history', { full: true, dept_id: req.params.dept_id }).then(async (resolve) => {
+            for (let i in resolve.data) {
                 resolve.data[i].monthly_detail = resolve.data[i].monthly_detail ? JSON.parse(resolve.data[i].monthly_detail) : [];
             }
             res.json({

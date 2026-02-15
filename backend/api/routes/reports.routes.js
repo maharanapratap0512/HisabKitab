@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const { json } = require('body-parser');
-const DBContex = require('../models/DBContex');
+const DBContex = require('../database/DBContex');
 const DB = new DBContex();
-const Fn = require('../models/functions');
+const Fn = require('../database/functions');
 
 
 // get country all
@@ -137,10 +137,10 @@ router.put('/awk_jwk_check/', async (req, res, next) => {
     try {
         let orderBy = req.body.orderBy ? req.body.orderBy : `_id`;
         let aawaks = [], jawaks = []
-        
+
         let awkConditionString = `1=1 ${req.body.date_from ? ` AND date >= '${req.body.date_from}'` : ``} ${req.body.date_to ? ` AND date <= '${req.body.date_to}'` : ``}  ${req.body.mm_id ? ` AND aawak.mm_id = ${req.body.mm_id}` : ``} ${req.body.aj_mm_id ? ` AND aawak_mm_id = '${req.body.aj_mm_id}'` : ``} ${req.body.item_id ? ` AND item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND subitem_id = ${req.body.subitem_id}` : ``}`;
         let jwkConditionString = `1=1 ${req.body.date_from ? ` AND date >= '${req.body.date_from}'` : ``} ${req.body.date_to ? ` AND date <= '${req.body.date_to}'` : ``}  ${req.body.mm_id ? ` AND jawak.mm_id = ${req.body.mm_id}` : ``} ${req.body.aj_mm_id ? ` AND jawak_mm_id = '${req.body.aj_mm_id}'` : ``} ${req.body.item_id ? ` AND item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND subitem_id = ${req.body.subitem_id}` : ``}`;
-        
+
 
         await DB.getList('aawak', { full: true, dept_id: req.params.dept_id, conditionString: awkConditionString, orderBy: orderBy }).then(async (resolve) => {
             for (let i in resolve.data) {
@@ -149,7 +149,7 @@ router.put('/awk_jwk_check/', async (req, res, next) => {
             }
             aawaks = resolve.data;
         });
-        
+
         await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkConditionString, orderBy: orderBy }).then(async (resolve) => {
             for (let i in resolve.data) {
                 resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});

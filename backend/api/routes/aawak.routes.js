@@ -1,9 +1,9 @@
 
 const router = require('express').Router();
 const { json } = require('body-parser');
-const DBContex = require('../models/DBContex');
-const Fn = require('../models/functions');
-const query = require('../models/query');
+const DBContex = require('../database/DBContex');
+const Fn = require('../database/functions');
+const query = require('../database/query');
 const DB = new DBContex();
 
 

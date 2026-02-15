@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const DBContex = require('../models/DBContex');
-const Fn = require('../models/functions');
+const Fn = require('../database/functions');
 const DB = new DBContex();
 
 // Helper function to generate months between from and to dates

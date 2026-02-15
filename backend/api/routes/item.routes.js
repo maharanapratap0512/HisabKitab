@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const DBContex = require('../models/DBContex');
+const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 
 
@@ -79,9 +79,9 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
                 resolve.data[i].categories_hin = JSON.parse(resolve.data[i].categories_hin)
                 // resolve.data[i].categories_eng = JSON.parse(resolve.data[i].categories_eng)
                 subitem_count += resolve.data[i].subitems.length;
-                
+
                 for (let j = 0; j < resolve.data[i].subitems.length; j++) {
-                    resolve.data[i].subitems[j].categories_hin = ((resolve.data[i].subitems[j].categories_hin && typeof resolve.data[i].subitems[j].categories_hin == "string"  && resolve.data[i].subitems[j].categories_hin != "[null]") ? JSON.parse(resolve.data[i].subitems[j].categories_hin) : []);
+                    resolve.data[i].subitems[j].categories_hin = ((resolve.data[i].subitems[j].categories_hin && typeof resolve.data[i].subitems[j].categories_hin == "string" && resolve.data[i].subitems[j].categories_hin != "[null]") ? JSON.parse(resolve.data[i].subitems[j].categories_hin) : []);
                 }
             }
 

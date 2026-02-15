@@ -1,5 +1,6 @@
 const { version } = require('os');
 let path = require('path');
+const { Sequelize } = require('sequelize');
 
 class dbModal {
   // path;
@@ -2379,7 +2380,14 @@ let dbmodal = new dbModal(path.resolve(__dirname, '../../../../Data/Database.db'
 
 // for khatti
 // let dbmodal = new dbModal(path.resolve(__dirname, '../../../../Data/Khatti/Database.db'))
-module.exports = { dbModal, dbmodal }
+
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: path.resolve(__dirname, '../../../../Data/Database.db'),
+  logging: false
+});
+
+module.exports = { dbModal, dbmodal, sequelize }
 
 
 

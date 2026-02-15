@@ -227,13 +227,13 @@
 
                                         </td>
                                         <td>
-                                            <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Item"
+                                            <ng-select class="custom-sm" style="width: 50%;" placeholder="Select Item"
                                                 [clearable]="true" [virtualScroll]="true"
                                                 [(ngModel)]="jwkForm.item_subitem_id" name="item_subitem_id"
                                                 #item_subitem_id="ngModel" (change)="itemSubitemSelected($event, i)"
                                                 [ngClass]="{'validation' : (item_subitem_id?.touched || fMain.submitted) && item_subitem_id.errors?.['required'], 'readonly-field': !!jwkForm.aawak_ref_id}"
                                                 [selectOnTab]="true" [readonly]="!!jwkForm.aawak_ref_id" required
-                                                [showSelectAll]="true" styleMode="material">
+                                                [showSelectAll]="true" appendTo="body">
 
                                                 <ng-container
                                                     *ngFor="let item of items | filterByDate:fs.jawakFormMain.date">
