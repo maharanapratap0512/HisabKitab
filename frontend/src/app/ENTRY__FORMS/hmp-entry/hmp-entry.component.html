@@ -29,12 +29,15 @@
                 <!-- Recipe Selection -->
                 <div class="col-md-4">
                     <label class="form-label">Recipe</label>
-                    <ng-select class="custom mb-1" [items]="recipes" bindLabel="recipe_name" bindValue="_id"
-                        [(ngModel)]="fs.hmpBatchForm.recipe_id" name="recipe_id" (change)="onRecipeSelect($event)"
-                        [addTag]="true" (add)="onRecipeNameChange($event)" placeholder="Select or Type New Recipe">
+                    <ng-select class="custom mb-1" [(ngModel)]="fs.hmpBatchForm.recipe_id" name="recipe_id"
+                        (change)="onRecipeSelect($event)" [addTag]="true" placeholder="Select or Type New Recipe"
+                        required>
+                        <ng-option *ngFor="let item of recipes" [value]="item._id">
+                            {{item.recipe_name}} - ({{item.Description}})
+                        </ng-option>
                     </ng-select>
-                    <input *ngIf="fs.hmpBatchForm.recipe_name" type="text" class="form-control"
-                        placeholder="Description" [(ngModel)]="fs.hmpBatchForm.recipe_description"
+                    <input *ngIf="fs.hmpBatchForm.recipe_name && !fs.hmpBatchForm.recipe_id" type="text"
+                        class="form-control" placeholder="Description" [(ngModel)]="fs.hmpBatchForm.recipe_description"
                         name="recipe_description">
                 </div>
                 <div class="col-md-4 text-center">

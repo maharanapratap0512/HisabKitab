@@ -83,37 +83,49 @@ export class HmpEntryComponent implements OnInit {
   }
 
   onRecipeSelect(event: any) {
-    if (event) {
+    console.log("recipe select", event);
 
-
-      this.fs.hmpBatchForm.recipe_name = null;
-      // this.fs.hmpBatchForm.recipe_code = null;
-      this.fs.hmpBatchForm.recipe_id = event;
+    if (event && event.label) {
+      this.fs.hmpBatchForm.recipe_name = event.label;
+      this.fs.hmpBatchForm.recipe_id = null;
       // this.fs.hmpBatchForm.update_recipe = true; // New recipe likely
+    } else if (event) {
+      let recipe = this.recipes.find((x: any) => x._id == event);
+      if (recipe) {
+        this.fs.hmpBatchForm = JSON.parse(JSON.stringify(recipe));
+        this.fs.hmpBatchForm.recipe_id = recipe._id;
+        for (let i = 0; i < recipe.inputs.length; i++) {
+          let item_subitem_id = recipe.inputs[i].item_id + ":" + recipe.inputs[i].subitem_id || null;
+          this.itemSubitemSelected(item_subitem_id, i, 'inputs');
+        }
+        for (let i = 0; i < recipe.outputs.length; i++) {
+          let item_subitem_id = recipe.outputs[i].item_id + ":" + recipe.outputs[i].subitem_id || null;
+          this.itemSubitemSelected(item_subitem_id, i, 'outputs');
+        }
+
+        console.log(this.fs.hmpBatchForm);
+
+      } else {
+        this.fs.reset();
+      }
+    } else {
+      this.fs.reset();
     }
     this.fs.formStatusChanges();
   }
 
-  onRecipeNameChange(event: any) {
-    let name = event.recipe_name || event.label || event;
-    console.log('okok', name);
-
-
-    this.fs.hmpBatchForm.recipe_name = name;
-    this.fs.hmpBatchForm.recipe_id = null; // New recipe
-    // this.fs.hmpBatchForm.update_recipe = true;
-  }
-
   // --- Input Table Logic ---
 
-  itemSubitemSelected(ev: any, i: number, type: string) {
+  async itemSubitemSelected(ev: any, i: number, type: string) {
     if (ev) {
       let item_id = parseInt(ev.split(':')[0]);
       let subitem_id = ev.split(':')[1] ? parseInt(ev.split(':')[1]) : null;
 
-      let item = this.items.find((x: any) => x._id == item_id);
-      let subitem = item.subitems?.find((x: any) => x._id == subitem_id);
+      let item = await this.items.find((x: any) => x._id == item_id);
+      let subitem = await item?.subitems?.find((x: any) => x._id == subitem_id);
 
+
+      this.fs.hmpBatchForm[type][i].item_subitem_id = item_id + ":" + subitem_id || null;
       this.fs.hmpBatchForm[type][i].item_id = item_id;
       this.fs.hmpBatchForm[type][i].subitem_id = subitem_id;
       this.fs.hmpBatchForm[type][i].unit_id = subitem ? subitem.unit_id : item.unit_id;
