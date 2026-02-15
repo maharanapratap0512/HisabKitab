@@ -5,7 +5,8 @@
 
 <div class="row material-theme-container" id="hmpEntryComponent">
     <div class="card-body">
-        <form #f="ngForm">
+        <form id="hmpEntryForm" #f="ngForm">
+            <div class="row mb-2"></div>
 
             <!-- Top Section: Batch & Recipe Info -->
             <div class="row mb-3">
@@ -16,7 +17,7 @@
                 <div class="col-md-2">
                     <label class="form-label">MM</label>
                     <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
-                        [virtualScroll]="true" [(ngModel)]="fs.hmpBatchForm.mm_id" name="mm_id" #mm_id="ngModel"
+                        [virtualScroll]="true" [(ngModel)]="fs.hmpBatchForm.mm_id" #mm_id="ngModel"
                         [ngClass]="{ 'validation': (mm_id?.touched || f.submitted) && mm_id.errors?.['required']}"
                         required>
                         <ng-option selected="selected" disabled value="">MM</ng-option>
@@ -28,23 +29,25 @@
                 <!-- Recipe Selection -->
                 <div class="col-md-4">
                     <label class="form-label">Recipe</label>
-                    <ng-select class="custom" [items]="recipes" bindLabel="recipe_name" bindValue="_id"
+                    <ng-select class="custom mb-1" [items]="recipes" bindLabel="recipe_name" bindValue="_id"
                         [(ngModel)]="fs.hmpBatchForm.recipe_id" name="recipe_id" (change)="onRecipeSelect($event)"
                         [addTag]="true" (add)="onRecipeNameChange($event)" placeholder="Select or Type New Recipe">
                     </ng-select>
+                    <input *ngIf="fs.hmpBatchForm.recipe_name" type="text" class="form-control"
+                        placeholder="Description" [(ngModel)]="fs.hmpBatchForm.recipe_description"
+                        name="recipe_description">
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Description</label>
-                    <input type="text" class="form-control" placeholder="Description"
-                        [(ngModel)]="fs.hmpBatchForm.recipe_description" name="recipe_description">
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" [(ngModel)]="fs.hmpBatchForm.update_recipe"
-                            name="update_recipe" id="updateRecipe">
-                        <label class="form-check-label" for="updateRecipe">
-                            Update/Save Recipe
-                        </label>
+                <div class="col-md-4 text-center">
+                    <div class="d-flex">
+                        <button class="btn-sm btn-secondary submit" (click)="closeModal()">Cancel</button>
+                        <button class="btn-sm btn-primary submit mx-2" (click)="onSubmit()">Submit</button>
+                        <div class="submit form-check">
+                            <input class="form-check-input" type="checkbox" [(ngModel)]="fs.hmpBatchForm.update_recipe"
+                                name="update_recipe" id="updateRecipe">
+                            <label class="form-check-label" for="updateRecipe">
+                                Save Recipe
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -67,10 +70,12 @@
                                 <th width="15%">Qty</th>
                                 <th width="15%">Rate</th>
                                 <th width="15%">Condition</th>
+                                <th width="5%">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let row of fs.hmpBatchForm.inputs; let i = index">
+                            <tr ngModelGroup="in_{{i}}" #rowInput="ngModelGroup"
+                                *ngFor="let row of fs.hmpBatchForm.inputs; let i = index">
                                 <td>{{i+1}}</td>
                                 <!-- Lot No -->
                                 <!-- <td>
@@ -90,12 +95,12 @@
                                     </td> -->
                                 <!-- Item Dropdown -->
                                 <td>
-                                    <ng-select appendTo="body" class="custom" style="width: 100%;"
+                                    <ng-select appendTo="#hmpEntryForm" class="custom" style="width: 100%;"
                                         placeholder="Select Item" [clearable]="true" [virtualScroll]="true"
-                                        [(ngModel)]="row.item_subitem_id" name="out_item_{{i}}"
-                                        #item_subitem_id="ngModel" (change)="itemSubitemSelectedOutput($event, i)"
+                                        [(ngModel)]="row.item_subitem_id" #item_subitem_id="ngModel"
+                                        (change)="itemSubitemSelected($event, i, 'inputs')"
                                         [ngClass]="{'validation' : (item_subitem_id?.touched || f.submitted) && item_subitem_id.errors?.['required']}"
-                                        [selectOnTab]="true" required [showSelectAll]="false" styleMode="material">
+                                        [selectOnTab]="true" required styleMode="material">
 
                                         <ng-container *ngFor="let item of items | filterByDate:fs.hmpBatchForm.date">
                                             <ng-option [value]="item._id + ':' + null">
@@ -118,9 +123,10 @@
                                         <input type="number" class="form-control-sm flex-fill" [(ngModel)]="row.qty"
                                             name="in_qty_{{i}}" (change)="calculateAmountInput(i)">
                                         <!-- <span> -->
-                                        <ng-select class="custom-sm border mw-3" [items]="units" bindLabel="unit_short"
-                                            bindValue="_id" [(ngModel)]="row.unit_id" name="in_unit_{{i}}"
-                                            [clearable]="false" placeholder="Unit"></ng-select>
+                                        <ng-select appendTo="#hmpEntryForm" class="custom-sm border mw-3"
+                                            [items]="units" bindLabel="unit_short" bindValue="_id"
+                                            [(ngModel)]="row.unit_id" name="in_unit_{{i}}" [clearable]="false"
+                                            placeholder="Unit"></ng-select>
                                         <!-- </span> -->
                                     </div>
                                 </td>
@@ -132,9 +138,21 @@
                                 </td>
                                 <!-- Condition -->
                                 <td>
-                                    <ng-select class="custom-sm" [items]="conditions" bindLabel="condition_name"
-                                        bindValue="_id" [(ngModel)]="row.condition_id" name="in_condition_{{i}}"
-                                        [clearable]="false" placeholder="Select Condition"></ng-select>
+                                    <ng-select appendTo="#hmpEntryForm" class="custom-sm" [(ngModel)]="row.condition_id"
+                                        name="in_condition_{{i}}" [clearable]="false" placeholder="Select Condition">
+                                        <ng-option selected="selected" disabled value="">Select Condition</ng-option>
+                                        <ng-option *ngFor="let item of conditions"
+                                            [value]="item._id">{{item.list_name_hin}} :
+                                            {{item.list_name_eng}} </ng-option>
+                                    </ng-select>
+                                </td>
+                                <!-- Delete Action -->
+                                <td class="text-center">
+                                    <button *ngIf="row.item_subitem_id" type="button" class="btn btn-sm btn-danger"
+                                        (click)="deleteRow('inputs', i)" title="Delete this row"
+                                        style="padding: 0.2rem 0.5rem; border-radius: 4px;">
+                                        <i class="uil uil-times"></i>
+                                    </button>
                                 </td>
 
                             </tr>
@@ -148,7 +166,7 @@
             <!-- Right: Outputs (Production) -->
             <div class="row">
                 <h5 class="text-primary">Output Products (Produced)</h5>
-                <div class="table-container" style="padding-bottom: 200px; overflow-x: auto; overflow-y: visible;">
+                <div class="table-container">
                     <table class="table table-sm table-bordered">
                         <thead class="table-light">
                             <tr>
@@ -157,15 +175,17 @@
                                 <th width="15%">Qty</th>
                                 <th width="15%">Rate</th>
                                 <th width="15%">Condition</th>
+                                <th width="5%">Action</th>
                                 <!-- <th width="20%">Amount</th> -->
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let row of fs.hmpBatchForm.outputs; let i = index">
+                            <tr ngModelGroup="out_{{i}}" #rowOutput="ngModelGroup"
+                                *ngFor="let row of fs.hmpBatchForm.outputs; let i = index">
                                 <td>{{i+1}}</td>
                                 <!-- Item Dropdown -->
                                 <td>
-                                    <!-- <ng-select class="custom-sm" [clearable]="true" [virtualScroll]="true"
+                                    <!-- <ng-select appendTo="body" class="custom-sm" [clearable]="true" [virtualScroll]="true"
                                         [(ngModel)]="row.item_subitem_id" name="out_item_{{i}}"
                                         (change)="itemSubitemSelectedOutput($event, i)" placeholder="Item">
                                         <ng-container *ngFor="let item of items">
@@ -176,10 +196,10 @@
                                             </ng-option>
                                         </ng-container>
                                     </ng-select> -->
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
-                                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="row.item_subitem_id"
-                                        name="out_item_{{i}}" #item_subitem_id="ngModel"
-                                        (change)="itemSubitemSelectedOutput($event, i)"
+                                    <ng-select appendTo="#hmpEntryForm" class="custom" style="width: 100%;"
+                                        placeholder="Select Item" [clearable]="true" [virtualScroll]="true"
+                                        [(ngModel)]="row.item_subitem_id" name="out_item_{{i}}"
+                                        #item_subitem_id="ngModel" (change)="itemSubitemSelected($event, i, 'outputs')"
                                         [ngClass]="{'validation' : (item_subitem_id?.touched || f.submitted) && item_subitem_id.errors?.['required']}"
                                         [selectOnTab]="true" required [showSelectAll]="false" styleMode="material">
 
@@ -204,9 +224,10 @@
                                         <input type="number" class="form-control-sm flex-fill" [(ngModel)]="row.qty"
                                             name="in_qty_{{i}}" (change)="calculateAmountInput(i)">
                                         <!-- <span> -->
-                                        <ng-select class="custom-sm border mw-3" [items]="units" bindLabel="unit_short"
-                                            bindValue="_id" [(ngModel)]="row.unit_id" name="in_unit_{{i}}"
-                                            [clearable]="false" placeholder="Unit"></ng-select>
+                                        <ng-select appendTo="#hmpEntryForm" class="custom-sm border mw-3"
+                                            [items]="units" bindLabel="unit_short" bindValue="_id"
+                                            [(ngModel)]="row.unit_id" name="in_unit_{{i}}" [clearable]="false"
+                                            placeholder="Unit"></ng-select>
                                         <!-- </span> -->
                                     </div>
                                 </td>
@@ -221,9 +242,21 @@
 
                                 <!-- Condition -->
                                 <td>
-                                    <ng-select class="custom-sm" [items]="conditions" bindLabel="condition_name"
-                                        bindValue="_id" [(ngModel)]="row.condition_id" name="out_condition_{{i}}"
-                                        [clearable]="false"></ng-select>
+                                    <ng-select appendTo="#hmpEntryForm" class="custom-sm" [(ngModel)]="row.condition_id"
+                                        name="in_condition_{{i}}" [clearable]="false" placeholder="Select Condition">
+                                        <ng-option selected="selected" disabled value="">Select Condition</ng-option>
+                                        <ng-option *ngFor="let item of conditions"
+                                            [value]="item._id">{{item.list_name_hin}} :
+                                            {{item.list_name_eng}} </ng-option>
+                                    </ng-select>
+                                </td>
+                                <!-- Delete Action -->
+                                <td class="text-center">
+                                    <button *ngIf="row.item_subitem_id" type="button" class="btn btn-sm btn-danger"
+                                        (click)="deleteRow('outputs', i)" title="Delete this row"
+                                        style="padding: 0.2rem 0.5rem; border-radius: 4px;">
+                                        <i class="uil uil-times"></i>
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -234,12 +267,12 @@
             <!-- </div> -->
 
             <!-- Bottom Actions -->
-            <div class="row mt-4">
+            <!-- <div class="row mt-4">
                 <div class="col-md-12 text-center">
                     <button class="btn btn-secondary me-2" (click)="closeModal()">Cancel</button>
                     <button class="btn btn-primary" (click)="onSubmit()">Save Batch</button>
                 </div>
-            </div>
+            </div> -->
 
         </form>
     </div>
