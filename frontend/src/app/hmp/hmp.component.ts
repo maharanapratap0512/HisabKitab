@@ -9,7 +9,7 @@ declare var $: any;
 @Component({
   selector: 'app-hmp',
   templateUrl: './hmp.component.html',
-  styleUrls: ['./hmp.component.scss']
+  // styleUrls: ['./hmp.component.scss']
 })
 export class HmpComponent implements OnInit {
 
@@ -34,6 +34,7 @@ export class HmpComponent implements OnInit {
         this.batches = data.result || [];
       });
   }
+
 
   openEntryModal(batch: any = null) {
     this.isEdit = !!batch;

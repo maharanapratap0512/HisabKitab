@@ -13,43 +13,124 @@
   <div class="col-12">
     <div class="card">
       <div class="card-body">
-        <table class="table table-bordered table-centered mb-0">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Batch No</th>
-              <th>Recipe</th>
-              <th>Status</th>
-              <th>Location</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let batch of batches">
-              <td>{{batch.date | date:'dd-MM-yyyy'}}</td>
-              <td>{{batch.batch_no}}</td>
-              <td>
-                {{batch.recipe_name}}
-                <small class="d-block text-muted">{{batch.recipe_code}}</small>
-              </td>
-              <td>
-                <span class="badge"
-                  [ngClass]="{'bg-success': batch.status === 'completed', 'bg-warning': batch.status === 'pending'}">
-                  {{batch.status}}
-                </span>
-              </td>
-              <td>{{batch.mm_hin}}</td>
-              <td>
-                <button class="btn btn-light btn-sm" (click)="openEntryModal(batch)">
-                  <i class="uil uil-pen"></i>
-                </button>
-              </td>
-            </tr>
-            <tr *ngIf="batches.length === 0">
-              <td colspan="6" class="text-center">No Batches Found</td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- Accordion for batches -->
+        <div class="accordion" id="batchAccordion">
+          <div *ngFor="let batch of batches; let batchIndex = index" class="accordion-item">
+            <h2 class="accordion-header" [id]="'heading' + batchIndex">
+              <button class="accordion-button" [class.collapsed]="batchIndex !== 0" type="button"
+                data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse' + batchIndex"
+                [attr.aria-expanded]="batchIndex === 0" [attr.aria-controls]="'collapse' + batchIndex">
+                <div class="w-100 d-flex align-items-center justify-content-between pe-3">
+                  <div class="d-flex align-items-center gap-4">
+                    <span>{{batch.date | date:'dd-MM-yyyy'}}</span>
+                    <span class="text-muted">|</span>
+                    <strong>{{batch.recipe_name}}</strong>
+                    <span class="text-muted">|</span>
+                    <span>{{batch.recipe_description}}</span>
+                    <span class="text-muted">|</span>
+                    <span>{{batch.mm_hin}}</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge"
+                      [ngClass]="{'bg-success': batch.status === 'completed', 'bg-warning': batch.status === 'pending'}">
+                      {{batch.status}}
+                    </span>
+                    <button class="btn btn-light btn-sm" (click)="$event.stopPropagation(); openEntryModal(batch)"
+                      title="Edit Batch">
+                      <i class="uil uil-pen"></i>
+                    </button>
+                  </div>
+                </div>
+              </button>
+            </h2>
+            <div [id]="'collapse' + batchIndex" class="accordion-collapse collapse" [class.show]="batchIndex === 0"
+              [attr.aria-labelledby]="'heading' + batchIndex" data-bs-parent="#batchAccordion">
+              <div class="accordion-body">
+
+                <!-- Inputs and Outputs Side by Side -->
+                <div class="row">
+                  <!-- Inputs Table -->
+                  <div class="col-md-6 border-end">
+                    <h6 class="text-secondary mb-3">
+                      <i class="uil uil-arrow-down text-danger"></i> Input Materials (Consumed)
+                    </h6>
+                    <div class="table-responsive">
+                      <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                          <tr>
+                            <th width="8%">#</th>
+                            <th width="42%">Item</th>
+                            <th width="20%">Qty</th>
+                            <th width="15%">Rate</th>
+                            <th width="15%">Condition</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let input of batch.inputs; let i = index">
+                            <td>{{i+1}}</td>
+                            <td>
+                              <span *ngIf="input.subitem_hin">{{input.subitem_hin}} </span>{{input.item_hin}}
+                              <span class="text-muted"> : </span>
+                              <span *ngIf="input.subitem_eng">{{input.subitem_eng}} </span>{{input.item_eng}}
+                            </td>
+                            <td>{{input.qty}} {{input.unit_short}}</td>
+                            <td>{{input.rate || '-'}}</td>
+                            <td><small>{{input.condition_hin}}</small></td>
+                          </tr>
+                          <tr *ngIf="!batch.inputs || batch.inputs.length === 0">
+                            <td colspan="5" class="text-center text-muted">No inputs</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <!-- Outputs Table -->
+                  <div class="col-md-6">
+                    <h6 class="text-primary mb-3">
+                      <i class="uil uil-arrow-up text-success"></i> Output Products (Produced)
+                    </h6>
+                    <div class="table-responsive">
+                      <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                          <tr>
+                            <th width="8%">#</th>
+                            <th width="42%">Item</th>
+                            <th width="20%">Qty</th>
+                            <th width="15%">Rate</th>
+                            <th width="15%">Condition</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let output of batch.outputs; let i = index">
+                            <td>{{i+1}}</td>
+                            <td>
+                              <span *ngIf="output.subitem_hin">{{output.subitem_hin}} </span>{{output.item_hin}}
+                              <span class="text-muted"> : </span>
+                              <span *ngIf="output.subitem_eng">{{output.subitem_eng}} </span>{{output.item_eng}}
+                            </td>
+                            <td>{{output.qty}} {{output.unit_short}}</td>
+                            <td>{{output.rate || '-'}}</td>
+                            <td><small>{{output.condition_hin}}</small></td>
+                          </tr>
+                          <tr *ngIf="!batch.outputs || batch.outputs.length === 0">
+                            <td colspan="5" class="text-center text-muted">No outputs</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Batches Message -->
+        <div *ngIf="batches.length === 0" class="text-center text-muted p-4">
+          <i class="uil uil-box" style="font-size: 3rem;"></i>
+          <p>No Batches Found</p>
+        </div>
       </div>
     </div>
   </div>

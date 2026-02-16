@@ -83,35 +83,39 @@ export class HmpEntryComponent implements OnInit {
   }
 
   onRecipeSelect(event: any) {
-    console.log("recipe select", event);
-
     if (event && event.label) {
       this.fs.hmpBatchForm.recipe_name = event.label;
       this.fs.hmpBatchForm.recipe_id = null;
       // this.fs.hmpBatchForm.update_recipe = true; // New recipe likely
-    } else if (event) {
-      let recipe = this.recipes.find((x: any) => x._id == event);
-      if (recipe) {
-        this.fs.hmpBatchForm = JSON.parse(JSON.stringify(recipe));
-        this.fs.hmpBatchForm.recipe_id = recipe._id;
-        for (let i = 0; i < recipe.inputs.length; i++) {
-          let item_subitem_id = recipe.inputs[i].item_id + ":" + recipe.inputs[i].subitem_id || null;
-          this.itemSubitemSelected(item_subitem_id, i, 'inputs');
-        }
-        for (let i = 0; i < recipe.outputs.length; i++) {
-          let item_subitem_id = recipe.outputs[i].item_id + ":" + recipe.outputs[i].subitem_id || null;
-          this.itemSubitemSelected(item_subitem_id, i, 'outputs');
-        }
-
-        console.log(this.fs.hmpBatchForm);
-
-      } else {
-        this.fs.reset();
-      }
-    } else {
-      this.fs.reset();
     }
-    this.fs.formStatusChanges();
+    else if (event) {
+      this.fs.hmpBatchForm.recipe_name = null;
+      this.fs.hmpBatchForm.recipe_id = event;
+    }
+    console.log("recipe select", this.fs.hmpBatchForm.recipe_name, this.fs.hmpBatchForm.recipe_id);
+
+    // let recipe = this.recipes.find((x: any) => x._id == event);
+    //   if (recipe) {
+    //     this.fs.hmpBatchForm = JSON.parse(JSON.stringify(recipe));
+    //     this.fs.hmpBatchForm.recipe_id = recipe._id;
+    //     for (let i = 0; i < recipe.inputs.length; i++) {
+    //       let item_subitem_id = recipe.inputs[i].item_id + ":" + recipe.inputs[i].subitem_id || null;
+    //       this.itemSubitemSelected(item_subitem_id, i, 'inputs');
+    //     }
+    //     for (let i = 0; i < recipe.outputs.length; i++) {
+    //       let item_subitem_id = recipe.outputs[i].item_id + ":" + recipe.outputs[i].subitem_id || null;
+    //       this.itemSubitemSelected(item_subitem_id, i, 'outputs');
+    //     }
+
+    //     console.log(this.fs.hmpBatchForm);
+
+    //   } else {
+    //     this.fs.reset();
+    //   }
+    // } else {
+    //   this.fs.reset();
+    // }
+    // this.fs.formStatusChanges();
   }
 
   // --- Input Table Logic ---
@@ -176,7 +180,7 @@ export class HmpEntryComponent implements OnInit {
   onSubmit() {
     console.log(this.fs.hmpBatchForm);
     if (this.fs.valid()) {
-      this.http.post(this.api.getUrl('HMP') + 'batch', this.fs.hmpBatchForm).subscribe((data: any) => {
+      this.http.post(this.api.getUrl('HMP') + 'batch/' + this.auth.webUser.dept_id, this.fs.hmpBatchForm).subscribe((data: any) => {
         console.log(data);
       });
     }
