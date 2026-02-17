@@ -249,6 +249,44 @@ class TableInterface {
       }
    }
 
+   getJawakFromHmpInput(batch, input) {
+      return {
+         ...this.jawak,
+         date: batch.date,
+         mm_id: batch.mm_id,
+         item_id: input.item_id,
+         subitem_id: input.subitem_id,
+         unit_id: input.unit_id,
+         condition_id: input.condition_id,
+         qty: input.qty,
+         rate: input.rate,
+         actual_amt: input.qty * (input.rate || 0),
+         jawak_type_id: 40,
+         dept_id: batch.dept_id,
+         description: `HMP Batch Consumption (Batch ID: ${batch._id || ''})`,
+         active: 1
+      }
+   }
+
+   getAawakFromHmpOutput(batch, output) {
+      return {
+         ...this.aawak,
+         date: batch.date,
+         mm_id: batch.mm_id,
+         item_id: output.item_id,
+         subitem_id: output.subitem_id,
+         unit_id: output.unit_id,
+         condition_id: output.condition_id,
+         qty: output.qty,
+         rate: output.rate,
+         actual_amt: output.qty * (output.rate || 0),
+         aawak_type_id: 50,
+         dept_id: batch.dept_id,
+         description: `HMP Batch Production (Batch ID: ${batch._id || ''})`,
+         active: 1
+      }
+   }
+
    pbk_closing = {
       pbk_id: null,
       voucher_no: null,

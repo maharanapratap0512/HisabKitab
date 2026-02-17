@@ -1,6 +1,13 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database/db.model');
 
+const Mm = require('./mm.model');
+const Item = require('./item.model');
+const Subitem = require('./subitem.model');
+const SubitemList = require('./subitem_list.model');
+const Unit = require('./unit.model');
+const SupportList = require('./support_list.model');
+
 // 1. HmpRecipe
 const HmpRecipe = sequelize.define('HmpRecipe', {
     _id: {
@@ -122,6 +129,10 @@ const HmpBatch = sequelize.define('HmpBatch', {
     },
     recipe_id: {
         type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    batch_no: {
+        type: DataTypes.TEXT,
         allowNull: false
     },
     date: {
@@ -251,7 +262,9 @@ const HmpBatchOutput = sequelize.define('HmpBatchOutput', {
     updatedAt: false
 });
 
-// Associations
+// ================= Associations =================
+
+// 1. HmpRecipe Relationships
 HmpRecipe.hasMany(HmpRecipeInput, { foreignKey: 'recipe_id', as: 'inputs' });
 HmpRecipeInput.belongsTo(HmpRecipe, { foreignKey: 'recipe_id' });
 
@@ -259,30 +272,37 @@ HmpRecipe.hasMany(HmpRecipeOutput, { foreignKey: 'recipe_id', as: 'outputs' });
 HmpRecipeOutput.belongsTo(HmpRecipe, { foreignKey: 'recipe_id' });
 
 HmpRecipe.hasMany(HmpBatch, { foreignKey: 'recipe_id' });
-HmpBatch.belongsTo(HmpRecipe, { foreignKey: 'recipe_id' });
+HmpBatch.belongsTo(HmpRecipe, { foreignKey: 'recipe_id', as: 'recipe' });
 
+// 2. HmpBatch Relationships
 HmpBatch.hasMany(HmpBatchInput, { foreignKey: 'batch_id', as: 'inputs' });
 HmpBatchInput.belongsTo(HmpBatch, { foreignKey: 'batch_id' });
 
 HmpBatch.hasMany(HmpBatchOutput, { foreignKey: 'batch_id', as: 'outputs' });
 HmpBatchOutput.belongsTo(HmpBatch, { foreignKey: 'batch_id' });
 
-// Add Base Models for joins
-const Mm = sequelize.define('Mm', {
-    _id: { type: DataTypes.INTEGER, primaryKey: true },
-    mm_hin: { type: DataTypes.STRING },
-    mm_eng: { type: DataTypes.STRING }
-}, { tableName: 'mm', timestamps: false });
-
-const Item = sequelize.define('Item', {
-    _id: { type: DataTypes.INTEGER, primaryKey: true },
-    item_hin: { type: DataTypes.STRING },
-    item_eng: { type: DataTypes.STRING }
-}, { tableName: 'item', timestamps: false });
-
 HmpBatch.belongsTo(Mm, { foreignKey: 'mm_id', as: 'mm' });
+
+// 3. Child-side associations for HmpRecipe/Batch inputs/outputs
+HmpRecipeInput.belongsTo(Item, { foreignKey: 'item_id', as: 'item' });
+HmpRecipeOutput.belongsTo(Item, { foreignKey: 'item_id', as: 'item' });
 HmpBatchInput.belongsTo(Item, { foreignKey: 'item_id', as: 'item' });
 HmpBatchOutput.belongsTo(Item, { foreignKey: 'item_id', as: 'item' });
+
+HmpRecipeInput.belongsTo(Subitem, { foreignKey: 'subitem_id', as: 'subitem' });
+HmpRecipeOutput.belongsTo(Subitem, { foreignKey: 'subitem_id', as: 'subitem' });
+HmpBatchInput.belongsTo(Subitem, { foreignKey: 'subitem_id', as: 'subitem' });
+HmpBatchOutput.belongsTo(Subitem, { foreignKey: 'subitem_id', as: 'subitem' });
+
+HmpRecipeInput.belongsTo(Unit, { foreignKey: 'unit_id', as: 'unit' });
+HmpRecipeOutput.belongsTo(Unit, { foreignKey: 'unit_id', as: 'unit' });
+HmpBatchInput.belongsTo(Unit, { foreignKey: 'unit_id', as: 'unit' });
+HmpBatchOutput.belongsTo(Unit, { foreignKey: 'unit_id', as: 'unit' });
+
+HmpRecipeInput.belongsTo(SupportList, { foreignKey: 'condition_id', as: 'condition' });
+HmpRecipeOutput.belongsTo(SupportList, { foreignKey: 'condition_id', as: 'condition' });
+HmpBatchInput.belongsTo(SupportList, { foreignKey: 'condition_id', as: 'condition' });
+HmpBatchOutput.belongsTo(SupportList, { foreignKey: 'condition_id', as: 'condition' });
 
 module.exports = {
     HmpRecipe,
@@ -292,5 +312,9 @@ module.exports = {
     HmpBatchInput,
     HmpBatchOutput,
     Mm,
-    Item
+    Item,
+    Subitem,
+    SubitemList,
+    Unit,
+    SupportList
 };
