@@ -5,7 +5,6 @@ import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import { HmpFormService } from 'src/app/services/hmp-form.service';
-import { log } from 'console';
 
 declare var $: any;
 
@@ -91,31 +90,40 @@ export class HmpEntryComponent implements OnInit {
     else if (event) {
       this.fs.hmpBatchForm.recipe_name = null;
       this.fs.hmpBatchForm.recipe_id = event;
+      let recipe = this.recipes.find((x: any) => x._id == event);
+      console.log('recipe', recipe);
+
+
+
+      if (recipe) {
+        for (let i = 0; i < recipe.inputs.length; i++) {
+          let item_subitem_id = recipe.inputs[i].item_id + ":" + recipe.inputs[i].subitem_id || null;
+          this.itemSubitemSelected(item_subitem_id, i, 'inputs');
+          this.fs.hmpBatchForm.inputs[i].qty = recipe.inputs[i].qty;
+          this.fs.hmpBatchForm.inputs[i].rate = recipe.inputs[i].rate;
+          this.fs.hmpBatchForm.inputs[i].condition_id = recipe.inputs[i].condition_id;
+          this.fs.hmpBatchForm.inputs[i].unit_id = recipe.inputs[i].unit_id;
+        }
+        for (let i = 0; i < recipe.outputs.length; i++) {
+          let item_subitem_id = recipe.outputs[i].item_id + ":" + recipe.outputs[i].subitem_id || null;
+          this.itemSubitemSelected(item_subitem_id, i, 'outputs');
+          this.fs.hmpBatchForm.outputs[i].qty = recipe.outputs[i].qty;
+          this.fs.hmpBatchForm.outputs[i].rate = recipe.outputs[i].rate;
+          this.fs.hmpBatchForm.outputs[i].condition_id = recipe.outputs[i].condition_id;
+          this.fs.hmpBatchForm.outputs[i].unit_id = recipe.outputs[i].unit_id;
+        }
+
+        //     console.log(this.fs.hmpBatchForm);
+
+        //   } else {
+        //     this.fs.reset();
+        //   }
+        // } else {
+        //   this.fs.reset();
+        // }
+        // this.fs.formStatusChanges();
+      }
     }
-    console.log("recipe select", this.fs.hmpBatchForm.recipe_name, this.fs.hmpBatchForm.recipe_id);
-
-    // let recipe = this.recipes.find((x: any) => x._id == event);
-    //   if (recipe) {
-    //     this.fs.hmpBatchForm = JSON.parse(JSON.stringify(recipe));
-    //     this.fs.hmpBatchForm.recipe_id = recipe._id;
-    //     for (let i = 0; i < recipe.inputs.length; i++) {
-    //       let item_subitem_id = recipe.inputs[i].item_id + ":" + recipe.inputs[i].subitem_id || null;
-    //       this.itemSubitemSelected(item_subitem_id, i, 'inputs');
-    //     }
-    //     for (let i = 0; i < recipe.outputs.length; i++) {
-    //       let item_subitem_id = recipe.outputs[i].item_id + ":" + recipe.outputs[i].subitem_id || null;
-    //       this.itemSubitemSelected(item_subitem_id, i, 'outputs');
-    //     }
-
-    //     console.log(this.fs.hmpBatchForm);
-
-    //   } else {
-    //     this.fs.reset();
-    //   }
-    // } else {
-    //   this.fs.reset();
-    // }
-    // this.fs.formStatusChanges();
   }
 
   // --- Input Table Logic ---
