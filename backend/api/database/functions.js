@@ -818,6 +818,67 @@ class Functions extends DBContex {
       }
    }
 
+   async deleteHMPRecipe(id) {
+      try {
+         await HmpRecipeInput.destroy({ where: { recipe_id: id } });
+         await HmpRecipeOutput.destroy({ where: { recipe_id: id } });
+         return await HmpRecipe.destroy({ where: { _id: id } });
+      } catch (ex) {
+         console.log("Fn delete recipe", ex);
+         throw ex;
+      }
+   }
+
+   async deleteHMPBatchInput(id) {
+      try {
+         const input = await HmpBatchInput.findByPk(id);
+         if (input) {
+            if (input.jawak_ref_id) {
+               await this.deleteAJ(input.jawak_ref_id, 'jawak');
+            }
+            return await HmpBatchInput.destroy({ where: { _id: id } });
+         }
+         return 0;
+      } catch (ex) {
+         console.log("Fn delete batch input", ex);
+         throw ex;
+      }
+   }
+
+   async deleteHMPBatchOutput(id) {
+      try {
+         const output = await HmpBatchOutput.findByPk(id);
+         if (output) {
+            if (output.aawak_ref_id) {
+               await this.deleteAJ(output.aawak_ref_id, 'aawak');
+            }
+            return await HmpBatchOutput.destroy({ where: { _id: id } });
+         }
+         return 0;
+      } catch (ex) {
+         console.log("Fn delete batch output", ex);
+         throw ex;
+      }
+   }
+
+   async deleteHMPBatch(id) {
+      try {
+         const inputs = await HmpBatchInput.findAll({ where: { batch_id: id } });
+         for (const input of inputs) {
+            await this.deleteHMPBatchInput(input._id);
+         }
+
+         const outputs = await HmpBatchOutput.findAll({ where: { batch_id: id } });
+         for (const output of outputs) {
+            await this.deleteHMPBatchOutput(output._id);
+         }
+
+         return await HmpBatch.destroy({ where: { _id: id } });
+      } catch (ex) {
+         console.log("Fn delete batch", ex);
+         throw ex;
+      }
+   }
 
 }
 
