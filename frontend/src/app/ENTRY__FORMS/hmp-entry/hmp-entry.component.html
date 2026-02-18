@@ -93,7 +93,7 @@
                                         [selectOnTab]="true" required styleMode="material">
 
                                         <ng-container *ngFor="let item of items | filterByDate:fs.hmpBatchForm.date">
-                                            <ng-option [value]="item._id + ':' + null">
+                                            <ng-option [value]="item._id">
                                                 {{item.item_hin}} : {{item.item_eng}} : {{item.item_code}}
                                             </ng-option>
 

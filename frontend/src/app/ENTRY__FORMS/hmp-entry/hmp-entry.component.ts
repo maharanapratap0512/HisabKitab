@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -6,6 +6,8 @@ import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import { HmpFormService } from 'src/app/services/hmp-form.service';
 import { error } from 'console';
+import { NgForm } from '@angular/forms';
+import { debounceTime } from 'rxjs';
 
 declare var $: any;
 
@@ -16,6 +18,7 @@ declare var $: any;
 })
 export class HmpEntryComponent implements OnInit {
 
+  @ViewChild('f') f!: NgForm;
   @Output() response = new EventEmitter();
   @Input() isEdit: any;
   @Input() getData: any;
@@ -60,6 +63,14 @@ export class HmpEntryComponent implements OnInit {
   ngOnInit(): void {
     this.getRecipes();
     this.getLotNo();
+
+    setTimeout(() => {
+      if (this.f) {
+        this.f.statusChanges?.pipe(debounceTime(100)).subscribe(() => {
+          this.fs.formStatusChanges();
+        });
+      }
+    }, 500);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -90,38 +101,21 @@ export class HmpEntryComponent implements OnInit {
     }
     else if (event) {
       let recipe = this.recipes.find((x: any) => x._id == event);
-      this.fs.hmpBatchForm.recipe_name = recipe.recipe_name;
-      this.fs.hmpBatchForm.recipe_id = event;
-      console.log('recipe', recipe);
-
-
+      for (let i in this.recipes) {
+        for (let j in this.recipes[i].inputs) {
+          this.recipes[i].inputs[j].item_subitem_id = this.recipes[i].inputs[j].subitem_id ? this.recipes[i].inputs[j].item_id + ":" + this.recipes[i].inputs[j].subitem_id : this.recipes[i].inputs[j].item_id;
+        }
+        for (let j in this.recipes[i].outputs) {
+          this.recipes[i].outputs[j].item_subitem_id = this.recipes[i].outputs[j].subitem_id ? this.recipes[i].outputs[j].item_id + ":" + this.recipes[i].outputs[j].subitem_id : this.recipes[i].outputs[j].item_id;
+        }
+      }
 
       if (recipe) {
-        console.log('recipe', recipe);
+        this.fs.hmpBatchForm.recipe_id = event;
+        this.fs.hmpBatchForm.recipe_name = recipe.recipe_name;
         this.fs.hmpBatchForm.description = recipe.description;
-        this.fs.hmpBatchForm.inputs = [{ ...this.fs.inputFormTemplate }];
-        this.fs.hmpBatchForm.outputs = [{ ...this.fs.outputFormTemplate }];
-        for (let i = 0; i < recipe.inputs.length; i++) {
-          let item_subitem_id = recipe.inputs[i].item_id + ":" + recipe.inputs[i].subitem_id || null;
-          await this.itemSubitemSelected(item_subitem_id, i, 'inputs');
-          this.fs.hmpBatchForm.inputs[i].qty = recipe.inputs[i].qty;
-          this.fs.hmpBatchForm.inputs[i].rate = recipe.inputs[i].rate;
-          this.fs.hmpBatchForm.inputs[i].condition_id = recipe.inputs[i].condition_id;
-          this.fs.hmpBatchForm.inputs[i].unit_id = recipe.inputs[i].unit_id;
-          // this.fs.formStatusChanges();
-        }
-        for (let i = 0; i < recipe.outputs.length; i++) {
-          let item_subitem_id = recipe.outputs[i].item_id + ":" + recipe.outputs[i].subitem_id || null;
-          await this.itemSubitemSelected(item_subitem_id, i, 'outputs');
-          this.fs.hmpBatchForm.outputs[i].qty = recipe.outputs[i].qty;
-          this.fs.hmpBatchForm.outputs[i].rate = recipe.outputs[i].rate;
-          this.fs.hmpBatchForm.outputs[i].condition_id = recipe.outputs[i].condition_id;
-          this.fs.hmpBatchForm.outputs[i].unit_id = recipe.outputs[i].unit_id;
-          // this.fs.formStatusChanges();
-
-        }
-        console.log(this.fs.hmpBatchForm);
-
+        this.fs.hmpBatchForm.inputs = structuredClone(recipe.inputs);
+        this.fs.hmpBatchForm.outputs = structuredClone(recipe.outputs);
       } else {
         this.fs.reset();
       }
@@ -137,14 +131,20 @@ export class HmpEntryComponent implements OnInit {
 
   async itemSubitemSelected(ev: any, i: number, type: string) {
     if (ev) {
-      let item_id = parseInt(ev.split(':')[0]);
-      let subitem_id = ev.split(':')[1] ? parseInt(ev.split(':')[1]) : null;
+      let item_id: any = null, subitem_id: any = null;
+      if (typeof ev == 'number') {
+        item_id = ev;
+        subitem_id = null;
+      } else {
+        item_id = parseInt(ev.split(':')[0]);
+        subitem_id = parseInt(ev.split(':')[1]) || null;
+      }
 
       let item = await this.items.find((x: any) => x._id == item_id);
       let subitem = await item?.subitems?.find((x: any) => x._id == subitem_id);
 
 
-      this.fs.hmpBatchForm[type][i].item_subitem_id = item_id + ":" + subitem_id || null;
+      this.fs.hmpBatchForm[type][i].item_subitem_id = subitem_id ? item_id + ":" + subitem_id : item_id;
       this.fs.hmpBatchForm[type][i].item_id = item_id;
       this.fs.hmpBatchForm[type][i].subitem_id = subitem_id;
       this.fs.hmpBatchForm[type][i].unit_id = subitem ? subitem.unit_id : item.unit_id;
@@ -158,7 +158,6 @@ export class HmpEntryComponent implements OnInit {
       this.fs.hmpBatchForm[type][i].unit_id = null;
       // this.lotNos = this.lotNoAll;
     }
-    this.fs.formStatusChanges();
   }
 
   onSubmit() {
