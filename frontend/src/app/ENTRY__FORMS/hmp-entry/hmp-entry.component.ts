@@ -98,7 +98,7 @@ export class HmpEntryComponent implements OnInit {
 
       if (recipe) {
         console.log('recipe', recipe);
-
+        this.fs.hmpBatchForm.description = recipe.description;
         this.fs.hmpBatchForm.inputs = [{ ...this.fs.inputFormTemplate }];
         this.fs.hmpBatchForm.outputs = [{ ...this.fs.outputFormTemplate }];
         for (let i = 0; i < recipe.inputs.length; i++) {
