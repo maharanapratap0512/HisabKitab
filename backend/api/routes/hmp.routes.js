@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Op } = require('sequelize');
+const { Op, col } = require('sequelize');
 const { sequelize } = require('../database/db.model');
 const Fn = require('../database/functions');
 const { HmpRecipe, HmpRecipeInput, HmpRecipeOutput, HmpBatch, HmpBatchInput, HmpBatchOutput, Mm, Item, Subitem, SubitemList, Unit, SupportList } = require('../models/hmp.model');
@@ -104,7 +104,11 @@ router.post('/batch/:dept_id', async (req, res, next) => {
                         where: { active: 1 },
                         include: [
                             { model: Item, as: "item" },
-                            { model: Subitem, as: "subitem" },
+                            {
+                                model: Subitem,
+                                as: "subitem",
+                                include: [{ model: SubitemList, as: 'subitem_list' }]
+                            },
                             { model: Unit, as: "unit" },
                             { model: SupportList, as: "condition" },
                         ],
@@ -116,7 +120,11 @@ router.post('/batch/:dept_id', async (req, res, next) => {
                         where: { active: 1 },
                         include: [
                             { model: Item, as: "item" },
-                            { model: Subitem, as: "subitem" },
+                            {
+                                model: Subitem,
+                                as: "subitem",
+                                include: [{ model: SubitemList, as: 'subitem_list' }]
+                            },
                             { model: Unit, as: "unit" },
                             { model: SupportList, as: "condition" },
                         ],
@@ -127,7 +135,7 @@ router.post('/batch/:dept_id', async (req, res, next) => {
         }
 
         await Fn.commit();
-        res.status(200).json({ success: true });
+        res.status(200).json({ success: true, result: batch });
     } catch (e) {
         console.log(e);
 

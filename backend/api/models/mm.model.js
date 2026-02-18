@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database/db.model');
+const State = require('./state.model');
 
 const Mm = sequelize.define('Mm', {
     _id: {
@@ -37,7 +38,6 @@ const Mm = sequelize.define('Mm', {
 });
 
 // Associations
-const State = require('./state.model');
 Mm.belongsTo(State, { foreignKey: 'state_id', as: 'state' });
 State.hasMany(Mm, { foreignKey: 'state_id' });
 

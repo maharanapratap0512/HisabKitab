@@ -1,5 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database/db.model');
+const Unit = require('./unit.model');
+const Category = require('./category.model');
 
 const Item = sequelize.define('Item', {
     _id: {
@@ -20,10 +22,6 @@ const Item = sequelize.define('Item', {
     item_code: {
         type: DataTypes.STRING(50)
     },
-    category_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
     unit_id: {
         type: DataTypes.INTEGER
     },
@@ -37,8 +35,21 @@ const Item = sequelize.define('Item', {
 });
 
 // Associations
-const Unit = require('./unit.model');
 Item.belongsTo(Unit, { foreignKey: 'unit_id', as: 'unit' });
 Unit.hasMany(Item, { foreignKey: 'unit_id' });
+
+// Category Association
+Item.belongsToMany(Category, {
+    through: 'rel_item_category',
+    foreignKey: 'item_id',
+    otherKey: 'category_id',
+    as: 'categories'
+});
+Category.belongsToMany(Item, {
+    through: 'rel_item_category',
+    foreignKey: 'category_id',
+    otherKey: 'item_id',
+    as: 'items'
+});
 
 module.exports = Item;

@@ -2261,6 +2261,30 @@ class dbModal {
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))
       )`
+    },
+    // Version 27
+    {
+      hmp_batch_drop: `drop table if exists hmp_batch`,
+      hmp_batch: `create table if not exists hmp_batch(
+        _id integer primary key AUTOINCREMENT,
+        recipe_id integer not null references hmp_recipe(_id),
+        batch_no varchar(50),
+        date date not null,
+        mm_id integer not null references mm(_id),
+        status varchar(20) default 'pending',
+        notes text,
+        dept_id integer not null references department(_id),
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      migrate_item_categories: `INSERT OR IGNORE INTO rel_item_category (item_id, category_id)
+        SELECT item._id, json_each.value
+        FROM item, json_each(item.categories)`,
+      migrate_subitem_categories: `INSERT OR IGNORE INTO rel_subitem_category (subitem_id, category_id)
+        SELECT subitem._id, json_each.value
+        FROM subitem, json_each(subitem.categories)`
+
     }
 
 
@@ -2355,6 +2379,9 @@ class dbModal {
 
       this.db.pragma('legacy_alter_table=OFF');
       this.db.pragma('foreign_keys=ON');
+      this.db.pragma('journal_mode=WAL');
+      this.db.pragma('synchronous=NORMAL');
+
 
       // console.log(this.db.prepare(this.query.bachat_new.select_exists).get({
       //   month: 2,
@@ -2384,8 +2411,23 @@ let dbmodal = new dbModal(path.resolve(__dirname, '../../../../Data/Database.db'
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: path.resolve(__dirname, '../../../../Data/Database.db'),
-  logging: false
+  logging: false,
+  dialectOptions: {
+    timeout: 10000
+  }
 });
+
+
+// Enable WAL mode
+sequelize.query("PRAGMA journal_mode=WAL;");
+
+// Better performance for WAL
+sequelize.query("PRAGMA synchronous=NORMAL;");
+
+// Busy timeout (important)
+sequelize.query("PRAGMA busy_timeout=10000;");
+
+console.log("SQLite WAL mode enabled");
 
 module.exports = { dbModal, dbmodal, sequelize }
 

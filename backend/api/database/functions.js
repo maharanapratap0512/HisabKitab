@@ -735,10 +735,10 @@ class Functions extends DBContex {
                   let jawakId;
                   if (input.jawak_ref_id) {
                      jawakObj._id = input.jawak_ref_id;
-                     await this.updateAJ(jawakObj, 'jawak');
+                     // await this.updateAJ(jawakObj, 'jawak');
                      jawakId = input.jawak_ref_id;
                   } else {
-                     jawakId = await this.insertAJ(jawakObj, 'jawak');
+                     // jawakId = await this.insertAJ(jawakObj, 'jawak');
                   }
 
                   input.batch_id = batchId;
@@ -760,10 +760,10 @@ class Functions extends DBContex {
                   let aawakId;
                   if (output.aawak_ref_id) {
                      aawakObj._id = output.aawak_ref_id;
-                     await this.updateAJ(aawakObj, 'aawak');
+                     // await this.updateAJ(aawakObj, 'aawak');
                      aawakId = output.aawak_ref_id;
                   } else {
-                     aawakId = await this.insertAJ(aawakObj, 'aawak');
+                     // aawakId = await this.insertAJ(aawakObj, 'aawak');
                   }
 
                   output.batch_id = batchId;
