@@ -794,11 +794,14 @@ class Functions extends DBContex {
          const [recipe, created] = await HmpRecipe.upsert(data);
          const recipeId = recipe?._id || data._id;
 
+         // delete old inputs and outputs
+         await HmpRecipeInput.destroy({ where: { recipe_id: recipeId } });
+         await HmpRecipeOutput.destroy({ where: { recipe_id: recipeId } });
          // 2. Upsert Inputs
          if (data.inputs && Array.isArray(data.inputs)) {
             for (let input of data.inputs) {
                input.recipe_id = recipeId;
-               await HmpRecipeInput.upsert(input);
+               await HmpRecipeInput.create(input);
             }
          }
 
@@ -806,7 +809,7 @@ class Functions extends DBContex {
          if (data.outputs && Array.isArray(data.outputs)) {
             for (let output of data.outputs) {
                output.recipe_id = recipeId;
-               await HmpRecipeOutput.upsert(output);
+               await HmpRecipeOutput.create(output);
             }
          }
 
@@ -834,7 +837,7 @@ class Functions extends DBContex {
          const input = await HmpBatchInput.findByPk(id);
          if (input) {
             if (input.jawak_ref_id) {
-               await this.deleteAJ(input.jawak_ref_id, 'jawak');
+               // await this.deleteAJ(input.jawak_ref_id, 'jawak');
             }
             return await HmpBatchInput.destroy({ where: { _id: id } });
          }
@@ -850,7 +853,7 @@ class Functions extends DBContex {
          const output = await HmpBatchOutput.findByPk(id);
          if (output) {
             if (output.aawak_ref_id) {
-               await this.deleteAJ(output.aawak_ref_id, 'aawak');
+               // await this.deleteAJ(output.aawak_ref_id, 'aawak');
             }
             return await HmpBatchOutput.destroy({ where: { _id: id } });
          }

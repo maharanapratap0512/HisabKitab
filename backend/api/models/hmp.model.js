@@ -8,6 +8,9 @@ const SubitemList = require('./subitem_list.model');
 const Unit = require('./unit.model');
 const SupportList = require('./support_list.model');
 const Category = require('./category.model');
+const Pbk = require('./pbk.model');
+const PbkBachat = require('./pbk_bachat.model');
+const PbkClosing = require('./pbk_closing.model');
 
 // 1. HmpRecipe
 const HmpRecipe = sequelize.define('HmpRecipe', {
@@ -318,5 +321,8 @@ module.exports = {
     SubitemList,
     Unit,
     SupportList,
-    Category
+    Category,
+    Pbk,
+    PbkBachat,
+    PbkClosing
 };
