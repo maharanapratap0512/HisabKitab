@@ -48,7 +48,7 @@ export class HmpFormService {
       mm_id: auth.webUser.settings.defaultMM,
       recipe_id: null,
       recipe_name: null,
-      recipe_description: null,
+      description: null,
       dept_id: auth.webUser.dept_id,
       inputs: [JSON.parse(JSON.stringify(this.inputFormTemplate))],
       outputs: [JSON.parse(JSON.stringify(this.outputFormTemplate))],
