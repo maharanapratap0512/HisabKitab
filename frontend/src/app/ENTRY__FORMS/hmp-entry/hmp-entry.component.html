@@ -42,7 +42,7 @@
                 </div>
                 <div class="col-md-4 text-center">
                     <div class="d-flex">
-                        <button class="btn-sm btn-secondary submit" (click)="closeModal()">Cancel</button>
+                        <button class="btn-sm btn-secondary submit" (click)="fs.reset();">Cancel</button>
                         <button class="btn-sm btn-primary submit mx-2" (click)="onSubmit()">Submit</button>
                         <div class="submit form-check">
                             <input class="form-check-input" type="checkbox" [(ngModel)]="fs.hmpBatchForm.update_recipe"
@@ -80,23 +80,6 @@
                             <tr ngModelGroup="in_{{i}}" #rowInput="ngModelGroup"
                                 *ngFor="let row of fs.hmpBatchForm.inputs; let i = index">
                                 <td>{{i+1}}</td>
-                                <!-- Lot No -->
-                                <!-- <td>
-                                        <div class="ng-autocomplete">
-                                            <ng-autocomplete [data]="lotNos" [searchKeyword]="keyword"
-                                                class="form-control-sm" placeholder="lot"
-                                                (selected)='selectLotEvent($event, i)' [itemTemplate]="itemTemplate"
-                                                [notFoundTemplate]="notFoundTemplate">
-                                            </ng-autocomplete>
-                                            <ng-template #itemTemplate let-item>
-                                                <a [innerHTML]="item.lot_no"></a>
-                                            </ng-template>
-                                            <ng-template #notFoundTemplate let-notFound>
-                                                <div [innerHTML]="notFound"></div>
-                                            </ng-template>
-                                        </div>
-                                    </td> -->
-                                <!-- Item Dropdown -->
                                 <td>
                                     <ng-select appendTo="#hmpEntryForm" class="custom" style="width: 100%;"
                                         placeholder="Select Item" [clearable]="true" [virtualScroll]="true"
@@ -124,7 +107,7 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <input type="number" class="form-control-sm flex-fill" [(ngModel)]="row.qty"
-                                            name="in_qty_{{i}}" (change)="calculateAmountInput(i)">
+                                            name="in_qty_{{i}}">
                                         <!-- <span> -->
                                         <ng-select appendTo="#hmpEntryForm" class="custom-sm border mw-3"
                                             [items]="units" bindLabel="unit_short" bindValue="_id"
@@ -137,7 +120,7 @@
                                 <!-- Rate -->
                                 <td>
                                     <input type="number" class="form-control form-control-sm" [(ngModel)]="row.rate"
-                                        name="in_rate_{{i}}" (change)="calculateAmountInput(i)">
+                                        name="in_rate_{{i}}">
                                 </td>
                                 <!-- Condition -->
                                 <td>
@@ -151,9 +134,9 @@
                                 </td>
                                 <!-- Delete Action -->
                                 <td class="text-center">
-                                    <button *ngIf="row.item_subitem_id" type="button" class="btn btn-sm btn-danger"
-                                        (click)="deleteRow('inputs', i)" title="Delete this row"
-                                        style="padding: 0.2rem 0.5rem; border-radius: 4px;">
+                                    <button *ngIf="row.item_subitem_id && fs.hmpBatchForm.inputs.length > 1"
+                                        type="button" class="btn btn-sm btn-danger" (click)="deleteRow('inputs', i)"
+                                        title="Delete this row" style="padding: 0.2rem 0.5rem; border-radius: 4px;">
                                         <i class="uil uil-times"></i>
                                     </button>
                                 </td>
@@ -225,7 +208,7 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <input type="number" class="form-control-sm flex-fill" [(ngModel)]="row.qty"
-                                            name="in_qty_{{i}}" (change)="calculateAmountInput(i)">
+                                            name="in_qty_{{i}}">
                                         <!-- <span> -->
                                         <ng-select appendTo="#hmpEntryForm" class="custom-sm border mw-3"
                                             [items]="units" bindLabel="unit_short" bindValue="_id"
@@ -240,7 +223,7 @@
                                 <!-- Rate -->
                                 <td>
                                     <input type="number" class="form-control form-control-sm" [(ngModel)]="row.rate"
-                                        name="out_rate_{{i}}" (change)="calculateAmountOutput(i)">
+                                        name="out_rate_{{i}}">
                                 </td>
 
                                 <!-- Condition -->
@@ -255,9 +238,9 @@
                                 </td>
                                 <!-- Delete Action -->
                                 <td class="text-center">
-                                    <button *ngIf="row.item_subitem_id" type="button" class="btn btn-sm btn-danger"
-                                        (click)="deleteRow('outputs', i)" title="Delete this row"
-                                        style="padding: 0.2rem 0.5rem; border-radius: 4px;">
+                                    <button *ngIf="row.item_subitem_id && fs.hmpBatchForm.outputs.length > 1"
+                                        type="button" class="btn btn-sm btn-danger" (click)="deleteRow('outputs', i)"
+                                        title="Delete this row" style="padding: 0.2rem 0.5rem; border-radius: 4px;">
                                         <i class="uil uil-times"></i>
                                     </button>
                                 </td>

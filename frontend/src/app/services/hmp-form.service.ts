@@ -108,6 +108,10 @@ export class HmpFormService {
   }
 
   valid() {
+    // Basic Validation
+    if (!this.hmpBatchForm.date || !this.hmpBatchForm.mm_id) return false;
+    if (this.hmpBatchForm.inputs.length < 2 || this.hmpBatchForm.outputs.length < 2) return false;
+
     // Remove last empty inputs
     if (!this.hmpBatchForm.inputs[this.hmpBatchForm.inputs.length - 1].item_id) {
       this.hmpBatchForm.inputs.splice(this.hmpBatchForm.inputs.length - 1, 1);
@@ -117,9 +121,6 @@ export class HmpFormService {
       this.hmpBatchForm.outputs.splice(this.hmpBatchForm.outputs.length - 1, 1);
     }
 
-    // Basic Validation
-    if (!this.hmpBatchForm.date || !this.hmpBatchForm.mm_id) return false;
-    if (this.hmpBatchForm.inputs.length === 0 || this.hmpBatchForm.outputs.length === 0) return false;
 
     // Validate Input Rows
     for (let row of this.hmpBatchForm.inputs) {

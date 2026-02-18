@@ -5,6 +5,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import { HmpFormService } from 'src/app/services/hmp-form.service';
+import { error } from 'console';
 
 declare var $: any;
 
@@ -81,16 +82,16 @@ export class HmpEntryComponent implements OnInit {
     })
   }
 
-  onRecipeSelect(event: any) {
+  async onRecipeSelect(event: any) {
     if (event && event.label) {
       this.fs.hmpBatchForm.recipe_name = event.label;
       this.fs.hmpBatchForm.recipe_id = null;
       // this.fs.hmpBatchForm.update_recipe = true; // New recipe likely
     }
     else if (event) {
-      this.fs.hmpBatchForm.recipe_name = null;
-      this.fs.hmpBatchForm.recipe_id = event;
       let recipe = this.recipes.find((x: any) => x._id == event);
+      this.fs.hmpBatchForm.recipe_name = recipe.recipe_name;
+      this.fs.hmpBatchForm.recipe_id = event;
       console.log('recipe', recipe);
 
 
@@ -98,32 +99,34 @@ export class HmpEntryComponent implements OnInit {
       if (recipe) {
         for (let i = 0; i < recipe.inputs.length; i++) {
           let item_subitem_id = recipe.inputs[i].item_id + ":" + recipe.inputs[i].subitem_id || null;
-          this.itemSubitemSelected(item_subitem_id, i, 'inputs');
+          await this.itemSubitemSelected(item_subitem_id, i, 'inputs');
           this.fs.hmpBatchForm.inputs[i].qty = recipe.inputs[i].qty;
           this.fs.hmpBatchForm.inputs[i].rate = recipe.inputs[i].rate;
           this.fs.hmpBatchForm.inputs[i].condition_id = recipe.inputs[i].condition_id;
           this.fs.hmpBatchForm.inputs[i].unit_id = recipe.inputs[i].unit_id;
+          // this.fs.formStatusChanges();
         }
         for (let i = 0; i < recipe.outputs.length; i++) {
           let item_subitem_id = recipe.outputs[i].item_id + ":" + recipe.outputs[i].subitem_id || null;
-          this.itemSubitemSelected(item_subitem_id, i, 'outputs');
+          await this.itemSubitemSelected(item_subitem_id, i, 'outputs');
           this.fs.hmpBatchForm.outputs[i].qty = recipe.outputs[i].qty;
           this.fs.hmpBatchForm.outputs[i].rate = recipe.outputs[i].rate;
           this.fs.hmpBatchForm.outputs[i].condition_id = recipe.outputs[i].condition_id;
           this.fs.hmpBatchForm.outputs[i].unit_id = recipe.outputs[i].unit_id;
+          // this.fs.formStatusChanges();
+
         }
+        console.log(this.fs.hmpBatchForm);
 
-        //     console.log(this.fs.hmpBatchForm);
-
-        //   } else {
-        //     this.fs.reset();
-        //   }
-        // } else {
-        //   this.fs.reset();
-        // }
-        // this.fs.formStatusChanges();
+      } else {
+        this.fs.reset();
       }
+    } else {
+      this.fs.reset();
     }
+    // this.fs.formStatusChanges();
+
+
   }
 
   // --- Input Table Logic ---
@@ -154,43 +157,19 @@ export class HmpEntryComponent implements OnInit {
     this.fs.formStatusChanges();
   }
 
-  // Lot No Auto-complete Logic mimicking Jawak
-  // selectLotEvent(ev: any, i: number) {
-  //   if (ev.lot_no) {
-  //     this.fs.hmpBatchForm.inputs[i].item_subitem_id = ev.item_id + ':' + (ev.subitem_id || '');
-  //     this.itemSubitemSelectedInput(this.fs.hmpBatchForm.inputs[i].item_subitem_id, i);
-
-  //     this.fs.hmpBatchForm.inputs[i].lot_no = ev.lot_no;
-  //     this.fs.hmpBatchForm.inputs[i].condition_id = ev.condition_id;
-  //     this.fs.hmpBatchForm.inputs[i].rate = ev.rate;
-  //     this.fs.hmpBatchForm.inputs[i].jawak_ref_id = null; // Ideally this links to Aawak of the lot
-
-  //     // If we want to link consumption to specific Aawak (Jawak Ref), we need that ID from lot search
-  //     // Assuming `ev` has enough info
-  //   }
-  // }
-
-  calculateAmountInput(i: number) {
-    let row = this.fs.hmpBatchForm.inputs[i];
-    if (row.qty && row.rate) {
-      row.amount = (row.qty * row.rate).toFixed(2);
-    }
-  }
-
-  calculateAmountOutput(i: number) {
-    let row = this.fs.hmpBatchForm.outputs[i];
-    if (row.qty && row.rate) {
-      row.amount = (row.qty * row.rate).toFixed(2);
-    }
-  }
-
-
   onSubmit() {
     console.log(this.fs.hmpBatchForm);
     if (this.fs.valid()) {
       this.http.post(this.api.getUrl('HMP') + 'batch/' + this.auth.webUser.dept_id, this.fs.hmpBatchForm).subscribe((data: any) => {
         console.log(data);
-      });
+        this.fs.reset();
+        this.toastr.success('Batch created successfully');
+        this.response.emit(data);
+      },
+        error => {
+          this.fs.reset();
+          console.log(error);
+        });
     }
   }
 
