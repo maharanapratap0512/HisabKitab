@@ -722,6 +722,7 @@ class Functions extends DBContex {
 
          // 1. Main Batch Upsert
          const [batch, created] = await HmpBatch.upsert(data);
+
          const batchId = batch?._id || data._id;
 
          // 2. Process Inputs (Consumption -> Jawak)

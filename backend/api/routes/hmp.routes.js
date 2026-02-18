@@ -100,13 +100,16 @@ router.post('/batch/:dept_id', async (req, res, next) => {
     try {
         req.body.dept_id = req.params.dept_id;
         req.body.batch_no = 'batch_no';
+
         await Fn.begin();
         if (!req.body.recipe_id || req.body.update_recipe) {
             console.log("inserting recipe");
-            req.body.recipe_id = await Fn.insertUpdateHMPRecipe(req.body);
+            req.body.recipe_id = await Fn.insertUpdateHMPRecipe({ ...req.body });
         }
+        console.log("start", req.body._id);
+
         console.log("inserting batch");
-        let batchId = await Fn.insertUpdateHMPBatch(req.body);
+        let batchId = await Fn.insertUpdateHMPBatch({ ...req.body });
 
         let batch;
         if (batchId) {
