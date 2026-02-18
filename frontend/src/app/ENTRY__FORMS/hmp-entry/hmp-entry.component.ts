@@ -97,6 +97,8 @@ export class HmpEntryComponent implements OnInit {
 
 
       if (recipe) {
+        this.fs.hmpBatchForm.inputs = [{ ...this.fs.inputFormTemplate }];
+        this.fs.hmpBatchForm.outputs = [{ ...this.fs.outputFormTemplate }];
         for (let i = 0; i < recipe.inputs.length; i++) {
           let item_subitem_id = recipe.inputs[i].item_id + ":" + recipe.inputs[i].subitem_id || null;
           await this.itemSubitemSelected(item_subitem_id, i, 'inputs');
