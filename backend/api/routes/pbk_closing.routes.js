@@ -2,6 +2,7 @@ const router = require('express').Router();
 const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 const Fn = require('../database/functions');
+const { PbkBachat, Item, Subitem, Unit, SupportList } = require('../models/hmp.model');
 
 // get closing all
 router.get('/', async (req, res, next) => {
@@ -35,13 +36,24 @@ router.get('/bachat/:pbk_id', async (req, res, next) => {
     try {
         // Fetch pbk_bachat for the specific PBK in the department
         // We use the 'pbk_bachat' table name and filter by pbk_id and dept_id
-        let condition = `pbk_bachat.pbk_id = ${req.params.pbk_id} AND pbk_bachat.dept_id = ${req.query.dept_id} AND pbk_bachat.active = 1`;
-        await DB.getList('pbk_bachat', { full: true, conditionString: condition }).then(async (resolve) => {
-            res.json({
-                success: true,
-                result: resolve.data || [],
-                total_count: resolve.total_count
-            });
+        const bachat = await PbkBachat.findAll({
+            where: {
+                pbk_id: req.params.pbk_id,
+                dept_id: req.query.dept_id,
+                active: 1
+            },
+            include: [
+                { model: Item, as: 'item' },
+                { model: Subitem, as: 'subitem' },
+                { model: Unit, as: 'unit' },
+                { model: SupportList, as: 'condition' }
+            ]
+        });
+
+        res.json({
+            success: true,
+            result: bachat || [],
+            total_count: bachat.length
         });
     } catch (err) { next(err) };
 });
