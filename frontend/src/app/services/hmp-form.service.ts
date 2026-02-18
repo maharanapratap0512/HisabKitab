@@ -84,6 +84,8 @@ export class HmpFormService {
 
   // Logic to auto-add rows if the last row is valid
   formStatusChanges() {
+    console.log("fsc");
+
     let validInput = true;
     for (let form of this.hmpBatchForm.inputs) {
       if (!(form.item_id)) {

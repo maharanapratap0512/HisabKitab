@@ -89,7 +89,7 @@
                                         [selectOnTab]="true" required styleMode="material">
 
                                         <ng-container *ngFor="let item of items | filterByDate:fs.hmpBatchForm.date">
-                                            <ng-option [value]="item._id + ':' + null">
+                                            <ng-option [value]="item._id">
                                                 {{item.item_hin}} : {{item.item_eng}} : {{item.item_code}}
                                             </ng-option>
 
@@ -212,7 +212,7 @@
                                         <!-- <span> -->
                                         <ng-select appendTo="#hmpEntryForm" class="custom-sm border mw-3"
                                             [items]="units" bindLabel="unit_short" bindValue="_id"
-                                            [(ngModel)]="row.unit_id" name="in_unit_{{i}}" [clearable]="false"
+                                            [(ngModel)]="row.unit_id" name="out_unit_{{i}}" [clearable]="false"
                                             placeholder="Unit"></ng-select>
                                         <!-- </span> -->
                                     </div>
@@ -229,7 +229,7 @@
                                 <!-- Condition -->
                                 <td>
                                     <ng-select appendTo="#hmpEntryForm" class="custom-sm" [(ngModel)]="row.condition_id"
-                                        name="in_condition_{{i}}" [clearable]="false" placeholder="Select Condition">
+                                        name="out_condition_{{i}}" [clearable]="false" placeholder="Select Condition">
                                         <ng-option selected="selected" disabled value="">Select Condition</ng-option>
                                         <ng-option *ngFor="let item of conditions"
                                             [value]="item._id">{{item.list_name_hin}} :
