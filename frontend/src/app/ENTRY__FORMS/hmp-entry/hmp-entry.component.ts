@@ -167,6 +167,7 @@ export class HmpEntryComponent implements OnInit {
         console.log(data);
         this.fs.reset();
         this.toastr.success('Batch created successfully');
+        this.getRecipes();
         this.response.emit(data);
       },
         error => {
@@ -177,12 +178,18 @@ export class HmpEntryComponent implements OnInit {
   }
 
   deleteRow(type: string, index: number) {
-    // Remove row from inputs or outputs array
+    // Remove row and reassign array reference so Angular fully re-renders all ngModelGroup rows
     if (type === 'inputs' && this.fs.hmpBatchForm.inputs.length > 1) {
       this.fs.hmpBatchForm.inputs.splice(index, 1);
+      this.fs.hmpBatchForm.inputs = [...this.fs.hmpBatchForm.inputs];
     } else if (type === 'outputs' && this.fs.hmpBatchForm.outputs.length > 1) {
       this.fs.hmpBatchForm.outputs.splice(index, 1);
+      this.fs.hmpBatchForm.outputs = [...this.fs.hmpBatchForm.outputs];
     }
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 
   closeModal() {

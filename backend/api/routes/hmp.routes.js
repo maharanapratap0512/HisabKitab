@@ -53,7 +53,7 @@ router.put('/batch/:dept_id', async (req, res, next) => {
         const batches = await HmpBatch.findAll({
             where: where,
             include: [
-                { model: HmpRecipe },
+                { model: HmpRecipe, as: 'recipe' },
                 { model: Mm, as: 'mm' },
                 {
                     model: HmpBatchInput,

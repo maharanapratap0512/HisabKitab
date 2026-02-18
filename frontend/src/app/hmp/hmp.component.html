@@ -13,6 +13,25 @@
   <div class="col-12">
     <div class="card">
       <div class="card-body">
+
+        <div class="row">
+          <div class="col-4 pt-2">
+            <!-- <span class="badge year-box" [ngClass]="{'badge-outline-danger':!isDeleting, 'bg-danger': isDeleting}"
+              (click)="deleteMultiple()"
+              title="Click for multiple delete selection & click same again to perform delete.">Delete</span> -->
+            <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
+              (click)="filterBody.year = null">All</span>
+            <span *ngFor="let y of gs.years" class="badge year-box" (click)="filterBody.year = y"
+              [ngClass]="{'badge-outline-secondary':filterBody.year == y}">
+              {{y}}
+            </span>
+          </div>
+          <div class="col-8" *ngIf="batches.length">
+            <!-- <pagination-controls class="pagi text-end" (pageChange)="getAawakPage(page = $event)" [autoHide]="true">
+            </pagination-controls> -->
+          </div>
+        </div>
+
         <!-- Accordion for batches -->
         <div class="accordion" id="batchAccordion">
           <div *ngFor="let batch of batches; let batchIndex = index" class="accordion-item">
@@ -24,11 +43,11 @@
                   <div class="d-flex align-items-center gap-4">
                     <span>{{batch.date | date:'dd-MM-yyyy'}}</span>
                     <span class="text-muted">|</span>
-                    <strong>{{batch.recipe_name}}</strong>
+                    <strong>{{batch.recipe?.recipe_name}}</strong>
                     <span class="text-muted">|</span>
-                    <span>{{batch.recipe_description}}</span>
+                    <span>{{batch.recipe?.description}}</span>
                     <span class="text-muted">|</span>
-                    <span>{{batch.mm_hin}}</span>
+                    <span>{{batch.mm?.mm_hin}}</span>
                   </div>
                   <div class="d-flex align-items-center gap-2">
                     <span class="badge"
@@ -38,6 +57,10 @@
                     <button class="btn btn-light btn-sm" (click)="$event.stopPropagation(); openEntryModal(batch)"
                       title="Edit Batch">
                       <i class="uil uil-pen"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm"
+                      (click)="$event.stopPropagation(); delete(batch._id, batchIndex)" title="Delete Batch">
+                      <i class="uil uil-trash"></i>
                     </button>
                   </div>
                 </div>
@@ -67,15 +90,23 @@
                         </thead>
                         <tbody>
                           <tr *ngFor="let input of batch.inputs; let i = index">
-                            <td>{{i+1}}</td>
                             <td>
-                              <span *ngIf="input.subitem_hin">{{input.subitem_hin}} </span>{{input.item_hin}}
+                              {{i+1}}
+                              <i class="uil uil-trash text-danger cursor-pointer" *ngIf="batch.inputs.length > 1"
+                                (click)="deleteInput(input._id, i)"></i>
+                            </td>
+                            <td>
+                              <span
+                                *ngIf="input.subitem?.subitem_list?.subitem_hin">{{input.subitem?.subitem_list?.subitem_hin}}
+                              </span>{{input.item.item_hin}}
                               <span class="text-muted"> : </span>
-                              <span *ngIf="input.subitem_eng">{{input.subitem_eng}} </span>{{input.item_eng}}
+                              <span
+                                *ngIf="input.subitem?.subitem_list?.subitem_eng">{{input.subitem?.subitem_list?.subitem_eng}}
+                              </span>{{input.item.item_eng}}
                             </td>
                             <td>{{input.qty}} {{input.unit_short}}</td>
                             <td>{{input.rate || '-'}}</td>
-                            <td><small>{{input.condition_hin}}</small></td>
+                            <td><small>{{input.condition?.list_name_hin}}</small></td>
                           </tr>
                           <tr *ngIf="!batch.inputs || batch.inputs.length === 0">
                             <td colspan="5" class="text-center text-muted">No inputs</td>
@@ -103,15 +134,21 @@
                         </thead>
                         <tbody>
                           <tr *ngFor="let output of batch.outputs; let i = index">
-                            <td>{{i+1}}</td>
                             <td>
-                              <span *ngIf="output.subitem_hin">{{output.subitem_hin}} </span>{{output.item_hin}}
+                              {{i+1}}
+                              <i class="uil uil-trash text-danger cursor-pointer" *ngIf="batch.outputs.length > 1"
+                                (click)="deleteOutput(output._id, i)"></i>
+                            </td>
+                            <td>
+                              <span *ngIf="output.subitem_hin">{{output.subitem?.subitem_list?.subitem_hin}}
+                              </span>{{output.item_hin}}
                               <span class="text-muted"> : </span>
-                              <span *ngIf="output.subitem_eng">{{output.subitem_eng}} </span>{{output.item_eng}}
+                              <span *ngIf="output.subitem_eng">{{output.subitem?.subitem_list?.subitem_eng}}
+                              </span>{{output.item_eng}}
                             </td>
                             <td>{{output.qty}} {{output.unit_short}}</td>
                             <td>{{output.rate || '-'}}</td>
-                            <td><small>{{output.condition_hin}}</small></td>
+                            <td><small>{{output.condition?.list_name_hin}}</small></td>
                           </tr>
                           <tr *ngIf="!batch.outputs || batch.outputs.length === 0">
                             <td colspan="5" class="text-center text-muted">No outputs</td>
