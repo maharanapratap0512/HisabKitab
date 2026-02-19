@@ -116,7 +116,7 @@ export class FormService {
       dept_id: auth.webUser.dept_id,
       nimitt_id: null,
       description: null,
-      jawaks: [JSON.parse(JSON.stringify(this.jawakForm))],
+      jawaks: [structuredClone(this.jawakForm)],
       voucher_no: null,
     };
     this.jawakFormMain.date = gs.dateString;
@@ -140,7 +140,7 @@ export class FormService {
       date: gs.dateString,
       pbk_id: null,
       dept_id: auth.webUser.dept_id,
-      pbk_closings: [],
+      pbk_closings: [structuredClone(this.pbkClosingForm)],
       voucher_no: null
     };
   }

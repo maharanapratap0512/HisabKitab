@@ -61,7 +61,7 @@
 
             <div class="row" *ngIf="fs.pbkClosingFormMain.pbk_closings.length > 0">
                 <div class="card card-body" style="font-size: smaller; overflow: auto; flex-direction: column;">
-                    <div class="table-container" style=" padding-bottom: 250px;" appHorizontalScrollWithArrows>
+                    <div class="table-container" appHorizontalScrollWithArrows>
                         <table class="table table-bordered table-sticky-header table-centered mb-0"
                             style="width: max-content;">
                             <thead>
@@ -80,10 +80,11 @@
                             <tbody>
                                 <tr *ngFor="let row of fs.pbkClosingFormMain.pbk_closings; let i = index">
                                     <td>
-                                        <ng-select class="custom-sm" style="width: 100%;"
-                                            placeholder="Select Item Subitem" [clearable]="true" [virtualScroll]="true"
-                                            [(ngModel)]="row.item_subitem_id" name="item_subitem_id_{{i}}"
-                                            #item_subitem_id="ngModel" (change)="itemSubitemSelected($event, i)"
+                                        <ng-select class="custom-sm" style="width: 100%;" [clearable]="true"
+                                            appendTo="#bunchPbkClosingComponent" placeholder="Select Item Subitem"
+                                            [virtualScroll]="true" [(ngModel)]="row.item_subitem_id"
+                                            name="item_subitem_id_{{i}}" #item_subitem_id="ngModel"
+                                            (change)="itemSubitemSelected($event, i)"
                                             [ngClass]="{'validation' : (item_subitem_id?.touched || fMain.submitted) && item_subitem_id.errors?.['required']}"
                                             [selectOnTab]="true" [disabled]="row.pbk_bachat_id" required>
 
@@ -104,25 +105,30 @@
                                         </ng-select>
                                     </td>
                                     <td>
-                                        <ng-select class="custom-sm" style="width: 100%;" [items]="conditions"
-                                            bindLabel="list_name_hin" bindValue="_id" [(ngModel)]="row.condition_id"
-                                            name="cond_{{i}}" [disabled]="row.pbk_bachat_id"
-                                            [clearable]="false"></ng-select>
+                                        <ng-select class="custom-sm" style="width: 100%;" placeholder="item condition"
+                                            appendTo="#bunchPbkClosingComponent" [(ngModel)]="row.condition_id"
+                                            name="cond_{{i}}" [disabled]="row.pbk_bachat_id" [clearable]="false">
+                                            <ng-option selected="selected" disabled value="">Select
+                                                Condition</ng-option>
+                                            <ng-option *ngFor="let item of conditions"
+                                                [value]="item._id">{{item.list_name_hin}} : {{item.list_name_roman}} :
+                                                {{item.list_name_eng}} </ng-option>
+                                        </ng-select>
                                     </td>
                                     <td>
                                         <div class="input-group">
                                             <input type="number" class="form-control" placeholder="Quantity"
                                                 [(ngModel)]="row.qty" name="qty_{{i}}" (change)="qtyChanged(i)"
-                                                #qty="ngModel"
                                                 [ngClass]="{'validation' : ((qty?.touched || fMain.submitted) && qty.errors?.['required'])}"
-                                                required>
+                                                #qty="ngModel" required>
                                             <span class="input-group-text ml-1 border border-secondary"
                                                 style="padding: 0px; min-width: 40%;background: #252932;">
                                                 <ng-select class="custom" style="width: 100%;" placeholder="Unit"
                                                     [clearable]="true" [virtualScroll]="true" [(ngModel)]="row.unit_id"
-                                                    name="unit_id_{{i}}" #unit_id="ngModel"
+                                                    name="unit_id_{{i}}" #unit_id="ngModel" [selectOnTab]="true"
                                                     [ngClass]="{'validation' : (unit_id?.touched || fMain.submitted) && unit_id.errors?.['required']}"
-                                                    [selectOnTab]="true" [disabled]="row.pbk_bachat_id" required>
+                                                    appendTo="#bunchPbkClosingComponent" [disabled]="row.pbk_bachat_id"
+                                                    required>
                                                     <ng-option selected="selected" disabled value="">Unit</ng-option>
                                                     <ng-option *ngFor="let item of units"
                                                         [value]="item._id">{{item.unit_short}}</ng-option>

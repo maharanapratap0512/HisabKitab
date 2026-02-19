@@ -18,6 +18,7 @@ export class AuthService {
       { key: 'aawak', title: 'Aawak', detail: '' },
       { key: 'jawak', title: 'Jawak', detail: '' },
       { key: 'bachat', title: 'Bachat', detail: '' },
+      { key: 'pbk_closing', title: 'PBK Closing', detail: '' },
       { key: 'vehicle', title: 'Vehicle', detail: '', add: true, edit: true, delete: true },
       { key: 'report', title: 'Report', detail: '', },
       { key: 'product', title: 'Product', detail: 'Can be tranced between All MM', add: true, edit: true, delete: true },
@@ -164,6 +165,7 @@ export class AuthService {
       { colName: 'subitem_roman', title: 'Subitem (Roman)' },
     ],
     bachat: [],
+    pbk_closing: [],
     category: [
       { colName: 'category_eng', title: 'Name (Eng)' },
       { colName: 'category_roman', title: 'Name (Roman)' },

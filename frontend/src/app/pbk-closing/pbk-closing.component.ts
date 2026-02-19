@@ -41,6 +41,7 @@ export class PbkClosingComponent implements OnInit {
   isLoader: boolean = false;
   showModal: string = '';
   editData: any = null;
+  settings: any = {}
 
   // Filter
   filterBody: any = {
@@ -67,6 +68,16 @@ export class PbkClosingComponent implements OnInit {
       this.items = result.itemmix || [];
       this.units = result.unit || [];
     });
+    this.settings = auth.webUser.settings;
+    if (!this.settings.pbk_closing) {
+      this.settings = {
+        ...this.settings,
+        pbk_closing: {
+          samePageEntryForm: false,
+          viewMode: 'voucher'
+        }
+      }
+    }
   }
 
   ngOnInit(): void {
@@ -143,13 +154,18 @@ export class PbkClosingComponent implements OnInit {
     $('#showModal').modal('show');
   }
 
+  UISettingsChanged() {
+    this.auth.webUser.settings = this.settings;
+    this.auth.updateSettings()
+  }
+
   closeModal() {
     $('#showModal').modal('hide');
     this.showModal = '';
     this.getClosingData(); // Refresh on close for simplicity
   }
 
-  handleSubmitResponse(event: any) {
+  addPbkClosingResponse(event: any) {
     if (event) {
       this.toastr.success('Success');
       this.closeModal();

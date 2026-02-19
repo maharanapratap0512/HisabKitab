@@ -15,7 +15,10 @@ router.put('/bypbk/:dept_id', async (req, res, next) => {
         const { pbk_id } = req.body;
         const bachat = await PbkBachat.findAll({
             where: {
-                pbk_id: pbk_id
+                pbk_id: pbk_id,
+                qty: {
+                    [Op.gt]: 0
+                }
             },
             include: [
                 { model: Item, as: 'item' },
