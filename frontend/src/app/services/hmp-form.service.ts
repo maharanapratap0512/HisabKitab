@@ -74,12 +74,21 @@ export class HmpFormService {
   }
 
   patchForm(data: any) {
+    console.log('data', data);
+
     this.hmpBatchForm = {
       ...this.hmpBatchForm,
-      ...data,
-      inputs: data.inputs ? data.inputs : [JSON.parse(JSON.stringify(this.inputFormTemplate))],
-      outputs: data.outputs ? data.outputs : [JSON.parse(JSON.stringify(this.outputFormTemplate))]
     };
+
+
+    for (let j in data.inputs) {
+      data.inputs[j].item_subitem_id = data.inputs[j].subitem_id ? data.inputs[j].item_id + ":" + data.inputs[j].subitem_id : data.inputs[j].item_id;
+    }
+    for (let j in data.outputs) {
+      data.outputs[j].item_subitem_id = data.outputs[j].subitem_id ? data.outputs[j].item_id + ":" + data.outputs[j].subitem_id : data.outputs[j].item_id;
+    }
+
+    this.hmpBatchForm = structuredClone(data);
   }
 
   // Logic to auto-add rows if the last row is valid
@@ -112,24 +121,27 @@ export class HmpFormService {
   valid() {
     // Basic Validation
     if (!this.hmpBatchForm.date || !this.hmpBatchForm.mm_id) return false;
-    if (this.hmpBatchForm.inputs.length < 2 || this.hmpBatchForm.outputs.length < 2) return false;
 
-    // Remove last empty inputs
-    if (!this.hmpBatchForm.inputs[this.hmpBatchForm.inputs.length - 1].item_id) {
+    // Remove trailing blank inputs row (auto-added by formStatusChanges)
+    const lastInput = this.hmpBatchForm.inputs[this.hmpBatchForm.inputs.length - 1];
+    if (lastInput && !lastInput.item_id) {
       this.hmpBatchForm.inputs.splice(this.hmpBatchForm.inputs.length - 1, 1);
     }
-    // Remove last empty outputs
-    if (!this.hmpBatchForm.outputs[this.hmpBatchForm.outputs.length - 1].item_id) {
+    // Remove trailing blank outputs row
+    const lastOutput = this.hmpBatchForm.outputs[this.hmpBatchForm.outputs.length - 1];
+    if (lastOutput && !lastOutput.item_id) {
       this.hmpBatchForm.outputs.splice(this.hmpBatchForm.outputs.length - 1, 1);
     }
 
+    // At least 1 filled row each
+    if (!this.hmpBatchForm.inputs.length || !this.hmpBatchForm.outputs.length) return false;
 
     // Validate Input Rows
     for (let row of this.hmpBatchForm.inputs) {
       if (!row.item_id || !row.qty) return false;
     }
 
-    // Validate Output Rows 
+    // Validate Output Rows
     for (let row of this.hmpBatchForm.outputs) {
       if (!row.item_id || !row.qty) return false;
     }

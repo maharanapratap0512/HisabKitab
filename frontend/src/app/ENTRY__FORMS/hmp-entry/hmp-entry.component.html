@@ -47,7 +47,8 @@
                 <div class="col-md-4 text-center">
                     <div class="d-flex">
                         <button class="btn-sm btn-secondary submit" (click)="fs.reset();">Cancel</button>
-                        <button class="btn-sm btn-primary submit mx-2" (click)="onSubmit()">Submit</button>
+                        <button class="btn-sm btn-primary submit mx-2" (click)="onSubmit()">{{isEdit ? 'Update Batch' :
+                            'Save Batch'}}</button>
                         <div class="submit form-check">
                             <input class="form-check-input" type="checkbox" [(ngModel)]="fs.hmpBatchForm.update_recipe"
                                 name="update_recipe" id="updateRecipe">

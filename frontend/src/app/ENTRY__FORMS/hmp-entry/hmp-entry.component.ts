@@ -161,19 +161,31 @@ export class HmpEntryComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log(this.fs.hmpBatchForm);
     if (this.fs.valid()) {
-      this.http.post(this.api.getUrl('HMP') + 'batch/' + this.auth.webUser.dept_id, this.fs.hmpBatchForm).subscribe((data: any) => {
-        console.log(data);
-        this.fs.reset();
-        this.toastr.success('Batch created successfully');
-        this.getRecipes();
-        this.response.emit(data);
-      },
-        error => {
+      if (this.isEdit) {
+        // Update existing batch
+        const id = this.fs.hmpBatchForm._id;
+        this.http.put(this.api.getUrl('HMP') + id, this.fs.hmpBatchForm).subscribe((data: any) => {
           this.fs.reset();
-          console.log(error);
+          this.toastr.success('Batch updated successfully');
+          this.getRecipes();
+          this.response.emit(data);
+        }, err => {
+          console.log(err);
+          this.toastr.error('Failed to update batch');
         });
+      } else {
+        // Create new batch
+        this.http.post(this.api.getUrl('HMP') + 'batch/' + this.auth.webUser.dept_id, this.fs.hmpBatchForm).subscribe((data: any) => {
+          this.fs.reset();
+          this.toastr.success('Batch created successfully');
+          this.getRecipes();
+          this.response.emit(data);
+        }, err => {
+          console.log(err);
+          this.toastr.error('Failed to create batch');
+        });
+      }
     }
   }
 
