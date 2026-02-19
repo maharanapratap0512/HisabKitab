@@ -27,10 +27,15 @@ router.get('/recipe/:dept_id', async (req, res, next) => {
 // Put Batches (get Filtered List)
 router.put('/batch/:dept_id', async (req, res, next) => {
     try {
-        const { mm_id, item_id, date_from, date_to } = req.body;
+        const { mm_id, item_id, date_from, date_to, year, pageNo } = req.body;
         const where = { dept_id: req.params.dept_id, active: 1 };
 
         if (mm_id) where.mm_id = mm_id;
+        if (year) {
+            where[Op.and] = [
+                sequelize.where(sequelize.fn('strftime', '%Y', sequelize.col('date')), year.toString())
+            ];
+        }
         if (date_from && date_to) {
             where.date = { [Op.between]: [date_from, date_to] };
         } else if (date_from) {
@@ -50,7 +55,16 @@ router.put('/batch/:dept_id', async (req, res, next) => {
             };
         }
 
-        const batches = await HmpBatch.findAll({
+        const limit = 100;
+        let offset = null;
+        let page = 1;
+
+        if (pageNo && pageNo > 0) {
+            offset = (pageNo - 1) * limit;
+            page = pageNo;
+        }
+
+        const batches = await HmpBatch.findAndCountAll({
             where: where,
             include: [
                 { model: HmpRecipe, as: 'recipe' },
@@ -88,10 +102,18 @@ router.put('/batch/:dept_id', async (req, res, next) => {
                     required: false
                 }
             ],
-            order: [['date', 'DESC'], ['_id', 'DESC']]
+            order: [['date', 'DESC'], ['_id', 'DESC']],
+            limit: limit,
+            offset: offset,
+            distinct: true
         });
 
-        res.status(200).json({ success: true, result: batches });
+        res.status(200).json({
+            success: true,
+            result: batches.rows,
+            pageNo: page,
+            total_count: batches.count
+        });
     } catch (e) { next(e); }
 });
 
@@ -104,12 +126,12 @@ router.post('/batch/:dept_id', async (req, res, next) => {
         await Fn.begin();
         if (!req.body.recipe_id || req.body.update_recipe) {
             console.log("inserting recipe");
-            req.body.recipe_id = await Fn.insertUpdateHMPRecipe({ ...req.body });
+            req.body.recipe_id = await Fn.insertUpdateHMPRecipe(structuredClone(req.body));
         }
         console.log("start", req.body._id);
 
         console.log("inserting batch");
-        let batchId = await Fn.insertUpdateHMPBatch({ ...req.body });
+        let batchId = await Fn.insertUpdateHMPBatch(structuredClone(req.body));
 
         let batch;
         if (batchId) {
@@ -173,19 +195,16 @@ router.put('/:id', async (req, res, next) => {
         await Fn.begin();
         if (!req.body.recipe_id || req.body.update_recipe) {
             console.log("inserting recipe");
-            req.body.recipe_id = await Fn.insertUpdateHMPRecipe(req.body);
+            req.body.recipe_id = await Fn.insertUpdateHMPRecipe(structuredClone(req.body));
         }
         console.log("inserting batch");
-        let batchId = await Fn.insertUpdateHMPBatch(req.body);
+        let batchId = await Fn.insertUpdateHMPBatch(structuredClone(req.body));
 
         let batch;
         if (batchId) {
             batch = await HmpBatch.findByPk(batchId, {
                 include: [
-                    {
-                        model: HmpRecipe,
-                        as: 'recipe'
-                    },
+                    { model: HmpRecipe, as: 'recipe' },
                     {
                         model: HmpBatchInput,
                         as: 'inputs',
@@ -231,8 +250,6 @@ router.put('/:id', async (req, res, next) => {
         next(e);
     }
 });
-
-// delete batch
 
 
 // Delete Batch

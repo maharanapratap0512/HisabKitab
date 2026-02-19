@@ -32,13 +32,18 @@ export class HmpComponent implements OnInit {
     this.getBatches();
   }
 
-  getBatches() {
-    this.http.put(this.api.getUrl('HMP') + 'batch/' + this.auth.webUser.dept_id, {})
+  async getBatches() {
+    await this.http.put(this.api.getUrl('HMP') + 'batch/' + this.auth.webUser.dept_id, this.filterBody)
       .subscribe((data: any) => {
         this.batches = data.result || [];
         console.log('batches', this.batches);
 
       });
+  }
+
+  async yearChanged(year: any) {
+    this.filterBody.year = year;
+    await this.getBatches();
   }
 
 

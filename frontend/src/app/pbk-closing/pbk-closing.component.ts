@@ -75,7 +75,7 @@ export class PbkClosingComponent implements OnInit {
 
   getClosingData() {
     this.isLoader = true;
-    this.http.post(this.api.getUrl('PBK_CLOSING') + 'filter/' + this.auth.webUser.dept_id, this.filterBody)
+    this.http.post(this.api.getUrl('PBKCLOSING') + 'filter/' + this.auth.webUser.dept_id, this.filterBody)
       .subscribe((data: any) => {
         if (data.success) {
           this.closingDataRaw = data.result;

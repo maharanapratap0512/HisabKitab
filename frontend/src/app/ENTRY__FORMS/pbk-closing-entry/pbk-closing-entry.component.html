@@ -16,13 +16,41 @@
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label class="form-label">Select PBK</label>
-                        <ng-select class="custom" style="width: 100%;" [items]="pbks" bindLabel="pbk_hin"
-                            bindValue="_id" [(ngModel)]="fs.pbkClosingFormMain.pbk_id" name="pbk_id"
-                            (change)="pbkSelected()" placeholder="Search PBK" required>
-                            <ng-template ng-option-tmp let-item="item">
-                                {{item.pbk_hin}} : {{item.pbk_eng}} ({{item.roll_no}})
-                            </ng-template>
+                        <label class="form-label">Sewadhari</label>
+                        <div class="float-end">
+                            <!-- Filter Button with Popover -->
+                            <app-popover-filter [iconClass]="'uil uil-filter'" (clear)="stateSelected(null)">
+                                <div class="mb-2">
+                                    <label class="form-label"
+                                        style="font-size: 0.875rem; margin-bottom: 5px;">State</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Filter PBK by State"
+                                        [selectOnTab]="true" [clearable]="true" [virtualScroll]="true"
+                                        (change)="stateSelected($event)">
+                                        <ng-option selected="selected" disabled value="">Select State to Filter Pbk
+                                        </ng-option>
+                                        <ng-option *ngFor="let item of states" [value]="item._id">
+                                            {{item.state_hin}} : {{item.state_eng}}
+                                        </ng-option>
+                                    </ng-select>
+                                </div>
+                            </app-popover-filter>
+                            <!-- <a type="button" *ngIf="settings.pbk.add" style="padding: 1px 6px !important;"
+                                class="btn btn-outline-primary" (click)="openModal('Add PBK')">
+                                + PBK
+                            </a> -->
+                        </div>
+
+                        <ng-select class="custom" style="width: 100%;" [clearable]="true" [virtualScroll]="true"
+                            [(ngModel)]="fs.pbkClosingFormMain.pbk_id" name="pbk_id" #pbk_id="ngModel"
+                            [selectOnTab]="true" (change)="pbkSelected($event)"
+                            [ngClass]="{ 'validation': (pbk_id?.touched || fMain.submitted) && pbk_id.errors?.['required']}"
+                            placeholder="Select Roll no. or Pbk name" required>
+                            <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
+                            </ng-option>
+                            <ng-option *ngFor="let item of pbks" [value]="item._id">
+                                {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :
+                                {{item.relative_name}}
+                            </ng-option>
                         </ng-select>
                     </div>
                 </div>
@@ -39,10 +67,14 @@
                             <thead>
                                 <tr>
                                     <th class="mw-15">Item</th>
-                                    <th class="mw-10">मौजूद बचत</th>
                                     <th class="mw-6">Condition</th>
-                                    <th class="mw-6">बचत होनी चाहिए</th>
-                                    <th class="mw-6">अंतर ('Rejected')</th>
+                                    <th class="mw-10">मौजूद बचत</th>
+                                    <th class="mw-6">पिछली बचत</th>
+                                    <th class="mw-6">
+                                        <input type="checkbox" class="form-check-input" id="customCheckcolor2"
+                                            [(ngModel)]="fs.pbkClosingFormMain.auto_jawak">
+                                        अंतर (Auto Jawak)
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -57,7 +89,7 @@
 
                                             <ng-container
                                                 *ngFor="let item of items | filterByDate:fs.pbkClosingFormMain.date">
-                                                <ng-option [value]="item._id + ':'">
+                                                <ng-option [value]="item._id">
                                                     {{item.item_hin}} : {{item.item_eng}} : {{item.item_code}}
                                                 </ng-option>
 
@@ -70,6 +102,12 @@
                                                 </ng-option>
                                             </ng-container>
                                         </ng-select>
+                                    </td>
+                                    <td>
+                                        <ng-select class="custom-sm" style="width: 100%;" [items]="conditions"
+                                            bindLabel="list_name_hin" bindValue="_id" [(ngModel)]="row.condition_id"
+                                            name="cond_{{i}}" [disabled]="row.pbk_bachat_id"
+                                            [clearable]="false"></ng-select>
                                     </td>
                                     <td>
                                         <div class="input-group">
@@ -93,13 +131,6 @@
                                         </div>
 
                                     </td>
-
-                                    <td>
-                                        <ng-select class="custom-sm" style="width: 100%;" [items]="conditions"
-                                            bindLabel="list_name_hin" bindValue="_id" [(ngModel)]="row.condition_id"
-                                            name="cond_{{i}}" [disabled]="row.pbk_bachat_id"
-                                            [clearable]="false"></ng-select>
-                                    </td>
                                     <td class="text-center">{{row.sw_bachat}}</td>
                                     <td class="text-center"
                                         [ngClass]="{'text-danger': row.difference < 0, 'text-success': row.difference > 0}">
@@ -118,5 +149,30 @@
                 </div>
             </div>
         </form>
+    </div>
+
+
+
+    <!-- Show Model -->
+    <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width:95%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Select Images</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Add PBK -->
+                    <app-pbk-entry *ngIf="showModal == 'Add PBK'" (response)='pbkAddResponse($event)'>
+                    </app-pbk-entry>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        (click)="closeModal()">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
