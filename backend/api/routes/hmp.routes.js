@@ -27,10 +27,11 @@ router.get('/recipe/:dept_id', async (req, res, next) => {
 // Put Batches (get Filtered List)
 router.put('/batch/:dept_id', async (req, res, next) => {
     try {
-        const { mm_id, item_id, date_from, date_to, year, pageNo } = req.body;
+        const { mm_id, item_id, date_from, date_to, year, pageNo, recipe_id } = req.body;
         const where = { dept_id: req.params.dept_id, active: 1 };
 
         if (mm_id) where.mm_id = mm_id;
+        if (recipe_id) where.recipe_id = recipe_id;
         if (year) {
             where[Op.and] = [
                 sequelize.where(sequelize.fn('strftime', '%Y', sequelize.col('date')), year.toString())

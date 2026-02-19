@@ -15,10 +15,22 @@ declare var $: any;
 })
 export class HmpComponent implements OnInit {
 
+  page = 1;
+  pageNo: any = 0;
+  itemsPerPage = 100;
+  currentPage: any;
+  totalItems: any;
   batches: any = [];
   isEdit = false;
   selectedBatch: any = null;
   filterBody: any = {};
+  term: any = '';
+  total_count: any = 0;
+
+  // Filter data
+  recipes: any = [];
+  mms: any = [];
+  showFilter = false;
 
   constructor(
     public api: ApiService,
@@ -30,20 +42,50 @@ export class HmpComponent implements OnInit {
 
   ngOnInit(): void {
     this.getBatches();
+    this.getRecipes();
+    this.gs.observeList().subscribe((result: any) => {
+      this.mms = result.mm || [];
+    });
   }
 
-  async getBatches() {
-    await this.http.put(this.api.getUrl('HMP') + 'batch/' + this.auth.webUser.dept_id, this.filterBody)
+  getRecipes() {
+    this.http.get(this.api.getUrl('HMP') + 'recipe/' + this.auth.webUser.dept_id)
       .subscribe((data: any) => {
-        this.batches = data.result || [];
-        console.log('batches', this.batches);
-
+        this.recipes = data.result || [];
       });
   }
 
-  async yearChanged(year: any) {
+  getBatches() {
+    this.filterBody.pageNo = this.pageNo;
+    this.http.put(this.api.getUrl('HMP') + 'batch/' + this.auth.webUser.dept_id, this.filterBody)
+      .subscribe((data: any) => {
+        this.batches = data.result || [];
+        this.total_count = data.total_count || 0;
+      });
+  }
+
+  getHmpPage(page: any = null) {
+    if (page) {
+      this.pageNo = page;
+      this.getBatches();
+    }
+  }
+
+  yearChanged(year: any) {
     this.filterBody.year = year;
-    await this.getBatches();
+    this.pageNo = 0;
+    this.getBatches();
+  }
+
+  applyFilter() {
+    this.pageNo = 0;
+    this.getBatches();
+  }
+
+  clearFilter() {
+    this.filterBody = {};
+    this.pageNo = 0;
+    this.getBatches();
   }
 
 

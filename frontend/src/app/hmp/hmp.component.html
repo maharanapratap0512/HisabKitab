@@ -2,7 +2,15 @@
   <div class="col-12">
     <div class="page-title-box d-flex align-items-center justify-content-between">
       <h4 class="mb-0">HMP Batches</h4>
-      <div class="page-title-right">
+      <div class="col-4">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term" name="search">
+        </div>
+      </div>
+      <div class="page-title-right d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm" (click)="showFilter = !showFilter">
+          <i class="uil uil-filter"></i> Filter
+        </button>
         <button class="btn btn-primary btn-sm" (click)="openEntryModal()">+ Add Batch</button>
       </div>
     </div>
@@ -14,11 +22,57 @@
     <div class="card">
       <div class="card-body">
 
+        <!-- Filter Panel -->
+        <div class="row mb-2" *ngIf="showFilter">
+          <div class="col-12">
+            <div class="card border mb-2">
+              <div class="card-body py-2">
+                <div class="row g-2 align-items-end">
+                  <!-- Recipe Filter -->
+                  <div class="col-md-3">
+                    <label class="form-label mb-1"><small>Recipe</small></label>
+                    <select class="form-select form-select-sm" [(ngModel)]="filterBody.recipe_id" name="filter_recipe">
+                      <option [ngValue]="null">All Recipes</option>
+                      <option *ngFor="let r of recipes" [value]="r._id">{{r.recipe_name}}</option>
+                    </select>
+                  </div>
+                  <!-- MM Filter -->
+                  <div class="col-md-3">
+                    <label class="form-label mb-1"><small>MM</small></label>
+                    <select class="form-select form-select-sm" [(ngModel)]="filterBody.mm_id" name="filter_mm">
+                      <option [ngValue]="null">All MMs</option>
+                      <option *ngFor="let m of mms" [value]="m._id">{{m.mm_hin}}</option>
+                    </select>
+                  </div>
+                  <!-- Date From -->
+                  <div class="col-md-2">
+                    <label class="form-label mb-1"><small>Date From</small></label>
+                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date_from"
+                      name="filter_date_from">
+                  </div>
+                  <!-- Date To -->
+                  <div class="col-md-2">
+                    <label class="form-label mb-1"><small>Date To</small></label>
+                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date_to"
+                      name="filter_date_to">
+                  </div>
+                  <!-- Buttons -->
+                  <div class="col-md-2 d-flex gap-2">
+                    <button class="btn btn-primary btn-sm w-100" (click)="applyFilter()">
+                      <i class="uil uil-check"></i> Apply
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm w-100" (click)="clearFilter()">
+                      <i class="uil uil-times"></i> Clear
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="row">
           <div class="col-4 pt-2">
-            <!-- <span class="badge year-box" [ngClass]="{'badge-outline-danger':!isDeleting, 'bg-danger': isDeleting}"
-              (click)="deleteMultiple()"
-              title="Click for multiple delete selection & click same again to perform delete.">Delete</span> -->
             <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
               (click)="yearChanged(null)">All</span>
             <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearChanged(y)"
@@ -27,14 +81,16 @@
             </span>
           </div>
           <div class="col-8" *ngIf="batches.length">
-            <!-- <pagination-controls class="pagi text-end" (pageChange)="getAawakPage(page = $event)" [autoHide]="true">
-            </pagination-controls> -->
+            <pagination-controls class="pagi text-end" (pageChange)="getHmpPage(page = $event)" [autoHide]="true">
+            </pagination-controls>
           </div>
         </div>
 
         <!-- Accordion for batches -->
         <div class="accordion" id="batchAccordion">
-          <div *ngFor="let batch of batches; let batchIndex = index" class="accordion-item">
+          <div
+            *ngFor="let batch of batches | search:term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let batchIndex = index"
+            class="accordion-item">
             <h2 class="accordion-header" [id]="'heading' + batchIndex">
               <button class="accordion-button" [class.collapsed]="batchIndex !== 0" type="button"
                 data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse' + batchIndex"
@@ -140,11 +196,13 @@
                                 (click)="deleteOutput(output._id, i)"></i>
                             </td>
                             <td>
-                              <span *ngIf="output.subitem_hin">{{output.subitem?.subitem_list?.subitem_hin}}
-                              </span>{{output.item_hin}}
+                              <span
+                                *ngIf="output.subitem?.subitem_list?.subitem_hin">{{output.subitem?.subitem_list?.subitem_hin}}
+                              </span>{{output.item?.item_hin}}
                               <span class="text-muted"> : </span>
-                              <span *ngIf="output.subitem_eng">{{output.subitem?.subitem_list?.subitem_eng}}
-                              </span>{{output.item_eng}}
+                              <span
+                                *ngIf="output.subitem?.subitem_list?.subitem_eng">{{output.subitem?.subitem_list?.subitem_eng}}
+                              </span>{{output.item?.item_eng}}
                             </td>
                             <td>{{output.qty}} {{output.unit_short}}</td>
                             <td>{{output.rate || '-'}}</td>
@@ -168,6 +226,10 @@
           <i class="uil uil-box" style="font-size: 3rem;"></i>
           <p>No Batches Found</p>
         </div>
+
+        <pagination-controls class="pagi text-center" (pageChange)="getHmpPage(page = $event)" [autoHide]="true"
+          *ngIf="batches.length">
+        </pagination-controls>
       </div>
     </div>
   </div>
