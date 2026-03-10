@@ -7,202 +7,198 @@
 <div class="wrapper">
    <div class="content-page">
       <div class="content">
-         <div class="container-fluid">
 
-            <!-- First Row -->
-            <!-- Add Button, Search Field, Filter button, Total Count -->
-            <div class="row" *ngIf="bachatData.length">
-               <div class="card-body">
-                  <div class="row d-flex justify-content-between">
-                     <div class="col-5">
-                        <div class="form-group">
-                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                              name="search">
-                        </div>
+         <!-- First Row -->
+         <!-- Add Button, Search Field, Filter button, Total Count -->
+         <div class="row" *ngIf="bachatData.length">
+            <div class="card-body">
+               <div class="row d-flex justify-content-between">
+                  <div class="col-5">
+                     <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                           name="search">
                      </div>
-                     <div class="col-2">
-                        <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse"
-                           data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i
-                              class="uil-search-plus h4 icon-mx-2"></i> Advance Search
-                        </button>
-                     </div>
-                     <div class="col-3">
-                        <button type="button" class="btn btn-outline-success" (click)="excelExport()"> Export To Excel
-                        </button>
-                     </div>
-                     <div class="col-2">
-                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">
-                           Total Count : {{total_count}}
-                        </button>
-                     </div>
+                  </div>
+                  <div class="col-2">
+                     <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i
+                           class="uil-search-plus h4 icon-mx-2"></i> Advance Search
+                     </button>
+                  </div>
+                  <div class="col-3">
+                     <button type="button" class="btn btn-outline-success" (click)="excelExport()"> Export To Excel
+                     </button>
+                  </div>
+                  <div class="col-2">
+                     <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">
+                        Total Count : {{total_count}}
+                     </button>
                   </div>
                </div>
             </div>
+         </div>
 
-            <!-- fliter collapse -->
-            <div class="collapse" id="collapseExample">
-               <div class="card card-body">
-                  <div class="row">
-                     <div class="card-body">
-                        <form #filterForm="ngForm">
-                           <div class="row">
-                              <div class="col-3">
-                                 <ng-select class="custom" style="width: 100%;" placeholder="Select State"
-                                    [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)">
-                                    <ng-option *ngFor="let item of states" [value]="item._id">
-                                       {{item.state_hin}}:{{item.state_eng}}</ng-option>
-                                 </ng-select>
-                              </div>
-                              <div class="col-3">
-                                 <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
-                                    [clearable]="true" [virtualScroll]="true" (change)="mmSelected($event)">
-                                    <ng-option *ngFor="let item of mms" [value]="item._id">
-                                       {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
-                                 </ng-select>
-                              </div>
-                              <div class="col-3">
-                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
-                                    [clearable]="true" [virtualScroll]="true" (change)="catSelected($event)">
-                                    <ng-option *ngFor="let item of categories" [value]="item._id">
-                                       {{item.category_hin}}:{{item.category_eng}}</ng-option>
-                                 </ng-select>
-                              </div>
-                              <div class="col-3">
-                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
-                                    [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)">
-                                    <ng-option *ngFor="let item of items" [value]="item._id">
-                                       {{item.item_hin}}:{{item.item_eng}}</ng-option>
-                                 </ng-select>
-                              </div>
+         <!-- fliter collapse -->
+         <div class="collapse" id="collapseExample">
+            <div class="card card-body">
+               <div class="row">
+                  <div class="card-body">
+                     <form #filterForm="ngForm">
+                        <div class="row">
+                           <div class="col-3">
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select State"
+                                 [clearable]="true" [virtualScroll]="true" (change)="stateSelected($event)">
+                                 <ng-option *ngFor="let item of states" [value]="item._id">
+                                    {{item.state_hin}}:{{item.state_eng}}</ng-option>
+                              </ng-select>
                            </div>
-                        </form>
-                     </div>
+                           <div class="col-3">
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="true"
+                                 [virtualScroll]="true" (change)="mmSelected($event)">
+                                 <ng-option *ngFor="let item of mms" [value]="item._id">
+                                    {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                           <div class="col-3">
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
+                                 [clearable]="true" [virtualScroll]="true" (change)="catSelected($event)">
+                                 <ng-option *ngFor="let item of categories" [value]="item._id">
+                                    {{item.category_hin}}:{{item.category_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                           <div class="col-3">
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                 [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)">
+                                 <ng-option *ngFor="let item of items" [value]="item._id">
+                                    {{item.item_hin}}:{{item.item_eng}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+                     </form>
                   </div>
                </div>
             </div>
+         </div>
 
-            <div class="row" *ngIf="bachatData.length">
-               <div class="card-body" style="overflow: auto;">
-                  <h4 class="card-title">Click Row to See Image if available.</h4>
-                  <div class="table-container">
-                     <table id="datatable-buttons" class="table table-hover table-sticky-header dt-responsive">
-                        <thead>
-                           <tr>
-                              <!-- <td>Image</td> -->
-                              <td style="width: 70px;">No.</td>
-                              <td>Department</td>
-                              <td>State</td>
-                              <td>MM</td>
-                              <td>Category</td>
-                              <td>Item</td>
-                              <td>Used</td>
-                              <td *ngIf="settings.new">New</td>
-                              <td *ngIf="settings.old">Old</td>
-                              <td *ngIf="settings.repairing">IN Repairing</td>
-                              <td *ngIf="settings.defective">Defective</td>
-                              <td *ngIf="settings.scrap">Scrap</td>
-                              <td>Stock</td>
-                              <td>Difference</td>
-                              <td>Jawak</td>
-                           </tr>
-                        </thead>
-                        <tbody>
-                           <ng-container *ngFor="let data of bachatData | search:term; let i=index">
-                              <tr (click)="setImages(data)">
-                                 <!-- <td>
+         <div class="row" *ngIf="bachatData.length">
+            <h4 class="card-title">Click Row to See Image if available.</h4>
+            <div class="table-container">
+               <table id="datatable-buttons" class="table table-hover table-sticky-header dt-responsive">
+                  <thead>
+                     <tr>
+                        <!-- <td>Image</td> -->
+                        <th style="width: 70px;">No.</th>
+                        <th *ngIf="false">Department</th>
+                        <th>State</th>
+                        <th>MM</th>
+                        <th>Category</th>
+                        <th>Item</th>
+                        <th>Used</th>
+                        <th *ngIf="settings.new">New</th>
+                        <th *ngIf="settings.old">Old</th>
+                        <th *ngIf="settings.repairing">IN Repairing</th>
+                        <th *ngIf="settings.defective">Defective</th>
+                        <th *ngIf="settings.scrap">Scrap</th>
+                        <th>Stock</th>
+                        <th>Difference</th>
+                        <th>Jawak</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <ng-container *ngFor="let data of bachatData | search:term; let i=index">
+                        <tr (click)="setImages(data)">
+                           <!-- <td>
                                  <div> 
                                     <img [src]="data.image" class="img-fluid img-thumbnail mx-1 p-1 h-100" *ngIf="data.image"
                                     style="max-width: 75px; object-fit: cover;" alt="item-img + {{i}}"  />
                                  </div>
                               </td> -->
-                                 <td>{{i+1}}</td>
-                                 <td>
-                                    {{data.dept_hin}}<br />
-                                    {{data.dept_eng}}
-                                 </td>
-                                 <td>
-                                    {{data.state_hin}}<br />
-                                    {{data.state_eng}}
-                                 </td>
-                                 <td>
-                                    {{data.mm_hin}}<br />
-                                    {{data.mm_eng}}
-                                 </td>
-                                 <td *ngIf="!data.scat_id">
-                                    {{data.icat_hin}}<br />
-                                    {{data.icat_eng}}
-                                 </td>
-                                 <td *ngIf="data.scat_id">
-                                    {{data.scat_hin}}<br />
-                                    {{data.scat_eng}}
-                                 </td>
-                                 <td>
-                                    {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}} <br />
-                                    {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
-                                 </td>
-                                 <td>
-                                    {{data.Used ? data.Used + " " + data.unit_short : "-"}}
-                                 </td>
-                                 <td *ngIf="settings.new">
-                                    <span class="px-1" [ngClass]="{'error': data.New < 0}">
-                                       {{data.New ? data.New + " " + data.unit_short : "-"}}
-                                    </span>
-                                 </td>
-                                 <td *ngIf="settings.old">
-                                    <span class="px-1" [ngClass]="{'error': data.Old < 0}">
-                                       {{data.Old ? data.Old + " " + data.unit_short : "-"}}
-                                    </span>
-                                 </td>
-                                 <td *ngIf="settings.repairing">
-                                    <span class="px-1" [ngClass]="{'error': data.Repairing < 0}">
-                                       {{data.Repairing ? data.Repairing + " " + data.unit_short : "-"}}
-                                    </span>
-                                 </td>
-                                 <td *ngIf="settings.defective">
-                                    <span class="px-1" [ngClass]="{'error': data.Defective < 0}">
-                                       {{data.Defective ? data.Defective + " " + data.unit_short : "-"}}
-                                    </span>
-                                 </td>
-                                 <td *ngIf="settings.scrap">
-                                    <span class="px-1" [ngClass]="{'error': data.Scrap < 0}">
-                                       {{data.Scrap ? data.Scrap + " " + data.unit_short : "-"}}
-                                    </span>
-                                 </td>
-                                 <td>
-                                    <span class="px-1" [ngClass]="{'error': data.Stock < 0, 'stock':data.Stock > 0}">
-                                       {{data.Stock ? data.Stock + " " + data.unit_short : "-"}}
-                                    </span>
-                                 </td>
-                                 <td>
-                                    <span class="px-1" [ngClass]="{'error': data.difference != 0}">
-                                       {{data.difference ? data.difference + " " + data.unit_short : "-"}}
-                                    </span>
-                                 </td>
-                                 <td>
-                                    <!-- <button class="btn btn-sm btn-warning mx-1" (click)="addJawak(data)"
+                           <td>{{i+1}}</td>
+                           <td *ngIf="false">
+                              {{data.dept_hin}}<br />
+                              {{data.dept_eng}}
+                           </td>
+                           <td>
+                              {{data.state_hin}}<br />
+                              {{data.state_eng}}
+                           </td>
+                           <td>
+                              {{data.mm_hin}}<br />
+                              {{data.mm_eng}}
+                           </td>
+                           <td *ngIf="!data.scat_id">
+                              {{data.icat_hin}}<br />
+                              {{data.icat_eng}}
+                           </td>
+                           <td *ngIf="data.scat_id">
+                              {{data.scat_hin}}<br />
+                              {{data.scat_eng}}
+                           </td>
+                           <td>
+                              {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}} <br />
+                              {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
+                           </td>
+                           <td>
+                              {{data.Used ? data.Used + " " + data.unit_short : "-"}}
+                           </td>
+                           <td *ngIf="settings.new">
+                              <span class="px-1" [ngClass]="{'error': data.New < 0}">
+                                 {{data.New ? data.New + " " + data.unit_short : "-"}}
+                              </span>
+                           </td>
+                           <td *ngIf="settings.old">
+                              <span class="px-1" [ngClass]="{'error': data.Old < 0}">
+                                 {{data.Old ? data.Old + " " + data.unit_short : "-"}}
+                              </span>
+                           </td>
+                           <td *ngIf="settings.repairing">
+                              <span class="px-1" [ngClass]="{'error': data.Repairing < 0}">
+                                 {{data.Repairing ? data.Repairing + " " + data.unit_short : "-"}}
+                              </span>
+                           </td>
+                           <td *ngIf="settings.defective">
+                              <span class="px-1" [ngClass]="{'error': data.Defective < 0}">
+                                 {{data.Defective ? data.Defective + " " + data.unit_short : "-"}}
+                              </span>
+                           </td>
+                           <td *ngIf="settings.scrap">
+                              <span class="px-1" [ngClass]="{'error': data.Scrap < 0}">
+                                 {{data.Scrap ? data.Scrap + " " + data.unit_short : "-"}}
+                              </span>
+                           </td>
+                           <td>
+                              <span class="px-1" [ngClass]="{'error': data.Stock < 0, 'fw-bold':data.Stock > 0}">
+                                 {{data.Stock ? data.Stock + " " + data.unit_short : "-"}}
+                              </span>
+                           </td>
+                           <td>
+                              <span class="px-1" [ngClass]="{'error': data.difference != 0}">
+                                 {{data.difference ? data.difference + " " + data.unit_short : "-"}}
+                              </span>
+                           </td>
+                           <td>
+                              <!-- <button class="btn btn-sm btn-warning mx-1" (click)="addJawak(data)"
                                     *ngIf="data.Stock">
                                     <i class="mdi mdi-plus noti-icon"></i> जावक
                                  </button> -->
-                                    <span class="text-success" *ngIf="!data.Stock"
-                                       style="font-size: xx-large;line-height: 0px;">
-                                       <i class="uil-check-circle"></i>
-                                       <!-- <i class="uil-check"></i> -->
-                                    </span>
-                                    <!-- <button class="btn btn-sm btn-primary" (click)="showJawak(data._id)">
+                              <span class="text-success" *ngIf="!data.Stock"
+                                 style="font-size: xx-large;line-height: 0px;">
+                                 <i class="uil-check-circle"></i>
+                                 <!-- <i class="uil-check"></i> -->
+                              </span>
+                              <!-- <button class="btn btn-sm btn-primary" (click)="showJawak(data._id)">
                                     <i class="dripicons-view-list noti-icon"></i>
                                  </button> -->
-                                 </td>
+                           </td>
 
-                              </tr>
-                           </ng-container>
-                        </tbody>
-                     </table>
-                  </div>
-               </div>
+                        </tr>
+                     </ng-container>
+                  </tbody>
+               </table>
             </div>
-
-            <h2 class="text-center m-5" *ngIf="!bachatData.length">No Data!</h2>
          </div>
+
+         <h2 class="text-center m-5" *ngIf="!bachatData.length">No Data!</h2>
       </div>
    </div>
 </div>

@@ -57,6 +57,8 @@ export class PbkClosingEntryComponent implements OnInit {
     }, 500);
   }
 
+
+
   stateSelected(ev: any) {
     if (ev) {
       this.pbks = this.gs.Lists.pbk.filter((p: { state_id: any; }) => p.state_id == ev);
@@ -71,6 +73,7 @@ export class PbkClosingEntryComponent implements OnInit {
       this.http.put(this.api.getUrl('PBKBACHAT') + 'bypbk/' + this.auth.webUser.dept_id, { pbk_id: ev })
         .subscribe((data: any) => {
           if (data.success) {
+
             this.populateForm(data.result);
           }
           this.isLoader = false;
@@ -87,8 +90,11 @@ export class PbkClosingEntryComponent implements OnInit {
     this.fs.pbkClosingFormMain.pbk_closings = [];
 
     for (let i in bachatList) {
+      bachatList[i].pbk_bachat_id = bachatList[i]._id || null;
       bachatList[i].sw_bachat = bachatList[i].qty;
+      bachatList[i].difference = bachatList[i].qty - bachatList[i].sw_bachat;
       bachatList[i].item_subitem_id = bachatList[i].subitem_id ? bachatList[i].item_id + ":" + bachatList[i].subitem_id : bachatList[i].item_id;
+      delete bachatList[i]._id;
     }
 
     this.fs.pbkClosingFormMain.pbk_closings = [...bachatList];
@@ -101,24 +107,23 @@ export class PbkClosingEntryComponent implements OnInit {
   }
 
   submit() {
-    this.fs.submit = true;
-    if (this.fs.pbkClosingFormMain.pbk_id && this.fs.pbkClosingFormMain.date && this.fs.pbkClosingFormMain.pbk_closings.length > 0) {
+    if (this.fs.validPbkClosing()) {
       this.isLoader = true;
-      console.log(this.fs.pbkClosingFormMain);
 
-      // this.http.post(this.api.getUrl('PBK_CLOSING') + 'bunch/' + this.auth.webUser.dept_id, this.fs.pbkClosingFormMain)
-      //   .subscribe((data: any) => {
-      //     if (data.success) {
-      //       this.toastr.success('Closing Added Successfully');
-      //       this.fs.resetPbkClosing();
-      //     } else {
-      //       this.toastr.error(data.message);
-      //     }
-      //     this.isLoader = false;
-      //   }, err => {
-      //     this.isLoader = false;
-      //     this.toastr.error(err.error || 'Error saving closing');
-      //   });
+      this.http.post(this.api.getUrl('PBKCLOSING') + 'bunch/' + this.auth.webUser.dept_id, this.fs.pbkClosingFormMain)
+        .subscribe((data: any) => {
+          if (data.success) {
+            this.toastr.success('PBK Closing Added Successfully');
+            this.fs.resetPbkClosing();
+            this.response.emit(data.result);
+          } else {
+            this.toastr.error(data.message);
+          }
+          this.isLoader = false;
+        }, err => {
+          this.isLoader = false;
+          this.toastr.error(err.error || 'Error saving closing');
+        });
     } else {
       this.toastr.error('Please fill required fields (Date, PBK) or ensure items exist.');
     }

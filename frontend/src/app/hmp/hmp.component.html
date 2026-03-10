@@ -8,10 +8,27 @@
         </div>
       </div>
       <div class="page-title-right d-flex gap-2">
-        <button class="btn btn-outline-secondary btn-sm" (click)="showFilter = !showFilter">
-          <i class="uil uil-filter"></i> Filter
-        </button>
-        <button class="btn btn-primary btn-sm" (click)="openEntryModal()">+ Add Batch</button>
+        <app-popover-filter [btnOutline]="false" iconClass="dripicons-gear" direction="left" [showClearButton]="false"
+          triggerOn="hover">
+          <ul class="list-unstyled p-2 mb-0">
+            <li>
+              <h5 class="fs-6 mb-2">डाटा टेबल मोड</h5>
+              <div class="d-flex justify-content-between gap-3">
+                <div class="form-check form-radio-info mb-0">
+                  <input type="radio" [value]="'individual'" [(ngModel)]="settings.hmp.viewMode"
+                    class="form-check-input" (change)="UISettingsChanged()" name="viewMode" id="viewSingle">
+                  <label class="form-check-label fs-7" for="viewSingle">Individual</label>
+                </div>
+                <div class="form-check form-radio-info mb-0">
+                  <input type="radio" [value]="'voucher'" [(ngModel)]="settings.hmp.viewMode" class="form-check-input"
+                    (change)="UISettingsChanged()" name="viewMode" id="viewVoucher">
+                  <label class="form-check-label fs-7" for="viewVoucher">Voucher Wise</label>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </app-popover-filter>
+        <button class="btn btn-primary btn-sm" (click)="openEntryModal()">+ Add HMP</button>
       </div>
     </div>
   </div>
@@ -20,59 +37,16 @@
 <div class="row">
   <div class="col-12">
     <div class="card">
-      <div class="card-body">
+      <div class="card-body p-1">
 
-        <!-- Filter Panel -->
-        <div class="row mb-2" *ngIf="showFilter">
-          <div class="col-12">
-            <div class="card border mb-2">
-              <div class="card-body py-2">
-                <div class="row g-2 align-items-end">
-                  <!-- Recipe Filter -->
-                  <div class="col-md-3">
-                    <label class="form-label mb-1"><small>Recipe</small></label>
-                    <select class="form-select form-select-sm" [(ngModel)]="filterBody.recipe_id" name="filter_recipe">
-                      <option [ngValue]="null">All Recipes</option>
-                      <option *ngFor="let r of recipes" [value]="r._id">{{r.recipe_name}}</option>
-                    </select>
-                  </div>
-                  <!-- MM Filter -->
-                  <div class="col-md-3">
-                    <label class="form-label mb-1"><small>MM</small></label>
-                    <select class="form-select form-select-sm" [(ngModel)]="filterBody.mm_id" name="filter_mm">
-                      <option [ngValue]="null">All MMs</option>
-                      <option *ngFor="let m of mms" [value]="m._id">{{m.mm_hin}}</option>
-                    </select>
-                  </div>
-                  <!-- Date From -->
-                  <div class="col-md-2">
-                    <label class="form-label mb-1"><small>Date From</small></label>
-                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date_from"
-                      name="filter_date_from">
-                  </div>
-                  <!-- Date To -->
-                  <div class="col-md-2">
-                    <label class="form-label mb-1"><small>Date To</small></label>
-                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date_to"
-                      name="filter_date_to">
-                  </div>
-                  <!-- Buttons -->
-                  <div class="col-md-2 d-flex gap-2">
-                    <button class="btn btn-primary btn-sm w-100" (click)="applyFilter()">
-                      <i class="uil uil-check"></i> Apply
-                    </button>
-                    <button class="btn btn-outline-secondary btn-sm w-100" (click)="clearFilter()">
-                      <i class="uil uil-times"></i> Clear
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- top filter row -->
+        <div class="row mb-2">
 
-        <div class="row">
-          <div class="col-4 pt-2">
+          <div class="col-3 pt-2">
+            <button class="badge year-box badge-outline-secondary me-1" (click)="toggleExpandAll()"
+              *ngIf="settings.hmp.viewMode === 'voucher'" title="Toggle Expand All">
+              <i class="uil" [ngClass]="expandAll ? 'uil-compress-arrows' : 'uil-expand-arrows'"></i>
+            </button>
             <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
               (click)="yearChanged(null)">All</span>
             <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearChanged(y)"
@@ -80,92 +54,133 @@
               {{y}}
             </span>
           </div>
-          <div class="col-8" *ngIf="batches.length">
+          <!-- Filter Options -->
+          <div class="col-1 pt-2">
+            <app-popover-filter label="Filter" iconClass="uil uil-filter" direction="auto" (clear)="clearFilter()"
+              clearButtonLabel="Clear Filter" triggerOn="hover">
+              <div style="width: 300px;">
+                <!-- Date From -->
+                <label class="form-label mb-1"><small>Date From</small></label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date_from"
+                  name="filter_date_from" (change)="applyFilter()">
+                <!-- Date To -->
+                <label class="form-label mb-1"><small>Date To</small></label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date_to"
+                  name="filter_date_to" (change)="applyFilter()">
+                <!-- Recipe Filter -->
+                <label class="form-label mb-1"><small>Recipe</small></label>
+                <ng-select class="custom-sm" [(ngModel)]="filterBody.recipe_id" name="filter_recipe"
+                  (change)="applyFilter()" placeholder="Select Recipe" [clearable]="true" [selectOnTab]="true">
+                  <ng-option *ngFor="let r of recipes" [value]="r._id">
+                    {{r.recipe_name}} - ({{r.description}})
+                  </ng-option>
+                </ng-select>
+                <!-- MM Filter -->
+                <label class="form-label mb-1"><small>MM</small></label>
+                <ng-select class="custom-sm" [(ngModel)]="filterBody.mm_id" name="filter_mm" (change)="applyFilter()"
+                  placeholder="Select MM" [clearable]="true" [selectOnTab]="true">
+                  <ng-option *ngFor="let item of mms" [value]="item._id">
+                    {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}
+                  </ng-option>
+                </ng-select>
+              </div>
+            </app-popover-filter>
+          </div>
+          <div class="col-1 pt-2">
+            <button type="button" class="badge badge-outline-success dropdown-toggle year-box mx-2"
+              data-bs-toggle="dropdown" aria-expanded="false"> Export To </button>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" (click)="exportToExcel()" style="cursor: pointer;">Excel</a>
+              <a class="dropdown-item" (click)="exportToPdf()" style="cursor: pointer;">Pdf</a>
+            </div>
+          </div>
+          <div class="col-2 pt-2 text-center">
+            <span>Total Count - {{total_count}}</span>
+          </div>
+          <div class="col-5" *ngIf="batches.length">
             <pagination-controls class="pagi text-end" (pageChange)="getHmpPage(page = $event)" [autoHide]="true">
             </pagination-controls>
           </div>
         </div>
 
-        <!-- Accordion for batches -->
-        <div class="accordion" id="batchAccordion">
+        <!-- Voucher View (Accordion) -->
+        <div class="accordion" id="batchAccordion" *ngIf="settings.hmp.viewMode === 'voucher'">
           <div
             *ngFor="let batch of batches | search:term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let batchIndex = index"
-            class="accordion-item">
+            class="accordion-item mb-1 border-0 shadow-sm" style="border-radius: 8px; overflow: hidden;">
             <h2 class="accordion-header" [id]="'heading' + batchIndex">
-              <button class="accordion-button" [class.collapsed]="batchIndex !== 0" type="button"
+              <button class="accordion-button py-2" [class.collapsed]="batchIndex !== 0" type="button"
                 data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse' + batchIndex"
-                [attr.aria-expanded]="batchIndex === 0" [attr.aria-controls]="'collapse' + batchIndex">
+                [attr.aria-expanded]="batchIndex === 0" [attr.aria-controls]="'collapse' + batchIndex"
+                style="background-color: #5c4cae; color: white;">
                 <div class="w-100 d-flex align-items-center justify-content-between pe-3">
-                  <div class="d-flex align-items-center gap-4">
-                    <span>{{batch.date | date:'dd-MM-yyyy'}}</span>
-                    <span class="text-muted">|</span>
+                  <div class="d-flex align-items-center gap-3 flex-wrap fs-7">
+                    <strong>{{batch.date | date:'dd-MM-yyyy'}}</strong>
+                    <span style="opacity: 0.4;">|</span>
                     <strong>{{batch.recipe?.recipe_name}}</strong>
-                    <span class="text-muted">|</span>
-                    <span>{{batch.recipe?.description}}</span>
-                    <span class="text-muted">|</span>
-                    <span>{{batch.mm?.mm_hin}}</span>
+                    <span style="opacity: 0.4;">|</span>
+                    <span style="opacity: 0.8;">{{batch.recipe?.description}}</span>
+                    <span style="opacity: 0.4;">|</span>
+                    <span>{{batch.mm?.mm_hin}} · {{batch.mm?.mm_eng}}</span>
                   </div>
                   <div class="d-flex align-items-center gap-2">
-                    <span class="badge"
+                    <span class="badge py-1 px-2" *ngIf="batch.status === 'completed'"
                       [ngClass]="{'bg-success': batch.status === 'completed', 'bg-warning': batch.status === 'pending'}">
                       {{batch.status}}
                     </span>
-                    <button class="btn btn-light btn-sm" (click)="$event.stopPropagation(); openEntryModal(batch)"
-                      title="Edit Batch">
-                      <i class="uil uil-pen"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm"
-                      (click)="$event.stopPropagation(); delete(batch._id, batchIndex)" title="Delete Batch">
-                      <i class="uil uil-trash"></i>
-                    </button>
+                    <i class="uil uil-pen i-outline-primary shadow-sm"
+                      style="background: rgba(255,255,255,0.1); border-color: transparent; color: white; padding: 4px 6px; cursor: pointer; border-radius: 4px;"
+                      (click)="$event.stopPropagation(); openEntryModal(batch)" title="Edit Batch"></i>
+                    <i class="uil uil-trash i-outline-danger shadow-sm"
+                      style="background: #fa5c7c; border-color: transparent; color: white; padding: 4px 6px; cursor: pointer; border-radius: 4px;"
+                      (click)="$event.stopPropagation(); delete(batch._id, batchIndex)" title="Delete Batch"></i>
                   </div>
                 </div>
               </button>
             </h2>
             <div [id]="'collapse' + batchIndex" class="accordion-collapse collapse" [class.show]="batchIndex === 0"
-              [attr.aria-labelledby]="'heading' + batchIndex" data-bs-parent="#batchAccordion">
-              <div class="accordion-body">
-
-                <!-- Inputs and Outputs Side by Side -->
-                <div class="row">
+              [attr.aria-labelledby]="'heading' + batchIndex">
+              <div class="accordion-body p-0">
+                <div class="row g-0">
                   <!-- Inputs Table -->
-                  <div class="col-md-6 border-end">
-                    <h6 class="text-secondary mb-3">
-                      <i class="uil uil-arrow-down text-danger"></i> Input Materials (Consumed)
-                    </h6>
-                    <div class="table-responsive">
-                      <table class="table table-sm table-bordered">
-                        <thead class="table-light">
+                  <div class="col-md-6" style="border-right: 1px solid #2e3250;">
+                    <div class="d-flex align-items-center px-2"
+                      style="height: 25px; background: #162d50; color: #7ab3ff; border-left: 3px solid #4a9eff; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">
+                      ⬇ &nbsp; INPUT MATERIALS
+                    </div>
+                    <div class="">
+                      <table class="table-compact mb-0 no-border-last-row">
+                        <thead>
                           <tr>
-                            <th width="8%">#</th>
-                            <th width="42%">Item</th>
+                            <th width="8%" class="ps-2">#</th>
+                            <th width="52%">Item</th>
                             <th width="20%">Qty</th>
-                            <th width="15%">Rate</th>
-                            <th width="15%">Condition</th>
+                            <th width="10%">Rate</th>
+                            <th width="10%">Cond.</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr *ngFor="let input of batch.inputs; let i = index">
-                            <td>
+                            <td class="ps-2">
                               {{i+1}}
-                              <i class="uil uil-trash text-danger cursor-pointer" *ngIf="batch.inputs.length > 1"
+                              <i class="uil uil-trash text-danger cursor-pointer fs-7" *ngIf="batch.inputs.length > 1"
                                 (click)="deleteInput(input._id, i)"></i>
                             </td>
                             <td>
                               <span
                                 *ngIf="input.subitem?.subitem_list?.subitem_hin">{{input.subitem?.subitem_list?.subitem_hin}}
                               </span>{{input.item.item_hin}}
-                              <span class="text-muted"> : </span>
+                              <span style="opacity: 0.5;"> : </span>
                               <span
                                 *ngIf="input.subitem?.subitem_list?.subitem_eng">{{input.subitem?.subitem_list?.subitem_eng}}
                               </span>{{input.item.item_eng}}
                             </td>
-                            <td>{{input.qty}} {{input.unit_short}}</td>
-                            <td>{{input.rate || '-'}}</td>
-                            <td><small>{{input.condition?.list_name_hin}}</small></td>
+                            <td><strong>{{input.qty}}</strong> <small>{{input.unit_short}}</small></td>
+                            <td><span style="opacity: 0.6;">{{input.rate || '-'}}</span></td>
+                            <td><small style="color: #f0a500;">{{input.condition?.list_name_hin}}</small></td>
                           </tr>
                           <tr *ngIf="!batch.inputs || batch.inputs.length === 0">
-                            <td colspan="5" class="text-center text-muted">No inputs</td>
+                            <td colspan="5" class="text-center text-muted p-2">No inputs</td>
                           </tr>
                         </tbody>
                       </table>
@@ -174,42 +189,43 @@
 
                   <!-- Outputs Table -->
                   <div class="col-md-6">
-                    <h6 class="text-primary mb-3">
-                      <i class="uil uil-arrow-up text-success"></i> Output Products (Produced)
-                    </h6>
-                    <div class="table-responsive">
-                      <table class="table table-sm table-bordered">
-                        <thead class="table-light">
+                    <div class="d-flex align-items-center px-2"
+                      style="height: 25px; background: #132a14; color: #7de07d; border-left: 3px solid #4caf50; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">
+                      ⬆ &nbsp; OUTPUT PRODUCTS
+                    </div>
+                    <div class="">
+                      <table class="table-compact mb-0 no-border-last-row">
+                        <thead>
                           <tr>
-                            <th width="8%">#</th>
-                            <th width="42%">Item</th>
+                            <th width="8%" class="ps-2">#</th>
+                            <th width="52%">Item</th>
                             <th width="20%">Qty</th>
-                            <th width="15%">Rate</th>
-                            <th width="15%">Condition</th>
+                            <th width="10%">Rate</th>
+                            <th width="10%">Cond.</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr *ngFor="let output of batch.outputs; let i = index">
-                            <td>
+                            <td class="ps-2">
                               {{i+1}}
-                              <i class="uil uil-trash text-danger cursor-pointer" *ngIf="batch.outputs.length > 1"
+                              <i class="uil uil-trash text-danger cursor-pointer fs-7" *ngIf="batch.outputs.length > 1"
                                 (click)="deleteOutput(output._id, i)"></i>
                             </td>
                             <td>
                               <span
                                 *ngIf="output.subitem?.subitem_list?.subitem_hin">{{output.subitem?.subitem_list?.subitem_hin}}
                               </span>{{output.item?.item_hin}}
-                              <span class="text-muted"> : </span>
+                              <span style="opacity: 0.5;"> : </span>
                               <span
                                 *ngIf="output.subitem?.subitem_list?.subitem_eng">{{output.subitem?.subitem_list?.subitem_eng}}
                               </span>{{output.item?.item_eng}}
                             </td>
-                            <td>{{output.qty}} {{output.unit_short}}</td>
-                            <td>{{output.rate || '-'}}</td>
-                            <td><small>{{output.condition?.list_name_hin}}</small></td>
+                            <td><strong>{{output.qty}}</strong> <small>{{output.unit_short}}</small></td>
+                            <td><span style="opacity: 0.6;">{{output.rate || '-'}}</span></td>
+                            <td><small style="color: #f0a500;">{{output.condition?.list_name_hin}}</small></td>
                           </tr>
                           <tr *ngIf="!batch.outputs || batch.outputs.length === 0">
-                            <td colspan="5" class="text-center text-muted">No outputs</td>
+                            <td colspan="5" class="text-center text-muted p-2">No outputs</td>
                           </tr>
                         </tbody>
                       </table>
@@ -219,6 +235,148 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Individual Mode (Flat Table) -->
+        <div class="table-responsive shadow-sm"
+          style="border-radius: 8px; overflow-y: auto; max-height: calc(100vh - 250px);"
+          *ngIf="settings.hmp.viewMode === 'individual'">
+          <table class="table-sm table-compact table-hover mb-0">
+            <thead>
+              <tr>
+                <th style="min-width: 50px;">#</th>
+                <th style="min-width: 95px;">Date</th>
+                <th style="min-width: 120px;">Recipe</th>
+                <th style="min-width: 110px;">MM</th>
+                <th style="min-width: 75px; text-align: center;">Status</th>
+                <th style="min-width: 60px;">Type</th>
+                <th style="min-width: 200px;">Item (HIN · ENG)</th>
+                <th style="min-width: 75px;">Qty</th>
+                <th style="min-width: 60px;">Rate</th>
+                <th style="min-width: 100px;">Condition</th>
+                <th style="min-width: 80px; text-align: center;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container
+                *ngFor="let batch of batches | search:term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i = index;">
+                <!-- First Row of Batch -->
+                <tr class="border-top-accent">
+                  <td
+                    [attr.rowspan]="(batch.inputs?.length || 1) + (batch.outputs?.length > 0 ? batch.outputs.length : 0)"
+                    style="border-left: 3px solid #6c5fc7 !important; font-weight: 600; white-space: nowrap; vertical-align: middle; border-right: 1px solid #2e3250;">
+                    {{i+1}}</td>
+                  <td [attr.rowspan]=" (batch.inputs?.length || 1) + (batch.outputs?.length> 0 ? batch.outputs.length :
+                    0)" style="vertical-align: middle; border-right: 1px solid #2e3250;">
+                    {{batch.date | date:'dd-MM-yyyy'}}
+                  </td>
+                  <td
+                    [attr.rowspan]="(batch.inputs?.length || 1) + (batch.outputs?.length > 0 ? batch.outputs.length : 0)"
+                    style="vertical-align: middle; border-right: 1px solid #2e3250;">
+                    <strong>{{batch.recipe?.recipe_name}}</strong><br>
+                    <small style="color: #6c7ab8;">{{batch.recipe?.description}}</small>
+                  </td>
+                  <td
+                    [attr.rowspan]="(batch.inputs?.length || 1) + (batch.outputs?.length > 0 ? batch.outputs.length : 0)"
+                    style="vertical-align: middle; border-right: 1px solid #2e3250;">
+                    {{batch.mm?.mm_hin}}<br><small style="color: #6c7ab8;">{{batch.mm?.mm_eng}}</small>
+                  </td>
+                  <td
+                    [attr.rowspan]="(batch.inputs?.length || 1) + (batch.outputs?.length > 0 ? batch.outputs.length : 0)"
+                    style="vertical-align: middle; border-right: 1px solid #2e3250; text-align: center;">
+                    <span class="badge py-1 px-2"
+                      [ngClass]="{'bg-success': batch.status === 'completed', 'bg-warning': batch.status === 'pending'}">
+                      {{batch.status}}
+                    </span>
+                  </td>
+
+                  <!-- First Input Row or Empty Placeholder -->
+                  <ng-container *ngIf="batch.inputs?.length > 0">
+                    <td><span class="badge badge-primary-lighten rounded-pill py-1 px-2">↓ IN</span>
+                    </td>
+                    <td>
+                      <span
+                        *ngIf="$any(batch.inputs[0])?.subitem?.subitem_list?.subitem_hin">{{$any(batch.inputs[0])?.subitem?.subitem_list?.subitem_hin}}
+                      </span>{{$any(batch.inputs[0])?.item.item_hin}}
+                      <br>
+                      <small style="color: #6c7ab8;">
+                        <span
+                          *ngIf="$any(batch.inputs[0])?.subitem?.subitem_list?.subitem_eng">{{$any(batch.inputs[0])?.subitem?.subitem_list?.subitem_eng}}
+                        </span>{{$any(batch.inputs[0])?.item.item_eng}}
+                      </small>
+                    </td>
+                    <td><strong>{{$any(batch.inputs[0])?.qty}}</strong>
+                      <small>{{$any(batch.inputs[0])?.unit_short}}</small>
+                    </td>
+                    <td><span style="opacity: 0.6;">{{$any(batch.inputs[0])?.rate || '-'}}</span></td>
+                    <td><small style="color: #f0a500;">{{$any(batch.inputs[0])?.condition?.list_name_hin}}</small></td>
+                    <td style="text-align: center;">
+                      <i class="uil uil-pen i-outline-primary me-1" (click)="openEntryModal(batch)" title="Edit"></i>
+                      <i class="uil uil-trash i-outline-danger" (click)="deleteInput($any(batch.inputs[0])._id, 0)"
+                        title="Delete Item"></i>
+                    </td>
+                  </ng-container>
+
+                  <ng-container *ngIf="!batch.inputs || batch.inputs.length === 0">
+                    <td colspan="6" class="text-center text-muted" style="font-style: italic;">No Inputs</td>
+                  </ng-container>
+                </tr>
+
+                <!-- Remaining Input Rows -->
+                <tr *ngFor="let input of $any(batch.inputs) | slice:1; let i = index">
+                  <td><span class="badge badge-primary-lighten rounded-pill py-1 px-2">↓ IN</span>
+                  </td>
+                  <td>
+                    <span
+                      *ngIf="$any(input)?.subitem?.subitem_list?.subitem_hin">{{$any(input)?.subitem?.subitem_list?.subitem_hin}}
+                    </span>{{$any(input)?.item?.item_hin}}
+                    <br>
+                    <small style="color: #6c7ab8;">
+                      <span
+                        *ngIf="$any(input)?.subitem?.subitem_list?.subitem_eng">{{$any(input)?.subitem?.subitem_list?.subitem_eng}}
+                      </span>{{$any(input)?.item?.item_eng}}
+                    </small>
+                  </td>
+                  <td><strong>{{$any(input)?.qty}}</strong> <small>{{$any(input)?.unit_short}}</small></td>
+                  <td><span style="opacity: 0.6;">{{$any(input)?.rate || '-'}}</span></td>
+                  <td><small style="color: #f0a500;">{{$any(input)?.condition?.list_name_hin}}</small></td>
+                  <td style="text-align: center;">
+                    <i class="uil uil-trash i-outline-danger" (click)="deleteInput($any(input)._id, i + 1)"
+                      title="Delete Item">
+                    </i>
+                  </td>
+                </tr>
+
+                <!-- Output Rows -->
+                <ng-container *ngIf="batch.outputs?.length > 0">
+                  <tr *ngFor="let output of batch.outputs; let i = index"
+                    [class.border-top-dashed]="i === 0 && (batch.inputs?.length > 0)">
+                    <td><span class="badge badge-success-lighten rounded-pill py-1 px-2">↑ OUT</span>
+                    </td>
+                    <td>
+                      <span
+                        *ngIf="$any(output)?.subitem?.subitem_list?.subitem_hin">{{$any(output)?.subitem?.subitem_list?.subitem_hin}}
+                      </span>{{$any(output)?.item?.item_hin}}
+                      <br>
+                      <small style="color: #6c7ab8;">
+                        <span
+                          *ngIf="$any(output)?.subitem?.subitem_list?.subitem_eng">{{$any(output)?.subitem?.subitem_list?.subitem_eng}}
+                        </span>{{$any(output)?.item?.item_eng}}
+                      </small>
+                    </td>
+                    <td><strong>{{$any(output)?.qty}}</strong> <small>{{$any(output)?.unit_short}}</small></td>
+                    <td><span style="opacity: 0.6;">{{$any(output)?.rate || '-'}}</span></td>
+                    <td><small style="color: #f0a500;">{{$any(output)?.condition?.list_name_hin}}</small></td>
+                    <td style="text-align: center;">
+                      <i class="uil uil-trash i-outline-danger" (click)="deleteOutput($any(output)._id, i)"
+                        title="Delete Item">
+                      </i>
+                    </td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </tbody>
+          </table>
         </div>
 
         <!-- No Batches Message -->

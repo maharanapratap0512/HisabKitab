@@ -2,7 +2,7 @@ const router = require('express').Router();
 const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 const Fn = require('../database/functions');
-const { PbkBachat, Item, Subitem, Unit, SupportList } = require('../models/hmp.model');
+const { PbkBachat, Item, Subitem, Unit, SupportList, PbkClosing } = require('../models/hmp.model');
 
 // get closing all
 router.get('/', async (req, res, next) => {
@@ -62,39 +62,51 @@ router.get('/bachat/:pbk_id', async (req, res, next) => {
 // post closing bunch
 router.post('/bunch/:dept_id', async (req, res, next) => {
     try {
-        if (req.body && req.body.pbk_closings && req.body.pbk_closings.length > 0) {
+        let result = [];
+        await Fn.begin();
+        if (req.body && req.body.date && req.body.pbk_id && req.body.pbk_closings && req.body.pbk_closings.length > 0) {
             let voucher_no = await Fn.getLastVoucherNo('pbk_closing') + 1;
-            let successResult = [];
+
+
 
             // Transaction-like loop approach as per existing pattern
             for (let item of req.body.pbk_closings) {
                 // Prepare object
                 let closingObj = {
                     ...item,
+                    voucher_no: voucher_no,
                     date: req.body.date,
                     pbk_id: req.body.pbk_id,
                     dept_id: req.params.dept_id,
                     active: 1
                 };
 
-                // Use function for insert
-                await Fn.insertPBKClosing(closingObj, voucher_no).then((data) => {
-                    successResult.push(data);
-                }).catch((err) => {
-                    throw err; // Stop processing on error
-                });
+                const record = await PbkClosing.create(closingObj);
+                closingObj._id = record._id;
+
+                // Sync with pbk_bachat
+                await Fn.syncPBKBachatFromPBKClosing(closingObj);
             }
+
+            result = await PbkClosing.findAll({
+                where: { voucher_no: voucher_no }
+            });
+
+            await Fn.commit();
 
             res.json({
                 success: true,
-                result: successResult,
+                result: result,
                 voucher_no: voucher_no
             });
 
         } else {
-            return next(new Error('Please fill required fields.'))
+            throw new Error('Please fill required fields.')
         }
-    } catch (err) { next(err) };
+    } catch (err) {
+        await Fn.rollback();
+        next(err)
+    };
 });
 
 // put closing bunch (update)

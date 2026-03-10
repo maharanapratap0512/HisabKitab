@@ -69,7 +69,7 @@ export class JawakNewComponent implements OnInit {
   ngOnInit(): void {
     this.spinner.show();
     this.settings = this.auth.webUser.settings;
-    this.viewMode = this.settings.jawak.view_mode || 'voucher';
+    this.settings.jawak.view_mode = this.settings.jawak.view_mode || 'voucher';
     this.gs.observeList().subscribe((result: any) => {
       this.mms = result.mm || [];
       this.items = result.itemmix || [];

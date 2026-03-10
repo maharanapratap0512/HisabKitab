@@ -83,6 +83,11 @@ router.get('/all/:dept_id', async (req, res, next) => {
                     resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
                     resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
                     resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
+                    resolve.data[i].categories_hin = (resolve.data[i].categories_hin != "[null]" ? JSON.parse(resolve.data[i].categories_hin) : []);
+                    for (let j in resolve.data[i].subitems) {
+                        // resolve.data[i].subitems[j].categories = (resolve.data[i].subitems[j].categories != "[null]" ? JSON.parse(resolve.data[i].subitems[j].categories) : []);
+                        resolve.data[i].subitems[j].categories_hin = ((resolve.data[i].subitems[j].categories_hin && typeof resolve.data[i].subitems[j].categories_hin == "string" && resolve.data[i].subitems[j].categories_hin != "[null]") ? JSON.parse(resolve.data[i].subitems[j].categories_hin) : []);
+                    }
                     subitem_count += resolve.data[i].subitems.length;
                 }
                 lists.itemmix = {

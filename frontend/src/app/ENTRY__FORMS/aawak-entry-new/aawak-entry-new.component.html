@@ -187,7 +187,8 @@
                                             required>
                                             <ng-option *ngFor="let item of items | filterByDate:fs.aawakFormMain.date"
                                                 [value]="item._id">{{item.item_hin}} :
-                                                {{item.item_eng}} : {{item.item_code}}</ng-option>
+                                                {{item.item_eng}} : {{item.item_roman ? item.item_roman : ''}} :
+                                                {{item.item_code}}</ng-option>
                                         </ng-select>
                                     </td>
                                     <td>
@@ -198,7 +199,8 @@
                                             <ng-option
                                                 *ngFor="let item of awkForm.subitems | filterByDate:fs.aawakFormMain.date"
                                                 [value]="item._id">{{item.subitem_hin}}
-                                                : {{item.subitem_eng}}</ng-option>
+                                                : {{item.subitem_eng}} : {{item.subitem_roman ? item.subitem_roman :
+                                                ''}}</ng-option>
                                         </ng-select>
                                     </td>
                                     <td *ngIf="settings.aawak.product_id">

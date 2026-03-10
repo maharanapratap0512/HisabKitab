@@ -81,7 +81,8 @@ export class JawakEntryNewComponent implements OnInit {
       this.states = result.state ? result.state : [];
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];
-      // this.departments = result.department ? result.department : [];
+      this.departments = result.department ? result.department : [];
+      this.aawak_types = result.aawak_type ? result.aawak_type : [];
       this.pbks = result.pbk ? result.pbk : [];
       this.usage_lists = result.usage_list ? result.usage_list : [];
       this.aawak_sources = result.aawak_source ? result.aawak_source : [];
@@ -91,6 +92,7 @@ export class JawakEntryNewComponent implements OnInit {
     });
     this.settings = this.auth.webUser.settings;
     fs.jawakFormMain.mm_id = this.settings.defaultMM;
+    this.getDepartments();
     this.getLotNo();
   }
 
@@ -278,6 +280,12 @@ export class JawakEntryNewComponent implements OnInit {
     this.http.get(this.api.getUrl('LIST') + 'lot_no/' + this.auth.webUser.dept_id).subscribe((data: any) => {
       this.lotNoAll = data['result'] || [];
       this.lotNos = data['result'] || [];
+    })
+  }
+
+  getDepartments() {
+    this.http.get(this.api.getUrl('DEPT')).subscribe((data: any) => {
+      this.departments = data['result'] || [];
     })
   }
 

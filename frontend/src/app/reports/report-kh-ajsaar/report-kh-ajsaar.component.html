@@ -58,7 +58,8 @@
                                         [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}"
                                         (change)="itemSelected($event)">
                                         <ng-option *ngFor="let item of items" [value]="item._id">
-                                            {{item.item_hin}} : {{item.item_eng}}</ng-option>
+                                            {{item.item_hin}} : {{item.item_eng}} : {{item.item_roman ? item.item_roman
+                                            : ''}}</ng-option>
                                     </ng-select>
                                 </div>
                             </div>
@@ -69,7 +70,8 @@
                                         [clearable]="true" [multiple]="true" [virtualScroll]="true"
                                         [(ngModel)]="filterBody.subitem_id" [ngModelOptions]="{standalone: true}">
                                         <ng-option *ngFor="let item of subitems" [value]="item._id">
-                                            {{item.subitem_hin}} : {{item.subitem_eng}}</ng-option>
+                                            {{item.subitem_hin}} : {{item.subitem_eng}} : {{item.subitem_roman ?
+                                            item.subitem_roman : ''}}</ng-option>
                                     </ng-select>
                                 </div>
                             </div>

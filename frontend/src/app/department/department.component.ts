@@ -194,7 +194,7 @@ export class DepartmentComponent implements OnInit {
         visible: false,
         add: false,
       },
-      repairing:{
+      repairing: {
         visible: false,
         add: false
       },
@@ -264,6 +264,7 @@ export class DepartmentComponent implements OnInit {
     if (!ev) {
       ev = this.auth.webUser.dept_id;
     }
+    // this.dept_id = ev;
     let getdept = await this.departments.find((d: { _id: any; }) => d._id == ev);
 
     if (getdept && getdept.settings) {
@@ -1508,6 +1509,10 @@ export class DepartmentComponent implements OnInit {
         }
       });
     }
+    for (let key of Object.keys(this.deptConf)) {
+      this.deptConf[key].dept_id = this.dept_id ? dept_id : this.auth.webUser.dept_id;
+    }
+
     this.http.put(this.api.getUrl('DEPTCONFSAVE'), this.deptConf).subscribe((data: any) => {
       if (data && data['success']) {
         // this.isLoader = false;
@@ -1527,7 +1532,7 @@ export class DepartmentComponent implements OnInit {
       // If it doesn't exist, create it and initialize config_value as an empty array
       this.deptConf[type] = { config_value: [], dept_id: this.dept_id };
     }
-    if(!this.deptConf[type].config_value){
+    if (!this.deptConf[type].config_value) {
       this.deptConf[type].config_value = []
     }
   }

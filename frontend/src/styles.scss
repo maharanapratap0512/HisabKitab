@@ -489,3 +489,146 @@ span.search-icon {
     }
   }
 }
+
+// Soft buttons
+.btn-soft-primary {
+  background-color: rgba(108, 95, 199, 0.1);
+  color: #6c5fc7;
+  border: none;
+
+  &:hover {
+    background-color: rgba(108, 95, 199, 0.2);
+  }
+}
+
+.btn-soft-secondary {
+  background-color: rgba(108, 117, 125, 0.1);
+  color: #6c757d;
+  border: none;
+
+  &:hover {
+    background-color: rgba(108, 117, 125, 0.2);
+  }
+}
+
+
+.ngx-pagination a,
+.ngx-pagination button {
+  color: #abb8c4 !important;
+}
+
+
+// multi header table design
+
+.table-dynamic {
+
+  thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--thead-color);
+    height: 50px;
+    padding: 0 18px;
+    text-align: left;
+    background: var(--thead-bg);
+    border-top: var(--thead-border-top);
+    border-bottom: var(--thead-border-bottom);
+    box-shadow: var(--thead-box-shadow);
+    transition: all 0.35s ease;
+  }
+
+  td {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--row-border);
+    color: #c5c3df;
+    transition: background 0.2s;
+  }
+
+  tr:hover td {
+    background: var(--row-hover);
+  }
+}
+
+
+
+
+/* ── Button ── */
+.btn-theme {
+  background-color: var(--thead-accent-color);
+  border-color: var(--thead-accent-color);
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.btn-theme:hover {
+  filter: brightness(1.15);
+  border-color: var(--thead-accent-color);
+  color: #ffffff;
+}
+
+.btn-theme:focus,
+.btn-theme:active {
+  box-shadow: 0 0 0 0.2rem rgba(var(--thead-accent-color), 0.35);
+  border-color: var(--thead-accent-color);
+  color: #ffffff;
+}
+
+/* ── Outline Button ── */
+.btn-outline-theme {
+  background-color: transparent;
+  border: 1.5px solid var(--thead-accent-color);
+  color: var(--thead-accent-color);
+  transition: all 0.2s ease;
+}
+
+.btn-outline-theme:hover {
+  background-color: var(--thead-accent-color);
+  color: #ffffff;
+}
+
+/* ── Badge ── */
+.badge-theme {
+  background-color: var(--thead-accent-color);
+  color: #ffffff;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-theme-soft {
+  background-color: var(--thead-bg);
+  color: var(--thead-color);
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--thead-accent-color);
+}
+
+/* ── Text ── */
+.text-theme {
+  color: var(--thead-accent-color) !important;
+}
+
+.text-theme-soft {
+  color: var(--thead-color) !important;
+}
+
+/* ── Border ── */
+.border-theme {
+  border-color: var(--thead-accent-color) !important;
+}
+
+.border-theme-soft {
+  border-color: var(--thead-border-bottom) !important;
+}
+
+/* ── Card accent ── */
+.card-theme {
+  border-top: 3px solid var(--thead-accent-color) !important;
+}
+
+.card-theme-left {
+  border-left: 3px solid var(--thead-accent-color) !important;
+}

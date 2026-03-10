@@ -48,17 +48,23 @@
 
 body {
    margin: 0;
-   font-family: Nunito, sans-serif;
-   font-size: .9rem;
+   font-family: 'Inter', sans-serif;
+   font-size: .8rem;
    font-weight: 400;
-   line-height: 1.5;
+   line-height: 1;
    color: #aab8c5;
    /* background-color: #061621; */
-   background-color: #343a40;
+   /* background-color: #343a40; */
+   /* background-color: #151428; */
+   background-color: var(--bg-color);
    -webkit-text-size-adjust: 100%;
    -webkit-tap-highlight-color: transparent
 }
 
+.ngx-pagination a,
+.ngx-pagination button {
+   color: #abb8c4 !important;
+}
 
 
 /* Auto Complete dialog Darkmode css */
@@ -66,7 +72,7 @@ body {
 .ng-autocomplete {}
 
 .autocomplete-container .input-container input {
-   font-size: .9rem;
+   font-size: .8rem;
    font-weight: 400;
    line-height: 1.5 !important;
    color: #e3eaef !important;
@@ -2312,15 +2318,54 @@ progress {
    vertical-align: middle
 }
 
-.table>thead {
-   /* vertical-align: bottom; */
+.table>thead>tr>th {
+   height: 40px;
+   background: var(--thead-bg);
+   color: var(--thead-color);
+   border-top: var(--thead-border-top);
+   border-bottom: var(--thead-border-bottom);
+   box-shadow: var(--thead-box-shadow);
+   transition: all 0.35s ease;
+   position: relative;
+   /* needed for ::after */
+}
+
+.table>thead th:not(:last-child) {
+   border-right: var(--thead-border-bottom);
+}
+
+/* .table > thead th {
+} */
+
+.table>thead th::after {
+   content: '';
+   position: absolute;
+   bottom: 0;
+   left: 50%;
+   transform: translateX(-50%);
+   width: min(100%, 120px);
+   /* caps width — diamond effect on all columns */
+   height: 2px;
+   background: linear-gradient(90deg, transparent, var(--thead-accent-color), transparent);
+}
+
+/* .table>thead th::after {
+   content: '';
+   position: absolute;
+   bottom: 0;
+   left: 0;
+   right: 0;
+   height: 2px;
+   background: linear-gradient(90deg, transparent, var(--thead-accent-color), transparent);
+} */
+
+/* .table>thead {
    font-size: medium;
-   /* background-color: #39afd124; */
    background-color: #10313a;
    color: #ffffffed;
    height: 50px;
    box-shadow: 0px -1px 5px 1px #39afd1 !important;
-}
+} */
 
 .table-container {
    overflow-y: auto;
@@ -2560,7 +2605,7 @@ progress {
    display: block;
    width: 100%;
    padding: .45rem .9rem;
-   font-size: .9rem;
+   font-size: .8rem;
    font-weight: 400;
    line-height: 1.5;
    color: #e3eaef;
@@ -2816,7 +2861,7 @@ textarea.form-control-lg {
    display: block;
    width: 100%;
    padding: .45rem 2.5rem .45rem .9rem;
-   font-size: .9rem;
+   font-size: .8rem;
    font-weight: 400;
    line-height: 1.5;
    color: #e3eaef;
@@ -3290,7 +3335,7 @@ textarea.form-control-lg {
    -ms-flex-align: center;
    align-items: center;
    padding: .45rem .9rem;
-   font-size: .9rem;
+   font-size: .8rem;
    font-weight: 400;
    line-height: 1.5;
    color: #e3eaef;
@@ -3590,7 +3635,7 @@ textarea.form-control.is-invalid {
 .btn {
    display: inline-block;
    font-weight: 400;
-   line-height: 1.5;
+   line-height: 1;
    color: #aab8c5;
    text-align: center;
    vertical-align: middle;
@@ -3602,7 +3647,7 @@ textarea.form-control.is-invalid {
    background-color: transparent;
    border: 1px solid transparent;
    padding: .45rem .9rem;
-   font-size: .9rem;
+   font-size: .8rem;
    border-radius: .15rem;
    -webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;
    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;
@@ -4451,7 +4496,7 @@ fieldset:disabled .btn {
    min-width: 10rem;
    padding: .25rem 0;
    margin: 0;
-   font-size: .9rem;
+   font-size: .8rem;
    color: #aab8c5;
    text-align: left;
    list-style: none;
@@ -5712,7 +5757,7 @@ fieldset:disabled .btn {
    align-items: center;
    width: 100%;
    padding: 1rem 1.25rem;
-   font-size: .9rem;
+   font-size: .8rem;
    color: #aab8c5;
    text-align: left;
    background-color: transparent;
@@ -7336,7 +7381,7 @@ fieldset:disabled .btn {
 .popover-header {
    padding: .7rem .8rem;
    margin-bottom: 0;
-   font-size: .9rem;
+   font-size: .8rem;
    color: #37404a;
    background-color: #e5e8eb;
    border-bottom: 1px solid #ced1d4;
@@ -16091,7 +16136,7 @@ body[data-layout=topnav] .container-xxl {
    margin-bottom: .5rem;
    text-transform: uppercase;
    letter-spacing: .02em;
-   font-size: .9rem;
+   font-size: .8rem;
    margin-top: 0
 }
 
@@ -21237,7 +21282,7 @@ div.table-responsive>div.dataTables_wrapper>div.row>div[class^=col-]:first-child
    background: #e3eaef;
    color: #404954;
    font-family: Nunito, sans-serif;
-   font-size: .9rem;
+   font-size: .8rem;
    padding: 5px 8px
 }
 
@@ -22455,7 +22500,7 @@ Not supports in Firefox and IE */
 
 /* scrollbar itself */
 ::-webkit-scrollbar-thumb {
-   background-color: #4c53b2;
+   background-color: var(--thead-accent-color);
    border-radius: 16px;
    border: 1px solid #343a40
 }
@@ -22485,7 +22530,7 @@ Not supports in Firefox and IE */
 }
 
 .ng-select.custom .ng-select-container {
-   font-size: .9rem;
+   font-size: .8rem;
    font-weight: 400;
    line-height: 1.5;
    color: #e3eaef !important;
@@ -22746,4 +22791,51 @@ Not supports in Firefox and IE */
          border-color: #c0392b;
       }
    }
+}
+
+
+
+/* ==========================================================================
+   CUSTOM COMPACT TABLE STYLES - DARK MODE
+   ========================================================================== */
+
+.table-compact {
+   width: 100%;
+   margin-bottom: 0;
+   color: #c5cce8;
+   background-color: transparent;
+   border-collapse: collapse;
+   font-size: 12px;
+   background: #21253d;
+}
+
+.table-compact th,
+.table-compact td {
+   padding: 2px 8px;
+   vertical-align: middle;
+   border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.table-compact thead {
+   background: #1c2038;
+   color: #6c7ab8;
+   position: sticky;
+   top: 0;
+   z-index: 10;
+}
+
+.table-compact thead th {
+   vertical-align: bottom;
+   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+   border-top: none;
+   padding-top: 4px;
+   padding-bottom: 4px;
+}
+
+.table-compact tbody::before {
+   content: "" !important;
+}
+
+.table-compact.table-hover tbody tr:hover {
+   background-color: rgba(255, 255, 255, 0.05);
 }

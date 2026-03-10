@@ -91,7 +91,7 @@ export class BachatNewComponent implements OnInit {
       this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
     });
-    this.filterBody.mm_id = [this.auth.webUser.settings.defaultMM];
+    this.filterBody.mm_id = this.auth.webUser.settings.defaultMM ? [this.auth.webUser.settings.defaultMM] : [];
     // this.filterBody.year = 2024;
     // this.gs.yearChangedGetMonth(2024);
     // this.filterBody.months = [3, 1];

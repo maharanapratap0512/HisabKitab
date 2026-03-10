@@ -1246,7 +1246,7 @@ const mm = {
         st.state_hin, st.state_eng, 
         cnt.country_hin, cnt.country_eng, 
         zn.zone_hin, zn.zone_eng, 
-        pm.mm_hin as parent_mm_hin, pm.mm_eng as parent_mm_eng, pm.mm_code as parent_mm_code, 
+        pm.mm_hin as parent_mm_hin, pm.mm_eng as parent_mm_eng, pm.mm_roman as parent_mm_roman, pm.mm_code as parent_mm_code, 
         nm.nimitt_hin, nm.nimitt_eng, nm.gender as nimitt_gender,
         nst.state_hin as nimitt_state_hin, nst.state_eng as nimitt_state_eng,
         dept.dept_hin, dept.dept_eng, dept.dept_code 
@@ -1261,16 +1261,17 @@ const mm = {
      limit @limit offset @offset`
     , insert:
         `insert into mm (
-            mm_hin, mm_eng, mm_code, mm_type, dept_id, state_id,
+            mm_hin, mm_eng, mm_roman, mm_code, mm_type, dept_id, state_id,
             parent_mm_id, opening_date, mm_closed, nimitt_id, restrict_month, restrict_year, active)
         values (
-            @mm_hin, @mm_eng,  @mm_code, @mm_type, @dept_id, @state_id,
+            @mm_hin, @mm_eng, @mm_roman, @mm_code, @mm_type, @dept_id, @state_id,
             @parent_mm_id, @opening_date, @mm_closed, @nimitt_id, @restrict_month, @restrict_year, @active)`
     , insert_ignore:
         `insert or ignore into mm (
             _id,
             mm_hin,
             mm_eng,
+            mm_roman,
             mm_code,
             mm_type,
             dept_id,
@@ -1288,6 +1289,7 @@ const mm = {
             @_id,
             @mm_hin,
             @mm_eng,
+            @mm_roman,
             @mm_code,
             @mm_type,
             @dept_id,
@@ -1305,6 +1307,7 @@ const mm = {
         `update mm set 
         mm_hin=@mm_hin,
         mm_eng=@mm_eng,
+        mm_roman=@mm_roman,
         mm_code=@mm_code,
         mm_type=@mm_type,
         dept_id=@dept_id,
@@ -1321,6 +1324,7 @@ const mm = {
         `update mm set 
         mm_hin=@mm_hin,
         mm_eng=@mm_eng,
+        mm_roman=@mm_roman,
         mm_code=@mm_code,
         mm_type=@mm_type,
         dept_id=@dept_id,
@@ -1342,7 +1346,7 @@ const mm = {
         restrict_year=@restrict_year,
         updated_at=datetime('now','localtime')`
     , order:
-        `mm_hin, mm_eng`
+        `mm_hin, mm_eng, mm_roman`
 }
 
 const nimitt = {

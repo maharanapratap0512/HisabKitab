@@ -240,118 +240,115 @@
                         <thead>
                            <tr *ngIf="monthsSel.length <= 0">
                               <!-- <td>Image</td> -->
-                              <td style="width: 70px;">No.</td>
-                              <td style="width: 100px;">Department</td>
-                              <td style="width: 180px;">
+                              <th style="width: 70px;">No.</th>
+                              <th style="width: 100px;">Department</th>
+                              <th style="width: 180px;">
                                  <div class="d-flex justify-content-between align-items-center">
                                     <span>M M</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                        (clear)="filterBody.mm_id = []; onHeaderFilterChange()"
-                                       [isOpen]="!!filterBody.mm_id.length">
-                                       <ng-select class="custom-sm" style="width: 200px;" placeholder="Select MM"
-                                          [multiple]="true" [clearable]="true" [virtualScroll]="true"
-                                          (change)="onHeaderFilterChange()" [(ngModel)]="filterBody.mm_id"
-                                          [ngModelOptions]="{standalone: true}">
+                                       [isOpen]="!!filterBody.mm_id.length" triggerOn="hover">
+                                       <ng-select class="custom-sm" placeholder="Select MM" [multiple]="true"
+                                          [clearable]="true" [virtualScroll]="true" (change)="onHeaderFilterChange()"
+                                          [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
                                           <ng-option *ngFor="let item of mms" [value]="item._id">
                                              {{item.mm_hin}} : {{item.mm_eng}}</ng-option>
                                        </ng-select>
                                     </app-popover-filter>
                                  </div>
-                              </td>
-                              <td>
+                              </th>
+                              <th>
                                  <div class="d-flex justify-content-between align-items-center">
                                     <span>Category</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                        (clear)="filterBody.category_id = null; onHeaderFilterChange()"
-                                       [isOpen]="!!filterBody.category_id">
-                                       <ng-select class="custom-sm" style="width: 200px;" placeholder="Select Category"
-                                          [clearable]="true" [virtualScroll]="true" (change)="catSelected($event)"
+                                       [isOpen]="!!filterBody.category_id" triggerOn="hover">
+                                       <ng-select class="custom-sm" placeholder="Select Category" [clearable]="true"
+                                          [virtualScroll]="true" (change)="catSelected($event)"
                                           [(ngModel)]="filterBody.category_id" [ngModelOptions]="{standalone: true}">
                                           <ng-option *ngFor="let item of categories" [value]="item._id">
                                              {{item.category_hin}} : {{item.category_eng}}</ng-option>
                                        </ng-select>
                                     </app-popover-filter>
                                  </div>
-                              </td>
-                              <td>
+                              </th>
+                              <th>
                                  <div class="d-flex justify-content-between align-items-center">
                                     <span>Item</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                        (clear)="filterBody.item_id = []; onHeaderFilterChange()"
-                                       [isOpen]="!!(filterBody.item_id && filterBody.item_id.length)">
-                                       <ng-select class="custom-sm" style="width: 200px;" placeholder="Select Item"
-                                          [multiple]="true" [clearable]="true" [virtualScroll]="true"
-                                          (change)="itemSelected($event)" [(ngModel)]="filterBody.item_id"
-                                          [ngModelOptions]="{standalone: true}">
+                                       [isOpen]="!!(filterBody.item_id && filterBody.item_id.length)" triggerOn="hover">
+                                       <ng-select class="custom-sm" placeholder="Select Item" [multiple]="true"
+                                          [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)"
+                                          [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}">
                                           <ng-option *ngFor="let item of items" [value]="item._id">
                                              {{item.item_hin}} : {{item.item_eng}}</ng-option>
                                        </ng-select>
                                     </app-popover-filter>
                                  </div>
-                              </td>
-                              <td>Total Aawak</td>
-                              <td>Used</td>
-                              <td>Other Jawak</td>
-                              <td>
+                              </th>
+                              <th>Total Aawak</th>
+                              <th>Used</th>
+                              <th>Other Jawak</th>
+                              <th>
                                  Bachat <br />
                                  <div class="form-check mb-2">
                                     <input type="checkbox" class="form-check-input" id="customCheckcolor1"
                                        (change)="hideBachatZero($event.target)">
                                     <label class="form-check-label fs-6" for="customCheckcolor1">Hide 0</label>
                                  </div>
-                              </td>
-                              <td>
+                              </th>
+                              <th>
                                  Difference <br />
                                  <div class="form-check mb-2">
                                     <input type="checkbox" class="form-check-input" id="customCheckcolor2"
                                        (change)="hideDifferenceZero($event.target)">
                                     <label class="form-check-label fs-6" for="customCheckcolor2">Hide 0</label>
                                  </div>
-                              </td>
+                              </th>
                            </tr>
                            <ng-container *ngIf="monthsSel.length > 0">
                               <tr>
-                                 <td rowspan="2" style="width: 70px;">No.</td>
-                                 <td rowspan="2" style="width: 100px;">Department</td>
-                                 <td rowspan="2" style="width: 180px;">
+                                 <th rowspan="2" style="width: 70px;">No.</th>
+                                 <th rowspan="2" style="width: 100px;">Department</th>
+                                 <th rowspan="2" style="width: 180px;">
                                     <div class="d-flex justify-content-between align-items-center">
                                        <span>Mini_Madhuban</span>
                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                           (clear)="filterBody.mm_id = []; onHeaderFilterChange()"
-                                          [isOpen]="!!(filterBody.mm_id && filterBody.mm_id.length)">
-                                          <ng-select class="custom-sm" style="width: 200px;" placeholder="Select MM"
-                                             [multiple]="true" [clearable]="true" [virtualScroll]="true"
-                                             (change)="onHeaderFilterChange()" [(ngModel)]="filterBody.mm_id"
-                                             [ngModelOptions]="{standalone: true}">
+                                          [isOpen]="!!(filterBody.mm_id && filterBody.mm_id.length)" triggerOn="hover">
+                                          <ng-select class="custom-sm" placeholder="Select MM" [multiple]="true"
+                                             [clearable]="true" [virtualScroll]="true" (change)="onHeaderFilterChange()"
+                                             [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
                                              <ng-option *ngFor="let item of mms" [value]="item._id">
                                                 {{item.mm_hin}} : {{item.mm_eng}}</ng-option>
                                           </ng-select>
                                        </app-popover-filter>
                                     </div>
-                                 </td>
-                                 <td rowspan="2">
+                                 </th>
+                                 <th rowspan="2">
                                     <div class="d-flex justify-content-between align-items-center">
                                        <span>Category</span>
                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                           (clear)="filterBody.category_id = null; onHeaderFilterChange()"
-                                          [isOpen]="!!filterBody.category_id">
-                                          <ng-select class="custom-sm" style="width: 200px;"
-                                             placeholder="Select Category" [clearable]="true" [virtualScroll]="true"
-                                             (change)="catSelected($event)" [(ngModel)]="filterBody.category_id"
-                                             [ngModelOptions]="{standalone: true}">
+                                          [isOpen]="!!filterBody.category_id" triggerOn="hover">
+                                          <ng-select class="custom-sm" placeholder="Select Category" [clearable]="true"
+                                             [virtualScroll]="true" (change)="catSelected($event)"
+                                             [(ngModel)]="filterBody.category_id" [ngModelOptions]="{standalone: true}">
                                              <ng-option *ngFor="let item of categories" [value]="item._id">
                                                 {{item.category_hin}} : {{item.category_eng}}</ng-option>
                                           </ng-select>
                                        </app-popover-filter>
                                     </div>
-                                 </td>
-                                 <td rowspan="2">
+                                 </th>
+                                 <th rowspan="2">
                                     <div class="d-flex justify-content-between align-items-center">
                                        <span>Item_Subitem_Name</span>
                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                           (clear)="filterBody.item_id = []; onHeaderFilterChange()"
-                                          [isOpen]="!!(filterBody.item_id && filterBody.item_id.length)">
-                                          <ng-select class="custom-sm" style="width: 200px;" placeholder="Select Item"
+                                          [isOpen]="!!(filterBody.item_id && filterBody.item_id.length)"
+                                          triggerOn="click">
+                                          <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Item"
                                              [multiple]="true" [clearable]="true" [virtualScroll]="true"
                                              (change)="itemSelected($event)" [(ngModel)]="filterBody.item_id"
                                              [ngModelOptions]="{standalone: true}">
@@ -360,9 +357,9 @@
                                           </ng-select>
                                        </app-popover-filter>
                                     </div>
-                                 </td>
-                                 <td rowspan="2" *ngIf="monthsSel.length > 0">Condition</td>
-                                 <td rowspan="2">पिछला बचत</td>
+                                 </th>
+                                 <th rowspan="2" *ngIf="monthsSel.length > 0">Condition</th>
+                                 <th rowspan="2">पिछला बचत</th>
                                  <th colspan="5" class="center-header partition" *ngFor="let row of monthsSel">{{
                                     row.name
                                     +
@@ -370,11 +367,11 @@
                               </tr>
                               <tr>
                                  <ng-container *ngFor="let row of monthsSel">
-                                    <td class="partition">Total Aawak</td>
-                                    <td>Used</td>
-                                    <td>Other Jawak</td>
-                                    <td>Bachat</td>
-                                    <td>Difference</td>
+                                    <th class="partition">Total Aawak</th>
+                                    <th>Used</th>
+                                    <th>Other Jawak</th>
+                                    <th>Bachat</th>
+                                    <th>Difference</th>
                                  </ng-container>
                               </tr>
                            </ng-container>

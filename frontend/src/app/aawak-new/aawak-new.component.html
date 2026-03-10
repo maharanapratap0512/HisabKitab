@@ -167,7 +167,8 @@
                                                         Item</ng-option>
                                                     <ng-option *ngFor="let item of items"
                                                         [value]="item._id">{{item.item_hin}} :
-                                                        {{item.item_eng}} : {{item.item_code}}</ng-option>
+                                                        {{item.item_eng}} : {{item.item_roman ? item.item_roman : ''}} :
+                                                        {{item.item_code}}</ng-option>
                                                 </ng-select>
                                                 <ng-select class="custom mt-1" style="width: 100%;"
                                                     placeholder="Select SubitemList" [clearable]="false"
@@ -178,7 +179,8 @@
                                                     <ng-option *ngFor="let item of subitems"
                                                         [value]="item._id">{{item.subitem_hin}}
                                                         :
-                                                        {{item.subitem_eng}}</ng-option>
+                                                        {{item.subitem_eng}} : {{item.subitem_roman ? item.subitem_roman
+                                                        : ''}}</ng-option>
                                                 </ng-select>
                                             </div>
                                         </div>
@@ -440,8 +442,7 @@
                                                 <!-- <td style="border: none;"></td> -->
                                                 <td colspan="10" class="sub-row">
                                                     <table
-                                                        class="table-sm table-bordered table-hover dt-responsive w-100"
-                                                        >
+                                                        class="table-sm table-bordered table-hover dt-responsive w-100">
                                                         <tr class="aawak-header">
                                                             <th>No.</th>
                                                             <th *ngIf="settings.aawak.lot_no">Lot No</th>

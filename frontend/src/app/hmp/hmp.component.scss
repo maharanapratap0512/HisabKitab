@@ -1,0 +1,27 @@
+.no-border-last-row tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+.fs-7 {
+    font-size: 0.8rem !important;
+}
+
+.border-top-accent td {
+    border-top: 2px solid #3a3f6e !important;
+}
+
+.border-top-dashed td {
+    border-top: 1px dashed #3a3f6e !important;
+}
+
+.year-box {
+    cursor: pointer;
+}
+
+.accordion-button::after {
+    filter: brightness(0) invert(1);
+}
+
+.accordion-button:not(.collapsed)::after {
+    filter: brightness(0) invert(1);
+}

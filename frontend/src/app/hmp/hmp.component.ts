@@ -4,14 +4,16 @@ import { AuthService } from '../services/auth.service';
 import { GlobalService } from '../services/global.service';
 import { HttpService } from '../services/http.service';
 import Swal from 'sweetalert2';
-import { Toast } from 'bootstrap';
 import { ToastrService } from 'ngx-toastr';
+import * as ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 declare var $: any;
 
 @Component({
   selector: 'app-hmp',
   templateUrl: './hmp.component.html',
+  styleUrls: ['./hmp.component.scss']
 })
 export class HmpComponent implements OnInit {
 
@@ -26,11 +28,15 @@ export class HmpComponent implements OnInit {
   filterBody: any = {};
   term: any = '';
   total_count: any = 0;
+  settings: any = {};
 
   // Filter data
   recipes: any = [];
   mms: any = [];
   showFilter = false;
+
+  // UI state
+  expandAll = false;
 
   constructor(
     public api: ApiService,
@@ -38,7 +44,17 @@ export class HmpComponent implements OnInit {
     public gs: GlobalService,
     public auth: AuthService,
     private toastr: ToastrService
-  ) { }
+  ) {
+    this.settings = auth.webUser.settings;
+    if (!this.settings.hmp) {
+      this.settings.hmp = { viewMode: 'voucher' };
+    }
+  }
+
+  UISettingsChanged() {
+    this.auth.webUser.settings = this.settings;
+    this.auth.updateSettings()
+  }
 
   ngOnInit(): void {
     this.getBatches();
@@ -88,6 +104,170 @@ export class HmpComponent implements OnInit {
     this.getBatches();
   }
 
+  toggleExpandAll() {
+    this.expandAll = !this.expandAll;
+    if (this.expandAll) {
+      $('#batchAccordion .accordion-collapse').collapse('show');
+    } else {
+      $('#batchAccordion .accordion-collapse').collapse('hide');
+    }
+  }
+
+
+  async exportToExcel() {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('HMP Batches');
+
+    // Style helpers
+    const headerFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F4E79' } };
+    const inputFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCE6F1' } };
+    const outputFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2EFDA' } };
+    const colHdrFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFBDD7EE' } };
+    const colHdrFillG: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC6EFCE' } };
+
+    const border: Partial<ExcelJS.Borders> = {
+      top: { style: 'thin' }, left: { style: 'thin' },
+      bottom: { style: 'thin' }, right: { style: 'thin' }
+    };
+
+    const boldWhite: Partial<ExcelJS.Font> = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
+    const boldDark: Partial<ExcelJS.Font> = { bold: true, size: 9 };
+    const smallFont: Partial<ExcelJS.Font> = { size: 9 };
+
+    // Set column widths [#, Item (hin+eng), Qty, Unit, Rate, Condition]
+    ws.columns = [
+      { width: 4 },   // A  #
+      { width: 28 },  // B  Item (hin)
+      { width: 28 },  // C  Item (eng)
+      { width: 8 },   // D  Qty
+      { width: 8 },   // E  Unit
+      { width: 8 },   // F  Rate
+      { width: 16 },  // G  Condition     }  INPUT block (cols A-G)
+      { width: 4 },   // H  #
+      { width: 28 },  // I  Item (hin)
+      { width: 28 },  // J  Item (eng)
+      { width: 8 },   // K  Qty
+      { width: 8 },   // L  Unit
+      { width: 8 },   // M  Rate
+      { width: 16 },  // N  Condition     }  OUTPUT block (cols H-N)
+    ];
+
+    let rowNum = 1;
+
+    const addCell = (row: ExcelJS.Row, col: number, value: any, font?: Partial<ExcelJS.Font>, fill?: ExcelJS.Fill, align: Partial<ExcelJS.Alignment> = { vertical: 'middle', horizontal: 'left' }) => {
+      const cell = row.getCell(col);
+      cell.value = value ?? '';
+      cell.border = border;
+      if (font) cell.font = font;
+      if (fill) cell.fill = fill;
+      cell.alignment = { wrapText: true, ...align } as ExcelJS.Alignment;
+    };
+
+    for (const batch of this.batches) {
+      // --- Batch header row (full width merge) ---
+      const hdrRow = ws.getRow(rowNum++);
+      hdrRow.height = 20;
+      ws.mergeCells(`A${hdrRow.number}:N${hdrRow.number}`);
+      const hdrCell = hdrRow.getCell(1);
+      const date = batch.date ? new Date(batch.date).toLocaleDateString('en-IN') : '';
+      hdrCell.value = `📅 ${date}   |   🍃 ${batch.recipe?.recipe_name || ''}  (${batch.recipe?.description || ''})   |   🏠 ${batch.mm?.mm_hin || ''}  ${batch.mm?.mm_eng || ''}   |   Batch: ${batch.batch_no || ''}`;
+      hdrCell.fill = headerFill;
+      hdrCell.font = boldWhite;
+      hdrCell.alignment = { vertical: 'middle', horizontal: 'left' };
+      hdrCell.border = border;
+
+      // --- Sub-header: "INPUT MATERIALS" | "OUTPUT PRODUCTS" ---
+      const subRow = ws.getRow(rowNum++);
+      subRow.height = 16;
+      ws.mergeCells(`A${subRow.number}:G${subRow.number}`);
+      ws.mergeCells(`H${subRow.number}:N${subRow.number}`);
+      const inputHdr = subRow.getCell(1);
+      inputHdr.value = '⬇ Input Materials (Consumed)';
+      inputHdr.fill = inputFill; inputHdr.font = boldDark; inputHdr.border = border;
+      inputHdr.alignment = { vertical: 'middle', horizontal: 'center' };
+      const outputHdr = subRow.getCell(8);
+      outputHdr.value = '⬆ Output Products (Produced)';
+      outputHdr.fill = outputFill; outputHdr.font = boldDark; outputHdr.border = border;
+      outputHdr.alignment = { vertical: 'middle', horizontal: 'center' };
+
+      // --- Column headers ---
+      const colRow = ws.getRow(rowNum++);
+      const inputCols = ['#', 'Item (HIN)', 'Item (ENG)', 'Qty', 'Unit', 'Rate', 'Condition'];
+      const outputCols = ['#', 'Item (HIN)', 'Item (ENG)', 'Qty', 'Unit', 'Rate', 'Condition'];
+      inputCols.forEach((h, i) => addCell(colRow, i + 1, h, boldDark, colHdrFill, { vertical: 'middle', horizontal: 'center' }));
+      outputCols.forEach((h, i) => addCell(colRow, i + 8, h, boldDark, colHdrFillG, { vertical: 'middle', horizontal: 'center' }));
+
+      // --- Data rows (zip inputs + outputs) ---
+      const inputs = batch.inputs || [];
+      const outputs = batch.outputs || [];
+      const maxRows = Math.max(inputs.length, outputs.length);
+
+      for (let i = 0; i < maxRows; i++) {
+        const dataRow = ws.getRow(rowNum++);
+
+        // Input side
+        if (inputs[i]) {
+          const inp = inputs[i];
+          const iHin = [(inp.subitem?.subitem_list?.subitem_hin || ''), inp.item?.item_hin || ''].filter(Boolean).join(' ');
+          const iEng = [(inp.subitem?.subitem_list?.subitem_eng || ''), inp.item?.item_eng || ''].filter(Boolean).join(' ');
+          addCell(dataRow, 1, i + 1, smallFont);
+          addCell(dataRow, 2, iHin, smallFont);
+          addCell(dataRow, 3, iEng, smallFont);
+          addCell(dataRow, 4, inp.qty, smallFont, undefined, { vertical: 'middle', horizontal: 'right' });
+          addCell(dataRow, 5, inp.unit_short || inp.unit?.unit_short, smallFont);
+          addCell(dataRow, 6, inp.rate || '', smallFont, undefined, { vertical: 'middle', horizontal: 'right' });
+          addCell(dataRow, 7, inp.condition?.list_name_hin || '', smallFont);
+        } else {
+          [1, 2, 3, 4, 5, 6, 7].forEach(c => addCell(dataRow, c, ''));
+        }
+
+        // Output side
+        if (outputs[i]) {
+          const out = outputs[i];
+          const oHin = [(out.subitem?.subitem_list?.subitem_hin || ''), out.item?.item_hin || ''].filter(Boolean).join(' ');
+          const oEng = [(out.subitem?.subitem_list?.subitem_eng || ''), out.item?.item_eng || ''].filter(Boolean).join(' ');
+          addCell(dataRow, 8, i + 1, smallFont);
+          addCell(dataRow, 9, oHin, smallFont);
+          addCell(dataRow, 10, oEng, smallFont);
+          addCell(dataRow, 11, out.qty, smallFont, undefined, { vertical: 'middle', horizontal: 'right' });
+          addCell(dataRow, 12, out.unit_short || out.unit?.unit_short, smallFont);
+          addCell(dataRow, 13, out.rate || '', smallFont, undefined, { vertical: 'middle', horizontal: 'right' });
+          addCell(dataRow, 14, out.condition?.list_name_hin || '', smallFont);
+        } else {
+          [8, 9, 10, 11, 12, 13, 14].forEach(c => addCell(dataRow, c, ''));
+        }
+      }
+
+      rowNum++; // blank spacer row between batches
+    }
+
+    // Save
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const dateStr = new Date().toLocaleDateString('en-IN').replace(/\//g, '-');
+    saveAs(blob, `HMP_Batches_${dateStr}.xlsx`);
+  }
+
+  exportToPdf() {
+    // Switch to Individual view mode temporarily for best print layout
+    const originalSettings = JSON.parse(JSON.stringify(this.settings));
+    this.settings.hmp.viewMode = 'voucher';
+    this.expandAll = false;
+    this.toggleExpandAll();
+
+    // Disable pagination temporarily to show all records in print
+    const originalItemsPerPage = this.itemsPerPage;
+    this.itemsPerPage = this.total_count > 0 ? this.total_count : 9999;
+
+    // Give Angular a moment to render all rows into the DOM before printing
+    setTimeout(() => {
+      window.print();
+
+      // Restore original views after print dialog closes
+      this.settings.hmp.viewMode = originalSettings.hmp.viewMode;
+      this.itemsPerPage = originalItemsPerPage;
+    }, 500);
+  }
 
   openEntryModal(batch: any = null) {
     this.isEdit = !!batch;
@@ -95,8 +275,15 @@ export class HmpComponent implements OnInit {
     $('#hmpEntryModal').modal('show');
   }
 
+  closeModal() {
+    $('#hmpEntryModal').modal('hide');
+    this.isEdit = false;
+    this.selectedBatch = null;
+  }
+
   onBatchSaved(event: any) {
     // Refresh list
+    this.closeModal();
     this.getBatches();
   }
 
@@ -116,7 +303,7 @@ export class HmpComponent implements OnInit {
           .subscribe((data: any) => {
             if (data.success) {
               this.toastr.success('Input deleted successfully');
-              this.batches.inputs.splice(index, 1);
+              this.getBatches();
             }
             else {
               this.toastr.error('Failed to delete input');
@@ -143,7 +330,7 @@ export class HmpComponent implements OnInit {
           .subscribe((data: any) => {
             if (data.success) {
               this.toastr.success('Output deleted successfully');
-              this.batches.outputs.splice(index, 1);
+              this.getBatches();
             }
             else {
               this.toastr.error('Failed to delete output');

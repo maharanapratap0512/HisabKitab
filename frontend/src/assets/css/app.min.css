@@ -48,12 +48,12 @@
 
 body {
    margin: 0;
-   font-family: Nunito, sans-serif;
-   font-size: .9rem;
+   font-family: 'Inter', sans-serif;
+   font-size: .8rem;
    font-weight: 400;
-   line-height: 1.5;
+   line-height: 1;
    color: #4a5158;
-   background-color: #ebddfd;
+   background-color: var(--bg-color);
    -webkit-text-size-adjust: 100%;
    -webkit-tap-highlight-color: transparent
 }
@@ -2270,12 +2270,45 @@ progress {
    vertical-align: middle
 }
 
-.table>thead {
+/* .table>thead {
    font-size: medium;
    background-color: #8a6dd3f5;
    color: #fff;
    height: 50px;
    box-shadow: 0px 5px 10px 5px #966cffcf !important
+} */
+
+.table>thead>tr>th {
+   height: 40px;
+   background: var(--thead-bg);
+   color: var(--thead-color);
+   border-top: var(--thead-border-top);
+   border-bottom: var(--thead-border-bottom);
+   box-shadow: var(--thead-box-shadow);
+   transition: all 0.35s ease;
+   position: relative;
+   backdrop-filter: blur(8px);
+   /* ✅ frosted glass effect */
+   -webkit-backdrop-filter: blur(8px);
+}
+
+.table>thead th:not(:last-child) {
+   border-right: var(--thead-border-bottom);
+}
+
+/* .table > thead th {
+} */
+
+.table>thead th::after {
+   content: '';
+   position: absolute;
+   bottom: 0;
+   left: 50%;
+   transform: translateX(-50%);
+   width: min(100%, 120px);
+   /* caps width — diamond effect on all columns */
+   height: 2px;
+   background: linear-gradient(90deg, transparent, var(--thead-accent-color), transparent);
 }
 
 .table-container {
@@ -2516,7 +2549,7 @@ progress {
    display: block;
    width: 100%;
    padding: .45rem .9rem;
-   font-size: .9rem;
+   font-size: .8rem;
    font-weight: 400;
    line-height: 1.5;
    color: #6c757d;
@@ -2754,7 +2787,7 @@ textarea.form-control-lg {
    display: block;
    width: 100%;
    padding: .45rem 2.5rem .45rem .9rem;
-   font-size: .9rem;
+   font-size: .8rem;
    font-weight: 400;
    line-height: 1.5;
    color: #6c757d;
@@ -3228,7 +3261,7 @@ textarea.form-control-lg {
    -ms-flex-align: center;
    align-items: center;
    padding: .45rem .9rem;
-   font-size: .9rem;
+   font-size: .8rem;
    font-weight: 400;
    line-height: 1.5;
    color: #6c757d;
@@ -3528,7 +3561,7 @@ textarea.form-control.is-invalid {
 .btn {
    display: inline-block;
    font-weight: 400;
-   line-height: 1.5;
+   line-height: 1;
    color: #6c757d;
    text-align: center;
    vertical-align: middle;
@@ -3540,7 +3573,7 @@ textarea.form-control.is-invalid {
    background-color: transparent;
    border: 1px solid transparent;
    padding: .45rem .9rem;
-   font-size: .9rem;
+   font-size: .8rem;
    border-radius: .15rem;
    -webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;
    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;
@@ -4389,7 +4422,7 @@ fieldset:disabled .btn {
    min-width: 10rem;
    padding: .25rem 0;
    margin: 0;
-   font-size: .9rem;
+   font-size: .8rem;
    color: #6c757d;
    text-align: left;
    list-style: none;
@@ -5644,7 +5677,7 @@ fieldset:disabled .btn {
    align-items: center;
    width: 100%;
    padding: 1rem 1.25rem;
-   font-size: .9rem;
+   font-size: .8rem;
    color: #6c757d;
    text-align: left;
    background-color: transparent;
@@ -7267,7 +7300,7 @@ fieldset:disabled .btn {
 .popover-header {
    padding: .7rem .8rem;
    margin-bottom: 0;
-   font-size: .9rem;
+   font-size: .8rem;
    background-color: #f1f3fa;
    border-bottom: 1px solid #d9dbe1;
    border-top-left-radius: calc(.3rem - 1px);
@@ -16016,7 +16049,7 @@ body[data-layout=topnav] .container-xxl {
    margin-bottom: .5rem;
    text-transform: uppercase;
    letter-spacing: .02em;
-   font-size: .9rem;
+   font-size: .8rem;
    margin-top: 0
 }
 
@@ -21163,7 +21196,7 @@ div.table-responsive>div.dataTables_wrapper>div.row>div[class^=col-]:first-child
    background: #343a40;
    color: #f1f3fa;
    font-family: Nunito, sans-serif;
-   font-size: .9rem;
+   font-size: .8rem;
    padding: 5px 8px
 }
 
@@ -22395,7 +22428,7 @@ Not supports in Firefox and IE */
 }
 
 .ng-select.custom .ng-select-container {
-   font-size: .9rem;
+   font-size: .8rem;
    font-weight: 400;
    line-height: 1.5;
    color: #6c757d;
@@ -22541,5 +22574,128 @@ Not supports in Firefox and IE */
       &.filled {
          color: #ffc107;
       }
+   }
+}
+
+
+/* ==========================================================================
+   CUSTOM COMPACT TABLE STYLES
+   ========================================================================== */
+
+
+.table-compact {
+   width: 100%;
+   margin-bottom: 0;
+   border-collapse: collapse;
+   font-size: 12px;
+
+   thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: #f1f5f9;
+      /* Light mode header background */
+
+      th {
+         color: #475569;
+         /* Light mode header text */
+         font-weight: 700;
+         border-bottom: 2px solid #e2e8f0;
+         padding-top: 10px;
+         padding-bottom: 10px;
+         text-transform: uppercase;
+         font-size: 11px;
+         letter-spacing: 0.5px;
+      }
+   }
+}
+
+
+.table-compact th,
+.table-compact td {
+   padding: 2px 8px;
+   vertical-align: middle;
+   border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+
+.table-compact thead th {
+   vertical-align: bottom;
+   border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+   border-top: none;
+   padding-top: 6px;
+   padding-bottom: 6px;
+   font-weight: 600;
+}
+
+
+.table-compact tbody::before {
+   content: "" !important;
+}
+
+.table-compact.table-hover tbody tr:hover {
+   background-color: rgba(0, 0, 0, 0.02);
+}
+
+
+/* Specific styling for HMP Component Tables */
+.hmp-themed-table {
+   font-size: 12px;
+   background-color: #ffffff;
+   color: #333333;
+
+   thead {
+      background-color: #f8f9fa;
+      color: #4a5568;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+   }
+
+   .border-top-accent {
+      border-top: 1px solid #dee2e6 !important;
+   }
+
+   /* Theme-aware border right for merged cells */
+   .themed-border-right {
+      border-right: 1px solid #dee2e6;
+   }
+
+   /* Badge colors for light mode */
+   .badge-in {
+      background: #e1effe;
+      color: #1e429f;
+      font-size: 10px;
+      border-radius: 20px;
+   }
+
+   .badge-out {
+      background: #def7ec;
+      color: #03543f;
+      font-size: 10px;
+      border-radius: 20px;
+   }
+}
+
+.hmp-label-row {
+   height: 25px;
+   font-size: 12px;
+   font-weight: 700;
+   letter-spacing: 1.5px;
+   text-transform: uppercase;
+   display: flex;
+   align-items: center;
+   padding: 0 8px;
+
+   &.input-label {
+      background: #eff6ff;
+      color: #1a56db;
+      border-left: 3px solid #3b82f6;
+   }
+
+   &.output-label {
+      background: #f3faf7;
+      color: #046c4e;
+      border-left: 3px solid #10b981;
    }
 }

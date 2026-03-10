@@ -63,7 +63,7 @@ export class FormService {
       dept_id: auth.webUser.dept_id,
       nimitt_id: null,
       description: null,
-      aawaks: [JSON.parse(JSON.stringify(this.aawakForm))],
+      aawaks: [structuredClone(this.aawakForm)],
       voucher_no: null,
     };
     this.jawakForm = {
@@ -103,6 +103,12 @@ export class FormService {
         nuksan: null,
         rating: null,
       },
+      auto_awk: 0,
+      auto_reawk: 0,
+      aawak_date: gs.dateString,
+      re_aawak_type_id: null,
+      aawak_dept_id: null,
+      aawak_type_id: null,
       active: 1,
     };
     this.jawakFormMain = {
@@ -129,8 +135,8 @@ export class FormService {
       unit_id: null,
       condition_id: null,
       qty: null,
-      sw_bachat: null,
-      difference: null,
+      sw_bachat: 0,
+      difference: 0,
       hl: 0,
       is_xl: 0,
       active: 1
@@ -179,16 +185,22 @@ export class FormService {
   }
 
   patchFormPbkClosing(obj: any) {
+
+    if (obj.pbk_closings && obj.pbk_closings.length > 0) {
+      for (let i in obj.pbk_closing) {
+        obj.pbk_closing[i].item_subitem_id = obj.pbk_closing[i].subitem_id ? obj.pbk_closing[i].item_id + ":" + obj.pbk_closing[i].subitem_id : obj.pbk_closing[i].item_id;
+      }
+    } else {
+      obj.pbk_closing = [structuredClone(this.pbkClosingForm)]
+    }
+
     this.pbkClosingFormMain = {
       date: new Date(obj.date).toISOString().slice(0, 10),
       pbk_id: obj.pbk_id,
       dept_id: obj.dept_id,
-      pbk_closings: obj.pbk_closings && obj.pbk_closings.length > 0 ? obj.pbk_closings : [],
+      pbk_closings: structuredClone(obj.pbk_closings),
       voucher_no: obj.voucher_no
     };
-    if (this.pbkClosingFormMain.pbk_closings.length === 0) {
-      this.pbkClosingFormMain.pbk_closings.push(JSON.parse(JSON.stringify(this.pbkClosingForm)));
-    }
   }
 
   formStatusChanges() {
@@ -202,7 +214,7 @@ export class FormService {
     }
 
     if (valid && !this.submit) {
-      this.aawakFormMain.aawaks.push(JSON.parse(JSON.stringify(this.aawakForm)));
+      this.aawakFormMain.aawaks.push(structuredClone(this.aawakForm));
     }
   }
 
@@ -219,7 +231,7 @@ export class FormService {
     }
 
     if (valid && !this.submit) {
-      this.jawakFormMain.jawaks.push(JSON.parse(JSON.stringify(this.jawakForm)));
+      this.jawakFormMain.jawaks.push(structuredClone(this.jawakForm));
     }
   }
 
@@ -234,7 +246,7 @@ export class FormService {
     }
 
     if (valid && !this.submit) {
-      this.pbkClosingFormMain.pbk_closings.push(JSON.parse(JSON.stringify(this.pbkClosingForm)));
+      this.pbkClosingFormMain.pbk_closings.push(structuredClone(this.pbkClosingForm));
     }
   }
 
@@ -273,26 +285,21 @@ export class FormService {
   }
 
   validPbkClosing() {
-    // Remove last empty row if invalid
-    if (this.pbkClosingFormMain.pbk_closings.length > 0) {
-      let last = this.pbkClosingFormMain.pbk_closings[this.pbkClosingFormMain.pbk_closings.length - 1];
-      if (!(last.item_id && last.qty)) {
-        this.pbkClosingFormMain.pbk_closings.splice(this.pbkClosingFormMain.pbk_closings.length - 1, 1);
-      }
-    }
 
-    // Validate remaining
-    for (let i in this.pbkClosingFormMain.pbk_closings) {
+    if (!this.pbkClosingFormMain.date || !this.pbkClosingFormMain.pbk_id || this.pbkClosingFormMain.pbk_closings?.length <= 1)
+      return false;
+
+    for (let i = 0; i < this.pbkClosingFormMain.pbk_closings.length - 1; i++) {
       if (!(this.pbkClosingFormMain.pbk_closings[i].item_id && this.pbkClosingFormMain.pbk_closings[i].qty)) {
         return false;
       }
     }
 
-    if (this.pbkClosingFormMain.date && this.pbkClosingFormMain.pbk_id && this.pbkClosingFormMain.pbk_closings.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    this.submit = true;
+    // remove last auto inserted empty row
+    this.pbkClosingFormMain.pbk_closings.splice(this.pbkClosingFormMain.pbk_closings.length - 1, 1);
+    return true;
+
   }
 
 
@@ -325,7 +332,7 @@ export class FormService {
       dept_id: this.auth.webUser.dept_id,
       nimitt_id: this.jawakFormMain.nimitt_id,
       description: null,
-      jawaks: [JSON.parse(JSON.stringify(this.jawakForm))],
+      jawaks: [structuredClone(this.jawakForm)],
       voucher_no: null,
     }
     this.submit = false;

@@ -1,5 +1,5 @@
 const DBContex = require('./DBContex');
-const { HmpRecipe, HmpRecipeInput, HmpRecipeOutput, HmpBatch, HmpBatchInput, HmpBatchOutput } = require('../models/hmp.model');
+const { HmpRecipe, HmpRecipeInput, HmpRecipeOutput, HmpBatch, HmpBatchInput, HmpBatchOutput, PbkClosing, PbkBachat } = require('../models/hmp.model');
 const { sequelize } = require('./db.model');
 const { log } = require('node:console');
 class Functions extends DBContex {
@@ -630,85 +630,47 @@ class Functions extends DBContex {
    // PBK Closing Functions
    // -------------------------------------------------------------------------
 
-   async insertPBKClosing(obj, voucher_no = null) {
-      return new Promise(async (resolve, reject) => {
-         try {
-            if (!obj.voucher_no) {
-               obj.voucher_no = voucher_no ? voucher_no : await this.getLastVoucherNo('pbk_closing') + 1;
-            }
-
-            obj.hl = obj.hl ? 1 : 0;
-            obj.is_xl = obj.is_xl ? 1 : 0;
-            obj.active = 1;
-
-            // Ensure data types
-            obj.qty = Number(obj.qty);
-            obj.sw_bachat = Number(obj.sw_bachat);
-            obj.difference = Number(obj.difference);
-
-            // Insert into pbk_closing
-            let result = await this.db.prepare(this.query.pbk_closing.insert).run(obj);
-            obj._id = result.lastInsertRowid;
-
-            // Sync with pbk_bachat
-            await this.syncPBKBachatFromPBKClosing(obj);
-
-            resolve(obj);
-         } catch (err) {
-            reject(err);
-         }
-      });
-   }
-
-   async updatePBKClosing(obj) {
-      return new Promise(async (resolve, reject) => {
-         try {
-            obj.hl = obj.hl ? 1 : 0;
-            obj.is_xl = obj.is_xl ? 1 : 0;
-            obj.qty = Number(obj.qty);
-            obj.sw_bachat = Number(obj.sw_bachat);
-            obj.difference = Number(obj.difference);
-
-            await this.db.prepare(this.query.pbk_closing.update).run(obj);
-
-            // Sync with pbk_bachat
-            await this.syncPBKBachatFromPBKClosing(obj);
-
-            resolve(obj);
-         } catch (err) {
-            reject(err);
-         }
-      });
-   }
-
-   async deletePBKClosing(id) {
-      return new Promise(async (resolve, reject) => {
-         try {
-            // Just delete the record as per plan
-            await this.db.prepare(`delete from pbk_closing where _id = ${id}`).run();
-            resolve(true);
-         } catch (err) {
-            reject(err);
-         }
-      });
-   }
-
 
    async syncPBKBachatFromPBKClosing(obj) {
-      // Upsert logic for pbk_bachat
+      // Build the lookup key from closing fields
+      let where = {};
+      where = {
+         pbk_id: obj.pbk_id,
+         item_id: obj.item_id,
+         dept_id: obj.dept_id,
+         unit_id: obj.unit_id,
+         // Always match exactly — null → IS NULL, value → = value
+         subitem_id: obj.subitem_id || null,
+         condition_id: obj.condition_id || null,
+      };
+
       if (obj.pbk_bachat_id) {
          // Direct update by ID
-         await this.db.prepare(this.query.pbk_bachat.update_by_id).run(obj);
+         await PbkBachat.update(
+            { qty: obj.qty, active: 1 },
+            { where: { _id: obj.pbk_bachat_id } }
+         );
       } else {
          // Find existing bachat by fields
-         let bachat = this.db.prepare(this.query.pbk_bachat.find_bachat_from_closing).get(obj);
+         let bachat = await PbkBachat.findOne({ where });
          if (bachat) {
-            // Found, update using found ID
             obj.pbk_bachat_id = bachat._id;
-            await this.db.prepare(this.query.pbk_bachat.update_by_id).run(obj);
+            await PbkBachat.update(
+               { qty: obj.qty, active: 1 },
+               { where: { _id: bachat._id } }
+            );
          } else {
-            // Insert new record
-            await this.db.prepare(this.query.pbk_bachat.insert).run(obj);
+            // Insert new pbk_bachat record
+            await PbkBachat.create({
+               pbk_id: obj.pbk_id,
+               item_id: obj.item_id,
+               subitem_id: obj.subitem_id || null,
+               unit_id: obj.unit_id,
+               condition_id: obj.condition_id || null,
+               qty: obj.qty,
+               dept_id: obj.dept_id,
+               active: 1,
+            });
          }
       }
    }

@@ -44,11 +44,13 @@ const PBKClosing = sequelize.define('PBKClosing', {
     },
     sw_bachat: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     },
     difference: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
     },
     active: {
         type: DataTypes.TINYINT,

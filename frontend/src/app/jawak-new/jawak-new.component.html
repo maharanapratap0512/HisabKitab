@@ -18,7 +18,7 @@
                             </div>
                             <div class="d-flex gap-2">
                                 <app-popover-filter [btnOutline]="false" iconClass="dripicons-gear" direction="left"
-                                    [showClearButton]="false">
+                                    [showClearButton]="false" triggerOn="hover">
                                     <ul>
                                         <li>
                                             <h5>नया एंट्री फॉर्म</h5>
@@ -362,7 +362,7 @@
                                             <span>Voucher</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 (clear)="filterBody.voucher_no = null; onHeaderFilterChange()"
-                                                [isOpen]="!!filterBody.voucher_no">
+                                                [isOpen]="!!filterBody.voucher_no" triggerOn="hover">
                                                 <input type="number" class="form-control form-control-sm"
                                                     [(ngModel)]="filterBody.voucher_no"
                                                     (change)="onHeaderFilterChange()" placeholder="Voucher No...">
@@ -375,7 +375,7 @@
                                             <span>Pkt No</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 (clear)="filterBody.pkt_num = null; onHeaderFilterChange()"
-                                                [isOpen]="!!filterBody.pkt_num">
+                                                [isOpen]="!!filterBody.pkt_num" triggerOn="hover">
                                                 <input type="number" class="form-control form-control-sm"
                                                     [(ngModel)]="filterBody.pkt_num" (change)="onHeaderFilterChange()"
                                                     placeholder="Pkt No...">
@@ -387,7 +387,7 @@
                                             <span>Reg Page</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 (clear)="filterBody.reg_pg_no = null; onHeaderFilterChange()"
-                                                [isOpen]="!!filterBody.reg_pg_no">
+                                                [isOpen]="!!filterBody.reg_pg_no" triggerOn="hover">
                                                 <input type="number" class="form-control form-control-sm"
                                                     [(ngModel)]="filterBody.reg_pg_no" (change)="onHeaderFilterChange()"
                                                     placeholder="Page No...">
@@ -399,9 +399,9 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Jawak MM</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left"
+                                                direction="left" [isOpen]="filterBody.aj_mm_id?.length > 0"
                                                 (clear)="filterBody.aj_mm_id = []; onHeaderFilterChange()"
-                                                [isOpen]="filterBody.aj_mm_id?.length > 0">
+                                                triggerOn="hover">
                                                 <ng-select [multiple]="true" placeholder="Select MM" class="custom-sm"
                                                     dropdownClass="custom-sm" [(ngModel)]="filterBody.aj_mm_id"
                                                     (change)="onHeaderFilterChange()" style="width: 100%;">
@@ -416,9 +416,9 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Sewadhari</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left"
+                                                direction="left" [isOpen]="filterBody.pbk_id?.length > 0"
                                                 (clear)="filterBody.pbk_id = []; onHeaderFilterChange()"
-                                                [isOpen]="filterBody.pbk_id?.length > 0">
+                                                triggerOn="hover">
                                                 <ng-select [multiple]="true" placeholder="Select Sewadhari"
                                                     class="custom-sm" dropdownClass="custom-sm"
                                                     [(ngModel)]="filterBody.pbk_id" (change)="onHeaderFilterChange()"
@@ -434,7 +434,7 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Item</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left"
+                                                direction="left" triggerOn="hover"
                                                 (clear)="filterBody.item_subitem_mix = []; onHeaderFilterChange()"
                                                 [isOpen]="filterBody.item_subitem_mix?.length > 0">
                                                 <ng-select [multiple]="true" placeholder="Select Item" class="custom-sm"
@@ -442,13 +442,16 @@
                                                     (change)="onHeaderFilterChange()" style="width: 500px;">
                                                     <ng-container *ngFor="let item of items">
                                                         <ng-option [value]="item._id + ':'">
-                                                            {{item.item_hin}} : {{item.item_eng}} :
-                                                            {{item.item_code}}
+                                                            {{item.item_hin}} : {{item.item_eng}} : {{item.item_roman ?
+                                                            item.item_roman : ''}}
+                                                            : {{item.item_code}}
                                                         </ng-option>
                                                         <ng-option *ngFor="let subitem of item.subitems"
                                                             [value]="item._id + ':' + subitem._id">
                                                             {{subitem.subitem_hin}} {{item.item_hin}} :
                                                             {{subitem.subitem_eng}} {{item.item_eng}} :
+                                                            {{subitem.subitem_roman ? subitem.subitem_roman : ''}} :
+                                                            {{item.item_roman ? item.item_roman : ''}} :
                                                             {{subitem.subitem_code}} {{item.item_code}}
                                                         </ng-option>
                                                     </ng-container>
@@ -464,7 +467,7 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Product</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left"
+                                                direction="left" triggerOn="hover"
                                                 (clear)="filterBody.product_id = []; onHeaderFilterChange()"
                                                 [isOpen]="filterBody.product_id?.length > 0">
                                                 <ng-select [multiple]="true" placeholder="Select Product"
@@ -482,7 +485,7 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Condition</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left"
+                                                direction="left" triggerOn="hover"
                                                 (clear)="filterBody.condition_id = []; onHeaderFilterChange()"
                                                 [isOpen]="filterBody.condition_id?.length > 0">
                                                 <ng-select [multiple]="true" placeholder="Select Condition"
@@ -501,7 +504,7 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Aawak Source</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left"
+                                                direction="left" triggerOn="hover"
                                                 (clear)="filterBody.aawak_source_id = []; onHeaderFilterChange()"
                                                 [isOpen]="filterBody.aawak_source_id?.length > 0">
                                                 <ng-select [multiple]="true" placeholder="Select Aawak Source"
@@ -519,7 +522,7 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Jawak Type</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left"
+                                                direction="left" triggerOn="hover"
                                                 (clear)="filterBody.jawak_type_id = []; onHeaderFilterChange()"
                                                 [isOpen]="filterBody.jawak_type_id?.length > 0">
                                                 <ng-select [multiple]="true" placeholder="Select Jawak Type"
@@ -537,7 +540,7 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Usage</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left"
+                                                direction="left" triggerOn="hover"
                                                 (clear)="filterBody.usage_list_id = []; onHeaderFilterChange()"
                                                 [isOpen]="filterBody.usage_list_id?.length > 0">
                                                 <ng-select [multiple]="true" placeholder="Select Usage"
@@ -562,7 +565,7 @@
                                         <td class="w-80">
                                             <button class="btn btn-xs btn-primary" title="Edit Item"
                                                 (click)="editJawak(i, row)">
-                                                <i class="uil uil-edit"></i>
+                                                <i class="uil uil-pen"></i>
                                             </button>
                                             <button class="btn btn-xs btn-danger mx-1" title="Delete Item"
                                                 (click)="deleteOne(i, j, item._id)">

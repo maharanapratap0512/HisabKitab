@@ -275,7 +275,7 @@
                      <!-- Filter Button with Popover -->
                      <app-popover-filter
                         [iconClass]="(selDept_id != null || cat != null) ? 'uil uil-check' : 'uil uil-filter'"
-                        (clear)="clearItemFilters()">
+                        (clear)="clearItemFilters()" triggerOn="hover">
                         <div class="mb-2">
                            <label class="form-label" style="font-size: 0.875rem; margin-bottom: 5px;">Department</label>
                            <ng-select *ngIf="departments.length > 0" class="custom" style="width: 100%;"
@@ -337,13 +337,16 @@
 
                      <ng-container *ngFor="let item of items | filterByDate:awkfg.date">
                         <ng-option [value]="item._id + ':' + null">
-                           {{item.item_hin}} : {{item.item_eng}} : {{item.item_code}}
+                           {{item.item_hin}} : {{item.item_eng}} : {{item.item_roman ?
+                           item.item_roman : ''}} : {{item.item_code}}
                         </ng-option>
 
                         <ng-option *ngFor="let subitem of item.subitems | filterByDate:awkfg.date"
                            [value]="item._id + ':' + subitem._id">
                            {{subitem.subitem_hin}} {{item.item_hin}} :
                            {{subitem.subitem_eng}} {{item.item_eng}} :
+                           {{subitem.subitem_roman ? subitem.subitem_roman : ''}} :
+                           {{item.item_roman ? item.item_roman : ''}} :
                            {{subitem.subitem_code}} {{item.item_code}}
                         </ng-option>
                      </ng-container>

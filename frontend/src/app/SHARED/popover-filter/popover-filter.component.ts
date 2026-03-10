@@ -9,12 +9,16 @@ export class PopoverFilterComponent {
 
   @Input() iconClass: string = '';
   @Input() btnOutline: boolean = true;
+  @Input() btnClass: string = 'btn';
   @Input() showClearButton: boolean = true;
   @Input() clearButtonLabel: string = 'Clear Filter';
   @Input() label: string = '';
   @Input() direction: 'left' | 'right' | 'auto' = 'auto';
   @Input() isOpen: boolean = false;
+  @Input() triggerOn: 'click' | 'hover' = 'click';
   @Output() clear = new EventEmitter<void>();
+
+  private _hoverTimeout: any = null;
 
 
   popoverPosition: { left?: string; right?: string } = {};
@@ -40,6 +44,18 @@ export class PopoverFilterComponent {
     } else if (this.isOpen && this.direction === 'right') {
       this.popoverPosition = { left: '0' };
     }
+
+    if (this.isOpen) this.focusFirst();
+  }
+
+  openPopover() {
+    if (this._hoverTimeout) { clearTimeout(this._hoverTimeout); this._hoverTimeout = null; }
+    this.isOpen = true;
+    this.focusFirst();
+  }
+
+  hoverClose() {
+    this._hoverTimeout = setTimeout(() => { this.isOpen = false; }, 120);
   }
 
   closePopover() {
@@ -49,6 +65,18 @@ export class PopoverFilterComponent {
   onClear() {
     this.clear.emit();
     this.closePopover();
+  }
+
+  focusFirst() {
+    // Wait one tick for *ngIf to render the popover panel
+    setTimeout(() => {
+      const panel = this.elementRef.nativeElement.querySelector('.filter-popover');
+      if (!panel) return;
+      const focusable = panel.querySelector(
+        'input:not([type=hidden]), select, textarea, ng-select .ng-input input, button:not(.btn-outline-secondary)'
+      ) as HTMLElement | null;
+      focusable?.focus();
+    }, 0);
   }
 
   calculateAutoPosition() {

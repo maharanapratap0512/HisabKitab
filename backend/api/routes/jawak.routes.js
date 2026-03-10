@@ -325,7 +325,26 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
                 }
                 console.log(jawak);
                 await Fn.insertAJ(jawak, 'jawak').then(async (resolve) => {
-                    console.log(resolve);
+                    if (jawak.auto_awk) {
+                        let awk = DB.tbInterface.getAawakFromJawak(jawak);
+                        awk.dept_id = jawak.aawak_dept_id;
+                        awk.aawak_type_id = jawak.aawak_type_id;
+                        awk.aawak_source_id = jawak.aawak_source_id;
+                        awk.description = "Automatic Entry from Jawak."
+                        await Fn.insertAJ(awk, 'aawak').then(async (rs) => {
+                        });
+                    }
+                    if (jawak.auto_reawk) {
+                        let awk = DB.tbInterface.getAawakFromJawak(jawak);
+                        awk.date = jawak.aawak_date;
+                        awk.aawak_type_id = jawak.re_aawak_type_id;
+                        awk.mm_id = jawak.mm_id;
+                        awk.aawak_mm_id = jawak.jawak_mm_id;
+                        awk.aawak_source_id = jawak.aawak_source_id;
+                        awk.description = "Automatic Entry from Jawak to Re-aawak."
+                        await Fn.insertAJ(awk, 'aawak').then(async (rs) => {
+                        });
+                    }
                 }, (reject) => {
                     throw reject;
                 });

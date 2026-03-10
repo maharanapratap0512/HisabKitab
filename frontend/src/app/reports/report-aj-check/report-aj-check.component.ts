@@ -23,6 +23,9 @@ export class ReportAjCheckComponent {
   term: any;
   termAawak: any;
   termJawak: any;
+  itemPerPage: any = 100;
+  pageAwk: any = 1;
+  pageJwk: any = 1;
   filterBody: any = {}
   months: any = [];
   monthsSel: any = [];
@@ -70,11 +73,10 @@ export class ReportAjCheckComponent {
 
     this.settings = this.auth.webUser.settings;
 
-    // this.filterBody = {
-    //   months: [12],
-    //   year: 2022
-    // }
-    // this.searchReports();
+    this.filterBody = {
+      mm_id: this.auth.webUser.defaultMM
+    }
+    this.searchReports();
 
   }
 
@@ -230,26 +232,26 @@ export class ReportAjCheckComponent {
     */
   async exportToExcel(aj: string = 'both') {
     let title = this.auth.webUser.dept_code || '' + '_आवक_जावक_चेक_';
-    if (this.filterBody.date_from){
+    if (this.filterBody.date_from) {
       title += 'तारीख_' + this.filterBody.date_from + '_से_';
     }
-    if (this.filterBody.date_to){
+    if (this.filterBody.date_to) {
       title += this.filterBody.date_to + '_तक_का';
     }
-      switch (aj) {
-        case 'aawak': await this.exportAawakToExcel();
-          title += '_आवक';
-          break;
-          case 'jawak': await this.exportJawakToExcel();
-          title += '_जावक';
-          break;
-        default:
-          await this.exportAawakToExcel();
-          await this.exportJawakToExcel();
-          title += '_आवक_जावक';
-      }
+    switch (aj) {
+      case 'aawak': await this.exportAawakToExcel();
+        title += '_आवक';
+        break;
+      case 'jawak': await this.exportJawakToExcel();
+        title += '_जावक';
+        break;
+      default:
+        await this.exportAawakToExcel();
+        await this.exportJawakToExcel();
+        title += '_आवक_जावक';
+    }
 
-      this.excelExportService.saveAsExcel(title);
+    this.excelExportService.saveAsExcel(title);
 
 
   }

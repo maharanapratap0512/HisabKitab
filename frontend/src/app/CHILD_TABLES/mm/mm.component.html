@@ -69,6 +69,7 @@
                               </th>
                               <th style="width: 150px;">MM(Hin)</th>
                               <th style="width: 150px;" *ngIf="settings.mm_eng">MM(Eng)</th>
+                              <th style="width: 150px;" *ngIf="settings.mm_roman">MM(Roman)</th>
                               <th style="width: 100px;" *ngIf="settings.mm_code">MM Code</th>
                               <th style="width: 100px;">MM Type</th>
                               <th style="width: 150px;" *ngIf="settings.parent_mm_id">Parent MM</th>
@@ -114,6 +115,7 @@
                               </td>
                               <td>{{data.mm_hin}}</td>
                               <td *ngIf="settings.mm_eng">{{data.mm_eng}}</td>
+                              <td *ngIf="settings.mm_roman">{{data.mm_roman}}</td>
                               <td *ngIf="settings.mm_code">{{data.mm_code}}</td>
                               <td>{{data.mm_type}}</td>
                               <td *ngIf="settings.parent_mm_id">

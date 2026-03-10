@@ -7,36 +7,37 @@
 <div class="wrapper">
     <div class="content-page">
         <div class="content">
-            <div class="container-fluid">
 
-                <div class="row">
-                    <!-- <div class="card-header">Report Khet Saar (Under Construction)</div> -->
-                    <div class="card-body">
-                        <div class="row mb-2 mt-3">
-                            <div class="col-md-3 mb-2">
-                                <div class="form-group">
-                                    <label class="form-label">Item</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
-                                        [clearable]="true" [multiple]="true" [virtualScroll]="true"
-                                        [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}"
-                                        (change)="itemSelected($event)">
-                                        <ng-option *ngFor="let item of items" [value]="item._id">
-                                            {{item.item_hin}} : {{item.item_eng}}</ng-option>
-                                    </ng-select>
-                                </div>
+            <div class="row">
+                <!-- <div class="card-header">Report Khet Saar (Under Construction)</div> -->
+                <div class="card-body">
+                    <div class="row mb-2 mt-3">
+                        <div class="col-md-3 mb-2">
+                            <div class="form-group">
+                                <label class="form-label">Item</label>
+                                <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                    [clearable]="true" [multiple]="true" [virtualScroll]="true"
+                                    [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}"
+                                    (change)="itemSelected($event)">
+                                    <ng-option *ngFor="let item of items" [value]="item._id">
+                                        {{item.item_hin}} : {{item.item_eng}} : {{item.item_roman ? item.item_roman :
+                                        ''}}</ng-option>
+                                </ng-select>
                             </div>
-                            <div class="col-md-2 mb-2">
-                                <div class="form-group">
-                                    <label class="form-label">Subitem</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Subitem"
-                                        [clearable]="true" [multiple]="true" [virtualScroll]="true"
-                                        [(ngModel)]="filterBody.subitem_id" [ngModelOptions]="{standalone: true}">
-                                        <ng-option *ngFor="let item of subitems" [value]="item._id">
-                                            {{item.subitem_hin}} : {{item.subitem_eng}}</ng-option>
-                                    </ng-select>
-                                </div>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <div class="form-group">
+                                <label class="form-label">Subitem</label>
+                                <ng-select class="custom" style="width: 100%;" placeholder="Select Subitem"
+                                    [clearable]="true" [multiple]="true" [virtualScroll]="true"
+                                    [(ngModel)]="filterBody.subitem_id" [ngModelOptions]="{standalone: true}">
+                                    <ng-option *ngFor="let item of subitems" [value]="item._id">
+                                        {{item.subitem_hin}} : {{item.subitem_eng}} : {{item.subitem_roman ?
+                                        item.subitem_roman : ''}}</ng-option>
+                                </ng-select>
                             </div>
-                            <!-- <div class="col-md-3 mb-2">
+                        </div>
+                        <!-- <div class="col-md-3 mb-2">
                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Khet"
                                     [clearable]="true" [multiple]="true" [virtualScroll]="true"
                                     [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
@@ -44,81 +45,81 @@
                                         {{item.mm_hin}} : {{item.mm_code}} : {{item.mm_eng}}</ng-option>
                                 </ng-select>
                             </div> -->
-                            <div class="col-md-2 mb-2">
-                                <div class="form-group">
-                                    <label class="form-label">Year</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Year"
-                                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.year"
-                                        name="year" (change)="months = gs.yearChangedGetMonth($event)">
-                                        <ng-option selected="selected" disabled value="">Select Year
-                                        </ng-option>
-                                        <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
-                                    </ng-select>
-                                </div>
+                        <div class="col-md-2 mb-2">
+                            <div class="form-group">
+                                <label class="form-label">Year</label>
+                                <ng-select class="custom" style="width: 100%;" placeholder="Select Year"
+                                    [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.year" name="year"
+                                    (change)="months = gs.yearChangedGetMonth($event)">
+                                    <ng-option selected="selected" disabled value="">Select Year
+                                    </ng-option>
+                                    <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
+                                </ng-select>
                             </div>
-                            <div class="col-md-2 mb-2">
-                                <div class="form-group">
-                                    <label class="form-label">Month</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Month"
-                                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month     "
-                                        name="month" [multiple]="false" [ngModalOptions]="{standalone: true}">
-                                        <ng-option selected="selected" disabled value="">Select Month
-                                        </ng-option>
-                                        <ng-option *ngFor="let item of months"
-                                            [value]="item.m">{{item.name}}</ng-option>
-                                    </ng-select>
-                                </div>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <div class="form-group">
+                                <label class="form-label">Month</label>
+                                <ng-select class="custom" style="width: 100%;" placeholder="Select Month"
+                                    [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month     "
+                                    name="month" [multiple]="false" [ngModalOptions]="{standalone: true}">
+                                    <ng-option selected="selected" disabled value="">Select Month
+                                    </ng-option>
+                                    <ng-option *ngFor="let item of months" [value]="item.m">{{item.name}}</ng-option>
+                                </ng-select>
                             </div>
+                        </div>
 
-                            <div class="col-md-2 mb-2 mt-3">
-                                <div class="form-group">
-                                    <label class="form-label"></label>
-                                    <button class="btn btn-primary form-control" (click)="searchReports()">Generate
-                                        Saar</button>
-                                </div>
+                        <div class="col-md-2 mb-2 mt-3">
+                            <div class="form-group">
+                                <label class="form-label"></label>
+                                <button class="btn btn-primary form-control" (click)="searchReports()">Generate
+                                    Saar</button>
                             </div>
+                        </div>
 
-                            <!-- <div class="col-md-2 mb-2 mt-3">
+                        <!-- <div class="col-md-2 mb-2 mt-3">
                                 <button type="button" style="font-weight: 700 !important;"
                                     class="btn btn-light w-100">Total
                                     Count : {{reportData.length}}
                                 </button>
                             </div> -->
-                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="row" *ngIf="reportData.length">
-                    <div class=" d-flex justify-content-center">
-                        <h3>{{reportHeading}}</h3>
-                    </div>
-                    <div class="card-body" style="overflow: auto;">
-                        <div class="row mb-2">
-                            <div class="col-md-5">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                                        name="search">
-                                </div>
+            <div class="row" *ngIf="reportData.length">
+                <div class=" d-flex justify-content-center">
+                    <h3>{{reportHeading}}</h3>
+                </div>
+                <div class="card-body" style="overflow: auto;">
+                    <div class="row mb-2">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                                    name="search">
                             </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label class="form-label"></label>
-                                    <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
-                                        data-bs-toggle="dropdown" aria-expanded="false"> Export Data </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" (click)="exportToExcelHin()">To Excel (Hin)</a>
-                                        <a class="dropdown-item" (click)="exportToExcelEng()">To Excel (Eng)</a>
-                                        <a class="dropdown-item" (click)="exportToPDF()">To PDF (Eng)</a>
-                                    </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="form-label"></label>
+                                <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                                    data-bs-toggle="dropdown" aria-expanded="false"> Export Data </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" (click)="exportToExcelHin()">To Excel (Hin)</a>
+                                    <a class="dropdown-item" (click)="exportToExcelEng()">To Excel (Eng)</a>
+                                    <a class="dropdown-item" (click)="exportToPDF()">To PDF (Eng)</a>
                                 </div>
                             </div>
                         </div>
-                        <ng-container *ngFor="let data of reportData | search: term; let i = index;">
-                            <table class="table dt-responsive mb-0">
-                                <thead>
+                    </div>
+                    <ng-container *ngFor="let data of reportData | search: term; let i = index;">
+                        <table class="table dt-responsive mb-0">
+                            <thead>
+                                <tr>
                                     <th style="width: 8%;">{{i+1}}</th>
                                     <th style="width: 22%;">
-                                        {{data.subitem_hin}} {{data.item_hin}} <br />
+                                        {{data.subitem_hin}} {{data.item_hin}} -
                                         {{data.subitem_eng}} {{data.item_eng}}
                                     </th>
                                     <th style="width: 60%;">
@@ -127,36 +128,36 @@
                                         </span>
                                     </th>
                                     <th style="width: 10%;">{{data.total_amt ? data.total_amt : 0}} INR</th>
-                                </thead>
-                            </table>
-                            <table *ngIf="data.khetData.length > 0" class="table-bordered dt-responsive w-100 mb-4">
-                                <tr class="fs-4 border-info text-center">
-                                    <th>No.</th>
-                                    <th>State</th>
-                                    <th>Khet Name</th>
-                                    <th>Unit</th>
-                                    <th>Qty</th>
-                                    <th>Amount</th>
                                 </tr>
-                                <tr *ngFor="let idata of data.khetData | search: term; let j = index;">
-                                    <td>{{j+1}}</td>
-                                    <td>{{idata.state_id ? idata.state_hin : idata.state_eng}}</td>
-                                    <td>
-                                        {{idata.mm_hin}} : {{idata.mm_eng}} : {{idata.mm_code}}
-                                    </td>
-                                    <td>{{idata.unit_short}}</td>
-                                    <td>{{idata.sum_qty}}</td>
-                                    <td>{{idata.sum_amt ? idata.sum_amt : 0}} INR</td>
-                                </tr>
-                            </table>
-                        </ng-container>
+                            </thead>
+                        </table>
+                        <table *ngIf="data.khetData.length > 0" class="table-bordered dt-responsive w-100 mb-4">
+                            <tr class="fs-4 border-info text-center">
+                                <th>No.</th>
+                                <th>State</th>
+                                <th>Khet Name</th>
+                                <th>Unit</th>
+                                <th>Qty</th>
+                                <th>Amount</th>
+                            </tr>
+                            <tr *ngFor="let idata of data.khetData | search: term; let j = index;">
+                                <td>{{j+1}}</td>
+                                <td>{{idata.state_id ? idata.state_hin : idata.state_eng}}</td>
+                                <td>
+                                    {{idata.mm_hin}} : {{idata.mm_eng}} : {{idata.mm_code}}
+                                </td>
+                                <td>{{idata.unit_short}}</td>
+                                <td>{{idata.sum_qty}}</td>
+                                <td>{{idata.sum_amt ? idata.sum_amt : 0}} INR</td>
+                            </tr>
+                        </table>
+                    </ng-container>
 
-                    </div>
                 </div>
-
             </div>
 
-
         </div>
+
+
     </div>
 </div>

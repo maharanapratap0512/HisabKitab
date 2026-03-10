@@ -42,6 +42,7 @@ export class MmEntryComponent implements OnInit {
     this.mmForm = this.fb.group({
       mm_eng: [null],
       mm_hin: [null, Validators.required],
+      mm_roman: [null],
       mm_code: [null],
       mm_type: [null, Validators.required],
       parent_mm_id: [null],
@@ -79,6 +80,7 @@ export class MmEntryComponent implements OnInit {
       this.mmForm.patchValue({
         mm_eng: changes.getData.currentValue.mm_eng,
         mm_hin: changes.getData.currentValue.mm_hin,
+        mm_roman: changes.getData.currentValue.mm_roman,
         mm_code: changes.getData.currentValue.mm_code,
         mm_type: changes.getData.currentValue.mm_type,
         parent_mm_id: changes.getData.currentValue.parent_mm_id,
@@ -129,6 +131,7 @@ export class MmEntryComponent implements OnInit {
       body.set = {
         mm_eng: this.mmForm.value.mm_eng,
         mm_hin: this.mmForm.value.mm_hin,
+        mm_roman: this.mmForm.value.mm_roman,
         mm_code: this.mmForm.value.mm_code,
         mm_type: this.mmForm.value.mm_type,
         parent_mm_id: this.mmForm.value.parent_mm_id,
@@ -218,6 +221,7 @@ export class MmEntryComponent implements OnInit {
     this.mmForm.patchValue({
       mm_hin: parentMM ? parentMM.mm_hin : null,
       mm_eng: parentMM ? parentMM.mm_eng : null,
+      mm_roman: parentMM ? parentMM.mm_roman : null,
       mm_code: parentMM ? parentMM.mm_code : null,
       state_id: parentMM ? parentMM.state_id : null,
     });

@@ -17,6 +17,7 @@ export class AuthService {
       { key: 'department', title: 'Department', detail: '', add: true, edit: true, delete: true },
       { key: 'aawak', title: 'Aawak', detail: '' },
       { key: 'jawak', title: 'Jawak', detail: '' },
+      { key: 'hmp', title: 'HMP', detail: '' },
       { key: 'bachat', title: 'Bachat', detail: '' },
       { key: 'pbk_closing', title: 'PBK Closing', detail: '' },
       { key: 'vehicle', title: 'Vehicle', detail: '', add: true, edit: true, delete: true },

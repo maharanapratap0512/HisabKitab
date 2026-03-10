@@ -34,6 +34,8 @@ export class HeaderComponent implements AfterViewInit {
   affData: any = [];
   mms: any = []
   defaultMM: any = 'Select Default MM';
+  menuItems: any[] = [];
+  customColor: string = '';
 
   constructor(
     private http: HttpService,
@@ -50,6 +52,7 @@ export class HeaderComponent implements AfterViewInit {
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
       this.setDefaultMMLabel();
+      this.initMenu();
     });
   }
   @HostListener('window:scroll')
@@ -93,6 +96,102 @@ export class HeaderComponent implements AfterViewInit {
     this.htmlElement = this.elementRef.nativeElement.ownerDocument.documentElement;
 
     // this.themeService.toggleDarkMode()
+    this.initMenu();
+  }
+
+  initMenu() {
+    this.menuItems = [
+      { title: 'Home', icon: 'uil-home-alt', link: 'dashboard', visible: true },
+      {
+        title: 'Entries',
+        icon: 'uil-edit',
+        dropdown: true,
+        visible: true,
+        children: [
+          { title: 'Aawak', link: 'aawak', visible: this.auth.webUser.settings?.aawak?.visible },
+          { title: 'Aawak (Bunch)', link: 'aawakN', visible: this.auth.webUser.settings?.aawak?.visible },
+          { title: 'Jawak', link: 'jawak', visible: this.auth.webUser.settings?.jawak?.visible },
+          { title: 'Jawak (Bunch)', link: 'jawakN', visible: this.auth.webUser.settings?.jawak?.visible },
+          { title: 'HMP', link: 'hmp', visible: true },
+          { title: 'PBK Closing', link: 'pbk_closing', visible: true },
+          { title: 'Product', link: 'product', visible: this.auth.webUser.settings?.product?.visible },
+          { title: 'Vehicle', link: 'vehicle', visible: this.auth.webUser.settings?.vehicle?.visible },
+        ]
+      },
+
+      {
+        title: 'Main Lists',
+        icon: 'uil-list-ul',
+        dropdown: true,
+        visible: true,
+        children: [
+          { title: 'LOT Nos', link: 'view/lot_no', visible: this.auth.webUser.settings?.aawak?.lot_no },
+          { title: 'Item', link: 'item', visible: this.auth.webUser.settings?.item?.visible },
+          { title: 'MM', link: 'mm', visible: this.auth.webUser.settings?.mm?.visible },
+          { title: 'PBK', link: 'pbk', visible: this.auth.webUser.settings?.pbk?.visible },
+          { title: 'Nimitt', link: 'nimitt', visible: this.auth.webUser.settings?.nimitt?.visible },
+          { title: 'Zone', link: 'view/zone', visible: true },
+          { title: 'State', link: 'view/state', visible: true },
+          { title: 'District', link: 'view/district', visible: true },
+          { title: 'Unit', link: 'view/unit', visible: true },
+          { title: 'Category', link: 'category', visible: this.auth.webUser.settings?.category?.visible },
+          { title: 'Subitem List', link: 'view/subitem_list', visible: true },
+        ]
+      },
+      {
+        title: 'Lists',
+        icon: 'uil-list-ui-alt',
+        dropdown: true,
+        visible: true,
+        children: [
+          { title: 'Aawak Type', link: 'view/aawak_type', visible: true },
+          { title: 'Aawak Source', link: 'view/aawak_source', visible: true },
+          { title: 'Jawak Type', link: 'view/jawak_type', visible: true },
+          { title: 'Usage List', link: 'view/usage_list', visible: true },
+          { title: 'Condition', link: 'view/condition', visible: true },
+          { title: 'MM Type', link: 'view/mm_type', visible: true },
+          { title: 'Dictionary', link: 'view/dict', visible: true },
+          { title: 'Gender', link: 'view/gender', visible: true },
+          { title: 'Relation', link: 'view/relation', visible: true },
+          { title: 'Word Correction', link: 'view/word_correction', visible: true },
+        ]
+      },
+      {
+        title: 'Reports',
+        icon: 'uil-apps',
+        dropdown: true,
+        visible: true,
+        children: [
+          { title: 'Bachat', link: 'bachat_new', visible: true },
+          { title: 'All Time Bachat', link: 'bachat', visible: this.auth.webUser.settings?.bachat?.visible },
+          { title: 'Aawak Jawak Check', link: 'report-aj-check', visible: this.auth.webUser.settings?.report?.report_aj_check },
+          { title: 'Aawak Type Saar', link: 'report-at', visible: this.auth.webUser.settings?.report?.report_at },
+          { title: 'Jawak Type Saar', link: 'report-jt', visible: this.auth.webUser.settings?.report?.report_jt },
+          { title: 'Store Stock', link: 'report-str-stk', visible: this.auth.webUser.settings?.report?.report_str_stk },
+          { title: 'Khet Saar', link: 'report-kh-saar', visible: this.auth.webUser.settings?.report?.report_kh },
+          { title: 'Khet Saar (Item Wise)', link: 'report-kh-itemwise', visible: this.auth.webUser.settings?.report?.report_kh },
+          { title: 'Khet AJ saar', link: 'report-kh-ajsaar', visible: this.auth.webUser.settings?.report?.report_kh },
+        ]
+      },
+      {
+        title: 'Utility',
+        icon: 'uil-wrench',
+        dropdown: true,
+        visible: true,
+        children: [
+          { title: 'Department', link: 'department', visible: this.auth.webUser.settings?.department?.visible },
+        ]
+      },
+      { title: 'Points', icon: 'uil-layer-group', link: 'point', visible: this.auth.webUser.settings?.point?.visible },
+      { title: 'MySQL', icon: 'uil-layer-group', link: 'mysql', visible: false },
+    ];
+  }
+
+  getActiveChildTitle(item: any): string {
+    if (!item.children) return '';
+    // Find the child whose link matches the current URL
+    const activeChild = item.children.find((sub: { link: string; }) => this.router.url.includes(sub.link));
+    return activeChild ? activeChild.title : '';
   }
 
   setDefaultMMLabel(id: any = null) {
@@ -124,11 +223,10 @@ export class HeaderComponent implements AfterViewInit {
 
   defaultMMChanged(ev: any) {
     if (ev) {
-      this.defaultMM = ev.mm_hin + (ev.mm_code ? ' : ' + ev.mm_code : '');
-      this.auth.webUser.settings.defaultMM = ev._id;
+      let mm = this.mms.find((m: { _id: any; }) => m._id == ev);
+      this.defaultMM = mm.mm_hin + (mm.mm_code ? ' : ' + mm.mm_code : '');
     } else {
       this.defaultMM = 'Select Default MM';
-      this.auth.webUser.settings.defaultMM = null;
     }
     this.auth.updateSettings();
   }
@@ -147,19 +245,18 @@ export class HeaderComponent implements AfterViewInit {
       || url.includes('/view/country');
   }
 
-  darkModeToggle(ev: any) {
-    // const config = $("body").data("layout-config");
-    // config.darkMode = ev.target.checked;
-    // console.log("darkMode", config);
-    this.renderer.setAttribute(this.htmlElement, 'darkMode', ev.target.checked);
+  setLightMode() {
+    this.auth.webUser.settings.darkMode = false;
+    this.auth.webUser.settings.amoledMode = false;
+    this.auth.updateSettings();
+    this.themeService.initializeTheme();
+  }
 
-    // (window as any).App.activateDarkMode();
-
-    // $(document.body).attr("data-layout-config", JSON.stringify(config));
-
-    // $(document.body)  .data("layout-config", config);
-    // $("body").toggleClass("dark-mode");
-
+  setDarkMode(amoled: boolean = false) {
+    this.auth.webUser.settings.darkMode = true;
+    this.auth.webUser.settings.amoledMode = amoled;
+    this.auth.updateSettings();
+    this.themeService.initializeTheme();
   }
 
   exportUpdate() {

@@ -512,7 +512,7 @@ export class AawakComponent implements OnInit {
         }
       }
 
-      if (this.allAJData.length < this.total_count) {
+      if (this.allAJData.length < this.export_total_count) {
         this.getMoreAJ();
       }
       else {

@@ -1,13 +1,15 @@
-<div style="position: relative; display: inline-block;">
-    <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;" class="btn"
-        [class.btn-outline-secondary]="btnOutline" (click)="togglePopover($event)">
+<div style="position: relative; display: inline-block;" (mouseenter)="triggerOn === 'hover' && openPopover()"
+    (mouseleave)="triggerOn === 'hover' && hoverClose()">
+    <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;" [class]="btnClass"
+        [class.btn-outline-secondary]="btnOutline" (click)="triggerOn === 'click' && togglePopover($event)">
         <i [class]="iconClass"></i>
         <span *ngIf="label" class="ms-1">{{label}}</span>
     </button>
 
     <div class="popover-container" *ngIf="isOpen">
-        <div class="filter-backdrop" (click)="closePopover()"></div>
-        <div class="filter-popover" [ngStyle]="popoverPosition">
+        <div class="filter-backdrop" (click)="closePopover()" *ngIf="triggerOn === 'click'"></div>
+        <div class="filter-popover" [ngStyle]="popoverPosition" (mouseenter)="triggerOn === 'hover' && openPopover()"
+            (mouseleave)="triggerOn === 'hover' && hoverClose()">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h6 class="mb-0">{{ label }}</h6>
                 <button *ngIf="showClearButton" type="button" class="btn btn-sm btn-outline-secondary"

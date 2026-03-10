@@ -35,6 +35,13 @@
                             [ngClass]="{'validation':mmForm.get('mm_eng')?.errors && (mmForm.get('mm_eng')?.touched || mmForm.get ('mm_eng')?.dirty)}">
                     </div>
                 </div>
+                <div class="col-md-3 mb-3" *ngIf="!parentMM && settings.mm_roman">
+                    <div class="form-group">
+                        <label class="form-label">MM(Roman)</label>
+                        <input type="text" class="form-control" placeholder="MM(Roman)" formControlName="mm_roman"
+                            [ngClass]="{'validation':mmForm.get('mm_roman')?.errors && (mmForm.get('mm_roman')?.touched || mmForm.get ('mm_roman')?.dirty)}">
+                    </div>
+                </div>
                 <div class="col-md-3 mb-3" *ngIf="settings.mm_code">
                     <div class="form-group">
                         <label class="form-label">MM Code</label>

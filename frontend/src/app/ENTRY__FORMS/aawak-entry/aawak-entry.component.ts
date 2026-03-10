@@ -144,7 +144,7 @@ export class AawakEntryComponent implements OnInit {
 	}
 
 	ngOnChanges(changes: SimpleChanges) {
-		console.log("changes.getData.currentValue", changes.getData.currentValue);
+		// console.log("changes.getData.currentValue", changes.getData.currentValue);
 		if (changes.isEdit && changes.isEdit.currentValue) {
 		}
 

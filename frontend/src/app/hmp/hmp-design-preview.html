@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>HMP View Modes Preview</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #1a1d2e;
+            color: #cdd3f0;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        /* ── VIEW TOGGLE BAR ── */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #242840;
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+        }
+
+        .toolbar h6 {
+            color: #fff;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .btn-group {
+            display: flex;
+            border: 1px solid #3a3f6e;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .btn-group button {
+            background: transparent;
+            color: #8892c4;
+            border: none;
+            padding: 5px 14px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-group button.active {
+            background: #5a45d5;
+            color: #fff;
+        }
+
+        .mode-label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #6c7ab8;
+            margin-bottom: 8px;
+        }
+
+        /* ── SHARED TABLE ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th {
+            padding: 7px 8px;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 5px 8px;
+            border-bottom: 1px solid #2e3250;
+            color: #c5cce8;
+            vertical-align: middle;
+        }
+
+        /* ── BADGES ── */
+        .badge-pill {
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .badge-in {
+            background: #1a4a7a;
+            color: #4a9eff;
+        }
+
+        .badge-out {
+            background: #1a3d1a;
+            color: #4caf50;
+        }
+
+        .badge-ok {
+            background: #1a3d1a;
+            color: #4caf50;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .badge-pen {
+            background: #4a3300;
+            color: #f0a500;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        /* ════════════════════════
+     VOUCHER MODE — Option B
+  ════════════════════════ */
+        .acc-item {
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 12px #0004;
+        }
+
+        .acc-header {
+            background: linear-gradient(90deg, #4a38c2 0%, #6c5fc7 100%);
+            padding: 9px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .acc-header .meta {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .acc-header .sep {
+            opacity: .35;
+        }
+
+        .acc-header .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, .12);
+            border: none;
+            color: #fff;
+            border-radius: 5px;
+            width: 26px;
+            height: 26px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .btn-icon.danger {
+            background: #c0392b;
+        }
+
+        .acc-body {
+            background: #21253d;
+        }
+
+        .stripe {
+            height: 20px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .stripe-in {
+            background: #162d50;
+            color: #7ab3ff;
+            border-left: 3px solid #4a9eff;
+        }
+
+        .stripe-out {
+            background: #132a14;
+            color: #7de07d;
+            border-left: 3px solid #4caf50;
+        }
+
+        .cols-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1px 1fr;
+        }
+
+        .col-divider {
+            background: #2e3250;
+        }
+
+        .voucher-table thead {
+            background: #1c2038;
+        }
+
+        .voucher-table thead th {
+            color: #6c7ab8;
+        }
+
+        /* ════════════════════════════════
+     INDIVIDUAL MODE — Flat table
+  ════════════════════════════════ */
+        .flat-table-wrap {
+            background: #21253d;
+            border-radius: 8px;
+            overflow: auto;
+            box-shadow: 0 2px 12px #0004;
+        }
+
+        .flat-table thead {
+            background: #1c2038;
+        }
+
+        .flat-table thead th {
+            color: #6c7ab8;
+            border-bottom: 2px solid #2e3250;
+        }
+
+        /* first row of a new batch group gets a top border accent */
+        .batch-start td {
+            border-top: 2px solid #3a3f6e !important;
+        }
+
+        /* dashed divider between IN and OUT rows inside a batch */
+        .grp-sep td {
+            border-top: 1px dashed #3a3f6e;
+        }
+
+        /* the purple left-border date cell */
+        .date-cell {
+            border-left: 3px solid #6c5fc7 !important;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .action-btn {
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            padding: 2px 7px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .btn-edit {
+            background: #3a3f6e;
+        }
+
+        .btn-delete {
+            background: #c0392b;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── TOOLBAR ── -->
+    <div class="toolbar">
+        <h6>HMP Batches <span style="font-size:11px;color:#6c7ab8;font-weight:400;">— Total: 26</span></h6>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <span style="font-size:11px;color:#6c7ab8;">View Mode:</span>
+            <div class="btn-group">
+                <button class="active">⊟ Voucher Wise</button>
+                <button>≡ Individual</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+     VOUCHER MODE — Option B (slim stripe)
+═══════════════════════════════════════ -->
+    <div class="mode-label">▶ Voucher Mode (Option B — Slim Stripe)</div>
+
+    <!-- Batch 1 — expanded -->
+    <div class="acc-item">
+        <div class="acc-header">
+            <div class="meta">
+                <strong>20-02-2026</strong>
+                <span class="sep">|</span><span>recipe 1</span>
+                <span class="sep">|</span><span style="opacity:.7">description here</span>
+                <span class="sep">|</span><span>नयाखेड़ा · NKD</span>
+                <span class="badge-ok">completed</span>
+            </div>
+            <div class="actions">
+                <button class="btn-icon">✏</button>
+                <button class="btn-icon danger">🗑</button>
+                <button class="btn-icon">∧</button>
+            </div>
+        </div>
+        <div class="acc-body">
+            <div class="cols-wrap">
+                <div>
+                    <div class="stripe stripe-in">⬇ &nbsp;Input Materials</div>
+                    <table class="voucher-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Item (HIN · ENG)</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Condition</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>एफटीए यूपीवीसी · FIA UPVC</td>
+                                <td><strong>3 kg</strong></td>
+                                <td style="color:#6c7ab8;">-</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>0.75" एफटीए यूपीवीसी · 0.75" FIA UPVC</td>
+                                <td><strong>5 kg</strong></td>
+                                <td style="color:#6c7ab8;">-</td>
+                                <td><span style="color:#f0a500;font-size:10px;">खराब</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-divider"></div>
+                <div>
+                    <div class="stripe stripe-out">⬆ &nbsp;Output Products</div>
+                    <table class="voucher-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Item (HIN · ENG)</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Condition</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>1.25" एफटीए यूपीवीसी · 1.25" FIA UPVC</td>
+                                <td><strong>3 kg</strong></td>
+                                <td style="color:#6c7ab8;">-</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>1.25" एफटीए यूपीवीसी · 1.25" FIA UPVC</td>
+                                <td><strong>5 kg</strong></td>
+                                <td style="color:#6c7ab8;">-</td>
+                                <td><span style="color:#f0a500;font-size:10px;">खराब</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batch 2 — collapsed -->
+    <div class="acc-item">
+        <div class="acc-header">
+            <div class="meta">
+                <strong>18-02-2026</strong>
+                <span class="sep">|</span><span>hfjjj</span>
+                <span class="sep">|</span><span style="opacity:.7">hi</span>
+                <span class="sep">|</span><span>नयाखेड़ा · NKD</span>
+                <span class="badge-pen">pending</span>
+            </div>
+            <div class="actions">
+                <button class="btn-icon">✏</button>
+                <button class="btn-icon danger">🗑</button>
+                <button class="btn-icon">∨</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batch 3 — collapsed -->
+    <div class="acc-item">
+        <div class="acc-header">
+            <div class="meta">
+                <strong>18-02-2026</strong>
+                <span class="sep">|</span><span>eraer</span>
+                <span class="sep">|</span><span style="opacity:.7">hello</span>
+                <span class="sep">|</span><span>विजय विहार · VVH</span>
+                <span class="badge-pen">pending</span>
+            </div>
+            <div class="actions">
+                <button class="btn-icon">✏</button>
+                <button class="btn-icon danger">🗑</button>
+                <button class="btn-icon">∨</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════
+     INDIVIDUAL MODE — Flat table (all in one row)
+═══════════════════════════════════════════════ -->
+    <div class="mode-label" style="margin-top:32px;">▶ Individual Mode — Flat Table (Date · Recipe · MM · Status · Type
+        · Item · Qty · Rate · Condition · Action)</div>
+
+    <div class="flat-table-wrap">
+        <table class="flat-table">
+            <thead>
+                <tr>
+                    <th style="min-width:95px;">Date</th>
+                    <th style="min-width:120px;">Recipe</th>
+                    <th style="min-width:110px;">MM</th>
+                    <th style="min-width:75px;">Status</th>
+                    <th style="min-width:60px;">Type</th>
+                    <th style="min-width:200px;">Item (HIN · ENG)</th>
+                    <th style="min-width:75px;">Qty</th>
+                    <th style="min-width:60px;">Rate</th>
+                    <th style="min-width:100px;">Condition</th>
+                    <th style="min-width:80px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <!-- ── BATCH 1 (4 rows: 2 IN + 2 OUT) ── -->
+                <tr class="batch-start">
+                    <td class="date-cell" rowspan="4"><strong>20-02-2026</strong></td>
+                    <td rowspan="4" style="border-right:1px solid #2e3250;">
+                        <strong>recipe 1</strong><br><small style="color:#6c7ab8;">description here</small>
+                    </td>
+                    <td rowspan="4" style="border-right:1px solid #2e3250;">
+                        नयाखेड़ा<br><small style="color:#6c7ab8;">NKD</small>
+                    </td>
+                    <td rowspan="4" style="border-right:1px solid #2e3250; text-align:center;">
+                        <span class="badge-ok">done</span>
+                    </td>
+                    <td><span class="badge-pill badge-in">↓ IN</span></td>
+                    <td>एफटीए यूपीवीसी<br><small style="color:#6c7ab8;">FIA UPVC</small></td>
+                    <td><strong>3 kg</strong></td>
+                    <td style="color:#6c7ab8;">-</td>
+                    <td></td>
+                    <td>
+                        <button class="action-btn btn-edit" style="margin-bottom:2px;">✏</button>
+                        <button class="action-btn btn-delete">🗑</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="badge-pill badge-in">↓ IN</span></td>
+                    <td>0.75" एफटीए यूपीवीसी<br><small style="color:#6c7ab8;">0.75" FIA UPVC</small></td>
+                    <td><strong>5 kg</strong></td>
+                    <td style="color:#6c7ab8;">-</td>
+                    <td><span style="color:#f0a500;font-size:11px;">खराब</span></td>
+                    <td><button class="action-btn btn-delete">🗑</button></td>
+                </tr>
+                <tr class="grp-sep">
+                    <td><span class="badge-pill badge-out">↑ OUT</span></td>
+                    <td>1.25" एफटीए यूपीवीसी<br><small style="color:#6c7ab8;">1.25" FIA UPVC</small></td>
+                    <td><strong>3 kg</strong></td>
+                    <td style="color:#6c7ab8;">-</td>
+                    <td></td>
+                    <td><button class="action-btn btn-delete">🗑</button></td>
+                </tr>
+                <tr>
+                    <td><span class="badge-pill badge-out">↑ OUT</span></td>
+                    <td>1.25" एफटीए यूपीवीसी<br><small style="color:#6c7ab8;">1.25" FIA UPVC</small></td>
+                    <td><strong>5 kg</strong></td>
+                    <td style="color:#6c7ab8;">-</td>
+                    <td><span style="color:#f0a500;font-size:11px;">खराब</span></td>
+                    <td><button class="action-btn btn-delete">🗑</button></td>
+                </tr>
+
+                <!-- ── BATCH 2 (1 IN + 1 OUT) ── -->
+                <tr class="batch-start">
+                    <td class="date-cell" rowspan="2"><strong>18-02-2026</strong></td>
+                    <td rowspan="2" style="border-right:1px solid #2e3250;">
+                        <strong>hfjjj</strong><br><small style="color:#6c7ab8;">hi</small>
+                    </td>
+                    <td rowspan="2" style="border-right:1px solid #2e3250;">
+                        नयाखेड़ा<br><small style="color:#6c7ab8;">NKD</small>
+                    </td>
+                    <td rowspan="2" style="border-right:1px solid #2e3250; text-align:center;">
+                        <span class="badge-pen">pending</span>
+                    </td>
+                    <td><span class="badge-pill badge-in">↓ IN</span></td>
+                    <td>गेहूं<br><small style="color:#6c7ab8;">Wheat</small></td>
+                    <td><strong>10 kg</strong></td>
+                    <td>25.00</td>
+                    <td></td>
+                    <td>
+                        <button class="action-btn btn-edit" style="margin-bottom:2px;">✏</button>
+                        <button class="action-btn btn-delete">🗑</button>
+                    </td>
+                </tr>
+                <tr class="grp-sep">
+                    <td><span class="badge-pill badge-out">↑ OUT</span></td>
+                    <td>आटा<br><small style="color:#6c7ab8;">Wheat Flour</small></td>
+                    <td><strong>8 kg</strong></td>
+                    <td style="color:#6c7ab8;">-</td>
+                    <td></td>
+                    <td><button class="action-btn btn-delete">🗑</button></td>
+                </tr>
+
+                <!-- ── BATCH 3 (2 IN + 1 OUT) ── -->
+                <tr class="batch-start">
+                    <td class="date-cell" rowspan="3"><strong>18-02-2026</strong></td>
+                    <td rowspan="3" style="border-right:1px solid #2e3250;">
+                        <strong>eraer</strong><br><small style="color:#6c7ab8;">hello</small>
+                    </td>
+                    <td rowspan="3" style="border-right:1px solid #2e3250;">
+                        विजय विहार<br><small style="color:#6c7ab8;">VVH</small>
+                    </td>
+                    <td rowspan="3" style="border-right:1px solid #2e3250; text-align:center;">
+                        <span class="badge-pen">pending</span>
+                    </td>
+                    <td><span class="badge-pill badge-in">↓ IN</span></td>
+                    <td>सेब<br><small style="color:#6c7ab8;">Apple</small></td>
+                    <td><strong>20 pcs</strong></td>
+                    <td>12.50</td>
+                    <td></td>
+                    <td>
+                        <button class="action-btn btn-edit" style="margin-bottom:2px;">✏</button>
+                        <button class="action-btn btn-delete">🗑</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="badge-pill badge-in">↓ IN</span></td>
+                    <td>चीनी<br><small style="color:#6c7ab8;">Sugar</small></td>
+                    <td><strong>2 kg</strong></td>
+                    <td>45.00</td>
+                    <td></td>
+                    <td><button class="action-btn btn-delete">🗑</button></td>
+                </tr>
+                <tr class="grp-sep">
+                    <td><span class="badge-pill badge-out">↑ OUT</span></td>
+                    <td>सेब का रस<br><small style="color:#6c7ab8;">Apple Juice</small></td>
+                    <td><strong>15 ltr</strong></td>
+                    <td style="color:#6c7ab8;">-</td>
+                    <td></td>
+                    <td><button class="action-btn btn-delete">🗑</button></td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+</body>
+
+</html>
