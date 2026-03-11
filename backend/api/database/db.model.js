@@ -2301,6 +2301,10 @@ class dbModal {
         qty decimal(10,2) not null,
         rate decimal(10,2),
         amount decimal(10,2),
+        bachat varchar(50),
+        uses varchar(50),
+        needs varchar(50),
+        desc varchar(50),
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))
       )`,
@@ -2320,6 +2324,7 @@ class dbModal {
         bori_count varchar(50),
         kiske_dwara varchar(100),
         source_mm_id integer not null references mm(_id),
+        desc varchar(50),
         is_received tinyint default 0,
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))

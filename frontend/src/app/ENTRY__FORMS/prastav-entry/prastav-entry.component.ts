@@ -82,6 +82,12 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
     this.jawaks = [];
   }
 
+  updateAmount() {
+    const qty = Number(this.prastav.qty) || 0;
+    const rate = Number(this.prastav.rate) || 0;
+    this.prastav.amount = qty * rate;
+  }
+
   addJawakRow() {
     this.jawaks.push({
       _id: null,
@@ -114,8 +120,8 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
       return;
     }
 
-    // auto amount
-    this.prastav.amount = (this.prastav.qty || 0) * (this.prastav.rate || 0);
+    // auto amount (ensure latest before save)
+    this.updateAmount();
 
     const url = this.api.getUrl('PRASTAV');
     if (this.isEdit && this.prastav._id) {

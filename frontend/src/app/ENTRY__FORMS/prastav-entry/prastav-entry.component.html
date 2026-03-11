@@ -1,52 +1,132 @@
-<form #f="ngForm" (ngSubmit)="onSubmit()">
+<form #f="ngForm" (ngSubmit)="onSubmit()" id="prastavEntryForm">
   <div class="container-fluid p-2">
     <div class="row">
-      <div class="col-md-3">
-        <label class="form-label mb-1"><small>Date</small></label>
-        <input type="date" class="form-control form-control-sm" [(ngModel)]="prastav.date" name="date" required>
+      <div class="col-md-3 mb-3">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input
+            type="date"
+            class="form-control"
+            placeholder="Select Date"
+            [(ngModel)]="prastav.date"
+            name="date"
+            required
+          >
+        </div>
       </div>
-      <div class="col-md-3">
-        <label class="form-label mb-1"><small>MM</small></label>
-        <ng-select class="custom-sm" [(ngModel)]="prastav.mm_id" name="mm_id" [clearable]="false" required>
-          <ng-option *ngFor="let m of mms" [value]="m._id">
-            {{m.mm_hin}} : {{m.mm_eng}} : {{m.mm_code}}
-          </ng-option>
-        </ng-select>
+      <div class="col-md-3 mb-3">
+        <div class="form-group">
+          <label class="form-label">MM</label>
+          <ng-select
+            class="custom"
+            style="width: 100%;"
+            placeholder="Select MM"
+            [clearable]="true"
+            [virtualScroll]="true"
+            [(ngModel)]="prastav.mm_id"
+            name="mm_id"
+            required
+          >
+            <ng-option selected="selected" disabled value="">Select MM</ng-option>
+            <ng-option *ngFor="let m of mms | filterByDate: prastav.date" [value]="m._id">
+              {{ m.mm_hin }}:{{ m.mm_eng }}{{ m.mm_code ? ' : ' + m.mm_code : '' }}
+            </ng-option>
+          </ng-select>
+        </div>
       </div>
-      <div class="col-md-2">
-        <label class="form-label mb-1"><small>PBK Count</small></label>
-        <input type="text" class="form-control form-control-sm" [(ngModel)]="prastav.pbk_count" name="pbk_count">
+      <div class="col-md-2 mb-3">
+        <div class="form-group">
+          <label class="form-label">PBK Count</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Enter PBK Count"
+            [(ngModel)]="prastav.pbk_count"
+            name="pbk_count"
+          >
+        </div>
       </div>
-      <div class="col-md-4">
-        <label class="form-label mb-1"><small>Item</small></label>
-        <ng-select class="custom-sm" [(ngModel)]="prastav.item_id" name="item_id" [clearable]="true" required>
-          <ng-option *ngFor="let it of items" [value]="it._id">
-            {{it.item_hin}} : {{it.item_eng}}
-          </ng-option>
-        </ng-select>
+      <div class="col-md-4 mb-3">
+        <div class="form-group">
+          <label class="form-label">Item</label>
+          <ng-select
+            class="custom"
+            style="width: 100%;"
+            placeholder="Select Item"
+            [clearable]="true"
+            [virtualScroll]="true"
+            [(ngModel)]="prastav.item_id"
+            name="item_id"
+            required
+          >
+            <ng-option *ngFor="let it of items | filterByDate: prastav.date" [value]="it._id">
+              {{ it.item_hin }}:{{ it.item_eng }}
+            </ng-option>
+          </ng-select>
+        </div>
       </div>
     </div>
 
-    <div class="row mt-2">
-      <div class="col-md-2">
-        <label class="form-label mb-1"><small>Unit</small></label>
-        <ng-select class="custom-sm" [(ngModel)]="prastav.unit_id" name="unit_id" [clearable]="true" required>
-          <ng-option *ngFor="let u of units" [value]="u._id">
-            {{u.unit_short}} ({{u.unit_full}})
-          </ng-option>
-        </ng-select>
+    <div class="row">
+      <div class="col-md-2 mb-3">
+        <div class="form-group">
+          <label class="form-label">Unit</label>
+          <ng-select
+            class="custom"
+            style="width: 100%;"
+            placeholder="Select Unit"
+            [clearable]="false"
+            [virtualScroll]="true"
+            [(ngModel)]="prastav.unit_id"
+            name="unit_id"
+            required
+          >
+            <ng-option selected="selected" disabled value="">Select Unit</ng-option>
+            <ng-option *ngFor="let u of units | filterByDate: prastav.date" [value]="u._id">
+              {{ u.unit_short }} ({{ u.unit_full }})
+            </ng-option>
+          </ng-select>
+        </div>
       </div>
-      <div class="col-md-2">
-        <label class="form-label mb-1"><small>Qty</small></label>
-        <input type="number" class="form-control form-control-sm" [(ngModel)]="prastav.qty" name="qty" required>
+      <div class="col-md-2 mb-3">
+        <div class="form-group">
+          <label class="form-label">Qty</label>
+          <input
+            type="number"
+            class="form-control"
+            placeholder="Enter Qty"
+            [(ngModel)]="prastav.qty"
+            name="qty"
+            (ngModelChange)="updateAmount()"
+            required
+          >
+        </div>
       </div>
-      <div class="col-md-2">
-        <label class="form-label mb-1"><small>Rate</small></label>
-        <input type="number" class="form-control form-control-sm" [(ngModel)]="prastav.rate" name="rate">
+      <div class="col-md-2 mb-3">
+        <div class="form-group">
+          <label class="form-label">Rate</label>
+          <input
+            type="number"
+            class="form-control"
+            placeholder="Enter Rate"
+            [(ngModel)]="prastav.rate"
+            name="rate"
+            (ngModelChange)="updateAmount()"
+          >
+        </div>
       </div>
-      <div class="col-md-2">
-        <label class="form-label mb-1"><small>Amount</small></label>
-        <input type="number" class="form-control form-control-sm" [(ngModel)]="prastav.amount" name="amount" readonly>
+      <div class="col-md-2 mb-3">
+        <div class="form-group">
+          <label class="form-label">Amount</label>
+          <input
+            type="number"
+            class="form-control"
+            placeholder="Auto Amount"
+            [(ngModel)]="prastav.amount"
+            name="amount"
+            readonly
+          >
+        </div>
       </div>
     </div>
 
@@ -58,5 +138,3 @@
     </div>
   </div>
 </form>
-
-<p>prastav-entry works!</p>
