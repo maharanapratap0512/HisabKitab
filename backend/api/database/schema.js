@@ -1,6 +1,14 @@
 // database/schema.js
 // Only simple tables (no business logic) live here.
 
+
+/* allowed types
+1. number
+2. string
+3. boolean
+4. json
+*/
+
 const tableMeta = {
 
     prastav: {
@@ -61,6 +69,13 @@ const tableMeta = {
             condition_id: { type: 'number' },
             qty: { type: 'number' },
             active: { type: 'boolean', default: 1 },
+        },
+        joins: {
+            recipe: { on: 'recipe_id', table: 'hmp_recipe', target: '_id', as: 'recipe', select: ['recipe_name', 'recipe_code'] },
+            item: { on: 'item_id', table: 'item', target: '_id', as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] },
+            subitem: { on: 'subitem_id', table: 'subitem_list', target: '_id', as: 'subitem', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'] },
+            unit: { on: 'unit_id', table: 'unit', target: '_id', as: 'unit', select: ['unit_short', 'unit_full'] },
+            condition: { on: 'condition_id', table: 'support_list', target: '_id', as: 'condition', select: ['list_name_hin', 'list_name_eng'] },
         }
     },
 
@@ -74,6 +89,13 @@ const tableMeta = {
             condition_id: { type: 'number' },
             qty: { type: 'number' },
             active: { type: 'boolean', default: 1 },
+        },
+        joins: {
+            recipe: { on: 'recipe_id', table: 'hmp_recipe', target: '_id', as: 'recipe', select: ['recipe_name', 'recipe_code'] },
+            item: { on: 'item_id', table: 'item', target: '_id', as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] },
+            subitem: { on: 'subitem_id', table: 'subitem_list', target: '_id', as: 'subitem', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'] },
+            unit: { on: 'unit_id', table: 'unit', target: '_id', as: 'unit', select: ['unit_short', 'unit_full'] },
+            condition: { on: 'condition_id', table: 'support_list', target: '_id', as: 'condition', select: ['list_name_hin', 'list_name_eng'] },
         }
     },
 
@@ -87,6 +109,11 @@ const tableMeta = {
             date: { type: 'string' },
             notes: { type: 'string' },
             active: { type: 'boolean', default: 1 },
+        },
+        joins: {
+            recipe: { on: 'recipe_id', table: 'hmp_recipe', target: '_id', as: 'recipe', select: ['recipe_name', 'recipe_code'] },
+            mm: { on: 'mm_id', table: 'mm', target: '_id', as: 'mm', select: ['mm_hin', 'mm_eng', 'mm_roman'] },
+            dept: { on: 'dept_id', table: 'department', target: '_id', as: 'dept', select: ['dept_hin', 'dept_eng', 'dept_code'] },
         }
     },
 
@@ -105,6 +132,13 @@ const tableMeta = {
             auto_jawak: { type: 'boolean', default: 0 },
             active: { type: 'boolean', default: 1 },
             lot_no: { type: 'string' },
+        },
+        joins: {
+            item: { on: 'item_id', table: 'item', target: '_id', as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] },
+            subitem: { on: 'subitem_id', table: 'subitem_list', target: '_id', as: 'subitem', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'] },
+            unit: { on: 'unit_id', table: 'unit', target: '_id', as: 'unit', select: ['unit_short', 'unit_full'] },
+            condition: { on: 'condition_id', table: 'support_list', target: '_id', as: 'condition', select: ['list_name_hin', 'list_name_eng'] },
+            jawak_ref: { on: 'jawak_ref_id', table: 'jawak', target: '_id', as: 'jawak_ref', select: ['date', 'qty'] },
         }
     },
 
@@ -122,6 +156,13 @@ const tableMeta = {
             aawak_ref_id: { type: 'number' },
             auto_aawak: { type: 'boolean', default: 0 },
             active: { type: 'boolean', default: 1 },
+        },
+        joins: {
+            item: { on: 'item_id', table: 'item', target: '_id', as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] },
+            subitem: { on: 'subitem_id', table: 'subitem_list', target: '_id', as: 'subitem', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'] },
+            unit: { on: 'unit_id', table: 'unit', target: '_id', as: 'unit', select: ['unit_short', 'unit_full'] },
+            condition: { on: 'condition_id', table: 'support_list', target: '_id', as: 'condition', select: ['list_name_hin', 'list_name_eng'] },
+            aawak_ref: { on: 'aawak_ref_id', table: 'aawak', target: '_id', as: 'aawak_ref', select: ['date', 'qty'] },
         }
     },
 
@@ -199,6 +240,13 @@ const tableMeta = {
             active: { type: 'boolean', default: 1 },
             voucher_no: { type: 'string' },
             date: { type: 'string' },
+        },
+        joins: {
+            item: { on: 'item_id', table: 'item', target: '_id', as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] },
+            subitem: { on: 'subitem_id', table: 'subitem_list', target: '_id', as: 'subitem', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'] },
+            unit: { on: 'unit_id', table: 'unit', target: '_id', as: 'unit', select: ['unit_short', 'unit_full'] },
+            condition: { on: 'condition_id', table: 'support_list', target: '_id', as: 'condition', select: ['list_name_hin', 'list_name_eng'] },
+            dept: { on: 'dept_id', table: 'department', target: '_id', as: 'dept', select: ['dept_hin', 'dept_eng'] },
         }
     },
 
@@ -213,6 +261,13 @@ const tableMeta = {
             dept_id: { type: 'number' },
             qty: { type: 'number', default: 0 },
             active: { type: 'boolean', default: 1 },
+        },
+        joins: {
+            item: { on: 'item_id', table: 'item', target: '_id', as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] },
+            subitem: { on: 'subitem_id', table: 'subitem_list', target: '_id', as: 'subitem', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'] },
+            unit: { on: 'unit_id', table: 'unit', target: '_id', as: 'unit', select: ['unit_short', 'unit_full'] },
+            condition: { on: 'condition_id', table: 'support_list', target: '_id', as: 'condition', select: ['list_name_hin', 'list_name_eng'] },
+            dept: { on: 'dept_id', table: 'department', target: '_id', as: 'dept', select: ['dept_hin', 'dept_eng'] },
         }
     },
 

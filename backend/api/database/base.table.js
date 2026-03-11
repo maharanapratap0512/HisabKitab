@@ -9,6 +9,7 @@ class BaseTable {
             const meta = tableMeta[tableName];
             if (!meta) throw new Error(`Table "${tableName}" not found in schema and no columns defined`);
             this.columns = meta.columns;
+            this.joins = meta.joins ?? {};
         }
     }
 
@@ -54,6 +55,7 @@ class BaseTable {
         if (!row) return null;
         const result = { ...row };
 
+        // ── Parse normal columns ──
         for (const col in this.columns) {
             if (!(col in result)) continue;
             const def = this.columns[col];
@@ -73,6 +75,21 @@ class BaseTable {
             }
 
             result[col] = val;
+        }
+
+        // ── Parse join objects (came back as JSON strings from json_object()) ──
+        for (const [joinKey, def] of Object.entries(this.joins ?? {})) {
+            const outKey = def.as ?? joinKey;
+            if (!(outKey in result)) continue;
+            let val = result[outKey];
+            if (typeof val === 'string') {
+                try { val = JSON.parse(val); } catch { val = null; }
+            }
+            // If the LEFT JOIN missed (all values null), collapse to null
+            if (val && typeof val === 'object' && Object.values(val).every(v => v === null)) {
+                val = null;
+            }
+            result[outKey] = val;
         }
 
         return result;
@@ -108,6 +125,99 @@ class BaseTable {
         const params = [...Object.values(clean), ...where.map(w => w.val)];
 
         const sql = `UPDATE ${this.tableName} SET ${setClauses} WHERE ${whereClauses}`;
+        return [sql, params];
+    }
+
+
+    // ── Build SELECT query ──
+    // where: { '_id': 5, ... }
+    buildSelect(where, orderBy = null) {
+        let sql = `SELECT * FROM ${this.tableName}`;
+        const params = [];
+
+        if (where && Object.keys(where).length > 0) {
+            const whereClauses = Object.keys(where).map(k => `${k} = ?`).join(' AND ');
+            params.push(...Object.values(where));
+            sql += ` WHERE ${whereClauses}`;
+        }
+
+        if (orderBy) {
+            sql += ` ORDER BY ${orderBy}`;
+        }
+
+        return [sql, params];
+    }
+
+    // ── Build LEFT JOIN clauses from schema join definitions ──
+    // Each join produces a single json_object() column → desanitize() nests it as a JS object.
+    //
+    // Schema join format:
+    //   joinKey: {
+    //     on:     'local_fk_col',
+    //     table:  'target_table',
+    //     target: '_id',
+    //     as:     'outputKeyName',   // optional, defaults to joinKey
+    //     select: ['col1', 'col2']   // columns to pull from joined table
+    //   }
+    _buildJoins() {
+        if (!this.joins || Object.keys(this.joins).length === 0) {
+            return { selectCols: `${this.tableName}.*`, joinClauses: '' };
+        }
+
+        const selectParts = [`${this.tableName}.*`];
+        const joinParts = [];
+
+        for (const [alias, def] of Object.entries(this.joins)) {
+            // LEFT JOIN clause
+            joinParts.push(
+                `LEFT JOIN ${def.table} AS ${alias} ON ${this.tableName}.${def.on} = ${alias}.${def.target}`
+            );
+
+            // Pack all selected columns into a json_object() → one nested object per join
+            if (def.select && def.select.length > 0) {
+                const jsonArgs = def.select
+                    .map(col => `'${col}', ${alias}.${col}`)
+                    .join(', ');
+                const outKey = def.as ?? alias;
+                selectParts.push(`json_object(${jsonArgs}) AS ${outKey}`);
+            }
+        }
+
+        return {
+            selectCols: selectParts.join(', '),
+            joinClauses: joinParts.join(' ')
+        };
+    }
+
+    buildSelectFull(where, orderBy = null, limit = null, offset = null) {
+        const { selectCols, joinClauses } = this._buildJoins();
+
+        let sql = `SELECT ${selectCols} FROM ${this.tableName}`;
+        if (joinClauses) sql += ` ${joinClauses}`;
+
+        const params = [];
+
+        if (where && Object.keys(where).length > 0) {
+            // Prefix bare column names with the main table to avoid ambiguity
+            const whereClauses = Object.keys(where)
+                .map(k => (k.includes('.') ? `${k} = ?` : `${this.tableName}.${k} = ?`))
+                .join(' AND ');
+            params.push(...Object.values(where));
+            sql += ` WHERE ${whereClauses}`;
+        }
+
+        if (orderBy) {
+            sql += ` ORDER BY ${orderBy}`;
+        }
+
+        if (limit) {
+            sql += ` LIMIT ${limit}`;
+        }
+
+        if (offset) {
+            sql += ` OFFSET ${offset}`;
+        }
+
         return [sql, params];
     }
 
