@@ -264,20 +264,27 @@ class BaseTable {
     // ─────────────────────────────────────────────────────────
     //
     // hasOne   — declared on column with ref: 'table.col'
-    //   unit_id: { type: 'number', ref: 'unit._id', as: 'unit', select: [...] }
+    //   unit_id: { type: 'number', ref: 'unit._id', as: 'unit', select: '*' / [...] }
     //   → LEFT JOIN unit AS unit ON this.unit_id = unit._id
     //   → json_object(...) AS unit
     //
     // hasMany  — declared in joins{} with hasMany: true
-    //   { hasMany: true, on: 'item_id', table: 'subitem', target: '_id', as: 'subitems', select: [...] }
+    //   { hasMany: true, on: 'item_id', table: 'subitem', target: '_id', as: 'subitems', select: '*' / [...] }
     //   → LEFT JOIN subitem AS subitems ON subitems.item_id = this._id
     //   → json_group_array(DISTINCT json_object(...)) AS subitems
     //
     // manyToMany — declared in joins{} with manyToMany: true
-    //   { manyToMany: true, table: 'category', junction: 'rel_item_category', on: 'item_id', target: 'category_id', as: 'categories', select: [...] }
+    //   { manyToMany: true, table: 'category', junction: 'rel_item_category', on: 'item_id', target: 'category_id', as: 'categories', select: '*' / [...] }
     //   → LEFT JOIN rel_item_category AS categories_junc ON categories_junc.item_id = this._id
     //   → LEFT JOIN category AS categories ON categories._id = categories_junc.category_id
     //   → json_group_array(DISTINCT json_object(...)) AS categories
+
+    _resolveSelect(select, refTable) {
+        if (select !== '*') return select;
+        const meta = tableMeta[refTable];
+        if (!meta) throw new Error(`Cannot resolve * for "${refTable}" — not in schema`);
+        return Object.keys(meta.columns);
+    }
 
     _buildJoins() {
         const selectParts = [`${this.tableName}.*`];
@@ -293,8 +300,9 @@ class BaseTable {
             joinParts.push(
                 `LEFT JOIN ${refTable} AS ${alias} ON ${this.tableName}.${col} = ${alias}.${refCol}`
             );
-            if (def.select?.length) {
-                const jsonArgs = def.select.map(c => `'${c}', ${alias}.${c}`).join(', ');
+            if (def.select) {
+                const cols = this._resolveSelect(def.select, refTable);
+                const jsonArgs = cols.map(c => `'${c}', ${alias}.${c}`).join(', ');
                 selectParts.push(`json_object(${jsonArgs}) AS ${alias}`);
             }
         }
@@ -304,15 +312,15 @@ class BaseTable {
 
             // ── hasMany ──────────────────────────────────────────────
             if (def.hasMany) {
-                // flip: other_table.fk = this._id
                 joinParts.push(
                     `LEFT JOIN ${def.table} AS ${alias} ON ${alias}.${def.on} = ${this.tableName}.${def.target}`
                 );
-                if (def.select?.length) {
-                    const jsonArgs = def.select.map(c => `'${c}', ${alias}.${c}`).join(', ');
+                if (def.select) {
+                    const cols = this._resolveSelect(def.select, def.table);
+                    const jsonArgs = cols.map(c => `'${c}', ${alias}.${c}`).join(', ');
                     const outKey = def.as ?? alias;
                     selectParts.push(
-                        `CASE WHEN ${alias}.${def.select[0]} IS NULL THEN json('[]') ` +
+                        `CASE WHEN ${alias}.${cols[0]} IS NULL THEN json('[]') ` +
                         `ELSE json_group_array(DISTINCT json_object(${jsonArgs})) END AS ${outKey}`
                     );
                 }
@@ -322,19 +330,18 @@ class BaseTable {
             // ── manyToMany ───────────────────────────────────────────
             else if (def.manyToMany) {
                 const juncAlias = `${alias}_junc`;
-                // step 1: this → junction
                 joinParts.push(
                     `LEFT JOIN ${def.junction} AS ${juncAlias} ON ${juncAlias}.${def.on} = ${this.tableName}._id`
                 );
-                // step 2: junction → target table
                 joinParts.push(
                     `LEFT JOIN ${def.table} AS ${alias} ON ${alias}._id = ${juncAlias}.${def.target}`
                 );
-                if (def.select?.length) {
-                    const jsonArgs = def.select.map(c => `'${c}', ${alias}.${c}`).join(', ');
+                if (def.select) {
+                    const cols = this._resolveSelect(def.select, def.table);
+                    const jsonArgs = cols.map(c => `'${c}', ${alias}.${c}`).join(', ');
                     const outKey = def.as ?? alias;
                     selectParts.push(
-                        `CASE WHEN ${alias}.${def.select[0]} IS NULL THEN json('[]') ` +
+                        `CASE WHEN ${alias}.${cols[0]} IS NULL THEN json('[]') ` +
                         `ELSE json_group_array(DISTINCT json_object(${jsonArgs})) END AS ${outKey}`
                     );
                 }

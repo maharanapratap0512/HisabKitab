@@ -7,13 +7,13 @@
  * ── Join types ────────────────────────────────────────────────
  *
  *  hasOne — declare ref directly on the FK column (like SQL REFERENCES)
- *    unit_id: { type: 'number', ref: 'unit._id', as: 'unit', select: ['unit_short', 'unit_full'] }
+ *    unit_id: { type: 'number', ref: 'unit._id', as: 'unit', select: '*' / ['unit_short', 'unit_full'] }
  *
  *  hasMany — declare in joins{} — fk is on the OTHER table
- *    subitems: { hasMany: true, on: 'item_id', table: 'subitem', target: '_id', as: 'subitems', select: [...] }
+ *    subitems: { hasMany: true, on: 'item_id', table: 'subitem', target: '_id', as: 'subitems', select: '*' / [...] }
  *
  *  manyToMany — declare in joins{} — through a junction table
- *    categories: { manyToMany: true, table: 'category', junction: 'rel_item_category', on: 'item_id', target: 'category_id', as: 'categories', select: [...] }
+ *    categories: { manyToMany: true, table: 'category', junction: 'rel_item_category', on: 'item_id', target: 'category_id', as: 'categories', select: '*' / [...] }
  */
 
 const tableMeta = {
