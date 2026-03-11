@@ -19,6 +19,41 @@
 
 const tableMeta = {
 
+    prastav: {
+        columns: {
+            _id: { type: 'number' },
+            date: { type: 'string' },
+            mm_id: { type: 'number' },
+            pbk_count: { type: 'string' },
+            item_id: { type: 'number' },
+            subitem_id: { type: 'number' },
+            unit_id: { type: 'number' },
+            qty: { type: 'number' },
+            rate: { type: 'number' },
+            amount: { type: 'number' },
+            active: { type: 'boolean', default: 1 },
+        }
+    },
+    prastav_jawak: {
+        columns: {
+            _id: { type: 'number' },
+            prastav_id: { type: 'number' },
+            date: { type: 'string' },
+            mm_id: { type: 'number' },
+            item_id: { type: 'number' },
+            subitem_id: { type: 'number' },
+            unit_id: { type: 'number' },
+            qty: { type: 'number' },
+            rate: { type: 'number' },
+            amount: { type: 'number' },
+            bori_count: { type: 'string' },
+            kiske_dwara: { type: 'string' },
+            source_mm_id: { type: 'number' },
+            is_received: { type: 'boolean', default: 0 },
+            active: { type: 'boolean', default: 1 },
+        }
+    },
+
     // ── HMP ──────────────────────────────────────────────────
 
     hmp_recipe: {

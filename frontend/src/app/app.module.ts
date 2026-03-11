@@ -102,6 +102,9 @@ import { PbkBachatComponent } from './pbk-bachat/pbk-bachat.component';
 import { HmpEntryComponent } from './ENTRY__FORMS/hmp-entry/hmp-entry.component';
 import { SelectionService } from './services/selection.service';
 import { TableSmartCheckboxDirective } from './SHARED/table-smart-checkbox.directive';
+import { PrastavComponent } from './prastav/prastav.component';
+import { PrastavEntryComponent } from './ENTRY__FORMS/prastav-entry/prastav-entry.component';
+
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -191,6 +194,8 @@ import { TableSmartCheckboxDirective } from './SHARED/table-smart-checkbox.direc
     PbkBachatComponent,
     HmpEntryComponent,
     TableSmartCheckboxDirective,
+    PrastavComponent,
+    PrastavEntryComponent,
   ],
 
   imports: [
