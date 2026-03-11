@@ -142,21 +142,31 @@ class BaseTable {
             result[col] = val;
         }
 
-        // ── parse join outputs ──
+        // ── parse hasOne join outputs (from column ref) ──
+        for (const [col, def] of Object.entries(this.columns)) {
+            if (!def.ref) continue;
+            const outKey = def.as ?? def.ref.split('.')[0];
+            if (!(outKey in result)) continue;
+            let val = result[outKey];
+
+            if (typeof val === 'string') {
+                try { val = JSON.parse(val); } catch { val = null; }
+            }
+            // LEFT JOIN missed — collapse to null
+            if (val && typeof val === 'object' && !Array.isArray(val) && Object.values(val).every(v => v === null)) {
+                val = null;
+            }
+            result[outKey] = val;
+        }
+
+        // ── parse hasMany / manyToMany join outputs ──
         for (const [joinKey, def] of Object.entries(this.joins ?? {})) {
             const outKey = def.as ?? joinKey;
             if (!(outKey in result)) continue;
             let val = result[outKey];
 
             if (typeof val === 'string') {
-                try { val = JSON.parse(val); } catch { val = def.manyToMany || def.hasMany ? [] : null; }
-            }
-
-            // hasOne — LEFT JOIN missed, collapse to null
-            if (!def.hasMany && !def.manyToMany) {
-                if (val && typeof val === 'object' && !Array.isArray(val) && Object.values(val).every(v => v === null)) {
-                    val = null;
-                }
+                try { val = JSON.parse(val); } catch { val = []; }
             }
 
             result[outKey] = val;
@@ -202,7 +212,7 @@ class BaseTable {
         const { clause, params } = this._buildWhere(where, true);
         if (clause) sql += ` ${clause}`;
 
-        // hasMany / manyToMany joins use aggregation — need GROUP BY
+        // hasMany / manyToMany use aggregation — need GROUP BY
         if (needsGroupBy) sql += ` GROUP BY ${this.tableName}._id`;
 
         if (orderBy) sql += ` ORDER BY ${orderBy}`;
@@ -253,54 +263,53 @@ class BaseTable {
     // ── JOIN BUILDER ─────────────────────────────────────────
     // ─────────────────────────────────────────────────────────
     //
-    // Three join types in schema:
+    // hasOne   — declared on column with ref: 'table.col'
+    //   unit_id: { type: 'number', ref: 'unit._id', as: 'unit', select: [...] }
+    //   → LEFT JOIN unit AS unit ON this.unit_id = unit._id
+    //   → json_object(...) AS unit
     //
-    // hasOne (default) — fk is ON THIS table
-    //   { on: 'unit_id', table: 'unit', target: '_id', as: 'unit', select: [...] }
-    //   → LEFT JOIN unit AS alias ON this.unit_id = alias._id
-    //   → json_object(...)
-    //
-    // hasMany — fk is ON THE OTHER table pointing back here
+    // hasMany  — declared in joins{} with hasMany: true
     //   { hasMany: true, on: 'item_id', table: 'subitem', target: '_id', as: 'subitems', select: [...] }
-    //   → LEFT JOIN subitem AS alias ON alias.item_id = this._id
-    //   → json_group_array(DISTINCT json_object(...))
+    //   → LEFT JOIN subitem AS subitems ON subitems.item_id = this._id
+    //   → json_group_array(DISTINCT json_object(...)) AS subitems
     //
-    // manyToMany — through a junction table
+    // manyToMany — declared in joins{} with manyToMany: true
     //   { manyToMany: true, table: 'category', junction: 'rel_item_category', on: 'item_id', target: 'category_id', as: 'categories', select: [...] }
-    //   → LEFT JOIN rel_item_category AS alias_junc ON alias_junc.item_id = this._id
-    //   → LEFT JOIN category AS alias ON alias._id = alias_junc.category_id
-    //   → json_group_array(DISTINCT json_object(...))
+    //   → LEFT JOIN rel_item_category AS categories_junc ON categories_junc.item_id = this._id
+    //   → LEFT JOIN category AS categories ON categories._id = categories_junc.category_id
+    //   → json_group_array(DISTINCT json_object(...)) AS categories
 
     _buildJoins() {
-        if (!this.joins || Object.keys(this.joins).length === 0) {
-            return { selectCols: `${this.tableName}.*`, joinClauses: '', needsGroupBy: false };
-        }
-
         const selectParts = [`${this.tableName}.*`];
         const joinParts = [];
         let needsGroupBy = false;
 
-        for (const [alias, def] of Object.entries(this.joins)) {
+        // ── hasOne — auto-built from column ref declarations ──────────
+        for (const [col, def] of Object.entries(this.columns)) {
+            if (!def.ref) continue;
+            const [refTable, refCol] = def.ref.split('.');
+            const alias = def.as ?? refTable;
 
-            // ── hasOne ───────────────────────────────────────────────
-            if (!def.hasMany && !def.manyToMany) {
-                joinParts.push(
-                    `LEFT JOIN ${def.table} AS ${alias} ON ${this.tableName}.${def.on} = ${alias}.${def.target}`
-                );
-                if (def.select?.length) {
-                    const jsonArgs = def.select.map(col => `'${col}', ${alias}.${col}`).join(', ');
-                    selectParts.push(`json_object(${jsonArgs}) AS ${def.as ?? alias}`);
-                }
+            joinParts.push(
+                `LEFT JOIN ${refTable} AS ${alias} ON ${this.tableName}.${col} = ${alias}.${refCol}`
+            );
+            if (def.select?.length) {
+                const jsonArgs = def.select.map(c => `'${c}', ${alias}.${c}`).join(', ');
+                selectParts.push(`json_object(${jsonArgs}) AS ${alias}`);
             }
+        }
+
+        // ── hasMany / manyToMany — from joins{} ───────────────────────
+        for (const [alias, def] of Object.entries(this.joins ?? {})) {
 
             // ── hasMany ──────────────────────────────────────────────
-            else if (def.hasMany) {
+            if (def.hasMany) {
                 // flip: other_table.fk = this._id
                 joinParts.push(
                     `LEFT JOIN ${def.table} AS ${alias} ON ${alias}.${def.on} = ${this.tableName}.${def.target}`
                 );
                 if (def.select?.length) {
-                    const jsonArgs = def.select.map(col => `'${col}', ${alias}.${col}`).join(', ');
+                    const jsonArgs = def.select.map(c => `'${c}', ${alias}.${c}`).join(', ');
                     const outKey = def.as ?? alias;
                     selectParts.push(
                         `CASE WHEN ${alias}.${def.select[0]} IS NULL THEN json('[]') ` +
@@ -317,12 +326,12 @@ class BaseTable {
                 joinParts.push(
                     `LEFT JOIN ${def.junction} AS ${juncAlias} ON ${juncAlias}.${def.on} = ${this.tableName}._id`
                 );
-                // step 2: junction → target
+                // step 2: junction → target table
                 joinParts.push(
                     `LEFT JOIN ${def.table} AS ${alias} ON ${alias}._id = ${juncAlias}.${def.target}`
                 );
                 if (def.select?.length) {
-                    const jsonArgs = def.select.map(col => `'${col}', ${alias}.${col}`).join(', ');
+                    const jsonArgs = def.select.map(c => `'${c}', ${alias}.${c}`).join(', ');
                     const outKey = def.as ?? alias;
                     selectParts.push(
                         `CASE WHEN ${alias}.${def.select[0]} IS NULL THEN json('[]') ` +
@@ -336,7 +345,7 @@ class BaseTable {
         return {
             selectCols: selectParts.join(', '),
             joinClauses: joinParts.join(' '),
-            needsGroupBy              // true when any hasMany/manyToMany present
+            needsGroupBy
         };
     }
 
