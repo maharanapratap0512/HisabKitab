@@ -1,0 +1,62 @@
+<form #f="ngForm" (ngSubmit)="onSubmit()">
+  <div class="container-fluid p-2">
+    <div class="row">
+      <div class="col-md-3">
+        <label class="form-label mb-1"><small>Date</small></label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="prastav.date" name="date" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label mb-1"><small>MM</small></label>
+        <ng-select class="custom-sm" [(ngModel)]="prastav.mm_id" name="mm_id" [clearable]="false" required>
+          <ng-option *ngFor="let m of mms" [value]="m._id">
+            {{m.mm_hin}} : {{m.mm_eng}} : {{m.mm_code}}
+          </ng-option>
+        </ng-select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label mb-1"><small>PBK Count</small></label>
+        <input type="text" class="form-control form-control-sm" [(ngModel)]="prastav.pbk_count" name="pbk_count">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label mb-1"><small>Item</small></label>
+        <ng-select class="custom-sm" [(ngModel)]="prastav.item_id" name="item_id" [clearable]="true" required>
+          <ng-option *ngFor="let it of items" [value]="it._id">
+            {{it.item_hin}} : {{it.item_eng}}
+          </ng-option>
+        </ng-select>
+      </div>
+    </div>
+
+    <div class="row mt-2">
+      <div class="col-md-2">
+        <label class="form-label mb-1"><small>Unit</small></label>
+        <ng-select class="custom-sm" [(ngModel)]="prastav.unit_id" name="unit_id" [clearable]="true" required>
+          <ng-option *ngFor="let u of units" [value]="u._id">
+            {{u.unit_short}} ({{u.unit_full}})
+          </ng-option>
+        </ng-select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label mb-1"><small>Qty</small></label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="prastav.qty" name="qty" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label mb-1"><small>Rate</small></label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="prastav.rate" name="rate">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label mb-1"><small>Amount</small></label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="prastav.amount" name="amount" readonly>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="col-12 d-flex justify-content-between">
+        <button type="button" class="btn btn-light btn-sm" (click)="closeModal()">Close</button>
+        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+      </div>
+    </div>
+  </div>
+</form>
+
+<p>prastav-entry works!</p>

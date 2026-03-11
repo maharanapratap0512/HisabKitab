@@ -1,0 +1,74 @@
+<div class="row">
+  <div class="col-12">
+    <div class="page-title-box d-flex align-items-center justify-content-between">
+      <h4 class="mb-0">Prastav</h4>
+      <div class="col-4">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term" name="search">
+        </div>
+      </div>
+      <div class="page-title-right d-flex gap-2">
+        <button class="btn btn-primary btn-sm" (click)="openEntryModal()">+ Add Prastav</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body p-1">
+        <div class="table-responsive shadow-sm" style="border-radius: 8px; overflow-y: auto; max-height: calc(100vh - 250px);">
+          <table class="table-sm table-compact table-hover mb-0">
+            <thead>
+              <tr>
+                <th style="min-width: 50px;">#</th>
+                <th style="min-width: 95px;">Date</th>
+                <th style="min-width: 140px;">MM</th>
+                <th style="min-width: 120px;">Item</th>
+                <th style="min-width: 80px;">Qty</th>
+                <th style="min-width: 80px;">Rate</th>
+                <th style="min-width: 100px;">Amount</th>
+                <th style="min-width: 80px; text-align: center;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of prastavs | search:term; let i = index">
+                <td>{{i+1}}</td>
+                <td>{{p.date | date:'dd-MM-yyyy'}}</td>
+                <td>{{p.mm_name || p.mm_id}}</td>
+                <td>{{p.item_name || p.item_id}}</td>
+                <td>{{p.qty}}</td>
+                <td>{{p.rate}}</td>
+                <td>{{p.amount}}</td>
+                <td class="text-center">
+                  <i class="uil uil-pen i-outline-primary me-1" (click)="openEntryModal(p)" title="Edit"></i>
+                  <i class="uil uil-trash i-outline-danger" (click)="delete(p._id, i)" title="Delete"></i>
+                </td>
+              </tr>
+              <tr *ngIf="!prastavs.length">
+                <td colspan="8" class="text-center text-muted p-3">No Prastav records found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="prastavEntryModal" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog" role="document" style="width: 98%;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{isEdit ? 'Edit Prastav' : 'New Prastav'}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <app-prastav-entry [isEdit]="isEdit" [getData]="selectedPrastav" (response)="onSaved($event)"></app-prastav-entry>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p>prastav works!</p>

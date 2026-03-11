@@ -2285,9 +2285,48 @@ class dbModal {
         SELECT subitem._id, json_each.value
         FROM subitem, json_each(subitem.categories)`
 
+    },
+
+    // Version 28
+    {
+      prastav_drop: `drop table if exists prastav`,
+      prastav: `create table if not exists prastav(
+        _id integer primary key AUTOINCREMENT,
+        date date,
+        mm_id integer not null references mm(_id),
+        pbk_count varchar(50),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),       
+        qty decimal(10,2) not null,
+        rate decimal(10,2),
+        amount decimal(10,2),
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      
+      prastav_jawak_drop: `drop table if exists prastav_jawak`,
+      prastav_jawak: `create table if not exists prastav_jawak(
+        _id integer primary key AUTOINCREMENT,
+        prastav_id integer not null references prastav(_id),
+        date date,
+        mm_id integer not null references mm(_id),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),       
+        qty decimal(10,2) not null,
+        rate decimal(10,2),
+        amount decimal(10,2),
+        bori_count varchar(50),
+        kiske_dwara varchar(100),
+        source_mm_id integer not null references mm(_id),
+        is_received tinyint default 0,
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      add_is_received_in_jawak: `alter table jawak add column is_received tinyint default 0`,
+      add_container_qty_in_jawak: `alter table jawak add column container_qty decimal(10,2)`,
     }
-
-
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.

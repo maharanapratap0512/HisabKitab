@@ -37,6 +37,7 @@ import { AawakNewComponent } from './aawak-new/aawak-new.component';
 import { ReportAjCheckComponent } from './reports/report-aj-check/report-aj-check.component';
 import { MysqlComponent } from './MySQL/mysql.component';
 import { HmpComponent } from './hmp/hmp.component';
+import { PrastavComponent } from './prastav/prastav.component';
 import { PbkClosingComponent } from './pbk-closing/pbk-closing.component';
 import { JawakNewComponent } from './jawak-new/jawak-new.component';
 import { JawakEntryNewComponent } from './ENTRY__FORMS/jawak-entry-new/jawak-entry-new.component';
@@ -65,6 +66,7 @@ const routes: Routes = [
          { path: "bachat", component: BachatComponent },
          { path: "bachat_new", component: BachatNewComponent },
          { path: "hmp", component: HmpComponent },
+         { path: "prastav", component: PrastavComponent },
          { path: "pbk_closing", component: PbkClosingComponent },
          { path: "pbk_closing_entry", component: PbkClosingEntryComponent },
          { path: "pbk_bachat", component: PbkBachatComponent },

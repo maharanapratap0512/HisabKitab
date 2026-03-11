@@ -2973,10 +2973,36 @@ const test = {
     insert: `insert into test(name) values(@name)`,
 }
 
+const prastav = {
+    select: `select * from prastav ?`,
+    select_full: `select prastav.*, mm.mm_hin, mm.mm_eng, mm.mm_code, item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories, sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories, unit.unit_short, unit.unit_full 
+    from prastav 
+    left join mm on mm._id = prastav.mm_id 
+    left join item on item._id = prastav.item_id 
+    left join subitem si on si._id = prastav.subitem_id 
+    left join subitem_list sil on sil._id = si.subitem_list_id 
+    left join unit on unit._id = prastav.unit_id ?`,
+    order: `prastav._id`
+}
+
+const prastav_jawak = {
+    select: `select * from prastav_jawak ?`,
+    select_full: `select prastav_jawak.*, prastav.date, prastav.mm_id, prastav.pbk_count, prastav.item_id, prastav.subitem_id, prastav.unit_id, prastav.qty, prastav.rate, prastav.amount, mm.mm_hin, mm.mm_eng, mm.mm_code, item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories, sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories, unit.unit_short, unit.unit_full 
+    from prastav_jawak 
+    left join prastav on prastav._id = prastav_jawak.prastav_id 
+    left join mm on mm._id = prastav_jawak.mm_id 
+    left join item on item._id = prastav_jawak.item_id 
+    left join subitem si on si._id = prastav_jawak.subitem_id 
+    left join subitem_list sil on sil._id = si.subitem_list_id 
+    left join unit on unit._id = prastav_jawak.unit_id ?`,
+    order: `prastav_jawak._id`
+}
+
 module.exports = {
     queryBuilder, country, city, category, department, department_config, item, itemmix, mm, nimitt, pbk, point, zone, district, state, subitem, subitem_list, support_list, unit, conditions,
     aawak, aawak_voucher, bachat, pbk_bachat, pbk_closing, jawak, jawak_voucher, bachat_new, temp_import, product, vehicle, vehicle_document,
     hmp_recipe, hmp_recipe_input, hmp_recipe_output, hmp_batch, hmp_batch_input, hmp_batch_output,
     aawak_enzyme, jawak_enzyme, usage_report,
     genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, test, report_comment,
+    prastav, prastav_jawak,
 };
