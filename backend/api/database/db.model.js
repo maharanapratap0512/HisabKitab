@@ -2292,23 +2292,27 @@ class dbModal {
       prastav_drop: `drop table if exists prastav`,
       prastav: `create table if not exists prastav(
         _id integer primary key AUTOINCREMENT,
+        voucher_no integer not null,
         date date,
-        mm_id integer not null references mm(_id),
+        mm_id integer references mm(_id),
+        pbk_id integer references pbk(_id),
         pbk_count varchar(50),
         item_id integer not null references item(_id),
         subitem_id integer null references subitem(_id),
         unit_id integer not null references unit(_id),       
-        qty decimal(10,2) not null,
         rate decimal(10,2),
         amount decimal(10,2),
-        bachat varchar(50),
-        uses varchar(50),
-        needs varchar(50),
-        desc varchar(50),
+        qty decimal(10,2) not null,
+        bachat decimal(10,2),
+        monthly_uses decimal(10,2),
+        qty_needs decimal(10,2),
+        is_noted tinyint default 0,
+        note_details text,
+        description text,
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))
       )`,
-      
+
       prastav_jawak_drop: `drop table if exists prastav_jawak`,
       prastav_jawak: `create table if not exists prastav_jawak(
         _id integer primary key AUTOINCREMENT,
@@ -2324,7 +2328,7 @@ class dbModal {
         bori_count varchar(50),
         kiske_dwara varchar(100),
         source_mm_id integer not null references mm(_id),
-        desc varchar(50),
+        description text,
         is_received tinyint default 0,
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))

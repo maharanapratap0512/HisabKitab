@@ -19,21 +19,64 @@
 
 const tableMeta = {
 
+    // ── Prastav (Proposal) ─────────────────────────────────────
+
     prastav: {
         columns: {
             _id: { type: 'number' },
+            voucher_no: { type: 'number' },
             date: { type: 'string' },
             mm_id: { type: 'number' },
             pbk_count: { type: 'string' },
             item_id: { type: 'number' },
             subitem_id: { type: 'number' },
             unit_id: { type: 'number' },
-            qty: { type: 'number' },
             rate: { type: 'number' },
             amount: { type: 'number' },
+            qty: { type: 'number' },
+            bachat: { type: 'number' },
+            monthly_uses: { type: 'number' },
+            qty_needs: { type: 'number' },
+            is_noted: { type: 'boolean', default: 0 },
+            note_details: { type: 'string' },
+            description: { type: 'string' },
             active: { type: 'boolean', default: 1 },
+        },
+        joins: {
+            // hasOne — basic masters
+            mm: { on: 'mm_id', table: 'mm', target: '_id', as: 'mm', select: ['mm_hin', 'mm_eng', 'mm_roman', 'mm_code'] },
+            item: { on: 'item_id', table: 'item', target: '_id', as: 'item', select: ['item_hin', 'item_eng', 'item_roman', 'item_code'] },
+            subitem: { on: 'subitem_id', table: 'subitem_list', target: '_id', as: 'subitem', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'] },
+            unit: { on: 'unit_id', table: 'unit', target: '_id', as: 'unit', select: ['unit_short', 'unit_full'] },
+
+            // hasMany — linked jawak lines
+            jawaks: {
+                hasMany: true,
+                on: 'prastav_id',
+                table: 'prastav_jawak',
+                target: '_id',
+                as: 'jawaks',
+                select: [
+                    '_id',
+                    'prastav_id',
+                    'date',
+                    'mm_id',
+                    'item_id',
+                    'subitem_id',
+                    'unit_id',
+                    'qty',
+                    'rate',
+                    'amount',
+                    'bori_count',
+                    'kiske_dwara',
+                    'source_mm_id',
+                    'is_received',
+                    'active'
+                ]
+            }
         }
     },
+
     prastav_jawak: {
         columns: {
             _id: { type: 'number' },
@@ -49,8 +92,22 @@ const tableMeta = {
             bori_count: { type: 'string' },
             kiske_dwara: { type: 'string' },
             source_mm_id: { type: 'number' },
+            description: { type: 'string' },
             is_received: { type: 'boolean', default: 0 },
             active: { type: 'boolean', default: 1 },
+        },
+        joins: {
+            // Parent prastav
+            prastav: { on: 'prastav_id', table: 'prastav', target: '_id', as: 'prastav', select: ['voucher_no', 'date', 'mm_id', 'item_id', 'unit_id'] },
+
+            // Masters
+            mm: { on: 'mm_id', table: 'mm', target: '_id', as: 'mm', select: ['mm_hin', 'mm_eng', 'mm_roman', 'mm_code'] },
+            item: { on: 'item_id', table: 'item', target: '_id', as: 'item', select: ['item_hin', 'item_eng', 'item_roman', 'item_code'] },
+            subitem: { on: 'subitem_id', table: 'subitem_list', target: '_id', as: 'subitem', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'] },
+            unit: { on: 'unit_id', table: 'unit', target: '_id', as: 'unit', select: ['unit_short', 'unit_full'] },
+
+            // Source MM (from where material is received)
+            source_mm: { on: 'source_mm_id', table: 'mm', target: '_id', as: 'source_mm', select: ['mm_hin', 'mm_eng', 'mm_roman', 'mm_code'] },
         }
     },
 
