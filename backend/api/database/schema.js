@@ -28,6 +28,10 @@ const tableMeta = {
             recipe_code: { type: 'string' },
             description: { type: 'string' },
             active: { type: 'boolean', default: 1 },
+        }, joins: {
+            // hasMany  — subitem.item_id → item._id
+            inputs: { hasMany: true, on: 'recipe_id', table: 'hmp_recipe_input', target: '_id', as: 'inputs', select: '*' },
+            outputs: { hasMany: true, on: 'recipe_id', table: 'hmp_recipe_output', target: '_id', as: 'outputs', select: '*' },
         }
     },
 
