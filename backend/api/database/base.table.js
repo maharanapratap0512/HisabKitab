@@ -1,5 +1,6 @@
 // database/base.table.js
-const db = require('../db/connection');
+const { dbmodal } = require('./db.model');
+const db = dbmodal.db;
 const { tableMeta } = require('./schema');
 
 class BaseTable {
@@ -16,20 +17,56 @@ class BaseTable {
     }
 
     // ─────────────────────────────────────────────────────────
+    // ── TRANSACTIONS ─────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────
+    //
+    // Wraps multiple operations in a single atomic transaction.
+    // If fn() throws — rollback. If fn() succeeds — commit.
+    // Returns whatever fn() returns.
+    //
+    // Usage:
+    //   const result = BaseTable.transaction(() => {
+    //       const id = hmpBatch.insert(data, false);
+    //       hmpBatchIn.insert({ ...input, batch_id: id }, false);
+    //       hmpBatchOut.insert({ ...output, batch_id: id }, false);
+    //       return id;
+    //   });
+
+    static transaction(fn) {
+        return db.transaction(fn)();
+    }
+
+    // Instance version — same thing, callable on any table instance
+    // Usage: this.transaction(() => { ... })
+    transaction(fn) {
+        return BaseTable.transaction(fn);
+    }
+
+    // manual control — for complex / nested / router-level cases
+    static begin() { db.prepare('BEGIN').run(); }
+    static commit() { db.prepare('COMMIT').run(); }
+    static rollback() { db.prepare('ROLLBACK').run(); }
+
+
+
+    // ─────────────────────────────────────────────────────────
     // ── PUBLIC CRUD API ───────────────────────────────────────
     // ─────────────────────────────────────────────────────────
 
-    // full: true  → desanitized joined object
-    // full: false → just the new id  (use for bulk inserts)
+    // Insert a single row.
+    // full: true  → returns desanitized joined object  (default)
+    // full: false → returns just the new id            (use for bulk inserts — skips join select)
     insert(data, full = true) {
         const [sql, params] = this._buildInsert(data);
         const id = this._stmt(sql).run(...params).lastInsertRowid;
         return full ? this.getById(id) : id;
     }
 
+    // Update row(s) matching where.
     // where: { _id: 5 }  or  "date > '2024-01-01'"
-    // full: true  → desanitized joined object
-    // full: false → just the id
+    // full: true  → returns desanitized joined object  (default)
+    // full: false → returns just the id
+    // note: if where is a raw string, full is ignored — use getOne() manually after
     update(data, where, full = true) {
         const [sql, params] = this._buildUpdate(data, where);
         this._stmt(sql).run(...params);
@@ -42,6 +79,7 @@ class BaseTable {
         return this.update(data, { _id: id }, full);
     }
 
+    // Delete row(s) matching where.
     // where: { _id: 5 }  or  "active = 0"
     // returns number of deleted rows
     delete(where) {
@@ -56,31 +94,45 @@ class BaseTable {
         return this.delete({ _id: id });
     }
 
-    // Single row by _id — full joins
+    // Single row by _id — always returns full joined object
     getById(id) {
         return this.getOne({ _id: id });
     }
 
-    // Single row — full joins
-    // where: { dept_id: 3 }  or  "voucher_no = 'V001'"
-    getOne(where) {
-        const [sql, params] = this._buildSelectFull(where);
+    // Single row matching where.
+    // where : { dept_id: 3 }  or  "voucher_no = 'V001'"
+    // opts  : { full }
+    //   full: true  → with joins, desanitized  (default)
+    //   full: false → plain SELECT *, no joins (faster for internal checks)
+    getOne(where, { full = true } = {}) {
+        const [sql, params] = full
+            ? this._buildSelectFull(where)
+            : this._buildSelectPlain(where);
         const row = this._stmt(sql).get(...params);
-        return this.desanitize(row);
+        return full ? this.desanitize(row) : row;
     }
 
-    // Multiple rows — full joins
-    // where: { active: 1 }  or  "date >= '2024-01-01'"  or  {} for all
-    getAll(where = {}, orderBy = null, limit = null, offset = null) {
-        const [sql, params] = this._buildSelectFull(where, orderBy, limit, offset);
+    // Multiple rows matching where.
+    // where : { active: 1 }  or  "date >= '2024-01-01'"  or  {} for all
+    // opts  : { full, orderBy, limit, offset }
+    //   full: true  → with joins, desanitized  (default)
+    //   full: false → plain SELECT *, no joins (faster for bulk / internal use)
+    getAll(where = {}, { full = true, orderBy = null, limit = null, offset = null } = {}) {
+        const [sql, params] = full
+            ? this._buildSelectFull(where, orderBy, limit, offset)
+            : this._buildSelectPlain(where, orderBy, limit, offset);
         const rows = this._stmt(sql).all(...params);
-        return this.desanitizeAll(rows);
+        return full ? this.desanitizeAll(rows) : rows;
     }
 
     // ─────────────────────────────────────────────────────────
     // ── SANITIZE / DESANITIZE ─────────────────────────────────
     // ─────────────────────────────────────────────────────────
 
+    // Prepare data FOR the database.
+    // Coerces types, applies defaults, skips unknown columns.
+    // mode: 'insert' → skips _id, applies defaults
+    // mode: 'update' → only processes fields present in data
     sanitize(data, mode = 'insert') {
         const result = {};
 
@@ -102,6 +154,7 @@ class BaseTable {
                 } else if (typeof val === 'object') {
                     val = JSON.stringify(val);
                 }
+                // already a string — leave as is
 
             } else if (def.type === 'number') {
                 val = (val !== null && val !== undefined && val !== '') ? Number(val) : null;
@@ -116,11 +169,13 @@ class BaseTable {
         return result;
     }
 
+    // Parse data FROM the database.
+    // Coerces types back to JS, parses JSON strings, parses join outputs.
     desanitize(row) {
         if (!row) return null;
         const result = { ...row };
 
-        // ── parse normal columns ──
+        // ── parse normal columns ──────────────────────────────
         for (const col in this.columns) {
             if (!(col in result)) continue;
             const def = this.columns[col];
@@ -142,21 +197,32 @@ class BaseTable {
             result[col] = val;
         }
 
-        // ── parse join outputs ──
+        // ── parse hasOne join outputs (came back as json_object strings) ──
+        // Collapse to null if LEFT JOIN missed (all values null inside object)
+        for (const [, def] of Object.entries(this.columns)) {
+            if (!def.ref) continue;
+            const outKey = def.as ?? def.ref.split('.')[0];
+            if (!(outKey in result)) continue;
+            let val = result[outKey];
+
+            if (typeof val === 'string') {
+                try { val = JSON.parse(val); } catch { val = null; }
+            }
+            if (val && typeof val === 'object' && !Array.isArray(val) && Object.values(val).every(v => v === null)) {
+                val = null;
+            }
+            result[outKey] = val;
+        }
+
+        // ── parse hasMany / manyToMany join outputs (came back as json_group_array strings) ──
+        // Falls back to [] if parse fails or LEFT JOIN missed
         for (const [joinKey, def] of Object.entries(this.joins ?? {})) {
             const outKey = def.as ?? joinKey;
             if (!(outKey in result)) continue;
             let val = result[outKey];
 
             if (typeof val === 'string') {
-                try { val = JSON.parse(val); } catch { val = def.manyToMany || def.hasMany ? [] : null; }
-            }
-
-            // hasOne — LEFT JOIN missed, collapse to null
-            if (!def.hasMany && !def.manyToMany) {
-                if (val && typeof val === 'object' && !Array.isArray(val) && Object.values(val).every(v => v === null)) {
-                    val = null;
-                }
+                try { val = JSON.parse(val); } catch { val = []; }
             }
 
             result[outKey] = val;
@@ -165,6 +231,7 @@ class BaseTable {
         return result;
     }
 
+    // Desanitize an array of rows
     desanitizeAll(rows) {
         return rows.map(row => this.desanitize(row));
     }
@@ -193,34 +260,129 @@ class BaseTable {
         return [sql, [...Object.values(clean), ...whereParams]];
     }
 
-    _buildSelectFull(where, orderBy = null, limit = null, offset = null) {
-        const { selectCols, joinClauses, needsGroupBy } = this._buildJoins();
-        let sql = `SELECT ${selectCols} FROM ${this.tableName}`;
-        if (joinClauses) sql += ` ${joinClauses}`;
-
-        // prefixTable=true — avoids column ambiguity in JOINs
-        const { clause, params } = this._buildWhere(where, true);
+    // Plain SELECT * — no joins, no desanitize overhead
+    // Used internally and when full: false is passed to getOne / getAll
+    _buildSelectPlain(where, orderBy = null, limit = null, offset = null) {
+        let sql = `SELECT * FROM ${this.tableName}`;
+        const { clause, params } = this._buildWhere(where, false);
         if (clause) sql += ` ${clause}`;
-
-        // hasMany / manyToMany joins use aggregation — need GROUP BY
-        if (needsGroupBy) sql += ` GROUP BY ${this.tableName}._id`;
-
         if (orderBy) sql += ` ORDER BY ${orderBy}`;
         if (limit) sql += ` LIMIT ${limit}`;
         if (offset) sql += ` OFFSET ${offset}`;
         return [sql, params];
     }
 
+    // Full SELECT with all joins built from schema
+    // prefixTable=true on WHERE — avoids column ambiguity when joins are present
+    // GROUP BY added automatically when hasMany / manyToMany joins are present
+    // _buildSelectFull(where, orderBy = null, limit = null, offset = null) {
+    //     const { selectCols, joinClauses, needsGroupBy } = this._buildJoins();
+    //     let sql = `SELECT ${selectCols} FROM ${this.tableName}`;
+    //     if (joinClauses) sql += ` ${joinClauses}`;
+
+    //     const { clause, params } = this._buildWhere(where, true);
+    //     if (clause) sql += ` ${clause}`;
+
+    //     if (needsGroupBy) sql += ` GROUP BY ${this.tableName}._id`;
+    //     if (orderBy) sql += ` ORDER BY ${orderBy}`;
+    //     if (limit) sql += ` LIMIT ${limit}`;
+    //     if (offset) sql += ` OFFSET ${offset}`;
+    //     return [sql, params];
+    // }
+
+    // ─────────────────────────────────────────────────────────
+    // ── RECURSIVE JOIN BUILDER ───────────────────────────────
+    // ─────────────────────────────────────────────────────────
+
+    _buildSelectFull(where, orderBy = null, limit = null, offset = null) {
+        // Start recursion from the root table
+        const { selectParts, joinParts, needsGroupBy } = this._buildRecursive(this.tableName, this.tableName);
+
+        let sql = `SELECT ${selectParts.join(', ')} FROM ${this.tableName}`;
+        if (joinParts.length > 0) sql += ` ${joinParts.join(' ')}`;
+
+        const { clause, params } = this._buildWhere(where, true);
+        if (clause) sql += ` ${clause}`;
+
+        if (needsGroupBy) sql += ` GROUP BY ${this.tableName}._id`;
+        if (orderBy) sql += ` ORDER BY ${orderBy}`;
+        if (limit) sql += ` LIMIT ${limit}`;
+        if (offset) sql += ` OFFSET ${offset}`;
+
+        console.log(sql);
+
+        return [sql, params];
+    }
+
+    _buildRecursive(tableName, alias, depth = 0) {
+        const meta = tableMeta[tableName];
+        const selectParts = (depth === 0) ? [`${alias}.*`] : [];
+        const joinParts = [];
+        let needsGroupBy = false;
+
+        // ── 1. HAS-ONE (Columns with 'ref') ──
+        for (const [col, def] of Object.entries(meta.columns)) {
+            if (!def.ref) continue;
+
+            const [refTable, refCol] = def.ref.split('.');
+            const subAlias = `${alias}_${def.as ?? refTable}`;
+            const cols = this._resolveSelect(def.select || '*', refTable);
+
+            joinParts.push(`LEFT JOIN ${refTable} AS ${subAlias} ON ${alias}.${col} = ${subAlias}.${refCol}`);
+
+            // Correct json_object syntax: 'key', value
+            const jsonArgs = cols.map(c => `'${c}', ${subAlias}.${c}`).join(', ');
+            selectParts.push(`json_object(${jsonArgs}) AS ${def.as ?? refTable}`);
+        }
+
+        // ── 2. HAS-MANY (The joins{} object) ──
+        for (const [joinKey, def] of Object.entries(meta.joins ?? {})) {
+            if (depth === 0 || def.join) {
+                const childTable = def.table;
+                const childAlias = `${alias}_${def.as ?? joinKey}`;
+                needsGroupBy = true;
+
+                joinParts.push(`LEFT JOIN ${childTable} AS ${childAlias} ON ${childAlias}.${def.on} = ${alias}.${def.target} AND ${childAlias}.active = 1`);
+
+                // RECURSE: Get child columns and their own nested joins
+                const nested = this._buildRecursive(childTable, childAlias, depth + 1);
+                joinParts.push(...nested.joinParts);
+
+                // Get child base columns
+                const baseCols = this._resolveSelect(def.select || '*', childTable);
+                const baseJsonArgs = baseCols.map(c => `'${c}', ${childAlias}.${c}`).join(', ');
+
+                // Format nested joins for this child (e.g., 'item', json_object(...))
+                // This is where your previous error was: you were missing the key before the nested json_object
+                const nestedJsonArgs = nested.selectParts.map(part => {
+                    const parts = part.split(' AS ');
+                    const key = parts[1].trim();
+                    const value = parts[0].trim();
+                    return `'${key}', ${value}`;
+                }).join(', ');
+
+                const finalJsonArgs = nestedJsonArgs ? `${baseJsonArgs}, ${nestedJsonArgs}` : baseJsonArgs;
+
+                selectParts.push(
+                    `CASE WHEN ${childAlias}._id IS NULL THEN json('[]') ` +
+                    `ELSE json_group_array(DISTINCT json_object(${finalJsonArgs})) END AS ${def.as ?? joinKey}`
+                );
+            }
+        }
+
+        return { selectParts, joinParts, needsGroupBy };
+    }
+
     // ─────────────────────────────────────────────────────────
     // ── WHERE HELPER ─────────────────────────────────────────
     // ─────────────────────────────────────────────────────────
     //
-    // Two formats:
-    //   object → { _id: 5, active: 1 }
-    //   string → "date > '2024-01-01' AND qty > 10"  (raw SQL, no bound params)
+    // Accepts two formats:
+    //   object → { _id: 5, active: 1 }         → WHERE col = ? AND col = ?  (bound params)
+    //   string → "date > '2024-01-01'"          → WHERE <raw sql>            (no bound params)
     //
-    // prefixTable: true  → tableName.col = ?  (SELECT with JOINs)
-    // prefixTable: false → col = ?            (UPDATE / DELETE)
+    // prefixTable: true  → tableName.col = ?   (use in SELECT — avoids JOIN ambiguity)
+    // prefixTable: false → col = ?             (use in UPDATE / DELETE / plain SELECT)
 
     _buildWhere(where, prefixTable = false) {
         if (!where) return { clause: '', params: [] };
@@ -231,7 +393,7 @@ class BaseTable {
             return { clause: trimmed ? `WHERE ${trimmed}` : '', params: [] };
         }
 
-        // plain object
+        // plain object — equality conditions joined by AND
         if (typeof where === 'object') {
             const keys = Object.keys(where);
             if (keys.length === 0) return { clause: '', params: [] };
@@ -253,100 +415,145 @@ class BaseTable {
     // ── JOIN BUILDER ─────────────────────────────────────────
     // ─────────────────────────────────────────────────────────
     //
-    // Three join types in schema:
+    // Three join types — all driven by schema declarations:
     //
-    // hasOne (default) — fk is ON THIS table
-    //   { on: 'unit_id', table: 'unit', target: '_id', as: 'unit', select: [...] }
-    //   → LEFT JOIN unit AS alias ON this.unit_id = alias._id
-    //   → json_object(...)
+    // ── hasOne ───────────────────────────────────────────────
+    // Declared on the FK column itself (like SQL REFERENCES).
+    // FK is on THIS table.
     //
-    // hasMany — fk is ON THE OTHER table pointing back here
-    //   { hasMany: true, on: 'item_id', table: 'subitem', target: '_id', as: 'subitems', select: [...] }
-    //   → LEFT JOIN subitem AS alias ON alias.item_id = this._id
-    //   → json_group_array(DISTINCT json_object(...))
+    //   unit_id: { type: 'number', ref: 'unit._id', as: 'unit', select: ['unit_short', 'unit_full'] }
+    //   unit_id: { type: 'number', ref: 'unit._id', as: 'unit', select: '*' }
     //
-    // manyToMany — through a junction table
-    //   { manyToMany: true, table: 'category', junction: 'rel_item_category', on: 'item_id', target: 'category_id', as: 'categories', select: [...] }
-    //   → LEFT JOIN rel_item_category AS alias_junc ON alias_junc.item_id = this._id
-    //   → LEFT JOIN category AS alias ON alias._id = alias_junc.category_id
-    //   → json_group_array(DISTINCT json_object(...))
+    //   → LEFT JOIN unit AS unit ON this_table.unit_id = unit._id
+    //   → json_object('unit_short', unit.unit_short, ...) AS unit
+    //   → desanitize collapses to null if LEFT JOIN missed
+    //
+    // ── hasMany ──────────────────────────────────────────────
+    // Declared in joins{} — FK is on the OTHER table pointing back here.
+    //
+    //   subitems: { hasMany: true, on: 'item_id', table: 'subitem', target: '_id', as: 'subitems', select: [...] }
+    //
+    //   → LEFT JOIN subitem AS subitems ON subitems.item_id = this_table._id
+    //   → CASE WHEN ... THEN json('[]') ELSE json_group_array(DISTINCT json_object(...)) END AS subitems
+    //   → requires GROUP BY this_table._id
+    //
+    // ── manyToMany ───────────────────────────────────────────
+    // Declared in joins{} — through a junction table.
+    //
+    //   categories: { manyToMany: true, table: 'category', junction: 'rel_item_category', on: 'item_id', target: 'category_id', as: 'categories', select: [...] }
+    //
+    //   → LEFT JOIN rel_item_category AS categories_junc ON categories_junc.item_id = this_table._id
+    //   → LEFT JOIN category AS categories ON categories._id = categories_junc.category_id
+    //   → CASE WHEN ... THEN json('[]') ELSE json_group_array(DISTINCT json_object(...)) END AS categories
+    //   → requires GROUP BY this_table._id
+
+    // Resolves select: '*' to all column names from the referenced table's schema.
+    // Explicit arrays are passed through unchanged.
+    _resolveSelect(select, refTable) {
+        if (select !== '*') return select;
+        const meta = tableMeta[refTable];
+        if (!meta) throw new Error(`Cannot resolve * for "${refTable}" — not in schema`);
+        return Object.keys(meta.columns);
+    }
 
     _buildJoins() {
-        if (!this.joins || Object.keys(this.joins).length === 0) {
-            return { selectCols: `${this.tableName}.*`, joinClauses: '', needsGroupBy: false };
-        }
-
         const selectParts = [`${this.tableName}.*`];
         const joinParts = [];
-        let needsGroupBy = false;
+        let needsGroupBy = false; // Usually not needed with subqueries, but kept for compatibility
 
-        for (const [alias, def] of Object.entries(this.joins)) {
+        // ── 1. hasOne (Standard Joins - Level 1) ──
+        for (const [col, def] of Object.entries(this.columns)) {
+            if (!def.ref) continue;
+            const [refTable, refCol] = def.ref.split('.');
+            const alias = def.as ?? refTable;
 
-            // ── hasOne ───────────────────────────────────────────────
-            if (!def.hasMany && !def.manyToMany) {
-                joinParts.push(
-                    `LEFT JOIN ${def.table} AS ${alias} ON ${this.tableName}.${def.on} = ${alias}.${def.target}`
-                );
-                if (def.select?.length) {
-                    const jsonArgs = def.select.map(col => `'${col}', ${alias}.${col}`).join(', ');
-                    selectParts.push(`json_object(${jsonArgs}) AS ${def.as ?? alias}`);
-                }
+            joinParts.push(`LEFT JOIN ${refTable} AS ${alias} ON ${this.tableName}.${col} = ${alias}.${refCol}`);
+
+            if (def.select) {
+                const cols = this._resolveSelect(def.select, refTable);
+                const jsonArgs = cols.map(c => `'${c}', ${alias}.${c}`).join(', ');
+                selectParts.push(`json_object(${jsonArgs}) AS ${alias}`);
             }
+        }
 
-            // ── hasMany ──────────────────────────────────────────────
-            else if (def.hasMany) {
-                // flip: other_table.fk = this._id
-                joinParts.push(
-                    `LEFT JOIN ${def.table} AS ${alias} ON ${alias}.${def.on} = ${this.tableName}.${def.target}`
-                );
-                if (def.select?.length) {
-                    const jsonArgs = def.select.map(col => `'${col}', ${alias}.${col}`).join(', ');
-                    const outKey = def.as ?? alias;
-                    selectParts.push(
-                        `CASE WHEN ${alias}.${def.select[0]} IS NULL THEN json('[]') ` +
-                        `ELSE json_group_array(DISTINCT json_object(${jsonArgs})) END AS ${outKey}`
-                    );
+        // ── 2. hasMany (Subqueries - Level 2 Support) ──
+        for (const [alias, def] of Object.entries(this.joins ?? {})) {
+            if (def.hasMany) {
+                const childTable = def.table;
+                const childAlias = `sub_${alias}`;
+
+                // Get child columns
+                const cols = this._resolveSelect(def.select || '*', childTable);
+                let jsonArgs = cols.map(c => `'${c}', ${childAlias}.${c}`).join(', ');
+
+                // ── Deep Level 2: Join dependencies for the child (e.g., Input -> Item) ──
+                const childMeta = tableMeta[childTable];
+                const childJoins = [];
+
+                for (const [cCol, cDef] of Object.entries(childMeta.columns)) {
+                    if (cDef.ref && cDef.as) {
+                        const [gRefTable, gRefCol] = cDef.ref.split('.');
+                        const gAlias = `${childAlias}_${cDef.as}`;
+                        const gCols = this._resolveSelect(cDef.select || '*', gRefTable);
+
+                        childJoins.push(`LEFT JOIN ${gRefTable} AS ${gAlias} ON ${gAlias}.${gRefCol} = ${childAlias}.${cCol}`);
+
+                        const gJsonArgs = gCols.map(gc => `'${gc}', ${gAlias}.${gc}`).join(', ');
+                        jsonArgs += `, '${cDef.as}', json_object(${gJsonArgs})`;
+                    }
                 }
-                needsGroupBy = true;
-            }
 
-            // ── manyToMany ───────────────────────────────────────────
+                // ── Build the Final Subquery ──
+                const outKey = def.as ?? alias;
+                const subQuery = `(
+                    SELECT json_group_array(json_object(${jsonArgs}))
+                    FROM ${childTable} AS ${childAlias}
+                    ${childJoins.join(' ')}
+                    WHERE ${childAlias}.${def.on} = ${this.tableName}.${def.target}
+                    AND ${childAlias}.active = 1
+                )`;
+
+                selectParts.push(`COALESCE(${subQuery}, json('[]')) AS ${outKey}`);
+            }
             else if (def.manyToMany) {
-                const juncAlias = `${alias}_junc`;
-                // step 1: this → junction
-                joinParts.push(
-                    `LEFT JOIN ${def.junction} AS ${juncAlias} ON ${juncAlias}.${def.on} = ${this.tableName}._id`
-                );
-                // step 2: junction → target
-                joinParts.push(
-                    `LEFT JOIN ${def.table} AS ${alias} ON ${alias}._id = ${juncAlias}.${def.target}`
-                );
-                if (def.select?.length) {
-                    const jsonArgs = def.select.map(col => `'${col}', ${alias}.${col}`).join(', ');
-                    const outKey = def.as ?? alias;
-                    selectParts.push(
-                        `CASE WHEN ${alias}.${def.select[0]} IS NULL THEN json('[]') ` +
-                        `ELSE json_group_array(DISTINCT json_object(${jsonArgs})) END AS ${outKey}`
-                    );
-                }
-                needsGroupBy = true;
+                const targetTable = def.table;
+                const junctionTable = def.junction;
+                const alias_target = `sub_${alias}`;
+                const alias_junc = `${alias}_junc`;
+
+                // 1. Resolve columns for the target table (e.g., Category names)
+                const targetCols = this._resolveSelect(def.select || '*', targetTable);
+                const jsonArgs = targetCols.map(c => `'${c}', ${alias_target}.${c}`).join(', ');
+
+                // 2. Build the Many-to-Many Subquery
+                const outKey = def.as ?? alias;
+                const subQuery = `(
+                    SELECT json_group_array(json_object(${jsonArgs}))
+                    FROM ${junctionTable} AS ${alias_junc}
+                    INNER JOIN ${targetTable} AS ${alias_target} ON ${alias_target}._id = ${alias_junc}.${def.target}
+                    WHERE ${alias_junc}.${def.on} = ${this.tableName}._id
+                )`;
+
+                selectParts.push(`COALESCE(${subQuery}, json('[]')) AS ${outKey}`);
             }
+
         }
 
         return {
             selectCols: selectParts.join(', '),
             joinClauses: joinParts.join(' '),
-            needsGroupBy              // true when any hasMany/manyToMany present
+            needsGroupBy: false // Subqueries handle aggregation, no main GROUP BY required!
         };
     }
+
 
     // ─────────────────────────────────────────────────────────
     // ── STATEMENT CACHE ──────────────────────────────────────
     // ─────────────────────────────────────────────────────────
     //
-    // better-sqlite3: preparing a statement is expensive.
-    // Same SQL string reuses the same prepared statement.
-    // Bulk inserts prepare once, reuse for every row — big speed gain.
+    // better-sqlite3: db.prepare() is expensive — avoid calling it repeatedly.
+    // Cache by SQL string so the same statement is prepared once and reused.
+    // Key benefit: bulk inserts prepare once, reuse for every row — big speed gain.
 
     _stmt(sql) {
         if (!this._stmtCache[sql]) {

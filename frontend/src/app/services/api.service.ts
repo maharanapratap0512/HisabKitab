@@ -41,6 +41,7 @@ export class ApiService {
     PBKBACHAT: base_url + 'pbk_bachat/',
     PBKCLOSING: base_url + 'pbk_closing/',
     HMP: base_url + 'hmp/',
+    PRASTAV: base_url + 'prastav/',
     COUNTRY: base_url + 'countries/',
     STATE: base_url + 'states/',
     ZONE: base_url + 'zones/',

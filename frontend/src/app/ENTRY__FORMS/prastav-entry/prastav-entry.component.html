@@ -1,140 +1,167 @@
-<form #f="ngForm" (ngSubmit)="onSubmit()" id="prastavEntryForm">
-  <div class="container-fluid p-2">
-    <div class="row">
-      <div class="col-md-3 mb-3">
-        <div class="form-group">
-          <label class="form-label">Date</label>
-          <input
-            type="date"
-            class="form-control"
-            placeholder="Select Date"
-            [(ngModel)]="prastav.date"
-            name="date"
-            required
-          >
-        </div>
-      </div>
-      <div class="col-md-3 mb-3">
-        <div class="form-group">
-          <label class="form-label">MM</label>
-          <ng-select
-            class="custom"
-            style="width: 100%;"
-            placeholder="Select MM"
-            [clearable]="true"
-            [virtualScroll]="true"
-            [(ngModel)]="prastav.mm_id"
-            name="mm_id"
-            required
-          >
-            <ng-option selected="selected" disabled value="">Select MM</ng-option>
-            <ng-option *ngFor="let m of mms | filterByDate: prastav.date" [value]="m._id">
-              {{ m.mm_hin }}:{{ m.mm_eng }}{{ m.mm_code ? ' : ' + m.mm_code : '' }}
-            </ng-option>
-          </ng-select>
-        </div>
-      </div>
-      <div class="col-md-2 mb-3">
-        <div class="form-group">
-          <label class="form-label">PBK Count</label>
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Enter PBK Count"
-            [(ngModel)]="prastav.pbk_count"
-            name="pbk_count"
-          >
-        </div>
-      </div>
-      <div class="col-md-4 mb-3">
-        <div class="form-group">
-          <label class="form-label">Item</label>
-          <ng-select
-            class="custom"
-            style="width: 100%;"
-            placeholder="Select Item"
-            [clearable]="true"
-            [virtualScroll]="true"
-            [(ngModel)]="prastav.item_id"
-            name="item_id"
-            required
-          >
-            <ng-option *ngFor="let it of items | filterByDate: prastav.date" [value]="it._id">
-              {{ it.item_hin }}:{{ it.item_eng }}
-            </ng-option>
-          </ng-select>
-        </div>
-      </div>
-    </div>
+<div class="row" id="prastavEntryComponent">
+  <div class="card-body">
 
-    <div class="row">
-      <div class="col-md-2 mb-3">
-        <div class="form-group">
-          <label class="form-label">Unit</label>
-          <ng-select
-            class="custom"
-            style="width: 100%;"
-            placeholder="Select Unit"
-            [clearable]="false"
-            [virtualScroll]="true"
-            [(ngModel)]="prastav.unit_id"
-            name="unit_id"
-            required
-          >
-            <ng-option selected="selected" disabled value="">Select Unit</ng-option>
-            <ng-option *ngFor="let u of units | filterByDate: prastav.date" [value]="u._id">
-              {{ u.unit_short }} ({{ u.unit_full }})
-            </ng-option>
-          </ng-select>
-        </div>
-      </div>
-      <div class="col-md-2 mb-3">
-        <div class="form-group">
-          <label class="form-label">Qty</label>
-          <input
-            type="number"
-            class="form-control"
-            placeholder="Enter Qty"
-            [(ngModel)]="prastav.qty"
-            name="qty"
-            (ngModelChange)="updateAmount()"
-            required
-          >
-        </div>
-      </div>
-      <div class="col-md-2 mb-3">
-        <div class="form-group">
-          <label class="form-label">Rate</label>
-          <input
-            type="number"
-            class="form-control"
-            placeholder="Enter Rate"
-            [(ngModel)]="prastav.rate"
-            name="rate"
-            (ngModelChange)="updateAmount()"
-          >
-        </div>
-      </div>
-      <div class="col-md-2 mb-3">
-        <div class="form-group">
-          <label class="form-label">Amount</label>
-          <input
-            type="number"
-            class="form-control"
-            placeholder="Auto Amount"
-            [(ngModel)]="prastav.amount"
-            name="amount"
-            readonly
-          >
-        </div>
-      </div>
-    </div>
+    <form #f="ngForm" (ngSubmit)="onSubmit()" id="prastavEntryForm">
 
-    <div class="row mt-3">
-      <div class="col-12 d-flex justify-content-between">
-        <button type="button" class="btn btn-light btn-sm" (click)="closeModal()">Close</button>
-        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+      <!-- ── Header Row ─────────────────────────────── -->
+      <div class="row">
+
+        <div class="col-md-2 mb-3">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-control"
+              [(ngModel)]="pfs.prastavForm.date" name="date" required>
+          </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <div class="form-group">
+            <label class="form-label">MM</label>
+            <ng-select class="custom" style="width:100%;" placeholder="Select MM"
+              [clearable]="false" [virtualScroll]="true"
+              [(ngModel)]="pfs.prastavForm.mm_id" name="mm_id" required>
+              <ng-option selected disabled value="">MM</ng-option>
+              <ng-option *ngFor="let m of mms | filterByDate: pfs.prastavForm.date" [value]="m._id">
+                {{m.mm_hin}} : {{m.mm_eng}}{{m.mm_code ? ' : ' + m.mm_code : ''}}
+              </ng-option>
+            </ng-select>
+          </div>
+        </div>
+
+        <div class="col-md-2 mb-3">
+          <div class="form-group">
+            <label class="form-label">PBK Count</label>
+            <input type="text" class="form-control" placeholder="PBK Count"
+              [(ngModel)]="pfs.prastavForm.pbk_count" name="pbk_count">
+          </div>
+        </div>
+
+        <!-- Noted checkbox + Note Details (conditional) -->
+        <div class="col-md-5 mb-3 d-flex align-items-end gap-3">
+          <div class="form-check mb-1">
+            <input class="form-check-input" type="checkbox" id="isNoted"
+              [(ngModel)]="pfs.prastavForm.is_noted" name="is_noted">
+            <label class="form-check-label" for="isNoted">Noted</label>
+          </div>
+          <div class="flex-fill" *ngIf="pfs.prastavForm.is_noted">
+            <input type="text" class="form-control" placeholder="Note Details"
+              [(ngModel)]="pfs.prastavForm.note_details" name="note_details">
+          </div>
+        </div>
+
       </div>
-    </div>
+      <!-- end header row -->
+
+      <!-- ── Lines Table ──────────────────────────────── -->
+      <div class="row">
+        <div class="card card-body" style="font-size: smaller; overflow: auto; flex-direction: column;">
+          <div class="table-container" style="padding-bottom: 250px;">
+            <table class="table table-bordered table-centered mb-0" style="width: max-content; min-width: 100%;">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th class="mw-15">Item - Subitem <strong class="text-danger">*</strong></th>
+                  <th class="mw-6">Unit <strong class="text-danger">*</strong></th>
+                  <th class="mw-6">Qty <strong class="text-danger">*</strong></th>
+                  <th class="mw-6">Rate</th>
+                  <th class="mw-6">Amount</th>
+                  <th class="mw-8">Description</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let line of pfs.prastavForm.lines; let i = index">
+
+                  <td class="text-center">{{i + 1}}</td>
+
+                  <!-- Item + Subitem (HMP / jawak style) -->
+                  <td>
+                    <ng-select class="custom-sm" style="width: 100%;"
+                      placeholder="Select Item" [clearable]="true" [virtualScroll]="true"
+                      [(ngModel)]="line.item_subitem_id" [name]="'item_' + i"
+                      (change)="onItemChange(line)" [selectOnTab]="true" appendTo="body">
+                      <ng-container *ngFor="let it of items | filterByDate: pfs.prastavForm.date">
+
+                        <!-- Parent item -->
+                        <ng-option [value]="it._id">
+                          {{it.item_hin}} : {{it.item_eng}} : {{it.item_roman ? it.item_roman : ''}} : {{it.item_code}}
+                        </ng-option>
+
+                        <!-- Subitems (indented) -->
+                        <ng-option
+                          *ngFor="let sub of it.subitems | filterByDate: pfs.prastavForm.date"
+                          [value]="it._id + ':' + sub._id">
+                          &nbsp;&nbsp;↳ {{sub.subitem_hin}} {{it.item_hin}} : {{sub.subitem_eng}} {{it.item_eng}} : {{sub.subitem_roman ? sub.subitem_roman : ''}}
+                        </ng-option>
+
+                      </ng-container>
+                    </ng-select>
+                  </td>
+
+                  <!-- Unit -->
+                  <td>
+                    <ng-select class="custom-sm" style="width: 100%;"
+                      placeholder="Unit" [clearable]="false" [virtualScroll]="true"
+                      [(ngModel)]="line.unit_id" [name]="'unit_' + i"
+                      (ngModelChange)="pfs.formStatusChanges()" [selectOnTab]="true" appendTo="body">
+                      <ng-option selected disabled value="">Unit</ng-option>
+                      <ng-option *ngFor="let u of units | filterByDate: pfs.prastavForm.date" [value]="u._id">
+                        {{u.unit_short}}
+                      </ng-option>
+                    </ng-select>
+                  </td>
+
+                  <!-- Qty -->
+                  <td>
+                    <input type="number" class="form-control form-control-sm" placeholder="Qty"
+                      [(ngModel)]="line.qty" [name]="'qty_' + i"
+                      (ngModelChange)="onLineChange(line)" min="0">
+                  </td>
+
+                  <td>
+                    <input type="number" class="form-control form-control-sm" placeholder="Rate"
+                      [(ngModel)]="line.rate" [name]="'rate_' + i"
+                      (ngModelChange)="onLineChange(line)" min="0">
+                  </td>
+
+                  <!-- Amount readonly -->
+                  <td>
+                    <input type="number" class="form-control form-control-sm"
+                      [(ngModel)]="line.amount" [name]="'amount_' + i" readonly>
+                  </td>
+
+                  <!-- Line description -->
+                  <td>
+                    <input type="text" class="form-control form-control-sm" placeholder="Note"
+                      [(ngModel)]="line.description" [name]="'desc_' + i">
+                  </td>
+
+                  <!-- Remove -->
+                  <td class="text-center">
+                    <button *ngIf="line.item_id && pfs.prastavForm.lines.length > 1"
+                      type="button" class="btn btn-sm btn-danger"
+                      (click)="removeLine(i)" title="Remove"
+                      style="padding: 0.2rem 0.5rem; border-radius: 4px;">
+                      <i class="uil uil-times"></i>
+                    </button>
+                  </td>
+
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- end lines table -->
+
+      <!-- ── Footer ───────────────────────────────────── -->
+      <div class="row mt-2">
+        <div class="col-12 d-flex justify-content-between">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
+          <button type="submit" class="btn btn-primary btn-sm" [disabled]="pfs.submit">Save</button>
+        </div>
+      </div>
+
+    </form>
   </div>
-</form>
+</div>
