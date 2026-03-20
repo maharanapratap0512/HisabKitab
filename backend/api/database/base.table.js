@@ -564,4 +564,15 @@ class BaseTable {
 
 }
 
-module.exports = BaseTable;
+// database/base.table.js
+//
+// Shim — re-exports the BaseTable bound to the main 'sewa' Sutram instance.
+//
+// All existing services that do require('../database/base.table') keep working
+// with zero changes — they get the instance-aware BaseTable tied to the sewa db.
+//
+// Backward note: the large class body above this section is legacy code kept
+// for reference only (not exported). The active implementation is in sutramcore.
+
+const { sutramDB } = require('./db.model');
+module.exports = sutramDB.BaseTable;

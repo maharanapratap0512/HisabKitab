@@ -52,7 +52,7 @@ router.put('/batch/:dept_id', (req, res, next) => {
 });
 
 // POST /batch/:dept_id  — create new batch
-router.post('/batch/:dept_id', (req, res, next) => {
+router.post('/batch/:dept_id', async (req, res, next) => {
     try {
         req.body.dept_id = req.params.dept_id;
 
@@ -61,7 +61,7 @@ router.post('/batch/:dept_id', (req, res, next) => {
             req.body.recipe_id = hmp.insertUpdateRecipe({ ...req.body });
         }
 
-        const batch = hmp.insertUpdateBatch(req.body);
+        const batch = await hmp.insertUpdateBatch(req.body);
         res.json({ success: true, result: batch });
     } catch (e) { next(e); }
 });
@@ -70,17 +70,17 @@ router.post('/batch/:dept_id', (req, res, next) => {
 // ── Batch Input / Output — MUST be before /:id ────────────────
 
 // DELETE /input/:id  — delete single batch input (+ linked jawak if auto_jawak)
-router.delete('/input/:id', (req, res, next) => {
+router.delete('/input/:id', async (req, res, next) => {
     try {
-        const result = hmp.deleteBatchInput(req.params.id);
+        const result = await hmp.deleteBatchInput(req.params.id);
         res.json({ success: true, result });
     } catch (e) { next(e); }
 });
 
 // DELETE /output/:id  — delete single batch output (+ linked aawak if auto_aawak)
-router.delete('/output/:id', (req, res, next) => {
+router.delete('/output/:id', async (req, res, next) => {
     try {
-        const result = hmp.deleteBatchOutput(req.params.id);
+        const result = await hmp.deleteBatchOutput(req.params.id);
         res.json({ success: true, result });
     } catch (e) { next(e); }
 });
@@ -89,7 +89,7 @@ router.delete('/output/:id', (req, res, next) => {
 // ── Single Batch — generic /:id LAST ─────────────────────────
 
 // PUT /:id  — update existing batch
-router.put('/:id', (req, res, next) => {
+router.put('/:id', async (req, res, next) => {
     try {
         req.body._id = req.params.id;
 
@@ -97,15 +97,15 @@ router.put('/:id', (req, res, next) => {
             req.body.recipe_id = hmp.insertUpdateRecipe({ ...req.body });
         }
 
-        const batch = hmp.insertUpdateBatch(req.body);
+        const batch = await hmp.insertUpdateBatch(req.body);
         res.json({ success: true, result: batch });
     } catch (e) { next(e); }
 });
 
 // DELETE /:id  — delete batch + all its inputs/outputs
-router.delete('/:id', (req, res, next) => {
+router.delete('/:id', async (req, res, next) => {
     try {
-        const result = hmp.deleteBatch(req.params.id);
+        const result = await hmp.deleteBatch(req.params.id);
         res.json({ success: true, result });
     } catch (e) { next(e); }
 });

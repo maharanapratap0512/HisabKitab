@@ -26,6 +26,7 @@ export class HmpFormService {
       qty: null,
       rate: null,
       lot_no: null,
+      aawak_source_id: null,
       jawak_ref_id: null,
       active: 1
     };
@@ -40,6 +41,7 @@ export class HmpFormService {
       rate: null,
       lot_no: null,
       aawak_ref_id: null,
+      jawak_detail: [],
       active: 1
     };
 
@@ -53,6 +55,8 @@ export class HmpFormService {
       inputs: [JSON.parse(JSON.stringify(this.inputFormTemplate))],
       outputs: [JSON.parse(JSON.stringify(this.outputFormTemplate))],
       update_recipe: false,
+      auto_jawak: false,
+      auto_aawak: false,
       active: 1
     };
   }
@@ -68,6 +72,8 @@ export class HmpFormService {
       inputs: [JSON.parse(JSON.stringify(this.inputFormTemplate))],
       outputs: [JSON.parse(JSON.stringify(this.outputFormTemplate))],
       update_recipe: false,
+      auto_jawak: false,
+      auto_aawak: false,
       active: 1
     };
     this.submit = false;
@@ -83,9 +89,11 @@ export class HmpFormService {
 
     for (let j in data.inputs) {
       data.inputs[j].item_subitem_id = data.inputs[j].subitem_id ? data.inputs[j].item_id + ":" + data.inputs[j].subitem_id : data.inputs[j].item_id;
+      if (data.inputs[j].jawak_ref_id) data.auto_jawak = true;
     }
     for (let j in data.outputs) {
       data.outputs[j].item_subitem_id = data.outputs[j].subitem_id ? data.outputs[j].item_id + ":" + data.outputs[j].subitem_id : data.outputs[j].item_id;
+      if (data.outputs[j].aawak_ref_id) data.auto_aawak = true;
     }
 
     this.hmpBatchForm = structuredClone(data);

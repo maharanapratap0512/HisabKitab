@@ -1,6 +1,6 @@
 const { version } = require('os');
 let path = require('path');
-const { Sequelize } = require('sequelize');
+const { Sutram } = require('sutramcore');
 
 class dbModal {
   // path;
@@ -2289,6 +2289,7 @@ class dbModal {
 
     // Version 28
     {
+      hmp_batch_input_add_aawak_source: `alter table hmp_batch_input add column aawak_source_id integer references support_list(_id)`,
       prastav_drop: `drop table if exists prastav`,
       prastav: `create table if not exists prastav(
         _id integer primary key AUTOINCREMENT,
@@ -2304,7 +2305,7 @@ class dbModal {
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))
       )`,
-      
+
       prastav_jawak_drop: `drop table if exists prastav_jawak`,
       prastav_jawak: `create table if not exists prastav_jawak(
         _id integer primary key AUTOINCREMENT,
@@ -2444,31 +2445,19 @@ class dbModal {
 // for sewa
 let dbmodal = new dbModal(path.resolve(__dirname, '../../../../Data/Database.db'))
 
-// for khatti
-// let dbmodal = new dbModal(path.resolve(__dirname, '../../../../Data/Khatti/Database.db'))
-
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: path.resolve(__dirname, '../../../../Data/Database.db'),
-  logging: false,
-  dialectOptions: {
-    timeout: 10000
-  }
+// Create Sutram instance — instance-based ORM (supports multiple dbs)
+const sutramDB = new Sutram({
+  db: dbmodal.db,
+  schema: require('./schema'),
 });
 
+// for khatti (second database example):
+// const khatti = new Sutram({
+//   db:     khattiDbmodal.db,
+//   schema: require('./khatti-schema'),
+// });
 
-// Enable WAL mode
-sequelize.query("PRAGMA journal_mode=WAL;");
-
-// Better performance for WAL
-sequelize.query("PRAGMA synchronous=NORMAL;");
-
-// Busy timeout (important)
-sequelize.query("PRAGMA busy_timeout=10000;");
-
-console.log("SQLite WAL mode enabled");
-
-module.exports = { dbModal, dbmodal, sequelize }
+module.exports = { dbModal, dbmodal, sutramDB }
 
 
 

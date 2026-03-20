@@ -1,0 +1,24 @@
+{
+    "name": "sutramcore",
+    "version": "1.0.0",
+    "description": "Metadata-driven SQLite ORM for better-sqlite3 — सूत्र (Sutram) = foundational thread",
+    "main": "index.js",
+    "bin": {
+        "sutramcore": "./bin/sutramcore.js"
+    },
+    "scripts": {
+        "test": "node test/test.js"
+    },
+    "keywords": [
+        "sqlite",
+        "orm",
+        "better-sqlite3",
+        "sutramcore"
+    ],
+    "peerDependencies": {
+        "better-sqlite3": ">=9.0.0"
+    },
+    "devDependencies": {
+        "better-sqlite3": "^9.6.0"
+    }
+}

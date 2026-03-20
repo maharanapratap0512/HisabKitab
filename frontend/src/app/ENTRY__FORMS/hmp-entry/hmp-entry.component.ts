@@ -26,6 +26,11 @@ export class HmpEntryComponent implements OnInit {
   showModal = '';
   isLoader = false;
 
+  // Jawak Modal State
+  editOutputIndex: number | null = null;
+  editJawakIndex: number | null = null;
+  editData: any = {};
+
   // Lists
   recipes: any = [];
   mms: any = [];
@@ -207,5 +212,106 @@ export class HmpEntryComponent implements OnInit {
   closeModal() {
     // Close logic handled by parent or jquery
     $('#hmpEntryModal').modal('hide'); // Assuming ID
+  }
+
+  // --- Jawak Distribution Logic ---
+  addJawakToOutput(index: number) {
+    this.editOutputIndex = index;
+    const output = this.fs.hmpBatchForm.outputs[index];
+
+    if (!output.item_id || !output.qty) {
+      this.toastr.warning('Please select item and quantity first.');
+      return;
+    }
+
+    const item = this.items.find((i: any) => i._id === output.item_id);
+    const mm = this.mms.find((m: any) => m._id === this.fs.hmpBatchForm.mm_id);
+    const unit = this.units.find((u: any) => u._id === output.unit_id);
+
+    this.editData = {
+      date: this.fs.hmpBatchForm.date,
+      mm_id: this.fs.hmpBatchForm.mm_id,
+      mm_hin: mm ? (mm.mm_hin || mm.mm_eng) : '',
+      item_id: output.item_id,
+      item_hin: item ? (item.item_hin || item.item_eng) : '',
+      subitem_id: output.subitem_id,
+      product_id: output.product_id,
+      condition_id: output.condition_id,
+      remaining_qty: 0,
+      unit_id: output.unit_id,
+      unit_short: unit ? unit.unit_short : '',
+      aawak_source_id: output.aawak_source_id || null,
+      dept_id: this.fs.hmpBatchForm.dept_id,
+      jawak_type_id: 27,
+      description: `HMP Batch Production`
+    };
+
+    // Lookup subitem name if present
+    if (output.subitem_id) {
+      const subitem = this.items.find((i: any) => i._id === output.subitem_id);
+      this.editData.subitem_hin = subitem ? (subitem.subitem_hin || subitem.subitem_eng) : '';
+    }
+
+    // Calculate remaining quantity
+    let usedQty = 0;
+    if (output.jawak_detail && output.jawak_detail.length > 0) {
+      usedQty = output.jawak_detail.reduce((sum: number, j: any) => sum + Number(j.qty || 0), 0);
+    }
+    this.editData.remaining_qty = output.qty - usedQty;
+
+    this.showModal = 'Add Jawak';
+    $('#jawakOffcanvas').offcanvas('show');
+  }
+
+  editJawakOfOutput(outIndex: number, jwkIndex: number) {
+    this.editOutputIndex = outIndex;
+    this.editJawakIndex = jwkIndex;
+    this.editData = this.fs.hmpBatchForm.outputs[outIndex].jawak_detail[jwkIndex];
+    this.showModal = 'Edit Jawak';
+    $('#jawakOffcanvas').offcanvas('show');
+  }
+
+  removeJawak(outIndex: number, jwkIndex: number, id: any = null) {
+    if (id) {
+      if (confirm('Are you sure you want to delete this Jawak?')) {
+        this.isLoader = true;
+        this.http.delete(this.api.getUrl('JAWAK') + '/' + id).subscribe((data: any) => {
+          if (data['success']) {
+            this.fs.hmpBatchForm.outputs[outIndex].jawak_detail.splice(jwkIndex, 1);
+            this.toastr.success('Jawak Deleted Successfully');
+          } else {
+            this.toastr.error(data['message']);
+          }
+          this.isLoader = false;
+        });
+      }
+    } else {
+      this.fs.hmpBatchForm.outputs[outIndex].jawak_detail.splice(jwkIndex, 1);
+    }
+  }
+
+  addJawakResponse(ev: any) {
+    if (ev) {
+      if (!this.fs.hmpBatchForm.outputs[this.editOutputIndex!].jawak_detail) {
+        this.fs.hmpBatchForm.outputs[this.editOutputIndex!].jawak_detail = [];
+      }
+      this.fs.hmpBatchForm.outputs[this.editOutputIndex!].jawak_detail.push(ev);
+      this.closeJawakModal();
+    }
+  }
+
+  editJawakResponse(ev: any) {
+    if (ev) {
+      this.fs.hmpBatchForm.outputs[this.editOutputIndex!].jawak_detail.splice(this.editJawakIndex!, 1, ev);
+      this.editOutputIndex = null;
+      this.editJawakIndex = null;
+      this.editData = {};
+      this.closeJawakModal();
+    }
+  }
+
+  closeJawakModal() {
+    this.showModal = '';
+    $('#jawakOffcanvas').offcanvas('hide');
   }
 }

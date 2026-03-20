@@ -69,17 +69,25 @@
 
                 <!-- Left: Inputs (Consumption) -->
                 <!-- <div class="col-md-6 border-end"> -->
-                <h5 class="text-secondary">Input Materials (Consumed)</h5>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="text-secondary m-0">Input Materials (Consumed)</h5>
+                    <div class="form-check form-switch m-0 d-flex align-items-center">
+                        <input class="form-check-input me-2" type="checkbox" id="autoJawakGlobal"
+                            [(ngModel)]="fs.hmpBatchForm.auto_jawak" name="auto_jawak_global">
+                        <label class="form-check-label text-secondary fw-bold" for="autoJawakGlobal"
+                            style="cursor: pointer;">Auto Jawak</label>
+                    </div>
+                </div>
                 <div class="table-container">
                     <table class="table table-sm table-bordered">
                         <thead class="table-light">
                             <tr>
                                 <th width="5%">#</th>
-                                <!-- <th width="15%">Lot</th> -->
-                                <th width="35%">Item</th>
+                                <th width="30%">Item</th>
                                 <th width="15%">Qty</th>
                                 <th width="15%">Rate</th>
                                 <th width="15%">Condition</th>
+                                <th width="15%">Aawak Source</th>
                                 <th width="5%">Action</th>
                             </tr>
                         </thead>
@@ -118,33 +126,40 @@
                                     <div class="d-flex align-items-center">
                                         <input type="number" class="form-control-sm flex-fill" [(ngModel)]="row.qty"
                                             name="in_qty_{{i}}">
-                                        <!-- <span> -->
                                         <ng-select appendTo="#hmpEntryForm" class="custom-sm border mw-3"
                                             [items]="units" bindLabel="unit_short" bindValue="_id"
-                                            [(ngModel)]="row.unit_id" #item_subitem_id="ngModel" name="in_unit_{{i}}"
-                                            [clearable]="false" placeholder="Unit"></ng-select>
-                                        <!-- </span> -->
+                                            [(ngModel)]="row.unit_id" name="in_unit_{{i}}" [clearable]="false"
+                                            placeholder="Unit"></ng-select>
                                     </div>
                                 </td>
 
                                 <!-- Rate -->
                                 <td>
                                     <input type="number" class="form-control form-control-sm" [(ngModel)]="row.rate"
-                                        #item_subitem_id="ngModel" name="in_rate_{{i}}">
+                                        name="in_rate_{{i}}">
                                 </td>
                                 <!-- Condition -->
                                 <td>
                                     <ng-select appendTo="#hmpEntryForm" class="custom-sm" [(ngModel)]="row.condition_id"
-                                        #item_subitem_id="ngModel" name="in_condition_{{i}}" [clearable]="false"
-                                        placeholder="Select Condition">
+                                        name="in_condition_{{i}}" [clearable]="false" placeholder="Select Condition">
                                         <ng-option selected="selected" disabled value="">Select Condition</ng-option>
                                         <ng-option *ngFor="let item of conditions"
                                             [value]="item._id">{{item.list_name_hin}} :
                                             {{item.list_name_eng}} </ng-option>
                                     </ng-select>
                                 </td>
+                                <!-- Aawak Source (Inputs Only) -->
+                                <td>
+                                    <ng-select appendTo="#hmpEntryForm" class="custom-sm"
+                                        [(ngModel)]="row.aawak_source_id" name="in_aawak_source_{{i}}"
+                                        [clearable]="true" placeholder="Aawak Source">
+                                        <ng-option *ngFor="let item of conditions" [value]="item._id">
+                                            {{item.list_name_hin}} : {{item.list_name_eng}}
+                                        </ng-option>
+                                    </ng-select>
+                                </td>
                                 <!-- Delete Action -->
-                                <td class="text-center">
+                                <td class="text-center align-middle">
                                     <button *ngIf="row.item_subitem_id && fs.hmpBatchForm.inputs.length > 1"
                                         type="button" class="btn btn-sm btn-danger" (click)="deleteRow('inputs', i)"
                                         title="Delete this row" style="padding: 0.2rem 0.5rem; border-radius: 4px;">
@@ -162,103 +177,148 @@
 
             <!-- Right: Outputs (Production) -->
             <div class="row">
-                <h5 class="text-primary">Output Products (Produced)</h5>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="text-primary m-0">Output Products (Produced)</h5>
+                    <div class="form-check form-switch m-0 d-flex align-items-center">
+                        <input class="form-check-input me-2" type="checkbox" id="autoAawakGlobal"
+                            [(ngModel)]="fs.hmpBatchForm.auto_aawak" name="auto_aawak_global">
+                        <label class="form-check-label text-primary fw-bold" for="autoAawakGlobal"
+                            style="cursor: pointer;">Auto Aawak</label>
+                    </div>
+                </div>
                 <div class="table-container">
                     <table class="table table-sm table-bordered">
                         <thead class="table-light">
                             <tr>
                                 <th width="5%">#</th>
                                 <th width="35%">Item</th>
-                                <th width="15%">Qty</th>
+                                <th width="20%">Qty</th>
                                 <th width="15%">Rate</th>
-                                <th width="15%">Condition</th>
+                                <th width="20%">Condition</th>
                                 <th width="5%">Action</th>
-                                <!-- <th width="20%">Amount</th> -->
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ngModelGroup="out_{{i}}" #rowOutput="ngModelGroup"
+                            <ng-container
                                 *ngFor="let row of fs.hmpBatchForm.outputs; let i = index; trackBy: trackByIndex">
-                                <td>{{i+1}}</td>
-                                <!-- Item Dropdown -->
-                                <td>
-                                    <!-- <ng-select appendTo="body" class="custom-sm" [clearable]="true" [virtualScroll]="true"
-                                        [(ngModel)]="row.item_subitem_id" name="out_item_{{i}}"
-                                        (change)="itemSubitemSelectedOutput($event, i)" placeholder="Item">
-                                        <ng-container *ngFor="let item of items">
-                                            <ng-option [value]="item._id + ':'">{{item.item_hin}}</ng-option>
-                                            <ng-option *ngFor="let sub of item.subitems"
-                                                [value]="item._id + ':' + sub._id">
-                                                -- {{sub.subitem_hin}}
-                                            </ng-option>
-                                        </ng-container>
-                                    </ng-select> -->
-                                    <ng-select appendTo="#hmpEntryForm" class="custom" style="width: 100%;"
-                                        placeholder="Select Item" [clearable]="true" [virtualScroll]="true"
-                                        [(ngModel)]="row.item_subitem_id" name="out_item_{{i}}"
-                                        #item_subitem_id="ngModel" (change)="itemSubitemSelected($event, i, 'outputs')"
-                                        [ngClass]="{'validation' : (item_subitem_id?.touched || f.submitted) && item_subitem_id.errors?.['required']}"
-                                        [selectOnTab]="true" required [showSelectAll]="false" styleMode="material">
+                                <tr ngModelGroup="out_{{i}}" #rowOutput="ngModelGroup">
+                                    <td>{{i+1}}</td>
+                                    <!-- Item Dropdown -->
+                                    <td>
+                                        <ng-select appendTo="#hmpEntryForm" class="custom" style="width: 100%;"
+                                            placeholder="Select Item" [clearable]="true" [virtualScroll]="true"
+                                            [(ngModel)]="row.item_subitem_id" name="out_item_{{i}}"
+                                            #item_subitem_id="ngModel"
+                                            (change)="itemSubitemSelected($event, i, 'outputs')"
+                                            [ngClass]="{'validation' : (item_subitem_id?.touched || f.submitted) && item_subitem_id.errors?.['required']}"
+                                            [selectOnTab]="true" required [showSelectAll]="false" styleMode="material">
 
-                                        <ng-container *ngFor="let item of items | filterByDate:fs.hmpBatchForm.date">
-                                            <ng-option [value]="item._id + ':' + null">
-                                                {{item.item_hin}} : {{item.item_eng}} : {{item.item_roman ?
-                                                item.item_roman : ''}} : {{item.item_code}}
-                                            </ng-option>
+                                            <ng-container
+                                                *ngFor="let item of items | filterByDate:fs.hmpBatchForm.date">
+                                                <ng-option [value]="item._id + ':' + null">
+                                                    {{item.item_hin}} : {{item.item_eng}} : {{item.item_roman ?
+                                                    item.item_roman : ''}} : {{item.item_code}}
+                                                </ng-option>
 
-                                            <ng-option
-                                                *ngFor="let subitem of item.subitems | filterByDate:fs.hmpBatchForm.date"
-                                                [value]="item._id + ':' + subitem._id">
-                                                {{subitem.subitem_hin}} {{item.item_hin}} :
-                                                {{subitem.subitem_eng}} {{item.item_eng}} :
-                                                {{subitem.subitem_roman ? subitem.subitem_roman : ''}} :
-                                                {{item.item_roman ? item.item_roman : ''}} :
-                                                {{subitem.subitem_code}} {{item.item_code}}
-                                            </ng-option>
-                                        </ng-container>
-                                    </ng-select>
-                                </td>
-                                <!-- Qty & Unit -->
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <input type="number" class="form-control-sm flex-fill" [(ngModel)]="row.qty"
-                                            name="out_qty_{{i}}">
-                                        <!-- <span> -->
-                                        <ng-select appendTo="#hmpEntryForm" class="custom-sm border mw-3"
-                                            [items]="units" bindLabel="unit_short" bindValue="_id"
-                                            [(ngModel)]="row.unit_id" name="out_unit_{{i}}" [clearable]="false"
-                                            placeholder="Unit"></ng-select>
-                                        <!-- </span> -->
-                                    </div>
-                                </td>
+                                                <ng-option
+                                                    *ngFor="let subitem of item.subitems | filterByDate:fs.hmpBatchForm.date"
+                                                    [value]="item._id + ':' + subitem._id">
+                                                    {{subitem.subitem_hin}} {{item.item_hin}} :
+                                                    {{subitem.subitem_eng}} {{item.item_eng}} :
+                                                    {{subitem.subitem_roman ? subitem.subitem_roman : ''}} :
+                                                    {{item.item_roman ? item.item_roman : ''}} :
+                                                    {{subitem.subitem_code}} {{item.item_code}}
+                                                </ng-option>
+                                            </ng-container>
+                                        </ng-select>
+                                    </td>
+                                    <!-- Qty & Unit -->
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <input type="number" class="form-control-sm flex-fill" [(ngModel)]="row.qty"
+                                                name="out_qty_{{i}}">
+                                            <ng-select appendTo="#hmpEntryForm" class="custom-sm border mw-3"
+                                                [items]="units" bindLabel="unit_short" bindValue="_id"
+                                                [(ngModel)]="row.unit_id" name="out_unit_{{i}}" [clearable]="false"
+                                                placeholder="Unit"></ng-select>
+                                        </div>
+                                    </td>
+                                    <!-- Rate -->
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm" [(ngModel)]="row.rate"
+                                            name="out_rate_{{i}}">
+                                    </td>
+                                    <!-- Condition -->
+                                    <td>
+                                        <ng-select appendTo="#hmpEntryForm" class="custom-sm"
+                                            [(ngModel)]="row.condition_id" name="out_condition_{{i}}"
+                                            [clearable]="false" placeholder="Select Condition">
+                                            <ng-option selected="selected" disabled value="">Select
+                                                Condition</ng-option>
+                                            <ng-option *ngFor="let item of conditions"
+                                                [value]="item._id">{{item.list_name_hin}} :
+                                                {{item.list_name_eng}} </ng-option>
+                                        </ng-select>
+                                    </td>
+                                    <!-- Delete Action -->
+                                    <td class="text-center align-middle">
+                                        <button *ngIf="row.item_subitem_id && fs.hmpBatchForm.outputs.length > 1"
+                                            type="button" class="btn btn-sm btn-danger mb-1"
+                                            (click)="deleteRow('outputs', i)" title="Delete this row"
+                                            style="padding: 0.2rem 0.5rem; border-radius: 4px;">
+                                            <i class="uil uil-times"></i>
+                                        </button>
+                                        <button *ngIf="row.item_subitem_id" type="button" class="btn btn-sm btn-info"
+                                            (click)="addJawakToOutput(i)" title="Add Jawak"
+                                            style="padding: 0.2rem 0.5rem; border-radius: 4px; display: block; margin: 0 auto;">
+                                            <i class="uil uil-plus"></i> Jwk
+                                        </button>
+                                    </td>
+                                </tr>
 
-
-
-                                <!-- Rate -->
-                                <td>
-                                    <input type="number" class="form-control form-control-sm" [(ngModel)]="row.rate"
-                                        name="out_rate_{{i}}">
-                                </td>
-
-                                <!-- Condition -->
-                                <td>
-                                    <ng-select appendTo="#hmpEntryForm" class="custom-sm" [(ngModel)]="row.condition_id"
-                                        name="out_condition_{{i}}" [clearable]="false" placeholder="Select Condition">
-                                        <ng-option selected="selected" disabled value="">Select Condition</ng-option>
-                                        <ng-option *ngFor="let item of conditions"
-                                            [value]="item._id">{{item.list_name_hin}} :
-                                            {{item.list_name_eng}} </ng-option>
-                                    </ng-select>
-                                </td>
-                                <!-- Delete Action -->
-                                <td class="text-center">
-                                    <button *ngIf="row.item_subitem_id && fs.hmpBatchForm.outputs.length > 1"
-                                        type="button" class="btn btn-sm btn-danger" (click)="deleteRow('outputs', i)"
-                                        title="Delete this row" style="padding: 0.2rem 0.5rem; border-radius: 4px;">
-                                        <i class="uil uil-times"></i>
-                                    </button>
-                                </td>
-                            </tr>
+                                <!-- Nested Jawak Details Table -->
+                                <tr *ngIf="row.jawak_detail && row.jawak_detail.length > 0">
+                                    <td></td>
+                                    <td colspan="5">
+                                        <div class="p-2 border rounded bg-light">
+                                            <h6 class="mb-2 text-primary">Jawak Distribution</h6>
+                                            <table class="table table-sm table-bordered m-0"
+                                                style="background-color: white;">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Jawak MM</th>
+                                                        <th>Person (PBK)</th>
+                                                        <th>Qty</th>
+                                                        <th>Type</th>
+                                                        <th class="text-center">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr *ngFor="let jwk of row.jawak_detail; let j = index">
+                                                        <td style="width: 15%">{{jwk.date | date:'dd-MM-yyyy'}}</td>
+                                                        <td style="width: 20%">{{jwk.jawak_mm_hin}}</td>
+                                                        <td style="width: 30%">{{jwk.pbk_hin}} {{jwk.pbk_state_hin ? '('
+                                                            + jwk.pbk_state_hin + ')' : ''}}</td>
+                                                        <td style="width: 10%">{{jwk.qty}}</td>
+                                                        <td style="width: 15%">{{jwk.jawak_type_hin}}</td>
+                                                        <td style="width: 10%" class="text-center align-middle">
+                                                            <i class="uil uil-edit-alt mx-1 text-primary cursor-pointer"
+                                                                style="cursor: pointer; font-size: 1.1rem;"
+                                                                (click)="editJawakOfOutput(i, j)"
+                                                                title="Edit Jawak"></i>
+                                                            <i class="uil uil-trash text-danger cursor-pointer"
+                                                                style="cursor: pointer; font-size: 1.1rem;"
+                                                                (click)="removeJawak(i, j, jwk._id)"
+                                                                title="Delete Jawak"></i>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </ng-container>
                         </tbody>
                     </table>
                 </div>
@@ -275,5 +335,23 @@
             </div> -->
 
         </form>
+    </div>
+</div>
+
+<!-- Jawak Offcanvas -->
+<div class="offcanvas offcanvas-end me-2 " tabindex="-1" id="jawakOffcanvas" aria-labelledby="jawakOffcanvasLabel"
+    style="width: 98vw;">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="jawakOffcanvasLabel">{{showModal}}</h5>
+        <button type="button" class="btn-close" (click)="closeJawakModal()" aria-label="Close">
+            <i class="uil uil-times"></i>
+        </button>
+    </div>
+    <div class="offcanvas-body p-0">
+        <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)="addJawakResponse($event)" [noAPICall]="true"
+            [aawakRef]="editData"></app-jawak-entry>
+
+        <app-jawak-entry *ngIf="showModal == 'Edit Jawak'" (response)="editJawakResponse($event)" [noAPICall]="true"
+            [isEdit]="true" [getData]="editData"></app-jawak-entry>
     </div>
 </div>

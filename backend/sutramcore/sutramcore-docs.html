@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sutramcore — SQLite ORM for Node.js</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d0f14;
+    --bg2:       #13161d;
+    --bg3:       #1a1e28;
+    --bg4:       #222736;
+    --border:    #2a2f3e;
+    --border2:   #353c50;
+    --text:      #e2e6f0;
+    --text2:     #9ba3b8;
+    --text3:     #5f6880;
+    --accent:    #7c9bff;
+    --accent2:   #5b7bef;
+    --green:     #4ade80;
+    --green2:    #166534;
+    --orange:    #fb923c;
+    --orange2:   #7c2d12;
+    --red:       #f87171;
+    --yellow:    #fbbf24;
+
+    /* code token colors */
+    --tk-kw:     #c084fc;
+    --tk-fn:     #7c9bff;
+    --tk-str:    #4ade80;
+    --tk-num:    #fb923c;
+    --tk-cmt:    #5f6880;
+    --tk-prop:   #e2e6f0;
+    --tk-op:     #9ba3b8;
+    --tk-const:  #fbbf24;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── LAYOUT ── */
+  .shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 0 0 40px 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  .sidebar-logo .name {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .sidebar-logo .tagline {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 2px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .sidebar-badge {
+    display: inline-block;
+    background: var(--bg4);
+    border: 1px solid var(--border2);
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+  }
+
+  .nav-group {
+    padding: 8px 0;
+  }
+
+  .nav-group-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 8px 24px 4px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 24px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-link:hover {
+    color: var(--text);
+    background: var(--bg3);
+    border-left-color: var(--border2);
+  }
+
+  .nav-link.active {
+    color: var(--accent);
+    background: rgba(124,155,255,0.07);
+    border-left-color: var(--accent);
+  }
+
+  .nav-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--border2);
+    flex-shrink: 0;
+  }
+
+  .nav-link.active .nav-dot { background: var(--accent); }
+
+  /* ── MAIN ── */
+  .main {
+    padding: 0;
+    max-width: 900px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 72px 64px 56px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, #0d0f14 0%, #111422 50%, #0d1020 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(124,155,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 20px; height: 1px;
+    background: var(--accent);
+  }
+
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .hero h1 span {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--text2);
+    font-weight: 300;
+    margin-bottom: 36px;
+    max-width: 520px;
+    line-height: 1.6;
+  }
+
+  .hero-install {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--green);
+  }
+
+  .hero-install .prompt { color: var(--text3); }
+
+  .hero-chips {
+    display: flex;
+    gap: 10px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .chip .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: 0 64px 80px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    padding-top: 60px;
+  }
+
+  .section-anchor {
+    display: block;
+    position: relative;
+    top: -80px;
+    visibility: hidden;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .section h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .section h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 28px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section h3::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .section p {
+    color: var(--text2);
+    margin-bottom: 16px;
+    line-height: 1.75;
+    font-size: 14.5px;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-wrap {
+    margin: 18px 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.3px;
+  }
+
+  .code-lang {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    background: rgba(124,155,255,0.1);
+    border: 1px solid rgba(124,155,255,0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .code-body {
+    padding: 20px 24px;
+    overflow-x: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  .code-body pre { margin: 0; white-space: pre; }
+
+  /* tokens */
+  .kw  { color: var(--tk-kw); }
+  .fn  { color: var(--tk-fn); }
+  .str { color: var(--tk-str); }
+  .num { color: var(--tk-num); }
+  .cmt { color: var(--tk-cmt); font-style: italic; }
+  .cn  { color: var(--tk-const); }
+  .op  { color: var(--tk-op); }
+  .pr  { color: #e2e6f0; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    display: flex;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  .callout.info {
+    background: rgba(124,155,255,0.07);
+    border: 1px solid rgba(124,155,255,0.2);
+    color: #a5b8ff;
+  }
+
+  .callout.tip {
+    background: rgba(74,222,128,0.07);
+    border: 1px solid rgba(74,222,128,0.2);
+    color: #86efac;
+  }
+
+  .callout.warn {
+    background: rgba(251,146,60,0.07);
+    border: 1px solid rgba(251,146,60,0.2);
+    color: #fdba74;
+  }
+
+  /* ── TABLE ── */
+  .doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13.5px;
+  }
+
+  .doc-table th {
+    background: var(--bg3);
+    color: var(--text2);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .doc-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+
+  .doc-table tr:last-child td { border-bottom: none; }
+  .doc-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .doc-table code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(124,155,255,0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  .tbl-wrap {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+
+  /* ── TWO COL ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .badge.green { background: rgba(74,222,128,0.1); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+  .badge.blue  { background: rgba(124,155,255,0.1); color: var(--accent); border: 1px solid rgba(124,155,255,0.2); }
+  .badge.orange{ background: rgba(251,146,60,0.1); color: var(--orange); border: 1px solid rgba(251,146,60,0.2); }
+
+  /* ── DIVIDER ── */
+  hr.sec { border: none; border-top: 1px solid var(--border); margin: 48px 0 0; }
+
+  /* ── INLINE CODE ── */
+  p code, li code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12.5px;
+    color: var(--accent);
+    background: rgba(124,155,255,0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(124,155,255,0.15);
+  }
+
+  ul.doc-list { padding-left: 20px; }
+  ul.doc-list li { color: var(--text2); font-size: 14px; margin-bottom: 6px; }
+
+  /* ── JOIN CARD ── */
+  .join-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 20px 0; }
+  .join-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    transition: border-color 0.2s;
+  }
+  .join-card:hover { border-color: var(--accent); }
+  .join-card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .join-card-desc { font-size: 12.5px; color: var(--text2); line-height: 1.6; }
+  .join-card-where { font-size: 11px; color: var(--text3); margin-top: 8px; font-family: 'DM Mono', monospace; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .hero { padding: 48px 28px; }
+    .content { padding: 0 28px 60px; }
+    .join-cards { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="name">sutramcore</div>
+    <div class="tagline">सूत्र — foundational thread</div>
+    <div class="sidebar-badge">v1.0.0</div>
+  </div>
+
+  <nav>
+    <div class="nav-group">
+      <div class="nav-group-label">Getting Started</div>
+      <a href="#install" class="nav-link"><span class="nav-dot"></span>Installation</a>
+      <a href="#connect" class="nav-link"><span class="nav-dot"></span>Connection</a>
+      <a href="#schema" class="nav-link"><span class="nav-dot"></span>Defining Schema</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">CRUD</div>
+      <a href="#insert" class="nav-link"><span class="nav-dot"></span>Insert</a>
+      <a href="#update" class="nav-link"><span class="nav-dot"></span>Update</a>
+      <a href="#delete" class="nav-link"><span class="nav-dot"></span>Delete</a>
+      <a href="#getone" class="nav-link"><span class="nav-dot"></span>Get One</a>
+      <a href="#getall" class="nav-link"><span class="nav-dot"></span>Get All</a>
+      <a href="#count" class="nav-link"><span class="nav-dot"></span>Count</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Querying</div>
+      <a href="#where" class="nav-link"><span class="nav-dot"></span>WHERE Clause</a>
+      <a href="#joins" class="nav-link"><span class="nav-dot"></span>Joins</a>
+      <a href="#nested" class="nav-link"><span class="nav-dot"></span>Nested Joins</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Advanced</div>
+      <a href="#transactions" class="nav-link"><span class="nav-dot"></span>Transactions</a>
+      <a href="#rawsql" class="nav-link"><span class="nav-dot"></span>Raw SQL</a>
+      <a href="#migrations" class="nav-link"><span class="nav-dot"></span>Migrations</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Reference</div>
+      <a href="#api" class="nav-link"><span class="nav-dot"></span>API Reference</a>
+      <a href="#types" class="nav-link"><span class="nav-dot"></span>Type Coercion</a>
+    </div>
+  </nav>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">SQLite ORM for Node.js</div>
+    <h1>sutram<span>core</span></h1>
+    <p class="hero-sub">
+      Metadata-driven SQLite ORM built on better-sqlite3.
+      Define your schema once — get automatic joins, type coercion, and clean CRUD.
+    </p>
+    <div class="hero-install">
+      <span class="prompt">$</span>
+      <span>npm install sutramcore better-sqlite3</span>
+    </div>
+    <div class="hero-chips">
+      <div class="chip"><span class="dot" style="background:#4ade80"></span>Synchronous</div>
+      <div class="chip"><span class="dot" style="background:#7c9bff"></span>Instance-based</div>
+      <div class="chip"><span class="dot" style="background:#fb923c"></span>No global state</div>
+      <div class="chip"><span class="dot" style="background:#c084fc"></span>Schema-driven joins</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── INSTALLATION ── -->
+    <div class="section">
+      <span class="section-anchor" id="install"></span>
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2>Installation</h2>
+      </div>
+
+      <p><code>better-sqlite3</code> is a peer dependency — you install it separately to avoid native binary version conflicts.</p>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">terminal</span>
+          <span class="code-lang">bash</span>
+        </div>
+        <div class="code-body"><pre><span class="cmt"># install both</span>
+<span class="fn">npm</span> install sutramcore better-sqlite3
+
+<span class="cmt"># generate starter files in database/</span>
+<span class="fn">npx</span> sutramcore init</pre></div>
+      </div>
+
+      <p>The <code>init</code> command creates <code>database/schema.js</code>, <code>database/migrations.js</code>, and <code>database/views.js</code> with examples to get you started.</p>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── CONNECTION ── -->
+    <div class="section">
+      <span class="section-anchor" id="connect"></span>
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2>Connection</h2>
+      </div>
+
+      <p>Create one <code>Sutram</code> instance per database. Each instance is fully isolated — its own connection, schema, and prepared statement cache.</p>
+
+      <h3>Option A — Pass your own db instance</h3>
+      <p>Use when you already have a db file with your own migration runner. Hand the ready <code>db</code> to sutramcore.</p>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">database/db.js</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> { <span class="cn">Sutram</span> }  = <span class="fn">require</span>(<span class="str">'sutramcore'</span>);
+<span class="kw">const</span> Database     = <span class="fn">require</span>(<span class="str">'better-sqlite3'</span>);
+<span class="kw">const</span> schema       = <span class="fn">require</span>(<span class="str">'./schema'</span>);
+
+<span class="kw">const</span> db   = <span class="kw">new</span> <span class="fn">Database</span>(<span class="str">'./app.db'</span>);
+<span class="cmt">// ... your own migration runner here ...</span>
+
+<span class="kw">const</span> app  = <span class="kw">new</span> <span class="fn">Sutram</span>({ db, schema });
+
+module.exports = { app };</pre></div>
+      </div>
+
+      <h3>Option B — Let sutramcore manage the db</h3>
+      <p>For fresh projects. sutramcore opens the file, runs migrations, sets up views, and returns a ready instance.</p>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">database/db.js</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> { <span class="cn">Sutram</span> }  = <span class="fn">require</span>(<span class="str">'sutramcore'</span>);
+<span class="kw">const</span> schema       = <span class="fn">require</span>(<span class="str">'./schema'</span>);
+<span class="kw">const</span> migrations   = <span class="fn">require</span>(<span class="str">'./migrations'</span>);
+<span class="kw">const</span> views        = <span class="fn">require</span>(<span class="str">'./views'</span>);
+
+<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Sutram</span>({
+  dbPath: <span class="str">'./app.db'</span>,
+  schema,
+  migrations,
+  views,
+});
+
+module.exports = { app };</pre></div>
+      </div>
+
+      <h3>Multiple databases</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">two isolated connections</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> shopDB  = <span class="kw">new</span> <span class="fn">Sutram</span>({ db: shopConn,  schema });
+<span class="kw">const</span> auditDB = <span class="kw">new</span> <span class="fn">Sutram</span>({ db: auditConn, schema });
+
+<span class="cmt">// completely isolated — different connections, different caches</span>
+<span class="kw">const</span> product = shopDB.<span class="fn">table</span>(<span class="str">'product'</span>);
+<span class="kw">const</span> log     = auditDB.<span class="fn">table</span>(<span class="str">'log'</span>);</pre></div>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── SCHEMA ── -->
+    <div class="section">
+      <span class="section-anchor" id="schema"></span>
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2>Defining Schema</h2>
+      </div>
+
+      <p>The schema describes your tables — columns, types, defaults, and relationships. Write it once; sutramcore generates all SQL from it.</p>
+
+      <h3>Column types</h3>
+
+      <div class="tbl-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Builder</th><th>SQLite type</th><th>JS → DB</th><th>DB → JS</th></tr></thead>
+          <tbody>
+            <tr><td><code>col.id()</code></td><td>INTEGER PK AUTOINCREMENT</td><td>—</td><td>number</td></tr>
+            <tr><td><code>col.number()</code></td><td>INTEGER / DECIMAL</td><td>Number(val)</td><td>number | null</td></tr>
+            <tr><td><code>col.string()</code></td><td>VARCHAR / TEXT</td><td>String(val).trim()</td><td>string | null</td></tr>
+            <tr><td><code>col.boolean()</code></td><td>TINYINT 0/1</td><td>true → 1, false → 0</td><td>1 → true, 0 → false</td></tr>
+            <tr><td><code>col.json()</code></td><td>TEXT (JSON string)</td><td>JSON.stringify()</td><td>JSON.parse()</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>A complete schema example</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">database/schema.js</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> { defineTable, col } = <span class="fn">require</span>(<span class="str">'sutramcore'</span>);
+
+module.exports = {
+
+  <span class="cmt">// ── simple lookup table ────────────────────────────</span>
+  ...<span class="fn">defineTable</span>(<span class="str">'category'</span>, {
+    _id:          col.<span class="fn">id</span>(),
+    name:         col.<span class="fn">string</span>().<span class="fn">required</span>(),
+    active:       col.<span class="fn">boolean</span>().<span class="fn">default</span>(<span class="num">1</span>),
+  }),
+
+  <span class="cmt">// ── table with hasOne join ─────────────────────────</span>
+  ...<span class="fn">defineTable</span>(<span class="str">'product'</span>, {
+    _id:          col.<span class="fn">id</span>(),
+    name:         col.<span class="fn">string</span>().<span class="fn">required</span>(),
+    price:        col.<span class="fn">number</span>().<span class="fn">default</span>(<span class="num">0</span>),
+    category_id:  col.<span class="fn">ref</span>(<span class="str">'category._id'</span>, {   <span class="cmt">// hasOne</span>
+                    as:     <span class="str">'category'</span>,
+                    select: [<span class="str">'name'</span>],
+                  }),
+    in_stock:     col.<span class="fn">boolean</span>().<span class="fn">default</span>(<span class="num">1</span>),
+    meta:         col.<span class="fn">json</span>(),
+    active:       col.<span class="fn">boolean</span>().<span class="fn">default</span>(<span class="num">1</span>),
+  }, {
+    <span class="cmt">// hasMany — orders that include this product</span>
+    order_items: {
+      hasMany: <span class="kw">true</span>,
+      table:   <span class="str">'order_item'</span>,
+      on:      <span class="str">'product_id'</span>,   <span class="cmt">// FK on order_item</span>
+      target:  <span class="str">'_id'</span>,
+      as:      <span class="str">'order_items'</span>,
+      select:  [<span class="str">'_id'</span>, <span class="str">'qty'</span>, <span class="str">'price'</span>],
+    },
+    <span class="cmt">// manyToMany — tags via junction table</span>
+    tags: {
+      manyToMany: <span class="kw">true</span>,
+      table:      <span class="str">'tag'</span>,
+      junction:   <span class="str">'product_tag'</span>,
+      on:         <span class="str">'product_id'</span>,
+      target:     <span class="str">'tag_id'</span>,
+      as:         <span class="str">'tags'</span>,
+      select:     [<span class="str">'_id'</span>, <span class="str">'label'</span>],
+    },
+  }),
+
+};</pre></div>
+      </div>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ</span>
+        <span>Raw object style also works: <code>{ type: 'string', ref: 'category._id', as: 'category', select: ['name'] }</code>. Both styles are equivalent — use whichever you prefer.</span>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── INSERT ── -->
+    <div class="section">
+      <span class="section-anchor" id="insert"></span>
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2>Insert</h2>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">insert examples</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> { app } = <span class="fn">require</span>(<span class="str">'./database/db'</span>);
+<span class="kw">const</span> product  = app.<span class="fn">table</span>(<span class="str">'product'</span>);
+
+<span class="cmt">// insert — returns full object with joins (default)</span>
+<span class="kw">const</span> newProduct = product.<span class="fn">insert</span>({
+  name:        <span class="str">'Wireless Keyboard'</span>,
+  price:       <span class="num">1299</span>,
+  category_id: <span class="num">2</span>,
+  in_stock:    <span class="kw">true</span>,
+});
+<span class="cmt">// newProduct._id = 1</span>
+<span class="cmt">// newProduct.category = { name: 'Electronics' }   ← joined automatically</span>
+<span class="cmt">// newProduct.in_stock = true                      ← coerced from 1</span>
+
+<span class="cmt">// insert — return only the new _id (faster, use inside transactions)</span>
+<span class="kw">const</span> id = product.<span class="fn">insert</span>({ name: <span class="str">'USB Hub'</span>, price: <span class="num">499</span> }, <span class="kw">false</span>);</pre></div>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-icon">✓</span>
+        <span>Use <code>full: false</code> inside transactions and loops — it skips the follow-up SELECT and is significantly faster for bulk operations.</span>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── UPDATE ── -->
+    <div class="section">
+      <span class="section-anchor" id="update"></span>
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2>Update</h2>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">update examples</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> product = app.<span class="fn">table</span>(<span class="str">'product'</span>);
+
+<span class="cmt">// updateById — most common pattern</span>
+<span class="kw">const</span> updated = product.<span class="fn">updateById</span>({ price: <span class="num">999</span>, in_stock: <span class="kw">false</span> }, <span class="num">1</span>);
+<span class="cmt">// returns full updated row</span>
+
+<span class="cmt">// update with object WHERE</span>
+product.<span class="fn">update</span>({ in_stock: <span class="kw">false</span> }, { category_id: <span class="num">3</span> });
+
+<span class="cmt">// update with raw string WHERE</span>
+product.<span class="fn">update</span>({ active: <span class="num">0</span> }, <span class="str">"price = 0 AND in_stock = 0"</span>);
+
+<span class="cmt">// full: false — skip return fetch (just returns the id)</span>
+product.<span class="fn">updateById</span>({ price: <span class="num">1499</span> }, <span class="num">1</span>, <span class="kw">false</span>);</pre></div>
+      </div>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ</span>
+        <span>Only fields present in the data object are updated. Missing fields are untouched. Sutramcore runs sanitize in "update" mode.</span>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── DELETE ── -->
+    <div class="section">
+      <span class="section-anchor" id="delete"></span>
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <h2>Delete</h2>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">delete examples</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> product = app.<span class="fn">table</span>(<span class="str">'product'</span>);
+
+<span class="cmt">// deleteById — returns number of rows deleted</span>
+<span class="kw">const</span> count = product.<span class="fn">deleteById</span>(<span class="num">5</span>);   <span class="cmt">// 1</span>
+
+<span class="cmt">// delete with object WHERE</span>
+product.<span class="fn">delete</span>({ active: <span class="num">0</span> });         <span class="cmt">// delete all inactive</span>
+
+<span class="cmt">// delete with raw string WHERE</span>
+product.<span class="fn">delete</span>(<span class="str">"price = 0 AND in_stock = 0"</span>);</pre></div>
+      </div>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠</span>
+        <span><code>delete()</code> requires a WHERE clause — it throws if <code>where</code> is empty to prevent accidental full-table deletes.</span>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── GET ONE ── -->
+    <div class="section">
+      <span class="section-anchor" id="getone"></span>
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <h2>Get One Row</h2>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">getById / getOne</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> product = app.<span class="fn">table</span>(<span class="str">'product'</span>);
+
+<span class="cmt">// getById — always returns full object with joins</span>
+<span class="kw">const</span> row = product.<span class="fn">getById</span>(<span class="num">1</span>);
+<span class="cmt">// row.category = { name: 'Electronics' }   ← hasOne joined</span>
+<span class="cmt">// row.tags     = [ { _id: 1, label: 'new' } ]   ← manyToMany joined</span>
+<span class="cmt">// returns null if not found</span>
+
+<span class="cmt">// getOne with object WHERE</span>
+<span class="kw">const</span> row = product.<span class="fn">getOne</span>({ name: <span class="str">'USB Hub'</span> });
+
+<span class="cmt">// getOne with raw string WHERE</span>
+<span class="kw">const</span> row = product.<span class="fn">getOne</span>(<span class="str">"price &lt; 500 AND in_stock = 1"</span>);
+
+<span class="cmt">// full: false — no joins, plain SELECT * (faster for checks)</span>
+<span class="kw">const</span> row = product.<span class="fn">getOne</span>({ _id: <span class="num">1</span> }, { full: <span class="kw">false</span> });
+<span class="cmt">// row.category_id = 2   (raw FK, no join)</span></pre></div>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── GET ALL ── -->
+    <div class="section">
+      <span class="section-anchor" id="getall"></span>
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <h2>Get All Rows</h2>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">getAll examples</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> product = app.<span class="fn">table</span>(<span class="str">'product'</span>);
+
+<span class="cmt">// get all active products</span>
+<span class="kw">const</span> rows = product.<span class="fn">getAll</span>({ active: <span class="num">1</span> });
+
+<span class="cmt">// with options — ordering, pagination</span>
+<span class="kw">const</span> rows = product.<span class="fn">getAll</span>({ active: <span class="num">1</span> }, {
+  orderBy: <span class="str">'price ASC'</span>,
+  limit:   <span class="num">20</span>,
+  offset:  <span class="num">0</span>,
+});
+
+<span class="cmt">// raw string WHERE for complex conditions</span>
+<span class="kw">const</span> rows = product.<span class="fn">getAll</span>(<span class="str">"price BETWEEN 100 AND 500 AND in_stock = 1"</span>);
+
+<span class="cmt">// full: false — no joins, much faster for internal processing</span>
+<span class="kw">const</span> rows = product.<span class="fn">getAll</span>({ active: <span class="num">1</span> }, { full: <span class="kw">false</span> });
+
+<span class="cmt">// paginated list — typical API pattern</span>
+<span class="kw">const</span> PAGE    = <span class="num">20</span>;
+<span class="kw">const</span> pageNo  = <span class="num">2</span>;
+<span class="kw">const</span> total   = product.<span class="fn">count</span>({ active: <span class="num">1</span> });
+<span class="kw">const</span> items   = product.<span class="fn">getAll</span>({ active: <span class="num">1</span> }, {
+  limit:  PAGE,
+  offset: (pageNo - <span class="num">1</span>) * PAGE,
+  orderBy: <span class="str">'name ASC'</span>,
+});</pre></div>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── COUNT ── -->
+    <div class="section">
+      <span class="section-anchor" id="count"></span>
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <h2>Count</h2>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">count examples</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> product = app.<span class="fn">table</span>(<span class="str">'product'</span>);
+
+product.<span class="fn">count</span>();                        <span class="cmt">// all rows</span>
+product.<span class="fn">count</span>({ active: <span class="num">1</span> });           <span class="cmt">// active only</span>
+product.<span class="fn">count</span>({ category_id: <span class="num">3</span> });      <span class="cmt">// by category</span>
+product.<span class="fn">count</span>(<span class="str">"price &gt; 1000"</span>);          <span class="cmt">// raw WHERE</span></pre></div>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── WHERE ── -->
+    <div class="section">
+      <span class="section-anchor" id="where"></span>
+      <div class="section-header">
+        <span class="section-num">10</span>
+        <h2>WHERE Clause — Two Formats</h2>
+      </div>
+
+      <p>Every method that filters rows accepts either an object or a raw SQL string.</p>
+
+      <div class="two-col">
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-label">Object format <span class="badge green">recommended</span></span>
+          </div>
+          <div class="code-body"><pre><span class="cmt">// equality, joined by AND</span>
+{ active: <span class="num">1</span> }
+{ active: <span class="num">1</span>, category_id: <span class="num">2</span> }
+
+<span class="cmt">// all values are bound params</span>
+<span class="cmt">// safe from SQL injection</span>
+{ name: userInput }   <span class="cmt">// safe ✓</span></pre></div>
+        </div>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-label">String format <span class="badge orange">raw SQL</span></span>
+          </div>
+          <div class="code-body"><pre><span class="cmt">// complex conditions</span>
+<span class="str">"price BETWEEN 100 AND 500"</span>
+<span class="str">"name LIKE '%keyboard%'"</span>
+<span class="str">"in_stock = 1 OR price = 0"</span>
+
+<span class="cmt">// OR conditions (object only does AND)</span>
+<span class="str">"cat_id = 1 OR cat_id = 2"</span></pre></div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠</span>
+        <span>Raw string WHERE is not parameterized. Use object format for any user-supplied values to avoid SQL injection.</span>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── JOINS ── -->
+    <div class="section">
+      <span class="section-anchor" id="joins"></span>
+      <div class="section-header">
+        <span class="section-num">11</span>
+        <h2>Joins</h2>
+      </div>
+
+      <p>Declare relationships in the schema once — sutramcore generates the SQL automatically whenever you call <code>getById</code>, <code>getOne</code>, or <code>getAll</code> with the default <code>full: true</code>.</p>
+
+      <div class="join-cards">
+        <div class="join-card">
+          <div class="join-card-title">hasOne</div>
+          <div class="join-card-desc">FK is on this table. Returns a nested object or null.</div>
+          <div class="join-card-where">Declared on FK column</div>
+        </div>
+        <div class="join-card">
+          <div class="join-card-title">hasMany</div>
+          <div class="join-card-desc">FK is on the child table. Returns an array, always.</div>
+          <div class="join-card-where">Declared in joins{}</div>
+        </div>
+        <div class="join-card">
+          <div class="join-card-title">manyToMany</div>
+          <div class="join-card-desc">Through a junction table. Returns an array, always.</div>
+          <div class="join-card-where">Declared in joins{}</div>
+        </div>
+      </div>
+
+      <h3>hasOne — FK on this table</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">schema declaration + result</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="cmt">// schema</span>
+category_id: col.<span class="fn">ref</span>(<span class="str">'category._id'</span>, {
+  as:     <span class="str">'category'</span>,       <span class="cmt">// output key on result</span>
+  select: [<span class="str">'name'</span>],         <span class="cmt">// columns to include</span>
+})
+
+<span class="cmt">// result</span>
+product.<span class="fn">getById</span>(<span class="num">1</span>)
+<span class="cmt">// {</span>
+<span class="cmt">//   _id: 1, name: 'Keyboard', category_id: 2,</span>
+<span class="cmt">//   category: { name: 'Electronics' }  ← joined</span>
+<span class="cmt">//   category: null                     ← if no match</span>
+<span class="cmt">// }</span></pre></div>
+      </div>
+
+      <h3>hasMany — FK on other table</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">schema declaration + result</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="cmt">// schema (in joins{} second arg of defineTable)</span>
+order_items: {
+  hasMany: <span class="kw">true</span>,
+  table:   <span class="str">'order_item'</span>,
+  on:      <span class="str">'product_id'</span>,   <span class="cmt">// FK column on order_item</span>
+  target:  <span class="str">'_id'</span>,           <span class="cmt">// column on this table</span>
+  as:      <span class="str">'order_items'</span>,
+  select:  [<span class="str">'_id'</span>, <span class="str">'qty'</span>, <span class="str">'price'</span>],
+}
+
+<span class="cmt">// result</span>
+product.<span class="fn">getById</span>(<span class="num">1</span>)
+<span class="cmt">// {</span>
+<span class="cmt">//   _id: 1, name: 'Keyboard',</span>
+<span class="cmt">//   order_items: [ { _id: 5, qty: 2, price: 1299 }, ... ]</span>
+<span class="cmt">//   order_items: []   ← if none found</span>
+<span class="cmt">// }</span></pre></div>
+      </div>
+
+      <h3>manyToMany — through junction table</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">schema declaration + result</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="cmt">// schema</span>
+tags: {
+  manyToMany: <span class="kw">true</span>,
+  table:      <span class="str">'tag'</span>,
+  junction:   <span class="str">'product_tag'</span>,   <span class="cmt">// junction table</span>
+  on:         <span class="str">'product_id'</span>,     <span class="cmt">// FK on junction → this</span>
+  target:     <span class="str">'tag_id'</span>,         <span class="cmt">// FK on junction → tag</span>
+  as:         <span class="str">'tags'</span>,
+  select:     [<span class="str">'_id'</span>, <span class="str">'label'</span>],
+}
+
+<span class="cmt">// result</span>
+product.<span class="fn">getById</span>(<span class="num">1</span>)
+<span class="cmt">// {</span>
+<span class="cmt">//   _id: 1, name: 'Keyboard',</span>
+<span class="cmt">//   tags: [ { _id: 1, label: 'wireless' }, { _id: 3, label: 'new' } ]</span>
+<span class="cmt">// }</span></pre></div>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── NESTED JOINS ── -->
+    <div class="section">
+      <span class="section-anchor" id="nested"></span>
+      <div class="section-header">
+        <span class="section-num">12</span>
+        <h2>Nested Joins — One Level Deep</h2>
+      </div>
+
+      <p>When a <code>hasMany</code> child table also has <code>hasOne</code> refs in its schema, sutramcore includes those automatically — no extra config needed.</p>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">order with line items — each item includes its product info</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="cmt">// order_item schema has:</span>
+<span class="cmt">// product_id: col.ref('product._id', { as: 'product', select: ['name', 'price'] })</span>
+
+<span class="cmt">// order schema has hasMany → order_item</span>
+
+<span class="kw">const</span> order = app.<span class="fn">table</span>(<span class="str">'order'</span>).<span class="fn">getById</span>(<span class="num">1</span>);
+
+<span class="cmt">// order.items is nested with product info inside:</span>
+order.items
+<span class="cmt">// [</span>
+<span class="cmt">//   {</span>
+<span class="cmt">//     _id: 1, qty: 2, price: 1299,</span>
+<span class="cmt">//     product_id: 5,</span>
+<span class="cmt">//     product: { name: 'Wireless Keyboard', price: 1299 }  ← nested hasOne</span>
+<span class="cmt">//   },</span>
+<span class="cmt">//   { _id: 2, qty: 1, product: { name: 'USB Hub', price: 499 } }</span>
+<span class="cmt">// ]</span></pre></div>
+      </div>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ</span>
+        <span>Nesting works one level deep automatically. For deeper nesting (grandchild tables), use raw SQL via <code>app.prepare()</code>.</span>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── TRANSACTIONS ── -->
+    <div class="section">
+      <span class="section-anchor" id="transactions"></span>
+      <div class="section-header">
+        <span class="section-num">13</span>
+        <h2>Transactions</h2>
+      </div>
+
+      <p>All transaction methods are bound to the Sutram instance. Automatic transactions commit on success and roll back on any thrown error.</p>
+
+      <h3>Automatic — recommended</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">atomic insert — order + line items</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="kw">const</span> order     = app.<span class="fn">table</span>(<span class="str">'order'</span>);
+<span class="kw">const</span> orderItem = app.<span class="fn">table</span>(<span class="str">'order_item'</span>);
+
+<span class="kw">const</span> orderId = app.<span class="fn">transaction</span>(() => {
+  <span class="kw">const</span> id = order.<span class="fn">insert</span>({
+    customer_id: <span class="num">42</span>,
+    status:      <span class="str">'pending'</span>,
+  }, <span class="kw">false</span>);                          <span class="cmt">// false = return id only</span>
+
+  <span class="kw">for</span> (<span class="kw">const</span> item <span class="kw">of</span> cart) {
+    orderItem.<span class="fn">insert</span>({
+      order_id:   id,
+      product_id: item.product_id,
+      qty:        item.qty,
+      price:      item.price,
+    }, <span class="kw">false</span>);
+  }
+
+  <span class="kw">return</span> id;    <span class="cmt">// returned from transaction()</span>
+});
+<span class="cmt">// if any insert throws → everything rolls back</span></pre></div>
+      </div>
+
+      <h3>Manual — for router-level control</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">manual begin / commit / rollback</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre>app.<span class="fn">begin</span>();
+<span class="kw">try</span> {
+  order.<span class="fn">insert</span>(data, <span class="kw">false</span>);
+  orderItem.<span class="fn">insert</span>(item, <span class="kw">false</span>);
+  app.<span class="fn">commit</span>();
+} <span class="kw">catch</span> (e) {
+  app.<span class="fn">rollback</span>();
+  <span class="kw">throw</span> e;
+}</pre></div>
+      </div>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠</span>
+        <span>better-sqlite3 transactions are synchronous and cannot be nested. Do not call <code>app.transaction()</code> inside another <code>app.transaction()</code>.</span>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── RAW SQL ── -->
+    <div class="section">
+      <span class="section-anchor" id="rawsql"></span>
+      <div class="section-header">
+        <span class="section-num">14</span>
+        <h2>Raw SQL Access</h2>
+      </div>
+
+      <p>For complex aggregations, CTEs, or anything BaseTable doesn't handle — use <code>app.prepare()</code> to access better-sqlite3 directly.</p>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">raw SQL examples</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre><span class="cmt">// aggregate query</span>
+<span class="kw">const</span> stats = app.<span class="fn">prepare</span>(<span class="str">`
+  SELECT category_id,
+         COUNT(*) as total,
+         AVG(price) as avg_price
+  FROM product
+  WHERE active = 1
+  GROUP BY category_id
+`</span>).<span class="fn">all</span>();
+
+<span class="cmt">// single value</span>
+<span class="kw">const</span> row = app.<span class="fn">prepare</span>(
+  <span class="str">`SELECT MAX(price) as highest FROM product`</span>
+).<span class="fn">get</span>();
+<span class="kw">const</span> highest = row?.highest ?? <span class="num">0</span>;
+
+<span class="cmt">// with bound params</span>
+<span class="kw">const</span> rows = app.<span class="fn">prepare</span>(
+  <span class="str">`SELECT * FROM product WHERE category_id = ? AND price &lt; ?`</span>
+).<span class="fn">all</span>(categoryId, maxPrice);</pre></div>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── MIGRATIONS ── -->
+    <div class="section">
+      <span class="section-anchor" id="migrations"></span>
+      <div class="section-header">
+        <span class="section-num">15</span>
+        <h2>Migrations</h2>
+      </div>
+
+      <p>Migrations are an array of arrays. Each inner array is one version. Versions run in order, each in its own transaction.</p>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-label">database/migrations.js</span>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body"><pre>module.exports = [
+
+  <span class="cmt">// version 1 — create tables</span>
+  [
+    <span class="str">`create table category(
+      _id    integer primary key AUTOINCREMENT,
+      name   varchar(100) not null unique,
+      active tinyint default 1
+    )`</span>,
+    <span class="str">`create table product(
+      _id         integer primary key AUTOINCREMENT,
+      name        varchar(200) not null,
+      price       decimal(10,2) default 0,
+      category_id integer references category(_id),
+      in_stock    tinyint default 1,
+      active      tinyint default 1
+    )`</span>,
+  ],
+
+  <span class="cmt">// version 2 — add column</span>
+  [
+    <span class="str">`alter table product add column sku varchar(50)`</span>,
+  ],
+
+  <span class="cmt">// version 3 — drop + recreate trigger in SAME version</span>
+  [
+    <span class="str">`DROP TRIGGER IF EXISTS "old_trigger"`</span>,
+    <span class="str">`CREATE TRIGGER "stock_check" AFTER UPDATE ON product ...`</span>,
+  ],
+
+];</pre></div>
+      </div>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ</span>
+        <span>Never edit past versions — always add a new array at the end. Each version is atomic: failure rolls back only that version, not the whole history.</span>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── API REF ── -->
+    <div class="section">
+      <span class="section-anchor" id="api"></span>
+      <div class="section-header">
+        <span class="section-num">16</span>
+        <h2>API Reference</h2>
+      </div>
+
+      <h3>Sutram instance</h3>
+      <div class="tbl-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Method</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>new Sutram({ db, schema })</code></td><td>Create with existing db instance</td></tr>
+            <tr><td><code>new Sutram({ dbPath, schema, migrations, views })</code></td><td>Create — sutramcore manages db</td></tr>
+            <tr><td><code>app.table(name)</code></td><td>Get cached BaseTable instance</td></tr>
+            <tr><td><code>app.transaction(fn)</code></td><td>Atomic — auto rollback on throw</td></tr>
+            <tr><td><code>app.begin() / commit() / rollback()</code></td><td>Manual transaction control</td></tr>
+            <tr><td><code>app.prepare(sql)</code></td><td>Raw better-sqlite3 statement</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>BaseTable methods</h3>
+      <div class="tbl-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Method</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr><td><code>insert(data, full?)</code></td><td>Full row (default) or new <code>_id</code></td></tr>
+            <tr><td><code>update(data, where, full?)</code></td><td>Full row or <code>_id</code></td></tr>
+            <tr><td><code>updateById(data, id, full?)</code></td><td>Full row or <code>_id</code></td></tr>
+            <tr><td><code>delete(where)</code></td><td>Number of deleted rows</td></tr>
+            <tr><td><code>deleteById(id)</code></td><td>Number of deleted rows</td></tr>
+            <tr><td><code>getById(id)</code></td><td>Full row with joins or <code>null</code></td></tr>
+            <tr><td><code>getOne(where, { full? })</code></td><td>Single row or <code>null</code></td></tr>
+            <tr><td><code>getAll(where, { full?, orderBy?, limit?, offset? })</code></td><td>Array of rows</td></tr>
+            <tr><td><code>count(where)</code></td><td>Number</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <hr class="sec">
+
+    <!-- ── TYPE COERCION ── -->
+    <div class="section">
+      <span class="section-anchor" id="types"></span>
+      <div class="section-header">
+        <span class="section-num">17</span>
+        <h2>Type Coercion</h2>
+      </div>
+
+      <p>sutramcore automatically converts types when writing to and reading from SQLite.</p>
+
+      <div class="tbl-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Type</th><th>Write (JS → DB)</th><th>Read (DB → JS)</th></tr></thead>
+          <tbody>
+            <tr><td><code>boolean</code></td><td><code>true</code>/<code>1</code>/<code>"1"</code>/<code>"true"</code> → <code>1</code>, else → <code>0</code></td><td><code>1</code> → <code>true</code>, <code>0</code> → <code>false</code></td></tr>
+            <tr><td><code>number</code></td><td><code>Number(val)</code> or <code>null</code> if empty</td><td><code>Number(val)</code> or <code>null</code></td></tr>
+            <tr><td><code>string</code></td><td><code>String(val).trim()</code> or <code>null</code></td><td>unchanged</td></tr>
+            <tr><td><code>json</code></td><td><code>JSON.stringify(val)</code></td><td><code>JSON.parse(val)</code> or default</td></tr>
+            <tr><td><code>hasOne join</code></td><td>—</td><td>JSON string → object, or <code>null</code></td></tr>
+            <tr><td><code>hasMany / manyToMany</code></td><td>—</td><td>JSON string → array, or <code>[]</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="height: 80px"></div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /shell -->
+
+<script>
+  // Active nav link on scroll
+  const links = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('.section-anchor');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-link[href="#${id}"]`);
+        if (active) {
+          active.classList.add('active');
+          active.scrollIntoView({ block: 'nearest' });
+        }
+      }
+    });
+  }, { rootMargin: '-20% 0px -75% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
