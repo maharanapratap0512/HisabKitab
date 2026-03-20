@@ -356,6 +356,31 @@ export class AawakEntryComponent implements OnInit {
 	}
 
 	addJawak() {
+		if (this.awkfg.mm_id && !this.awkfg.mm_hin) {
+			let mm = this.mms.find((m: any) => m._id == this.awkfg.mm_id);
+			this.awkfg.mm_hin = mm ? (mm.mm_hin || mm.mm_eng) : '';
+		}
+		if (this.awkfg.aawak_mm_id && !this.awkfg.aawak_mm_hin) {
+			let mm = this.mms.find((m: any) => m._id == this.awkfg.aawak_mm_id);
+			this.awkfg.aawak_mm_hin = mm ? (mm.mm_hin || mm.mm_eng) : '';
+		}
+		if (this.awkfg.item_id && !this.awkfg.item_hin) {
+			let item = this.items.find((i: any) => i._id == this.awkfg.item_id);
+			this.awkfg.item_hin = item ? (item.item_hin || item.item_eng) : '';
+		}
+		if (this.awkfg.subitem_id && !this.awkfg.subitem_hin) {
+			let subitem = this.subitems.find((s: any) => s._id == this.awkfg.subitem_id);
+			this.awkfg.subitem_hin = subitem ? (subitem.subitem_hin || subitem.subitem_eng) : '';
+		}
+		if (this.awkfg.unit_id && !this.awkfg.unit_short) {
+			let unit = this.units.find((u: any) => u._id == this.awkfg.unit_id);
+			this.awkfg.unit_short = unit ? unit.unit_short : '';
+		}
+		if (this.awkfg.aawak_type_id && !this.awkfg.aawak_type_hin) {
+			let type = this.aawak_types.find((t: any) => t._id == this.awkfg.aawak_type_id);
+			this.awkfg.aawak_type_hin = type ? type.list_name_hin : '';
+		}
+
 		this.editData = this.awkfg;
 		this.openModal("Add Jawak");
 	}

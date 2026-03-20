@@ -14,3 +14,17 @@
 .form-control-sm {
     min-height: auto !important;
 }
+
+#jawakOffcanvas {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+
+    .offcanvas-header {
+        background-color: var(--bg-color) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+
+        .offcanvas-title {
+            color: var(--text-color);
+        }
+    }
+}
