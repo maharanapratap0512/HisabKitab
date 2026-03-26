@@ -1,0 +1,12 @@
+{
+    "name": "sutramexcel",
+    "version": "1.0.0-beta.1",
+    "description": "Excel import/export for sutramEngine — schema-driven, FK matching, correction UI support",
+    "main": "index.js",
+    "keywords": ["excel", "import", "sutramcore", "sutramengine", "sutramexcel", "xlsx"],
+    "peerDependencies": {
+        "sutramengine": ">=1.0.0",
+        "exceljs":      ">=4.0.0",
+        "express":      ">=4.0.0"
+    }
+}

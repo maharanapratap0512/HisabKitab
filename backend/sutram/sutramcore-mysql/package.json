@@ -1,0 +1,16 @@
+{
+    "name": "sutramcore-mysql",
+    "version": "1.0.0-beta.1",
+    "description": "MySQL adapter for sutramcore — async BaseTable + Sutram + CLI importer",
+    "main": "index.js",
+    "bin": {
+        "sutramcore-mysql": "./bin/sutramcore-mysql.js"
+    },
+    "keywords": ["mysql", "orm", "async", "sutramcore", "sutram"],
+    "peerDependencies": {
+        "mysql2": ">=3.0.0"
+    },
+    "devDependencies": {
+        "mysql2": "^3.0.0"
+    }
+}

@@ -3,6 +3,7 @@
 
 const DbModal             = require('./src/DbModal');
 const BaseTable           = require('./src/BaseTable');
+const ReportManager       = require('./src/ReportManager');
 const { col, ColBuilder } = require('./src/col');
 const { defineTable }     = require('./src/defineTable');
 
@@ -26,6 +27,10 @@ const { defineTable }     = require('./src/defineTable');
 //   const item  = sewa.table('item');
 //   const batch = sewa.table('hmp_batch');
 //
+//   // Reports / Procedures — CTE only in sutramCore
+//   const sewa = new Sutram({ db, schema, reports: require('./reports') });
+//   const rows = sewa.procedure('monthly_sales').run({ from: '2024-01' });
+//
 //   // Transactions — bound to this instance's db
 //   sewa.transaction(() => {
 //       item.insert(data, false);
@@ -42,7 +47,7 @@ class Sutram {
      * migrations — array-of-arrays migration list         (only with dbPath)
      * views      — array of CREATE VIEW sql strings       (only with dbPath)
      */
-    constructor({ db = null, dbPath = null, schema, migrations = [], views = [] } = {}) {
+    constructor({ db = null, dbPath = null, schema, migrations = [], views = [], reports = [] } = {}) {
 
         // ── schema validation ──────────────────────────────────
         if (!schema) {
@@ -76,6 +81,12 @@ class Sutram {
         this.schema      = schema;
         this._tableCache = {};  // cache — sewa.table('item') returns same instance every call
 
+        // ── report manager ─────────────────────────────────────
+        this._report = new ReportManager(this.db);
+        if (reports.length) {
+            this._report.loadFromArray(reports);
+        }
+
         // ── bind BaseTable subclass to this instance ───────────
         // Every table created via sewa.table() or new sewa.BaseTable()
         // automatically receives this instance's db + schema.
@@ -101,6 +112,20 @@ class Sutram {
             this._tableCache[tableName] = new this.BaseTable(tableName);
         }
         return this._tableCache[tableName];
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // ── PROCEDURE — same pattern as table() ───────────────────
+    // ─────────────────────────────────────────────────────────
+    // Returns cached ProcedureHandle for a named CTE report.
+    // Sync — returns rows directly (no await needed).
+    //
+    //   const rows = sewa.procedure('monthly_sales').run({ from: '2024-01' });
+    //   sewa.procedure('low_stock').getParams()
+    //   sewa.procedure('low_stock').getMeta()
+
+    procedure(name) {
+        return this._report.procedure(name);
     }
 
     // ─────────────────────────────────────────────────────────

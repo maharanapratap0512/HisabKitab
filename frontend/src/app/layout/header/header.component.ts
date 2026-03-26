@@ -184,7 +184,7 @@ export class HeaderComponent implements AfterViewInit {
         ]
       },
       { title: 'Points', icon: 'uil-layer-group', link: 'point', visible: this.auth.webUser.settings?.point?.visible },
-      { title: 'MySQL', icon: 'uil-layer-group', link: 'mysql', visible: false },
+      { title: 'MySQL', icon: 'uil-layer-group', link: 'mysql', visible: true },
     ];
   }
 

@@ -1,0 +1,20 @@
+{
+    "name": "sutramengine",
+    "version": "1.0.0-beta.1",
+    "description": "Metadata-driven self-bootstrapping engine for sutramcore — stores schema, triggers, reports in sys_ tables",
+    "main": "index.js",
+    "keywords": [
+        "sqlite",
+        "orm",
+        "metadata",
+        "engine",
+        "sutram"
+    ],
+    "peerDependencies": {
+        "better-sqlite3": ">=9.0.0",
+        "sutramcore": "file:../sutramcore_fixed"
+    },
+    "devDependencies": {
+        "better-sqlite3": "^9.0.0"
+    }
+}

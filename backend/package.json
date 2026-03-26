@@ -17,7 +17,9 @@
     "mysql2": "^3.15.3",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7",
-    "sutramcore": "file:sutramcore"
+    "sutramcore": "file:sutram/sutramcore",
+    "sutramcore-mysql": "file:sutram/sutramcore-mysql",
+    "sutramengine": "file:sutram/sutramEngine"
   },
   "devDependencies": {
     "@types/node": "^18.15.3"
