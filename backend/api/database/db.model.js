@@ -2336,6 +2336,10 @@ class dbModal {
       )`,
       add_is_received_in_jawak: `alter table jawak add column is_received tinyint default 0`,
       add_container_qty_in_jawak: `alter table jawak add column container_qty decimal(10,2)`,
+    },
+    // Version 29
+    {
+      add_dept_id_to_pbk_closing: `alter table pbk_closing add column dept_id integer references department(_id)`
     }
     /* TODO cleanup task 
       1. remove table - closing.

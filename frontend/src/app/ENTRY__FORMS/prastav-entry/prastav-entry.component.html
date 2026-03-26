@@ -8,18 +8,18 @@
 
         <div class="col-md-2 mb-3">
           <div class="form-group">
-            <label class="form-label">Date</label>
-            <input type="date" class="form-control"
-              [(ngModel)]="pfs.prastavForm.date" name="date" required>
+            <label class="form-label">Date <strong class="text-danger">*</strong></label>
+            <input type="date" class="form-control" [(ngModel)]="pfs.prastavForm.date" name="date" required 
+              [ngClass]="{'is-invalid': f.submitted && !pfs.prastavForm.date}">
           </div>
         </div>
 
         <div class="col-md-3 mb-3">
           <div class="form-group">
-            <label class="form-label">MM</label>
-            <ng-select class="custom" style="width:100%;" placeholder="Select MM"
-              [clearable]="false" [virtualScroll]="true"
-              [(ngModel)]="pfs.prastavForm.mm_id" name="mm_id" required>
+            <label class="form-label">MM <strong class="text-danger">*</strong></label>
+            <ng-select class="custom" style="width:100%;" placeholder="Select MM" [clearable]="false"
+              [virtualScroll]="true" [(ngModel)]="pfs.prastavForm.mm_id" name="mm_id" required
+              [ngClass]="{'is-invalid': f.submitted && !pfs.prastavForm.mm_id}">
               <ng-option selected disabled value="">MM</ng-option>
               <ng-option *ngFor="let m of mms | filterByDate: pfs.prastavForm.date" [value]="m._id">
                 {{m.mm_hin}} : {{m.mm_eng}}{{m.mm_code ? ' : ' + m.mm_code : ''}}
@@ -28,19 +28,31 @@
           </div>
         </div>
 
+        <div class="col-md-3 mb-3">
+          <div class="form-group">
+            <label class="form-label">PBK</label>
+            <ng-select class="custom" style="width:100%;" placeholder="Select PBK" [clearable]="true"
+              [virtualScroll]="true" [(ngModel)]="pfs.prastavForm.pbk_id" name="pbk_id">
+              <ng-option *ngFor="let p of pbks | filterByDate: pfs.prastavForm.date" [value]="p._id">
+                {{p.pbk_hin}} : {{p.pbk_eng}}
+              </ng-option>
+            </ng-select>
+          </div>
+        </div>
+
         <div class="col-md-2 mb-3">
           <div class="form-group">
             <label class="form-label">PBK Count</label>
-            <input type="text" class="form-control" placeholder="PBK Count"
-              [(ngModel)]="pfs.prastavForm.pbk_count" name="pbk_count">
+            <input type="text" class="form-control" placeholder="PBK Count" [(ngModel)]="pfs.prastavForm.pbk_count"
+              name="pbk_count">
           </div>
         </div>
 
         <!-- Noted checkbox + Note Details (conditional) -->
-        <div class="col-md-5 mb-3 d-flex align-items-end gap-3">
-          <div class="form-check mb-1">
-            <input class="form-check-input" type="checkbox" id="isNoted"
-              [(ngModel)]="pfs.prastavForm.is_noted" name="is_noted">
+        <div class="col-md-12 mb-3 d-flex align-items-end gap-3">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="isNoted" [(ngModel)]="pfs.prastavForm.is_noted"
+              name="is_noted">
             <label class="form-check-label" for="isNoted">Noted</label>
           </div>
           <div class="flex-fill" *ngIf="pfs.prastavForm.is_noted">
@@ -54,102 +66,219 @@
 
       <!-- ── Lines Table ──────────────────────────────── -->
       <div class="row">
-        <div class="card card-body" style="font-size: smaller; overflow: auto; flex-direction: column;">
-          <div class="table-container" style="padding-bottom: 250px;">
-            <table class="table table-bordered table-centered mb-0" style="width: max-content; min-width: 100%;">
-              <thead>
+        <!-- <div class="col-md-12 border-end"> -->
+        <div class="d-flex align-items-center justify-content-between">
+          <h5 class="text-secondary m-0">Prastav Entries</h5>
+        </div>
+        <div class="table-container">
+          <table class="table table-sm table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th width="3%" class="text-center align-middle">#</th>
+                <th width="30%" class="text-center align-middle">Item - Subitem <strong class="text-danger">*</strong>
+                </th>
+                <th width="8%" class="text-center align-middle">Req Qty</th>
+                <th width="20%" class="text-center align-middle">Qty & Unit <strong class="text-danger">*</strong></th>
+                <th width="10%" class="text-center align-middle">Rate</th>
+                <th width="10%" class="text-center align-middle">Amount</th>
+                <th width="15%" class="text-center align-middle">Description</th>
+                <th width="4%" class="text-center align-middle">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let line of pfs.prastavForm.lines; let i = index">
                 <tr>
-                  <th>No</th>
-                  <th class="mw-15">Item - Subitem <strong class="text-danger">*</strong></th>
-                  <th class="mw-6">Unit <strong class="text-danger">*</strong></th>
-                  <th class="mw-6">Qty <strong class="text-danger">*</strong></th>
-                  <th class="mw-6">Rate</th>
-                  <th class="mw-6">Amount</th>
-                  <th class="mw-8">Description</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let line of pfs.prastavForm.lines; let i = index">
-
-                  <td class="text-center">{{i + 1}}</td>
+                  <td class="text-center align-middle">{{i + 1}}</td>
 
                   <!-- Item + Subitem (HMP / jawak style) -->
                   <td>
-                    <ng-select class="custom-sm" style="width: 100%;"
-                      placeholder="Select Item" [clearable]="true" [virtualScroll]="true"
-                      [(ngModel)]="line.item_subitem_id" [name]="'item_' + i"
-                      (change)="onItemChange(line)" [selectOnTab]="true" appendTo="body">
+                    <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Item" [clearable]="true"
+                      [virtualScroll]="true" [(ngModel)]="line.item_subitem_id" [name]="'item_' + i"
+                      (change)="onItemChange(line)" [selectOnTab]="true" 
+                      [ngClass]="{'is-invalid': f.submitted && !line.item_id}">
                       <ng-container *ngFor="let it of items | filterByDate: pfs.prastavForm.date">
-
-                        <!-- Parent item -->
                         <ng-option [value]="it._id">
                           {{it.item_hin}} : {{it.item_eng}} : {{it.item_roman ? it.item_roman : ''}} : {{it.item_code}}
                         </ng-option>
-
-                        <!-- Subitems (indented) -->
-                        <ng-option
-                          *ngFor="let sub of it.subitems | filterByDate: pfs.prastavForm.date"
+                        <ng-option *ngFor="let sub of it.subitems | filterByDate: pfs.prastavForm.date"
                           [value]="it._id + ':' + sub._id">
-                          &nbsp;&nbsp;↳ {{sub.subitem_hin}} {{it.item_hin}} : {{sub.subitem_eng}} {{it.item_eng}} : {{sub.subitem_roman ? sub.subitem_roman : ''}}
+                          &nbsp;&nbsp;↳ {{sub.subitem_hin}} {{it.item_hin}} : {{sub.subitem_eng}} {{it.item_eng}} :
+                          {{sub.subitem_roman ? sub.subitem_roman : ''}}
                         </ng-option>
-
                       </ng-container>
                     </ng-select>
                   </td>
 
-                  <!-- Unit -->
+                  <!-- Qty Needs -->
                   <td>
-                    <ng-select class="custom-sm" style="width: 100%;"
-                      placeholder="Unit" [clearable]="false" [virtualScroll]="true"
-                      [(ngModel)]="line.unit_id" [name]="'unit_' + i"
-                      (ngModelChange)="pfs.formStatusChanges()" [selectOnTab]="true" appendTo="body">
-                      <ng-option selected disabled value="">Unit</ng-option>
-                      <ng-option *ngFor="let u of units | filterByDate: pfs.prastavForm.date" [value]="u._id">
-                        {{u.unit_short}}
-                      </ng-option>
-                    </ng-select>
+                    <input type="number" class="form-control form-control-sm text-center" placeholder="Req Qty"
+                      [(ngModel)]="line.qty_needs" [name]="'qty_needs_' + i" min="0">
                   </td>
 
-                  <!-- Qty -->
+                  <!-- Qty + Unit -->
                   <td>
-                    <input type="number" class="form-control form-control-sm" placeholder="Qty"
-                      [(ngModel)]="line.qty" [name]="'qty_' + i"
-                      (ngModelChange)="onLineChange(line)" min="0">
+                    <div class="d-flex align-items-center">
+                      <input type="number" class="form-control-sm flex-fill" placeholder="Qty" [(ngModel)]="line.qty"
+                        [name]="'qty_' + i" (ngModelChange)="onLineChange(line)" min="0"
+                        [ngClass]="{'is-invalid': f.submitted && !line.qty}">
+                      <ng-select class="custom-sm border mw-3" style="min-width: 80px;" [items]="units"
+                        bindLabel="unit_short" bindValue="_id" [(ngModel)]="line.unit_id" [name]="'unit_' + i"
+                        [clearable]="false" placeholder="Unit" (ngModelChange)="onUnitChange(line)"
+                        [ngClass]="{'is-invalid': f.submitted && !line.unit_id}"></ng-select>
+                    </div>
                   </td>
 
+                  <!-- Rate -->
                   <td>
-                    <input type="number" class="form-control form-control-sm" placeholder="Rate"
-                      [(ngModel)]="line.rate" [name]="'rate_' + i"
-                      (ngModelChange)="onLineChange(line)" min="0">
+                    <input type="number" class="form-control form-control-sm text-center" placeholder="Rate"
+                      [(ngModel)]="line.rate" [name]="'rate_' + i" (ngModelChange)="onLineChange(line)" min="0">
                   </td>
 
                   <!-- Amount readonly -->
                   <td>
-                    <input type="number" class="form-control form-control-sm"
+                    <input type="number" class="form-control form-control-sm text-center" placeholder="Amount"
                       [(ngModel)]="line.amount" [name]="'amount_' + i" readonly>
                   </td>
 
                   <!-- Line description -->
                   <td>
-                    <input type="text" class="form-control form-control-sm" placeholder="Note"
+                    <input type="text" class="form-control form-control-sm" placeholder="Description"
                       [(ngModel)]="line.description" [name]="'desc_' + i">
                   </td>
 
                   <!-- Remove -->
-                  <td class="text-center">
-                    <button *ngIf="line.item_id && pfs.prastavForm.lines.length > 1"
-                      type="button" class="btn btn-sm btn-danger"
-                      (click)="removeLine(i)" title="Remove"
-                      style="padding: 0.2rem 0.5rem; border-radius: 4px;">
+                  <td class="text-center align-middle">
+                    <button *ngIf="line.item_id && pfs.prastavForm.lines.length > 1" type="button"
+                      class="btn btn-sm btn-danger" style="padding: 0.2rem 0.5rem; border-radius: 4px;"
+                      (click)="removeLine(i)" title="Remove">
                       <i class="uil uil-times"></i>
                     </button>
                   </td>
-
                 </tr>
-              </tbody>
-            </table>
-          </div>
+
+                <!-- NESTED JAWAK ROW -->
+                <tr *ngIf="line.item_id">
+                  <td></td> <!-- skip numbering col -->
+                  <td colspan="7">
+                    <div class="p-2 border rounded bg-light">
+                      <h6 class="mb-2 text-primary">Jawak Sub-Entries</h6>
+                      <table class="table table-sm table-bordered m-0">
+                        <thead class="table-light">
+                          <tr>
+                            <th width="10%" class="text-center align-middle">Date <strong class="text-danger">*</strong>
+                            </th>
+                            <th width="20%" class="text-center align-middle">Item - Subitem</th>
+                            <th width="13%" class="text-center align-middle">Source MM</th>
+                            <th width="16%" class="text-center align-middle">Qty & Unit <strong
+                                class="text-danger">*</strong></th>
+                            <th width="8%" class="text-center align-middle">Rate</th>
+                            <th width="8%" class="text-center align-middle">Amount</th>
+                            <th width="8%" class="text-center align-middle">Bori</th>
+                            <th width="8%" class="text-center align-middle">Kiske Dwara</th>
+                            <th width="5%" class="text-center align-middle">Rcvd?</th>
+                            <th width="4%" class="text-center align-middle">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let jw of line.jawaks; let j = index">
+                            <td class="align-middle">
+                              <input type="date" class="form-control form-control-sm px-1 text-center"
+                                [(ngModel)]="jw.date" [name]="'jw_date_' + i + '_' + j" required
+                                [ngClass]="{'is-invalid': f.submitted && !jw.date}">
+                            </td>
+
+                            <td class="align-middle">
+                              <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Item"
+                                [clearable]="true" [virtualScroll]="true" [(ngModel)]="jw.item_subitem_id"
+                                [name]="'jw_item_' + i + '_' + j" (change)="onJawakItemChange(line, jw)"
+                                [selectOnTab]="true">
+                                <ng-container *ngFor="let it of items | filterByDate: jw.date || pfs.prastavForm.date">
+                                  <ng-option [value]="it._id">
+                                    {{it.item_hin}} : {{it.item_eng}} : {{it.item_roman ? it.item_roman : ''}} :
+                                    {{it.item_code}}
+                                  </ng-option>
+                                  <ng-option
+                                    *ngFor="let sub of it.subitems | filterByDate: jw.date || pfs.prastavForm.date"
+                                    [value]="it._id + ':' + sub._id">
+                                    &nbsp;&nbsp;↳ {{sub.subitem_hin}} {{it.item_hin}} : {{sub.subitem_eng}}
+                                    {{it.item_eng}} : {{sub.subitem_roman ? sub.subitem_roman : ''}}
+                                  </ng-option>
+                                </ng-container>
+                              </ng-select>
+                            </td>
+
+                            <td class="align-middle">
+                              <ng-select class="custom-sm" style="width: 100%;" placeholder="Source MM"
+                                [clearable]="true" [virtualScroll]="true" [(ngModel)]="jw.source_mm_id"
+                                [name]="'jw_mm_' + i + '_' + j" (ngModelChange)="pfs.onJawakChange(line, jw)"
+                                [selectOnTab]="true">
+                                <ng-option *ngFor="let m of mms | filterByDate: pfs.prastavForm.date" [value]="m._id">
+                                  {{m.mm_hin}} : {{m.mm_eng}}
+                                </ng-option>
+                              </ng-select>
+                            </td>
+
+                            <td class="align-middle">
+                              <div class="d-flex align-items-center">
+                                <input type="number" class="form-control-sm flex-fill px-1 text-center"
+                                  placeholder="Qty" [(ngModel)]="jw.qty" [name]="'jw_qty_' + i + '_' + j"
+                                  (ngModelChange)="pfs.onJawakChange(line, jw)" min="0"
+                                  [ngClass]="{'is-invalid': f.submitted && !jw.qty}">
+                                <ng-select class="custom-sm border m-0" style="min-width: 60px;" [items]="units"
+                                  bindLabel="unit_short" bindValue="_id" [(ngModel)]="jw.unit_id"
+                                  [name]="'jw_unit_' + i + '_' + j" [clearable]="false" placeholder="Unit"
+                                  (ngModelChange)="pfs.onJawakChange(line, jw)"
+                                  [ngClass]="{'is-invalid': f.submitted && !jw.unit_id}"></ng-select>
+                              </div>
+                            </td>
+
+                            <td class="align-middle">
+                              <input type="number" class="form-control form-control-sm px-1 text-center"
+                                placeholder="Rate" [(ngModel)]="jw.rate" [name]="'jw_rate_' + i + '_' + j"
+                                (ngModelChange)="pfs.onJawakChange(line, jw)" min="0">
+                            </td>
+
+                            <td class="align-middle">
+                              <input type="number" class="form-control form-control-sm px-1 text-center"
+                                placeholder="Amount" [(ngModel)]="jw.amount" [name]="'jw_amount_' + i + '_' + j"
+                                readonly>
+                            </td>
+
+                            <td class="align-middle">
+                              <input type="text" class="form-control form-control-sm px-1 text-center"
+                                placeholder="Bori" [(ngModel)]="jw.bori_count" [name]="'jw_bori_' + i + '_' + j">
+                            </td>
+
+                            <td class="align-middle">
+                              <input type="text" class="form-control form-control-sm px-1" placeholder="Dwara"
+                                [(ngModel)]="jw.kiske_dwara" [name]="'jw_dwara_' + i + '_' + j">
+                            </td>
+
+                            <!-- Jawak description removed to save space, user can add logic if strictly desired -->
+                            <!-- Re-added Received checkbox -->
+                            <td class="text-center align-middle">
+                              <input type="checkbox" class="form-check-input m-0"
+                                [(ngModel)]="jw.is_received" [name]="'jw_recv_' + i + '_' + j" title="Received?">
+                            </td>
+
+                            <td class="text-center align-middle">
+                              <button
+                                *ngIf="(jw.source_mm_id || jw.qty || jw.item_subitem_id) && line.jawaks.length > 1"
+                                type="button" class="btn btn-sm btn-danger"
+                                style="padding: 0.2rem 0.5rem; border-radius: 4px;" (click)="pfs.removeJawak(line, j)"
+                                title="Remove Jawak">
+                                <i class="uil uil-times"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
         </div>
       </div>
       <!-- end lines table -->

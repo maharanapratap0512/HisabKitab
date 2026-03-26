@@ -1,8 +1,64 @@
-// revert to minimal project-standard scss only
+// Uniform height for all inputs and selects within tables to keep row heights compact
+.table-sm th,
+.table-sm td {
+  padding: 0.2rem 0.3rem !important;
+  vertical-align: middle !important;
+}
+
+// Ensure uniform height for all fields inside tables
+.table-sm .form-control-sm,
+.table-sm .custom-sm .ng-select-container,
+.table-sm .btn-sm {
+  height: 28px !important;
+  min-height: 28px !important;
+  font-size: 0.85rem !important;
+  box-sizing: border-box !important;
+}
+
+// Adjust ng-select specifics for uniform look
+
+.table-sm .custom-sm .ng-value-container {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 0.3rem !important;
+  min-height: 26px !important;
+  height: 26px !important;
+}
+
+.table-sm .form-control-sm {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  line-height: normal !important;
+}
+
+// Ensure transparent table background so it defaults to parent rather than white
+.table {
+  background-color: transparent !important;
+}
+
+// Existing overrides for non-table parts or global fallbacks
 .custom-sm .ng-select-container {
-  min-height: 30px !important;
+  min-height: 28px !important;
 }
 
 .form-control-sm {
-  min-height: auto !important;
+  min-height: 28px !important;
+}
+
+// Make unchecked checkboxes clearly visible against light backgrounds
+.form-check-input:not(:checked) {
+  border-color: #8f8f8f !important;
+  border-width: 1.5px !important;
+}
+
+// Validation styling for empty required fields on submit
+ng-select.is-invalid .ng-select-container,
+.form-control.is-invalid,
+.form-control-sm.is-invalid {
+  border-color: #dc3545 !important;
+}
+
+// Give container enough space so first-row dropdowns aren't cut off
+.table-container {
+  min-height: 200px;
 }
