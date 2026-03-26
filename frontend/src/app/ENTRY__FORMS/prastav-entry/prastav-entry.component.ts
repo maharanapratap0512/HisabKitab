@@ -1,10 +1,10 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
+import { PrastavFormService } from 'src/app/services/prastav-form.service';
 
 declare var $: any;
 
@@ -15,19 +15,17 @@ declare var $: any;
 })
 export class PrastavEntryComponent implements OnInit, OnChanges {
 
-  @ViewChild('f') f!: NgForm;
   @Output() response = new EventEmitter();
   @Input() isEdit: any;
   @Input() getData: any;
 
-  prastav: any = {};
-  jawaks: any[] = [];
-
   mms: any[] = [];
-  items: any[] = [];
+  pbks: any[] = [];
+  items: any[] = [];    // itemmix list (item + subitems combined)
   units: any[] = [];
 
   constructor(
+    public pfs: PrastavFormService,
     public api: ApiService,
     public http: HttpService,
     public gs: GlobalService,
@@ -36,109 +34,142 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
   ) {
     this.gs.observeList().subscribe((result: any) => {
       this.mms = result.mm || [];
-      this.items = result.itemmix || [];
+      this.pbks = result.pbk || [];
+      this.items = result.itemmix || [];   // itemmix has nested subitems[]
       this.units = result.unit || [];
     });
-
-    this.reset();
   }
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void { }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.getData && changes.getData.currentValue) {
-      const data = changes.getData.currentValue;
-      this.prastav = {
-        _id: data._id,
-        date: data.date,
-        mm_id: data.mm_id,
-        pbk_count: data.pbk_count,
-        item_id: data.item_id,
-        subitem_id: data.subitem_id,
-        unit_id: data.unit_id,
-        qty: data.qty,
-        rate: data.rate,
-        amount: data.amount,
-        active: data.active
-      };
-      this.jawaks = (data.jawaks || []).map((j: any) => ({ ...j }));
+    if (changes['getData'] && changes['getData'].currentValue) {
+      this.pfs.patchForm(changes['getData'].currentValue);
     }
   }
 
-  reset() {
-    this.prastav = {
-      date: this.gs.dateString,
-      mm_id: this.auth.webUser.settings.defaultMM,
-      pbk_count: null,
-      item_id: null,
-      subitem_id: null,
-      unit_id: null,
-      qty: null,
-      rate: null,
-      amount: null,
-      active: 1
-    };
-    this.jawaks = [];
+  // ── Line helpers ──────────────────────────────────────────
+
+  /** item_subitem_id change → split into item_id / subitem_id, then auto-add row */
+  onItemChange(line: any) {
+    this.pfs.resolveItemSubitem(line);
+
+    // Auto-select unit if available
+    if (line.item_id) {
+      const parentItem = this.items.find(it => it._id === line.item_id);
+      if (parentItem) {
+        if (line.subitem_id) {
+          const subitem = parentItem.subitems?.find((s: any) => s._id === line.subitem_id);
+          if (subitem && subitem.unit_id) line.unit_id = subitem.unit_id;
+        } else if (parentItem.unit_id) {
+          line.unit_id = parentItem.unit_id;
+        }
+      }
+    }
+
+    // Sync item and unit to ALL jawaks
+    if (line.jawaks && line.jawaks.length > 0) {
+      for (const jw of line.jawaks) {
+        jw.item_subitem_id = line.item_subitem_id;
+        this.pfs.resolveItemSubitem(jw);
+        jw.unit_id = line.unit_id;
+      }
+    }
+    this.pfs.formStatusChanges();
   }
 
-  addJawakRow() {
-    this.jawaks.push({
-      _id: null,
-      prastav_id: this.prastav._id || null,
-      date: this.prastav.date,
-      mm_id: this.prastav.mm_id,
-      item_id: this.prastav.item_id,
-      subitem_id: this.prastav.subitem_id,
-      unit_id: this.prastav.unit_id,
-      qty: null,
-      rate: null,
-      amount: null,
-      bori_count: null,
-      kiske_dwara: null,
-      source_mm_id: null,
-      is_received: 0,
-      active: 1
-    });
+  /** qty / rate change → auto-calculate amount, then auto-add row */
+  onLineChange(line: any) {
+    const qty = Number(line.qty) || 0;
+    const rate = Number(line.rate) || 0;
+    line.amount = qty * rate || null;
+    
+    // Sync qty and rate only to the first jawak row
+    if (line.jawaks && line.jawaks.length > 0) {
+      const jw = line.jawaks[0];
+      jw.qty = line.qty;
+      jw.rate = line.rate;
+      jw.amount = line.amount;
+    }
+    this.pfs.formStatusChanges();
   }
 
-  removeJawakRow(index: number) {
-    if (index >= 0 && index < this.jawaks.length) {
-      this.jawaks.splice(index, 1);
+  onUnitChange(line: any) {
+    if (line.jawaks && line.jawaks.length > 0) {
+      for (const jw of line.jawaks) {
+        // Only override jawak unit if it's currently matching the parent item
+        if (jw.item_subitem_id === line.item_subitem_id) {
+          jw.unit_id = line.unit_id;
+        }
+      }
+    }
+    this.pfs.formStatusChanges();
+  }
+
+  onJawakItemChange(line: any, jw: any) {
+    this.pfs.resolveItemSubitem(jw);
+
+    if (jw.item_id) {
+      const parentItem = this.items.find((it: any) => it._id === jw.item_id);
+      if (parentItem) {
+        if (jw.subitem_id) {
+          const subitem = parentItem.subitems?.find((s: any) => s._id === jw.subitem_id);
+          if (subitem && subitem.unit_id) jw.unit_id = subitem.unit_id;
+        } else if (parentItem.unit_id) {
+          jw.unit_id = parentItem.unit_id;
+        }
+      }
+    }
+
+    this.pfs.onJawakChange(line, jw);
+  }
+
+  removeLine(index: number) {
+    if (this.pfs.prastavForm.lines.length > 1) {
+      this.pfs.prastavForm.lines.splice(index, 1);
     }
   }
+
+  // ── Submit ──────────────────────────────────────────────
 
   onSubmit() {
-    if (!this.prastav.date || !this.prastav.mm_id || !this.prastav.item_id || !this.prastav.unit_id || !this.prastav.qty) {
-      this.toastr.error('Please fill required fields');
+    if (!this.pfs.valid()) {
+      this.toastr.error('कृपया सभी जरूरी fields भरें');
       return;
     }
 
-    // auto amount
-    this.prastav.amount = (this.prastav.qty || 0) * (this.prastav.rate || 0);
+    // Lock Save button for the duration of the HTTP call only
+    this.pfs.submit = true;
 
     const url = this.api.getUrl('PRASTAV');
-    if (this.isEdit && this.prastav._id) {
-      this.http.post(url, this.prastav).subscribe((data: any) => {
+    const payload = this.pfs.prastavForm;
+
+    if (this.isEdit && payload._id) {
+      this.http.post(url, payload).subscribe((data: any) => {
         if (data.success) {
+          this.pfs.submit = false;   // unlock on success
           this.toastr.success('Updated successfully');
           this.response.emit(data);
         } else {
+          this.pfs.submit = false;   // unlock on backend error
           this.toastr.error('Failed to update');
         }
-      }, err => {
+      }, () => {
+        this.pfs.submit = false;     // unlock on network error
         this.toastr.error('Failed to update');
       });
     } else {
-      this.http.post(url, this.prastav).subscribe((data: any) => {
+      this.http.post(url, payload).subscribe((data: any) => {
         if (data.success) {
           this.toastr.success('Saved successfully');
-          this.reset();
+          this.pfs.reset();          // reset() already sets submit = false
           this.response.emit(data);
         } else {
+          this.pfs.submit = false;   // unlock on backend error
           this.toastr.error('Failed to save');
         }
-      }, err => {
+      }, () => {
+        this.pfs.submit = false;     // unlock on network error
         this.toastr.error('Failed to save');
       });
     }

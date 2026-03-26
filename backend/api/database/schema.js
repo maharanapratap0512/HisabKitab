@@ -5,6 +5,51 @@ const { defineTable, col } = require('sutramcore');
 
 module.exports = {
 
+    // ── Prastav (Proposal) ─────────────────────────────────────
+
+    ...defineTable('prastav', {
+        _id: col.id(),
+        voucher_no: col.number(),
+        date: col.string(),
+        mm_id: col.ref('mm._id', { as: 'mm', select: ['mm_hin', 'mm_eng', 'mm_roman', 'mm_code'] }),
+        pbk_id: col.ref('pbk._id', { as: 'pbk', select: ['pbk_hin', 'pbk_eng', 'pbk_roman'] }),
+        pbk_count: col.string(),
+        item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman', 'item_code'] }),
+        subitem_id: col.ref('subitem_list._id', { as: 'subitem', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'] }),
+        unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
+        rate: col.number(),
+        amount: col.number(),
+        qty: col.number(),
+        bachat: col.number(),
+        monthly_uses: col.number(),
+        qty_needs: col.number(),
+        is_noted: col.boolean().default(0),
+        note_details: col.string(),
+        description: col.string(),
+        active: col.boolean().default(1),
+    }, {
+        jawaks: { hasMany: true, on: 'prastav_id', table: 'prastav_jawak', target: '_id', as: 'jawaks', select: '*' }
+    }),
+
+    ...defineTable('prastav_jawak', {
+        _id: col.id(),
+        prastav_id: col.ref('prastav._id', { as: 'prastav', select: ['voucher_no', 'date', 'mm_id', 'item_id', 'unit_id'] }),
+        date: col.string(),
+        mm_id: col.ref('mm._id', { as: 'mm', select: ['mm_hin', 'mm_eng', 'mm_roman', 'mm_code'] }),
+        item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman', 'item_code'] }),
+        subitem_id: col.ref('subitem_list._id', { as: 'subitem', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'] }),
+        unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
+        qty: col.number(),
+        rate: col.number(),
+        amount: col.number(),
+        bori_count: col.string(),
+        kiske_dwara: col.string(),
+        source_mm_id: col.ref('mm._id', { as: 'source_mm', select: ['mm_hin', 'mm_eng'] }),
+        description: col.string(),
+        is_received: col.boolean().default(0),
+        active: col.boolean().default(1),
+    }),
+
     // ── HMP ──────────────────────────────────────────────────
 
     ...defineTable('hmp_recipe', {

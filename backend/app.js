@@ -61,6 +61,7 @@ const mysqlRoutes = require('./api/routes/mysql.routes');
 const pbkClosingRoutes = require('./api/routes/pbk_closing.routes');
 const pbkBachatRoutes = require('./api/routes/pbk_bachat.routes');
 const hmpRoutes = require('./api/routes/hmp.routes');
+const prastavRoutes = require('./api/routes/prastav.routes');
 
 
 // // Routes - Binding
@@ -102,6 +103,7 @@ app.use('/api/vehicle_document', vehicleDocRoutes);
 app.use('/api/comment', commentRoutes);
 app.use('/api/mysql', mysqlRoutes);
 app.use('/api/hmp', hmpRoutes);
+app.use('/api/prastav', prastavRoutes);
 
 
 

@@ -2293,15 +2293,23 @@ class dbModal {
       prastav_drop: `drop table if exists prastav`,
       prastav: `create table if not exists prastav(
         _id integer primary key AUTOINCREMENT,
+        voucher_no integer not null,
         date date,
-        mm_id integer not null references mm(_id),
+        mm_id integer references mm(_id),
+        pbk_id integer references pbk(_id),
         pbk_count varchar(50),
         item_id integer not null references item(_id),
         subitem_id integer null references subitem(_id),
         unit_id integer not null references unit(_id),       
-        qty decimal(10,2) not null,
         rate decimal(10,2),
         amount decimal(10,2),
+        qty decimal(10,2) not null,
+        bachat decimal(10,2),
+        monthly_uses decimal(10,2),
+        qty_needs decimal(10,2),
+        is_noted tinyint default 0,
+        note_details text,
+        description text,
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))
       )`,
@@ -2321,12 +2329,17 @@ class dbModal {
         bori_count varchar(50),
         kiske_dwara varchar(100),
         source_mm_id integer not null references mm(_id),
+        description text,
         is_received tinyint default 0,
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))
       )`,
       add_is_received_in_jawak: `alter table jawak add column is_received tinyint default 0`,
       add_container_qty_in_jawak: `alter table jawak add column container_qty decimal(10,2)`,
+    },
+    // Version 29
+    {
+      add_dept_id_to_pbk_closing: `alter table pbk_closing add column dept_id integer references department(_id)`
     }
     /* TODO cleanup task 
       1. remove table - closing.
