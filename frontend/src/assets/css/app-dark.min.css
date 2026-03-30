@@ -22819,7 +22819,7 @@ Not supports in Firefox and IE */
 .table-compact thead {
    background: #1c2038;
    color: #6c7ab8;
-   position: sticky;
+   /* position: sticky; */
    top: 0;
    z-index: 10;
 }

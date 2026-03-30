@@ -62,6 +62,7 @@ const pbkClosingRoutes = require('./api/routes/pbk_closing.routes');
 const pbkBachatRoutes = require('./api/routes/pbk_bachat.routes');
 const hmpRoutes = require('./api/routes/hmp.routes');
 const prastavRoutes = require('./api/routes/prastav.routes');
+const { sutramEngine } = require('./api/database/db.model');
 
 
 // // Routes - Binding
@@ -105,6 +106,11 @@ app.use('/api/mysql', mysqlRoutes);
 app.use('/api/hmp', hmpRoutes);
 app.use('/api/prastav', prastavRoutes);
 
+
+
+
+
+app.use('/api/sutram', sutramEngine.router());
 
 
 // app.use((req, res, next) => {

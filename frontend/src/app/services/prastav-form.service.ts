@@ -80,36 +80,55 @@ export class PrastavFormService {
   }
 
   /**
-   * Patch form from API object (joined prastav with jawaks)
+   * Patch form from API object (grouped voucher or single item)
    */
   patchForm(data: any) {
+    if (!data) return;
+
+    // Data can be a full voucher (has 'lines' or 'items') 
+    // or a single prastav item from individual mode (which has nested 'jawaks')
+    let lines = [];
+    if (Array.isArray(data.lines)) {
+      lines = structuredClone(data.lines);
+    } else if (Array.isArray(data.items)) {
+      lines = structuredClone(data.items);
+    } else if (data._id) {
+      // Single item mode - treat the object itself as a line
+      lines = [structuredClone(data)];
+    }
+
     const header = {
+      _id: data._id ?? null,
       date: data.date,
-      mm_id: data.mm_id,
-      pbk_id: data.pbk_id ?? null,
+      // Pull common fields from top-level or from the first line if grouping didn't include them
+      mm_id: data.mm_id ?? lines[0]?.mm_id,
+      pbk_id: data.pbk_id ?? lines[0]?.pbk_id ?? null,
       pbk_count: data.pbk_count ?? null,
+      voucher_no: data.voucher_no ?? null,
       is_noted: data.is_noted ?? 0,
       note_details: data.note_details ?? null,
       active: data.active ?? 1
     };
 
-    let lines = Array.isArray(data.jawaks) ? structuredClone(data.jawaks) : [];
-
-    // Legacy or flattened list handling - normally data comes structured or we just init empty
     if (!lines.length) {
       lines = [structuredClone(this.lineTemplate)];
     } else {
-      // If backend returns jawaks inside lines already, this will handle it
       for (const row of lines) {
+        // UI helper for dropdowns
         row.item_subitem_id = row.subitem_id
           ? `${row.item_id}:${row.subitem_id}`
-          : row.item_id;
+          : (row.item_id ? String(row.item_id) : null);
 
         row.bachat = row.bachat ?? null;
         row.monthly_uses = row.monthly_uses ?? null;
 
+        // Ensure nested jawaks have their own UI helpers
         if (!row.jawaks || !row.jawaks.length) {
           row.jawaks = [structuredClone(this.jawakTemplate)];
+        } else {
+          for (const jw of row.jawaks) {
+            jw.item_subitem_id = row.item_subitem_id;
+          }
         }
       }
     }
@@ -195,7 +214,7 @@ export class PrastavFormService {
 
     // ── For each line, remove last invalid JAWAK row ─────────
     for (const row of lines) {
-      if (row.jawaks && row.jawaks.length > 1) {
+      if (row.jawaks && row.jawaks.length > 0) {
         const lastJw = row.jawaks[row.jawaks.length - 1];
         if (!lastJw.source_mm_id || !lastJw.qty) {
           row.jawaks.splice(row.jawaks.length - 1, 1);

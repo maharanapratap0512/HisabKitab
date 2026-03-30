@@ -45,6 +45,8 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['getData'] && changes['getData'].currentValue) {
       this.pfs.patchForm(changes['getData'].currentValue);
+      console.log(changes);
+
     }
   }
 
@@ -83,7 +85,7 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
     const qty = Number(line.qty) || 0;
     const rate = Number(line.rate) || 0;
     line.amount = qty * rate || null;
-    
+
     // Sync qty and rate only to the first jawak row
     if (line.jawaks && line.jawaks.length > 0) {
       const jw = line.jawaks[0];
@@ -144,18 +146,19 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
     const url = this.api.getUrl('PRASTAV');
     const payload = this.pfs.prastavForm;
 
-    if (this.isEdit && payload._id) {
-      this.http.post(url, payload).subscribe((data: any) => {
+    if (this.isEdit && payload.voucher_no) {
+      const updateUrl = `${this.api.getUrl('PRASTAV')}/voucher/${payload.voucher_no}`;
+      this.http.put(updateUrl, payload).subscribe((data: any) => {
         if (data.success) {
-          this.pfs.submit = false;   // unlock on success
+          this.pfs.submit = false;
           this.toastr.success('Updated successfully');
           this.response.emit(data);
         } else {
-          this.pfs.submit = false;   // unlock on backend error
+          this.pfs.submit = false;
           this.toastr.error('Failed to update');
         }
       }, () => {
-        this.pfs.submit = false;     // unlock on network error
+        this.pfs.submit = false;
         this.toastr.error('Failed to update');
       });
     } else {

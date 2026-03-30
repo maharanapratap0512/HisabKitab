@@ -1,6 +1,7 @@
 const { version } = require('os');
 let path = require('path');
 const { Sutram } = require('sutramcore');
+const { SutramEngine } = require('sutramengine');
 
 class dbModal {
   // path;
@@ -2464,13 +2465,12 @@ const sutramDB = new Sutram({
   schema: require('./schema'),
 });
 
-// for khatti (second database example):
-// const khatti = new Sutram({
-//   db:     khattiDbmodal.db,
-//   schema: require('./khatti-schema'),
-// });
+// Instantiate SutramEngine using Pattern 1 (reusing sutramDB)
+const sutramEngine = new SutramEngine({
+  sutram: sutramDB
+}).init();
 
-module.exports = { dbModal, dbmodal, sutramDB }
+module.exports = { dbModal, dbmodal, sutramDB, sutramEngine }
 
 
 

@@ -155,7 +155,7 @@ module.exports = {
 
     ...defineTable('subitem', {
         _id: col.id(),
-        item_id: col.number(),
+        item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] }),
         subitem_list_id: col.ref('subitem_list._id', { as: 'subitem_list', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'] }),
         unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
         extra_note: col.string(),

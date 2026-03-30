@@ -312,11 +312,11 @@
                                         </button>
                                     </ng-container>
                                 </div>
-                                <button type="button" class="btn btn-primary ml-3" (click)="runMigration()"
+                                <button type="button" class="btn btn-primary ms-3" (click)="runMigration()"
                                     [disabled]="!mappingFile || !selectedDatabase || isMappingLoading">
                                     <i class="fas fa-play mr-2" *ngIf="!isMappingLoading"></i>
                                     <i class="fas fa-spinner fa-spin mr-2" *ngIf="isMappingLoading"></i>
-                                    Run Migration
+                                    मैपिंग शुरू करें
                                 </button>
                             </div>
 
@@ -361,11 +361,12 @@
 
                                 <div class="migration-tab-content p-3 border rounded-bottom bg-white">
 
-                                    <div class="export-options-row d-flex align-items-end mb-4 p-3 bg-light rounded">
-                                        <div class="export-field mr-3">
+                                    <div
+                                        class="export-options-row d-flex flex-wrap align-items-end mb-4 p-3 bg-light rounded">
+                                        <div class="export-field mr-3 mb-2">
                                             <label class="small font-weight-bold text-muted mb-1">Entry Type</label>
                                             <select class="form-control form-control-sm" [(ngModel)]="exportType"
-                                                (change)="exportRange = ''">
+                                                (change)="exportRange = ''; exportSewadhariRange = ''">
                                                 <option value="aawak">Aawak</option>
                                                 <option value="jawak">Jawak</option>
                                                 <option value="closing">Closing</option>
@@ -374,7 +375,7 @@
                                                 </option>
                                             </select>
                                         </div>
-                                        <div class="export-field mr-3" *ngIf="exportType !== 'all'">
+                                        <div class="export-field mx-2 mb-2" *ngIf="exportType !== 'all'">
                                             <label class="small font-weight-bold text-muted mb-1">Select Range
                                                 (Chunk)</label>
                                             <select class="form-control form-control-sm" [(ngModel)]="exportRange">
@@ -386,11 +387,32 @@
                                                     }}</option>
                                             </select>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-success export-btn"
+                                        <button type="button" class="btn btn-sm btn-success export-btn mr-4 mb-2"
                                             (click)="exportChunk()" [disabled]="!exportRange && exportType !== 'all'">
                                             <i class="fas fa-file-excel mr-1"></i>Download Excel
                                         </button>
-                                        <div class="ml-auto text-muted small">
+
+                                        <!-- Sewadhari Export -->
+                                        <div class="export-field mx-2 mb-2" *ngIf="exportType !== 'all'">
+                                            <label class="small font-weight-bold text-muted mb-1">Sewadhari Range
+                                                (Chunk)</label>
+                                            <select class="form-control form-control-sm"
+                                                [(ngModel)]="exportSewadhariRange">
+                                                <option value="">-- Select Range --</option>
+                                                <option value="All Data">All Sewadhari ({{
+                                                    getSewadhariExportRanges().length > 0 ? 'Filtered' : '0' }})
+                                                </option>
+                                                <option *ngFor="let range of getSewadhariExportRanges()"
+                                                    [value]="range">{{ range }}</option>
+                                            </select>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-success export-btn mb-2"
+                                            (click)="exportSewadhariChunk()"
+                                            [disabled]="!exportSewadhariRange && exportType !== 'all'">
+                                            <i class="fas fa-file-excel mr-1"></i>Download Sewadhari Excel
+                                        </button>
+
+                                        <div class="ml-auto text-muted small mb-2">
                                             <i class="fas fa-info-circle mr-1"></i>Chunked export (10k rows) recommended
                                             for stability.
                                         </div>

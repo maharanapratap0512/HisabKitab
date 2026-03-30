@@ -34,13 +34,13 @@
 
 'use strict';
 
-const SysMigrator      = require('./SysMigrator');
+const SysMigrator = require('./SysMigrator');
 const BootstrapBuilder = require('./BootstrapBuilder');
-const SchemaManager    = require('./SchemaManager');
-const TriggerManager   = require('./TriggerManager');
-const ReportManager    = require('./ReportManager');
-const UiManager        = require('./UiManager');
-const buildRouter      = require('./RouterBuilder');
+const SchemaManager = require('./SchemaManager');
+const TriggerManager = require('./TriggerManager');
+const ReportManager = require('./ReportManager');
+const UiManager = require('./UiManager');
+const buildRouter = require('./RouterBuilder');
 
 class Engine {
 
@@ -50,16 +50,16 @@ class Engine {
 
     constructor({
         // Pattern 1
-        sutram    = null,
+        sutram = null,
 
         // Pattern 2 + 3 — db source (one of these)
-        db        = null,
-        dbPath    = null,
+        db = null,
+        dbPath = null,
 
         // Pattern 2 — direct schema
-        schema    = null,
-        triggers  = null,
-        reports   = null,
+        schema = null,
+        triggers = null,
+        reports = null,
     } = {}) {
 
         // ── resolve db ────────────────────────────────────────
@@ -67,7 +67,7 @@ class Engine {
         if (sutram) {
             // Pattern 1 — accept sutramCore Sutram OR sutramcore-mysql MySQLSutram
             const isSQLite = typeof sutram.db?.prepare === 'function';
-            const isMySQL  = sutram.dialect === 'mysql';
+            const isMySQL = sutram.dialect === 'mysql';
 
             if (!isSQLite && !isMySQL) {
                 throw new Error(
@@ -76,10 +76,10 @@ class Engine {
                 );
             }
 
-            this.db          = isSQLite ? sutram.db : null;
-            this._adapter    = isMySQL  ? sutram.adapter : null;
-            this._dialect    = isMySQL  ? 'mysql' : 'sqlite';
-            this._sutram     = sutram;
+            this.db = isSQLite ? sutram.db : null;
+            this._adapter = isMySQL ? sutram.adapter : null;
+            this._dialect = isMySQL ? 'mysql' : 'sqlite';
+            this._sutram = sutram;
             this._ownsSutram = false;
 
         } else if (db) {
@@ -89,19 +89,19 @@ class Engine {
                     '[sutramEngine] db must be a better-sqlite3 Database instance'
                 );
             }
-            this.db          = db;
-            this._sutram     = null;
+            this.db = db;
+            this._sutram = null;
             this._ownsSutram = true;
 
         } else if (dbPath) {
             // Pattern 2/3 Option B — engine opens the file
-            const Database   = require('better-sqlite3');
-            this.db          = new Database(dbPath);
+            const Database = require('better-sqlite3');
+            this.db = new Database(dbPath);
             this.db.pragma('journal_mode = WAL');
             this.db.pragma('foreign_keys = ON');
             this.db.pragma('synchronous = NORMAL');
             this.db.pragma('busy_timeout = 10000');
-            this._sutram     = null;
+            this._sutram = null;
             this._ownsSutram = true;
             console.log(`[sutramEngine] Connected: ${dbPath}`);
 
@@ -125,23 +125,23 @@ class Engine {
         }
 
         // ── store direct-mode schema ──────────────────────────
-        this._directSchema   = schema;
+        this._directSchema = schema;
         this._directTriggers = triggers ?? [];
-        this._directReports  = reports  ?? [];
+        this._directReports = reports ?? [];
 
         // ── internal state ────────────────────────────────────
-        this._schema     = {};
+        this._schema = {};
         this._tableCache = {};
-        this._dialect    = this._dialect ?? 'sqlite';
-        this._adapter    = this._adapter ?? null;
+        this._dialect = this._dialect ?? 'sqlite';
+        this._adapter = this._adapter ?? null;
 
         // ── sub-managers ──────────────────────────────────────
         // TriggerManager and ReportManager always read from sys_
         // in managed mode, or from direct arrays in direct mode
         this.trigger = new TriggerManager(this.db);
-        this.report  = new ReportManager(this.db);
-        this.schema  = new SchemaManager(this.db, () => this.rebootstrap());
-        this.ui      = new UiManager(this.db);
+        this.report = new ReportManager(this.db);
+        this.schema = new SchemaManager(this.db, () => this.rebootstrap());
+        this.ui = new UiManager(this);
     }
 
     // ─────────────────────────────────────────────────────────
@@ -228,10 +228,10 @@ class Engine {
 
         // read everything from sys_ tables
         const builder = new BootstrapBuilder(this.db);
-        this._schema  = builder.build();
+        this._schema = builder.build();
 
         // always create fresh Sutram in managed mode
-        this._sutram     = new Sutram({ db: this.db, schema: this._schema });
+        this._sutram = new Sutram({ db: this.db, schema: this._schema });
         this._tableCache = {};
 
         // load triggers + reports from sys_ tables
@@ -262,9 +262,9 @@ class Engine {
     // ─────────────────────────────────────────────────────────
 
     insert(tableName, data, full = true) {
-        const tbl    = this.table(tableName);
+        const tbl = this.table(tableName);
         const result = this.db.transaction(() => {
-            const id     = tbl.insert(data, false);
+            const id = tbl.insert(data, false);
             const newRow = tbl.getOne({ _id: id }, { full: false });
             this.trigger.execute(tableName, 'INSERT', newRow, null);
             return id;
@@ -273,8 +273,8 @@ class Engine {
     }
 
     update(tableName, data, where, full = true) {
-        const tbl    = this.table(tableName);
-        const id     = typeof where === 'object' ? (where._id ?? null) : null;
+        const tbl = this.table(tableName);
+        const id = typeof where === 'object' ? (where._id ?? null) : null;
         const oldRow = id ? tbl.getOne({ _id: id }, { full: false }) : null;
 
         const result = this.db.transaction(() => {
@@ -292,7 +292,7 @@ class Engine {
     }
 
     delete(tableName, where) {
-        const tbl     = this.table(tableName);
+        const tbl = this.table(tableName);
         const oldRows = tbl.getAll(where, { full: false });
 
         return this.db.transaction(() => {
@@ -331,10 +331,10 @@ class Engine {
     // PASS-THROUGH QUERIES — no triggers
     // ─────────────────────────────────────────────────────────
 
-    getById(tableName, id)         { return this.table(tableName).getById(id); }
+    getById(tableName, id) { return this.table(tableName).getById(id); }
     getOne(tableName, where, opts) { return this.table(tableName).getOne(where, opts); }
     getAll(tableName, where, opts) { return this.table(tableName).getAll(where, opts); }
-    count(tableName, where)        { return this.table(tableName).count(where); }
+    count(tableName, where) { return this.table(tableName).count(where); }
 
     // ─────────────────────────────────────────────────────────
     // IMPORT / EXPORT
@@ -372,19 +372,19 @@ class Engine {
         return this.schema.importReports(list);
     }
 
-    exportAll()        { return this.schema.exportAll(); }
-    exportSchema()     { return this.schema.exportSchema(); }
-    exportTriggers()   { return this.schema.exportTriggers(); }
-    exportReports()    { return this.schema.exportReports(); }
+    exportAll() { return this.schema.exportAll(); }
+    exportSchema() { return this.schema.exportSchema(); }
+    exportTriggers() { return this.schema.exportTriggers(); }
+    exportReports() { return this.schema.exportReports(); }
 
     // ─────────────────────────────────────────────────────────
     // TRANSACTIONS
     // ─────────────────────────────────────────────────────────
 
     transaction(fn) { return this.db.transaction(fn)(); }
-    begin()         { this.db.prepare('BEGIN').run(); }
-    commit()        { this.db.prepare('COMMIT').run(); }
-    rollback()      { this.db.prepare('ROLLBACK').run(); }
+    begin() { this.db.prepare('BEGIN').run(); }
+    commit() { this.db.prepare('COMMIT').run(); }
+    rollback() { this.db.prepare('ROLLBACK').run(); }
 
     // ─────────────────────────────────────────────────────────
     // UI CONFIG

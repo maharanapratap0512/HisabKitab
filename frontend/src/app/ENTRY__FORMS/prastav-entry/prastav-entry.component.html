@@ -9,7 +9,7 @@
         <div class="col-md-2 mb-3">
           <div class="form-group">
             <label class="form-label">Date <strong class="text-danger">*</strong></label>
-            <input type="date" class="form-control" [(ngModel)]="pfs.prastavForm.date" name="date" required 
+            <input type="date" class="form-control" [(ngModel)]="pfs.prastavForm.date" name="date" required
               [ngClass]="{'is-invalid': f.submitted && !pfs.prastavForm.date}">
           </div>
         </div>
@@ -94,7 +94,7 @@
                   <td>
                     <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Item" [clearable]="true"
                       [virtualScroll]="true" [(ngModel)]="line.item_subitem_id" [name]="'item_' + i"
-                      (change)="onItemChange(line)" [selectOnTab]="true" 
+                      (change)="onItemChange(line)" [selectOnTab]="true"
                       [ngClass]="{'is-invalid': f.submitted && !line.item_id}">
                       <ng-container *ngFor="let it of items | filterByDate: pfs.prastavForm.date">
                         <ng-option [value]="it._id">
@@ -257,8 +257,8 @@
                             <!-- Jawak description removed to save space, user can add logic if strictly desired -->
                             <!-- Re-added Received checkbox -->
                             <td class="text-center align-middle">
-                              <input type="checkbox" class="form-check-input m-0"
-                                [(ngModel)]="jw.is_received" [name]="'jw_recv_' + i + '_' + j" title="Received?">
+                              <input type="checkbox" class="form-check-input m-0" [(ngModel)]="jw.is_received"
+                                [name]="'jw_recv_' + i + '_' + j" title="Received?">
                             </td>
 
                             <td class="text-center align-middle">
@@ -287,7 +287,9 @@
       <div class="row mt-2">
         <div class="col-12 d-flex justify-content-between">
           <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
-          <button type="submit" class="btn btn-primary btn-sm" [disabled]="pfs.submit">Save</button>
+          <button type="submit" class="btn btn-primary btn-sm" [disabled]="pfs.submit">
+            {{ isEdit ? 'Update' : 'Save' }}
+          </button>
         </div>
       </div>
 

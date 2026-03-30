@@ -114,7 +114,7 @@ function getBatches({ dept_id, mm_id, recipe_id, item_id, date_from, date_to, ye
     //   hasMany → inputs, outputs   (via joins{})
     //             └─ each child auto-includes its own hasOne: item, subitem, unit, condition
     const result = hmpBatch.getAll(where, {
-        orderBy: 'hmp_batch.date DESC, hmp_batch._id DESC',
+        orderBy: 'hmp_batch.date DESC',
         limit: PAGE_SIZE,
         offset,
     });

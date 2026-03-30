@@ -1,9 +1,3 @@
-.container-fluid {
-  padding: 20px;
-}
-
-// ── Base Card ──────────────────────────────────────────────────
-
 .card {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border: 1px solid #dee2e6;
@@ -22,81 +16,6 @@
   color: #343a40;
   font-size: 1rem;
   font-weight: 600;
-}
-
-// ── Form ───────────────────────────────────────────────────────
-
-.form-group {
-  margin-bottom: 1rem;
-
-  label {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 0.35rem;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-  }
-}
-
-.form-control {
-  border-radius: 0.375rem;
-  border: 1px solid #ced4da;
-  font-size: 0.9rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-  &:focus {
-    border-color: #80bdff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.2);
-  }
-}
-
-// ── Buttons ────────────────────────────────────────────────────
-
-.btn {
-  border-radius: 0.375rem;
-  font-weight: 500;
-  letter-spacing: 0.3px;
-  transition: all 0.25s ease;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none !important;
-  }
-}
-
-.btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
-  color: #fff;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  border-color: #6c757d;
-  color: #fff;
-}
-
-.btn-success {
-  background-color: #28a745;
-  border-color: #28a745;
-  color: #fff;
-}
-
-.btn-outline-danger {
-  color: #dc3545;
-  border-color: #dc3545;
-
-  &:hover {
-    background-color: #dc3545;
-    color: #fff;
-  }
 }
 
 // ── Alerts ─────────────────────────────────────────────────────
@@ -671,63 +590,6 @@
   }
 }
 
-// ── Utilities ──────────────────────────────────────────────────
-
-.text-nowrap {
-  white-space: nowrap;
-}
-
-.mr-1 {
-  margin-right: 0.25rem !important;
-}
-
-.mr-2 {
-  margin-right: 0.5rem !important;
-}
-
-.ml-1 {
-  margin-left: 0.25rem !important;
-}
-
-.ml-2 {
-  margin-left: 0.5rem !important;
-}
-
-.ml-auto {
-  margin-left: auto !important;
-}
-
-.mt-3 {
-  margin-top: 1rem !important;
-}
-
-.mt-4 {
-  margin-top: 1.5rem !important;
-}
-
-.float-right {
-  float: right !important;
-}
-
-.p-0 {
-  padding: 0 !important;
-}
-
-.mb-0 {
-  margin-bottom: 0 !important;
-}
-
-.flex-grow-1 {
-  flex: 1 !important;
-}
-
-.d-flex {
-  display: flex !important;
-}
-
-.align-items-center {
-  align-items: center !important;
-}
 
 // ── Responsive ─────────────────────────────────────────────────
 
@@ -1143,15 +1005,6 @@
 
 .text-light-grey {
   color: #aab2c8 !important;
-}
-
-.uppercase {
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
-
-.opacity-2 {
-  opacity: 0.2;
 }
 
 // -- Custom Dark Table --

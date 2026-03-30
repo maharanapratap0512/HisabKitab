@@ -90,6 +90,7 @@ export class MysqlComponent implements OnInit, OnDestroy {
   displaySection: 'aawak' | 'jawak' | 'closing' = 'aawak';
   exportType: 'aawak' | 'jawak' | 'closing' | 'all' = 'aawak';
   exportRange: string = '';
+  exportSewadhariRange: string = '';
 
   categorizedResult: any = {
     matched: { aawak: [], jawak: [], closing: [] },
@@ -634,7 +635,10 @@ export class MysqlComponent implements OnInit, OnDestroy {
     const type = this.exportType;
     const rangeStr = this.exportRange;
 
-    if (!rangeStr) { this.globalService['toastr'].warning('Please select a range to export.'); return; }
+    if (!rangeStr) {
+      this.globalService['toastr'].warning('Please select a range to export.');
+      return;
+    }
 
     let dataToExport: any[] = [];
     let fileNameSuffix = '';
@@ -656,13 +660,100 @@ export class MysqlComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (dataToExport.length === 0) { this.globalService['toastr'].warning('No data to export for selected range.'); return; }
+    if (dataToExport.length === 0) {
+      this.globalService['toastr'].warning('No data to export for selected range.');
+      return;
+    }
+
+    // Map to reduced columns as requested
+    const mappedData = dataToExport;
+    // const mappedData = dataToExport.map((row: any) => ({
+    //   'ID': row.id || row.sr_id,
+    //   'Entry Date': row.entry_date || row.date || '',
+    //   'Category': row.category || '',
+    //   'Item': row.item || '',
+    //   'Subitem': row.subitem || '',
+    //   'Quantity': row.qty || row.quantity || 0,
+    //   'Unit': row.unit || '',
+    //   'Sewadhari Name': row.sewadhari_name || row.sewadhari || ''
+    // }));
 
     const sheetName = `${tab.charAt(0).toUpperCase() + tab.slice(1)} ${type}`;
-    this.excelService.addSheet(dataToExport, sheetName);
+    this.excelService.addSheet(mappedData, sheetName);
     const fileName = `${tab}_${fileNameSuffix}_${new Date().toISOString().slice(0, 10)}`;
     this.excelService.saveAsExcel(fileName);
     this.globalService['toastr'].success(`Exported ${dataToExport.length} rows to Excel.`);
+  }
+
+  getSewadhariExportRanges(): string[] {
+    if (this.exportType === 'all') return ['All Data'];
+    const allData = this.categorizedResult[this.activeMigrationTab][this.exportType] || [];
+    const filteredData = allData.filter((row: any) => row.sewadhari_id !== null && row.sewadhari_id !== undefined && row.sewadhari_id !== '' && row.sewadhari_id !== 0);
+    const total = filteredData.length;
+    if (total === 0) return [];
+
+    const ranges: string[] = [];
+    const chunkSize = 10000;
+    for (let i = 0; i < total; i += chunkSize) {
+      ranges.push(`${i + 1} - ${Math.min(i + chunkSize, total)}`);
+    }
+    return ranges;
+  }
+
+  exportSewadhariChunk(): void {
+    const tab = this.activeMigrationTab;
+    const type = this.exportType;
+    const rangeStr = this.exportSewadhariRange;
+
+    if (!rangeStr) {
+      this.globalService['toastr'].warning('Please select a sewadhari range to export.');
+      return;
+    }
+
+    const allData = this.categorizedResult[tab][type] || [];
+    const filteredData = allData.filter((row: any) => row.sewadhari_id !== null && row.sewadhari_id !== undefined && row.sewadhari_id !== '' && row.sewadhari_id !== 0);
+
+    if (filteredData.length === 0) {
+      this.globalService['toastr'].warning('No sewadhari data to export.');
+      return;
+    }
+
+    let dataToExport: any[] = [];
+    if (rangeStr === 'All Data') {
+      dataToExport = filteredData;
+    } else {
+      const parts = rangeStr.split(' - ');
+      const start = parseInt(parts[0]) - 1;
+      const end = parseInt(parts[1]);
+      dataToExport = filteredData.slice(start, end);
+    }
+
+    // Map to reduced columns as requested
+    const mappedData = dataToExport.map(row => ({
+      'Pbk (hin)': row.sewadhari_name || '',
+      'Pbk (Eng)': row.sewadhari_name_eng || '',
+      'Jawak Place': row.aj_mm_name_hin || '',
+      'Date': row.date ? this.globalService.formatDisplayDate(row.date) : '',
+      'Category': row.category || '',
+      'Item (Hin)': row.item || '',
+      'Item (Eng)': row.item || '',
+      'Subitem (Hin)': row.subitem || '',
+      'Subitem (Eng)': row.subitem || '',
+      'Quantity': row.qty || row.quantity || 0,
+      'Unit': row.unit || '',
+      'Rate': row.price || 0,
+      'Amount': row.amount || 0,
+      'Awak Type': row.aj_type_hin || '',
+      'Awak Type (Eng)': row.aj_type_eng || '',
+      'Packet No': row.pkt_num || '',
+      'Aawak Place': row.mm_name_hin || '',
+    }));
+
+    const sheetName = `Sewadhari ${type}`;
+    this.excelService.addSheet(mappedData, sheetName);
+    const fileName = `sewadhari_${tab}_${type}_${new Date().toISOString().slice(0, 10)}`;
+    this.excelService.saveAsExcel(fileName);
+    this.globalService['toastr'].success(`Exported ${mappedData.length} sewadhari rows to Excel.`);
   }
 
   exportResultSet(resultSet: any, index: number): void {

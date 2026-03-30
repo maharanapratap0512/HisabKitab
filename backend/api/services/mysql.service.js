@@ -529,7 +529,9 @@ class MysqlService {
 
         /* Jawak specific */
         sr.jawak_detail      AS jawak_detail,
+        sr.sewadhari_id      AS sewadhari_id,
         pb.name_hin          AS sewadhari_name,
+        pb.name_eng          AS sewadhari_name_eng,
 
         /* Combined aawak/jawak type */
         CASE

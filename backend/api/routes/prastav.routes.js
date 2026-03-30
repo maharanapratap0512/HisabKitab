@@ -5,6 +5,7 @@ const router = express.Router();
 const { dbmodal, sutramDB } = require('../database/db.model');
 const db = dbmodal.db;
 const BaseTable = require('../database/base.table');
+const service = require('../services/prastav.service');
 
 // ── Simple table instances ──
 const Prastav = new BaseTable('prastav');
@@ -12,27 +13,27 @@ const PrastavJawak = new BaseTable('prastav_jawak');
 
 // ── Prastav main ──────────────────────────────────────────────
 
-// Get all prastav (with joins)
-// Optional query params: active, mm_id, item_id, date
+// Paginated + Filtered List (PUT used for body-based filters)
+router.put('/', (req, res, next) => {
+    try {
+        const { result, pageNo, total_count } = service.getPrastavs(req.body || {});
+        res.status(200).json({ success: true, result, pageNo, total_count });
+    } catch (e) {
+        next(e);
+    }
+});
+
+// Get all prastav (legacy GET, optional query params)
 router.get('/', (req, res, next) => {
     try {
-        const { active, mm_id, item_id, date } = req.query || {};
-        const where = {};
-
-        if (active !== undefined) where.active = (active === '1' || active === 1 || active === true || active === 'true') ? 1 : 0;
-        if (mm_id !== undefined && mm_id !== '') where.mm_id = Number(mm_id);
-        if (item_id !== undefined && item_id !== '') where.item_id = Number(item_id);
-        if (date !== undefined && date !== '') where.date = String(date);
-
-        let rows = Prastav.getAll(where);
-        
-        // Include nested jawaks for each prastav
-        rows = rows.map(row => {
-            row.jawaks = PrastavJawak.getAll({ prastav_id: row._id });
-            return row;
+        const { active, mm_id, item_id, date, year } = req.query || {};
+        const { result, total_count } = service.getPrastavs({
+            mm_id, item_id, year,
+            active: (active === '1' || active === 'true' || active === true) ? 1 : null,
+            itemsPerPage: 10000 // Return large set for legacy GET
         });
 
-        res.status(200).json({ success: true, result: rows });
+        res.status(200).json({ success: true, result, total_count });
     } catch (e) {
         next(e);
     }
@@ -63,13 +64,15 @@ router.post('/', (req, res, next) => {
             let voucher_no;
             let pIds = [];
 
-            // If updating an existing single prastav (data._id is passed)
-            if (data._id && lines.length === 1) {
-                const line = lines[0];
-                const pId = Number(data._id);
+            // Case B: Generate NEW Voucher No
+            const row = db.prepare('SELECT MAX(CAST(voucher_no AS INTEGER)) AS v_no FROM prastav').get();
+            voucher_no = (row.v_no || 0) + 1;
+
+            // Insertion Logic
+            for (const line of lines) {
                 const prastavData = {
                     ...data,
-                    _id: pId,
+                    voucher_no: voucher_no,
                     item_id: line.item_id,
                     subitem_id: line.subitem_id || null,
                     unit_id: line.unit_id,
@@ -80,12 +83,14 @@ router.post('/', (req, res, next) => {
                     rate: line.rate || 0,
                     amount: line.amount || 0,
                     description: line.description || null,
+                    active: 1
                 };
+                delete prastavData._id;
                 delete prastavData.lines;
 
-                Prastav.updateById(prastavData, pId, false);
-                db.prepare(`DELETE FROM prastav_jawak WHERE prastav_id = ?`).run(pId);
-                
+                const pId = Prastav.insert(prastavData, false);
+                pIds.push(pId);
+
                 const jawaks = Array.isArray(line.jawaks) ? line.jawaks.filter(j => j.source_mm_id && j.qty) : [];
                 for (const jw of jawaks) {
                     const jawakData = {
@@ -94,7 +99,7 @@ router.post('/', (req, res, next) => {
                         mm_id: data.mm_id,
                         item_id: jw.item_id || line.item_id,
                         subitem_id: jw.subitem_id || line.subitem_id || null,
-                        unit_id: line.unit_id,
+                        unit_id: jw.unit_id || line.unit_id,
                         qty: jw.qty,
                         rate: jw.rate || 0,
                         amount: jw.amount || 0,
@@ -107,55 +112,6 @@ router.post('/', (req, res, next) => {
                     };
                     PrastavJawak.insert(jawakData, false);
                 }
-                return [pId];
-            } else {
-                // Insert new bunch of prastavs
-                const row = db.prepare('SELECT MAX(CAST(voucher_no AS INTEGER)) AS v_no FROM prastav').get();
-                voucher_no = (row.v_no || 0) + 1;
-
-                for (const line of lines) {
-                    const prastavData = {
-                        ...data,
-                        voucher_no: voucher_no,
-                        item_id: line.item_id,
-                        subitem_id: line.subitem_id || null,
-                        unit_id: line.unit_id,
-                        qty_needs: line.qty_needs || null,
-                        qty: line.qty,
-                        bachat: line.bachat || 0,
-                        monthly_uses: line.monthly_uses || 0,
-                        rate: line.rate || 0,
-                        amount: line.amount || 0,
-                        description: line.description || null,
-                    };
-                    delete prastavData._id;
-                    delete prastavData.lines;
-
-                    const pId = Prastav.insert(prastavData, false);
-                    pIds.push(pId);
-
-                    const jawaks = Array.isArray(line.jawaks) ? line.jawaks.filter(j => j.source_mm_id && j.qty) : [];
-                    for (const jw of jawaks) {
-                        const jawakData = {
-                            prastav_id: pId,
-                            date: jw.date || data.date,
-                            mm_id: data.mm_id,
-                            item_id: jw.item_id || line.item_id,
-                            subitem_id: jw.subitem_id || line.subitem_id || null,
-                            unit_id: line.unit_id,
-                            qty: jw.qty,
-                            rate: jw.rate || 0,
-                            amount: jw.amount || 0,
-                            bori_count: jw.bori_count || null,
-                            kiske_dwara: jw.kiske_dwara || null,
-                            source_mm_id: jw.source_mm_id,
-                            description: jw.description || null,
-                            is_received: jw.is_received ? 1 : 0,
-                            active: 1
-                        };
-                        PrastavJawak.insert(jawakData, false);
-                    }
-                }
             }
 
             sutramDB.commit();
@@ -165,7 +121,7 @@ router.post('/', (req, res, next) => {
             sutramDB.rollback();
             throw err;
         }
-    
+
         res.status(200).json({ success: true, result: resultIds });
     } catch (e) {
         next(e);
@@ -217,6 +173,38 @@ router.delete('/jawak/:id', (req, res, next) => {
         const id = req.params.id;
         const changes = db.prepare(`DELETE FROM prastav_jawak WHERE _id = ?`).run(id).changes;
         res.status(200).json({ success: true, result: changes });
+    } catch (e) {
+        next(e);
+    }
+});
+
+// ── Voucher endpoints ─────────────────────────────────────────
+
+// Get full voucher data by voucher_no
+router.get('/voucher/:vno', (req, res, next) => {
+    try {
+        const result = service.getVoucher(req.params.vno);
+        res.status(200).json({ success: true, result });
+    } catch (e) {
+        next(e);
+    }
+});
+
+// Delete entire voucher by voucher_no
+router.delete('/voucher/:vno', (req, res, next) => {
+    try {
+        const result = service.deleteVoucher(req.params.vno);
+        res.status(200).json({ success: true, result });
+    } catch (e) {
+        next(e);
+    }
+});
+
+// Update entire voucher by voucher_no
+router.put('/voucher/:vno', (req, res, next) => {
+    try {
+        const result = service.updateVoucher(req.params.vno, req.body || {});
+        res.status(200).json({ success: true, result });
     } catch (e) {
         next(e);
     }

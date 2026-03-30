@@ -19,8 +19,9 @@ const FIELD_TYPES = [
 
 class UiManager {
 
-    constructor(db) {
-        this.db = db;
+    constructor(engineOrDb) {
+        this.engine = engineOrDb.db ? engineOrDb : null;
+        this.db = engineOrDb.db || engineOrDb;
     }
 
     // ═════════════════════════════════════════════════════════
@@ -38,6 +39,24 @@ class UiManager {
     // }
 
     getMenu() {
+        if (this.engine?._mode === 'direct') {
+            const tables = Object.entries(this.engine._schema || {}).map(([name, def]) => {
+                const ui = def.ui || def;
+                const ov = this.db.prepare(`SELECT u.* FROM sys_table t JOIN sys_table_ui u ON u.table_id = t._id WHERE t.table_name = ?`).get(name);
+                if (ov?.visible === 0 || (!ov && ui.visible === 0)) return null;
+                return {
+                    table_name: name, display_name: ov?.display_name || ui.display_name || ui.label || name, icon: ov?.icon || ui.icon || null,
+                    sort_order: ov?.sort_order || ui.sort_order || 0, can_add: (ov?.can_add ?? ui.can_add ?? 1) === 1,
+                    can_edit: (ov?.can_edit ?? ui.can_edit ?? 1) === 1, can_delete: (ov?.can_delete ?? ui.can_delete ?? 1) === 1,
+                };
+            }).filter(Boolean).sort((a, b) => a.sort_order - b.sort_order);
+            const reports = (this.engine._directReports || []).map(r => ({
+                report_name: r.report_name || r.name, label: r.label || r.report_name || r.name,
+                params: typeof r.params === 'string' ? JSON.parse(r.params) : (r.params || []),
+            }));
+            return { tables, reports };
+        }
+
         const tables = this.db.prepare(`
             SELECT
                 t.table_name,
@@ -55,8 +74,8 @@ class UiManager {
             ORDER BY COALESCE(u.sort_order, 0) ASC, t._id ASC
         `).all().map(r => ({
             ...r,
-            can_add:    r.can_add    === 1,
-            can_edit:   r.can_edit   === 1,
+            can_add: r.can_add === 1,
+            can_edit: r.can_edit === 1,
             can_delete: r.can_delete === 1,
         }));
 
@@ -93,6 +112,30 @@ class UiManager {
     // }
 
     getTableSchema(tableName) {
+        if (this.engine?._mode === 'direct') {
+            const def = this.engine._schema?.[tableName];
+            if (!def) throw new Error(`[sutramEngine] Table "${tableName}" not found`);
+            const ui = def.ui || def;
+            const ov = this.db.prepare(`SELECT u.* FROM sys_table t JOIN sys_table_ui u ON u.table_id = t._id WHERE t.table_name = ?`).get(tableName);
+            const columns = Object.entries(def.columns || {}).map(([name, col]) => {
+                const cui = col.ui || col;
+                const cov = this.db.prepare(`SELECT u.* FROM sys_column c JOIN sys_column_ui u ON u.column_id = c._id JOIN sys_table t ON t._id = c.table_id WHERE t.table_name = ? AND c.column_name = ?`).get(tableName, name);
+                const ref = col.ref ? { table: col.ref.split('.')[0], col: col.ref.split('.')[1], as: col.as || col.ref.split('.')[0], select: col.select || '*' } : null;
+                return {
+                    column_name: name, label: cov?.label || cui.label || name, col_type: col.type, field_type: cov?.field_type || cui.field_type || 'text',
+                    display_format: cov?.display_format || cui.display_format || null, is_pk: col.is_pk === true || name === '_id',
+                    is_required: col.required === true, required_ui: (cov?.required_ui ?? cui.required_ui ?? 0) === 1,
+                    visible_list: (cov?.visible_list ?? cui.visible_list ?? 1) === 1, visible_form: (cov?.visible_form ?? cui.visible_form ?? 1) === 1,
+                    searchable: (cov?.searchable ?? cui.searchable ?? 0) === 1, sortable: (cov?.sortable ?? cui.sortable ?? 0) === 1, sort_order: cov?.sort_order || cui.sort_order || 0, ref
+                };
+            }).sort((a, b) => a.sort_order - b.sort_order);
+            return {
+                table_name: tableName, display_name: ov?.display_name || ui.display_name || ui.label || tableName, icon: ov?.icon || ui.icon || null,
+                can_add: (ov?.can_add ?? ui.can_add ?? 1) === 1, can_edit: (ov?.can_edit ?? ui.can_edit ?? 1) === 1, can_delete: (ov?.can_delete ?? ui.can_delete ?? 1) === 1,
+                columns, joins: Object.entries(def.joins || {}).map(([k, j]) => ({ join_key: k, join_type: j.manyToMany ? 'manyToMany' : 'hasMany', table: j.table, as: j.as || k }))
+            };
+        }
+
         const tableRow = this.db.prepare(
             `SELECT t.*, u.display_name, u.icon,
                     COALESCE(u.can_add,    1) as can_add,
@@ -135,26 +178,26 @@ class UiManager {
 
             // build ref object for FK columns
             const ref = col.ref_table ? {
-                table:  col.ref_table,
-                col:    col.ref_col,
-                as:     col.ref_as,
+                table: col.ref_table,
+                col: col.ref_col,
+                as: col.ref_as,
                 select: col.ref_select ? JSON.parse(col.ref_select) : '*',
             } : null;
 
             return {
-                column_name:    col.column_name,
-                label:          col.label,
-                col_type:       col.col_type,
-                field_type:     col.field_type,
+                column_name: col.column_name,
+                label: col.label,
+                col_type: col.col_type,
+                field_type: col.field_type,
                 display_format: col.display_format ?? null,
-                is_pk:          col.is_pk === 1,
-                is_required:    col.is_required === 1,
-                required_ui:    col.required_ui === 1,
-                visible_list:   col.visible_list === 1,
-                visible_form:   col.visible_form === 1,
-                searchable:     col.searchable === 1,
-                sortable:       col.sortable === 1,
-                sort_order:     col.sort_order,
+                is_pk: col.is_pk === 1,
+                is_required: col.is_required === 1,
+                required_ui: col.required_ui === 1,
+                visible_list: col.visible_list === 1,
+                visible_form: col.visible_form === 1,
+                searchable: col.searchable === 1,
+                sortable: col.sortable === 1,
+                sort_order: col.sort_order,
                 ref,
             };
         });
@@ -167,12 +210,12 @@ class UiManager {
         `).all(tableRow._id);
 
         return {
-            table_name:   tableRow.table_name,
+            table_name: tableRow.table_name,
             display_name: tableRow.display_name ?? tableRow.label ?? tableRow.table_name,
-            icon:         tableRow.icon ?? null,
-            can_add:      tableRow.can_add    === 1,
-            can_edit:     tableRow.can_edit   === 1,
-            can_delete:   tableRow.can_delete === 1,
+            icon: tableRow.icon ?? null,
+            can_add: tableRow.can_add === 1,
+            can_edit: tableRow.can_edit === 1,
+            can_delete: tableRow.can_delete === 1,
             columns,
             joins,
         };
@@ -198,14 +241,14 @@ class UiManager {
 
         if (exists) {
             const fields = [];
-            const vals   = [];
+            const vals = [];
             if (opts.display_name !== undefined) { fields.push('display_name = ?'); vals.push(opts.display_name); }
-            if (opts.icon         !== undefined) { fields.push('icon = ?');         vals.push(opts.icon); }
-            if (opts.sort_order   !== undefined) { fields.push('sort_order = ?');   vals.push(opts.sort_order); }
-            if (opts.visible      !== undefined) { fields.push('visible = ?');      vals.push(opts.visible ? 1 : 0); }
-            if (opts.can_add      !== undefined) { fields.push('can_add = ?');      vals.push(opts.can_add ? 1 : 0); }
-            if (opts.can_edit     !== undefined) { fields.push('can_edit = ?');     vals.push(opts.can_edit ? 1 : 0); }
-            if (opts.can_delete   !== undefined) { fields.push('can_delete = ?');   vals.push(opts.can_delete ? 1 : 0); }
+            if (opts.icon !== undefined) { fields.push('icon = ?'); vals.push(opts.icon); }
+            if (opts.sort_order !== undefined) { fields.push('sort_order = ?'); vals.push(opts.sort_order); }
+            if (opts.visible !== undefined) { fields.push('visible = ?'); vals.push(opts.visible ? 1 : 0); }
+            if (opts.can_add !== undefined) { fields.push('can_add = ?'); vals.push(opts.can_add ? 1 : 0); }
+            if (opts.can_edit !== undefined) { fields.push('can_edit = ?'); vals.push(opts.can_edit ? 1 : 0); }
+            if (opts.can_delete !== undefined) { fields.push('can_delete = ?'); vals.push(opts.can_delete ? 1 : 0); }
             fields.push('updated_at = ?');
             vals.push(new Date().toISOString());
             vals.push(exists._id);
@@ -220,12 +263,12 @@ class UiManager {
             `).run(
                 tableRow._id,
                 opts.display_name ?? null,
-                opts.icon         ?? null,
-                opts.sort_order   ?? 0,
-                opts.visible      !== false ? 1 : 0,
-                opts.can_add      !== false ? 1 : 0,
-                opts.can_edit     !== false ? 1 : 0,
-                opts.can_delete   !== false ? 1 : 0,
+                opts.icon ?? null,
+                opts.sort_order ?? 0,
+                opts.visible !== false ? 1 : 0,
+                opts.can_add !== false ? 1 : 0,
+                opts.can_edit !== false ? 1 : 0,
+                opts.can_delete !== false ? 1 : 0,
             );
         }
 
@@ -264,16 +307,16 @@ class UiManager {
 
         if (exists) {
             const fields = [];
-            const vals   = [];
-            if (opts.label          !== undefined) { fields.push('label = ?');          vals.push(opts.label); }
-            if (opts.field_type     !== undefined) { fields.push('field_type = ?');     vals.push(opts.field_type); }
+            const vals = [];
+            if (opts.label !== undefined) { fields.push('label = ?'); vals.push(opts.label); }
+            if (opts.field_type !== undefined) { fields.push('field_type = ?'); vals.push(opts.field_type); }
             if (opts.display_format !== undefined) { fields.push('display_format = ?'); vals.push(opts.display_format); }
-            if (opts.visible_list   !== undefined) { fields.push('visible_list = ?');   vals.push(opts.visible_list ? 1 : 0); }
-            if (opts.visible_form   !== undefined) { fields.push('visible_form = ?');   vals.push(opts.visible_form ? 1 : 0); }
-            if (opts.searchable     !== undefined) { fields.push('searchable = ?');     vals.push(opts.searchable ? 1 : 0); }
-            if (opts.sortable       !== undefined) { fields.push('sortable = ?');       vals.push(opts.sortable ? 1 : 0); }
-            if (opts.required_ui    !== undefined) { fields.push('required_ui = ?');    vals.push(opts.required_ui ? 1 : 0); }
-            if (opts.sort_order     !== undefined) { fields.push('sort_order = ?');     vals.push(opts.sort_order); }
+            if (opts.visible_list !== undefined) { fields.push('visible_list = ?'); vals.push(opts.visible_list ? 1 : 0); }
+            if (opts.visible_form !== undefined) { fields.push('visible_form = ?'); vals.push(opts.visible_form ? 1 : 0); }
+            if (opts.searchable !== undefined) { fields.push('searchable = ?'); vals.push(opts.searchable ? 1 : 0); }
+            if (opts.sortable !== undefined) { fields.push('sortable = ?'); vals.push(opts.sortable ? 1 : 0); }
+            if (opts.required_ui !== undefined) { fields.push('required_ui = ?'); vals.push(opts.required_ui ? 1 : 0); }
+            if (opts.sort_order !== undefined) { fields.push('sort_order = ?'); vals.push(opts.sort_order); }
             fields.push('updated_at = ?');
             vals.push(new Date().toISOString());
             vals.push(exists._id);
@@ -289,15 +332,15 @@ class UiManager {
             `).run(
                 colRow._id,
                 tableRow._id,
-                opts.label          ?? null,
-                opts.field_type     ?? 'text',
+                opts.label ?? null,
+                opts.field_type ?? 'text',
                 opts.display_format ?? null,
-                opts.visible_list   !== false ? 1 : 0,
-                opts.visible_form   !== false ? 1 : 0,
-                opts.searchable     ? 1 : 0,
-                opts.sortable       ? 1 : 0,
-                opts.required_ui    ? 1 : 0,
-                opts.sort_order     ?? 0,
+                opts.visible_list !== false ? 1 : 0,
+                opts.visible_form !== false ? 1 : 0,
+                opts.searchable ? 1 : 0,
+                opts.sortable ? 1 : 0,
+                opts.required_ui ? 1 : 0,
+                opts.sort_order ?? 0,
             );
         }
 
