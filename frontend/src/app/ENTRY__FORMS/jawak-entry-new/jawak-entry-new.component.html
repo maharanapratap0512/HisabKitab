@@ -301,7 +301,8 @@
                                                         [clearable]="true" [virtualScroll]="true" name="aawak_ref_id"
                                                         [(ngModel)]="jwkForm.aawak_ref_id" [selectOnTab]="true"
                                                         (change)="refAawakSelected($event, i)">
-                                                        <ng-option *ngFor="let item of aawaks"
+                                                        <ng-option
+                                                            *ngFor="let item of aawaks | filterAawak:jwkForm.filterObj"
                                                             [value]="item._id">{{item.lot_no}} -
                                                             {{item.date}} -
                                                             {{item.qty}} {{item.unit_short}}

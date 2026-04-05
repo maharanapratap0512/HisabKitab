@@ -15,9 +15,9 @@ export class AuthService {
   settingsUI = {
     pageList: [
       { key: 'department', title: 'Department', detail: '', add: true, edit: true, delete: true },
-      { key: 'aawak', title: 'Aawak', detail: '' },
-      { key: 'jawak', title: 'Jawak', detail: '' },
-      { key: 'hmp', title: 'HMP', detail: '' },
+      { key: 'aawak', title: 'Aawak', detail: '', add: true, edit: true, delete: true },
+      { key: 'jawak', title: 'Jawak', detail: '', add: true, edit: true, delete: true },
+      { key: 'hmp', title: 'HMP', detail: '', add: true, edit: true, delete: true },
       { key: 'bachat', title: 'Bachat', detail: '' },
       { key: 'pbk_closing', title: 'PBK Closing', detail: '' },
       { key: 'vehicle', title: 'Vehicle', detail: '', add: true, edit: true, delete: true },

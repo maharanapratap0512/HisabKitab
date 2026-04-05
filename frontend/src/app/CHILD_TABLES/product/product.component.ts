@@ -102,7 +102,10 @@ export class ProductComponent implements OnInit {
 
     if (ev.length) {
       this.closeModal();
-      this.productData.splice(this.productData.indexOf(this.editData), 1, ev[0]);
+      let index = this.productData.findIndex((p: any) => p._id === ev[0]._id);
+      if (index > -1) {
+        this.productData.splice(index, 1, ev[0]);
+      }
       this.isLoader = false;
     }
     else {

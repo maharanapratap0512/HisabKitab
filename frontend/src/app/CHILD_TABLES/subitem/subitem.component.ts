@@ -73,7 +73,10 @@ export class SubitemComponent implements OnInit {
       this.isLoader = true;
       $('#showModal').modal('hide');
       this.showModal = '';
-      this.subitemData.splice(this.subitemData.indexOf(this.editData), 1, ev);
+      let index = this.subitemData.findIndex((it: any) => it._id === ev._id);
+      if (index > -1) {
+        this.subitemData.splice(index, 1, ev);
+      }
       this.isLoader = false;
     }
     else {
@@ -102,7 +105,7 @@ export class SubitemComponent implements OnInit {
           if (data['success']) {
             this.isLoader = false;
             this.subitemData.splice(i, 1);
-            this.gs.Lists.mm.splice(this.gs.Lists.mm.indexOf((i: { _id: any; }) => i._id == id), 1);
+            // this.gs.Lists.mm.splice(this.gs.Lists.mm.indexOf((i: { _id: any; }) => i._id == id), 1);
             this.total_count -= 1;
             this.toastr.success('Deleted Successfully');
           }

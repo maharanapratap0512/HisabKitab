@@ -158,8 +158,12 @@
                 <td class="py-2 opacity-85 font-size-12 fw-medium text-dark">{{v.date | date:'dd-MM-yyyy'}}</td>
 
                 <td class="py-2 text-start ps-3">
-                  <div class="fw-bold font-size-12 text-dark" style="max-width: 220px;">
-                    <i class="uil uil-map-marker-alt me-1 text-danger"></i>{{v.mm?.mm_hin}}
+                  <div class="fw-bold font-size-12 text-dark d-flex align-items-center justify-content-between pe-1">
+                    <div><i class="uil uil-map-marker-alt me-1 text-danger"></i>{{v.mm?.mm_hin}}</div>
+                    <span class="badge badge-theme rounded-pill font-size-8" *ngIf="v.pbk_count"
+                      title="Registered PBK count at this MM">
+                      count - {{v.pbk_count}}
+                    </span>
                   </div>
                 </td>
 
@@ -255,11 +259,13 @@
                           <!-- ACTION COLUMN (Linked to Item) -->
                           <ng-container *ngIf="vr.isIFirst">
                             <td [attr.rowspan]="vr.iRowSpan" class="py-0" (click)="$event.stopPropagation()">
-                              <div class="d-flex justify-content-center gap-2">
-                                <i class="uil uil-pen text-primary opacity-50 hover-opacity-100 cursor-pointer"
-                                  (click)="openEntryModal(vr.item)"></i>
-                                <i class="uil uil-trash text-danger opacity-50 hover-opacity-100 cursor-pointer"
-                                  (click)="delete(vr.item._id)"></i>
+                              <div class="d-flex justify-content-center gap-2 align-items-center">
+                                <i class="uil uil-truck text-info opacity-40 hover-opacity-100 cursor-pointer font-size-16"
+                                  title="Edit Deliveries (Jawak Focus)" (click)="openJawakEdit(v, vr.sr - 1)"></i>
+                                <i class="uil uil-pen text-primary opacity-40 hover-opacity-100 cursor-pointer font-size-13"
+                                  title="Edit full voucher" (click)="editVoucher(v)"></i>
+                                <i class="uil uil-trash text-danger opacity-40 hover-opacity-100 cursor-pointer font-size-13"
+                                  title="Delete item" (click)="delete(vr.item._id)"></i>
                               </div>
                             </td>
                           </ng-container>
@@ -328,7 +334,13 @@
                   </td>
                   <td [attr.rowspan]="row.vRowSpan" class="px-3 border-end fw-bold text-dark font-size-12"
                     style="position: sticky; left: 230px; z-index: 5; background: var(--card-bg); vertical-align: middle;">
-                    <div style="max-width: 140px;">{{row.voucher.mm?.mm_hin}}</div>
+                    <div style="max-width: 140px;" class="d-flex align-items-center justify-content-between pe-1">
+                      <div>{{row.voucher.mm?.mm_hin}}</div>
+                      <span class="badge bg-soft-info text-info px-1 py-0 rounded-pill font-size-8"
+                        *ngIf="row.voucher.pbk_count" title="Registered PBK count at this MM">
+                        {{row.voucher.pbk_count}}
+                      </span>
+                    </div>
                   </td>
                   <td [attr.rowspan]="row.vRowSpan" class="px-3 border-end font-size-11 text-muted fw-medium"
                     style="position: sticky; left: 390px; z-index: 5; background: var(--card-bg); vertical-align: middle;">
@@ -357,10 +369,12 @@
                   <td [attr.rowspan]="row.iRowSpan" class="text-end border-end fw-bold pe-3 text-dark font-size-13"
                     style="vertical-align: middle;">₹{{row.item.amount || '-'}}</td>
                   <td [attr.rowspan]="row.iRowSpan" class="text-center border-end" style="vertical-align: middle;">
-                    <div class="d-flex justify-content-center gap-2 opacity-60 hover-opacity-100">
-                      <i class="uil uil-pen text-primary cursor-pointer font-size-16"
-                        (click)="openEntryModal(row.item)"></i>
-                      <i class="uil uil-trash-alt text-danger cursor-pointer font-size-16"
+                    <div class="d-flex justify-content-center gap-3 align-items-center opacity-60 hover-opacity-100">
+                      <i class="uil uil-truck text-info cursor-pointer font-size-18"
+                        title="Edit Deliveries (Jawak Focus)" (click)="openJawakEdit(row.voucher, row.sr - 1)"></i>
+                      <i class="uil uil-pen text-primary cursor-pointer font-size-15" title="Edit full voucher"
+                        (click)="editVoucher(row.voucher)"></i>
+                      <i class="uil uil-trash-alt text-danger cursor-pointer font-size-15" title="Delete item"
                         (click)="delete(row.item._id)"></i>
                     </div>
                   </td>
@@ -412,8 +426,8 @@
       </div>
       <div class="modal-body p-0">
         <div class="p-1">
-          <app-prastav-entry [isEdit]="isEdit" [getData]="selectedPrastav"
-            (response)="onSaved($event)"></app-prastav-entry>
+          <app-prastav-entry [isEdit]="isEdit" [getData]="selectedPrastav" [jawakFocusMode]="jawakFocusMode"
+            [focusedLineIndex]="focusedLineIndex" (response)="onSaved($event)"></app-prastav-entry>
         </div>
       </div>
     </div>

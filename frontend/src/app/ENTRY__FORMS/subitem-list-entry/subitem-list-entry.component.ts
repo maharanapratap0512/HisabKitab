@@ -39,7 +39,7 @@ export class SubitemListEntryComponent implements OnInit {
       subitem_hin: [null, Validators.required],
       subitem_eng: [null],
       subitem_roman: [null],
-      extra_note:[null]
+      extra_note: [null]
     });
   }
 

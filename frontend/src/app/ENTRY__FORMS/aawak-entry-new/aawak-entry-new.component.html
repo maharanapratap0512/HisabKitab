@@ -148,14 +148,26 @@
                                     [appContextMenu]="getContextMenuItems(awkForm)"
                                     [contextMenuData]="{ i: i, hl: awkForm.hl }" [ngClass]="{'hl': awkForm.hl}">
                                     <td class="text-center">
-                                        <div class="d-flex justify-content-between">
+                                        <div class="d-flex justify-content-between align-items-center">
                                             <div>{{i+1}}</div>
 
-                                            <i class="mdi mdi-plus i-outline-warning" title="Add Jawak"
-                                                (click)="addJawak(i)"></i>
-                                            <!-- <button class="btn btn-sm btn-outline-warning" (click)="showJawak(data, i)">
-                                                <i class="dripicons-view-list noti-icon"></i>
-                                            </button> -->
+                                            <div class="d-flex align-items-center">
+                                                <i class="mdi mdi-plus i-outline-warning cursor-pointer me-1"
+                                                    title="Add Jawak" *ngIf="isRowValid(i)" (click)="addJawak(i)"
+                                                    [ngClass]="{'text-success': awkForm.jawak_detail?.length > 0}"></i>
+
+                                                <button *ngIf="awkForm.jawak_detail?.length > 0"
+                                                    class="btn btn-sm btn-outline-warning p-0 lh-1"
+                                                    style="font-size: 9px; min-width: 35px; line-height: 1.2;"
+                                                    (click)="showJawak(i)"
+                                                    [title]="'Total Jawak Qty: ' + getJawakQty(i)">
+                                                    <div style="font-weight: bold; padding: 1px 2px;">J -
+                                                        {{awkForm.jawak_detail.length}}</div>
+                                                    <div
+                                                        style="border-top: 1px solid rgba(255,193,7,0.3); padding: 1px 2px;">
+                                                        Q - {{getJawakQty(i)}}</div>
+                                                </button>
+                                            </div>
                                         </div>
                                     </td>
                                     <td *ngIf="settings.aawak.lot_no">
@@ -388,6 +400,31 @@
 
 
 
+
+    <!-- Modal -->
+    <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
+                    <button type="button" (click)="closeModal()" class="btn-close" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
+                        [noAPICall]="true" [aawakRef]="editData"></app-jawak-entry>
+
+                    <app-data-view *ngIf="showModal == 'Show Jawak'" [getData]="viewData" Type="jawak"
+                        [isLocal]="true"></app-data-view>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="width: 120px;"
+                        (click)="closeModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Image upload Model -->
     <div class="modal fade" id="addImages" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -402,6 +439,7 @@
                     <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)"
                         type="aawak" [getData]="fs.aawakFormMain.aawaks[imageIndex].document">
                     </app-files-view>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" style="width: 120px;"

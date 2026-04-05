@@ -36,6 +36,8 @@ export class PrastavComponent implements OnInit {
 
   isEdit = false;
   selectedPrastav: any = null;
+  jawakFocusMode: boolean = false;
+  focusedLineIndex: number = 0;
 
   constructor(
     public api: ApiService,
@@ -114,6 +116,7 @@ export class PrastavComponent implements OnInit {
           date: p.date,
           mm: p.mm,
           pbk: p.pbk,
+          pbk_count: p.pbk_count,
           note: p.note, // Capture note from the first item
           items: [],
           expanded: true, // Default open for Voucher Mode
@@ -289,6 +292,16 @@ export class PrastavComponent implements OnInit {
     this.openEntryModal(v);
   }
 
+  openJawakEdit(v: any, lineIndex: number) {
+    // Ensure lines exists for the entry component
+    if (v && v.items && !v.lines) {
+      v.lines = v.items;
+    } else if (v && !v.lines) {
+      v.lines = [v]; // Individual mode fix
+    }
+    this.openEntryModal(v, true, lineIndex);
+  }
+
   deleteVoucher(v: any) {
     if (!v.voucher_no) return;
 
@@ -315,9 +328,11 @@ export class PrastavComponent implements OnInit {
     });
   }
 
-  openEntryModal(row: any = null) {
+  openEntryModal(row: any = null, jawakFocus: boolean = false, lineIndex: number = 0) {
     this.isEdit = !!row;
     this.selectedPrastav = row;
+    this.jawakFocusMode = jawakFocus;
+    this.focusedLineIndex = lineIndex;
     $('#prastavEntryModal').modal('show');
   }
 

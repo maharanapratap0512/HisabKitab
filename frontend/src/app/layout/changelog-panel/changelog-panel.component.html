@@ -1,0 +1,66 @@
+<!-- 
+  @CHANGELOG_PANEL_UI
+  Slide-in drawer with Accordion-style Hindi-first updates and distinctive iconography.
+-->
+<div class="changelog-overlay" [class.show]="isVisible" (click)="close()"></div>
+
+<div class="changelog-panel card p-0 shadow-lg border-start" [class.show]="isVisible">
+    <div class="card-header d-flex justify-content-between align-items-center border-bottom px-3 py-2">
+        <h5 class="m-0 fw-bold"><i class="uil uil-megaphone me-2"></i>What's New / क्या नया है?</h5>
+        <button type="button" class="btn-close shadow-none" (click)="close()"></button>
+    </div>
+
+    <div class="card-body p-0" style="overflow-y: auto; height: calc(100% - 50px);">
+        <div *ngIf="!updates || updates.length === 0" class="p-5 text-center text-muted">
+            <i class="uil uil-hourglass-end fs-1 mb-2 d-block"></i>
+            कोई अपडेट नहीं मिला। (No updates found)
+        </div>
+
+        <div *ngFor="let version of updates; let isFirst = first" class="version-accordion border-bottom">
+            <!-- Accordion Header -->
+            <div class="accordion-header px-3 py-3 d-flex align-items-center cursor-pointer hover-bg"
+                (click)="toggleVersion(version.version)" [class.active-header]="expandedStates[version.version]">
+                <i class="uil fs-3 text-primary transition-all" [class.uil-angle-down]="expandedStates[version.version]"
+                    [class.uil-angle-right]="!expandedStates[version.version]"></i>
+
+                <div class="ms-2 flex-grow-1">
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="badge badge-theme-soft me-2 px-2 py-1">v{{version.version}}</span>
+                        <span class="text-muted smallest fst-italic">{{version.date}}</span>
+                    </div>
+                    <h6 class="mb-0 fw-bold header-summary">{{version.summary_hin || version.summary}}</h6>
+                </div>
+            </div>
+
+            <!-- Accordion Body -->
+            <div class="accordion-body px-0 bg-white" [class.d-none]="!expandedStates[version.version]">
+                <div class="px-3 pt-3">
+                    <div *ngFor="let item of version.items" class="update-card mb-4">
+                        <div class="item-content p-3 rounded-3 border">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span [class]="'badge-pill ' + getTypeBadgeClass(item.type)">
+                                    <i class="uil me-1" [ngClass]="getTypeIcon(item.type)"></i>
+                                    {{item.type | uppercase}}
+                                </span>
+                                <span class="fw-bold text-secondary smallest opacity-75">{{item.module}}</span>
+                            </div>
+
+                            <h6 class="mb-2 item-title fw-bold">
+                                {{item.title_hin || item.title}}
+                            </h6>
+
+                            <div class="item-desc text-muted small" [innerHTML]="item.desc_hin || item.desc"></div>
+
+                            <div *ngIf="item.media"
+                                class="update-media mt-3 rounded-2 border overflow-hidden p-1 shadow-sm">
+                                <img [src]="item.media" class="img-fluid rounded" [alt]="item.title"
+                                    (error)="item.media = null"
+                                    style="max-height: 250px; width: 100%; object-fit: contain;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

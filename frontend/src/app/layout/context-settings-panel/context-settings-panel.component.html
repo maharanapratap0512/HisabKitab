@@ -1,0 +1,103 @@
+<!-- Context Settings Panel: Full Functional Sidebar Layout -->
+<div class="context-overlay" [class.show]="isVisible" (click)="close()"></div>
+
+<div class="context-panel shadow-lg border-0 rounded-0" [class.show]="isVisible">
+    <div class="d-flex h-100">
+
+        <!-- Sidebar: Page List & Global Visibility/Permissions -->
+        <div class="panel-sidebar bg-light border-end">
+            <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+                <h6 class="m-0 fw-bold text-uppercase smallest opacity-75">Pages On/Off</h6>
+            </div>
+            <div class="sidebar-scroll">
+                <div *ngFor="let page of auth.settingsUI.pageList"
+                    class="sidebar-item d-flex align-items-center cursor-pointer p-2 px-3 border-bottom transition-all"
+                    [class.active-item]="activeKey === page.key" (click)="selectPage(page.key)">
+
+                    <!-- Visibility Toggle -->
+                    <div class="form-check form-switch me-2 mb-0 p-0">
+                        <input class="form-check-input ms-0" type="checkbox" [checked]="getPageVisible(page.key)"
+                            (click)="$event.stopPropagation(); togglePageVisible(page.key)">
+                    </div>
+
+                    <span class="flex-grow-1 text-truncate fw-medium">{{page.title}}</span>
+
+                    <!-- A/E/D Quick Permissions -->
+                    <div class="permission-pill d-flex gap-1 ms-2" *ngIf="page.add || page.edit || page.delete">
+                        <span class="perm-badge perm-a" *ngIf="page.add" [class.active]="getPermission(page.key, 'add')"
+                            title="Add Permission"
+                            (click)="$event.stopPropagation(); togglePermission(page.key, 'add')">A</span>
+                        <span class="perm-badge perm-e" *ngIf="page.edit"
+                            [class.active]="getPermission(page.key, 'edit')" title="Edit Permission"
+                            (click)="$event.stopPropagation(); togglePermission(page.key, 'edit')">E</span>
+                        <span class="perm-badge perm-d" *ngIf="page.delete"
+                            [class.active]="getPermission(page.key, 'delete')" title="Delete Permission"
+                            (click)="$event.stopPropagation(); togglePermission(page.key, 'delete')">D</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Area: Context Settings -->
+        <div class="panel-content flex-grow-1">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white sticky-top">
+                <h5 class="m-0 fw-bold text-primary">
+                    <i class="uil uil-setting me-2"></i>{{activeTitle}} Settings
+                    <span class="badge badge-soft-primary ms-2" *ngIf="activeKey === contextKey">Current Page</span>
+                </h5>
+                <button type="button" class="btn-close shadow-none" (click)="close()"></button>
+            </div>
+
+            <div class="p-4 content-scroll">
+
+                <!-- Section 1: UI Modes (Entry Form & Table Mode) -->
+                <!-- <div class="ui-modes-block mb-4" *ngIf="activeUISettings.length > 0">
+                    <h6 class="group-title mb-3">UI & Data Interaction</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3" *ngFor="let ui of activeUISettings">
+                            <div class="mode-card p-3 rounded border">
+                                <label class="d-block fw-bold mb-2 small text-muted">{{ui.title}}</label>
+                                <div class="btn-group btn-group-sm w-100 p-1 bg-light rounded-pill">
+                                    <button *ngFor="let opt of ui.options"
+                                        class="btn border-0 rounded-pill transition-all"
+                                        [class.btn-white]="getUIMode(activeKey!, ui.key) === opt.value"
+                                        [class.shadow-sm]="getUIMode(activeKey!, ui.key) === opt.value"
+                                        [class.text-primary]="getUIMode(activeKey!, ui.key) === opt.value"
+                                        (click)="setUIMode(activeKey!, ui.key, opt.value)">
+                                        {{opt.label}}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+
+                <!-- Section 2: Column Visibility -->
+                <div class="columns-block" *ngIf="activeColumns.length > 0">
+                    <h6 class="group-title mb-3">Visible Columns</h6>
+                    <div class="toggle-grid">
+                        <div *ngFor="let col of activeColumns"
+                            class="column-toggle-card p-2 px-3 rounded border bg-white d-flex align-items-center gap-2">
+                            <div class="form-check form-switch m-0 p-0">
+                                <input class="form-check-input ms-0" type="checkbox" [id]="'col-' + col.colName"
+                                    [checked]="getSetting(activeKey!, col.colName)"
+                                    (change)="toggleSetting(activeKey!, col.colName)">
+                            </div>
+                            <label class="m-0 smallest fw-medium cursor-pointer flex-grow-1"
+                                [for]="'col-' + col.colName">
+                                {{col.title}}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="activeColumns.length === 0 && activeUISettings.length === 0"
+                    class="p-5 text-center text-muted">
+                    <i class="uil uil-shutter-alt fs-1 mb-2 d-block"></i>
+                    No specific settings found for this page.
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

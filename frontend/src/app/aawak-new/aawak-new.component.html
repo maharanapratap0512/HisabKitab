@@ -444,7 +444,7 @@
                                                     <table
                                                         class="table-sm table-bordered table-hover dt-responsive w-100">
                                                         <tr class="aawak-header">
-                                                            <th>No.</th>
+                                                            <th style="width: 80px;">Manage</th>
                                                             <th *ngIf="settings.aawak.lot_no">Lot No</th>
                                                             <th>Item - Subitem</th>
                                                             <th *ngIf="settings.aawak.product_id">Product</th>
@@ -462,12 +462,33 @@
                                                         <tr *ngFor="let awk of data.aawaks; let j = index;"
                                                             class="aawak-row" title="Click on Row to Edit"
                                                             [ngClass]="{'hl': awk.hl}">
-                                                            <td style="width: 80px;">
-                                                                <i class="uil-corner-down-right"></i>
-                                                                <span class="mx-1">{{j+1}}</span>
-                                                                <!-- <i class="uil uil-pen mx-1 text-info"></i> -->
-                                                                <i class="uil uil-trash text-danger"
-                                                                    (click)="deleteOne(i, j, awk._id)"></i>
+                                                            <td class="text-center p-1">
+                                                                <div
+                                                                    class="d-flex align-items-center justify-content-between p-0 px-1">
+                                                                    <span class="text-muted"
+                                                                        style="font-size: 10px;">#{{j+1}}</span>
+                                                                    <i class="uil uil-trash text-danger p-0 cursor-pointer"
+                                                                        title="Delete Row"
+                                                                        (click)="deleteOne(i, j, awk._id)"></i>
+                                                                </div>
+                                                                <div
+                                                                    class="d-flex align-items-center justify-content-center p-0 pt-1">
+                                                                    <i class="mdi mdi-plus i-outline-warning cursor-pointer me-1"
+                                                                        title="Add Jawak" *ngIf="awk.remaining_qty > 0"
+                                                                        style="font-size: 12px;"
+                                                                        (click)=" addJawak(awk)"> Jawak </i>
+
+                                                                    <button *ngIf="awk.jawak_detail?.length > 0"
+                                                                        class="btn btn-sm btn-outline-warning p-0 py-1 lh-1 d-flex align-items-center justify-content-center"
+                                                                        style="font-size: 10px; min-width: 48px; border-radius: 3px;"
+                                                                        (click)="showJawak(awk)"
+                                                                        [title]="'Total Jawak Qty: ' + getJawakQty(awk)">
+                                                                        <span class="px-1"
+                                                                            style="font-weight: 600;">J-{{awk.jawak_detail.length}}</span>
+                                                                        <span class="px-1"
+                                                                            style="border-left: 1px solid rgba(255,193,7,0.3); font-weight: 600;">Q-{{getJawakQty(awk)}}</span>
+                                                                    </button>
+                                                                </div>
                                                             </td>
                                                             <td *ngIf="settings.aawak.lot_no">{{awk.lot_no ? awk.lot_no
                                                                 :
@@ -578,7 +599,7 @@
 <!-- Modal -->
 <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
-    <div class="modal-dialog" style="width: 90%;">
+    <div class="modal-dialog" style="width: 98%;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>

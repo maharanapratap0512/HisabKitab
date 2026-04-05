@@ -92,7 +92,7 @@ export class ItemEntryComponent implements OnInit {
   }
 
   saveFormSettings() {
-    this.isEditForm = false; 
+    this.isEditForm = false;
     this.auth.updateSettings();
     this.settings = this.auth.webUser.settings.item;
   }

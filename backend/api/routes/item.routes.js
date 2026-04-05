@@ -56,12 +56,12 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
             itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` item.active = ${req.body.active}`;
         }
         if (req.body.categories) {
-            itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` (json_each.value = ${req.body.categories} OR subitems <> '[]')`;
+            itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` (json_each.value = ${req.body.categories} OR item._id IN (SELECT item_id FROM subitem, json_each(subitem.categories) WHERE json_each.value = ${req.body.categories}))`;
             sitemCondition += (sitemCondition.trim() != `` ? ` AND` : ``) + ` json_each.value = ${req.body.categories}`;
         }
         if (req.body.subitem_list_id) {
             sitemCondition += (sitemCondition.trim() != `` ? ` AND` : ``) + ` subitem.subitem_list_id = ${req.body.subitem_list_id}`;
-            itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` subitems <> '[]'`;
+            itemCondition += (itemCondition.trim() != `` ? ` AND` : ``) + ` item._id IN (SELECT item_id FROM subitem WHERE subitem.subitem_list_id = ${req.body.subitem_list_id})`;
         }
         if (itemCondition.trim() == `` && sitemCondition.trim() == ``) {
             orderBy = "item._id";

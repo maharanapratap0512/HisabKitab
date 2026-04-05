@@ -257,6 +257,7 @@ router.post('/new/:dept_id', async (req, res, next) => {
                         awk.aawak_mm_id = req.body.jawak_mm_id;
                         awk.aawak_source_id = req.body.aawak_source_id;
                         awk.description = "Automatic Entry from Jawak to Re-aawak."
+
                         await Fn.insertAJ(awk, 'aawak').then(async (rs) => {
                         });
                     }

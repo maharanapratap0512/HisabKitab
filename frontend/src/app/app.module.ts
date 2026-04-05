@@ -63,6 +63,7 @@ import { VehicleComponent } from './vehicle/vehicle.component';
 import { VehicleEntryComponent } from './ENTRY__FORMS/vehicle-entry/vehicle-entry.component';
 
 import { FilterByDatePipe } from './pipe/filter-by-date.pipe';
+import { FilterAawakPipe } from './pipe/filter-aawak.pipe';
 import { FilterItemCatPipe } from './pipe/filter-item-cat.pipe';
 import { ExcelImportComponent } from './excel-import/excel-import.component';
 import { ClosingComponent } from './closing/closing.component';
@@ -104,6 +105,9 @@ import { SelectionService } from './services/selection.service';
 import { TableSmartCheckboxDirective } from './SHARED/table-smart-checkbox.directive';
 import { PrastavComponent } from './prastav/prastav.component';
 import { PrastavEntryComponent } from './ENTRY__FORMS/prastav-entry/prastav-entry.component';
+import { ChangelogPanelComponent } from './layout/changelog-panel/changelog-panel.component';
+import { ContextSettingsPanelComponent } from './layout/context-settings-panel/context-settings-panel.component';
+import { SmartFocusDirective } from './SHARED/smart-focus.directive';
 
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
@@ -160,6 +164,7 @@ import { PrastavEntryComponent } from './ENTRY__FORMS/prastav-entry/prastav-entr
     VehicleComponent,
     VehicleEntryComponent,
     FilterByDatePipe,
+    FilterAawakPipe,
     FilterItemCatPipe,
     ExcelImportComponent,
     ClosingComponent,
@@ -196,6 +201,9 @@ import { PrastavEntryComponent } from './ENTRY__FORMS/prastav-entry/prastav-entr
     TableSmartCheckboxDirective,
     PrastavComponent,
     PrastavEntryComponent,
+    ChangelogPanelComponent,
+    ContextSettingsPanelComponent,
+    SmartFocusDirective,
   ],
 
   imports: [

@@ -854,14 +854,27 @@ export class AawakNewComponent implements OnInit {
     $('#showModal').modal('show');
   }
 
-  showJawak(id: any) {
-    if (id) {
-      this.http.get(this.api.getUrl('JAWAKBYAWK') + id).subscribe((data: any) => {
-        if (data['result'] && data['success']) {
-          this.viewData = data['result'];
+  getJawakQty(awk: any) {
+    let qty = 0;
+    if (awk.jawak_detail) {
+      awk.jawak_detail.forEach((j: any) => {
+        qty += j.qty;
+      });
+    }
+    return qty;
+  }
+
+  showJawak(data: any) {
+    if (typeof data == 'string') {
+      this.http.get(this.api.getUrl('JAWAKBYAWK') + data).subscribe((res: any) => {
+        if (res['result'] && res['success']) {
+          this.viewData = res['result'];
           this.openModal('Show Jawak');
         }
       });
+    } else {
+      this.viewData = data.jawak_detail || [];
+      this.openModal('Show Jawak');
     }
   }
 

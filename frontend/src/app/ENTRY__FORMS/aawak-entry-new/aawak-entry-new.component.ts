@@ -46,6 +46,9 @@ export class AawakEntryNewComponent implements OnInit {
   lotNoAll: any = [];
   lotNos: any = [];
   keyword: any = 'lot_no';
+  editData: any;
+  viewData: any;
+  currentBatchRowIndex: any;
 
   contextMenuItems: ContextMenuItem[] = [
   ];
@@ -136,6 +139,7 @@ export class AawakEntryNewComponent implements OnInit {
       this.fs.aawakFormMain.aawaks[index].aawak_source_id = ev.aawak_source_id;
       this.fs.aawakFormMain.aawaks[index].rate = ev.rate;
       this.fs.aawakFormMain.aawaks[index].unit_id = ev.unit_id;
+      this.fs.aawakFormMain.aawaks[index].lot_no = ev.lot_no;
     }
 
   }
@@ -341,8 +345,110 @@ export class AawakEntryNewComponent implements OnInit {
     }
   }
 
-  addJawak(i: any) {
+  isRowValid(i: any) {
+    let row = this.fs.aawakFormMain.aawaks[i];
+    return (row.item_id && row.qty && row.unit_id && row.aawak_type_id);
+  }
 
+  getJawakQty(i: any) {
+    let row = this.fs.aawakFormMain.aawaks[i];
+    if (row.jawak_detail && row.jawak_detail.length > 0) {
+      return row.jawak_detail.reduce((acc: any, curr: any) => acc + Number(curr.qty), 0);
+    }
+    return 0;
+  }
+
+  addJawak(i: any) {
+    this.currentBatchRowIndex = i;
+    let row = JSON.parse(JSON.stringify(this.fs.aawakFormMain.aawaks[i]));
+
+    // Enrich with top-level fields
+    row.date = this.fs.aawakFormMain.date;
+    row.mm_id = this.fs.aawakFormMain.mm_id;
+    row.aawak_mm_id = this.fs.aawakFormMain.aawak_mm_id;
+    row.pbk_id = this.fs.aawakFormMain.pbk_id;
+    row.nimitt_id = this.fs.aawakFormMain.nimitt_id;
+    row.description = this.fs.aawakFormMain.description;
+    row.dept_id = this.fs.aawakFormMain.dept_id;
+
+    // Enrich with display labels
+    if (row.mm_id) {
+      let mm = this.mms.find((m: any) => m._id == row.mm_id);
+      row.mm_hin = mm ? (mm.mm_hin || mm.mm_eng) : '';
+    }
+    if (row.aawak_mm_id) {
+      let mm = this.mms.find((m: any) => m._id == row.aawak_mm_id);
+      row.aawak_mm_hin = mm ? (mm.mm_hin || mm.mm_eng) : '';
+    }
+    if (row.item_id) {
+      let item = this.items.find((it: any) => it._id == row.item_id);
+      row.item_hin = item ? (item.item_hin || item.item_eng) : '';
+    }
+    if (row.subitem_id) {
+      let item = this.items.find((it: any) => it._id == row.item_id);
+      let subitem = item?.subitems?.find((s: any) => s._id == row.subitem_id);
+      row.subitem_hin = subitem ? (subitem.subitem_hin || subitem.subitem_eng) : '';
+    }
+    if (row.unit_id) {
+      let unit = this.units.find((u: any) => u._id == row.unit_id);
+      row.unit_short = unit ? unit.unit_short : '';
+    }
+    if (row.aawak_type_id) {
+      let type = this.aawak_types.find((t: any) => t._id == row.aawak_type_id);
+      row.aawak_type_hin = type ? type.list_name_hin : '';
+    }
+
+    this.editData = row;
+    this.openModal("Add Jawak");
+  }
+
+  showJawak(i: any) {
+    this.viewData = this.fs.aawakFormMain.aawaks[i].jawak_detail;
+    this.openModal("Show Jawak");
+  }
+
+  enrichJawak(jwk: any) {
+    if (jwk.jawak_mm_id) {
+      let mm = this.mms.find((m: any) => m._id == jwk.jawak_mm_id);
+      jwk.jawak_mm_hin = mm ? (mm.mm_hin || mm.mm_eng) : '';
+      jwk.jawak_mm_eng = mm ? mm.mm_eng : '';
+    }
+    if (jwk.item_id) {
+      let item = this.items.find((it: any) => it._id == jwk.item_id);
+      jwk.item_hin = item ? (item.item_hin || item.item_eng) : '';
+      jwk.item_eng = item ? item.item_eng : '';
+      if (jwk.subitem_id) {
+        let subitem = item?.subitems?.find((s: any) => s._id == jwk.subitem_id);
+        jwk.subitem_hin = subitem ? (subitem.subitem_hin || subitem.subitem_eng) : '';
+        jwk.subitem_eng = subitem ? subitem.subitem_eng : '';
+      }
+    }
+    if (jwk.unit_id) {
+      let unit = this.units.find((u: any) => u._id == jwk.unit_id);
+      jwk.unit_short = unit ? unit.unit_short : '';
+    }
+    if (jwk.jawak_type_id) {
+      let type = this.jawak_types.find((t: any) => t._id == jwk.jawak_type_id);
+      jwk.jawak_type_hin = type ? type.list_name_hin : '';
+      jwk.jawak_type_eng = type ? type.list_name_eng : '';
+    }
+    if (jwk.nimitt_id) {
+      let nimitt = this.nimitts.find((n: any) => n._id == jwk.nimitt_id);
+      jwk.nimitt_hin = nimitt ? (nimitt.nimitt_hin || nimitt.nimitt_eng) : '';
+    }
+    return jwk;
+  }
+
+  addJawakResponse(ev: any) {
+    if (ev) {
+      let enriched = this.enrichJawak(ev);
+      if (!this.fs.aawakFormMain.aawaks[this.currentBatchRowIndex].jawak_detail) {
+        this.fs.aawakFormMain.aawaks[this.currentBatchRowIndex].jawak_detail = [];
+      }
+      this.fs.aawakFormMain.aawaks[this.currentBatchRowIndex].jawak_detail.push(enriched);
+      this.toastr.success("Jawak added to row " + (this.currentBatchRowIndex + 1));
+      this.closeModal();
+    }
   }
 
   getProductData(item_id: any) {

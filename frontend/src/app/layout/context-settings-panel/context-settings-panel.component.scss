@@ -1,0 +1,265 @@
+.context-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1058;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+
+    &.show {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+.context-panel {
+    position: fixed;
+    top: 55px;
+    right: 0;
+    left: 0;
+    z-index: 1059;
+    height: 0;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    background-color: #fff;
+    opacity: 0;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+
+    &.show {
+        height: 520px;
+        opacity: 1;
+    }
+
+    .panel-sidebar {
+        width: 280px;
+        display: flex;
+        flex-direction: column;
+
+        .sidebar-scroll {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .sidebar-item {
+            &:hover {
+                background-color: rgba(114, 124, 245, 0.05);
+            }
+
+            &.active-item {
+                background-color: rgba(114, 124, 245, 0.1);
+                border-left: 4px solid #727cf5;
+                padding-left: calc(1rem - 4px) !important;
+
+                span {
+                    color: #727cf5;
+                    font-weight: 700;
+                }
+            }
+
+            .permission-pill {
+                .perm-badge {
+                    width: 22px;
+                    height: 18px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 4px;
+                    font-size: 10px;
+                    font-weight: 800;
+                    background: rgba(0, 0, 0, 0.05);
+                    color: #999;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    border: 1px solid transparent;
+
+                    &:hover {
+                        transform: scale(1.1);
+                        border-color: rgba(0, 0, 0, 0.1);
+                    }
+
+                    &.active {
+                        border-color: rgba(0, 0, 0, 0.1);
+
+                        &.perm-a {
+                            background: #0acf97;
+                            color: white;
+                            box-shadow: 0 2px 4px rgba(10, 207, 151, 0.3);
+                        }
+
+                        &.perm-e {
+                            background: #39afd1;
+                            color: white;
+                            box-shadow: 0 2px 4px rgba(57, 175, 209, 0.3);
+                        }
+
+                        &.perm-d {
+                            background: #fa5c7c;
+                            color: white;
+                            box-shadow: 0 2px 4px rgba(250, 92, 124, 0.3);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .panel-content {
+        display: flex;
+        flex-direction: column;
+        background: #fdfdfd;
+
+        .content-scroll {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .group-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #6c757d;
+            border-bottom: 2px solid #727cf522;
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        .mode-card {
+            background: #fff;
+
+            .btn-white {
+                background: #fff;
+                border-color: #eee !important;
+            }
+        }
+
+        .toggle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .column-toggle-card {
+            transition: all 0.2s;
+
+            &:hover {
+                border-color: #727cf5 !important;
+                background: rgba(114, 124, 245, 0.02);
+            }
+        }
+    }
+}
+
+// Dark mode overrides
+:host-context(.dark-mode),
+:host-context([data-bs-theme="dark"]) {
+    .context-panel {
+        background-color: #313a46 !important;
+        border-bottom: 1px solid #404954 !important;
+
+        .panel-sidebar {
+            background-color: #37404a !important;
+            border-right-color: #48525e !important;
+
+            .sidebar-item {
+                border-bottom-color: #48525e !important;
+
+                span {
+                    color: #cfd6de;
+                }
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.05);
+                }
+
+                &.active-item {
+                    background-color: rgba(114, 124, 245, 0.2);
+
+                    span {
+                        color: #727cf5;
+                    }
+                }
+
+                .permission-pill .perm-badge {
+                    background: rgba(255, 255, 255, 0.1);
+                    color: #8a96a1;
+                    border-color: rgba(255, 255, 255, 0.05);
+
+                    &.active {
+                        &.perm-a {
+                            background: #0acf97;
+                            color: #fff;
+                            box-shadow: 0 0 8px rgba(10, 207, 151, 0.4);
+                        }
+
+                        &.perm-e {
+                            background: #39afd1;
+                            color: #fff;
+                            box-shadow: 0 0 8px rgba(57, 175, 209, 0.4);
+                        }
+
+                        &.perm-d {
+                            background: #fa5c7c;
+                            color: #fff;
+                            box-shadow: 0 0 8px rgba(250, 92, 124, 0.4);
+                        }
+                    }
+                }
+            }
+        }
+
+        .panel-content {
+            background-color: #313a46 !important;
+
+            .bg-white {
+                background-color: #37404a !important;
+                border-bottom-color: #48525e !important;
+            }
+
+            .mode-card {
+                background: #3c4652;
+                border-color: #48525e !important;
+            }
+
+            .bg-light {
+                background-color: #313a46 !important;
+            }
+
+            .btn-white {
+                background: #44505e;
+                color: #eee;
+                border-color: #555 !important;
+            }
+
+            .column-toggle-card {
+                background: #37404a !important;
+                border-color: #48525e !important;
+
+                label {
+                    color: #cfd6de;
+                }
+            }
+
+            .group-title {
+                color: #adb5bd;
+            }
+        }
+    }
+}
+
+// Shared Utility
+.transition-all {
+    transition: all 0.2s ease-in-out;
+}
+
+.smallest {
+    font-size: 0.75rem;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

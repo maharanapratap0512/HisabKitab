@@ -74,6 +74,21 @@
 
             <ul class="navbar-nav ms-auto d-flex align-items-center gap-3">
 
+               <li class="nav-item position-relative">
+                  <a class="nav-link p-0" (click)="toggleContextSettings()" style="cursor: pointer;"
+                     title="Page Settings">
+                     <i class="uil uil-sliders-v noti-icon fs-3"></i>
+                  </a>
+               </li>
+
+               <li class="nav-item position-relative">
+                  <a class="nav-link p-0" (click)="toggleChangelog()" style="cursor: pointer;" title="What's New">
+                     <i class="uil uil-bell noti-icon fs-3"></i>
+                     <span *ngIf="hasNewUpdates" class="badge rounded-pill bg-danger position-absolute"
+                        style="top: 2px; right: -2px; font-size: 8px; padding: 3px 5px; border: 1px solid white;">NEW</span>
+                  </a>
+               </li>
+
                <li class="nav-item">
                   <a class="nav-link end-bar-toggle p-0" href="javascript: void(0);" role="button">
                      <i class="dripicons-gear noti-icon fs-3"></i>
@@ -440,3 +455,13 @@
       </div>
    </div>
 </div>
+
+<!-- Context Settings Panel -->
+<app-context-settings-panel [isVisible]="isContextSettingsVisible" [contextKey]="contextKey"
+   (onClose)="isContextSettingsVisible = false">
+</app-context-settings-panel>
+
+<!-- Changelog Panel -->
+<app-changelog-panel [isVisible]="isChangelogVisible" [updates]="updates" [lastSeenVersion]="lastSeenVersion"
+   (onClose)="toggleChangelog()">
+</app-changelog-panel>

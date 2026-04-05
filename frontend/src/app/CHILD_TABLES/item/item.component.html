@@ -139,10 +139,10 @@
                                     </button>
                                     <ng-container *ngIf="settings.edit">
                                        <button *ngIf="!data.restrict_year" class="btn btn-sm btn-outline-warning"
-                                          type="button" (click)="lockItem(i,data._id)"><i
+                                          type="button" (click)="lockItem(data._id)"><i
                                              class="uil-unlock-alt"></i></button>
                                        <button *ngIf="data.restrict_year" class="btn btn-sm btn-warning" type="button"
-                                          (click)="unlockItem(i,data._id)"><i class="uil-lock-alt"></i></button>
+                                          (click)="unlockItem(data._id)"><i class="uil-lock-alt"></i></button>
                                     </ng-container>
                                     <button class="btn btn-sm btn-outline-danger" type="button"
                                        (click)="deleteItem(data._id)" *ngIf="settings.delete">
@@ -214,12 +214,12 @@
                                                 <!-- </button> -->
                                                 <i *ngIf="!si.restrict_year && settings.edit"
                                                    class="uil-unlock-alt i-outline-warning me-1"
-                                                   (click)="lockSubitem(i, j, si._id)"></i>
+                                                   (click)="lockSubitem(si._id)"></i>
                                                 <i *ngIf="si.restrict_year && settings.edit"
                                                    class="uil-lock-alt i-warning me-1"
-                                                   (click)="unlockSubitem(i, j, si._id)"></i>
+                                                   (click)="unlockSubitem(data._id, si._id)"></i>
                                                 <i *ngIf="settings.delete" class="uil-trash i-outline-danger me-1"
-                                                   (click)="deleteSubitem(i, j,si._id)"></i>
+                                                   (click)="deleteSubitem(data._id, si._id)"></i>
                                                 <div *ngIf="si.restrict_year" class="lock-date text-warning me-1">
                                                    {{si.restrict_month}}/{{si.restrict_year}} से लॉक।
                                                 </div>

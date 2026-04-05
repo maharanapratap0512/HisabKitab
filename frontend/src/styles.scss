@@ -11,6 +11,10 @@
   border: 1px solid red !important;
 }
 
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
 tbody:before {
   /* This doesn't work because of border-collapse */
   line-height: 1.5em;

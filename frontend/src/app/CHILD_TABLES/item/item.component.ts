@@ -184,38 +184,39 @@ export class ItemComponent implements OnInit {
 
 
 
-  lockItem(i: any, id: any) {
+  lockItem(id: any) {
     this.app.appModal$ = new Subject();
     this.app.appModal$.subscribe((result: any) => {
       if (result) {
-        this.toggleLock(i, { _id: id, ...result }, 'ITEM');
+        this.toggleLock({ _id: id, ...result }, 'ITEM');
       }
     });
     this.app.openModal('lockModal');
   }
 
-  unlockItem(i: any, id: any) {
-    this.toggleLock(i, { _id: id, restrict_month: null, restrict_year: null }, 'ITEM');
+  unlockItem(id: any) {
+    this.toggleLock({ _id: id, restrict_month: null, restrict_year: null }, 'ITEM');
   }
 
-  lockSubitem(i: any, j: any, id: any) {
+  lockSubitem(id: any) {
     this.app.appModal$ = new Subject();
     this.app.appModal$.subscribe((result: any) => {
       if (result) {
-        this.toggleLock(i, { _id: id, ...result }, 'SUBITEM', j);
+        this.toggleLock({ _id: id, ...result }, 'SUBITEM');
       }
     });
     this.app.openModal('lockModal');
   }
 
-  unlockSubitem(i: any, j: any, id: any) {
-    if (this.itemData[i].restrict_year) {
-      this.toggleLock(i, { _id: this.itemData[i]._id, restrict_month: null, restrict_year: null }, 'ITEM');
+  unlockSubitem(itemId: any, id: any) {
+    let i = this.itemData.findIndex((it: any) => it._id === itemId);
+    if (i > -1 && this.itemData[i].restrict_year) {
+      this.toggleLock({ _id: itemId, restrict_month: null, restrict_year: null }, 'ITEM');
     }
-    this.toggleLock(i, { _id: id, restrict_month: null, restrict_year: null }, 'SUBITEM', j);
+    this.toggleLock({ _id: id, restrict_month: null, restrict_year: null }, 'SUBITEM');
   }
 
-  toggleLock(i: any, row: any, APIname: any, j: any = null) {
+  toggleLock(row: any, APIname: any) {
     this.http.put(this.api.getUrl(APIname) + 'lock/', row).subscribe((data: any) => {
       if (data['result'].restrict_year) {
         this.toastr.success(APIname + " Lock Successfully.");
@@ -224,11 +225,20 @@ export class ItemComponent implements OnInit {
         this.toastr.success(APIname + " Unlock Successfully.");
       }
       if (APIname == 'SUBITEM') {
-        this.itemData[i].subitems[j].restrict_month = data['result'].restrict_month;
-        this.itemData[i].subitems[j].restrict_year = data['result'].restrict_year;
+        let i = this.itemData.findIndex((it: any) => it._id === data['result'].item_id);
+        if (i > -1) {
+          let j = this.itemData[i].subitems.findIndex((si: any) => si._id === data['result']._id);
+          if (j > -1) {
+            this.itemData[i].subitems[j].restrict_month = data['result'].restrict_month;
+            this.itemData[i].subitems[j].restrict_year = data['result'].restrict_year;
+          }
+        }
       } else {
-        this.itemData[i].restrict_month = data['result'].restrict_month;
-        this.itemData[i].restrict_year = data['result'].restrict_year;
+        let i = this.itemData.findIndex((it: any) => it._id === data['result']._id);
+        if (i > -1) {
+          this.itemData[i].restrict_month = data['result'].restrict_month;
+          this.itemData[i].restrict_year = data['result'].restrict_year;
+        }
       }
     }, err => {
       this.toastr.error(err['message']);
@@ -330,7 +340,7 @@ export class ItemComponent implements OnInit {
     if (ev._id) {
       this.isLoader = true;
       this.closeModal();
-      let index = this.itemData.indexOf(this.editData);
+      let index = this.itemData.findIndex((it: any) => it._id === ev._id);
 
       if (index >= 0) {
         console.log("index", index);
@@ -417,7 +427,10 @@ export class ItemComponent implements OnInit {
           if (data['success']) {
             this.isLoader = false;
             this.itemData.splice(i, 1);
-            this.gs.Lists.mm.splice(this.gs.Lists.mm.indexOf((i: { _id: any; }) => i._id == id), 1);
+            // const mmIndex = this.gs.Lists.mm.findIndex((m: any) => m._id === id);
+            // if (mmIndex > -1) {
+            //   this.gs.Lists.mm.splice(mmIndex, 1);
+            // }
             this.total_count -= 1;
             this.toastr.success('Deleted Successfully');
           }
@@ -430,7 +443,7 @@ export class ItemComponent implements OnInit {
     })
   }
 
-  deleteSubitem(i: any, j: any, id: any) {
+  deleteSubitem(itemId: any, id: any) {
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -444,7 +457,13 @@ export class ItemComponent implements OnInit {
         this.http.delete(this.api.getUrl('SUBITEM') + '/' + id).subscribe((data: any) => {
           if (data['success']) {
             this.isLoader = false;
-            this.itemData[i].subitems.splice(j, 1);
+            let i = this.itemData.findIndex((it: any) => it._id === itemId);
+            if (i > -1) {
+              let j = this.itemData[i].subitems.findIndex((si: any) => si._id === id);
+              if (j > -1) {
+                this.itemData[i].subitems.splice(j, 1);
+              }
+            }
             this.si_total_count--;
             this.toastr.success('Deleted Successfully');
           }

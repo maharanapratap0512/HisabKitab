@@ -21,6 +21,7 @@ export class DataViewComponent implements OnInit {
   @Input() getData: any;
   @Input() Type: any = "";
   @Input() isEdit: any;
+  @Input() isLocal: boolean = false;
   @Output() response = new EventEmitter();
   isLoader: boolean = false;
   fields: any = [];
@@ -244,19 +245,25 @@ export class DataViewComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.http.delete(this.api.getUrl(this.apiName) + '/' + id).subscribe((data: any) => {
-          if (data['success']) {
-            this.isLoader = false;
-            this.records.splice(i, 1);
-            this.toastr.success('deleted successfully.');
-          }
-          else {
-            this.toastr.error(data['message']);
-            this.isLoader = false;
-          }
-        }, err => {
-          this.toastr.error(err['error']);
-        });
+        if (this.isLocal) {
+          this.records.splice(i, 1);
+          this.toastr.success('deleted successfully.');
+          this.isLoader = false;
+        } else {
+          this.http.delete(this.api.getUrl(this.apiName) + '/' + id).subscribe((data: any) => {
+            if (data['success']) {
+              this.isLoader = false;
+              this.records.splice(i, 1);
+              this.toastr.success('deleted successfully.');
+            }
+            else {
+              this.toastr.error(data['message']);
+              this.isLoader = false;
+            }
+          }, err => {
+            this.toastr.error(err['error']);
+          });
+        }
       }
     });
     this.isLoader = false;

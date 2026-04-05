@@ -1,0 +1,74 @@
+[
+    {
+        "version": "29.1",
+        "date": "05-04-2026",
+        "summary": "Major Software Upgrade - Version 29.1",
+        "summary_hin": "नया सॉफ्टवेयर अपग्रेड - वर्जन 29.1",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Settings Panel",
+                "title": "Context Settings Panel PRO",
+                "title_hin": "एडवांस्ड सेटिंग्स पैनल",
+                "desc": "Redesigned settings panel with sidebar navigation, permission toggles (Add/Edit/Delete), and theme-aware UI. <br/> - Configure columns for each page individually. <br/> - Global page visibility control.",
+                "desc_hin": "साइडबार नेविगेशन और परमिशन कंट्रोल (Add/Edit/Delete) के साथ नया सेटिंग्स पैनल। <br/> - हर पेज के कॉलम सेटिंग्स अब एक ही जगह से मैनेज करें। <br/> - डार्क और लाइट मोड में बेहतर दृश्यता (Visibility)।",
+                "media": "/assets/updates/settings-panel.gif"
+            },
+            {
+                "type": "feature",
+                "module": "Updates Manager",
+                "title": "Interactive Changelog Panel",
+                "title_hin": "नया वर्जन अपडेट पैनल",
+                "desc": "Stay updated with all new features and fixes. <br/> - Detailed version history with icons and descriptions. <br/> - Automatic popup notification for new releases.",
+                "desc_hin": "सॉफ्टवेयर के हर नए अपडेट को अब आप आसानी से देख सकते हैं। <br/> - वर्जन हिस्ट्री को नए डिजाइन और आइकॉन्स के साथ देखें। <br/> - नया वर्जन आने पर अपने आप जानकारी (Popup) आ जाएगी।",
+                "media": "/assets/updates/updates-panel.gif"
+            },
+            {
+                "type": "feature",
+                "module": "Aawak New & Entry",
+                "title": "Jawak Integration & UI Redesign",
+                "title_hin": "जावक इंटीग्रेशन और नया डिजाइन",
+                "desc": "Smart Jawak management now available directly on each row. <br/> - View Jawak count and total quantity at a glance.",
+                "desc_hin": "अब हर रो (Row) पर जावक की जानकारी सीधे देखें। <br/> - जावक की संख्या और कुल वजन एक साथ देखें। <br/> - बिना पेज बदले जावक एंट्री करें।",
+                "media": ""
+            },
+            {
+                "type": "feature",
+                "module": "Prastav (Proposal)",
+                "title": "Whole New Prastav Page",
+                "title_hin": "नया प्रस्ताव पेज",
+                "desc": "Integrated a dedicated Prastav management page for streamlined proposal handling and tracking.",
+                "desc_hin": "प्रस्तावों को मैनेज करने के लिए एक नया और आसान पेज जोड़ा गया है।",
+                "media": ""
+            },
+            {
+                "type": "fix",
+                "module": "Item Directory",
+                "title": "Category Filter Correction",
+                "title_hin": "कैटेगरी फ़िल्टर सुधार",
+                "desc": "Fixed a bug where the category filter was showing inaccurate results. <br/> - More precise item and subitem matching logic.",
+                "desc_hin": "आइटम पेज पर कैटेगरी फ़िल्टर की गड़बड़ी को ठीक किया गया है। <br/> - अब आइटम्स और सब-आइटम्स अपनी जुडी हुई कैटेगरी के हिसाब से बिलकुल सही दिखेंगे।",
+                "media": ""
+            },
+            {
+                "type": "feature",
+                "module": "Prastav Management",
+                "title": "PBK Count Ribbon",
+                "title_hin": "PBK काउंट रिबन",
+                "desc": "Added a small ribbon next to MM names showing the total registered PBKs for that location.",
+                "desc_hin": "MM के नाम के बगल में एक छोटा रिबन जोड़ा गया है जो उस स्थान के कुल रजिस्टर्ड PBK की संख्या दिखाता है।",
+                "media": ""
+            },
+            {
+                "type": "feature",
+                "module": "Prastav Management",
+                "title": "Jawak Focus Mode",
+                "title_hin": "जावक फोकस मोड",
+                "desc": "A new focused editing mode for deliveries. Hides complex headers and parent tables, showing only a summary and the delivery (Jawak) table for a single item.",
+                "desc_hin": "डिलिवरी (जावक) के लिए विशेष फोकस मोड। यह फालतू के हेडर्स और टेबल्स को छुपाकर केवल चुने हुए आइटम की डिलिवरी डिटेल्स पर ध्यान केंद्रित करने में मदद करता है।",
+                "media": ""
+            }
+        ]
+    }
+]

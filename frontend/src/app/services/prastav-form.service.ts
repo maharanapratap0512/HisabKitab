@@ -137,6 +137,14 @@ export class PrastavFormService {
       ...header,
       lines
     };
+
+    // Auto-add rows if existing ones are valid
+    this.formStatusChanges();
+    for (const line of this.prastavForm.lines) {
+      if (line.jawaks && line.jawaks.length > 0) {
+        this.onJawakChange(line, line.jawaks[line.jawaks.length - 1]);
+      }
+    }
   }
 
   /**

@@ -18,6 +18,12 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
   @Output() response = new EventEmitter();
   @Input() isEdit: any;
   @Input() getData: any;
+  @Input() jawakFocusMode: boolean = false;
+  @Input() focusedLineIndex: number = 0;
+
+  // Focus state triggers
+  focusJawakLine: number | null = null;
+  focusJawakIndex: number | null = null;
 
   mms: any[] = [];
   pbks: any[] = [];
@@ -45,9 +51,30 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['getData'] && changes['getData'].currentValue) {
       this.pfs.patchForm(changes['getData'].currentValue);
-      console.log(changes);
-
     }
+
+    if (changes['jawakFocusMode'] && changes['jawakFocusMode']?.currentValue === true) {
+      this.focusLastJawak(this.focusedLineIndex);
+    }
+  }
+
+  focusLastJawak(lineIdx: number) {
+    // Small delay to ensure *ngIf has rendered the Jawak table before we set focus indices
+    setTimeout(() => {
+      const line = this.pfs.prastavForm.lines[lineIdx];
+      if (line && line.jawaks) {
+        this.focusJawakLine = lineIdx;
+        this.focusJawakIndex = line.jawaks.length - 1;
+        this.resetFocusTriggers();
+      }
+    }, 100);
+  }
+
+  resetFocusTriggers() {
+    setTimeout(() => {
+      this.focusJawakLine = null;
+      this.focusJawakIndex = null;
+    }, 500);
   }
 
   // ── Line helpers ──────────────────────────────────────────
@@ -86,14 +113,16 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
     const rate = Number(line.rate) || 0;
     line.amount = qty * rate || null;
 
+    this.pfs.formStatusChanges();
+
     // Sync qty and rate only to the first jawak row
     if (line.jawaks && line.jawaks.length > 0) {
       const jw = line.jawaks[0];
       jw.qty = line.qty;
       jw.rate = line.rate;
       jw.amount = line.amount;
+      this.onJawakChange(line, jw);
     }
-    this.pfs.formStatusChanges();
   }
 
   onUnitChange(line: any) {
@@ -106,6 +135,10 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
       }
     }
     this.pfs.formStatusChanges();
+  }
+
+  onJawakChange(line: any, jLine: any) {
+    this.pfs.onJawakChange(line, jLine);
   }
 
   onJawakItemChange(line: any, jw: any) {
@@ -180,5 +213,34 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
 
   closeModal() {
     $('#prastavEntryModal').modal('hide');
+  }
+
+  // ── Display Helpers for Jawak Focus Mode ──────────────
+  getMMDisplay(mmId: any) {
+    return this.mms.find(m => m._id === mmId)?.mm_hin || '-';
+  }
+
+  getPBKDisplay(pbkId: any) {
+    return this.pbks.find(p => p._id === pbkId)?.pbk_hin || '-';
+  }
+
+  getUnitShort(unitId: any) {
+    return this.units.find(u => u._id === unitId)?.unit_short || '';
+  }
+
+  getItemDisplay(itemSubitemId: any) {
+    if (!itemSubitemId) return '-';
+    const parts = String(itemSubitemId).split(':');
+    const itemId = Number(parts[0]);
+    const subitemId = parts[1] ? Number(parts[1]) : null;
+
+    const it = this.items.find(i => i._id === itemId);
+    if (!it) return '-';
+
+    if (subitemId) {
+      const sub = it.subitems?.find((s: any) => s._id === subitemId);
+      return sub ? `${sub.subitem_hin} ${it.item_hin}` : it.item_hin;
+    }
+    return it.item_hin;
   }
 }

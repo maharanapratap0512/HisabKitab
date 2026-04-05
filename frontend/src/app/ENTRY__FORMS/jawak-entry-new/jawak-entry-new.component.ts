@@ -113,13 +113,13 @@ export class JawakEntryNewComponent implements OnInit {
     if (this.aawakFilter.max_date != this.fs.jawakFormMain.date || this.aawakFilter.mm_id != this.fs.jawakFormMain.mm_id) {
 
       // update filter object
-      this.aawakFilter.max_date = this.fs.jawakFormMain.date
-      this.aawakFilter.mm_id = this.fs.jawakFormMain.mm_id
+      this.aawakFilter.max_date = this.fs.jawakFormMain.date;
+      this.aawakFilter.mm_id = this.fs.jawakFormMain.mm_id;
+      this.aawakFilter.limit = -1;
       this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, this.aawakFilter).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.aawaksAll = data['result'];
           this.aawaks = this.aawaksAll;
-          this.filterAawak();
         }
       });
     } else {
@@ -127,39 +127,19 @@ export class JawakEntryNewComponent implements OnInit {
     }
   }
 
+  updateFilterObj(i: any) {
+    const jwk = this.fs.jawakFormMain.jawaks[i];
+    jwk.filterObj = {
+      item_id: jwk.item_id,
+      subitem_id: jwk.subitem_id,
+    };
+  }
+
   filterAawak() {
-    if (this.aawakFilter.item_id != this.fs.jawakFormMain.item_id || this.aawakFilter.subitem_id != this.fs.jawakFormMain.subitem_id || this.aawakFilter.condition_id != this.fs.jawakFormMain.condition_id || this.aawakFilter.unit_id != this.fs.jawakFormMain.unit_id || this.aawakFilter.aawak_source_id != this.fs.jawakFormMain.aawak_source_id) {
-
-      // Update filter values
-      this.aawakFilter.item_id = this.fs.jawakFormMain.item_id;
-      this.aawakFilter.subitem_id = this.fs.jawakFormMain.subitem_id;
-      this.aawakFilter.condition_id = this.fs.jawakFormMain.condition_id;
-      this.aawakFilter.unit_id = this.fs.jawakFormMain.unit_id;
-      this.aawakFilter.aawak_source_id = this.fs.jawakFormMain.aawak_source_id;
-
-      // If all filter values are null, copy full array
-      if (!this.aawakFilter.item_id &&
-        !this.aawakFilter.subitem_id &&
-        !this.aawakFilter.condition_id &&
-        !this.aawakFilter.unit_id &&
-        !this.aawakFilter.aawak_source_id) {
-        this.aawaks = this.aawaksAll;
-      } else {
-        // Filter based on non-null values
-        this.aawaks = this.aawaksAll.filter((aawak: any) => {
-          return (!this.aawakFilter.item_id || aawak.item_id === this.aawakFilter.item_id) &&
-            (!this.aawakFilter.subitem_id || aawak.subitem_id === this.aawakFilter.subitem_id) &&
-            (!this.aawakFilter.condition_id || aawak.condition_id === this.aawakFilter.condition_id) &&
-            (!this.aawakFilter.unit_id || aawak.unit_id === this.aawakFilter.unit_id) &&
-            (!this.aawakFilter.aawak_source_id || aawak.aawak_source_id === this.aawakFilter.aawak_source_id);
-        });
-      }
-    } else {
-      this.aawakLoader = false;
-      return;
-    }
     this.aawakLoader = false;
-    return;
+    for (let i in this.fs.jawakFormMain.jawaks) {
+      this.updateFilterObj(i);
+    }
   }
 
   async refAawakSelected(awk_id: any, i: any) {
@@ -372,6 +352,8 @@ export class JawakEntryNewComponent implements OnInit {
         this.fs.jawakFormMain.jawaks[i].unit_id = subitem.unit_id;
       else if (!this.isEdit)
         this.fs.jawakFormMain.jawaks[i].unit_id = item.unit_id;
+
+      this.updateFilterObj(i);
     }
     else {
       this.subitems = [];
@@ -380,6 +362,7 @@ export class JawakEntryNewComponent implements OnInit {
       this.fs.jawakFormMain.jawaks[i].item_id = null
       this.fs.jawakFormMain.jawaks[i].subitem_id = null
       this.fs.jawakFormMain.jawaks[i].lot_no = null;
+      this.updateFilterObj(i);
     }
   }
 
@@ -390,6 +373,7 @@ export class JawakEntryNewComponent implements OnInit {
       this.products = this.products.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
       if (!this.isEdit && subitem)
         this.fs.jawakFormMain.jawaks[i].unit_id = subitem.unit_id;
+      this.updateFilterObj(i);
     }
     else {
       if (this.fs.jawakFormMain.jawaks[i].item_id) {
@@ -400,6 +384,7 @@ export class JawakEntryNewComponent implements OnInit {
         this.lotNos = this.lotNoAll;
         this.fs.jawakFormMain.jawaks[i].lot_no = null;
       }
+      this.updateFilterObj(i);
     }
   }
 
@@ -412,6 +397,7 @@ export class JawakEntryNewComponent implements OnInit {
     this.fs.jawakFormMain.jawaks[i].qty = 1;
     this.fs.jawakFormMain.jawaks[i].unit_id = 1;
     this.fs.jawakFormMain.jawaks[i].rate = product.price ? product.price : null;
+    this.updateFilterObj(i);
     this.rateClick(i);
   }
 

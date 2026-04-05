@@ -1,8 +1,9 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnInit, Renderer2 } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import * as FileSaver from 'file-saver';
 import * as JSZip from 'jszip';
 import { ToastrService } from 'ngx-toastr';
+import { filter } from 'rxjs/operators';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
@@ -36,6 +37,30 @@ export class HeaderComponent implements AfterViewInit {
   defaultMM: any = 'Select Default MM';
   menuItems: any[] = [];
   customColor: string = '';
+  isChangelogVisible: boolean = false;
+  isContextSettingsVisible: boolean = false;
+  contextKey: string | null = null;
+  updates: any[] = [];
+  hasNewUpdates: boolean = false;
+  lastSeenVersion: string | null = null;
+
+  // Route → settingsUI key mapping
+  private readonly routeKeyMap: { [route: string]: string } = {
+    'aawak': 'aawak', 'aawakN': 'aawak',
+    'jawak': 'jawak', 'jawakN': 'jawak',
+    'hmp': 'hmp',
+    'pbk': 'pbk',
+    'mm': 'mm',
+    'nimitt': 'nimitt',
+    'bachat': 'bachat', 'bachat_new': 'bachat',
+    'category': 'category',
+    'department': 'department',
+    'item': 'item',
+    'product': 'product',
+    'repairing': 'repairing',
+    'report': 'report',
+    'point': 'point',
+  };
 
   constructor(
     private http: HttpService,
@@ -92,11 +117,62 @@ export class HeaderComponent implements AfterViewInit {
   }
 
   ngOnInit(): void {
-    // console.log(this.auth.webUser);
     this.htmlElement = this.elementRef.nativeElement.ownerDocument.documentElement;
-
-    // this.themeService.toggleDarkMode()
     this.initMenu();
+    this.loadUpdates();
+
+    // Auto-detect context key from router URL
+    this.detectContextKey(this.router.url);
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.detectContextKey(event.urlAfterRedirects || event.url);
+      this.isContextSettingsVisible = false; // close panel on navigation
+    });
+  }
+
+  detectContextKey(url: string) {
+    const segment = url.replace(/^\//, '').split('/')[0].split('?')[0];
+    this.contextKey = this.routeKeyMap[segment] || null;
+  }
+
+  toggleContextSettings() {
+    this.isContextSettingsVisible = !this.isContextSettingsVisible;
+    if (this.isContextSettingsVisible) { this.isChangelogVisible = false; }
+  }
+
+  loadUpdates() {
+    this.http.get('assets/updates.json').subscribe((data: any) => {
+      this.updates = data;
+      this.lastSeenVersion = localStorage.getItem('last_seen_version');
+      this.checkNewUpdates();
+    }, err => {
+      console.error('Could not load updates.json', err);
+    });
+  }
+
+  checkNewUpdates() {
+    if (this.updates && this.updates.length > 0) {
+      const latestVersion = this.updates[0].version;
+
+      if (latestVersion !== this.lastSeenVersion) {
+        this.hasNewUpdates = true;
+        // Auto-open panel on load if new version exists
+        this.isChangelogVisible = true;
+      }
+    }
+  }
+
+  toggleChangelog() {
+    this.isChangelogVisible = !this.isChangelogVisible;
+    if (this.isChangelogVisible && this.hasNewUpdates) {
+      if (this.updates && this.updates.length > 0) {
+        // Clear badge but DONT update lastSeenVersion yet in memory so panel can expand
+        this.hasNewUpdates = false;
+        // Update localStorage for next app load
+        localStorage.setItem('last_seen_version', this.updates[0].version);
+      }
+    }
   }
 
   initMenu() {

@@ -51,6 +51,7 @@ export class FormService {
         container_capacity: null,
         container_qty: null,
       },
+      jawak_detail: [],
       active: 1,
     };
     this.aawakFormMain = {
@@ -109,6 +110,7 @@ export class FormService {
       re_aawak_type_id: null,
       aawak_dept_id: null,
       aawak_type_id: null,
+      filterObj: {},
       active: 1,
     };
     this.jawakFormMain = {
