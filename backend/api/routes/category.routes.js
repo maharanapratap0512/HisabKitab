@@ -139,5 +139,51 @@ router.delete('/:id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+// transfer all category references from one category to another
+router.put('/transfer/:dept_id', async (req, res, next) => {
+    try {
+        const { dept_id } = req.params;
+        const { from_id, to_id } = req.body;
+        if (!from_id || !to_id) return next(new Error('from_id and to_id are required'));
+
+        const Fn = require('../database/functions');
+        await Fn.begin();
+
+        // Category IDs are stored in JSON arrays in item and subitem tables
+        // We find all items/subitems that contain the old category ID and update them
+        const tables = ['item', 'subitem'];
+        for (const table of tables) {
+            const rows = DB.db.prepare(`SELECT _id, categories FROM ${table} WHERE categories LIKE ?`).all(`%${from_id}%`);
+            for (const row of rows) {
+                try {
+                    let cats = JSON.parse(row.categories || '[]');
+                    if (Array.isArray(cats)) {
+                        let changed = false;
+                        for (let i = 0; i < cats.length; i++) {
+                            if (Number(cats[i]) === Number(from_id)) {
+                                cats[i] = Number(to_id);
+                                changed = true;
+                            }
+                        }
+                        if (changed) {
+                            // Deduplicate
+                            cats = [...new Set(cats)];
+                            DB.db.prepare(`UPDATE ${table} SET categories = ? WHERE _id = ?`).run(JSON.stringify(cats), row._id);
+                        }
+                    }
+                } catch (e) {
+                    console.log(`Category Transfer error in ${table} ID ${row._id}:`, e.message);
+                }
+            }
+        }
+
+        await Fn.commit();
+        res.json({ success: true, message: `All references transferred from Category ${from_id} to Category ${to_id}` });
+    } catch (err) {
+        await Fn.rollback();
+        next(err);
+    }
+});
+
 
 module.exports = router;

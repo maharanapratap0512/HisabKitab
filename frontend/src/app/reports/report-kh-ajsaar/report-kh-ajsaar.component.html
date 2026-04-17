@@ -38,6 +38,18 @@
                                     </ng-select>
                                 </div>
                             </div>
+                            <div class="col-md-2 mb-2">
+                                <div class="form-group">
+                                    <label class="form-label">MM Type</label>
+                                    <ng-select class="custom" style="width: 100%;" placeholder="Select MM Type"
+                                        [clearable]="false" [virtualScroll]="true" [selectOnTab]="true"
+                                        (change)="mmTypeSelected($event)">
+                                        <ng-option selected="selected" disabled value="">Select MM Type</ng-option>
+                                        <ng-option *ngFor="let item of mm_types" [value]="item.list_name_eng">
+                                            {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                                    </ng-select>
+                                </div>
+                            </div>
                             <div class="col-md-3 mb-2">
                                 <div class="form-group">
                                     <label class="form-label">Khet</label>
@@ -45,7 +57,7 @@
                                         [clearable]="true" [multiple]="false" [virtualScroll]="true"
                                         [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}"
                                         [ngClass]="{'validation': !filterBody.mm_id || filterBody.mm_id.length < 1}">
-                                        <ng-option *ngFor="let item of khets" [value]="item._id">
+                                        <ng-option *ngFor="let item of mms" [value]="item._id">
                                             {{item.mm_hin}} : {{item.mm_code}} : {{item.mm_eng}}</ng-option>
                                     </ng-select>
                                 </div>

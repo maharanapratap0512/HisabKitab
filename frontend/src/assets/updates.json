@@ -8,21 +8,21 @@
         "items": [
             {
                 "type": "feature",
-                "module": "Settings Panel",
-                "title": "Context Settings Panel PRO",
-                "title_hin": "एडवांस्ड सेटिंग्स पैनल",
-                "desc": "Redesigned settings panel with sidebar navigation, permission toggles (Add/Edit/Delete), and theme-aware UI. <br/> - Configure columns for each page individually. <br/> - Global page visibility control.",
-                "desc_hin": "साइडबार नेविगेशन और परमिशन कंट्रोल (Add/Edit/Delete) के साथ नया सेटिंग्स पैनल। <br/> - हर पेज के कॉलम सेटिंग्स अब एक ही जगह से मैनेज करें। <br/> - डार्क और लाइट मोड में बेहतर दृश्यता (Visibility)।",
-                "media": "/assets/updates/settings-panel.gif"
-            },
-            {
-                "type": "feature",
                 "module": "Updates Manager",
                 "title": "Interactive Changelog Panel",
                 "title_hin": "नया वर्जन अपडेट पैनल",
                 "desc": "Stay updated with all new features and fixes. <br/> - Detailed version history with icons and descriptions. <br/> - Automatic popup notification for new releases.",
                 "desc_hin": "सॉफ्टवेयर के हर नए अपडेट को अब आप आसानी से देख सकते हैं। <br/> - वर्जन हिस्ट्री को नए डिजाइन और आइकॉन्स के साथ देखें। <br/> - नया वर्जन आने पर अपने आप जानकारी (Popup) आ जाएगी।",
                 "media": "/assets/updates/updates-panel.gif"
+            },
+            {
+                "type": "feature",
+                "module": "Settings Panel",
+                "title": "Context Settings Panel PRO",
+                "title_hin": "एडवांस्ड सेटिंग्स पैनल",
+                "desc": "Redesigned settings panel with sidebar navigation, permission toggles (Add/Edit/Delete), and theme-aware UI. <br/> - Configure columns for each page individually. <br/> - Global page visibility control.",
+                "desc_hin": "साइडबार नेविगेशन और परमिशन कंट्रोल (Add/Edit/Delete) के साथ नया सेटिंग्स पैनल। <br/> - हर पेज के कॉलम सेटिंग्स अब एक ही जगह से मैनेज करें। <br/> - डार्क और लाइट मोड में बेहतर दृश्यता (Visibility)।",
+                "media": "/assets/updates/settings-panel.gif"
             },
             {
                 "type": "feature",
@@ -68,6 +68,23 @@
                 "desc": "A new focused editing mode for deliveries. Hides complex headers and parent tables, showing only a summary and the delivery (Jawak) table for a single item.",
                 "desc_hin": "डिलिवरी (जावक) के लिए विशेष फोकस मोड। यह फालतू के हेडर्स और टेबल्स को छुपाकर केवल चुने हुए आइटम की डिलिवरी डिटेल्स पर ध्यान केंद्रित करने में मदद करता है।",
                 "media": ""
+            },
+            {
+                "type": "improvement",
+                "module": "Report MM Stock, Khet Saar, Khet AJ Saar",
+                "title": "Report MM Stock, Khet Saar, Khet AJ Saar",
+                "title_hin": "रिपोर्ट एमएम स्टॉक, खेत सार, खेत एजे सार को All MM ke liye upgrade kar diya hai",
+                "desc": "All Type of MM Report Generation",
+                "desc_hin": "pehle sirf stores/Khets ka report dekh sakte the abhi सभी प्रकार के MM ke liye report तैयार करने की सुविधा",
+                "media": ""
+            },
+            {
+                "type": "fix",
+                "module": "Report Awk Type Saar and Jawak Type Saar",
+                "title": "Report Awk Type Saar and Jawak Type Saar",
+                "title_hin": "रिपोर्ट आवक टाइप सार और जावक टाइप सार",
+                "desc": "Without Month Select, All rows comes with blank Qty, now Month compulsary to Procced.",
+                "desc_hin": "बिना Month Select किए, सभी rows blank Qty के साथ आती थी, अब आगे बढ़ने के लिए Month अनिवार्य है।"
             }
         ]
     }

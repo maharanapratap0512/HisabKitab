@@ -41,6 +41,13 @@ export class DeleteComponent {
     ID: null,
     Type: null,
   }
+  mmList: any[] = [];
+  targetID: any = null;
+  transferring: boolean = false;
+  transferList: any[] = [];
+  configMapping: any = {};
+  page: number = 1;
+  itemsPerPage: number = 100;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -54,7 +61,13 @@ export class DeleteComponent {
     this.apiMapping = {
       'AAWAK': api.URLS['AAWAK'] + 'filter/',
       'JAWAK': api.URLS['JAWAK'] + 'filter/',
+      'MM': api.URLS['MM'] + 'filter/',
       'ITEM': api.URLS['ITEMMIX'],
+      'PRODUCT': api.URLS['PRODUCT'],
+      'BACHAT': api.URLS['BACHAT'] + 'filter/',
+      'BACHATNEW': api.URLS['BACHATNEW'] + 'filter/',
+      'HMP': api.URLS['HMP'] + 'batch/',
+      'PRASTAV': api.URLS['PRASTAV'] + 'filter/',
     }
   }
 
@@ -76,24 +89,119 @@ export class DeleteComponent {
   async configureData() {
     this.isLoader = true;
     if (this.Type && this.ID) {
-      switch (this.Type) {
-        case 'mm': this.apiName = 'MM';
-          this.filterBody = { or: true, mm_id: [this.ID], aj_mm_id: [this.ID] }
-          this.relatedTables = ['AAWAK', 'JAWAK', 'PRODUCT'];
-          break;
-        case 'item': this.apiName = 'ITEM';
-          this.filterBody = { item_id: [this.ID] }
-          this.relatedTables = ['SUBITEM', 'AAWAK', 'JAWAK', 'PRODUCT'];
-          break;
-        case 'subitem': this.apiName = 'SUBITEM';
-          this.filterBody = { subitem_id: [this.ID] }
-          this.relatedTables = ['AAWAK', 'JAWAK', 'PRODUCT'];
-          break;
-        case 'subitem_list': this.apiName = 'SUBITEMLIST';
-          this.filterBody = { subitem_list_id: [this.ID] }
-          this.relatedTables = ['SUBITEM'];
-          break;
-        default:
+      this.relatedTables = [];
+      this.relatedData = {};
+      let configKey = this.Type;
+      // Handle various support list types
+      const supportListTypes = ['aawak_type', 'jawak_type', 'condition', 'usage_list', 'aawak_source', 'mm_type'];
+      if (supportListTypes.includes(this.Type)) {
+        configKey = 'support_list';
+      }
+
+      // Unified configuration for checking related records and transferring references
+      this.configMapping = {
+        'mm': {
+          apiName: 'MM',
+          filterBody: { or: true, mm_id: [this.ID], aj_mm_id: [this.ID] },
+          relatedTables: ['AAWAK', 'JAWAK', 'BACHAT', 'BACHATNEW', 'PRODUCT', 'HMP', 'PRASTAV'],
+          transferAPI: 'MM',
+          listAPI: 'MM'
+        },
+        'item': {
+          apiName: 'ITEM',
+          filterBody: { item_id: [this.ID] },
+          relatedTables: ['SUBITEM', 'AAWAK', 'JAWAK', 'BACHAT', 'BACHATNEW', 'PRODUCT', 'HMP', 'PRASTAV'],
+          transferAPI: 'ITEM',
+          listAPI: 'ITEM'
+        },
+        'subitem': {
+          apiName: 'SUBITEM',
+          filterBody: { subitem_id: [this.ID] },
+          relatedTables: ['AAWAK', 'JAWAK', 'BACHAT', 'BACHATNEW', 'PRODUCT', 'PRASTAV'],
+          transferAPI: 'SUBITEM',
+          listAPI: 'SUBITEM',
+        },
+        'support_list': {
+          apiName: 'SUPPORTLIST',
+          transferAPI: 'SUPPORTLIST',
+          listAPI: 'SUPPORTLIST',
+          subTypes: {
+            'aawak_type': { relatedTables: ['AAWAK'], transferField: 'aawak_type_id' },
+            'jawak_type': { relatedTables: ['JAWAK'], transferField: 'jawak_type_id' },
+            'aawak_source': { relatedTables: ['AAWAK', 'JAWAK'], transferField: 'aawak_source_id' },
+            'condition': { relatedTables: ['AAWAK', 'JAWAK', 'BACHATNEW', 'PRODUCT'], transferField: 'condition_id' },
+            'usage_list': { relatedTables: ['AAWAK', 'JAWAK'], transferField: 'usage_list_id' },
+            'mm_type': { relatedTables: ['MM'], transferField: 'mm_type', matchBy: 'list_name_hin' }
+          }
+        },
+        'category': {
+          apiName: 'CATEGORY',
+          filterBody: { category_id: [this.ID] },
+          relatedTables: ['ITEM', 'SUBITEM'],
+          transferAPI: 'CATEGORY',
+          listAPI: 'CATEGORY'
+        },
+        'unit': {
+          apiName: 'UNIT',
+          filterBody: { unit_id: [this.ID] },
+          relatedTables: ['AAWAK', 'JAWAK', 'HMP', 'PRASTAV', 'ITEM', 'SUBITEM', 'PRODUCT'],
+          transferAPI: 'UNIT',
+          listAPI: 'UNIT'
+        }
+      };
+
+      const config = this.configMapping[configKey];
+      if (config) {
+        this.apiName = config.apiName;
+        this.relatedTables = config.relatedTables;
+
+        // Unified handling for standard and support list types
+        if (configKey === 'support_list') {
+          const sub = config.subTypes[this.Type] || { relatedTables: [], transferField: 'support_list_id' };
+          this.relatedTables = sub.relatedTables;
+
+          if (sub.matchBy) {
+            // Special case for types like mm_type: match by name string (e.g. list_name_hin) instead of ID
+            this.isLoader = true;
+            this.http.get(this.api.getUrl('SUPPORTLIST') + 'id/' + this.ID).subscribe((res: any) => {
+              if (res?.result?.[0]) {
+                const name = res.result[0][sub.matchBy];
+                this.filterBody = { [sub.transferField]: [name] };
+                this.getRelatedData();
+              } else {
+                this.isLoader = false;
+              }
+            }, err => { this.isLoader = false; });
+            return; // Wait for async name fetch
+          } else {
+            this.filterBody = { [sub.transferField]: [this.ID] };
+          }
+        } else {
+          this.filterBody = config.filterBody;
+        }
+
+        // Load transfer list
+        if (config.listAPI) {
+          let listUrl = this.api.getUrl(config.listAPI);
+          if (configKey === 'support_list') {
+            listUrl = this.api.getUrl('SUPPORTLIST') + 'splists/';
+          }
+          this.http.get(listUrl + this.auth.webUser.dept_id).subscribe((data: any) => {
+            if (data?.result) {
+              if (configKey === 'support_list') {
+                this.transferList = data.result.filter((m: any) => m._id != this.ID && m.list_type === this.Type);
+              } else {
+                this.transferList = data.result.filter((m: any) => m._id != this.ID);
+              }
+            }
+          });
+        }
+        this.page = 1;
+      } else if (this.Type === 'subitem_list') {
+        this.apiName = 'SUBITEMLIST';
+        this.filterBody = { subitem_list_id: [this.ID] };
+        this.relatedTables = ['SUBITEM'];
+        this.page = 1;
       }
 
       await this.getRelatedData();
@@ -154,13 +262,24 @@ export class DeleteComponent {
   }
 
   configureFields(type: string) {
-    this.selectedTable = type
+    this.selectedTable = type;
+    this.page = 1;
     switch (type) {
       case 'AAWAK': this.setAawakFields();
         break;
       case 'JAWAK': this.setJawakFields();
         break;
       case 'SUBITEM': this.setSubitemFields();
+        break;
+      case 'BACHAT': this.setBachatFields();
+        break;
+      case 'BACHATNEW': this.setBachatNewFields();
+        break;
+      case 'PRODUCT': this.setProductFields();
+        break;
+      case 'HMP': this.setHmpFields();
+        break;
+      case 'PRASTAV': this.setPrastavFields();
         break;
       default:
     }
@@ -262,6 +381,102 @@ export class DeleteComponent {
     ]
   }
 
+  setBachatFields() {
+    this.fields = [
+      {
+        title: "MM",
+        columns: ["mm_hin", "mm_eng"]
+      }, {
+        title: "Item",
+        columns: ["item_hin", "subitem_hin", "item_eng", "subitem_eng"]
+      }, {
+        title: "Stock",
+        columns: ["Stock", "unit_short"]
+      }, {
+        title: "Used",
+        columns: ["Used", "unit_short"]
+      }
+    ]
+  }
+
+  setBachatNewFields() {
+    this.fields = [
+      {
+        title: "MM",
+        columns: ["mm_hin", "mm_eng"]
+      }, {
+        title: "Item",
+        columns: ["item_hin", "subitem_hin", "item_eng", "subitem_eng"]
+      }, {
+        title: "Stock",
+        columns: ["Stock", "unit_short"]
+      }, {
+        title: "Used",
+        columns: ["Used", "unit_short"]
+      }
+    ]
+  }
+
+  setProductFields() {
+    this.fields = [
+      {
+        title: "Date",
+        columns: ["purchase_date"]
+      }, {
+        title: "MM",
+        columns: ["mm_hin", "mm_eng"]
+      }, {
+        title: "Item",
+        columns: ["item_hin", "subitem_hin"]
+      }, {
+        title: "Qty",
+        columns: ["qty", "unit_short"]
+      }, {
+        title: "Code/Sr",
+        columns: ["product_code", "sr_num"]
+      }
+    ]
+  }
+
+  setHmpFields() {
+    this.fields = [
+      {
+        title: "Date",
+        columns: ["date"]
+      }, {
+        title: "Batch No",
+        columns: ["batch_no"]
+      }, {
+        title: "Recipe",
+        columns: ["recipe_name"]
+      }, {
+        title: "MM",
+        columns: ["mm_hin", "mm_eng"]
+      }
+    ]
+  }
+
+  setPrastavFields() {
+    this.fields = [
+      {
+        title: "Date",
+        columns: ["date"]
+      }, {
+        title: "Voucher No",
+        columns: ["voucher_no"]
+      }, {
+        title: "MM",
+        columns: ["mm_hin", "mm_eng"]
+      }, {
+        title: "Item",
+        columns: ["item_hin", "subitem_hin"]
+      }, {
+        title: "Qty",
+        columns: ["qty", "unit_short"]
+      }
+    ]
+  }
+
   closeModal() {
     this.showModal = "";
     $('#deleteComponent' + this.Type + ' > #showModal').modal('hide');
@@ -335,5 +550,81 @@ export class DeleteComponent {
   deleteResponse(ev: any) {
     this.closeModal();
     this.getRelatedData();
+  }
+
+  transferReferences() {
+    if (!this.targetID) { this.toastr.warning('Please select target first.'); return; }
+    Swal.fire({
+      title: 'Transfer References?',
+      text: `All related entries will be moved to selected target. This cannot be undone.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f39c12',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, Transfer!'
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        this.transferring = true;
+        let configKey = this.Type;
+        const supportListTypes = ['unit', 'aawak_type', 'jawak_type', 'condition', 'usage_list', 'aawak_source', 'mm_type'];
+        if (supportListTypes.includes(this.Type)) {
+          configKey = 'support_list';
+        }
+
+        const config = this.configMapping[configKey];
+        if (config) {
+          const sub = configKey === 'support_list' ? config.subTypes[this.Type] : null;
+
+          if (sub && sub.matchBy) {
+            // Special case for name-based transfer
+            this.transferring = true;
+            this.http.get(this.api.getUrl('SUPPORTLIST') + 'id/' + this.ID).subscribe((res: any) => {
+              if (res?.result?.[0]) {
+                const fromName = res.result[0][sub.matchBy];
+                this.http.get(this.api.getUrl('SUPPORTLIST') + 'id/' + this.targetID).subscribe((res2: any) => {
+                  if (res2?.result?.[0]) {
+                    const toName = res2.result[0][sub.matchBy];
+                    const body = {
+                      list_type: this.Type,
+                      from_id: fromName,
+                      to_id: toName
+                    };
+                    this.executeTransfer(body, config.transferAPI);
+                  } else {
+                    this.transferring = false;
+                  }
+                }, err => { this.transferring = false; });
+              } else {
+                this.transferring = false;
+              }
+            }, err => { this.transferring = false; });
+          } else {
+            let body: any = { from_id: this.ID, to_id: this.targetID };
+            if (configKey === 'support_list') {
+              body.list_type = this.Type;
+            }
+            this.executeTransfer(body, config.transferAPI);
+          }
+        }
+      }
+    });
+  }
+
+  executeTransfer(body: any, apiName: string) {
+    this.http.put(
+      this.api.getUrl(apiName) + 'transfer/' + this.auth.webUser.dept_id,
+      body
+    ).subscribe((data: any) => {
+      this.transferring = false;
+      if (data?.success) {
+        this.toastr.success('References transferred successfully!');
+        this.getRelatedData();
+      } else {
+        this.toastr.error('Transfer failed.');
+      }
+    }, err => {
+      this.transferring = false;
+      this.toastr.error('Transfer error.');
+    });
   }
 }

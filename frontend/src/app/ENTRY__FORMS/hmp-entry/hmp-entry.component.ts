@@ -78,9 +78,33 @@ export class HmpEntryComponent implements OnInit {
     }, 500);
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  async ngOnChanges(changes: SimpleChanges) {
     if (changes.getData && changes.getData.currentValue) {
-      this.fs.patchForm(changes.getData.currentValue);
+      let data = structuredClone(changes.getData.currentValue);
+
+      this.isLoader = true;
+      if (data.outputs && data.outputs.length > 0) {
+        for (let i = 0; i < data.outputs.length; i++) {
+          if (data.outputs[i].aawak_ref_id) {
+            try {
+              const filterBody = { _id: data.outputs[i].aawak_ref_id };
+              const res: any = await new Promise((resolve, reject) => {
+                this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, filterBody)
+                  .subscribe((res: any) => resolve(res), (err: any) => reject(err));
+              });
+
+              if (res.result && res.result.length > 0 && res.result[0].jawak_detail) {
+                data.outputs[i].jawak_detail = res.result[0].jawak_detail;
+              }
+            } catch (e) {
+              console.error('Failed to fetch jawak details for aawak: ', data.outputs[i].aawak_ref_id);
+            }
+          }
+        }
+      }
+      this.isLoader = false;
+
+      this.fs.patchForm(data);
     }
   }
 
@@ -212,6 +236,14 @@ export class HmpEntryComponent implements OnInit {
   closeModal() {
     // Close logic handled by parent or jquery
     $('#hmpEntryModal').modal('hide'); // Assuming ID
+  }
+
+  getJawakQty(i: any) {
+    let row = this.fs.hmpBatchForm.outputs[i];
+    if (row.jawak_detail && row.jawak_detail.length > 0) {
+      return row.jawak_detail.reduce((acc: any, curr: any) => acc + Number(curr.qty), 0);
+    }
+    return 0;
   }
 
   // --- Jawak Distribution Logic ---

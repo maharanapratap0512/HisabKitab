@@ -23,10 +23,10 @@ export class ReportStoreStockComponent {
   filterBody: any = {}
   months: any = [];
   monthsSel: any = [];
-  stores: any = [];
   mms: any = [];
   conditions: any = [];
   categories: any = [];
+  mm_types: any = [];
 
   reportData: any = [];
 
@@ -47,20 +47,29 @@ export class ReportStoreStockComponent {
       this.mms = result.mm ? result.mm : [];
       this.conditions = result.condition ? result.condition : [];
       this.categories = result.category ? result.category : [];
-
-      this.stores = this.mms.filter((m: { dept_id: any; }) => m.dept_id == 6);
+      this.mm_types = result.mm_type ? result.mm_type : [];
       this.filterBody.condition = this.conditions.map((c: { list_name_eng: any; }) => c.list_name_eng)
-      this.filterBody.mm_id = this.stores.map((s: { _id: any; }) => s._id)
+
       this.isLoader = false;
-      this.searchReports();
+      // this.searchReports();
     });
 
 
   }
 
+  mmTypeSelected(ev: any) {
+
+    this.mms = this.gs.Lists.mm.filter((m: { mm_type: any; }) => m.mm_type == ev);
+    if (['store', 'khet', 'stock'].includes(ev.toLowerCase())) {
+      this.filterBody.mm_id = this.mms.map((m: { _id: any; }) => m._id);
+    } else {
+      this.filterBody.mm_id = [];
+    }
+  }
+
   setHeading() {
     this.reportHeading = ''
-    for (let mm of this.stores.filter((s: { _id: any; }) => this.filterBody.mm_id.includes(s._id))) {
+    for (let mm of this.mms.filter((s: { _id: any; }) => this.filterBody.mm_id.includes(s._id))) {
       this.reportHeading += mm.mm_hin + ",";
     }
     this.reportHeading += ' का हाल का स्टॉक';

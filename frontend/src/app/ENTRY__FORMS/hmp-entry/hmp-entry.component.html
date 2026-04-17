@@ -1,4 +1,4 @@
-<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
+1<ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
     [fullScreen]="true">
     <p style="color: white"> Processing Batch... </p>
 </ngx-spinner>
@@ -202,7 +202,29 @@
                             <ng-container
                                 *ngFor="let row of fs.hmpBatchForm.outputs; let i = index; trackBy: trackByIndex">
                                 <tr ngModelGroup="out_{{i}}" #rowOutput="ngModelGroup">
-                                    <td>{{i+1}}</td>
+                                    <td>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>{{i+1}}</div>
+                                            <div class="d-flex align-items-center">
+                                                <i class="mdi mdi-plus i-outline-warning cursor-pointer mx-1"
+                                                    title="Add Jawak" *ngIf="row.item_subitem_id"
+                                                    (click)="addJawakToOutput(i)"
+                                                    [ngClass]="{'text-success': row.jawak_detail?.length > 0}"></i>
+
+                                                <button *ngIf="row.jawak_detail?.length > 0"
+                                                    class="btn btn-sm btn-outline-warning p-0 lh-1"
+                                                    style="font-size: 9px; min-width: 35px; line-height: 1.2;"
+                                                    (click)="row.show_jawak = !row.show_jawak"
+                                                    [title]="'Total Jawak Qty: ' + getJawakQty(i)">
+                                                    <div style="font-weight: bold; padding: 1px 2px;">J -
+                                                        {{row.jawak_detail.length}}</div>
+                                                    <div
+                                                        style="border-top: 1px solid rgba(255,193,7,0.3); padding: 1px 2px;">
+                                                        Q - {{getJawakQty(i)}}</div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
                                     <!-- Item Dropdown -->
                                     <td>
                                         <ng-select appendTo="#hmpEntryForm" class="custom" style="width: 100%;"
@@ -268,23 +290,17 @@
                                             style="padding: 0.2rem 0.5rem; border-radius: 4px;">
                                             <i class="uil uil-times"></i>
                                         </button>
-                                        <button *ngIf="row.item_subitem_id" type="button" class="btn btn-sm btn-info"
-                                            (click)="addJawakToOutput(i)" title="Add Jawak"
-                                            style="padding: 0.2rem 0.5rem; border-radius: 4px; display: block; margin: 0 auto;">
-                                            <i class="uil uil-plus"></i> Jwk
-                                        </button>
                                     </td>
                                 </tr>
 
                                 <!-- Nested Jawak Details Table -->
-                                <tr *ngIf="row.jawak_detail && row.jawak_detail.length > 0">
+                                <tr *ngIf="row.show_jawak && row.jawak_detail && row.jawak_detail.length > 0">
                                     <td></td>
                                     <td colspan="5">
-                                        <div class="p-2 border rounded bg-light">
+                                        <div class="p-2 border rounded">
                                             <h6 class="mb-2 text-primary">Jawak Distribution</h6>
-                                            <table class="table table-sm table-bordered m-0"
-                                                style="background-color: white;">
-                                                <thead class="table-light">
+                                            <table class="table table-sm table-bordered m-0">
+                                                <thead>
                                                     <tr>
                                                         <th>Date</th>
                                                         <th>Jawak MM</th>
@@ -304,11 +320,11 @@
                                                         <td style="width: 15%">{{jwk.jawak_type_hin}}</td>
                                                         <td style="width: 10%" class="text-center align-middle">
                                                             <i class="uil uil-edit-alt mx-1 text-primary cursor-pointer"
-                                                                style="cursor: pointer; font-size: 1.1rem;"
+                                                                style="font-size: 1.1rem;"
                                                                 (click)="editJawakOfOutput(i, j)"
                                                                 title="Edit Jawak"></i>
                                                             <i class="uil uil-trash text-danger cursor-pointer"
-                                                                style="cursor: pointer; font-size: 1.1rem;"
+                                                                style="font-size: 1.1rem;"
                                                                 (click)="removeJawak(i, j, jwk._id)"
                                                                 title="Delete Jawak"></i>
                                                         </td>

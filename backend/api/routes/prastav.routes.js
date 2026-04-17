@@ -23,6 +23,16 @@ router.put('/', (req, res, next) => {
     }
 });
 
+// filter prastav with dept_id
+router.put('/filter/:dept_id', (req, res, next) => {
+    try {
+        const { result, pageNo, total_count } = service.getPrastavs({ ...req.body, dept_id: req.params.dept_id });
+        res.status(200).json({ success: true, result, pageNo, total_count });
+    } catch (e) {
+        next(e);
+    }
+});
+
 // Get all prastav (legacy GET, optional query params)
 router.get('/', (req, res, next) => {
     try {

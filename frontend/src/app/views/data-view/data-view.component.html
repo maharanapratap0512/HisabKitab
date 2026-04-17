@@ -58,12 +58,12 @@
                             </div>
                         </td>
                         <td>
-                            <ng-container *ngIf="Type=='jawak'">
+                            <!-- <ng-container *ngIf="Type=='jawak'">
                                 <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
                                         class="uil uil-pen"></i></button>
                                 <button class="btn btn-sm btn-danger" type="button" (click)="delete(i,data._id)"><i
                                         class="uil-trash"></i></button>
-                            </ng-container>
+                            </ng-container> -->
                             <button *ngIf="!data.lock && (!settings || (settings && settings.edit)) && Type!='dict'"
                                 class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i
                                     class="uil uil-pen"></i></button>
@@ -183,6 +183,9 @@
                     <app-support-list-entry *ngIf="showModal == 'usage_list'" (response)='editResponse($event)'
                         [getData]="editData" [isEdit]="isEdit" list_type="usage_list">
                     </app-support-list-entry>
+
+                    <app-delete *ngIf='showModal == "delete_advance"' [Type]="delType" [ID]="delID"
+                        (response)="deleteResponse($event)"></app-delete>
 
                     <!-- excel import -->
                     <app-excel-import *ngIf='showModal == "excel_import"' [importType]="importType"></app-excel-import>

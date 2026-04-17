@@ -43,7 +43,7 @@ router.get('/:dept_id', async (req, res, next) => {
 // Optimized get filtered bachat_new with date range support using pure SQL approach
 router.put('/filter/:dept_id', async (req, res, next) => {
     try {
-        let bcht_new = [];
+        let bachat = [], bcht_new = [], months = [];
         let conditionQuery1 = `where bn.dept_id = ${req.params.dept_id}`;
         let conditionQuery2 = ``;
 
