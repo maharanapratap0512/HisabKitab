@@ -1,7 +1,7 @@
 // database/schema.js
 // Only simple tables (no business logic) live here.
 
-const { defineTable, col } = require('sutramcore');
+const { defineTable, defineView, col } = require('sutramcore');
 
 module.exports = {
 
@@ -120,7 +120,7 @@ module.exports = {
         _id: col.id(),
         batch_id: col.number(),
         item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] }),
-        subitem_id: col.ref('subitem._id', { as: 'subitem', select: ['_id', 'subitem_list_id', 'unit_id', 'active'] }),
+        subitem_id: col.ref('subitem._id', { as: 'subitem', select: '*' }),
         unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
         condition_id: col.ref('support_list._id', { as: 'condition', select: ['list_name_hin', 'list_name_eng'] }),
         aawak_ref_id: col.ref('aawak._id', { as: 'aawak_ref', select: ['date', 'qty'] }),
@@ -145,9 +145,14 @@ module.exports = {
         restrict_year: col.number(),
         min_rate: col.number(),
         max_rate: col.number(),
+        add_by_dept_id: col.ref('department._id', { as: 'add_by_dept' }),
+        update_by_dept_id: col.ref('department._id', { as: 'update_by_dept' }),
+        verify: col.boolean().default(0),
         active: col.boolean().default(1),
+        created_at: col.string(),
+        updated_at: col.string(),
     }, {
-        subitems: { hasMany: true, on: 'item_id', table: 'subitem', target: '_id', as: 'subitems', select: ['_id', 'subitem_list_id', 'unit_id', 'active'] },
+        subitems: { hasMany: true, on: 'item_id', table: 'subitem', target: '_id', as: 'subitems', select: ['_id', 'subitem_hin', 'subitem_eng', 'active'] },
         categories: { manyToMany: true, on: 'item_id', table: 'category', junction: 'rel_item_category', target: 'category_id', as: 'categories', select: ['_id', 'category_hin', 'category_eng'] },
     }),
 
@@ -156,7 +161,10 @@ module.exports = {
     ...defineTable('subitem', {
         _id: col.id(),
         item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] }),
-        subitem_list_id: col.ref('subitem_list._id', { as: 'subitem_list', select: ['subitem_hin', 'subitem_eng', 'subitem_roman'], join: true }),
+        variant_id: col.ref('variant._id', { as: 'variant', select: ['sku', 'display_name'], join: true }),
+        subitem_hin: col.string(),
+        subitem_eng: col.string(),
+        subitem_roman: col.string(),
         unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
         extra_note: col.string(),
         document: col.json(),
@@ -164,7 +172,12 @@ module.exports = {
         restrict_year: col.number(),
         min_rate: col.number(),
         max_rate: col.number(),
-        active: col.boolean().default(1),
+        add_by_dept_id: col.ref('department._id', { as: 'add_by_dept' }),
+        update_by_dept_id: col.ref('department._id', { as: 'update_by_dept' }),
+        verify: col.boolean().default(0),
+        active: col.boolean().default(0),
+        created_at: col.string(),
+        updated_at: col.string(),
     }, {
         categories: { manyToMany: true, on: 'subitem_id', table: 'category', junction: 'rel_subitem_category', target: 'category_id', as: 'categories', select: ['_id', 'category_hin', 'category_eng'] },
     }),
@@ -342,13 +355,18 @@ module.exports = {
 
     ...defineTable('mm', {
         _id: col.id(),
-        mm_hin: col.string(),
+        mm_hin: col.string().required(),
         mm_eng: col.string(),
         mm_roman: col.string(),
         mm_code: col.string(),
         dept_id: col.ref('department._id', { as: 'dept', select: ['dept_hin', 'dept_eng', 'dept_code'] }),
         state_id: col.ref('state._id', { as: 'state', select: ['state_hin', 'state_eng'] }),
-        active: col.boolean().default(1),
+        parent_mm_id: col.ref('mm._id', { as: 'parent_mm' }),
+        opening_date: col.string(),
+        nimitt_id: col.ref('nimitt._id', { as: 'nimitt', select: ['nimitt_hin', 'nimitt_eng'] }),
+        active: col.boolean().default(0),
+        created_at: col.string(),
+        updated_at: col.string(),
     }),
 
     ...defineTable('pbk', {
@@ -413,6 +431,183 @@ module.exports = {
         dept_id: col.ref('department._id', { as: 'dept', select: ['dept_hin', 'dept_eng'] }),
         qty: col.number().default(0),
         active: col.boolean().default(1),
+    }),
+
+    // ── Variant System (Version 30) ──────────────────────────
+
+    ...defineTable('category', {
+        _id: col.id(),
+        category_hin: col.string().required(),
+        category_eng: col.string(),
+        parent_id: col.ref('category._id', { as: 'parent' }),
+        sort_order: col.number().default(0),
+        active: col.boolean().default(1),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }),
+
+    ...defineTable('attributes', {
+        _id: col.id(),
+        attribute_hin: col.string().required(),
+        attribute_eng: col.string(),
+        attribute_roman: col.string(),
+        active: col.boolean().default(1),
+        created_at: col.string(),
+    }),
+
+    ...defineTable('attributes_value', {
+        _id: col.id(),
+        attribute_id: col.ref('attributes._id', { as: 'attribute' }),
+        attribute_value_hin: col.string().required(),
+        attribute_value_eng: col.string(),
+        attribute_value_roman: col.string(),
+        active: col.boolean().default(1),
+        created_at: col.string(),
+    }),
+
+    ...defineTable('variant', {
+        _id: col.id(),
+        item_id: col.ref('item._id', { as: 'item' }),
+        sku: col.string(),
+        display_name: col.string(),
+        active: col.boolean().default(1),
+        created_at: col.string(),
+    }),
+
+    ...defineTable('variant_attribute_map', {
+        _id: col.id(),
+        variant_id: col.ref('variant._id', { as: 'variant' }),
+        attribute_id: col.ref('attributes._id', { as: 'attribute' }),
+        attribute_value_id: col.ref('attributes_value._id', { as: 'attribute_value' }),
+        active: col.boolean().default(1),
+        created_at: col.string(),
+    }),
+
+    ...defineTable('variant_category_map', {
+        _id: col.id(),
+        variant_id: col.ref('variant._id', { as: 'variant' }),
+        category_id: col.ref('category._id', { as: 'category' }),
+        created_at: col.string(),
+    }),
+
+    ...defineTable('item_source_map', {
+        _id: col.id(),
+        item_id: col.ref('item._id', { as: 'item' }),
+        source_item_id: col.ref('item._id', { as: 'source_item' }),
+        created_at: col.string(),
+    }),
+
+    ...defineTable('item_aliases', {
+        _id: col.id(),
+        item_id: col.ref('item._id', { as: 'item' }),
+        alias: col.string().required(),
+        language: col.string().required(),
+        created_at: col.string(),
+    }),
+
+    ...defineTable('variant_aliases', {
+        _id: col.id(),
+        variant_id: col.ref('variant._id', { as: 'variant' }),
+        alias: col.string().required(),
+        created_at: col.string(),
+    }),
+
+    // ── System Lookups ────────────────────────────────────────
+
+    ...defineTable('unit', {
+        _id: col.id(),
+        unit_short: col.string().required(),
+        unit_full: col.string(),
+        active: col.boolean().default(1),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }),
+
+    ...defineTable('support_list', {
+        _id: col.id(),
+        list_type: col.string().required(),
+        list_name_hin: col.string(),
+        list_name_eng: col.string().required(),
+        list_name_roman: col.string(),
+        active: col.boolean().default(1),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }),
+
+    ...defineTable('nimitt', {
+        _id: col.id(),
+        old_id: col.number(),
+        roll_no: col.number(),
+        nimitt_hin: col.string().required(),
+        nimitt_eng: col.string(),
+        gender: col.string().required(),
+        relative_name: col.string(),
+        state_id: col.ref('state._id', { as: 'state' }),
+        townarea: col.string(),
+        document: col.json(),
+        active: col.boolean().default(1),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }),
+
+    ...defineTable('product', {
+        _id: col.id(),
+        mm_id: col.ref('mm._id', { as: 'mm' }),
+        purchased_by: col.string(),
+        purchase_date: col.string(),
+        item_id: col.ref('item._id', { as: 'item' }),
+        subitem_id: col.ref('subitem._id', { as: 'subitem' }),
+        product_code: col.string(),
+        company_name: col.string(),
+        model_name: col.string(),
+        sr_num: col.string(),
+        condition_id: col.ref('support_list._id', { as: 'condition' }),
+        price: col.number(),
+        product_detail: col.string(),
+        accessories: col.string(),
+        purchase_from: col.string(),
+        warranty_period: col.number(),
+        dept_id: col.ref('department._id', { as: 'dept' }),
+        warranty_from: col.string(),
+        document: col.json(),
+        nimmit: col.string(),
+        active: col.boolean().default(1),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }),
+
+    ...defineTable('bachat', {
+        _id: col.id(),
+        mm_id: col.ref('mm._id', { as: 'mm' }),
+        item_id: col.ref('item._id', { as: 'item' }),
+        subitem_id: col.ref('subitem._id', { as: 'subitem' }),
+        Stock: col.number().default(0),
+        Used: col.number().default(0),
+        New: col.number().default(0),
+        Old: col.number().default(0),
+        Defective: col.number().default(0),
+        Scrap: col.number().default(0),
+        Repairing: col.number().default(0),
+        unit_id: col.ref('unit._id', { as: 'unit' }),
+        dept_id: col.ref('department._id', { as: 'dept' }),
+        active: col.boolean().default(1),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }),
+
+    ...defineTable('point', {
+        _id: col.id(),
+        type: col.string(),
+        no: col.number(),
+        mrl_date: col.string(),
+        clrf_date: col.string(),
+        time_from: col.string(),
+        time_to: col.string(),
+        point_hin: col.string().required(),
+        point_eng: col.string(),
+        active: col.boolean().default(1),
+        created_at: col.string(),
+        updated_at: col.string(),
     }),
 
 };

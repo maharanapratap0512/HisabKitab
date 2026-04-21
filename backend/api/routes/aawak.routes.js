@@ -40,6 +40,8 @@ router.post('/new/:dept_id', async (req, res, next) => {
                         for (let i in data.data) {
                             data.data[i].document = (data.data[i].document ? JSON.parse(data.data[i].document) : {});
                             data.data[i].enz = (data.data[i].enz ? JSON.parse(data.data[i].enz) : {});
+                            data.data[i].icategories = (data.data[i].icategories ? JSON.parse(data.data[i].icategories) : []);
+                            data.data[i].scategories = (data.data[i].scategories ? JSON.parse(data.data[i].scategories) : []);
                             data.data[i].isbill = data.data[i].isbill ? true : false;
 
                             let jwkconditionString = ` jawak.aawak_ref_id = ${data.data[i]._id}`;
@@ -112,8 +114,8 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
                         for (let i in aawaks) {
                             aawaks[i].document = (aawaks[i].document ? JSON.parse(aawaks[i].document) : {});
                             aawaks[i].enz = (aawaks[i].enz ? JSON.parse(aawaks[i].enz) : {});
-                            aawaks[i].item_categories = (aawaks[i].item_categories ? JSON.parse(aawaks[i].item_categories) : {});
-                            aawaks[i].subitem_categories = (aawaks[i].subitem_categories ? JSON.parse(aawaks[i].subitem_categories) : {});
+                            aawaks[i].icategories = (aawaks[i].icategories ? JSON.parse(aawaks[i].icategories) : {});
+                            aawaks[i].scategories = (aawaks[i].scategories ? JSON.parse(aawaks[i].scategories) : {});
                             let jwkconditionString = ` jawak.aawak_ref_id = ${aawaks[i]._id}`;
                             await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then(async (jwkdata) => {
                                 aawaks[i].jawak_detail = jwkdata.data;
@@ -236,8 +238,8 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
 
                     for (let j in resolve.data[i].aawaks) {
                         resolve.data[i].aawaks[j].document = (resolve.data[i].aawaks[j].document ? JSON.parse(resolve.data[i].aawaks[j].document) : {});
-                        resolve.data[i].aawaks[j].item_categories = resolve.data[i].aawaks[j].item_categories ? JSON.parse(resolve.data[i].aawaks[j].item_categories) : [];
-                        resolve.data[i].aawaks[j].subitem_categories = resolve.data[i].aawaks[j].subitem_categories ? JSON.parse(resolve.data[i].aawaks[j].subitem_categories) : [];
+                        resolve.data[i].aawaks[j].icategories = resolve.data[i].aawaks[j].icategories ? JSON.parse(resolve.data[i].aawaks[j].icategories) : [];
+                        resolve.data[i].aawaks[j].scategories = resolve.data[i].aawaks[j].scategories ? JSON.parse(resolve.data[i].aawaks[j].scategories) : [];
                         resolve.data[i].aawaks[j].isbill = resolve.data[i].aawaks[j].isbill ? true : false;
                         resolve.data[i].aawaks[j].enz = {
                             '_id': resolve.data[i].aawaks[j].enz_id,
@@ -288,6 +290,8 @@ router.get('/:dept_id', async (req, res, next) => {
         for (let i = 0; i < resolve.data.length; i++) {
             resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
             resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
+            resolve.data[i].icategories = (resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []);
+            resolve.data[i].scategories = (resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : []);
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` jawak.aawak_ref_id = ${resolve.data[i]._id}`;
 
@@ -314,6 +318,8 @@ router.get('/pending/:dept_id', async (req, res, next) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
             resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
+            resolve.data[i].icategories = (resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []);
+            resolve.data[i].scategories = (resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : []);
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
 
@@ -338,6 +344,8 @@ router.put('/pending/:dept_id', async (req, res, next) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
             resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
+            resolve.data[i].icategories = (resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []);
+            resolve.data[i].scategories = (resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : []);
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
 
@@ -416,6 +424,8 @@ router.put('/new', async (req, res, next) => {
                     for (let i in data.data) {
                         data.data[i].document = (data.data[i].document ? JSON.parse(data.data[i].document) : {});
                         data.data[i].enz = (data.data[i].enz ? JSON.parse(data.data[i].enz) : {});
+                        data.data[i].icategories = (data.data[i].icategories ? JSON.parse(data.data[i].icategories) : []);
+                        data.data[i].scategories = (data.data[i].scategories ? JSON.parse(data.data[i].scategories) : []);
                         data.data[i].isbill = data.data[i].isbill ? true : false;
 
                         let jwkconditionString = ` jawak.aawak_ref_id = ${data.data[i]._id}`;
@@ -506,6 +516,8 @@ router.put('/filter/:dept_id', async (req, res, next) => {
         for (let i in resolve.data) {
             resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
             resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
+            resolve.data[i].icategories = (resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []);
+            resolve.data[i].scategories = (resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : []);
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
             let jwkconditionString = `${jwkIds && jwkIds.length > 0 ? ` jawak._id in (${jwkIds}) AND ` : ``} aawak_ref_id = ${resolve.data[i]._id}`;
 
@@ -562,12 +574,12 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
 
             for (let j in resolve.data[i].aawaks) {
                 resolve.data[i].aawaks[j].document = (resolve.data[i].aawaks[j].document ? JSON.parse(resolve.data[i].aawaks[j].document) : {});
-                resolve.data[i].aawaks[j].item_categories = resolve.data[i].aawaks[j].item_categories ? JSON.parse(resolve.data[i].aawaks[j].item_categories) : [];
-                resolve.data[i].aawaks[j].subitem_categories = resolve.data[i].aawaks[j].subitem_categories ? JSON.parse(resolve.data[i].aawaks[j].subitem_categories) : [];
+                resolve.data[i].aawaks[j].icategories = resolve.data[i].aawaks[j].icategories ? JSON.parse(resolve.data[i].aawaks[j].icategories) : [];
+                resolve.data[i].aawaks[j].scategories = resolve.data[i].aawaks[j].scategories ? JSON.parse(resolve.data[i].aawaks[j].scategories) : [];
                 resolve.data[i].aawaks[j].isbill = resolve.data[i].aawaks[j].isbill ? true : false;
                 resolve.data[i].aawaks[j].enz = {
                     '_id': resolve.data[i].aawaks[j].enz_id,
-                    'aawak_id': resolve.data[i].aawaks[j].id,
+                    'aawak_id': resolve.data[i].aawaks[j]._id,
                     'container_aawak_source_id': resolve.data[i].aawaks[j].container_aawak_source_id,
                     'container_aawak_source_hin': resolve.data[i].aawaks[j].container_aawak_source_hin,
                     'container_enz_no': resolve.data[i].aawaks[j].container_enz_no,

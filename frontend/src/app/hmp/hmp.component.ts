@@ -274,8 +274,8 @@ export class HmpComponent implements OnInit {
         // Input side
         if (inputs[i]) {
           const inp = inputs[i];
-          const iHin = [(inp.subitem?.subitem_list?.subitem_hin || ''), inp.item?.item_hin || ''].filter(Boolean).join(' ');
-          const iEng = [(inp.subitem?.subitem_list?.subitem_eng || ''), inp.item?.item_eng || ''].filter(Boolean).join(' ');
+          const iHin = [(inp.subitem?.subitem_hin || ''), inp.item?.item_hin || ''].filter(Boolean).join(' ');
+          const iEng = [(inp.subitem?.subitem_eng || ''), inp.item?.item_eng || ''].filter(Boolean).join(' ');
           addCell(dataRow, 1, i + 1, smallFont);
           addCell(dataRow, 2, iHin, smallFont);
           addCell(dataRow, 3, iEng, smallFont);
@@ -290,8 +290,8 @@ export class HmpComponent implements OnInit {
         // Output side
         if (outputs[i]) {
           const out = outputs[i];
-          const oHin = [(out.subitem?.subitem_list?.subitem_hin || ''), out.item?.item_hin || ''].filter(Boolean).join(' ');
-          const oEng = [(out.subitem?.subitem_list?.subitem_eng || ''), out.item?.item_eng || ''].filter(Boolean).join(' ');
+          const oHin = [(out.subitem?.subitem_hin || ''), out.item?.item_hin || ''].filter(Boolean).join(' ');
+          const oEng = [(out.subitem?.subitem_eng || ''), out.item?.item_eng || ''].filter(Boolean).join(' ');
           addCell(dataRow, 8, i + 1, smallFont);
           addCell(dataRow, 9, oHin, smallFont);
           addCell(dataRow, 10, oEng, smallFont);
@@ -360,7 +360,7 @@ export class HmpComponent implements OnInit {
     console.log(this.selectedJawak);
 
     for (let i in this.selectedJawak) {
-      const item = this.items.find((i: any) => i._id === this.selectedJawak[i].item_id);
+      const item = this.items.find((i: any) => i._id === this.selectedJawak[i]?.item_id);
       const mm = this.mms.find((m: any) => m._id === this.selectedJawak[i].mm_id);
       const unit = this.units.find((u: any) => u._id === this.selectedJawak[i].unit_id);
       // const condition = this.conditions.find((c: any) => c._id === this.selectedJawak[i].condition_id);

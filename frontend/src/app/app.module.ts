@@ -8,6 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FileSaverModule } from 'ngx-filesaver';
+import { NetdropModule } from './modules/netdrop/netdrop.module';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -108,6 +109,7 @@ import { PrastavEntryComponent } from './ENTRY__FORMS/prastav-entry/prastav-entr
 import { ChangelogPanelComponent } from './layout/changelog-panel/changelog-panel.component';
 import { ContextSettingsPanelComponent } from './layout/context-settings-panel/context-settings-panel.component';
 import { SmartFocusDirective } from './SHARED/smart-focus.directive';
+import { JoinObjPipe } from './pipe/formatter/join-obj.pipe';
 
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
@@ -204,6 +206,7 @@ import { SmartFocusDirective } from './SHARED/smart-focus.directive';
     ChangelogPanelComponent,
     ContextSettingsPanelComponent,
     SmartFocusDirective,
+    JoinObjPipe,
   ],
 
   imports: [
@@ -225,7 +228,11 @@ import { SmartFocusDirective } from './SHARED/smart-focus.directive';
     FileSaverModule,
     NgxSpinnerModule,
     NgxPaginationModule,
-    AutocompleteLibModule
+    AutocompleteLibModule,
+    NetdropModule.forRoot({
+      // Dynamically get the host IP but use backend port 3200
+      serverUrl: window.location.protocol + '//' + window.location.hostname + ':3200'
+    })
   ],
   providers: [GlobalService, AuthService, ThemeService, SelectionService],
   bootstrap: [AppComponent],

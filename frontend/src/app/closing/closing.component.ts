@@ -214,7 +214,7 @@ export class ClosingComponent implements OnInit {
 
   catForAwkSelected(ev: any) {
     if (ev) {
-      this.pendingAawakData = this.pendingAawakDataAll.filter((a: { item_categories: any[], subitem_categories: any[] }) => a.item_categories.includes(ev) || a.subitem_categories.includes(ev))
+      this.pendingAawakData = this.pendingAawakDataAll.filter((a: { icategories: any[], scategories: any[] }) => a.icategories.includes(ev) || a.scategories.includes(ev))
     } else {
       this.pendingAawakData = this.pendingAawakDataAll;
     }

@@ -1,5 +1,23 @@
 [
     {
+        "version": "30.0",
+        "date": "21-04-2026",
+        "summary": "Major Upgrade: NetDrop P2P Sharing",
+        "summary_hin": "नया अपग्रेड: नेटड्रॉप P2P शेयरिंग",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "NetDrop",
+                "title": "Local Network P2P Transfer",
+                "title_hin": "लोकल नेटवर्क P2P ट्रांसफर",
+                "desc": "Share files instantly between devices on the same Wi-Fi. <br/> - High-speed P2P transfer using WebRTC. <br/> - Animated Radar UI for device discovery.",
+                "desc_hin": "एक ही वाई-फाई पर मौजूद डिवाइस के बीच तुरंत फाइल शेयर करें। <br/> - वेब-आरटीसी (WebRTC) के साथ हाई-स्पीड ट्रांसफर। <br/> - डिवाइस खोजने के लिए एनिमेटेड राडार यूआई।",
+                "media": ""
+            }
+        ]
+    },
+    {
         "version": "29.1",
         "date": "05-04-2026",
         "summary": "Major Software Upgrade - Version 29.1",

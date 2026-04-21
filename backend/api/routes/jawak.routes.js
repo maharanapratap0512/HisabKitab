@@ -145,8 +145,8 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
 
             for (let j in resolve.data[i].jawaks) {
                 resolve.data[i].jawaks[j].document = (resolve.data[i].jawaks[j].document ? JSON.parse(resolve.data[i].jawaks[j].document) : {});
-                resolve.data[i].jawaks[j].item_categories = resolve.data[i].jawaks[j].item_categories ? JSON.parse(resolve.data[i].jawaks[j].item_categories) : [];
-                resolve.data[i].jawaks[j].subitem_categories = resolve.data[i].jawaks[j].subitem_categories ? JSON.parse(resolve.data[i].jawaks[j].subitem_categories) : [];
+                resolve.data[i].jawaks[j].icategories = resolve.data[i].jawaks[j].icategories ? JSON.parse(resolve.data[i].jawaks[j].icategories) : [];
+                resolve.data[i].jawaks[j].scategories = resolve.data[i].jawaks[j].scategories ? JSON.parse(resolve.data[i].jawaks[j].scategories) : [];
                 resolve.data[i].jawaks[j].enz = {
                     '_id': resolve.data[i].jawaks[j].enz_id,
                     'jawak_id': resolve.data[i].jawaks[j]._id,
@@ -362,8 +362,8 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
                             jawaks[i].document = (jawaks[i].document ? JSON.parse(jawaks[i].document) : {});
                             jawaks[i].enz = (jawaks[i].enz ? JSON.parse(jawaks[i].enz) : {});
                             jawaks[i].usage_report = (jawaks[i].usage_report ? JSON.parse(jawaks[i].usage_report) : {});
-                            jawaks[i].item_categories = (jawaks[i].item_categories ? JSON.parse(jawaks[i].item_categories) : {});
-                            jawaks[i].subitem_categories = (jawaks[i].subitem_categories ? JSON.parse(jawaks[i].subitem_categories) : {});
+                            jawaks[i].icategories = (jawaks[i].icategories ? JSON.parse(jawaks[i].icategories) : {});
+                            jawaks[i].scategories = (jawaks[i].scategories ? JSON.parse(jawaks[i].scategories) : {});
                         }
                         data[i].jawaks = jawaks;
                     }, (err) => {
@@ -428,8 +428,8 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
 
                     for (let j in resolve.data[i].jawaks) {
                         resolve.data[i].jawaks[j].document = (resolve.data[i].jawaks[j].document ? JSON.parse(resolve.data[i].jawaks[j].document) : {});
-                        resolve.data[i].jawaks[j].item_categories = resolve.data[i].jawaks[j].item_categories ? JSON.parse(resolve.data[i].jawaks[j].item_categories) : [];
-                        resolve.data[i].jawaks[j].subitem_categories = resolve.data[i].jawaks[j].subitem_categories ? JSON.parse(resolve.data[i].jawaks[j].subitem_categories) : [];
+                        resolve.data[i].jawaks[j].icategories = resolve.data[i].jawaks[j].icategories ? JSON.parse(resolve.data[i].jawaks[j].icategories) : [];
+                        resolve.data[i].jawaks[j].scategories = resolve.data[i].jawaks[j].scategories ? JSON.parse(resolve.data[i].jawaks[j].scategories) : [];
                         resolve.data[i].jawaks[j].enz = {
                             '_id': resolve.data[i].jawaks[j].enz_id,
                             'jawak_id': resolve.data[i]._id,

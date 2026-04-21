@@ -253,8 +253,16 @@
                                              {{data.mm_eng}}
                                           </td>
                                           <td>
-                                             {{data.categories_hin}}<br />
-                                             {{data.categories_eng}}
+                                             <ng-container
+                                                *ngIf="(data.scategories?.length > 0 ? data.scategories : data.icategories) as activeCats">
+                                                <div *ngIf="activeCats?.length > 0; else noCat">
+                                                   <span>{{ activeCats | joinObj:'category_hin' }}</span>
+                                                   <br />
+                                                   <small class="text-muted">{{ activeCats | joinObj:'category_eng'
+                                                      }}</small>
+                                                </div>
+                                                <ng-template #noCat>-</ng-template>
+                                             </ng-container>
                                           </td>
                                           <td>
                                              {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}}

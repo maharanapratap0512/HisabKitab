@@ -44,6 +44,7 @@ import { JawakEntryNewComponent } from './ENTRY__FORMS/jawak-entry-new/jawak-ent
 import { PbkClosingEntryComponent } from './ENTRY__FORMS/pbk-closing-entry/pbk-closing-entry.component';
 import { PbkBachatComponent } from './pbk-bachat/pbk-bachat.component';
 import { listsResolver } from './resolver/lists.resolver';
+import { NetdropUiComponent } from './modules/netdrop/components/netdrop-ui/netdrop-ui.component';
 
 const routes: Routes = [
    {
@@ -95,6 +96,7 @@ const routes: Routes = [
          { path: "files", component: FilesViewComponent },
          { path: "import_export", component: ImportExportComponent },
          { path: "mysql", component: MysqlComponent },
+         { path: "netdrop", component: NetdropUiComponent },
       ],
       resolve: {
          lists: listsResolver

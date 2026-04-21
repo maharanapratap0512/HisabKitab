@@ -2,7 +2,9 @@ const router = require('express').Router();
 const { json } = require('body-parser');
 const DBContex = require('../database/DBContex');
 const DB = new DBContex();
+const BaseTable = require('../database/base.table');
 
+const Item = new BaseTable('item');
 
 // get
 router.get('/:list_name', async (req, res, next) => {
@@ -23,14 +25,14 @@ router.get('/all/:dept_id', async (req, res, next) => {
         if (req.params.dept_id) {
             // Parallel fetch all independent lists
             const [
-                country, category, city, itemsRes, department, departmen_config, mm, pbk,
+                country, category, city, department, departmen_config, mm, pbk,
                 nimitt, state, zone, district, subitem_list, unit, gender, relation,
                 aawak_type, mm_type, jawak_type, condition, usage_list, usage_type, aawak_source
             ] = await Promise.all([
                 DB.getList('country', { dept_id: req.params.dept_id }),
                 DB.getList('category', { dept_id: req.params.dept_id }),
                 DB.getList('city', { dept_id: req.params.dept_id }),
-                DB.getList('item', { full: true, dept_id: req.params.dept_id }),
+                // DB.getList('item', { full: true, dept_id: req.params.dept_id }),
                 DB.getList('department'),
                 DB.getList('department_config', { dept_id: req.params.dept_id }),
                 DB.getList('mm', { full: true, dept_id: req.params.dept_id }),
@@ -39,7 +41,7 @@ router.get('/all/:dept_id', async (req, res, next) => {
                 DB.getList('state', { dept_id: req.params.dept_id }),
                 DB.getList('zone', { dept_id: req.params.dept_id }),
                 DB.getList('district', { full: true, dept_id: req.params.dept_id }),
-                DB.getList('subitem_list', { dept_id: req.params.dept_id }),
+                // DB.getList('subitem_list', { dept_id: req.params.dept_id }),
                 DB.getList('unit', { dept_id: req.params.dept_id }),
                 DB.getList('gender', { dept_id: req.params.dept_id }),
                 DB.getList('relation', { dept_id: req.params.dept_id }),
@@ -83,10 +85,10 @@ router.get('/all/:dept_id', async (req, res, next) => {
                     resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
                     resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
                     resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
-                    resolve.data[i].categories_hin = (resolve.data[i].categories_hin != "[null]" ? JSON.parse(resolve.data[i].categories_hin) : []);
+                    // resolve.data[i].categories_hin = (resolve.data[i].categories_hin != "[null]" ? JSON.parse(resolve.data[i].categories_hin) : []);
                     for (let j in resolve.data[i].subitems) {
                         // resolve.data[i].subitems[j].categories = (resolve.data[i].subitems[j].categories != "[null]" ? JSON.parse(resolve.data[i].subitems[j].categories) : []);
-                        resolve.data[i].subitems[j].categories_hin = ((resolve.data[i].subitems[j].categories_hin && typeof resolve.data[i].subitems[j].categories_hin == "string" && resolve.data[i].subitems[j].categories_hin != "[null]") ? JSON.parse(resolve.data[i].subitems[j].categories_hin) : []);
+                        resolve.data[i].subitems[j].categories = ((resolve.data[i].subitems[j].categories_hin && typeof resolve.data[i].subitems[j].categories_hin == "string" && resolve.data[i].subitems[j].categories_hin != "[null]") ? JSON.parse(resolve.data[i].subitems[j].categories_hin) : []);
                     }
                     subitem_count += resolve.data[i].subitems.length;
                 }
@@ -115,6 +117,10 @@ router.get('/lot_no/:dept_id', async (req, res, next) => {
     try {
         let conditionString = `where aawak.dept_id = ${req.params.dept_id} AND lot_no IS NOT NULL order by _id`
         let lot_nos = await DB.db.prepare(DB.query.aawak.select_lot_no.replace('?', conditionString)).all();
+        for (let i in lot_nos) {
+            lot_nos[i].icategories = (lot_nos[i].icategories ? JSON.parse(lot_nos[i].icategories) : []);
+            lot_nos[i].scategories = (lot_nos[i].scategories ? JSON.parse(lot_nos[i].scategories) : []);
+        }
         res.json({
             success: true,
             result: lot_nos

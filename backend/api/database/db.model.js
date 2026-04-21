@@ -2344,7 +2344,7 @@ class dbModal {
     },
     // Version 30
     // recursive category support
-    // item-variant system migration -> attributes, attributes_value, variant, variant-attribute-map, variant-category-map
+    // item-variant system migration -> attributes, attributes_value, variant, varinat-attribute-map, variant-category-map
     // alias for items, variant - item-alias, variant-alias table
     // mm - recreate as it is
     // subitem - convert and support variant system, rel-subitem-cat table data copy
@@ -2500,14 +2500,49 @@ class dbModal {
   ];
 
   views = {
-    // drop_1: `drop view if exists mn_jwk_aj_type`,
-    subitems_join: `create view if not exists subitems 
-      AS 
-      select subitem.*, 
-      subitem_list.subitem_hin as subitem_hin, 
-      subitem_list.subitem_eng as subitem_eng, 
-      subitem_list.subitem_roman as subitem_roman from subitem 
-      left join subitem_list on subitem.subitem_list_id = subitem_list._id`,
+    drop_v_item: `drop view if exists v_item`,
+    drop_v_subitem: `drop view if exists v_subitem`,
+    v_item: `CREATE VIEW IF NOT EXISTS v_item AS
+      SELECT 
+          i.*, 
+          u.unit_short, 
+          u.unit_full,
+          (
+              SELECT IFNULL(json_group_array(
+                  json_object(
+                      '_id', c._id,
+                      'category_hin', c.category_hin, 
+                      'category_eng', c.category_eng,
+                      'category_roman', c.category_roman
+                  )
+              ), json('[]'))
+              FROM rel_item_category ric
+              JOIN category c ON c._id = ric.category_id
+              WHERE ric.item_id = i._id
+          ) as icategories
+      FROM item i
+      LEFT JOIN unit u ON u._id = i.unit_id`,
+
+    v_subitem: `CREATE VIEW IF NOT EXISTS v_subitem AS
+      SELECT 
+        s.*, 
+        u.unit_short, 
+        u.unit_full,
+        (
+          SELECT IFNULL(json_group_array(
+              json_object(
+                  '_id', c._id, 
+                  'category_hin', c.category_hin, 
+                  'category_eng', c.category_eng
+              )
+          ), json('[]'))
+          FROM rel_subitem_category rsc
+          JOIN category c ON c._id = rsc.category_id
+          WHERE rsc.subitem_id = s._id
+        ) as categories
+      FROM subitem s
+      LEFT JOIN unit u ON u._id = s.unit_id`,
+
     mn_jwk_aj_type:
       `create view if not exists mn_jwk_aj_type
       AS
@@ -2584,9 +2619,10 @@ class dbModal {
       this.db.pragma('legacy_alter_table=ON');
       runMigration();
 
-      for (const viewQuery of Object.values(this.views)) {
+      for (const [viewName, viewQuery] of Object.entries(this.views)) {
         // console.log(viewQuery);
         this.db.prepare(viewQuery).run();
+        console.log("view created : ", viewName);
       }
 
       this.db.pragma('legacy_alter_table=OFF');

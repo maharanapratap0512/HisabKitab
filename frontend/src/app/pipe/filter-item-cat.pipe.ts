@@ -10,7 +10,10 @@ export class FilterItemCatPipe implements PipeTransform {
     if (!catId || !value)
       return value;
 
-    let filterValue = value.filter(v => v.categories.includes(catId));
+    let filterValue = value.filter(v =>
+      v.categories && v.categories.some((cat: { _id: any; }) => cat._id === catId)
+    );
+
     return filterValue;
   }
 

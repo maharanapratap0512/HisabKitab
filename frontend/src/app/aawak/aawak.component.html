@@ -480,8 +480,16 @@
                                     {{data.aawak_type_eng ? data.aawak_type_eng:''}} / {{data.aawak_source_eng ?
                                     data.aawak_source_eng:''}} </td>
                                  <td>
-                                    {{data.categories_hin}} <br />
-                                    {{data.categories_eng}}
+                                    <ng-container
+                                       *ngIf="(data.scategories?.length > 0 ? data.scategories : data.icategories) as activeCats">
+                                       <div *ngIf="activeCats?.length > 0; else noCat">
+                                          <span>{{ activeCats | joinObj:'category_hin' }}</span>
+                                          <br />
+                                          <small class="text-muted">{{ activeCats | joinObj:'category_eng'
+                                             }}</small>
+                                       </div>
+                                       <ng-template #noCat>-</ng-template>
+                                    </ng-container>
                                  </td>
                                  <td>
                                     {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
@@ -548,7 +556,7 @@
                                              <th>कहा भेजा</th>
                                              <th>किसको दिया</th>
                                              <th>जावक प्रकार</th>
-                                             <th>जावक केटेगरी</th>
+                                             <!-- <th>जावक केटेगरी</th> -->
                                              <th>परिमाण</th>
                                              <th style="width:0px;">
                                                 <div class="ribbon ribbon-secondary text-light float-end"> Destribution
@@ -574,8 +582,8 @@
                                              </td>
                                              <td>{{jwk.jawak_type_hin}}{{jwk.jawak_type_eng ? " : "+jwk.jawak_type_eng :
                                                 ''}}</td>
-                                             <td>{{jwk.category_hin}}{{jwk.category_eng ? " : "+jwk.category_eng :
-                                                ''}}</td>
+                                             <!-- <td>{{jwk.category_hin}}{{jwk.category_eng ? " : "+jwk.category_eng :
+                                                ''}}</td> -->
                                              <td>{{jwk.qty}} {{jwk.unit_short}}</td>
                                           </tr>
                                        </table>

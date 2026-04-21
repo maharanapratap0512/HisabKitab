@@ -352,8 +352,19 @@ class BaseTable {
             );
 
             if (def.select) {
-                const cols = this._resolveSelect(def.select, refTable);
-                const jsonArgs = cols.map(c => `'${c}', ${alias}.${c}`).join(', ');
+                const cols    = this._resolveSelect(def.select, refTable);
+                const refMeta = this.schema[refTable];
+                const jsonArgs = cols.map(c => {
+                    const colDef = refMeta?.columns[c];
+                    // json() wrapper: if the refTable column is type:'json', it means
+                    // the column holds a JSON string (e.g. a view baking a hasOne join).
+                    // Wrapping with json() embeds it as proper nested JSON instead of
+                    // double-stringifying it inside the outer json_object().
+                    const expr = (colDef?.type === 'json')
+                        ? `json(${alias}.${c})`
+                        : `${alias}.${c}`;
+                    return `'${c}', ${expr}`;
+                }).join(', ');
                 selectParts.push(`json_object(${jsonArgs}) AS ${alias}`);
             }
         }

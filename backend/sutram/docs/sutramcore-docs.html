@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sutramCore — Docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--bg2:#13161d;--bg3:#1a1e28;--bg4:#222736;--border:#2a2f3e;--border2:#353c50;--text:#e2e6f0;--text2:#9ba3b8;--text3:#5f6880;--acc:#4ade80;--acc2:#22c55e;--green:#4ade80;--purple:#c084fc;--orange:#fb923c;--blue:#7c9bff;--yellow:#fbbf24;--red:#f87171;--tk-kw:#c084fc;--tk-fn:#7c9bff;--tk-str:#4ade80;--tk-num:#fb923c;--tk-cmt:#5f6880;--tk-cn:#fbbf24}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.7}
+.shell{display:grid;grid-template-columns:268px 1fr;min-height:100vh}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.sb-logo{padding:28px 24px 18px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.sb-logo .name{font-family:'Fraunces',serif;font-size:21px;font-weight:600;color:var(--text);letter-spacing:-.5px}
+.sb-logo .sub{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:3px}
+.sb-badge{display:inline-block;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:var(--acc);font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;margin-top:8px}
+.nav-grp{padding:6px 0}
+.nav-lbl{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);padding:8px 24px 3px}
+.nav-a{display:flex;align-items:center;gap:8px;padding:6px 24px;color:var(--text2);text-decoration:none;font-size:13px;transition:all .15s;border-left:2px solid transparent}
+.nav-a:hover{color:var(--text);background:var(--bg3);border-left-color:var(--border2)}
+.nav-a.active{color:var(--acc);background:rgba(74,222,128,.07);border-left-color:var(--acc)}
+.nd{width:5px;height:5px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.nav-a.active .nd{background:var(--acc)}
+.main{max-width:920px}
+.hero{padding:72px 64px 56px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#0d0f14 0%,#0a130d 50%,#0d0f14 100%);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(74,222,128,.04) 0%,transparent 65%);pointer-events:none}
+.hero-ey{font-family:'DM Mono',monospace;font-size:12px;color:var(--acc);letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.hero-ey::before{content:'';display:inline-block;width:20px;height:1px;background:var(--acc)}
+.hero h1{font-family:'Fraunces',serif;font-size:52px;font-weight:700;line-height:1.1;letter-spacing:-1.5px;color:var(--text);margin-bottom:8px}
+.hero h1 span{color:var(--acc);font-style:italic}
+.hero-sub{font-size:18px;color:var(--text2);font-weight:300;margin-bottom:36px;max-width:520px;line-height:1.6}
+.hero-inst{display:inline-flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:12px 20px;font-family:'DM Mono',monospace;font-size:14px;color:var(--green)}
+.hero-inst .p{color:var(--text3)}
+.chips{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text2);font-family:'DM Mono',monospace}
+.chip .dot{width:6px;height:6px;border-radius:50%}
+.content{padding:0 64px 80px}
+.sec{padding-top:60px}
+.anc{display:block;position:relative;top:-80px;visibility:hidden}
+.sec-hdr{display:flex;align-items:baseline;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.sec-num{font-family:'DM Mono',monospace;font-size:12px;color:var(--acc);font-weight:500}
+.sec h2{font-family:'Fraunces',serif;font-size:26px;font-weight:600;color:var(--text);letter-spacing:-.5px}
+.sec h3{font-size:15px;font-weight:600;color:var(--text);margin:28px 0 10px;display:flex;align-items:center;gap:8px}
+.sec h3::before{content:'';display:inline-block;width:3px;height:14px;background:var(--acc);border-radius:2px;flex-shrink:0}
+.sec p{color:var(--text2);margin-bottom:16px;line-height:1.75;font-size:14.5px}
+p code,li code{font-family:'DM Mono',monospace;font-size:12.5px;color:var(--acc);background:rgba(74,222,128,.08);padding:1px 6px;border-radius:4px;border:1px solid rgba(74,222,128,.15)}
+.cw{margin:18px 0;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--bg2)}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.cl{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+.clang{font-family:'DM Mono',monospace;font-size:10px;color:var(--acc);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);padding:2px 8px;border-radius:4px}
+.cb{padding:20px 24px;overflow-x:auto;font-family:'DM Mono',monospace;font-size:13px;line-height:1.8}
+.cb pre{margin:0;white-space:pre}
+.kw{color:var(--tk-kw)}.fn{color:var(--tk-fn)}.str{color:var(--tk-str)}.num{color:var(--tk-num)}.cmt{color:var(--tk-cmt);font-style:italic}.cn{color:var(--tk-cn)}
+.note{display:flex;gap:14px;padding:14px 18px;border-radius:8px;margin:16px 0;font-size:13.5px;line-height:1.65}
+.ni{font-size:16px;flex-shrink:0;margin-top:1px}
+.note.info{background:rgba(124,155,255,.07);border:1px solid rgba(124,155,255,.2);color:#a5b8ff}
+.note.tip{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);color:#86efac}
+.note.warn{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.2);color:#fdba74}
+.note.purple{background:rgba(192,132,252,.07);border:1px solid rgba(192,132,252,.2);color:#d8b4fe}
+.tw{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:16px 0}
+.dt{width:100%;border-collapse:collapse;font-size:13.5px}
+.dt th{background:var(--bg3);color:var(--text2);font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border2)}
+.dt td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:rgba(255,255,255,.02)}
+.dt code{font-family:'DM Mono',monospace;font-size:12px;color:var(--acc);background:rgba(74,222,128,.08);padding:1px 6px;border-radius:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+hr.s{border:none;border-top:1px solid var(--border);margin:48px 0 0}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+@media(max-width:900px){.shell{grid-template-columns:1fr}.sidebar{display:none}.hero{padding:48px 28px}.content{padding:0 28px 60px}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="name">sutramCore</div>
+    <div class="sub">SQLite ORM — sync</div>
+    <div class="sb-badge">v2.0.0</div>
+  </div>
+  <nav>
+    <div class="nav-grp">
+      <div class="nav-lbl">Getting Started</div>
+      <a href="#what" class="nav-a"><span class="nd"></span>What is sutramCore</a>
+      <a href="#install" class="nav-a"><span class="nd"></span>Installation</a>
+      <a href="#connect" class="nav-a"><span class="nd"></span>Connect</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Schema</div>
+      <a href="#defineTable" class="nav-a"><span class="nd"></span>defineTable</a>
+      <a href="#defineView" class="nav-a"><span class="nd"></span>defineView</a>
+      <a href="#col" class="nav-a"><span class="nd"></span>col builders</a>
+      <a href="#joins" class="nav-a"><span class="nd"></span>Joins</a>
+      <a href="#migrations" class="nav-a"><span class="nd"></span>Migrations</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">CRUD</div>
+      <a href="#insert" class="nav-a"><span class="nd"></span>insert</a>
+      <a href="#get" class="nav-a"><span class="nd"></span>getById / getOne / getAll</a>
+      <a href="#update" class="nav-a"><span class="nd"></span>update</a>
+      <a href="#delete" class="nav-a"><span class="nd"></span>delete</a>
+      <a href="#count" class="nav-a"><span class="nd"></span>count</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Reports</div>
+      <a href="#reports" class="nav-a"><span class="nd"></span>CTE Reports</a>
+      <a href="#procedure" class="nav-a"><span class="nd"></span>procedure()</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Advanced</div>
+      <a href="#where" class="nav-a"><span class="nd"></span>WHERE clause</a>
+      <a href="#tx" class="nav-a"><span class="nd"></span>Transactions</a>
+      <a href="#raw" class="nav-a"><span class="nd"></span>Raw SQL</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Reference</div>
+      <a href="#api" class="nav-a"><span class="nd"></span>API Reference</a>
+    </div>
+  </nav>
+</aside>
+
+<main class="main">
+<div class="hero">
+  <div class="hero-ey">SQLite ORM — synchronous</div>
+  <h1>sutram<span>Core</span></h1>
+  <p class="hero-sub">Schema-driven SQLite ORM. Define tables with <code style="color:var(--acc);font-size:15px">col</code> builders, get full CRUD + joins + CTE reports. Sync — no await needed.</p>
+  <div class="hero-inst"><span class="p">$</span><span>npm install sutramcore better-sqlite3</span></div>
+  <div class="chips">
+    <div class="chip"><span class="dot" style="background:#4ade80"></span>Synchronous</div>
+    <div class="chip"><span class="dot" style="background:#c084fc"></span>Schema-driven</div>
+    <div class="chip"><span class="dot" style="background:#7c9bff"></span>Joins — hasOne / hasMany / M2M</div>
+    <div class="chip"><span class="dot" style="background:#fb923c"></span>CTE reports</div>
+    <div class="chip"><span class="dot" style="background:#fbbf24"></span>Migrations</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- WHAT -->
+<div class="sec"><span class="anc" id="what"></span>
+  <div class="sec-hdr"><span class="sec-num">01</span><h2>What is sutramCore?</h2></div>
+  <p>sutramCore is a lightweight, schema-driven SQLite ORM. You define your tables once using <code>defineTable</code> and <code>col</code> builders — then get a full CRUD API with joins, pagination, and CTE reports automatically.</p>
+  <p>Everything is synchronous — no <code>async/await</code> needed. If you need MySQL, use <code>sutramcore-mysql</code> which has the same API but async.</p>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Feature</th><th>sutramCore</th><th>sutramcore-mysql</th></tr></thead>
+    <tbody>
+      <tr><td>Database</td><td>SQLite (better-sqlite3)</td><td>MySQL (mysql2)</td></tr>
+      <tr><td>Methods</td><td>Sync — returns value</td><td>Async — returns Promise</td></tr>
+      <tr><td>await</td><td>Optional (always safe)</td><td>Required</td></tr>
+      <tr><td>Reports</td><td>CTE only</td><td>CTE + Stored Procedures</td></tr>
+      <tr><td>schema.js</td><td>Same format</td><td>Same format</td></tr>
+      <tr><td>procedure()</td><td>CTE reports</td><td>CTE + CALL sp()</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- INSTALL -->
+<div class="sec"><span class="anc" id="install"></span>
+  <div class="sec-hdr"><span class="sec-num">02</span><h2>Installation</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">terminal</span><span class="clang">bash</span></div>
+  <div class="cb"><pre><span class="fn">npm</span> install sutramcore better-sqlite3</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- CONNECT -->
+<div class="sec"><span class="anc" id="connect"></span>
+  <div class="sec-hdr"><span class="sec-num">03</span><h2>Connect</h2></div>
+  <p>Create one <code>Sutram</code> instance per database. Two options — pass your own <code>db</code>, or let sutramCore open the file.</p>
+
+  <div class="two">
+    <div class="cw"><div class="ch"><span class="cl">Option A — pass existing db</span><span class="clang">js</span></div>
+    <div class="cb"><pre><span class="kw">const</span> { <span class="cn">Sutram</span> } = <span class="fn">require</span>(<span class="str">'sutramcore'</span>);
+<span class="kw">const</span> schema = <span class="fn">require</span>(<span class="str">'./schema'</span>);
+<span class="kw">const</span> reports = <span class="fn">require</span>(<span class="str">'./reports'</span>);
+
+<span class="kw">const</span> sewa = <span class="kw">new</span> <span class="fn">Sutram</span>({
+  db: dbmodal.db,
+  schema,
+  reports,   <span class="cmt">// optional</span>
+});</pre></div></div>
+
+    <div class="cw"><div class="ch"><span class="cl">Option B — sutramCore opens file</span><span class="clang">js</span></div>
+    <div class="cb"><pre><span class="kw">const</span> sewa = <span class="kw">new</span> <span class="fn">Sutram</span>({
+  dbPath:     <span class="str">'./app.db'</span>,
+  schema,
+  reports,
+  migrations: <span class="fn">require</span>(<span class="str">'./migrations'</span>),
+  views:      [],
+});</pre></div></div>
+  </div>
+</div>
+
+<hr class="s">
+
+<!-- DEFINE TABLE -->
+<div class="sec"><span class="anc" id="defineTable"></span>
+  <div class="sec-hdr"><span class="sec-num">04</span><h2>defineTable</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">database/schema.js</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> { defineTable, col } = <span class="fn">require</span>(<span class="str">'sutramcore'</span>);
+
+module.exports = {
+
+  ...<span class="fn">defineTable</span>(<span class="str">'category'</span>, {
+    _id:    col.<span class="fn">id</span>(),
+    name:   col.<span class="fn">string</span>().<span class="fn">required</span>(),
+    active: col.<span class="fn">boolean</span>().<span class="fn">default</span>(<span class="num">1</span>),
+  }),
+
+  ...<span class="fn">defineTable</span>(<span class="str">'product'</span>, {
+    _id:         col.<span class="fn">id</span>(),
+    name:        col.<span class="fn">string</span>().<span class="fn">required</span>(),
+    price:       col.<span class="fn">number</span>().<span class="fn">default</span>(<span class="num">0</span>),
+    category_id: col.<span class="fn">ref</span>(<span class="str">'category._id'</span>, {   <span class="cmt">// hasOne</span>
+                     as: <span class="str">'category'</span>, select: [<span class="str">'name'</span>],
+                 }),
+    meta:        col.<span class="fn">json</span>(),
+    active:      col.<span class="fn">boolean</span>().<span class="fn">default</span>(<span class="num">1</span>),
+  }, {
+    reviews: {                                   <span class="cmt">// hasMany</span>
+      hasMany: <span class="kw">true</span>, table: <span class="str">'review'</span>,
+      on: <span class="str">'product_id'</span>, target: <span class="str">'_id'</span>,
+      as: <span class="str">'reviews'</span>, select: [<span class="str">'_id'</span>, <span class="str">'rating'</span>],
+    },
+    tags: {                                      <span class="cmt">// manyToMany</span>
+      manyToMany: <span class="kw">true</span>, table: <span class="str">'tag'</span>,
+      junction: <span class="str">'product_tag'</span>,
+      on: <span class="str">'product_id'</span>, target: <span class="str">'tag_id'</span>,
+      as: <span class="str">'tags'</span>, select: [<span class="str">'_id'</span>, <span class="str">'label'</span>],
+    },
+  }),
+
+};</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- DEFINE VIEW -->
+<div class="sec"><span class="anc" id="defineView"></span>
+  <div class="sec-hdr"><span class="sec-num">04b</span><h2>defineView</h2></div>
+  <p>Declare a <strong>SQLite VIEW</strong> backed by a table's full join query — in one line. The view bakes in all <code>hasOne</code>, <code>hasMany</code>, and <code>manyToMany</code> joins. You can then reference the view with <code>col.ref()</code> in another table, enabling <strong>unlimited join depth</strong> with zero custom SQL.</p>
+
+  <div class="cw"><div class="ch"><span class="cl">database/schema.js</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> { defineTable, <span class="fn">defineView</span>, col } = <span class="fn">require</span>(<span class="str">'sutramcore'</span>);
+
+module.exports = {
+
+  <span class="cmt">// ── Level 1: base table — item joins unit (hasOne)</span>
+  ...<span class="fn">defineTable</span>(<span class="str">'item'</span>, {
+    _id:     col.<span class="fn">id</span>(),
+    name:    col.<span class="fn">string</span>().<span class="fn">required</span>(),
+    unit_id: col.<span class="fn">ref</span>(<span class="str">'unit._id'</span>, { as: <span class="str">'unit'</span>, select: [<span class="str">'unit_short'</span>] }),
+  }),
+
+  <span class="cmt">// ── Level 2: view — bakes item + unit into a SQLite VIEW</span>
+  ...<span class="fn">defineView</span>(<span class="str">'v_item'</span>, <span class="str">'item'</span>),
+  <span class="cmt">//              ↑ view name   ↑ source table (uses its full join query)</span>
+
+  <span class="cmt">// ── Level 3: outer table joins the VIEW — gets item + unit in one shot</span>
+  ...<span class="fn">defineTable</span>(<span class="str">'batch_item'</span>, {
+    _id:      col.<span class="fn">id</span>(),
+    batch_id: col.<span class="fn">number</span>(),
+    item_id:  col.<span class="fn">ref</span>(<span class="str">'v_item._id'</span>, { as: <span class="str">'item'</span>, select: [<span class="str">'name'</span>, <span class="str">'unit'</span>] }),
+    <span class="cmt">//                   ↑ join the VIEW — 'unit' is the nested object</span>
+    qty:      col.<span class="fn">number</span>(),
+  }),
+
+};</pre></div></div>
+
+  <h3>Result</h3>
+  <div class="cw"><div class="ch"><span class="cl">sewa.table('batch_item').getById(1)</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// {</span>
+<span class="cmt">//   _id: 1, batch_id: 3, qty: 5,</span>
+<span class="cmt">//   item: {                        ← from v_item</span>
+<span class="cmt">//     name: 'Rice',</span>
+<span class="cmt">//     unit: { unit_short: 'kg' }   ← nested — from item's own join</span>
+<span class="cmt">//   }</span>
+<span class="cmt">// }</span></pre></div></div>
+
+  <h3>Unlimited depth — chain views</h3>
+  <p>Each <code>defineView()</code> can be the source for the next one. Declare source before view — order in <code>schema.js</code> matters.</p>
+  <div class="cw"><div class="ch"><span class="cl">chaining views</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// depth 1 — item + unit baked in</span>
+...<span class="fn">defineView</span>(<span class="str">'v_item'</span>, <span class="str">'item'</span>),
+
+<span class="cmt">// depth 2 — batch_item joins v_item → gets item + unit</span>
+...<span class="fn">defineView</span>(<span class="str">'v_batch_item'</span>, <span class="str">'batch_item'</span>),
+
+<span class="cmt">// depth 3 — order_line joins v_batch_item → gets everything, 3 levels deep</span>
+...<span class="fn">defineTable</span>(<span class="str">'order_line'</span>, {
+  batch_item_id: col.<span class="fn">ref</span>(<span class="str">'v_batch_item._id'</span>, {
+    as: <span class="str">'batch_item'</span>, select: [<span class="str">'qty'</span>, <span class="str">'item'</span>],
+  }),
+}),</pre></div></div>
+
+  <div class="note tip"><span class="ni">✓</span><span>Declare <code>defineTable()</code> for the source BEFORE <code>defineView()</code> that references it — insertion order in <code>schema.js</code> is the resolution order.</span></div>
+  <div class="note warn"><span class="ni">⚠</span><span>Views are <strong>read-only</strong>. Calling <code>insert()</code> / <code>update()</code> on a view will throw a SQLite error. Always write to the real underlying table.</span></div>
+
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>viewName</code></td><td>string</td><td>Name for the SQLite VIEW — e.g. <code>'v_item'</code></td></tr>
+      <tr><td><code>sourceTableName</code></td><td>string</td><td>Table whose full join query backs the view</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- COL BUILDERS -->
+<div class="sec"><span class="anc" id="col"></span>
+  <div class="sec-hdr"><span class="sec-num">05</span><h2>col builders</h2></div>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Builder</th><th>SQLite type</th><th>Modifiers</th></tr></thead>
+    <tbody>
+      <tr><td><code>col.id()</code></td><td>INTEGER PRIMARY KEY AUTOINCREMENT</td><td>—</td></tr>
+      <tr><td><code>col.string()</code></td><td>TEXT</td><td><code>.required()</code> <code>.default(val)</code></td></tr>
+      <tr><td><code>col.number()</code></td><td>DECIMAL(10,2)</td><td><code>.required()</code> <code>.default(val)</code></td></tr>
+      <tr><td><code>col.boolean()</code></td><td>TINYINT</td><td><code>.default(0|1)</code></td></tr>
+      <tr><td><code>col.json()</code></td><td>TEXT</td><td>Auto stringify/parse</td></tr>
+      <tr><td><code>col.ref(target, opts)</code></td><td>FK column</td><td><code>as</code> <code>select</code></td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- JOINS -->
+<div class="sec"><span class="anc" id="joins"></span>
+  <div class="sec-hdr"><span class="sec-num">06</span><h2>Joins</h2></div>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Type</th><th>How</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>hasOne</td><td><code>col.ref('table.col', { as, select })</code></td><td><code>row.category = { name: '...' }</code></td></tr>
+      <tr><td>hasMany</td><td><code>joins{} → hasMany: true</code></td><td><code>row.reviews = [...]</code></td></tr>
+      <tr><td>manyToMany</td><td><code>joins{} → manyToMany: true, junction</code></td><td><code>row.tags = [...]</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="note info"><span class="ni">ℹ</span><span>Pass <code>{ full: false }</code> to skip joins — faster queries when joins not needed.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- MIGRATIONS -->
+<div class="sec"><span class="anc" id="migrations"></span>
+  <div class="sec-hdr"><span class="sec-num">07</span><h2>Migrations</h2></div>
+  <p>Array-of-arrays. Each version is one array. Never edit past versions — add new arrays at the end. Tracked via <code>user_version</code> pragma.</p>
+  <div class="cw"><div class="ch"><span class="cl">database/migrations.js</span><span class="clang">js</span></div>
+  <div class="cb"><pre>module.exports = [
+  <span class="cmt">// version 1</span>
+  [
+    <span class="str">`CREATE TABLE IF NOT EXISTS category (
+      _id  INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      active TINYINT DEFAULT 1
+    )`</span>,
+    <span class="str">`CREATE TABLE IF NOT EXISTS product (
+      _id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      name        TEXT NOT NULL,
+      price       DECIMAL(10,2) DEFAULT 0,
+      category_id INTEGER REFERENCES category(_id),
+      active      TINYINT DEFAULT 1
+    )`</span>,
+  ],
+  <span class="cmt">// version 2 — add column</span>
+  [
+    <span class="str">`ALTER TABLE product ADD COLUMN sku TEXT`</span>,
+  ],
+];</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- INSERT -->
+<div class="sec"><span class="anc" id="insert"></span>
+  <div class="sec-hdr"><span class="sec-num">08</span><h2>insert</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">insert examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> product = sewa.<span class="fn">table</span>(<span class="str">'product'</span>);
+
+<span class="cmt">// full: true (default) — returns complete row with joins</span>
+<span class="kw">const</span> row = product.<span class="fn">insert</span>({
+  name:        <span class="str">'Wireless Mouse'</span>,
+  price:       <span class="num">799</span>,
+  category_id: <span class="num">2</span>,
+});
+<span class="cmt">// row.category = { name: 'Electronics' }  ← joined</span>
+
+<span class="cmt">// full: false — returns insertId only (faster, use in transactions)</span>
+<span class="kw">const</span> id = product.<span class="fn">insert</span>({ name: <span class="str">'USB Hub'</span> }, <span class="kw">false</span>);</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- GET -->
+<div class="sec"><span class="anc" id="get"></span>
+  <div class="sec-hdr"><span class="sec-num">09</span><h2>getById / getOne / getAll</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">get examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> product = sewa.<span class="fn">table</span>(<span class="str">'product'</span>);
+
+<span class="cmt">// getById — full with joins</span>
+<span class="kw">const</span> row = product.<span class="fn">getById</span>(<span class="num">1</span>);
+
+<span class="cmt">// getOne — first match</span>
+<span class="kw">const</span> row = product.<span class="fn">getOne</span>({ name: <span class="str">'USB Hub'</span> });
+<span class="kw">const</span> row = product.<span class="fn">getOne</span>(<span class="str">'price &lt; 500 AND active = 1'</span>);
+
+<span class="cmt">// getAll — filter + options</span>
+<span class="kw">const</span> rows = product.<span class="fn">getAll</span>({ active: <span class="num">1</span> });
+<span class="kw">const</span> rows = product.<span class="fn">getAll</span>({ active: <span class="num">1</span> }, {
+  orderBy: <span class="str">'price ASC'</span>,
+  limit:   <span class="num">20</span>,
+  offset:  <span class="num">0</span>,
+  full:    <span class="kw">false</span>,   <span class="cmt">// skip joins</span>
+});</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- UPDATE -->
+<div class="sec"><span class="anc" id="update"></span>
+  <div class="sec-hdr"><span class="sec-num">10</span><h2>update</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">update examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> product = sewa.<span class="fn">table</span>(<span class="str">'product'</span>);
+
+product.<span class="fn">updateById</span>({ price: <span class="num">699</span> }, <span class="num">1</span>);
+product.<span class="fn">update</span>({ active: <span class="num">0</span> }, { category_id: <span class="num">3</span> });
+product.<span class="fn">update</span>({ active: <span class="num">0</span> }, <span class="str">'price = 0'</span>);
+
+<span class="cmt">// full: false — skip return fetch</span>
+product.<span class="fn">updateById</span>({ price: <span class="num">599</span> }, <span class="num">1</span>, <span class="kw">false</span>);</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- DELETE -->
+<div class="sec"><span class="anc" id="delete"></span>
+  <div class="sec-hdr"><span class="sec-num">11</span><h2>delete</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">delete examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre>product.<span class="fn">deleteById</span>(<span class="num">5</span>);
+product.<span class="fn">delete</span>({ active: <span class="num">0</span> });
+product.<span class="fn">delete</span>(<span class="str">'price = 0 AND stock = 0'</span>);</pre></div></div>
+  <div class="note warn"><span class="ni">⚠</span><span>WHERE required — empty where throws. No accidental full-table deletes.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- COUNT -->
+<div class="sec"><span class="anc" id="count"></span>
+  <div class="sec-hdr"><span class="sec-num">12</span><h2>count</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">count examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> total  = product.<span class="fn">count</span>();
+<span class="kw">const</span> active = product.<span class="fn">count</span>({ active: <span class="num">1</span> });
+<span class="kw">const</span> cheap  = product.<span class="fn">count</span>(<span class="str">'price &lt; 500'</span>);
+
+<span class="cmt">// pagination</span>
+<span class="kw">const</span> PAGE  = <span class="num">20</span>;
+<span class="kw">const</span> total = product.<span class="fn">count</span>({ active: <span class="num">1</span> });
+<span class="kw">const</span> rows  = product.<span class="fn">getAll</span>({ active: <span class="num">1</span> }, { limit: PAGE, offset: <span class="num">0</span> });
+<span class="kw">const</span> pages = <span class="cn">Math</span>.<span class="fn">ceil</span>(total / PAGE);</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- REPORTS -->
+<div class="sec"><span class="anc" id="reports"></span>
+  <div class="sec-hdr"><span class="sec-num">13</span><h2>CTE Reports</h2></div>
+  <p>Named SQL queries — any SELECT, CTE, aggregation — defined in <code>reports.js</code> and executed via <code>procedure()</code>. CTE only in sutramCore (SQLite). For stored procedures, use sutramcore-mysql.</p>
+
+  <div class="cw"><div class="ch"><span class="cl">database/reports.js</span><span class="clang">js</span></div>
+  <div class="cb"><pre>module.exports = [
+  {
+    report_name: <span class="str">'monthly_sales'</span>,
+    label:       <span class="str">'Monthly Sales Summary'</span>,
+    report_type: <span class="str">'cte'</span>,
+    cte_sql: <span class="str">`
+      SELECT strftime('%Y-%m', date) as month,
+             COUNT(*) as orders,
+             SUM(amount) as revenue
+      FROM orders
+      WHERE date >= :from AND date &lt;= :to
+      GROUP BY month ORDER BY month DESC
+    `</span>,
+    params: [
+      { name: <span class="str">'from'</span>, type: <span class="str">'string'</span>, default: <span class="str">'2024-01-01'</span> },
+      { name: <span class="str">'to'</span>,   type: <span class="str">'string'</span>, default: <span class="str">'2024-12-31'</span> },
+    ],
+  },
+
+  {
+    report_name: <span class="str">'low_stock'</span>,
+    label:       <span class="str">'Low Stock Products'</span>,
+    report_type: <span class="str">'cte'</span>,
+    cte_sql: <span class="str">`SELECT * FROM product WHERE stock &lt; :threshold AND active = 1`</span>,
+    params: [
+      { name: <span class="str">'threshold'</span>, type: <span class="str">'number'</span>, default: <span class="num">10</span> },
+    ],
+  },
+];</pre></div></div>
+
+  <div class="note tip"><span class="ni">✓</span><span>Use <code>:param_name</code> style in SQL. better-sqlite3 binds them automatically.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- PROCEDURE -->
+<div class="sec"><span class="anc" id="procedure"></span>
+  <div class="sec-hdr"><span class="sec-num">14</span><h2>procedure() — same pattern as table()</h2></div>
+  <p>Access reports the same way you access tables. Returns a cached <code>ProcedureHandle</code> — same instance every call.</p>
+
+  <div class="cw"><div class="ch"><span class="cl">usage</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> sewa = <span class="kw">new</span> <span class="fn">Sutram</span>({ db, schema,
+  reports: <span class="fn">require</span>(<span class="str">'./reports'</span>),
+});
+
+<span class="cmt">// run with custom params</span>
+<span class="kw">const</span> rows = sewa.<span class="fn">procedure</span>(<span class="str">'monthly_sales'</span>).<span class="fn">run</span>({
+  from: <span class="str">'2024-06-01'</span>,
+  to:   <span class="str">'2024-06-30'</span>,
+});
+
+<span class="cmt">// run with defaults</span>
+<span class="kw">const</span> rows = sewa.<span class="fn">procedure</span>(<span class="str">'low_stock'</span>).<span class="fn">run</span>();
+
+<span class="cmt">// inspect</span>
+sewa.<span class="fn">procedure</span>(<span class="str">'monthly_sales'</span>).<span class="fn">getParams</span>();
+sewa.<span class="fn">procedure</span>(<span class="str">'monthly_sales'</span>).<span class="fn">getMeta</span>();
+
+<span class="cmt">// cached — same instance</span>
+sewa.<span class="fn">procedure</span>(<span class="str">'low_stock'</span>) === sewa.<span class="fn">procedure</span>(<span class="str">'low_stock'</span>)  <span class="cmt">// true</span>
+
+<span class="cmt">// await safe — sync under hood</span>
+<span class="kw">const</span> rows = <span class="kw">await</span> sewa.<span class="fn">procedure</span>(<span class="str">'low_stock'</span>).<span class="fn">run</span>();  <span class="cmt">// works fine</span></pre></div></div>
+
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Method</th><th>Returns</th></tr></thead>
+    <tbody>
+      <tr><td><code>.run(params?)</code></td><td>Array of rows — sync</td></tr>
+      <tr><td><code>.getParams()</code></td><td>Params definition array</td></tr>
+      <tr><td><code>.getMeta()</code></td><td><code>{ name, label, report_type, params }</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note purple"><span class="ni">◈</span><span>sutramCore only supports <code>report_type: 'cte'</code>. If you pass a report with <code>report_type: 'procedure'</code>, it logs a warning and skips it. Use <code>sutramcore-mysql</code> for stored procedures.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- WHERE -->
+<div class="sec"><span class="anc" id="where"></span>
+  <div class="sec-hdr"><span class="sec-num">15</span><h2>WHERE Clause</h2></div>
+  <div class="two">
+    <div class="cw"><div class="ch"><span class="cl">object — safe, bound params</span><span class="clang">js</span></div>
+    <div class="cb"><pre>{ active: <span class="num">1</span> }
+{ active: <span class="num">1</span>, category_id: <span class="num">2</span> }
+<span class="cmt">// → WHERE active = ? AND category_id = ?</span></pre></div></div>
+    <div class="cw"><div class="ch"><span class="cl">string — raw SQL</span><span class="clang">js</span></div>
+    <div class="cb"><pre><span class="str">'price BETWEEN 100 AND 500'</span>
+<span class="str">'name LIKE "%keyboard%"'</span>
+<span class="str">'cat = 1 OR cat = 2'</span></pre></div></div>
+  </div>
+</div>
+
+<hr class="s">
+
+<!-- TX -->
+<div class="sec"><span class="anc" id="tx"></span>
+  <div class="sec-hdr"><span class="sec-num">16</span><h2>Transactions</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">automatic + manual</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// automatic — commit on success, rollback on throw</span>
+<span class="kw">const</span> id = sewa.<span class="fn">transaction</span>(() => {
+  <span class="kw">const</span> oid = order.<span class="fn">insert</span>({ customer_id: <span class="num">5</span> }, <span class="kw">false</span>);
+  <span class="kw">for</span> (<span class="kw">const</span> item <span class="kw">of</span> cart) {
+    orderItem.<span class="fn">insert</span>({ order_id: oid, ...item }, <span class="kw">false</span>);
+  }
+  <span class="kw">return</span> oid;
+});
+
+<span class="cmt">// manual</span>
+sewa.<span class="fn">begin</span>();
+<span class="kw">try</span> {
+  order.<span class="fn">insert</span>(data, <span class="kw">false</span>);
+  sewa.<span class="fn">commit</span>();
+} <span class="kw">catch</span>(e) {
+  sewa.<span class="fn">rollback</span>();
+  <span class="kw">throw</span> e;
+}</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- RAW -->
+<div class="sec"><span class="anc" id="raw"></span>
+  <div class="sec-hdr"><span class="sec-num">17</span><h2>Raw SQL</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">sewa.prepare()</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> rows = sewa.<span class="fn">prepare</span>(<span class="str">`
+  SELECT p.*, COUNT(r._id) as reviews
+  FROM product p
+  LEFT JOIN review r ON r.product_id = p._id
+  GROUP BY p._id ORDER BY reviews DESC
+`</span>).<span class="fn">all</span>();
+
+<span class="kw">const</span> row = sewa.<span class="fn">prepare</span>(<span class="str">'SELECT MAX(price) as top FROM product'</span>).<span class="fn">get</span>();</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- API -->
+<div class="sec"><span class="anc" id="api"></span>
+  <div class="sec-hdr"><span class="sec-num">18</span><h2>API Reference</h2></div>
+
+  <h3>Sutram instance</h3>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>new Sutram({ db?, dbPath?, schema, migrations?, views?, reports? })</code></td><td>Create instance</td></tr>
+      <tr><td><code>sewa.table(name)</code></td><td>Get cached BaseTable</td></tr>
+      <tr><td><code>sewa.procedure(name)</code></td><td>Get cached ProcedureHandle</td></tr>
+      <tr><td><code>sewa.transaction(fn)</code></td><td>Auto commit/rollback</td></tr>
+      <tr><td><code>sewa.begin() / commit() / rollback()</code></td><td>Manual control</td></tr>
+      <tr><td><code>sewa.prepare(sql)</code></td><td>Raw better-sqlite3 statement</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>BaseTable — sewa.table(name)</h3>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Method</th><th>Returns</th></tr></thead>
+    <tbody>
+      <tr><td><code>insert(data, full?)</code></td><td>Full row or insertId</td></tr>
+      <tr><td><code>update(data, where, full?)</code></td><td>Full row or _id</td></tr>
+      <tr><td><code>updateById(data, id, full?)</code></td><td>Full row or _id</td></tr>
+      <tr><td><code>delete(where)</code></td><td>changes count</td></tr>
+      <tr><td><code>deleteById(id)</code></td><td>changes count</td></tr>
+      <tr><td><code>getById(id)</code></td><td>Row with joins or null</td></tr>
+      <tr><td><code>getOne(where, opts?)</code></td><td>Single row or null</td></tr>
+      <tr><td><code>getAll(where, opts?)</code></td><td>Array of rows</td></tr>
+      <tr><td><code>count(where?)</code></td><td>Number</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>ProcedureHandle — sewa.procedure(name)</h3>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Method</th><th>Returns</th></tr></thead>
+    <tbody>
+      <tr><td><code>.run(params?)</code></td><td>Array of rows (sync)</td></tr>
+      <tr><td><code>.getParams()</code></td><td>Params definition array</td></tr>
+      <tr><td><code>.getMeta()</code></td><td><code>{ name, label, report_type, params }</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <div style="height:40px"></div>
+  <hr style="border:none;border-top:1px solid var(--border)">
+  <p style="text-align:center;font-family:'DM Mono',monospace;font-size:13px;color:var(--text3);margin-top:20px">
+    sutramCore v2.0.0 · better-sqlite3 ≥9.0.0
+  </p>
+</div>
+
+</div>
+</main>
+</div>
+
+<script>
+const links = document.querySelectorAll('.nav-a');
+const secs  = document.querySelectorAll('.anc');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.nav-a[href="#${id}"]`);
+      if (a) { a.classList.add('active'); a.scrollIntoView({ block: 'nearest' }); }
+    }
+  });
+}, { rootMargin: '-15% 0px -80% 0px' });
+secs.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

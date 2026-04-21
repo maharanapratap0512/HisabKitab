@@ -378,10 +378,9 @@ const item = {
     select:
         `select * from item ?`
     , select_full:
-        `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
-        unit.unit_full, unit.unit_short from item, json_each(item.categories)
-        left join category ct on ct._id = json_each.value
-        left join unit on unit._id = item.unit_id ? group by item._id limit @limit offset @offset`
+        `select vi.* from v_item vi ? limit @limit offset @offset`
+    , count:
+        `select count(*) as total_count from item ?`
     , insert:
         `insert into item (
             item_hin, item_eng, item_roman, item_code, categories, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, active)
@@ -444,26 +443,35 @@ const item = {
 }
 
 const itemmix = {
-    select_full: `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
-    unit.unit_full, unit.unit_short ,
-    (select json_group_array(json_object('_id', si._id , 'item_id', si.item_id , 'subitem_list_id', si.subitem_list_id , 'subitem_hin', si.subitem_hin , 'subitem_eng', si.subitem_eng, 'subitem_roman', si.subitem_roman, 'categories_hin', si.categories_hin, 'unit_full', si.unit_full , 'unit_short', si.unit_short , 'categories', json(si.categories) , 'extra_note', si.extra_note, 'unit_id', si.unit_id , 'restrict_month', si.restrict_month, 'restrict_year', si.restrict_year, 'min_rate', si.min_rate, 'max_rate', si.max_rate, 'active', si.active)) as subitems from (select subitem.*, sl.subitem_hin, sl.subitem_eng, sl.subitem_roman, json_group_array(cat.category_hin) as categories_hin, ut.unit_short, ut.unit_full from subitem, json_each(subitem.categories)
-        left join category cat on cat._id = json_each.value
+    select_full: `select item.*, 
+    json_group_array(distinct json_object('_id', ct._id, 'category_hin', ct.category_hin, 'category_eng', ct.category_eng)) as categories,
+    unit.unit_full, unit.unit_short,
+    (select json_group_array(json_object(
+        '_id', si._id, 'item_id', si.item_id, 'variant_id', si.variant_id,
+        'subitem_hin', si.subitem_hin, 'subitem_eng', si.subitem_eng, 'subitem_roman', si.subitem_roman,
+        'categories', si.categories, 'unit_full', si.unit_full, 'unit_short', si.unit_short,
+        'extra_note', si.extra_note, 'unit_id', si.unit_id,
+        'restrict_month', si.restrict_month, 'restrict_year', si.restrict_year,
+        'min_rate', si.min_rate, 'max_rate', si.max_rate, 'active', si.active
+    )) from (
+        select subitem.*,
+        json_group_array(json_object('_id', cat._id, 'category_hin', cat.category_hin, 'category_eng', cat.category_eng)) as categories,
+        ut.unit_short, ut.unit_full
+        from subitem
+        left join rel_subitem_category rsc on rsc.subitem_id = subitem._id
+        left join category cat on cat._id = rsc.category_id
         left join unit ut on ut._id = subitem.unit_id
-        left join subitem_list sl on  sl._id = subitem.subitem_list_id where subitem.item_id = item._id & group by subitem._id) as si) as subitems from item, json_each(item.categories)
-    left join category ct on ct._id = json_each.value
-    left join unit on unit._id = item.unit_id ? group by item._id # limit @limit offset @offset`,
-    select_full_old: `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
-    unit.unit_full, unit.unit_short ,
-    json_group_array(JSON('{"_id": ' || si._id || ', "item_id": ' || si.item_id || ', "subitem_list_id": ' || si.subitem_list_id || ', "subitem_hin": "' ||si.subitem_hin || '", "subitem_eng": "' ||si.subitem_eng || '", "categories_hin": ' || si.categories_hin || ', "categories_eng": ' || si.categories_eng || ', "unit_full": "' || si.unit_full || '", "unit_short": "' || si.unit_short || '", "categories": ' || si.categories || ', "extra_note": "' || si.extra_note || '", "unit_id": ' || si.unit_id || ', "active": ' || si.active || '}')) as subitems from item, json_each(item.categories)
-    left join category ct on ct._id = json_each.value
-    left join unit on unit._id = item.unit_id
-    left join (select subitem.*, json_group_array(cat.category_hin) as categories_hin, json_group_array(cat.category_eng) as categories_eng, sl.subitem_hin, sl.subitem_eng, ut.unit_short, ut.unit_full from subitem, json_each(subitem.categories)
-        left join category cat on cat._id = json_each.value
-        left join unit ut on ut._id = subitem.unit_id
-        left join subitem_list sl on  sl._id = subitem.subitem_list_id group by subitem._id
-    ) si on si.item_id = item._id ? group by item._id # limit @limit offset @offset`,
+        where subitem.item_id = item._id
+        group by subitem._id
+    ) as si) as subitems
+    from item
+    left join rel_item_category ric on ric.item_id = item._id
+    left join category ct on ct._id = ric.category_id
+    left join unit on unit._id = item.unit_id ? 
+    group by item._id # limit @limit offset @offset`,
+
     order: `item_hin, item_eng`,
-    count: `select count(*) as total_count from (select count(*) from item, json_each(item.categories)
+    count: `select count(*) as total_count from (select count(*) from item
         left join subitem si on si.item_id = item._id ? group by item._id)`
 }
 
@@ -477,7 +485,7 @@ const jawak = {
         jmm.mm_hin as jawak_mm_hin, jmm.mm_eng as jawak_mm_eng, jmm.mm_code as jawak_mm_code,
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.state_id as pbk_state_id, pst.state_hin as pbk_state_hin, pst.state_eng as pbk_state_eng,
         it.item_hin, it.item_eng, it.item_code, it.item_roman,
-        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman,
+        si.subitem_hin, si.subitem_eng, si.subitem_roman,
         slul.list_name_hin as usage_list_hin, slul.list_name_eng as usage_list_eng, slul.list_name_roman as usage_list_roman,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code,
@@ -498,9 +506,8 @@ const jawak = {
         left join pbk on pbk._id = jawak.pbk_id
         left join state pst on pst._id = pbk.state_id
         left join mm jmm on jmm._id = jawak.jawak_mm_id
-        left join item it on it._id = jawak.item_id
-        left join subitem si on si._id = jawak.subitem_id
-        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join v_item it on it._id = jawak.item_id
+        left join v_subitem si on si._id = jawak.subitem_id
         left join product pd on pd._id = jawak.product_id
         left join support_list sl on sl._id = jawak.condition_id 
         left join support_list slul on slul._id = jawak.usage_list_id
@@ -574,8 +581,8 @@ const jawak = {
         left join state nst on nst._id = nmt.state_id ? group by voucher_no limit @limit offset @offset`
     , select_one_voucher:
         `select jawak.*, 
-        item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
-        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories,
+        item.item_hin, item.item_eng, item.item_code, item.item_roman, item.icategories as icategories,
+        si.subitem_hin, si.subitem_eng, si.subitem_roman, si.categories as scategories,
         slul.list_name_hin as usage_list_hin, slul.list_name_eng as usage_list_eng, slul.list_name_roman as usage_list_roman,
         product.sr_num, product.product_code,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
@@ -589,9 +596,8 @@ const jawak = {
         left join jawak_enzyme enz on enz.jawak_id = jawak._id
         left join usage_report ur on ur.jawak_id = jawak._id
         left join support_list ut on ut._id = ur.usage_type
-        left join item on item._id = jawak.item_id
-        left join subitem si on si._id = jawak.subitem_id
-        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join v_item item on item._id = jawak.item_id
+        left join v_subitem si on si._id = jawak.subitem_id
         left join support_list slul on slul._id = jawak.usage_list_id
         left join product on product._id = jawak.product_id
         left join support_list sl on sl._id = jawak.condition_id
@@ -623,8 +629,8 @@ const jawak_voucher = {
             'product_id', jawak.product_id,'condition_id', jawak.condition_id, 'unit_id', jawak.unit_id,
             'aawak_source_id', jawak.aawak_source_id, 'jawak_type_id', jawak.jawak_type_id, 'item_detail', jawak.item_detail,
             'item_hin', item.item_hin, 'item_eng', item.item_eng, 'item_code', item.item_code, 'item_roman', item.item_roman,
-            'item_categories', item.categories, 'subitem_hin', sil.subitem_hin, 'subitem_eng', sil.subitem_eng,
-            'subitem_categories', si.categories, 'sr_num', product.sr_num, 'product_code', product.product_code,
+            'icategories', item.icategories, 'subitem_hin', si.subitem_hin, 'subitem_eng', si.subitem_eng,
+            'scategories', si.categories, 'sr_num', product.sr_num, 'product_code', product.product_code,
             'qty', jawak.qty, 'unit_short', unit.unit_short, 'unit_full', unit.unit_full, 'rate', jawak.rate, 'actual_amt', jawak.actual_amt, 
             'company_name', jawak.company_name, 'sell_repair_place', jawak.sell_repair_place, 'parchi_place', jawak.parchi_place, 
             'usage_list_id', jawak.usage_list_id, 'usage_list_hin', slul.list_name_hin, 'usage_list_eng', slul.list_name_eng, 'usage_list_roman', slul.list_name_roman,
@@ -643,9 +649,8 @@ const jawak_voucher = {
         left join pbk on pbk._id = jawak.pbk_id
         left join state pst on pst._id = pbk.state_id
         left join mm amm on amm._id = jawak.jawak_mm_id
-        left join item on item._id = jawak.item_id
-        left join subitem si on si._id = jawak.subitem_id
-        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join v_item item on item._id = jawak.item_id
+        left join v_subitem si on si._id = jawak.subitem_id
         left join support_list slul on slul._id = jawak.usage_list_id
         left join product on product._id = jawak.product_id
         left join support_list sl on sl._id = jawak.condition_id
@@ -719,8 +724,8 @@ const aawak = {
         mst.zone_id as mm_zone_id, zn.zone_hin as mm_zone_hin, zn.zone_eng as mm_zone_eng,
         amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name, pbk.address, pbk.mo_no,
-        item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
-        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories,
+        item.item_hin, item.item_eng, item.item_code, item.item_roman, item.icategories as icategories,
+        si.subitem_hin, si.subitem_eng, si.subitem_roman, si.categories as scategories,
         slul.list_name_hin as usage_list_hin, slul.list_name_eng as usage_list_eng, slul.list_name_roman as usage_list_roman,
         product.sr_num, product.product_code,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
@@ -739,9 +744,8 @@ const aawak = {
         left join zone zn on zn._id = mst.zone_id
         left join pbk on pbk._id = aawak.pbk_id
         left join mm amm on amm._id = aawak.aawak_mm_id
-        left join item on item._id = aawak.item_id
-        left join subitem si on si._id = aawak.subitem_id
-        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join v_item item on item._id = aawak.item_id
+        left join v_subitem si on si._id = aawak.subitem_id
         left join support_list slul on slul._id = aawak.usage_list_id
         left join product on product._id = aawak.product_id
         left join support_list sl on sl._id = aawak.condition_id
@@ -756,8 +760,8 @@ const aawak = {
         mm.mm_hin,mm.mm_eng,mm.mm_code,
         amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
-        item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
-        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories,
+        item.item_hin, item.item_eng, item.item_code, item.item_roman, item.icategories as icategories,
+        si.subitem_hin, si.subitem_eng, si.subitem_roman, si.categories as scategories,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         unit.unit_short, unit.unit_full,
         slat.list_name_hin as aawak_type_hin, slat.list_name_eng as aawak_type_eng,
@@ -766,9 +770,8 @@ const aawak = {
         left join mm on mm._id = aawak.mm_id
         left join pbk on pbk._id = aawak.pbk_id
         left join mm amm on amm._id = aawak.aawak_mm_id
-        left join item on item._id = aawak.item_id
-        left join subitem si on si._id = aawak.subitem_id
-        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join v_item item on item._id = aawak.item_id
+        left join v_subitem si on si._id = aawak.subitem_id
         left join support_list sl on sl._id = aawak.condition_id
         left join unit on unit._id = aawak.unit_id
         left join support_list slat on slat._id = aawak.aawak_type_id
@@ -795,8 +798,8 @@ const aawak = {
         left join state nst on nst._id = nmt.state_id ? group by voucher_no limit @limit offset @offset`,
     select_one_voucher:
         `select aawak.*, 
-        item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
-        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories,
+        item.item_hin, item.item_eng, item.item_code, item.item_roman, item.icategories as icategories,
+        si.subitem_hin, si.subitem_eng, si.subitem_roman, si.categories as scategories,
         slul.list_name_hin as usage_list_hin, slul.list_name_eng as usage_list_eng, slul.list_name_roman as usage_list_roman,
         product.sr_num, product.product_code,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
@@ -808,9 +811,8 @@ const aawak = {
         from aawak 
         left join aawak_enzyme enz on enz.aawak_id = aawak._id
         left join support_list enz_as on enz_as._id = enz.container_aawak_source_id
-        left join item on item._id = aawak.item_id
-        left join subitem si on si._id = aawak.subitem_id
-        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join v_item item on item._id = aawak.item_id
+        left join v_subitem si on si._id = aawak.subitem_id
         left join support_list slul on slul._id = aawak.usage_list_id
         left join product on product._id = aawak.product_id
         left join support_list sl on sl._id = aawak.condition_id
@@ -834,8 +836,8 @@ const aawak_voucher = {
                 'product_id', aawak.product_id,'condition_id', aawak.condition_id, 'unit_id', aawak.unit_id,
                 'aawak_source', aawak.aawak_source_id,'aawak_type_id', aawak.aawak_type_id, 'item_detail', aawak.item_detail,
                 'item_hin', item.item_hin, 'item_eng', item.item_eng, 'item_code', item.item_code, 'item_roman', item.item_roman,
-                'item_categories', item.categories, 'subitem_hin', sil.subitem_hin, 'subitem_eng', sil.subitem_eng,
-                'subitem_categories', si.categories, 'sr_num', product.sr_num, 'product_code', product.product_code,
+                'icategories', item.icategories, 'subitem_hin', si.subitem_hin, 'subitem_eng', si.subitem_eng,
+                'scategories', si.categories, 'sr_num', product.sr_num, 'product_code', product.product_code,
                 'qty', aawak.qty, 'remaining_qty', aawak.remaining_qty, 'unit_short', unit.unit_short, 'unit_full', unit.unit_full,
                 'rate', aawak.rate, 'actual_amt', aawak.actual_amt, 'company_name', aawak.company_name,
                 'usage_list_hin', slul.list_name_hin, 'usage_list_eng', slul.list_name_eng, 'usage_list_roman', slul.list_name_roman,
@@ -854,9 +856,8 @@ const aawak_voucher = {
             left join pbk on pbk._id = aawak.pbk_id
             left join state pst on pst._id = pbk.state_id
             left join mm amm on amm._id = aawak.aawak_mm_id
-            left join item on item._id = aawak.item_id
-            left join subitem si on si._id = aawak.subitem_id
-            left join subitem_list sil on sil._id = si.subitem_list_id
+            left join v_item item on item._id = aawak.item_id
+            left join v_subitem si on si._id = aawak.subitem_id
             left join support_list slul on slul._id = aawak.usage_list_id
             left join product on product._id = aawak.product_id
             left join support_list sl on sl._id = aawak.condition_id
@@ -883,28 +884,47 @@ const bachat = {
     , select_full:
         `select bachat.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng, st.zone_id, zn.zone_hin, zn.zone_eng,   
-        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as icategories, it.document as idocument,
-        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as scategories, si.document as sdocument,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as icategories, it.document as idocument,
+        si.subitem_hin, si.subitem_eng, si.subitem_roman, si.categories as scategories, si.document as sdocument,
         bachat.unit_id,unit.unit_short, unit.unit_full,             
         dept.dept_eng, dept.dept_hin, dept.dept_code
         from bachat
         left join mm on mm._id = bachat.mm_id
-        left join item it on it._id = bachat.item_id
-        left join subitem si on si._id = bachat.subitem_id
-        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join v_item item it on it._id = bachat.item_id
+        left join v_subitem si on si._id = bachat.subitem_id
         left join unit on unit._id = bachat.unit_id   
         left join state st on st._id = mm.state_id
         left join zone zn on zn._id = st.zone_id
         left join department dept on dept._id = bachat.dept_id ? limit @limit offset @offset`
     ,
     with_pending_aawak: `select bachat.*,
-        mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng, st.zone_id, zn.zone_hin, zn.zone_eng,
-        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as icategories,
-        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as scategories,
-        bachat.unit_id,unit.unit_short, unit.unit_full,             
+        mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng, st.zone_id, zn.zone_hin, zn.zone_eng,
+        vi.item_hin, vi.item_eng, vi.item_code, vi.item_roman,
+        vi.icategories as icategories,
+        vs.subitem_hin, vs.subitem_eng, vs.subitem_roman,
+        vs.categories as scategories,
+        bachat.unit_id, unit.unit_short, unit.unit_full,
         dept.dept_eng, dept.dept_hin, dept.dept_code,
-        CASE WHEN aawak._id is not null THEN json_group_array(json_object('_id', aawak._id, 'date', aawak.date, 'aawak_mm_id', aawak.aawak_mm_id, 'aawak_mm_hin', amm.mm_hin, 'pkt_num', aawak.pkt_num, 'pbk_id', aawak.pbk_id, 'roll_no', pbk.roll_no, 'pbk_hin', pbk.pbk_hin, 'relation', pbk.relation, 'relative_name', pbk.relative_name, 'item_detail', aawak.item_detail, 'company_name', aawak.company_name, 'condition_id', aawak.condition_id, 'condition_hin', cnd.list_name_hin, 'qty', aawak.qty, 'rate', aawak.rate, 'actual_amt', aawak.actual_amt, 'aawak_type_id', aawak.aawak_type_id, 'aawak_type_hin', awk_type.list_name_hin, 'description', aawak.description, 'remaining_qty', aawak.remaining_qty )) ELSE json('[]') END as aawaks from bachat 
-        left join aawak on aawak.dept_id = bachat.dept_id AND aawak.mm_id = bachat.mm_id AND aawak.item_id = bachat.item_id AND IFNULL(aawak.subitem_id, 0) = IFNULL(bachat.subitem_id, 0) AND aawak.unit_id = bachat.unit_id AND aawak.remaining_qty <> 0
+        CASE WHEN aawak._id is not null 
+            THEN json_group_array(distinct json_object(
+                '_id', aawak._id, 'date', aawak.date, 'aawak_mm_id', aawak.aawak_mm_id,
+                'aawak_mm_hin', amm.mm_hin, 'pkt_num', aawak.pkt_num, 'pbk_id', aawak.pbk_id,
+                'roll_no', pbk.roll_no, 'pbk_hin', pbk.pbk_hin, 'relation', pbk.relation,
+                'relative_name', pbk.relative_name, 'item_detail', aawak.item_detail,
+                'company_name', aawak.company_name, 'condition_id', aawak.condition_id,
+                'condition_hin', cnd.list_name_hin, 'qty', aawak.qty, 'rate', aawak.rate,
+                'actual_amt', aawak.actual_amt, 'aawak_type_id', aawak.aawak_type_id,
+                'aawak_type_hin', awk_type.list_name_hin, 'description', aawak.description,
+                'remaining_qty', aawak.remaining_qty
+            )) 
+            ELSE json('[]') END as aawaks
+        from bachat
+        left join aawak on aawak.dept_id = bachat.dept_id 
+            AND aawak.mm_id = bachat.mm_id 
+            AND aawak.item_id = bachat.item_id 
+            AND IFNULL(aawak.subitem_id, 0) = IFNULL(bachat.subitem_id, 0) 
+            AND aawak.unit_id = bachat.unit_id 
+            AND aawak.remaining_qty <> 0
         left join mm amm on amm._id = aawak.aawak_mm_id
         left join pbk on pbk._id = aawak.pbk_id
         left join support_list cnd on cnd._id = aawak.condition_id
@@ -912,11 +932,11 @@ const bachat = {
         left join mm on mm._id = bachat.mm_id
         left join state st on st._id = mm.state_id
         left join zone zn on zn._id = st.zone_id
-        left join item it on it._id = bachat.item_id
-        left join subitem si on si._id = bachat.subitem_id
-        left join subitem_list sil on sil._id = si.subitem_list_id
-        left join unit on unit._id = bachat.unit_id           
-        left join department dept on dept._id = bachat.dept_id ? group by bachat.mm_id, bachat.item_id, bachat.subitem_id, bachat.unit_id # limit @limit offset @offset`,
+        left join v_item vi on vi._id = bachat.item_id
+        left join v_subitem vs on vs._id = bachat.subitem_id
+        left join unit on unit._id = bachat.unit_id
+        left join department dept on dept._id = bachat.dept_id ? 
+        group by bachat.mm_id, bachat.item_id, bachat.subitem_id, bachat.unit_id # limit @limit offset @offset`,
     insert:
         `insert into bachat (
             mm_id,
@@ -1036,16 +1056,15 @@ const bachat_new = {
     , select_full:
         `select bachat_new.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, mm.state_id, st.state_hin, st.state_eng, st.zone_id, zn.zone_hin, zn.zone_eng,     
-        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as icategories, it.document as idocument,
-        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as scategories, si.document as sdocument,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as icategories, it.document as idocument,
+        si.subitem_hin, si.subitem_eng, si.subitem_roman, si.categories as scategories, si.document as sdocument,
         bachat_new.unit_id,unit.unit_short, unit.unit_full,             
         slc.list_name_hin as condition_hin, slc.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code
         from bachat_new
         left join mm on mm._id = bachat_new.mm_id
-        left join item it on it._id = bachat_new.item_id
-        left join subitem si on si._id = bachat_new.subitem_id
-        left join subitem_list sil on sil._id = si.subitem_list_id
+        left join v_item item it on it._id = bachat_new.item_id
+        left join v_subitem si on si._id = bachat_new.subitem_id
         left join unit on unit._id = bachat_new.unit_id   
         left join state st on st._id = mm.state_id
         left join zone zn on zn._id = st.zone_id
@@ -1054,8 +1073,8 @@ const bachat_new = {
     , select_all:
         `select bcht.*, json_group_array(list_name_hin) as arr_condition_hin, json_group_array(condition_id) as arr_condition_id, json_group_array(sum_aawak) as arr_sum_aawak, json_group_array(sum_used) as arr_sum_used, json_group_array(sum_jawak) as arr_sum_jawak, json_group_array(sum_bachat) as arr_sum_bachat, json_group_array(sum_difference) as arr_sum_difference, sum(sum_aawak) as total_aawak_all, sum(sum_jawak) as total_jawak_all, sum(sum_used) as total_used_all, sum(sum_bachat) as total_bachat_all, sum(sum_difference) as total_difference_all,
         mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
-        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
-        sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
+        sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
         unit.unit_short, unit.unit_full,
         dept.dept_code, dept.dept_hin, dept.dept_eng
         from (select sum(total_aawak) as sum_aawak, sum(used_jawak) as sum_used, sum(jawak) as sum_jawak, sum(bachat) as sum_bachat, sum(difference) as sum_difference, bn.*,
@@ -1064,9 +1083,8 @@ const bachat_new = {
             group by mm_id, item_id, subitem_id, unit_id, condition_id) bcht 
         left join mm on mm._id = bcht.mm_id
         left join state st on st._id = mm.state_id
-        left join item it on it._id = bcht.item_id
-        left join subitem sit on sit._id = bcht.subitem_id
-        left join subitem_list sitl on sitl._id = sit.subitem_list_id
+        left join v_item it on it._id = bcht.item_id
+        left join v_subitem sit on sit._id = bcht.subitem_id
         left join unit on unit._id = bcht.unit_id
         left join department dept on dept._id = bcht.dept_id #
         group by bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.unit_id order by @order;`
@@ -1181,15 +1199,14 @@ const pbk_bachat = {
     select_full: `select pbk_bachat.*,
       pbk.pbk_hin, pbk.pbk_eng, pbk.roll_no,
       it.item_hin, it.item_eng, it.item_code, it.item_roman,
-      sil.subitem_hin, sil.subitem_eng, sil.subitem_roman,
+      si.subitem_hin, si.subitem_eng, si.subitem_roman,
       unit.unit_short, unit.unit_full,
       sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
       dept.dept_code, dept.dept_hin, dept.dept_eng
       from pbk_bachat
       left join pbk on pbk._id = pbk_bachat.pbk_id
-      left join item it on it._id = pbk_bachat.item_id
-      left join subitem si on si._id = pbk_bachat.subitem_id
-      left join subitem_list sil on sil._id = si.subitem_list_id
+      left join v_item item it on it._id = pbk_bachat.item_id
+      left join v_subitem si on si._id = pbk_bachat.subitem_id
       left join unit on unit._id = pbk_bachat.unit_id
       left join support_list sl on sl._id = pbk_bachat.condition_id
       left join department dept on dept._id = pbk_bachat.dept_id ? limit @limit offset @offset`,
@@ -1212,16 +1229,15 @@ const pbk_closing = {
     select_full: `select pbk_closing.*,
       pbk.pbk_hin, pbk.pbk_eng, pbk.roll_no,
       it.item_hin, it.item_eng, it.item_code, it.item_roman,
-      sil.subitem_hin, sil.subitem_eng, sil.subitem_roman,
+      si.subitem_hin, si.subitem_eng, si.subitem_roman,
       unit.unit_short, unit.unit_full,
       st.state_hin, st.state_eng,
       sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng
       from pbk_closing
       left join pbk on pbk._id = pbk_closing.pbk_id
       left join state st on st._id = pbk.state_id
-      left join item it on it._id = pbk_closing.item_id
-      left join subitem si on si._id = pbk_closing.subitem_id
-      left join subitem_list sil on sil._id = si.subitem_list_id
+      left join v_item it on it._id = pbk_closing.item_id
+      left join v_subitem si on si._id = pbk_closing.subitem_id
       left join unit on unit._id = pbk_closing.unit_id
       left join support_list sl on sl._id = pbk_closing.condition_id ? limit @limit offset @offset`,
     insert: `insert into pbk_closing (
@@ -1609,28 +1625,25 @@ const hmp_recipe = {
 }
 
 const hmp_recipe_input = {
-    select: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name
+    select: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, si.subitem_hin, si.subitem_eng, sl.list_name_hin as condition_name
              from hmp_recipe_input pri
-             left join item i on pri.item_id = i._id
+             left join v_item i on pri.item_id = i._id
              left join unit u on pri.unit_id = u._id
-             left join subitem s on pri.subitem_id = s._id
-             left join subitem_list sil on s.subitem_list_id = sil._id
+             left join v_subitem si on pri.subitem_id = si._id
              left join support_list sl on pri.condition_id = sl._id
              where pri.active = 1`,
-    select_full: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name
+    select_full: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, si.subitem_hin, si.subitem_eng, sl.list_name_hin as condition_name
              from hmp_recipe_input pri
-             left join item i on pri.item_id = i._id
+             left join v_item i on pri.item_id = i._id
              left join unit u on pri.unit_id = u._id
-             left join subitem s on pri.subitem_id = s._id
-             left join subitem_list sil on s.subitem_list_id = sil._id
+             left join v_subitem si on pri.subitem_id = si._id
              left join support_list sl on pri.condition_id = sl._id
              where pri.active = 1 limit @limit offset @offset`,
-    select_by_recipe: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name
+    select_by_recipe: `select pri.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, si.subitem_hin, si.subitem_eng, sl.list_name_hin as condition_name
                        from hmp_recipe_input pri
-                       left join item i on pri.item_id = i._id
+                       left join v_item i on pri.item_id = i._id
                        left join unit u on pri.unit_id = u._id
-                       left join subitem s on pri.subitem_id = s._id
-                       left join subitem_list sil on s.subitem_list_id = sil._id
+                       left join v_subitem si on pri.subitem_id = si._id
                        left join support_list sl on pri.condition_id = sl._id
                        where pri.active = 1 and pri.recipe_id = @recipe_id`,
     insert: `insert into hmp_recipe_input (recipe_id, item_id, subitem_id, unit_id, condition_id, qty) values (@recipe_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty)`,
@@ -1639,28 +1652,25 @@ const hmp_recipe_input = {
 }
 
 const hmp_recipe_output = {
-    select: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name
+    select: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, si.subitem_hin, si.subitem_eng, sl.list_name_hin as condition_name
              from hmp_recipe_output pro
-             left join item i on pro.item_id = i._id
+             left join v_item i on pro.item_id = i._id
              left join unit u on pro.unit_id = u._id
-             left join subitem s on pro.subitem_id = s._id
-             left join subitem_list sil on s.subitem_list_id = sil._id
+             left join v_subitem si on pro.subitem_id = si._id
              left join support_list sl on pro.condition_id = sl._id
              where pro.active = 1`,
-    select_full: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name
+    select_full: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, si.subitem_hin, si.subitem_eng, sl.list_name_hin as condition_name
              from hmp_recipe_output pro
-             left join item i on pro.item_id = i._id
+             left join v_item i on pro.item_id = i._id
              left join unit u on pro.unit_id = u._id
-             left join subitem s on pro.subitem_id = s._id
-             left join subitem_list sil on s.subitem_list_id = sil._id
+             left join v_subitem si on pro.subitem_id = si._id
              left join support_list sl on pro.condition_id = sl._id
              where pro.active = 1 limit @limit offset @offset`,
-    select_by_recipe: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name
+    select_by_recipe: `select pro.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, si.subitem_hin, si.subitem_eng, sl.list_name_hin as condition_name
                        from hmp_recipe_output pro
-                       left join item i on pro.item_id = i._id
+                       left join v_item i on pro.item_id = i._id
                        left join unit u on pro.unit_id = u._id
-                       left join subitem s on pro.subitem_id = s._id
-                       left join subitem_list sil on s.subitem_list_id = sil._id
+                       left join v_subitem si on pro.subitem_id = si._id
                        left join support_list sl on pro.condition_id = sl._id
                        where pro.active = 1 and pro.recipe_id = @recipe_id`,
     insert: `insert into hmp_recipe_output (recipe_id, item_id, subitem_id, unit_id, condition_id, qty) values (@recipe_id, @item_id, @subitem_id, @unit_id, @condition_id, @qty)`,
@@ -1687,30 +1697,27 @@ const hmp_batch = {
 }
 
 const hmp_batch_input = {
-    select: `select pbi.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name 
+    select: `select pbi.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, si.subitem_hin, si.subitem_eng, sl.list_name_hin as condition_name 
              from hmp_batch_input pbi 
              left join hmp_batch pb on pbi.batch_id = pb._id 
-             left join item i on pbi.item_id = i._id 
+             left join v_item i on pbi.item_id = i._id 
              left join unit u on pbi.unit_id = u._id 
-             left join subitem s on pbi.subitem_id = s._id 
-             left join subitem_list sil on s.subitem_list_id = sil._id
+             left join v_subitem si on pbi.subitem_id = si._id 
              left join support_list sl on pbi.condition_id = sl._id 
              where pbi.active = 1`,
-    select_full: `select pbi.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name 
+    select_full: `select pbi.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, si.subitem_hin, si.subitem_eng, sl.list_name_hin as condition_name 
              from hmp_batch_input pbi 
              left join hmp_batch pb on pbi.batch_id = pb._id 
-             left join item i on pbi.item_id = i._id 
+             left join v_item i on pbi.item_id = i._id 
              left join unit u on pbi.unit_id = u._id 
-             left join subitem s on pbi.subitem_id = s._id 
-             left join subitem_list sil on s.subitem_list_id = sil._id
+             left join v_subitem si on pbi.subitem_id = si._id 
              left join support_list sl on pbi.condition_id = sl._id 
              where pbi.active = 1 limit @limit offset @offset`,
-    select_by_batch: `select pbi.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name 
+    select_by_batch: `select pbi.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, si.subitem_hin, si.subitem_eng, sl.list_name_hin as condition_name 
                       from hmp_batch_input pbi 
-                      left join item i on pbi.item_id = i._id 
+                      left join v_item i on pbi.item_id = i._id 
                       left join unit u on pbi.unit_id = u._id 
-                      left join subitem s on pbi.subitem_id = s._id 
-                      left join subitem_list sil on s.subitem_list_id = sil._id
+                      left join v_subitem si on pbi.subitem_id = si._id 
                       left join support_list sl on pbi.condition_id = sl._id 
                       where pbi.active = 1 and pbi.batch_id = ?`,
     insert: `insert into hmp_batch_input (batch_id, item_id, subitem_id, unit_id, condition_id, qty, rate, amount, lot_no, jawak_ref_id) 
@@ -1720,32 +1727,29 @@ const hmp_batch_input = {
 }
 
 const hmp_batch_output = {
-    select: `select pbo.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
+    select: `select pbo.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, si.subitem_hin, si.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
              from hmp_batch_output pbo 
              left join hmp_batch pb on pbo.batch_id = pb._id 
-             left join item i on pbo.item_id = i._id 
+             left join v_item i on pbo.item_id = i._id 
              left join unit u on pbo.unit_id = u._id 
-             left join subitem s on pbo.subitem_id = s._id 
-             left join subitem_list sil on s.subitem_list_id = sil._id
+             left join v_subitem si on pbo.subitem_id = si._id 
              left join support_list sl on pbo.condition_id = sl._id 
              left join support_list slt on pbo.hmp_type = slt._id 
              where pbo.active = 1`,
-    select_full: `select pbo.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
+    select_full: `select pbo.*, pb.batch_no, i.item_hin, i.item_eng, u.unit_short, u.unit_full, si.subitem_hin, si.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
              from hmp_batch_output pbo 
              left join hmp_batch pb on pbo.batch_id = pb._id 
-             left join item i on pbo.item_id = i._id 
+             left join v_item i on pbo.item_id = i._id 
              left join unit u on pbo.unit_id = u._id 
-             left join subitem s on pbo.subitem_id = s._id 
-             left join subitem_list sil on s.subitem_list_id = sil._id
+             left join v_subitem si on pbo.subitem_id = si._id 
              left join support_list sl on pbo.condition_id = sl._id 
              left join support_list slt on pbo.hmp_type = slt._id 
              where pbo.active = 1 limit @limit offset @offset`,
-    select_by_batch: `select pbo.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, sil.subitem_hin, sil.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
+    select_by_batch: `select pbo.*, i.item_hin, i.item_eng, u.unit_short, u.unit_full, si.subitem_hin, si.subitem_eng, sl.list_name_hin as condition_name, slt.list_name_hin as hmp_type_hin 
                 from hmp_batch_output pbo 
-                left join item i on pbo.item_id = i._id 
+                left join v_item i on pbo.item_id = i._id 
                 left join unit u on pbo.unit_id = u._id 
-                left join subitem s on pbo.subitem_id = s._id 
-                left join subitem_list sil on s.subitem_list_id = sil._id
+                left join v_subitem si on pbo.subitem_id = si._id 
                 left join support_list slt on pbo.hmp_type = slt._id 
                 left join support_list sl on pbo.condition_id = sl._id 
                 where pbo.active = 1 and pbo.batch_id = @batch_id`,
@@ -1766,7 +1770,7 @@ const product = {
         nt.roll_no, nt.nimitt_hin, nt.nimitt_eng, nt.gender, nt.relative_name, nt.state_id, 
         ntst.state_hin as nimitt_state_hin, ntst.state_eng as nimitt_state_eng,
         item.item_hin,item.item_eng,item.item_code, item.item_roman,
-        subitem_list.subitem_hin,subitem_list.subitem_eng, subitem_list.subitem_roman,
+        subitem.subitem_hin,subitem.subitem_eng, subitem.subitem_roman,
         unit.unit_short, unit.unit_full,
         support_list.list_name_hin as condition_hin,support_list.list_name_eng as condition_eng,
         at.list_name_hin as aawak_type_hin, at.list_name_eng as aawak_type_eng,
@@ -1775,10 +1779,9 @@ const product = {
         from product 
         left join mm on mm._id = product.mm_id
         left join mm lmm on lmm._id = product.last_mm
-        left join item on item._id = product.item_id
-        left join subitem on subitem._id = product.subitem_id
+        left join v_item item on item._id = product.item_id
+        left join v_subitem subitem on subitem._id = product.subitem_id
         left join unit on unit._id = product.unit_id
-        left join subitem_list on subitem_list._id = subitem.subitem_list_id
         left join nimitt nt on product.nimitt_id = nt._id
         left join state ntst on nt.state_id = ntst._id
         left join support_list on support_list._id = product.condition_id
@@ -1790,7 +1793,7 @@ const product = {
         `select product.*,
         mm.mm_hin,mm.mm_eng,mm.mm_code, 
         item.item_hin,item.item_eng,item.item_code, item.item_roman,
-        subitem_list.subitem_hin,subitem_list.subitem_eng, subitem_list.subitem_roman,
+        si.subitem_hin,si.subitem_eng, si.subitem_roman,
         support_list.list_name_hin as condition_hin,support_list.list_name_eng as condition_eng,
         lmm.mm_hin as last_mm_hin, lmm.mm_eng as last_mm_eng, lmm.mm_code as last_mm_code, 
         lc.list_name_hin as last_condition_hin, lc.list_name_eng as last_condition_eng,
@@ -1809,9 +1812,8 @@ const product = {
             left join support_list oc on oc._id = product_tracking.old_condition_id) pt on pt.product_id = product._id
         left join mm on mm._id = product.mm_id
         left join mm lmm on lmm._id = product.last_mm
-        left join item on item._id = product.item_id
-        left join subitem on subitem._id = product.subitem_id
-        left join subitem_list on subitem_list._id = subitem.subitem_list_id
+        left join v_item item on item._id = product.item_id
+        left join v_subitem si on si._id = product.subitem_id
         left join support_list on support_list._id = product.condition_id
         left join support_list lc on lc._id = product.last_condition ? group by product._id # limit @limit offset @offset`
     , insert:
@@ -2079,12 +2081,10 @@ const subitem = {
         json_group_array(cat.category_eng) as categories_eng,
         unit.unit_full, unit.unit_short, 
         item.item_eng, item.item_hin, 
-        subitem_list.subitem_eng, subitem_list.subitem_hin, subitem_list.subitem_roman
         from subitem, json_each(subitem.categories)
         left join category cat on cat._id = json_each.value
         left join unit on unit._id = subitem.unit_id
-        left join item on  item._id = subitem.item_id
-        left join subitem_list on subitem_list._id = subitem.subitem_list_id ? group by subitem._id # limit @limit offset @offset`
+        left join item on  item._id = subitem.item_id ? group by subitem._id # limit @limit offset @offset`
     , insert:
         `insert into subitem (
         item_id,
@@ -2515,7 +2515,7 @@ const temp_import = {
         amm.mm_hin as aj_mm_hin, amm.mm_eng as aj_mm_eng, amm.mm_code as aj_mm_code, 
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
         item.item_hin, item.item_eng, item.item_code, item.item_roman,
-        sil.subitem_hin, sil.subitem_eng, sil.subitem_roman,
+        si.subitem_hin, si.subitem_eng, si.subitem_roman,
         slul.list_name_hin as usage_list_hin, slul.list_name_eng as usage_list_eng, slul.list_name_roman as usage_list_roman,
         product.sr_num, product.product_code,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
@@ -2530,7 +2530,6 @@ const temp_import = {
         left join mm amm on amm._id = temp_import.aj_mm_id
         left join item on item._id = temp_import.item_id
         left join subitem si on si._id = temp_import.subitem_id
-        left join subitem_list sil on sil._id = si.subitem_list_id
         left join support_list slul on slul._id = temp_import.usage_list_id
         left join product on product._id = temp_import.product_id
         left join support_list sl on sl._id = temp_import.condition_id
@@ -2675,10 +2674,9 @@ const dictionary = {
         WHEN dict.type = 'city' THEN city.city_hin || ' : ' || city.city_eng
         WHEN dict.type = 'category' THEN ct.category_hin || ' : ' || ct.category_eng
         WHEN dict.type = 'unit' THEN unit.unit_short || ' : ' || unit.unit_full
-        WHEN dict.type = 'subitem_list' THEN sl.subitem_hin || ' : ' || sl.subitem_eng
         WHEN dict.type = 'item' THEN item.item_hin || ' : ' || item.item_eng
         ELSE NULL END as original_name,
-        CASE WHEN dict.type = 'item' THEN sil.subitem_hin || ' : ' || sil.subitem_eng
+        CASE WHEN dict.type = 'item' THEN si.subitem_hin || ' : ' || si.subitem_eng
         ELSE NULL END as sub_name
          from dictionary dict
         left join mm on dict.type = 'aj_mm' AND mm._id = dict.id
@@ -2689,10 +2687,8 @@ const dictionary = {
         left join city on dict.type = 'city' AND city._id = dict.id
         left join category ct on dict.type = 'category' AND ct._id = dict.id
         left join unit on dict.type = 'unit' AND unit._id = dict.id
-        left join subitem_list sl on dict.type = 'subitem_list' AND sl._id = dict.id
         left join item on dict.type = 'item' AND item._id = dict.id
-        left join subitem on dict.type = 'item' AND subitem._id = dict.id2
-        left join subitem_list sil on dict.type = 'item' AND sil._id = subitem.subitem_list_id
+        left join subitem si on dict.type = 'item' AND si._id = dict.id2
          ?
         `,
     update: `update dictionary set 
@@ -2807,7 +2803,7 @@ const conditions = {
     nimitt_duplicate: `roll_no = @roll_no OR (nimitt_hin = @nimitt_hin AND gender = @gender AND state_id = @state_id)`,
     subitem_list_duplicate: `subitem_hin = @subitem_hin OR (subitem_eng IS NOT NULL AND subitem_eng = @subitem_eng) OR (subitem_roman IS NOT NULL AND subitem_roman = @subitem_roman)`,
     item_duplicate: `item_hin = @item_hin OR (item_eng IS NOT NULL AND item_eng = @item_eng) OR (item_roman IS NOT NULL AND item_roman = @item_roman) OR (item_code IS NOT NULL AND item_code = @item_code)`,
-    subitem_duplicate: `item_id = @item_id AND subitem_list_id = @subitem_list_id `,
+    subitem_duplicate: `item_id = @item_id AND subitem_hin = @subitem_hin`,
     support_list_duplicate: `list_type = @list_type AND list_name_eng = @list_name_eng `,
     category_duplicate: `category_eng = @category_eng OR category_hin = @category_hin `,
     district_duplicate: `(district_eng = @district_eng OR district_hin = @district_hin) AND state_id = @state_id`,
@@ -2844,7 +2840,7 @@ genDeptDB = {
     item: `insert into item select * from mainDB.item`,
     // item: `insert into item select * from mainDB.item where item._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='item')`,
 
-    subitem_list: `insert into subitem_list select * from mainDB.subitem_list `,
+    // subitem_list: `insert into subitem_list select * from mainDB.subitem_list `,
 
     subitem: `insert into subitem select * from mainDB.subitem `,
     // subitem: `insert into subitem select * from mainDB.subitem where subitem._id in (select json_each.value from department_config, json_each(config_value) where dept_id = @dept_id AND config_key='subitem')`,
@@ -2871,8 +2867,8 @@ reports = {
     mm.mm_hin,mm.mm_eng,mm.mm_code,
     amm.mm_hin as aawak_mm_hin, amm.mm_eng as aawak_mm_eng, amm.mm_code as aawak_mm_code, 
     pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.relative_name,
-    item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories,
-    sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories,
+    item.item_hin, item.item_eng, item.item_code, item.item_roman, item.icategories as icategories,
+    si.subitem_hin, si.subitem_eng, si.subitem_roman, si.categories as scategories,
     product.sr_num, product.product_code,
     sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
     dept.dept_eng, dept.dept_hin, dept.dept_code,
@@ -2883,9 +2879,8 @@ reports = {
     left join mm on mm._id = aawak.mm_id
     left join pbk on pbk._id = aawak.pbk_id
     left join mm amm on amm._id = aawak.aawak_mm_id
-    left join item on item._id = aawak.item_id
-    left join subitem si on si._id = aawak.subitem_id
-    left join subitem_list sil on sil._id = si.subitem_list_id
+    left join v_item item on item._id = aawak.item_id
+    left join v_subitem si on si._id = aawak.subitem_id
     left join product on product._id = aawak.product_id
     left join support_list sl on sl._id = aawak.condition_id
     left join unit on unit._id = aawak.unit_id
@@ -2975,25 +2970,23 @@ const test = {
 
 const prastav = {
     select: `select * from prastav ?`,
-    select_full: `select prastav.*, mm.mm_hin, mm.mm_eng, mm.mm_code, item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories, sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories, unit.unit_short, unit.unit_full 
+    select_full: `select prastav.*, mm.mm_hin, mm.mm_eng, mm.mm_code, item.item_hin, item.item_eng, item.item_code, item.item_roman, item.icategories as icategories, si.subitem_hin, si.subitem_eng, si.subitem_roman, si.categories as scategories, unit.unit_short, unit.unit_full 
     from prastav 
     left join mm on mm._id = prastav.mm_id 
-    left join item on item._id = prastav.item_id 
-    left join subitem si on si._id = prastav.subitem_id 
-    left join subitem_list sil on sil._id = si.subitem_list_id 
+    left join v_item item on item._id = prastav.item_id 
+    left join v_subitem si on si._id = prastav.subitem_id 
     left join unit on unit._id = prastav.unit_id ?`,
     order: `prastav._id`
 }
 
 const prastav_jawak = {
     select: `select * from prastav_jawak ?`,
-    select_full: `select prastav_jawak.*, prastav.date, prastav.mm_id, prastav.pbk_count, prastav.item_id, prastav.subitem_id, prastav.unit_id, prastav.qty, prastav.rate, prastav.amount, mm.mm_hin, mm.mm_eng, mm.mm_code, item.item_hin, item.item_eng, item.item_code, item.item_roman, item.categories as item_categories, sil.subitem_hin, sil.subitem_eng, sil.subitem_roman, si.categories as subitem_categories, unit.unit_short, unit.unit_full 
+    select_full: `select prastav_jawak.*, prastav.date, prastav.mm_id, prastav.pbk_count, prastav.item_id, prastav.subitem_id, prastav.unit_id, prastav.qty, prastav.rate, prastav.amount, mm.mm_hin, mm.mm_eng, mm.mm_code, item.item_hin, item.item_eng, item.item_code, item.item_roman, item.icategories as icategories, si.subitem_hin, si.subitem_eng, si.subitem_roman, si.categories as scategories, unit.unit_short, unit.unit_full 
     from prastav_jawak 
     left join prastav on prastav._id = prastav_jawak.prastav_id 
     left join mm on mm._id = prastav_jawak.mm_id 
-    left join item on item._id = prastav_jawak.item_id 
-    left join subitem si on si._id = prastav_jawak.subitem_id 
-    left join subitem_list sil on sil._id = si.subitem_list_id 
+    left join v_item item on item._id = prastav_jawak.item_id 
+    left join v_subitem si on si._id = prastav_jawak.subitem_id 
     left join unit on unit._id = prastav_jawak.unit_id ?`,
     order: `prastav_jawak._id`
 }
