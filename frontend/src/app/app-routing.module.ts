@@ -54,6 +54,7 @@ const routes: Routes = [
          { path: "", redirectTo: "login", pathMatch: 'full' }
       ]
    },
+   { path: "netdrop", component: NetdropUiComponent },
    {
       path: "", component: HomeComponent,
       canActivate: [AuthGuard],
@@ -96,7 +97,6 @@ const routes: Routes = [
          { path: "files", component: FilesViewComponent },
          { path: "import_export", component: ImportExportComponent },
          { path: "mysql", component: MysqlComponent },
-         { path: "netdrop", component: NetdropUiComponent },
       ],
       resolve: {
          lists: listsResolver

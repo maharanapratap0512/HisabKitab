@@ -46,15 +46,58 @@ export class CategoryComponent implements OnInit {
 
   getCategoryData() {
     this.isLoader = true;
-    this.http.get(this.api.getUrl('CATEGORY') + this.auth.webUser.dept_id).subscribe((data) => {
-      if (data['result'] && data['success']) {
-        this.categoryData = data['result'];
-        this.total_count = data['total_count'];
-        this.isLoader = false;
+    this.http.get(this.api.getUrl('CATEGORY') + this.auth.webUser.dept_id).subscribe((data: any) => {
+      if (data && data['result'] && data['success']) {
+        this.categoryData = this.buildTree(data['result']);
+        this.total_count = data['total_count'] || this.categoryData.length;
       }
+      this.isLoader = false;
+    }, err => {
       this.isLoader = false;
     });
   }
+
+  buildTree(list: any[]) {
+    const map = new Map();
+    const roots: any[] = [];
+
+    // Create a map for quick lookup and normalize IDs
+    list.forEach(item => {
+      item._id = Number(item._id);
+      if (item.parent_id) item.parent_id = Number(item.parent_id);
+      item.children = [];
+      map.set(item._id, item);
+    });
+
+    // Populate children
+    list.forEach(item => {
+      if (item.parent_id && map.has(item.parent_id)) {
+        map.get(item.parent_id).children.push(item);
+      } else {
+        roots.push(item);
+      }
+    });
+
+    // Flatten with level info
+    const flattened: any[] = [];
+    const traverse = (nodes: any[], level: number) => {
+      // Sort nodes by sort_order then by name
+      nodes.sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0) || a.category_hin.localeCompare(b.category_hin));
+      
+      nodes.forEach(node => {
+        node.level = level;
+        flattened.push(node);
+        if (node.children && node.children.length > 0) {
+          traverse(node.children, level + 1);
+        }
+      });
+    };
+
+    traverse(roots, 0);
+    return flattened;
+  }
+
+
 
   openModal(type: any) {
     this.showModal = type;
@@ -69,7 +112,7 @@ export class CategoryComponent implements OnInit {
     if (ev) {
       this.isLoader = true;
       this.closeModal();
-      this.categoryData.unshift(ev);
+      this.getCategoryData(); // Refresh to rebuild tree correctly
       this.isLoader = false;
     }
     else {
@@ -81,13 +124,14 @@ export class CategoryComponent implements OnInit {
     if (ev._id) {
       this.isLoader = true;
       this.closeModal();
-      this.categoryData.splice(this.categoryData.indexOf(this.editData), 1, ev);
+      this.getCategoryData(); // Refresh to rebuild tree correctly
       this.isLoader = false;
     }
     else {
       console.log("message", ev);
     }
   }
+
 
   exportToExcel() {
     this.isLoader = true;
@@ -139,11 +183,10 @@ export class CategoryComponent implements OnInit {
         this.http.delete(this.api.getUrl('CATEGORY') + '/' + id).subscribe((data: any) => {
           if (data['success']) {
             this.isLoader = false;
-            this.categoryData.splice(i, 1);
-            this.gs.Lists.mm.splice(this.gs.Lists.mm.indexOf((i: { _id: any; }) => i._id == id), 1);
-            this.total_count -= 1;
+            this.getCategoryData(); // Refresh entire tree
             this.toastr.success('Deleted Successfully');
           }
+
           else {
             this.toastr.error(data['message']);
             this.isLoader = false;

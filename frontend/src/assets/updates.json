@@ -15,6 +15,14 @@
                 "desc_hin": "वर्जन 30 का अपडेट अभी चल रहा है, इसलिए कुछ पेजों में एरर आ सकते हैं। अगर कहीं भी एरर आए तो कृपया स्क्रीनशॉट के साथ रिपोर्ट करें।"
             },
             {
+                "type": "coming_soon",
+                "module": "Inventory Core",
+                "title": "Coming Soon: Variant System",
+                "title_hin": "आने वाला है: वेरिएंट सिस्टम (Variant System)",
+                "desc": "A major upgrade to handle items with different attributes (Size, Color, Brand, etc.) under a single product. <br/> - Multi-attribute Mapping. <br/> - Detailed stock tracking per variant.",
+                "desc_hin": "एक ही आइटम के अलग-अलग प्रकारों (जैसे साइज, कलर, ब्रांड आदि) को मैनेज करने के लिए बड़ा अपग्रेड। <br/> - एट्रिब्यूट मैपिंग की सुविधा। <br/> - हर वेरिएंट का अलग स्टॉक मैनेजमेंट।"
+            },
+            {
                 "type": "improvement",
                 "module": "Inventory Core",
                 "title": "Structure Optimization",
@@ -28,15 +36,8 @@
                 "title": "Smart Aawak Selection UI",
                 "title_hin": "स्मार्ट आवक सिलेक्शन यूआई",
                 "desc": "Redesigned Aawak selection dropdown with detailed summaries. View Lot No, Date, Source MM, and Remaining Quantity at a glance to ensure accurate data entry.",
-                "desc_hin": "जावक एंट्री में आवक चुनने के लिए नया और बेहतर डिजाइन। अब लॉट नंबर, तारीख, एमएम और बची हुई मात्रा (Remaining Qty) को एक साथ देखें, जिससे गलतियां कम होंगी।"
-            },
-            {
-                "type": "improvement",
-                "module": "UI/UX",
-                "title": "Bilingual Table Design",
-                "title_hin": "हिंदी-इंग्लिश टेबल डिजाइन",
-                "desc": "Improved table UI with a standardized bilingual format. Hindi on top, muted English on the second line for consistent readability across all reports.",
-                "desc_hin": "रिपोर्ट टेबल्स में हिंदी और इंग्लिश को बेहतर तरीके से दिखाया गया है। पहली लाइन में हिंदी और दूसरी लाइन में हल्की इंग्लिश, जिससे पढ़ना आसान हो गया है।"
+                "desc_hin": "जावक एंट्री में आवक चुनने के लिए नया और बेहतर डिजाइन। अब लॉट नंबर, तारीख, एमएम और बची हुई मात्रा (Remaining Qty) को एक साथ देखें, जिससे गलतियां कम होंगी।",
+                "media": "/assets/updates/aawak_ref_design.png"
             },
             {
                 "type": "feature",
@@ -45,7 +46,32 @@
                 "title_hin": "लोकल नेटवर्क P2P ट्रांसफर",
                 "desc": "Share files instantly between devices on the same Wi-Fi. <br/> - High-speed P2P transfer using WebRTC. <br/> - Animated Radar UI for device discovery.",
                 "desc_hin": "एक ही वाई-फाई पर मौजूद डिवाइस के बीच तुरंत फाइल शेयर करें। <br/> - वेब-आरटीसी (WebRTC) के साथ हाई-स्पीड ट्रांसफर। <br/> - डिवाइस खोजने के लिए एनिमेटेड राडार यूआई।",
-                "media": ""
+                "media": "/assets/updates/netdrop-ui.png"
+            },
+            {
+                "type": "feature",
+                "module": "MM Delete & Transfer",
+                "title": "Transfer MM & Clear MM data.",
+                "title_hin": "एमएम ट्रांसफर और एमएम डेटा क्लियर।",
+                "desc": "Transfer All data of one MM to another or Delete ALL related MM data.",
+                "desc_hin": "एक एमएम का सभी डेटा दूसरे एमएम में ट्रांसफर हो जाएगा। या एक एमएम को डिलीट कर सकते हैं।",
+                "media": "/assets/updates/mm-transfer-delete.png"
+            },
+            {
+                "type": "feature",
+                "module": "Category Management",
+                "title": "Hierarchical Category System (Tree UI)",
+                "title_hin": "हाइरार्कीकल कैटेगरी सिस्टम (ट्री यूआई)",
+                "desc": "Organize categories in a parent-child structure for better classification. <br/> - Interactive Tree UI with folder/file icons and branch lines. <br/> - Hierarchical selection in entry forms with indentation. <br/> - Custom sort order support for each level.",
+                "desc_hin": "कैटेगरी को अब आप पेरेंट-चाइल्ड (सीढ़ीनुमा) स्ट्रक्चर में व्यवस्थित कर सकते हैं। <br/> - नया ट्री यूआई, फोल्डर आइकॉन्स और ब्रांच लाइन्स के साथ। <br/> - एंट्री फॉर्म में कैटेगरी चुनना हुआ और भी आसान। <br/> - हर लेवल पर अपनी पसंद का क्रम (Sort Order) सेट करने की सुविधा।"
+            },
+            {
+                "type": "improvement",
+                "module": "UI/UX",
+                "title": "Bilingual Table Design",
+                "title_hin": "हिंदी-इंग्लिश टेबल डिजाइन",
+                "desc": "Improved table UI with a standardized bilingual format. Hindi on top, muted English on the second line for consistent readability across all reports.",
+                "desc_hin": "रिपोर्ट टेबल्स में हिंदी और इंग्लिश को बेहतर तरीके से दिखाया गया है। पहली लाइन में हिंदी और दूसरी लाइन में हल्की इंग्लिश, जिससे पढ़ना आसान हो गया है।"
             }
         ]
     },

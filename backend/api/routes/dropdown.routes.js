@@ -41,7 +41,7 @@ router.get('/all/:dept_id', async (req, res, next) => {
                 DB.getList('state', { dept_id: req.params.dept_id }),
                 DB.getList('zone', { dept_id: req.params.dept_id }),
                 DB.getList('district', { full: true, dept_id: req.params.dept_id }),
-                // DB.getList('subitem_list', { dept_id: req.params.dept_id }),
+                DB.getList('subitem_list', { dept_id: req.params.dept_id }),
                 DB.getList('unit', { dept_id: req.params.dept_id }),
                 DB.getList('gender', { dept_id: req.params.dept_id }),
                 DB.getList('relation', { dept_id: req.params.dept_id }),

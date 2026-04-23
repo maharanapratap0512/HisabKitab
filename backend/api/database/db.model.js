@@ -2426,26 +2426,31 @@ class dbModal {
         mm_eng varchar(100) null, 
         mm_roman varchar(100) null, 
         mm_code varchar(50) unique null, 
+        mm_type varchar(100) null,
         dept_id integer null references department(_id),
         state_id integer not null references state(_id),
         parent_mm_id integer null REFERENCES mm(_id),
         opening_date date null,
+        mm_closed date null,
         nimitt_id integer REFERENCES nimitt(_id),
+        verify tinyint default 0,
         active tinyint default 0,  
+        restrict_month integer null,
+        restrict_year integer null,
         created_at timestamp default (datetime('now', 'localtime')),
         updated_at timestamp default (datetime('now', 'localtime')),
         unique(mm_eng, dept_id),
         unique(mm_hin, dept_id)
       );`,
       copy_backup_to_mm: `INSERT INTO mm (
-          _id, mm_hin, mm_eng, mm_roman, mm_code, 
-          dept_id, state_id, parent_mm_id, opening_date, 
-          nimitt_id, active, created_at, updated_at
+          _id, mm_hin, mm_eng, mm_roman, mm_code, mm_type, dept_id, state_id, parent_mm_id, 
+          opening_date, mm_closed, restrict_month, restrict_year,
+          verify, nimitt_id, active, created_at, updated_at
         ) 
         SELECT 
-          _id, mm_hin, mm_eng, mm_roman, mm_code, 
-          dept_id, state_id, parent_mm_id, opening_date, 
-          nimitt_id, active, created_at, updated_at 
+          _id, mm_hin, mm_eng, mm_roman, mm_code, null, dept_id, state_id, parent_mm_id, 
+          opening_date, mm_closed, restrict_month, restrict_year,
+          verify, nimitt_id, active, created_at, updated_at 
         FROM mm_backup`,
       drop_backup: `drop table if exists mm_backup`,
       rename_subitem: `alter table subitem rename to subitem_backup`,

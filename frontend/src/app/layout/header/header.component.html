@@ -38,7 +38,7 @@
                <ng-container *ngFor="let item of menuItems">
 
                   <li class="nav-item" *ngIf="item.visible && !item.dropdown">
-                     <a class="nav-link" routerLinkActive="active-parent" [routerLink]="item.link">
+                     <a class="nav-link" routerLinkActive="active-parent" [routerLink]="item.link" [target]="item.target">
                         <i [class]="item.icon" class="me-1" *ngIf="item.icon"></i>{{item.title}}
                      </a>
                   </li>
@@ -63,7 +63,7 @@
                            <div class="dropdown-divider" *ngIf="sub.visible && sub.divider"></div>
 
                            <a class="dropdown-item" *ngIf="sub.visible && sub.link" routerLinkActive="active"
-                              [routerLink]="sub.link" [class]="sub.class">
+                              [routerLink]="sub.link" [class]="sub.class" [target]="sub.target">
                               <i [class]="sub.icon + ' me-1 text-info'" *ngIf="sub.icon"></i>{{sub.title}}
                            </a>
                         </ng-container>
