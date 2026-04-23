@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, Inject, NgZone } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { BehaviorSubject, Subject } from 'rxjs';
 
@@ -24,11 +24,12 @@ export class NetdropService {
   public peers$ = new BehaviorSubject<Peer[]>([]);
   public transferState$ = new BehaviorSubject<FileTransferState | null>(null);
   public serverIp$ = new BehaviorSubject<string>('');
-  
+
   // To handle incoming file chunks
   private receiveBuffer: ArrayBuffer[] = [];
   private receivedSize = 0;
   private currentIncomingFile: { name: string, size: number } | null = null;
+  private receivedChunksCount = 0;
 
   // ICE Servers for local network (usually empty is fine, but adding a public stun just in case)
   private rtcConfig = {
@@ -39,13 +40,16 @@ export class NetdropService {
 
   private myName: string;
 
-  constructor(@Inject('NETDROP_CONFIG') private config: { serverUrl: string }) {
+  constructor(
+    @Inject('NETDROP_CONFIG') private config: { serverUrl: string },
+    private ngZone: NgZone
+  ) {
     this.myName = this.generateName();
   }
 
   public connect() {
     if (this.socket) return;
-    
+
     // Connect to the specific namespace
     this.socket = io(this.config.serverUrl + '/netdrop');
 
@@ -104,12 +108,12 @@ export class NetdropService {
     try {
       const userData = localStorage.getItem('userData'); // Assuming standard HK auth logic, adjust if needed
       if (userData) {
-         const parsed = JSON.parse(userData);
-         if (parsed && parsed.departmentName) dept = parsed.departmentName;
-         else if (parsed && parsed.user_name) dept = parsed.user_name;
+        const parsed = JSON.parse(userData);
+        if (parsed && parsed.departmentName) dept = parsed.departmentName;
+        else if (parsed && parsed.user_name) dept = parsed.user_name;
       }
-    } catch(e) {}
-    
+    } catch (e) { }
+
     return `${dept}_${Math.floor(Math.random() * 9000) + 1000}`;
   }
 
@@ -148,62 +152,94 @@ export class NetdropService {
 
   private setupDataChannel(channel: RTCDataChannel, peerId: string) {
     this.dataChannels.set(peerId, channel);
-    
+
     // We expect ArrayBuffer for files
     channel.binaryType = 'arraybuffer';
 
     channel.onopen = () => console.log(`DataChannel open with ${peerId}`);
     channel.onclose = () => {
-        console.log(`DataChannel closed with ${peerId}`);
-        this.cleanupPeer(peerId);
+      console.log(`DataChannel closed with ${peerId}`);
+      this.cleanupPeer(peerId);
     };
-    
+
     channel.onmessage = (event) => {
       if (typeof event.data === 'string') {
-        // Handle metadata (JSON)
         try {
           const meta = JSON.parse(event.data);
           if (meta.type === 'file-start') {
             this.currentIncomingFile = { name: meta.name, size: meta.size };
             this.receiveBuffer = [];
             this.receivedSize = 0;
-            this.transferState$.next({ fileName: meta.name, progress: 0, incoming: true, active: true });
+            this.receivedChunksCount = 0;
+            this.ngZone.run(() => {
+              this.transferState$.next({ fileName: meta.name, progress: 0, incoming: true, active: true });
+            });
+          } else if (meta.type === 'file-end') {
+            this.saveReceivedFile();
           }
         } catch (e) {
           console.error("Unknown string message", event.data);
         }
       } else {
         // Handle binary data chunk
+        this.receivedChunksCount++;
+        console.log(`[Receiver] Got chunk #${this.receivedChunksCount} (${event.data.byteLength} bytes)`);
         this.receiveBuffer.push(event.data);
         this.receivedSize += event.data.byteLength;
 
         if (this.currentIncomingFile) {
           const progress = this.receivedSize / this.currentIncomingFile.size;
-          this.transferState$.next({ fileName: this.currentIncomingFile.name, progress: progress, incoming: true, active: true });
 
+          // Throttle updates but ensure they run in Angular Zone
+          const lastProgress = this.transferState$.value?.progress || 0;
+          if (progress - lastProgress > 0.01 || progress >= 0.99) {
+            this.ngZone.run(() => {
+              this.transferState$.next({
+                fileName: this.currentIncomingFile!.name,
+                progress: progress,
+                incoming: true,
+                active: true
+              });
+            });
+          }
+
+          // Safety check in case 'file-end' message is lost
           if (this.receivedSize >= this.currentIncomingFile.size) {
-            this.saveReceivedFile(this.currentIncomingFile.name);
+            this.saveReceivedFile();
           }
         }
       }
     };
   }
 
-  private saveReceivedFile(fileName: string) {
-    const blob = new Blob(this.receiveBuffer);
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  private saveReceivedFile() {
+    if (!this.currentIncomingFile) return;
 
-    this.currentIncomingFile = null;
-    this.receiveBuffer = [];
-    this.transferState$.next(null); // Clear state
+    const fileName = this.currentIncomingFile.name;
+
+    this.ngZone.run(() => {
+      this.transferState$.next({ fileName: fileName, progress: 1, incoming: true, active: true });
+
+      const blob = new Blob(this.receiveBuffer);
+      const url = URL.createObjectURL(blob);
+
+      // Reset state IMMEDIATELY after blob creation
+      this.currentIncomingFile = null;
+      this.receiveBuffer = [];
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // Final disappearance after 1 second
+      setTimeout(() => {
+        this.transferState$.next(null);
+      }, 1000);
+    });
   }
 
   private async handleSignal(fromPeerId: string, signalData: any) {
@@ -236,83 +272,121 @@ export class NetdropService {
 
     // If no channel, we are the initiator, so setup connection
     if (!pc || !channel || channel.readyState !== 'open') {
-        pc = this.createPeerConnection(peerId);
-        
-        channel = pc.createDataChannel('fileTransfer');
-        this.setupDataChannel(channel, peerId);
+      pc = this.createPeerConnection(peerId);
 
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        this.socket.emit('signal', { to: peerId, signalData: pc.localDescription });
+      channel = pc.createDataChannel('fileTransfer');
+      this.setupDataChannel(channel, peerId);
 
-        // Wait for channel to open before sending
-        await new Promise<void>((resolve) => {
-            if(channel) {
-                channel.onopen = () => resolve();
-            }
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      this.socket.emit('signal', { to: peerId, signalData: pc.localDescription });
+
+      // Wait for channel to open before sending (only if not already open)
+      if (channel && channel.readyState !== 'open') {
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(() => reject('Channel open timeout'), 5000);
+          channel!.onopen = () => {
+            clearTimeout(timeout);
+            resolve();
+          };
         });
+      }
+      // Give the channel a tiny bit of time to "settle" (warm-up)
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
-    if (!channel) return;
+    if (!channel || channel.readyState !== 'open') {
+      console.error("Channel not open after initialization");
+      return;
+    }
 
     // 1. Send Metadata
-    channel.send(JSON.stringify({ type: 'file-start', name: file.name, size: file.size }));
-    this.transferState$.next({ fileName: file.name, progress: 0, incoming: false, active: true });
+    try {
+      channel.send(JSON.stringify({ type: 'file-start', name: file.name, size: file.size }));
+      this.transferState$.next({ fileName: file.name, progress: 0, incoming: false, active: true });
+    } catch (e) {
+      console.error("Failed to send metadata:", e);
+      return;
+    }
 
-    // 2. Read and Send Chunks
-    const chunkSize = 64 * 1024; // 64 KB
+    let currentChunkSize = 64 * 1024; // Start in 1st gear (64 KB)
+    let chunksSent = 0;
     let offset = 0;
 
-    const readSlice = (o: number) => {
-      const slice = file.slice(offset, o + chunkSize);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const buffer = e.target?.result as ArrayBuffer;
-        
-        // Handle Backpressure
-        if (channel && channel.bufferedAmount > channel.bufferedAmountLowThreshold) {
-          channel.onbufferedamountlow = () => {
-              if(channel) channel.onbufferedamountlow = null;
-              this.sendChunk(buffer, channel!, file, offset);
-          };
-        } else {
-          this.sendChunk(buffer, channel!, file, offset);
+    // Increase the "In-Flight" data buffer to 8MB for God Speed
+    channel.bufferedAmountLowThreshold = 8 * 1024 * 1024;
+
+    const sendNextChunk = async () => {
+      while (offset < file.size) {
+        if (!channel || channel.readyState !== 'open') break;
+
+        if (chunksSent === 10) {
+          currentChunkSize = 256 * 1024; // God Speed (Lowered to 256KB for testing)
+          console.log("[Sender] Gearing up to God Speed (256KB)");
         }
-      };
-      reader.readAsArrayBuffer(slice);
+
+        // Check backpressure
+        if (channel.bufferedAmount > (channel.bufferedAmountLowThreshold || 0)) {
+          console.log(`[Sender] Buffer full (${channel.bufferedAmount} bytes), waiting...`);
+          await new Promise<void>(resolve => {
+            if (!channel) return resolve();
+            channel.onbufferedamountlow = () => {
+              if (channel) channel.onbufferedamountlow = null;
+              resolve();
+            };
+          });
+        }
+
+        if (!channel || channel.readyState !== 'open') break;
+
+        const slice = file.slice(offset, offset + currentChunkSize);
+        const buffer = await slice.arrayBuffer();
+
+        try {
+          if (channel && channel.readyState === 'open') {
+            console.log(`[Sender] Sending chunk #${chunksSent + 1} (${buffer.byteLength} bytes)`);
+            channel.send(buffer);
+            offset += buffer.byteLength;
+            chunksSent++;
+          } else {
+            break;
+          }
+        } catch (e) {
+          console.error("Failed to send chunk:", e);
+          break;
+        }
+
+        const progress = offset / file.size;
+        const lastProgress = this.transferState$.value?.progress || 0;
+
+        // Throttle sender UI updates to 1% increments
+        if (progress - lastProgress > 0.01 || progress >= 0.99) {
+          this.ngZone.run(() => {
+            this.transferState$.next({
+              fileName: file.name,
+              progress: progress,
+              incoming: false,
+              active: true
+            });
+          });
+        }
+      }
+
+      // 3. Send End Signal
+      try {
+        if (channel && channel.readyState === 'open') {
+          channel.send(JSON.stringify({ type: 'file-end' }));
+        }
+      } catch (e) { }
+
+      // Finished
+      this.ngZone.run(() => {
+        setTimeout(() => {
+          this.transferState$.next(null);
+        }, 1000);
+      });
     };
 
-    readSlice(0);
-  }
-
-  private sendChunk(buffer: ArrayBuffer, channel: RTCDataChannel, file: File, offset: number) {
-    if (channel.readyState !== 'open') return;
-    
-    channel.send(buffer);
-    offset += buffer.byteLength;
-
-    this.transferState$.next({ fileName: file.name, progress: offset / file.size, incoming: false, active: true });
-
-    if (offset < file.size) {
-      // Continue sending
-      const chunkSize = 64 * 1024;
-      const slice = file.slice(offset, offset + chunkSize);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-          const nextBuffer = e.target?.result as ArrayBuffer;
-          
-          if (channel.bufferedAmount > 1024 * 1024 * 2) { // 2MB backpressure threshold
-              setTimeout(() => this.sendChunk(nextBuffer, channel, file, offset), 50);
-          } else {
-              this.sendChunk(nextBuffer, channel, file, offset);
-          }
-      };
-      reader.readAsArrayBuffer(slice);
-    } else {
-       // Finished
-       setTimeout(() => {
-         this.transferState$.next(null);
-       }, 1000);
-    }
+    sendNextChunk();
   }
 }

@@ -326,7 +326,7 @@
                                        </app-popover-filter>
                                     </div>
                                  </th>
-                                 <th rowspan="2">
+                                 <th rowspan="2" style="width: 150px;">
                                     <div class="d-flex justify-content-between align-items-center">
                                        <span>Category</span>
                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
@@ -341,7 +341,7 @@
                                        </app-popover-filter>
                                     </div>
                                  </th>
-                                 <th rowspan="2">
+                                 <th rowspan="2" style="width: 200px;">
                                     <div class="d-flex justify-content-between align-items-center">
                                        <span>Item_Subitem_Name</span>
                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
@@ -394,14 +394,29 @@
                                     {{data.dept_hin}} {{data.dept_code ? "(" + data.dept_code + ")" : ''}}
                                  </td>
                                  <td>
-                                    {{data.mm_hin}} ({{data.state_hin}})<br />
-                                    {{data.mm_eng}} ({{data.state_eng}})
+                                    <div>
+                                       <span>{{data.mm_hin}} ({{data.state_hin}})</span> <br />
+                                       <small class="text-muted">{{data.mm_eng}} ({{data.state_eng}})</small>
+                                    </div>
                                  </td>
                                  <td>
-                                    {{data.categories_eng ? data.categories_eng : data.categories_hin}}
+                                    <ng-container
+                                       *ngIf="(data.arr_scategories?.length > 0 ? data.arr_scategories : data.arr_icategories) as activeCats">
+                                       <div *ngIf="activeCats?.length > 0; else noCat">
+                                          <span>{{ activeCats | joinObj:'category_hin' }}</span>
+                                          <br />
+                                          <small class="text-muted">{{ activeCats | joinObj:'category_eng'
+                                             }}</small>
+                                       </div>
+                                       <ng-template #noCat>-</ng-template>
+                                    </ng-container>
                                  <td>
-                                    {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}} <br />
-                                    {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
+                                    <div>
+                                       <span>{{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin :
+                                          ""}}</span> <br />
+                                       <small class="text-muted">{{data.item_eng}} {{data.subitem_eng ? " : " +
+                                          data.subitem_eng : ""}}</small>
+                                    </div>
                                  </td>
                                  <ng-container *ngIf="monthsSel.length <= 0">
                                     <td>
@@ -435,8 +450,11 @@
                                  </ng-container>
                                  <ng-container *ngIf="monthsSel.length > 0">
                                     <td>
-                                       {{data.condition_hin ? data.condition_hin : 'N/A'}} <br />
-                                       {{data.condition_eng ? data.condition_eng : 'N/A'}}
+                                       <div>
+                                          <span>{{data.condition_hin ? data.condition_hin : 'N/A'}}</span> <br />
+                                          <small class="text-muted">{{data.condition_eng ? data.condition_eng :
+                                             ''}}</small>
+                                       </div>
                                     </td>
                                     <td>{{data.past_bachat + " " + data.unit_short}}</td>
 
@@ -548,8 +566,11 @@
                                     </ng-container>
                                     <td>{{j+1}}</td>
                                     <td>
-                                       {{(sdata.list_name_hin ? sdata.list_name_hin : 'N/A')}}
-                                       {{(sdata.list_name_eng ? " : " + sdata.list_name_eng : '')}}
+                                       <div>
+                                          <span>{{(sdata.list_name_hin ? sdata.list_name_hin : 'N/A')}}</span> <br />
+                                          <small class="text-muted">{{(sdata.list_name_eng ? sdata.list_name_eng :
+                                             '')}}</small>
+                                       </div>
                                     </td>
                                     <ng-container *ngIf="monthsSel.length > 0">
                                        <td>{{sdata.past_bachat ? sdata.past_bachat : 0 + " " + sdata.unit_short}}</td>

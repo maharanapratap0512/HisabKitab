@@ -113,25 +113,6 @@ export class BachatNewComponent implements OnInit {
       if (data['result'] && data['success']) {
 
         this.bachatAll = data['result'];
-        for (let i in this.bachatAll) {
-          this.bachatAll[i].categories_hin = '';
-          this.bachatAll[i].categories_eng = '';
-          if (this.bachatAll[i].arr_subitem_categories && this.bachatAll[i].arr_subitem_categories.length > 0) {
-            for (let j in this.categories) {
-              if (this.bachatAll[i].arr_subitem_categories.includes(this.categories[j]._id)) {
-                this.bachatAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.bachatAll[i].categories_eng += this.categories[j].category_eng + ', ';
-              }
-            }
-          } else {
-            for (let j in this.categories) {
-              if (this.bachatAll[i].arr_item_categories.includes(this.categories[j]._id)) {
-                this.bachatAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.bachatAll[i].categories_eng += this.categories[j].category_eng + ', ';
-              }
-            }
-          }
-        }
         this.bachatData = this.bachatAll;
         this.applyClientSideFilter();
         this.isLoader = false;
@@ -192,7 +173,7 @@ export class BachatNewComponent implements OnInit {
 
   catSelected(ev: any) {
     if (ev) {
-      this.items = this.gs.Lists.itemmix.filter((i: { categories: string | any[]; }) => i.categories.includes(ev));
+      this.items = this.gs.Lists.itemmix.filter((i: { categories: any[]; }) => i.categories.some(c => c._id == ev));
     }
     else {
       this.items = this.gs.Lists.itemmix;
@@ -205,7 +186,7 @@ export class BachatNewComponent implements OnInit {
       let item = this.items.find((i: { _id: any; }) => i._id == ev);
 
       if (this.filterBody.category_id && item) {
-        this.subitems = item.subitems.filter((s: { categories: string | any[]; }) => s.categories.includes(this.filterBody.category_id));
+        this.subitems = item.subitems.filter((s: { categories: any[]; }) => s.categories.some(c => c.this.filterBody.category_id));
       } else {
         this.subitems = item.subitems ? item.subitems : [];
       }
@@ -526,23 +507,6 @@ export class BachatNewComponent implements OnInit {
 
           for (let i in this.bachatAll) {
             this.bachatAll[i].showTooltip = {};
-            this.bachatAll[i].categories_hin = '';
-            this.bachatAll[i].categories_eng = '';
-            if (this.bachatAll[i].arr_subitem_categories && this.bachatAll[i].arr_subitem_categories.length > 0) {
-              for (let j in this.categories) {
-                if (this.bachatAll[i].arr_subitem_categories.includes(this.categories[j]._id)) {
-                  this.bachatAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                  this.bachatAll[i].categories_eng += this.categories[j].category_eng + ', ';
-                }
-              }
-            } else {
-              for (let j in this.categories) {
-                if (this.bachatAll[i].arr_item_categories.includes(this.categories[j]._id)) {
-                  this.bachatAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                  this.bachatAll[i].categories_eng += this.categories[j].category_eng + ', ';
-                }
-              }
-            }
           }
           this.bachatData = this.bachatAll;
           // this.onHeaderFilterChange();
@@ -574,10 +538,10 @@ export class BachatNewComponent implements OnInit {
 
     if (this.filterBody.category_id) {
       filtered = filtered.filter(row => {
-        const categories = (row.arr_subitem_categories && row.arr_subitem_categories.length > 0)
-          ? row.arr_subitem_categories
-          : row.arr_item_categories;
-        return categories && categories.includes(this.filterBody.category_id);
+        const categories = (row.arr_scategories && row.arr_scategories.length > 0)
+          ? row.arr_scategories
+          : row.arr_icategories;
+        return categories && categories.some((c: { _id: any; }) => c._id == this.filterBody.category_id);
       });
     }
 

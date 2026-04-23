@@ -15,11 +15,6 @@ export class JoinObjPipe implements PipeTransform {
       return '';
     }
 
-    console.log(key, value
-      .map((item: any) => item[key])
-      .filter((val: any) => val !== null && val !== undefined && val !== '')
-      .join(separator));
-
     return value
       .map((item: any) => item[key])
       .filter((val: any) => val !== null && val !== undefined && val !== '')

@@ -34,8 +34,6 @@ router.get('/:dept_id', async (req, res, next) => {
             for (let i = 0; i < resolve.data.length; i++) {
                 resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
                 resolve.data[i].categories = resolve.data[i].categories ? JSON.parse(resolve.data[i].categories) : [];
-                resolve.data[i].categories_hin = resolve.data[i].categories_hin ? JSON.parse(resolve.data[i].categories_hin) : [];
-                resolve.data[i].categories_eng = resolve.data[i].categories_eng ? JSON.parse(resolve.data[i].categories_eng) : [];
             }
             res.json({
                 success: true,
@@ -53,8 +51,6 @@ router.put('/:dept_id', async (req, res, next) => {
         let conditionString = '', conditions = [];
         if (req.body.item_id && req.body.item_id.length > 0)
             conditions.push(`subitem.item_id in (${req.body.item_id.join(',')})`)
-        if (req.body.subitem_list_id && req.body.subitem_list_id.length > 0)
-            conditions.push(`subitem.subitem_list_id in (${req.body.subitem_list_id.join(',')})`)
 
         conditionString = conditions.length > 0 ? `(${conditions.join(' OR ')})` : `1=1`;
 
@@ -62,8 +58,6 @@ router.put('/:dept_id', async (req, res, next) => {
             for (let i = 0; i < resolve.data.length; i++) {
                 resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
                 resolve.data[i].categories = resolve.data[i].categories ? JSON.parse(resolve.data[i].categories) : [];
-                resolve.data[i].categories_hin = resolve.data[i].categories_hin ? JSON.parse(resolve.data[i].categories_hin) : [];
-                resolve.data[i].categories_eng = resolve.data[i].categories_eng ? JSON.parse(resolve.data[i].categories_eng) : [];
             }
             res.json({
                 success: true,
@@ -85,7 +79,6 @@ router.post('/:dept_id', async (req, res, next) => {
             await DB.insert('subitem', req.body, req.params.dept_id).then((data) => {
                 data.document = data.document ? JSON.parse(data.document) : [];
                 data.categories = data.categories ? JSON.parse(data.categories) : [];
-                data.categories_hin = data.categories_hin ? JSON.parse(data.categories_hin) : [];
                 res.json({
                     success: true,
                     result: data || {}
@@ -108,7 +101,6 @@ router.put('/', async (req, res, next) => {
             await DB.update('subitem', req.body.set, req.body.query._id).then(async (data) => {
                 data.document = data.document ? JSON.parse(data.document) : [];
                 data.categories = data.categories ? JSON.parse(data.categories) : [];
-                data.categories_hin = data.categories_hin ? JSON.parse(data.categories_hin) : [];
                 res.json({
                     success: true,
                     result: data || {}

@@ -155,6 +155,7 @@ class DBContex {
                 else if (["itemmix", "item", "subitem", "product", "aawak_voucher"].includes(tblname)) {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : ''));
                     sql = sql.replace('#', (order ? ` order by ${order}` : ``));
+
                 }
                 else {
                     sql = sql.replace('?', (conditionQuery ? ` where ${conditionQuery}` : '') + (order ? ` order by ${order}` : ``));

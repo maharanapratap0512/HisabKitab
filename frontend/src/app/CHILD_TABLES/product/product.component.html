@@ -132,9 +132,9 @@
                               </td>
                               <td
                                  [ngClass]="{'text-success':data.last_entry_type=='awk', 'text-warning':data.last_entry_type=='jwk'}">
-                                 {{data.last_mm_hin ? data.last_mm_hin : data.mm_hin}} <br />
-                                 {{data.last_condition_hin ? data.last_condition_hin : data.condition_hin}} <br />
-                                 {{data.last_date ? data.last_date : data.purchase_date}}
+                                 <span>{{data.last_mm_hin ? data.last_mm_hin : data.mm_hin}}</span> <br />
+                                 <small class="text-muted">{{data.last_condition_hin ? data.last_condition_hin : data.condition_hin}}</small> <br />
+                                 <small class="text-muted">{{data.last_date ? data.last_date : data.purchase_date}}</small>
                               </td>
                               <td *ngIf="data.products.length <= 0">
                                  {{data.qty}} {{data.unit_short}}
@@ -145,13 +145,20 @@
                                  </ng-container>
                               </td>
                               <td>{{data.purchase_date}}</td>
-                              <td>{{data.mm_id?data.mm_hin:''}} <br /> {{data.mm_eng ? data.mm_eng:'-'}}</td>
-                              <td>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}} <br />
-                                 {{data.subitem_id? data.subitem_hin + ' : ' + data.subitem_eng:''}}</td>
+                              <td>
+                                 <span>{{data.mm_id?data.mm_hin:''}}</span> <br />
+                                 <small class="text-muted">{{data.mm_eng ? data.mm_eng:'-'}}</small>
+                              </td>
+                              <td>
+                                 <span>{{data.item_id?data.item_hin + ' : ' + data.item_eng:'-'}}</span> <br />
+                                 <small class="text-muted">{{data.subitem_id? data.subitem_hin + ' : ' + data.subitem_eng:''}}</small>
+                              </td>
                               <td *ngIf="settings.company_name">{{data.company_name}} <br /> {{data.model_name}}</td>
                               <td>{{data.price}}</td>
-                              <td>{{data.condition_id ? data.condition_hin: ''}}<br />
-                                 {{data.condition_id ? data.condition_eng:''}}</td>
+                              <td>
+                                 <span>{{data.condition_id ? data.condition_hin: ''}}</span> <br />
+                                 <small class="text-muted">{{data.condition_id ? data.condition_eng:''}}</small>
+                              </td>
                               <td *ngIf="settings.warranty_period || settings.warranty_from">
                                  {{data.warranty_period ? data.warranty_period + 'M' : ''}} <br />
                                  {{data.warranty_from ? 'From : ' + data.warranty_from : ""}}

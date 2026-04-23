@@ -378,9 +378,10 @@ const item = {
     select:
         `select * from item ?`
     , select_full:
-        `select vi.* from v_item vi ? limit @limit offset @offset`
-    , count:
-        `select count(*) as total_count from item ?`
+        `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
+        unit.unit_full, unit.unit_short from item, json_each(item.categories)
+        left join category ct on ct._id = json_each.value
+        left join unit on unit._id = item.unit_id ? group by item._id limit @limit offset @offset`
     , insert:
         `insert into item (
             item_hin, item_eng, item_roman, item_code, categories, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, active)
@@ -471,7 +472,7 @@ const itemmix = {
     group by item._id # limit @limit offset @offset`,
 
     order: `item_hin, item_eng`,
-    count: `select count(*) as total_count from (select count(*) from item
+    count: `select count(*) as total_count from (select count(*) from item, json_each(item.categories)
         left join subitem si on si.item_id = item._id ? group by item._id)`
 }
 
@@ -890,7 +891,7 @@ const bachat = {
         dept.dept_eng, dept.dept_hin, dept.dept_code
         from bachat
         left join mm on mm._id = bachat.mm_id
-        left join v_item item it on it._id = bachat.item_id
+        left join v_item it on it._id = bachat.item_id
         left join v_subitem si on si._id = bachat.subitem_id
         left join unit on unit._id = bachat.unit_id   
         left join state st on st._id = mm.state_id
@@ -1063,7 +1064,7 @@ const bachat_new = {
         dept.dept_eng, dept.dept_hin, dept.dept_code
         from bachat_new
         left join mm on mm._id = bachat_new.mm_id
-        left join v_item item it on it._id = bachat_new.item_id
+        left join v_item it on it._id = bachat_new.item_id
         left join v_subitem si on si._id = bachat_new.subitem_id
         left join unit on unit._id = bachat_new.unit_id   
         left join state st on st._id = mm.state_id
@@ -1073,8 +1074,8 @@ const bachat_new = {
     , select_all:
         `select bcht.*, json_group_array(list_name_hin) as arr_condition_hin, json_group_array(condition_id) as arr_condition_id, json_group_array(sum_aawak) as arr_sum_aawak, json_group_array(sum_used) as arr_sum_used, json_group_array(sum_jawak) as arr_sum_jawak, json_group_array(sum_bachat) as arr_sum_bachat, json_group_array(sum_difference) as arr_sum_difference, sum(sum_aawak) as total_aawak_all, sum(sum_jawak) as total_jawak_all, sum(sum_used) as total_used_all, sum(sum_bachat) as total_bachat_all, sum(sum_difference) as total_difference_all,
         mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
-        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
-        sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_icategories,
+        sit.subitem_hin, sit.subitem_eng, sit.categories as arr_scategories,
         unit.unit_short, unit.unit_full,
         dept.dept_code, dept.dept_hin, dept.dept_eng
         from (select sum(total_aawak) as sum_aawak, sum(used_jawak) as sum_used, sum(jawak) as sum_jawak, sum(bachat) as sum_bachat, sum(difference) as sum_difference, bn.*,
@@ -1205,7 +1206,7 @@ const pbk_bachat = {
       dept.dept_code, dept.dept_hin, dept.dept_eng
       from pbk_bachat
       left join pbk on pbk._id = pbk_bachat.pbk_id
-      left join v_item item it on it._id = pbk_bachat.item_id
+      left join v_item it on it._id = pbk_bachat.item_id
       left join v_subitem si on si._id = pbk_bachat.subitem_id
       left join unit on unit._id = pbk_bachat.unit_id
       left join support_list sl on sl._id = pbk_bachat.condition_id
@@ -2077,14 +2078,22 @@ const subitem = {
     select:
         `select * from subitem ?`
     , select_full:
-        `select subitem.*, json_group_array(cat.category_hin) as categories_hin, 
-        json_group_array(cat.category_eng) as categories_eng,
-        unit.unit_full, unit.unit_short, 
-        item.item_eng, item.item_hin, 
-        from subitem, json_each(subitem.categories)
-        left join category cat on cat._id = json_each.value
+        `select subitem.*, (
+          SELECT IFNULL(json_group_array(
+              json_object(
+                  '_id', c._id, 
+                  'category_hin', c.category_hin, 
+                  'category_eng', c.category_eng
+              )
+          ), json('[]'))
+          FROM rel_subitem_category rsc
+          JOIN category c ON c._id = rsc.category_id
+          WHERE rsc.subitem_id = subitem._id
+        ) as categories,
+        unit.unit_full, unit.unit_short, item.item_eng, item.item_hin
+        from subitem
         left join unit on unit._id = subitem.unit_id
-        left join item on  item._id = subitem.item_id ? group by subitem._id # limit @limit offset @offset`
+        left join item on  item._id = subitem.item_id ? limit @limit offset @offset`
     , insert:
         `insert into subitem (
         item_id,

@@ -5,6 +5,64 @@ const { defineTable, defineView, col } = require('sutramcore');
 
 module.exports = {
 
+
+    // ── Subitem ───────────────────────────────────────────────
+
+    ...defineTable('subitem', {
+        _id: col.id(),
+        item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] }),
+        variant_id: col.ref('variant._id', { as: 'variant', select: ['sku', 'display_name'], join: true }),
+        subitem_hin: col.string(),
+        subitem_eng: col.string(),
+        subitem_roman: col.string(),
+        unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
+        extra_note: col.string(),
+        document: col.json(),
+        restrict_month: col.number(),
+        restrict_year: col.number(),
+        min_rate: col.number(),
+        max_rate: col.number(),
+        add_by_dept_id: col.ref('department._id', { as: 'add_by_dept' }),
+        update_by_dept_id: col.ref('department._id', { as: 'update_by_dept' }),
+        verify: col.boolean().default(0),
+        active: col.boolean().default(0),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }, {
+        categories: { manyToMany: true, on: 'subitem_id', table: 'category', junction: 'rel_subitem_category', target: 'category_id', as: 'categories', select: ['_id', 'category_hin', 'category_eng'] },
+    }),
+
+    ...defineView('vsi', 'subitem'),
+
+    // ── Item ──────────────────────────────────────────────────
+
+    ...defineTable('item', {
+        _id: col.id(),
+        item_hin: col.string(),
+        item_eng: col.string(),
+        item_roman: col.string(),
+        item_code: col.string(),
+        unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
+        extra_note: col.string(),
+        document: col.json(),
+        restrict_month: col.number(),
+        restrict_year: col.number(),
+        min_rate: col.number(),
+        max_rate: col.number(),
+        add_by_dept_id: col.ref('department._id', { as: 'add_by_dept' }),
+        update_by_dept_id: col.ref('department._id', { as: 'update_by_dept' }),
+        verify: col.boolean().default(0),
+        active: col.boolean().default(1),
+        created_at: col.string(),
+        updated_at: col.string(),
+    }, {
+        subitems: { hasMany: true, on: 'item_id', table: 'subitem', target: '_id', as: 'subitems', select: '*' },
+        categories: { manyToMany: true, on: 'item_id', table: 'category', junction: 'rel_item_category', target: 'category_id', as: 'categories', select: ['_id', 'category_hin', 'category_eng'] },
+    }),
+
+    ...defineView('vi', 'item'),
+
+
     // ── Prastav (Proposal) ─────────────────────────────────────
 
     ...defineTable('prastav', {
@@ -15,7 +73,7 @@ module.exports = {
         pbk_id: col.ref('pbk._id', { as: 'pbk', select: ['pbk_hin', 'pbk_eng', 'pbk_roman'] }),
         pbk_count: col.string(),
         item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman', 'item_code'] }),
-        subitem_id: col.ref('subitem._id', { as: 'subitem', select: '*', join: true }),
+        subitem_id: col.ref('subitem._id', { as: 'subitem', select: '*' }),
         unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
         rate: col.number(),
         amount: col.number(),
@@ -128,58 +186,6 @@ module.exports = {
         rate: col.number(),
         amount: col.number(),
         active: col.boolean().default(1),
-    }),
-
-    // ── Item ──────────────────────────────────────────────────
-
-    ...defineTable('item', {
-        _id: col.id(),
-        item_hin: col.string(),
-        item_eng: col.string(),
-        item_roman: col.string(),
-        item_code: col.string(),
-        unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
-        extra_note: col.string(),
-        document: col.json(),
-        restrict_month: col.number(),
-        restrict_year: col.number(),
-        min_rate: col.number(),
-        max_rate: col.number(),
-        add_by_dept_id: col.ref('department._id', { as: 'add_by_dept' }),
-        update_by_dept_id: col.ref('department._id', { as: 'update_by_dept' }),
-        verify: col.boolean().default(0),
-        active: col.boolean().default(1),
-        created_at: col.string(),
-        updated_at: col.string(),
-    }, {
-        subitems: { hasMany: true, on: 'item_id', table: 'subitem', target: '_id', as: 'subitems', select: ['_id', 'subitem_hin', 'subitem_eng', 'active'] },
-        categories: { manyToMany: true, on: 'item_id', table: 'category', junction: 'rel_item_category', target: 'category_id', as: 'categories', select: ['_id', 'category_hin', 'category_eng'] },
-    }),
-
-    // ── Subitem ───────────────────────────────────────────────
-
-    ...defineTable('subitem', {
-        _id: col.id(),
-        item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] }),
-        variant_id: col.ref('variant._id', { as: 'variant', select: ['sku', 'display_name'], join: true }),
-        subitem_hin: col.string(),
-        subitem_eng: col.string(),
-        subitem_roman: col.string(),
-        unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
-        extra_note: col.string(),
-        document: col.json(),
-        restrict_month: col.number(),
-        restrict_year: col.number(),
-        min_rate: col.number(),
-        max_rate: col.number(),
-        add_by_dept_id: col.ref('department._id', { as: 'add_by_dept' }),
-        update_by_dept_id: col.ref('department._id', { as: 'update_by_dept' }),
-        verify: col.boolean().default(0),
-        active: col.boolean().default(0),
-        created_at: col.string(),
-        updated_at: col.string(),
-    }, {
-        categories: { manyToMany: true, on: 'subitem_id', table: 'category', junction: 'rel_subitem_category', target: 'category_id', as: 'categories', select: ['_id', 'category_hin', 'category_eng'] },
     }),
 
 
@@ -407,7 +413,7 @@ module.exports = {
         _id: col.id(),
         pbk_id: col.ref('pbk._id', { as: 'pbk', select: ['pbk_hin', 'pbk_eng', 'pbk_roman', 'roll_no'] }),
         item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] }),
-        subitem_id: col.ref('subitem._id', { as: 'subitem', select: ['item_id', 'subitem_list_id'] }),
+        subitem_id: col.ref('subitem._id', { as: 'subitem', select: '*' }),
         unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
         condition_id: col.ref('support_list._id', { as: 'condition', select: ['list_name_hin', 'list_name_eng'] }),
         dept_id: col.ref('department._id', { as: 'dept', select: ['dept_hin', 'dept_eng'] }),
@@ -425,7 +431,7 @@ module.exports = {
         _id: col.id(),
         pbk_id: col.ref('pbk._id', { as: 'pbk', select: ['pbk_hin', 'pbk_eng', 'pbk_roman', 'roll_no'] }),
         item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] }),
-        subitem_id: col.ref('subitem._id', { as: 'subitem', select: ['item_id', 'subitem_list_id'] }),
+        subitem_id: col.ref('subitem._id', { as: 'subitem', select: '*' }),
         unit_id: col.ref('unit._id', { as: 'unit', select: ['unit_short', 'unit_full'] }),
         condition_id: col.ref('support_list._id', { as: 'condition', select: ['list_name_hin', 'list_name_eng'] }),
         dept_id: col.ref('department._id', { as: 'dept', select: ['dept_hin', 'dept_eng'] }),

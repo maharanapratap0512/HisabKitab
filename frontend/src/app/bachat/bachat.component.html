@@ -119,24 +119,28 @@
                               {{data.dept_eng}}
                            </td>
                            <td>
-                              {{data.state_hin}}<br />
-                              {{data.state_eng}}
+                              <span>{{data.state_hin}}</span><br />
+                              <small class="text-muted">{{data.state_eng}}</small>
                            </td>
                            <td>
-                              {{data.mm_hin}}<br />
-                              {{data.mm_eng}}
-                           </td>
-                           <td *ngIf="!data.scat_id">
-                              {{data.icat_hin}}<br />
-                              {{data.icat_eng}}
-                           </td>
-                           <td *ngIf="data.scat_id">
-                              {{data.scat_hin}}<br />
-                              {{data.scat_eng}}
+                              <span>{{data.mm_hin}}</span><br />
+                              <small class="text-muted">{{data.mm_eng}}</small>
                            </td>
                            <td>
-                              {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}} <br />
-                              {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
+                              <ng-container
+                                 *ngIf="(data.scategories?.length > 0 ? data.scategories : data.icategories) as activeCats">
+                                 <div *ngIf="activeCats?.length > 0; else noCat">
+                                    <span>{{ activeCats | joinObj:'category_hin' }}</span>
+                                    <br />
+                                    <small class="text-muted">{{ activeCats | joinObj:'category_eng'
+                                       }}</small>
+                                 </div>
+                                 <ng-template #noCat>-</ng-template>
+                              </ng-container>
+                           </td>
+                           <td>
+                              <span>{{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}}</span> <br />
+                              <small class="text-muted">{{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}</small>
                            </td>
                            <td>
                               {{data.Used ? data.Used + " " + data.unit_short : "-"}}

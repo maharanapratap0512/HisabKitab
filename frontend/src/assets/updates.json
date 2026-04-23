@@ -1,11 +1,43 @@
 [
     {
         "version": "30.0",
-        "date": "21-04-2026",
-        "summary": "Major Upgrade: NetDrop P2P Sharing",
-        "summary_hin": "नया अपग्रेड: नेटड्रॉप P2P शेयरिंग",
+        "date": "22-04-2026",
+        "summary": "Major Upgrade: Structure Optimization & UI Redesign & NetDrop P2P Offline File Sharing",
+        "summary_hin": "नया अपग्रेड: स्ट्रक्चर सुधार और नया यूआई और नेटड्रॉप P2P शेयरिंग",
         "isNew": true,
         "items": [
+            {
+                "type": "warning",
+                "module": "Version 30",
+                "title": "Update in Progress",
+                "title_hin": "अपडेट जारी है",
+                "desc": "Version 30 update is still in progress, so errors may occur on some pages. If you encounter an error anywhere, please report it with a screenshot.",
+                "desc_hin": "वर्जन 30 का अपडेट अभी चल रहा है, इसलिए कुछ पेजों में एरर आ सकते हैं। अगर कहीं भी एरर आए तो कृपया स्क्रीनशॉट के साथ रिपोर्ट करें।"
+            },
+            {
+                "type": "improvement",
+                "module": "Inventory Core",
+                "title": "Structure Optimization",
+                "title_hin": "इन्वेंट्री स्ट्रक्चर सुधार",
+                "desc": "Category, Item, and Subitem structure optimized and improved. Reset all related modules (Aawak, Jawak, HMP, etc.) for better performance.",
+                "desc_hin": "कैटेगरी, आइटम और सब-आइटम स्ट्रक्चर को पहले से बेहतर बनाया गया है। आवक, जावक और अन्य पेजों को नए स्ट्रक्चर के हिसाब से अपडेट किया गया है।"
+            },
+            {
+                "type": "improvement",
+                "module": "Jawak Entry",
+                "title": "Smart Aawak Selection UI",
+                "title_hin": "स्मार्ट आवक सिलेक्शन यूआई",
+                "desc": "Redesigned Aawak selection dropdown with detailed summaries. View Lot No, Date, Source MM, and Remaining Quantity at a glance to ensure accurate data entry.",
+                "desc_hin": "जावक एंट्री में आवक चुनने के लिए नया और बेहतर डिजाइन। अब लॉट नंबर, तारीख, एमएम और बची हुई मात्रा (Remaining Qty) को एक साथ देखें, जिससे गलतियां कम होंगी।"
+            },
+            {
+                "type": "improvement",
+                "module": "UI/UX",
+                "title": "Bilingual Table Design",
+                "title_hin": "हिंदी-इंग्लिश टेबल डिजाइन",
+                "desc": "Improved table UI with a standardized bilingual format. Hindi on top, muted English on the second line for consistent readability across all reports.",
+                "desc_hin": "रिपोर्ट टेबल्स में हिंदी और इंग्लिश को बेहतर तरीके से दिखाया गया है। पहली लाइन में हिंदी और दूसरी लाइन में हल्की इंग्लिश, जिससे पढ़ना आसान हो गया है।"
+            },
             {
                 "type": "feature",
                 "module": "NetDrop",

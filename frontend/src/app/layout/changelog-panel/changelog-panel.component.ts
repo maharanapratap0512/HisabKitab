@@ -23,9 +23,9 @@ export class ChangelogPanelComponent implements OnInit, OnChanges {
         // Only recalculate expansion when updates or lastSeenVersion changes AND the panel becomes visible
         if (this.isVisible && (changes['isVisible'] || changes['updates'] || changes['lastSeenVersion'])) {
             if (this.updates && this.updates.length > 0) {
-                this.updates.forEach(v => {
-                    // If it's a new version (newer than lastSeenVersion), expand it by default
-                    if (!this.lastSeenVersion || this.compareVersions(v.version, this.lastSeenVersion) > 0) {
+                this.updates.forEach((v, index) => {
+                    // If it's the latest version (index 0) OR a new version (newer than lastSeenVersion), expand it
+                    if (index === 0 || !this.lastSeenVersion || this.compareVersions(v.version, this.lastSeenVersion) > 0) {
                         this.expandedStates[v.version] = true;
                     } else {
                         // Otherwise keep its current state or collapse if it's the first time
@@ -51,6 +51,7 @@ export class ChangelogPanelComponent implements OnInit, OnChanges {
             case 'fix': return 'uil-wrench';
             case 'improvement': return 'uil-chart-growth';
             case 'coming_soon': return 'uil-clock';
+            case 'warning': return 'uil-exclamation-triangle';
             default: return 'uil-info-circle';
         }
     }
@@ -61,6 +62,7 @@ export class ChangelogPanelComponent implements OnInit, OnChanges {
             case 'fix': return 'badge-fix';
             case 'improvement': return 'badge-improvement';
             case 'coming_soon': return 'badge-coming_soon';
+            case 'warning': return 'badge-outline-warning';
             default: return 'bg-secondary';
         }
     }
