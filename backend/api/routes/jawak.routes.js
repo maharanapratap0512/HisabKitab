@@ -92,7 +92,7 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
     if (req.body._id)
         conditions.push(`jawak._id = ${req.body._id}`)
     if (req.body.date)
-        conditions.push(`jawak.date = ${req.body.date}`)
+        conditions.push(`jawak.date = '${req.body.date}'`)
     if (req.body.month)
         conditions.push(`strftime('%m', jawak.date) = '${req.body.month}'`)
     if (req.body.year)

@@ -42,20 +42,15 @@
         <!-- top filter row -->
         <div class="row mb-2">
 
-          <div class="col-3 pt-2">
+          <div class="col-3 d-flex align-items-center gap-2">
             <button class="badge year-box badge-outline-secondary me-1" (click)="toggleExpandAll()"
               *ngIf="settings.hmp.viewMode === 'voucher'" title="Toggle Expand All">
               <i class="uil" [ngClass]="expandAll ? 'uil-compress-arrows' : 'uil-expand-arrows'"></i>
             </button>
-            <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
-              (click)="yearChanged(null)">All</span>
-            <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearChanged(y)"
-              [ngClass]="{'badge-outline-secondary':filterBody.year == y}">
-              {{y}}
-            </span>
+            <app-popover-year [selectedYear]="filterBody.year" (yearChanged)="yearChanged($event)"></app-popover-year>
           </div>
           <!-- Filter Options -->
-          <div class="col-1 pt-2">
+          <div class="col-1 d-flex align-items-center gap-2">
             <app-popover-filter label="Filter" iconClass="uil uil-filter" direction="auto" (clear)="clearFilter()"
               clearButtonLabel="Clear Filter" triggerOn="hover">
               <div style="width: 300px;">
@@ -86,7 +81,7 @@
               </div>
             </app-popover-filter>
           </div>
-          <div class="col-1 pt-2">
+          <div class="col-1 d-flex align-items-center gap-2">
             <button type="button" class="badge badge-outline-success dropdown-toggle year-box mx-2"
               data-bs-toggle="dropdown" aria-expanded="false"> Export To </button>
             <div class="dropdown-menu">
@@ -94,8 +89,8 @@
               <a class="dropdown-item" (click)="exportToPdf()" style="cursor: pointer;">Pdf</a>
             </div>
           </div>
-          <div class="col-2 pt-2 text-center">
-            <span>Total Count - {{total_count}}</span>
+          <div class="col-2 text-center d-flex align-items-center gap-2">
+            <span><b>Total Count = {{total_count}}</b></span>
           </div>
           <div class="col-5" *ngIf="batches.length">
             <pagination-controls class="pagi text-end" (pageChange)="getHmpPage(page = $event)" [autoHide]="true">
@@ -241,11 +236,11 @@
         <div class="table-responsive shadow-sm"
           style="border-radius: 8px; overflow-y: auto; max-height: calc(100vh - 250px);"
           *ngIf="settings.hmp.viewMode === 'individual'">
-          <table class="table-sm table-compact table-hover mb-0">
+          <table class="table-sm table-compact table-hover table-sticky-header mb-0">
             <thead>
               <tr>
                 <th style="min-width: 50px;">#</th>
-                <th style="min-width: 95px;">Date</th>
+                <th style="min-width: 140px;" class="text-start ps-2">Date</th>
                 <th style="min-width: 120px;">Recipe</th>
                 <th style="min-width: 110px;">MM</th>
                 <th style="min-width: 75px; text-align: center;">Status</th>

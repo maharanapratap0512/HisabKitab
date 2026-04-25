@@ -94,6 +94,16 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="row mt-2">
+                  <div class="col-12 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
+                    <button type="submit" class="btn btn-primary btn-sm px-4" [disabled]="pfs.submit">
+                      {{ isEdit ? 'Update' : 'Save' }}
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
           </ng-container>
@@ -152,7 +162,7 @@
             </div>
           </div>
 
-          <div class="col-md-12 mb-3 d-flex align-items-end gap-3">
+          <div class="col-md-5 mb-3 d-flex align-items-end gap-3">
             <div class="form-check mb-2">
               <input class="form-check-input" type="checkbox" id="isNoted" [(ngModel)]="pfs.prastavForm.is_noted"
                 name="is_noted">
@@ -163,6 +173,13 @@
               <input type="text" class="form-control" placeholder="Note Details"
                 [(ngModel)]="pfs.prastavForm.note_details" name="note_details">
             </div>
+          </div>
+
+          <div class="col-md-7 mb-3 d-flex align-items-end justify-content-end gap-2">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
+            <button type="submit" class="btn btn-primary btn-sm px-4" [disabled]="pfs.submit">
+              {{ isEdit ? 'Update' : 'Save' }}
+            </button>
           </div>
 
         </div>
@@ -417,15 +434,6 @@
 
 
 
-      <!-- ── Footer ───────────────────────────────────── -->
-      <div class="row mt-2">
-        <div class="col-12 d-flex justify-content-between">
-          <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
-          <button type="submit" class="btn btn-primary btn-sm" [disabled]="pfs.submit">
-            {{ isEdit ? 'Update' : 'Save' }}
-          </button>
-        </div>
-      </div>
 
     </form>
   </div>

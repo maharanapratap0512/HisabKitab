@@ -91,6 +91,7 @@ import { FltByCatPipe } from './pipe/flt-by-cat.pipe';
 import { BachatImportComponent } from './bachat-import/bachat-import.component';
 import { DeleteComponent } from './views/delete/delete.component';
 import { PopoverFilterComponent } from './SHARED/popover-filter/popover-filter.component';
+import { PopoverYearComponent } from './SHARED/popover-year/popover-year.component';
 import { HorizontalScrollWithArrowsDirective } from './SHARED/horizontal-scroll-with-arrows.directive';
 import { ContextMenuDirective } from './SHARED/context-menu.directive';
 import { JawakEntryNewComponent } from './ENTRY__FORMS/jawak-entry-new/jawak-entry-new.component';
@@ -188,6 +189,7 @@ import { SmartFocusDirective } from './SHARED/smart-focus.directive';
     BachatImportComponent,
     DeleteComponent,
     PopoverFilterComponent,
+    PopoverYearComponent,
     HorizontalScrollWithArrowsDirective,
     ContextMenuDirective,
     JawakEntryNewComponent,

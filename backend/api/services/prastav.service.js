@@ -9,7 +9,7 @@ const PrastavJawak = new BaseTable('prastav_jawak');
 /**
  * Paginated, filtered Prastav list.
  */
-function getPrastavs({ mm_id, pbk_id, item_id, year, pageNo, itemsPerPage }) {
+function getPrastavs({ mm_id, pbk_id, item_id, year, date, pageNo, itemsPerPage }) {
     const PAGE_SIZE = itemsPerPage ? Number(itemsPerPage) : 100;
     const page = (pageNo !== undefined && pageNo !== null) ? Number(pageNo) + 1 : 1;
     const offset = (page - 1) * PAGE_SIZE;
@@ -23,6 +23,10 @@ function getPrastavs({ mm_id, pbk_id, item_id, year, pageNo, itemsPerPage }) {
 
     if (year) {
         conds.push(`strftime('%Y', prastav.date) = '${String(year)}'`);
+    }
+
+    if (date) {
+        conds.push(`prastav.date = '${String(date)}'`);
     }
 
     const where = conds.join(' AND ');

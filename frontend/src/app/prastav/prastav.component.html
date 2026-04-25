@@ -55,15 +55,10 @@
 </div>
 
 <!-- Year Filter, Export and Total Count Row (Matching Jawak/HMP) -->
-<div class="row align-items-center mb-3">
+<div class="row align-items-center mb-1">
   <div class="col-md-5">
     <div class="d-flex align-items-center gap-1">
-      <span class="badge year-box cursor-pointer"
-        [ngClass]="!filterBody.year ? 'badge-primary' : 'badge-outline-secondary'" (click)="yearClick(null)">All</span>
-      <span *ngFor="let y of gs.years" class="badge year-box cursor-pointer"
-        [ngClass]="filterBody.year == y ? 'badge-primary' : 'badge-outline-secondary'" (click)="yearClick(y)">
-        {{y}}
-      </span>
+      <app-popover-year [selectedYear]="filterBody.year" (yearChanged)="yearClick($event)"></app-popover-year>
     </div>
   </div>
 
@@ -95,7 +90,16 @@
               <th style="width: 40px;" class="py-2">#</th>
               <th style="width: 100px;" class="py-2">Manage</th>
               <th style="width: 100px;" class="py-2">Voucher #</th>
-              <th style="width: 110px;" class="py-2">Date</th>
+              <th style="width: 140px;" class="py-2 text-start ps-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span>Date</span>
+                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                    [isOpen]="filterBody.date ? true : false" (clear)="filterBody.date = null; applyFilter()"
+                    triggerOn="hover">
+                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date" (change)="applyFilter()">
+                  </app-popover-filter>
+                </div>
+              </th>
 
               <!-- MM Column with Filter -->
               <th style="min-width: 180px;" class="py-2 text-start ps-3">
@@ -293,7 +297,16 @@
               <th style="width: 110px; position: sticky; left: 0; z-index: 21; background: var(--dark);"
                 class="py-2 border-end border-start">Voucher #</th>
               <th style="width: 120px; position: sticky; left: 110px; z-index: 21; background: var(--dark);"
-                class="py-2 border-end">Date</th>
+                class="py-2 border-end text-start ps-2">
+                <div class="d-flex align-items-center justify-content-between pe-1">
+                  <span>Date</span>
+                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                    [isOpen]="filterBody.date ? true : false" (clear)="filterBody.date = null; applyFilter()"
+                    triggerOn="hover">
+                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date" (change)="applyFilter()">
+                  </app-popover-filter>
+                </div>
+              </th>
               <th style="width: 160px; position: sticky; left: 230px; z-index: 21; background: var(--dark);"
                 class="py-2 border-end text-start ps-3">MM (Place)</th>
               <th style="width: 160px; position: sticky; left: 390px; z-index: 21; background: var(--dark);"
@@ -417,7 +430,7 @@
 <div class="modal fade" id="prastavEntryModal" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static">
   <div class="modal-dialog" role="document" style="width: 98%">
     <div class="modal-content shadow-lg border-0" style="border-radius: 12px; overflow: hidden;">
-      <div class="modal-header border-0 pb-0 bg-light">
+      <div class="modal-header border-0 bg-light">
         <h5 class="modal-title fw-bold text-dark font-size-16">
           <i class="uil uil-file-edit-alt me-2 text-primary"></i>
           {{isEdit ? 'Refine Record' : 'Prastav Entry'}}

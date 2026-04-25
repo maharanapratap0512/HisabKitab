@@ -70,7 +70,7 @@ function deleteRecipe(id) {
 // Uses BaseTable.getAll() with a raw WHERE string — schema-driven joins
 // auto-build recipe + mm (hasOne) and inputs/outputs (hasMany) from schema.
 
-function getBatches({ dept_id, mm_id, recipe_id, item_id, date_from, date_to, year, pageNo }) {
+function getBatches({ dept_id, mm_id, recipe_id, item_id, date, date_from, date_to, year, pageNo }) {
     const PAGE_SIZE = 100;
     const page = (pageNo && pageNo > 0) ? Number(pageNo) : 1;
     const offset = (page - 1) * PAGE_SIZE;
@@ -84,6 +84,7 @@ function getBatches({ dept_id, mm_id, recipe_id, item_id, date_from, date_to, ye
     if (mm_id) conds.push(`hmp_batch.mm_id = ${Number(mm_id)}`);
     if (recipe_id) conds.push(`hmp_batch.recipe_id = ${Number(recipe_id)}`);
     if (year) conds.push(`strftime('%Y', hmp_batch.date) = '${String(year)}'`);
+    if (date) conds.push(`hmp_batch.date = '${date}'`);
 
     if (date_from && date_to) {
         conds.push(`hmp_batch.date BETWEEN '${date_from}' AND '${date_to}'`);

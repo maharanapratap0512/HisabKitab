@@ -65,13 +65,8 @@
 
                <div class="card-body" style="overflow: auto;">
                   <div class="row">
-                     <div class="col-4 pt-2">
-                        <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
-                           (click)="yearClick(null)">All</span>
-                        <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearClick(y)"
-                           [ngClass]="{'badge-outline-secondary':filterBody.year == y}">
-                           {{y}}
-                        </span>
+                     <div class="col-4 pt-2 d-flex align-items-center gap-1" *ngIf="productData.length">
+                        <app-popover-year [selectedYear]="filterBody.year" (yearChanged)="yearClick($event)"></app-popover-year>
                      </div>
                      <div class="col-8" *ngIf="productData.length">
                         <pagination-controls class="pagi text-end" (pageChange)="getFilteredData(page = $event)"

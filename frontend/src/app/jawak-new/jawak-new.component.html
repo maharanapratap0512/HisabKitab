@@ -125,13 +125,8 @@
 
                 <div class="card-body" style="overflow: auto; flex-direction: column;">
                     <div class="row">
-                        <div class="col-4 pt-2">
-                            <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
-                                (click)="yearClick(null)">All</span>
-                            <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearClick(y)"
-                                [ngClass]="{'badge-outline-secondary':filterBody.year == y}">
-                                {{y}}
-                            </span>
+                        <div class="col-4 pt-2 d-flex align-items-center gap-1">
+                            <app-popover-year [selectedYear]="filterBody.year" (yearChanged)="yearClick($event)"></app-popover-year>
                         </div>
                         <div class="col-8 d-flex justify-content-end align-items-center" *ngIf="jawakData.length">
                             <pagination-controls class="pagi text-end" (pageChange)="getJawakPage(page = $event)"
@@ -161,7 +156,16 @@
                                     <th width="3%">#</th>
                                     <th width="7%">Actions</th>
                                     <th width="8%">Voucher No</th>
-                                    <th width="8%">Date</th>
+                                    <th style="width: 140px;" class="text-start ps-2">
+                                      <div class="d-flex align-items-center justify-content-between">
+                                        <span>Date</span>
+                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                          [isOpen]="!!filterBody.date" (clear)="filterBody.date = null; getFilteredData()"
+                                          triggerOn="hover">
+                                          <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date" (change)="getFilteredData()">
+                                        </app-popover-filter>
+                                      </div>
+                                    </th>
                                     <th width="6%">Pkt No</th>
                                     <th width="6%">Reg Page</th>
                                     <th width="12%">From MM</th>
@@ -369,7 +373,16 @@
                                             </app-popover-filter>
                                         </div>
                                     </th>
-                                    <th class="w-100">Date</th>
+                                    <th class="w-100 text-start ps-2" style="min-width: 140px;">
+                                      <div class="d-flex align-items-center justify-content-between">
+                                        <span>Date</span>
+                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                          [isOpen]="!!filterBody.date" (clear)="filterBody.date = null; getFilteredData()"
+                                          triggerOn="hover">
+                                          <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date" (change)="getFilteredData()">
+                                        </app-popover-filter>
+                                      </div>
+                                    </th>
                                     <th class="w-100">
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Pkt No</span>
