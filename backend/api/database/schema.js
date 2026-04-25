@@ -62,6 +62,65 @@ module.exports = {
 
     ...defineView('vi', 'item'),
 
+    ...defineTable('attributes', {
+        _id: col.id(),
+        attribute_hin: col.string(),
+        attribute_eng: col.string(),
+        attribute_roman: col.string(),
+        active: col.boolean().default(1),
+        created_at: col.string()
+    }),
+    ...defineTable('attributes_value', {
+        _id: col.id(),
+        attribute_id: col.ref('attributes._id', { as: 'attribute', select: ['attribute_hin', 'attribute_eng', 'attribute_roman'] }),
+        attribute_value_hin: col.string(),
+        attribute_value_eng: col.string(),
+        attribute_value_roman: col.string(),
+        active: col.boolean().default(1),
+        created_at: col.string()
+    }),
+    ...defineTable('variant', {
+        _id: col.id(),
+        item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] }),
+        sku: col.string(),
+        display_name: col.string(),
+        active: col.boolean().default(1),
+        created_at: col.string()
+    }),
+    ...defineTable('variant_attribute_map', {
+        _id: col.id(),
+        variant_id: col.ref('variant._id', { as: 'variant', select: ['sku', 'display_name'] }),
+        attribute_id: col.ref('attributes._id', { as: 'attribute', select: ['attribute_hin', 'attribute_eng', 'attribute_roman'] }),
+        attribute_value_id: col.ref('attributes_value._id', { as: 'attribute_value', select: ['attribute_value_hin', 'attribute_value_eng', 'attribute_value_roman'] }),
+        active: col.boolean().default(1),
+        created_at: col.string()
+    }),
+    ...defineTable('variant_category_map', {
+        _id: col.id(),
+        variant_id: col.ref('variant._id', { as: 'variant', select: ['sku', 'display_name'] }),
+        category_id: col.ref('category._id', { as: 'category', select: ['category_hin', 'category_eng'] }),
+        created_at: col.string()
+    }),
+    ...defineTable('item_source_map', {
+        _id: col.id(),
+        item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] }),
+        source_item_id: col.ref('item._id', { as: 'source_item', select: ['item_hin', 'item_eng', 'item_roman'] }),
+        created_at: col.string(),
+    }),
+    ...defineTable('item_aliases', {
+        _id: col.id(),
+        item_id: col.ref('item._id', { as: 'item', select: ['item_hin', 'item_eng', 'item_roman'] }),
+        alias: col.string(),
+        language: col.string(),
+        created_at: col.string()
+    }),
+    ...defineTable('variant_aliases', {
+        _id: col.id(),
+        variant_id: col.ref('variant._id', { as: 'variant', select: ['sku', 'display_name'] }),
+        alias: col.string(),
+        created_at: col.string()
+    }),
+
 
     // ── Prastav (Proposal) ─────────────────────────────────────
 

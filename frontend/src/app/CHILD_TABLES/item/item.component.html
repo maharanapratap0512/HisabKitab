@@ -162,7 +162,7 @@
                               <td *ngIf="settings.document">
                                  <div class="d-flex flex-wrap" *ngIf="data.document && data.document.images"
                                     (click)="viewProduct(data)" style="cursor: pointer;">
-                                    <span class="imageCount">x{{data.document.images.length}}</span>
+                                    <span class="imageCount">{{data.document.images.length}}</span>
                                     <img *ngFor=" let img of data.document.images" src="{{baseurl + img}}" height="25px"
                                        width="25px" alt="image" style="object-fit: cover;">
                                     <!-- <span class="badge bg-info"
