@@ -46,6 +46,7 @@ export class VariantNewComponent implements OnInit {
   units: any[] = [];
   allAttributes: any[] = [];
   attrValueMap: any = {};   // attribute_id → values[]
+  allItems: any[] = [];
 
   // ── Modal state ──────────────────────────────────────────────────────────
   showModal = '';
@@ -67,6 +68,7 @@ export class VariantNewComponent implements OnInit {
     this.gs.observeList().subscribe((r: any) => {
       this.categories = r.category || [];
       this.units = r.unit || [];
+      this.allItems = r.itemmix || [];
     });
     this.getItemData(1);
     this.loadAttributes();

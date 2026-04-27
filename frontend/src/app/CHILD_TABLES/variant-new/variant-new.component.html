@@ -65,11 +65,16 @@
                                     <div class="d-flex align-items-center justify-content-between">
                                         <span>Item Name (Hindi / Eng)</span>
                                         <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                            direction="left" [isOpen]="conditionObj.search?.length > 0"
-                                            (clear)="conditionObj.search = undefined; applyFilter()" triggerOn="hover">
-                                            <input type="text" class="form-control form-control-sm"
-                                                placeholder="Item search..." [(ngModel)]="conditionObj.search"
-                                                (keyup.enter)="applyFilter()" />
+                                            direction="left" [isOpen]="conditionObj.item_ids?.length > 0"
+                                            (clear)="conditionObj.item_ids = undefined; applyFilter()" triggerOn="hover">
+                                            <ng-select class="custom-sm" [multiple]="true" placeholder="Select items"
+                                                [(ngModel)]="conditionObj.item_ids" (change)="applyFilter()"
+                                                style="width: 250px;">
+                                                <ng-option *ngFor="let item of allItems" [value]="item._id">
+                                                    {{ item.item_hin }} <span class="small text-muted"
+                                                        *ngIf="item.item_code">({{ item.item_code }})</span>
+                                                </ng-option>
+                                            </ng-select>
                                         </app-popover-filter>
                                     </div>
                                 </th>
