@@ -14,28 +14,43 @@
                     <div class="card-body">
                         <div class="row mb-2 mt-3">
 
+                            <div class="col-md-2">
+                                <ng-select class="custom" style="width: 100%;" placeholder="Select MM Type"
+                                    [clearable]="false" [virtualScroll]="true" [selectOnTab]="true"
+                                    (change)="mmTypeSelected($event)">
+                                    <ng-option selected="selected" disabled value="">Select MM Type</ng-option>
+                                    <ng-option *ngFor="let item of mm_types" [value]="item.list_name_eng">
+                                        {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                                </ng-select>
+                            </div>
                             <div class="col-md-3">
                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Store"
                                     [clearable]="true" [multiple]="true" [virtualScroll]="true"
-                                    (change)="searchReports()" [(ngModel)]="filterBody.mm_id"
-                                    [ngModelOptions]="{standalone: true}"
+                                    [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}"
                                     [ngClass]="{'validation': !filterBody.mm_id || filterBody.mm_id.length < 1}">
-                                    <ng-option *ngFor="let item of stores" [value]="item._id">
+                                    <ng-option *ngFor="let item of mms" [value]="item._id">
                                         {{item.mm_hin}} : {{item.mm_code}} : {{item.mm_eng}}</ng-option>
                                 </ng-select>
                             </div>
                             <div class="col-md-3">
                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Condition"
                                     [clearable]="true" [multiple]="true" [virtualScroll]="true"
-                                    (change)="searchReports()" [(ngModel)]="filterBody.condition"
-                                    [ngModelOptions]="{standalone: true}"
+                                    [(ngModel)]="filterBody.condition" [ngModelOptions]="{standalone: true}"
                                     [ngClass]="{'validation': !filterBody.condition || filterBody.condition.length < 1}">
                                     <ng-option *ngFor="let item of conditions" [value]="item.list_name_eng">
                                         {{item.list_name_hin}} : {{item.list_name_eng}}</ng-option>
                                 </ng-select>
                             </div>
 
-                            <div class="col-md-2">
+                            <div class="col-md-1">
+                                <div class="form-group">
+                                    <label class="form-label"></label>
+                                    <button type="button" class="btn btn-theme mx-2" (click)="searchReports()"> Generate
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-1">
                                 <div class="form-group">
                                     <label class="form-label"></label>
                                     <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"

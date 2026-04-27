@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ng-sutramui — Docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--bg2:#13161d;--bg3:#1a1e28;--bg4:#222736;--border:#2a2f3e;--border2:#353c50;--text:#e2e6f0;--text2:#9ba3b8;--text3:#5f6880;--acc:#4ade80;--acc2:#22c55e;--green:#4ade80;--purple:#c084fc;--orange:#fb923c;--blue:#7c9bff;--yellow:#fbbf24;--red:#f87171;--tk-kw:#c084fc;--tk-fn:#7c9bff;--tk-str:#4ade80;--tk-num:#fb923c;--tk-cmt:#5f6880;--tk-cn:#fbbf24}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.7}
+.shell{display:grid;grid-template-columns:268px 1fr;min-height:100vh}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.sb-logo{padding:28px 24px 18px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.sb-logo .name{font-family:'Fraunces',serif;font-size:21px;font-weight:600;color:var(--text);letter-spacing:-.5px}
+.sb-logo .sub{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:3px}
+.sb-badge{display:inline-block;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:var(--acc);font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;margin-top:8px}
+.sb-badge.beta{background:rgba(251,146,60,.1);border-color:rgba(251,146,60,.25);color:var(--orange)}
+.nav-grp{padding:6px 0}
+.nav-lbl{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);padding:8px 24px 3px}
+.nav-a{display:flex;align-items:center;gap:8px;padding:6px 24px;color:var(--text2);text-decoration:none;font-size:13px;transition:all .15s;border-left:2px solid transparent}
+.nav-a:hover{color:var(--text);background:var(--bg3);border-left-color:var(--border2)}
+.nav-a.active{color:var(--acc);background:rgba(74,222,128,.07);border-left-color:var(--acc)}
+.nd{width:5px;height:5px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.nav-a.active .nd{background:var(--acc)}
+.main{max-width:920px}
+.hero{padding:72px 64px 56px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#0d0f14 0%,#0a130d 50%,#0d0f14 100%);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(74,222,128,.04) 0%,transparent 65%);pointer-events:none}
+.hero-ey{font-family:'DM Mono',monospace;font-size:12px;color:var(--acc);letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.hero-ey::before{content:'';display:inline-block;width:20px;height:1px;background:var(--acc)}
+.hero h1{font-family:'Fraunces',serif;font-size:52px;font-weight:700;line-height:1.1;letter-spacing:-1.5px;color:var(--text);margin-bottom:8px}
+.hero h1 span{color:var(--acc);font-style:italic}
+.hero-sub{font-size:18px;color:var(--text2);font-weight:300;margin-bottom:36px;max-width:520px;line-height:1.6}
+.hero-inst{display:inline-flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:12px 20px;font-family:'DM Mono',monospace;font-size:14px;color:var(--green)}
+.hero-inst .p{color:var(--text3)}
+.chips{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text2);font-family:'DM Mono',monospace}
+.chip .dot{width:6px;height:6px;border-radius:50%}
+.content{padding:0 64px 80px}
+.sec{padding-top:60px}
+.anc{display:block;position:relative;top:-80px;visibility:hidden}
+.sec-hdr{display:flex;align-items:baseline;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.sec-num{font-family:'DM Mono',monospace;font-size:12px;color:var(--acc);font-weight:500}
+.sec h2{font-family:'Fraunces',serif;font-size:26px;font-weight:600;color:var(--text);letter-spacing:-.5px}
+.sec h3{font-size:15px;font-weight:600;color:var(--text);margin:28px 0 10px;display:flex;align-items:center;gap:8px}
+.sec h3::before{content:'';display:inline-block;width:3px;height:14px;background:var(--acc);border-radius:2px;flex-shrink:0}
+.sec p{color:var(--text2);margin-bottom:16px;line-height:1.75;font-size:14.5px}
+p code,li code,td code{font-family:'DM Mono',monospace;font-size:12.5px;color:var(--acc);background:rgba(74,222,128,.08);padding:1px 6px;border-radius:4px;border:1px solid rgba(74,222,128,.15)}
+.cw{margin:18px 0;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--bg2)}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.cl{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+.clang{font-family:'DM Mono',monospace;font-size:10px;color:var(--acc);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);padding:2px 8px;border-radius:4px}
+.clang.ts{color:var(--blue);background:rgba(124,155,255,.1);border-color:rgba(124,155,255,.2)}
+.clang.html{color:var(--orange);background:rgba(251,146,60,.1);border-color:rgba(251,146,60,.2)}
+.clang.css{color:var(--purple);background:rgba(192,132,252,.1);border-color:rgba(192,132,252,.2)}
+.cb{padding:20px 24px;overflow-x:auto;font-family:'DM Mono',monospace;font-size:13px;line-height:1.8}
+.cb pre{margin:0;white-space:pre}
+.kw{color:var(--tk-kw)}.fn{color:var(--tk-fn)}.str{color:var(--tk-str)}.num{color:var(--tk-num)}.cmt{color:var(--tk-cmt);font-style:italic}.cn{color:var(--tk-cn)}
+.tag{color:#89ddff}.attr{color:#ffcb6b}.val{color:var(--tk-str)}
+.note{display:flex;gap:14px;padding:14px 18px;border-radius:8px;margin:16px 0;font-size:13.5px;line-height:1.65}
+.ni{font-size:16px;flex-shrink:0;margin-top:1px}
+.note.info{background:rgba(124,155,255,.07);border:1px solid rgba(124,155,255,.2);color:#a5b8ff}
+.note.tip{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);color:#86efac}
+.note.warn{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.2);color:#fdba74}
+.note.purple{background:rgba(192,132,252,.07);border:1px solid rgba(192,132,252,.2);color:#d8b4fe}
+.tw{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:16px 0}
+.dt{width:100%;border-collapse:collapse;font-size:13.5px}
+.dt th{background:var(--bg3);color:var(--text2);font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border2)}
+.dt td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:rgba(255,255,255,.02)}
+.dt td:first-child{color:var(--text);font-family:'DM Mono',monospace;font-size:12.5px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+hr.s{border:none;border-top:1px solid var(--border);margin:48px 0 0}
+/* layer diagram */
+.layer-stack{display:flex;flex-direction:column;gap:4px;margin:20px 0}
+.layer{border-radius:8px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;font-family:'DM Mono',monospace;font-size:13px}
+.layer.core{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);color:var(--acc)}
+.layer.primeng{background:rgba(124,155,255,.08);border:1px solid rgba(124,155,255,.2);color:var(--blue)}
+.layer.bootstrap{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.2);color:var(--purple)}
+.layer-label{font-weight:600}
+.layer-desc{font-size:11px;opacity:.7;margin-top:2px}
+.layer-pkg{font-size:11px;opacity:.6}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+@media(max-width:900px){.shell{grid-template-columns:1fr}.sidebar{display:none}.hero{padding:48px 28px}.content{padding:0 28px 60px}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="name">ng-sutramui</div>
+    <div class="sub">Angular UI — sutramEngine</div>
+    <div class="sb-badge beta">v1.0.0-beta</div>
+  </div>
+  <nav>
+    <div class="nav-grp">
+      <div class="nav-lbl">Getting Started</div>
+      <a href="#what"    class="nav-a active"><span class="nd"></span>What is ng-sutramui</a>
+      <a href="#install" class="nav-a"><span class="nd"></span>Installation</a>
+      <a href="#setup"   class="nav-a"><span class="nd"></span>Setup</a>
+      <a href="#styles"  class="nav-a"><span class="nd"></span>Styles</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Architecture</div>
+      <a href="#layers"   class="nav-a"><span class="nd"></span>Three Layers</a>
+      <a href="#core"     class="nav-a"><span class="nd"></span>Core Services</a>
+      <a href="#compact"  class="nav-a"><span class="nd"></span>Compact Mode</a>
+      <a href="#dark"     class="nav-a"><span class="nd"></span>Dark Mode</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Components</div>
+      <a href="#menu"        class="nav-a"><span class="nd"></span>sutram-menu</a>
+      <a href="#form"        class="nav-a"><span class="nd"></span>sutram-form</a>
+      <a href="#table"       class="nav-a"><span class="nd"></span>sutram-table</a>
+      <a href="#bunch-form"  class="nav-a"><span class="nd"></span>sutram-bunch-form</a>
+      <a href="#bunch-table" class="nav-a"><span class="nd"></span>sutram-bunch-table</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Custom UI</div>
+      <a href="#custom" class="nav-a"><span class="nd"></span>Build Your Own</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Reference</div>
+      <a href="#api"    class="nav-a"><span class="nd"></span>API Contract</a>
+      <a href="#models" class="nav-a"><span class="nd"></span>Models</a>
+    </div>
+  </nav>
+</aside>
+
+<main class="main">
+<div class="hero">
+  <div class="hero-ey">Angular Component Library — sutramEngine</div>
+  <h1>ng-sutram<span>ui</span></h1>
+  <p class="hero-sub">Schema-driven Angular components that auto-build from your sutramEngine API. PrimeNG and Bootstrap implementations — plus a headless core for custom UIs.</p>
+  <div class="hero-inst"><span class="p">$</span> npm install ng-sutramui primeng</div>
+  <div class="chips">
+    <div class="chip"><span class="dot" style="background:#4ade80"></span>Schema-driven</div>
+    <div class="chip"><span class="dot" style="background:#7c9bff"></span>PrimeNG + Bootstrap</div>
+    <div class="chip"><span class="dot" style="background:#c084fc"></span>Headless core</div>
+    <div class="chip"><span class="dot" style="background:#fb923c"></span>Compact mode</div>
+    <div class="chip"><span class="dot" style="background:#fbbf24"></span>Dark mode</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- WHAT -->
+<div class="sec"><span class="anc" id="what"></span>
+  <div class="sec-hdr"><span class="sec-num">01</span><h2>What is ng-sutramui?</h2></div>
+  <p>ng-sutramui is an Angular component library that reads schema from your <code>sutramEngine</code> backend and auto-generates menus, forms, tables, and bulk-entry UIs — without writing a single column definition in the frontend.</p>
+  <p>It ships three independent layers. Use only what you need — PrimeNG, Bootstrap, or just the headless core services to build your own UI.</p>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Layer</th><th>Import from</th><th>Requires</th></tr></thead>
+    <tbody>
+      <tr><td>Core</td><td><code>ng-sutramui/core</code></td><td>Angular only — zero UI deps</td></tr>
+      <tr><td>PrimeNG</td><td><code>ng-sutramui/primeng</code></td><td>primeng, @primeng/themes, primeicons</td></tr>
+      <tr><td>Bootstrap</td><td><code>ng-sutramui/bootstrap</code></td><td>bootstrap, @ng-select/ng-select</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- INSTALL -->
+<div class="sec"><span class="anc" id="install"></span>
+  <div class="sec-hdr"><span class="sec-num">02</span><h2>Installation</h2></div>
+  <p>Install only what you need. Peer dependencies are optional — npm will suggest them automatically.</p>
+  <div class="two">
+    <div class="cw"><div class="ch"><span class="cl">PrimeNG</span><span class="clang">bash</span></div>
+    <div class="cb"><pre><span class="fn">npm</span> install ng-sutramui primeng</pre></div></div>
+    <div class="cw"><div class="ch"><span class="cl">Bootstrap</span><span class="clang">bash</span></div>
+    <div class="cb"><pre><span class="fn">npm</span> install ng-sutramui bootstrap</pre></div></div>
+  </div>
+  <div class="cw"><div class="ch"><span class="cl">Core only — custom UI</span><span class="clang">bash</span></div>
+  <div class="cb"><pre><span class="fn">npm</span> install ng-sutramui</pre></div></div>
+  <div class="note info"><span class="ni">ℹ</span><span>Export to Excel/PDF uses <code>xlsx</code> and <code>jspdf</code> — both loaded lazily via dynamic import. No bundle cost until user clicks Export.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- SETUP -->
+<div class="sec"><span class="anc" id="setup"></span>
+  <div class="sec-hdr"><span class="sec-num">03</span><h2>Setup</h2></div>
+  <p>Call <code>provideSutramUI()</code> once in <code>app.config.ts</code>. Every component and service reads from this config automatically.</p>
+
+  <div class="two">
+    <div class="cw"><div class="ch"><span class="cl">PrimeNG — app.config.ts</span><span class="clang ts">ts</span></div>
+    <div class="cb"><pre><span class="kw">import</span> { <span class="cn">provideSutramUI</span> } <span class="kw">from</span> <span class="str">'ng-sutramui/core'</span>;
+<span class="kw">import</span> { <span class="cn">providePrimeNG</span> }  <span class="kw">from</span> <span class="str">'primeng/config'</span>;
+<span class="kw">import</span> <span class="cn">Aura</span> <span class="kw">from</span> <span class="str">'@primeng/themes/aura'</span>;
+
+<span class="kw">export const</span> appConfig = {
+  providers: [
+    <span class="fn">provideSutramUI</span>({
+      apiBase: <span class="str">'http://localhost:3000/api'</span>,
+      theme:   <span class="str">'primeng'</span>,
+      compact: <span class="kw">false</span>,
+    }),
+    <span class="fn">providePrimeNG</span>({
+      theme: { preset: <span class="cn">Aura</span>, options: { darkModeSelector: <span class="str">'.dark'</span> } }
+    }),
+  ]
+};</pre></div></div>
+
+    <div class="cw"><div class="ch"><span class="cl">Bootstrap — app.config.ts</span><span class="clang ts">ts</span></div>
+    <div class="cb"><pre><span class="kw">import</span> { <span class="cn">provideSutramUI</span> } <span class="kw">from</span> <span class="str">'ng-sutramui/core'</span>;
+
+<span class="kw">export const</span> appConfig = {
+  providers: [
+    <span class="fn">provideSutramUI</span>({
+      apiBase: <span class="str">'http://localhost:3000/api'</span>,
+      theme:   <span class="str">'bootstrap'</span>,
+      compact: <span class="kw">true</span>,  <span class="cmt">// global compact</span>
+    }),
+  ]
+};</pre></div></div>
+  </div>
+
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Config key</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>apiBase</td><td>string</td><td>—</td><td>sutramEngine API URL e.g. <code>http://localhost:3000/api</code></td></tr>
+      <tr><td>headers</td><td>Record&lt;string,string&gt;</td><td>{}</td><td>Optional HTTP headers added to every request</td></tr>
+      <tr><td>theme</td><td>'primeng' | 'bootstrap'</td><td>'primeng'</td><td>Which component layer is active</td></tr>
+      <tr><td>compact</td><td>boolean</td><td>false</td><td>Global compact mode — per-component [compact] overrides this</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- STYLES -->
+<div class="sec"><span class="anc" id="styles"></span>
+  <div class="sec-hdr"><span class="sec-num">04</span><h2>Styles</h2></div>
+  <p>Import styles in order. Base CSS variables must come first. Compact is optional.</p>
+  <div class="two">
+    <div class="cw"><div class="ch"><span class="cl">PrimeNG — styles.css</span><span class="clang css">css</span></div>
+    <div class="cb"><pre><span class="kw">@import</span> <span class="str">'ng-sutramui/styles'</span>;
+<span class="kw">@import</span> <span class="str">'ng-sutramui/styles/primeng'</span>;
+<span class="kw">@import</span> <span class="str">'ng-sutramui/styles/compact'</span>; <span class="cmt">/* optional */</span></pre></div></div>
+
+    <div class="cw"><div class="ch"><span class="cl">Bootstrap — styles.css</span><span class="clang css">css</span></div>
+    <div class="cb"><pre><span class="kw">@import</span> <span class="str">'bootstrap/dist/css/bootstrap.min.css'</span>;
+<span class="kw">@import</span> <span class="str">'@ng-select/ng-select/themes/default.theme.css'</span>;
+<span class="kw">@import</span> <span class="str">'ng-sutramui/styles'</span>;
+<span class="kw">@import</span> <span class="str">'ng-sutramui/styles/bootstrap'</span>;
+<span class="kw">@import</span> <span class="str">'ng-sutramui/styles/compact'</span>; <span class="cmt">/* optional */</span></pre></div></div>
+  </div>
+</div>
+
+<hr class="s">
+
+<!-- LAYERS -->
+<div class="sec"><span class="anc" id="layers"></span>
+  <div class="sec-hdr"><span class="sec-num">05</span><h2>Three Layers</h2></div>
+  <div class="layer-stack">
+    <div class="layer primeng">
+      <div><div class="layer-label">PrimeNG Layer</div><div class="layer-desc">sutram-menu, sutram-form, sutram-table, sutram-bunch-form, sutram-bunch-table</div></div>
+      <div class="layer-pkg">ng-sutramui/primeng</div>
+    </div>
+    <div class="layer bootstrap">
+      <div><div class="layer-label">Bootstrap Layer</div><div class="layer-desc">Same 5 components — Bootstrap 5 + ng-select</div></div>
+      <div class="layer-pkg">ng-sutramui/bootstrap</div>
+    </div>
+    <div class="layer core">
+      <div><div class="layer-label">Core Layer</div><div class="layer-desc">SutramSchemaService, SutramFormService, SutramTableService, SutramDropdownService, SutramBunchService</div></div>
+      <div class="layer-pkg">ng-sutramui/core</div>
+    </div>
+  </div>
+  <div class="note tip"><span class="ni">✓</span><span>Both PrimeNG and Bootstrap layers use the same core services. Switching themes = change import path + CSS — no logic changes needed.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- CORE -->
+<div class="sec"><span class="anc" id="core"></span>
+  <div class="sec-hdr"><span class="sec-num">06</span><h2>Core Services</h2></div>
+  <p>Import from <code>ng-sutramui/core</code>. Zero UI dependency — use in any Angular project regardless of UI library.</p>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Service</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>SutramSchemaService</td><td>Fetches + caches schemas, dropdown data, CRUD operations. shareReplay(1) — one HTTP call per session per key.</td></tr>
+      <tr><td>SutramFormService</td><td>Builds Angular FormGroup from schema. Validates, patches (edit mode), submits POST/PUT.</td></tr>
+      <tr><td>SutramTableService</td><td>Manages table state via signals — rows, total, page, loading. Pagination, filter, sort, inline update.</td></tr>
+      <tr><td>SutramDropdownService</td><td>In-memory dropdown cache. Local search (no API). Dependent filter by parent _id. Dirty flag for refresh.</td></tr>
+      <tr><td>SutramBunchService</td><td>Master-detail / bulk form logic. Auto-push new row when required fields filled. Calc fields (qty*rate). Submit validation.</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- COMPACT -->
+<div class="sec"><span class="anc" id="compact"></span>
+  <div class="sec-hdr"><span class="sec-num">07</span><h2>Compact Mode</h2></div>
+  <p>Compact mode reduces font sizes, padding, input heights, table cell spacing — everything via CSS variables. Works on both PrimeNG and Bootstrap.</p>
+  <div class="two">
+    <div class="cw"><div class="ch"><span class="cl">Global compact (app.config.ts)</span><span class="clang ts">ts</span></div>
+    <div class="cb"><pre><span class="fn">provideSutramUI</span>({ compact: <span class="kw">true</span> })</pre></div></div>
+    <div class="cw"><div class="ch"><span class="cl">Per-component override</span><span class="clang html">html</span></div>
+    <div class="cb"><pre><span class="cmt">&lt;!-- global ON, this table normal --&gt;</span>
+<span class="tag">&lt;sutram-table</span> <span class="attr">table</span>=<span class="str">"city"</span> <span class="attr">[compact]</span>=<span class="str">"false"</span> <span class="tag">/&gt;</span>
+
+<span class="cmt">&lt;!-- global OFF, just this form compact --&gt;</span>
+<span class="tag">&lt;sutram-form</span>  <span class="attr">table</span>=<span class="str">"city"</span> <span class="attr">[compact]</span>=<span class="str">"true"</span>  <span class="tag">/&gt;</span></pre></div></div>
+  </div>
+  <div class="note info"><span class="ni">ℹ</span><span>Compact overrides all <code>--sui-*</code> CSS variables. PrimeNG component sizes are also reduced via scoped overrides in <code>sutramui-compact.css</code>.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- DARK MODE -->
+<div class="sec"><span class="anc" id="dark"></span>
+  <div class="sec-hdr"><span class="sec-num">08</span><h2>Dark Mode</h2></div>
+  <div class="two">
+    <div>
+      <h3>PrimeNG</h3>
+      <p>Set <code>darkModeSelector: '.dark'</code> in <code>providePrimeNG()</code>. sutram-menu's theme toggle adds/removes <code>.dark</code> on <code>document.body</code>. Preference saved to <code>localStorage</code>.</p>
+      <div class="cw"><div class="ch"><span class="cl">app.config.ts</span><span class="clang ts">ts</span></div>
+      <div class="cb"><pre><span class="fn">providePrimeNG</span>({
+  theme: {
+    preset: <span class="cn">Aura</span>,
+    options: { darkModeSelector: <span class="str">'.dark'</span> }
+  }
+})</pre></div></div>
+    </div>
+    <div>
+      <h3>Bootstrap</h3>
+      <p>Bootstrap 5.3+ native dark mode. sutram-menu toggle sets <code>data-bs-theme="dark"</code> on <code>&lt;html&gt;</code>. All ng-select styles respond automatically via Bootstrap CSS variables.</p>
+      <div class="cw"><div class="ch"><span class="cl">Automatic</span><span class="clang html">html</span></div>
+      <div class="cb"><pre><span class="cmt">&lt;!-- sutram-menu handles this automatically --&gt;</span>
+<span class="tag">&lt;sutram-menu</span> <span class="attr">[showThemeToggle]</span>=<span class="str">"true"</span> <span class="tag">/&gt;</span></pre></div></div>
+    </div>
+  </div>
+</div>
+
+<hr class="s">
+
+<!-- MENU -->
+<div class="sec"><span class="anc" id="menu"></span>
+  <div class="sec-hdr"><span class="sec-num">09</span><h2>sutram-menu</h2></div>
+  <p>Auto-builds sidebar (PanelMenu / Bootstrap nav) or topbar (Menubar / Bootstrap navbar) from <code>GET /_sutram/menu</code>. Supports 1-level submenu via <code>children[]</code> in the schema response.</p>
+  <div class="cw"><div class="ch"><span class="cl">Usage</span><span class="clang html">html</span></div>
+  <div class="cb"><pre><span class="cmt">&lt;!-- Default sidebar --&gt;</span>
+<span class="tag">&lt;sutram-menu</span> <span class="tag">/&gt;</span>
+
+<span class="cmt">&lt;!-- Topbar --&gt;</span>
+<span class="tag">&lt;sutram-menu</span> <span class="attr">mode</span>=<span class="str">"topbar"</span> <span class="tag">/&gt;</span>
+
+<span class="cmt">&lt;!-- All options --&gt;</span>
+<span class="tag">&lt;sutram-menu</span>
+  <span class="attr">mode</span>=<span class="str">"sidebar"</span>
+  <span class="attr">[collapsible]</span>=<span class="str">"true"</span>
+  <span class="attr">[showReports]</span>=<span class="str">"true"</span>
+  <span class="attr">[showThemeToggle]</span>=<span class="str">"true"</span>
+  <span class="attr">[overrides]</span>=<span class="str">"extraItems"</span>
+  <span class="attr">[compact]</span>=<span class="str">"false"</span>
+<span class="tag">/&gt;</span></pre></div></div>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Input</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>mode</td><td>'sidebar' | 'topbar'</td><td>'sidebar'</td><td>Layout mode</td></tr>
+      <tr><td>collapsible</td><td>boolean</td><td>true</td><td>Sidebar collapse toggle</td></tr>
+      <tr><td>showReports</td><td>boolean</td><td>true</td><td>Show reports section from menu</td></tr>
+      <tr><td>showThemeToggle</td><td>boolean</td><td>true</td><td>Light/dark toggle button</td></tr>
+      <tr><td>overrides</td><td>SutramMenuItem[]</td><td>[]</td><td>Extra items merged after API items</td></tr>
+      <tr><td>compact</td><td>boolean</td><td>global</td><td>Override global compact for this component</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- FORM -->
+<div class="sec"><span class="anc" id="form"></span>
+  <div class="sec-hdr"><span class="sec-num">10</span><h2>sutram-form</h2></div>
+  <p>Auto-generates a reactive form from <code>GET /_sutram/schema/:table</code>. Developer controls placement — no opinionated dialog wrapper. Wrap in <code>p-dialog</code> or Bootstrap modal yourself.</p>
+  <div class="cw"><div class="ch"><span class="cl">Usage</span><span class="clang html">html</span></div>
+  <div class="cb"><pre><span class="cmt">&lt;!-- Auto-fetch schema --&gt;</span>
+<span class="tag">&lt;sutram-form</span> <span class="attr">table</span>=<span class="str">"city"</span> <span class="attr">(onSubmit)</span>=<span class="str">"save($event)"</span> <span class="tag">/&gt;</span>
+
+<span class="cmt">&lt;!-- Edit mode --&gt;</span>
+<span class="tag">&lt;sutram-form</span> <span class="attr">table</span>=<span class="str">"city"</span> <span class="attr">[record]</span>=<span class="str">"selectedRow"</span>
+  <span class="attr">submitLabel</span>=<span class="str">"Update"</span>
+  <span class="attr">(onSubmit)</span>=<span class="str">"update($event)"</span>
+  <span class="attr">(onCancel)</span>=<span class="str">"close()"</span> <span class="tag">/&gt;</span>
+
+<span class="cmt">&lt;!-- Readonly view --&gt;</span>
+<span class="tag">&lt;sutram-form</span> <span class="attr">table</span>=<span class="str">"city"</span> <span class="attr">[record]</span>=<span class="str">"row"</span> <span class="attr">[readonly]</span>=<span class="str">"true"</span> <span class="tag">/&gt;</span>
+
+<span class="cmt">&lt;!-- In PrimeNG dialog --&gt;</span>
+<span class="tag">&lt;p-dialog</span> <span class="attr">[(visible)]</span>=<span class="str">"showForm"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;sutram-form</span> <span class="attr">table</span>=<span class="str">"city"</span>
+    <span class="attr">(onSubmit)</span>=<span class="str">"saved($event)"</span>
+    <span class="attr">(onCancel)</span>=<span class="str">"showForm=false"</span> <span class="tag">/&gt;</span>
+<span class="tag">&lt;/p-dialog&gt;</span></pre></div></div>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Input</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>table</td><td>string</td><td>Fetch schema by table name</td></tr>
+      <tr><td>schema</td><td>SutramTableSchema</td><td>Pass schema manually (optional)</td></tr>
+      <tr><td>record</td><td>any</td><td>Existing record → edit mode. POST if absent, PUT if present.</td></tr>
+      <tr><td>submitLabel</td><td>string</td><td>Submit button label. Default: 'Save'</td></tr>
+      <tr><td>showCancel</td><td>boolean</td><td>Show cancel button. Default: true</td></tr>
+      <tr><td>showReset</td><td>boolean</td><td>Show reset button. Default: false</td></tr>
+      <tr><td>readonly</td><td>boolean</td><td>Disable all fields. Default: false</td></tr>
+      <tr><td>compact</td><td>boolean</td><td>Override global compact</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>field_type</th><th>PrimeNG</th><th>Bootstrap</th></tr></thead>
+    <tbody>
+      <tr><td>text</td><td>p-inputText</td><td>input.form-control</td></tr>
+      <tr><td>number</td><td>p-inputNumber</td><td>input[type=number]</td></tr>
+      <tr><td>boolean</td><td>p-inputSwitch</td><td>input[type=checkbox]</td></tr>
+      <tr><td>textarea</td><td>p-textarea</td><td>textarea.form-control</td></tr>
+      <tr><td>date / datetime</td><td>p-calendar</td><td>input[type=date/datetime-local]</td></tr>
+      <tr><td>dropdown</td><td>p-dropdown (filterable)</td><td>ng-select.sutram-select</td></tr>
+      <tr><td>multiselect</td><td>p-multiSelect</td><td>ng-select[multiple]</td></tr>
+      <tr><td>file</td><td>p-fileUpload</td><td>input[type=file]</td></tr>
+      <tr><td>color</td><td>input[type=color]</td><td>input[type=color]</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- TABLE -->
+<div class="sec"><span class="anc" id="table"></span>
+  <div class="sec-hdr"><span class="sec-num">11</span><h2>sutram-table</h2></div>
+  <p>Schema-driven data table with pagination, global filter, inline editing, and Excel/PDF export. Table headers are always colorful — configurable via inputs.</p>
+  <div class="cw"><div class="ch"><span class="cl">Usage</span><span class="clang html">html</span></div>
+  <div class="cb"><pre><span class="cmt">&lt;!-- Simple --&gt;</span>
+<span class="tag">&lt;sutram-table</span> <span class="attr">table</span>=<span class="str">"city"</span> <span class="tag">/&gt;</span>
+
+<span class="cmt">&lt;!-- Inline edit — small tables (city, state, category) --&gt;</span>
+<span class="tag">&lt;sutram-table</span>
+  <span class="attr">table</span>=<span class="str">"city"</span>
+  <span class="attr">[inlineEdit]</span>=<span class="str">"true"</span>
+  <span class="attr">[actions]</span>=<span class="str">"['delete']"</span>
+  <span class="attr">(onSave)</span>=<span class="str">"saved($event)"</span>
+<span class="tag">/&gt;</span>
+
+<span class="cmt">&lt;!-- Full actions — large tables --&gt;</span>
+<span class="tag">&lt;sutram-table</span>
+  <span class="attr">table</span>=<span class="str">"product"</span>
+  <span class="attr">[actions]</span>=<span class="str">"['view','edit','delete']"</span>
+  <span class="attr">[rows]</span>=<span class="str">"25"</span>
+  <span class="attr">(onEdit)</span>=<span class="str">"openForm($event)"</span>
+  <span class="attr">(onDelete)</span>=<span class="str">"deleted($event)"</span>
+<span class="tag">/&gt;</span>
+
+<span class="cmt">&lt;!-- Custom export headers and colors --&gt;</span>
+<span class="tag">&lt;sutram-table</span>
+  <span class="attr">table</span>=<span class="str">"product"</span>
+  <span class="attr">exportHeaderColor</span>=<span class="str">"#10B981"</span>
+  <span class="attr">exportHeaderTextColor</span>=<span class="str">"#fff"</span>
+  <span class="attr">[exportColumns]</span>=<span class="str">"myColumns"</span>
+<span class="tag">/&gt;</span></pre></div></div>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Input</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>table</td><td>string</td><td>—</td><td>Table name — schema + data auto-fetched</td></tr>
+      <tr><td>rows</td><td>number</td><td>10</td><td>Rows per page</td></tr>
+      <tr><td>inlineEdit</td><td>boolean</td><td>false</td><td>Row click = editable cells. Best for simple tables.</td></tr>
+      <tr><td>actions</td><td>TableAction[]</td><td>[]</td><td>'view' | 'edit' | 'delete'</td></tr>
+      <tr><td>exportExcel</td><td>boolean</td><td>true</td><td>Show Excel export button</td></tr>
+      <tr><td>exportPdf</td><td>boolean</td><td>true</td><td>Show PDF export button</td></tr>
+      <tr><td>exportColumns</td><td>SutramExportColumn[]</td><td>schema columns</td><td>Override default export columns</td></tr>
+      <tr><td>exportHeaderColor</td><td>string</td><td>'#4F46E5'</td><td>Export header background color (hex)</td></tr>
+      <tr><td>compact</td><td>boolean</td><td>global</td><td>Override global compact</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- BUNCH FORM -->
+<div class="sec"><span class="anc" id="bunch-form"></span>
+  <div class="sec-hdr"><span class="sec-num">12</span><h2>sutram-bunch-form</h2></div>
+  <p>Master-detail and bulk entry form. Schema fetched from <code>GET /_sutram/bunch-schema/:formName</code>. Two modes determined by schema — no code change needed.</p>
+  <div class="two">
+    <div>
+      <h3>Master + Detail (Voucher)</h3>
+      <div class="cw"><div class="ch"><span class="cl">Usage</span><span class="clang html">html</span></div>
+      <div class="cb"><pre><span class="tag">&lt;sutram-bunch-form</span>
+  <span class="attr">schema</span>=<span class="str">"voucher_entry"</span>
+  <span class="attr">(onSubmit)</span>=<span class="str">"saved($event)"</span>
+<span class="tag">/&gt;</span></pre></div></div>
+    </div>
+    <div>
+      <h3>Detail Only (Bulk City)</h3>
+      <div class="cw"><div class="ch"><span class="cl">Usage</span><span class="clang html">html</span></div>
+      <div class="cb"><pre><span class="tag">&lt;sutram-bunch-form</span>
+  <span class="attr">schema</span>=<span class="str">"city_bulk"</span>
+  <span class="attr">(onSubmit)</span>=<span class="str">"saved($event)"</span>
+<span class="tag">/&gt;</span></pre></div></div>
+    </div>
+  </div>
+  <div class="note tip"><span class="ni">✓</span><span>Auto-push: when all required fields of a row are filled → new empty row appears automatically. Minimum 1 row always kept.</span></div>
+  <div class="note info"><span class="ni">ℹ</span><span>Submit payload: <code>{"master": {}, "details": [{...}]}</code>. <code>master</code> is <code>{}</code> in detail-only mode. Sent to <code>POST /_sutram/bunch/:formName</code>.</span></div>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Input</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>schema</td><td>string (required)</td><td>Bunch form name — fetches from <code>/_sutram/bunch-schema/:name</code></td></tr>
+      <tr><td>submitLabel</td><td>string</td><td>Submit button label. Default: 'Submit'</td></tr>
+      <tr><td>showCancel</td><td>boolean</td><td>Show cancel button. Default: true</td></tr>
+      <tr><td>compact</td><td>boolean</td><td>Override global compact</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- BUNCH TABLE -->
+<div class="sec"><span class="anc" id="bunch-table"></span>
+  <div class="sec-hdr"><span class="sec-num">13</span><h2>sutram-bunch-table</h2></div>
+  <p>Displays master-detail data grouped. Each master row = expandable card showing its detail rows. Export includes all groups in one sheet/PDF.</p>
+  <div class="cw"><div class="ch"><span class="cl">Usage</span><span class="clang html">html</span></div>
+  <div class="cb"><pre><span class="tag">&lt;sutram-bunch-table</span>
+  <span class="attr">schema</span>=<span class="str">"voucher_entry"</span>
+  <span class="attr">[masterData]</span>=<span class="str">"vouchers"</span>
+  <span class="attr">[detailData]</span>=<span class="str">"voucherItems"</span>
+  <span class="attr">detailForeignKey</span>=<span class="str">"voucher_id"</span>
+  <span class="attr">[actions]</span>=<span class="str">"['edit','delete']"</span>
+  <span class="attr">(onEdit)</span>=<span class="str">"editVoucher($event)"</span>
+  <span class="attr">(onDelete)</span>=<span class="str">"deleted($event)"</span>
+<span class="tag">/&gt;</span></pre></div></div>
+  <div class="note info"><span class="ni">ℹ</span><span><code>detailForeignKey</code> is auto-detected from schema if not provided — uses the first dropdown ref field in <code>detailFields</code>.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- CUSTOM UI -->
+<div class="sec"><span class="anc" id="custom"></span>
+  <div class="sec-hdr"><span class="sec-num">14</span><h2>Build Your Own UI</h2></div>
+  <p>Import from <code>ng-sutramui/core</code> — inject the services you need, build your own templates with any UI library.</p>
+  <div class="cw"><div class="ch"><span class="cl">Custom table component example</span><span class="clang ts">ts</span></div>
+  <div class="cb"><pre><span class="kw">import</span> { <span class="cn">SutramTableService</span>, <span class="cn">SutramSchemaService</span> } <span class="kw">from</span> <span class="str">'ng-sutramui/core'</span>;
+
+<span class="kw">@Component</span>({ ... })
+<span class="kw">export class</span> <span class="cn">MyTableComponent</span> <span class="kw">implements</span> <span class="cn">OnInit</span> {
+  <span class="kw">private</span> tableService = <span class="fn">inject</span>(<span class="cn">SutramTableService</span>);
+  <span class="kw">private</span> schemaService = <span class="fn">inject</span>(<span class="cn">SutramSchemaService</span>);
+
+  schema = <span class="fn">signal</span>&lt;<span class="cn">SutramTableSchema</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+  <span class="cmt">// Proxy signals from service — reactive</span>
+  rows    = <span class="kw">this</span>.tableService.rows;
+  total   = <span class="kw">this</span>.tableService.total;
+  loading = <span class="kw">this</span>.tableService.loading;
+  page    = <span class="kw">this</span>.tableService.page;
+
+  <span class="fn">ngOnInit</span>() {
+    <span class="kw">this</span>.schemaService.<span class="fn">getTableSchema</span>(<span class="str">'city'</span>).<span class="fn">subscribe</span>(s => {
+      <span class="kw">this</span>.schema.<span class="fn">set</span>(s);
+      <span class="kw">this</span>.tableService.<span class="fn">init</span>(<span class="str">'city'</span>, { limit: <span class="num">20</span> });
+      <span class="kw">this</span>.tableService.<span class="fn">load</span>().<span class="fn">subscribe</span>();
+    });
+  }
+
+  nextPage() { <span class="kw">this</span>.tableService.<span class="fn">nextPage</span>()?.subscribe(); }
+}</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- API CONTRACT -->
+<div class="sec"><span class="anc" id="api"></span>
+  <div class="sec-hdr"><span class="sec-num">15</span><h2>API Contract</h2></div>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Endpoint</th><th>Used by</th><th>Returns</th></tr></thead>
+    <tbody>
+      <tr><td>GET /_sutram/menu</td><td>sutram-menu</td><td>{ tables[], reports[] }</td></tr>
+      <tr><td>GET /_sutram/schema/:table</td><td>sutram-form, sutram-table</td><td>SutramTableSchema</td></tr>
+      <tr><td>GET /_sutram/bunch-schema/:name</td><td>sutram-bunch-form/table</td><td>SutramBunchSchema</td></tr>
+      <tr><td>GET /:table?_limit=&_page=</td><td>sutram-table</td><td>{ result[], total }</td></tr>
+      <tr><td>GET /:refTable?_limit=9999</td><td>dropdown cache</td><td>{ result[] }</td></tr>
+      <tr><td>POST /:table</td><td>sutram-form (new)</td><td>{ result: savedRow }</td></tr>
+      <tr><td>PUT /:table/:id</td><td>sutram-form (edit)</td><td>{ result: updatedRow }</td></tr>
+      <tr><td>DELETE /:table/:id</td><td>sutram-table delete</td><td>{ result: { deleted: N } }</td></tr>
+      <tr><td>POST /_sutram/bunch/:name</td><td>sutram-bunch-form</td><td>{ result: any }</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note purple"><span class="ni">◈</span><span>All responses wrapped in <code>{ success: true, result: T, total?, count? }</code> or <code>{ success: false, error: string }</code> — standard sutramEngine router envelope.</span></div>
+</div>
+
+</div></main>
+</div>
+
+<script>
+const anchors  = document.querySelectorAll('.anc');
+const navLinks = document.querySelectorAll('.nav-a');
+new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => a.classList.remove('active'));
+      const lnk = document.querySelector(`.nav-a[href="#${e.target.id}"]`);
+      if (lnk) lnk.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' }).observe(anchors);
+anchors.forEach(a => new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => a.classList.remove('active'));
+      const lnk = document.querySelector(`.nav-a[href="#${e.target.id}"]`);
+      if (lnk) lnk.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' }).observe(a));
+</script>
+</body>
+</html>

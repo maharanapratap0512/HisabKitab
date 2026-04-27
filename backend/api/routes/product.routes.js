@@ -57,7 +57,12 @@ router.put('/:dept_id', async (req, res, next) => {
         }
 
         let conditionString = ` 1=1 ${req.body._id ? ` AND product._id = ${req.body._id}` : ``} ${req.body.year ? ` AND strftime('%Y', product.purchase_date) = '${req.body.year}'` : ''}`;
-        // let conditionString = ` 1=1 ${req.body._id ? `product._id = ${req.body._id}` : ``} ${typeof req.body.item_id == "string" || typeof req.body.item_id == "number" ? ` AND product.item_id = (${req.body.item_id})` : ``} ${req.body.item_id.length > 0 ? ` AND product.item_id IN (${req.body.item_id})` : ``}`;
+        if (req.body.mm_id && req.body.mm_id.length > 0)
+            conditionString += ` AND product.mm_id in (${req.body.mm_id.join(',')})`;
+        if (req.body.item_id && req.body.item_id.length > 0)
+            conditionString += ` AND product.item_id in (${req.body.item_id.join(',')})`;
+        if (req.body.subitem_id && req.body.subitem_id.length > 0)
+            conditionString += ` AND product.subitem_id in (${req.body.subitem_id.join(',')})`;
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
         await DB.getList('product', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: 'product._id desc', limit: limit, offset: offset }).then(async (resolve) => {
             for (let i in resolve.data) {

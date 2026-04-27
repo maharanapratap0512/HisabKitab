@@ -1,5 +1,81 @@
 [
     {
+        "version": "30.0",
+        "date": "22-04-2026",
+        "summary": "Major Upgrade: Structure Optimization & UI Redesign & NetDrop P2P Offline File Sharing",
+        "summary_hin": "नया अपग्रेड: स्ट्रक्चर सुधार और नया यूआई और नेटड्रॉप P2P शेयरिंग",
+        "isNew": true,
+        "items": [
+            {
+                "type": "warning",
+                "module": "Version 30",
+                "title": "Update in Progress",
+                "title_hin": "अपडेट जारी है",
+                "desc": "Version 30 update is still in progress, so errors may occur on some pages. If you encounter an error anywhere, please report it with a screenshot.",
+                "desc_hin": "वर्जन 30 का अपडेट अभी चल रहा है, इसलिए कुछ पेजों में एरर आ सकते हैं। अगर कहीं भी एरर आए तो कृपया स्क्रीनशॉट के साथ रिपोर्ट करें।"
+            },
+            {
+                "type": "coming_soon",
+                "module": "Inventory Core",
+                "title": "Coming Soon: Variant System",
+                "title_hin": "आने वाला है: वेरिएंट सिस्टम (Variant System)",
+                "desc": "A major upgrade to handle items with different attributes (Size, Color, Brand, etc.) under a single product. <br/> - Multi-attribute Mapping. <br/> - Detailed stock tracking per variant.",
+                "desc_hin": "एक ही आइटम के अलग-अलग प्रकारों (जैसे साइज, कलर, ब्रांड आदि) को मैनेज करने के लिए बड़ा अपग्रेड। <br/> - एट्रिब्यूट मैपिंग की सुविधा। <br/> - हर वेरिएंट का अलग स्टॉक मैनेजमेंट।"
+            },
+            {
+                "type": "improvement",
+                "module": "Inventory Core",
+                "title": "Structure Optimization",
+                "title_hin": "इन्वेंट्री स्ट्रक्चर सुधार",
+                "desc": "Category, Item, and Subitem structure optimized and improved. Reset all related modules (Aawak, Jawak, HMP, etc.) for better performance.",
+                "desc_hin": "कैटेगरी, आइटम और सब-आइटम स्ट्रक्चर को पहले से बेहतर बनाया गया है। आवक, जावक और अन्य पेजों को नए स्ट्रक्चर के हिसाब से अपडेट किया गया है।"
+            },
+            {
+                "type": "improvement",
+                "module": "Jawak Entry",
+                "title": "Smart Aawak Selection UI",
+                "title_hin": "स्मार्ट आवक सिलेक्शन यूआई",
+                "desc": "Redesigned Aawak selection dropdown with detailed summaries. View Lot No, Date, Source MM, and Remaining Quantity at a glance to ensure accurate data entry.",
+                "desc_hin": "जावक एंट्री में आवक चुनने के लिए नया और बेहतर डिजाइन। अब लॉट नंबर, तारीख, एमएम और बची हुई मात्रा (Remaining Qty) को एक साथ देखें, जिससे गलतियां कम होंगी।",
+                "media": "/assets/updates/aawak_ref_design.png"
+            },
+            {
+                "type": "feature",
+                "module": "NetDrop",
+                "title": "Local Network P2P Transfer",
+                "title_hin": "लोकल नेटवर्क P2P ट्रांसफर",
+                "desc": "Share files instantly between devices on the same Wi-Fi. <br/> - High-speed P2P transfer using WebRTC. <br/> - Animated Radar UI for device discovery.",
+                "desc_hin": "एक ही वाई-फाई पर मौजूद डिवाइस के बीच तुरंत फाइल शेयर करें। <br/> - वेब-आरटीसी (WebRTC) के साथ हाई-स्पीड ट्रांसफर। <br/> - डिवाइस खोजने के लिए एनिमेटेड राडार यूआई।",
+                "media": "/assets/updates/netdrop-ui.png"
+            },
+            {
+                "type": "feature",
+                "module": "MM Delete & Transfer",
+                "title": "Transfer MM & Clear MM data.",
+                "title_hin": "एमएम ट्रांसफर और एमएम डेटा क्लियर।",
+                "desc": "Transfer All data of one MM to another or Delete ALL related MM data.",
+                "desc_hin": "एक एमएम का सभी डेटा दूसरे एमएम में ट्रांसफर हो जाएगा। या एक एमएम को डिलीट कर सकते हैं।",
+                "media": "/assets/updates/mm-transfer-delete.png"
+            },
+            {
+                "type": "feature",
+                "module": "Category Management",
+                "title": "Hierarchical Category System (Tree UI)",
+                "title_hin": "हाइरार्कीकल कैटेगरी सिस्टम (ट्री यूआई)",
+                "desc": "Organize categories in a parent-child structure for better classification. <br/> - Interactive Tree UI with folder/file icons and branch lines. <br/> - Hierarchical selection in entry forms with indentation. <br/> - Custom sort order support for each level.",
+                "desc_hin": "कैटेगरी को अब आप पेरेंट-चाइल्ड (सीढ़ीनुमा) स्ट्रक्चर में व्यवस्थित कर सकते हैं। <br/> - नया ट्री यूआई, फोल्डर आइकॉन्स और ब्रांच लाइन्स के साथ। <br/> - एंट्री फॉर्म में कैटेगरी चुनना हुआ और भी आसान। <br/> - हर लेवल पर अपनी पसंद का क्रम (Sort Order) सेट करने की सुविधा।"
+            },
+            {
+                "type": "improvement",
+                "module": "UI/UX",
+                "title": "Bilingual Table Design",
+                "title_hin": "हिंदी-इंग्लिश टेबल डिजाइन",
+                "desc": "Improved table UI with a standardized bilingual format. Hindi on top, muted English on the second line for consistent readability across all reports.",
+                "desc_hin": "रिपोर्ट टेबल्स में हिंदी और इंग्लिश को बेहतर तरीके से दिखाया गया है। पहली लाइन में हिंदी और दूसरी लाइन में हल्की इंग्लिश, जिससे पढ़ना आसान हो गया है।"
+            }
+        ]
+    },
+    {
         "version": "29.1",
         "date": "05-04-2026",
         "summary": "Major Software Upgrade - Version 29.1",
@@ -8,21 +84,21 @@
         "items": [
             {
                 "type": "feature",
-                "module": "Settings Panel",
-                "title": "Context Settings Panel PRO",
-                "title_hin": "एडवांस्ड सेटिंग्स पैनल",
-                "desc": "Redesigned settings panel with sidebar navigation, permission toggles (Add/Edit/Delete), and theme-aware UI. <br/> - Configure columns for each page individually. <br/> - Global page visibility control.",
-                "desc_hin": "साइडबार नेविगेशन और परमिशन कंट्रोल (Add/Edit/Delete) के साथ नया सेटिंग्स पैनल। <br/> - हर पेज के कॉलम सेटिंग्स अब एक ही जगह से मैनेज करें। <br/> - डार्क और लाइट मोड में बेहतर दृश्यता (Visibility)।",
-                "media": "/assets/updates/settings-panel.gif"
-            },
-            {
-                "type": "feature",
                 "module": "Updates Manager",
                 "title": "Interactive Changelog Panel",
                 "title_hin": "नया वर्जन अपडेट पैनल",
                 "desc": "Stay updated with all new features and fixes. <br/> - Detailed version history with icons and descriptions. <br/> - Automatic popup notification for new releases.",
                 "desc_hin": "सॉफ्टवेयर के हर नए अपडेट को अब आप आसानी से देख सकते हैं। <br/> - वर्जन हिस्ट्री को नए डिजाइन और आइकॉन्स के साथ देखें। <br/> - नया वर्जन आने पर अपने आप जानकारी (Popup) आ जाएगी।",
                 "media": "/assets/updates/updates-panel.gif"
+            },
+            {
+                "type": "feature",
+                "module": "Settings Panel",
+                "title": "Context Settings Panel PRO",
+                "title_hin": "एडवांस्ड सेटिंग्स पैनल",
+                "desc": "Redesigned settings panel with sidebar navigation, permission toggles (Add/Edit/Delete), and theme-aware UI. <br/> - Configure columns for each page individually. <br/> - Global page visibility control.",
+                "desc_hin": "साइडबार नेविगेशन और परमिशन कंट्रोल (Add/Edit/Delete) के साथ नया सेटिंग्स पैनल। <br/> - हर पेज के कॉलम सेटिंग्स अब एक ही जगह से मैनेज करें। <br/> - डार्क और लाइट मोड में बेहतर दृश्यता (Visibility)।",
+                "media": "/assets/updates/settings-panel.gif"
             },
             {
                 "type": "feature",
@@ -68,6 +144,23 @@
                 "desc": "A new focused editing mode for deliveries. Hides complex headers and parent tables, showing only a summary and the delivery (Jawak) table for a single item.",
                 "desc_hin": "डिलिवरी (जावक) के लिए विशेष फोकस मोड। यह फालतू के हेडर्स और टेबल्स को छुपाकर केवल चुने हुए आइटम की डिलिवरी डिटेल्स पर ध्यान केंद्रित करने में मदद करता है।",
                 "media": ""
+            },
+            {
+                "type": "improvement",
+                "module": "Report MM Stock, Khet Saar, Khet AJ Saar",
+                "title": "Report MM Stock, Khet Saar, Khet AJ Saar",
+                "title_hin": "रिपोर्ट एमएम स्टॉक, खेत सार, खेत एजे सार को All MM ke liye upgrade kar diya hai",
+                "desc": "All Type of MM Report Generation",
+                "desc_hin": "pehle sirf stores/Khets ka report dekh sakte the abhi सभी प्रकार के MM ke liye report तैयार करने की सुविधा",
+                "media": ""
+            },
+            {
+                "type": "fix",
+                "module": "Report Awk Type Saar and Jawak Type Saar",
+                "title": "Report Awk Type Saar and Jawak Type Saar",
+                "title_hin": "रिपोर्ट आवक टाइप सार और जावक टाइप सार",
+                "desc": "Without Month Select, All rows comes with blank Qty, now Month compulsary to Procced.",
+                "desc_hin": "बिना Month Select किए, सभी rows blank Qty के साथ आती थी, अब आगे बढ़ने के लिए Month अनिवार्य है।"
             }
         ]
     }

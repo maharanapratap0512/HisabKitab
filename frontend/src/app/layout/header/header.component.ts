@@ -257,6 +257,7 @@ export class HeaderComponent implements AfterViewInit {
         visible: true,
         children: [
           { title: 'Department', link: 'department', visible: this.auth.webUser.settings?.department?.visible },
+          { title: 'NetDrop', link: 'netdrop', visible: true, target: '_blank' },
         ]
       },
       { title: 'Points', icon: 'uil-layer-group', link: 'point', visible: this.auth.webUser.settings?.point?.visible },

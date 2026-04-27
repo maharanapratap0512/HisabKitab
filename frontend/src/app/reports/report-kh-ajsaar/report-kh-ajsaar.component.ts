@@ -30,6 +30,7 @@ export class ReportKhAjsaarComponent {
   mms: any = [];
   conditions: any = [];
   categories: any = [];
+  mm_types: any = [];
 
   reportData: any = [];
 
@@ -51,20 +52,23 @@ export class ReportKhAjsaarComponent {
       this.items = result.itemmix ? result.itemmix : [];
       this.conditions = result.condition ? result.condition : [];
       this.categories = result.category ? result.category : [];
-      this.khets = this.mms.filter((m: { dept_id: any; }) => m.dept_id == 4);
-      // this.filterBody.condition = this.conditions.map((c: { list_name_eng: any; }) => c.list_name_eng)
-      // this.filterBody.mm_id = this.khets.map((s: { _id: any; }) => s._id)
+      this.mm_types = result.mm_type ? result.mm_type : [];
       this.isLoader = false;
-      this.searchReports();
+      // this.searchReports();
     });
+  }
 
-
+  mmTypeSelected(ev: any) {
+    this.mms = this.gs.Lists.mm.filter((m: { mm_type: any; }) => m.mm_type == ev);
+    this.filterBody.mm_id = null;
   }
 
   setHeading() {
     this.reportHeading = ''
-    let khet = this.khets.find((k: { _id: any; }) => k._id == this.filterBody.mm_id);
-    this.reportHeading = khet.mm_hin;
+    let khet = this.mms.find((k: { _id: any; }) => k._id == this.filterBody.mm_id);
+    if (khet) {
+      this.reportHeading = khet.mm_hin;
+    }
     if (this.filterBody.year && this.filterBody.month) {
       this.reportHeading += ' का ' + this.filterBody.year + '-' + this.months[this.filterBody.month - 1].name_hin + " का आवक जावक सार"
     } else if (this.filterBody.year) {

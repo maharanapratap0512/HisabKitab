@@ -19,7 +19,8 @@ export class CategoryEntryComponent implements OnInit {
   @Input() isVisible: any;
   categoryForm: FormGroup;
   isLoader: boolean = false;
-  settings:any = null;
+  settings: any = null;
+  categories: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -32,13 +33,62 @@ export class CategoryEntryComponent implements OnInit {
 
     this.settings = auth.webUser.settings.category;
     this.categoryForm = this.fb.group({
-      category_eng: [null, Validators.required],
+      category_eng: [null],
       category_hin: [null, Validators.required],
       category_roman: [null],
+      parent_id: [null],
+      sort_order: [0]
     });
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.getCategories();
+  }
+
+  getCategories() {
+    this.http.get(this.api.getUrl('CATEGORY') + '1').subscribe((data: any) => {
+      if (data && data.success) {
+        let list = data.result;
+        if (this.isEdit && this.getData) {
+          list = list.filter((c: any) => Number(c._id) !== Number(this.getData._id));
+        }
+        this.categories = this.buildTree(list);
+      }
+    });
+  }
+
+  buildTree(list: any[]) {
+    const map = new Map();
+    const roots: any[] = [];
+    list.forEach(item => {
+      item._id = Number(item._id);
+      if (item.parent_id) item.parent_id = Number(item.parent_id);
+      item.children = [];
+      map.set(item._id, item);
+    });
+    list.forEach(item => {
+      if (item.parent_id && map.has(item.parent_id)) {
+        map.get(item.parent_id).children.push(item);
+      } else {
+        roots.push(item);
+      }
+    });
+    const flattened: any[] = [];
+    const traverse = (nodes: any[], level: number) => {
+      nodes.sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0) || a.category_hin.localeCompare(b.category_hin));
+      nodes.forEach(node => {
+        node.level = level;
+        flattened.push(node);
+        if (node.children && node.children.length > 0) {
+          traverse(node.children, level + 1);
+        }
+      });
+    };
+    traverse(roots, 0);
+    return flattened;
+  }
+
+
 
   ngOnChanges(changes: SimpleChanges) {
     console.log("cat-changes", changes);
@@ -46,10 +96,13 @@ export class CategoryEntryComponent implements OnInit {
       this.categoryForm.patchValue({
         category_eng: changes.getData.currentValue.category_eng,
         category_hin: changes.getData.currentValue.category_hin ? changes.getData.currentValue.category_hin : null,
-        category_roman: changes.getData.currentValue.category_roman ? changes.getData.currentValue.category_roman : null
+        category_roman: changes.getData.currentValue.category_roman ? changes.getData.currentValue.category_roman : null,
+        parent_id: changes.getData.currentValue.parent_id,
+        sort_order: changes.getData.currentValue.sort_order || 0
       });
     }
   }
+
 
   categoryFormSubmit() {
     if (this.categoryForm.valid) {

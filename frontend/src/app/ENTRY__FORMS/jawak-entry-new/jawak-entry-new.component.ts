@@ -142,9 +142,21 @@ export class JawakEntryNewComponent implements OnInit {
     }
   }
 
-  async refAawakSelected(awk_id: any, i: any) {
+  searchAawak(term: string, item: any) {
+    term = term.toLowerCase();
+    return item.lot_no?.toString().toLowerCase().includes(term) ||
+      item.item_hin?.toLowerCase().includes(term) ||
+      item.item_eng?.toLowerCase().includes(term) ||
+      item.subitem_hin?.toLowerCase().includes(term) ||
+      item.subitem_eng?.toLowerCase().includes(term) ||
+      item.mm_hin?.toLowerCase().includes(term) ||
+      item.mm_code?.toLowerCase().includes(term) ||
+      item.aawak_mm_hin?.toLowerCase().includes(term);
+  }
+
+  async refAawakSelected(awk: any, i: any) {
+    let awk_id = awk._id;
     if (awk_id) {
-      let awk = await this.aawaks.find((a: any) => a._id == awk_id);
       this.fs.jawakFormMain.jawaks[i] = {
         ...this.fs.jawakFormMain.jawaks[i],
         item_id: awk.item_id,
@@ -156,7 +168,9 @@ export class JawakEntryNewComponent implements OnInit {
         rate: typeof awk.rate == 'number' ? awk.rate : 0,
         remaining_qty: awk.remaining_qty,
       }
+
       this.itemSubitemSelected(awk.item_id + ':' + awk.subitem_id, i);
+
     } else {
       this.clearAawak(i);
     }

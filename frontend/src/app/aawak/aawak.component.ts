@@ -191,29 +191,6 @@ export class AawakComponent implements OnInit {
     this.http.get(this.api.getUrl('AAWAK') + this.auth.webUser.dept_id).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.aawakAll = data['result'];
-        for (let i in this.aawakAll) {
-          this.aawakAll[i].categories_hin = '';
-          this.aawakAll[i].categories_eng = '';
-          if (this.aawakAll[i].subitem_categories && this.aawakAll[i].subitem_categories.length > 0) {
-            // console.log(this.aawakAll[i].subitem_categories, this.categories);
-
-            for (let j in this.categories) {
-              if (this.aawakAll[i].subitem_categories.includes(this.categories[j]._id)) {
-                this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.aawakAll[i].categories_eng += this.categories[j].category_eng + ', ';
-              }
-            }
-          } else {
-            // console.log(this.aawakAll[i].item_categories, this.categories);
-
-            for (let j in this.categories) {
-              if (this.aawakAll[i].item_categories.includes(this.categories[j]._id)) {
-                this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.aawakAll[i].categories_eng += this.categories[j].category_eng + ', ';
-              }
-            }
-          }
-        }
         // console.log(this.aawakData);
 
         this.aawakData = this.aawakAll;
@@ -258,29 +235,7 @@ export class AawakComponent implements OnInit {
     this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.aawakAll = data['result'];
-        for (let i in this.aawakAll) {
-          this.aawakAll[i].categories_hin = '';
-          this.aawakAll[i].categories_eng = '';
-          if (this.aawakAll[i].subitem_categories && this.aawakAll[i].subitem_categories.length > 0) {
-            // console.log(this.aawakAll[i].subitem_categories, this.categories);
 
-            for (let j in this.categories) {
-              if (this.aawakAll[i].subitem_categories.includes(this.categories[j]._id)) {
-                this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.aawakAll[i].categories_eng += this.categories[j].category_eng + ', ';
-              }
-            }
-          } else {
-            // console.log(this.aawakAll[i].item_categories, this.categories);
-
-            for (let j in this.categories) {
-              if (this.aawakAll[i].item_categories.includes(this.categories[j]._id)) {
-                this.aawakAll[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.aawakAll[i].categories_eng += this.categories[j].category_eng + ', ';
-              }
-            }
-          }
-        }
         this.aawakData = this.aawakAll;
         this.total_count = data['total_count'];
         this.isLoader = false;
@@ -316,7 +271,7 @@ export class AawakComponent implements OnInit {
     this.allAJData = [];
     this.exportAJdata$ = new Subject();
 
-    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, item_categories, subitem_categories, item_hin, subitem_hin, aawak.date" : null;
+    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, icategories, scategories, item_hin, subitem_hin, aawak.date" : null;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -532,7 +487,7 @@ export class AawakComponent implements OnInit {
     this.exportAJdata$ = new Subject();
 
     this.filterBody.remaining_qty = true;
-    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, item_categories, subitem_categories, item_hin, subitem_hin, aawak.date" : null;
+    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, icategories, scategories, item_hin, subitem_hin, aawak.date" : null;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -749,7 +704,7 @@ export class AawakComponent implements OnInit {
     let uniqueAawakMM = new Set();
     let uniqueUnit = new Set();
 
-    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, item_categories, subitem_categories, item_hin, subitem_hin, aawak.date" : null;
+    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, icategories, scategories, item_hin, subitem_hin, aawak.date" : null;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -855,7 +810,7 @@ export class AawakComponent implements OnInit {
     let uniqueJawakMM = new Set();
     let uniqueUnit = new Set();
 
-    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, item_categories, subitem_categories, item_hin, subitem_hin, aawak.date" : null;;
+    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, icategories, scategories, item_hin, subitem_hin, aawak.date" : null;;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {

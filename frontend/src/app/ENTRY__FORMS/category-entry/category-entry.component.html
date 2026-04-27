@@ -27,6 +27,25 @@
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Parent Category</label>
+                        <select class="form-select" formControlName="parent_id">
+                            <option [ngValue]="null">None (Root Category)</option>
+                            <option *ngFor="let cat of categories" [ngValue]="cat._id">
+                                {{ '\u00A0'.repeat(cat.level * 4) }}{{cat.category_hin}} <span *ngIf="cat.category_eng && cat.level === 0">({{cat.category_eng}})</span>
+                            </option>
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Sort Order</label>
+                        <input type="number" class="form-control" placeholder="0" formControlName="sort_order">
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
                     <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
                         (click)="categoryFormSubmit()">Submit</button>
                     <button class="btn btn-warning submit mx-3" *ngIf="isEdit" type="submit"

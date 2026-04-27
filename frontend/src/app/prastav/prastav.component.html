@@ -219,8 +219,9 @@
                             <td [attr.rowspan]="vr.iRowSpan" class="text-start ps-3 py-0 border-end">
                               <div class="fw-bold text-dark lh-1 mt-1">{{vr.item.item?.item_hin || vr.item.item_id}}
                               </div>
-                              <div class="font-size-9 opacity-50 pb-1" *ngIf="vr.item.subitem?.subitem_hin">
-                                ({{vr.item.subitem.subitem_hin}})</div>
+                              <div class="font-size-9 opacity-50 pb-1"
+                                *ngIf="vr.item.subitem?.subitem_list?.subitem_hin">
+                                ({{vr.item.subitem.subitem_list?.subitem_hin}})</div>
                             </td>
                             <td [attr.rowspan]="vr.iRowSpan" class="fw-bold py-0 border-end"
                               style="color: var(--thead-accent-color);">
@@ -368,8 +369,8 @@
                     {{row.sr}}</td>
                   <td [attr.rowspan]="row.iRowSpan" class="px-3 border-end" style="vertical-align: middle;">
                     <div class="fw-bold text-dark font-size-13 lh-1 mb-1">{{row.item.item?.item_hin}}</div>
-                    <div class="font-size-10 text-muted" *ngIf="row.item.subitem?.subitem_hin">
-                      ({{row.item.subitem.subitem_hin}})</div>
+                    <div class="font-size-10 text-muted" *ngIf="row.item.subitem?.subitem_list?.subitem_hin">
+                      ({{row.item.subitem.subitem_list?.subitem_hin}})</div>
                   </td>
                   <td [attr.rowspan]="row.iRowSpan" class="text-center border-end fw-bold text-theme font-size-13"
                     style="vertical-align: middle;">

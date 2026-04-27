@@ -16,12 +16,12 @@ class BaseTable {
     // db and schema come from the parent Sutram instance — never global.
 
     constructor(tableName, { db, schema } = {}) {
-        if (!db)     throw new Error('[sutramcore] BaseTable requires db — use sewa.table() or new sewa.BaseTable()');
+        if (!db) throw new Error('[sutramcore] BaseTable requires db — use sewa.table() or new sewa.BaseTable()');
         if (!schema) throw new Error('[sutramcore] BaseTable requires schema — use sewa.table() or new sewa.BaseTable()');
 
         this.tableName = tableName;
-        this.db        = db;      // resolved once at construction — never changes
-        this.schema    = schema;  // resolved once at construction — never changes
+        this.db = db;      // resolved once at construction — never changes
+        this.schema = schema;  // resolved once at construction — never changes
 
         const meta = schema[tableName];
         if (!meta) {
@@ -31,8 +31,8 @@ class BaseTable {
             );
         }
 
-        this.columns    = meta.columns;
-        this.joins      = meta.joins ?? {};
+        this.columns = meta.columns;
+        this.joins = meta.joins ?? {};
         this._stmtCache = {};
     }
 
@@ -239,7 +239,7 @@ class BaseTable {
 
     _buildInsert(data) {
         const clean = this.sanitize(data, 'insert');
-        const keys  = Object.keys(clean);
+        const keys = Object.keys(clean);
         if (keys.length === 0) throw new Error(`[sutramcore] No valid fields to insert into "${this.tableName}"`);
         const sql = `INSERT INTO ${this.tableName} (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`;
         return [sql, Object.values(clean)];
@@ -262,8 +262,8 @@ class BaseTable {
         let sql = `SELECT * FROM ${this.tableName}`;
         const { clause, params } = this._buildWhere(where, false);
         if (clause) sql += ` ${clause}`;
-        if (orderBy)       sql += ` ORDER BY ${orderBy}`;
-        if (limit !== null)  sql += ` LIMIT ${limit}`;
+        if (orderBy) sql += ` ORDER BY ${orderBy}`;
+        if (limit !== null) sql += ` LIMIT ${limit}`;
         if (offset !== null) sql += ` OFFSET ${offset}`;
         return [sql, params];
     }
@@ -279,8 +279,8 @@ class BaseTable {
         const { clause, params } = this._buildWhere(where, true);
         if (clause) sql += ` ${clause}`;
 
-        if (orderBy)       sql += ` ORDER BY ${orderBy}`;
-        if (limit !== null)  sql += ` LIMIT ${limit}`;
+        if (orderBy) sql += ` ORDER BY ${orderBy}`;
+        if (limit !== null) sql += ` LIMIT ${limit}`;
         if (offset !== null) sql += ` OFFSET ${offset}`;
 
         return [sql, params];
@@ -338,7 +338,7 @@ class BaseTable {
 
     _buildJoins() {
         const selectParts = [`${this.tableName}.*`];
-        const joinParts   = [];
+        const joinParts = [];
 
         // ── 1. hasOne ──────────────────────────────────────────
         for (const [colName, def] of Object.entries(this.columns)) {
@@ -352,8 +352,19 @@ class BaseTable {
             );
 
             if (def.select) {
-                const cols     = this._resolveSelect(def.select, refTable);
-                const jsonArgs = cols.map(c => `'${c}', ${alias}.${c}`).join(', ');
+                const cols    = this._resolveSelect(def.select, refTable);
+                const refMeta = this.schema[refTable];
+                const jsonArgs = cols.map(c => {
+                    const colDef = refMeta?.columns[c];
+                    // json() wrapper: if the refTable column is type:'json', it means
+                    // the column holds a JSON string (e.g. a view baking a hasOne join).
+                    // Wrapping with json() embeds it as proper nested JSON instead of
+                    // double-stringifying it inside the outer json_object().
+                    const expr = (colDef?.type === 'json')
+                        ? `json(${alias}.${c})`
+                        : `${alias}.${c}`;
+                    return `'${c}', ${expr}`;
+                }).join(', ');
                 selectParts.push(`json_object(${jsonArgs}) AS ${alias}`);
             }
         }
@@ -364,12 +375,12 @@ class BaseTable {
 
             const childTable = def.table;
             const childAlias = `_sub_${joinKey}`;
-            const outKey     = def.as ?? joinKey;
-            const childMeta  = this.schema[childTable];
+            const outKey = def.as ?? joinKey;
+            const childMeta = this.schema[childTable];
 
             // base columns of child
-            const baseCols    = this._resolveSelect(def.select ?? '*', childTable);
-            let jsonArgParts  = baseCols.map(c => `'${c}', ${childAlias}.${c}`);
+            const baseCols = this._resolveSelect(def.select ?? '*', childTable);
+            let jsonArgParts = baseCols.map(c => `'${c}', ${childAlias}.${c}`);
 
             // nested hasOne inside child — one level deep
             const childJoinParts = [];
@@ -377,9 +388,9 @@ class BaseTable {
                 for (const [cCol, cDef] of Object.entries(childMeta.columns)) {
                     if (!cDef.ref) continue;
                     const [gRefTable, gRefCol] = cDef.ref.split('.');
-                    const gAlias  = `${childAlias}_${cDef.as ?? gRefTable}`;
-                    const gCols   = this._resolveSelect(cDef.select ?? '*', gRefTable);
-                    const gJson   = gCols.map(gc => `'${gc}', ${gAlias}.${gc}`).join(', ');
+                    const gAlias = `${childAlias}_${cDef.as ?? gRefTable}`;
+                    const gCols = this._resolveSelect(cDef.select ?? '*', gRefTable);
+                    const gJson = gCols.map(gc => `'${gc}', ${gAlias}.${gc}`).join(', ');
 
                     childJoinParts.push(
                         `LEFT JOIN ${gRefTable} AS ${gAlias} ON ${gAlias}.${gRefCol} = ${childAlias}.${cCol}`
@@ -403,12 +414,12 @@ class BaseTable {
             if (!def.manyToMany) continue;
 
             const targetTable = def.table;
-            const juncTable   = def.junction;
+            const juncTable = def.junction;
             const targetAlias = `_sub_${joinKey}`;
-            const juncAlias   = `_junc_${joinKey}`;
-            const outKey      = def.as ?? joinKey;
+            const juncAlias = `_junc_${joinKey}`;
+            const outKey = def.as ?? joinKey;
 
-            const cols     = this._resolveSelect(def.select ?? '*', targetTable);
+            const cols = this._resolveSelect(def.select ?? '*', targetTable);
             const jsonArgs = cols.map(c => `'${c}', ${targetAlias}.${c}`).join(', ');
 
             const subQuery = `(
@@ -423,7 +434,7 @@ class BaseTable {
         }
 
         return {
-            selectCols:  selectParts.join(', '),
+            selectCols: selectParts.join(', '),
             joinClauses: joinParts.join(' '),
         };
     }

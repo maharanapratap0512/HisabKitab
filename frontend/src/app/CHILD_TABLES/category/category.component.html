@@ -92,9 +92,27 @@
                                  </span>
 
                               </td>
-                              <td>{{data.category_hin}}</td>
-                              <td *ngIf="settings.category_eng">{{data.category_eng}}</td>
+                              <td>
+                                 <div [style.padding-left.px]="data.level * 25" class="d-flex align-items-center">
+                                    <div class="tree-line" *ngIf="data.level > 0"
+                                       style="width: 20px; border-bottom: 1px solid #dee2e6; margin-right: 5px; height: 10px;">
+                                    </div>
+                                    <span class="me-2" style="font-size: 1.1rem;">
+                                       <i
+                                          [class]="data.children && data.children.length > 0 ? 'uil uil-folder' : 'uil uil-file-alt'"></i>
+                                    </span>
+                                    <span [ngStyle]="{'font-weight': data.level === 0 ? '700' : '400'}">
+                                       {{data.category_hin}}
+                                    </span>
+                                 </div>
+                              </td>
+                              <td *ngIf="settings.category_eng">
+                                 <span class="text-muted" *ngIf="data.level > 0">{{ '\u00A0'.repeat(data.level * 4)
+                                    }}</span>
+                                 {{data.category_eng}}
+                              </td>
                               <td *ngIf="settings.category_roman">{{data.category_roman}}</td>
+
                            </tr>
                         </tbody>
                      </table>

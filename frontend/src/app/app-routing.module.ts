@@ -44,6 +44,7 @@ import { JawakEntryNewComponent } from './ENTRY__FORMS/jawak-entry-new/jawak-ent
 import { PbkClosingEntryComponent } from './ENTRY__FORMS/pbk-closing-entry/pbk-closing-entry.component';
 import { PbkBachatComponent } from './pbk-bachat/pbk-bachat.component';
 import { listsResolver } from './resolver/lists.resolver';
+import { NetdropUiComponent } from './modules/netdrop/components/netdrop-ui/netdrop-ui.component';
 
 const routes: Routes = [
    {
@@ -53,6 +54,7 @@ const routes: Routes = [
          { path: "", redirectTo: "login", pathMatch: 'full' }
       ]
    },
+   { path: "netdrop", component: NetdropUiComponent },
    {
       path: "", component: HomeComponent,
       canActivate: [AuthGuard],

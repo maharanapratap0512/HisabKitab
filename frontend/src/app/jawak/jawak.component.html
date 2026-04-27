@@ -348,24 +348,24 @@
                                        class="uil-trash"></i></button>
                               </td>
                               <td *ngIf="!settings.defaultMM">
-                                 {{data.mm_hin}} {{data.mm_code ? '('+data.mm_code+')': ''}}<br />
-                                 {{data.mm_eng}}
+                                 <span>{{data.mm_hin}} {{data.mm_code ? '('+data.mm_code+')': ''}}</span> <br />
+                                 <small class="text-muted">{{data.mm_eng}}</small>
                               </td>
                               <td *ngIf="settings.jawak.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
                               <td>{{data.date | date:'dd-MM-yyyy'}}</td>
                               <td>
-                                 <span *ngIf="data.pbk_id">
-                                    {{data.pbk_hin}} {{data.relation ? data.relation : ''}} {{data.relative_name ? " -
-                                    "+data.relative_name: ''}}
-                                    <br />
-                                 </span>
-                                 <span *ngIf="data.jawak_mm_id">
-                                    {{data.jawak_mm_hin}} - {{data.jawak_mm_eng}}
-                                 </span>
+                                 <div *ngIf="data.pbk_id">
+                                    <span>{{data.roll_no ? data.roll_no : '___'}} - {{data.pbk_hin}}</span> <br />
+                                    <small class="text-muted">{{data.relation ? data.relation : ''}} {{data.relative_name ? " - "+data.relative_name: ''}}</small>
+                                 </div>
+                                 <div *ngIf="data.jawak_mm_id">
+                                    <span>{{data.jawak_mm_hin}} {{data.jawak_mm_code ? "("+data.jawak_mm_code+")" : ''}}</span> <br />
+                                    <small class="text-muted">{{data.jawak_mm_eng}}</small>
+                                 </div>
                               </td>
                               <td>
-                                 {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
-                                 {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
+                                 <span>{{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}}</span> <br />
+                                 <small class="text-muted">{{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}</small>
                               </td>
                               <!-- <td *ngIf="settings.jawak.product_id">
                                  <span *ngIf="!data.product_id">-</span>
@@ -373,16 +373,23 @@
                                  {{data.product_code ? data.product_code : ''}}
                               </td> -->
                               <td *ngIf="settings.jawak.condition_id">
-                                 {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
+                                 <div *ngIf="data.condition_id">
+                                    <span>{{data.condition_hin}}</span> <br />
+                                    <small class="text-muted">{{data.condition_eng}}</small>
+                                 </div>
                               </td>
                               <td>
                                  {{data.qty}} {{data.unit_short}} <br />
                                  {{data.rate ? '@'+data.rate + ' = '+ data.actual_amt : ''}}
                               </td>
-                              <td>{{data.aawak_source_hin}}<br />
-                                 {{data.aawak_source_eng}}</td>
-                              <td>{{data.jawak_type_hin}}<br />
-                                 {{data.jawak_type_eng}}</td>
+                              <td>
+                                 <span>{{data.aawak_source_hin}}</span><br />
+                                 <small class="text-muted">{{data.aawak_source_eng}}</small>
+                              </td>
+                              <td>
+                                 <span>{{data.jawak_type_hin}}</span><br />
+                                 <small class="text-muted">{{data.jawak_type_eng}}</small>
+                              </td>
                               <td>{{data.usage_list_id ? data.usage_list_hin : ''}}<br />
                                  {{data.category_eng}}</td>
                               <td>{{data.parchi_place ? data.parchi_place: ''}}</td>

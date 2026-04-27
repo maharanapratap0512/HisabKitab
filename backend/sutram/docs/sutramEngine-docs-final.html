@@ -1,0 +1,3406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sutramEngine — Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --bg2: #13161d;
+      --bg3: #1a1e28;
+      --bg4: #222736;
+      --border: #2a2f3e;
+      --border2: #353c50;
+      --text: #e2e6f0;
+      --text2: #9ba3b8;
+      --text3: #5f6880;
+      --acc: #c084fc;
+      --acc2: #a855f7;
+      --green: #4ade80;
+      --orange: #fb923c;
+      --blue: #7c9bff;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --tk-kw: #c084fc;
+      --tk-fn: #7c9bff;
+      --tk-str: #4ade80;
+      --tk-num: #fb923c;
+      --tk-cmt: #5f6880;
+      --tk-cn: #fbbf24;
+      --tk-op: #9ba3b8;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.7
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 268px 1fr;
+      min-height: 100vh
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border2) transparent
+    }
+
+    .sb-logo {
+      padding: 28px 24px 18px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 6px
+    }
+
+    .sb-logo .name {
+      font-family: 'Fraunces', serif;
+      font-size: 21px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -.5px
+    }
+
+    .sb-logo .sub {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      margin-top: 3px
+    }
+
+    .sb-badge {
+      display: inline-block;
+      background: rgba(192, 132, 252, .1);
+      border: 1px solid rgba(192, 132, 252, .25);
+      color: var(--acc);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 8px
+    }
+
+    .nav-grp {
+      padding: 6px 0
+    }
+
+    .nav-lbl {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text3);
+      padding: 8px 24px 3px
+    }
+
+    .nav-a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 24px;
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 13px;
+      transition: all .15s;
+      border-left: 2px solid transparent
+    }
+
+    .nav-a:hover {
+      color: var(--text);
+      background: var(--bg3);
+      border-left-color: var(--border2)
+    }
+
+    .nav-a.active {
+      color: var(--acc);
+      background: rgba(192, 132, 252, .07);
+      border-left-color: var(--acc)
+    }
+
+    .nd {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--border2);
+      flex-shrink: 0
+    }
+
+    .nav-a.active .nd {
+      background: var(--acc)
+    }
+
+    /* MAIN */
+    .main {
+      /* max-width: 920px */
+    }
+
+    /* HERO */
+    .hero {
+      padding: 72px 64px 56px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, #0d0f14 0%, #130d1e 50%, #0d0f14 100%);
+      position: relative;
+      overflow: hidden
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(192, 132, 252, .05) 0%, transparent 65%);
+      pointer-events: none
+    }
+
+    .hero-ey {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--acc);
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .hero-ey::before {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 1px;
+      background: var(--acc)
+    }
+
+    .hero h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 52px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      color: var(--text);
+      margin-bottom: 8px
+    }
+
+    .hero h1 span {
+      color: var(--acc);
+      font-style: italic
+    }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--text2);
+      font-weight: 300;
+      margin-bottom: 36px;
+      max-width: 520px;
+      line-height: 1.6
+    }
+
+    .hero-inst {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      color: var(--green)
+    }
+
+    .hero-inst .p {
+      color: var(--text3)
+    }
+
+    .chips {
+      display: flex;
+      gap: 10px;
+      margin-top: 28px;
+      flex-wrap: wrap
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--text2);
+      font-family: 'DM Mono', monospace
+    }
+
+    .chip .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%
+    }
+
+    /* CONTENT */
+    .content {
+      padding: 0 64px 80px
+    }
+
+    .sec {
+      padding-top: 60px
+    }
+
+    .anc {
+      display: block;
+      position: relative;
+      top: -80px;
+      visibility: hidden
+    }
+
+    .sec-hdr {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .sec-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--acc);
+      font-weight: 500
+    }
+
+    .sec h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -.5px
+    }
+
+    .sec h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 28px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .sec h3::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 14px;
+      background: var(--acc);
+      border-radius: 2px;
+      flex-shrink: 0
+    }
+
+    .sec p {
+      color: var(--text2);
+      margin-bottom: 16px;
+      line-height: 1.75;
+      font-size: 14.5px
+    }
+
+    p code,
+    li code {
+      font-family: 'DM Mono', monospace;
+      font-size: 12.5px;
+      color: var(--acc);
+      background: rgba(192, 132, 252, .08);
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(192, 132, 252, .15)
+    }
+
+    /* CODE */
+    .cw {
+      margin: 18px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg2)
+    }
+
+    .ch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border)
+    }
+
+    .cl {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text3)
+    }
+
+    .clang {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--acc);
+      background: rgba(192, 132, 252, .1);
+      border: 1px solid rgba(192, 132, 252, .2);
+      padding: 2px 8px;
+      border-radius: 4px
+    }
+
+    .cb {
+      padding: 20px 24px;
+      overflow-x: auto;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      line-height: 1.8
+    }
+
+    .cb pre {
+      margin: 0;
+      white-space: pre
+    }
+
+    .kw {
+      color: var(--tk-kw)
+    }
+
+    .fn {
+      color: var(--tk-fn)
+    }
+
+    .str {
+      color: var(--tk-str)
+    }
+
+    .num {
+      color: var(--tk-num)
+    }
+
+    .cmt {
+      color: var(--tk-cmt);
+      font-style: italic
+    }
+
+    .cn {
+      color: var(--tk-cn)
+    }
+
+    .op {
+      color: var(--tk-op)
+    }
+
+    /* CALLOUT */
+    .note {
+      display: flex;
+      gap: 14px;
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-size: 13.5px;
+      line-height: 1.65
+    }
+
+    .ni {
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px
+    }
+
+    .note.info {
+      background: rgba(124, 155, 255, .07);
+      border: 1px solid rgba(124, 155, 255, .2);
+      color: #a5b8ff
+    }
+
+    .note.tip {
+      background: rgba(74, 222, 128, .07);
+      border: 1px solid rgba(74, 222, 128, .2);
+      color: #86efac
+    }
+
+    .note.warn {
+      background: rgba(251, 146, 60, .07);
+      border: 1px solid rgba(251, 146, 60, .2);
+      color: #fdba74
+    }
+
+    .note.purple {
+      background: rgba(192, 132, 252, .07);
+      border: 1px solid rgba(192, 132, 252, .2);
+      color: #d8b4fe
+    }
+
+    /* PATTERN CARDS */
+    .pat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 20px 0
+    }
+
+    .pat {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: border-color .2s;
+      position: relative;
+      overflow: hidden
+    }
+
+    .pat:hover {
+      border-color: var(--acc)
+    }
+
+    .pat::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px
+    }
+
+    .pat.p1::before {
+      background: linear-gradient(90deg, #c084fc, #7c9bff)
+    }
+
+    .pat.p2::before {
+      background: linear-gradient(90deg, #4ade80, #7c9bff)
+    }
+
+    .pat.p3::before {
+      background: linear-gradient(90deg, #fb923c, #c084fc)
+    }
+
+    .pat-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text3);
+      margin-bottom: 8px;
+      letter-spacing: .5px
+    }
+
+    .pat-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px
+    }
+
+    .pat-desc {
+      font-size: 12.5px;
+      color: var(--text2);
+      line-height: 1.65
+    }
+
+    .pat-desc code {
+      font-family: 'DM Mono', monospace;
+      font-size: 11.5px;
+      color: var(--acc);
+      background: rgba(192, 132, 252, .08);
+      padding: 1px 5px;
+      border-radius: 3px
+    }
+
+    .pat-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px
+    }
+
+    .pat-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 500
+    }
+
+    .tag-g {
+      background: rgba(74, 222, 128, .1);
+      color: var(--green);
+      border: 1px solid rgba(74, 222, 128, .2)
+    }
+
+    .tag-b {
+      background: rgba(124, 155, 255, .1);
+      color: var(--blue);
+      border: 1px solid rgba(124, 155, 255, .2)
+    }
+
+    .tag-p {
+      background: rgba(192, 132, 252, .1);
+      color: var(--acc);
+      border: 1px solid rgba(192, 132, 252, .2)
+    }
+
+    .tag-o {
+      background: rgba(251, 146, 60, .1);
+      color: var(--orange);
+      border: 1px solid rgba(251, 146, 60, .2)
+    }
+
+    /* TABLE */
+    .tw {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 16px 0
+    }
+
+    .dt {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px
+    }
+
+    .dt th {
+      background: var(--bg3);
+      color: var(--text2);
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border2)
+    }
+
+    .dt td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text2);
+      vertical-align: top
+    }
+
+    .dt tr:last-child td {
+      border-bottom: none
+    }
+
+    .dt tr:hover td {
+      background: rgba(255, 255, 255, .02)
+    }
+
+    .dt code {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--acc);
+      background: rgba(192, 132, 252, .08);
+      padding: 1px 6px;
+      border-radius: 4px
+    }
+
+    /* FLOW */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      margin: 20px 0
+    }
+
+    .fs {
+      display: flex;
+      gap: 0
+    }
+
+    .fl {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 40px;
+      flex-shrink: 0
+    }
+
+    .fc {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(192, 132, 252, .15);
+      border: 1px solid var(--acc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--acc);
+      flex-shrink: 0
+    }
+
+    .fli {
+      width: 1px;
+      flex: 1;
+      background: var(--border2);
+      min-height: 16px
+    }
+
+    .fcon {
+      flex: 1;
+      padding: 2px 0 20px 16px
+    }
+
+    .ft {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px
+    }
+
+    .fd {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.6
+    }
+
+    .fd code {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--acc);
+      background: rgba(192, 132, 252, .08);
+      padding: 1px 5px;
+      border-radius: 3px
+    }
+
+    /* COMPARE TABLE */
+    .cmp {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13px
+    }
+
+    .cmp th {
+      background: var(--bg3);
+      color: var(--text2);
+      font-size: 11px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border2);
+      font-weight: 600
+    }
+
+    .cmp th:first-child {
+      border-radius: 10px 0 0 0
+    }
+
+    .cmp th:last-child {
+      border-radius: 0 10px 0 0
+    }
+
+    .cmp td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text2);
+      vertical-align: top
+    }
+
+    .cmp tr:last-child td:first-child {
+      border-radius: 0 0 0 10px
+    }
+
+    .cmp tr:last-child td:last-child {
+      border-radius: 0 0 10px 0
+    }
+
+    .cmp tr:last-child td {
+      border-bottom: none
+    }
+
+    .cmp tr:hover td {
+      background: rgba(255, 255, 255, .02)
+    }
+
+    .cmp code {
+      font-family: 'DM Mono', monospace;
+      font-size: 11.5px;
+      color: var(--acc);
+      background: rgba(192, 132, 252, .08);
+      padding: 1px 5px;
+      border-radius: 3px
+    }
+
+    .yes {
+      color: var(--green);
+      font-weight: 600
+    }
+
+    .no {
+      color: var(--text3)
+    }
+
+    .half {
+      color: var(--orange)
+    }
+
+    /* TWO COL */
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0
+    }
+
+    /* BADGE */
+    .bdg {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500
+    }
+
+    .bdg.g {
+      background: rgba(74, 222, 128, .1);
+      color: var(--green);
+      border: 1px solid rgba(74, 222, 128, .2)
+    }
+
+    .bdg.p {
+      background: rgba(192, 132, 252, .1);
+      color: var(--acc);
+      border: 1px solid rgba(192, 132, 252, .2)
+    }
+
+    .bdg.o {
+      background: rgba(251, 146, 60, .1);
+      color: var(--orange);
+      border: 1px solid rgba(251, 146, 60, .2)
+    }
+
+    .bdg.b {
+      background: rgba(124, 155, 255, .1);
+      color: var(--blue);
+      border: 1px solid rgba(124, 155, 255, .2)
+    }
+
+    hr.s {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 48px 0 0
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px
+    }
+
+    @media(max-width:900px) {
+      .shell {
+        grid-template-columns: 1fr
+      }
+
+      .sidebar {
+        display: none
+      }
+
+      .hero {
+        padding: 48px 28px
+      }
+
+      .content {
+        padding: 0 28px 60px
+      }
+
+      .pat-grid {
+        grid-template-columns: 1fr
+      }
+
+      .two {
+        grid-template-columns: 1fr
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sb-logo">
+        <div class="name">sutramEngine</div>
+        <div class="sub">depends on sutramcore</div>
+        <div class="sb-badge">v1.0.0-beta</div>
+      </div>
+      <nav>
+        <div class="nav-grp">
+          <div class="nav-lbl">Overview</div>
+          <a href="#what" class="nav-a"><span class="nd"></span>What is sutramEngine</a>
+          <a href="#install" class="nav-a"><span class="nd"></span>Installation</a>
+        </div>
+        <div class="nav-grp">
+          <div class="nav-lbl">Initialization</div>
+          <a href="#patterns" class="nav-a"><span class="nd"></span>Three Patterns</a>
+          <a href="#p1" class="nav-a"><span class="nd"></span>Pattern 1 — sutram instance</a>
+          <a href="#p2" class="nav-a"><span class="nd"></span>Pattern 2 — direct schema</a>
+          <a href="#p3" class="nav-a"><span class="nd"></span>Pattern 3 — managed</a>
+          <a href="#dbvsdbpath" class="nav-a"><span class="nd"></span>db vs dbPath</a>
+        </div>
+        <div class="nav-grp">
+          <div class="nav-lbl">Bootstrap</div>
+          <a href="#bootstrap" class="nav-a"><span class="nd"></span>How Bootstrap Works</a>
+          <a href="#modes" class="nav-a"><span class="nd"></span>Direct vs Managed Mode</a>
+        </div>
+        <div class="nav-grp">
+          <div class="nav-lbl">Import / Export</div>
+          <a href="#importall" class="nav-a"><span class="nd"></span>importAll</a>
+          <a href="#importsep" class="nav-a"><span class="nd"></span>Separate imports</a>
+          <a href="#exportall" class="nav-a"><span class="nd"></span>exportAll</a>
+          <a href="#exportsep" class="nav-a"><span class="nd"></span>Separate exports</a>
+        </div>
+        <div class="nav-grp">
+          <div class="nav-lbl">Schema Manager</div>
+          <a href="#createtable" class="nav-a"><span class="nd"></span>createTable</a>
+          <a href="#columns" class="nav-a"><span class="nd"></span>addColumn / dropColumn</a>
+          <a href="#joins" class="nav-a"><span class="nd"></span>addJoin / removeJoin</a>
+        </div>
+        <div class="nav-grp">
+          <div class="nav-lbl">Triggers</div>
+          <a href="#triggers" class="nav-a"><span class="nd"></span>Creating Triggers</a>
+          <a href="#tactions" class="nav-a"><span class="nd"></span>Trigger Actions</a>
+          <a href="#fieldmap" class="nav-a"><span class="nd"></span>Field Map</a>
+        </div>
+        <div class="nav-grp">
+          <div class="nav-lbl">Reports</div>
+          <a href="#reports" class="nav-a"><span class="nd"></span>CTE Reports</a>
+        </div>
+        <div class="nav-grp">
+          <div class="nav-lbl">CRUD</div>
+          <a href="#crud" class="nav-a"><span class="nd"></span>Trigger-aware CRUD</a>
+          <a href="#procedure-engine" class="nav-a"><span class="nd"></span>procedure()</a>
+          <a href="#tx" class="nav-a"><span class="nd"></span>Transactions</a>
+          <a href="#raw" class="nav-a"><span class="nd"></span>Raw SQL</a>
+        </div>
+        <div class="nav-grp">
+          <div class="nav-lbl">Router</div>
+          <a href="#router" class="nav-a"><span class="nd"></span>engine.router()</a>
+          <a href="#sutram-routes" class="nav-a"><span class="nd"></span>_sutram routes</a>
+          <a href="#crud-routes" class="nav-a"><span class="nd"></span>CRUD routes</a>
+        </div>
+        <div class="nav-grp">
+          <div class="nav-lbl">UI Config</div>
+          <a href="#ui-overview" class="nav-a"><span class="nd"></span>Overview</a>
+          <a href="#table-ui" class="nav-a"><span class="nd"></span>Table UI config</a>
+          <a href="#column-ui" class="nav-a"><span class="nd"></span>Column UI config</a>
+          <a href="#display-format" class="nav-a"><span class="nd"></span>display_format</a>
+          <a href="#import-ui" class="nav-a"><span class="nd"></span>importUi / ui.js</a>
+          <a href="#menu-response" class="nav-a"><span class="nd"></span>/_sutram/menu response</a>
+          <a href="#schema-response" class="nav-a"><span class="nd"></span>/_sutram/schema response</a>
+        </div>
+        <div class="nav-grp">
+          <div class="nav-lbl">MySQL Support</div>
+          <a href="#mysql-why" class="nav-a"><span class="nd"></span>Why sutramcore-mysql</a>
+          <a href="#mysql-install" class="nav-a"><span class="nd"></span>Installation</a>
+          <a href="#mysql-connect" class="nav-a"><span class="nd"></span>Connect</a>
+          <a href="#mysql-crud" class="nav-a"><span class="nd"></span>CRUD — async</a>
+          <a href="#mysql-tx" class="nav-a"><span class="nd"></span>Transactions</a>
+          <a href="#mysql-engine" class="nav-a"><span class="nd"></span>With sutramEngine</a>
+        </div>
+        <div class="nav-grp">
+          <div class="nav-lbl">Reference</div>
+          <a href="#systables" class="nav-a"><span class="nd"></span>sys_ Tables</a>
+          <a href="#api" class="nav-a"><span class="nd"></span>Full API Reference</a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <div class="hero">
+        <div class="hero-ey">depends on sutramcore</div>
+        <h1>sutram<span>Engine</span></h1>
+        <p class="hero-sub">Self-bootstrapping metadata brain. Works alongside sutramCore, or standalone. Schema,
+          triggers, and reports live in the database itself — or stay in your JS files.</p>
+        <div class="hero-inst"><span class="p">$</span><span>npm install sutramengine sutramcore better-sqlite3</span>
+        </div>
+        <div class="chips">
+          <div class="chip"><span class="dot" style="background:#c084fc"></span>3 init patterns</div>
+          <div class="chip"><span class="dot" style="background:#4ade80"></span>sutramCore compatible</div>
+          <div class="chip"><span class="dot" style="background:#7c9bff"></span>Trigger-aware CRUD</div>
+          <div class="chip"><span class="dot" style="background:#fb923c"></span>CTE reports</div>
+          <div class="chip"><span class="dot" style="background:#fbbf24"></span>Idempotent imports</div>
+        </div>
+
+        <div id="hero-demo"
+          style="margin-top:36px;border-radius:10px;overflow:hidden;border:1px solid #2a2f3e;display:grid;grid-template-columns:1.8fr 1fr 1fr">
+
+          <div style="border-right:1px solid #2a2f3e">
+            <div
+              style="background:#13161d;border-bottom:1px solid #2a2f3e;padding:9px 14px;display:flex;align-items:center;gap:8px">
+              <div style="display:flex;gap:5px">
+                <div style="width:9px;height:9px;border-radius:50%;background:#ff5f56"></div>
+                <div style="width:9px;height:9px;border-radius:50%;background:#ffbd2e"></div>
+                <div style="width:9px;height:9px;border-radius:50%;background:#27c93f"></div>
+              </div>
+              <span style="font-family:'DM Mono',monospace;font-size:10px;color:#5f6880">schema.js</span>
+            </div>
+            <div id="demo-schema"
+              style="background:#0d0f14;padding:16px 18px;font-family:'DM Mono',monospace;font-size:11.5px;line-height:1.85;min-height:260px;overflow:hidden">
+            </div>
+          </div>
+
+          <div>
+            <div
+              style="background:#13161d;border-bottom:1px solid #2a2f3e;padding:9px 14px;display:flex;align-items:center;gap:8px">
+              <div style="display:flex;gap:5px">
+                <div style="width:9px;height:9px;border-radius:50%;background:#ff5f56"></div>
+                <div style="width:9px;height:9px;border-radius:50%;background:#ffbd2e"></div>
+                <div style="width:9px;height:9px;border-radius:50%;background:#27c93f"></div>
+              </div>
+              <span style="font-family:'DM Mono',monospace;font-size:10px;color:#5f6880">db.js</span>
+            </div>
+            <div id="demo-db"
+              style="background:#0d0f14;padding:16px 18px;font-family:'DM Mono',monospace;font-size:11.5px;line-height:1.85;min-height:260px;overflow:hidden">
+            </div>
+          </div>
+
+          <div style="background:#090b0f;border-right:1px solid #2a2f3e;padding:12px 18px;min-height:310px">
+            <div
+              style="font-family:'DM Mono',monospace;font-size:9px;color:#5f6880;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase">
+              Live API</div>
+            <div id="demo-apis" style="display:flex;flex-direction:column;gap:5px"></div>
+            <div id="demo-ready"
+              style="font-family:'DM Mono',monospace;font-size:11px;color:#4ade80;margin-top:10px;opacity:0;transition:opacity 0.5s">
+              ✓ sutramEngine ready — routes live</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (function () {
+          var K = function (s) { return '<span style="color:#c084fc">' + s + '</span>'; };
+          var F = function (s) { return '<span style="color:#7c9bff">' + s + '</span>'; };
+          var S = function (s) { return '<span style="color:#4ade80">' + s + '</span>'; };
+          var C = function (s) { return '<span style="color:#5f6880;font-style:italic">' + s + '</span>'; };
+          var N = function (s) { return '<span style="color:#fbbf24">' + s + '</span>'; };
+          var P = function (s) { return '<span style="color:#fb923c">' + s + '</span>'; };
+
+          var SCHEMA = [
+            C('// database/schema.js'),
+            K('const') + ' { defineTable, col } = ' + F('require') + '(' + S("'sutramcore'") + ');',
+            '',
+            K('module') + '.' + 'exports = {',
+            '',
+            C('  // country table'),
+            '  ...' + F('defineTable') + '(' + S("'country'") + ', {',
+            '    _id:          col.' + F('id') + '(),',
+            '    country_name: col.' + F('string') + '().' + F('required') + '(),',
+            '    country_code: col.' + F('string') + '(),',
+            '    active:       col.' + F('boolean') + '().' + F('default') + '(' + P('1') + '),',
+            '  }),',
+            '',
+            C('  // state — hasOne → country'),
+            '  ...' + F('defineTable') + '(' + S("'state'") + ', {',
+            '    _id:        col.' + F('id') + '(),',
+            '    state_name: col.' + F('string') + '().' + F('required') + '(),',
+            '    country_id: col.' + F('ref') + '(' + S("'country._id'") + ', {',
+            '      as: ' + S("'country'") + ', select: [' + S("'country_name'") + '],',
+            '    }),',
+            '    active: col.' + F('boolean') + '().' + F('default') + '(' + P('1') + '),',
+            '  }),',
+            '',
+            '};',
+          ];
+
+          var DB = [
+            K('const') + ' { ' + N('SutramEngine') + ' }',
+            '  = ' + F('require') + '(' + S("'sutramengine'") + ');',
+            K('const') + ' schema = ' + F('require') + '(' + S("'./schema'") + ');',
+            '',
+            K('const') + ' engine = ' + K('new') + ' ' + F('SutramEngine') + '({',
+            '  dbPath: ' + S("'./app.db'") + ',',
+            '  schema,',
+            '}).' + F('init') + '();',
+            '',
+            C('// mount router'),
+            'app.' + F('use') + '(' + S("'/api'") + ',',
+            '  engine.' + F('router') + '()',
+            ');',
+          ];
+
+          var APIS = [
+            { method: 'GET', url: '/api/country', desc: 'all countries', mc: '#4ade80', mb: 'rgba(74,222,128,.12)' },
+            { method: 'GET', url: '/api/country/1', desc: 'country by id', mc: '#4ade80', mb: 'rgba(74,222,128,.12)' },
+            { method: 'GET', url: '/api/state?country_id=1', desc: 'states of country', mc: '#4ade80', mb: 'rgba(74,222,128,.12)' },
+            { method: 'POST', url: '/api/country', desc: 'create country', mc: '#fb923c', mb: 'rgba(251,146,60,.12)' },
+            { method: 'PUT', url: '/api/state/5', desc: 'update state', mc: '#7c9bff', mb: 'rgba(124,155,255,.12)' },
+            { method: 'DELETE', url: '/api/country/3', desc: 'delete', mc: '#f87171', mb: 'rgba(248,113,113,.12)' },
+          ];
+
+          var schemaEl = document.getElementById('demo-schema');
+          var dbEl = document.getElementById('demo-db');
+          var apisEl = document.getElementById('demo-apis');
+          var readyEl = document.getElementById('demo-ready');
+          var timers = [];
+
+          function clr() {
+            timers.forEach(function (t) { clearTimeout(t); });
+            timers = [];
+            schemaEl.innerHTML = '';
+            dbEl.innerHTML = '';
+            apisEl.innerHTML = '';
+            readyEl.style.opacity = '0';
+          }
+
+          function add(cb, ms) { timers.push(setTimeout(cb, ms)); }
+
+          function typeLines(el, lines, startAt, perLine, cb) {
+            var t = startAt;
+            lines.forEach(function (line) {
+              (function (html, at) {
+                add(function () {
+                  var d = document.createElement('div');
+                  d.style.cssText = 'white-space:pre;min-height:1.85em;color:#e2e6f0';
+                  d.innerHTML = html || ' ';
+                  el.appendChild(d);
+                }, at);
+              })(line, t);
+              t += perLine;
+            });
+            if (cb) add(cb, t);
+            return t;
+          }
+
+          function run() {
+            clr();
+
+            var schemaEnd = typeLines(schemaEl, SCHEMA, 200, 220, null);
+
+            var dbStart = 600;
+            var dbEnd = typeLines(dbEl, DB, dbStart, 280, null);
+
+            var apiStart = Math.max(schemaEnd, dbEnd) + 400;
+
+            APIS.forEach(function (api, i) {
+              add(function () {
+                var row = document.createElement('div');
+                row.style.cssText = 'display:flex;align-items:center;gap:8px;opacity:0;transform:translateX(-6px);transition:opacity 0.3s,transform 0.3s;font-family:"DM Mono",monospace;font-size:11px';
+                var badge = '<span style="min-width:48px;text-align:center;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:500;background:' + api.mb + ';color:' + api.mc + ';border:1px solid ' + api.mc + '40">' + api.method + '</span>';
+                var url = '<span style="color:#9ba3b8">' + api.url + '</span>';
+                var desc = '<span style="color:#5f6880;font-size:10px">' + api.desc + '</span>';
+                row.innerHTML = badge + url + '&nbsp;&nbsp;' + desc;
+                apisEl.appendChild(row);
+                requestAnimationFrame(function () {
+                  requestAnimationFrame(function () {
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateX(0)';
+                  });
+                });
+              }, apiStart + i * 180);
+            });
+
+            add(function () {
+              readyEl.style.opacity = '1';
+            }, apiStart + APIS.length * 180 + 300);
+          }
+
+          run();
+          // setInterval(run, 16000);
+        })();
+      </script>
+
+      <div class="content">
+
+        <!-- WHAT -->
+        <div class="sec"><span class="anc" id="what"></span>
+          <div class="sec-hdr"><span class="sec-num">01</span>
+            <h2>What is sutramEngine?</h2>
+          </div>
+          <p>sutramCore is a schema-driven ORM where your schema lives in a JS file. sutramEngine takes that further —
+            it can store your schema, triggers, and CTE reports <em>inside the database itself</em> in <code>sys_</code>
+            tables. Change schema at runtime without redeployment.</p>
+          <p>But it's also designed to work <em>alongside</em> sutramCore with zero disruption. You can keep your
+            existing sutramCore code untouched and add engine features incrementally.</p>
+          <div class="tw">
+            <table class="cmp">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>sutramCore</th>
+                  <th>sutramEngine</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Schema location</td>
+                  <td>schema.js file</td>
+                  <td>sys_ tables <span class="no">or</span> schema.js</td>
+                </tr>
+                <tr>
+                  <td>Runtime schema change</td>
+                  <td class="no">No — redeploy needed</td>
+                  <td class="yes">Yes — rebootstrap()</td>
+                </tr>
+                <tr>
+                  <td>Trigger support</td>
+                  <td class="no">No</td>
+                  <td class="yes">Yes — Node.js triggers</td>
+                </tr>
+                <tr>
+                  <td>CTE reports</td>
+                  <td class="no">No</td>
+                  <td class="yes">Yes — named + parameterized</td>
+                </tr>
+                <tr>
+                  <td>sutramUI compatible</td>
+                  <td class="no">No</td>
+                  <td class="yes">Yes (managed mode)</td>
+                </tr>
+                <tr>
+                  <td>CRUD API</td>
+                  <td class="yes">Full BaseTable API</td>
+                  <td class="yes">Same + trigger-aware wrappers</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- INSTALL -->
+        <div class="sec"><span class="anc" id="install"></span>
+          <div class="sec-hdr"><span class="sec-num">02</span>
+            <h2>Installation</h2>
+          </div>
+          <div class="cw">
+            <div class="ch"><span class="cl">terminal</span><span class="clang">bash</span></div>
+            <div class="cb">
+              <pre><span class="fn">npm</span> install sutramengine sutramcore better-sqlite3</pre>
+            </div>
+          </div>
+          <div class="note purple"><span class="ni">◈</span><span>sutramEngine uses <code>sys_meta</code> to track its
+              own migration version — completely separate from SQLite's <code>user_version</code> pragma which
+              sutramCore uses. Zero conflict, always.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- PATTERNS OVERVIEW -->
+        <div class="sec"><span class="anc" id="patterns"></span>
+          <div class="sec-hdr"><span class="sec-num">03</span>
+            <h2>Three Initialization Patterns</h2>
+          </div>
+          <p>Pick the pattern that fits your situation. All three produce the same engine API — the difference is where
+            the schema comes from and who manages the db.</p>
+          <div class="pat-grid">
+            <div class="pat p1">
+              <div class="pat-num">PATTERN 1</div>
+              <div class="pat-title">Reuse sutramCore instance</div>
+              <div class="pat-desc">You already have a <code>sewa</code> Sutram instance. Pass it to engine. Same db,
+                same cache, atomic transactions across both.</div>
+              <div class="pat-tags">
+                <span class="pat-tag tag-g">existing codebase</span>
+                <span class="pat-tag tag-b">zero migration</span>
+                <span class="pat-tag tag-p">direct mode</span>
+              </div>
+            </div>
+            <div class="pat p2">
+              <div class="pat-num">PATTERN 2</div>
+              <div class="pat-title">Direct schema</div>
+              <div class="pat-desc">Pass <code>schema.js</code> directly. Engine creates its own Sutram. User manages
+                SQLite tables and migrations.</div>
+              <div class="pat-tags">
+                <span class="pat-tag tag-g">fresh project</span>
+                <span class="pat-tag tag-b">no sys_ overhead</span>
+                <span class="pat-tag tag-p">direct mode</span>
+              </div>
+            </div>
+            <div class="pat p3">
+              <div class="pat-num">PATTERN 3</div>
+              <div class="pat-title">Managed (sys_ tables)</div>
+              <div class="pat-desc">Schema lives in <code>sys_table</code>, <code>sys_column</code> etc. Change at
+                runtime. Ready for sutramUI + sutramServer.</div>
+              <div class="pat-tags">
+                <span class="pat-tag tag-o">runtime changes</span>
+                <span class="pat-tag tag-b">sutramUI ready</span>
+                <span class="pat-tag tag-p">managed mode</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- PATTERN 1 -->
+        <div class="sec"><span class="anc" id="p1"></span>
+          <div class="sec-hdr"><span class="sec-num">04</span>
+            <h2>Pattern 1 — Reuse Sutram Instance</h2>
+          </div>
+          <p>The cleanest upgrade path. Your existing sutramCore code stays <strong>completely unchanged</strong>.
+            Engine borrows <code>sewa.db</code> and <code>sewa</code>'s cache. <code>sewa.table()</code> and
+            <code>engine.table()</code> return the exact same BaseTable instance.
+          </p>
+
+          <div class="cw">
+            <div class="ch"><span class="cl">database/db.js</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="kw">const</span> { <span class="cn">Sutram</span> }       = <span class="fn">require</span>(<span class="str">'sutramcore'</span>);
+<span class="kw">const</span> { <span class="cn">SutramEngine</span> } = <span class="fn">require</span>(<span class="str">'sutramengine'</span>);
+<span class="kw">const</span> schema           = <span class="fn">require</span>(<span class="str">'./schema'</span>);
+
+<span class="cmt">// existing sutramCore setup — NOT touched</span>
+<span class="kw">const</span> sewa = <span class="kw">new</span> <span class="fn">Sutram</span>({ db: dbmodal.db, schema });
+
+<span class="cmt">// engine reuses sewa's db and cache</span>
+<span class="kw">const</span> engine = <span class="kw">new</span> <span class="fn">SutramEngine</span>({
+  sutram:   sewa,
+  triggers: <span class="fn">require</span>(<span class="str">'./triggers'</span>),  <span class="cmt">// optional</span>
+  reports:  <span class="fn">require</span>(<span class="str">'./reports'</span>),   <span class="cmt">// optional</span>
+}).<span class="fn">init</span>();
+
+module.exports = { sewa, engine };</pre>
+            </div>
+          </div>
+
+          <div class="cw">
+            <div class="ch"><span class="cl">in your services — existing code untouched</span><span
+                class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="kw">const</span> { sewa, engine } = <span class="fn">require</span>(<span class="str">'./database/db'</span>);
+
+<span class="cmt">// old code — works exactly as before</span>
+<span class="kw">const</span> hmpBatch = sewa.<span class="fn">table</span>(<span class="str">'hmp_batch'</span>);
+hmpBatch.<span class="fn">getAll</span>({ dept_id: <span class="num">1</span> });
+
+<span class="cmt">// new feature — engine adds triggers, reports</span>
+engine.<span class="fn">insert</span>(<span class="str">'new_table'</span>, data);   <span class="cmt">// fires triggers</span>
+engine.report.<span class="fn">run</span>(<span class="str">'monthly_sales'</span>);
+
+<span class="cmt">// transactions across both — FULLY ATOMIC</span>
+<span class="cmt">// same db, same connection, same transaction</span>
+sewa.<span class="fn">transaction</span>(() => {
+  hmpBatch.<span class="fn">insert</span>(data, <span class="kw">false</span>);               <span class="cmt">// old table</span>
+  engine.<span class="fn">table</span>(<span class="str">'new_table'</span>).<span class="fn">insert</span>(x, <span class="kw">false</span>); <span class="cmt">// new table</span>
+});
+
+<span class="cmt">// sewa.table() === engine.table() — same instance</span>
+sewa.<span class="fn">table</span>(<span class="str">'hmp_batch'</span>) === engine.<span class="fn">table</span>(<span class="str">'hmp_batch'</span>);  <span class="cmt">// true</span></pre>
+            </div>
+          </div>
+
+          <div class="note tip"><span class="ni">✓</span><span>importAll() / importSchema() are NOT available in Pattern
+              1 — engine is in direct mode, sys_ tables are not used for schema. Add new tables via sutramCore's
+              schema.js.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- PATTERN 2 -->
+        <div class="sec"><span class="anc" id="p2"></span>
+          <div class="sec-hdr"><span class="sec-num">05</span>
+            <h2>Pattern 2 — Direct Schema</h2>
+          </div>
+          <p>No existing sutramCore instance. Pass schema, triggers, reports directly. Engine creates its own Sutram
+            instance. You manage SQLite tables and migrations — engine just drives them.</p>
+
+          <div class="cw">
+            <div class="ch"><span class="cl">database/db.js — with existing better-sqlite3 instance</span><span
+                class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="kw">const</span> { <span class="cn">SutramEngine</span> } = <span class="fn">require</span>(<span class="str">'sutramengine'</span>);
+
+<span class="kw">const</span> engine = <span class="kw">new</span> <span class="fn">SutramEngine</span>({
+  db:       dbmodal.db,                          <span class="cmt">// better-sqlite3 instance</span>
+  schema:   <span class="fn">require</span>(<span class="str">'./database/schema'</span>),
+  triggers: <span class="fn">require</span>(<span class="str">'./database/triggers'</span>),
+  reports:  <span class="fn">require</span>(<span class="str">'./database/reports'</span>),
+}).<span class="fn">init</span>();
+
+module.exports = { engine };</pre>
+            </div>
+          </div>
+
+          <div class="cw">
+            <div class="ch"><span class="cl">database/db.js — engine opens the file</span><span class="clang">js</span>
+            </div>
+            <div class="cb">
+              <pre><span class="kw">const</span> engine = <span class="kw">new</span> <span class="fn">SutramEngine</span>({
+  dbPath:   <span class="str">'./app.db'</span>,                         <span class="cmt">// engine opens + sets WAL pragmas</span>
+  schema:   <span class="fn">require</span>(<span class="str">'./database/schema'</span>),
+  triggers: <span class="fn">require</span>(<span class="str">'./database/triggers'</span>),
+  reports:  <span class="fn">require</span>(<span class="str">'./database/reports'</span>),
+}).<span class="fn">init</span>();</pre>
+            </div>
+          </div>
+
+          <div class="note info"><span class="ni">ℹ</span><span>In Pattern 2, triggers and reports load directly from
+              your arrays — sys_trigger and sys_report tables are not involved. Fast, zero overhead.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- PATTERN 3 -->
+        <div class="sec"><span class="anc" id="p3"></span>
+          <div class="sec-hdr"><span class="sec-num">06</span>
+            <h2>Pattern 3 — Managed Mode</h2>
+          </div>
+          <p>Schema lives in <code>sys_</code> tables. Use <code>importAll()</code> to seed from your existing files on
+            first run, or define tables programmatically via <code>engine.schema.createTable()</code>. Designed for
+            sutramUI + sutramServer.</p>
+
+          <div class="cw">
+            <div class="ch"><span class="cl">database/db.js — with db instance</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="kw">const</span> engine = <span class="kw">new</span> <span class="fn">SutramEngine</span>({ db: dbmodal.db }).<span class="fn">init</span>();
+
+<span class="cmt">// seed sys_ tables from your existing files (idempotent)</span>
+engine.<span class="fn">importAll</span>({
+  schema:   <span class="fn">require</span>(<span class="str">'./database/schema'</span>),
+  triggers: <span class="fn">require</span>(<span class="str">'./database/triggers'</span>),
+  reports:  <span class="fn">require</span>(<span class="str">'./database/reports'</span>),
+});</pre>
+            </div>
+          </div>
+
+          <div class="cw">
+            <div class="ch"><span class="cl">database/db.js — with dbPath</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="kw">const</span> engine = <span class="kw">new</span> <span class="fn">SutramEngine</span>({ dbPath: <span class="str">'./app.db'</span> }).<span class="fn">init</span>();
+
+<span class="cmt">// or define tables in code</span>
+engine.schema.<span class="fn">createTable</span>({
+  table_name: <span class="str">'product'</span>,
+  columns: [
+    { column_name: <span class="str">'_id'</span>,    col_type: <span class="str">'number'</span>,  is_pk: <span class="kw">true</span> },
+    { column_name: <span class="str">'name'</span>,   col_type: <span class="str">'string'</span>,  is_required: <span class="kw">true</span> },
+    { column_name: <span class="str">'price'</span>,  col_type: <span class="str">'number'</span>,  default_value: <span class="num">0</span> },
+    { column_name: <span class="str">'active'</span>, col_type: <span class="str">'boolean'</span>, default_value: <span class="num">1</span> },
+  ],
+});</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- DB VS DBPATH -->
+        <div class="sec"><span class="anc" id="dbvsdbpath"></span>
+          <div class="sec-hdr"><span class="sec-num">07</span>
+            <h2>db vs dbPath</h2>
+          </div>
+          <p>For Patterns 2 and 3, you can either pass a <code>db</code> instance or a <code>dbPath</code>. The
+            difference is who manages the database lifecycle.</p>
+          <div class="tw">
+            <table class="cmp">
+              <thead>
+                <tr>
+                  <th>Option</th>
+                  <th>Who opens db</th>
+                  <th>Who sets pragmas</th>
+                  <th>Who manages lifecycle</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>db</code></td>
+                  <td>Caller (you)</td>
+                  <td>Caller (you)</td>
+                  <td>Caller — call db.close() yourself</td>
+                </tr>
+                <tr>
+                  <td><code>dbPath</code></td>
+                  <td>Engine</td>
+                  <td>Engine (WAL, foreign_keys, busy_timeout)</td>
+                  <td>Engine manages the file</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note info"><span class="ni">ℹ</span><span>If you already have a db.model.js or DbModal running
+              migrations, always use <code>db</code> — pass the ready instance. Use <code>dbPath</code> for fresh
+              projects where engine is the only thing touching the file.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- BOOTSTRAP -->
+        <div class="sec"><span class="anc" id="bootstrap"></span>
+          <div class="sec-hdr"><span class="sec-num">08</span>
+            <h2>How Bootstrap Works</h2>
+          </div>
+          <p><code>init()</code> always runs sys_ migrations first, then calls <code>rebootstrap()</code>. What
+            rebootstrap does depends on the mode.</p>
+          <div class="flow">
+            <div class="fs">
+              <div class="fl">
+                <div class="fc">1</div>
+                <div class="fli"></div>
+              </div>
+              <div class="fcon">
+                <div class="ft">Run sys_ migrations</div>
+                <div class="fd">Creates <code>sys_meta</code>, <code>sys_table</code>, <code>sys_column</code>,
+                  <code>sys_join</code>, <code>sys_trigger</code>, <code>sys_report</code> etc. Version tracked in
+                  <code>sys_meta.engine_version</code> — separate from <code>user_version</code>.
+                </div>
+              </div>
+            </div>
+            <div class="fs">
+              <div class="fl">
+                <div class="fc">2</div>
+                <div class="fli"></div>
+              </div>
+              <div class="fcon">
+                <div class="ft">Detect mode</div>
+                <div class="fd"><code>direct</code> — schema passed via constructor (Pattern 1 or 2).
+                  <code>managed</code> — no schema in constructor, read from sys_ (Pattern 3).
+                </div>
+              </div>
+            </div>
+            <div class="fs">
+              <div class="fl">
+                <div class="fc">3</div>
+                <div class="fli"></div>
+              </div>
+              <div class="fcon">
+                <div class="ft">Build tableMeta</div>
+                <div class="fd">Direct: uses <code>_directSchema</code> as-is. Managed: BootstrapBuilder reads
+                  <code>sys_table</code> + <code>sys_column</code> + <code>sys_join</code> and constructs the tableMeta
+                  object in memory.
+                </div>
+              </div>
+            </div>
+            <div class="fs">
+              <div class="fl">
+                <div class="fc">4</div>
+                <div class="fli"></div>
+              </div>
+              <div class="fcon">
+                <div class="ft">Initialize sutramCore</div>
+                <div class="fd">Direct Pattern 1: reuses <code>sewa</code> — no new Sutram created. Direct Pattern 2 +
+                  Managed: creates <code>new Sutram({ db, schema: builtMeta })</code>.</div>
+              </div>
+            </div>
+            <div class="fs">
+              <div class="fl">
+                <div class="fc">5</div>
+                <div class="fli"></div>
+              </div>
+              <div class="fcon">
+                <div class="ft">Load triggers + reports</div>
+                <div class="fd">Direct: <code>loadFromArray()</code> from constructor arrays. Managed:
+                  <code>load()</code> reads from <code>sys_trigger</code> and <code>sys_report</code>.
+                </div>
+              </div>
+            </div>
+            <div class="fs">
+              <div class="fl">
+                <div class="fc">✓</div>
+              </div>
+              <div class="fcon">
+                <div class="ft">Ready</div>
+                <div class="fd">All runtime queries use in-memory cache. <code>sys_</code> tables never touched again
+                  until next schema change or startup.</div>
+              </div>
+            </div>
+          </div>
+          <div class="note tip"><span class="ni">✓</span><span><code>rebootstrap()</code> is called automatically after
+              every <code>createTable</code>, <code>addColumn</code>, <code>addJoin</code> etc. You never need to call
+              it manually.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- MODES -->
+        <div class="sec"><span class="anc" id="modes"></span>
+          <div class="sec-hdr"><span class="sec-num">09</span>
+            <h2>Direct vs Managed Mode</h2>
+          </div>
+          <div class="tw">
+            <table class="cmp">
+              <thead>
+                <tr>
+                  <th>Capability</th>
+                  <th>Direct mode</th>
+                  <th>Managed mode</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Schema source</td>
+                  <td>Constructor argument</td>
+                  <td><code>sys_table / sys_column / sys_join</code></td>
+                </tr>
+                <tr>
+                  <td>SQLite table creation</td>
+                  <td class="no">User's responsibility</td>
+                  <td class="yes">engine.schema.createTable()</td>
+                </tr>
+                <tr>
+                  <td>Runtime schema change</td>
+                  <td class="no">No — redeploy needed</td>
+                  <td class="yes">Yes — rebootstrap() auto</td>
+                </tr>
+                <tr>
+                  <td>importAll / importSchema</td>
+                  <td class="no">Not available — throws</td>
+                  <td class="yes">Available</td>
+                </tr>
+                <tr>
+                  <td>exportSchema / exportAll</td>
+                  <td class="yes">Returns in-memory state</td>
+                  <td class="yes">Reads from sys_ tables</td>
+                </tr>
+                <tr>
+                  <td>Triggers</td>
+                  <td>Loaded from array</td>
+                  <td>Stored in sys_trigger</td>
+                </tr>
+                <tr>
+                  <td>Reports</td>
+                  <td>Loaded from array</td>
+                  <td>Stored in sys_report</td>
+                </tr>
+                <tr>
+                  <td>sutramUI compatible</td>
+                  <td class="no">No</td>
+                  <td class="yes">Yes</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- IMPORT ALL -->
+        <div class="sec"><span class="anc" id="importall"></span>
+          <div class="sec-hdr"><span class="sec-num">10</span>
+            <h2>importAll</h2>
+          </div>
+          <p>Managed mode only. Seeds sys_ tables from your existing JS files in one call. Idempotent — entries with
+            same name are skipped. Safe to call on every startup.</p>
+          <div class="cw">
+            <div class="ch"><span class="cl">importAll</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre>engine.<span class="fn">importAll</span>({
+  schema:   <span class="fn">require</span>(<span class="str">'./database/schema'</span>),    <span class="cmt">// required</span>
+  triggers: <span class="fn">require</span>(<span class="str">'./database/triggers'</span>),  <span class="cmt">// optional</span>
+  reports:  <span class="fn">require</span>(<span class="str">'./database/reports'</span>),   <span class="cmt">// optional</span>
+});
+<span class="cmt">// first run  → inserts all</span>
+<span class="cmt">// next runs  → skips existing names silently</span></pre>
+            </div>
+          </div>
+
+          <h3>What each file looks like</h3>
+          <div class="cw">
+            <div class="ch"><span class="cl">database/schema.js — sutramCore format</span><span class="clang">js</span>
+            </div>
+            <div class="cb">
+              <pre><span class="kw">const</span> { defineTable, col } = <span class="fn">require</span>(<span class="str">'sutramcore'</span>);
+module.exports = {
+  ...<span class="fn">defineTable</span>(<span class="str">'category'</span>, {
+    _id:    col.<span class="fn">id</span>(),
+    name:   col.<span class="fn">string</span>().<span class="fn">required</span>(),
+    active: col.<span class="fn">boolean</span>().<span class="fn">default</span>(<span class="num">1</span>),
+  }),
+  ...<span class="fn">defineTable</span>(<span class="str">'product'</span>, {
+    _id:         col.<span class="fn">id</span>(),
+    name:        col.<span class="fn">string</span>().<span class="fn">required</span>(),
+    price:       col.<span class="fn">number</span>().<span class="fn">default</span>(<span class="num">0</span>),
+    category_id: col.<span class="fn">ref</span>(<span class="str">'category._id'</span>, { as: <span class="str">'category'</span>, select: [<span class="str">'name'</span>] }),
+    active:      col.<span class="fn">boolean</span>().<span class="fn">default</span>(<span class="num">1</span>),
+  }, {
+    reviews: { hasMany: <span class="kw">true</span>, table: <span class="str">'review'</span>, on: <span class="str">'product_id'</span>,
+               target: <span class="str">'_id'</span>, as: <span class="str">'reviews'</span>, select: [<span class="str">'_id'</span>, <span class="str">'rating'</span>] },
+    tags: { manyToMany: <span class="kw">true</span>, table: <span class="str">'tag'</span>, junction: <span class="str">'product_tag'</span>,
+            on: <span class="str">'product_id'</span>, target: <span class="str">'tag_id'</span>, as: <span class="str">'tags'</span>, select: [<span class="str">'_id'</span>, <span class="str">'label'</span>] },
+  }),
+};</pre>
+            </div>
+          </div>
+
+          <div class="cw">
+            <div class="ch"><span class="cl">database/triggers.js</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre>module.exports = [
+  {
+    trigger_name: <span class="str">'log_product_insert'</span>,
+    source_table: <span class="str">'product'</span>,
+    event:        <span class="str">'INSERT'</span>,
+    actions: [{
+      action_type:  <span class="str">'insert_row'</span>,
+      target_table: <span class="str">'activity_log'</span>,
+      field_map: { message: <span class="str">'literal:Product added'</span>, ref_id: <span class="str">'new._id'</span> },
+    }],
+  },
+];</pre>
+            </div>
+          </div>
+
+          <div class="cw">
+            <div class="ch"><span class="cl">database/reports.js</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre>module.exports = [
+  {
+    report_name: <span class="str">'monthly_sales'</span>,
+    cte_sql: <span class="str">`
+      SELECT strftime('%Y-%m', date) as month, SUM(amount) as revenue
+      FROM orders WHERE date >= :from AND date <= :to
+      GROUP BY month ORDER BY month DESC
+    `</span>,
+    params: [
+      { name: <span class="str">'from'</span>, type: <span class="str">'string'</span>, default: <span class="str">'2024-01-01'</span> },
+      { name: <span class="str">'to'</span>,   type: <span class="str">'string'</span>, default: <span class="str">'2024-12-31'</span> },
+    ],
+  },
+];</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- IMPORT SEPARATE -->
+        <div class="sec"><span class="anc" id="importsep"></span>
+          <div class="sec-hdr"><span class="sec-num">11</span>
+            <h2>Separate Imports</h2>
+          </div>
+          <p>All managed mode only. Each is independently idempotent.</p>
+          <div class="two">
+            <div class="cw">
+              <div class="ch"><span class="cl">importSchema</span><span class="clang">js</span></div>
+              <div class="cb">
+                <pre>engine.<span class="fn">importSchema</span>(
+  <span class="fn">require</span>(<span class="str">'./database/schema'</span>)
+);
+<span class="cmt">// tables + columns + joins only</span></pre>
+              </div>
+            </div>
+            <div class="cw">
+              <div class="ch"><span class="cl">importTriggers</span><span class="clang">js</span></div>
+              <div class="cb">
+                <pre>engine.<span class="fn">importTriggers</span>(
+  <span class="fn">require</span>(<span class="str">'./database/triggers'</span>)
+);
+<span class="cmt">// triggers only</span></pre>
+              </div>
+            </div>
+          </div>
+          <div class="cw">
+            <div class="ch"><span class="cl">importReports</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre>engine.<span class="fn">importReports</span>(<span class="fn">require</span>(<span class="str">'./database/reports'</span>));</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- EXPORT ALL -->
+        <div class="sec"><span class="anc" id="exportall"></span>
+          <div class="sec-hdr"><span class="sec-num">12</span>
+            <h2>exportAll</h2>
+          </div>
+          <p>Available in all modes. Returns exact same format as the input files — full roundtrip guarantee.</p>
+          <div class="cw">
+            <div class="ch"><span class="cl">exportAll</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="kw">const</span> { schema, triggers, reports } = engine.<span class="fn">exportAll</span>();
+
+<span class="cmt">// schema   → same shape as schema.js   (tableMeta)</span>
+<span class="cmt">// triggers → same shape as triggers.js (array)</span>
+<span class="cmt">// reports  → same shape as reports.js  (array)</span>
+
+<span class="cmt">// roundtrip — import what you exported:</span>
+engine.<span class="fn">importAll</span>({ schema, triggers, reports });</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- EXPORT SEPARATE -->
+        <div class="sec"><span class="anc" id="exportsep"></span>
+          <div class="sec-hdr"><span class="sec-num">13</span>
+            <h2>Separate Exports</h2>
+          </div>
+          <div class="two">
+            <div class="cw">
+              <div class="ch"><span class="cl">exportSchema</span><span class="clang">js</span></div>
+              <div class="cb">
+                <pre><span class="kw">const</span> schema = engine.<span class="fn">exportSchema</span>();
+<span class="cmt">// {</span>
+<span class="cmt">//   product: {</span>
+<span class="cmt">//     columns: { _id: {...}, name: {...} },</span>
+<span class="cmt">//     joins:   { reviews: {...} }</span>
+<span class="cmt">//   }</span>
+<span class="cmt">// }</span></pre>
+              </div>
+            </div>
+            <div class="cw">
+              <div class="ch"><span class="cl">exportTriggers / exportReports</span><span class="clang">js</span></div>
+              <div class="cb">
+                <pre><span class="kw">const</span> t = engine.<span class="fn">exportTriggers</span>();
+<span class="cmt">// [ { trigger_name, source_table,</span>
+<span class="cmt">//     event, actions: [...] } ]</span>
+
+<span class="kw">const</span> r = engine.<span class="fn">exportReports</span>();
+<span class="cmt">// [ { report_name, cte_sql,</span>
+<span class="cmt">//     params: [...] } ]</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- CREATE TABLE -->
+        <div class="sec"><span class="anc" id="createtable"></span>
+          <div class="sec-hdr"><span class="sec-num">14</span>
+            <h2>createTable</h2>
+          </div>
+          <p>Managed mode. Inserts into <code>sys_table</code>, <code>sys_column</code>, <code>sys_join</code>, executes
+            <code>CREATE TABLE</code>, then rebootstraps automatically.
+          </p>
+          <div class="cw">
+            <div class="ch"><span class="cl">createTable</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre>engine.schema.<span class="fn">createTable</span>({
+  table_name: <span class="str">'product'</span>,
+  label:      <span class="str">'Products'</span>,
+  columns: [
+    { column_name: <span class="str">'_id'</span>,         col_type: <span class="str">'number'</span>,  is_pk: <span class="kw">true</span> },
+    { column_name: <span class="str">'name'</span>,        col_type: <span class="str">'string'</span>,  is_required: <span class="kw">true</span> },
+    { column_name: <span class="str">'price'</span>,       col_type: <span class="str">'number'</span>,  default_value: <span class="num">0</span> },
+    { column_name: <span class="str">'category_id'</span>, col_type: <span class="str">'number'</span>,
+      ref_table: <span class="str">'category'</span>, ref_col: <span class="str">'_id'</span>,
+      ref_as: <span class="str">'category'</span>,    ref_select: <span class="cn">JSON</span>.<span class="fn">stringify</span>([<span class="str">'name'</span>]) },
+    { column_name: <span class="str">'active'</span>,      col_type: <span class="str">'boolean'</span>, default_value: <span class="num">1</span> },
+  ],
+  joins: [
+    { join_type: <span class="str">'hasMany'</span>, join_key: <span class="str">'reviews'</span>,
+      child_table: <span class="str">'review'</span>, fk_col: <span class="str">'product_id'</span>, target_col: <span class="str">'_id'</span>,
+      as_name: <span class="str">'reviews'</span>, select_cols: <span class="cn">JSON</span>.<span class="fn">stringify</span>([<span class="str">'_id'</span>, <span class="str">'rating'</span>]) },
+  ],
+});
+<span class="cmt">// engine.table('product') works immediately after this</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- COLUMNS -->
+        <div class="sec"><span class="anc" id="columns"></span>
+          <div class="sec-hdr"><span class="sec-num">15</span>
+            <h2>addColumn / dropColumn</h2>
+          </div>
+          <div class="two">
+            <div class="cw">
+              <div class="ch"><span class="cl">addColumn</span><span class="clang">js</span></div>
+              <div class="cb">
+                <pre>engine.schema.<span class="fn">addColumn</span>(<span class="str">'product'</span>, {
+  column_name: <span class="str">'sku'</span>,
+  col_type:    <span class="str">'string'</span>,
+});
+<span class="cmt">// ALTER TABLE product ADD COLUMN</span>
+<span class="cmt">// updates sys_column + rebootstrap</span></pre>
+              </div>
+            </div>
+            <div class="cw">
+              <div class="ch"><span class="cl">dropColumn</span><span class="clang">js</span></div>
+              <div class="cb">
+                <pre>engine.schema.<span class="fn">dropColumn</span>(
+  <span class="str">'product'</span>, <span class="str">'sku'</span>
+);
+<span class="cmt">// ALTER TABLE DROP COLUMN</span>
+<span class="cmt">// cannot drop primary key</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- JOINS -->
+        <div class="sec"><span class="anc" id="joins"></span>
+          <div class="sec-hdr"><span class="sec-num">16</span>
+            <h2>addJoin / removeJoin</h2>
+          </div>
+          <div class="two">
+            <div class="cw">
+              <div class="ch"><span class="cl">addJoin</span><span class="clang">js</span></div>
+              <div class="cb">
+                <pre>engine.schema.<span class="fn">addJoin</span>(<span class="str">'product'</span>, {
+  join_type:   <span class="str">'manyToMany'</span>,
+  join_key:    <span class="str">'tags'</span>,
+  child_table: <span class="str">'tag'</span>,
+  junction_table: <span class="str">'product_tag'</span>,
+  fk_col:      <span class="str">'product_id'</span>,
+  target_col:  <span class="str">'tag_id'</span>,
+  as_name:     <span class="str">'tags'</span>,
+  select_cols: <span class="cn">JSON</span>.<span class="fn">stringify</span>([<span class="str">'_id'</span>,<span class="str">'label'</span>]),
+});</pre>
+              </div>
+            </div>
+            <div class="cw">
+              <div class="ch"><span class="cl">removeJoin</span><span class="clang">js</span></div>
+              <div class="cb">
+                <pre>engine.schema.<span class="fn">removeJoin</span>(
+  <span class="str">'product'</span>,
+  <span class="str">'tags'</span>   <span class="cmt">// join_key</span>
+);
+<span class="cmt">// removes from sys_join</span>
+<span class="cmt">// SQLite table untouched</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- TRIGGERS -->
+        <div class="sec"><span class="anc" id="triggers"></span>
+          <div class="sec-hdr"><span class="sec-num">17</span>
+            <h2>Creating Triggers</h2>
+          </div>
+          <p>Triggers run in Node.js inside the same transaction as the original operation. Managed mode stores in
+            <code>sys_trigger</code>. Direct mode: define in <code>triggers.js</code> array.
+          </p>
+          <div class="cw">
+            <div class="ch"><span class="cl">trigger.create — managed mode</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre>engine.trigger.<span class="fn">create</span>({
+  trigger_name: <span class="str">'stock_deduct_on_sale'</span>,
+  source_table: <span class="str">'sale_item'</span>,
+  event:        <span class="str">'INSERT'</span>,
+  condition_type: <span class="str">'always'</span>,
+  actions: [
+    {
+      action_type:  <span class="str">'update_row'</span>,
+      target_table: <span class="str">'product'</span>,
+      condition:    <span class="str">'_id = {new.product_id}'</span>,
+      field_map:    { last_sold: <span class="str">'literal:now'</span> },
+    },
+    {
+      action_type:  <span class="str">'insert_row'</span>,
+      target_table: <span class="str">'audit_log'</span>,
+      field_map: {
+        event:      <span class="str">'literal:sale'</span>,
+        ref_id:     <span class="str">'new._id'</span>,
+        product_id: <span class="str">'new.product_id'</span>,
+      },
+    },
+  ],
+});</pre>
+            </div>
+          </div>
+
+          <h3>Condition types</h3>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>condition_type</th>
+                  <th>Fires when</th>
+                  <th>Extra fields</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>always</code></td>
+                  <td>Every time</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td><code>when_col_equals</code></td>
+                  <td>Column equals value</td>
+                  <td><code>condition_col</code>, <code>condition_value</code></td>
+                </tr>
+                <tr>
+                  <td><code>raw_sql</code></td>
+                  <td>SQL expression is truthy</td>
+                  <td><code>condition_sql</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- TRIGGER ACTIONS -->
+        <div class="sec"><span class="anc" id="tactions"></span>
+          <div class="sec-hdr"><span class="sec-num">18</span>
+            <h2>Trigger Actions</h2>
+          </div>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>action_type</th>
+                  <th>What it does</th>
+                  <th>Required fields</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>insert_row</code></td>
+                  <td>INSERT into target_table</td>
+                  <td><code>target_table</code>, <code>field_map</code></td>
+                </tr>
+                <tr>
+                  <td><code>update_row</code></td>
+                  <td>UPDATE rows in target_table</td>
+                  <td><code>target_table</code>, <code>field_map</code>, <code>condition</code></td>
+                </tr>
+                <tr>
+                  <td><code>delete_row</code></td>
+                  <td>DELETE from target_table</td>
+                  <td><code>target_table</code>, <code>condition</code></td>
+                </tr>
+                <tr>
+                  <td><code>raw_sql</code></td>
+                  <td>Execute any SQL</td>
+                  <td><code>raw_sql</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- FIELD MAP -->
+        <div class="sec"><span class="anc" id="fieldmap"></span>
+          <div class="sec-hdr"><span class="sec-num">19</span>
+            <h2>Field Map Format</h2>
+          </div>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Value format</th>
+                  <th>Resolves to</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>"new.column"</code></td>
+                  <td>Value from the new row (after INSERT/UPDATE)</td>
+                </tr>
+                <tr>
+                  <td><code>"old.column"</code></td>
+                  <td>Value from the old row (before UPDATE/DELETE)</td>
+                </tr>
+                <tr>
+                  <td><code>"literal:value"</code></td>
+                  <td>Fixed string value</td>
+                </tr>
+                <tr>
+                  <td><code>42</code> / <code>true</code></td>
+                  <td>Direct JS value</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="cw">
+            <div class="ch"><span class="cl">field_map examples</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre>field_map: {
+  product_id:  <span class="str">'new._id'</span>,          <span class="cmt">// from inserted row</span>
+  old_price:   <span class="str">'old.price'</span>,         <span class="cmt">// before update</span>
+  status:      <span class="str">'literal:pending'</span>,   <span class="cmt">// fixed string</span>
+  is_active:   <span class="num">1</span>,                    <span class="cmt">// direct number</span>
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- REPORTS -->
+        <div class="sec"><span class="anc" id="reports"></span>
+          <div class="sec-hdr"><span class="sec-num">20</span>
+            <h2>CTE Reports</h2>
+          </div>
+          <p>Named SQL queries — CTEs, aggregations, complex joins — stored in <code>sys_report</code> (managed) or
+            loaded from array (direct). Execute on demand with named <code>:param</code> bindings.</p>
+          <div class="cw">
+            <div class="ch"><span class="cl">create + run</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="cmt">// create (managed mode)</span>
+engine.report.<span class="fn">create</span>({
+  report_name: <span class="str">'revenue_by_category'</span>,
+  cte_sql: <span class="str">`
+    SELECT c.name, SUM(p.price * oi.qty) as revenue
+    FROM order_item oi
+    JOIN product p  ON p._id = oi.product_id
+    JOIN category c ON c._id = p.category_id
+    WHERE oi.created_at >= :from
+    GROUP BY c._id ORDER BY revenue DESC
+  `</span>,
+  params: [{ name: <span class="str">'from'</span>, type: <span class="str">'string'</span>, default: <span class="str">'2024-01-01'</span> }],
+});
+
+<span class="cmt">// run — all modes</span>
+<span class="kw">const</span> rows = engine.report.<span class="fn">run</span>(<span class="str">'revenue_by_category'</span>, {
+  from: <span class="str">'2024-06-01'</span>,
+});
+
+<span class="cmt">// run with defaults</span>
+<span class="kw">const</span> rows = engine.report.<span class="fn">run</span>(<span class="str">'monthly_sales'</span>);
+
+<span class="cmt">// list, update, delete</span>
+engine.report.<span class="fn">getReports</span>();
+engine.report.<span class="fn">update</span>(<span class="str">'monthly_sales'</span>, { cte_sql: <span class="str">`...`</span> });
+engine.report.<span class="fn">delete</span>(<span class="str">'old_report'</span>);</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- CRUD -->
+        <div class="sec"><span class="anc" id="crud"></span>
+          <div class="sec-hdr"><span class="sec-num">21</span>
+            <h2>Trigger-aware CRUD</h2>
+          </div>
+          <div class="cw">
+            <div class="ch"><span class="cl">CRUD — all patterns</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="cmt">// trigger-aware — fires triggers in same transaction</span>
+engine.<span class="fn">insert</span>(<span class="str">'product'</span>, { name: <span class="str">'Mouse'</span>, price: <span class="num">499</span> });
+engine.<span class="fn">insert</span>(<span class="str">'product'</span>, data, <span class="kw">false</span>);      <span class="cmt">// false = return id only</span>
+engine.<span class="fn">updateById</span>(<span class="str">'product'</span>, { price: <span class="num">399</span> }, <span class="num">1</span>);
+engine.<span class="fn">update</span>(<span class="str">'product'</span>, { active: <span class="num">0</span> }, { category_id: <span class="num">3</span> });
+engine.<span class="fn">deleteById</span>(<span class="str">'product'</span>, <span class="num">1</span>);
+engine.<span class="fn">delete</span>(<span class="str">'product'</span>, { active: <span class="num">0</span> });
+
+<span class="cmt">// pass-through — no triggers, direct BaseTable</span>
+engine.<span class="fn">getById</span>(<span class="str">'product'</span>, <span class="num">1</span>);
+engine.<span class="fn">getOne</span>(<span class="str">'product'</span>, { name: <span class="str">'Mouse'</span> });
+engine.<span class="fn">getAll</span>(<span class="str">'product'</span>, { active: <span class="num">1</span> }, { orderBy: <span class="str">'price ASC'</span>, limit: <span class="num">50</span> });
+engine.<span class="fn">count</span>(<span class="str">'product'</span>, { category_id: <span class="num">2</span> });
+
+<span class="cmt">// direct BaseTable access — full sutramCore API</span>
+engine.<span class="fn">table</span>(<span class="str">'product'</span>).<span class="fn">getAll</span>({ active: <span class="num">1</span> }, { orderBy: <span class="str">'name ASC'</span> });
+engine.<span class="fn">table</span>(<span class="str">'product'</span>).<span class="fn">count</span>({ category_id: <span class="num">2</span> });</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- PROCEDURE ENGINE -->
+        <div class="sec"><span class="anc" id="procedure-engine"></span>
+          <div class="sec-hdr"><span class="sec-num">23</span><h2>procedure() — same pattern as table()</h2></div>
+          <p>Access CTE reports and MySQL stored procedures using the same pattern as <code>table()</code>. Returns a cached <code>ProcedureHandle</code>. Works identically in SQLite and MySQL mode.</p>
+
+          <div class="cw"><div class="ch"><span class="cl">database/reports.js</span><span class="clang">js</span></div>
+          <div class="cb"><pre>module.exports = [
+  {
+    report_name: <span class="str">'low_stock'</span>,
+    report_type: <span class="str">'cte'</span>,
+    cte_sql: <span class="str">`SELECT * FROM product WHERE stock &lt; :threshold AND active = 1`</span>,
+    params: [{ name: <span class="str">'threshold'</span>, type: <span class="str">'number'</span>, default: <span class="num">10</span> }],
+  },
+  {
+    report_name:    <span class="str">'monthly_report'</span>,  <span class="cmt">// MySQL stored procedure</span>
+    report_type:    <span class="str">'procedure'</span>,
+    procedure_name: <span class="str">'monthly_report'</span>,
+    params: [{ name: <span class="str">'year'</span>, type: <span class="str">'number'</span>, default: <span class="num">2024</span> }],
+  },
+];</pre></div></div>
+
+          <div class="cw"><div class="ch"><span class="cl">usage — same for SQLite and MySQL</span><span class="clang">js</span></div>
+          <div class="cb"><pre><span class="cmt">// SQLite engine (CTE only)</span>
+<span class="kw">const</span> engine = <span class="kw">new</span> <span class="fn">SutramEngine</span>({ db, schema, reports }).<span class="fn">init</span>();
+
+<span class="kw">const</span> rows = engine.<span class="fn">procedure</span>(<span class="str">'low_stock'</span>).<span class="fn">run</span>({ threshold: <span class="num">5</span> });
+engine.<span class="fn">procedure</span>(<span class="str">'low_stock'</span>).<span class="fn">getParams</span>();
+engine.<span class="fn">procedure</span>(<span class="str">'low_stock'</span>).<span class="fn">getMeta</span>();
+
+<span class="cmt">// MySQL engine — same call, CTE or CALL sp()</span>
+<span class="kw">const</span> mysqlDb = <span class="kw">await</span> <span class="kw">new</span> <span class="fn">MySQLSutram</span>({ ...config, schema, reports }).<span class="fn">connect</span>();
+<span class="kw">const</span> engine  = <span class="kw">new</span> <span class="fn">SutramEngine</span>({ sutram: mysqlDb }).<span class="fn">init</span>();
+
+<span class="kw">await</span> engine.<span class="fn">procedure</span>(<span class="str">'low_stock'</span>).<span class="fn">run</span>({ threshold: <span class="num">5</span> });    <span class="cmt">// CTE</span>
+<span class="kw">await</span> engine.<span class="fn">procedure</span>(<span class="str">'monthly_report'</span>).<span class="fn">run</span>({ year: <span class="num">2024</span> }); <span class="cmt">// CALL monthly_report(2024)</span>
+
+<span class="cmt">// cached — same instance</span>
+engine.<span class="fn">procedure</span>(<span class="str">'low_stock'</span>) === engine.<span class="fn">procedure</span>(<span class="str">'low_stock'</span>)  <span class="cmt">// true</span></pre></div></div>
+
+          <div class="note purple"><span class="ni">◈</span><span><code>engine.report</code> is internal — always use <code>engine.procedure()</code>. In MySQL mode, engine automatically proxies to <code>MySQLSutram</code>'s report manager — no duplication.</span></div>
+        </div>
+
+<hr class="s">
+
+        <!-- TRANSACTIONS -->
+        <div class="sec"><span class="anc" id="tx"></span>
+          <div class="sec-hdr"><span class="sec-num">22</span>
+            <h2>Transactions</h2>
+          </div>
+          <div class="cw">
+            <div class="ch"><span class="cl">transactions</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="cmt">// automatic — commit on success, rollback on throw</span>
+<span class="kw">const</span> orderId = engine.<span class="fn">transaction</span>(() => {
+  <span class="kw">const</span> id = engine.<span class="fn">insert</span>(<span class="str">'order'</span>, { customer_id: <span class="num">5</span> }, <span class="kw">false</span>);
+  <span class="kw">for</span> (<span class="kw">const</span> item <span class="kw">of</span> cart) {
+    engine.<span class="fn">insert</span>(<span class="str">'order_item'</span>, { order_id: id, ...item }, <span class="kw">false</span>);
+  }
+  <span class="kw">return</span> id;
+});
+
+<span class="cmt">// Pattern 1 — sutramCore + engine share same db</span>
+<span class="cmt">// sewa.transaction() and engine.transaction() are interchangeable</span>
+sewa.<span class="fn">transaction</span>(() => {
+  sewa.<span class="fn">table</span>(<span class="str">'old_table'</span>).<span class="fn">insert</span>(x, <span class="kw">false</span>);   <span class="cmt">// old code</span>
+  engine.<span class="fn">insert</span>(<span class="str">'new_table'</span>, y, <span class="kw">false</span>);      <span class="cmt">// new code — ATOMIC</span>
+});</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- RAW SQL -->
+        <div class="sec"><span class="anc" id="raw"></span>
+          <div class="sec-hdr"><span class="sec-num">23</span>
+            <h2>Raw SQL</h2>
+          </div>
+          <div class="cw">
+            <div class="ch"><span class="cl">engine.prepare</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="kw">const</span> rows = engine.<span class="fn">prepare</span>(<span class="str">`
+  SELECT p.*, COUNT(r._id) as reviews
+  FROM product p
+  LEFT JOIN review r ON r.product_id = p._id
+  GROUP BY p._id ORDER BY reviews DESC
+`</span>).<span class="fn">all</span>();
+
+<span class="kw">const</span> row = engine.<span class="fn">prepare</span>(<span class="str">`SELECT MAX(voucher_no) as last FROM orders`</span>).<span class="fn">get</span>();</pre>
+            </div>
+          </div>
+        </div>
+
+
+        <hr class="s">
+
+        <!-- ROUTER -->
+        <div class="sec"><span class="anc" id="router"></span>
+          <div class="sec-hdr"><span class="sec-num">26</span>
+            <h2>engine.router()</h2>
+          </div>
+          <p>Returns an Express router with CRUD routes for every table in schema, plus <code>_sutram</code> config
+            routes. Works in both direct and managed mode.</p>
+          <div class="cw">
+            <div class="ch"><span class="cl">mount in your app</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="kw">const</span> express = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> app     = <span class="fn">express</span>();
+app.<span class="fn">use</span>(express.<span class="fn">json</span>());
+
+<span class="kw">const</span> { engine } = <span class="fn">require</span>(<span class="str">'./database/db'</span>);
+
+<span class="cmt">// mount — all routes available under /api</span>
+app.<span class="fn">use</span>(<span class="str">'/api'</span>, engine.<span class="fn">router</span>());
+
+<span class="cmt">// your own custom routes still work alongside</span>
+app.<span class="fn">get</span>(<span class="str">'/api/special'</span>, (req, res) => { ... });</pre>
+            </div>
+          </div>
+          <div class="note tip"><span class="ni">✓</span><span>Custom routes don't conflict — <code>_sutram</code>
+              prefix is reserved. Mount engine router first, then add your own routes after.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- _SUTRAM ROUTES -->
+        <div class="sec"><span class="anc" id="sutram-routes"></span>
+          <div class="sec-hdr"><span class="sec-num">27</span>
+            <h2>_sutram Routes</h2>
+          </div>
+          <p>Engine config routes — always mounted at <code>/_sutram/</code> prefix. These never conflict with table
+            names.</p>
+
+          <h3>GET /_sutram/menu</h3>
+          <p>Sidebar menu — visible tables and reports list.</p>
+          <div class="cw">
+            <div class="ch"><span class="cl">GET /api/_sutram/menu</span><span class="clang">json</span></div>
+            <div class="cb">
+              <pre>{
+  <span class="str">"success"</span>: <span class="kw">true</span>,
+  <span class="str">"result"</span>: {
+    <span class="str">"tables"</span>: [
+      {
+        <span class="str">"table_name"</span>:   <span class="str">"product"</span>,
+        <span class="str">"display_name"</span>: <span class="str">"Products"</span>,
+        <span class="str">"icon"</span>:         <span class="str">"box"</span>,
+        <span class="str">"sort_order"</span>:   <span class="num">1</span>,
+        <span class="str">"can_add"</span>:      <span class="kw">true</span>,
+        <span class="str">"can_edit"</span>:     <span class="kw">true</span>,
+        <span class="str">"can_delete"</span>:   <span class="kw">false</span>
+      }
+    ],
+    <span class="str">"reports"</span>: [
+      {
+        <span class="str">"report_name"</span>: <span class="str">"monthly_sales"</span>,
+        <span class="str">"label"</span>:       <span class="str">"Monthly Sales"</span>,
+        <span class="str">"params"</span>:      [{ <span class="str">"name"</span>: <span class="str">"from"</span>, <span class="str">"type"</span>: <span class="str">"string"</span>, <span class="str">"default"</span>: <span class="str">"2024-01-01"</span> }]
+      }
+    ]
+  }
+}</pre>
+            </div>
+          </div>
+
+          <h3>GET /_sutram/schema/:table</h3>
+          <p>Full column config — frontend uses this to build forms and data tables. See <a
+              href="#schema-response">schema response</a> for full shape.</p>
+
+          <h3>POST /_sutram/reports/:name/run</h3>
+          <div class="cw">
+            <div class="ch"><span class="cl">POST /api/_sutram/reports/monthly_sales/run</span><span
+                class="clang">json</span></div>
+            <div class="cb">
+              <pre><span class="cmt">// request body — params</span>
+{ <span class="str">"from"</span>: <span class="str">"2024-06-01"</span>, <span class="str">"to"</span>: <span class="str">"2024-06-30"</span> }
+
+<span class="cmt">// response</span>
+{
+  <span class="str">"success"</span>: <span class="kw">true</span>,
+  <span class="str">"report"</span>: <span class="str">"monthly_sales"</span>,
+  <span class="str">"count"</span>:  <span class="num">6</span>,
+  <span class="str">"result"</span>: [{ <span class="str">"month"</span>: <span class="str">"2024-06"</span>, <span class="str">"revenue"</span>: <span class="num">48200</span> }, ...]
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- CRUD ROUTES -->
+        <div class="sec"><span class="anc" id="crud-routes"></span>
+          <div class="sec-hdr"><span class="sec-num">28</span>
+            <h2>CRUD Routes</h2>
+          </div>
+
+          <h3>GET /:table — getAll</h3>
+          <p>Query params for filtering. Reserved params start with <code>_</code>.</p>
+          <div class="cw">
+            <div class="ch"><span class="cl">GET /api/product</span><span class="clang">bash</span></div>
+            <div class="cb">
+              <pre><span class="cmt"># simple filter</span>
+GET /api/product?active=1&category_id=2
+
+<span class="cmt"># with pagination + ordering</span>
+GET /api/product?active=1&_limit=20&_page=2&_order=name+ASC
+
+<span class="cmt"># no joins (faster)</span>
+GET /api/product?active=1&_full=false</pre>
+            </div>
+          </div>
+
+          <div class="cw">
+            <div class="ch"><span class="cl">response</span><span class="clang">json</span></div>
+            <div class="cb">
+              <pre>{
+  <span class="str">"success"</span>: <span class="kw">true</span>,
+  <span class="str">"total"</span>:   <span class="num">142</span>,
+  <span class="str">"count"</span>:   <span class="num">20</span>,
+  <span class="str">"result"</span>: [...]
+}</pre>
+            </div>
+          </div>
+
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Param</th>
+                  <th>Description</th>
+                  <th>Example</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>_limit</code></td>
+                  <td>Page size</td>
+                  <td><code>_limit=20</code></td>
+                </tr>
+                <tr>
+                  <td><code>_page</code></td>
+                  <td>Page number (1-based)</td>
+                  <td><code>_page=2</code></td>
+                </tr>
+                <tr>
+                  <td><code>_order</code></td>
+                  <td>ORDER BY clause</td>
+                  <td><code>_order=price+DESC</code></td>
+                </tr>
+                <tr>
+                  <td><code>_full</code></td>
+                  <td>Include joins (default true)</td>
+                  <td><code>_full=false</code></td>
+                </tr>
+                <tr>
+                  <td>anything else</td>
+                  <td>WHERE column = value</td>
+                  <td><code>active=1&dept=3</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>POST /:table/query — complex WHERE</h3>
+          <div class="cw">
+            <div class="ch"><span class="cl">POST /api/product/query</span><span class="clang">json</span></div>
+            <div class="cb">
+              <pre>{
+  <span class="str">"where"</span>:   <span class="str">"price > 500 AND active = 1"</span>,
+  <span class="str">"orderBy"</span>: <span class="str">"price DESC"</span>,
+  <span class="str">"limit"</span>:   <span class="num">50</span>,
+  <span class="str">"page"</span>:    <span class="num">1</span>
+}</pre>
+            </div>
+          </div>
+
+          <h3>Other CRUD routes</h3>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Route</th>
+                  <th>Body / Params</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>GET</code></td>
+                  <td><code>/:table/:id</code></td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td><code>POST</code></td>
+                  <td><code>/:table</code></td>
+                  <td>JSON body = data</td>
+                </tr>
+                <tr>
+                  <td><code>PUT</code></td>
+                  <td><code>/:table/:id</code></td>
+                  <td>JSON body = fields to update</td>
+                </tr>
+                <tr>
+                  <td><code>DELETE</code></td>
+                  <td><code>/:table/:id</code></td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note info"><span class="ni">ℹ</span><span>POST, PUT, DELETE are trigger-aware — matching triggers
+              fire inside the same transaction.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- UI OVERVIEW -->
+        <div class="sec"><span class="anc" id="ui-overview"></span>
+          <div class="sec-hdr"><span class="sec-num">29</span>
+            <h2>UI Config — Overview</h2>
+          </div>
+          <p>Two new sys_ tables store frontend display configuration — separate from schema so you can change display
+            behavior without touching the actual table structure.</p>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Table</th>
+                  <th>Controls</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>sys_table_ui</code></td>
+                  <td>Menu visibility, display name, icon, sort order, can_add/edit/delete</td>
+                </tr>
+                <tr>
+                  <td><code>sys_column_ui</code></td>
+                  <td>Field type, display format, visible in list/form, searchable, sortable</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note purple"><span class="ni">◈</span><span>Both tables use <code>COALESCE</code> — if no UI
+              config exists for a table/column, sensible defaults are returned automatically. Nothing breaks without UI
+              config.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- TABLE UI -->
+        <div class="sec"><span class="anc" id="table-ui"></span>
+          <div class="sec-hdr"><span class="sec-num">30</span>
+            <h2>Table UI Config</h2>
+          </div>
+          <div class="cw">
+            <div class="ch"><span class="cl">setTableUi</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre>engine.ui.<span class="fn">setTableUi</span>(<span class="str">'product'</span>, {
+  display_name: <span class="str">'Products'</span>,   <span class="cmt">// shown in menu sidebar</span>
+  icon:         <span class="str">'box'</span>,        <span class="cmt">// icon name for frontend</span>
+  sort_order:   <span class="num">1</span>,            <span class="cmt">// position in menu</span>
+  visible:      <span class="kw">true</span>,         <span class="cmt">// show in menu</span>
+  can_add:      <span class="kw">true</span>,
+  can_edit:     <span class="kw">true</span>,
+  can_delete:   <span class="kw">false</span>,        <span class="cmt">// hide delete button in UI</span>
+});</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- COLUMN UI -->
+        <div class="sec"><span class="anc" id="column-ui"></span>
+          <div class="sec-hdr"><span class="sec-num">31</span>
+            <h2>Column UI Config</h2>
+          </div>
+          <div class="cw">
+            <div class="ch"><span class="cl">setColumnUi</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="cmt">// text field with search</span>
+engine.ui.<span class="fn">setColumnUi</span>(<span class="str">'product'</span>, <span class="str">'name'</span>, {
+  label:        <span class="str">'Product Name'</span>,
+  field_type:   <span class="str">'text'</span>,
+  visible_list: <span class="kw">true</span>,
+  visible_form: <span class="kw">true</span>,
+  searchable:   <span class="kw">true</span>,
+  sortable:     <span class="kw">true</span>,
+  sort_order:   <span class="num">1</span>,
+});
+
+<span class="cmt">// dropdown FK field</span>
+engine.ui.<span class="fn">setColumnUi</span>(<span class="str">'product'</span>, <span class="str">'category_id'</span>, {
+  label:          <span class="str">'Category'</span>,
+  field_type:     <span class="str">'dropdown'</span>,
+  display_format: <span class="str">'{name}'</span>,   <span class="cmt">// how dropdown options render</span>
+  sort_order:     <span class="num">2</span>,
+});
+
+<span class="cmt">// hidden from form — auto-set by server</span>
+engine.ui.<span class="fn">setColumnUi</span>(<span class="str">'product'</span>, <span class="str">'created_at'</span>, {
+  visible_form: <span class="kw">false</span>,
+  visible_list: <span class="kw">true</span>,
+  sortable:     <span class="kw">true</span>,
+});</pre>
+            </div>
+          </div>
+
+          <h3>Available field_type values</h3>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>field_type</th>
+                  <th>Renders as</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>text</code></td>
+                  <td>Standard text input (default)</td>
+                </tr>
+                <tr>
+                  <td><code>number</code></td>
+                  <td>Number input</td>
+                </tr>
+                <tr>
+                  <td><code>boolean</code></td>
+                  <td>Toggle / checkbox</td>
+                </tr>
+                <tr>
+                  <td><code>textarea</code></td>
+                  <td>Multi-line text area</td>
+                </tr>
+                <tr>
+                  <td><code>date</code></td>
+                  <td>Date picker</td>
+                </tr>
+                <tr>
+                  <td><code>datetime</code></td>
+                  <td>Date + time picker</td>
+                </tr>
+                <tr>
+                  <td><code>dropdown</code></td>
+                  <td>Single select (for FK cols)</td>
+                </tr>
+                <tr>
+                  <td><code>multiselect</code></td>
+                  <td>Multi select (for manyToMany)</td>
+                </tr>
+                <tr>
+                  <td><code>file</code></td>
+                  <td>File upload</td>
+                </tr>
+                <tr>
+                  <td><code>image</code></td>
+                  <td>Image upload with preview</td>
+                </tr>
+                <tr>
+                  <td><code>color</code></td>
+                  <td>Color picker</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- DISPLAY FORMAT -->
+        <div class="sec"><span class="anc" id="display-format"></span>
+          <div class="sec-hdr"><span class="sec-num">32</span>
+            <h2>display_format — Template Strings</h2>
+          </div>
+          <p>Controls how a joined object renders as a label — in dropdowns, table cells, or anywhere a readable string
+            is needed. Uses <code>{key}</code> placeholders. Nested keys supported with dot notation.</p>
+          <div class="cw">
+            <div class="ch"><span class="cl">examples</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="cmt">// simple single field</span>
+<span class="str">"{name}"</span>                          <span class="cmt">// → "Sugar"</span>
+
+<span class="cmt">// hin : eng pattern</span>
+<span class="str">"{hin} : {eng}"</span>                   <span class="cmt">// → "चीनी : Sugar"</span>
+<span class="str">"{item_hin} / {item_eng}"</span>         <span class="cmt">// → "चीनी / Sugar"</span>
+
+<span class="cmt">// city with state — nested dot notation</span>
+<span class="str">"{city_name} ({state.state_name})"</span> <span class="cmt">// → "Mumbai (Maharashtra)"</span>
+
+<span class="cmt">// unit with full name</span>
+<span class="str">"{unit_short} - {unit_full}"</span>      <span class="cmt">// → "kg - Kilogram"</span>
+
+<span class="cmt">// complex nested</span>
+<span class="str">"{subitem_hin} ({unit.unit_short})"</span> <span class="cmt">// → "आटा (kg)"</span></pre>
+            </div>
+          </div>
+
+          <h3>How frontend resolves it</h3>
+          <div class="cw">
+            <div class="ch"><span class="cl">frontend utility — one function for all formats</span><span
+                class="clang">js</span></div>
+            <div class="cb">
+              <pre><span class="kw">function</span> <span class="fn">applyFormat</span>(format, row) {
+  <span class="kw">return</span> format.<span class="fn">replace</span>(<span class="str">/\{([^}]+)\}/g</span>, (_, key) => {
+    <span class="kw">const</span> val = key.<span class="fn">split</span>(<span class="str">'.'</span>).<span class="fn">reduce</span>((obj, k) => obj?.[k], row);
+    <span class="kw">return</span> val ?? <span class="str">''</span>;
+  });
+}
+
+<span class="cmt">// usage</span>
+<span class="fn">applyFormat</span>(<span class="str">'{city_name} ({state.state_name})'</span>, row);
+<span class="cmt">// → "Mumbai (Maharashtra)"</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- IMPORT UI -->
+        <div class="sec"><span class="anc" id="import-ui"></span>
+          <div class="sec-hdr"><span class="sec-num">33</span>
+            <h2>importUi — ui.js file</h2>
+          </div>
+          <p>Define all UI config in one file and import it. Works in all modes. Pass it to <code>importAll()</code> or
+            call separately.</p>
+          <div class="cw">
+            <div class="ch"><span class="cl">database/ui.js</span><span class="clang">js</span></div>
+            <div class="cb">
+              <pre>module.exports = {
+
+  product: {
+    display_name: <span class="str">'Products'</span>,
+    icon:         <span class="str">'box'</span>,
+    sort_order:   <span class="num">1</span>,
+    can_delete:   <span class="kw">false</span>,
+    columns: {
+      name:        { label: <span class="str">'Product Name'</span>, searchable: <span class="kw">true</span>, sortable: <span class="kw">true</span> },
+      category_id: { field_type: <span class="str">'dropdown'</span>, display_format: <span class="str">'{name}'</span> },
+      unit_id:     { field_type: <span class="str">'dropdown'</span>, display_format: <span class="str">'{unit_short} - {unit_full}'</span> },
+      price:       { sortable: <span class="kw">true</span> },
+      created_at:  { visible_form: <span class="kw">false</span>, sortable: <span class="kw">true</span> },
+    },
+  },
+
+  category: {
+    display_name: <span class="str">'Categories'</span>,
+    icon:         <span class="str">'tag'</span>,
+    sort_order:   <span class="num">2</span>,
+    columns: {
+      name: { searchable: <span class="kw">true</span>, sortable: <span class="kw">true</span> },
+    },
+  },
+
+};</pre>
+            </div>
+          </div>
+
+          <div class="cw">
+            <div class="ch"><span class="cl">import with importAll or separately</span><span class="clang">js</span>
+            </div>
+            <div class="cb">
+              <pre><span class="cmt">// with importAll (managed mode)</span>
+engine.<span class="fn">importAll</span>({
+  schema:   <span class="fn">require</span>(<span class="str">'./schema'</span>),
+  triggers: <span class="fn">require</span>(<span class="str">'./triggers'</span>),
+  reports:  <span class="fn">require</span>(<span class="str">'./reports'</span>),
+  ui:       <span class="fn">require</span>(<span class="str">'./ui'</span>),       <span class="cmt">// ← add here</span>
+});
+
+<span class="cmt">// separately — all modes</span>
+engine.<span class="fn">importUi</span>(<span class="fn">require</span>(<span class="str">'./database/ui'</span>));</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- MENU RESPONSE -->
+        <div class="sec"><span class="anc" id="menu-response"></span>
+          <div class="sec-hdr"><span class="sec-num">34</span>
+            <h2>/_sutram/menu — Full Response</h2>
+          </div>
+          <div class="cw">
+            <div class="ch"><span class="cl">GET /api/_sutram/menu — full response shape</span><span
+                class="clang">json</span></div>
+            <div class="cb">
+              <pre>{
+  <span class="str">"success"</span>: <span class="kw">true</span>,
+  <span class="str">"result"</span>: {
+    <span class="str">"tables"</span>: [
+      {
+        <span class="str">"table_name"</span>:   <span class="str">"product"</span>,
+        <span class="str">"display_name"</span>: <span class="str">"Products"</span>,   <span class="cmt">// sys_table_ui.display_name ?? label</span>
+        <span class="str">"icon"</span>:         <span class="str">"box"</span>,
+        <span class="str">"sort_order"</span>:   <span class="num">1</span>,
+        <span class="str">"can_add"</span>:      <span class="kw">true</span>,
+        <span class="str">"can_edit"</span>:     <span class="kw">true</span>,
+        <span class="str">"can_delete"</span>:   <span class="kw">false</span>
+      },
+      {
+        <span class="str">"table_name"</span>:   <span class="str">"category"</span>,
+        <span class="str">"display_name"</span>: <span class="str">"Categories"</span>,
+        <span class="str">"icon"</span>:         <span class="str">"tag"</span>,
+        <span class="str">"sort_order"</span>:   <span class="num">2</span>,
+        <span class="str">"can_add"</span>:      <span class="kw">true</span>,
+        <span class="str">"can_edit"</span>:     <span class="kw">true</span>,
+        <span class="str">"can_delete"</span>:   <span class="kw">true</span>
+      }
+    ],
+    <span class="str">"reports"</span>: [
+      {
+        <span class="str">"report_name"</span>: <span class="str">"monthly_sales"</span>,
+        <span class="str">"label"</span>:       <span class="str">"Monthly Sales"</span>,
+        <span class="str">"params"</span>: [
+          { <span class="str">"name"</span>: <span class="str">"from"</span>, <span class="str">"type"</span>: <span class="str">"string"</span>, <span class="str">"default"</span>: <span class="str">"2024-01-01"</span> },
+          { <span class="str">"name"</span>: <span class="str">"to"</span>,   <span class="str">"type"</span>: <span class="str">"string"</span>, <span class="str">"default"</span>: <span class="str">"2024-12-31"</span> }
+        ]
+      }
+    ]
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- SCHEMA RESPONSE -->
+        <div class="sec"><span class="anc" id="schema-response"></span>
+          <div class="sec-hdr"><span class="sec-num">35</span>
+            <h2>/_sutram/schema/:table — Full Response</h2>
+          </div>
+          <p>Frontend uses this to build forms and data table columns dynamically.</p>
+          <div class="cw">
+            <div class="ch"><span class="cl">GET /api/_sutram/schema/product</span><span class="clang">json</span></div>
+            <div class="cb">
+              <pre>{
+  <span class="str">"success"</span>: <span class="kw">true</span>,
+  <span class="str">"result"</span>: {
+    <span class="str">"table_name"</span>:   <span class="str">"product"</span>,
+    <span class="str">"display_name"</span>: <span class="str">"Products"</span>,
+    <span class="str">"icon"</span>:         <span class="str">"box"</span>,
+    <span class="str">"can_add"</span>:      <span class="kw">true</span>,
+    <span class="str">"can_edit"</span>:     <span class="kw">true</span>,
+    <span class="str">"can_delete"</span>:   <span class="kw">false</span>,
+    <span class="str">"columns"</span>: [
+      {
+        <span class="str">"column_name"</span>:    <span class="str">"name"</span>,
+        <span class="str">"label"</span>:          <span class="str">"Product Name"</span>,
+        <span class="str">"col_type"</span>:       <span class="str">"string"</span>,
+        <span class="str">"field_type"</span>:     <span class="str">"text"</span>,
+        <span class="str">"display_format"</span>: <span class="kw">null</span>,
+        <span class="str">"is_pk"</span>:          <span class="kw">false</span>,
+        <span class="str">"is_required"</span>:    <span class="kw">true</span>,
+        <span class="str">"required_ui"</span>:    <span class="kw">true</span>,
+        <span class="str">"visible_list"</span>:   <span class="kw">true</span>,
+        <span class="str">"visible_form"</span>:   <span class="kw">true</span>,
+        <span class="str">"searchable"</span>:     <span class="kw">true</span>,
+        <span class="str">"sortable"</span>:       <span class="kw">true</span>,
+        <span class="str">"sort_order"</span>:     <span class="num">1</span>,
+        <span class="str">"ref"</span>:            <span class="kw">null</span>
+      },
+      {
+        <span class="str">"column_name"</span>:    <span class="str">"category_id"</span>,
+        <span class="str">"label"</span>:          <span class="str">"Category"</span>,
+        <span class="str">"col_type"</span>:       <span class="str">"number"</span>,
+        <span class="str">"field_type"</span>:     <span class="str">"dropdown"</span>,
+        <span class="str">"display_format"</span>: <span class="str">"{name}"</span>,   <span class="cmt">// dropdown options use this</span>
+        <span class="str">"is_required"</span>:    <span class="kw">false</span>,
+        <span class="str">"visible_list"</span>:   <span class="kw">true</span>,
+        <span class="str">"visible_form"</span>:   <span class="kw">true</span>,
+        <span class="str">"searchable"</span>:     <span class="kw">false</span>,
+        <span class="str">"sortable"</span>:       <span class="kw">true</span>,
+        <span class="str">"sort_order"</span>:     <span class="num">2</span>,
+        <span class="str">"ref"</span>: {
+          <span class="str">"table"</span>:  <span class="str">"category"</span>,
+          <span class="str">"col"</span>:    <span class="str">"_id"</span>,
+          <span class="str">"as"</span>:     <span class="str">"category"</span>,
+          <span class="str">"select"</span>: [<span class="str">"name"</span>]
+        }
+      },
+      {
+        <span class="str">"column_name"</span>:    <span class="str">"unit_id"</span>,
+        <span class="str">"label"</span>:          <span class="str">"Unit"</span>,
+        <span class="str">"field_type"</span>:     <span class="str">"dropdown"</span>,
+        <span class="str">"display_format"</span>: <span class="str">"{unit_short} - {unit_full}"</span>,
+        <span class="str">"ref"</span>: { <span class="str">"table"</span>: <span class="str">"unit"</span>, <span class="str">"col"</span>: <span class="str">"_id"</span>, <span class="str">"as"</span>: <span class="str">"unit"</span>, <span class="str">"select"</span>: [<span class="str">"unit_short"</span>, <span class="str">"unit_full"</span>] }
+      }
+    ],
+    <span class="str">"joins"</span>: [
+      { <span class="str">"join_key"</span>: <span class="str">"reviews"</span>, <span class="str">"join_type"</span>: <span class="str">"hasMany"</span>, <span class="str">"table"</span>: <span class="str">"review"</span>, <span class="str">"as"</span>: <span class="str">"reviews"</span> }
+    ]
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <hr class="s">
+
+        <!-- SYS TABLES -->
+        <div class="sec"><span class="anc" id="systables"></span>
+          <div class="sec-hdr"><span class="sec-num">36</span>
+            <h2>sys_ Tables</h2>
+          </div>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Table</th>
+                  <th>Stores</th>
+                  <th>Used in</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>sys_meta</code></td>
+                  <td>Engine version (<code>engine_version</code>)</td>
+                  <td>All modes</td>
+                </tr>
+                <tr>
+                  <td><code>sys_table</code></td>
+                  <td>Table registry</td>
+                  <td>Managed</td>
+                </tr>
+                <tr>
+                  <td><code>sys_column</code></td>
+                  <td>Column definitions + hasOne refs</td>
+                  <td>Managed</td>
+                </tr>
+                <tr>
+                  <td><code>sys_join</code></td>
+                  <td>hasMany + manyToMany joins</td>
+                  <td>Managed</td>
+                </tr>
+                <tr>
+                  <td><code>sys_trigger</code></td>
+                  <td>Trigger definitions</td>
+                  <td>Managed</td>
+                </tr>
+                <tr>
+                  <td><code>sys_trigger_action</code></td>
+                  <td>Actions per trigger</td>
+                  <td>Managed</td>
+                </tr>
+                <tr>
+                  <td><code>sys_report</code></td>
+                  <td>Named CTE reports</td>
+                  <td>Managed</td>
+                </tr>
+                <!-- sys_user, sys_role, sys_permission — sutramServer concern, not engine -->
+                <tr>
+                  <td><code>sys_table_ui</code></td>
+                  <td>Frontend display config per table</td>
+                  <td>All modes</td>
+                </tr>
+                <tr>
+                  <td><code>sys_column_ui</code></td>
+                  <td>Frontend display config per column</td>
+                  <td>All modes</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note purple"><span class="ni">◈</span><span><code>sys_meta.engine_version</code> tracks engine
+              migrations. SQLite's <code>user_version</code> pragma tracks user migrations via sutramCore. They never
+              conflict.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- API REFERENCE -->
+        <div class="sec"><span class="anc" id="api"></span>
+          <div class="sec-hdr"><span class="sec-num">37</span>
+            <h2>Full API Reference</h2>
+          </div>
+
+          <h3>Constructor</h3>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Option</th>
+                  <th>Type</th>
+                  <th>Pattern</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>sutram</code></td>
+                  <td>Sutram instance</td>
+                  <td>1</td>
+                  <td>Reuse existing sutramCore instance</td>
+                </tr>
+                <tr>
+                  <td><code>db</code></td>
+                  <td>better-sqlite3</td>
+                  <td>2 / 3</td>
+                  <td>Ready db instance — caller manages</td>
+                </tr>
+                <tr>
+                  <td><code>dbPath</code></td>
+                  <td>string</td>
+                  <td>2 / 3</td>
+                  <td>File path — engine opens + manages</td>
+                </tr>
+                <tr>
+                  <td><code>schema</code></td>
+                  <td>tableMeta object</td>
+                  <td>1 / 2</td>
+                  <td>Direct schema — activates direct mode</td>
+                </tr>
+                <tr>
+                  <td><code>triggers</code></td>
+                  <td>array</td>
+                  <td>1 / 2</td>
+                  <td>Trigger definitions — loaded from array</td>
+                </tr>
+                <tr>
+                  <td><code>reports</code></td>
+                  <td>array</td>
+                  <td>1 / 2</td>
+                  <td>Report definitions — loaded from array</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Core methods</h3>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>engine.init()</code></td>
+                  <td>Run sys_ migrations + bootstrap. Call once. Chainable.</td>
+                </tr>
+                <tr>
+                  <td><code>engine.rebootstrap()</code></td>
+                  <td>Rebuild cache. Called auto after schema changes.</td>
+                </tr>
+                <tr>
+                  <td><code>engine.table(name)</code></td>
+                  <td>Get cached BaseTable instance (sutramCore API)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Import — managed mode only</h3>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>engine.importAll({ schema, triggers?, reports? })</code></td>
+                  <td>Seed sys_ tables — idempotent</td>
+                </tr>
+                <tr>
+                  <td><code>engine.importSchema(tableMeta)</code></td>
+                  <td>Tables + columns + joins only</td>
+                </tr>
+                <tr>
+                  <td><code>engine.importTriggers(array)</code></td>
+                  <td>Triggers only</td>
+                </tr>
+                <tr>
+                  <td><code>engine.importReports(array)</code></td>
+                  <td>Reports only</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Export — all modes</h3>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Returns</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>engine.exportAll()</code></td>
+                  <td><code>{ schema, triggers, reports }</code> — full roundtrip</td>
+                </tr>
+                <tr>
+                  <td><code>engine.exportSchema()</code></td>
+                  <td>tableMeta format</td>
+                </tr>
+                <tr>
+                  <td><code>engine.exportTriggers()</code></td>
+                  <td>triggers.js array format</td>
+                </tr>
+                <tr>
+                  <td><code>engine.exportReports()</code></td>
+                  <td>reports.js array format</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>CRUD</h3>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Triggers?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>insert(table, data, full?)</code></td>
+                  <td><span class="bdg g">fires</span></td>
+                </tr>
+                <tr>
+                  <td><code>update(table, data, where, full?)</code></td>
+                  <td><span class="bdg g">fires</span></td>
+                </tr>
+                <tr>
+                  <td><code>updateById(table, data, id, full?)</code></td>
+                  <td><span class="bdg g">fires</span></td>
+                </tr>
+                <tr>
+                  <td><code>delete(table, where)</code></td>
+                  <td><span class="bdg g">fires</span></td>
+                </tr>
+                <tr>
+                  <td><code>deleteById(table, id)</code></td>
+                  <td><span class="bdg g">fires</span></td>
+                </tr>
+                <tr>
+                  <td><code>getById(table, id)</code></td>
+                  <td><span class="bdg o">no</span></td>
+                </tr>
+                <tr>
+                  <td><code>getOne(table, where, opts?)</code></td>
+                  <td><span class="bdg o">no</span></td>
+                </tr>
+                <tr>
+                  <td><code>getAll(table, where, opts?)</code></td>
+                  <td><span class="bdg o">no</span></td>
+                </tr>
+                <tr>
+                  <td><code>count(table, where?)</code></td>
+                  <td><span class="bdg o">no</span></td>
+                </tr>
+                <tr>
+                  <td><code>transaction(fn) / begin() / commit() / rollback()</code></td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td><code>prepare(sql)</code></td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Schema Manager — engine.schema.*</h3>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Mode</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>createTable(def)</code></td>
+                  <td><span class="bdg p">managed</span></td>
+                  <td>Create + sys_ entry + DDL</td>
+                </tr>
+                <tr>
+                  <td><code>addColumn(table, col)</code></td>
+                  <td><span class="bdg p">managed</span></td>
+                  <td>ALTER TABLE + sys_column</td>
+                </tr>
+                <tr>
+                  <td><code>dropColumn(table, col)</code></td>
+                  <td><span class="bdg p">managed</span></td>
+                  <td>ALTER TABLE + remove</td>
+                </tr>
+                <tr>
+                  <td><code>addJoin(table, join)</code></td>
+                  <td><span class="bdg p">managed</span></td>
+                  <td>Add to sys_join</td>
+                </tr>
+                <tr>
+                  <td><code>removeJoin(table, key)</code></td>
+                  <td><span class="bdg p">managed</span></td>
+                  <td>Remove from sys_join</td>
+                </tr>
+                <tr>
+                  <td><code>dropTable(table)</code></td>
+                  <td><span class="bdg p">managed</span></td>
+                  <td>DROP TABLE + sys_table</td>
+                </tr>
+                <tr>
+                  <td><code>getTables()</code></td>
+                  <td>all</td>
+                  <td>List active tables</td>
+                </tr>
+                <tr>
+                  <td><code>getTableDetail(table)</code></td>
+                  <td>all</td>
+                  <td>Full detail with columns + joins</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Trigger Manager — engine.trigger.*</h3>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>create(def)</code></td>
+                  <td>Create trigger + actions (managed)</td>
+                </tr>
+                <tr>
+                  <td><code>enable(id) / disable(id)</code></td>
+                  <td>Toggle active (managed)</td>
+                </tr>
+                <tr>
+                  <td><code>delete(id)</code></td>
+                  <td>Delete trigger + actions (managed)</td>
+                </tr>
+                <tr>
+                  <td><code>getTriggers()</code></td>
+                  <td>List all triggers</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Report Manager — engine.report.*</h3>
+          <div class="tw">
+            <table class="dt">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>create(def)</code></td>
+                  <td>Create report (managed)</td>
+                </tr>
+                <tr>
+                  <td><code>run(name, params?)</code></td>
+                  <td>Execute with :param bindings — all modes</td>
+                </tr>
+                <tr>
+                  <td><code>update(name, updates)</code></td>
+                  <td>Update SQL or params (managed)</td>
+                </tr>
+                <tr>
+                  <td><code>delete(name)</code></td>
+                  <td>Delete (managed)</td>
+                </tr>
+                <tr>
+                  <td><code>getReports()</code></td>
+                  <td>List all reports</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+
+        <hr class="s">
+
+        <!-- MYSQL WHY -->
+        <div class="sec"><span class="anc" id="mysql-why"></span>
+          <div class="sec-hdr"><span class="sec-num">38</span><h2>MySQL Support</h2></div>
+          <p>MySQL support is available as a separate package — <code>sutramcore-mysql</code>. It uses the same <code>schema.js</code> format as sutramCore, but all methods return Promises. The same <code>col</code>, <code>defineTable</code> syntax works unchanged.</p>
+          <p>sutramCore stays synchronous and SQLite-only. If you need MySQL, install the adapter — your existing schema.js requires zero changes.</p>
+          <div class="tw"><table class="dt">
+            <thead><tr><th>Feature</th><th>sutramCore (SQLite)</th><th>sutramcore-mysql</th></tr></thead>
+            <tbody>
+              <tr><td>Methods</td><td>Synchronous</td><td>Async — returns Promise</td></tr>
+              <tr><td>await needed</td><td>Optional (works, safe)</td><td>Required</td></tr>
+              <tr><td>schema.js</td><td>Same format</td><td>Same format — no changes</td></tr>
+              <tr><td>Joins</td><td>SQLite json_object</td><td>MySQL JSON_OBJECT + JSON_ARRAYAGG</td></tr>
+              <tr><td>Transactions</td><td>db.transaction(fn)</td><td>await db.transaction(async fn)</td></tr>
+              <tr><td>sutramEngine</td><td>Pattern 1/2/3</td><td>Pattern 1 — pass MySQLSutram</td></tr>
+            </tbody>
+          </table></div>
+          <div class="note info"><span class="ni">ℹ</span><span>Tip — <code>await</code> on a sync function is always safe in JavaScript. If you write <code>await table.getById(1)</code> with SQLite, it works perfectly. So you can write all your code with <code>await</code> and switch between SQLite and MySQL by just changing the connection.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- MYSQL INSTALL -->
+        <div class="sec"><span class="anc" id="mysql-install"></span>
+          <div class="sec-hdr"><span class="sec-num">39</span><h2>Installation</h2></div>
+          <div class="cw"><div class="ch"><span class="cl">terminal</span><span class="clang">bash</span></div>
+          <div class="cb"><pre><span class="fn">npm</span> install sutramcore-mysql mysql2</pre></div></div>
+          <p><code>mysql2</code> is a peer dependency — install it alongside. Your existing <code>sutramcore</code> install is untouched.</p>
+        </div>
+
+        <hr class="s">
+
+        <!-- MYSQL CONNECT -->
+        <div class="sec"><span class="anc" id="mysql-connect"></span>
+          <div class="sec-hdr"><span class="sec-num">40</span><h2>Connect</h2></div>
+          <p>Create a <code>MySQLSutram</code> instance and call <code>.connect()</code>. This creates a connection pool and tests the connection.</p>
+          <div class="cw"><div class="ch"><span class="cl">database/db.js</span><span class="clang">js</span></div>
+          <div class="cb"><pre><span class="kw">const</span> { <span class="cn">MySQLSutram</span> } = <span class="fn">require</span>(<span class="str">'sutramcore-mysql'</span>);
+<span class="kw">const</span> schema           = <span class="fn">require</span>(<span class="str">'./schema'</span>);  <span class="cmt">// same schema.js — no changes</span>
+
+<span class="kw">const</span> db = <span class="kw">await</span> <span class="kw">new</span> <span class="fn">MySQLSutram</span>({
+  host:     <span class="str">'localhost'</span>,
+  port:     <span class="num">3306</span>,
+  user:     <span class="str">'root'</span>,
+  password: <span class="str">'secret'</span>,
+  database: <span class="str">'myapp'</span>,
+  schema,
+}).<span class="fn">connect</span>();
+
+module.exports = { db };</pre></div></div>
+          <div class="note tip"><span class="ni">✓</span><span>Connection pool is created internally — <code>connectionLimit</code> defaults to 10. Pass <code>connectionLimit: 20</code> to increase.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- MYSQL CRUD -->
+        <div class="sec"><span class="anc" id="mysql-crud"></span>
+          <div class="sec-hdr"><span class="sec-num">41</span><h2>CRUD — Async</h2></div>
+          <p>Same API as sutramCore — just add <code>await</code>. All methods return Promises.</p>
+          <div class="cw"><div class="ch"><span class="cl">service.js</span><span class="clang">js</span></div>
+          <div class="cb"><pre><span class="kw">const</span> { db } = <span class="fn">require</span>(<span class="str">'./database/db'</span>);
+<span class="kw">const</span> product = db.<span class="fn">table</span>(<span class="str">'product'</span>);
+
+<span class="cmt">// insert</span>
+<span class="kw">const</span> newRow = <span class="kw">await</span> product.<span class="fn">insert</span>({ name: <span class="str">'Keyboard'</span>, price: <span class="num">1299</span> });
+
+<span class="cmt">// getById</span>
+<span class="kw">const</span> row = <span class="kw">await</span> product.<span class="fn">getById</span>(<span class="num">1</span>);
+<span class="cmt">// row.category = { name: 'Electronics' }  ← hasOne joined automatically</span>
+
+<span class="cmt">// getAll with filter + pagination</span>
+<span class="kw">const</span> rows = <span class="kw">await</span> product.<span class="fn">getAll</span>({ active: <span class="num">1</span> }, {
+  orderBy: <span class="str">'price ASC'</span>,
+  limit:   <span class="num">20</span>,
+  offset:  <span class="num">0</span>,
+});
+
+<span class="cmt">// update</span>
+<span class="kw">await</span> product.<span class="fn">updateById</span>({ price: <span class="num">999</span> }, <span class="num">1</span>);
+
+<span class="cmt">// delete</span>
+<span class="kw">await</span> product.<span class="fn">deleteById</span>(<span class="num">5</span>);
+
+<span class="cmt">// count</span>
+<span class="kw">const</span> total = <span class="kw">await</span> product.<span class="fn">count</span>({ active: <span class="num">1</span> });</pre></div></div>
+          <div class="note info"><span class="ni">ℹ</span><span>Joins work exactly like sutramCore — <code>hasOne</code>, <code>hasMany</code>, <code>manyToMany</code> all supported. MySQL uses <code>JSON_OBJECT</code> and <code>JSON_ARRAYAGG</code> internally instead of SQLite's <code>json_object</code>.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- MYSQL TRANSACTIONS -->
+        <div class="sec"><span class="anc" id="mysql-tx"></span>
+          <div class="sec-hdr"><span class="sec-num">42</span><h2>Transactions</h2></div>
+          <p>Transactions use a scoped connection — all operations inside <code>transaction()</code> are on the same MySQL connection, guaranteed atomic.</p>
+          <div class="cw"><div class="ch"><span class="cl">automatic — recommended</span><span class="clang">js</span></div>
+          <div class="cb"><pre><span class="kw">const</span> orderId = <span class="kw">await</span> db.<span class="fn">transaction</span>(<span class="kw">async</span> (tx) => {
+  <span class="kw">const</span> id = <span class="kw">await</span> tx.<span class="fn">table</span>(<span class="str">'order'</span>).<span class="fn">insert</span>({ customer_id: <span class="num">5</span> }, <span class="kw">false</span>);
+
+  <span class="kw">for</span> (<span class="kw">const</span> item <span class="kw">of</span> cart) {
+    <span class="kw">await</span> tx.<span class="fn">table</span>(<span class="str">'order_item'</span>).<span class="fn">insert</span>({
+      order_id: id, ...item
+    }, <span class="kw">false</span>);
+  }
+
+  <span class="kw">return</span> id;  <span class="cmt">// commits on success, rolls back on throw</span>
+});</pre></div></div>
+          <div class="note warn"><span class="ni">⚠</span><span>Inside <code>transaction(fn)</code>, always use <code>tx.table()</code> — not the outer <code>db.table()</code>. The <code>tx</code> object is scoped to the transaction connection.</span></div>
+        </div>
+
+        <hr class="s">
+
+        <!-- MYSQL WITH ENGINE -->
+        <div class="sec"><span class="anc" id="mysql-engine"></span>
+          <div class="sec-hdr"><span class="sec-num">43</span><h2>With sutramEngine</h2></div>
+          <p>Pass <code>MySQLSutram</code> instance as <code>sutram</code> to sutramEngine — Pattern 1. Engine detects <code>dialect: 'mysql'</code> automatically and all engine methods become async.</p>
+          <div class="cw"><div class="ch"><span class="cl">database/db.js</span><span class="clang">js</span></div>
+          <div class="cb"><pre><span class="kw">const</span> { <span class="cn">MySQLSutram</span> } = <span class="fn">require</span>(<span class="str">'sutramcore-mysql'</span>);
+<span class="kw">const</span> { <span class="cn">SutramEngine</span> } = <span class="fn">require</span>(<span class="str">'sutramengine'</span>);
+<span class="kw">const</span> schema            = <span class="fn">require</span>(<span class="str">'./schema'</span>);
+
+<span class="cmt">// connect MySQL</span>
+<span class="kw">const</span> mysqlDb = <span class="kw">await</span> <span class="kw">new</span> <span class="fn">MySQLSutram</span>({
+  host: <span class="str">'localhost'</span>, user: <span class="str">'root'</span>,
+  password: <span class="str">'secret'</span>, database: <span class="str">'myapp'</span>,
+  schema,
+}).<span class="fn">connect</span>();
+
+<span class="cmt">// pass to engine — dialect auto-detected</span>
+<span class="kw">const</span> engine = <span class="kw">new</span> <span class="fn">SutramEngine</span>({ sutram: mysqlDb }).<span class="fn">init</span>();
+
+module.exports = { engine };</pre></div></div>
+
+          <div class="cw"><div class="ch"><span class="cl">usage — await on everything</span><span class="clang">js</span></div>
+          <div class="cb"><pre><span class="kw">const</span> { engine } = <span class="fn">require</span>(<span class="str">'./database/db'</span>);
+
+<span class="cmt">// trigger-aware CRUD — async</span>
+<span class="kw">const</span> row = <span class="kw">await</span> engine.<span class="fn">insert</span>(<span class="str">'product'</span>, data);
+<span class="kw">const</span> rows = <span class="kw">await</span> engine.<span class="fn">getAll</span>(<span class="str">'product'</span>, { active: <span class="num">1</span> });
+
+<span class="cmt">// router — Express handles async automatically</span>
+app.<span class="fn">use</span>(<span class="str">'/api'</span>, engine.<span class="fn">router</span>());</pre></div></div>
+
+          <div class="tw"><table class="dt">
+            <thead><tr><th>Feature</th><th>SQLite Pattern 1</th><th>MySQL Pattern 1</th></tr></thead>
+            <tbody>
+              <tr><td>Pass to engine</td><td><code>sutram: sewa</code></td><td><code>sutram: mysqlDb</code></td></tr>
+              <tr><td>engine.insert()</td><td>sync (await optional)</td><td>async (await required)</td></tr>
+              <tr><td>engine.router()</td><td>works as-is</td><td>works as-is</td></tr>
+              <tr><td>importAll()</td><td>not available (direct mode)</td><td>not available (direct mode)</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+
+          <div style="height:40px"></div>
+          <hr style="border:none;border-top:1px solid var(--border)">
+          <p
+            style="text-align:center;font-family:'DM Mono',monospace;font-size:13px;color:var(--text3);margin-top:20px">
+            sutramEngine v1.0.0-beta · depends on sutramcore ≥1.0.0 · better-sqlite3 ≥9.0.0
+          </p>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const links = document.querySelectorAll('.nav-a');
+    const secs = document.querySelectorAll('.anc');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const id = e.target.id;
+          links.forEach(l => l.classList.remove('active'));
+          const a = document.querySelector(`.nav-a[href="#${id}"]`);
+          if (a) { a.classList.add('active'); a.scrollIntoView({ block: 'nearest' }); }
+        }
+      });
+    }, { rootMargin: '-15% 0px -80% 0px' });
+    secs.forEach(s => obs.observe(s));
+  </script>
+</body>
+
+</html>

@@ -1,15 +1,17 @@
 const { dbmodal, sutramDB } = require('../database/db.model');
 const db = dbmodal.db;
 const BaseTable = require('../database/base.table');
+const { buildSubitemListMap, injectSubitemList } = require('./hmp.service');
 
 // ── Table instances ───────────────────────────────────────────
 const Prastav = new BaseTable('prastav');
 const PrastavJawak = new BaseTable('prastav_jawak');
+const subitemList = new BaseTable('subitem_list');
 
 /**
  * Paginated, filtered Prastav list.
  */
-function getPrastavs({ mm_id, pbk_id, item_id, year, date, pageNo, itemsPerPage }) {
+function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, year, pageNo, itemsPerPage, dept_id }) {
     const PAGE_SIZE = itemsPerPage ? Number(itemsPerPage) : 100;
     const page = (pageNo !== undefined && pageNo !== null) ? Number(pageNo) + 1 : 1;
     const offset = (page - 1) * PAGE_SIZE;
@@ -17,9 +19,11 @@ function getPrastavs({ mm_id, pbk_id, item_id, year, date, pageNo, itemsPerPage 
     // ── build WHERE ───────────────────────────────────────────
     const conds = [`prastav.active = 1`];
 
+    // if (dept_id) conds.push(`prastav.dept_id = ${Number(dept_id)}`);
     if (mm_id && mm_id.length > 0) conds.push(`prastav.mm_id IN (${mm_id.join(',')})`);
     if (pbk_id && pbk_id.length > 0) conds.push(`prastav.pbk_id IN (${pbk_id.join(',')})`);
     if (item_id && item_id.length > 0) conds.push(`prastav.item_id IN (${item_id.join(',')})`);
+    if (subitem_id && subitem_id.length > 0) conds.push(`prastav.subitem_id IN (${subitem_id.join(',')})`);
 
     if (year) {
         conds.push(`strftime('%Y', prastav.date) = '${String(year)}'`);
@@ -45,6 +49,11 @@ function getPrastavs({ mm_id, pbk_id, item_id, year, date, pageNo, itemsPerPage 
         offset,
     });
 
+    const subitemListMap = buildSubitemListMap(subitemList.getAll());
+    for (const prastav of result) {
+        injectSubitemList([prastav], subitemListMap);           // prastav ka apna subitem
+        injectSubitemList(prastav.jawaks || [], subitemListMap); // har jawak ka subitem
+    }
     return { result, pageNo: page - 1, total_count };
 }
 
@@ -54,6 +63,13 @@ function getPrastavs({ mm_id, pbk_id, item_id, year, date, pageNo, itemsPerPage 
 function getVoucher(voucherNo) {
     const rows = Prastav.getAll({ voucher_no: Number(voucherNo), active: 1 });
     if (rows.length === 0) return null;
+
+    const subitemListMap = buildSubitemListMap(subitemList.getAll());
+
+    for (const row of rows) {
+        injectSubitemList([row], subitemListMap);           // prastav ka apna subitem
+        injectSubitemList(row.jawaks || [], subitemListMap); // har jawak ka subitem
+    }
 
     // The component expected structure: voucher core data + lines[]
     const voucher = {
@@ -68,6 +84,7 @@ function getVoucher(voucherNo) {
             jawaks: r.jawaks || []
         }))
     };
+
     return voucher;
 }
 
@@ -159,9 +176,37 @@ function updateVoucher(voucherNo, data) {
     }
 }
 
+/**
+ * Centralized reference transfer
+ */
+async function transferReferences(list_type, from_id, to_id) {
+    const fromIdNum = Number(from_id);
+    const toIdNum = Number(to_id);
+
+    // Find all vouchers that use this reference
+    let col = "";
+    switch (list_type) {
+        case 'mm': col = 'mm_id'; break;
+        case 'item': col = 'item_id'; break;
+        case 'subitem': col = 'subitem_id'; break;
+        case 'unit': col = 'unit_id'; break;
+    }
+
+    if (!col) return;
+
+    // Direct SQL updates for prastav as it has no complex relational business logic
+    db.prepare(`UPDATE prastav SET ${col} = ? WHERE ${col} = ?`).run(toIdNum, fromIdNum);
+    db.prepare(`UPDATE prastav_jawak SET ${col} = ? WHERE ${col} = ?`).run(toIdNum, fromIdNum);
+
+    if (list_type === 'mm') {
+        db.prepare(`UPDATE prastav_jawak SET source_mm_id = ? WHERE source_mm_id = ?`).run(toIdNum, fromIdNum);
+    }
+}
+
 module.exports = {
     getPrastavs,
     getVoucher,
     updateVoucher,
-    deleteVoucher
+    deleteVoucher,
+    transferReferences
 };

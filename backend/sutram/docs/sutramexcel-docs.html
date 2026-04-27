@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sutramExcel — Docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--bg2:#13161d;--bg3:#1a1e28;--bg4:#222736;--border:#2a2f3e;--border2:#353c50;--text:#e2e6f0;--text2:#9ba3b8;--text3:#5f6880;--acc:#22d3ee;--green:#4ade80;--purple:#c084fc;--orange:#fb923c;--blue:#7c9bff;--yellow:#fbbf24;--red:#f87171;--tk-kw:#c084fc;--tk-fn:#7c9bff;--tk-str:#4ade80;--tk-num:#fb923c;--tk-cmt:#5f6880;--tk-cn:#fbbf24}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.7}
+.shell{display:grid;grid-template-columns:268px 1fr;min-height:100vh}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.sb-logo{padding:28px 24px 18px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.sb-logo .name{font-family:'Fraunces',serif;font-size:21px;font-weight:600;color:var(--text);letter-spacing:-.5px}
+.sb-logo .sub{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:3px}
+.sb-badge{display:inline-block;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);color:var(--acc);font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;margin-top:8px}
+.nav-grp{padding:6px 0}
+.nav-lbl{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);padding:8px 24px 3px}
+.nav-a{display:flex;align-items:center;gap:8px;padding:6px 24px;color:var(--text2);text-decoration:none;font-size:13px;transition:all .15s;border-left:2px solid transparent}
+.nav-a:hover{color:var(--text);background:var(--bg3);border-left-color:var(--border2)}
+.nav-a.active{color:var(--acc);background:rgba(34,211,238,.07);border-left-color:var(--acc)}
+.nd{width:5px;height:5px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.nav-a.active .nd{background:var(--acc)}
+.main{max-width:920px}
+.hero{padding:72px 64px 56px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#0d0f14 0%,#071318 50%,#0d0f14 100%);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(34,211,238,.04) 0%,transparent 65%);pointer-events:none}
+.hero-ey{font-family:'DM Mono',monospace;font-size:12px;color:var(--acc);letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.hero-ey::before{content:'';display:inline-block;width:20px;height:1px;background:var(--acc)}
+.hero h1{font-family:'Fraunces',serif;font-size:52px;font-weight:700;line-height:1.1;letter-spacing:-1.5px;color:var(--text);margin-bottom:8px}
+.hero h1 span{color:var(--acc);font-style:italic}
+.hero-sub{font-size:18px;color:var(--text2);font-weight:300;margin-bottom:36px;max-width:520px;line-height:1.6}
+.hero-inst{display:inline-flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:12px 20px;font-family:'DM Mono',monospace;font-size:14px;color:var(--green)}
+.hero-inst .p{color:var(--text3)}
+.chips{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text2);font-family:'DM Mono',monospace}
+.chip .dot{width:6px;height:6px;border-radius:50%}
+.content{padding:0 64px 80px}
+.sec{padding-top:60px}
+.anc{display:block;position:relative;top:-80px;visibility:hidden}
+.sec-hdr{display:flex;align-items:baseline;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.sec-num{font-family:'DM Mono',monospace;font-size:12px;color:var(--acc);font-weight:500}
+.sec h2{font-family:'Fraunces',serif;font-size:26px;font-weight:600;color:var(--text);letter-spacing:-.5px}
+.sec h3{font-size:15px;font-weight:600;color:var(--text);margin:28px 0 10px;display:flex;align-items:center;gap:8px}
+.sec h3::before{content:'';display:inline-block;width:3px;height:14px;background:var(--acc);border-radius:2px;flex-shrink:0}
+.sec p{color:var(--text2);margin-bottom:16px;line-height:1.75;font-size:14.5px}
+p code,li code{font-family:'DM Mono',monospace;font-size:12.5px;color:var(--acc);background:rgba(34,211,238,.08);padding:1px 6px;border-radius:4px;border:1px solid rgba(34,211,238,.15)}
+.cw{margin:18px 0;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--bg2)}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.cl{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+.clang{font-family:'DM Mono',monospace;font-size:10px;color:var(--acc);background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.2);padding:2px 8px;border-radius:4px}
+.cb{padding:20px 24px;overflow-x:auto;font-family:'DM Mono',monospace;font-size:13px;line-height:1.8}
+.cb pre{margin:0;white-space:pre}
+.kw{color:var(--tk-kw)}.fn{color:var(--tk-fn)}.str{color:var(--tk-str)}.num{color:var(--tk-num)}.cmt{color:var(--tk-cmt);font-style:italic}.cn{color:var(--tk-cn)}
+.note{display:flex;gap:14px;padding:14px 18px;border-radius:8px;margin:16px 0;font-size:13.5px;line-height:1.65}
+.ni{font-size:16px;flex-shrink:0;margin-top:1px}
+.note.info{background:rgba(124,155,255,.07);border:1px solid rgba(124,155,255,.2);color:#a5b8ff}
+.note.tip{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);color:#86efac}
+.note.warn{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.2);color:#fdba74}
+.note.cyan{background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.2);color:#67e8f9}
+.tw{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:16px 0}
+.dt{width:100%;border-collapse:collapse;font-size:13.5px}
+.dt th{background:var(--bg3);color:var(--text2);font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border2)}
+.dt td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:rgba(255,255,255,.02)}
+.dt code{font-family:'DM Mono',monospace;font-size:12px;color:var(--acc);background:rgba(34,211,238,.08);padding:1px 6px;border-radius:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+hr.s{border:none;border-top:1px solid var(--border);margin:48px 0 0}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+@media(max-width:900px){.shell{grid-template-columns:1fr}.sidebar{display:none}.hero{padding:48px 28px}.content{padding:0 28px 60px}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="name">sutramExcel</div>
+    <div class="sub">depends on sutramengine</div>
+    <div class="sb-badge">v1.0.0-beta</div>
+  </div>
+  <nav>
+    <div class="nav-grp">
+      <div class="nav-lbl">Getting Started</div>
+      <a href="#what" class="nav-a"><span class="nd"></span>What is sutramExcel</a>
+      <a href="#install" class="nav-a"><span class="nd"></span>Installation</a>
+      <a href="#setup" class="nav-a"><span class="nd"></span>Setup</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Register</div>
+      <a href="#register" class="nav-a"><span class="nd"></span>register()</a>
+      <a href="#config-auto" class="nav-a"><span class="nd"></span>Auto from schema</a>
+      <a href="#config-extend" class="nav-a"><span class="nd"></span>Extend config</a>
+      <a href="#autoset" class="nav-a"><span class="nd"></span>autoSet</a>
+      <a href="#duplicate" class="nav-a"><span class="nd"></span>Duplicate detection</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Router</div>
+      <a href="#router" class="nav-a"><span class="nd"></span>excel.router()</a>
+      <a href="#routes" class="nav-a"><span class="nd"></span>All routes</a>
+      <a href="#flow" class="nav-a"><span class="nd"></span>Import flow</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Dictionary</div>
+      <a href="#dict-what" class="nav-a"><span class="nd"></span>What is dictionary</a>
+      <a href="#dict-api" class="nav-a"><span class="nd"></span>Dictionary CRUD API</a>
+      <a href="#dict-direct" class="nav-a"><span class="nd"></span>Direct access</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Matching</div>
+      <a href="#refmatcher" class="nav-a"><span class="nd"></span>FK matching</a>
+      <a href="#normalization" class="nav-a"><span class="nd"></span>Hindi normalization</a>
+      <a href="#mix" class="nav-a"><span class="nd"></span>mix type</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Utils</div>
+      <a href="#dates" class="nav-a"><span class="nd"></span>Date conversion</a>
+      <a href="#migrations" class="nav-a"><span class="nd"></span>Own migrations</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Reference</div>
+      <a href="#api" class="nav-a"><span class="nd"></span>API Reference</a>
+    </div>
+  </nav>
+</aside>
+
+<main class="main">
+<div class="hero">
+  <div class="hero-ey">depends on sutramengine</div>
+  <h1>sutram<span>Excel</span></h1>
+  <p class="hero-sub">Schema-driven Excel import for sutramEngine. FK matching, Hindi normalization, correction support, dictionary memory — register a table and get a full API.</p>
+  <div class="hero-inst"><span class="p">$</span><span>npm install sutramexcel exceljs</span></div>
+  <div class="chips">
+    <div class="chip"><span class="dot" style="background:#22d3ee"></span>register() whitelist</div>
+    <div class="chip"><span class="dot" style="background:#4ade80"></span>Auto from schema</div>
+    <div class="chip"><span class="dot" style="background:#c084fc"></span>FK matching</div>
+    <div class="chip"><span class="dot" style="background:#fb923c"></span>Dictionary memory</div>
+    <div class="chip"><span class="dot" style="background:#fbbf24"></span>Hindi normalization</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- WHAT -->
+<div class="sec"><span class="anc" id="what"></span>
+  <div class="sec-hdr"><span class="sec-num">01</span><h2>What is sutramExcel?</h2></div>
+  <p>sutramExcel adds Excel import capability to sutramEngine. It auto-derives column config from your existing schema — FK columns become dropdown matchers, required columns become validation rules. You only provide what schema can't know.</p>
+  <p>Security: only <code>register()</code>-ed tables are accessible. Unregistered tables return 403 — sensitive tables like users or permissions can never be imported via Excel.</p>
+
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Layer</th><th>Package</th><th>Responsibility</th></tr></thead>
+    <tbody>
+      <tr><td>ORM</td><td><code>sutramcore</code></td><td>Schema, BaseTable, CRUD</td></tr>
+      <tr><td>Engine</td><td><code>sutramengine</code></td><td>Triggers, reports, router, UI meta</td></tr>
+      <tr><td>Excel</td><td><code>sutramexcel</code></td><td>Import, FK match, dictionary, error report</td></tr>
+      <tr><td>UI</td><td><code>sutramui-excel</code></td><td>Angular components (Phase 2)</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- INSTALL -->
+<div class="sec"><span class="anc" id="install"></span>
+  <div class="sec-hdr"><span class="sec-num">02</span><h2>Installation</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">terminal</span><span class="clang">bash</span></div>
+  <div class="cb"><pre><span class="fn">npm</span> install sutramexcel exceljs express</pre></div></div>
+  <div class="note cyan"><span class="ni">◈</span><span><code>exceljs</code> is a peer dependency — install it explicitly. Used for error report Excel generation. <code>express</code> is required for <code>excel.router()</code>.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- SETUP -->
+<div class="sec"><span class="anc" id="setup"></span>
+  <div class="sec-hdr"><span class="sec-num">03</span><h2>Setup</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">database/excel.js</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> { <span class="cn">SutramExcel</span> } = <span class="fn">require</span>(<span class="str">'sutramexcel'</span>);
+<span class="kw">const</span> { engine }      = <span class="fn">require</span>(<span class="str">'./db'</span>);
+
+<span class="kw">const</span> excel = <span class="kw">new</span> <span class="fn">SutramExcel</span>(engine);
+
+<span class="cmt">// register tables — only these are allowed</span>
+excel.<span class="fn">register</span>(engine.<span class="fn">table</span>(<span class="str">'product'</span>), { ... });
+excel.<span class="fn">register</span>(engine.<span class="fn">table</span>(<span class="str">'category'</span>));   <span class="cmt">// no config — all auto</span>
+excel.<span class="fn">register</span>(engine.<span class="fn">table</span>(<span class="str">'pbk'</span>), { ... });
+
+module.exports = { excel };</pre></div></div>
+
+  <div class="cw"><div class="ch"><span class="cl">app.js — mount router</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> { excel } = <span class="fn">require</span>(<span class="str">'./database/excel'</span>);
+
+<span class="cmt">// mount under any prefix</span>
+app.<span class="fn">use</span>(<span class="str">'/_sutram/excel'</span>, excel.<span class="fn">router</span>());</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- REGISTER -->
+<div class="sec"><span class="anc" id="register"></span>
+  <div class="sec-hdr"><span class="sec-num">04</span><h2>register()</h2></div>
+  <p>Whitelist a table for Excel import. Pass a BaseTable instance — not a string. If the table doesn't exist in schema, it fails immediately at startup.</p>
+
+  <div class="cw"><div class="ch"><span class="cl">register signature</span><span class="clang">js</span></div>
+  <div class="cb"><pre>excel.<span class="fn">register</span>(
+  engine.<span class="fn">table</span>(<span class="str">'product'</span>),  <span class="cmt">// BaseTable instance — not string</span>
+  {
+    headers:        { ... },  <span class="cmt">// per-column extensions (optional)</span>
+    autoSet:        { ... },  <span class="cmt">// auto-set values on import (optional)</span>
+    duplicateOn:    [...],    <span class="cmt">// duplicate check columns (optional)</span>
+    fullDuplicateOn:[...],    <span class="cmt">// exact duplicate columns (optional)</span>
+    canUpdate:      <span class="kw">false</span>,   <span class="cmt">// allow update on duplicate (optional)</span>
+    autoIncrement:  [...],    <span class="cmt">// auto-increment columns (optional)</span>
+    jsonColumns:    [...],    <span class="cmt">// JSON stringify before insert (optional)</span>
+    booleanColumns: [...],    <span class="cmt">// boolean → 0/1 (optional)</span>
+    display_name:   <span class="str">'...'</span>,   <span class="cmt">// shown in table list (optional)</span>
+  }
+);</pre></div></div>
+
+  <div class="note tip"><span class="ni">✓</span><span>All config is optional. <code>excel.register(engine.table('category'))</code> works with zero config — schema provides everything needed.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- AUTO FROM SCHEMA -->
+<div class="sec"><span class="anc" id="config-auto"></span>
+  <div class="sec-hdr"><span class="sec-num">05</span><h2>Auto-derived from Schema</h2></div>
+  <p>sutramExcel reads your schema and auto-builds the import config. You get this for free — no manual configuration needed.</p>
+
+  <div class="two">
+    <div class="cw"><div class="ch"><span class="cl">schema.js</span><span class="clang">js</span></div>
+    <div class="cb"><pre>...<span class="fn">defineTable</span>(<span class="str">'product'</span>, {
+  _id:         col.<span class="fn">id</span>(),
+  name:        col.<span class="fn">string</span>()
+                  .<span class="fn">required</span>(),
+  price:       col.<span class="fn">number</span>(),
+  category_id: col.<span class="fn">ref</span>(
+    <span class="str">'category._id'</span>, {
+    as:     <span class="str">'category'</span>,
+    select: [<span class="str">'name'</span>],
+  }),
+  active: col.<span class="fn">boolean</span>()
+              .<span class="fn">default</span>(<span class="num">1</span>),
+})</pre></div></div>
+    <div class="cw"><div class="ch"><span class="cl">auto-derived config</span><span class="clang">js</span></div>
+    <div class="cb"><pre><span class="cmt">// _id → skipped (auto)</span>
+
+<span class="cmt">// name → string, required</span>
+{ col_name: <span class="str">'name'</span>,
+  not_null: <span class="kw">true</span>,
+  type: <span class="str">'string'</span> }
+
+<span class="cmt">// category_id → ref auto</span>
+{ col_name:  <span class="str">'category_id'</span>,
+  name:      <span class="str">'category'</span>,
+  type:      <span class="str">'ref'</span>,
+  ref_table: <span class="str">'category'</span>,
+  ref_field: <span class="str">'category_id'</span>,
+  ref_data:  <span class="str">'name'</span> }
+
+<span class="cmt">// active → boolean</span>
+{ col_name: <span class="str">'active'</span>,
+  type: <span class="str">'boolean'</span> }</pre></div></div>
+  </div>
+
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Schema</th><th>Auto-derived</th></tr></thead>
+    <tbody>
+      <tr><td><code>col.id()</code></td><td>Skipped — auto by DB</td></tr>
+      <tr><td><code>col.string().required()</code></td><td><code>not_null: true</code></td></tr>
+      <tr><td><code>col.boolean()</code></td><td><code>type: 'boolean'</code> → 0/1 conversion</td></tr>
+      <tr><td><code>col.json()</code></td><td><code>type: 'json'</code> → JSON.stringify</td></tr>
+      <tr><td><code>col.ref('category._id', { as, select })</code></td><td><code>ref_table, ref_field, ref_data</code> auto</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- EXTEND CONFIG -->
+<div class="sec"><span class="anc" id="config-extend"></span>
+  <div class="sec-hdr"><span class="sec-num">06</span><h2>Extend Config</h2></div>
+  <p>Developer only provides what schema cannot know — alternate names, date types, mix type.</p>
+
+  <div class="cw"><div class="ch"><span class="cl">extend example</span><span class="clang">js</span></div>
+  <div class="cb"><pre>excel.<span class="fn">register</span>(engine.<span class="fn">table</span>(<span class="str">'product'</span>), {
+  headers: {
+
+    <span class="cmt">// add alternate header names (alt_names append — not replace)</span>
+    mm_id: {
+      alt_names: [<span class="str">'mm_name'</span>, <span class="str">'मि.म.'</span>, <span class="str">'मिनी मधुबन'</span>],
+    },
+
+    <span class="cmt">// override type — date conversion</span>
+    purchase_date: {
+      type:      <span class="str">'date'</span>,     <span class="cmt">// Excel serial or string → ISO date</span>
+      alt_names: [<span class="str">'date'</span>, <span class="str">'तारीख'</span>],
+    },
+
+    <span class="cmt">// unix timestamp</span>
+    rc_date: {
+      type: <span class="str">'unix_date'</span>,   <span class="cmt">// → Unix seconds</span>
+    },
+
+    <span class="cmt">// mix type — item + subitem combo</span>
+    item_id: {
+      type: <span class="str">'mix'</span>,
+      alt_names: [<span class="str">'item_name'</span>, <span class="str">'आइटम'</span>],
+    },
+
+    <span class="cmt">// category FK — extra alt names</span>
+    category_id: {
+      alt_names: [<span class="str">'cat'</span>, <span class="str">'श्रेणी'</span>, <span class="str">'category name'</span>],
+    },
+  },
+});</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- AUTOSET -->
+<div class="sec"><span class="anc" id="autoset"></span>
+  <div class="sec-hdr"><span class="sec-num">07</span><h2>autoSet</h2></div>
+  <p>Automatically set column values on every imported row. Two types — literal values and functions that receive the request object.</p>
+
+  <div class="cw"><div class="ch"><span class="cl">autoSet examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre>excel.<span class="fn">register</span>(engine.<span class="fn">table</span>(<span class="str">'product'</span>), {
+  autoSet: {
+
+    <span class="cmt">// literal — hamesha ye value set hogi</span>
+    is_xl:  <span class="num">1</span>,
+    active: <span class="num">1</span>,
+    source: <span class="str">'excel'</span>,
+
+    <span class="cmt">// function — req se value lena hai</span>
+    <span class="cmt">// missing req value → null → schema default used</span>
+    dept_id:    (req) => req.deptId,
+    created_by: (req) => req.user?._id,
+    branch_id:  (req) => req.headers[<span class="str">'x-branch-id'</span>],
+  },
+});</pre></div></div>
+
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Type</th><th>Example</th><th>Behavior</th></tr></thead>
+    <tbody>
+      <tr><td>Literal</td><td><code>is_xl: 1</code></td><td>Always sets this exact value</td></tr>
+      <tr><td>Function</td><td><code>dept_id: (req) => req.deptId</code></td><td>Called with Express req object</td></tr>
+      <tr><td>Function — missing</td><td><code>req.deptId</code> is undefined</td><td>→ null → schema default used by engine</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- DUPLICATE -->
+<div class="sec"><span class="anc" id="duplicate"></span>
+  <div class="sec-hdr"><span class="sec-num">08</span><h2>Duplicate Detection</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">duplicate config</span><span class="clang">js</span></div>
+  <div class="cb"><pre>excel.<span class="fn">register</span>(engine.<span class="fn">table</span>(<span class="str">'product'</span>), {
+
+  <span class="cmt">// check these columns for duplicate</span>
+  duplicateOn: [<span class="str">'mm_id'</span>, <span class="str">'item_id'</span>, <span class="str">'purchase_date'</span>],
+
+  <span class="cmt">// exact match check — all these must match for "full duplicate"</span>
+  fullDuplicateOn: [<span class="str">'mm_id'</span>, <span class="str">'item_id'</span>, <span class="str">'purchase_date'</span>, <span class="str">'qty'</span>],
+
+  <span class="cmt">// allow update when duplicate found with changes</span>
+  canUpdate: <span class="kw">true</span>,
+});</pre></div></div>
+
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Scenario</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>No match on <code>duplicateOn</code></td><td><code>inserted</code></td></tr>
+      <tr><td>Match found, <code>fullDuplicateOn</code> all same</td><td><code>duplicate</code> — skipped</td></tr>
+      <tr><td>Match found, some fields differ, <code>canUpdate: true</code></td><td><code>update</code></td></tr>
+      <tr><td>Match found, some fields differ, <code>canUpdate: false</code></td><td><code>duplicate</code> — skipped</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- ROUTER -->
+<div class="sec"><span class="anc" id="router"></span>
+  <div class="sec-hdr"><span class="sec-num">09</span><h2>excel.router()</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">mount</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// mount under any prefix</span>
+app.<span class="fn">use</span>(<span class="str">'/_sutram/excel'</span>, excel.<span class="fn">router</span>());
+
+<span class="cmt">// or alongside engine router</span>
+app.<span class="fn">use</span>(<span class="str">'/api'</span>, engine.<span class="fn">router</span>());
+app.<span class="fn">use</span>(<span class="str">'/api/_sutram/excel'</span>, excel.<span class="fn">router</span>());</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- ROUTES -->
+<div class="sec"><span class="anc" id="routes"></span>
+  <div class="sec-hdr"><span class="sec-num">10</span><h2>All Routes</h2></div>
+
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Method</th><th>Route</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET</code></td><td><code>/tables</code></td><td>Registered table list</td></tr>
+      <tr><td><code>GET</code></td><td><code>/config/:table</code></td><td>Full derived header config</td></tr>
+      <tr><td><code>POST</code></td><td><code>/verify/:table</code></td><td>FK resolve → correctionList</td></tr>
+      <tr><td><code>POST</code></td><td><code>/import/:table</code></td><td>Single row insert (trigger-aware)</td></tr>
+      <tr><td><code>POST</code></td><td><code>/update/:table</code></td><td>Single row update</td></tr>
+      <tr><td><code>POST</code></td><td><code>/error-report</code></td><td>Rejected rows → .xlsx download</td></tr>
+      <tr><td><code>GET</code></td><td><code>/dictionary</code></td><td>List all dictionary entries</td></tr>
+      <tr><td><code>GET</code></td><td><code>/dictionary/:type</code></td><td>List by type</td></tr>
+      <tr><td><code>POST</code></td><td><code>/dictionary</code></td><td>Add entry</td></tr>
+      <tr><td><code>PUT</code></td><td><code>/dictionary/:id</code></td><td>Update entry</td></tr>
+      <tr><td><code>DELETE</code></td><td><code>/dictionary/:id</code></td><td>Soft delete</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note warn"><span class="ni">⚠</span><span>Unregistered table → <code>403 Forbidden</code>. Sensitive tables (users, permissions, sys_) should never be registered.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- FLOW -->
+<div class="sec"><span class="anc" id="flow"></span>
+  <div class="sec-hdr"><span class="sec-num">11</span><h2>Import Flow</h2></div>
+  <p>Frontend calls these routes in sequence — one row at a time for import (streaming progress).</p>
+
+  <div class="cw"><div class="ch"><span class="cl">step by step</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// Step 1 — frontend parses Excel (SheetJS)</span>
+<span class="cmt">// rows = array of objects, keys = Excel headers</span>
+
+<span class="cmt">// Step 2 — verify: FK resolve</span>
+<span class="kw">const</span> res = <span class="kw">await</span> http.<span class="fn">post</span>(<span class="str">'/_sutram/excel/verify/product'</span>, {
+  rows: excelArrObj,
+});
+<span class="cmt">// res.rows         → resolved rows (category_id filled)</span>
+<span class="cmt">// res.correctionList → [ { type:'unit', name:'kulo', rowIndexes:[3,7] } ]</span>
+
+<span class="cmt">// Step 3 — user resolves corrections in UI</span>
+<span class="cmt">// frontend applies corrections locally to rows</span>
+
+<span class="cmt">// Step 4 — import one row at a time</span>
+<span class="kw">for</span> (<span class="kw">const</span> row <span class="kw">of</span> resolvedRows) {
+  <span class="kw">const</span> result = <span class="kw">await</span> http.<span class="fn">post</span>(<span class="str">'/_sutram/excel/import/product'</span>, { row });
+  <span class="cmt">// result.status: 'inserted' | 'updated' | 'duplicate' | 'rejected'</span>
+}
+
+<span class="cmt">// Step 5 — export rejected rows</span>
+<span class="kw">const</span> blob = <span class="kw">await</span> http.<span class="fn">post</span>(<span class="str">'/_sutram/excel/error-report'</span>, {
+  table: <span class="str">'product'</span>, rows: rejectedRows,
+}, { responseType: <span class="str">'blob'</span> });
+<span class="cmt">// → .xlsx file download</span></pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- DICT WHAT -->
+<div class="sec"><span class="anc" id="dict-what"></span>
+  <div class="sec-hdr"><span class="sec-num">12</span><h2>What is Dictionary?</h2></div>
+  <p>Dictionary is a correction memory. When a user corrects "kulo" → unit <code>kg</code> during import, they can save it to dictionary. Next import — "kulo" is automatically resolved to <code>kg</code> without asking again.</p>
+
+  <div class="cw"><div class="ch"><span class="cl">flow</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// First import — "kulo" not found in unit table</span>
+<span class="cmt">// correctionList: [ { type: 'unit', name: 'kulo' } ]</span>
+<span class="cmt">// User selects: kg (unit._id = 5)</span>
+<span class="cmt">// User checks "Dictionary" checkbox</span>
+
+<span class="cmt">// Frontend saves to dictionary:</span>
+http.<span class="fn">post</span>(<span class="str">'/_sutram/excel/dictionary'</span>, {
+  type:   <span class="str">'unit'</span>,
+  name:   <span class="str">'kulo'</span>,
+  ref_id: <span class="num">5</span>,
+});
+
+<span class="cmt">// Second import — "kulo" auto-resolved to 5</span>
+<span class="cmt">// No correction needed</span></pre></div></div>
+
+  <div class="note cyan"><span class="ni">◈</span><span>Dictionary uses its own table <code>xls_dictionary</code> with its own version tracking (<code>xls_meta.xls_version</code>) — separate from <code>user_version</code> and <code>sys_meta.engine_version</code>. Zero conflict.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- DICT API -->
+<div class="sec"><span class="anc" id="dict-api"></span>
+  <div class="sec-hdr"><span class="sec-num">13</span><h2>Dictionary CRUD API</h2></div>
+
+  <div class="cw"><div class="ch"><span class="cl">examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// list all</span>
+GET /_sutram/excel/dictionary
+<span class="cmt">// → [ { _id, type, name, ref_id, ref_id2, extra_note, active } ]</span>
+
+<span class="cmt">// list by type</span>
+GET /_sutram/excel/dictionary/unit
+<span class="cmt">// → all unit entries</span>
+
+<span class="cmt">// add</span>
+POST /_sutram/excel/dictionary
+{ type: <span class="str">'unit'</span>, name: <span class="str">'kulo'</span>, ref_id: <span class="num">5</span> }
+<span class="cmt">// → { _id: 12 }</span>
+
+<span class="cmt">// update</span>
+PUT /_sutram/excel/dictionary/<span class="num">12</span>
+{ ref_id: <span class="num">7</span> }
+
+<span class="cmt">// soft delete (active = 0)</span>
+DELETE /_sutram/excel/dictionary/<span class="num">12</span></pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- DICT DIRECT -->
+<div class="sec"><span class="anc" id="dict-direct"></span>
+  <div class="sec-hdr"><span class="sec-num">14</span><h2>Direct Dictionary Access</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">direct access</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> dict = excel.dictionary;
+
+dict.<span class="fn">add</span>({ type: <span class="str">'unit'</span>, name: <span class="str">'kulo'</span>, ref_id: <span class="num">5</span> });
+dict.<span class="fn">find</span>(<span class="str">'unit'</span>, <span class="str">'kulo'</span>);      <span class="cmt">// → { ref_id: '5', ... }</span>
+dict.<span class="fn">find</span>(<span class="str">'unit'</span>, <span class="str">'  KULO  '</span>);  <span class="cmt">// → same — normalized match</span>
+dict.<span class="fn">list</span>(<span class="str">'unit'</span>);               <span class="cmt">// → all unit entries</span>
+dict.<span class="fn">list</span>();                      <span class="cmt">// → all entries</span>
+dict.<span class="fn">update</span>(<span class="num">12</span>, { ref_id: <span class="num">7</span> });
+dict.<span class="fn">delete</span>(<span class="num">12</span>);                  <span class="cmt">// soft — active = 0</span>
+dict.<span class="fn">hardDelete</span>(<span class="num">12</span>);             <span class="cmt">// permanent</span></pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- REFMATCHER -->
+<div class="sec"><span class="anc" id="refmatcher"></span>
+  <div class="sec-hdr"><span class="sec-num">15</span><h2>FK Matching</h2></div>
+  <p>For every FK column, RefMatcher loads ref table data and matches Excel value. Three-step fallback:</p>
+
+  <div class="cw"><div class="ch"><span class="cl">matching order</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// Excel cell: "Electronics" (category column)</span>
+
+<span class="cmt">// Step 1 — direct match against category table</span>
+<span class="cmt">// checks: category_hin, category_eng, category_roman, category_code</span>
+<span class="cmt">// (auto-guessed from column names with _hin/_eng/_roman/_code pattern)</span>
+<span class="cmt">// found → category_id = 3 ✓</span>
+
+<span class="cmt">// Step 2 — xls_dictionary fallback</span>
+<span class="cmt">// "electronics" in dictionary? → ref_id</span>
+
+<span class="cmt">// Step 3 — not found</span>
+<span class="cmt">// correctionList.push({ type:'category', name:'Electronics', rowIndexes:[2,5,8] })</span>
+<span class="cmt">// all rows with same value grouped — one correction fixes all</span></pre></div></div>
+
+  <h3>matchFields — auto-guess + override</h3>
+  <div class="cw"><div class="ch"><span class="cl">auto vs override</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// auto — guessed from column names</span>
+<span class="cmt">// looks for: _hin, _eng, _roman, _code, _short, _full, name, roll_no</span>
+<span class="cmt">// category table → category_hin, category_eng, category_roman</span>
+
+<span class="cmt">// override — developer specifies exact fields</span>
+excel.<span class="fn">register</span>(engine.<span class="fn">table</span>(<span class="str">'product'</span>), {
+  headers: {
+    unit_id: {
+      matchFields: [<span class="str">'unit_short'</span>, <span class="str">'unit_full'</span>],  <span class="cmt">// explicit</span>
+    },
+  },
+});</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- NORMALIZATION -->
+<div class="sec"><span class="anc" id="normalization"></span>
+  <div class="sec-hdr"><span class="sec-num">16</span><h2>Hindi Normalization</h2></div>
+  <p>All string matching uses Unicode normalization — critical for Hindi/Devanagari strings where same character can have multiple encodings.</p>
+
+  <div class="cw"><div class="ch"><span class="cl">_clean() — applied to all comparisons</span><span class="clang">js</span></div>
+  <div class="cb"><pre>_clean(str) {
+  <span class="kw">return</span> (str || <span class="str">''</span>)
+    .<span class="fn">toString</span>()
+    .<span class="fn">trim</span>()
+    .<span class="fn">normalize</span>(<span class="str">'NFC'</span>)          <span class="cmt">// Unicode normalization</span>
+    .<span class="fn">replace</span>(<span class="str">/\u200B/g</span>, <span class="str">''</span>)   <span class="cmt">// remove zero-width space</span>
+    .<span class="fn">replace</span>(<span class="str">/\u00A0/g</span>, <span class="str">' '</span>)  <span class="cmt">// non-breaking space → space</span>
+    .<span class="fn">replace</span>(<span class="str">/\s+/g</span>, <span class="str">' '</span>)     <span class="cmt">// collapse multiple spaces</span>
+    .<span class="fn">toLowerCase</span>();              <span class="cmt">// case insensitive</span>
+}</pre></div></div>
+  <div class="note tip"><span class="ni">✓</span><span>"कुलो", "  KULO  ", "kulo" — all match the same dictionary entry. Applied to both Excel input and database values before comparison.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- MIX TYPE -->
+<div class="sec"><span class="anc" id="mix"></span>
+  <div class="sec-hdr"><span class="sec-num">17</span><h2>mix type — item + subitem</h2></div>
+  <p>Special type for cascading FK — item and subitem are linked. Excel has two columns, matching is dependent.</p>
+
+  <div class="cw"><div class="ch"><span class="cl">mix type config + Excel format</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// config</span>
+excel.<span class="fn">register</span>(engine.<span class="fn">table</span>(<span class="str">'product'</span>), {
+  headers: {
+    item_id: { type: <span class="str">'mix'</span>, alt_names: [<span class="str">'item_name'</span>, <span class="str">'आइटम'</span>] },
+    <span class="cmt">// subitem column auto-detected as 'subitem'</span>
+  },
+});
+
+<span class="cmt">// Excel columns needed:</span>
+<span class="cmt">// | item          | subitem       |</span>
+<span class="cmt">// | चीनी          | सफेद चीनी     |</span>
+<span class="cmt">// | आटा           | (empty)       |</span>
+
+<span class="cmt">// matching flow:</span>
+<span class="cmt">// 1. match item → item_id = 5</span>
+<span class="cmt">// 2. match subitem within item_id=5 → subitem_id = 12</span>
+<span class="cmt">// 3. if item not found → correctionList (item + subitem together)</span></pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- DATES -->
+<div class="sec"><span class="anc" id="dates"></span>
+  <div class="sec-hdr"><span class="sec-num">18</span><h2>Date Conversion</h2></div>
+  <p>Excel stores dates as serial numbers. sutramExcel auto-converts based on header <code>type</code>.</p>
+
+  <div class="tw"><table class="dt">
+    <thead><tr><th>type</th><th>Input</th><th>Output</th></tr></thead>
+    <tbody>
+      <tr><td><code>date</code></td><td>Excel serial (45291) or string (15/06/2024)</td><td>ISO string — <code>2024-06-15</code></td></tr>
+      <tr><td><code>unix_date</code></td><td>Excel serial or string</td><td>Unix timestamp (seconds)</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="cw"><div class="ch"><span class="cl">date config</span><span class="clang">js</span></div>
+  <div class="cb"><pre>headers: {
+  purchase_date:      { type: <span class="str">'date'</span>,      alt_names: [<span class="str">'date'</span>, <span class="str">'तारीख'</span>] },
+  insurance_exp_date: { type: <span class="str">'unix_date'</span>, alt_names: [<span class="str">'ins exp'</span>] },
+}</pre></div></div>
+
+  <h3>Supported string formats</h3>
+  <div class="cw"><div class="ch"><span class="cl">auto-detected</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// DD/MM/YYYY</span>  15/06/2024  → 2024-06-15
+<span class="cmt">// DD-MM-YYYY</span>  15-06-2024  → 2024-06-15
+<span class="cmt">// DD.MM.YYYY</span>  15.06.2024  → 2024-06-15
+<span class="cmt">// YYYY-MM-DD</span>  2024-06-15  → 2024-06-15 (as-is)
+<span class="cmt">// Excel serial</span> 45291      → 2024-01-15</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- MIGRATIONS -->
+<div class="sec"><span class="anc" id="migrations"></span>
+  <div class="sec-hdr"><span class="sec-num">19</span><h2>Own Migrations</h2></div>
+  <p>sutramExcel maintains its own tables — <code>xls_meta</code> and <code>xls_dictionary</code>. Version tracked via <code>xls_meta.xls_version</code>.</p>
+
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Version tracker</th><th>Package</th><th>Tracks</th></tr></thead>
+    <tbody>
+      <tr><td><code>user_version</code> pragma</td><td>sutramCore</td><td>User table migrations</td></tr>
+      <tr><td><code>sys_meta.engine_version</code></td><td>sutramEngine</td><td>sys_ table migrations</td></tr>
+      <tr><td><code>xls_meta.xls_version</code></td><td>sutramExcel</td><td>xls_ table migrations</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>Runs automatically on <code>new SutramExcel(engine)</code> — no manual call needed. Future columns in <code>xls_dictionary</code>? Add version 2 to <code>excel.migrations.js</code> — never edit version 1.</p>
+</div>
+
+<hr class="s">
+
+<!-- API REFERENCE -->
+<div class="sec"><span class="anc" id="api"></span>
+  <div class="sec-hdr"><span class="sec-num">20</span><h2>API Reference</h2></div>
+
+  <h3>SutramExcel</h3>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>new SutramExcel(engine)</code></td><td>Init — runs xls_ migrations automatically</td></tr>
+      <tr><td><code>excel.register(tableInstance, config?)</code></td><td>Whitelist table — chainable</td></tr>
+      <tr><td><code>excel.router()</code></td><td>Returns Express router</td></tr>
+      <tr><td><code>excel.dictionary</code></td><td>DictionaryManager instance</td></tr>
+      <tr><td><code>excel.getConfig(tableName)</code></td><td>Get derived config for table</td></tr>
+      <tr><td><code>excel.getRegisteredTables()</code></td><td>List registered table names</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>DictionaryManager</h3>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>add({ type, name, ref_id, ref_id2?, extra_note? })</code></td><td>Add or update entry</td></tr>
+      <tr><td><code>find(type, name)</code></td><td>Find by type + name (normalized)</td></tr>
+      <tr><td><code>list(type?)</code></td><td>List all or by type</td></tr>
+      <tr><td><code>update(id, updates)</code></td><td>Update entry fields</td></tr>
+      <tr><td><code>delete(id)</code></td><td>Soft delete (active = 0)</td></tr>
+      <tr><td><code>hardDelete(id)</code></td><td>Permanent delete</td></tr>
+    </tbody>
+  </table></div>
+
+  <div style="height:40px"></div>
+  <hr style="border:none;border-top:1px solid var(--border)">
+  <p style="text-align:center;font-family:'DM Mono',monospace;font-size:13px;color:var(--text3);margin-top:20px">
+    sutramExcel v1.0.0-beta · depends on sutramengine ≥1.0.0 · exceljs ≥4.0.0
+  </p>
+</div>
+
+</div>
+</main>
+</div>
+
+<script>
+const links = document.querySelectorAll('.nav-a');
+const secs  = document.querySelectorAll('.anc');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.nav-a[href="#${id}"]`);
+      if (a) { a.classList.add('active'); a.scrollIntoView({ block: 'nearest' }); }
+    }
+  });
+}, { rootMargin: '-15% 0px -80% 0px' });
+secs.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

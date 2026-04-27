@@ -27,10 +27,11 @@
                             </div>
                             <div class="col-md-3 mb-2">
                                 <div class="form-group">
-                                    <label class="form-label">Month</label>
+                                    <label class="form-label">Month <strong class="text-danger">*</strong></label>
                                     <ng-select class="custom" style="width: 100%;" placeholder="Select Month"
                                         [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.months"
-                                        name="month" [multiple]="true" [ngModalOptions]="{standalone: true}">
+                                        name="month" [multiple]="true" [ngModalOptions]="{standalone: true}"
+                                        [ngClass]="{'validation': submitted && (!filterBody.months || filterBody.months.length === 0)}">
                                         <ng-option selected="selected" disabled value="">Select Month
                                         </ng-option>
                                         <ng-option *ngFor="let item of gs.yearChangedGetMonth(filterBody.year)"

@@ -30,9 +30,16 @@ export class HmpComponent implements OnInit {
   total_count: any = 0;
   settings: any = {};
 
+  showModal = '';
+  selectedJawak: any = null;
+  awkRefData: any = null;
+
   // Filter data
   recipes: any = [];
   mms: any = [];
+  items: any = [];
+  units: any = [];
+  conditions: any = [];
   showFilter = false;
 
   // UI state
@@ -61,6 +68,9 @@ export class HmpComponent implements OnInit {
     this.getRecipes();
     this.gs.observeList().subscribe((result: any) => {
       this.mms = result.mm || [];
+      this.items = result.itemmix || [];
+      this.units = result.unit || [];
+      this.conditions = result.condition || [];
     });
   }
 
@@ -113,8 +123,60 @@ export class HmpComponent implements OnInit {
     }
   }
 
+  getJawakQty(output: any) {
+    if (output && output.jawak_detail && output.jawak_detail.length > 0) {
+      return output.jawak_detail.reduce((acc: any, curr: any) => acc + Number(curr.qty), 0);
+    }
+    return 0;
+  }
 
   async exportToExcel() {
+    Swal.fire({
+      title: 'Preparing Export',
+      html: `Fetching data... 0 / ${this.total_count}`,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    let allBatches: any[] = [];
+    let currentPage = 1;
+    let filter = { ...this.filterBody };
+    let total = this.total_count || 0;
+
+    while (true) {
+      filter.pageNo = currentPage;
+      try {
+        const data: any = await new Promise((resolve, reject) => {
+          this.http.put(this.api.getUrl('HMP') + 'batch/' + this.auth.webUser.dept_id, filter)
+            .subscribe((res: any) => resolve(res), (err: any) => reject(err));
+        });
+
+        let result = data.result || [];
+        if (total === 0) total = data.total_count || 0;
+
+        if (result.length > 0) {
+          allBatches = allBatches.concat(result);
+        }
+
+        Swal.update({
+          html: `Fetching data... ${allBatches.length} / ${total}`
+        });
+
+        if (result.length === 0 || allBatches.length >= total || allBatches.length >= 100000) {
+          break;
+        }
+        currentPage++;
+      } catch (err) {
+        Swal.close();
+        this.toastr.error('Error fetching data for export');
+        return;
+      }
+    }
+
+    Swal.update({ html: 'Generating Excel File...', title: 'Processing' });
+
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('HMP Batches');
 
@@ -163,7 +225,11 @@ export class HmpComponent implements OnInit {
       cell.alignment = { wrapText: true, ...align } as ExcelJS.Alignment;
     };
 
-    for (const batch of this.batches) {
+    const sortedBatches = [...allBatches].sort((a: any, b: any) => {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+
+    for (const batch of sortedBatches) {
       // --- Batch header row (full width merge) ---
       const hdrRow = ws.getRow(rowNum++);
       hdrRow.height = 20;
@@ -208,8 +274,8 @@ export class HmpComponent implements OnInit {
         // Input side
         if (inputs[i]) {
           const inp = inputs[i];
-          const iHin = [(inp.subitem?.subitem_list?.subitem_hin || ''), inp.item?.item_hin || ''].filter(Boolean).join(' ');
-          const iEng = [(inp.subitem?.subitem_list?.subitem_eng || ''), inp.item?.item_eng || ''].filter(Boolean).join(' ');
+          const iHin = [(inp.subitem?.subitem_hin || ''), inp.item?.item_hin || ''].filter(Boolean).join(' ');
+          const iEng = [(inp.subitem?.subitem_eng || ''), inp.item?.item_eng || ''].filter(Boolean).join(' ');
           addCell(dataRow, 1, i + 1, smallFont);
           addCell(dataRow, 2, iHin, smallFont);
           addCell(dataRow, 3, iEng, smallFont);
@@ -224,8 +290,8 @@ export class HmpComponent implements OnInit {
         // Output side
         if (outputs[i]) {
           const out = outputs[i];
-          const oHin = [(out.subitem?.subitem_list?.subitem_hin || ''), out.item?.item_hin || ''].filter(Boolean).join(' ');
-          const oEng = [(out.subitem?.subitem_list?.subitem_eng || ''), out.item?.item_eng || ''].filter(Boolean).join(' ');
+          const oHin = [(out.subitem?.subitem_hin || ''), out.item?.item_hin || ''].filter(Boolean).join(' ');
+          const oEng = [(out.subitem?.subitem_eng || ''), out.item?.item_eng || ''].filter(Boolean).join(' ');
           addCell(dataRow, 8, i + 1, smallFont);
           addCell(dataRow, 9, oHin, smallFont);
           addCell(dataRow, 10, oEng, smallFont);
@@ -246,6 +312,7 @@ export class HmpComponent implements OnInit {
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const dateStr = new Date().toLocaleDateString('en-IN').replace(/\//g, '-');
     saveAs(blob, `HMP_Batches_${dateStr}.xlsx`);
+    Swal.close();
   }
 
   exportToPdf() {
@@ -272,13 +339,57 @@ export class HmpComponent implements OnInit {
   openEntryModal(batch: any = null) {
     this.isEdit = !!batch;
     this.selectedBatch = batch;
+    this.openModal(this.isEdit ? "Edit HMP" : "Add HMP");
+  }
+
+  openModal(type: string) {
+    this.showModal = type;
     $('#hmpEntryModal').modal('show');
   }
 
   closeModal() {
     $('#hmpEntryModal').modal('hide');
+    this.showModal = ""
     this.isEdit = false;
     this.selectedBatch = null;
+  }
+
+  showJawak(output: any) {
+    this.selectedJawak = output?.aawak_detail?.jawak_detail || [];
+
+    console.log(this.selectedJawak);
+
+    for (let i in this.selectedJawak) {
+      const item = this.items.find((i: any) => i._id === this.selectedJawak[i]?.item_id);
+      const mm = this.mms.find((m: any) => m._id === this.selectedJawak[i].mm_id);
+      const unit = this.units.find((u: any) => u._id === this.selectedJawak[i].unit_id);
+      // const condition = this.conditions.find((c: any) => c._id === this.selectedJawak[i].condition_id);
+      this.selectedJawak[i].mm_hin = mm ? (mm.mm_hin || mm.mm_eng) : '';
+      this.selectedJawak[i].item_hin = item ? (item.item_hin || item.item_eng) : '';
+      this.selectedJawak[i].unit_short = unit ? unit.unit_short : '';
+      // Lookup subitem name if present
+      if (output.subitem_id) {
+        const subitem = this.items.find((i: any) => i._id === output.subitem_id);
+        this.selectedJawak[i].subitem_hin = subitem ? (subitem.subitem_hin || subitem.subitem_eng) : '';
+      }
+    }
+    this.openModal('show jawak');
+  }
+
+
+  addJawak(output: any) {
+    this.awkRefData = output.aawak_detail;
+    this.openModal('Add Jawak');
+  }
+
+
+
+  addJawakResponse(ev: any) {
+    if (ev) {
+      this.closeModal();
+      this.awkRefData = null;
+      this.getBatches();
+    }
   }
 
   onBatchSaved(event: any) {

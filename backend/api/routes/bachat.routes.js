@@ -40,7 +40,6 @@ router.get('/home/:dept_id', async (req, res, next) => {
         // let conditionString = ` bachat.Stock <> 0 OR bachat.Used <> 0`;
         let sql = DB.query.bachat.with_pending_aawak.replace('?', `where bachat.dept_id = ${req.params.dept_id} AND bachat.Stock <> 0`);
         sql = sql.replace('#', '');
-        console.log(sql);
         let stmt = DB.db.prepare(sql);
         for (let row of stmt.iterate({ limit: -1, offset: -1 })) {
             row.aawaks = JSON.parse(row.aawaks);
@@ -127,6 +126,42 @@ router.delete('/many/:dept_id', async (req, res, next) => {
         }
         else {
             return next(new Error('Id not Found.'))
+        }
+    } catch (err) { next(err) };
+});
+
+// filter bachat 
+router.put('/filter/:dept_id', async (req, res, next) => {
+    try {
+        if (req.params.dept_id) {
+            let conditions = [];
+            conditions.push(`bachat.dept_id = ${req.params.dept_id}`)
+            if (req.body.mm_id && req.body.mm_id.length > 0)
+                conditions.push(`bachat.mm_id in (${req.body.mm_id.join(',')})`)
+            if (req.body.item_id && req.body.item_id.length > 0)
+                conditions.push(`bachat.item_id in (${req.body.item_id.join(',')})`)
+            if (req.body.subitem_id && req.body.subitem_id.length > 0)
+                conditions.push(`bachat.subitem_id in (${req.body.subitem_id.join(',')})`)
+            if (req.body.unit_id && req.body.unit_id.length > 0)
+                conditions.push(`bachat.unit_id in (${req.body.unit_id.join(',')})`)
+
+            let conditionString = conditions.length > 0 ? conditions.join(' AND ') : ``;
+            await DB.getList('bachat', { full: true, conditionString: conditionString }).then((resolve) => {
+                for (let i in resolve.data) {
+                    resolve.data[i].icategories = resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []
+                    resolve.data[i].scategories = resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : null
+                    resolve.data[i].idocument = resolve.data[i].idocument ? JSON.parse(resolve.data[i].idocument) : []
+                    resolve.data[i].sdocument = resolve.data[i].sdocument ? JSON.parse(resolve.data[i].sdocument) : []
+                }
+                res.json({
+                    success: true,
+                    result: resolve.data || [],
+                    total_count: resolve.total_count
+                });
+            });
+        }
+        else {
+            return next(new Error('Dept Id not Found.'))
         }
     } catch (err) { next(err) };
 });

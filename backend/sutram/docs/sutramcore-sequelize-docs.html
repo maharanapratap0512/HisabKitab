@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sutramcore-sequelize — Docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--bg2:#13161d;--bg3:#1a1e28;--bg4:#222736;--border:#2a2f3e;--border2:#353c50;--text:#e2e6f0;--text2:#9ba3b8;--text3:#5f6880;--acc:#2dd4bf;--acc2:#14b8a6;--green:#4ade80;--purple:#c084fc;--orange:#fb923c;--blue:#7c9bff;--yellow:#fbbf24;--red:#f87171;--tk-kw:#c084fc;--tk-fn:#7c9bff;--tk-str:#4ade80;--tk-num:#fb923c;--tk-cmt:#5f6880;--tk-cn:#fbbf24}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.7}
+.shell{display:grid;grid-template-columns:268px 1fr;min-height:100vh}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.sb-logo{padding:28px 24px 18px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.sb-logo .name{font-family:'Fraunces',serif;font-size:21px;font-weight:600;color:var(--text);letter-spacing:-.5px}
+.sb-logo .sub{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:3px}
+.sb-badge{display:inline-block;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.25);color:var(--acc);font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;margin-top:8px}
+.nav-grp{padding:6px 0}
+.nav-lbl{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);padding:8px 24px 3px}
+.nav-a{display:flex;align-items:center;gap:8px;padding:6px 24px;color:var(--text2);text-decoration:none;font-size:13px;transition:all .15s;border-left:2px solid transparent}
+.nav-a:hover{color:var(--text);background:var(--bg3);border-left-color:var(--border2)}
+.nav-a.active{color:var(--acc);background:rgba(45,212,191,.07);border-left-color:var(--acc)}
+.nd{width:5px;height:5px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.nav-a.active .nd{background:var(--acc)}
+.main{max-width:920px}
+.hero{padding:72px 64px 56px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#0d0f14 0%,#071312 50%,#0d0f14 100%);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(45,212,191,.04) 0%,transparent 65%);pointer-events:none}
+.hero-ey{font-family:'DM Mono',monospace;font-size:12px;color:var(--acc);letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.hero-ey::before{content:'';display:inline-block;width:20px;height:1px;background:var(--acc)}
+.hero h1{font-family:'Fraunces',serif;font-size:52px;font-weight:700;line-height:1.1;letter-spacing:-1.5px;color:var(--text);margin-bottom:8px}
+.hero h1 span{color:var(--acc);font-style:italic}
+.hero-sub{font-size:18px;color:var(--text2);font-weight:300;margin-bottom:36px;max-width:520px;line-height:1.6}
+.hero-inst{display:inline-flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:12px 20px;font-family:'DM Mono',monospace;font-size:14px;color:var(--green)}
+.hero-inst .p{color:var(--text3)}
+.chips{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text2);font-family:'DM Mono',monospace}
+.chip .dot{width:6px;height:6px;border-radius:50%}
+.content{padding:0 64px 80px}
+.sec{padding-top:60px}
+.anc{display:block;position:relative;top:-80px;visibility:hidden}
+.sec-hdr{display:flex;align-items:baseline;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.sec-num{font-family:'DM Mono',monospace;font-size:12px;color:var(--acc);font-weight:500}
+.sec h2{font-family:'Fraunces',serif;font-size:26px;font-weight:600;color:var(--text);letter-spacing:-.5px}
+.sec h3{font-size:15px;font-weight:600;color:var(--text);margin:28px 0 10px;display:flex;align-items:center;gap:8px}
+.sec h3::before{content:'';display:inline-block;width:3px;height:14px;background:var(--acc);border-radius:2px;flex-shrink:0}
+.sec p{color:var(--text2);margin-bottom:16px;line-height:1.75;font-size:14.5px}
+p code,li code{font-family:'DM Mono',monospace;font-size:12.5px;color:var(--acc);background:rgba(45,212,191,.08);padding:1px 6px;border-radius:4px;border:1px solid rgba(45,212,191,.15)}
+.cw{margin:18px 0;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--bg2)}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.cl{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+.clang{font-family:'DM Mono',monospace;font-size:10px;color:var(--acc);background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);padding:2px 8px;border-radius:4px}
+.cb{padding:20px 24px;overflow-x:auto;font-family:'DM Mono',monospace;font-size:13px;line-height:1.8}
+.cb pre{margin:0;white-space:pre}
+.kw{color:var(--tk-kw)}.fn{color:var(--tk-fn)}.str{color:var(--tk-str)}.num{color:var(--tk-num)}.cmt{color:var(--tk-cmt);font-style:italic}.cn{color:var(--tk-cn)}
+.note{display:flex;gap:14px;padding:14px 18px;border-radius:8px;margin:16px 0;font-size:13.5px;line-height:1.65}
+.ni{font-size:16px;flex-shrink:0;margin-top:1px}
+.note.info{background:rgba(124,155,255,.07);border:1px solid rgba(124,155,255,.2);color:#a5b8ff}
+.note.tip{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);color:#86efac}
+.note.warn{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.2);color:#fdba74}
+.note.teal{background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.2);color:#5eead4}
+.tw{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:16px 0}
+.dt{width:100%;border-collapse:collapse;font-size:13.5px}
+.dt th{background:var(--bg3);color:var(--text2);font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border2)}
+.dt td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:rgba(255,255,255,.02)}
+.dt code{font-family:'DM Mono',monospace;font-size:12px;color:var(--acc);background:rgba(45,212,191,.08);padding:1px 6px;border-radius:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+hr.s{border:none;border-top:1px solid var(--border);margin:48px 0 0}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+@media(max-width:900px){.shell{grid-template-columns:1fr}.sidebar{display:none}.hero{padding:48px 28px}.content{padding:0 28px 60px}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="name">sutramcore-sequelize</div>
+    <div class="sub">multi-dialect Sequelize adapter</div>
+    <div class="sb-badge">v1.0.0-beta</div>
+  </div>
+  <nav>
+    <div class="nav-grp">
+      <div class="nav-lbl">Getting Started</div>
+      <a href="#what"    class="nav-a"><span class="nd"></span>What is this</a>
+      <a href="#install" class="nav-a"><span class="nd"></span>Installation</a>
+      <a href="#dialects"class="nav-a"><span class="nd"></span>Supported dialects</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Initialization</div>
+      <a href="#p1" class="nav-a"><span class="nd"></span>Pattern 1 — existing instance</a>
+      <a href="#p2" class="nav-a"><span class="nd"></span>Pattern 2 — autoDiscover</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">CRUD</div>
+      <a href="#insert"     class="nav-a"><span class="nd"></span>insert</a>
+      <a href="#upsert"     class="nav-a"><span class="nd"></span>upsert ★</a>
+      <a href="#bulkinsert" class="nav-a"><span class="nd"></span>bulkInsert ★</a>
+      <a href="#get"        class="nav-a"><span class="nd"></span>get / getAll</a>
+      <a href="#update"     class="nav-a"><span class="nd"></span>update</a>
+      <a href="#delete"     class="nav-a"><span class="nd"></span>delete</a>
+      <a href="#extras"     class="nav-a"><span class="nd"></span>findOrCreate / increment ★</a>
+      <a href="#count"      class="nav-a"><span class="nd"></span>count</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Reports</div>
+      <a href="#reports"   class="nav-a"><span class="nd"></span>CTE + Stored Procedures</a>
+      <a href="#procedure" class="nav-a"><span class="nd"></span>procedure()</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Advanced</div>
+      <a href="#joins"    class="nav-a"><span class="nd"></span>Joins</a>
+      <a href="#tx"       class="nav-a"><span class="nd"></span>Transactions</a>
+      <a href="#raw"      class="nav-a"><span class="nd"></span>Raw Query</a>
+      <a href="#scaffold" class="nav-a"><span class="nd"></span>scaffold()</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">CLI</div>
+      <a href="#cli-import"   class="nav-a"><span class="nd"></span>import</a>
+      <a href="#cli-scaffold" class="nav-a"><span class="nd"></span>scaffold</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-lbl">Reference</div>
+      <a href="#vs"  class="nav-a"><span class="nd"></span>vs sutramcore-mysql</a>
+      <a href="#api" class="nav-a"><span class="nd"></span>API Reference</a>
+    </div>
+  </nav>
+</aside>
+
+<main class="main">
+<div class="hero">
+  <div class="hero-ey">multi-dialect Sequelize adapter</div>
+  <h1>sutramcore-<span>sequelize</span></h1>
+  <p class="hero-sub">Sequelize adapter for the sutramCore ecosystem. PostgreSQL, MySQL, MariaDB, MSSQL, SQLite — same API everywhere. AutoDiscover, scaffold, upsert, bulkInsert — all built in.</p>
+  <div class="hero-inst"><span class="p">$</span><span>npm install sutramcore-sequelize sequelize</span></div>
+  <div class="chips">
+    <div class="chip"><span class="dot" style="background:#2dd4bf"></span>5 dialects</div>
+    <div class="chip"><span class="dot" style="background:#4ade80"></span>autoDiscover</div>
+    <div class="chip"><span class="dot" style="background:#c084fc"></span>scaffold</div>
+    <div class="chip"><span class="dot" style="background:#fb923c"></span>upsert + bulkInsert</div>
+    <div class="chip"><span class="dot" style="background:#7c9bff"></span>procedure()</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- WHAT -->
+<div class="sec"><span class="anc" id="what"></span>
+  <div class="sec-hdr"><span class="sec-num">01</span><h2>What is sutramcore-sequelize?</h2></div>
+  <p>sutramcore-sequelize brings Sequelize's multi-dialect support into the sutramCore ecosystem. Same <code>table()</code> / <code>procedure()</code> pattern as <code>sutramcore-mysql</code> — but works with PostgreSQL, MySQL, MariaDB, MSSQL, and SQLite.</p>
+  <p>Two extra features not in sutramcore-mysql: <strong>autoDiscover</strong> (connect to any DB and immediately read all tables — no schema.js needed) and <strong>scaffold</strong> (write the discovered schema to files for developer control).</p>
+
+  <div class="note teal"><span class="ni">◈</span><span>Use <code>sutramcore-mysql</code> when you only need MySQL/MariaDB — it's lighter. Use <code>sutramcore-sequelize</code> when you need PostgreSQL, MSSQL, multi-dialect, autoDiscover, or scaffold.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- INSTALL -->
+<div class="sec"><span class="anc" id="install"></span>
+  <div class="sec-hdr"><span class="sec-num">02</span><h2>Installation</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">terminal</span><span class="clang">bash</span></div>
+  <div class="cb"><pre><span class="cmt"># core + sequelize</span>
+<span class="fn">npm</span> install sutramcore-sequelize sequelize
+
+<span class="cmt"># + dialect driver (install the one you need)</span>
+<span class="fn">npm</span> install pg pg-hstore          <span class="cmt"># PostgreSQL</span>
+<span class="fn">npm</span> install mysql2                 <span class="cmt"># MySQL / MariaDB</span>
+<span class="fn">npm</span> install tedious                <span class="cmt"># MSSQL</span>
+<span class="fn">npm</span> install better-sqlite3        <span class="cmt"># SQLite</span></pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- DIALECTS -->
+<div class="sec"><span class="anc" id="dialects"></span>
+  <div class="sec-hdr"><span class="sec-num">03</span><h2>Supported Dialects</h2></div>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>dialect</th><th>Driver</th><th>Procedures</th><th>autoDiscover FK</th></tr></thead>
+    <tbody>
+      <tr><td><code>postgres</code></td><td>pg + pg-hstore</td><td>SELECT * FROM proc($1)</td><td>✓</td></tr>
+      <tr><td><code>mysql</code></td><td>mysql2</td><td>CALL `proc`(?,?)</td><td>✓</td></tr>
+      <tr><td><code>mariadb</code></td><td>mysql2</td><td>CALL `proc`(?,?)</td><td>✓</td></tr>
+      <tr><td><code>mssql</code></td><td>tedious</td><td>EXEC proc @p1=?</td><td>✓</td></tr>
+      <tr><td><code>sqlite</code></td><td>better-sqlite3</td><td>Not supported</td><td>Limited</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<hr class="s">
+
+<!-- PATTERN 1 -->
+<div class="sec"><span class="anc" id="p1"></span>
+  <div class="sec-hdr"><span class="sec-num">04</span><h2>Pattern 1 — Existing Sequelize Instance</h2></div>
+  <p>Pass your existing Sequelize instance. Models already registered on it are cached automatically. You manage the lifecycle.</p>
+  <div class="cw"><div class="ch"><span class="cl">database/db.js</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> { <span class="cn">Sequelize</span> }  = <span class="fn">require</span>(<span class="str">'sequelize'</span>);
+<span class="kw">const</span> { <span class="cn">Sutram</span> }     = <span class="fn">require</span>(<span class="str">'sutramcore-sequelize'</span>);
+<span class="kw">const</span> schema         = <span class="fn">require</span>(<span class="str">'./schema'</span>);
+
+<span class="kw">const</span> sequelize = <span class="kw">new</span> <span class="fn">Sequelize</span>({
+  dialect:  <span class="str">'postgres'</span>,
+  host:     <span class="str">'localhost'</span>,
+  port:     <span class="num">5432</span>,
+  username: <span class="str">'postgres'</span>,
+  password: <span class="str">'secret'</span>,
+  database: <span class="str">'myapp'</span>,
+  logging:  <span class="kw">false</span>,
+});
+
+<span class="kw">const</span> db = <span class="kw">new</span> <span class="fn">Sutram</span>({ instance: sequelize, schema });
+<span class="kw">await</span> db.<span class="fn">connect</span>();
+
+module.exports = { db, sequelize };</pre></div></div>
+  <div class="note tip"><span class="ni">✓</span><span>Pattern 1 is recommended when you already have Sequelize set up in your project. sutramcore-sequelize wraps it — no migration needed.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- PATTERN 2 -->
+<div class="sec"><span class="anc" id="p2"></span>
+  <div class="sec-hdr"><span class="sec-num">05</span><h2>Pattern 2 — autoDiscover</h2></div>
+  <p>Pass connection config — no schema.js needed. sutramcore-sequelize reads all tables from DB, builds models and schema automatically. Best for exploring existing databases.</p>
+  <div class="cw"><div class="ch"><span class="cl">autoDiscover — no schema.js needed</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> { <span class="cn">Sutram</span> } = <span class="fn">require</span>(<span class="str">'sutramcore-sequelize'</span>);
+
+<span class="kw">const</span> db = <span class="kw">new</span> <span class="fn">Sutram</span>({
+  dialect:  <span class="str">'postgres'</span>,
+  host:     <span class="str">'localhost'</span>,
+  username: <span class="str">'postgres'</span>,
+  password: <span class="str">'secret'</span>,
+  database: <span class="str">'myapp'</span>,
+  <span class="cmt">// autoDiscover: true  ← default, no need to pass</span>
+});
+
+<span class="kw">await</span> db.<span class="fn">connect</span>();
+<span class="cmt">// All tables discovered — ready to use</span>
+
+<span class="kw">const</span> rows = <span class="kw">await</span> db.<span class="fn">table</span>(<span class="str">'product'</span>).<span class="fn">getAll</span>({ active: <span class="num">1</span> });
+
+<span class="cmt">// Write discovered schema to files for developer control</span>
+<span class="kw">await</span> db.<span class="fn">scaffold</span>(<span class="str">'./database'</span>);
+<span class="cmt">// → database/schema.js</span>
+<span class="cmt">// → database/models/product.js ...</span>
+<span class="cmt">// → database/db.js</span></pre></div></div>
+  <div class="note info"><span class="ni">ℹ</span><span><code>sys_</code>, <code>xls_</code>, <code>sqlite_</code>, and <code>SequelizeMeta</code> tables are skipped automatically during discovery.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- INSERT -->
+<div class="sec"><span class="anc" id="insert"></span>
+  <div class="sec-hdr"><span class="sec-num">06</span><h2>insert</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">insert examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> product = db.<span class="fn">table</span>(<span class="str">'product'</span>);
+
+<span class="cmt">// full: true (default) — returns complete row with joins</span>
+<span class="kw">const</span> row = <span class="kw">await</span> product.<span class="fn">insert</span>({
+  name:        <span class="str">'Wireless Mouse'</span>,
+  price:       <span class="num">799</span>,
+  category_id: <span class="num">2</span>,
+});
+
+<span class="cmt">// full: false — returns primary key only (faster)</span>
+<span class="kw">const</span> id = <span class="kw">await</span> product.<span class="fn">insert</span>({ name: <span class="str">'USB Hub'</span> }, <span class="kw">false</span>);</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- UPSERT -->
+<div class="sec"><span class="anc" id="upsert"></span>
+  <div class="sec-hdr"><span class="sec-num">07</span><h2>upsert ★ <span style="font-size:13px;color:var(--acc);font-family:'DM Mono',monospace;font-weight:400">extra — not in sutramcore-mysql</span></h2></div>
+  <p>Insert if not exists, update if exists. Pass a <code>where</code> clause to check before inserting.</p>
+  <div class="cw"><div class="ch"><span class="cl">upsert examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// upsert with where check — insert or update</span>
+<span class="kw">const</span> row = <span class="kw">await</span> product.<span class="fn">upsert</span>(
+  { name: <span class="str">'Keyboard'</span>, price: <span class="num">999</span>, sku: <span class="str">'KB-01'</span> },
+  { sku: <span class="str">'KB-01'</span> },   <span class="cmt">// where — check if exists</span>
+);
+<span class="cmt">// → inserts if sku='KB-01' not found</span>
+<span class="cmt">// → updates price if found</span>
+
+<span class="cmt">// upsert without where — Sequelize native upsert</span>
+<span class="kw">await</span> product.<span class="fn">upsert</span>({ _id: <span class="num">5</span>, name: <span class="str">'Updated'</span> });</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- BULK INSERT -->
+<div class="sec"><span class="anc" id="bulkinsert"></span>
+  <div class="sec-hdr"><span class="sec-num">08</span><h2>bulkInsert ★ <span style="font-size:13px;color:var(--acc);font-family:'DM Mono',monospace;font-weight:400">extra — not in sutramcore-mysql</span></h2></div>
+  <p>Insert multiple rows in a single DB call. Much faster than looping <code>insert()</code>.</p>
+  <div class="cw"><div class="ch"><span class="cl">bulkInsert example</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> ids = <span class="kw">await</span> product.<span class="fn">bulkInsert</span>([
+  { name: <span class="str">'Item A'</span>, price: <span class="num">100</span> },
+  { name: <span class="str">'Item B'</span>, price: <span class="num">200</span> },
+  { name: <span class="str">'Item C'</span>, price: <span class="num">300</span> },
+], <span class="kw">false</span>);
+<span class="cmt">// → [1, 2, 3] — array of inserted PKs</span>
+
+<span class="cmt">// full: true — returns full rows (slower)</span>
+<span class="kw">const</span> rows = <span class="kw">await</span> product.<span class="fn">bulkInsert</span>([...], <span class="kw">true</span>);</pre></div></div>
+  <div class="note warn"><span class="ni">⚠</span><span><code>individualHooks: false</code> — Sequelize hooks (beforeCreate etc.) are skipped for performance. Use loop <code>insert()</code> if you need hooks.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- GET -->
+<div class="sec"><span class="anc" id="get"></span>
+  <div class="sec-hdr"><span class="sec-num">09</span><h2>getById / getOne / getAll</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">get examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> product = db.<span class="fn">table</span>(<span class="str">'product'</span>);
+
+<span class="cmt">// getById</span>
+<span class="kw">const</span> row = <span class="kw">await</span> product.<span class="fn">getById</span>(<span class="num">1</span>);
+
+<span class="cmt">// getOne — object where or Sequelize Op</span>
+<span class="kw">const</span> row = <span class="kw">await</span> product.<span class="fn">getOne</span>({ name: <span class="str">'USB Hub'</span> });
+<span class="kw">const</span> row = <span class="kw">await</span> product.<span class="fn">getOne</span>({ price: { [<span class="cn">Op</span>.lt]: <span class="num">500</span> } });
+
+<span class="cmt">// getAll</span>
+<span class="kw">const</span> rows = <span class="kw">await</span> product.<span class="fn">getAll</span>({ active: <span class="num">1</span> });
+<span class="kw">const</span> rows = <span class="kw">await</span> product.<span class="fn">getAll</span>({ active: <span class="num">1</span> }, {
+  orderBy: <span class="str">'price ASC'</span>,
+  limit:   <span class="num">20</span>,
+  offset:  <span class="num">0</span>,
+  full:    <span class="kw">false</span>,  <span class="cmt">// skip joins</span>
+});</pre></div></div>
+  <div class="note info"><span class="ni">ℹ</span><span>Sequelize <code>Op</code> operators work directly in <code>where</code> — <code>{ price: { [Op.between]: [100, 500] } }</code>, <code>{ name: { [Op.like]: '%keyboard%' } }</code> etc.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- UPDATE -->
+<div class="sec"><span class="anc" id="update"></span>
+  <div class="sec-hdr"><span class="sec-num">10</span><h2>update</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">update examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">await</span> product.<span class="fn">updateById</span>({ price: <span class="num">699</span> }, <span class="num">1</span>);
+<span class="kw">await</span> product.<span class="fn">update</span>({ active: <span class="num">0</span> }, { category_id: <span class="num">3</span> });
+
+<span class="cmt">// bulkUpdate ★ — update many + return count or rows</span>
+<span class="kw">const</span> count = <span class="kw">await</span> product.<span class="fn">bulkUpdate</span>({ active: <span class="num">0</span> }, { price: <span class="num">0</span> });
+<span class="kw">const</span> rows  = <span class="kw">await</span> product.<span class="fn">bulkUpdate</span>({ active: <span class="num">0</span> }, { price: <span class="num">0</span> }, <span class="kw">true</span>);</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- DELETE -->
+<div class="sec"><span class="anc" id="delete"></span>
+  <div class="sec-hdr"><span class="sec-num">11</span><h2>delete</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">delete examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">await</span> product.<span class="fn">deleteById</span>(<span class="num">5</span>);
+<span class="kw">await</span> product.<span class="fn">delete</span>({ active: <span class="num">0</span> });
+<span class="kw">await</span> product.<span class="fn">delete</span>({ price: { [<span class="cn">Op</span>.lt]: <span class="num">1</span> } });</pre></div></div>
+  <div class="note warn"><span class="ni">⚠</span><span>WHERE required — empty where throws. No accidental full-table deletes.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- EXTRAS -->
+<div class="sec"><span class="anc" id="extras"></span>
+  <div class="sec-hdr"><span class="sec-num">12</span><h2>findOrCreate / increment / decrement ★</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">extra methods</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// findOrCreate — find or insert</span>
+<span class="kw">const</span> { created, result } = <span class="kw">await</span> product.<span class="fn">findOrCreate</span>(
+  { sku: <span class="str">'KB-01'</span> },       <span class="cmt">// where</span>
+  { name: <span class="str">'Keyboard'</span>, price: <span class="num">999</span> }  <span class="cmt">// defaults if not found</span>
+);
+<span class="cmt">// created: true/false, result: full row</span>
+
+<span class="cmt">// increment — atomic counter update</span>
+<span class="kw">await</span> product.<span class="fn">increment</span>(<span class="str">'stock'</span>, <span class="num">5</span>, { _id: <span class="num">1</span> });
+<span class="kw">await</span> product.<span class="fn">decrement</span>(<span class="str">'stock'</span>, <span class="num">1</span>, { _id: <span class="num">1</span> });</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- COUNT -->
+<div class="sec"><span class="anc" id="count"></span>
+  <div class="sec-hdr"><span class="sec-num">13</span><h2>count</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">count examples</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> total  = <span class="kw">await</span> product.<span class="fn">count</span>();
+<span class="kw">const</span> active = <span class="kw">await</span> product.<span class="fn">count</span>({ active: <span class="num">1</span> });
+<span class="kw">const</span> cheap  = <span class="kw">await</span> product.<span class="fn">count</span>({ price: { [<span class="cn">Op</span>.lt]: <span class="num">500</span> } });</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- REPORTS -->
+<div class="sec"><span class="anc" id="reports"></span>
+  <div class="sec-hdr"><span class="sec-num">14</span><h2>CTE Reports + Stored Procedures</h2></div>
+  <p>Pass <code>reports</code> array to constructor. CTE reports use Sequelize named replacements (<code>:param_name</code>). Stored procedures are dialect-aware — correct syntax per DB automatically.</p>
+  <div class="cw"><div class="ch"><span class="cl">database/reports.js</span><span class="clang">js</span></div>
+  <div class="cb"><pre>module.exports = [
+  {
+    report_name: <span class="str">'monthly_sales'</span>,
+    report_type: <span class="str">'cte'</span>,
+    cte_sql: <span class="str">`
+      SELECT date_trunc('month', date) as month,
+             COUNT(*) as orders, SUM(amount) as revenue
+      FROM orders
+      WHERE date >= :from AND date &lt;= :to
+      GROUP BY 1 ORDER BY 1 DESC
+    `</span>,
+    params: [
+      { name: <span class="str">'from'</span>, type: <span class="str">'string'</span>, default: <span class="str">'2024-01-01'</span> },
+      { name: <span class="str">'to'</span>,   type: <span class="str">'string'</span>, default: <span class="str">'2024-12-31'</span> },
+    ],
+  },
+  {
+    report_name:    <span class="str">'generate_report'</span>,
+    report_type:    <span class="str">'procedure'</span>,
+    procedure_name: <span class="str">'generate_report'</span>,
+    params: [{ name: <span class="str">'year'</span>, type: <span class="str">'number'</span>, default: <span class="num">2024</span> }],
+  },
+];</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- PROCEDURE -->
+<div class="sec"><span class="anc" id="procedure"></span>
+  <div class="sec-hdr"><span class="sec-num">15</span><h2>procedure() — same pattern as table()</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">usage</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> db = <span class="kw">new</span> <span class="fn">Sutram</span>({ instance: sequelize, schema,
+  reports: <span class="fn">require</span>(<span class="str">'./reports'</span>),
+});
+<span class="kw">await</span> db.<span class="fn">connect</span>();
+
+<span class="cmt">// CTE report — :named params</span>
+<span class="kw">const</span> rows = <span class="kw">await</span> db.<span class="fn">procedure</span>(<span class="str">'monthly_sales'</span>).<span class="fn">run</span>({
+  from: <span class="str">'2024-06-01'</span>,
+  to:   <span class="str">'2024-06-30'</span>,
+});
+
+<span class="cmt">// Stored procedure (dialect-aware)</span>
+<span class="cmt">// postgres  → SELECT * FROM generate_report($1)</span>
+<span class="cmt">// mysql     → CALL `generate_report`(?)</span>
+<span class="cmt">// mssql     → EXEC generate_report @p1=?</span>
+<span class="kw">const</span> rows = <span class="kw">await</span> db.<span class="fn">procedure</span>(<span class="str">'generate_report'</span>).<span class="fn">run</span>({ year: <span class="num">2024</span> });
+
+<span class="cmt">// inspect</span>
+db.<span class="fn">procedure</span>(<span class="str">'monthly_sales'</span>).<span class="fn">getParams</span>();
+db.<span class="fn">procedure</span>(<span class="str">'monthly_sales'</span>).<span class="fn">getMeta</span>();
+
+<span class="cmt">// cached — same instance</span>
+db.<span class="fn">procedure</span>(<span class="str">'monthly_sales'</span>) === db.<span class="fn">procedure</span>(<span class="str">'monthly_sales'</span>)  <span class="cmt">// true</span></pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- JOINS -->
+<div class="sec"><span class="anc" id="joins"></span>
+  <div class="sec-hdr"><span class="sec-num">16</span><h2>Joins</h2></div>
+  <p>Same <code>schema.js</code> format as sutramCore. Joins are passed as Sequelize <code>include</code> automatically when <code>full: true</code> (default).</p>
+  <div class="cw"><div class="ch"><span class="cl">schema.js — same format</span><span class="clang">js</span></div>
+  <div class="cb"><pre>...<span class="fn">defineTable</span>(<span class="str">'product'</span>, {
+  _id:         col.<span class="fn">id</span>(),
+  name:        col.<span class="fn">string</span>().<span class="fn">required</span>(),
+  category_id: col.<span class="fn">ref</span>(<span class="str">'category._id'</span>, {  <span class="cmt">// belongsTo → category</span>
+                   as: <span class="str">'category'</span>, select: [<span class="str">'name'</span>],
+               }),
+}, {
+  reviews: {                              <span class="cmt">// hasMany</span>
+    hasMany: <span class="kw">true</span>, table: <span class="str">'review'</span>,
+    on: <span class="str">'product_id'</span>, target: <span class="str">'_id'</span>,
+    as: <span class="str">'reviews'</span>, select: [<span class="str">'_id'</span>, <span class="str">'rating'</span>],
+  },
+  tags: {                                 <span class="cmt">// manyToMany</span>
+    manyToMany: <span class="kw">true</span>, table: <span class="str">'tag'</span>,
+    junction: <span class="str">'product_tag'</span>,
+    on: <span class="str">'product_id'</span>, target: <span class="str">'tag_id'</span>,
+    as: <span class="str">'tags'</span>, select: [<span class="str">'_id'</span>, <span class="str">'label'</span>],
+  },
+})</pre></div></div>
+  <div class="note tip"><span class="ni">✓</span><span>hasMany uses Sequelize <code>separate: true</code> internally — avoids cartesian product on large datasets.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- TRANSACTIONS -->
+<div class="sec"><span class="anc" id="tx"></span>
+  <div class="sec-hdr"><span class="sec-num">17</span><h2>Transactions</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">automatic — recommended</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> orderId = <span class="kw">await</span> db.<span class="fn">transaction</span>(<span class="kw">async</span> (tx) => {
+  <span class="kw">const</span> id = <span class="kw">await</span> tx.<span class="fn">table</span>(<span class="str">'order'</span>).<span class="fn">insert</span>(
+    { customer_id: <span class="num">5</span>, status: <span class="str">'pending'</span> }, <span class="kw">false</span>
+  );
+  <span class="kw">for</span> (<span class="kw">const</span> item <span class="kw">of</span> cart) {
+    <span class="kw">await</span> tx.<span class="fn">table</span>(<span class="str">'order_item'</span>).<span class="fn">insert</span>({
+      order_id: id, ...item
+    }, <span class="kw">false</span>);
+  }
+  <span class="kw">return</span> id;
+});</pre></div></div>
+  <div class="note warn"><span class="ni">⚠</span><span>Inside <code>transaction(fn)</code>, always use <code>tx.table()</code> — not <code>db.table()</code>. The <code>tx</code> object is bound to the transaction.</span></div>
+
+  <h3>Manual control</h3>
+  <div class="cw"><div class="ch"><span class="cl">manual begin / commit / rollback</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">await</span> db.<span class="fn">begin</span>();
+<span class="kw">try</span> {
+  <span class="kw">await</span> db.<span class="fn">table</span>(<span class="str">'order'</span>).<span class="fn">insert</span>(data, <span class="kw">false</span>);
+  <span class="kw">await</span> db.<span class="fn">commit</span>();
+} <span class="kw">catch</span> (e) {
+  <span class="kw">await</span> db.<span class="fn">rollback</span>();
+  <span class="kw">throw</span> e;
+}</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- RAW -->
+<div class="sec"><span class="anc" id="raw"></span>
+  <div class="sec-hdr"><span class="sec-num">18</span><h2>Raw Query</h2></div>
+  <div class="cw"><div class="ch"><span class="cl">db.query / db.queryOne</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="cmt">// multiple rows</span>
+<span class="kw">const</span> rows = <span class="kw">await</span> db.<span class="fn">query</span>(<span class="str">`
+  SELECT p.*, COUNT(r.id) as reviews
+  FROM product p
+  LEFT JOIN review r ON r.product_id = p.id
+  GROUP BY p.id ORDER BY reviews DESC
+`</span>);
+
+<span class="cmt">// single row</span>
+<span class="kw">const</span> row = <span class="kw">await</span> db.<span class="fn">queryOne</span>(<span class="str">`SELECT MAX(price) as top FROM product`</span>);</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- SCAFFOLD -->
+<div class="sec"><span class="anc" id="scaffold"></span>
+  <div class="sec-hdr"><span class="sec-num">19</span><h2>scaffold()</h2></div>
+  <p>After Pattern 2 autoDiscover, write the discovered schema to files. Generates three outputs:</p>
+
+  <div class="tw"><table class="dt">
+    <thead><tr><th>File</th><th>Contents</th></tr></thead>
+    <tbody>
+      <tr><td><code>database/schema.js</code></td><td>sutramCore <code>defineTable</code> + <code>col</code> format — review + add joins{}</td></tr>
+      <tr><td><code>database/models/*.js</code></td><td>One Sequelize model file per table</td></tr>
+      <tr><td><code>database/db.js</code></td><td>Ready-to-use connection file with Sutram instance</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="cw"><div class="ch"><span class="cl">usage</span><span class="clang">js</span></div>
+  <div class="cb"><pre><span class="kw">const</span> db = <span class="kw">new</span> <span class="fn">Sutram</span>({ dialect: <span class="str">'postgres'</span>, host, username, database });
+<span class="kw">await</span> db.<span class="fn">connect</span>();   <span class="cmt">// discovers all tables</span>
+<span class="kw">await</span> db.<span class="fn">scaffold</span>(<span class="str">'./database'</span>);
+
+<span class="cmt">// Output:</span>
+<span class="cmt">// ✓ schema.js</span>
+<span class="cmt">// ✓ models/ (12 files)</span>
+<span class="cmt">// ✓ db.js</span>
+<span class="cmt">// Next steps:</span>
+<span class="cmt">//   1. Review schema.js — add joins{}</span>
+<span class="cmt">//   2. Edit models/ if needed</span>
+<span class="cmt">//   3. Use: const { db } = require('./database/db')</span></pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- CLI IMPORT -->
+<div class="sec"><span class="anc" id="cli-import"></span>
+  <div class="sec-hdr"><span class="sec-num">20</span><h2>CLI — import</h2></div>
+  <p>Connect to DB and generate <code>schema.js</code> only.</p>
+  <div class="cw"><div class="ch"><span class="cl">terminal</span><span class="clang">bash</span></div>
+  <div class="cb"><pre><span class="cmt"># PostgreSQL</span>
+npx sutramcore-sequelize import \
+  --dialect postgres \
+  --host localhost \
+  --user postgres \
+  --database myapp
+
+<span class="cmt"># MySQL</span>
+npx sutramcore-sequelize import \
+  --dialect mysql \
+  --host localhost \
+  --user root \
+  --password secret \
+  --database myapp
+
+<span class="cmt"># SQLite</span>
+npx sutramcore-sequelize import \
+  --dialect sqlite \
+  --storage ./app.db
+
+<span class="cmt"># Custom output + overwrite</span>
+npx sutramcore-sequelize import \
+  --dialect postgres --host localhost --database myapp \
+  --out ./src/database \
+  --force</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- CLI SCAFFOLD -->
+<div class="sec"><span class="anc" id="cli-scaffold"></span>
+  <div class="sec-hdr"><span class="sec-num">21</span><h2>CLI — scaffold</h2></div>
+  <p>Connect to DB and generate <code>schema.js</code> + <code>models/</code> + <code>db.js</code>.</p>
+  <div class="cw"><div class="ch"><span class="cl">terminal</span><span class="clang">bash</span></div>
+  <div class="cb"><pre>npx sutramcore-sequelize scaffold \
+  --dialect postgres \
+  --host localhost \
+  --user postgres \
+  --database myapp \
+  --out ./database</pre></div></div>
+</div>
+
+<hr class="s">
+
+<!-- VS MYSQL -->
+<div class="sec"><span class="anc" id="vs"></span>
+  <div class="sec-hdr"><span class="sec-num">22</span><h2>vs sutramcore-mysql</h2></div>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Feature</th><th>sutramcore-mysql</th><th>sutramcore-sequelize</th></tr></thead>
+    <tbody>
+      <tr><td>Dialects</td><td>MySQL + MariaDB only</td><td>PostgreSQL, MySQL, MariaDB, MSSQL, SQLite</td></tr>
+      <tr><td>Dependency</td><td>mysql2</td><td>sequelize + dialect driver</td></tr>
+      <tr><td>autoDiscover</td><td>✗</td><td>✓ — no schema.js needed</td></tr>
+      <tr><td>scaffold()</td><td>✗</td><td>✓ — schema.js + models + db.js</td></tr>
+      <tr><td>upsert</td><td>✗</td><td>✓</td></tr>
+      <tr><td>bulkInsert</td><td>✗</td><td>✓</td></tr>
+      <tr><td>bulkUpdate</td><td>✗</td><td>✓</td></tr>
+      <tr><td>findOrCreate</td><td>✗</td><td>✓</td></tr>
+      <tr><td>increment/decrement</td><td>✗</td><td>✓</td></tr>
+      <tr><td>Sequelize Op in where</td><td>✗</td><td>✓ — { price: { [Op.lt]: 500 } }</td></tr>
+      <tr><td>CTE reports</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Stored procedures</td><td>✓ (mysql2)</td><td>✓ (dialect-aware)</td></tr>
+      <tr><td>sutramEngine Pattern 1</td><td>✓</td><td>✓ (dialect exposed)</td></tr>
+      <tr><td>Weight</td><td>Lighter</td><td>Heavier (sequelize)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note teal"><span class="ni">◈</span><span>If you only need MySQL — use <code>sutramcore-mysql</code> (lighter, no Sequelize overhead). Use <code>sutramcore-sequelize</code> for PostgreSQL, MSSQL, autoDiscover, or when you want Sequelize Op support.</span></div>
+</div>
+
+<hr class="s">
+
+<!-- API -->
+<div class="sec"><span class="anc" id="api"></span>
+  <div class="sec-hdr"><span class="sec-num">23</span><h2>API Reference</h2></div>
+
+  <h3>Sutram instance</h3>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Method</th><th>Returns</th></tr></thead>
+    <tbody>
+      <tr><td><code>new Sutram({ instance? | dialect?, schema?, reports?, autoDiscover? })</code></td><td>Instance</td></tr>
+      <tr><td><code>await db.connect()</code></td><td>this — chainable</td></tr>
+      <tr><td><code>db.table(name)</code></td><td>Cached BaseTable</td></tr>
+      <tr><td><code>db.procedure(name)</code></td><td>Cached ProcedureHandle</td></tr>
+      <tr><td><code>await db.transaction(async fn)</code></td><td>fn return value</td></tr>
+      <tr><td><code>await db.begin() / commit() / rollback()</code></td><td>—</td></tr>
+      <tr><td><code>await db.query(sql, opts?)</code></td><td>rows array</td></tr>
+      <tr><td><code>await db.queryOne(sql, opts?)</code></td><td>single row</td></tr>
+      <tr><td><code>await db.scaffold(outPath?)</code></td><td>this — chainable</td></tr>
+      <tr><td><code>await db.close()</code></td><td>—</td></tr>
+      <tr><td><code>db.models</code></td><td>{ tableName: SequelizeModel }</td></tr>
+      <tr><td><code>db.tables</code></td><td>string[] — discovered table names</td></tr>
+      <tr><td><code>db.dialect</code></td><td>string — 'postgres' | 'mysql' etc.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>BaseTable — db.table(name)</h3>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Method</th><th>Returns</th></tr></thead>
+    <tbody>
+      <tr><td><code>await insert(data, full?)</code></td><td>Full row or PK</td></tr>
+      <tr><td><code>await upsert(data, where?, full?) ★</code></td><td>Full row or PK</td></tr>
+      <tr><td><code>await bulkInsert(dataArray, full?) ★</code></td><td>PK array or rows array</td></tr>
+      <tr><td><code>await update(data, where, full?)</code></td><td>Full row or PK</td></tr>
+      <tr><td><code>await updateById(data, id, full?)</code></td><td>Full row or PK</td></tr>
+      <tr><td><code>await bulkUpdate(data, where, full?) ★</code></td><td>count or rows</td></tr>
+      <tr><td><code>await delete(where)</code></td><td>affected count</td></tr>
+      <tr><td><code>await deleteById(id)</code></td><td>affected count</td></tr>
+      <tr><td><code>await getById(id)</code></td><td>Row with joins or null</td></tr>
+      <tr><td><code>await getOne(where, { full? })</code></td><td>Single row or null</td></tr>
+      <tr><td><code>await getAll(where, { full?, orderBy?, limit?, offset? })</code></td><td>Array of rows</td></tr>
+      <tr><td><code>await count(where?)</code></td><td>Number</td></tr>
+      <tr><td><code>await findOrCreate(where, defaults?, full?) ★</code></td><td>{ created, result }</td></tr>
+      <tr><td><code>await increment(column, by?, where) ★</code></td><td>Updated rows</td></tr>
+      <tr><td><code>await decrement(column, by?, where) ★</code></td><td>Updated rows</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:12.5px;color:var(--text3);margin-top:8px">★ Extra methods — not available in sutramcore-mysql</p>
+
+  <h3>ProcedureHandle — db.procedure(name)</h3>
+  <div class="tw"><table class="dt">
+    <thead><tr><th>Method</th><th>Returns</th></tr></thead>
+    <tbody>
+      <tr><td><code>await .run(params?)</code></td><td>Array of rows</td></tr>
+      <tr><td><code>.getParams()</code></td><td>Params definition array</td></tr>
+      <tr><td><code>.getMeta()</code></td><td><code>{ name, label, report_type, procedure_name, params }</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <div style="height:40px"></div>
+  <hr style="border:none;border-top:1px solid var(--border)">
+  <p style="text-align:center;font-family:'DM Mono',monospace;font-size:13px;color:var(--text3);margin-top:20px">
+    sutramcore-sequelize v1.0.0-beta · peerDep: sequelize ≥6.0.0
+  </p>
+</div>
+
+</div>
+</main>
+</div>
+
+<script>
+const links = document.querySelectorAll('.nav-a');
+const secs  = document.querySelectorAll('.anc');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.nav-a[href="#${id}"]`);
+      if (a) { a.classList.add('active'); a.scrollIntoView({ block: 'nearest' }); }
+    }
+  });
+}, { rootMargin: '-15% 0px -80% 0px' });
+secs.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

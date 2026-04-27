@@ -101,17 +101,17 @@ export class JawakNewComponent implements OnInit {
             for (let j in this.jawakAll[i].aawaks) {
               this.jawakAll[i].aawaks[j].categories_hin = '';
               this.jawakAll[i].aawaks[j].categories_eng = '';
-              if (this.jawakAll[i].aawaks[j].subitem_categories && this.jawakAll[i].aawaks[j].subitem_categories.length > 0) {
+              if (this.jawakAll[i].aawaks[j].scategories && this.jawakAll[i].aawaks[j].scategories.length > 0) {
 
                 for (let k in this.categories) {
-                  if (this.jawakAll[i].aawaks[j].subitem_categories.includes(this.categories[k]._id)) {
+                  if (this.jawakAll[i].aawaks[j].scategories.includes(this.categories[k]._id)) {
                     this.jawakAll[i].aawaks[j].categories_hin += this.categories[k].category_hin + ', ';
                     this.jawakAll[i].aawaks[j].categories_eng += this.categories[k].category_eng + ', ';
                   }
                 }
               } else {
                 for (let k in this.categories) {
-                  if (this.jawakAll[i].aawaks[j].item_categories.includes(this.categories[k]._id)) {
+                  if (this.jawakAll[i].aawaks[j].icategories.includes(this.categories[k]._id)) {
                     this.jawakAll[i].aawaks[j].categories_hin += this.categories[k].category_hin + ', ';
                     this.jawakAll[i].aawaks[j].categories_eng += this.categories[k].category_eng + ', ';
                   }
@@ -201,17 +201,17 @@ export class JawakNewComponent implements OnInit {
           for (let j in this.jawakAll[i].aawaks) {
             this.jawakAll[i].aawaks[j].categories_hin = '';
             this.jawakAll[i].aawaks[j].categories_eng = '';
-            if (this.jawakAll[i].aawaks[j].subitem_categories && this.jawakAll[i].aawaks[j].subitem_categories.length > 0) {
+            if (this.jawakAll[i].aawaks[j].scategories && this.jawakAll[i].aawaks[j].scategories.length > 0) {
 
               for (let k in this.categories) {
-                if (this.jawakAll[i].aawaks[j].subitem_categories.includes(this.categories[k]._id)) {
+                if (this.jawakAll[i].aawaks[j].scategories.includes(this.categories[k]._id)) {
                   this.jawakAll[i].aawaks[j].categories_hin += this.categories[k].category_hin + ', ';
                   this.jawakAll[i].aawaks[j].categories_eng += this.categories[k].category_eng + ', ';
                 }
               }
             } else {
               for (let k in this.categories) {
-                if (this.jawakAll[i].aawaks[j].item_categories.includes(this.categories[k]._id)) {
+                if (this.jawakAll[i].aawaks[j].icategories.includes(this.categories[k]._id)) {
                   this.jawakAll[i].aawaks[j].categories_hin += this.categories[k].category_hin + ', ';
                   this.jawakAll[i].aawaks[j].categories_eng += this.categories[k].category_eng + ', ';
                 }

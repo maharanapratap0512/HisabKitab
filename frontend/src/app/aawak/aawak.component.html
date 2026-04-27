@@ -468,35 +468,57 @@
                                  <td *ngIf="settings.aawak.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
                                  <td>{{data.date | date:'dd-MM-yyyy'}}</td>
                                  <td *ngIf="auth.webUser.dept_id != 2">
-                                    {{data.mm_hin}} - {{data.mm_code}}<br />
-                                    {{data.mm_eng}}
+                                    <span>{{data.mm_hin}} - {{data.mm_code}}</span> <br />
+                                    <small class="text-muted">{{data.mm_eng}}</small>
                                  </td>
                                  <td>
-                                    {{data.aawak_mm_id ? data.aawak_mm_hin+' - '+data.aawak_mm_code:'-'}}<br />
-                                    {{data.aawak_mm_eng?data.aawak_mm_eng:''}}
+                                    <div *ngIf="data.aawak_mm_id">
+                                       <span>{{data.aawak_mm_hin}} - {{data.aawak_mm_code}}</span> <br />
+                                       <small class="text-muted">{{data.aawak_mm_eng}}</small>
+                                    </div>
+                                    <span *ngIf="!data.aawak_mm_id">-</span>
                                  </td>
                                  <td *ngIf="settings.aawak.pbk_id">
+                                    <div *ngIf="data.pbk_id">
+                                       <span>{{data.roll_no ? data.roll_no : '___'}} - {{data.pbk_hin}}</span> <br />
+                                       <small class="text-muted">{{data.relation}} {{data.relative_name ? " -
+                                          "+data.relative_name: ''}}</small>
+                                    </div>
                                     <span *ngIf="!data.pbk_id">-</span>
-                                    {{data.roll_no ? data.roll_no : '___'}} - {{data.pbk_hin}} <br />
-                                    {{data.relation}} {{data.pbk_id ? " - "+data.relative_name: ''}}
-                                 </td>
-                                 <td>{{data.aawak_type_id?data.aawak_type_hin:''}} /
-                                    {{data.aawak_source_id?data.aawak_source_hin:''}} <br />
-                                    {{data.aawak_type_eng ? data.aawak_type_eng:''}} / {{data.aawak_source_eng ?
-                                    data.aawak_source_eng:''}} </td>
-                                 <td>
-                                    {{data.categories_hin}} <br />
-                                    {{data.categories_eng}}
                                  </td>
                                  <td>
-                                    {{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}} <br />
-                                    {{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}
+                                    <span>{{data.aawak_type_id?data.aawak_type_hin:''}} /
+                                       {{data.aawak_source_id?data.aawak_source_hin:''}}</span> <br />
+                                    <small class="text-muted">{{data.aawak_type_eng ? data.aawak_type_eng:''}} /
+                                       {{data.aawak_source_eng ?
+                                       data.aawak_source_eng:''}}</small>
+                                 </td>
+                                 <td>
+                                    <ng-container
+                                       *ngIf="(data.scategories?.length > 0 ? data.scategories : data.icategories) as activeCats">
+                                       <div *ngIf="activeCats?.length > 0; else noCat">
+                                          <span>{{ activeCats | joinObj:'category_hin' }}</span>
+                                          <br />
+                                          <small class="text-muted">{{ activeCats | joinObj:'category_eng'
+                                             }}</small>
+                                       </div>
+                                       <ng-template #noCat>-</ng-template>
+                                    </ng-container>
+                                 </td>
+                                 <td>
+                                    <span>{{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}}</span>
+                                    <br />
+                                    <small class="text-muted">{{data.item_eng}} {{data.subitem_id ? ' : ' +
+                                       data.subitem_eng : ''}}</small>
                                  </td>
                                  <td *ngIf="settings.aawak.condition_id || settings.aawak.product_id">
-                                    {{data.product_id ? (data.product_code ? data.product_code : '') + " : " +
-                                    (data.sr_num
-                                    ? data.sr_num : '') : ''}} <br />
-                                    {{data.condition_id ? data.condition_hin + " : "+ data.condition_eng : ''}}
+                                    <div *ngIf="data.product_id">
+                                       <span>{{data.product_code || ''}} : {{data.sr_num || ''}}</span>
+                                    </div>
+                                    <div *ngIf="data.condition_id">
+                                       <span>{{data.condition_hin}}</span> <br />
+                                       <small class="text-muted">{{data.condition_eng}}</small>
+                                    </div>
                                  </td>
                                  <td *ngIf="settings.aawak.company_name">
                                     {{data.company_name ? data.company_name : ''}}
@@ -512,8 +534,11 @@
                                  <td *ngIf="settings.aawak.usage_list_id">{{data.usage_list_id ? data.usage_list_hin :
                                     ''}}</td>
                                  <td *ngIf="settings.aawak.nimitt_id">
-                                    {{data.nimitt_id?data.nimitt_hin:'-'}}<br />
-                                    {{data.nimitt_id? '(' + data.nimitt_state_hin + ')': ''}}
+                                    <div *ngIf="data.nimitt_id">
+                                       <span>{{data.nimitt_hin}}</span> <br />
+                                       <small class="text-muted">({{data.nimitt_state_hin}})</small>
+                                    </div>
+                                    <span *ngIf="!data.nimitt_id">-</span>
                                  </td>
                                  <td *ngIf="settings.aawak.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
                                  <td *ngIf="settings.aawak.isbill">{{data.isbill ? 'हाँ' : 'नहीं'}} </td>
@@ -553,7 +578,7 @@
                                              <th>कहा भेजा</th>
                                              <th>किसको दिया</th>
                                              <th>जावक प्रकार</th>
-                                             <th>जावक केटेगरी</th>
+                                             <!-- <th>जावक केटेगरी</th> -->
                                              <th>परिमाण</th>
                                              <th style="width:0px;">
                                                 <div class="ribbon ribbon-secondary text-light float-end"> Destribution
@@ -570,17 +595,22 @@
                                                    (click)="deleteOneJawak(i, j, jwk._id)"></i>
                                              </td>
                                              <td>{{jwk.date | date:'dd-MM-yyyy'}}</td>
-                                             <td>{{jwk.jawak_mm_hin}} {{jwk.jawak_mm_code ? "("+jwk.jawak_mm_code+")" :
-                                                ''}}</td>
                                              <td>
-                                                <span *ngIf="jwk.pbk_id">
-                                                   {{jwk.roll_no ? jwk.roll_no : '___'}} - {{jwk.pbk_hin}} <br />
-                                                </span>
+                                                <span>{{jwk.jawak_mm_hin}}</span> <br />
+                                                <small class="text-muted">{{jwk.jawak_mm_code ?
+                                                   "("+jwk.jawak_mm_code+")" : ''}}</small>
                                              </td>
-                                             <td>{{jwk.jawak_type_hin}}{{jwk.jawak_type_eng ? " : "+jwk.jawak_type_eng :
-                                                ''}}</td>
-                                             <td>{{jwk.category_hin}}{{jwk.category_eng ? " : "+jwk.category_eng :
-                                                ''}}</td>
+                                             <td>
+                                                <div *ngIf="jwk.pbk_id">
+                                                   <span>{{jwk.roll_no ? jwk.roll_no : '___'}} - {{jwk.pbk_hin}}</span>
+                                                </div>
+                                             </td>
+                                             <td>
+                                                <span>{{jwk.jawak_type_hin}}</span> <br />
+                                                <small class="text-muted">{{jwk.jawak_type_eng}}</small>
+                                             </td>
+                                             <!-- <td>{{jwk.category_hin}}{{jwk.category_eng ? " : "+jwk.category_eng :
+                                                ''}}</td> -->
                                              <td>{{jwk.qty}} {{jwk.unit_short}}</td>
                                           </tr>
                                        </table>

@@ -248,7 +248,7 @@ export class BachatComponent implements OnInit {
     footerRow['MM'] = uniqueMM.size + ' MMs'
     footerRow['Unit'] = uniqueUnit.size + ' Units'
     bchtData.push(footerRow);
-    
+
     let date = new Date();
     this.excelExportService.exportAsExcelFile(bchtData, "bachat_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear() + '.xlsx');
     this.isLoader = false;
@@ -262,13 +262,11 @@ export class BachatComponent implements OnInit {
         this.bachatData = this.bachatData.filter((b: any) => {
           if (key == "category_id") {
             if (b.scategories && b.scategories.length > 0) {
-              console.log(b.scategories, value);
-
-              return b.scategories.includes(value);
+              return b.scategories.some((c: { value: any; }) => c.value);
             }
             else {
               console.log(b.icategories, value);
-              return b.icategories.includes(value);
+              return b.icategories.some((c: { value: any; }) => c.value);
             }
           }
           else {

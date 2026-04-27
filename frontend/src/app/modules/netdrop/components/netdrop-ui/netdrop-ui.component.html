@@ -1,0 +1,115 @@
+<div class="netdrop-container">
+  
+  <div class="header">
+    <h3>Local Network Transfer</h3>
+    <p class="subtitle">You are visible as: <strong>{{ myName }}</strong></p>
+  </div>
+
+  <div class="main-layout">
+    <!-- Left Panel: Setup Guide (Desktop Only) -->
+    <div class="side-panel left-panel" *ngIf="!isMobile">
+      <div class="panel-header">
+        <i class="fa fa-shield-alt"></i>
+        <span>Setup Guide</span>
+      </div>
+      <div class="guide-item">
+        <strong>Windows:</strong>
+        <p>Allow <b>Node.js</b> in Firewall. Set network to <b>Private</b>.</p>
+      </div>
+      <div class="guide-item">
+        <strong>MacBook:</strong>
+        <p>Allow <b>Node</b> in Firewall > Options.</p>
+      </div>
+      <div class="guide-item mobile-tip">
+        <strong>Mobile Tip:</strong>
+        <p>If transfer fails, enable "Insecure origins" in <code>chrome://flags</code> for this IP.</p>
+      </div>
+    </div>
+
+    <!-- Center: Radar Area -->
+    <div class="radar-container">
+      <div class="radar-area">
+        <!-- Center Pulse -->
+        <div class="center-pulse">
+          <div class="radar-sweep"></div>
+          <div class="device-icon">
+            <i class="fa fa-laptop"></i>
+          </div>
+        </div>
+
+        <!-- Peers -->
+        <div class="peers-list" *ngIf="peers.length > 0; else noPeers">
+          <div class="peer-item" *ngFor="let peer of peers; let i = index" 
+               [ngStyle]="getPeerStyle(i, peers.length)"
+               (click)="openFilePicker(peer.id)">
+            <div class="peer-avatar" [style.background]="getPeerColor(peer.name)">
+              <span>{{ peer.name.charAt(0) }}</span>
+            </div>
+            <div class="peer-name">{{ peer.name }}</div>
+          </div>
+        </div>
+
+        <ng-template #noPeers>
+          <div class="no-peers-msg" *ngIf="isOnline">
+            <p>Scanning local network...</p>
+          </div>
+        </ng-template>
+
+        <!-- Offline Overlay -->
+        <div class="offline-status" *ngIf="!isOnline">
+          <i class="fa fa-wifi-slash"></i>
+          <p>No Connection</p>
+          <span>Connect to Wi-Fi to share</span>
+        </div>
+      </div>
+
+      <!-- Mobile Connection Card (Shown on all devices now) -->
+      <div class="mobile-invite-card">
+        <div class="card-glow"></div>
+        <div class="card-content">
+          <span class="label">Network Address</span>
+          <div class="url-display">{{ displayUrl }}</div>
+          <div class="helper-text">
+            <i class="fa fa-wifi"></i>
+            <span>Must be on same Wi-Fi</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Send Guide (Desktop Only) -->
+    <div class="side-panel right-panel" *ngIf="!isMobile">
+      <div class="panel-header">
+        <i class="fa fa-paper-plane"></i>
+        <span>How to Send</span>
+      </div>
+      <ol class="step-list">
+        <li>Wait for devices to appear.</li>
+        <li><strong>Click</strong> on a device.</li>
+        <li>Select your file.</li>
+        <li>Transfer starts!</li>
+      </ol>
+      <div class="security-note">
+        <i class="fa fa-lock"></i>
+        <span>Direct P2P Transfer</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Bar Modal/Overlay -->
+  <div class="transfer-overlay" *ngIf="transferState">
+    <div class="transfer-modal">
+      <h4>{{ transferState.incoming ? 'Receiving' : 'Sending' }}</h4>
+      <p class="filename">{{ transferState.fileName }}</p>
+      
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" [style.width.%]="transferState.progress * 100"></div>
+      </div>
+      
+      <p class="percentage">{{ (transferState.progress * 100) | number:'1.0-0' }}%</p>
+    </div>
+  </div>
+
+  <!-- Hidden File Input -->
+  <input type="file" #fileInput style="display: none;" (change)="onFileSelected($event)">
+</div>

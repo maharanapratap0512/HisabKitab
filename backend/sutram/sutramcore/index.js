@@ -1,11 +1,13 @@
 // index.js — sutramcore
 'use strict';
 
-const DbModal             = require('./src/DbModal');
-const BaseTable           = require('./src/BaseTable');
-const ReportManager       = require('./src/ReportManager');
+const DbModal = require('./src/DbModal');
+const BaseTable = require('./src/BaseTable');
+const ViewEngine = require('./src/ViewEngine');
+const ReportManager = require('./src/ReportManager');
 const { col, ColBuilder } = require('./src/col');
-const { defineTable }     = require('./src/defineTable');
+const { defineTable } = require('./src/defineTable');
+const { defineView } = require('./src/defineView');
 
 // ─────────────────────────────────────────────────────────────
 // ── Sutram — instance-based ORM ──────────────────────────────
@@ -78,8 +80,13 @@ class Sutram {
             );
         }
 
-        this.schema      = schema;
+        this.schema = schema;
         this._tableCache = {};  // cache — sewa.table('item') returns same instance every call
+
+        // ── materialize views declared via defineView() ────────
+        // Must run before report manager and table cache so views are
+        // registered in schema and available as join targets.
+        ViewEngine.materialize(this);
 
         // ── report manager ─────────────────────────────────────
         this._report = new ReportManager(this.db);
@@ -99,6 +106,7 @@ class Sutram {
 
         console.log('[sutramcore] Instance ready');
     }
+
 
     // ─────────────────────────────────────────────────────────
     // ── TABLE FACTORY ─────────────────────────────────────────
@@ -145,9 +153,9 @@ class Sutram {
     //   catch (e) { sewa.rollback(); throw e; }
 
     transaction(fn) { return this.db.transaction(fn)(); }
-    begin()         { this.db.prepare('BEGIN').run(); }
-    commit()        { this.db.prepare('COMMIT').run(); }
-    rollback()      { this.db.prepare('ROLLBACK').run(); }
+    begin() { this.db.prepare('BEGIN').run(); }
+    commit() { this.db.prepare('COMMIT').run(); }
+    rollback() { this.db.prepare('ROLLBACK').run(); }
 
     // ─────────────────────────────────────────────────────────
     // ── RAW DB ACCESS ─────────────────────────────────────────
@@ -158,4 +166,4 @@ class Sutram {
     prepare(sql) { return this.db.prepare(sql); }
 }
 
-module.exports = { Sutram, col, ColBuilder, defineTable };
+module.exports = { Sutram, col, ColBuilder, defineTable, defineView };

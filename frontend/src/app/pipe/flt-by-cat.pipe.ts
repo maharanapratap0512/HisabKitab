@@ -11,13 +11,10 @@ export class FltByCatPipe implements PipeTransform {
       return value;
 
     let filterValue: any = [];
-    filterValue = value.filter(v => {
-      if(v.scategories){
-        return v.scategories.includes(catId)
-      } else if(v.icategories){
-        return v.icategories.includes(catId)
-      }
-    });
+    filterValue = value.filter(v =>
+      ((v.scategories?.length ? v.scategories : v.icategories) || [])
+        .some((cat: { _id: any; }) => cat._id == catId)
+    );
     return filterValue;
   }
 

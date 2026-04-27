@@ -122,7 +122,11 @@
                                  {{data.parent_mm_id ? data.parent_mm_hin + ' : ' + data.parent_mm_eng + ' : ' +
                                  data.parent_mm_code:'-'}}
                               </td>
-                              <td>{{data.state_hin}} : {{data.state_eng}} ({{data.country_hin}} : {{data.country_eng}})
+                              <td>
+                                 <span>{{data.state_hin}} ({{data.country_hin}})</span>
+                                 <br />
+                                 <small class="text-muted">{{data.state_eng}} ({{data.country_eng}})</small>
+
                               </td>
                               <td *ngIf="settings.opening_date">{{data.opening_date | date: 'dd-MM-yyyy'}}</td>
                               <td [ngClass]="{'mata': data.nimitt_gender == 'Mata'}" *ngIf="settings.nimitt_id">

@@ -13,6 +13,9 @@ const hmpRecipeOut = new BaseTable('hmp_recipe_output');
 const hmpBatch = new BaseTable('hmp_batch');
 const hmpBatchIn = new BaseTable('hmp_batch_input');
 const hmpBatchOut = new BaseTable('hmp_batch_output');
+const aawak = new BaseTable('aawak');
+const subitemList = new BaseTable('subitem_list');
+const jawak = new BaseTable('jawak');
 
 // ─────────────────────────────────────────────────────────────
 // ── RECIPE ────────────────────────────────────────────────────
@@ -61,6 +64,19 @@ function deleteRecipe(id) {
     });
 }
 
+
+function buildSubitemListMap(subitemLists) {
+    return Object.fromEntries(subitemLists.map(sl => [sl._id, sl]));
+}
+
+
+function injectSubitemList(entries, subitemListMap) {
+    for (const entry of entries) {
+        if (entry.subitem?.subitem_list_id) {
+            entry.subitem.subitem_list = subitemListMap[entry.subitem.subitem_list_id] ?? null;
+        }
+    }
+}
 
 // ─────────────────────────────────────────────────────────────
 // ── BATCH LIST ────────────────────────────────────────────────
@@ -119,6 +135,30 @@ function getBatches({ dept_id, mm_id, recipe_id, item_id, date, date_from, date_
         limit: PAGE_SIZE,
         offset,
     });
+
+    const subitemListMap = buildSubitemListMap(subitemList.getAll());
+
+    for (const batch of result) {
+        injectSubitemList(batch.inputs || [], subitemListMap);
+        injectSubitemList(batch.outputs || [], subitemListMap);
+        if (batch.outputs && batch.outputs.length > 0) {
+            for (const out of batch.outputs) {
+                if (out.aawak_ref_id) {
+                    const aawak_detail = aawak.getById(out.aawak_ref_id);
+                    out.aawak_detail = aawak_detail;
+                    // if (aawak) {
+                    //     aawak.jawak_detail = jawak.getAll({ aawak_ref_id: out.aawak_ref_id });
+                    //     out.aawak_detail = aawak;
+                    //     out.jawak_detail = aawak.jawak_detail;
+                    // } else {
+                    //     out.jawak_detail = [];
+                    // }
+                } else {
+                    out.aawak_detail = null;
+                }
+            }
+        }
+    }
 
     return { result, pageNo: page, total_count };
 }
@@ -287,8 +327,53 @@ async function deleteBatchOutput(id) {
 }
 
 
+// Centralized reference transfer
+async function transferReferences(list_type, from_id, to_id, dept_id) {
+    const fromIdNum = Number(from_id);
+    const toIdNum = Number(to_id);
+
+    // Find all batches that use this reference
+    let condString = "";
+    switch (list_type) {
+        case 'mm': condString = `mm_id = ${fromIdNum}`; break;
+        case 'item': condString = `hmp_batch._id IN (SELECT batch_id FROM hmp_batch_input WHERE item_id = ${fromIdNum} UNION SELECT batch_id FROM hmp_batch_output WHERE item_id = ${fromIdNum})`; break;
+        case 'subitem': condString = `hmp_batch._id IN (SELECT batch_id FROM hmp_batch_input WHERE subitem_id = ${fromIdNum} UNION SELECT batch_id FROM hmp_batch_output WHERE subitem_id = ${fromIdNum})`; break;
+        case 'unit': condString = `hmp_batch._id IN (SELECT batch_id FROM hmp_batch_input WHERE unit_id = ${fromIdNum} UNION SELECT batch_id FROM hmp_batch_output WHERE unit_id = ${fromIdNum})`; break;
+    }
+
+    if (!condString) return;
+
+    const batches = hmpBatch.getAll(`hmp_batch.dept_id = ${Number(dept_id)} AND hmp_batch.active = 1 AND ${condString}`);
+
+    for (const batch of batches) {
+        if (list_type === 'mm') {
+            batch.mm_id = toIdNum;
+        }
+
+        // Update inputs/outputs
+        if (batch.inputs) {
+            batch.inputs.forEach(inp => {
+                if (list_type === 'item' && Number(inp.item_id) === fromIdNum) inp.item_id = toIdNum;
+                if (list_type === 'subitem' && Number(inp.subitem_id) === fromIdNum) inp.subitem_id = toIdNum;
+                if (list_type === 'unit' && Number(inp.unit_id) === fromIdNum) inp.unit_id = toIdNum;
+            });
+        }
+        if (batch.outputs) {
+            batch.outputs.forEach(out => {
+                if (list_type === 'item' && Number(out.item_id) === fromIdNum) out.item_id = toIdNum;
+                if (list_type === 'subitem' && Number(out.subitem_id) === fromIdNum) out.subitem_id = toIdNum;
+                if (list_type === 'unit' && Number(out.unit_id) === fromIdNum) out.unit_id = toIdNum;
+            });
+        }
+        await insertUpdateBatch(batch);
+    }
+}
+
 // ─────────────────────────────────────────────────────────────
 module.exports = {
+    // subitem list
+    buildSubitemListMap,
+    injectSubitemList,
     // recipe
     getRecipesByDept,
     insertUpdateRecipe,
@@ -299,4 +384,5 @@ module.exports = {
     deleteBatch,
     deleteBatchInput,
     deleteBatchOutput,
+    transferReferences,
 };

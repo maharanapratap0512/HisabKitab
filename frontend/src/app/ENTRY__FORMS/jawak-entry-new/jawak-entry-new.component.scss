@@ -138,3 +138,113 @@
 //   /* Shrink-wraps children */
 //   width: fit-content !important;
 // }
+.aawak-select {
+    ::ng-deep {
+        .ng-dropdown-panel {
+            width: 750px !important;
+            border: 1px solid #3b445c;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            background-color: #2a3042;
+        }
+        .ng-option {
+            padding: 4px 0 !important;
+            border-bottom: 2px solid #1a1f2c !important; /* Thick separator between items */
+            &:last-child { border-bottom: none !important; }
+            &.ng-option-marked {
+                background-color: #32394e !important;
+            }
+        }
+    }
+}
+
+.aawak-option-card {
+    padding: 4px 12px;
+    background: transparent;
+    transition: all 0.2s;
+    line-height: 1.2;
+    
+    .lot-badge {
+        background: #4b546c;
+        color: #fff;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: bold;
+    }
+    
+    .item-name {
+        font-size: 13px;
+        color: #e3e9f1;
+        font-weight: 500;
+    }
+    
+    .item-qty {
+        color: #f1b44c;
+        font-size: 13px;
+    }
+    
+    .item-meta {
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        opacity: 0.9;
+        
+        i { font-size: 12px; }
+    }
+}
+
+.selected-aawak {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    
+    .badge {
+        font-size: 10px;
+        padding: 2px 5px;
+    }
+}
+
+.border-bottom-subtle {
+    border-bottom: none !important; /* Remove separator line */
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.mm-text {
+    font-size: 12px;
+    background: rgba(85, 110, 230, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.source-mm {
+    color: #34c38f;
+}
+
+.mx-3 {
+    margin-left: 1rem !important;
+    margin-right: 1rem !important;
+}
+
+.mx-2 {
+    margin-left: 0.5rem !important;
+    margin-right: 0.5rem !important;
+}
+
+.badge-soft-success {
+    background-color: rgba(52, 195, 143, 0.1);
+    color: #34c38f;
+}
+
+.badge-soft-warning {
+    background-color: rgba(241, 180, 76, 0.1);
+    color: #f1b44c;
+}
+
+.badge-soft-danger {
+    background-color: rgba(244, 102, 102, 0.1);
+    color: #f46666;
+}

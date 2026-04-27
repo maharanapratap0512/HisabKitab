@@ -33,7 +33,8 @@ export class DataViewComponent implements OnInit {
   showModal: string = "";
   importType: string = '';
   settings: any = null;
-
+  delType: any = null;
+  delID: any = null;
   dictTypes: any = null;
 
 
@@ -180,7 +181,7 @@ export class DataViewComponent implements OnInit {
   }
 
   openModal(type: string) {
-    if (this.apiName == 'SUPPORTLIST') {
+    if (this.apiName == 'SUPPORTLIST' && type != 'delete_advance' && type != 'excel_import') {
       this.showModal = 'support_list';
     } else {
       this.showModal = type;
@@ -235,38 +236,16 @@ export class DataViewComponent implements OnInit {
 
 
   delete(i: any, id: any) {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        if (this.isLocal) {
-          this.records.splice(i, 1);
-          this.toastr.success('deleted successfully.');
-          this.isLoader = false;
-        } else {
-          this.http.delete(this.api.getUrl(this.apiName) + '/' + id).subscribe((data: any) => {
-            if (data['success']) {
-              this.isLoader = false;
-              this.records.splice(i, 1);
-              this.toastr.success('deleted successfully.');
-            }
-            else {
-              this.toastr.error(data['message']);
-              this.isLoader = false;
-            }
-          }, err => {
-            this.toastr.error(err['error']);
-          });
-        }
-      }
-    });
-    this.isLoader = false;
+    this.delID = id;
+    this.delType = this.Type;
+    this.openModal('delete_advance');
+  }
+
+  deleteResponse(ev: any) {
+    if (ev) {
+      this.closeModal();
+      this.getDataFromDB();
+    }
   }
 
 

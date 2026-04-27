@@ -204,27 +204,27 @@
                                         <td>{{row.reg_pg_no || '-'}}</td>
                                         <td>
                                             <div class="location-info">
-                                                <small class="text-muted">{{row.mm_eng}}</small><br>
-                                                <span class="hindi-text">{{row.mm_hin}}</span>
+                                                <span>{{row.mm_hin}}</span> <br />
+                                                <small class="text-muted">{{row.mm_eng}}</small>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="location-info">
-                                                <small class="text-muted">{{row.jawak_mm_eng}}</small><br>
-                                                <span class="hindi-text">{{row.jawak_mm_hin}}</span>
+                                                <span>{{row.jawak_mm_hin}} - {{row.jawak_mm_code}}</span> <br />
+                                                <small class="text-muted">{{row.jawak_mm_eng}}</small>
                                             </div>
                                         </td>
                                         <td>
                                             <div *ngIf="row.pbk_hin" class="pbk-info">
-                                                <small>{{row.roll_no || 'N/A'}}</small><br>
-                                                <span class="hindi-text">{{row.pbk_hin}}</span>
+                                                <span>{{row.pbk_hin}}</span> <br />
+                                                <small class="text-muted">{{row.roll_no || ''}}</small>
                                             </div>
                                             <span *ngIf="!row.pbk_hin">-</span>
                                         </td>
                                         <td>
                                             <div *ngIf="row.nimitt_hin" class="nimitt-info">
-                                                <small class="text-muted">{{row.nimitt_eng}}</small><br>
-                                                <span class="hindi-text">{{row.nimitt_hin}}</span>
+                                                <span>{{row.nimitt_hin}}</span> <br />
+                                                <small class="text-muted">{{row.nimitt_eng}}</small>
                                             </div>
                                             <span *ngIf="!row.nimitt_hin">-</span>
                                         </td>
@@ -271,15 +271,15 @@
                                                             <td>{{item.lot_no || '-'}}</td>
                                                             <td>
                                                                 <div class="item-info">
-                                                                    <strong>{{item.item_eng}}</strong><br>
-                                                                    <small class="hindi-text">{{item.item_hin}}</small>
+                                                                    <span>{{item.item_hin}}</span> <br />
+                                                                    <small class="text-muted">{{item.item_eng}}</small>
                                                                 </div>
                                                             </td>
                                                             <td>
                                                                 <div class="item-info" *ngIf="item.subitem_eng">
-                                                                    <span>{{item.subitem_eng}}</span><br>
+                                                                    <span>{{item.subitem_hin}}</span> <br />
                                                                     <small
-                                                                        class="hindi-text">{{item.subitem_hin}}</small>
+                                                                        class="text-muted">{{item.subitem_eng}}</small>
                                                                 </div>
                                                                 <span *ngIf="!item.subitem_eng">-</span>
                                                             </td>
@@ -300,17 +300,17 @@
                                                                 <span *ngIf="!item.rate">-</span>
                                                             </td>
                                                             <td>
-                                                                <small class="text-muted">{{item.aawak_source_eng ||
-                                                                    '-'}}</small> <br />
-                                                                <span class="hindi-text">{{item.aawak_source_hin ||
-                                                                    '-'}}</span>
+                                                                <div class="source-info">
+                                                                    <span>{{item.aawak_source_hin || '-'}}</span> <br />
+                                                                    <small class="text-muted">{{item.aawak_source_eng ||
+                                                                        '-'}}</small>
+                                                                </div>
                                                             </td>
                                                             <td>
                                                                 <div class="jawak-type-info">
+                                                                    <span>{{item.jawak_type_hin}}</span> <br />
                                                                     <small
-                                                                        class="text-muted">{{item.jawak_type_eng}}</small><br>
-                                                                    <span
-                                                                        class="hindi-text">{{item.jawak_type_hin}}</span>
+                                                                        class="text-muted">{{item.jawak_type_eng}}</small>
                                                                 </div>
                                                             </td>
                                                             <td>
@@ -605,23 +605,24 @@
                                             </td> -->
                                         <td class="w-200">
                                             <div class="location-info">
-                                                <small class="text-muted">{{row.jawak_mm_eng}}</small><br>
-                                                <span class="hindi-text">{{row.jawak_mm_hin}}</span>
+                                                <span>{{row.jawak_mm_hin}} - {{row.jawak_mm_code}}</span> <br />
+                                                <small class="text-muted">{{row.jawak_mm_eng}}</small>
                                             </div>
                                         </td>
                                         <td class="w-250">
                                             <div *ngIf="row.pbk_hin" class="pbk-info">
-                                                <span class="hindi-text">{{row.pbk_hin}}</span>
+                                                <span>{{row.pbk_hin}}</span> <br />
+                                                <small class="text-muted">{{row.roll_no || ''}}</small>
                                             </div>
                                         </td>
                                         <td class="w-400">
                                             <div class="item-info">
-                                                <strong>{{item.item_eng}}</strong>
-                                                <span *ngIf="item.subitem_eng"> - {{item.subitem_eng}}</span>
+                                                <span>{{item.item_hin}}</span>
+                                                <span *ngIf="item.subitem_hin"> - {{item.subitem_hin}}</span>
                                                 <br>
-                                                <small class="hindi-text">{{item.item_hin}}</small>
-                                                <small class="hindi-text" *ngIf="item.subitem_hin"> -
-                                                    {{item.subitem_hin}}</small>
+                                                <small class="text-muted">{{item.item_eng}}</small>
+                                                <small class="text-muted" *ngIf="item.subitem_eng"> -
+                                                    {{item.subitem_eng}}</small>
                                             </div>
                                         </td>
                                         <td class="w-100">{{item.lot_no || '-'}}</td>
@@ -641,14 +642,14 @@
                                         <td class="w-150">{{item.company_name || '-'}}</td>
                                         <td class="w-180">
                                             <div class="source-info">
-                                                <small class="text-muted">{{item.aawak_source_eng}}</small><br>
-                                                <span class="hindi-text">{{item.aawak_source_hin}}</span>
+                                                <span>{{item.aawak_source_hin}}</span> <br />
+                                                <small class="text-muted">{{item.aawak_source_eng}}</small>
                                             </div>
                                         </td>
                                         <td class="w-180">
                                             <div class="jawak-type-info">
-                                                <small class="text-muted">{{item.jawak_type_eng}}</small><br>
-                                                <span class="hindi-text">{{item.jawak_type_hin}}</span>
+                                                <span>{{item.jawak_type_hin}}</span> <br />
+                                                <small class="text-muted">{{item.jawak_type_eng}}</small>
                                             </div>
                                         </td>
                                         <td class="w-180">

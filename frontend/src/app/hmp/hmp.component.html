@@ -193,10 +193,11 @@
                         <thead>
                           <tr>
                             <th width="8%" class="ps-2">#</th>
-                            <th width="52%">Item</th>
+                            <th width="42%">Item</th>
                             <th width="20%">Qty</th>
                             <th width="10%">Rate</th>
                             <th width="10%">Cond.</th>
+                            <th width="10%">Destr.</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -218,9 +219,35 @@
                             <td><strong>{{output.qty}}</strong> <small>{{output.unit_short}}</small></td>
                             <td><span style="opacity: 0.6;">{{output.rate || '-'}}</span></td>
                             <td><small style="color: #f0a500;">{{output.condition?.list_name_hin}}</small></td>
+                            <td>
+                              <div class="d-flex align-items-center justify-content-center gap-1">
+                                <!-- Show + (Add) if no Aawak exists, OR if no Jawak exists, OR remaining_qty > 0 -->
+                                <button
+                                  *ngIf="output.aawak_ref_id && (!output.jawak_detail?.length || output.aawak_detail?.remaining_qty > 0)"
+                                  class="btn btn-sm btn-outline-warning p-0 lh-1"
+                                  style="font-size: 11px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center;"
+                                  title="Add Jawak" (click)="addJawak(output)">
+                                  <i class="uil uil-plus font-12 fw-bold"></i>
+                                </button>
+
+                                <span *ngIf="!output.aawak_ref_id" class="text-danger">No Aawak</span>
+
+
+                                <!-- Show J-Q summary if Jawaks exist -->
+                                <button *ngIf="output?.aawak_detail?.jawak_detail?.length > 0"
+                                  class="btn btn-sm btn-outline-warning p-0 lh-1" (click)="showJawak(output)"
+                                  style="font-size: 9px; min-width: 35px; line-height: 1.2; text-align: center;"
+                                  [title]="'Remaining Qty: ' + (output.aawak_detail?.remaining_qty || 0)">
+                                  <div style="font-weight: bold; padding: 1px 2px;">J -
+                                    {{output.aawak_detail?.jawak_detail?.length}}</div>
+                                  <div style="border-top: 1px solid rgba(255,193,7,0.3); padding: 1px 2px;">
+                                    Q - {{getJawakQty(output)}}</div>
+                                </button>
+                              </div>
+                            </td>
                           </tr>
                           <tr *ngIf="!batch.outputs || batch.outputs.length === 0">
-                            <td colspan="5" class="text-center text-muted p-2">No outputs</td>
+                            <td colspan="6" class="text-center text-muted p-2">No outputs</td>
                           </tr>
                         </tbody>
                       </table>
@@ -393,11 +420,17 @@
   <div class="modal-dialog" role="document" style="width: 98%;">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">{{isEdit ? 'Edit Packet' : 'New HMP Batch'}}</h5>
+        <h5 class="modal-title">{{showModal}}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-0">
-        <app-hmp-entry [isEdit]="isEdit" [getData]="selectedBatch" (response)="onBatchSaved($event)"></app-hmp-entry>
+        <app-hmp-entry *ngIf="showModal == 'Edit HMP' || showModal == 'Add HMP' " [isEdit]="isEdit"
+          [getData]="selectedBatch" (response)="onBatchSaved($event)"></app-hmp-entry>
+
+        <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)="addJawakResponse($event)"
+          [aawakRef]="awkRefData"></app-jawak-entry>
+
+        <app-data-view *ngIf="showModal == 'show jawak'" [getData]="selectedJawak" Type="jawak"></app-data-view>
       </div>
     </div>
   </div>

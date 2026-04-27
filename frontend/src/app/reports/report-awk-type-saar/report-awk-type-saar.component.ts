@@ -25,6 +25,7 @@ export class ReportAwkTypeSaarComponent {
   monthsSel: any = [];
   departments: any = [];
   categories: any = [];
+  submitted: boolean = false;
 
   reportData: any = [];
 
@@ -56,6 +57,11 @@ export class ReportAwkTypeSaarComponent {
   }
 
   searchReports() {
+    this.submitted = true;
+    if (!this.filterBody.months || this.filterBody.months.length === 0) {
+      this.toastr.error('Please Select Month');
+      return;
+    }
     this.isLoader = true;
     this.http.put(this.api.getUrl('REPORT_AT'), this.filterBody).subscribe((data: any) => {
       if (data.success) {

@@ -2341,7 +2341,163 @@ class dbModal {
     // Version 29
     {
       add_dept_id_to_pbk_closing: `alter table pbk_closing add column dept_id integer references department(_id)`
-    }
+    },
+    // Version 30
+    // recursive category support
+    // item-variant system migration -> attributes, attributes_value, variant, varinat-attribute-map, variant-category-map
+    // alias for items, variant - item-alias, variant-alias table
+    // mm - recreate as it is
+    // subitem - convert and support variant system, rel-subitem-cat table data copy
+    {
+      category_parent: `alter table category add column parent_id integer references category(_id)`,
+      category_sort_order: `alter table category add column sort_order integer default 0`,
+      attributes: `create table IF NOT EXISTS attributes(
+        _id integer primary key AUTOINCREMENT,
+        attribute_hin varchar(255) unique not null,
+        attribute_eng varchar(255) unique,
+        attribute_roman varchar(255) unique,
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      attributes_value: `create table IF NOT EXISTS attributes_value(
+        _id integer primary key AUTOINCREMENT,
+        attribute_id integer not null references attributes(_id),
+        attribute_value_hin varchar(255) not null,
+        attribute_value_eng varchar(255),
+        attribute_value_roman varchar(255),
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime')),
+        unique(attribute_id, attribute_value_hin),
+        unique(attribute_id, attribute_value_eng),
+        unique(attribute_id, attribute_value_roman)
+      )`,
+      // sku is variant code
+      variant: `create table IF NOT EXISTS variant(
+        _id integer primary key AUTOINCREMENT,
+        item_id integer not null references item(_id),
+        sku varchar(250),
+        display_name text,
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime'))
+      )`,
+      variant_attribute_map: `create table IF NOT EXISTS variant_attribute_map(
+        _id integer primary key AUTOINCREMENT,
+        variant_id integer not null references variant(_id),
+        attribute_id integer not null references attributes(_id),
+        attribute_value_id integer not null references attributes_value(_id),
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime')),
+        unique(variant_id, attribute_id, attribute_value_id)
+      )`,
+      variant_category_map: `create table IF NOT EXISTS variant_category_map(
+        _id integer primary key AUTOINCREMENT,
+        variant_id integer not null references variant(_id),
+        category_id integer not null references category(_id),
+        created_at timestamp default (datetime('now', 'localtime')),
+        unique(variant_id, category_id)
+      )`,
+      item_source_map: `CREATE TABLE IF NOT EXISTS item_source_map(
+        _id INTEGER PRIMARY KEY AUTOINCREMENT,
+        item_id INTEGER NOT NULL REFERENCES item(_id),
+        source_item_id INTEGER NOT NULL REFERENCES item(_id),
+        created_at TIMESTAMP DEFAULT(DATETIME('now', 'localtime')),
+        UNIQUE(item_id, source_item_id),
+        CHECK(item_id != source_item_id)
+      )`,
+      item_aliases: `CREATE TABLE IF NOT EXISTS item_aliases(
+        _id INTEGER PRIMARY KEY AUTOINCREMENT,
+        item_id INTEGER NOT NULL REFERENCES item(_id),
+        alias VARCHAR(150) NOT NULL,
+        language VARCHAR(50) not null,
+        created_at TIMESTAMP DEFAULT(DATETIME('now', 'localtime')),
+        UNIQUE(alias, language)
+      )`,
+      variant_aliases: `CREATE TABLE IF NOT EXISTS variant_aliases(
+        _id INTEGER PRIMARY KEY AUTOINCREMENT,
+        variant_id INTEGER NOT NULL REFERENCES variant(_id),
+        alias VARCHAR(150) NOT NULL,
+        created_at TIMESTAMP DEFAULT(DATETIME('now', 'localtime')),
+        UNIQUE(alias)
+      )`,
+      mm_backup: `alter table mm rename to mm_backup`,
+      mm: `create table if not exists mm(
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        mm_hin varchar(100) not null,
+        mm_eng varchar(100) null, 
+        mm_roman varchar(100) null, 
+        mm_code varchar(50) unique null, 
+        mm_type varchar(100) null,
+        dept_id integer null references department(_id),
+        state_id integer not null references state(_id),
+        parent_mm_id integer null REFERENCES mm(_id),
+        opening_date date null,
+        mm_closed date null,
+        nimitt_id integer REFERENCES nimitt(_id),
+        verify tinyint default 0,
+        active tinyint default 0,  
+        restrict_month integer null,
+        restrict_year integer null,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime')),
+        unique(mm_eng, dept_id),
+        unique(mm_hin, dept_id)
+      );`,
+      copy_backup_to_mm: `INSERT INTO mm (
+          _id, mm_hin, mm_eng, mm_roman, mm_code, mm_type, dept_id, state_id, parent_mm_id, 
+          opening_date, mm_closed, restrict_month, restrict_year,
+          verify, nimitt_id, active, created_at, updated_at
+        ) 
+        SELECT 
+          _id, mm_hin, mm_eng, mm_roman, mm_code, null, dept_id, state_id, parent_mm_id, 
+          opening_date, mm_closed, restrict_month, restrict_year,
+          verify, nimitt_id, active, created_at, updated_at 
+        FROM mm_backup`,
+      drop_backup: `drop table if exists mm_backup`,
+      rename_subitem: `alter table subitem rename to subitem_backup`,
+      create_subitem: `CREATE TABLE if not exists subitem (
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        item_id integer not null REFERENCES item (_id),
+        variant_id integer REFERENCES variant (_id),
+        subitem_hin varchar(150), 
+        subitem_eng varchar(150), 
+        subitem_roman varchar(150),
+        unit_id integer null REFERENCES unit (_id),
+        extra_note text,
+        document json,
+        active tinyint default 0,
+        restrict_month integer null,
+        restrict_year integer null,
+        min_rate decimal(7, 2) default 0,
+        max_rate decimal(7, 2) default 0,
+        add_by_dept_id integer references department (_id),
+        update_by_dept_id integer references department (_id),
+        verify tinyint default 0,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime')),
+        UNIQUE (item_id, subitem_hin)
+      )`,
+      copy_subitem: `INSERT INTO subitem (
+          _id, item_id, subitem_hin, subitem_eng, subitem_roman, 
+          unit_id, extra_note, document, active, created_at, 
+          updated_at, restrict_month, restrict_year, min_rate, 
+          max_rate, add_by_dept_id, update_by_dept_id, verify
+        )
+        SELECT 
+          b._id, b.item_id, l.subitem_hin, l.subitem_eng, l.subitem_roman,
+          b.unit_id, b.extra_note, b.document, b.active, b.created_at,
+          b.updated_at, b.restrict_month, b.restrict_year, b.min_rate,
+          b.max_rate, b.add_by_dept_id, b.update_by_dept_id, b.verify
+        FROM subitem_backup b
+        left JOIN subitem_list l ON b.subitem_list_id = l._id;`,
+      truncate_rel_subitem_category: `delete from rel_subitem_category`,
+      copy_subitem_categories: `INSERT INTO rel_subitem_category (subitem_id, category_id)
+        SELECT 
+          b._id, 
+          json_each.value
+        FROM subitem_backup b, json_each(b.categories)
+        WHERE json_valid(b.categories);`,
+      drop_subitem_backup: `drop table subitem_backup`
+    },
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.
@@ -2349,7 +2505,49 @@ class dbModal {
   ];
 
   views = {
-    // drop_1: `drop view if exists mn_jwk_aj_type`,
+    drop_v_item: `drop view if exists v_item`,
+    drop_v_subitem: `drop view if exists v_subitem`,
+    v_item: `CREATE VIEW IF NOT EXISTS v_item AS
+      SELECT 
+          i.*, 
+          u.unit_short, 
+          u.unit_full,
+          (
+              SELECT IFNULL(json_group_array(
+                  json_object(
+                      '_id', c._id,
+                      'category_hin', c.category_hin, 
+                      'category_eng', c.category_eng,
+                      'category_roman', c.category_roman
+                  )
+              ), json('[]'))
+              FROM rel_item_category ric
+              JOIN category c ON c._id = ric.category_id
+              WHERE ric.item_id = i._id
+          ) as icategories
+      FROM item i
+      LEFT JOIN unit u ON u._id = i.unit_id`,
+
+    v_subitem: `CREATE VIEW IF NOT EXISTS v_subitem AS
+      SELECT 
+        s.*, 
+        u.unit_short, 
+        u.unit_full,
+        (
+          SELECT IFNULL(json_group_array(
+              json_object(
+                  '_id', c._id, 
+                  'category_hin', c.category_hin, 
+                  'category_eng', c.category_eng
+              )
+          ), json('[]'))
+          FROM rel_subitem_category rsc
+          JOIN category c ON c._id = rsc.category_id
+          WHERE rsc.subitem_id = s._id
+        ) as categories
+      FROM subitem s
+      LEFT JOIN unit u ON u._id = s.unit_id`,
+
     mn_jwk_aj_type:
       `create view if not exists mn_jwk_aj_type
       AS
@@ -2426,9 +2624,10 @@ class dbModal {
       this.db.pragma('legacy_alter_table=ON');
       runMigration();
 
-      for (const viewQuery of Object.values(this.views)) {
+      for (const [viewName, viewQuery] of Object.entries(this.views)) {
         // console.log(viewQuery);
         this.db.prepare(viewQuery).run();
+        console.log("view created : ", viewName);
       }
 
       this.db.pragma('legacy_alter_table=OFF');

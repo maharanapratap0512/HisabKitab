@@ -444,36 +444,9 @@ export class ItemComponent implements OnInit {
   }
 
   deleteSubitem(itemId: any, id: any) {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.http.delete(this.api.getUrl('SUBITEM') + '/' + id).subscribe((data: any) => {
-          if (data['success']) {
-            this.isLoader = false;
-            let i = this.itemData.findIndex((it: any) => it._id === itemId);
-            if (i > -1) {
-              let j = this.itemData[i].subitems.findIndex((si: any) => si._id === id);
-              if (j > -1) {
-                this.itemData[i].subitems.splice(j, 1);
-              }
-            }
-            this.si_total_count--;
-            this.toastr.success('Deleted Successfully');
-          }
-          else {
-            this.toastr.error(data['message']);
-            this.isLoader = false;
-          }
-        });
-      }
-    })
+    this.delID = id;
+    this.delType = 'subitem';
+    this.openModal('delete_item');
   }
 
   protectionToggle(id: any, active: any) {

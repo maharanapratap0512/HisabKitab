@@ -6,9 +6,11 @@ import { Location } from '@angular/common';
 // const base_url = 'http://localhost:2018/api/';
 // const base_url = '/api';
 
+const currentHost = window.location.hostname;
 const host = window.location.host;
 const base_port = getPortFromHost(host) - 1000;
-const base_url = `http://localhost:${base_port}/api/`;
+// const base_url = `http://localhost:${base_port}/api/`;
+const base_url = `http://${currentHost}:${base_port}/api/`;
 
 @Injectable({
   providedIn: 'root'

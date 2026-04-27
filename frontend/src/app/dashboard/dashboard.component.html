@@ -130,12 +130,12 @@
                                           </td>
                                           <td>{{i+1}}</td>
                                           <td>
-                                             {{data.state_hin}}<br />
-                                             {{data.state_eng}}
+                                             <span>{{data.state_hin}}</span> <br />
+                                             <small class="text-muted">{{data.state_eng}}</small>
                                           </td>
                                           <td>
-                                             {{data.mm_hin}}<br />
-                                             {{data.mm_eng}}
+                                             <span>{{data.mm_hin}}</span> <br />
+                                             <small class="text-muted">{{data.mm_eng}}</small>
                                           </td>
                                           <!-- <td>{{data.year}}</td>  -->
                                           <td *ngFor="let m of months">
@@ -249,17 +249,24 @@
                                           aria-expanded="true" [attr.aria-controls]="'#collapse-' + i" class="main-row">
                                           <td>{{i+1}}</td>
                                           <td>
-                                             {{data.mm_hin}}<br />
-                                             {{data.mm_eng}}
+                                             <span>{{data.mm_hin}}</span> <br />
+                                             <small class="text-muted">{{data.mm_eng}}</small>
                                           </td>
                                           <td>
-                                             {{data.categories_hin}}<br />
-                                             {{data.categories_eng}}
+                                             <ng-container
+                                                *ngIf="(data.scategories?.length > 0 ? data.scategories : data.icategories) as activeCats">
+                                                <div *ngIf="activeCats?.length > 0; else noCat">
+                                                   <span>{{ activeCats | joinObj:'category_hin' }}</span>
+                                                   <br />
+                                                   <small class="text-muted">{{ activeCats | joinObj:'category_eng'
+                                                      }}</small>
+                                                </div>
+                                                <ng-template #noCat>-</ng-template>
+                                             </ng-container>
                                           </td>
                                           <td>
-                                             {{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}}
-                                             <br />
-                                             {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
+                                             <span>{{data.item_hin}} {{data.subitem_hin ? " : " + data.subitem_hin : ""}}</span> <br />
+                                             <small class="text-muted">{{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}</small>
                                           </td>
                                           <td>
                                              {{data.Used ? data.Used + " " + data.unit_short : "-"}}
@@ -330,15 +337,16 @@
                                                             {{awk.pkt_num ? awk.pkt_num : ''}}
                                                          </td>
                                                          <td>
-                                                            {{awk.aawak_mm_id ? awk.aawak_mm_hin: ''}}
+                                                            <div *ngIf="awk.aawak_mm_id">
+                                                               <span>{{awk.aawak_mm_hin}} - {{awk.aawak_mm_code}}</span> <br />
+                                                               <small class="text-muted">{{awk.aawak_mm_eng}}</small>
+                                                            </div>
                                                          </td>
                                                          <td *ngIf="settings.aawak.pbk_id">
-                                                            <span *ngIf="data.pbk_id">
-                                                               {{awk.roll_no ? awk.roll_no : '___'}} - {{awk.pbk_hin}}
-                                                               <br />
-                                                               {{awk.relation}} {{awk.relative_name ? awk.relative_name
-                                                               : ''}}
-                                                            </span>
+                                                            <div *ngIf="awk.pbk_id">
+                                                               <span>{{awk.roll_no ? awk.roll_no : '___'}} - {{awk.pbk_hin}}</span> <br />
+                                                               <small class="text-muted">{{awk.relation}} {{awk.relative_name ? " - "+awk.relative_name: ''}}</small>
+                                                            </div>
                                                          </td>
                                                          <td>{{awk.condition_hin}}</td>
                                                          <td>{{awk.aawak_type_hin}}</td>

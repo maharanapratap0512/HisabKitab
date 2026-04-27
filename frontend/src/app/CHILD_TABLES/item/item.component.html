@@ -162,7 +162,7 @@
                               <td *ngIf="settings.document">
                                  <div class="d-flex flex-wrap" *ngIf="data.document && data.document.images"
                                     (click)="viewProduct(data)" style="cursor: pointer;">
-                                    <span class="imageCount">x{{data.document.images.length}}</span>
+                                    <span class="imageCount">{{data.document.images.length}}</span>
                                     <img *ngFor=" let img of data.document.images" src="{{baseurl + img}}" height="25px"
                                        width="25px" alt="image" style="object-fit: cover;">
                                     <!-- <span class="badge bg-info"
@@ -173,11 +173,19 @@
                               <td *ngIf="settings.item_eng">{{data.item_eng?data.item_eng:'-'}}</td>
                               <td *ngIf="settings.item_roman">{{data.item_roman?data.item_roman:'-'}}</td>
                               <td *ngIf="settings.item_code">{{data.item_code?data.item_code:'-'}}</td>
-                              <td>{{data.unit_id?data.unit_short + ' : ' + data.unit_full:'-'}}</td>
                               <td>
-                                 <ng-container *ngFor="let cat of data.categories_hin">
-                                    {{cat}},
-                                 </ng-container>
+                                 <div *ngIf="data.unit_id">
+                                    <span>{{data.unit_full}}</span> <br />
+                                    <small class="text-muted">{{data.unit_short}}</small>
+                                 </div>
+                              </td>
+                              <td>
+                                 <div>
+                                    <span>{{ data.categories | joinObj:'category_hin' }}</span>
+                                    <br />
+                                    <small class="text-muted">{{ data.categories | joinObj:'category_eng'
+                                       }}</small>
+                                 </div>
                               </td>
                               <td *ngIf="settings.price_range">
                                  {{(data.min_rate || data.max_rate) ? data.min_rate + ' - ' + data.max_rate : ''}}
@@ -237,12 +245,16 @@
                                              <td style="width: 120px;" class="nav-item" *ngIf="settings.item_code">
                                              </td>
                                              <td style="width: 150px;" class="nav-item">
-                                                {{si.unit_id?si.unit_short + ' : ' + si.unit_full:'-'}}
+                                                <div *ngIf="si.unit_id">
+                                                   <span>{{si.unit_full}}</span> <br />
+                                                   <small class="text-muted">{{si.unit_short}}</small>
+                                                </div>
                                              </td>
                                              <td style="width: 180px;" class="nav-item">
-                                                <ng-container *ngFor="let scat of si.categories_hin">
-                                                   {{scat}},
-                                                </ng-container>
+                                                <span>{{ si.categories | joinObj:'category_hin' }}</span>
+                                                <br />
+                                                <small class="text-muted">{{ si.categories | joinObj:'category_eng'
+                                                   }}</small>
                                              </td>
                                              <td *ngIf="settings.price_range">
                                                 {{(si.min_rate || si.max_rate) ? si.min_rate + ' - ' +
