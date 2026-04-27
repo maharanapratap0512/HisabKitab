@@ -2498,6 +2498,9 @@ class dbModal {
         WHERE json_valid(b.categories);`,
       drop_subitem_backup: `drop table subitem_backup`
     },
+    {
+      closing_delete: `drop table if exists closing`
+    }
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.

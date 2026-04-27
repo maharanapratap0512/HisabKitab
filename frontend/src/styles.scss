@@ -505,6 +505,10 @@ span.search-icon {
   }
 }
 
+.bg-soft-primary {
+  background-color: rgba(var(--bs-primary-rgb, 114, 124, 245), 0.12) !important;
+}
+
 .btn-soft-secondary {
   background-color: rgba(108, 117, 125, 0.1);
   color: #6c757d;
@@ -631,6 +635,13 @@ span.search-icon {
 /* ── Card accent ── */
 .card-theme {
   border-top: 3px solid var(--thead-accent-color) !important;
+}
+
+// Fix for text-muted visibility inside ng-select options on hover/mark
+.ng-dropdown-panel .ng-option.ng-option-marked .text-muted,
+.ng-dropdown-panel .ng-option.ng-option-selected .text-muted {
+  color: inherit !important;
+  opacity: 0.8 !important;
 }
 
 .card-theme-left {

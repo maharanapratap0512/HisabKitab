@@ -405,10 +405,10 @@ export class ItemComponent implements OnInit {
   }
 
   deleteResponse(ev: any) {
-    // this.toastr.success("deleted Successfully.");
     if (ev) {
       this.closeModal();
-      this.getItemData(this.conditionObj.pageNo || 1)
+      this.toastr.success((this.delType || 'Item') + " deleted successfully.");
+      this.getItemData(this.conditionObj.pageNo || 1);
     }
   }
 

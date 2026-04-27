@@ -244,6 +244,7 @@ export class DataViewComponent implements OnInit {
   deleteResponse(ev: any) {
     if (ev) {
       this.closeModal();
+      this.toastr.success(this.Type + " deleted successfully.");
       this.getDataFromDB();
     }
   }

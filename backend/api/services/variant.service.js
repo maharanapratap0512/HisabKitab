@@ -3,8 +3,8 @@
 // variant.service.js
 // Pattern: exact same as hmp.service.js
 //   - BaseTable instances per table (schema-driven joins auto-handled)
-//   - BaseTable.transaction() for atomic operations
-//   - Fn.begin/commit/rollback for async AJ operations
+//   - sutramDB.begin/commit/rollback for atomic operations
+//   - Fn.begin/commit/rollback for async AJ operations (if needed)
 //   - NO raw db.prepare() queries anywhere
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -55,16 +55,28 @@ function updateAttribute(data) {
 
 function deleteAttribute(id) {
     // soft delete cascade — active=0 on attribute + all its values + all variant maps that use any of its values
-    return BaseTable.transaction(() => {
-        attributes.updateById({ active: 0 }, id);
-        // getAll with full:false for speed — we just need IDs
+    try {
+        sutramDB.begin();
+
+        // 1. Check if ANY value of this attribute is used in active variants
         const vals = attributes_value.getAll({ attribute_id: id }, { full: false });
         for (const v of vals) {
-            attributes_value.updateById({ active: 0 }, v._id);
-            variant_attr_map.update({ active: 0 }, { attribute_value_id: v._id });
+            const count = variant_attr_map.count({ attribute_value_id: v._id, active: 1 });
+            if (count > 0) {
+                throw new Error(`Is attribute ka value '${v.attribute_value_hin || v._id}' variants mein use ho raha hai. Delete nahi kar sakte.`);
+            }
         }
+
+        // 2. Hard delete attribute + values
+        attributes.deleteById(id);
+        attributes_value.delete({ attribute_id: id });
+
+        sutramDB.commit();
         return 1;
-    });
+    } catch (err) {
+        sutramDB.rollback();
+        throw err;
+    }
 }
 
 
@@ -105,11 +117,22 @@ function updateAttributeValue(data) {
 }
 
 function deleteAttributeValue(id) {
-    return BaseTable.transaction(() => {
-        attributes_value.updateById({ active: 0 }, id);
-        variant_attr_map.update({ active: 0 }, { attribute_value_id: id });
+    try {
+        sutramDB.begin();
+
+        // Check if used in active variants
+        const count = variant_attr_map.count({ attribute_value_id: id, active: 1 });
+        if (count > 0) {
+            throw new Error('Is value ko variants mein use kiya gaya hai. Delete nahi ho sakta.');
+        }
+
+        attributes_value.deleteById(id);
+        sutramDB.commit();
         return 1;
-    });
+    } catch (err) {
+        sutramDB.rollback();
+        throw err;
+    }
 }
 
 
@@ -371,14 +394,16 @@ function updateVariant(variant_id, data, userData) {
     }
 }
 
-// ─── Delete variant (soft) ────────────────────────────────────────────────────
+// ─── Delete variant (hard) ────────────────────────────────────────────────────
 function deleteVariant(variant_id) {
     const id = Number(variant_id);
     try {
         sutramDB.begin();
-        variant.updateById({ active: 0 }, id);
-        subitem.update({ active: 0 }, { variant_id: id });
-        variant_attr_map.update({ active: 0 }, { variant_id: id });
+        variant.deleteById(id);
+        subitem.delete({ variant_id: id });
+        variant_attr_map.delete({ variant_id: id });
+        variant_aliases.delete({ variant_id: id });
+        variant_cat_map.delete({ variant_id: id });
         sutramDB.commit();
         return 1;
     } catch (err) {

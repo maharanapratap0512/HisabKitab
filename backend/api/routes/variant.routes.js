@@ -20,22 +20,6 @@ const variantCatMap = new BaseTable('variant_category_map');
 const subitemTable = new BaseTable('subitem');
 const itemAliasTable = new BaseTable('item_aliases');
 
-// GET /api/variants/items-minimal/:dept_id → ID + Name only (for dropdowns)
-router.get('/items-minimal/:dept_id', async (req, res, next) => {
-    try {
-        const result = db.prepare(`
-            SELECT i._id, i.item_hin, i.item_eng, i.item_code
-            FROM item i
-            WHERE i.active = 1 AND i._id IN (
-                SELECT json_each.value FROM department_config, json_each(config_value) 
-                WHERE dept_id = ? AND config_key = 'item'
-            )
-            ORDER BY i.item_hin ASC
-        `).all(req.params.dept_id);
-        res.json({ success: true, result });
-    } catch (e) { next(e); }
-});
-
 // ─── GET /api/variants/items/:dept_id  (initial full load) ──────────────────
 // Returns: all items with variants, item_aliases embedded.
 router.get('/items/:dept_id', async (req, res, next) => {

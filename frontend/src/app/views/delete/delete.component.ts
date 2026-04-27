@@ -241,23 +241,49 @@ export class DeleteComponent {
         !this.relatedData[key] || this.relatedData[key].length === 0
       );
       this.isLoader = false;
+
+      // Auto-trigger SWAL if no references are found
+      if (this.canDelete) {
+        this.finalDelete();
+      }
     } else {
       this.canDelete = false;
     }
   }
 
   async finalDelete() {
-    if (!['SUBITEMLIST'].includes(this.apiName)) {
-      await this.http.delete(this.api.getUrl('BACHAT') + 'many/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
-      });
-      await this.http.delete(this.api.getUrl('BACHATNEW') + 'many/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
-      });
-    }
-    await this.http.delete(this.api.getUrl(this.apiName) + this.ID).subscribe((data: any) => {
-      if (data['success']) {
-        this.toastr.success('deleted successfully.');
-        this.response.emit(true);
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "Is entry ko hamesha ke liye delete kar diya jayega. Kya aap sure hain?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Haan, Delete Karo!',
+      cancelButtonText: 'Nahi'
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        this.executeFinalDelete();
       }
+    });
+  }
+
+  executeFinalDelete() {
+    if (!['SUBITEMLIST'].includes(this.apiName)) {
+      // Background cleanup for related tables
+      this.http.delete(this.api.getUrl('BACHAT') + 'many/' + this.auth.webUser.dept_id, this.filterBody).subscribe();
+      this.http.delete(this.api.getUrl('BACHATNEW') + 'many/' + this.auth.webUser.dept_id, this.filterBody).subscribe();
+    }
+
+    // Main deletion
+    this.http.delete(this.api.getUrl(this.apiName) + this.ID).subscribe((data: any) => {
+      if (data['success']) {
+        this.response.emit(true);
+      } else {
+        this.toastr.error(data['message'] || 'Delete failed.');
+      }
+    }, err => {
+      this.toastr.error(err.error?.message || 'Server error while deleting.');
     });
   }
 

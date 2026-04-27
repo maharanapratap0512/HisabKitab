@@ -127,7 +127,7 @@ app.use((error, req, res, next) => {
     console.log(error);
     let status = error.status || 500;
     let msg = (status == 404) ? "Browsed path not found" : error.message;
-    res.status(status).json(msg);
+    res.status(status).json({ success: false, message: msg });
 });
 
 

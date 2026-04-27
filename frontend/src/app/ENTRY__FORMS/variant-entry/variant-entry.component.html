@@ -15,13 +15,14 @@
                         Attributes
                         <small class="text-muted fw-normal ms-1">(jinke liye variants chahiye)</small>
                     </label>
-                    <button type="button" class="btn btn-sm py-0 px-1 btn-outline-success" (click)="openAttrModal('attributes')" title="Manage Attributes">
+                    <button type="button" class="btn btn-sm py-0 px-1 btn-outline-success"
+                        (click)="openAttrModal('attributes')" title="Manage Attributes">
                         <i class="uil uil-plus"></i>
                     </button>
                 </div>
-                <ng-select class="custom" placeholder="Attributes select karo..." [multiple]="true"
-                    [searchable]="true" [clearable]="true" [virtualScroll]="true" [(ngModel)]="selectedAttrs"
-                    [ngModelOptions]="{standalone: true}" (change)="onAttrChange($event)">
+                <ng-select class="custom" placeholder="Attributes select karo..." [multiple]="true" [searchable]="true"
+                    [clearable]="true" [virtualScroll]="true" [(ngModel)]="selectedAttrs"
+                    [ngModelOptions]="{standalone: true}" (change)="onAttrChange($event)" [tabToSelect]="true">
                     <ng-option *ngFor="let a of allAttributes" [value]="a">
                         {{ a.attribute_hin }}
                         <small *ngIf="a.attribute_eng" class="text-muted"> ({{ a.attribute_eng }})</small>
@@ -45,12 +46,14 @@
             <!-- Default Unit + Apply All -->
             <div class="col-3">
                 <label class="form-label mb-1 fw-semibold" style="font-size:12px;">Default Unit (sabko)</label>
-                <div class="d-flex gap-1">
-                    <select class="form-select form-select-sm" [(ngModel)]="defaultUnit"
-                        [ngModelOptions]="{standalone: true}">
-                        <option [ngValue]="null">Item ki unit</option>
-                        <option *ngFor="let u of units" [value]="u._id">{{ u.unit_short }}</option>
-                    </select>
+                <div class="d-flex gap-1 w-100">
+                    <ng-select class="custom flex-grow-1" style="font-size:11px;" [(ngModel)]="defaultUnit"
+                        [ngModelOptions]="{standalone: true}" [searchable]="true" [clearable]="true"
+                        placeholder="Item unit" [tabToSelect]="true">
+                        <ng-option [value]="null">Item ki unit</ng-option>
+                        <ng-option *ngFor="let u of units" [value]="u._id">{{ u.unit_short }} <span
+                                class="text-muted small" *ngIf="u.unit_full"> : {{ u.unit_full }}</span></ng-option>
+                    </ng-select>
                     <button class="btn btn-sm btn-outline-secondary" (click)="applyDefaultsToAll()"
                         style="white-space:nowrap;" title="Unit + Category sabke liye apply karo">
                         Apply All
@@ -69,20 +72,24 @@
                     <div class="d-flex align-items-center mb-1 gap-1">
                         <button type="button" class="btn btn-sm py-0 px-1 btn-outline-secondary"
                             [class.invisible]="ai === 0" (click)="moveUp(ai)" title="Sequence: pehle">‹</button>
-                        
+
                         <span class="badge bg-soft-primary text-primary text-truncate"
                             style="font-size:11px; flex:1; text-align:center;">
                             {{ ai+1 }}. {{ g.attr.attribute_hin }}
                         </span>
 
                         <!-- Checkbox for whole group individual variants -->
-                        <div class="form-check form-check-inline m-0 p-0 d-flex align-items-center" title="Is attribute ke har value ka ek individual variant bhi banega">
-                            <input type="checkbox" id="ind_{{ai}}" [(ngModel)]="g.isIndividual" (change)="recompute()" class="form-check-input m-0" style="width:13px; height:13px; cursor:pointer;" />
-                            <label for="ind_{{ai}}" class="ms-1 mb-0 text-primary fw-semibold" style="font-size:9px; cursor:pointer; user-select:none;">Ind.</label>
+                        <div class="form-check form-check-inline m-0 p-0 d-flex align-items-center"
+                            title="Is attribute ke har value ka ek individual variant bhi banega">
+                            <input type="checkbox" id="ind_{{ai}}" [(ngModel)]="g.isIndividual" (change)="recompute()"
+                                class="form-check-input m-0" style="width:13px; height:13px; cursor:pointer;" />
+                            <label for="ind_{{ai}}" class="ms-1 mb-0 text-primary fw-semibold"
+                                style="font-size:9px; cursor:pointer; user-select:none;">Ind.</label>
                         </div>
 
                         <!-- Plus button for attribute values modal -->
-                        <button type="button" class="btn btn-sm py-0 px-1 btn-outline-success" (click)="openAttrModal('attr_values', g.attr._id)" title="Manage Attribute Values">
+                        <button type="button" class="btn btn-sm py-0 px-1 btn-outline-success"
+                            (click)="openAttrModal('attr_values', g.attr._id)" title="Manage Attribute Values">
                             <i class="uil uil-plus"></i>
                         </button>
 
@@ -92,13 +99,16 @@
                     </div>
 
                     <!-- Value selector -->
-                    <ng-select class="custom" [placeholder]="g.attr.attribute_hin + ' values...'"
-                        [multiple]="true" [searchable]="true" [clearable]="true"
+                    <ng-select class="custom" [placeholder]="g.attr.attribute_hin + ' values...'" [multiple]="true"
+                        [searchable]="true" [clearable]="true" [tabToSelect]="true"
                         [ngModelOptions]="{standalone: true}" [(ngModel)]="g.selectedValues"
                         (change)="onValChange(g, $event)">
                         <ng-option *ngFor="let v of valuesForGroup(g)" [value]="v">
                             {{ v.attribute_value_hin }}
-                            <small *ngIf="v.attribute_value_eng" class="text-muted"> · {{ v.attribute_value_eng }}</small>
+                            <small class="text-muted" *ngIf="v.attribute_value_eng"> : {{ v.attribute_value_eng
+                                }}</small>
+                            <small class="text-muted fst-italic" *ngIf="v.attribute_value_roman"> : {{
+                                v.attribute_value_roman }}</small>
                         </ng-option>
                     </ng-select>
 
@@ -117,10 +127,13 @@
             </span>
             <div class="ms-auto d-flex align-items-center gap-1">
                 <small class="text-muted text-nowrap">Default Cat:</small>
-                <ng-select class="custom" style="min-width:180px; font-size:11px;" placeholder="Categories (all combos)"
+                <ng-select class="custom" style="min-width:200px; font-size:11px;" placeholder="Categories (all combos)"
                     [multiple]="true" [searchable]="true" [clearable]="true" [(ngModel)]="defaultCatIds"
-                    [ngModelOptions]="{standalone: true}" (change)="applyDefaultsToAll()">
-                    <ng-option *ngFor="let c of categories" [value]="c._id">{{ c.category_hin }}</ng-option>
+                    [ngModelOptions]="{standalone: true}" (change)="applyDefaultsToAll()" [tabToSelect]="true">
+                    <ng-option *ngFor="let c of categories" [value]="c._id">
+                        {{ c.category_hin }} <span class="text-muted small" *ngIf="c.category_eng"> : {{ c.category_eng
+                            }}</span>
+                    </ng-option>
                 </ng-select>
             </div>
         </div>
@@ -158,8 +171,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let c of combinations; let ci=index" [class.table-success]="c.selected"
-                    [style.opacity]="c.selected ? '1' : '0.4'">
+                <tr *ngFor="let c of combinations; let ci=index" [class.bg-soft-primary]="c.selected"
+                    [style.opacity]="c.selected ? '1' : '0.6'">
 
                     <td>
                         <input type="checkbox" [(ngModel)]="c.selected" [ngModelOptions]="{standalone: true}" />
@@ -192,11 +205,12 @@
 
                     <!-- Unit -->
                     <td>
-                        <select class="form-select form-select-sm" [(ngModel)]="c.unit_id"
-                            [ngModelOptions]="{standalone: true}" [disabled]="!c.selected">
-                            <option [ngValue]="null">Default</option>
-                            <option *ngFor="let u of units" [value]="u._id">{{ u.unit_short }}</option>
-                        </select>
+                        <ng-select class="custom custom-sm" [(ngModel)]="c.unit_id"
+                            [ngModelOptions]="{standalone: true}" [disabled]="!c.selected" [searchable]="true"
+                            [clearable]="true" placeholder="Unit" [tabToSelect]="true">
+                            <ng-option [value]="null">Default</ng-option>
+                            <ng-option *ngFor="let u of units" [value]="u._id">{{ u.unit_short }}</ng-option>
+                        </ng-select>
                     </td>
 
                     <!-- Min Rate -->
@@ -215,9 +229,10 @@
                     <td>
                         <ng-select class="custom custom-sm" placeholder="Categories..." [multiple]="true"
                             [searchable]="true" [clearable]="true" [disabled]="!c.selected" [(ngModel)]="c.category_ids"
-                            [ngModelOptions]="{standalone: true}">
+                            [ngModelOptions]="{standalone: true}" [tabToSelect]="true">
                             <ng-option *ngFor="let cat of categories" [value]="cat._id">
-                                {{ cat.category_hin }}
+                                {{ cat.category_hin }} <span class="text-muted small" *ngIf="cat.category_eng"> : {{
+                                    cat.category_eng }}</span>
                             </ng-option>
                         </ng-select>
                     </td>
@@ -253,14 +268,15 @@
         <div class="modal-content shadow-lg border-0">
             <div class="modal-header py-2 bg-light">
                 <h6 class="modal-title mb-0">
-                    <i class="uil" [class.uil-tag-alt]="attrModalMode === 'attributes'" [class.uil-list-ul]="attrModalMode === 'attr_values'"></i>
+                    <i class="uil" [class.uil-tag-alt]="attrModalMode === 'attributes'"
+                        [class.uil-list-ul]="attrModalMode === 'attr_values'"></i>
                     Manage {{ attrModalMode === 'attributes' ? 'Attributes' : 'Attribute Values' }}
                 </h6>
                 <button type="button" class="btn-close" (click)="closeAttrModal()"></button>
             </div>
             <div class="modal-body p-0" style="max-height: 80vh; overflow-y: auto;">
-                <app-attribute-entry *ngIf="attrModalMode" [mode]="attrModalMode"
-                    [allAttributes]="allAttributes" [initialAttrId]="attrModalInitialId" (response)="onAttrSaved($event)">
+                <app-attribute-entry *ngIf="attrModalMode" [mode]="attrModalMode" [allAttributes]="allAttributes"
+                    [initialAttrId]="attrModalInitialId" (response)="onAttrSaved($event)">
                 </app-attribute-entry>
             </div>
         </div>
