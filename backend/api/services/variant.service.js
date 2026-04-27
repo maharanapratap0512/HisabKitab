@@ -1,63 +1,454 @@
-// services/variant.service.js
 'use strict';
-const { dbmodal } = require('../database/db.model');
-const db = dbmodal.db;
+// ──────────────────────────────────────────────────────────────────────────────
+// variant.service.js
+// Pattern: exact same as hmp.service.js
+//   - BaseTable instances per table (schema-driven joins auto-handled)
+//   - BaseTable.transaction() for atomic operations
+//   - Fn.begin/commit/rollback for async AJ operations
+//   - NO raw db.prepare() queries anywhere
+// ──────────────────────────────────────────────────────────────────────────────
+
 const BaseTable = require('../database/base.table');
 const Fn = require('../database/functions');
+const { sutramDB } = require('../database/db.model');
 
-// ── Table instances ───────────────────────────────────────────
+// ── Table instances  (schema in schema.js drives all joins automatically) ──────
+const attributes = new BaseTable('attributes');
+const attributes_value = new BaseTable('attributes_value');
 const variant = new BaseTable('variant');
-const attributesValue = new BaseTable('attributes_value');
-const variantAttributeMap = new BaseTable('variant_attribute_map');
-const variantCategoryMap = new BaseTable('variant_category_map');
+const variant_attr_map = new BaseTable('variant_attribute_map');
+const variant_cat_map = new BaseTable('variant_category_map');
+const variant_aliases = new BaseTable('variant_aliases');
+const item_aliases = new BaseTable('item_aliases');
 const subitem = new BaseTable('subitem');
+const rel_subitem_cat = new BaseTable('rel_subitem_category');
 
-// ─────────────────────────────────────────────────────────────
-// ── VARIANTS ────────────────────────────────────────────────────
-function insertVariant(data) {
-    return BaseTable.transaction(() => {
-        const variantId = variant.insert(data, false);
-        for (const attrValueId of data.attribute_value_ids || []) {
-            variantAttributeMap.insert({ variant_id: variantId, attribute_value_id: attrValueId }, false);
-        }
-        if (data.categories) {
-            for (const categoryId of data.categories || []) {
-                variantCategoryMap.insert({ variant_id: variantId, category_id: categoryId }, false);
-            }
-        }
-        return variantId;
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  ATTRIBUTES
+// ═════════════════════════════════════════════════════════════════════════════
+
+function getAllAttributes() {
+    // schema on attributes_value has hasMany from attributes in schema → value_count
+    // but since schema may not have count aggregation, we fetch all and let
+    // BaseTable join handle attribute_value children if defined, else plain getAll
+    return attributes.getAll({ active: 1 }, { orderBy: 'attribute_hin ASC' });
+}
+
+function insertAttribute(data) {
+    return attributes.insert({
+        attribute_hin: data.attribute_hin,
+        attribute_eng: data.attribute_eng || null,
+        attribute_roman: data.attribute_roman || null,
+        active: 1,
+        created_at: new Date().toISOString(),
     });
 }
 
-function updateVariant(id, data) {
+function updateAttribute(data) {
+    return attributes.updateById({
+        attribute_hin: data.attribute_hin,
+        attribute_eng: data.attribute_eng || null,
+        attribute_roman: data.attribute_roman || null,
+    }, data._id);
+}
+
+function deleteAttribute(id) {
+    // soft delete cascade — active=0 on attribute + all its values + all variant maps that use any of its values
     return BaseTable.transaction(() => {
-        if (data.attribute_value_ids) {
-            variantAttributeMap.delete({ variant_id: id });
-            for (const attrValueId of data.attribute_value_ids || []) {
-                variantAttributeMap.insert({ variant_id: id, attribute_value_id: attrValueId }, false);
-            }
+        attributes.updateById({ active: 0 }, id);
+        // getAll with full:false for speed — we just need IDs
+        const vals = attributes_value.getAll({ attribute_id: id }, { full: false });
+        for (const v of vals) {
+            attributes_value.updateById({ active: 0 }, v._id);
+            variant_attr_map.update({ active: 0 }, { attribute_value_id: v._id });
         }
-        if (data.categories) {
-            variantCategoryMap.delete({ variant_id: id });
-            for (const categoryId of data.categories || []) {
-                variantCategoryMap.insert({ variant_id: id, category_id: categoryId }, false);
-            }
-        }
-        return variant.updateById(data, id);
+        return 1;
     });
 }
 
-function deleteVariant(id) {
-    return BaseTable.transaction(() => {
-        variantAttributeMap.delete({ variant_id: id });
-        variantCategoryMap.delete({ variant_id: id });
-        return variant.deleteById(id);
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  ATTRIBUTE VALUES
+// ═════════════════════════════════════════════════════════════════════════════
+
+function getAttributeValues(attribute_id) {
+    // schema col.ref on attributes_value.attribute_id → auto-joins attribute name
+    return attributes_value.getAll(
+        { attribute_id: Number(attribute_id), active: 1 },
+        { orderBy: 'attribute_value_hin ASC' }
+    );
+}
+
+function getAllAttributeValues() {
+    return attributes_value.getAll({ active: 1 }, { orderBy: 'attribute_value_hin ASC' });
+}
+
+function insertAttributeValue(data) {
+    return attributes_value.insert({
+        attribute_id: Number(data.attribute_id),
+        attribute_value_hin: data.attribute_value_hin,
+        attribute_value_eng: data.attribute_value_eng || null,
+        attribute_value_roman: data.attribute_value_roman || null,
+        active: 1,
+        created_at: new Date().toISOString(),
     });
 }
 
-// ─────────────────────────────────────────────────────────────
+function updateAttributeValue(data) {
+    return attributes_value.updateById({
+        attribute_id: Number(data.attribute_id),
+        attribute_value_hin: data.attribute_value_hin,
+        attribute_value_eng: data.attribute_value_eng || null,
+        attribute_value_roman: data.attribute_value_roman || null,
+    }, data._id);
+}
+
+function deleteAttributeValue(id) {
+    return BaseTable.transaction(() => {
+        attributes_value.updateById({ active: 0 }, id);
+        variant_attr_map.update({ active: 0 }, { attribute_value_id: id });
+        return 1;
+    });
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  ITEM-LEVEL ALIASES
+// ═════════════════════════════════════════════════════════════════════════════
+
+function getItemAliases(item_id) {
+    return item_aliases.getAll({ item_id: Number(item_id) }, { orderBy: 'language ASC, alias ASC' });
+}
+
+function insertItemAlias(data) {
+    return item_aliases.insert({
+        item_id: Number(data.item_id),
+        alias: data.alias,
+        language: data.language || 'hin',
+        created_at: new Date().toISOString(),
+    });
+}
+
+function deleteItemAlias(id) {
+    return item_aliases.deleteById(id);
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  ITEM VARIANT DATA  (full aggregated payload for frontend on item select)
+// ═════════════════════════════════════════════════════════════════════════════
+
+function getItemVariantData(item_id) {
+    const id = Number(item_id);
+
+    // variants for this item — schema col.ref on variant.item_id → auto-joins item
+    const variants = variant.getAll({ item_id: id, active: 1 }, { orderBy: '_id ASC' });
+
+    // enrich each variant with its attribute maps, aliases, categories, and subitem mirror
+    for (const v of variants) {
+        // variant_attribute_map: schema joins → attribute + attribute_value auto-included
+        v.attributes = variant_attr_map.getAll(
+            { variant_id: v._id, active: 1 },
+            { orderBy: '_id ASC' }
+        );
+
+        v.aliases = variant_aliases.getAll(
+            { variant_id: v._id },
+            { orderBy: '_id ASC' }
+        );
+
+        // variant_category_map: schema joins → category auto-included
+        v.categories = variant_cat_map.getAll(
+            { variant_id: v._id },
+            { orderBy: '_id ASC' }
+        );
+
+        // the mirrored subitem row
+        const si = subitem.getOne({ variant_id: v._id, active: 1 }, { full: true });
+        v.subitem = si || null;
+    }
+
+    // all global attributes for the generator dropdowns
+    const all_attributes = getAllAttributes();
+    const all_attr_values = getAllAttributeValues();
+
+    // build attr_id → values[] map  (for combination generator in frontend)
+    const attr_value_map = {};
+    for (const av of all_attr_values) {
+        if (!attr_value_map[av.attribute_id]) attr_value_map[av.attribute_id] = [];
+        attr_value_map[av.attribute_id].push(av);
+    }
+
+    // item aliases
+    const aliases = getItemAliases(id);
+
+    // unlinked subitems (existing subitems without a variant_id — legacy data)
+    const unlinked_subitems = subitem.getAll(
+        `subitem.item_id = ${id} AND (subitem.variant_id IS NULL) AND subitem.active = 1`,
+        { orderBy: 'subitem_hin ASC' }
+    );
+
+    return { variants, all_attributes, attr_value_map, item_aliases: aliases, unlinked_subitems };
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  COMBINATION PREVIEW  — pure logic, zero DB write
+// ═════════════════════════════════════════════════════════════════════════════
+
+function generateCombinationPreview(attribute_groups, separator = ' ') {
+    if (!attribute_groups || attribute_groups.length === 0) return [];
+
+    // cartesian product
+    const cartesian = (groups) => groups.reduce((acc, group) => {
+        if (!group.values || group.values.length === 0) return acc;
+        const result = [];
+        for (const existing of acc) {
+            for (const val of group.values) {
+                result.push([...existing, { attribute_id: group.attribute_id, attribute_hin: group.attribute_hin, value: val }]);
+            }
+        }
+        return result;
+    }, [[]]);
+
+    return cartesian(attribute_groups).map((combo, idx) => ({
+        combo_index: idx,
+        selected: true,
+        attribute_values: combo.map(c => ({
+            attribute_id: c.attribute_id,
+            attribute_hin: c.attribute_hin,
+            attribute_value_id: c.value._id,
+            value_hin: c.value.value_hin,
+            value_eng: c.value.value_eng,
+            value_roman: c.value.value_roman,
+        })),
+        display_name_hin: combo.map(c => c.value.value_hin).filter(Boolean).join(separator),
+        display_name_eng: combo.map(c => c.value.value_eng).filter(Boolean).join(separator),
+        display_name_roman: combo.map(c => c.value.value_roman).filter(Boolean).join(separator),
+        sku: '',
+    }));
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  VARIANT CRUD
+// ═════════════════════════════════════════════════════════════════════════════
+
+// ─── Internal: create one variant inside a transaction ────────────────────────
+function _createOneVariant(item_id, data, dept_id) {
+    const {
+        display_name_hin, display_name_eng, display_name_roman,
+        sku, attribute_values, category_ids,
+        unit_id, extra_note, min_rate, max_rate,
+    } = data;
+
+    // 1. variant core
+    const variant_id = variant.insert({
+        item_id: Number(item_id),
+        sku: sku || null,
+        display_name: display_name_hin || null,
+        active: 1,
+        created_at: new Date().toISOString(),
+    }, false);  // full:false → returns id only (faster in bulk)
+
+    // 2. attribute-value map
+    for (const av of (attribute_values ?? [])) {
+        if (!av.attribute_id || !av.attribute_value_id) continue;
+        variant_attr_map.insert({
+            variant_id,
+            attribute_id: Number(av.attribute_id),
+            attribute_value_id: Number(av.attribute_value_id),
+            active: 1,
+            created_at: new Date().toISOString(),
+        }, false);
+    }
+
+    // 3. category map
+    for (const cat_id of (category_ids ?? [])) {
+        variant_cat_map.insert({
+            variant_id,
+            category_id: Number(cat_id),
+            created_at: new Date().toISOString(),
+        }, false);
+    }
+
+    // 4. ── MIRROR TO SUBITEM TABLE ─────────────────────────────────────────
+    //    Keeps backward compat — all existing aawak/jawak/bachat code works via subitem_id
+    const subitem_id = subitem.insert({
+        item_id: Number(item_id),
+        variant_id,
+        subitem_hin: display_name_hin || null,
+        subitem_eng: display_name_eng || null,
+        subitem_roman: display_name_roman || null,
+        unit_id: unit_id || null,
+        extra_note: extra_note || null,
+        min_rate: min_rate || 0,
+        max_rate: max_rate || 0,
+        add_by_dept_id: dept_id || null,
+        active: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    }, false);
+
+    // 5. rel_subitem_category mirror (for old category join queries)
+    for (const cat_id of (category_ids ?? [])) {
+        rel_subitem_cat.insert({
+            subitem_id,
+            category_id: Number(cat_id),
+        }, false);
+    }
+
+    return { variant_id, subitem_id };
+}
+
+// ─── Bulk create — main action from frontend, single DB transaction ───────────
+function bulkCreateVariants(item_id, variants_data, userData) {
+    try {
+        sutramDB.begin();
+        const dept_id = userData ? userData.dept_id : null;
+        const result = variants_data.map(v => _createOneVariant(item_id, v, dept_id));
+        sutramDB.commit();
+        return result;
+    } catch (err) {
+        sutramDB.rollback();
+        throw err;
+    }
+}
+
+// ─── Update single variant ────────────────────────────────────────────────────
+function updateVariant(variant_id, data, userData) {
+    const id = Number(variant_id);
+    const dept_id = userData ? userData.dept_id : null;
+
+    try {
+        sutramDB.begin();
+        // variant core
+        variant.updateById({
+            sku: data.sku || null,
+            display_name: data.display_name_hin || null,
+        }, id);
+
+        // sync subitem mirror
+        subitem.update({
+            subitem_hin: data.display_name_hin || null,
+            subitem_eng: data.display_name_eng || null,
+            subitem_roman: data.display_name_roman || null,
+            unit_id: data.unit_id || null,
+            extra_note: data.extra_note || null,
+            min_rate: data.min_rate || 0,
+            max_rate: data.max_rate || 0,
+            update_by_dept_id: dept_id,
+            updated_at: new Date().toISOString(),
+        }, { variant_id: id, active: 1 });
+
+        // re-sync categories (delete + re-insert)
+        if (Array.isArray(data.category_ids)) {
+            variant_cat_map.delete({ variant_id: id });
+            const si = subitem.getOne({ variant_id: id, active: 1 }, { full: false });
+            if (si) rel_subitem_cat.delete({ subitem_id: si._id });
+
+            for (const cat_id of data.category_ids) {
+                variant_cat_map.insert({ variant_id: id, category_id: Number(cat_id), created_at: new Date().toISOString() }, false);
+                if (si) rel_subitem_cat.insert({ subitem_id: si._id, category_id: Number(cat_id) }, false);
+            }
+        }
+
+        // re-sync aliases (delete + re-insert)
+        if (Array.isArray(data.aliases)) {
+            variant_aliases.delete({ variant_id: id });
+            for (const a of data.aliases) {
+                if (a.alias) variant_aliases.insert({ variant_id: id, alias: a.alias, created_at: new Date().toISOString() }, false);
+            }
+        }
+
+        const updated = variant.getById(id);
+        sutramDB.commit();
+        return updated;
+    } catch (err) {
+        sutramDB.rollback();
+        throw err;
+    }
+}
+
+// ─── Delete variant (soft) ────────────────────────────────────────────────────
+function deleteVariant(variant_id) {
+    const id = Number(variant_id);
+    try {
+        sutramDB.begin();
+        variant.updateById({ active: 0 }, id);
+        subitem.update({ active: 0 }, { variant_id: id });
+        variant_attr_map.update({ active: 0 }, { variant_id: id });
+        sutramDB.commit();
+        return 1;
+    } catch (err) {
+        sutramDB.rollback();
+        throw err;
+    }
+}
+
+// ─── Get variants by item (for simple list) ───────────────────────────────────
+function getVariantsByItem(item_id) {
+    const variants_list = variant.getAll(
+        { item_id: Number(item_id), active: 1 },
+        { orderBy: '_id ASC' }
+    );
+    for (const v of variants_list) {
+        v.attributes = variant_attr_map.getAll({ variant_id: v._id, active: 1 });
+    }
+    return variants_list;
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  VARIANT ALIASES
+// ═════════════════════════════════════════════════════════════════════════════
+
+function getVariantAliases(variant_id) {
+    return variant_aliases.getAll({ variant_id: Number(variant_id) }, { orderBy: '_id ASC' });
+}
+
+function insertVariantAlias(data) {
+    return variant_aliases.insert({
+        variant_id: Number(data.variant_id),
+        alias: data.alias,
+        created_at: new Date().toISOString(),
+    });
+}
+
+function deleteVariantAlias(id) {
+    return variant_aliases.deleteById(id);
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
 module.exports = {
-insertVariant,
-updateVariant,
-deleteVariant,
+    // attributes
+    getAllAttributes,
+    insertAttribute,
+    updateAttribute,
+    deleteAttribute,
+    // attribute values
+    getAttributeValues,
+    getAllAttributeValues,
+    insertAttributeValue,
+    updateAttributeValue,
+    deleteAttributeValue,
+    // item aliases
+    getItemAliases,
+    insertItemAlias,
+    deleteItemAlias,
+    // item variant data (aggregated)
+    getItemVariantData,
+    // combination preview
+    generateCombinationPreview,
+    // variant CRUD
+    bulkCreateVariants,
+    updateVariant,
+    deleteVariant,
+    getVariantsByItem,
+    // variant aliases
+    getVariantAliases,
+    insertVariantAlias,
+    deleteVariantAlias,
 };

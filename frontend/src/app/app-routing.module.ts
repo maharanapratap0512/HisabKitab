@@ -15,6 +15,7 @@ import { CategoryComponent } from './CHILD_TABLES/category/category.component';
 import { ItemComponent } from './CHILD_TABLES/item/item.component';
 import { CityComponent } from './CHILD_TABLES/city/city.component';
 import { SubitemComponent } from './CHILD_TABLES/subitem/subitem.component';
+import { VariantComponent } from './CHILD_TABLES/variant/variant.component';
 import { DepartmentComponent } from './department/department.component';
 import { ProductComponent } from './CHILD_TABLES/product/product.component';
 
@@ -45,6 +46,7 @@ import { PbkClosingEntryComponent } from './ENTRY__FORMS/pbk-closing-entry/pbk-c
 import { PbkBachatComponent } from './pbk-bachat/pbk-bachat.component';
 import { listsResolver } from './resolver/lists.resolver';
 import { NetdropUiComponent } from './modules/netdrop/components/netdrop-ui/netdrop-ui.component';
+import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.component';
 
 const routes: Routes = [
    {
@@ -77,6 +79,8 @@ const routes: Routes = [
          { path: "category", component: CategoryComponent },
          { path: "item", component: ItemComponent },
          { path: "subitem", component: SubitemComponent },
+         { path: "variant", component: VariantComponent },
+         { path: "variantN", component: VariantNewComponent },
          { path: "city", component: CityComponent },
          { path: "product", component: ProductComponent },
          { path: "department", component: DepartmentComponent },

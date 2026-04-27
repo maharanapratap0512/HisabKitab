@@ -1,0 +1,384 @@
+<!-- CHILD_TABLES/variant/variant.component.html  v3 -->
+
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0,0,0,0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color:white">लोड हो रहा है...</p>
+</ngx-spinner>
+
+<div class="wrapper">
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+
+                <!-- ── Page Header ────────────────────────────────────────────── -->
+                <div class="row border-bottom border-secondary mb-2">
+                    <div class="card-body py-2">
+                        <div class="row align-items-center g-2">
+
+                            <!-- Search -->
+                            <div class="col-3">
+                                <input type="text" class="form-control form-control-sm"
+                                    placeholder="Item search karo..." #searchInput
+                                    (keyup.enter)="onSearch(searchInput.value)" />
+                            </div>
+
+                            <!-- Category filter (ng-select multi) -->
+                            <div class="col-3">
+                                <ng-select class="custom" placeholder="-- Categories filter --" [multiple]="true"
+                                    [virtualScroll]="true" [clearable]="true" (change)="onCatFilter($event)"
+                                    [ngModelOptions]="{standalone: true}" [(ngModel)]="conditionObj.categories">
+                                    <ng-option *ngFor="let c of categories" [value]="c._id">
+                                        {{ c.category_hin }}
+                                    </ng-option>
+                                </ng-select>
+                            </div>
+
+                            <div class="col-auto ms-auto d-flex gap-2">
+                                <button class="btn btn-outline-info btn-sm"
+                                    (click)="openAttributeManager('attributes')">
+                                    <i class="uil uil-tag-alt"></i> Attributes
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm"
+                                    (click)="openAttributeManager('attr_values')">
+                                    <i class="uil uil-list-ul"></i> Values
+                                </button>
+                                <span class="text-muted small align-self-center">{{ total_count }} items</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Main Accordion Table ──────────────────────────────────── -->
+                <div class="table-responsive">
+                    <table class="table table-hover dt-responsive nowrap mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width:36px;"></th>
+                                <th style="width:36px;">#</th>
+                                <th>Item Name (Hindi / Eng)</th>
+                                <th style="width:80px;">Unit</th>
+                                <th style="width:100px;">Variants</th>
+                                <th>Categories</th>
+                                <th>Aliases</th>
+                                <th style="width:160px;">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="accordion" id="variantAccordion">
+                            <ng-container *ngFor="let item of itemData
+                  | paginate:{itemsPerPage:itemsPerPage, currentPage:page, totalItems:total_count};
+                  let i=index; trackBy:trackById">
+
+                                <!-- ── ITEM ROW (main) ─────────────────────────────────── -->
+                                <tr class="main-row" style="cursor:pointer;" (click)="toggleAccordion(item)"
+                                    [class.table-active]="isExpanded(item)">
+
+                                    <!-- Expand arrow -->
+                                    <td class="text-center">
+                                        <i class="uil" [class.uil-angle-down]="!isExpanded(item)"
+                                            [class.uil-angle-up]="isExpanded(item)" style="font-size:16px;"></i>
+                                    </td>
+
+                                    <td class="text-muted">{{ itemsPerPage*(page-1)+(i+1) }}</td>
+
+                                    <!-- Item name -->
+                                    <td>
+                                        <div class="fw-semibold">{{ item.item_hin }}</div>
+                                        <small class="text-muted">{{ item.item_eng }}</small>
+                                    </td>
+
+                                    <!-- Unit -->
+                                    <td>
+                                        <span>{{ item.unit_full }}</span><br>
+                                        <small class="text-muted">{{ item.unit_short }}</small>
+                                    </td>
+
+                                    <!-- Variant count -->
+                                    <td>
+                                        <span class="badge bg-soft-primary text-primary">
+                                            {{ variantCount(item) }} variants
+                                        </span>
+                                    </td>
+
+                                    <!-- Categories -->
+                                    <td>
+                                        <span class="text-muted small">
+                                            {{ item.categories | joinObj:'category_hin' }}
+                                        </span>
+                                    </td>
+
+                                    <!-- Aliases -->
+                                    <td (click)="$event.stopPropagation()">
+                                        <ng-container *ngIf="!aliasDisplay(item)">
+                                            <button class="btn btn-sm btn-outline-secondary py-0 px-2"
+                                                (click)="openAliasManager(item)" style="font-size:11px;">
+                                                <i class="uil uil-plus me-1"></i>Add Alias
+                                            </button>
+                                        </ng-container>
+                                        <ng-container *ngIf="aliasDisplay(item)">
+                                            <span class="text-muted small me-1">{{ aliasDisplay(item) }}</span>
+                                            <button class="btn btn-sm btn-outline-secondary py-0 px-1"
+                                                (click)="openAliasManager(item)" style="font-size:10px;"
+                                                title="Alias add/manage karo">
+                                                <i class="uil uil-plus"></i>
+                                            </button>
+                                        </ng-container>
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td (click)="$event.stopPropagation()">
+                                        <button class="btn btn-sm btn-success py-0 w-100" (click)="openGenerator(item)"
+                                            title="Variants Generate Karo" style="white-space:nowrap;">
+                                            <i class="uil uil-plus-circle"></i> Variants
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- ── ACCORDION EXPAND ROW ───────────────────────────── -->
+                                <tr *ngIf="isExpanded(item)" class="accordion-collapse">
+                                    <td colspan="8" class="p-0">
+
+                                        <!-- Loading -->
+                                        <div *ngIf="expandedLoading" class="text-center py-3 text-muted">
+                                            <span class="spinner-border spinner-border-sm me-2"></span>
+                                            Loading...
+                                        </div>
+
+                                        <!-- Variant + Subitem nested table -->
+                                        <div *ngIf="!expandedLoading" class="sub-row">
+                                            <table style="width:100%; table-layout:fixed;">
+                                                <thead>
+                                                    <tr
+                                                        style="background: var(--bs-table-striped-bg, rgba(0,0,0,0.05));">
+                                                        <th
+                                                            style="width:60px; padding:6px 10px; font-size:11px; color:var(--bs-secondary-color);">
+                                                            Type</th>
+                                                        <th style="width:50px; padding:6px 4px; font-size:11px;">#</th>
+                                                        <th style="width:130px; padding:6px 4px; font-size:11px;">Action
+                                                        </th>
+                                                        <th style="padding:6px 4px; font-size:11px;">Name (Hindi)</th>
+                                                        <th style="padding:6px 4px; font-size:11px;">Eng / Roman</th>
+                                                        <th style="width:200px; padding:6px 4px; font-size:11px;">
+                                                            Attributes</th>
+                                                        <th style="width:80px; padding:6px 4px; font-size:11px;">SKU
+                                                        </th>
+                                                        <th style="width:60px; padding:6px 4px; font-size:11px;">Unit
+                                                        </th>
+                                                        <th style="width:100px; padding:6px 4px; font-size:11px;">Rate
+                                                        </th>
+                                                        <th style="width:120px; padding:6px 4px; font-size:11px;">
+                                                            Aliases</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                    <!-- VARIANTS (with variant_id) -->
+                                                    <ng-container *ngFor="let v of expandedVariants; let vi=index">
+                                                        <tr class="variant-row">
+
+                                                            <!-- Type badge: VARIANT -->
+                                                            <td style="padding:5px 10px;">
+                                                                <span class="badge bg-primary"
+                                                                    style="font-size:10px;">Variant</span>
+                                                            </td>
+
+                                                            <td
+                                                                style="padding:5px 4px; font-size:12px; color:var(--bs-secondary-color);">
+                                                                <i class="uil uil-corner-down-right me-1"></i>{{ vi+1 }}
+                                                            </td>
+
+                                                            <!-- Actions -->
+                                                            <td style="padding:5px 4px;"
+                                                                (click)="$event.stopPropagation()">
+                                                                <i class="uil uil-pen i-outline-primary me-2"
+                                                                    style="cursor:pointer; font-size:15px;"
+                                                                    (click)="openEditVariant(v, item)"
+                                                                    *ngIf="settings.edit" title="Edit variant"></i>
+                                                                <i class="uil uil-trash i-outline-danger"
+                                                                    style="cursor:pointer; font-size:15px;"
+                                                                    (click)="deleteVariant(v)" *ngIf="settings.delete"
+                                                                    title="Delete variant"></i>
+                                                            </td>
+
+                                                            <!-- Display Name (Hindi) -->
+                                                            <td style="padding:5px 4px;">
+                                                                <div class="fw-semibold" style="font-size:13px;">{{
+                                                                    v.display_name }}</div>
+                                                            </td>
+
+                                                            <!-- Eng / Roman (from subitem mirror) -->
+                                                            <td style="padding:5px 4px; font-size:12px;">
+                                                                <div>{{ v.subitem?.subitem_eng }}</div>
+                                                                <small class="text-muted">{{ v.subitem?.subitem_roman
+                                                                    }}</small>
+                                                            </td>
+
+                                                            <!-- Attributes combo -->
+                                                            <td style="padding:5px 4px;">
+                                                                <div class="d-flex flex-wrap gap-1">
+                                                                    <span *ngFor="let av of v.attributes"
+                                                                        class="badge bg-soft-primary text-primary"
+                                                                        style="font-size:10px;">
+                                                                        {{ av.attribute?.attribute_hin }}: {{
+                                                                        av.attribute_value?.attribute_value_hin }}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- SKU -->
+                                                            <td style="padding:5px 4px;">
+                                                                <code *ngIf="v.sku"
+                                                                    style="font-size:10px;">{{ v.sku }}</code>
+                                                                <span *ngIf="!v.sku" class="text-muted">—</span>
+                                                            </td>
+
+                                                            <!-- Unit -->
+                                                            <td style="padding:5px 4px; font-size:12px;">
+                                                                {{ v.subitem?.unit?.unit_short || '—' }}
+                                                            </td>
+
+                                                            <!-- Rate -->
+                                                            <td style="padding:5px 4px; font-size:12px;">
+                                                                <span
+                                                                    *ngIf="v.subitem?.min_rate || v.subitem?.max_rate">
+                                                                    {{ v.subitem?.min_rate }} – {{ v.subitem?.max_rate
+                                                                    }}
+                                                                </span>
+                                                                <span
+                                                                    *ngIf="!v.subitem?.min_rate && !v.subitem?.max_rate"
+                                                                    class="text-muted">—</span>
+                                                            </td>
+
+                                                            <!-- Aliases -->
+                                                            <td style="padding:5px 4px;">
+                                                                <span *ngFor="let a of v.aliases"
+                                                                    class="badge bg-soft-secondary text-secondary me-1"
+                                                                    style="font-size:10px;">{{ a.alias }}</span>
+                                                            </td>
+                                                        </tr>
+                                                    </ng-container>
+
+                                                    <!-- UNLINKED SUBITEMS (no variant_id) -->
+                                                    <ng-container *ngFor="let s of expandedUnlinked; let si=index">
+                                                        <tr class="subitem-row" style="opacity:0.75;">
+
+                                                            <!-- Type badge: SUBITEM -->
+                                                            <td style="padding:5px 10px;">
+                                                                <span class="badge bg-secondary"
+                                                                    style="font-size:10px;">Subitem</span>
+                                                            </td>
+
+                                                            <td
+                                                                style="padding:5px 4px; font-size:12px; color:var(--bs-secondary-color);">
+                                                                <i class="uil uil-corner-down-right me-1"></i>{{ si+1 }}
+                                                            </td>
+
+                                                            <td style="padding:5px 4px;">
+                                                                <small class="text-muted"
+                                                                    style="font-size:10px;">unlinked</small>
+                                                            </td>
+
+                                                            <td style="padding:5px 4px; font-size:13px;">{{
+                                                                s.subitem_hin }}</td>
+                                                            <td style="padding:5px 4px; font-size:12px;">
+                                                                <div>{{ s.subitem_eng }}</div>
+                                                                <small class="text-muted">{{ s.subitem_roman }}</small>
+                                                            </td>
+                                                            <td colspan="5" style="padding:5px 4px;">
+                                                                <small class="text-warning">
+                                                                    <i class="uil uil-exclamation-triangle me-1"></i>
+                                                                    Variant se link nahi hai
+                                                                </small>
+                                                            </td>
+                                                        </tr>
+                                                    </ng-container>
+
+                                                    <!-- Empty state -->
+                                                    <tr
+                                                        *ngIf="expandedVariants.length === 0 && expandedUnlinked.length === 0">
+                                                        <td colspan="10" class="text-center text-muted py-3">
+                                                            <i class="uil uil-puzzle-piece me-2"></i>
+                                                            Koi variant nahi.
+                                                            <a href="#" class="ms-2"
+                                                                (click)="$event.preventDefault(); openGenerator(item)">
+                                                                + Generate Karo
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </td>
+                                </tr>
+
+                            </ng-container>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-center mt-2">
+                    <pagination-controls (pageChange)="getItemData($event)" previousLabel="Prev" nextLabel="Next">
+                    </pagination-controls>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════
+  SINGLE MODAL — all entry forms inside
+════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog" [style.width]="showModal === 'Generate Variants' ? '90%' : '70%'" style="max-width:92%;">
+        <div class="modal-content">
+
+            <div class="modal-header py-2">
+                <h5 class="modal-title">
+                    {{ showModal }}
+                    <small *ngIf="activeItem" class="text-muted fw-normal ms-2">
+                        — {{ activeItem.item_hin }}
+                    </small>
+                </h5>
+                <button type="button" class="btn-close" (click)="closeModal()"></button>
+            </div>
+
+            <div class="modal-body p-0">
+
+                <app-variant-entry *ngIf="showModal === 'Generate Variants'" [selectedItem]="activeItem"
+                    [allAttributes]="allAttributes" [attrValueMap]="attrValueMap" [units]="units"
+                    [categories]="categories" (response)="onVariantsGenerated($event)">
+                </app-variant-entry>
+
+                <app-variant-edit-entry *ngIf="showModal === 'Edit Variant'" [getData]="editData" [isEdit]="isEdit"
+                    [units]="units" [categories]="categories" (response)="onVariantEdited($event)">
+                </app-variant-edit-entry>
+
+                <app-attribute-entry *ngIf="showModal === 'Manage Attributes'" [mode]="'attributes'"
+                    [allAttributes]="allAttributes" (response)="onAttributeSaved($event)">
+                </app-attribute-entry>
+
+                <app-attribute-entry *ngIf="showModal === 'Manage Attribute Values'" [mode]="'attr_values'"
+                    [allAttributes]="allAttributes" (response)="onAttributeSaved($event)">
+                </app-attribute-entry>
+
+                <app-item-alias-entry *ngIf="showModal === 'Manage Item Aliases'" [getData]="editData"
+                    (response)="onAliasSaved($event)">
+                </app-item-alias-entry>
+
+            </div>
+
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">
+                    Bandh Karo
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

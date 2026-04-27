@@ -1,0 +1,136 @@
+<div class="p-3">
+
+    <!-- ── ATTRIBUTES mode ───────────────────────────────────────────────── -->
+    <ng-container *ngIf="mode === 'attributes'">
+        <div class="row g-2 align-items-end mb-3 border-bottom pb-3">
+            <div class="col-4">
+                <label class="form-label">Attribute Hindi <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="attrForm.attribute_hin"
+                    placeholder="e.g. रंग" />
+            </div>
+            <div class="col-3">
+                <label class="form-label">English</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="attrForm.attribute_eng"
+                    placeholder="e.g. Color" />
+            </div>
+            <div class="col-3">
+                <label class="form-label">Roman</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="attrForm.attribute_roman"
+                    placeholder="e.g. Color" />
+            </div>
+            <div class="col-2">
+                <button class="btn btn-success btn-sm w-100" (click)="saveAttr()" [disabled]="isLoader">
+                    <i class="uil uil-plus"></i> Add
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive" style="max-height:50vh;overflow-y:auto;">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Hindi</th>
+                        <th>English</th>
+                        <th>Roman</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let row of rows; let i=index">
+                        <td class="text-muted">{{ i+1 }}</td>
+                        <td><strong>{{ row.attribute_hin }}</strong></td>
+                        <td>{{ row.attribute_eng }}</td>
+                        <td>{{ row.attribute_roman }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger py-0" (click)="deleteAttr(row)">
+                                <i class="uil uil-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="rows.length === 0">
+                        <td colspan="5" class="text-center text-muted py-3">Koi attribute nahi</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </ng-container>
+
+    <!-- ── ATTR VALUES mode ───────────────────────────────────────────────── -->
+    <ng-container *ngIf="mode === 'attr_values'">
+        <!-- Filter by attribute -->
+        <div class="mb-2">
+            <select class="form-select form-select-sm" (change)="onAttrValFilter($any($event.target).value)">
+                <option value="">-- Sab Attributes --</option>
+                <option *ngFor="let a of allAttributes" [value]="a._id">{{ a.attribute_hin }}</option>
+            </select>
+        </div>
+
+        <div class="row g-2 align-items-end mb-3 border-bottom pb-3">
+            <div class="col-3">
+                <label class="form-label">Attribute <span class="text-danger">*</span></label>
+                <select class="form-select form-select-sm" [(ngModel)]="attrValForm.attribute_id">
+                    <option [ngValue]="null">-- Select --</option>
+                    <option *ngFor="let a of allAttributes" [value]="a._id">{{ a.attribute_hin }}</option>
+                </select>
+            </div>
+            <div class="col-3">
+                <label class="form-label">Value (Hindi) <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="attrValForm.attribute_value_hin"
+                    placeholder="e.g. लाल" />
+            </div>
+            <div class="col-2">
+                <label class="form-label">English</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="attrValForm.attribute_value_eng"
+                    placeholder="e.g. Red" />
+            </div>
+            <div class="col-2">
+                <label class="form-label">Roman</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="attrValForm.attribute_value_roman"
+                    placeholder="e.g. Red" />
+            </div>
+            <div class="col-2">
+                <button class="btn btn-success btn-sm w-100" (click)="saveAttrVal()" [disabled]="isLoader">
+                    <i class="uil uil-plus"></i> Add
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive" style="max-height:50vh;overflow-y:auto;">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Attribute</th>
+                        <th>Hindi</th>
+                        <th>English</th>
+                        <th>Roman</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let row of rows; let i=index">
+                        <td class="text-muted">{{ i+1 }}</td>
+                        <td>
+                            <span class="badge bg-soft-primary text-primary">
+                                {{ row.attribute?.attribute_hin }}
+                            </span>
+                        </td>
+                        <td><strong>{{ row.attribute_value_hin }}</strong></td>
+                        <td>{{ row.attribute_value_eng }}</td>
+                        <td>{{ row.attribute_value_roman }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger py-0" (click)="deleteAttrVal(row)">
+                                <i class="uil uil-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="rows.length === 0">
+                        <td colspan="6" class="text-center text-muted py-3">Koi value nahi</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </ng-container>
+
+</div>

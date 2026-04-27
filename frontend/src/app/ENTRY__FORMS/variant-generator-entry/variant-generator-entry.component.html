@@ -1,0 +1,241 @@
+<!-- ENTRY__FORMS/variant-generator-entry/variant-generator-entry.component.html -->
+
+<div class="p-3">
+
+    <!-- ── Step Indicator ─────────────────────────────────────────────────── -->
+    <div class="d-flex mb-3 border-bottom pb-2">
+        <div class="me-3 fw-semibold" [class.text-primary]="step === 1" [class.text-muted]="step !== 1">
+            <span class="badge me-1" [class.bg-primary]="step === 1" [class.bg-secondary]="step !== 1">1</span>
+            Attributes & Values
+        </div>
+        <div class="fw-semibold" [class.text-primary]="step === 2" [class.text-muted]="step !== 2">
+            <span class="badge me-1" [class.bg-primary]="step === 2" [class.bg-secondary]="step !== 2">2</span>
+            Combinations Review
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+      STEP 1 — Build Attribute Groups
+    ══════════════════════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="step === 1">
+
+        <!-- Separator selector -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold">
+                Name Separator
+                <small class="text-muted fw-normal">(attribute values ke beech mein)</small>
+            </label>
+            <div class="d-flex flex-wrap gap-2">
+                <button *ngFor="let s of separators" type="button" class="btn btn-sm"
+                    [class.btn-primary]="separator === s.value" [class.btn-outline-secondary]="separator !== s.value"
+                    (click)="separator = s.value">
+                    "{{ s.value === ' ' ? 'Space' : s.value }}"
+                </button>
+            </div>
+        </div>
+
+        <!-- Attribute Groups -->
+        <div *ngFor="let group of attrGroups; let gi=index" class="card mb-2">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0 text-primary">Attribute {{ gi + 1 }}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger py-0" (click)="removeGroup(gi)">
+                        <i class="uil uil-times"></i> Hatao
+                    </button>
+                </div>
+
+                <!-- Attribute dropdown -->
+                <div class="mb-2">
+                    <label class="form-label">Attribute Choose Karo</label>
+                    <select class="form-select form-select-sm" (change)="onAttrSelect(group, $event)">
+                        <option value="">-- Select Attribute --</option>
+                        <option *ngFor="let a of allAttributes" [value]="a._id"
+                            [selected]="group.attribute_id === a._id">
+                            {{ a.attribute_hin }}
+                            <ng-container *ngIf="a.attribute_eng"> ({{ a.attribute_eng }})</ng-container>
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Value chips -->
+                <div *ngIf="group.attribute_id">
+                    <label class="form-label">
+                        Values Select Karo
+                        <span class="badge bg-primary ms-1">{{ group.selectedValues.length }} selected</span>
+                    </label>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                        <button *ngFor="let val of valuesForGroup(group)" type="button" class="btn btn-sm"
+                            [class.btn-primary]="isValueSelected(group, val._id)"
+                            [class.btn-outline-secondary]="!isValueSelected(group, val._id)"
+                            (click)="toggleValue(group, val)">
+                            {{ val.attribute_value_hin }}
+                            <small *ngIf="val.attribute_value_eng" class="opacity-75">
+                                &nbsp;{{ val.attribute_value_eng }}
+                            </small>
+                        </button>
+                        <span *ngIf="valuesForGroup(group).length === 0" class="text-muted small">
+                            Is attribute ke koi values nahi. "Attribute Values" button se add karo.
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Group Button -->
+        <button type="button" class="btn btn-outline-primary w-100 mb-3" (click)="addGroup()">
+            <i class="uil uil-plus"></i> Aur Attribute Add Karo
+        </button>
+
+        <!-- Estimated count -->
+        <div *ngIf="estimatedCount > 0" class="alert alert-info py-2 mb-3">
+            <i class="uil uil-info-circle"></i>
+            Estimated combinations: <strong>{{ estimatedCount }}</strong>
+        </div>
+
+        <!-- Step 1 Actions -->
+        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+            <button type="button" class="btn btn-primary" [disabled]="!canGoStep2() || isLoader"
+                (click)="generateCombinations()">
+                <span *ngIf="isLoader" class="spinner-border spinner-border-sm me-1"></span>
+                <i *ngIf="!isLoader" class="uil uil-arrow-right me-1"></i>
+                Combinations Generate Karo
+            </button>
+        </div>
+
+    </ng-container>
+    <!-- /STEP 1 -->
+
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+      STEP 2 — Review & Customize Combinations
+    ══════════════════════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="step === 2">
+
+        <!-- Summary + Separator re-selector -->
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+                <span class="text-muted">{{ combinations.length }} combinations generate huye.</span>
+                &nbsp;
+                <span class="badge bg-success">{{ selectedCount }} selected</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted small">Separator:</span>
+                <div class="d-flex gap-1">
+                    <button *ngFor="let s of separators" type="button" class="btn btn-sm"
+                        [class.btn-primary]="separator === s.value"
+                        [class.btn-outline-secondary]="separator !== s.value" (click)="onSeparatorChange(s.value)">
+                        "{{ s.value === ' ' ? 'Space' : s.value }}"
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Combination list -->
+        <div style="max-height: 55vh; overflow-y: auto;">
+            <div *ngFor="let c of combinations; let ci=index" class="card mb-2" [class.border-success]="c.selected"
+                [class.border-danger]="!c.selected" [class.opacity-50]="!c.selected">
+
+                <div class="card-body p-2">
+                    <div class="d-flex gap-2 align-items-start">
+
+                        <!-- Checkbox -->
+                        <div class="pt-1 flex-shrink-0">
+                            <input type="checkbox" class="form-check-input" [(ngModel)]="c.selected" />
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <!-- Attribute value tags (read only labels) -->
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                <span *ngFor="let av of c.attribute_values" class="badge bg-soft-primary text-primary"
+                                    style="font-size:11px;">
+                                    {{ av.value_hin }}
+                                </span>
+                            </div>
+
+                            <!-- Three name inputs (hin required, eng+roman auto-filled editable) -->
+                            <div class="row g-1 mb-2">
+                                <div class="col-4">
+                                    <label class="form-label mb-0" style="font-size:10px;">
+                                        Hindi (Display Name) <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="c.display_name_hin" [disabled]="!c.selected"
+                                        placeholder="Hindi name" />
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label mb-0" style="font-size:10px;">English</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="c.display_name_eng" [disabled]="!c.selected"
+                                        placeholder="English name" />
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label mb-0" style="font-size:10px;">Roman</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="c.display_name_roman" [disabled]="!c.selected"
+                                        placeholder="Roman name" />
+                                </div>
+                            </div>
+
+                            <!-- Extra fields row -->
+                            <div class="row g-1">
+                                <div class="col-2">
+                                    <label class="form-label mb-0" style="font-size:10px;">SKU</label>
+                                    <input type="text" class="form-control form-control-sm" [(ngModel)]="c.sku"
+                                        [disabled]="!c.selected" placeholder="SKU code" />
+                                </div>
+                                <div class="col-2">
+                                    <label class="form-label mb-0" style="font-size:10px;">Unit</label>
+                                    <select class="form-select form-select-sm" [(ngModel)]="c.unit_id"
+                                        [disabled]="!c.selected">
+                                        <option [ngValue]="null">Default</option>
+                                        <option *ngFor="let u of units" [value]="u._id">
+                                            {{ u.unit_short }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-2">
+                                    <label class="form-label mb-0" style="font-size:10px;">Min Rate</label>
+                                    <input type="number" class="form-control form-control-sm" [(ngModel)]="c.min_rate"
+                                        [disabled]="!c.selected" placeholder="0" />
+                                </div>
+                                <div class="col-2">
+                                    <label class="form-label mb-0" style="font-size:10px;">Max Rate</label>
+                                    <input type="number" class="form-control form-control-sm" [(ngModel)]="c.max_rate"
+                                        [disabled]="!c.selected" placeholder="0" />
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label mb-0" style="font-size:10px;">Categories</label>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        <button *ngFor="let cat of categories" type="button" class="btn py-0"
+                                            style="font-size:10px;" [class.btn-info]="isCatSelected(c, cat._id)"
+                                            [class.btn-outline-secondary]="!isCatSelected(c, cat._id)"
+                                            [disabled]="!c.selected" (click)="toggleCategory(c, cat._id)">
+                                            {{ cat.category_hin }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /combination list -->
+
+        <!-- Step 2 Actions -->
+        <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-2">
+            <button type="button" class="btn btn-outline-secondary" (click)="backToStep1()">
+                <i class="uil uil-arrow-left"></i> Wapas
+            </button>
+            <button type="button" class="btn btn-success" [disabled]="selectedCount === 0 || isLoader"
+                (click)="saveVariants()">
+                <span *ngIf="isLoader" class="spinner-border spinner-border-sm me-1"></span>
+                <i *ngIf="!isLoader" class="uil uil-save me-1"></i>
+                {{ selectedCount }} Variant{{ selectedCount > 1 ? 's' : '' }} Save Karo
+            </button>
+        </div>
+
+    </ng-container>
+    <!-- /STEP 2 -->
+
+</div>

@@ -10,7 +10,7 @@ app.use(express.static(__dirname + '/dist'));
 app.get('/*', function (req, res) {
     res.sendFile(path.join(__dirname + '/dist/index.html'));
 });
-app.listen(port, function () {
+app.listen(port, '0.0.0.0', function () {
     console.log(`your application is started on : http://localhost:${port}/`);
     console.log("Please do not close this Terminal Windows");
     open(`http://localhost:${port}/`);
