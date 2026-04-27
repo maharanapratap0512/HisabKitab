@@ -1,0 +1,379 @@
+<!-- CHILD_TABLES/variant/variant.component.html -->
+<!-- Pattern: exact same as item.component.html + hmp.component.html
+     - Bootstrap 4/5 theme classes only (card, btn, table, form-control, badge etc.)
+     - No inline styles except layout widths
+     - showModal string → *ngIf switch inside single #showModal
+     - Entry forms as separate <app-*> components inside modal body
+-->
+
+<ngx-spinner *ngIf="isLoader" bdColor="rgba(0,0,0,0.8)" size="large" color="#fff" type="ball-scale-multiple"
+    [fullScreen]="true">
+    <p style="color:white">लोड हो रहा है...</p>
+</ngx-spinner>
+
+<div class="wrapper">
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+
+                <!-- ── Page Title Row ──────────────────────────────────────── -->
+                <div class="row border-bottom border-secondary mb-2">
+                    <div class="card-body py-2">
+                        <div class="row align-items-center">
+                            <div class="col-6">
+                                <h4 class="mb-0">Item Variant Management</h4>
+                                <small class="text-muted">Items → Attributes → Variants → Subitems</small>
+                            </div>
+                            <div class="col-6 d-flex justify-content-end gap-2">
+                                <button class="btn btn-outline-info btn-sm"
+                                    (click)="openAttributeManager('attributes')">
+                                    <i class="uil uil-tag-alt"></i> Attributes
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm"
+                                    (click)="openAttributeManager('attr_values')">
+                                    <i class="uil uil-list-ul"></i> Attribute Values
+                                </button>
+                                <button class="btn btn-primary btn-sm" (click)="openGenerator()"
+                                    [disabled]="!selectedItem">
+                                    <i class="uil uil-plus-circle"></i> Variants Generate Karo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Split Layout ─────────────────────────────────────────── -->
+                <div class="row" style="height: calc(100vh - 170px);">
+
+                    <!-- ══ LEFT PANEL: Item List ══════════════════════════════ -->
+                    <div class="col-3 border-end pe-0 d-flex flex-column" style="overflow:hidden;">
+
+                        <!-- Search + Category filter -->
+                        <div class="px-2 pt-2 pb-1 border-bottom">
+                            <input type="text" class="form-control form-control-sm mb-1"
+                                placeholder="Item search karo..." #searchInput
+                                (keyup.enter)="onSearch(searchInput.value)" />
+                            <select class="form-select form-select-sm"
+                                (change)="onCatFilter($any($event.target).value)">
+                                <option value="">-- Sab Categories --</option>
+                                <option *ngFor="let c of categories; trackBy:trackById" [value]="c._id">
+                                    {{ c.category_hin }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Items count -->
+                        <div class="px-2 py-1 border-bottom">
+                            <small class="text-muted">Total: {{ total_count }} items</small>
+                        </div>
+
+                        <!-- Item List -->
+                        <div class="flex-grow-1 overflow-auto">
+                            <div *ngFor="let item of itemData; trackBy:trackById"
+                                class="d-flex justify-content-between align-items-center px-2 py-2 border-bottom cursor-pointer"
+                                [class.table-active]="selectedItem?._id === item._id"
+                                [class.border-start]="selectedItem?._id === item._id"
+                                [class.border-primary]="selectedItem?._id === item._id" style="cursor:pointer;"
+                                (click)="selectItem(item)">
+                                <div>
+                                    <div class="fw-semibold" style="font-size:13px;">{{ item.item_hin }}</div>
+                                    <div class="text-muted" style="font-size:11px;">{{ item.item_eng }}</div>
+                                </div>
+                                <div class="d-flex gap-1">
+                                    <span class="badge bg-soft-primary text-primary" style="font-size:10px;">
+                                        {{ getSubitemCount(item) }} sub
+                                    </span>
+                                    <span class="badge bg-soft-secondary text-secondary" style="font-size:10px;">
+                                        {{ item.unit_short }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div *ngIf="!isLoader && itemData.length === 0" class="text-center text-muted py-4"
+                                style="font-size:13px;">
+                                Koi item nahi mila
+                            </div>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="px-2 py-1 border-top d-flex justify-content-between align-items-center">
+                            <button class="btn btn-sm btn-outline-secondary py-0" (click)="getItemData(page - 1)"
+                                [disabled]="page === 1">‹ Prev</button>
+                            <small class="text-muted">Page {{ page }}</small>
+                            <button class="btn btn-sm btn-outline-secondary py-0" (click)="getItemData(page + 1)"
+                                [disabled]="page * itemsPerPage >= total_count">Next ›</button>
+                        </div>
+                    </div>
+                    <!-- /LEFT PANEL -->
+
+                    <!-- ══ RIGHT PANEL: Variant Detail ════════════════════════ -->
+                    <div class="col-9 ps-0 d-flex flex-column" style="overflow:hidden;">
+
+                        <!-- Empty state -->
+                        <div *ngIf="!selectedItem"
+                            class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                            <i class="uil uil-box" style="font-size:52px; opacity:0.3;"></i>
+                            <h5 class="mt-3">Koi item select karo</h5>
+                            <p>Left panel se item click karo uski variants dekhne ke liye</p>
+                        </div>
+
+                        <!-- Item selected -->
+                        <ng-container *ngIf="selectedItem">
+
+                            <!-- Right header -->
+                            <div class="px-3 py-2 border-bottom">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <h5 class="mb-0">
+                                            {{ selectedItem.item_hin }}
+                                            <span class="text-muted fw-normal fs-6 ms-1">
+                                                {{ selectedItem.item_eng }}
+                                            </span>
+                                        </h5>
+                                        <small class="text-muted">
+                                            Unit: {{ selectedItem.unit_short }}
+                                            &nbsp;·&nbsp;
+                                            Variants: <strong>{{ itemVariants.length }}</strong>
+                                            &nbsp;·&nbsp;
+                                            Aliases:
+                                            <span *ngFor="let a of itemAliases"
+                                                class="badge bg-soft-secondary text-secondary me-1"
+                                                style="font-size:10px;">{{ a.alias }}</span>
+                                        </small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-outline-secondary btn-sm" (click)="openAliasManager()">
+                                            <i class="uil uil-font"></i> Aliases
+                                        </button>
+                                        <button class="btn btn-success btn-sm" (click)="openGenerator()">
+                                            <i class="uil uil-plus-circle"></i> Variants Generate Karo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Unlinked subitems notice -->
+                            <div *ngIf="unlinkedSubitems.length > 0"
+                                class="mx-3 mt-2 alert alert-warning alert-dismissible py-2 mb-0">
+                                <i class="uil uil-exclamation-triangle"></i>
+                                <strong>{{ unlinkedSubitems.length }}</strong> purane subitems hain jo abhi variant se
+                                linked nahi hain.
+                            </div>
+
+                            <!-- Variant Table -->
+                            <div class="flex-grow-1 overflow-auto px-3 pt-2">
+
+                                <div *ngIf="itemVariants.length === 0" class="text-center text-muted py-5">
+                                    <i class="uil uil-puzzle-piece"
+                                        style="font-size:40px;opacity:0.3;display:block;"></i>
+                                    <p class="mt-2">Abhi koi variant nahi hai.<br>
+                                        <button class="btn btn-primary btn-sm mt-2" (click)="openGenerator()">
+                                            + Variants Generate Karo
+                                        </button>
+                                    </p>
+                                </div>
+
+                                <div class="table-container" *ngIf="itemVariants.length > 0">
+                                    <table class="table table-hover table-sticky-header dt-responsive nowrap">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:40px;">#</th>
+                                                <th style="width:180px;">Display Name (Hindi)</th>
+                                                <th style="width:160px;">Eng / Roman</th>
+                                                <th>Attributes</th>
+                                                <th style="width:100px;">SKU</th>
+                                                <th style="width:80px;">Unit</th>
+                                                <th style="width:120px;">Rate Range</th>
+                                                <th style="width:150px;">Aliases</th>
+                                                <th style="width:140px;">Categories</th>
+                                                <th style="width:70px;">Status</th>
+                                                <th style="width:90px;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let v of itemVariants; let i=index; trackBy:trackById">
+
+                                                <td class="text-muted">{{ i + 1 }}</td>
+
+                                                <!-- Display Name -->
+                                                <td>
+                                                    <div class="fw-semibold">{{ v.display_name }}</div>
+                                                    <small class="text-muted">{{ v.subitem?.subitem_hin }}</small>
+                                                </td>
+
+                                                <!-- Eng / Roman -->
+                                                <td>
+                                                    <div style="font-size:12px;">{{ v.subitem?.subitem_eng }}</div>
+                                                    <small class="text-muted">{{ v.subitem?.subitem_roman }}</small>
+                                                </td>
+
+                                                <!-- Attribute combo badges -->
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        <span *ngFor="let av of v.attributes"
+                                                            class="badge bg-soft-primary text-primary"
+                                                            style="font-size:10px;">
+                                                            {{ av.attribute?.attribute_hin }}:
+                                                            {{ av.attribute_value?.attribute_value_hin }}
+                                                        </span>
+                                                    </div>
+                                                </td>
+
+                                                <!-- SKU -->
+                                                <td>
+                                                    <code *ngIf="v.sku" style="font-size:11px;">{{ v.sku }}</code>
+                                                    <span *ngIf="!v.sku" class="text-muted">—</span>
+                                                </td>
+
+                                                <!-- Unit -->
+                                                <td style="font-size:12px;">
+                                                    {{ v.subitem?.unit?.unit_short || '—' }}
+                                                </td>
+
+                                                <!-- Rate Range -->
+                                                <td style="font-size:12px;">
+                                                    <span *ngIf="v.subitem?.min_rate || v.subitem?.max_rate">
+                                                        {{ v.subitem?.min_rate }} – {{ v.subitem?.max_rate }}
+                                                    </span>
+                                                    <span *ngIf="!v.subitem?.min_rate && !v.subitem?.max_rate"
+                                                        class="text-muted">—</span>
+                                                </td>
+
+                                                <!-- Aliases -->
+                                                <td>
+                                                    <span *ngFor="let a of v.aliases"
+                                                        class="badge bg-soft-secondary text-secondary me-1"
+                                                        style="font-size:10px;">{{ a.alias }}</span>
+                                                    <span *ngIf="!v.aliases?.length" class="text-muted"
+                                                        style="font-size:11px;">—</span>
+                                                </td>
+
+                                                <!-- Categories -->
+                                                <td>
+                                                    <span *ngFor="let c of v.categories"
+                                                        class="badge bg-soft-info text-info me-1"
+                                                        style="font-size:10px;">
+                                                        {{ c.category?.category_hin }}
+                                                    </span>
+                                                </td>
+
+                                                <!-- Active status -->
+                                                <td>
+                                                    <span class="badge" [class.bg-success]="v.active"
+                                                        [class.bg-secondary]="!v.active">
+                                                        {{ v.active ? 'Active' : 'Inactive' }}
+                                                    </span>
+                                                </td>
+
+                                                <!-- Actions -->
+                                                <td>
+                                                    <div class="d-flex gap-1">
+                                                        <button class="btn btn-sm btn-outline-primary py-0"
+                                                            (click)="openEditVariant(v)" *ngIf="settings.edit"
+                                                            title="Edit">
+                                                            <i class="uil uil-edit"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger py-0"
+                                                            (click)="deleteVariant(v)" *ngIf="settings.delete"
+                                                            title="Delete">
+                                                            <i class="uil uil-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Unlinked Subitems (collapsed section) -->
+                                <ng-container *ngIf="unlinkedSubitems.length > 0">
+                                    <h6 class="text-muted mt-3 mb-2 border-top pt-2">
+                                        Purane Subitems (Variant se Unlinked)
+                                    </h6>
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Hindi</th>
+                                                <th>English</th>
+                                                <th>Roman</th>
+                                                <th>Unit</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let s of unlinkedSubitems">
+                                                <td>{{ s.subitem_hin }}</td>
+                                                <td>{{ s.subitem_eng }}</td>
+                                                <td>{{ s.subitem_roman }}</td>
+                                                <td>{{ s.unit?.unit_short }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </ng-container>
+
+                            </div><!-- /overflow-auto -->
+                        </ng-container>
+                        <!-- /item selected -->
+
+                    </div>
+                    <!-- /RIGHT PANEL -->
+
+                </div><!-- /row split layout -->
+
+            </div><!-- /container-fluid -->
+        </div><!-- /content -->
+    </div><!-- /content-page -->
+</div><!-- /wrapper -->
+
+
+<!-- ════════════════════════════════════════════════════════════════════════
+  SINGLE MODAL — exact same pattern as item.component.html
+  All entry forms load via *ngIf on showModal string
+════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog" [style.width]="showModal === 'Generate Variants' ? '95%' : '70%'" style="max-width:95%;">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">{{ showModal }}</h5>
+                <button type="button" class="btn-close" (click)="closeModal()"></button>
+            </div>
+
+            <div class="modal-body p-0">
+
+                <!-- Variant Generator (Step 1+2 contained in entry component) -->
+                <app-variant-generator-entry *ngIf="showModal === 'Generate Variants'" [selectedItem]="selectedItem"
+                    [allAttributes]="allAttributes" [attrValueMap]="attrValueMap" [units]="units"
+                    [categories]="categories" (response)="onVariantsGenerated($event)">
+                </app-variant-generator-entry>
+
+                <!-- Edit Variant -->
+                <app-variant-edit-entry *ngIf="showModal === 'Edit Variant'" [getData]="editData" [isEdit]="isEdit"
+                    [units]="units" [categories]="categories" (response)="onVariantEdited($event)">
+                </app-variant-edit-entry>
+
+                <!-- Attribute Manager -->
+                <app-attribute-entry *ngIf="showModal === 'Manage Attributes'" [mode]="'attributes'"
+                    [allAttributes]="allAttributes" (response)="onAttributeSaved($event)">
+                </app-attribute-entry>
+
+                <!-- Attribute Value Manager -->
+                <app-attribute-entry *ngIf="showModal === 'Manage Attribute Values'" [mode]="'attr_values'"
+                    [allAttributes]="allAttributes" (response)="onAttributeSaved($event)">
+                </app-attribute-entry>
+
+                <!-- Item Alias Manager -->
+                <app-item-alias-entry *ngIf="showModal === 'Manage Item Aliases'" [getData]="editData"
+                    (response)="onAliasSaved($event)">
+                </app-item-alias-entry>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal()">
+                    Bandh Karo
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

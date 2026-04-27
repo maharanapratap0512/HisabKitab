@@ -106,7 +106,7 @@ app.use('/api/comment', commentRoutes);
 app.use('/api/mysql', mysqlRoutes);
 app.use('/api/hmp', hmpRoutes);
 app.use('/api/prastav', prastavRoutes);
-app.use('/api/variant', variantRoutes);
+app.use('/api/variants', variantRoutes);
 
 
 

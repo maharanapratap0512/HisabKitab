@@ -1,0 +1,99 @@
+<div class="p-3">
+
+    <!-- Attribute tags (read-only — cannot change after creation) -->
+    <div class="mb-3" *ngIf="getData?.attributes?.length">
+        <label class="form-label">Attribute Combination (Read-only)</label>
+        <div class="d-flex flex-wrap gap-1 mt-1">
+            <span *ngFor="let av of getData.attributes" class="badge bg-soft-primary text-primary">
+                {{ av.attribute?.attribute_hin }}: {{ av.attribute_value?.attribute_value_hin }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Three names -->
+    <div class="row g-2 mb-3">
+        <div class="col-4">
+            <label class="form-label">Display Name (Hindi) <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="formData.display_name_hin" placeholder="Hindi name" />
+        </div>
+        <div class="col-4">
+            <label class="form-label">Display Name (English)</label>
+            <input type="text" class="form-control" [(ngModel)]="formData.display_name_eng"
+                placeholder="English name" />
+        </div>
+        <div class="col-4">
+            <label class="form-label">Display Name (Roman)</label>
+            <input type="text" class="form-control" [(ngModel)]="formData.display_name_roman"
+                placeholder="Roman name" />
+        </div>
+    </div>
+
+    <!-- SKU + Unit + Rate -->
+    <div class="row g-2 mb-3">
+        <div class="col-3">
+            <label class="form-label">SKU Code</label>
+            <input type="text" class="form-control" [(ngModel)]="formData.sku" placeholder="SKU" />
+        </div>
+        <div class="col-3">
+            <label class="form-label">Unit</label>
+            <select class="form-select" [(ngModel)]="formData.unit_id">
+                <option [ngValue]="null">Default (Item ki unit)</option>
+                <option *ngFor="let u of units" [value]="u._id">{{ u.unit_short }}</option>
+            </select>
+        </div>
+        <div class="col-3">
+            <label class="form-label">Min Rate</label>
+            <input type="number" class="form-control" [(ngModel)]="formData.min_rate" />
+        </div>
+        <div class="col-3">
+            <label class="form-label">Max Rate</label>
+            <input type="number" class="form-control" [(ngModel)]="formData.max_rate" />
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="mb-3">
+        <label class="form-label">Categories</label>
+        <div class="d-flex flex-wrap gap-1 mt-1">
+            <button *ngFor="let c of categories" type="button" class="btn btn-sm"
+                [class.btn-info]="isCatSelected(c._id)" [class.btn-outline-secondary]="!isCatSelected(c._id)"
+                (click)="toggleCategory(c._id)">
+                {{ c.category_hin }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Aliases -->
+    <div class="mb-3">
+        <label class="form-label">Aliases</label>
+        <div class="d-flex flex-wrap gap-1 mb-2">
+            <span *ngFor="let a of formData.aliases; let ai=index"
+                class="badge bg-secondary d-flex align-items-center gap-1">
+                {{ a.alias }}
+                <i class="uil uil-times" style="cursor:pointer;" (click)="removeAlias(ai)"></i>
+            </span>
+            <span *ngIf="!formData.aliases?.length" class="text-muted small">Koi alias nahi</span>
+        </div>
+        <div class="input-group input-group-sm" style="max-width:300px;">
+            <input type="text" class="form-control" [(ngModel)]="newAlias" placeholder="Alias type karo..."
+                (keyup.enter)="addAlias()" />
+            <button class="btn btn-outline-secondary" type="button" (click)="addAlias()">+ Add</button>
+        </div>
+    </div>
+
+    <!-- Extra Note -->
+    <div class="mb-3">
+        <label class="form-label">Extra Note</label>
+        <textarea class="form-control" [(ngModel)]="formData.extra_note" rows="2"></textarea>
+    </div>
+
+    <!-- Actions -->
+    <div class="d-flex justify-content-end gap-2 border-top pt-3">
+        <button type="button" class="btn btn-primary" [disabled]="isLoader" (click)="save()">
+            <span *ngIf="isLoader" class="spinner-border spinner-border-sm me-1"></span>
+            <i *ngIf="!isLoader" class="uil uil-save me-1"></i>
+            Save Karo
+        </button>
+    </div>
+
+</div>

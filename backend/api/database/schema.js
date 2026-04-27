@@ -675,4 +675,16 @@ module.exports = {
         updated_at: col.string(),
     }),
 
+    ...defineTable('rel_subitem_category', {
+        _id: col.id(),
+        subitem_id: col.number(),
+        category_id: col.number(),
+    }),
+
+    ...defineTable('rel_item_category', {
+        _id: col.id(),
+        item_id: col.number(),
+        category_id: col.number(),
+    }),
+
 };

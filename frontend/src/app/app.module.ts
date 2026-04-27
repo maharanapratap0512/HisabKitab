@@ -112,6 +112,15 @@ import { ContextSettingsPanelComponent } from './layout/context-settings-panel/c
 import { SmartFocusDirective } from './SHARED/smart-focus.directive';
 import { JoinObjPipe } from './pipe/formatter/join-obj.pipe';
 
+import { VariantComponent }               from './CHILD_TABLES/variant/variant.component';
+import { VariantGeneratorEntryComponent } from './ENTRY__FORMS/variant-generator-entry/variant-generator-entry.component';
+import { VariantEditEntryComponent }      from './ENTRY__FORMS/variant-edit-entry/variant-edit-entry.component';
+import { AttributeEntryComponent }        from './ENTRY__FORMS/attribute-entry/attribute-entry.component';
+import { ItemAliasEntryComponent }        from './ENTRY__FORMS/item-alias-entry/item-alias-entry.component';
+import { VariantEntryComponent } from './ENTRY__FORMS/variant-entry/variant-entry.component';
+import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.component';
+
+
 // import { FilterPipeModule } from 'ngx-filter-pipe';
 // import { MultiSearchPipeModule } from 'multi-search-pipe';
 
@@ -209,6 +218,13 @@ import { JoinObjPipe } from './pipe/formatter/join-obj.pipe';
     ContextSettingsPanelComponent,
     SmartFocusDirective,
     JoinObjPipe,
+    VariantComponent,
+    VariantGeneratorEntryComponent,
+    VariantEditEntryComponent,
+    AttributeEntryComponent,
+    ItemAliasEntryComponent,
+    VariantEntryComponent,
+    VariantNewComponent,
   ],
 
   imports: [

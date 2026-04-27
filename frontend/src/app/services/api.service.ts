@@ -52,6 +52,7 @@ export class ApiService {
     PRODUCT: base_url + 'products/',
     PRDCT_TRNSFR: base_url + 'product_tracking/',
     ITEM: base_url + 'items/',
+    VARIANT: base_url + 'variants/',
     ITEMMIX: base_url + 'items/itemmix/',
     SUBITEM: base_url + 'subitems/',
     SUBITEMLIST: base_url + 'subitemlists/',
