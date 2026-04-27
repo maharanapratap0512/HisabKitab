@@ -13,6 +13,7 @@ export class AttributeEntryComponent implements OnInit {
 
     @Input()  mode:          'attributes' | 'attr_values' = 'attributes';
     @Input()  allAttributes: any[] = [];
+    @Input()  initialAttrId: any = null;
     @Output() response = new EventEmitter<any>();
 
     // Attribute form
@@ -34,7 +35,13 @@ export class AttributeEntryComponent implements OnInit {
         private toastr: ToastrService,
     ) {}
 
-    ngOnInit(): void { this.loadRows(); }
+    ngOnInit(): void {
+        if (this.initialAttrId) {
+            this.attrValForm.attribute_id = this.initialAttrId;
+            this.attrValFilter = this.initialAttrId;
+        }
+        this.loadRows();
+    }
 
     loadRows() {
         const url = this.mode === 'attributes'

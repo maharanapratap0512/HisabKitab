@@ -1,12 +1,228 @@
 'use strict';
-// ──────────────────────────────────────────────────────────────────────────────
-// variant.routes.js  –  Item-Variant System API
-// Tables touched: attributes, attributes_value, variant, variant_attribute_map,
-//                 variant_category_map, variant_aliases, item_aliases, subitem
-// ──────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// variant.routes.js  — additions to existing file
+// NEW endpoint: GET/PUT /api/variants/items/:dept_id
+// Returns full item list with variants + subitems + aliases embedded.
+// No accordion API call needed — everything in one payload.
+// Frontend filters/searches entirely client-side.
+// ─────────────────────────────────────────────────────────────────────────────
+// ADD THIS BLOCK inside variant.routes.js (before existing routes, after checkAuth)
 const router = require('express').Router();
 const vs = require('../services/variant.service');
+const BaseTable = require('../database/base.table');
+const db = require('../database/db.model').dbmodal.db;
 
+const itemTable = new BaseTable('item');
+const variantTable = new BaseTable('variant');
+const variantAttrMap = new BaseTable('variant_attribute_map');
+const variantAliasTable = new BaseTable('variant_aliases');
+const variantCatMap = new BaseTable('variant_category_map');
+const subitemTable = new BaseTable('subitem');
+const itemAliasTable = new BaseTable('item_aliases');
+
+// ─── GET /api/variants/items/:dept_id  (initial full load) ──────────────────
+// Returns: all items with variants, item_aliases embedded.
+router.get('/items/:dept_id', async (req, res, next) => {
+    try {
+        const rows = db.prepare(`
+            SELECT
+                i._id, i.item_hin, i.item_eng, i.item_roman, i.item_code,
+                i.unit_id, u.unit_short, u.unit_full, i.active,
+                i.min_rate, i.max_rate, i.extra_note,
+                -- counts
+                (SELECT COUNT(*) FROM variant v WHERE v.item_id = i._id AND v.active = 1) as variant_count,
+                (SELECT COUNT(*) FROM subitem s WHERE s.item_id = i._id AND s.active = 1 AND s.variant_id IS NULL) as subitem_count,
+                -- variants + subitems + variant aliases
+                (SELECT json_group_array(json_object(
+                    '_id', v._id,
+                    'display_name', v.display_name,
+                    'sku', v.sku,
+                    'subitem', (SELECT json_object(
+                        '_id', s._id,
+                        'subitem_hin', s.subitem_hin,
+                        'subitem_eng', s.subitem_eng,
+                        'subitem_roman', s.subitem_roman,
+                        'unit_short', su.unit_short,
+                        'min_rate', s.min_rate,
+                        'max_rate', s.max_rate
+                    ) FROM subitem s LEFT JOIN unit su ON su._id = s.unit_id WHERE s.variant_id = v._id LIMIT 1),
+                    'attributes', (SELECT json_group_array(json_object(
+                        'attribute_hin', a.attribute_hin,
+                        'value_hin', av.attribute_value_hin
+                    )) FROM variant_attribute_map vam 
+                       JOIN attributes a ON a._id = vam.attribute_id
+                       JOIN attributes_value av ON av._id = vam.attribute_value_id
+                       WHERE vam.variant_id = v._id),
+                    'aliases', (SELECT json_group_array(json_object('alias', va.alias)) FROM variant_aliases va WHERE va.variant_id = v._id)
+                )) FROM variant v WHERE v.item_id = i._id AND v.active = 1) as variants_json,
+                -- unlinked subitems
+                (SELECT json_group_array(json_object(
+                    '_id', s._id,
+                    'subitem_hin', s.subitem_hin,
+                    'subitem_eng', s.subitem_eng,
+                    'subitem_roman', s.subitem_roman,
+                    'min_rate', s.min_rate,
+                    'max_rate', s.max_rate
+                )) FROM subitem s WHERE s.item_id = i._id AND s.variant_id IS NULL AND s.active = 1) as unlinked_subitems_json,
+                -- item aliases
+                (SELECT json_group_array(json_object('_id', ia._id, 'alias', ia.alias, 'language', ia.language))
+                 FROM item_aliases ia WHERE ia.item_id = i._id) as item_aliases_json,
+                -- categories
+                (SELECT json_group_array(json_object('_id', c._id, 'category_hin', c.category_hin, 'category_eng', c.category_eng))
+                 FROM rel_item_category ric
+                 JOIN category c ON c._id = ric.category_id
+                 WHERE ric.item_id = i._id) as categories_json
+            FROM item i
+            LEFT JOIN unit u ON u._id = i.unit_id
+            WHERE i.active = 1 AND i._id IN (
+                SELECT json_each.value FROM department_config, json_each(config_value) 
+                WHERE dept_id = ? AND config_key = 'item'
+            )
+            ORDER BY i.item_hin ASC
+        `).all(req.params.dept_id);
+
+        const result = rows.map((r) => ({
+            ...r,
+            variants: _safeJson(r.variants_json, []).filter(v => v._id),
+            unlinked_subitems: _safeJson(r.unlinked_subitems_json, []).filter(s => s._id),
+            item_aliases: _safeJson(r.item_aliases_json, []).filter(a => a._id),
+            categories: _safeJson(r.categories_json, []).filter(c => c._id),
+            variants_json: undefined,
+            unlinked_subitems_json: undefined,
+            item_aliases_json: undefined,
+            categories_json: undefined
+        }));
+
+        res.json({ success: true, result, total_count: result.length });
+    } catch (e) { next(e); }
+});
+
+// ─── PUT /api/variants/items/:dept_id  (filtered load) ──────────────────────
+// Body: { search?, categories?: number[], pageNo? }
+router.put('/items/:dept_id', async (req, res, next) => {
+    try {
+        const { search, categories, pageNo = 1, limit = 100 } = req.body;
+        const offset = req.body.offset !== undefined ? req.body.offset : (pageNo - 1) * limit;
+
+        const conditions = [
+            'i.active = 1',
+            `i._id IN (SELECT json_each.value FROM department_config, json_each(config_value) WHERE dept_id = @dept_id AND config_key = 'item')`
+        ];
+        const params = { dept_id: req.params.dept_id };
+
+        if (search && search.trim()) {
+            conditions.push(`(
+                i.item_hin LIKE @term OR i.item_eng LIKE @term OR i.item_roman LIKE @term OR i.item_code LIKE @term
+                OR EXISTS (SELECT 1 FROM item_aliases ia WHERE ia.item_id = i._id AND ia.alias LIKE @term)
+                OR EXISTS (SELECT 1 FROM variant v
+                           JOIN subitem s ON s.variant_id = v._id
+                           WHERE v.item_id = i._id AND (
+                               v.display_name LIKE @term OR s.subitem_eng LIKE @term OR s.subitem_roman LIKE @term
+                           ))
+            )`);
+            params.term = `%${search.trim()}%`;
+        }
+
+        if (req.body.aliasSearch && req.body.aliasSearch.trim()) {
+            conditions.push(`EXISTS (SELECT 1 FROM item_aliases ia WHERE ia.item_id = i._id AND ia.alias LIKE @aliasTerm)`);
+            params.aliasTerm = `%${req.body.aliasSearch.trim()}%`;
+        }
+
+        if (categories && Array.isArray(categories) && categories.length > 0) {
+            const catConditions = [];
+            categories.forEach((catId, idx) => {
+                const key = `cat${idx}`;
+                catConditions.push(`@${key}`);
+                params[key] = catId;
+            });
+            conditions.push(`EXISTS (
+                SELECT 1 FROM rel_item_category ric
+                WHERE ric.item_id = i._id AND ric.category_id IN (${catConditions.join(',')})
+            )`);
+        }
+
+        const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+        const countRow = db.prepare(`SELECT COUNT(*) as cnt FROM item i ${where}`).get(params);
+        const total_count = countRow.cnt || 0;
+
+        const rows = db.prepare(`
+            SELECT
+                i._id, i.item_hin, i.item_eng, i.item_roman, i.item_code,
+                i.unit_id, u.unit_short, u.unit_full, i.active,
+                i.min_rate, i.max_rate, i.extra_note,
+                -- counts
+                (SELECT COUNT(*) FROM variant v WHERE v.item_id = i._id AND v.active = 1) as variant_count,
+                (SELECT COUNT(*) FROM subitem s WHERE s.item_id = i._id AND s.active = 1 AND s.variant_id IS NULL) as subitem_count,
+                -- variants + subitems + variant aliases as nested JSON
+                (SELECT json_group_array(json_object(
+                    '_id', v._id,
+                    'display_name', v.display_name,
+                    'sku', v.sku,
+                    'subitem', (SELECT json_object(
+                        '_id', s._id,
+                        'subitem_hin', s.subitem_hin,
+                        'subitem_eng', s.subitem_eng,
+                        'subitem_roman', s.subitem_roman,
+                        'unit_short', su.unit_short,
+                        'min_rate', s.min_rate,
+                        'max_rate', s.max_rate
+                    ) FROM subitem s LEFT JOIN unit su ON su._id = s.unit_id WHERE s.variant_id = v._id LIMIT 1),
+                    'attributes', (SELECT json_group_array(json_object(
+                        'attribute_hin', a.attribute_hin,
+                        'value_hin', av.attribute_value_hin
+                    )) FROM variant_attribute_map vam 
+                       JOIN attributes a ON a._id = vam.attribute_id
+                       JOIN attributes_value av ON av._id = vam.attribute_value_id
+                       WHERE vam.variant_id = v._id),
+                    'aliases', (SELECT json_group_array(json_object('alias', va.alias)) FROM variant_aliases va WHERE va.variant_id = v._id)
+                )) FROM variant v WHERE v.item_id = i._id AND v.active = 1) as variants_json,
+                -- unlinked subitems (subitems for this item with no variant_id)
+                (SELECT json_group_array(json_object(
+                    '_id', s._id,
+                    'subitem_hin', s.subitem_hin,
+                    'subitem_eng', s.subitem_eng,
+                    'subitem_roman', s.subitem_roman,
+                    'min_rate', s.min_rate,
+                    'max_rate', s.max_rate
+                )) FROM subitem s WHERE s.item_id = i._id AND s.variant_id IS NULL AND s.active = 1) as unlinked_subitems_json,
+                -- item aliases
+                (SELECT json_group_array(json_object('_id', ia._id, 'alias', ia.alias, 'language', ia.language))
+                 FROM item_aliases ia WHERE ia.item_id = i._id) as item_aliases_json,
+                -- categories
+                (SELECT json_group_array(json_object('_id', c._id, 'category_hin', c.category_hin, 'category_eng', c.category_eng))
+                 FROM rel_item_category ric
+                 JOIN category c ON c._id = ric.category_id
+                 WHERE ric.item_id = i._id) as categories_json
+            FROM item i
+            LEFT JOIN unit u ON u._id = i.unit_id
+            ${where}
+            ORDER BY i.item_hin ASC
+            LIMIT @limit OFFSET @offset
+        `).all({ ...params, limit, offset });
+
+        const result = rows.map((r) => ({
+            ...r,
+            variants: _safeJson(r.variants_json, []).filter(v => v._id),
+            unlinked_subitems: _safeJson(r.unlinked_subitems_json, []).filter(s => s._id),
+            item_aliases: _safeJson(r.item_aliases_json, []).filter(a => a._id),
+            categories: _safeJson(r.categories_json, []).filter(c => c._id),
+            variants_json: undefined,
+            unlinked_subitems_json: undefined,
+            item_aliases_json: undefined,
+            categories_json: undefined
+        }));
+
+        res.json({ success: true, result, total_count, page: pageNo });
+    } catch (e) { next(e); }
+});
+
+function _safeJson(val, fallback) {
+    try { return val ? JSON.parse(val) : fallback; } catch { return fallback; }
+}
+
+// ─── Note: existing GET /api/variants/item/:item_id stays as-is ──────────────
+// It loads variants+subitems for the expanded accordion row (still used).
 
 // ════════════════════════════════════════════════════════════════════════════
 //  ATTRIBUTES

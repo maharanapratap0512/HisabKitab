@@ -34,6 +34,9 @@
                             </div>
 
                             <div class="col-auto ms-auto d-flex gap-2">
+                                <button class="btn btn-outline-success btn-sm" (click)="exportToExcel()" title="Export list to Excel">
+                                    <i class="uil uil-file-download-alt"></i> Excel
+                                </button>
                                 <button class="btn btn-outline-info btn-sm"
                                     (click)="openAttributeManager('attributes')">
                                     <i class="uil uil-tag-alt"></i> Attributes
@@ -42,7 +45,9 @@
                                     (click)="openAttributeManager('attr_values')">
                                     <i class="uil uil-list-ul"></i> Values
                                 </button>
-                                <span class="text-muted small align-self-center">{{ total_count }} items</span>
+                                <button type="button" class="btn btn-light fw-bold text-dark btn-sm shadow-none border">
+                                    Total Count : {{ total_count }}
+                                </button>
                             </div>
 
                         </div>
@@ -56,11 +61,50 @@
                             <tr>
                                 <th style="width:36px;"></th>
                                 <th style="width:36px;">#</th>
-                                <th>Item Name (Hindi / Eng)</th>
+                                <th>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Item Name (Hindi / Eng)</span>
+                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                            direction="left" [isOpen]="conditionObj.search?.length > 0"
+                                            (clear)="conditionObj.search = undefined; applyFilter()" triggerOn="hover">
+                                            <input type="text" class="form-control form-control-sm"
+                                                placeholder="Item search..." [(ngModel)]="conditionObj.search"
+                                                (keyup.enter)="applyFilter()" />
+                                        </app-popover-filter>
+                                    </div>
+                                </th>
                                 <th style="width:80px;">Unit</th>
                                 <th style="width:100px;">Variants</th>
-                                <th>Categories</th>
-                                <th>Aliases</th>
+                                <th>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Categories</span>
+                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                            direction="left" [isOpen]="conditionObj.categories?.length > 0"
+                                            (clear)="conditionObj.categories = undefined; applyFilter()"
+                                            triggerOn="hover">
+                                            <ng-select class="custom-sm" [multiple]="true"
+                                                placeholder="Select categories" [(ngModel)]="conditionObj.categories"
+                                                (change)="applyFilter()">
+                                                <ng-option *ngFor="let c of categories" [value]="c._id">
+                                                    {{ c.category_hin }}
+                                                </ng-option>
+                                            </ng-select>
+                                        </app-popover-filter>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Aliases</span>
+                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                            direction="left" [isOpen]="conditionObj.aliasSearch?.length > 0"
+                                            (clear)="conditionObj.aliasSearch = undefined; applyFilter()"
+                                            triggerOn="hover">
+                                            <input type="text" class="form-control form-control-sm"
+                                                placeholder="Alias search..." [(ngModel)]="conditionObj.aliasSearch"
+                                                (keyup.enter)="applyFilter()" />
+                                        </app-popover-filter>
+                                    </div>
+                                </th>
                                 <th style="width:160px;">Action</th>
                             </tr>
                         </thead>
@@ -94,11 +138,18 @@
                                         <small class="text-muted">{{ item.unit_short }}</small>
                                     </td>
 
-                                    <!-- Variant count -->
+                                    <!-- Counts (Variants + Subitems) -->
                                     <td>
-                                        <span class="badge bg-soft-primary text-primary">
-                                            {{ variantCount(item) }} variants
-                                        </span>
+                                        <div class="d-flex gap-1">
+                                            <span *ngIf="item.variant_count" class="badge badge-outline-primary"
+                                                title="Total Variants">
+                                                {{ item.variant_count}}
+                                            </span>
+                                            <span *ngIf="item.subitem_count" class="badge badge-outline-secondary"
+                                                title="Total Subitems">
+                                                {{ item.subitem_count }}
+                                            </span>
+                                        </div>
                                     </td>
 
                                     <!-- Categories -->
@@ -220,7 +271,9 @@
                                                                     <span *ngFor="let av of v.attributes"
                                                                         class="badge bg-soft-primary text-primary"
                                                                         style="font-size:10px;">
-                                                                        {{ av.attribute?.attribute_hin }}: {{
+                                                                        {{ av.attribute_hin ||
+                                                                        av.attribute?.attribute_hin }}: {{
+                                                                        av.value_hin ||
                                                                         av.attribute_value?.attribute_value_hin }}
                                                                     </span>
                                                                 </div>
@@ -235,7 +288,8 @@
 
                                                             <!-- Unit -->
                                                             <td style="padding:5px 4px; font-size:12px;">
-                                                                {{ v.subitem?.unit?.unit_short || '—' }}
+                                                                {{ v.subitem?.unit_short || v.subitem?.unit?.unit_short
+                                                                || '—' }}
                                                             </td>
 
                                                             <!-- Rate -->

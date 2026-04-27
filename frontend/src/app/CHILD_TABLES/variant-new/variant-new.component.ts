@@ -11,6 +11,8 @@ import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
+import * as ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 declare var $: any;
 
@@ -77,7 +79,7 @@ export class VariantNewComponent implements OnInit {
   getItemData(pageNo: number) {
     this.isLoader = true;
     this.conditionObj.pageNo = pageNo;
-    this.http.put(this.api.getUrl('ITEMMIX') + this.auth.webUser.dept_id, this.conditionObj)
+    this.http.put(this.api.getUrl('VARIANT') + 'items/' + this.auth.webUser.dept_id, this.conditionObj)
       .subscribe((d: any) => {
         if (d.success) {
           this.itemData = d.result || [];
@@ -98,6 +100,96 @@ export class VariantNewComponent implements OnInit {
   onSearch(term: string) { this.conditionObj.search = term || undefined; this.getItemData(1); }
   onCatFilter(v: any) { this.conditionObj.categories = v || undefined; this.getItemData(1); }
 
+  applyFilter() {
+    this.getItemData(1);
+  }
+
+  async exportToExcel() {
+    this.spinner.show();
+    const body = { ...this.conditionObj, limit: -1, offset: 0 };
+    this.http.put(this.api.getUrl('VARIANT') + 'items/' + this.auth.webUser.dept_id, body)
+      .subscribe(async (d: any) => {
+        const fullData = d.result || [];
+        // parse JSON if needed (same as getItemData)
+        for (const item of fullData) {
+          try { item.categories = typeof item.categories === 'string' ? JSON.parse(item.categories) : (item.categories || []); }
+          catch { item.categories = []; }
+        }
+
+        const wb = new ExcelJS.Workbook();
+        const ws = wb.addWorksheet('Variants Data');
+
+        const borderThin: Partial<ExcelJS.Borders> = {
+          top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
+        };
+        const headerFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF203764' } }; // Dark Blue
+        const boldWhite: Partial<ExcelJS.Font> = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
+
+        ws.columns = [
+          { header: 'Sr', key: 'sr', width: 5 },
+          { header: 'Item Name', key: 'item', width: 25 },
+          { header: 'Code', key: 'code', width: 10 },
+          { header: 'Categories', key: 'cats', width: 20 },
+          { header: 'Unit', key: 'unit', width: 10 },
+          { header: 'Variant Name', key: 'v_name', width: 25 },
+          { header: 'SKU', key: 'sku', width: 15 },
+          { header: 'Attributes', key: 'attrs', width: 30 },
+          { header: 'Rate', key: 'rate', width: 10 },
+          { header: 'Type', key: 'type', width: 10 }
+        ];
+
+        ws.getRow(1).eachCell(cell => {
+          cell.font = boldWhite;
+          cell.fill = headerFill;
+          cell.border = borderThin;
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
+
+        fullData.forEach((item: any, iIdx: number) => {
+          const cats = (item.categories || []).map((c: any) => c.category_hin).join(', ');
+
+          // Variants
+          if (item.variants && item.variants.length > 0) {
+            item.variants.forEach((v: any, vIdx: number) => {
+              const attrs = (v.attributes || []).map((a: any) => `${a.attribute_hin}: ${a.value_hin}`).join(', ');
+              ws.addRow({
+                sr: vIdx === 0 ? iIdx + 1 : '',
+                item: vIdx === 0 ? item.item_hin : '',
+                code: vIdx === 0 ? item.item_code : '',
+                cats: vIdx === 0 ? cats : '',
+                unit: vIdx === 0 ? item.unit_short : '',
+                v_name: v.display_name,
+                sku: v.sku,
+                attrs: attrs,
+                rate: v.subitem?.min_rate || '',
+                type: 'Variant'
+              }).eachCell(cell => cell.border = borderThin);
+            });
+          } else {
+            ws.addRow({
+              sr: iIdx + 1,
+              item: item.item_hin,
+              code: item.item_code,
+              cats: cats,
+              unit: item.unit_short,
+              v_name: '—',
+              sku: '—',
+              attrs: '—',
+              rate: item.min_rate || '',
+              type: 'Item Only'
+            }).eachCell(cell => cell.border = borderThin);
+          }
+        });
+
+        const buffer = await wb.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `Variants_Report_${new Date().getTime()}.xlsx`);
+        this.spinner.hide();
+      }, err => {
+        this.spinner.hide();
+        this.toastr.error('Export failed!');
+      });
+  }
+
   // ── Toggle accordion row ────────────────────────────────────────────────
   toggleAccordion(item: any) {
     if (this.expandedItemId === item._id) {
@@ -108,8 +200,16 @@ export class VariantNewComponent implements OnInit {
     this.expandedVariants = [];
     this.expandedUnlinked = [];
     this.expandedAliases = [];
-    this.expandedLoading = true;
 
+    // Use embedded data if available to avoid API call
+    if (item.variants !== undefined) {
+      this.expandedVariants = item.variants || [];
+      this.expandedUnlinked = item.unlinked_subitems || [];
+      this.expandedLoading = false;
+      return;
+    }
+
+    this.expandedLoading = true;
     this.http.get(this.api.getUrl('VARIANT') + 'item/' + item._id)
       .subscribe((d: any) => {
         this.expandedLoading = false;
@@ -186,6 +286,10 @@ export class VariantNewComponent implements OnInit {
   // ════════════════════════════════════════════════════════════════════════
 
   onVariantsGenerated(result: any) {
+    if (result?.refreshAttributes) {
+      this.loadAttributes();
+      return;
+    }
     if (!result?.reload) return;
     this.toastr.success(`${result.created} variant${result.created > 1 ? 's' : ''} create ho gaye!`);
     this.closeModal();
@@ -244,13 +348,12 @@ export class VariantNewComponent implements OnInit {
   //  HELPERS
   // ════════════════════════════════════════════════════════════════════════
 
-  subitemCount(item: any): number { return item.subitems?.length || 0; }
-  variantCount(item: any): number { return item.subitems?.filter((s: any) => s.variant_id)?.length || 0; }
+  subitemCount(item: any): number { return item.subitem_count ?? item.subitems?.length ?? 0; }
+  variantCount(item: any): number { return item.variant_count ?? item.subitems?.filter((s: any) => s.variant_id)?.length ?? 0; }
   aliasDisplay(item: any): string {
-    try {
-      const aliases = typeof item.aliases === 'string' ? JSON.parse(item.aliases) : (item.aliases || []);
-      return aliases.map((a: any) => a.alias || a).join(', ');
-    } catch { return ''; }
+    const aliases = item.item_aliases;
+    if (!Array.isArray(aliases) || aliases.length === 0) return '';
+    return aliases.map((a: any) => a.alias).filter(Boolean).join(', ');
   }
   trackById(_: any, item: any) { return item._id; }
 }
