@@ -82,6 +82,7 @@ export class AawakComponent implements OnInit {
   };
   cat: any;
   settings: any = {};
+  selectedItemmix: any[] = [];
   exportAJdata$ = new Subject();
   currentYear: any;
   importForm: any = {
@@ -223,6 +224,7 @@ export class AawakComponent implements OnInit {
   getFilteredData(pageNo: any = null) {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
+    this.updateFilterItemSubitem(this.selectedItemmix);
     this.filterBody.pageNo = this.pageNo;
     // AUTO select all mm if mm not selected and state selected for mm.
     if (!this.filterBody.mm_id.length && this.filterBody.mm_states) {
@@ -1761,6 +1763,33 @@ export class AawakComponent implements OnInit {
   showImages(data: any) {
     this.editData = data;
     this.openModal('Show Images');
+  }
+
+  updateFilterItemSubitem(ev: any) {
+    if (Array.isArray(ev)) {
+      this.filterBody.item_id = [];
+      this.filterBody.subitem_id = [];
+      ev.forEach((item: any) => {
+        let item_id, subitem_id;
+        if (typeof item === 'string') {
+          const parts = item.split(':');
+          item_id = parts[0] ? parseInt(parts[0]) : null;
+          subitem_id = parts[1] ? parseInt(parts[1]) : null;
+        } else {
+          item_id = item.item_id;
+          subitem_id = item.subitem_id;
+        }
+        if (item_id && !this.filterBody.item_id.includes(item_id)) {
+          this.filterBody.item_id.push(item_id);
+        }
+        if (subitem_id && !this.filterBody.subitem_id.includes(subitem_id)) {
+          this.filterBody.subitem_id.push(subitem_id);
+        }
+      });
+    } else {
+      this.filterBody.item_id = [];
+      this.filterBody.subitem_id = [];
+    }
   }
 }
 

@@ -1,0 +1,46 @@
+<ng-select class="item-dropdown" dropdownClass="item-dropdown-panel" [class.custom-sm]="size === 'sm'" [items]="options" bindLabel="searchTags"
+  [(ngModel)]="selectedValue" (change)="onSelectChange($event)" [placeholder]="placeholder" [clearable]="true"
+  [virtualScroll]="true" [appendTo]="appendTo" [readonly]="readonly" [required]="required" [searchFn]="customSearch"
+  [multiple]="multiple" [closeOnSelect]="closeOnSelect" [compareWith]="compareById" dropdownPosition="auto">
+  <ng-template ng-option-tmp let-item="item" let-index="index">
+    <div class="item-option" [class.subitem]="item.isSubitem">
+      <div class="option-content-single">
+        <span class="hindi-name">
+          <span *ngIf="item.isSubitem" class="sub-prefix">↳ </span>
+          {{item.isSubitem ? item.subitem_hin : item.item_hin}}
+          <span *ngIf="item.isSubitem" class="parent-suffix"> {{item.item_hin}}</span>
+        </span>
+        <span class="eng-name text-truncate ms-2">
+          {{item.isSubitem ? item.subitem_eng : item.item_eng}}
+          <span *ngIf="item.isSubitem" class="parent-suffix"> {{item.item_eng}}</span>
+        </span>
+        <div class="ms-auto d-flex align-items-center gap-2">
+          <span class="roman-name" *ngIf="item.item_roman || item.subitem_roman">
+            {{item.subitem_roman || item.item_roman}}
+          </span>
+          <span class="label-alias" *ngIf="item.item_aliases && !item.isSubitem" style="font-size: 11px; opacity: 0.6; font-style: italic;">
+            {{item.item_aliases | joinObj:'alias'}}
+          </span>
+          <span class="item-code" *ngIf="item.item_code || item.subitem_code">
+            {{item.subitem_code || item.item_code}}
+          </span>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template ng-label-tmp let-item="item">
+    <div class="selected-label">
+      <span class="label-name">
+        <span *ngIf="item.isSubitem" class="subitem-text">{{item.subitem_hin}} </span>
+        <span class="item-text">{{item.item_hin}}</span>
+      </span>
+      <span class="label-code" *ngIf="item.item_code || item.subitem_code">
+        #{{item.subitem_code || item.item_code}}
+      </span>
+      <span class="label-alias" *ngIf="item.item_aliases && !item.isSubitem" style="font-size: 10px; opacity: 0.6; font-style: italic;">
+        {{item.item_aliases | joinObj:'alias'}}
+      </span>
+    </div>
+  </ng-template>
+</ng-select>

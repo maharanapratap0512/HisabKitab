@@ -96,30 +96,13 @@
                                 *ngFor="let row of fs.hmpBatchForm.inputs; let i = index; trackBy: trackByIndex">
                                 <td>{{i+1}}</td>
                                 <td>
-                                    <ng-select appendTo="#hmpEntryForm" class="custom" style="width: 100%;"
-                                        placeholder="Select Item" [clearable]="true" [virtualScroll]="true"
-                                        [(ngModel)]="row.item_subitem_id" #item_subitem_id="ngModel"
+                                    <app-item-dropdown size="sm" 
+                                        [items]="items | filterByDate:fs.hmpBatchForm.date"
+                                        [(itemId)]="row.item_id"
+                                        [(subitemId)]="row.subitem_id"
                                         (change)="itemSubitemSelected($event, i, 'inputs')"
-                                        [ngClass]="{'validation' : (item_subitem_id?.touched || f.submitted) && item_subitem_id.errors?.['required']}"
-                                        [selectOnTab]="true" required styleMode="material">
-
-                                        <ng-container *ngFor="let item of items | filterByDate:fs.hmpBatchForm.date">
-                                            <ng-option [value]="item._id">
-                                                {{item.item_hin}} : {{item.item_eng}} : {{item.item_roman ?
-                                                item.item_roman : ''}} : {{item.item_code}}
-                                            </ng-option>
-
-                                            <ng-option
-                                                *ngFor="let subitem of item.subitems | filterByDate:fs.hmpBatchForm.date"
-                                                [value]="item._id + ':' + subitem._id">
-                                                {{subitem.subitem_hin}} {{item.item_hin}} :
-                                                {{subitem.subitem_eng}} {{item.item_eng}} :
-                                                {{subitem.subitem_roman ? subitem.subitem_roman : ''}} :
-                                                {{item.item_roman ? item.item_roman : ''}} :
-                                                {{subitem.subitem_code}} {{item.item_code}}
-                                            </ng-option>
-                                        </ng-container>
-                                    </ng-select>
+                                        [required]="true" appendTo="#hmpEntryForm">
+                                    </app-item-dropdown>
                                 </td>
                                 <!-- Qty & Unit -->
                                 <td>
@@ -160,7 +143,7 @@
                                 </td>
                                 <!-- Delete Action -->
                                 <td class="text-center align-middle">
-                                    <button *ngIf="row.item_subitem_id && fs.hmpBatchForm.inputs.length > 1"
+                                    <button *ngIf="row.item_id && fs.hmpBatchForm.inputs.length > 1"
                                         type="button" class="btn btn-sm btn-danger" (click)="deleteRow('inputs', i)"
                                         title="Delete this row" style="padding: 0.2rem 0.5rem; border-radius: 4px;">
                                         <i class="uil uil-times"></i>
@@ -207,7 +190,7 @@
                                             <div>{{i+1}}</div>
                                             <div class="d-flex align-items-center">
                                                 <i class="mdi mdi-plus i-outline-warning cursor-pointer mx-1"
-                                                    title="Add Jawak" *ngIf="row.item_subitem_id"
+                                                    title="Add Jawak" *ngIf="row.item_id"
                                                     (click)="addJawakToOutput(i)"
                                                     [ngClass]="{'text-success': row.jawak_detail?.length > 0}"></i>
 
@@ -227,32 +210,13 @@
                                     </td>
                                     <!-- Item Dropdown -->
                                     <td>
-                                        <ng-select appendTo="#hmpEntryForm" class="custom" style="width: 100%;"
-                                            placeholder="Select Item" [clearable]="true" [virtualScroll]="true"
-                                            [(ngModel)]="row.item_subitem_id" name="out_item_{{i}}"
-                                            #item_subitem_id="ngModel"
+                                        <app-item-dropdown size="sm" 
+                                            [items]="items | filterByDate:fs.hmpBatchForm.date"
+                                            [(itemId)]="row.item_id"
+                                            [(subitemId)]="row.subitem_id"
                                             (change)="itemSubitemSelected($event, i, 'outputs')"
-                                            [ngClass]="{'validation' : (item_subitem_id?.touched || f.submitted) && item_subitem_id.errors?.['required']}"
-                                            [selectOnTab]="true" required [showSelectAll]="false" styleMode="material">
-
-                                            <ng-container
-                                                *ngFor="let item of items | filterByDate:fs.hmpBatchForm.date">
-                                                <ng-option [value]="item._id + ':' + null">
-                                                    {{item.item_hin}} : {{item.item_eng}} : {{item.item_roman ?
-                                                    item.item_roman : ''}} : {{item.item_code}}
-                                                </ng-option>
-
-                                                <ng-option
-                                                    *ngFor="let subitem of item.subitems | filterByDate:fs.hmpBatchForm.date"
-                                                    [value]="item._id + ':' + subitem._id">
-                                                    {{subitem.subitem_hin}} {{item.item_hin}} :
-                                                    {{subitem.subitem_eng}} {{item.item_eng}} :
-                                                    {{subitem.subitem_roman ? subitem.subitem_roman : ''}} :
-                                                    {{item.item_roman ? item.item_roman : ''}} :
-                                                    {{subitem.subitem_code}} {{item.item_code}}
-                                                </ng-option>
-                                            </ng-container>
-                                        </ng-select>
+                                            [required]="true" appendTo="#hmpEntryForm">
+                                        </app-item-dropdown>
                                     </td>
                                     <!-- Qty & Unit -->
                                     <td>
@@ -284,7 +248,7 @@
                                     </td>
                                     <!-- Delete Action -->
                                     <td class="text-center align-middle">
-                                        <button *ngIf="row.item_subitem_id && fs.hmpBatchForm.outputs.length > 1"
+                                        <button *ngIf="row.item_id && fs.hmpBatchForm.outputs.length > 1"
                                             type="button" class="btn btn-sm btn-danger mb-1"
                                             (click)="deleteRow('outputs', i)" title="Delete this row"
                                             style="padding: 0.2rem 0.5rem; border-radius: 4px;">

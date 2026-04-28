@@ -154,13 +154,13 @@
                                     <th class="mw-6" *ngIf="settings.jawak.lot_no">Lot No</th>
                                     <th class="mw-15">Item - Subitem<strong class="text-danger">*</strong></th>
                                     <th class="mw-6">Qty<strong class="text-danger">*</strong></th>
-                                    <th class="mw-6">Rate</th>
+                                    <th class="w-7">Rate</th>
                                     <th class="mw-6" *ngIf="settings.jawak.actual_amt">Amount</th>
                                     <th class="mw-8" *ngIf="settings.jawak.product_id">Product</th>
                                     <th class="mw-6" *ngIf="settings.jawak.condition_id">Condition</th>
                                     <th *ngIf="settings.jawak.company_name">Company</th>
                                     <th class="mw-6" *ngIf="settings.jawak.aawak_source_id">Aawak Source</th>
-                                    <th class="mw-6">Jawak Type<strong class="text-danger">*</strong></th>
+                                    <th class="mw-6">Jwak Type<strong class="text-danger">*</strong></th>
                                     <th class="mw-8" *ngIf="settings.jawak.usage_list_id">Usage List</th>
                                     <th *ngIf="settings.jawak.document">Image</th>
                                     <th *ngIf="settings.jawak.item_detail">Item Detail</th>
@@ -406,32 +406,12 @@
 
                                         </td>
                                         <td>
-                                            <ng-select class="custom-sm" placeholder="Select Item" [clearable]="true"
-                                                [virtualScroll]="true" [(ngModel)]="jwkForm.item_subitem_id"
-                                                name="item_subitem_id" #item_subitem_id="ngModel"
-                                                (change)="itemSubitemSelected($event, i)"
-                                                [ngClass]="{'validation' : (item_subitem_id?.touched || fMain.submitted) && item_subitem_id.errors?.['required'], 'readonly-field': !!jwkForm.aawak_ref_id}"
-                                                [selectOnTab]="true" [readonly]="!!jwkForm.aawak_ref_id" required
-                                                [showSelectAll]="true" appendTo="body">
-
-                                                <ng-container
-                                                    *ngFor="let item of items | filterByDate:fs.jawakFormMain.date">
-                                                    <ng-option [value]="item._id + ':'">
-                                                        {{item.item_hin}} : {{item.item_eng}} : {{item.item_roman ?
-                                                        item.item_roman : ''}} : {{item.item_code}}
-                                                    </ng-option>
-
-                                                    <ng-option
-                                                        *ngFor="let subitem of item.subitems | filterByDate:fs.jawakFormMain.date"
-                                                        [value]="item._id + ':' + subitem._id">
-                                                        {{subitem.subitem_hin}} {{item.item_hin}} :
-                                                        {{subitem.subitem_eng}} {{item.item_eng}} :
-                                                        {{subitem.subitem_roman ? subitem.subitem_roman : ''}} :
-                                                        {{item.item_roman ? item.item_roman : ''}} :
-                                                        {{subitem.subitem_code}} {{item.item_code}}
-                                                    </ng-option>
-                                                </ng-container>
-                                            </ng-select>
+                                            <app-item-dropdown size="sm"
+                                                [items]="items | filterByDate:fs.jawakFormMain.date"
+                                                [(itemId)]="jwkForm.item_id" [(subitemId)]="jwkForm.subitem_id"
+                                                (change)="itemSubitemSelected($event, i)" [required]="true"
+                                                [readonly]="!!jwkForm.aawak_ref_id">
+                                            </app-item-dropdown>
                                         </td>
 
                                         <td>

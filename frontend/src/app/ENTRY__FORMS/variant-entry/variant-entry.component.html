@@ -163,19 +163,21 @@
                         Generated Names
                         <small class="text-muted fw-normal">(auto)</small>
                     </th>
-                    <th style="width:85px;">SKU</th>
-                    <th style="width:85px;">Unit</th>
+                    <th style="width:150px;">SKU</th>
+                    <th style="width:120px;">Unit</th>
                     <th style="width:80px;">Min ₹</th>
                     <th style="width:80px;">Max ₹</th>
                     <th style="width:190px;">Categories</th>
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let c of combinations; let ci=index" [class.bg-soft-primary]="c.selected"
-                    [style.opacity]="c.selected ? '1' : '0.6'">
+                <tr *ngFor="let c of combinations; let ci=index" [class.bg-soft-primary]="c.selected && !c.exists"
+                    [class.bg-light]="c.exists" [style.opacity]="c.selected ? '1' : '0.6'">
 
-                    <td>
-                        <input type="checkbox" [(ngModel)]="c.selected" [ngModelOptions]="{standalone: true}" />
+                    <td class="text-center">
+                        <input *ngIf="!c.exists" type="checkbox" [(ngModel)]="c.selected"
+                            [ngModelOptions]="{standalone: true}" />
+                        <i *ngIf="c.exists" class="uil uil-lock text-muted" title="Already generated"></i>
                     </td>
 
                     <td class="text-muted">{{ ci+1 }}</td>

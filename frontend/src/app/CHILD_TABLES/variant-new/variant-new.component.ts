@@ -13,6 +13,8 @@ import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import { Subject } from 'rxjs';
+import { AppComponent } from 'src/app/app.component';
 
 declare var $: any;
 
@@ -24,6 +26,10 @@ declare var $: any;
 export class VariantNewComponent implements OnInit {
 
   settings: any = {};
+  menuItems: any[] = [];
+
+  delID: any;
+  delType: string = '';
 
   // ── Item table data ─────────────────────────────────────────────────────
   itemData: any[] = [];
@@ -61,6 +67,7 @@ export class VariantNewComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService,
+    private app: AppComponent
   ) { }
 
   ngOnInit(): void {
@@ -72,6 +79,46 @@ export class VariantNewComponent implements OnInit {
     });
     this.getItemData(1);
     this.loadAttributes();
+    this.setupContextMenu();
+  }
+
+  setupContextMenu() {
+    this.menuItems = [
+      {
+        label: 'Edit Item',
+        icon: 'uil uil-pen',
+        action: (item: any) => this.openEditItem(item),
+        disabled: !this.auth.webUser.settings?.item?.edit
+      },
+      {
+        label: 'Add Alias',
+        icon: 'uil uil-plus-circle',
+        action: (item: any) => this.openAliasManager(item)
+      },
+      {
+        label: 'Generate Variants',
+        icon: 'uil uil-layers',
+        action: (item: any) => this.openGenerator(item)
+      },
+      {
+        label: 'Lock Item',
+        icon: 'uil uil-lock-alt',
+        action: (item: any) => this.lockItem(item._id),
+        disabled: (item: any) => item.restrict_year
+      },
+      {
+        label: 'Unlock Item',
+        icon: 'uil uil-unlock-alt',
+        action: (item: any) => this.unlockItem(item._id),
+        disabled: (item: any) => !item.restrict_year
+      },
+      {
+        label: 'Delete Item',
+        icon: 'uil uil-trash',
+        action: (item: any) => this.deleteItem(item),
+        disabled: !this.auth.webUser.settings?.item?.delete
+      }
+    ];
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -163,8 +210,6 @@ export class VariantNewComponent implements OnInit {
                 v_name: v.display_name,
                 sku: v.sku,
                 attrs: attrs,
-                rate: v.subitem?.min_rate || '',
-                type: 'Variant'
               }).eachCell(cell => cell.border = borderThin);
             });
           } else {
@@ -258,6 +303,49 @@ export class VariantNewComponent implements OnInit {
     this.activeItem = null;
   }
 
+  openEditItem(item: any) {
+    this.editData = item;
+    this.isEdit = true;
+    this.openModal('Edit Item');
+  }
+
+  lockItem(id: any) {
+    this.app.appModal$ = new Subject();
+    this.app.appModal$.subscribe((result: any) => {
+      if (result) this.toggleLock({ _id: id, ...result });
+    });
+    this.app.openModal('lockModal');
+  }
+
+  unlockItem(id: any) {
+    this.toggleLock({ _id: id, restrict_month: null, restrict_year: null });
+  }
+
+  toggleLock(row: any) {
+    this.http.put(this.api.getUrl('ITEM') + 'lock/', row).subscribe((data: any) => {
+      this.toastr.success(data['result'].restrict_year ? "Locked Successfully" : "Unlocked Successfully");
+      const idx = this.itemData.findIndex(i => i._id === data['result']._id);
+      if (idx > -1) {
+        this.itemData[idx].restrict_month = data['result'].restrict_month;
+        this.itemData[idx].restrict_year = data['result'].restrict_year;
+      }
+    });
+  }
+
+  deleteItem(item: any) {
+    this.delID = item._id;
+    this.delType = 'item';
+    this.openModal('delete_item');
+  }
+
+  deleteResponse(ev: any) {
+    if (ev) {
+      this.closeModal();
+      this.toastr.success((this.delType || 'Item') + " deleted successfully.");
+      this.getItemData(this.page);
+    }
+  }
+
   openGenerator(item: any) {
     this.activeItem = item;
     this.isEdit = false;
@@ -293,23 +381,55 @@ export class VariantNewComponent implements OnInit {
       return;
     }
     if (!result?.reload) return;
-    this.toastr.success(`${result.created} variant${result.created > 1 ? 's' : ''} create ho gaye!`);
+    
+    if (result.createdCount > 0) {
+      this.toastr.success(`${result.createdCount} variant(s) create ho gaye!`);
+    }
+    
+    if (result.skippedCount > 0) {
+      this.toastr.warning(`${result.skippedCount} variant(s) already exist karte hain (skipped).`);
+    }
+
     this.closeModal();
-    // refresh expanded accordion
-    if (this.expandedItemId) this.toggleAccordion({ _id: -1 }); // collapse
-    const item = this.itemData.find((i: any) => i._id === this.activeItem?._id);
-    if (item) setTimeout(() => this.toggleAccordion(item), 100);
-    this.getItemData(this.page);
+    // Refresh the specific item to show new variants
+    this.refreshItemData(this.activeItem._id);
+  }
+
+  refreshItemData(itemId: number) {
+    // We fetch the updated list but only update the specific item to maintain state
+    this.http.put(this.api.getUrl('VARIANT') + 'items/' + this.auth.webUser.dept_id, { ...this.conditionObj, item_ids: [itemId] })
+      .subscribe((d: any) => {
+        if (d.success && d.result?.[0]) {
+          const updated = d.result[0];
+          const idx = this.itemData.findIndex(i => i._id === itemId);
+          if (idx > -1) {
+            this.itemData[idx] = updated;
+            this.itemData = [...this.itemData]; // Force refresh for pipes (like paginate)
+            
+            // Force refresh of the expanded accordion
+            if (this.expandedItemId === itemId) {
+              this.expandedItemId = null;
+              setTimeout(() => {
+                this.expandedItemId = itemId;
+              }, 50);
+            }
+          }
+        }
+      });
   }
 
   onVariantEdited(result: any) {
     if (!result?.reload) return;
     this.toastr.success('Variant update ho gaya!');
     this.closeModal();
-    if (this.expandedItemId) {
-      const item = this.itemData.find((i: any) => i._id === this.expandedItemId);
-      if (item) { this.expandedItemId = null; setTimeout(() => this.toggleAccordion(item), 50); }
-    }
+    if (this.activeItem) this.refreshItemData(this.activeItem._id);
+  }
+
+  onItemEdited(result: any) {
+    if (!result?._id) return;
+    this.toastr.success('Item updated!');
+    this.closeModal();
+    this.refreshItemData(result._id);
   }
 
   onAttributeSaved(result: any) {
@@ -318,10 +438,7 @@ export class VariantNewComponent implements OnInit {
 
   onAliasSaved(result: any) {
     if (!result?.reload) return;
-    if (this.expandedItemId) {
-      const item = this.itemData.find((i: any) => i._id === this.expandedItemId);
-      if (item) { this.expandedItemId = null; setTimeout(() => this.toggleAccordion(item), 50); }
-    }
+    if (this.activeItem) this.refreshItemData(this.activeItem._id);
   }
 
   // ════════════════════════════════════════════════════════════════════════

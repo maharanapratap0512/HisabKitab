@@ -2377,6 +2377,7 @@ class dbModal {
         item_id integer not null references item(_id),
         sku varchar(250),
         display_name text,
+        fingerprint varchar(500),
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))
       )`,
@@ -2499,7 +2500,12 @@ class dbModal {
       drop_subitem_backup: `drop table subitem_backup`
     },
     {
-      closing_delete: `drop table if exists closing`
+      closing_delete: `drop table if exists closing`,
+      variant_item_unique: `CREATE UNIQUE INDEX idx_variant_item_unique ON variant (item_id, display_name)`
+    },
+    {
+      variant_fingerprint_col: `ALTER TABLE variant ADD COLUMN fingerprint varchar(500)`,
+      variant_fingerprint_unique: `CREATE UNIQUE INDEX idx_variant_fingerprint ON variant (item_id, fingerprint)`
     }
     /* TODO cleanup task 
       1. remove table - closing.

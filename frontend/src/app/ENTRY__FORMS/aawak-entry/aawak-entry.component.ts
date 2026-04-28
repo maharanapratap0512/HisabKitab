@@ -196,7 +196,7 @@ export class AawakEntryComponent implements OnInit {
 			this.imagepath = ((this.awkfg.document && this.awkfg.document.images && this.awkfg.document.images.length > 0) ? this.awkfg.document.images[0] : null);
 
 			// this.itemSelected(changes.getData.currentValue.item_id);
-			this.itemSubitemSelected(this.awkfg.item_id + ':' + this.awkfg.subitem_id);
+			this.itemSubitemSelected(this.awkfg);
 		}
 	}
 
@@ -212,33 +212,27 @@ export class AawakEntryComponent implements OnInit {
 
 	itemSubitemSelected(ev: any) {
 		if (ev) {
-			console.log(ev);
-
-			this.awkfg.item_subitem_id = ev;
-			let item_id = Number.parseInt(ev.split(':')[0]);
-			let subitem_id = ev.split(':').length > 1 ? Number.parseInt(ev.split(':')[1]) : null;
+			const item_id = ev.item_id || this.awkfg.item_id;
+			const subitem_id = ev.subitem_id || this.awkfg.subitem_id;
 			this.awkfg.item_id = item_id;
 			this.awkfg.subitem_id = subitem_id;
-			console.log(item_id, subitem_id);
 
 			let item: any = this.items.find((i: { _id: any; }) => i._id == item_id);
-			let subitem: any = item.subitems.find((i: { _id: any; }) => i._id == subitem_id);
-			//   this.lotNos = this.lotNoAll.filter((l: { item_id: any; subitem_id: any; }) => l.item_id == item_id && l.subitem_id == subitem_id);
-			this.getProductData(item_id);
-			this.awkfg.subitems = item.subitems || [];
+			if (item) {
+				let subitem: any = item.subitems?.find((i: { _id: any; }) => i._id == subitem_id);
+				this.getProductData(item_id);
+				this.awkfg.subitems = item.subitems || [];
 
-			if (!this.isEdit && subitem)
-				this.awkfg.unit_id = subitem.unit_id;
-			else if (!this.isEdit)
-				this.awkfg.unit_id = item.unit_id;
+				if (!this.isEdit) {
+					this.awkfg.unit_id = subitem ? subitem.unit_id : item.unit_id;
+				}
+			}
 		}
 		else {
 			this.subitems = [];
-			//   this.lotNos = this.lotNoAll;
 			this.awkfg.unit_id = null
 			this.awkfg.item_id = null
 			this.awkfg.subitem_id = null
-			this.awkfg.item_subitem_id = null
 			this.awkfg.lot_no = null;
 		}
 	}

@@ -32,6 +32,7 @@ router.get('/:dept_id', async (req, res, next) => {
                 resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
                 resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
                 resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
+                resolve.data[i].item_aliases = (resolve.data[i].item_aliases && resolve.data[i].item_aliases != "[null]" ? JSON.parse(resolve.data[i].item_aliases) : []);
                 subitem_count += resolve.data[i].subitems.length;
             }
             res.json({
@@ -80,7 +81,8 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
             for (let i = 0; i < resolve.data.length; i++) {
                 resolve.data[i].subitems = ((resolve.data[i].subitems && resolve.data[i].subitems != "[null]") ? JSON.parse(resolve.data[i].subitems) : []);
                 resolve.data[i].document = ((resolve.data[i].document && resolve.data[i].document != "[null]") ? JSON.parse(resolve.data[i].document) : []);
-                resolve.data[i].categories = JSON.parse(resolve.data[i].categories)
+                resolve.data[i].categories = JSON.parse(resolve.data[i].categories);
+                resolve.data[i].item_aliases = ((resolve.data[i].item_aliases && resolve.data[i].item_aliases != "[null]") ? JSON.parse(resolve.data[i].item_aliases) : []);
                 subitem_count += resolve.data[i].subitems.length;
 
                 for (let j = 0; j < resolve.data[i].subitems.length; j++) {

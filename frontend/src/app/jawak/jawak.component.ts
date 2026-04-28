@@ -70,6 +70,7 @@ export class JawakComponent implements OnInit {
     nimitt_id: null,
     pkt_num: null
   };
+  selectedItemmix: any[] = [];
   cat: any;
   settings: any = {};
 
@@ -202,6 +203,9 @@ export class JawakComponent implements OnInit {
     if (!this.filterBody.jawak_mm_id.length && this.filterBody.jwk_mm_states) {
       this.filterBody.jawak_mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.jwk_mm_states.includes(m.state_id)).map((mm: { _id: any; }) => mm._id);
     }
+    // Combined item-subitem logic
+    this.updateFilterItemSubitem(this.selectedItemmix);
+
     this.http.put(this.api.getUrl('JAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.jawakData = data['result'];
@@ -417,4 +421,41 @@ export class JawakComponent implements OnInit {
     let product = this.products.find((p: { _id: any; }) => p._id == ev);
   }
 
+  updateFilterItemSubitem(ev: any) {
+    if (Array.isArray(ev)) {
+      this.filterBody.item_id = [];
+      this.filterBody.subitem_id = [];
+      ev.forEach((item: any) => {
+        let item_id, subitem_id;
+        if (typeof item === 'string') {
+          const parts = item.split(':');
+          item_id = parts[0] ? parseInt(parts[0]) : null;
+          subitem_id = parts[1] ? parseInt(parts[1]) : null;
+        } else {
+          item_id = item.item_id;
+          subitem_id = item.subitem_id;
+        }
+        if (item_id && !this.filterBody.item_id.includes(item_id)) {
+          this.filterBody.item_id.push(item_id);
+        }
+        if (subitem_id && !this.filterBody.subitem_id.includes(subitem_id)) {
+          this.filterBody.subitem_id.push(subitem_id);
+        }
+      });
+    } else {
+      this.filterBody.item_id = [];
+      this.filterBody.subitem_id = [];
+    }
+  }
+
+  getItemSubitemArray() {
+    const res: string[] = [];
+    this.filterBody.item_id.forEach((id: any) => res.push(id + ':'));
+    this.filterBody.subitem_id.forEach((sid: any) => {
+      // We need to find the parent item_id for this subitem to construct the correct string "itemId:subitemId"
+      // But in filterBody, we don't store the pairing.
+      // This is a limitation of the current filter structure if we combine them.
+    });
+    return res;
+  }
 }

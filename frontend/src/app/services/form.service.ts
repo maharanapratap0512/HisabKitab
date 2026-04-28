@@ -70,7 +70,6 @@ export class FormService {
     this.jawakForm = {
       aawak_ref_id: null,
       lot_no: null,
-      item_subitem_id: null,
       item_id: null,
       subitem_id: null,
       product_id: null,
@@ -131,7 +130,6 @@ export class FormService {
     this.aawakFormMain.date = gs.dateString;
 
     this.pbkClosingForm = {
-      item_subitem_id: null,
       item_id: null,
       subitem_id: null,
       unit_id: null,
@@ -189,9 +187,7 @@ export class FormService {
   patchFormPbkClosing(obj: any) {
 
     if (obj.pbk_closings && obj.pbk_closings.length > 0) {
-      for (let i in obj.pbk_closing) {
-        obj.pbk_closing[i].item_subitem_id = obj.pbk_closing[i].subitem_id ? obj.pbk_closing[i].item_id + ":" + obj.pbk_closing[i].subitem_id : obj.pbk_closing[i].item_id;
-      }
+      // IDs are already present
     } else {
       obj.pbk_closing = [structuredClone(this.pbkClosingForm)]
     }

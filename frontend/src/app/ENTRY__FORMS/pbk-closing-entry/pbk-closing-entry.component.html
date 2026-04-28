@@ -81,32 +81,14 @@
                             <tbody>
                                 <tr *ngFor="let row of fs.pbkClosingFormMain.pbk_closings; let i = index">
                                     <td>
-                                        <ng-select class="custom-sm" style="width: 100%;" [clearable]="true"
-                                            appendTo="#bunchPbkClosingComponent" placeholder="Select Item Subitem"
-                                            [virtualScroll]="true" [(ngModel)]="row.item_subitem_id"
-                                            name="item_subitem_id_{{i}}" #item_subitem_id="ngModel"
+                                        <app-item-dropdown size="sm" 
+                                            [items]="items"
+                                            [(itemId)]="row.item_id"
+                                            [(subitemId)]="row.subitem_id"
                                             (change)="itemSubitemSelected($event, i)"
-                                            [ngClass]="{'validation' : (item_subitem_id?.touched || fMain.submitted) && item_subitem_id.errors?.['required']}"
-                                            [selectOnTab]="true" [disabled]="row.pbk_bachat_id" required>
-
-                                            <ng-container
-                                                *ngFor="let item of items | filterByDate:fs.pbkClosingFormMain.date">
-                                                <ng-option [value]="item._id">
-                                                    {{item.item_hin}} : {{item.item_eng}} : {{item.item_roman ?
-                                                    item.item_roman : ''}} : {{item.item_code}}
-                                                </ng-option>
-
-                                                <ng-option
-                                                    *ngFor="let subitem of item.subitems | filterByDate:fs.pbkClosingFormMain.date"
-                                                    [value]="item._id + ':' + subitem._id">
-                                                    {{subitem.subitem_hin}} {{item.item_hin}} :
-                                                    {{subitem.subitem_eng}} {{item.item_eng}} :
-                                                    {{subitem.subitem_roman ? subitem.subitem_roman : ''}} :
-                                                    {{item.item_roman ? item.item_roman : ''}} :
-                                                    {{subitem.subitem_code}} {{item.item_code}}
-                                                </ng-option>
-                                            </ng-container>
-                                        </ng-select>
+                                            [required]="true" appendTo="#bunchPbkClosingComponent"
+                                            [readonly]="!!row.pbk_bachat_id">
+                                        </app-item-dropdown>
                                     </td>
                                     <td>
                                         <ng-select class="custom-sm" style="width: 100%;" placeholder="item condition"

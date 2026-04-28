@@ -464,7 +464,8 @@ const itemmix = {
         left join unit ut on ut._id = subitem.unit_id
         where subitem.item_id = item._id
         group by subitem._id
-    ) as si) as subitems
+    ) as si) as subitems,
+    (select json_group_array(json_object('_id', ia._id, 'alias', ia.alias, 'language', ia.language)) from item_aliases ia where ia.item_id = item._id) as item_aliases
     from item
     left join rel_item_category ric on ric.item_id = item._id
     left join category ct on ct._id = ric.category_id

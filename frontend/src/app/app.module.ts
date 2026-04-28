@@ -110,6 +110,7 @@ import { ChangelogPanelComponent } from './layout/changelog-panel/changelog-pane
 import { ContextSettingsPanelComponent } from './layout/context-settings-panel/context-settings-panel.component';
 import { SmartFocusDirective } from './SHARED/smart-focus.directive';
 import { JoinObjPipe } from './pipe/formatter/join-obj.pipe';
+import { ItemDropdownComponent } from './SHARED/item-dropdown/item-dropdown.component';
 
 import { VariantComponent }               from './CHILD_TABLES/variant/variant.component';
 import { VariantGeneratorEntryComponent } from './ENTRY__FORMS/variant-generator-entry/variant-generator-entry.component';
@@ -223,6 +224,7 @@ import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.comp
     ItemAliasEntryComponent,
     VariantEntryComponent,
     VariantNewComponent,
+    ItemDropdownComponent,
   ],
 
   imports: [
@@ -246,8 +248,8 @@ import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.comp
     NgxPaginationModule,
     AutocompleteLibModule,
     NetdropModule.forRoot({
-      // Dynamically get the host IP but use backend port 3200
-      serverUrl: window.location.protocol + '//' + window.location.hostname + ':3200'
+      // Dynamically get the host IP and calculate backend port (Frontend Port - 1000)
+      serverUrl: window.location.protocol + '//' + window.location.hostname + ':' + ((parseInt(window.location.port) || 5000) - 1000)
     })
   ],
   providers: [GlobalService, AuthService, ThemeService, SelectionService],

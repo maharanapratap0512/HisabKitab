@@ -1,18 +1,26 @@
 [
     {
-        "version": "31.0",
-        "date": "27-04-2026",
-        "summary": "Variant System Launch & Smart Management Workflow",
-        "summary_hin": "वेरिएंट सिस्टम लॉन्च और स्मार्ट मैनेजमेंट यूआई",
+        "version": "31.1",
+        "date": "28-04-2026",
+        "summary": "Variant System Fixes & UI Optimizations",
+        "summary_hin": "वेरिएंट सिस्टम फिक्स और यूआई सुधार",
         "isNew": true,
         "items": [
             {
                 "type": "feature",
-                "module": "Inventory Core",
-                "title": "Variant System: Advanced Product Mapping",
-                "title_hin": "वेरिएंट सिस्टम: एडवांस्ड प्रोडक्ट मैपिंग",
-                "desc": "A major upgrade to handle items with different attributes (Size, Color, Brand, etc.) under a single product. <br/> - Dynamic Attribute Generation. <br/> - Multi-variant combinations & Bulk Export. <br/> - Integrated management for units and categories per variant.",
-                "desc_hin": "एक ही आइटम के अलग-अलग प्रकारों (जैसे साइज, कलर, ब्रांड आदि) को मैनेज करने के लिए बड़ा अपग्रेड। <br/> - एट्रिब्यूट मैपिंग की सुविधा। <br/> - मल्टी-वेरिएंट कॉम्बिनेशन और बल्क एक्सपोर्ट। <br/> - हर वेरिएंट के लिए अलग यूनिट और कैटेगरी सेटिंग्स।"
+                "module": "Variant Management",
+                "title": "Full Variant Workflow",
+                "title_hin": "वेरिएंट मैनेजमेंट पेज",
+                "desc": "Complete system to manage item variants (Size, Color, etc.). <br/> - Bulk generation of variants. <br/> - Attribute & Alias management. <br/> - Real-time variant count badges.",
+                "desc_hin": "आइटम के अलग-अलग प्रकारों (Size, Color आदि) को मैनेज करने का पूरा सिस्टम। <br/> - एक साथ कई वेरिएंट बनाने की सुविधा। <br/> - एट्रिब्यूट और निकनेम (Alias) मैनेजमेंट। <br/> - वेरिएंट की संख्या तुरंत अपडेट होने की सुविधा।"
+            },
+            {
+                "type": "improvement",
+                "module": "Item-Subitem Dropdown Redesign",
+                "title": "UI Improvements & Fixes",
+                "title_hin": "आवक, जावक, एचएमपी और प्रस्ताव में नया ड्रॉपडाउन",
+                "desc": "new optimised dropdown UI design",
+                "desc_hin": "आवक, जावक, एचएमपी और प्रस्ताव में नया ड्रॉपडाउन UI डिजाइन"
             },
             {
                 "type": "fix",

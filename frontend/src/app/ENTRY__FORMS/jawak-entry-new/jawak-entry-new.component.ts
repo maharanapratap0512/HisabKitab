@@ -169,7 +169,7 @@ export class JawakEntryNewComponent implements OnInit {
         remaining_qty: awk.remaining_qty,
       }
 
-      this.itemSubitemSelected(awk.item_id + ':' + awk.subitem_id, i);
+      this.itemSubitemSelected(awk, i);
 
     } else {
       this.clearAawak(i);
@@ -181,7 +181,6 @@ export class JawakEntryNewComponent implements OnInit {
     this.fs.jawakFormMain.jawaks[i] = {
       ...this.fs.jawakFormMain.jawaks[i],
       aawak_ref_id: null,
-      item_subitem_id: null,
       item_id: null,
       subitem_id: null,
       condition_id: null,
@@ -208,7 +207,7 @@ export class JawakEntryNewComponent implements OnInit {
       this.fs.jawakFormStatusChanges()
       for (let i in this.fs.jawakFormMain.jawaks) {
         if (this.fs.jawakFormMain.jawaks[i].item_id) {
-          this.itemSubitemSelected(this.fs.jawakFormMain.jawaks[i].item_id + ':' + (this.fs.jawakFormMain.jawaks[i].subitem_id || ''), i);
+          this.itemSubitemSelected(this.fs.jawakFormMain.jawaks[i], i);
         }
       }
 
@@ -349,33 +348,34 @@ export class JawakEntryNewComponent implements OnInit {
   }
 
   itemSubitemSelected(ev: any, i: any) {
+    const jwk = this.fs.jawakFormMain.jawaks[i];
     if (ev) {
-      this.fs.jawakFormMain.jawaks[i].item_subitem_id = ev;
-      let item_id = Number.parseInt(ev.split(':')[0]);
-      let subitem_id = ev.split(':')[1] ? Number.parseInt(ev.split(':')[1]) : null;
-      this.fs.jawakFormMain.jawaks[i].item_id = item_id;
-      this.fs.jawakFormMain.jawaks[i].subitem_id = subitem_id;
+      const item_id = ev.item_id || jwk.item_id;
+      const subitem_id = ev.subitem_id || jwk.subitem_id;
+      jwk.item_id = item_id;
+      jwk.subitem_id = subitem_id;
 
-      let item: any = this.items.find((i: { _id: any; }) => i._id == item_id);
-      let subitem: any = item.subitems.find((i: { _id: any; }) => i._id == subitem_id);
-      this.lotNos = this.lotNoAll.filter((l: { item_id: any; subitem_id: any; }) => l.item_id == item_id && l.subitem_id == subitem_id);
-      this.getProductData(item_id);
-      this.fs.jawakFormMain.jawaks[i].subitems = item.subitems || [];
+      let item: any = this.items.find((it: { _id: any; }) => it._id == item_id);
+      if (item) {
+        let subitem: any = item.subitems ? item.subitems.find((s: { _id: any; }) => s._id == subitem_id) : null;
+        this.lotNos = this.lotNoAll.filter((l: { item_id: any; subitem_id: any; }) => l.item_id == item_id && l.subitem_id == subitem_id);
+        this.getProductData(item_id);
+        jwk.subitems = item.subitems || [];
 
-      if (!this.isEdit && subitem)
-        this.fs.jawakFormMain.jawaks[i].unit_id = subitem.unit_id;
-      else if (!this.isEdit)
-        this.fs.jawakFormMain.jawaks[i].unit_id = item.unit_id;
-
+        if (!this.isEdit) {
+          if (subitem) jwk.unit_id = subitem.unit_id;
+          else jwk.unit_id = item.unit_id;
+        }
+      }
       this.updateFilterObj(i);
     }
     else {
-      this.subitems = [];
+      jwk.item_id = null;
+      jwk.subitem_id = null;
+      jwk.subitems = [];
       this.lotNos = this.lotNoAll;
-      this.fs.jawakFormMain.jawaks[i].unit_id = null
-      this.fs.jawakFormMain.jawaks[i].item_id = null
-      this.fs.jawakFormMain.jawaks[i].subitem_id = null
-      this.fs.jawakFormMain.jawaks[i].lot_no = null;
+      jwk.unit_id = null;
+      jwk.lot_no = null;
       this.updateFilterObj(i);
     }
   }

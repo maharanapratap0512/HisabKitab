@@ -266,11 +266,67 @@ function _createOneVariant(item_id, data, dept_id) {
         unit_id, extra_note, min_rate, max_rate,
     } = data;
 
-    // 1. variant core
+    // 0. Fingerprint (unique combination of attribute values)
+    const fingerprint = (attribute_values ?? [])
+        .map(av => Number(av.attribute_value_id))
+        .filter(id => !isNaN(id))
+        .sort((a, b) => a - b)
+        .join('-');
+
+    // Check if variant with same fingerprint already exists for this item
+    const existing = variant.getOne({ item_id: Number(item_id), fingerprint, active: 1 });
+
+    if (existing) {
+        const vId = existing._id;
+        // UPDATE: update optional fields if provided
+        variant.update(vId, {
+            sku: sku || existing.sku,
+            unit_id: unit_id !== undefined ? unit_id : existing.unit_id,
+            display_name: display_name_hin || existing.display_name,
+            fingerprint: fingerprint || null,
+            min_rate: min_rate || existing.min_rate,
+            max_rate: max_rate || existing.max_rate,
+        });
+
+        // Update categories for existing variant
+        if (Array.isArray(category_ids)) {
+            sutramDB.run(`DELETE FROM variant_category_map WHERE variant_id = ?`, [vId]);
+            for (const catId of category_ids) {
+                variant_cat_map.insert({ variant_id: vId, category_id: Number(catId) }, false);
+            }
+        }
+
+        // Also sync subitem mirror
+        const existingSub = subitem.getOne({ variant_id: vId });
+        if (existingSub) {
+            subitem.update(existingSub._id, {
+                subitem_hin: display_name_hin || existingSub.subitem_hin,
+                subitem_eng: display_name_eng || existingSub.subitem_eng,
+                subitem_roman: display_name_roman || existingSub.subitem_roman,
+                unit_id: unit_id || existingSub.unit_id,
+                min_rate: min_rate || existingSub.min_rate,
+                max_rate: max_rate || existingSub.max_rate,
+                updated_at: new Date().toISOString(),
+            });
+
+            // categories mirror
+            if (Array.isArray(category_ids)) {
+                sutramDB.run(`DELETE FROM rel_subitem_category WHERE subitem_id = ?`, [existingSub._id]);
+                for (const catId of category_ids) {
+                    rel_subitem_cat.insert({ subitem_id: existingSub._id, category_id: Number(catId) }, false);
+                }
+            }
+        }
+
+        return { variant_id: vId, subitem_id: existingSub?._id };
+    }
+
+    // 1. variant core (NEW)
     const variant_id = variant.insert({
         item_id: Number(item_id),
         sku: sku || null,
         display_name: display_name_hin || null,
+        fingerprint: fingerprint || null,
         active: 1,
         created_at: new Date().toISOString(),
     }, false);  // full:false → returns id only (faster in bulk)
@@ -325,14 +381,31 @@ function _createOneVariant(item_id, data, dept_id) {
     return { variant_id, subitem_id };
 }
 
+
 // ─── Bulk create — main action from frontend, single DB transaction ───────────
 function bulkCreateVariants(item_id, variants_data, userData) {
     try {
         sutramDB.begin();
         const dept_id = userData ? userData.dept_id : null;
-        const result = variants_data.map(v => _createOneVariant(item_id, v, dept_id));
+
+        const created = [];
+        const skipped = [];
+
+        for (const vData of variants_data) {
+            try {
+                created.push(_createOneVariant(item_id, vData, dept_id));
+            } catch (err) {
+                // If it's a unique constraint violation (on fingerprint or display_name), we skip it
+                if (err.code === 'SQLITE_CONSTRAINT_UNIQUE' || (err.message && (err.message.includes('UNIQUE') || err.message.includes('unique')))) {
+                    skipped.push({ display_name: vData.display_name_hin, reason: 'Duplicate' });
+                } else {
+                    throw err; // Re-throw other errors
+                }
+            }
+        }
+
         sutramDB.commit();
-        return result;
+        return { created, skipped, createdCount: created.length, skippedCount: skipped.length };
     } catch (err) {
         sutramDB.rollback();
         throw err;

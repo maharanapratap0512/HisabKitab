@@ -47,7 +47,9 @@ router.get('/items/:dept_id', async (req, res, next) => {
                         'max_rate', s.max_rate
                     ) FROM subitem s LEFT JOIN unit su ON su._id = s.unit_id WHERE s.variant_id = v._id LIMIT 1),
                     'attributes', (SELECT json_group_array(json_object(
+                        'attribute_id', a._id,
                         'attribute_hin', a.attribute_hin,
+                        'attribute_value_id', av._id,
                         'value_hin', av.attribute_value_hin
                     )) FROM variant_attribute_map vam 
                        JOIN attributes a ON a._id = vam.attribute_id
@@ -173,7 +175,9 @@ router.put('/items/:dept_id', async (req, res, next) => {
                         'max_rate', s.max_rate
                     ) FROM subitem s LEFT JOIN unit su ON su._id = s.unit_id WHERE s.variant_id = v._id LIMIT 1),
                     'attributes', (SELECT json_group_array(json_object(
+                        'attribute_id', a._id,
                         'attribute_hin', a.attribute_hin,
+                        'attribute_value_id', av._id,
                         'value_hin', av.attribute_value_hin
                     )) FROM variant_attribute_map vam 
                        JOIN attributes a ON a._id = vam.attribute_id
@@ -388,7 +392,7 @@ router.post('/bulk', async (req, res, next) => {
             return next(new Error('item_id and variants[] required'));
         }
         const result = vs.bulkCreateVariants(item_id, variants, req.userData);
-        res.json({ success: true, result, created: result.length });
+        res.json({ success: true, ...result });
     } catch (e) { next(e); }
 });
 

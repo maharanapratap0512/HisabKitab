@@ -85,6 +85,7 @@ module.exports = {
         sku: col.string(),
         display_name: col.string(),
         active: col.boolean().default(1),
+        fingerprint: col.string(),
         created_at: col.string()
     }),
     ...defineTable('variant_attribute_map', {
@@ -536,6 +537,7 @@ module.exports = {
         sku: col.string(),
         display_name: col.string(),
         active: col.boolean().default(1),
+        fingerprint: col.string(),
         created_at: col.string(),
     }),
 

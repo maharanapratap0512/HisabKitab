@@ -40,7 +40,12 @@ export class ItemAliasEntryComponent implements OnInit {
                     this.aliasForm.alias = '';
                     this.loadAliases();
                     this.response.emit({ reload: true });
+                } else {
+                    this.toastr.error(d.message || 'Kuch error aa gaya');
                 }
+            }, (err) => {
+                const msg = err.error?.message || err.message || 'Unique constraint ya server error';
+                this.toastr.error(msg);
             });
     }
 
@@ -48,6 +53,8 @@ export class ItemAliasEntryComponent implements OnInit {
         this.http.delete(this.api.getUrl('VARIANT') + 'item-aliases/' + row._id)
             .subscribe((d: any) => {
                 if (d.success) { this.loadAliases(); this.response.emit({ reload: true }); }
+            }, (err) => {
+                this.toastr.error(err.error?.message || err.message || 'Delete fail ho gaya');
             });
     }
 }
