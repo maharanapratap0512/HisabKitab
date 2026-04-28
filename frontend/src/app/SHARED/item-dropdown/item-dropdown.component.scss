@@ -15,7 +15,9 @@
 }
 
 :host.validation {
-    border: none !important; /* Remove global .validation border from host */
+    border: none !important;
+
+    /* Remove global .validation border from host */
     ::ng-deep .ng-select .ng-select-container {
         border-color: #fa5c7c !important;
     }
@@ -115,6 +117,7 @@
 
 // Ensure high visibility in dark mode or when marked/selected
 ::ng-deep .ng-dropdown-panel .ng-option {
+    padding: 5px 10px !important;
 
     &.ng-option-marked,
     &.ng-option-selected {
