@@ -2501,9 +2501,7 @@ class dbModal {
     },
     {
       closing_delete: `drop table if exists closing`,
-      variant_item_unique: `CREATE UNIQUE INDEX idx_variant_item_unique ON variant (item_id, display_name)`
-    },
-    {
+      variant_item_unique: `CREATE UNIQUE INDEX idx_variant_item_unique ON variant (item_id, display_name)`,
       variant_fingerprint_col: `ALTER TABLE variant ADD COLUMN fingerprint varchar(500)`,
       variant_fingerprint_unique: `CREATE UNIQUE INDEX idx_variant_fingerprint ON variant (item_id, fingerprint)`
     }
