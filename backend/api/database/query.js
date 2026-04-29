@@ -2098,8 +2098,9 @@ const subitem = {
     , insert:
         `insert into subitem (
         item_id,
-        subitem_list_id,
-        categories,
+        subitem_hin,
+        subitem_eng,
+        subitem_roman,
         unit_id,
         extra_note,
         document,
@@ -2110,8 +2111,9 @@ const subitem = {
         active)
     values (
         @item_id,
-        @subitem_list_id,
-        @categories,
+        @subitem_hin,
+        @subitem_eng,
+        @subitem_roman,
         @unit_id,
         @extra_note,
         @document,
@@ -2123,8 +2125,9 @@ const subitem = {
     , import:
         `insert into subitem (
         item_id,
-        subitem_list_id,
-        categories,
+        subitem_hin,
+        subitem_eng,
+        subitem_roman,,
         unit_id,
         extra_note,
         document,
@@ -2137,8 +2140,9 @@ const subitem = {
         active)
     values (
         @item_id,
-        @subitem_list_id,
-        @categories,
+        @subitem_hin,
+        @subitem_eng,
+        @subitem_roman,,
         @unit_id,
         @extra_note,
         @document,
@@ -2153,8 +2157,9 @@ const subitem = {
         `insert or ignore into subitem (
             _id,
             item_id,
-            subitem_list_id,
-            categories,
+            subitem_hin,
+            subitem_eng,
+            subitem_roman,
             unit_id,
             extra_note,
             document,
@@ -2168,8 +2173,9 @@ const subitem = {
         values (
             @_id,
             @item_id,
-            @subitem_list_id,
-            @categories,
+            @subitem_hin,
+            @subitem_eng,
+            @subitem_roman,
             @unit_id,
             @extra_note,
             @document,
@@ -2183,8 +2189,9 @@ const subitem = {
     , import_update:
         `update subitem set 
         item_id=@item_id,
-        subitem_list_id=@subitem_list_id,
-        categories=@categories,
+        subitem_hin=@subitem_hin,
+        subitem_eng=@subitem_eng,
+        subitem_roman=@subitem_roman,
         unit_id=@unit_id,
         extra_note=@extra_note,
         document=@document,
@@ -2197,8 +2204,9 @@ const subitem = {
     , update:
         `update subitem set 
         item_id=@item_id,
-        subitem_list_id=@subitem_list_id,
-        categories=@categories,
+        subitem_hin=@subitem_hin,
+        subitem_eng=@subitem_eng,
+        subitem_roman=@subitem_roman,
         unit_id=@unit_id,
         extra_note=@extra_note,
         document=@document,

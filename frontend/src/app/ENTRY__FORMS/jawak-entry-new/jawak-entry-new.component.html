@@ -472,6 +472,7 @@
                                                 [(ngModel)]="jwkForm.condition_id" name="condition_id"
                                                 #condition_id="ngModel" [selectOnTab]="true"
                                                 [readonly]="!!jwkForm.aawak_ref_id" appendTo="body"
+                                                (change)="updateFilterObj(i)"
                                                 [ngClass]="{'readonly-field': !!jwkForm.aawak_ref_id}">
                                                 <ng-option selected="selected" disabled value="">Select
                                                     Condition</ng-option>
@@ -494,6 +495,7 @@
                                                 [(ngModel)]="jwkForm.aawak_source_id" name="aawak_source_id"
                                                 #aawak_source_id="ngModel" [selectOnTab]="true"
                                                 [readonly]="!!jwkForm.aawak_ref_id" appendTo="body"
+                                                (change)="updateFilterObj(i)"
                                                 [ngClass]="{'readonly-field': !!jwkForm.aawak_ref_id}">
                                                 <ng-option selected="selected" disabled value="">Aawak Source
                                                 </ng-option>

@@ -172,7 +172,7 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                 req.body.excelData[i][req.body.config[j].name] = data;
                 if (req.body.config[j].ref_table && (req.body.config[j].not_null || data)) {
                     let id = null, subitem_id = null, name;
-                    if (req.body.config[j].type != "array" && typeof data != "number") {
+                    if (data && req.body.config[j].type != "array" && typeof data != "number") {
                         name = data.trim().toLowerCase().normalize('NFC');
                     } else {
                         name = data;

@@ -109,18 +109,40 @@ export class JawakEntryNewComponent implements OnInit {
   }
 
   async getRemainingAawakData() {
+    if (!this.fs.jawakFormMain.mm_id) {
+      this.aawaksAll = [];
+      this.aawaks = [];
+      this.aawakLoader = false;
+      this.aawakFilter.mm_id = null;
+      return;
+    }
+
+    const currentMmId = this.fs.jawakFormMain.mm_id;
+    const lastMmId = Array.isArray(this.aawakFilter.mm_id) ? this.aawakFilter.mm_id[0] : null;
+
     this.aawakLoader = true;
-    if (this.aawakFilter.max_date != this.fs.jawakFormMain.date || this.aawakFilter.mm_id != this.fs.jawakFormMain.mm_id) {
+    if (this.aawakFilter.max_date != this.fs.jawakFormMain.date || lastMmId != currentMmId) {
+
+      if (lastMmId && lastMmId != currentMmId) {
+        for (let i in this.fs.jawakFormMain.jawaks) {
+          this.clearAawak(i);
+        }
+      }
 
       // update filter object
       this.aawakFilter.max_date = this.fs.jawakFormMain.date;
-      this.aawakFilter.mm_id = this.fs.jawakFormMain.mm_id;
+      this.aawakFilter.mm_id = [currentMmId];
       this.aawakFilter.limit = -1;
       this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, this.aawakFilter).subscribe((data: any) => {
         if (data['result'] && data['success']) {
           this.aawaksAll = data['result'];
           this.aawaks = this.aawaksAll;
+          this.filterAawak();
+        } else {
+          this.aawakLoader = false;
         }
+      }, err => {
+        this.aawakLoader = false;
       });
     } else {
       this.filterAawak();
@@ -132,6 +154,8 @@ export class JawakEntryNewComponent implements OnInit {
     jwk.filterObj = {
       item_id: jwk.item_id,
       subitem_id: jwk.subitem_id,
+      condition_id: jwk.condition_id,
+      aawak_source_id: jwk.aawak_source_id
     };
   }
 
@@ -155,8 +179,7 @@ export class JawakEntryNewComponent implements OnInit {
   }
 
   async refAawakSelected(awk: any, i: any) {
-    let awk_id = awk._id;
-    if (awk_id) {
+    if (awk && awk._id) {
       this.fs.jawakFormMain.jawaks[i] = {
         ...this.fs.jawakFormMain.jawaks[i],
         item_id: awk.item_id,

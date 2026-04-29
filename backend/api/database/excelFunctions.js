@@ -127,7 +127,9 @@ class ExcelFunctions {
       document: []
    }
    subitem_form = {
-      subitem_list_id: null,
+      subitem_hin: null,
+      subitem_eng: null,
+      subitem_roman: null,
       unit_id: null,
       item_id: null,
       categories: [],
