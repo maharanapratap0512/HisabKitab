@@ -2377,7 +2377,6 @@ class dbModal {
         item_id integer not null references item(_id),
         sku varchar(250),
         display_name text,
-        fingerprint varchar(500),
         active tinyint default 1,
         created_at timestamp default (datetime('now', 'localtime'))
       )`,
