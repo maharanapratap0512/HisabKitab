@@ -67,7 +67,7 @@ router.get('/items/:dept_id', async (req, res, next) => {
                     'max_rate', s.max_rate
                 )) FROM subitem s WHERE s.item_id = i._id AND s.variant_id IS NULL AND s.active = 1) as unlinked_subitems_json,
                 -- item aliases
-                (SELECT json_group_array(json_object('_id', ia._id, 'alias', ia.alias, 'language', ia.language))
+                (SELECT json_group_array(json_object('_id', ia._id, 'alias', ia.alias))
                  FROM item_aliases ia WHERE ia.item_id = i._id) as item_aliases_json,
                 -- categories
                 (SELECT json_group_array(json_object('_id', c._id, 'category_hin', c.category_hin, 'category_eng', c.category_eng))
@@ -195,7 +195,7 @@ router.put('/items/:dept_id', async (req, res, next) => {
                     'max_rate', s.max_rate
                 )) FROM subitem s WHERE s.item_id = i._id AND s.variant_id IS NULL AND s.active = 1) as unlinked_subitems_json,
                 -- item aliases
-                (SELECT json_group_array(json_object('_id', ia._id, 'alias', ia.alias, 'language', ia.language))
+                (SELECT json_group_array(json_object('_id', ia._id, 'alias', ia.alias))
                  FROM item_aliases ia WHERE ia.item_id = i._id) as item_aliases_json,
                 -- categories
                 (SELECT json_group_array(json_object('_id', c._id, 'category_hin', c.category_hin, 'category_eng', c.category_eng))
@@ -344,9 +344,9 @@ router.get('/item-aliases/:item_id', async (req, res, next) => {
 // POST /api/variants/item-aliases
 router.post('/item-aliases', async (req, res, next) => {
     try {
-        const { item_id, alias, language } = req.body;
-        if (!item_id || !alias || !language) return next(new Error('item_id, alias, language required'));
-        const result = vs.insertItemAlias({ item_id, alias, language });
+        const { item_id, alias } = req.body;
+        if (!item_id || !alias) return next(new Error('item_id and alias required'));
+        const result = vs.insertItemAlias({ item_id, alias });
         res.json({ success: true, result });
     } catch (e) { next(e); }
 });

@@ -7,14 +7,6 @@
             <input type="text" class="form-control" [(ngModel)]="aliasForm.alias"
                    placeholder="Alternate spelling / name" (keyup.enter)="save()" />
         </div>
-        <div class="col-3">
-            <label class="form-label">Language</label>
-            <select class="form-select" [(ngModel)]="aliasForm.language">
-                <option value="hin">Hindi</option>
-                <option value="eng">English</option>
-                <option value="roman">Roman</option>
-            </select>
-        </div>
         <div class="col-2">
             <button class="btn btn-success w-100" (click)="save()">
                 <i class="uil uil-plus"></i> Add
@@ -24,13 +16,12 @@
 
     <table class="table table-sm table-hover">
         <thead>
-            <tr><th>#</th><th>Alias</th><th>Language</th><th>Delete</th></tr>
+            <tr><th>#</th><th>Alias</th><th>Delete</th></tr>
         </thead>
         <tbody>
             <tr *ngFor="let row of rows; let i=index">
                 <td class="text-muted">{{ i+1 }}</td>
                 <td><strong>{{ row.alias }}</strong></td>
-                <td><span class="badge bg-soft-secondary text-secondary">{{ row.language }}</span></td>
                 <td>
                     <button class="btn btn-sm btn-outline-danger py-0" (click)="delete(row)">
                         <i class="uil uil-trash"></i>

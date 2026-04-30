@@ -22,6 +22,7 @@ const variant_aliases = new BaseTable('variant_aliases');
 const item_aliases = new BaseTable('item_aliases');
 const subitem = new BaseTable('subitem');
 const rel_subitem_cat = new BaseTable('rel_subitem_category');
+const item = new BaseTable('item');
 
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -141,14 +142,33 @@ function deleteAttributeValue(id) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function getItemAliases(item_id) {
-    return item_aliases.getAll({ item_id: Number(item_id) }, { orderBy: 'language ASC, alias ASC' });
+    return item_aliases.getAll({ item_id: Number(item_id) }, { orderBy: 'alias ASC' });
 }
 
 function insertItemAlias(data) {
+    const alias = data.alias.trim();
+    if (!alias) throw new Error('Alias required');
+
+    // NEW LOGIC: Check if alias exists in item names first using BaseTable.getOne
+    const conflict = item.getOne(
+        `item_hin = '${alias.replace(/'/g, "''")}' OR item_eng = '${alias.replace(/'/g, "''")}' OR item_roman = '${alias.replace(/'/g, "''")}'`,
+        { full: false }
+    );
+
+    if (conflict) {
+        throw new Error(`Yeh alias '${alias}' pehle se hi item '${conflict.item_hin}' ke name mein exist karta hai. Duplicate add nahi kar sakte.`);
+    }
+
+    // NEW LOGIC: Also check if alias exists in other items' aliases
+    const aliasConflict = item_aliases.getOne({ alias: alias }, { full: true });
+
+    if (aliasConflict && Number(aliasConflict.item_id) !== Number(data.item_id)) {
+        throw new Error(`Yeh alias '${alias}' pehle se hi item '${aliasConflict.item?.item_hin}' ke aliases mein exist karta hai.`);
+    }
+
     return item_aliases.insert({
         item_id: Number(data.item_id),
-        alias: data.alias,
-        language: data.language || 'hin',
+        alias: alias,
         created_at: new Date().toISOString(),
     });
 }

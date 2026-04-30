@@ -28,6 +28,7 @@ export class JawakComponent implements OnInit {
   toBeDelete: any = [];
 
   term: any;
+  loadingStatus: any = '';
   showModal: String = '';
   total_count: any = 0;
   jawakData: any = [];
@@ -112,7 +113,7 @@ export class JawakComponent implements OnInit {
 
   exportExcel() {
     this.isLoader = true;
-    // this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
+    this.loadingStatus = "डाटा प्रोसेस हो रहा है... ";
     this.pageNo = 0;
     this.jwkCount = 0;
     this.allJwkData = [];
@@ -161,6 +162,7 @@ export class JawakComponent implements OnInit {
         footerRow['Amount'] += result[i].actual_amt ? result[i].actual_amt : 0;
       }
 
+      this.loadingStatus = `डाटा प्रोसेस हो रहा है... (${this.allJwkData.length} / ${this.total_count})`;
       if (this.allJwkData.length < this.total_count) {
         this.getMoreAJ();
       }
@@ -185,6 +187,7 @@ export class JawakComponent implements OnInit {
           this.pageNo = data["pageNo"];
         }
         this.total_count = data.total_count;
+        this.loadingStatus = `डाटा डाउनलोड हो रहा है... (API: ${this.pageNo})`;
         this.exportJwkdata$.next(data['result']);
         // this.isLoader = false;
       }

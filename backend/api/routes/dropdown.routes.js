@@ -56,7 +56,13 @@ router.get('/all/:dept_id', async (req, res, next) => {
 
             // Assign with fallbacks
             lists.country = country || [];
-            lists.category = category || [];
+            lists.category = {
+                data: (category?.data || []).map(c => {
+                    c.alias = (c.alias && c.alias != "null" ? (typeof c.alias === 'string' ? JSON.parse(c.alias) : c.alias) : []);
+                    return c;
+                }),
+                total_count: category?.total_count || 0
+            };
             lists.city = city || [];
             lists.department = department || [];
             lists.departmen_config = departmen_config || [];

@@ -13,7 +13,7 @@ export class ItemAliasEntryComponent implements OnInit {
     @Input()  getData: any = null;   // the item object
     @Output() response = new EventEmitter<any>();
 
-    aliasForm = { alias: '', language: 'hin' };
+    aliasForm = { alias: '' };
     rows:     any[] = [];
 
     constructor(
@@ -27,7 +27,10 @@ export class ItemAliasEntryComponent implements OnInit {
     loadAliases() {
         if (!this.getData?._id) return;
         this.http.get(this.api.getUrl('VARIANT') + 'item-aliases/' + this.getData._id)
-            .subscribe((d: any) => { this.rows = d.success ? d.result : []; });
+            .subscribe((d: any) => { 
+                this.rows = d.success ? d.result : []; 
+                // Ensure rows only show alias and _id as per new schema
+            });
     }
 
     save() {

@@ -293,6 +293,15 @@ export class AawakNewComponent implements OnInit {
     return jawakArray;
   }
 
+  getCategoryString(obj: any): string {
+    if (obj.categories && Array.isArray(obj.categories)) {
+      return obj.categories.map((c: any) => c.category_hin).join(', ');
+    } else if (obj.categories_hin && Array.isArray(obj.categories_hin)) {
+      return obj.categories_hin.join(', ');
+    }
+    return '';
+  }
+
   exportAJData() {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
@@ -359,19 +368,12 @@ export class AawakNewComponent implements OnInit {
           awkObj.Relative = result[i].relative_name ? result[i].relative_name : '-';
         }
 
-        let cat = '';
         let item = this.gs.Lists.itemmix.find((it: { _id: any; }) => it._id == result[i].item_id);
-        if (item) {
-          if (result[i].subitem_id) {
-            let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
-            if (subitem) {
-              cat = subitem.categories_hin.join(', ');
-            } else {
-              cat = item.categories_hin.join(', ');
-            }
-          }
-          else {
-            cat = item.categories_hin.join(', ');
+        let cat = item ? this.getCategoryString(item) : '';
+        if (item && result[i].subitem_id) {
+          let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
+          if (subitem) {
+            cat = this.getCategoryString(subitem);
           }
         }
         awkObj = {
@@ -396,6 +398,7 @@ export class AawakNewComponent implements OnInit {
         this.allAJData.push(awkObj);
       }
 
+      this.loadingStatus = `डाटा प्रोसेस हो रहा है... (${this.allAJData.length} / ${this.total_count})`;
       if (this.allAJData.length < this.total_count) {
         this.getMoreAJ();
       }
@@ -454,13 +457,13 @@ export class AawakNewComponent implements OnInit {
           if (result[i].subitem_id) {
             let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
             if (subitem) {
-              cat = subitem.categories_hin.join(', ');
+              cat = this.getCategoryString(subitem);
             } else {
-              cat = item.categories_hin.join(', ');
+              cat = this.getCategoryString(item);
             }
           }
           else {
-            cat = item.categories_hin.join(', ');
+            cat = this.getCategoryString(item);
           }
         }
         awkObj = {
@@ -485,6 +488,7 @@ export class AawakNewComponent implements OnInit {
         this.allAJData.push(awkObj);
       }
 
+      this.loadingStatus = `डाटा प्रोसेस हो रहा है... (${this.allAJData.length} / ${this.export_total_count || this.total_count})`;
       if (this.allAJData.length < this.export_total_count) {
         this.getMoreAJ();
       }
@@ -541,13 +545,13 @@ export class AawakNewComponent implements OnInit {
           if (result[i].subitem_id) {
             let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
             if (subitem) {
-              cat = subitem.categories_hin.join(', ');
+              cat = this.getCategoryString(subitem);
             } else {
-              cat = item.categories_hin.join(', ');
+              cat = this.getCategoryString(item);
             }
           }
           else {
-            cat = item.categories_hin.join(', ');
+            cat = this.getCategoryString(item);
           }
         }
         awkObj = {
@@ -575,6 +579,7 @@ export class AawakNewComponent implements OnInit {
         this.allAJData.push(awkObj);
       }
 
+      this.loadingStatus = `डाटा प्रोसेस हो रहा है... (${this.allAJData.length} / ${this.total_count})`;
       if (this.allAJData.length < this.total_count) {
         this.getMoreAJ();
       }
@@ -647,6 +652,7 @@ export class AawakNewComponent implements OnInit {
         }
       }
       this.awkCount += result.length;
+      this.loadingStatus = `डाटा प्रोसेस हो रहा है... (${this.awkCount} / ${this.total_count})`;
 
       if (this.awkCount < this.total_count) {
         this.getMoreAJ();
@@ -673,6 +679,7 @@ export class AawakNewComponent implements OnInit {
           this.pageNo = data["pageNo"];
           this.export_total_count = data['total_count'];
         }
+        this.loadingStatus = `डाटा डाउनलोड हो रहा है... (API: ${this.pageNo})`;
         this.exportAJdata$.next(data['result']);
         // this.isLoader = false;
       }

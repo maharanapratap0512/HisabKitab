@@ -379,31 +379,31 @@ const item = {
         `select * from item ?`
     , select_full:
         `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
-        unit.unit_full, unit.unit_short from item, json_each(item.categories)
-        left join category ct on ct._id = json_each.value
+        unit.unit_full, unit.unit_short from item
+        left join rel_item_category ric on ric.item_id = item._id
+        left join category ct on ct._id = ric.category_id
         left join unit on unit._id = item.unit_id ? group by item._id limit @limit offset @offset`
     , insert:
         `insert into item (
-            item_hin, item_eng, item_roman, item_code, categories, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, active)
+            item_hin, item_eng, item_roman, item_code, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, active)
         values (
-            @item_hin, @item_eng, @item_roman, @item_code, @categories, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @active)`
+            @item_hin, @item_eng, @item_roman, @item_code, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @active)`
     , import:
         `insert into item (
-            item_hin, item_eng, item_roman, item_code, categories, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, created_at, updated_at, active) 
+            item_hin, item_eng, item_roman, item_code, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, created_at, updated_at, active) 
         values (
-            @item_hin, @item_eng, @item_roman, @item_code, @categories, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @created_at, @updated_at, @active)`
+            @item_hin, @item_eng, @item_roman, @item_code, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @created_at, @updated_at, @active)`
     , insert_ignore:
         `insert or ignore into item (
-            _id, item_hin, item_eng, item_roman, item_code, categories, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, created_at, updated_at, active) 
+            _id, item_hin, item_eng, item_roman, item_code, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, created_at, updated_at, active) 
         values (
-            @_id, @item_hin, @item_eng, @item_roman, @item_code, @categories, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @created_at, @updated_at, @active)`
+            @_id, @item_hin, @item_eng, @item_roman, @item_code, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @created_at, @updated_at, @active)`
     , import_update:
         `update item set 
         item_hin=@item_hin,
         item_eng=@item_eng,
         item_roman=@item_roman,
         item_code=@item_code,
-        categories=@categories,
         extra_note=@extra_note,
         document=@document,
         unit_id=@unit_id,
@@ -419,7 +419,6 @@ const item = {
         item_eng=@item_eng,
         item_roman=@item_roman,
         item_code=@item_code,
-        categories=@categories,
         extra_note=@extra_note,
         document=@document,
         unit_id=@unit_id,
@@ -465,7 +464,7 @@ const itemmix = {
         where subitem.item_id = item._id
         group by subitem._id
     ) as si) as subitems,
-    (select json_group_array(json_object('_id', ia._id, 'alias', ia.alias, 'language', ia.language)) from item_aliases ia where ia.item_id = item._id) as item_aliases
+    (select json_group_array(json_object('_id', ia._id, 'alias', ia.alias)) from item_aliases ia where ia.item_id = item._id) as item_aliases
     from item
     left join rel_item_category ric on ric.item_id = item._id
     left join category ct on ct._id = ric.category_id
@@ -473,7 +472,8 @@ const itemmix = {
     group by item._id # limit @limit offset @offset`,
 
     order: `item_hin, item_eng`,
-    count: `select count(*) as total_count from (select count(*) from item, json_each(item.categories)
+    count: `select count(*) as total_count from (select item._id from item 
+        left join rel_item_category ric on ric.item_id = item._id
         left join subitem si on si.item_id = item._id ? group by item._id)`
 }
 

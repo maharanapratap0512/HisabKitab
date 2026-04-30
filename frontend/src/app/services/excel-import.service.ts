@@ -18,6 +18,9 @@ export class ExcelImportService {
     { name: 'support_list', autoUpdate: true, note: 'list_type should be aawak_type, jawak_type, gender, relation, condition. MUST BE same spelling, lower case.' },
     { name: 'category', autoUpdate: true },
     { name: 'district', autoUpdate: true },
+    { name: 'attribute', autoUpdate: true },
+    { name: 'attributes_value', autoUpdate: true },
+    { name: 'variant', autoUpdate: true, note: 'Import variants with comma-separated attributes.' },
   ];
   config: any = {
     vehicle: [
@@ -107,7 +110,7 @@ export class ExcelImportService {
       { col_name: 'subitem_hin', name: 'subitem_hin', alt_names: ["subitemhin", "subitem hin", "subitem"], not_null: true },
       { col_name: 'subitem_eng', name: 'subitem_eng', alt_names: ["subitemeng", "subitem eng"], not_null: false, },
       { col_name: 'subitem_roman', name: 'subitem_roman', alt_names: ["subitemroman", "subitem roman"], not_null: false, },
-      { col_name: 'arr_categories', name: 'arr_categories', alt_names: ["category", "categories"], not_null: true, type: "array", ref_table: "category", ref_field: "categories", ref_data: "categories_hin" },
+      { col_name: 'arr_categories', name: 'categories', alt_names: ["category", "categories"], not_null: true, type: "array", ref_table: "category", ref_field: "categories", ref_data: "categories_hin" },
       { col_name: 'unit', name: 'unit', alt_names: [], not_null: false, },
       { col_name: 'extra_note', name: 'extra_note', alt_names: ["extra note", "extranote"], not_null: false, },
       { col_name: 'restrict_month', name: 'restrict_month', alt_names: ["restrict month"], not_null: false },
@@ -121,7 +124,7 @@ export class ExcelImportService {
       { col_name: 'item_roman', name: 'item_roman', alt_names: ["itemroman", "item roman"], not_null: false, },
       { col_name: 'item_code', name: 'item_code', alt_names: ["itemcode", "item code"], not_null: false, },
       { col_name: 'subitem_hin', name: 'subitem_hin', alt_names: ["subitemhin", "subitem hin", "subitem"], not_null: false, },
-      { col_name: 'arr_categories', name: 'arr_categories', alt_names: ["category", "categories"], not_null: true, type: "array", ref_table: "category", ref_field: "categories", ref_data: "categories_hin" },
+      { col_name: 'arr_categories', name: 'categories', alt_names: ["category", "categories"], not_null: true, type: "array", ref_table: "category", ref_field: "categories", ref_data: "categories_hin" },
       { col_name: 'unit', name: 'unit', alt_names: [], not_null: false, },
       { col_name: 'extra_note', name: 'extra_note', alt_names: ["extra note", "extranote"], not_null: false, },
       { col_name: 'restrict_month', name: 'restrict_month', alt_names: ["restrict month"], not_null: false },
@@ -161,7 +164,30 @@ export class ExcelImportService {
       { col_name: 'description', name: 'description', alt_names: ["note", "डिस्क्रिप्शन", "नोट"], not_null: false },
       { col_name: 'nimmit', name: 'nimmit', alt_names: ["निमित्त"], not_null: false, ref_table: 'nimitt', ref_field: 'nimitt_id', ref_data: 'nimitt_hin' },
     ],
-
+    attribute: [
+      { col_name: 'attribute_hin', name: 'attribute_hin', alt_names: ['attribute hin', 'attr hin'], not_null: true },
+      { col_name: 'attribute_eng', name: 'attribute_eng', alt_names: ['attribute eng', 'attr eng'], not_null: false },
+      { col_name: 'attribute_roman', name: 'attribute_roman', alt_names: ['attribute roman', 'attr roman'], not_null: false },
+    ],
+    attributes_value: [
+      { col_name: 'attribute', name: 'attribute', alt_names: ['attribute_hin', 'attribute hin', 'attr'], not_null: true, ref_table: 'attribute', ref_field: 'attribute_id', ref_data: 'attribute_hin' },
+      { col_name: 'attribute_value_hin', name: 'attribute_value_hin', alt_names: ['value hin', 'value_hin'], not_null: true },
+      { col_name: 'attribute_value_eng', name: 'attribute_value_eng', alt_names: ['value eng', 'value_eng'], not_null: false },
+      { col_name: 'attribute_value_roman', name: 'attribute_value_roman', alt_names: ['value roman', 'value_roman'], not_null: false },
+    ],
+    variant: [
+      { col_name: 'item', name: 'item', alt_names: ["item_hin", "item hin", "item name"], not_null: true, ref_table: "item", ref_field: "item_id", ref_data: "item_hin" },
+      { col_name: 'display_name_hin', name: 'display_name_hin', alt_names: ['variant_hin', 'variant hin', 'display name hin'], not_null: true },
+      { col_name: 'display_name_eng', name: 'display_name_eng', alt_names: ['variant_eng', 'variant eng', 'display name eng'], not_null: false },
+      { col_name: 'display_name_roman', name: 'display_name_roman', alt_names: ['variant_roman', 'variant roman', 'display name roman'], not_null: false },
+      { col_name: 'attributes_hin', name: 'attribute_values', alt_names: ['attributes hin', 'attrs hin'], not_null: true, type: 'array', ref_table: 'attributes_value', ref_field: 'attribute_values', ref_data: 'attribute_value_hin' },
+      { col_name: 'attributes_eng', name: 'attributes_eng', alt_names: ['attributes eng', 'attrs eng'], not_null: false },
+      { col_name: 'attributes_roman', name: 'attributes_roman', alt_names: ['attributes roman', 'attrs roman'], not_null: false },
+      { col_name: 'sku', name: 'sku', alt_names: ['variant_sku', 'variant sku'], not_null: false },
+      { col_name: 'unit', name: 'unit', alt_names: ['यूनिट'], not_null: false, ref_table: 'unit', ref_field: 'unit_id', ref_data: 'unit_short' },
+      { col_name: 'min_rate', name: 'min_rate', alt_names: ["min rate"], not_null: false },
+      { col_name: 'max_rate', name: 'max_rate', alt_names: ["max rate"], not_null: false },
+    ],
   }
   constructor() { }
 

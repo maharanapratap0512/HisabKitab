@@ -21,6 +21,8 @@ export class CategoryEntryComponent implements OnInit {
   isLoader: boolean = false;
   settings: any = null;
   categories: any[] = [];
+  aliases: string[] = [];
+  newAlias: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -100,7 +102,41 @@ export class CategoryEntryComponent implements OnInit {
         parent_id: changes.getData.currentValue.parent_id,
         sort_order: changes.getData.currentValue.sort_order || 0
       });
+      // Handle aliases
+      try {
+        const aliasData = changes.getData.currentValue.alias;
+        this.aliases = (aliasData && aliasData != 'null' ? (typeof aliasData === 'string' ? JSON.parse(aliasData) : aliasData) : []);
+      } catch (e) { this.aliases = []; }
     }
+  }
+
+  addAlias() {
+    const alias = this.newAlias.trim();
+    if (!alias) return;
+    
+    // Check for duplicates in the current list
+    if (this.aliases.includes(alias)) {
+      this.toastr.warning('Alias already added');
+      return;
+    }
+
+    // NEW LOGIC: Validation against category names
+    // This will be checked again on the server, but client-side check for current names:
+    const currentHin = this.categoryForm.get('category_hin')?.value;
+    const currentEng = this.categoryForm.get('category_eng')?.value;
+    const currentRoman = this.categoryForm.get('category_roman')?.value;
+
+    if (alias === currentHin || alias === currentEng || alias === currentRoman) {
+      this.toastr.error('Alias cannot be the same as Category Name');
+      return;
+    }
+
+    this.aliases.push(alias);
+    this.newAlias = '';
+  }
+
+  removeAlias(index: number) {
+    this.aliases.splice(index, 1);
   }
 
 
@@ -136,7 +172,8 @@ export class CategoryEntryComponent implements OnInit {
         _id: this.getData._id
       }
       body.set = {
-        ...this.categoryForm.value
+        ...this.categoryForm.value,
+        alias: JSON.stringify(this.aliases)
       };
       this.http.put(this.api.getUrl('CATEGORY'), body).subscribe((data: any) => {
         if (data && data['success']) {
