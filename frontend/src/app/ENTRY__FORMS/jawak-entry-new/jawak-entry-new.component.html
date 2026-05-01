@@ -180,13 +180,12 @@
                                                 <div>{{i+1}}</div>
                                             </div>
                                         </td>
-                                        <td *ngIf="!isEdit && (settings.jawak.auto_awk || settings.jawak.auto_reawk)">
+                                        <!-- <td *ngIf="!isEdit && (settings.jawak.auto_awk || settings.jawak.auto_reawk)">
                                             <app-popover-filter direction="auto" [showClearButton]="false"
                                                 [iconClass]="'uil uil-sliders-v-alt p-1'" [btnOutline]="false"
                                                 [btnClass]="(jwkForm.auto_awk || jwkForm.auto_reawk ? 'btn btn-soft-primary' : 'btn btn-soft-secondary')"
                                                 triggerOn="hover">
                                                 <div style="width: 450px; padding: 10px;">
-                                                    <!-- Auto Aawak Section -->
                                                     <div class="mb-1 border" style="border-radius: 4px;">
                                                         <div (click)="jwkForm.auto_awk = !jwkForm.auto_awk;"
                                                             style="cursor: pointer;"
@@ -232,7 +231,6 @@
                                                         </div>
                                                     </div>
 
-                                                    <!-- Auto Re-Aawak Section -->
                                                     <div class="border" style="border-radius: 4px;">
                                                         <div (click)="jwkForm.auto_reawk = !jwkForm.auto_reawk;"
                                                             style="cursor: pointer;"
@@ -282,109 +280,24 @@
                                                     </div>
                                                 </div>
                                             </app-popover-filter>
-                                        </td>
+                                        </td> -->
                                         <td *ngIf="settings.jawak.aawak_ref_id">
 
-                                            <app-popover-filter
-                                                [label]="(jwkForm.aawak_ref_id ? ' Aawak Selected' : 'Select Aawak')"
-                                                direction="auto" (clear)="clearAawak(i)" clearButtonLabel="Clear"
-                                                [iconClass]="(jwkForm.aawak_ref_id ? 'uil uil-check' : '')"
-                                                triggerOn="hover">
-                                                <div style="width: 500px;">
-                                                    <div *ngIf="aawakLoader" class="d-flex justify-content-center">
-                                                        <div class="spinner-border spinner-border-sm" role="status">
-                                                            <span class="visually-hidden">Loading...</span>
-                                                        </div>
-                                                    </div>
-                                                    <ng-select *ngIf="!aawakLoader" class="custom-sm aawak-select"
-                                                        style="width: 100%;" placeholder="Select Aawak"
-                                                        [items]="aawaks | filterAawak:jwkForm.filterObj"
-                                                        bindLabel="lot_no" bindValue="_id" [searchFn]="searchAawak"
-                                                        [clearable]="true" [virtualScroll]="true" name="aawak_ref_id"
-                                                        [(ngModel)]="jwkForm.aawak_ref_id" [selectOnTab]="true"
-                                                        (change)="refAawakSelected($event, i)">
-
-                                                        <ng-template ng-label-tmp let-item="item">
-                                                            <div class="selected-aawak">
-                                                                <span class="badge badge-soft-warning mr-1"
-                                                                    *ngIf="item.lot_no">#{{item.lot_no}}</span>
-                                                                <span class="font-weight-bold">{{item.item_hin}}</span>
-                                                                <span
-                                                                    class="text-primary mx-2 font-weight-bold">{{item.qty}}
-                                                                    {{item.unit_short}}</span>
-                                                                <span class="condition badge font-size-10 mr-2"
-                                                                    [ngClass]="{'badge-soft-success': item.condition_hin == 'New', 'badge-soft-warning': item.condition_hin == 'Old', 'badge-soft-danger': item.condition_hin == 'Damaged'}">
-                                                                    {{item.condition_hin}}
-                                                                </span>
-                                                                <small class="text-muted" *ngIf="item.mm_hin"> @
-                                                                    {{item.mm_hin}}</small>
-                                                            </div>
-                                                        </ng-template>
-
-                                                        <ng-template ng-option-tmp let-item="item" let-index="index"
-                                                            let-search="searchTerm">
-                                                            <div class="aawak-option-card">
-                                                                <!-- Line 1: Header Info & Main Qty -->
-                                                                <div
-                                                                    class="option-header d-flex justify-content-between border-bottom-subtle">
-                                                                    <div class="header-left d-flex align-items-center">
-                                                                        <span class="date-text font-weight-bold mr-2"><i
-                                                                                class="uil uil-calendar-alt mr-1"></i>{{item.date
-                                                                            | date:'dd-MM-yyyy'}}</span>
-                                                                        <span class="mm-text text-info mr-2"
-                                                                            *ngIf="item.mm_hin">
-                                                                            <i
-                                                                                class="uil uil-map-marker mr-1"></i>{{item.mm_hin}}
-                                                                            <small class="opacity-50 ml-1"
-                                                                                *ngIf="item.mm_code">({{item.mm_code}})</small>
-                                                                        </span>
-                                                                        <span class="source-mm text-success mr-2"
-                                                                            *ngIf="item.aawak_mm_hin">
-                                                                            <i
-                                                                                class="uil uil-arrow-right mr-1"></i>{{item.aawak_mm_hin}}
-                                                                            <small
-                                                                                *ngIf="item.aawak_mm_code">({{item.aawak_mm_code}})</small>
-                                                                            से
-                                                                        </span>
-                                                                        <span class="lot-badge"
-                                                                            *ngIf="item.lot_no">#{{item.lot_no}}</span>
-                                                                    </div>
-                                                                    <div class="header-right">
-                                                                        <span
-                                                                            class="item-qty font-weight-bold text-primary">{{item.qty}}
-                                                                            {{item.unit_short}}</span>
-                                                                    </div>
-                                                                </div>
-                                                                <!-- Line 2: Item Names, Condition & Remaining Qty -->
-                                                                <div
-                                                                    class="option-body d-flex justify-content-between align-items-center">
-                                                                    <div class="item-info d-flex align-items-center">
-                                                                        <span
-                                                                            class="item-name font-weight-bold">{{item.item_hin}}
-                                                                            {{item.subitem_id ? ' - ' + item.subitem_hin
-                                                                            : ''}}</span>
-                                                                        <span
-                                                                            class="text-muted font-weight-normal mx-3">{{item.item_eng}}
-                                                                            {{item.subitem_id ? ' - ' + item.subitem_eng
-                                                                            : ''}}</span>
-                                                                        <span class="condition badge font-size-10"
-                                                                            [ngClass]="{'badge-soft-success': item.condition_hin == 'New', 'badge-soft-warning': item.condition_hin == 'Old', 'badge-soft-danger': item.condition_hin == 'Damaged'}">
-                                                                            {{item.condition_hin}}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div class="qty-info">
-                                                                        <div class="remaining-qty font-weight-bold"
-                                                                            [ngClass]="{'text-danger': item.remaining_qty <= 0, 'text-success': item.remaining_qty > 0}">
-                                                                            बचत: {{item.remaining_qty}}
-                                                                            {{item.unit_short}}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </ng-template>
-                                                    </ng-select>
-                                                </div>
-                                            </app-popover-filter>
+                                            <app-aawak-ref-dropdown 
+                                                [mmId]="fs.jawakFormMain.mm_id"
+                                                [maxDate]="fs.jawakFormMain.date"
+                                                [deptId]="auth.webUser.dept_id"
+                                                [filterObj]="{
+                                                    item_id: jwkForm.item_id,
+                                                    subitem_id: jwkForm.subitem_id,
+                                                    condition_id: jwkForm.condition_id,
+                                                    aawak_source_id: jwkForm.aawak_source_id
+                                                }"
+                                                [(ngModel)]="jwkForm.aawak_ref_id"
+                                                (selectionChange)="refAawakSelected($event, i)"
+                                                size="sm"
+                                                placeholder="Select Aawak">
+                                            </app-aawak-ref-dropdown>
                                         </td>
                                         <td *ngIf="settings.jawak.lot_no">
 
@@ -472,7 +385,7 @@
                                                 [(ngModel)]="jwkForm.condition_id" name="condition_id"
                                                 #condition_id="ngModel" [selectOnTab]="true"
                                                 [readonly]="!!jwkForm.aawak_ref_id" appendTo="body"
-                                                (change)="updateFilterObj(i)"
+                                                
                                                 [ngClass]="{'readonly-field': !!jwkForm.aawak_ref_id}">
                                                 <ng-option selected="selected" disabled value="">Select
                                                     Condition</ng-option>
@@ -495,7 +408,7 @@
                                                 [(ngModel)]="jwkForm.aawak_source_id" name="aawak_source_id"
                                                 #aawak_source_id="ngModel" [selectOnTab]="true"
                                                 [readonly]="!!jwkForm.aawak_ref_id" appendTo="body"
-                                                (change)="updateFilterObj(i)"
+                                                
                                                 [ngClass]="{'readonly-field': !!jwkForm.aawak_ref_id}">
                                                 <ng-option selected="selected" disabled value="">Aawak Source
                                                 </ng-option>

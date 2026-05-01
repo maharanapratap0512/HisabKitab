@@ -1,0 +1,212 @@
+.aawak-ref-dropdown {
+    width: 100%;
+    display: block;
+
+    ::ng-deep .ng-select-container {
+        background-color: var(--bs-body-bg) !important;
+        border: 1px solid var(--bs-border-color) !important;
+        border-radius: 4px !important;
+        min-height: 35px !important;
+        color: var(--bs-body-color) !important;
+    }
+
+    &.custom-sm {
+        ::ng-deep .ng-select-container {
+            min-height: 31px !important;
+            height: 31px !important;
+            font-size: 13px !important;
+        }
+    }
+}
+
+.aawak-ref-dropdown-container {
+    &.mode-tiny {
+        width: 40px;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        ::ng-deep .ng-select {
+            opacity: 0;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Keep it on top but invisible so it intercepts clicks */
+            
+            .ng-select-container {
+                border: none !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                min-height: unset !important;
+                height: 100% !important;
+            }
+            .ng-arrow-wrapper { display: none !important; }
+            .ng-clear-wrapper { display: none !important; }
+        }
+
+        .tiny-overlay {
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            
+            &:hover {
+                transform: scale(1.1);
+            }
+        }
+        
+        .selected-label-tiny {
+             display: flex;
+             align-items: center;
+             justify-content: center;
+        }
+    }
+}
+
+.aawak-option-card {
+    padding: 4px 10px;
+    line-height: 1.25;
+    
+    /* Line 1: Meta info (Structured) */
+    .meta-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2px;
+        font-size: 10.5px;
+        
+        .meta-left {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            opacity: 0.8;
+            
+            .meta-item {
+                display: flex;
+                align-items: center;
+                gap: 3px;
+                
+                i { font-size: 11px; }
+            }
+            
+            .date-badge {
+                font-weight: 600;
+                color: var(--bs-primary);
+            }
+            
+            .source-badge {
+                margin-left: 2px;
+                padding: 0px 4px;
+                background: rgba(var(--bs-success-rgb), 0.12);
+                color: var(--bs-success);
+                border-radius: 3px;
+                font-size: 9.5px;
+            }
+        }
+        
+        .lot-badge {
+            background: var(--bs-secondary);
+            color: #fff;
+            padding: 0px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 9.5px;
+        }
+    }
+    
+    /* Line 2: Main info (Structured) */
+    .main-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center; /* Changed from flex-end to center for compactness */
+        
+        .product-section {
+            flex: 1;
+            overflow: hidden;
+            
+            .product-title-row {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--bs-emphasis-color);
+                display: flex;
+                align-items: center;
+                flex-wrap: nowrap; /* Force single line for name + badges */
+                overflow: hidden;
+                text-overflow: ellipsis;
+                
+                .product-eng {
+                    font-size: 10px;
+                    opacity: 0.5;
+                    font-weight: 400;
+                    margin-left: 6px;
+                }
+                
+                .badge-row {
+                    display: inline-flex;
+                    gap: 4px;
+                    margin-left: 8px;
+                    flex-shrink: 0;
+                    
+                    .badge {
+                        font-size: 9px;
+                        padding: 1px 4px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                    }
+                    
+                    .condition-badge {
+                        &.cond-new { background: rgba(var(--bs-success-rgb), 0.2); color: var(--bs-success); }
+                        &.cond-old { background: rgba(var(--bs-warning-rgb), 0.2); color: var(--bs-warning); }
+                    }
+                    
+                    .source-badge-pill {
+                        background: rgba(var(--bs-info-rgb), 0.15);
+                        color: var(--bs-info);
+                    }
+                    
+                    .type-badge-pill {
+                        background: rgba(var(--bs-primary-rgb), 0.15);
+                        color: var(--bs-primary);
+                    }
+                }
+            }
+        }
+        
+        .stock-section {
+            text-align: right;
+            min-width: 90px;
+            
+            .stock-remaining {
+                line-height: 1;
+                .label { font-size: 10px; opacity: 0.7; margin-right: 2px; }
+                .value { font-size: 14px; font-weight: 800; color: var(--bs-warning); }
+                .unit { font-size: 10px; opacity: 0.7; }
+            }
+            
+            .stock-total {
+                font-size: 10px;
+                opacity: 0.5;
+                margin-top: 0px;
+            }
+        }
+    }
+}
+
+.selected-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    
+    .badge {
+        font-size: 10px;
+        padding: 2px 5px;
+    }
+}
+

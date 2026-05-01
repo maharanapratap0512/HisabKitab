@@ -458,6 +458,72 @@ router.put('/new', async (req, res, next) => {
     }
 });
 
+//aawak dropdown lazy loading – lightweight, no jawak_detail sub-queries
+router.put('/dropdown/:dept_id', async (req, res, next) => {
+    try {
+        const limit = req.body.limit || 30;
+        const page = req.body.page || 1;
+        const offset = (page - 1) * limit;
+        const search = (req.body.search || '').trim().toLowerCase();
+
+        // Build condition string from filters
+        let conditions = [`1=1`];
+
+        if (req.body.max_date) conditions.push(`aawak.date <= '${req.body.max_date}'`);
+        if (req.body.mm_id && req.body.mm_id.length > 0) conditions.push(`aawak.mm_id in (${req.body.mm_id.join(',')})`);
+        if (req.body.remaining_qty) conditions.push(`remaining_qty <> 0`);
+
+        // Row-level filters (from filterObj)
+        if (req.body.item_id) conditions.push(`aawak.item_id = ${req.body.item_id}`);
+        if (req.body.subitem_id) conditions.push(`aawak.subitem_id = ${req.body.subitem_id}`);
+        if (req.body.condition_id) conditions.push(`aawak.condition_id = ${req.body.condition_id}`);
+        if (req.body.aawak_source_id) conditions.push(`aawak.aawak_source_id = ${req.body.aawak_source_id}`);
+        if (req.body.aawak_type_id) conditions.push(`aawak.aawak_type_id = ${req.body.aawak_type_id}`);
+
+        // Server-side text search (using subqueries so count query works too)
+        if (search) {
+            conditions.push(`(
+                aawak.item_id IN (SELECT _id FROM v_item WHERE LOWER(item_hin) LIKE '%${search}%' OR LOWER(item_eng) LIKE '%${search}%') OR
+                aawak.subitem_id IN (SELECT _id FROM v_subitem WHERE LOWER(subitem_hin) LIKE '%${search}%' OR LOWER(subitem_eng) LIKE '%${search}%') OR
+                aawak.mm_id IN (SELECT _id FROM mm WHERE LOWER(mm_hin) LIKE '%${search}%' OR LOWER(mm_code) LIKE '%${search}%') OR
+                aawak.aawak_mm_id IN (SELECT _id FROM mm WHERE LOWER(mm_hin) LIKE '%${search}%') OR
+                CAST(aawak.lot_no AS TEXT) LIKE '%${search}%' OR
+                aawak.aawak_type_id IN (SELECT _id FROM support_list WHERE LOWER(list_name_hin) LIKE '%${search}%' OR LOWER(list_name_eng) LIKE '%${search}%') OR
+                aawak.aawak_source_id IN (SELECT _id FROM support_list WHERE LOWER(list_name_hin) LIKE '%${search}%' OR LOWER(list_name_eng) LIKE '%${search}%') OR
+                aawak.condition_id IN (SELECT _id FROM support_list WHERE LOWER(list_name_hin) LIKE '%${search}%' OR LOWER(list_name_eng) LIKE '%${search}%')
+            )`);
+        }
+
+        const conditionString = conditions.join(' AND ');
+
+        await DB.getList('aawak', {
+            full: true,
+            dept_id: req.params.dept_id,
+            conditionString: conditionString,
+            orderBy: 'aawak._id desc',
+            limit: limit,
+            offset: offset
+        }).then(async (resolve) => {
+            // Parse JSON fields same as /filter – skip jawak_detail sub-queries only
+            for (let i in resolve.data) {
+                resolve.data[i].document = (resolve.data[i].document ? JSON.parse(resolve.data[i].document) : {});
+                resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
+                resolve.data[i].icategories = (resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []);
+                resolve.data[i].scategories = (resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : []);
+                resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
+            }
+            res.json({
+                success: true,
+                result: resolve.data || [],
+                page: page,
+                total_count: resolve.total_count
+            });
+        }, (err) => { return next(err) });
+    } catch (err) {
+        return next(err);
+    }
+});
+
 //aawak & jawak distribution get by dept + filter + pageNo
 router.put('/filter/:dept_id', async (req, res, next) => {
     let orderBy = null, limit = req.body.limit || 100, offset = null, page = 1, conditionString, jwkIds;

@@ -248,3 +248,53 @@
     background-color: rgba(244, 102, 102, 0.1);
     color: #f46666;
 }
+
+// ── Light mode overrides for aawak dropdown ──
+:host-context(body[data-bs-theme="light"]) {
+
+    .aawak-select {
+        ::ng-deep {
+            .ng-dropdown-panel {
+                border: 1px solid #dee2e6;
+                background-color: #ffffff;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            }
+            .ng-option {
+                border-bottom: 1px solid #e9ecef !important;
+                color: #1e293b !important;
+                &.ng-option-marked {
+                    background-color: rgba(99, 102, 241, 0.1) !important;
+                    color: #1e293b !important;
+                    * { color: inherit !important; }
+                }
+                &.ng-option-selected {
+                    background-color: rgba(99, 102, 241, 0.15) !important;
+                    color: #1e293b !important;
+                    * { color: inherit !important; }
+                }
+            }
+        }
+    }
+
+    .aawak-option-card {
+        .lot-badge {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        .item-name {
+            color: #1e293b;
+        }
+        .item-qty {
+            color: #b45309;
+        }
+    }
+
+    .mm-text {
+        background: rgba(59, 130, 246, 0.1);
+        color: #0369a1 !important;
+    }
+
+    .source-mm {
+        color: #059669;
+    }
+}

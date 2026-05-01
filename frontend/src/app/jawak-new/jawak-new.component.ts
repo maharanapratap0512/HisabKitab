@@ -87,6 +87,7 @@ export class JawakNewComponent implements OnInit {
       this.isLoader = true;
     });
     this.filterBody.mm_id = this.settings.defaultMM ? [this.settings.defaultMM] : [];
+    this.filterBody.unlinkedOnly = false;
     this.getFilteredData();
   }
 
@@ -138,6 +139,25 @@ export class JawakNewComponent implements OnInit {
   UISettingsChanged() {
     this.auth.webUser.settings = this.settings;
     this.auth.updateSettings()
+  }
+
+  onAawakRefSaved(updatedJawak: any, row: any) {
+    // If voucher view, update the specific jawak inside the voucher
+    if (this.settings.jawak.viewMode === 'voucher') {
+       const index = row.jawaks.findIndex((j: any) => j._id === updatedJawak._id);
+       if (index !== -1) {
+           row.jawaks[index].aawak_ref_id = updatedJawak.aawak_ref_id;
+           // Optionally fetch more details if needed, but for now we just link it
+       }
+    } else {
+        // Individual view
+        row.aawak_ref_id = updatedJawak.aawak_ref_id;
+    }
+  }
+
+  toggleUnlinkedFilter() {
+    this.filterBody.unlinkedOnly = !this.filterBody.unlinkedOnly;
+    this.onHeaderFilterChange();
   }
 
   getJawakPage(page: any = null) {

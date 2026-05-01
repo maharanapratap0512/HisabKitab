@@ -111,6 +111,8 @@ import { ContextSettingsPanelComponent } from './layout/context-settings-panel/c
 import { SmartFocusDirective } from './SHARED/smart-focus.directive';
 import { JoinObjPipe } from './pipe/formatter/join-obj.pipe';
 import { ItemDropdownComponent } from './SHARED/item-dropdown/item-dropdown.component';
+import { AawakRefDropdownComponent } from './SHARED/aawak-ref-dropdown/aawak-ref-dropdown.component';
+
 
 import { VariantComponent }               from './CHILD_TABLES/variant/variant.component';
 import { VariantGeneratorEntryComponent } from './ENTRY__FORMS/variant-generator-entry/variant-generator-entry.component';
@@ -225,6 +227,8 @@ import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.comp
     VariantEntryComponent,
     VariantNewComponent,
     ItemDropdownComponent,
+    AawakRefDropdownComponent,
+
   ],
 
   imports: [

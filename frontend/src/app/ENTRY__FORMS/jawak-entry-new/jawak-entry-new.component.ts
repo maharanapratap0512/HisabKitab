@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { debounceTime } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subject, Subscription } from 'rxjs';
 import { ContextMenuItem } from 'src/app/SHARED/context-menu.directive';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -15,7 +15,7 @@ declare var $: any;
   templateUrl: './jawak-entry-new.component.html',
   styleUrls: ['./jawak-entry-new.component.scss']
 })
-export class JawakEntryNewComponent implements OnInit {
+export class JawakEntryNewComponent implements OnInit, OnDestroy {
 
   @ViewChild('fMain') fMain!: NgForm;
   @Input() isEdit: any;
@@ -97,86 +97,18 @@ export class JawakEntryNewComponent implements OnInit {
 
   ngOnInit(): void {
 
+
+
     setTimeout(() => {
       if (this.fMain) {
-        this.getRemainingAawakData();
         this.fMain.statusChanges?.pipe(debounceTime(200)).subscribe(() => {
           this.fs.jawakFormStatusChanges();
-          this.getRemainingAawakData();
         });
       }
     }, 500);
   }
 
-  async getRemainingAawakData() {
-    if (!this.fs.jawakFormMain.mm_id) {
-      this.aawaksAll = [];
-      this.aawaks = [];
-      this.aawakLoader = false;
-      this.aawakFilter.mm_id = null;
-      return;
-    }
 
-    const currentMmId = this.fs.jawakFormMain.mm_id;
-    const lastMmId = Array.isArray(this.aawakFilter.mm_id) ? this.aawakFilter.mm_id[0] : null;
-
-    this.aawakLoader = true;
-    if (this.aawakFilter.max_date != this.fs.jawakFormMain.date || lastMmId != currentMmId) {
-
-      if (lastMmId && lastMmId != currentMmId) {
-        for (let i in this.fs.jawakFormMain.jawaks) {
-          this.clearAawak(i);
-        }
-      }
-
-      // update filter object
-      this.aawakFilter.max_date = this.fs.jawakFormMain.date;
-      this.aawakFilter.mm_id = [currentMmId];
-      this.aawakFilter.limit = -1;
-      this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, this.aawakFilter).subscribe((data: any) => {
-        if (data['result'] && data['success']) {
-          this.aawaksAll = data['result'];
-          this.aawaks = this.aawaksAll;
-          this.filterAawak();
-        } else {
-          this.aawakLoader = false;
-        }
-      }, err => {
-        this.aawakLoader = false;
-      });
-    } else {
-      this.filterAawak();
-    }
-  }
-
-  updateFilterObj(i: any) {
-    const jwk = this.fs.jawakFormMain.jawaks[i];
-    jwk.filterObj = {
-      item_id: jwk.item_id,
-      subitem_id: jwk.subitem_id,
-      condition_id: jwk.condition_id,
-      aawak_source_id: jwk.aawak_source_id
-    };
-  }
-
-  filterAawak() {
-    this.aawakLoader = false;
-    for (let i in this.fs.jawakFormMain.jawaks) {
-      this.updateFilterObj(i);
-    }
-  }
-
-  searchAawak(term: string, item: any) {
-    term = term.toLowerCase();
-    return item.lot_no?.toString().toLowerCase().includes(term) ||
-      item.item_hin?.toLowerCase().includes(term) ||
-      item.item_eng?.toLowerCase().includes(term) ||
-      item.subitem_hin?.toLowerCase().includes(term) ||
-      item.subitem_eng?.toLowerCase().includes(term) ||
-      item.mm_hin?.toLowerCase().includes(term) ||
-      item.mm_code?.toLowerCase().includes(term) ||
-      item.aawak_mm_hin?.toLowerCase().includes(term);
-  }
 
   async refAawakSelected(awk: any, i: any) {
     if (awk && awk._id) {
@@ -385,12 +317,11 @@ export class JawakEntryNewComponent implements OnInit {
         this.getProductData(item_id);
         jwk.subitems = item.subitems || [];
 
-        if (!this.isEdit) {
+        if (!this.isEdit || !jwk.aawak_ref_id) {
           if (subitem) jwk.unit_id = subitem.unit_id;
           else jwk.unit_id = item.unit_id;
         }
       }
-      this.updateFilterObj(i);
     }
     else {
       jwk.item_id = null;
@@ -399,7 +330,6 @@ export class JawakEntryNewComponent implements OnInit {
       this.lotNos = this.lotNoAll;
       jwk.unit_id = null;
       jwk.lot_no = null;
-      this.updateFilterObj(i);
     }
   }
 
@@ -410,7 +340,6 @@ export class JawakEntryNewComponent implements OnInit {
       this.products = this.products.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
       if (!this.isEdit && subitem)
         this.fs.jawakFormMain.jawaks[i].unit_id = subitem.unit_id;
-      this.updateFilterObj(i);
     }
     else {
       if (this.fs.jawakFormMain.jawaks[i].item_id) {
@@ -421,7 +350,6 @@ export class JawakEntryNewComponent implements OnInit {
         this.lotNos = this.lotNoAll;
         this.fs.jawakFormMain.jawaks[i].lot_no = null;
       }
-      this.updateFilterObj(i);
     }
   }
 
@@ -434,7 +362,6 @@ export class JawakEntryNewComponent implements OnInit {
     this.fs.jawakFormMain.jawaks[i].qty = 1;
     this.fs.jawakFormMain.jawaks[i].unit_id = 1;
     this.fs.jawakFormMain.jawaks[i].rate = product.price ? product.price : null;
-    this.updateFilterObj(i);
     this.rateClick(i);
   }
 
