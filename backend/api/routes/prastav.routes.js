@@ -38,7 +38,7 @@ router.get('/', (req, res, next) => {
     try {
         const { active, mm_id, item_id, date, year } = req.query || {};
         const { result, total_count } = service.getPrastavs({
-            mm_id, item_id, year,
+            mm_id, item_id, year, date,
             active: (active === '1' || active === 'true' || active === true) ? 1 : null,
             itemsPerPage: 10000 // Return large set for legacy GET
         });

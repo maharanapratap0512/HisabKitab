@@ -11,7 +11,7 @@ const subitemList = new BaseTable('subitem_list');
 /**
  * Paginated, filtered Prastav list.
  */
-function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, year, pageNo, itemsPerPage, dept_id }) {
+function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, year, date, pageNo, itemsPerPage, dept_id }) {
     const PAGE_SIZE = itemsPerPage ? Number(itemsPerPage) : 100;
     const page = (pageNo !== undefined && pageNo !== null) ? Number(pageNo) + 1 : 1;
     const offset = (page - 1) * PAGE_SIZE;
