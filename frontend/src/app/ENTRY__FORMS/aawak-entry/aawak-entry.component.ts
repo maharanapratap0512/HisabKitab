@@ -129,6 +129,7 @@ export class AawakEntryComponent implements OnInit {
 			this.usage_lists = result.usage_list ? result.usage_list : [];
 		});
 		this.settings = this.auth.webUser.settings;
+		console.log("this.settings", this.settings);
 		this.getDepartments();
 		this.getProductData(null);
 	}

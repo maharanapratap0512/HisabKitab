@@ -121,9 +121,9 @@
                         {{data.aj_mm}}
                      </td>
                      <td *ngIf="settings.aawak.pbk_id"
-                        [ngClass]="{'marked': (data.pbk.roll_no || data.pbk.pbk || data.pbk.relation || data.pbk.relative) && !data.pbk_id}">
-                        {{data.pbk.roll_no?data.pbk.roll_no:'____'}} {{data.pbk.name?data.pbk.name:'-'}} <br />
-                        {{data.pbk.relation?data.pbk.relation:'-'}} - {{data.pbk.relative?data.pbk.relative:'-'}}
+                        [ngClass]="{'marked': (data.pbk.roll_no || data.pbk.name) && !data.pbk_id}">
+                        {{data.pbk?.roll_no?data.pbk.roll_no:'____'}} {{data.pbk?.name?data.pbk.name:'-'}} <br />
+                        {{data.pbk?.relation?data.pbk.relation:'-'}} - {{data.pbk?.relative?data.pbk.relative:'-'}}
                      </td>
                      <td [ngClass]="{'marked': !data.item_id}">{{data.item?data.item:'-'}} <br /></td>
                      <td [ngClass]="{'marked': !data.subitem_id && data.subitem}">
@@ -188,7 +188,10 @@
                                  <td [ngClass]="{'marked': !jwk.date}">{{jwk.date}}</td>
                                  <td>{{jwk.pkt_num}}</td>
                                  <td [ngClass]="{'marked': !jwk.aj_mm_id}">{{jwk.aj_mm}}</td>
-                                 <td [ngClass]="{'marked': jwk.nimitt && !jwk.nimitt_id}">{{jwk.nimitt}} </td>
+                                 <td
+                                    [ngClass]="{'marked': jwk.pbk && (jwk.pbk.name || jwk.pbk.roll_no) && !jwk.pbk_id}">
+                                    {{jwk.pbk?.roll_no}} {{jwk.pbk?.name}}
+                                 </td>
                                  <td>{{jwk.description}}</td>
                                  <td [ngClass]="{'marked': !jwk.aj_type_id}">{{jwk.aj_type}}</td>
                                  <td [ngClass]="{'marked': !jwk.qty || !data.unit_id}">{{jwk.qty}} {{data.unit}}</td>
@@ -241,11 +244,14 @@
                         <td>{{10 * (pageCorrection - 1) + (i+1)}}</td>
                         <td>{{data.type}} </td>
                         <!-- <td *ngIf="data.type == 'item'">{{data.name}} - {{data.subitem}} </td> -->
-                        <td *ngIf="data.type == 'pbk'">
-                           {{data.pbk.roll_no ? data.pbk.roll_no : '____'}} {{data.pbk.pbk ? data.pbk.pbk : ''}} <br />
-                           {{data.pbk.relation ? data.pbk.relation : ''}} {{data.pbk.relative ? data.pbk.relative : ''}}
+                        <td *ngIf="data.type == 'pbk' || data.type == 'jwk_pbk'">
+                           {{data.name.roll_no ? data.name.roll_no : '____'}} {{data.name.name ? data.name.name : ''}}
+                           <br />
+                           {{data.name.relation ? data.name.relation : ''}} {{data.name.relative ? data.name.relative :
+                           ''}}
                         </td>
-                        <td *ngIf="data.type != 'pbk'">{{data.name}} - {{data.extra_note ? data.extra_note : ''}} </td>
+                        <td *ngIf="!(data.type == 'pbk' || data.type == 'jwk_pbk')">{{data.name}} - {{data.extra_note ?
+                           data.extra_note : ''}} </td>
                         <td>
                            <!-- mm dropdown -->
                            <ng-select *ngIf="data.type == 'mm' || data.type == 'aj_mm'" class="custom custom-import"
@@ -296,9 +302,9 @@
                            </div>
 
                            <!-- pbk dropdown -->
-                           <ng-select *ngIf="data.type == 'pbk'" class="custom custom-import" placeholder="Select Pbk"
-                              [virtualScroll]="true" [(ngModel)]="data.pbk_id" [ngModelOptions]="{standalone: true}"
-                              appendTo="body">
+                           <ng-select *ngIf="data.type == 'pbk' || data.type == 'jwk_pbk'" class="custom custom-import"
+                              placeholder="Select Pbk" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}" appendTo="body">
                               <ng-option selected="selected" disabled value="">-- Select Pbk --</ng-option>
                               <ng-option *ngFor="let item of pbks" [value]="item._id">
                                  {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :

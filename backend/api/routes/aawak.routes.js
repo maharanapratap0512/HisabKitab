@@ -480,18 +480,21 @@ router.put('/dropdown/:dept_id', async (req, res, next) => {
         if (req.body.aawak_source_id) conditions.push(`aawak.aawak_source_id = ${req.body.aawak_source_id}`);
         if (req.body.aawak_type_id) conditions.push(`aawak.aawak_type_id = ${req.body.aawak_type_id}`);
 
-        // Server-side text search (using subqueries so count query works too)
+        // Server-side text search by tags (split by space)
         if (search) {
-            conditions.push(`(
-                aawak.item_id IN (SELECT _id FROM v_item WHERE LOWER(item_hin) LIKE '%${search}%' OR LOWER(item_eng) LIKE '%${search}%') OR
-                aawak.subitem_id IN (SELECT _id FROM v_subitem WHERE LOWER(subitem_hin) LIKE '%${search}%' OR LOWER(subitem_eng) LIKE '%${search}%') OR
-                aawak.mm_id IN (SELECT _id FROM mm WHERE LOWER(mm_hin) LIKE '%${search}%' OR LOWER(mm_code) LIKE '%${search}%') OR
-                aawak.aawak_mm_id IN (SELECT _id FROM mm WHERE LOWER(mm_hin) LIKE '%${search}%') OR
-                CAST(aawak.lot_no AS TEXT) LIKE '%${search}%' OR
-                aawak.aawak_type_id IN (SELECT _id FROM support_list WHERE LOWER(list_name_hin) LIKE '%${search}%' OR LOWER(list_name_eng) LIKE '%${search}%') OR
-                aawak.aawak_source_id IN (SELECT _id FROM support_list WHERE LOWER(list_name_hin) LIKE '%${search}%' OR LOWER(list_name_eng) LIKE '%${search}%') OR
-                aawak.condition_id IN (SELECT _id FROM support_list WHERE LOWER(list_name_hin) LIKE '%${search}%' OR LOWER(list_name_eng) LIKE '%${search}%')
-            )`);
+            let tags = search.split(/\s+/).filter(t => t.length > 0);
+            tags.forEach(tag => {
+                conditions.push(`(
+                    aawak.item_id IN (SELECT _id FROM v_item WHERE LOWER(item_hin) LIKE '%${tag}%' OR LOWER(item_eng) LIKE '%${tag}%') OR
+                    aawak.subitem_id IN (SELECT _id FROM v_subitem WHERE LOWER(subitem_hin) LIKE '%${tag}%' OR LOWER(subitem_eng) LIKE '%${tag}%') OR
+                    aawak.mm_id IN (SELECT _id FROM mm WHERE LOWER(mm_hin) LIKE '%${tag}%' OR LOWER(mm_code) LIKE '%${tag}%' OR LOWER(mm_eng) LIKE '%${tag}%') OR
+                    aawak.aawak_mm_id IN (SELECT _id FROM mm WHERE LOWER(mm_hin) LIKE '%${tag}%' OR LOWER(mm_eng) LIKE '%${tag}%' OR LOWER(mm_code) LIKE '%${tag}%') OR
+                    CAST(aawak.lot_no AS TEXT) LIKE '%${tag}%' OR
+                    aawak.aawak_type_id IN (SELECT _id FROM support_list WHERE LOWER(list_name_hin) LIKE '%${tag}%' OR LOWER(list_name_eng) LIKE '%${tag}%') OR
+                    aawak.aawak_source_id IN (SELECT _id FROM support_list WHERE LOWER(list_name_hin) LIKE '%${tag}%' OR LOWER(list_name_eng) LIKE '%${tag}%') OR
+                    aawak.condition_id IN (SELECT _id FROM support_list WHERE LOWER(list_name_hin) LIKE '%${tag}%' OR LOWER(list_name_eng) LIKE '%${tag}%')
+                )`);
+            });
         }
 
         const conditionString = conditions.join(' AND ');

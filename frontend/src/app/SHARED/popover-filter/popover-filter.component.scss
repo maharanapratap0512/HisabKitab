@@ -1,7 +1,7 @@
 .filter-popover {
   position: absolute;
   z-index: 1050;
-  background: #2a3042;
+  background: inherit;
   border: 1px solid #404954;
   border-radius: 4px;
   padding: 10px;
@@ -12,7 +12,7 @@
   h6 {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #fff;
+    color: inherit;
     margin-bottom: 0.75rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 5px;

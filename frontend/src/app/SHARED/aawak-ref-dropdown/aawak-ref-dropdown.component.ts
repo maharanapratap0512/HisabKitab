@@ -1,12 +1,13 @@
 import { Component, Input, Output, EventEmitter, forwardRef, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Subject, Subscription } from 'rxjs';
+import { Subject, Subscription, of } from 'rxjs';
 import { ViewChild } from '@angular/core';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { HttpService } from 'src/app/services/http.service';
 import { ApiService } from 'src/app/services/api.service';
 import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-aawak-ref-dropdown',
@@ -29,7 +30,7 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
   @Input() size: 'sm' | 'default' = 'default';
   @Input() mode: 'default' | 'tiny' = 'default';
   @Input() readonly: boolean = false;
-  
+
   // Auto-save related
   @Input() autoSave: boolean = false;
   @Input() jawakId: any;
@@ -42,10 +43,11 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
   page = 1;
   search$ = new Subject<string>();
   currentSearchTerm = '';
-  
+
   @ViewChild('select') select!: NgSelectComponent;
-  
+
   selectedValue: any = null;
+  originalValue: any = null;
   private searchSub: Subscription;
 
   onChange: any = () => { };
@@ -91,6 +93,9 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
   // --- ControlValueAccessor ---
   writeValue(value: any): void {
     this.selectedValue = value;
+    if (this.originalValue === null) {
+      this.originalValue = value;
+    }
   }
   registerOnChange(fn: any): void { this.onChange = fn; }
   registerOnTouched(fn: any): void { this.onTouched = fn; }
@@ -118,10 +123,15 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
     });
   }
 
-  fetchData(search: string, page: number) {
+  fetchData(search: string, page: number): any {
+    if (!this.mmId) {
+      this.items = [];
+      this.totalCount = 0;
+      return of({ success: true, result: [], total_count: 0 });
+    }
     const body = {
       ...this.filterObj,
-      mm_id: this.mmId,
+      mm_id: Array.isArray(this.mmId) ? this.mmId : (this.mmId ? [this.mmId] : []),
       max_date: this.maxDate,
       search: search,
       pageNo: page,
@@ -131,11 +141,38 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
   }
 
   onSelectChange(event: any) {
-    this.onChange(event ? event._id : null);
+    const newValue = event ? event._id : null;
+    
+    // If autoSave is enabled, and there was already a reference saved
+    if (this.autoSave && this.jawakId && this.originalValue && newValue !== this.originalValue) {
+      Swal.fire({
+        title: 'Change Reference?',
+        text: "You are about to change an existing reference. The stock will be recalculated automatically. Proceed?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, change it'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.commitChange(newValue, event);
+        } else {
+          // Revert selection
+          this.selectedValue = this.originalValue;
+        }
+      });
+    } else {
+      // Normal flow (no original value, or autoSave disabled)
+      this.commitChange(newValue, event);
+    }
+  }
+
+  private commitChange(newValue: any, event: any) {
+    this.onChange(newValue);
     this.selectionChange.emit(event);
 
-    if (this.autoSave && this.jawakId && event) {
-        this.saveRef(event._id);
+    if (this.autoSave && this.jawakId) {
+      this.saveRef(newValue);
     }
   }
 
@@ -146,6 +183,7 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
         this.loading = false;
         if (res.success) {
           this.toastr.success('Aawak linked successfully');
+          this.originalValue = aawakRefId; // Update original value after successful save
           this.saved.emit(res.result);
         }
       }, err => {

@@ -291,13 +291,10 @@
                                 + Subitem
                             </a>
                         </div>
-                        <app-item-dropdown 
-                            [items]="items" 
-                            [itemId]="jawakForm.get('item_id')?.value"
+                        <app-item-dropdown [items]="items" [itemId]="jawakForm.get('item_id')?.value"
                             [subitemId]="jawakForm.get('subitem_id')?.value"
                             (change)="jawakForm.patchValue({item_id: $event.item_id, subitem_id: $event.subitem_id}); itemSelected($event.item_id); subitemSelected($event.subitem_id)"
-                            [readonly]="isEdit || ref_id"
-                            [required]="true">
+                            [readonly]="isEdit || ref_id" [required]="true">
                         </app-item-dropdown>
                     </div>
                 </div>
@@ -472,20 +469,6 @@
                     </div>
                 </div>
 
-                <div class="col-md-2 mb-3">
-                    <div>
-                        <div class="form-check form-checkbox-primary">
-                            <input type="checkbox" class="form-check-input" id="chkAutoAwk" formControlName="auto_awk">
-                            <label class="form-check-label" for="chkAutoAwk">Auto Aawak</label>
-                        </div>
-                        <div class="form-check form-checkbox-primary">
-                            <input type="checkbox" class="form-check-input" id="chkAutoReAwk"
-                                formControlName="auto_reawk">
-                            <label class="form-check-label" for="chkAutoReAwk">Auto Re-Aawak</label>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="col-md-3 mb-3 d-flex" *ngIf="jawakForm.value.auto_reawk && (!isEdit || !getData._id)">
                     <div class="form-group">
                         <label class="form-label">Auto Re-Aawak Date</label>
@@ -526,17 +509,25 @@
                     </div>
                 </div>
 
-                <div class="col-md-1 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="d-flex justify-content-between mt-3" *ngIf="!this.isEdit">
 
                         <button class="btn btn-primary mx-3" type="submit" (click)="jawakFormSubmit()">Submit</button>
+                        <button class="btn btn-warning mt-3 mx-3" type="submit" *ngIf="this.isEdit"
+                            (click)="jawakFormUpdate()">Update</button>
+
+
+                        <div class="form-check form-checkbox-primary">
+                            <input type="checkbox" class="form-check-input" id="chkAutoAwk" formControlName="auto_awk">
+                            <label class="form-check-label" for="chkAutoAwk">Auto Aawak</label>
+                        </div>
+                        <div class="form-check form-checkbox-primary">
+                            <input type="checkbox" class="form-check-input" id="chkAutoReAwk"
+                                formControlName="auto_reawk">
+                            <label class="form-check-label" for="chkAutoReAwk">Auto Re-Aawak</label>
+                        </div>
                     </div>
-                    <button class="btn btn-warning mt-3 mx-3" type="submit" *ngIf="this.isEdit"
-                        (click)="jawakFormUpdate()">Update</button>
-                    <div class="form-check form-checkbox-primary" *ngIf="getData && !getData._id">
-                        <input type="checkbox" class="form-check-input" id="chkAutoAwk" formControlName="auto_awk">
-                        <label class="form-check-label" for="chkAutoAwk">Auto Aawak</label>
-                    </div>
+
                     <!-- <button class="btn btn-light submit" type="button" (click)="jawakForm.reset()">Clear</button> -->
                 </div>
 

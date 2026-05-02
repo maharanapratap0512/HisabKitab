@@ -1056,8 +1056,8 @@ export class AawakNewComponent implements OnInit {
           dept_id: this.auth.webUser.dept_id,
           jawak_detail: []
         };
-        //jawak form
-        let jwkobj: any = {};
+        //jawak form - reset every row, pbk is null until data is present
+        let jwkobj: any = { pbk: null };
 
         //loop through element of row and separating to aawak and jawak form
         for (let j = 0; j < columns.length; j++) {
@@ -1285,15 +1285,18 @@ export class AawakNewComponent implements OnInit {
                 break;
               case "kisko diya":
               case "person":
-              case "kisko_diya": jwkobj.nimitt = exceldata[i][j];
-                let getnimitt = this.nimitts.find((n: any) => [n.nimitt_hin, n.nimitt_eng, n.roll_no].includes(jwkobj.nimitt));
-                if (getnimitt) {
-                  jwkobj.nimitt_id = getnimitt._id;
-                  jwkobj.nimitt_hin = getnimitt.nimitt_hin;
-                  jwkobj.nimitt_state_hin = getnimitt.state_hin;
-                } else {
-                  let dictnimitt = this.dictionary.find((d: any) => d.type == "nimitt" && d.name == jwkobj.nimitt)
-                  jwkobj.nimitt_id = dictnimitt ? dictnimitt.id : null;
+              case "kisko_diya":
+                if (exceldata[i][j]) {
+                  // Create fresh pbk object only when data exists
+                  jwkobj.pbk = { name: exceldata[i][j] };
+                  let getpbk = this.pbks.find((n: any) => [n.pbk_hin, n.pbk_eng, n.roll_no].includes(jwkobj.pbk.name));
+                  if (getpbk) {
+                    jwkobj.pbk_id = getpbk._id;
+                    jwkobj.pbk_hin = getpbk.pbk_hin;
+                  } else {
+                    let dictpbk = this.dictionary.find((d: any) => d.type == "pbk" && d.name == jwkobj.pbk.name);
+                    jwkobj.pbk_id = dictpbk ? dictpbk.id : null;
+                  }
                 }
                 break;
               case "usage list":
@@ -1391,7 +1394,7 @@ export class AawakNewComponent implements OnInit {
         }
         // check for required Fields in jawak object
         // finalJson[finalJson.length - 1].jawak_detail.push(jwkobj);
-        if (jwkobj.qty && (jwkobj.aj_mm || jwkobj.nimitt)) {
+        if (jwkobj.qty && (jwkobj.aj_mm || jwkobj.pbk?.name)) {
 
           // auto calculate rate and amount based on coresponding values for jawak.
           if (jwkobj.qty && jwkobj.rate && !jwkobj.actual_amt) {

@@ -1364,7 +1364,7 @@ export class AawakComponent implements OnInit {
           jawak_detail: []
         };
         //jawak form
-        let jwkobj: any = {};
+        let jwkobj: any = { pbk: null };
 
         //loop through element of row and separating to aawak and jawak form
         for (let j = 0; j < columns.length; j++) {
@@ -1605,15 +1605,18 @@ export class AawakComponent implements OnInit {
                 break;
               case "kisko diya":
               case "person":
-              case "kisko_diya": jwkobj.nimitt = exceldata[i][j];
-                let getnimitt = this.nimitts.find((n: any) => [n.nimitt_hin, n.nimitt_eng, n.roll_no].includes(jwkobj.nimitt));
-                if (getnimitt) {
-                  jwkobj.nimitt_id = getnimitt._id;
-                  jwkobj.nimitt_hin = getnimitt.nimitt_hin;
-                  jwkobj.nimitt_state_hin = getnimitt.state_hin;
-                } else {
-                  let dictnimitt = this.dictionary.find((d: any) => d.type == "nimitt" && d.name == jwkobj.nimitt)
-                  jwkobj.nimitt_id = dictnimitt ? dictnimitt.id : null;
+              case "kisko_diya":
+                if (exceldata[i][j]) {
+                  jwkobj.pbk ? jwkobj.pbk.name = exceldata[i][j] : jwkobj.pbk = { name: exceldata[i][j] }
+                }
+                break;
+              case "roll_no":
+                if (exceldata[i][j]) {
+                  jwkobj.pbk ? jwkobj.pbk.roll_no = exceldata[i][j] : jwkobj.pbk = { roll_no: exceldata[i][j] }
+                }
+                let getpbk = this.pbks.find((p: any) => p.roll_no == jwkobj.pbk.roll_no);
+                if (getpbk) {
+                  jwkobj.pbk_id = getpbk._id;
                 }
                 break;
               case "usage_list":
@@ -1685,6 +1688,7 @@ export class AawakComponent implements OnInit {
           // j < jawakStart ? (exceldata[i][j] != undefined ? aawak_values.push(exceldata[i][j]) : aawak_values.push(null)) :
           //   (exceldata[i][j] != undefined ? jawak_values.push(exceldata[i][j]) : jawak_values.push(null));
         }
+
 
         if (obj.subitem && !obj.subitem_id) {
           let dictitem = this.dictionary.find((d: any) => d.type == "item" && d.name == obj.item && d.extra_note == obj.subitem)

@@ -29,10 +29,12 @@
             </div>
         </ng-template>
 
-        <!-- Placeholder for tiny mode when nothing selected -->
-        <ng-template ng-header-tmp *ngIf="mode === 'tiny' && !selectedValue">
-             <div class="tiny-placeholder" (click)="select.open()">
-                <i class="uil uil-plus-circle text-muted fs-18"></i>
+        <!-- Header for tiny mode to show search text -->
+        <ng-template ng-header-tmp *ngIf="mode === 'tiny'">
+             <div class="tiny-placeholder d-flex align-items-center bg-light p-1 border-bottom">
+                <i class="uil uil-search text-muted fs-14 me-1"></i>
+                <span *ngIf="select.searchTerm" class="text-primary fw-bold" style="font-size: 11px;">{{select.searchTerm}}</span>
+                <span *ngIf="!select.searchTerm" class="text-muted" style="font-size: 11px;">Type to search...</span>
              </div>
         </ng-template>
 
@@ -99,6 +101,26 @@
             </div>
         </ng-template>
 
+        <!-- Not found template -->
+        <ng-template ng-notfound-tmp>
+            <div class="p-2 text-muted text-center" *ngIf="!mmId">
+                <i class="uil uil-info-circle me-1"></i> Please select MM & Jawak MM to load Aawak
+            </div>
+            <div class="p-2 text-muted text-center" *ngIf="mmId && items.length === 0">
+                No Aawak found.
+            </div>
+        </ng-template>
+
+        <!-- Type to search template (when search is empty and no items loaded) -->
+        <ng-template ng-typetosearch-tmp>
+            <div class="p-2 text-muted text-center" *ngIf="!mmId">
+                <i class="uil uil-info-circle me-1"></i> Please select MM & Jawak MM to load Aawak
+            </div>
+            <div class="p-2 text-muted text-center" *ngIf="mmId">
+                Type to search Aawak
+            </div>
+        </ng-template>
+
         <!-- Custom Footer (Optional) -->
         <ng-template ng-footer-tmp>
             <div class="p-2 d-flex justify-content-between align-items-center bg-light border-top">
@@ -108,8 +130,8 @@
         </ng-template>
     </ng-select>
 
-    <!-- Overlay trigger for tiny mode when nothing selected -->
-    <div *ngIf="mode === 'tiny' && !selectedValue" class="tiny-overlay" (click)="select.open()">
-        <i class="uil uil-plus-circle text-muted"></i>
+    <!-- Overlay trigger for tiny mode -->
+    <div *ngIf="mode === 'tiny'" class="tiny-overlay d-flex align-items-center" (click)="select.open()">
+        <i class="uil" [ngClass]="selectedValue ? 'uil-check-circle text-success' : 'uil-link-h text-muted'" style="font-size: 18px;"></i>
     </div>
 </div>

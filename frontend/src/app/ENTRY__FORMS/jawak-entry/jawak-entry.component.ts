@@ -88,8 +88,8 @@ export class JawakEntryComponent implements OnInit {
       is_xl: [null],
       is_process: [null],
       dept_id: [this.auth.webUser.dept_id],
-      auto_awk: [this.settings.jawak.auto_awk],
-      auto_reawk: [this.settings.jawak.auto_reawk],
+      auto_awk: [null],
+      auto_reawk: [null],
       aawak_type_id: [null],
       aawak_dept_id: [this.auth.webUser.dept_id],
       aawak_date: [null],
@@ -315,7 +315,7 @@ export class JawakEntryComponent implements OnInit {
       let item = this.items.find((i: { _id: any; }) => i._id == item_id);
       if (item) {
         this.subitems = this.cat ? item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat) : item.subitems;
-        
+
         if (this.cat && this.cat != item.category_id) {
           this.jawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
         } else {

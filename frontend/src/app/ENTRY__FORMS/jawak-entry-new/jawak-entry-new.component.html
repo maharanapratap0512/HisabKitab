@@ -180,7 +180,7 @@
                                                 <div>{{i+1}}</div>
                                             </div>
                                         </td>
-                                        <!-- <td *ngIf="!isEdit && (settings.jawak.auto_awk || settings.jawak.auto_reawk)">
+                                        <td *ngIf="!isEdit && (settings.jawak.auto_awk || settings.jawak.auto_reawk)">
                                             <app-popover-filter direction="auto" [showClearButton]="false"
                                                 [iconClass]="'uil uil-sliders-v-alt p-1'" [btnOutline]="false"
                                                 [btnClass]="(jwkForm.auto_awk || jwkForm.auto_reawk ? 'btn btn-soft-primary' : 'btn btn-soft-secondary')"
@@ -280,22 +280,19 @@
                                                     </div>
                                                 </div>
                                             </app-popover-filter>
-                                        </td> -->
+                                        </td>
                                         <td *ngIf="settings.jawak.aawak_ref_id">
 
-                                            <app-aawak-ref-dropdown 
-                                                [mmId]="fs.jawakFormMain.mm_id"
-                                                [maxDate]="fs.jawakFormMain.date"
-                                                [deptId]="auth.webUser.dept_id"
+                                            <app-aawak-ref-dropdown [mmId]="fs.jawakFormMain.mm_id"
+                                                [maxDate]="fs.jawakFormMain.date" [deptId]="auth.webUser.dept_id"
                                                 [filterObj]="{
                                                     item_id: jwkForm.item_id,
                                                     subitem_id: jwkForm.subitem_id,
                                                     condition_id: jwkForm.condition_id,
-                                                    aawak_source_id: jwkForm.aawak_source_id
-                                                }"
-                                                [(ngModel)]="jwkForm.aawak_ref_id"
-                                                (selectionChange)="refAawakSelected($event, i)"
-                                                size="sm"
+                                                    aawak_source_id: jwkForm.aawak_source_id,
+                                                    remaining_qty: true
+                                                }" [(ngModel)]="jwkForm.aawak_ref_id"
+                                                (selectionChange)="refAawakSelected($event, i)" size="sm"
                                                 placeholder="Select Aawak">
                                             </app-aawak-ref-dropdown>
                                         </td>
@@ -385,7 +382,6 @@
                                                 [(ngModel)]="jwkForm.condition_id" name="condition_id"
                                                 #condition_id="ngModel" [selectOnTab]="true"
                                                 [readonly]="!!jwkForm.aawak_ref_id" appendTo="body"
-                                                
                                                 [ngClass]="{'readonly-field': !!jwkForm.aawak_ref_id}">
                                                 <ng-option selected="selected" disabled value="">Select
                                                     Condition</ng-option>
@@ -408,7 +404,6 @@
                                                 [(ngModel)]="jwkForm.aawak_source_id" name="aawak_source_id"
                                                 #aawak_source_id="ngModel" [selectOnTab]="true"
                                                 [readonly]="!!jwkForm.aawak_ref_id" appendTo="body"
-                                                
                                                 [ngClass]="{'readonly-field': !!jwkForm.aawak_ref_id}">
                                                 <ng-option selected="selected" disabled value="">Aawak Source
                                                 </ng-option>

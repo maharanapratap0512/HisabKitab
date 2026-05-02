@@ -69,7 +69,8 @@ export class JawakComponent implements OnInit {
     usage_list_id: [],
     condition_id: [],
     nimitt_id: null,
-    pkt_num: null
+    pkt_num: null,
+    unlinkedOnly: false
   };
   selectedItemmix: any[] = [];
   cat: any;
@@ -251,6 +252,12 @@ export class JawakComponent implements OnInit {
     this.editData = data;
     this.showModal = 'Edit Jawak'
     $('#showModal').modal('show');
+  }
+
+  onAawakRefSaved(updatedJawak: any, index: number) {
+    if (updatedJawak && updatedJawak._id) {
+      this.jawakData[index].aawak_ref_id = updatedJawak.aawak_ref_id;
+    }
   }
 
   delete(i: any, id: any) {

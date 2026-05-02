@@ -112,14 +112,9 @@
                               <div class="col-md-3 mb-3">
                                  <div class="form-group">
                                     <label class="form-label">Item & Subitem</label>
-                                    <app-item-dropdown 
-                                       [items]="items" 
-                                       [(ngModel)]="selectedItemmix" 
-                                       [multiple]="true" 
-                                       [closeOnSelect]="false"
-                                       name="itemmix_ids"
-                                       placeholder="Select Item & Subitem"
-                                    ></app-item-dropdown>
+                                    <app-item-dropdown [items]="items" [(ngModel)]="selectedItemmix" [multiple]="true"
+                                       [closeOnSelect]="false" name="itemmix_ids"
+                                       placeholder="Select Item & Subitem"></app-item-dropdown>
                                  </div>
                               </div>
 
@@ -292,10 +287,19 @@
                               </th>
                               <th style="width: 40px;">No.</th>
                               <th style="width: 100px;">Manage</th>
+                              <th style="width: 150px;">
+                                 <div class="d-flex align-items-center justify-content-between" title="Show unlinked only">
+                                    <span>Ref. Aawak</span>
+                                    <input type="checkbox" style="width: 12px; height: 12px; margin-left: 4px; cursor: pointer;" 
+                                          [(ngModel)]="filterBody.unlinkedOnly" (change)="getJawakData(page=1)"
+                                          title="Check to show only unlinked jawaks">
+                                 </div>
+                              </th>
                               <th style="width: 150px;" *ngIf="!settings.defaultMM">MM</th>
                               <th style="width: 70px;" *ngIf="settings.jawak.pkt_num">Pkt No</th>
                               <th style="width: 101px;">Date</th>
                               <th style="width: 300px;">कहाँ / किसको भेजा </th>
+                              <th style="width: 150px;">Category</th>
                               <th style="width: 250px;">Item - Subitem</th>
                               <!-- <th style="width: 200px;" *ngIf="settings.jawak.product_id">Product</th> -->
                               <th style="width: 150px;" *ngIf="settings.jawak.condition_id">Condition</th>
@@ -329,6 +333,17 @@
                                  <button class="btn-xs btn-danger" type="button" (click)="delete(i,data._id)"><i
                                        class="uil-trash"></i></button>
                               </td>
+                              <td>
+                                 <app-aawak-ref-dropdown [mmId]="data.mm_id" [maxDate]="data.date"
+                                    [deptId]="auth.webUser.dept_id" [filterObj]="{
+                                        item_id: data.item_id,
+                                        subitem_id: data.subitem_id,
+                                        condition_id: data.condition_id,
+                                        aawak_source_id: data.aawak_source_id
+                                    }" [(ngModel)]="data.aawak_ref_id" [autoSave]="true" [jawakId]="data._id"
+                                    (saved)="onAawakRefSaved($event, i)" mode="tiny" size="sm">
+                                 </app-aawak-ref-dropdown>
+                              </td>
                               <td *ngIf="!settings.defaultMM">
                                  <span>{{data.mm_hin}} {{data.mm_code ? '('+data.mm_code+')': ''}}</span> <br />
                                  <small class="text-muted">{{data.mm_eng}}</small>
@@ -338,16 +353,32 @@
                               <td>
                                  <div *ngIf="data.pbk_id">
                                     <span>{{data.roll_no ? data.roll_no : '___'}} - {{data.pbk_hin}}</span> <br />
-                                    <small class="text-muted">{{data.relation ? data.relation : ''}} {{data.relative_name ? " - "+data.relative_name: ''}}</small>
+                                    <small class="text-muted">{{data.relation ? data.relation : ''}}
+                                       {{data.relative_name ? " - "+data.relative_name: ''}}</small>
                                  </div>
                                  <div *ngIf="data.jawak_mm_id">
-                                    <span>{{data.jawak_mm_hin}} {{data.jawak_mm_code ? "("+data.jawak_mm_code+")" : ''}}</span> <br />
+                                    <span>{{data.jawak_mm_hin}} {{data.jawak_mm_code ? "("+data.jawak_mm_code+")" :
+                                       ''}}</span> <br />
                                     <small class="text-muted">{{data.jawak_mm_eng}}</small>
                                  </div>
                               </td>
                               <td>
-                                 <span>{{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}}</span> <br />
-                                 <small class="text-muted">{{data.item_eng}} {{data.subitem_id ? ' : ' + data.subitem_eng : ''}}</small>
+                                 <ng-container
+                                    *ngIf="(data.scategories?.length > 0 ? data.scategories : data.icategories) as activeCats">
+                                    <div *ngIf="activeCats?.length > 0; else noCat">
+                                       <span>{{ activeCats | joinObj:'category_hin' }}</span>
+                                       <br />
+                                       <small class="text-muted">{{ activeCats | joinObj:'category_eng'
+                                          }}</small>
+                                    </div>
+                                    <ng-template #noCat>-</ng-template>
+                                 </ng-container>
+                              </td>
+                              <td>
+                                 <span>{{data.item_hin}} {{data.subitem_id ? ' : ' + data.subitem_hin : ''}}</span>
+                                 <br />
+                                 <small class="text-muted">{{data.item_eng}} {{data.subitem_id ? ' : ' +
+                                    data.subitem_eng : ''}}</small>
                               </td>
                               <!-- <td *ngIf="settings.jawak.product_id">
                                  <span *ngIf="!data.product_id">-</span>

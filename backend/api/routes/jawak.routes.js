@@ -74,6 +74,8 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             for (let i in resolve.data) {
                 resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
                 resolve.data[i].usage_report = (resolve.data[i].usage_report ? JSON.parse(resolve.data[i].usage_report) : {});
+                resolve.data[i].icategories = (resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []);
+                resolve.data[i].scategories = (resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : []);
             }
             res.json({
                 success: true,
@@ -126,7 +128,13 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
     if (req.body.reg_pg_no)
         conditions.push(`jawak.reg_pg_no LIKE '%${req.body.reg_pg_no}%'`)
     if (req.body.unlinkedOnly)
-        conditions.push(`jawak.aawak_ref_id IS NULL`)
+        // Match vouchers that have at least one unlinked jawak item (or standalone unlinked jawaks)
+        conditions.push(`(
+            (jawak.voucher_no IS NOT NULL AND jawak.voucher_no IN (
+                SELECT DISTINCT voucher_no FROM jawak WHERE aawak_ref_id IS NULL AND voucher_no IS NOT NULL
+            ))
+            OR (jawak.voucher_no IS NULL AND jawak.aawak_ref_id IS NULL)
+        )`)
 
     conditionString = conditions.length > 0 ? conditions.join(' AND ') : "1=1"
 

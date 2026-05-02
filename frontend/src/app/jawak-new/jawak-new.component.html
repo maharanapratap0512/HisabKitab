@@ -86,10 +86,11 @@
                             </div>
                         </div>
                         <div class="col-auto">
-                            <button class="btn" [ngClass]="filterBody.unlinkedOnly ? 'btn-warning' : 'btn-outline-warning'" 
+                            <!-- <button class="btn"
+                                [ngClass]="filterBody.unlinkedOnly ? 'btn-warning' : 'btn-outline-warning'"
                                 (click)="toggleUnlinkedFilter()" title="Show jawaks without aawak reference">
                                 <i class="uil uil-link-broken mr-1"></i> Unlinked Only
-                            </button>
+                            </button> -->
                         </div>
                         <div class="col-3 d-flex">
                             <!-- <button *ngIf="!gs.importPending" class="file btn btn-success"
@@ -325,21 +326,16 @@
                                                                     || '-'}}</small>
                                                             </td>
                                                             <td>
-                                                                <app-aawak-ref-dropdown 
-                                                                    [mmId]="row.mm_id"
-                                                                    [maxDate]="row.date"
-                                                                    [deptId]="auth.webUser.dept_id"
+                                                                <app-aawak-ref-dropdown [mmId]="row.mm_id"
+                                                                    [maxDate]="row.date" [deptId]="auth.webUser.dept_id"
                                                                     [filterObj]="{
                                                                         item_id: item.item_id,
                                                                         subitem_id: item.subitem_id,
                                                                         condition_id: item.condition_id,
                                                                         aawak_source_id: item.aawak_source_id
-                                                                    }"
-                                                                    [(ngModel)]="item.aawak_ref_id"
-                                                                    [autoSave]="true"
-                                                                    [jawakId]="item._id"
-                                                                    (saved)="onAawakRefSaved($event, row)"
-                                                                    size="sm">
+                                                                    }" [(ngModel)]="item.aawak_ref_id"
+                                                                    [autoSave]="true" [jawakId]="item._id"
+                                                                    (saved)="onAawakRefSaved($event, row)" size="sm">
                                                                 </app-aawak-ref-dropdown>
                                                             </td>
                                                             <td>
@@ -382,7 +378,16 @@
                                 <tr>
                                     <th class="w-50">#</th>
                                     <th class="w-80">Actions</th>
-                                    <th class="w-50">Link</th>
+                                    <th class="w-100">
+                                        <div class="d-flex align-items-center justify-content-between"
+                                            title="Show unlinked only">
+                                            <span>Ref. Aawak</span>
+                                            <input type="checkbox"
+                                                style="width: 12px; height: 12px; margin-left: 4px; cursor: pointer;"
+                                                [(ngModel)]="filterBody.unlinkedOnly" (change)="onHeaderFilterChange()"
+                                                title="Check to show only unlinked jawaks">
+                                        </div>
+                                    </th>
                                     <th class="w-100">
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Voucher</span>
@@ -451,6 +456,24 @@
                                                     style="width: 100%;">
                                                     <ng-option *ngFor="let item of pbks" [value]="item._id">
                                                         {{item.pbk_hin}} : {{item.pbk_eng}}
+                                                    </ng-option>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th class="w-100">
+                                        <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                                            <span>Category</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="left" [isOpen]="filterBody.categories?.length > 0"
+                                                (clear)="filterBody.categories = []; onHeaderFilterChange()"
+                                                triggerOn="hover">
+                                                <ng-select [multiple]="true" placeholder="Select Category"
+                                                    class="custom-sm" dropdownClass="custom-sm"
+                                                    [(ngModel)]="filterBody.categories"
+                                                    (change)="onHeaderFilterChange()" style="width: 100%;">
+                                                    <ng-option *ngFor="let item of categories" [value]="item._id">
+                                                        {{item.categories_hin}} : {{item.categories_eng}}
                                                     </ng-option>
                                                 </ng-select>
                                             </app-popover-filter>
@@ -579,7 +602,16 @@
                                             </app-popover-filter>
                                         </div>
                                     </th>
-                                    <th class="w-250">Link Aawak</th>
+                                    <th class="w-250">
+                                        <div class="d-flex align-items-center justify-content-between"
+                                            title="Show unlinked only">
+                                            <span>Ref. Aawak</span>
+                                            <input type="checkbox"
+                                                style="width: 12px; height: 12px; margin-left: 4px; cursor: pointer;"
+                                                [(ngModel)]="filterBody.unlinkedOnly" (change)="onHeaderFilterChange()"
+                                                title="Check to show only unlinked jawaks">
+                                        </div>
+                                    </th>
                                     <th class="w-400">Usage Report</th>
                                 </tr>
                             </thead>
@@ -599,21 +631,14 @@
                                             </button>
                                         </td>
                                         <td class="w-50">
-                                            <app-aawak-ref-dropdown 
-                                                [mmId]="row.mm_id"
-                                                [maxDate]="row.date"
-                                                [deptId]="auth.webUser.dept_id"
-                                                [filterObj]="{
+                                            <app-aawak-ref-dropdown [mmId]="row.mm_id" [maxDate]="row.date"
+                                                [deptId]="auth.webUser.dept_id" [filterObj]="{
                                                     item_id: item.item_id,
                                                     subitem_id: item.subitem_id,
                                                     condition_id: item.condition_id,
                                                     aawak_source_id: item.aawak_source_id
-                                                }"
-                                                [(ngModel)]="item.aawak_ref_id"
-                                                [autoSave]="true"
-                                                [jawakId]="item._id"
-                                                (saved)="onAawakRefSaved($event, item)"
-                                                mode="tiny"
+                                                }" [(ngModel)]="item.aawak_ref_id" [autoSave]="true"
+                                                [jawakId]="item._id" (saved)="onAawakRefSaved($event, item)" mode="tiny"
                                                 size="sm">
                                             </app-aawak-ref-dropdown>
                                         </td>
@@ -646,6 +671,18 @@
                                                 <span>{{row.pbk_hin}}</span> <br />
                                                 <small class="text-muted">{{row.roll_no || ''}}</small>
                                             </div>
+                                        </td>
+                                        <td class="w-100">
+                                            <ng-container
+                                                *ngIf="(item.scategories?.length > 0 ? item.scategories : item.icategories) as activeCats">
+                                                <div *ngIf="activeCats?.length > 0; else noCat">
+                                                    <span>{{ activeCats | joinObj:'category_hin' }}</span>
+                                                    <br />
+                                                    <small class="text-muted">{{ activeCats | joinObj:'category_eng'}}
+                                                    </small>
+                                                </div>
+                                                <ng-template #noCat>-</ng-template>
+                                            </ng-container>
                                         </td>
                                         <td class="w-400">
                                             <div class="item-info">

@@ -112,10 +112,10 @@ export class ItemComponent implements OnInit {
       for (let j in this.itemData[i].subitems) {
         item.push({
           No: counter++,
-          "Item Hin": null,
-          "Item Eng": null,
-          "Item Roman": null,
-          "Item Code": null,
+          "Item Hin": this.itemData[i].item_hin.trim(),
+          "Item Eng": this.itemData[i].item_eng,
+          "Item Roman": this.itemData[i].item_roman,
+          "Item Code": this.itemData[i].item_code,
           "Subitem Hin": this.itemData[i].subitems[j].subitem_hin,
           "Subitem Eng": this.itemData[i].subitems[j].subitem_eng,
           "Subitem Roman": this.itemData[i].subitems[j].subitem_roman,

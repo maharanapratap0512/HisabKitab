@@ -158,11 +158,13 @@ export class ImportComponent implements OnInit {
                 this.importData[i].jawak_detail[j].aj_mm_code = getmm.mm_code;
               }
             }
-            if (this.importData[i].jawak_detail[j].nimitt_id && !this.importData[i].jawak_detail[j].nimmit_hin) {
-              let getnimitt = this.nimitts.find((m: { _id: any; }) => m._id == this.importData[i].jawak_detail[j].nimitt_id);
-              if (getnimitt) {
-                this.importData[i].jawak_detail[j].nimitt_hin = getnimitt.nimitt_hin;
-                this.importData[i].jawak_detail[j].nimitt_state_hin = getnimitt.state_hin;
+            if (!this.importData[i].jawak_detail[j].pbk_id && this.importData[i].jawak_detail[j].pbk && this.importData[i].jawak_detail[j].pbk.roll_no) {
+              // Try to resolve pbk_id from pbk.name or pbk.roll_no
+              let getpbk = this.pbks.find((m: any) => this.importData[i].jawak_detail[j].pbk.roll_no == m.roll_no);
+              if (getpbk) {
+                this.importData[i].jawak_detail[j].pbk_id = getpbk._id;
+                this.importData[i].jawak_detail[j].pbk_hin = getpbk.pbk_hin;
+                this.importData[i].jawak_detail[j].pbk_state_hin = getpbk.state_hin;
               }
             }
             if (this.importData[i].jawak_detail[j].aj_type_id && !this.importData[i].jawak_detail[j].aj_type_hin) {
@@ -277,10 +279,10 @@ export class ImportComponent implements OnInit {
   }
 
   async processImport(i: number) {
-    await this.http.put(this.api.getUrl('IMPORTEXPORT') + 'process', { data: this.importData[i], autoUpdate: this.importForm.value.autoUpdate }).subscribe(async(data: any) => {
+    await this.http.put(this.api.getUrl('IMPORTEXPORT') + 'process', { data: this.importData[i], autoUpdate: this.importForm.value.autoUpdate }).subscribe(async (data: any) => {
       this.import$.next(data);
-      if(this.importData.length > i+1){
-        await this.processImport(i+1);
+      if (this.importData.length > i + 1) {
+        await this.processImport(i + 1);
       }
     }, (err) => {
       this.import$.next({ success: false });
@@ -576,7 +578,7 @@ export class ImportComponent implements OnInit {
       'Pkt No': jwk.pkt_num || '-',
       'Jawak MM': jwk.aj_mm || '-',
       'Jawak Detail': jwk.description || '-',
-      'Kisko Diya': jwk.nimitt || '-',
+      'Kisko Diya': jwk.pbk_hin || jwk.pbk?.name || '-',
       'Jawak Type': jwk.aj_type || '-',
       'Qty': jwk.qty || '-',
       'Unit': jwk.unit || '-',
