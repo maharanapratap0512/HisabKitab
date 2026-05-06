@@ -74,12 +74,12 @@
             <div class="row">
                 <div class="card-body">
                     <div class="row d-flex justify-content-between">
-                        <div class="col-2">
+                        <div class="col-1">
                             <button class="btn btn-primary w-100" (click)="openModal('Add Jawak')">
-                                <i class="dripicons-plus h4 icon-mx-2"> </i> Jawak
+                                <i class="dripicons-plus h4 icon-mx-1"> </i> Jawak
                             </button>
                         </div>
-                        <div class="col-3">
+                        <div class="col-4">
                             <div class="form-group">
                                 <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                                     name="search">
@@ -92,20 +92,14 @@
                                 <i class="uil uil-link-broken mr-1"></i> Unlinked Only
                             </button> -->
                         </div>
-                        <div class="col-3 d-flex">
-                            <!-- <button *ngIf="!gs.importPending" class="file btn btn-success"
-                                    style="font-weight: 700 !important;">
-                                    <i class="uil uil-arrow-to-bottom"></i> Import Aawak
-                                    <input type="file" class="inputtag"
-                                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                                        (change)="excelImport($event)" />
-                                </button>
-                                <button *ngIf="gs.importPending" class="file btn btn-success"
-                                    (click)="openModal('import')" style="font-weight: 700 !important;">
-                                    <i class="uil uil-arrow-to-bottom"></i> Import Aawak
-                                </button> -->
-
-                            <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                        <div class="col-4 d-flex">
+                            <button class="file btn btn-success w-50" style="font-weight: 700 !important;">
+                                <i class="uil uil-arrow-to-bottom"></i> Excel Import
+                                <input type="file" class="inputtag"
+                                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                    (change)="excelImport($event)" />
+                            </button>
+                            <button type="button" class="btn btn-outline-success dropdown-toggle ms-2 w-50"
                                 data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
                             <div class="dropdown-menu">
                                 <!-- <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
@@ -770,6 +764,9 @@
 
                 <app-jawak-entry-new *ngIf="showModal == 'Edit Jawak'" (response)='editJawakResponse($event)'
                     [getData]="editData" [isEdit]="true"></app-jawak-entry-new>
+
+                <app-excel-import *ngIf='showModal == "ei_jawak"' importType="jawak" [lockType]="true"
+                    [excelFile]="excelFile" (response)="importResponse('jawak')"></app-excel-import>
 
                 <!-- <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
                     [aawakRef]="editData"></app-jawak-entry>

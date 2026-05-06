@@ -19,6 +19,7 @@ declare var $: any;
 })
 export class ExcelImportComponent implements OnInit {
   @Input() importType: any;
+  @Input() lockType: boolean = false;
   @Input() stepNo: any = 0;
   @Input() excelFile: any;
   @Output() response = new EventEmitter();
@@ -238,6 +239,8 @@ export class ExcelImportComponent implements OnInit {
       this.excelArrObj = this.excelArrObj.filter((e: { subitem_hin: string | null; }) => e.subitem_hin)
     } else if (this.importType.name == 'bachat') {
       this.excelArrObj = this.excelArrObj.filter((e: { date: any; mm: any; item: any; qty: any; unit: any; }) => e.date && e.mm && e.item && e.qty != null && e.unit)
+    } else if (this.importType.name == 'jawak') {
+      this.excelArrObj = this.excelArrObj.filter((e: any) => e.date && e.mm && e.item && e.qty != null && e.unit && e.jawak_type)
     }
     this.stepNo = 2;
     this.isLoader = false;
@@ -372,44 +375,146 @@ export class ExcelImportComponent implements OnInit {
     }
   }
 
+  /*
   async finalImport() {
-    this.newInsertedData = []
-    this.willUpdateData = []
-    this.duplicateDate = []
-    this.rejectedData = []
+    this.newInsertedData = [];
+    this.willUpdateData = [];
+    this.duplicateDate = [];
+    this.rejectedData = [];
     this.swHeaderList = this.getSwHeaderList();
     this.processedCount = 0;
 
-    this.import$.subscribe((res: any) => {
-      this.processedCount++;
-      this.progressStyle = "width:" + (this.processedCount * 100) / this.excelArrObj.length + "%;";
-      if (res) {
-        switch (res.result.status) {
-          case 'inserted': this.newInsertedData.push(res.result.data.newData)
-            break;
-          case 'update': this.willUpdateData.push(res.result.data)
-            break;
-          case 'duplicate': this.duplicateDate.push(res.result.data)
-            break;
-          default: this.rejectedData.push(res.result.data)
+    if (this.importType.name == 'jawak') {
+      this.isLoader = true;
+      this.http.put(this.api.getUrl('EXCELIMPORT') + 'final_bulk/' + this.auth.webUser.dept_id, {
+        importType: this.importType,
+        headerList: this.headerList,
+        excelData: this.excelArrObj
+      }).subscribe((res: any) => {
+        this.isLoader = false;
+        if (res.success) {
+          this.newInsertedData = res.result.inserted;
+          this.rejectedData = res.result.rejected;
+          this.stepNo = 4;
+          this.toastr.success("Bulk import complete.");
+        }
+      }, (err: any) => {
+        this.isLoader = false;
+        this.toastr.error("Error in bulk import.");
+      });
+    } else {
+      this.import$.subscribe((res: any) => {
+        this.processedCount++;
+        this.progressStyle = "width:" + (this.processedCount * 100) / this.excelArrObj.length + "%;";
+        if (res) {
+          switch (res.result.status) {
+            case 'inserted': this.newInsertedData.push(res.result.data.newData)
+              break;
+            case 'update': this.willUpdateData.push(res.result.data)
+              break;
+            case 'duplicate': this.duplicateDate.push(res.result.data)
+              break;
+            default: this.rejectedData.push(res.result.data)
+          }
+        }
+
+        if (this.excelArrObj.length > this.processedCount) {
+          this.processImport(this.processedCount);
+        } else {
+          this.import$.complete();
+          this.stepNo = 4;
+          this.toastr.success("import complete. test your result")
+        }
+      });
+
+      this.processImport(0);
+    }
+  }
+  */
+
+  async finalImport() {
+    this.newInsertedData = [];
+    this.willUpdateData = [];
+    this.duplicateDate = [];
+    this.rejectedData = [];
+    this.processedCount = 0;
+    this.isLoader = true;
+
+    const url = this.api.getUrl('EXCELIMPORT') + 'final_stream/' + this.auth.webUser.dept_id;
+    const body = {
+      importType: this.importType,
+      headerList: this.headerList,
+      excelData: this.excelArrObj
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) throw new Error("Stream reader not available");
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = JSON.parse(line.replace('data: ', ''));
+
+            if (data.done) {
+              this.isLoader = false;
+              this.stepNo = 4;
+              this.toastr.success("Import complete.");
+              break;
+            }
+
+            if (data.error) {
+              this.toastr.error(data.error);
+              this.isLoader = false;
+              break;
+            }
+
+            // Update Progress
+            this.processedCount = data.index;
+            this.progressStyle = "width:" + (this.processedCount * 100) / data.total + "%;";
+
+            // Process Result
+            const res = data.result;
+            if (res) {
+              switch (res.status) {
+                case 'inserted': this.newInsertedData.push(res.data.newData || res.data)
+                  break;
+                case 'update': this.willUpdateData.push(res.data)
+                  break;
+                case 'duplicate': this.duplicateDate.push(res.data)
+                  break;
+                default: this.rejectedData.push(res.data)
+              }
+            }
+          }
         }
       }
-
-      if (this.excelArrObj.length > this.processedCount) {
-        this.processImport(this.processedCount);
-      } else {
-        this.import$.complete();
-        this.stepNo = 4;
-        this.toastr.success("import complete. test your result")
-      }
-
-    });
-
-    await this.processImport();
-
+    } catch (err: any) {
+      this.isLoader = false;
+      this.toastr.error("Stream error: " + err.message);
+    }
   }
 
   verifyForRejection(data: any) {
+    if (this.importType.name == 'jawak') {
+      if (!data.pbk_id && !data.jawak_mm_id) {
+        return true;
+      }
+    }
     for (let j in this.headerList) {
       if (this.headerList[j].not_null && !data[this.headerList[j].name]) {
         return true;

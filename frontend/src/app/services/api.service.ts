@@ -65,6 +65,7 @@ export class ApiService {
     SPLIST: base_url + 'supportlists/splists/',
     DEPT: base_url + 'departments/',
     DEPT_SETTINGS: base_url + 'departments/settings/',
+    DOWNLOAD: base_url + 'departments/download',
     EXPORTFULL: base_url + 'departments/dbfull/',
     IMPORTEXPORT: base_url + 'importexport/',
     EXPORTUPDATES: base_url + 'importexport/updates/',

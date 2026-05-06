@@ -141,6 +141,17 @@ export class JawakNewComponent implements OnInit {
     this.auth.updateSettings()
   }
 
+  excelFile: any;
+  excelImport(event: any) {
+    this.excelFile = event;
+    this.showModal = 'ei_jawak';
+    $('#jawakPageModal').modal('show');
+  }
+
+  importResponse(type: any) {
+    this.getFilteredData();
+  }
+
   onAawakRefSaved(updatedJawak: any, row: any) {
     // If voucher view, update the specific jawak inside the voucher
     if (this.settings.jawak.viewMode === 'voucher') {

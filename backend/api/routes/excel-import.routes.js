@@ -254,6 +254,12 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                             break;
                         case 'relation': id = await fn.matchSupportList(name, 'relation', "list_name_eng");
                             break;
+                        case 'jawak_type': id = await fn.matchSupportList(name, 'jawak_type');
+                            break;
+                        case 'usage_list': id = await fn.matchSupportList(name, 'usage_list');
+                            break;
+                        case 'aawak_source': id = await fn.matchSupportList(name, 'aawak_source');
+                            break;
                         default:
 
                     }
@@ -293,6 +299,103 @@ router.put('/final/:dept_id', async (req, res, next) => {
             result: result
         })
     } catch (err) { next(err) };
+});
+
+router.post('/final_stream/:dept_id', async (req, res, next) => {
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no' // Disable proxy buffering
+    });
+
+    const fn = new ExcelFunctions([], req.params.dept_id);
+    const { importType, headerList, excelData } = req.body;
+    const total = excelData.length;
+
+    try {
+        await Fn.begin();
+        
+        if (importType.name === 'jawak') {
+            // Grouping logic for Jawak
+            const groups = {};
+            for (let row of excelData) {
+                const groupKey = `${row.date}_${row.mm_id}_${row.pbk_id || ''}_${row.jawak_mm_id || ''}_${row.pkt_num || ''}_${row.reg_pg_no || ''}_${row.nimitt_id || ''}`;
+                if (!groups[groupKey]) groups[groupKey] = [];
+                groups[groupKey].push(row);
+            }
+
+            let lastVoucherNo = await Fn.getLastVoucherNo('jawak');
+            let processed = 0;
+
+            for (const key in groups) {
+                const groupRows = groups[key];
+                const voucher_no = ++lastVoucherNo;
+
+                for (let row of groupRows) {
+                    let status = 'rejected';
+                    let newData = null;
+                    try {
+                        let fdata = await fn.setFormData(fn.jawak_form, row);
+                        fdata.voucher_no = voucher_no;
+                        fdata.is_xl = 1;
+                        fdata.dept_id = req.params.dept_id;
+                        fdata.enz = { container_capacity: row.container_capacity || null };
+                        fdata.usage_report = {
+                            date: row.date,
+                            reporter: row.reporter || null,
+                            usage_type_id: row.usage_type_id || null,
+                            fayda: row.fayda || null,
+                            nuksan: row.nuksan || null,
+                            rating: row.rating || null
+                        };
+
+                        const insId = await Fn.insertAJ(fdata, 'jawak');
+                        newData = await DB.getById('jawak', insId, { full: true });
+                        status = 'inserted';
+                    } catch (err) {
+                        row.error = err.message;
+                    }
+                    
+                    processed++;
+                    res.write(`data: ${JSON.stringify({ index: processed, total, status, result: { status, data: { ...row, newData } } })}\n\n`);
+                }
+            }
+        } else {
+            // Generic tables / Variants / Items
+            for (let i = 0; i < excelData.length; i++) {
+                let row = excelData[i];
+                let result;
+                try {
+                    if (importType.name === 'variant') {
+                        const vs = require('../services/variant.service');
+                        let fdata = await fn.setFormData(fn.variant_form, row);
+                        let insResult = await vs.bulkCreateVariants(fdata.item_id, [fdata], req.userData);
+                        result = { status: 'inserted', data: row, newData: insResult };
+                    } else if (importType.name === 'item') {
+                        const is = require('../services/item.service');
+                        let fdata = await fn.setFormData(fn.item_form, row);
+                        let insResult = await is.bulkCreateItems([fdata], req.userData);
+                        result = { status: 'inserted', data: row, newData: insResult };
+                    } else {
+                        result = await fn.verifyAndInsert(importType, row, headerList);
+                    }
+                } catch (err) {
+                    result = { status: 'rejected', data: row, error: err.message };
+                }
+                res.write(`data: ${JSON.stringify({ index: i + 1, total, status: result.status, result })}\n\n`);
+            }
+        }
+
+        await Fn.commit();
+        res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+        res.end();
+
+    } catch (err) {
+        await Fn.rollback();
+        res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+        res.end();
+    }
 });
 
 // update data

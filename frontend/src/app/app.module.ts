@@ -121,6 +121,7 @@ import { AttributeEntryComponent }        from './ENTRY__FORMS/attribute-entry/a
 import { ItemAliasEntryComponent }        from './ENTRY__FORMS/item-alias-entry/item-alias-entry.component';
 import { VariantEntryComponent } from './ENTRY__FORMS/variant-entry/variant-entry.component';
 import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.component';
+import { DbGenerateComponent } from './department/db-generate/db-generate.component';
 
 
 // import { FilterPipeModule } from 'ngx-filter-pipe';
@@ -228,6 +229,7 @@ import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.comp
     VariantNewComponent,
     ItemDropdownComponent,
     AawakRefDropdownComponent,
+    DbGenerateComponent,
 
   ],
 

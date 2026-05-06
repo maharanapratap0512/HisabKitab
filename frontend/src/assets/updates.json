@@ -1,5 +1,30 @@
 [
     {
+        "version": "31.3",
+        "date": "05-05-2026",
+        "summary": "High-Speed Jawak Import & DB Automation",
+        "summary_hin": "हाई-स्पीड जावक आयात और डीबी स्वचालन",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Jawak Import",
+                "title": "Streaming Jawak Excel Import",
+                "title_hin": "स्ट्रीमिंग जावक एक्सेल आयात",
+                "desc": "Ultra-fast bulk import for Jawak records using single-transaction streaming (SSE). Features automated voucher grouping and real-time progress updates.",
+                "desc_hin": "जावक रिकॉर्ड्स के लिए अल्ट्रा-फास्ट थोक आयात। इसमें ऑटोमैटिक वाउचर ग्रुपिंग और रियल-टाइम प्रोग्रेस अपडेट शामिल हैं।"
+            },
+            {
+                "type": "feature",
+                "module": "Management Tools",
+                "title": "Automated DB Generate",
+                "title_hin": "स्वचालित डेटाबेस जनरेशन",
+                "desc": "Optimized DB generation with automated dependency handling for variant, attribute, and mapping tables.",
+                "desc_hin": "वेरिएंट, एट्रिब्यूट और मैपिंग टेबल्स के लिए ऑटोमैटिक डिपेंडेंसी हैंडलिंग के साथ बेहतर डेटाबेस जनरेशन।"
+            }
+        ]
+    },
+    {
         "version": "31.2",
         "date": "02-05-2026",
         "summary": "Reference Management, Dropdown Filters & More",

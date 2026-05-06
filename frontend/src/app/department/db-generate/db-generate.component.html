@@ -1,0 +1,130 @@
+<div class="modal fade" id="dbGenerateModal" tabindex="-1" role="dialog" aria-labelledby="dbGenerateModalLabel"
+  aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dbGenerateModalLabel">Configure Database Generation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="min-height: 60vh;">
+
+        <div class="row h-100" *ngIf="tableKeys.length > 0">
+          <!-- LEFT PANEL: TABLE LIST -->
+          <div class="col-md-3 border-end">
+            <h6 class="mb-3 text-muted">Tables to Include</h6>
+            <div class="list-group list-group-flush" style="max-height: 55vh; overflow-y: auto;">
+              <button type="button"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                *ngFor="let key of tableKeys" [class.active]="activeTable === key" (click)="setActiveTable(key)">
+                <div>
+                  <div class="form-check form-switch d-inline-block me-2" *ngIf="!config[key].compulsory">
+                    <input class="form-check-input" type="checkbox" role="switch" [checked]="!skippedTables.has(key)"
+                      (click)="$event.stopPropagation()" (change)="toggleTable(key, $event)">
+                  </div>
+                  <i class="mdi mdi-lock text-warning me-2" *ngIf="config[key].compulsory" title="Compulsory Table"></i>
+                  {{ config[key].label || key }}
+                </div>
+
+                <span class="badge bg-primary rounded-pill"
+                  *ngIf="config[key].handle_type === 'department_config' || config[key].handle_type === 'custom_selection'">
+                  {{ selections[key]?.size || 0 }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- RIGHT PANEL: TABLE DATA -->
+          <div class="col-md-9 pl-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="m-0 text-primary">{{ config[activeTable]?.label || activeTable }}</h5>
+              <div
+                *ngIf="config[activeTable]?.handle_type === 'department_config' || config[activeTable]?.handle_type === 'custom_selection'">
+                <button class="btn btn-sm btn-outline-success me-2" (click)="toggleAllRows(true)">Select All</button>
+                <button class="btn btn-sm btn-outline-danger" (click)="toggleAllRows(false)">Deselect All</button>
+              </div>
+            </div>
+
+            <!-- Non-selectable tables info -->
+            <div class="alert alert-info" *ngIf="config[activeTable]?.handle_type === 'all'">
+              <i class="mdi mdi-information me-2"></i> This table is fully copied. All rows will be included in the
+              generated database.
+            </div>
+            <div class="alert alert-info" *ngIf="config[activeTable]?.handle_type === 'dept_id'">
+              <i class="mdi mdi-information me-2"></i> This table is automatically filtered by your Department ID. All
+              relevant rows will be included.
+            </div>
+
+            <!-- Search Bar -->
+            <div class="form-group mb-3"
+              *ngIf="config[activeTable]?.handle_type === 'department_config' || config[activeTable]?.handle_type === 'custom_selection'">
+              <div class="input-group">
+                <span class="input-group-text"><i class="mdi mdi-magnify"></i></span>
+                <input type="text" class="form-control" placeholder="Search rows..." [(ngModel)]="searchTerm">
+              </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="table-responsive" style="max-height: 45vh; overflow-y: auto;"
+              *ngIf="config[activeTable]?.handle_type === 'department_config' || config[activeTable]?.handle_type === 'custom_selection'">
+              <div class="text-center p-3" *ngIf="isLoader">
+                <div class="spinner-border text-primary" role="status"></div>
+              </div>
+
+              <table class="table table-hover table-sm table-centered" *ngIf="!isLoader">
+                <thead class="table-light sticky-top">
+                  <tr>
+                    <th width="50">Select</th>
+                    <th *ngFor="let col of tableColumns">{{ col.title }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngIf="tableData.length === 0">
+                    <td colspan="2" class="text-center text-muted">No data found</td>
+                  </tr>
+
+                  <!-- Custom filtered getter to avoid pipe missing error -->
+                  <tr *ngFor="let row of tableData | search: searchTerm; let i=index"
+                    [class.table-success]="selections[activeTable]?.has(row._id)"
+                    (click)="toggleRowSelection(row, activeTable)" style="cursor:pointer">
+
+                    <td>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox"
+                          [checked]="selections[activeTable]?.has(row._id)"
+                          [disabled]="row.lock == 1 || (config[activeTable]?.lock_column && row[config[activeTable]?.lock_column])"
+                          (click)="$event.stopPropagation(); toggleRowSelection(row, activeTable)">
+                      </div>
+                    </td>
+
+                    <td *ngFor="let col of tableColumns">
+                      <div class="d-flex align-items-center">
+                        <i class="mdi mdi-lock text-danger me-2"
+                          *ngIf="col === tableColumns[0] && (row.lock == 1 || (config[activeTable]?.lock_column && row[config[activeTable]?.lock_column]))"
+                          title="Locked Row"></i>
+                        <div>
+                          <ng-container *ngFor="let subcol of col.columns; let first = first">
+                            <div [ngClass]="first ? 'fw-bold' : 'text-muted small'"
+                              *ngIf="row[subcol] !== null && row[subcol] !== undefined">
+                              {{ row[subcol] }}
+                            </div>
+                          </ng-container>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="generateDB()">
+          <i class="mdi mdi-database-export me-1"></i> Save Config & Generate DB
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

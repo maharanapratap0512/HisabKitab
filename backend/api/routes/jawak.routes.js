@@ -68,7 +68,6 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             offset = (req.body.pageNo - 1) * limit;
             page = req.body.pageNo
         }
-        console.log(conditionString);
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
         await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: conditionString, orderBy: orderBy, limit: limit, offset: offset }).then((resolve) => {
             for (let i in resolve.data) {
@@ -298,7 +297,6 @@ router.post('/new/:dept_id', async (req, res, next) => {
 router.put('/new', async (req, res, next) => {
     try {
         if (req.body.set && req.body.query) {
-            console.log(req.body.set);
             await Fn.updateAJ(req.body.set, 'jawak').then(async (resolve) => {
                 if (resolve) {
                     let jawak = await DB.getById('jawak', req.body.set._id, { full: true });
@@ -334,7 +332,6 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
                     ...req.body,
                     voucher_no: voucher_no,
                 }
-                console.log(jawak);
                 await Fn.insertAJ(jawak, 'jawak').then(async (resolve) => {
                     if (jawak.auto_awk) {
                         let awk = DB.tbInterface.getAawakFromJawak(jawak);
@@ -363,7 +360,6 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
             await DB.allQuery('jawak', 'select_all_voucher', {
                 conditionString: `jawak.voucher_no = ${voucher_no}`, obj: { limit: -1, offset: -1 }
             }).then(async (data) => {
-                console.log(data);
                 for (let i in data) {
                     await DB.allQuery('jawak', 'select_one_voucher', {
                         obj: { voucher_no: voucher_no }
@@ -431,7 +427,6 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
             }
 
             let conditionString = `jawak.voucher_no = ${req.body.voucher_no}`;
-            console.log(conditionString);
             await DB.getList('jawak_voucher', { full: true, dept_id: req.params.dept_id, conditionString: conditionString }).then(async (resolve) => {
                 for (let i in resolve.data) {
                     resolve.data[i].jawaks = (resolve.data[i].jawaks ? JSON.parse(resolve.data[i].jawaks) : {});

@@ -179,6 +179,17 @@ export class JawakComponent implements OnInit {
     });
   }
 
+  excelFile: any;
+  excelImport(event: any) {
+    this.excelFile = event;
+    this.showModal = 'ei_jawak';
+    $('#showModal').modal('show');
+  }
+
+  importResponse(type: any) {
+    this.getJawakData(1);
+  }
+
   getMoreAJ() {
     // this.isLoader = true;
     this.filterBody.pageNo = this.pageNo + 1;

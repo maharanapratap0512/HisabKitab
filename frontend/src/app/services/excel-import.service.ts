@@ -20,7 +20,8 @@ export class ExcelImportService {
     { name: 'district', autoUpdate: true },
     { name: 'attribute', autoUpdate: true },
     { name: 'attributes_value', autoUpdate: true },
-    { name: 'variant', autoUpdate: true, note: 'Import variants with comma-separated attributes.' },
+    { col_name: 'variant', autoUpdate: true, note: 'Import variants with comma-separated attributes.' },
+    { name: 'jawak', autoUpdate: true, note: 'Either PBK (Sewadhari) or Jawak MM (Destination) is mandatory.' },
   ];
   config: any = {
     vehicle: [
@@ -187,6 +188,29 @@ export class ExcelImportService {
       { col_name: 'unit', name: 'unit', alt_names: ['यूनिट'], not_null: false, ref_table: 'unit', ref_field: 'unit_id', ref_data: 'unit_short' },
       { col_name: 'min_rate', name: 'min_rate', alt_names: ["min rate"], not_null: false },
       { col_name: 'max_rate', name: 'max_rate', alt_names: ["max rate"], not_null: false },
+    ],
+    jawak: [
+      { col_name: 'date', name: 'date', type: 'date', alt_names: ["तारीख", "jawak date", "date"], not_null: true },
+      { col_name: 'mm', name: 'mm', alt_names: ["mm_name", "mm name", "मि.म.", "मि म", "मिनी मधुबन"], not_null: true, ref_table: 'mm', ref_field: 'mm_id', ref_data: 'mm_hin' },
+      { col_name: 'jawak_mm', name: 'jawak_mm', alt_names: ["jawak mm", "sent to mm", "destination mm", "kaha bheja", "कहाँ भेजा"], not_null: false, ref_table: 'mm', ref_field: 'jawak_mm_id', ref_data: 'mm_hin' },
+      { col_name: 'pbk', name: 'pbk', alt_names: ["pbk name", "sewadhari", "name", "नाम"], not_null: false, ref_table: 'pbk', ref_field: 'pbk_id', ref_data: 'pbk_hin' },
+      { col_name: 'item', name: 'item', alt_names: ["item_name", "item name", "आइटम", "आइटम का नाम"], not_null: true, ref_table: 'item', ref_field: 'item_id', ref_data: 'item_hin' },
+      { col_name: 'subitem', name: 'subitem', alt_names: ["subitem_name", "subitem name", "सबआइटम", "सबआइटम का नाम"], not_null: false, ref_table: 'subitem', ref_field: 'subitem_id', ref_data: 'subitem_hin' },
+      { col_name: 'qty', name: 'qty', alt_names: ["quantity", "संख्या", "qty"], not_null: true },
+      { col_name: 'unit', name: 'unit', alt_names: ["यूनिट"], not_null: true, ref_table: 'unit', ref_field: 'unit_id', ref_data: 'unit_short' },
+      { col_name: 'jawak_type', name: 'jawak_type', alt_names: ["जावक टाइप", "jawak type", "jawak_type"], not_null: true, ref_table: 'jawak_type', ref_field: 'jawak_type_id', ref_data: 'list_name_hin' },
+      { col_name: 'condition', name: 'condition', alt_names: ["कन्डिशन", "condition"], not_null: false, ref_table: 'condition', ref_field: 'condition_id', ref_data: 'list_name_hin' },
+      { col_name: 'nimitt', name: 'nimitt', alt_names: ["निमित्त", "nimitt"], not_null: false, ref_table: 'nimitt', ref_field: 'nimitt_id', ref_data: 'nimitt_hin' },
+      { col_name: 'pkt_num', name: 'pkt_num', alt_names: ["packet no", "pkt no", "pkt_no", "पैकेट नं"], not_null: false },
+      { col_name: 'voucher_no', name: 'voucher_no', alt_names: ["voucher no", "vch no", "वाउचर नं"], not_null: false },
+      { col_name: 'rate', name: 'rate', alt_names: ["रेट", "rate"], not_null: false },
+      { col_name: 'actual_amt', name: 'amount', alt_names: ["अमाउन्ट", "amt", "amount", "कुल राशि"], not_null: false },
+      { col_name: 'description', name: 'description', alt_names: ["note", "डिस्क्रिप्शन", "नोट", "विवरण"], not_null: false },
+      { col_name: 'usage_list', name: 'usage_list', alt_names: ["usage category", "उपयोग श्रेणी"], not_null: false, ref_table: 'usage_list', ref_field: 'usage_list_id', ref_data: 'list_name_hin' },
+      { col_name: 'sell_repair_place', name: 'place', alt_names: ["sent to place", "sell repair place", "जगह"], not_null: false },
+      { col_name: 'lot_no', name: 'lot_no', alt_names: ["lot no", "lot", "लॉट नं"], not_null: false },
+      { col_name: 'reg_pg_no', name: 'reg_pg_no', alt_names: ["reg pg no", "page no", "रजिस्टर पेज नं"], not_null: false },
+      { col_name: 'container_qty', name: 'container_qty', alt_names: ["container qty", "कंटेनर संख्या"], not_null: false },
     ],
   }
   constructor() { }
