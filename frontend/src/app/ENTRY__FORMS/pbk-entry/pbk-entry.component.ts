@@ -33,6 +33,7 @@ export class PbkEntryComponent implements OnInit {
   isLoader: boolean = false;
   imagepath: any;
   settings: any = {};
+  editDoc: any = {};
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -80,8 +81,8 @@ export class PbkEntryComponent implements OnInit {
 
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log("pbk-changes", changes);
     if (changes.getData && changes.getData.currentValue) {
+      const doc = changes.getData.currentValue.document || {};
       this.pbkForm.patchValue({
         roll_no: changes.getData.currentValue.roll_no,
         pbk_eng: changes.getData.currentValue.pbk_eng,
@@ -102,9 +103,10 @@ export class PbkEntryComponent implements OnInit {
         alt_mo_no: changes.getData.currentValue.alt_mo_no,
         class_mm_id: changes.getData.currentValue.class_mm_id,
         bhatti_date: changes.getData.currentValue.bhatti_date,
-        document: changes.getData.currentValue.document
+        document: doc
       });
-      this.imagepath = changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images[0] : null;
+      this.imagepath = doc.images || [];
+      this.editDoc = doc;
     }
   }
 
@@ -132,13 +134,13 @@ export class PbkEntryComponent implements OnInit {
   }
 
   imagesSelectResponse(ev: any) {
-    if (ev.path) {
+    if (ev) {
       this.isLoader = true;
       $('#pbkEntryComponent > #showModal').modal('hide');
       this.showModal = '';
-      this.imagepath = ev.path;
+      this.imagepath = ev;
       this.pbkForm.patchValue({
-        document: { images: [ev.path] }
+        document: { images: ev }
       });
       this.isLoader = false;
     }

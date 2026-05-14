@@ -49,11 +49,10 @@ export class BachatNewComponent implements OnInit {
     to_year: null,
     to_month: null,
   };
-  images: any = [];
-  imageNames: any = [];
+
   settings: any = {};
-  imagesToShow: any = [];
-  currentImage: any;
+  selectedItem: any;
+  selectedSubitem: any;
   monthsFrom: any = [];
   monthsTo: any = [];
   monthsSel: any = []
@@ -77,7 +76,6 @@ export class BachatNewComponent implements OnInit {
     private domSanitizer: DomSanitizer
   ) {
     this.settings = this.auth.webUser.settings.bachat;
-    this.getBase64Images();
     // this.months = gs.months;
   }
 
@@ -98,14 +96,7 @@ export class BachatNewComponent implements OnInit {
     // this.filter();
   }
 
-  getBase64Images() {
-    this.http.put(this.api.getUrl('IMAGE64'), { type: 'item' }).subscribe((data: any) => {
-      if (data['success']) {
-        this.imageNames = data['filenames'];
-        this.images = data['files'];
-      }
-    });
-  }
+
 
   getbachatData() {
     this.isLoader = true;
@@ -121,28 +112,7 @@ export class BachatNewComponent implements OnInit {
     });
   }
 
-  openImageModal() {
-    $('#showImageModal').modal('show');
-  }
 
-  showImages(list: any) {
-    this.imagesToShow = [];
-    this.currentImage = null;
-    for (let i in list) {
-      let iname = list[i].split('/').pop();
-      for (let j in this.imageNames) {
-        if (iname == this.imageNames[j]) {
-          this.imagesToShow.push(this.domSanitizer.bypassSecurityTrustUrl(this.images[j]));
-          break;
-        }
-      }
-    }
-
-    if (this.imagesToShow.length > 0) {
-      this.currentImage = this.imagesToShow[0];
-    }
-    this.openImageModal();
-  }
 
   // openImage(data: any) {
   //   var image = new Image(1000, 700);
@@ -152,12 +122,25 @@ export class BachatNewComponent implements OnInit {
   // }
 
   setImages(data: any) {
-
-    if (data.sdocument && data.sdocument.images) {
-      this.showImages(data.sdocument.images)
-    } else if (data.idocument && data.idocument.images) {
-      this.showImages(data.idocument.images)
+    if (data.subitem_id) {
+      this.selectedSubitem = {
+        _id: data.subitem_id,
+        subitem_hin: data.subitem_hin,
+        subitem_eng: data.subitem_eng,
+        document: data.sdocument
+      };
+      this.selectedItem = null;
+    } else {
+      this.selectedItem = {
+        _id: data.item_id,
+        item_hin: data.item_hin,
+        item_eng: data.item_eng,
+        document: data.idocument
+      };
+      this.selectedSubitem = null;
     }
+    this.showModal = 'View Product';
+    $('#showModal').modal('show');
   }
 
   stateSelected(ev: any) {

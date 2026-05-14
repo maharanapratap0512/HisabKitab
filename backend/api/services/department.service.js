@@ -12,11 +12,11 @@ const DB_GEN_CONFIG = {
     state: { label: 'State', compulsory: true, handle_type: 'all' },
     district: { label: 'District', compulsory: true, handle_type: 'all' },
     city: { label: 'City', compulsory: true, handle_type: 'all' },
-    category: { label: 'Category', compulsory: true, handle_type: 'all' },
+    category: { label: 'Category', compulsory: true, handle_type: 'department_config' },
     unit: { label: 'Unit', compulsory: false, handle_type: 'custom_selection' },
     point: { label: 'Point', compulsory: true, handle_type: 'all' },
     mm: { label: 'MM', compulsory: true, handle_type: 'all' },
-    subitem_list: { label: 'Subitem List', compulsory: true, handle_type: 'custom_selection' },
+
 
     // --- CONFIG-DRIVEN TABLES (Filtered by User Selection in Settings) ---
     support_list: { label: 'Small Lists (Support)', compulsory: false, handle_type: 'department_config' },
@@ -48,15 +48,52 @@ const DB_GEN_CONFIG = {
     department: {
         label: 'Department', compulsory: true, handle_type: 'custom',
         queries: [
-            `insert or ignore into department(_id, dept_eng, dept_hin, dept_code, settings, password, active, created_at, updated_at) select _id, dept_eng, dept_hin, dept_code, '{}', password, active, created_at, updated_at from mainDB.department`,
-            `update department set settings = (select settings from mainDB.department dp where dp._id = department._id) where department._id in (select json_each.value from mainDB.department_config, json_each(config_value) where dept_id = @dept_id AND config_key='department')`
+            // Step 1: insert all depts with blank settings
+            `insert or ignore into department(_id, dept_eng, dept_hin, dept_code, settings, password, active, created_at, updated_at) 
+            select _id, dept_eng, dept_hin, dept_code, '{}', password, active, created_at, updated_at 
+            from mainDB.department`,
+
+            // Step 2: update settings for the requesting dept itself
+            `update department 
+            set settings = (select settings from mainDB.department dp where dp._id = department._id) 
+            where department._id = @dept_id`,
+
+            // Step 3: update settings for linked depts (departments listed in dept's config)
+            `update department 
+             set settings = (select settings from mainDB.department dp where dp._id = department._id) 
+             where department._id in (
+                select json_each.value 
+                from mainDB.department_config, json_each(config_value) 
+                where dept_id = @dept_id AND config_key='department'
+             )`
         ]
     },
     department_config: {
         label: 'Department Config', compulsory: true, handle_type: 'custom',
         queries: [
-            `insert or ignore into department_config select * from mainDB.department_config where dept_id = @dept_id OR dept_id in (select json_each.value from mainDB.department_config, json_each(config_value) where dept_id = @dept_id AND config_key='department')`,
-            `update department_config set config_value = (select config_value from mainDB.department_config dpc where dpc.dept_id = department_config.dept_id and dpc.config_key = department_config.config_key) where department_config.dept_id = @dept_id OR department_config.dept_id in (select json_each.value from mainDB.department_config, json_each(config_value) where dept_id = @dept_id AND config_key='department')`
+            // Insert config for requesting dept AND linked depts
+            `insert or ignore into department_config 
+             select * from mainDB.department_config 
+             where dept_id = @dept_id 
+             OR dept_id in (
+                 select json_each.value 
+                 from mainDB.department_config, json_each(config_value) 
+                 where dept_id = @dept_id AND config_key='department'
+             )`,
+
+            // Update config values for requesting dept AND linked depts  
+            `update department_config 
+             set config_value = (
+                 select config_value from mainDB.department_config dpc 
+                 where dpc.dept_id = department_config.dept_id 
+                 and dpc.config_key = department_config.config_key
+             ) 
+             where department_config.dept_id = @dept_id 
+             OR department_config.dept_id in (
+                 select json_each.value 
+                 from mainDB.department_config, json_each(config_value) 
+                 where dept_id = @dept_id AND config_key='department'
+             )`
         ]
     }
 };

@@ -1,310 +1,746 @@
-<div class="row" id="productViewComponent">
-    <div class="card-body">
-        <div class="row" *ngIf="product">
-            <div class="col-lg-7" style="border-right: 0.5px #4c5763 dashed ;">
+<div class="product-view-container" id="productViewComponent">
+    <ngx-spinner *ngIf="isLoader" [fullScreen]="false" size="medium" color="#727cf5" type="ball-beat"></ngx-spinner>
 
-                <!-- Product image -->
-                <div class="m-1 p-1" style="height:400px;border: 0.5px #3c454f solid;">
-                    <a class=" text-center mb-4">
-                        <img [src]="baseUrl + product.image" class="img-fluid" style="height: 100%;width: 100%;
-                        object-fit: contain;" alt="Product-img" />
-                    </a>
+    <div class="view-wrapper" *ngIf="editDoc">
+        <!-- Header -->
+        <div class="view-header d-flex justify-content-between align-items-center mb-4">
+            <div class="title-group">
+                <div class="h6 text-muted text-uppercase fw-bold mb-1" style="letter-spacing: 1px;">
+                    <span *ngIf="aawak">आवक विवरण</span>
+                    <span *ngIf="jawak">जावक विवरण</span>
+                    <span *ngIf="pbk">PBK विवरण</span>
+                    <span *ngIf="product">प्रोडक्ट विवरण</span>
+                    <span *ngIf="item">आइटम मास्टर</span>
                 </div>
-
-                <div class="d-lg-flex d-none" style="overflow-x:auto;"
-                    *ngIf="product.document && product.document.images">
-                    <a *ngFor="let img of product.document.images; let i = index;" href="javascript: void(0);"
-                        (click)="product.image = img">
-                        <img [src]="baseUrl + img" class="img-fluid img-thumbnail mx-1 p-1 h-100"
-                            style="max-width: 75px; object-fit: cover;" alt="Product-img + {{i}}" />
-                    </a>
-                </div>
+                <h3 class="m-0 text-gradient">
+                    <ng-container *ngIf="aawak || jawak || product || item">
+                        {{(product || item || aawak || jawak).item_hin}} {{(product || item || aawak || jawak).subitem_hin ? ' - ' + (product || item || aawak || jawak).subitem_hin : ''}}
+                    </ng-container>
+                    <ng-container *ngIf="pbk">
+                        {{pbk.pbk_hin}} {{pbk.pbk_eng ? ' / ' + pbk.pbk_eng : ''}}
+                    </ng-container>
+                </h3>
             </div>
-
-
-            <!-- Product Detail -->
-            <div class="col-lg-5" style="overflow-y: auto; height: 30vw;">
-                <form class="ps-lg-4">
-
-                    <!-- Product title -->
-                    <h3 class="mt-0">
-                        {{product.subitem_hin+'-' ? product.subitem_hin:''}} {{product.item_hin ? product.item_hin:''}}
-                        -
-                        {{product.subitem_eng+'-' ? product.subitem_eng:''}} {{product.item_eng ? product.item_eng:''}}
-                        <!-- <span class="badge badge-success-lighten">New</span>
-                            <span class="badge badge-warning-lighten">Old</span>
-                            <span class="badge badge-danger-lighten">Bad</span> -->
-                        <!-- <a href="javascript: void(0);" class="text-muted"><i class="mdi mdi-square-edit-outline ms-2"></i></a> -->
-                    </h3>
-
-                    <!-- Company Name -->
-                    <h4>
-                        {{product.company_name?product.company_name:''}} {{product.model_name?product.model_name:''}}
-                    </h4>
-
-                    <!-- Date -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class=" font-16 badge badge-secondary-lighten m-1 w-50">Purchased Date : </span>
-                            <span class="font-14 custom-space">{{product.purchase_date | date:'dd-MM-yyyy'}}</span>
-                        </h5>
-                    </div>
-
-                    <!-- MM -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten m-1 w-50">MM : </span>
-                            <span class="font-14 custom-space">
-                                {{product.mm_hin ? product.mm_hin : ''}} {{product.mm_eng ? ' - '+product.mm_eng : ''}}
-                                {{product.mm_code ? ' : ' + product.mm_code : ''}}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <!-- Warranty -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten w-50 m-1">Warranty : </span>
-                            <span class="font-14 custom-space">
-                                {{product.warranty_period ? product.warranty_period + ' Months' :''}}
-                                {{product.warranty_from ? ' Form ' + product.warranty_from :''}}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <!-- Condition -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten w-50 m-1">Condition : </span>
-                            <span class="font-14 custom-space">
-                                {{product.condition_id ? product.condition_eng + ' - ' + product.condition_hin :'Not
-                                Available'}}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <!-- S/r -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten w-50 m-1">S/R Number / Product Code :
-                            </span>
-                            <span class="font-14 custom-space">
-                                {{product.sr_num ? product.sr_num :'Not Available'}} /
-                                {{product.product_code ? product.product_code:'Not Available'}}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <!-- Price -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten w-50 m-1">Price : </span>
-                            <span class="font-14 custom-space">
-                                {{product.price ? product.price :'Not Available'}}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <!-- Pruchased From -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten w-50 m-1">Pruchased From : </span>
-                            <span class="font-14 custom-space">
-                                {{product.purchase_from ? product.purchase_from :'Not Available'}}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <!-- Purchased By -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten w-50 m-1">Purchased By : </span>
-                            <span class="font-14 custom-space">
-                                {{product.purchased_by ? product.purchased_by :'Not Available'}}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <!-- Accessories -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten w-50 m-1">Accessories : </span>
-                            <span class="font-14 custom-space">
-                                {{product.accessories ? product.accessories :'Not Available'}}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <!-- Nimitt -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten w-50 m-1">Nimitt : </span>
-                            <span class="font-14 custom-space">
-                                {{product.nimitt_id ? product.nimitt_hin :'Not Available'}}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <!-- Product Detail -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten w-50 m-1">Product Detail : </span>
-                            <span class="font-14 custom-space">
-                                {{product.product_detail ? product.product_detail :'Not Available'}}
-                            </span>
-                        </h5>
-                    </div>
-
-                </form>
-            </div>
-
-        </div>
-
-        <div class="row mt-4" *ngIf="(product && !product.product_code && !product.sr_num)">
-            <div class="alert alert-warning bg-light text-dark" role="alert">
-                <strong>Sorry! </strong> Tracking currently not possible for this products.
+            <div class="header-actions">
+                <button *ngIf="isEditingImages" class="btn btn-outline-primary btn-rounded me-2" (click)="toggleImageEdit()">
+                    <i class="uil uil-arrow-left"></i> Back to View
+                </button>
             </div>
         </div>
-        <div class="table-responsive mt-4" *ngIf="product && (product.product_code || product.sr_num)">
-            <table class="table table-bordered table-centered mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>No.</th>
-                        <th>Date</th>
-                        <th>pkt</th>
-                        <th>MM</th>
-                        <th>कहा से आया</th>
-                        <th>Date</th>
-                        <th>pkt</th>
-                        <th>कहा भेजा</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let trk of product.tracking_detail; let j=index;">
-                        <td>{{j+1}}</td>
-                        <td>{{trk.date}}</td>
-                        <td>{{trk.pkt_num}}</td>
-                        <td>{{trk.mm_hin}}</td>
-                        <td>{{trk.aawak_mm_hin}}</td>
-                        <td>{{trk.jdate}}</td>
-                        <td>{{trk.jpkt_num}}</td>
-                        <td>{{trk.jawak_mm_hin}}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
 
+        <div class="row g-4">
+            <!-- Left Side: Image Gallery -->
+            <div class="col-lg-7">
+                <div class="gallery-card glass-panel h-100 p-3 rounded-4 shadow-lg border-0">
+                    <ng-container *ngIf="!isEditingImages">
+                        <!-- Main Preview -->
+                        <div class="main-preview mb-3 rounded-3 overflow-hidden position-relative" style="height: 480px; background: rgba(0,0,0,0.3);">
+                            <img *ngIf="editDoc.image" [src]="baseUrl + editDoc.image" class="img-fluid w-100 h-100" style="object-fit: contain;" alt="Preview" />
+                            
+                            <!-- Delete Button on Hover -->
+                            <div class="hover-actions" *ngIf="editDoc.image">
+                                <button class="btn btn-danger btn-fab shadow-lg" (click)="removeImage(editDoc.document.images.indexOf(editDoc.image))">
+                                    <i class="uil uil-trash-alt"></i>
+                                </button>
+                            </div>
 
+                            <div *ngIf="!editDoc.image" class="empty-preview h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+                                <i class="uil uil-image-block display-1 mb-3"></i>
+                                <h5>No Images Available</h5>
+                                <button class="btn btn-sm btn-outline-primary mt-3" (click)="toggleImageEdit()">Add First Image</button>
+                            </div>
+                        </div>
 
+                        <!-- Thumbnail Strip -->
+                        <div class="thumbnail-strip-container d-flex align-items-center gap-2 p-2 rounded-3">
+                            <div class="thumbnail-scroll d-flex gap-2" style="overflow-x: auto; flex: 1;">
+                                <div class="thumb-item position-relative" *ngFor="let img of editDoc.document?.images; let i = index" 
+                                     [class.active]="editDoc.image === img">
+                                    <img [src]="baseUrl + img" class="rounded shadow-sm" (click)="editDoc.image = img" />
+                                    <!-- Remove Button -->
+                                    <button class="btn-remove-thumb" (click)="removeImage(i); $event.stopPropagation()">
+                                        <i class="uil uil-multiply"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Add Button in strip -->
+                            <div class="add-thumb-btn" (click)="toggleImageEdit()">
+                                <i class="uil uil-plus"></i>
+                            </div>
+                        </div>
+                    </ng-container>
 
-
-
-
-
-
-        <!-- Items -->
-        <div class="row" *ngIf="item">
-            <div class="col-lg-7" style="border-right: 0.5px #4c5763 dashed ;">
-
-                <!-- Item image -->
-                <div class="m-1 p-1" style="height:400px;border: 0.5px #3c454f solid;">
-                    <a class=" text-center mb-4">
-                        <img [src]="baseUrl + item.image" class="img-fluid" style="height: 100%;width: 100%;
-                        object-fit: contain;" alt="item-img" />
-                    </a>
-                </div>
-
-                <div class="d-lg-flex d-none" style="overflow-x:auto;" *ngIf="item.document && item.document.images">
-                    <a *ngFor="let img of item.document.images; let i = index;" href="javascript: void(0);"
-                        (click)="item.image = img">
-                        <img [src]="baseUrl + img" class="img-fluid img-thumbnail mx-1 p-1 h-100"
-                            style="max-width: 75px; object-fit: cover;" alt="item-img + {{i}}" />
-                    </a>
-                </div>
-            </div>
-
-            <!-- Item Detail -->
-            <div class="col-lg-5" style="overflow-y: auto; height: 30vw;" *ngIf="item">
-                <form class="ps-lg-4">
-
-                    <!-- Item title -->
-                    <h3 class="mt-0">
-                        {{item.item_hin ? item.item_hin:''}} - {{item.item_eng ? item.item_eng:''}} -
-                        ({{item.item_code?item.item_code:''}})
-                        <!-- <span class="badge badge-success-lighten">New</span>
-                            <span class="badge badge-warning-lighten">Old</span>
-                            <span class="badge badge-danger-lighten">Bad</span> -->
-                        <!-- <a href="javascript: void(0);" class="text-muted"><i class="mdi mdi-square-edit-outline    ms-2"></i></a> -->
-                    </h3>
-
-
-                    <!-- Categories -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten m-1 w-50">Categories : </span>
-                            <span class="font-14 custom-space">
-                                {{item.categories?item.categories_hin:'-'}}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <!-- Subitems -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten w-50 m-1">Subitems : </span>
-                            <span class="font-14 custom-space">
-                                {{item.subitems.length?item.subitems:'-'}}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <!-- Unit -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten w-50 m-1">Unit : </span>
-                            <span class="font-14 custom-space">
-                                {{item.unit_id?item.unit_full + '-' + item.unit_short:'-'}}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <!-- Extra note -->
-                    <div class="mt-2">
-                        <h5 class="d-flex align-items-start">
-                            <span class="font-16 badge badge-secondary-lighten w-50 m-1">Extra note : </span>
-                            <span class="font-14 custom-space">
-                                {{item.extra_note?item.extra_note:'-'}}
-                            </span>
-                        </h5>
-                    </div>
-
-                </form>
-            </div>
-
-        </div>
-
-
-        <!-- aawak -->
-        <div class="row" *ngIf="aawak">
-            <div class="col-lg-2"></div>
-            <div class="col-lg-8" style="border-right: 0.5px #4c5763 dashed ;">
-
-                <!-- Item image -->
-                <div class="m-1 p-1" style="height:400px;border: 0.5px #3c454f solid;">
-                    <a class=" text-center mb-4">
-                        <img [src]="baseUrl + aawak.image" class="img-fluid" style="height: 100%;width: 100%;
-                        object-fit: contain;" alt="item-img" />
-                    </a>
-                </div>
-
-                <div class="d-lg-flex d-none" style="overflow-x:auto;" *ngIf="aawak.document && aawak.document.images">
-                    <a *ngFor="let img of aawak.document.images; let i = index;" href="javascript: void(0);"
-                        (click)="aawak.image = img">
-                        <img [src]="baseUrl + img" class="img-fluid img-thumbnail mx-1 p-1 h-100"
-                            style="max-width: 75px; object-fit: cover;" alt="item-img + {{i}}" />
-                    </a>
+                    <!-- Integrated Editor -->
+                    <ng-container *ngIf="isEditingImages">
+                        <div class="editor-container h-100">
+                            <app-files-view 
+                                [type]="product ? 'product' : (item ? 'item' : (subitem ? 'item' : (aawak ? 'aawak' : (jawak ? 'jawak' : 'pbk'))))" 
+                                [getData]="editDoc.document" 
+                                [isEdit]="true"
+                                (response)="handleImagesResponse($event)">
+                            </app-files-view>
+                        </div>
+                    </ng-container>
                 </div>
             </div>
-            <div class="col-lg-2"></div>
+
+            <!-- Right Side: Details -->
+            <div class="col-lg-5">
+                <div class="details-card glass-panel h-100 p-4 rounded-4 shadow-lg border-0 overflow-auto" style="max-height: 600px;">
+                    
+                    <!-- Product Details -->
+                    <div class="detail-section mb-4" *ngIf="product">
+                        <h5 class="section-title mb-3"><i class="uil uil-info-circle me-2"></i>प्रोडक्ट विवरण</h5>
+                        <div class="details-container">
+                            <div class="full-width glass-card">
+                                <div class="label-hindi"><i class="uil uil-building"></i> कंपनी / मॉडल</div>
+                                <div class="value-hindi">{{product.company_name}} {{product.model_name}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-check-circle"></i> स्थिति</div>
+                                <div class="status-chip bg-soft-info text-info">{{product.condition_hin}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-calendar-alt"></i> खरीद की तारीख</div>
+                                <div class="value-hindi">{{product.purchase_date | date:'dd-MM-yyyy'}}</div>
+                            </div>
+                            <div class="full-width glass-card">
+                                <div class="label-hindi"><i class="uil uil-barcode"></i> सीरियल / प्रोडक्ट कोड</div>
+                                <div class="value-hindi">{{product.sr_num || '-'}} / {{product.product_code || '-'}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-estate"></i> मिनी मधुबन</div>
+                                <div class="value-hindi">{{product.mm_hin}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-bill"></i> कीमत</div>
+                                <div class="value-hindi text-success">{{product.price | currency:'INR':'symbol':'1.0-0'}}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bachat (Stock) Details -->
+                    <div class="detail-section" *ngIf="bachat">
+                        <h5 class="section-title mb-3"><i class="uil uil-box me-2"></i>बचत (स्टॉक) विवरण</h5>
+                        <div class="details-container">
+                            <!-- Basic Info -->
+                            <div class="full-width glass-card">
+                                <div class="label-hindi"><i class="uil uil-character-alt"></i> आइटम का नाम</div>
+                                <div class="value-hindi">{{bachat.item_hin}} {{bachat.subitem_hin ? ' : ' + bachat.subitem_hin : ''}}</div>
+                                <div class="text-muted small mt-1">{{bachat.item_eng}} {{bachat.subitem_eng ? ' : ' + bachat.subitem_eng : ''}}</div>
+                            </div>
+                            
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-qrcode-scan"></i> कोड</div>
+                                <div class="value-hindi">{{bachat.item_code || bachat.subitem_code || '-'}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-apps"></i> श्रेणियां</div>
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                    <span class="badge bg-soft-primary text-primary" *ngFor="let cat of (bachat.scategories?.length > 0 ? bachat.scategories : bachat.icategories)">
+                                        {{cat.category_hin}}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Stock Breakdown (Small Boxes) -->
+                            <div class="full-width">
+                                <div class="stock-grid-compact">
+                                    <div class="stock-mini-card s-used" *ngIf="bachat.Used !== undefined && bachat.Used !== null">
+                                        <div class="s-label">उपयोग</div>
+                                        <div class="s-value">{{bachat.Used}}</div>
+                                    </div>
+                                    <div class="stock-mini-card s-new" *ngIf="bachat.New !== undefined && bachat.New !== null">
+                                        <div class="s-label">नया</div>
+                                        <div class="s-value">{{bachat.New}}</div>
+                                    </div>
+                                    <div class="stock-mini-card s-old" *ngIf="bachat.Old !== undefined && bachat.Old !== null">
+                                        <div class="s-label">पुराना</div>
+                                        <div class="s-value">{{bachat.Old}}</div>
+                                    </div>
+                                    <div class="stock-mini-card s-repair" *ngIf="bachat.Repairing !== undefined && bachat.Repairing !== null">
+                                        <div class="s-label">मरम्मत</div>
+                                        <div class="s-value">{{bachat.Repairing}}</div>
+                                    </div>
+                                    <div class="stock-mini-card s-defect" *ngIf="bachat.Defective !== undefined && bachat.Defective !== null">
+                                        <div class="s-label">खराब</div>
+                                        <div class="s-value text-danger">{{bachat.Defective}}</div>
+                                    </div>
+                                    <div class="stock-mini-card s-scrap" *ngIf="bachat.Scrap !== undefined && bachat.Scrap !== null">
+                                        <div class="s-label">रद्दी</div>
+                                        <div class="s-value text-muted">{{bachat.Scrap}}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Total Stock Highlight -->
+                            <div class="full-width glass-card text-center mt-2" style="background: rgba(10, 207, 151, 0.1); border-color: rgba(10, 207, 151, 0.2);">
+                                <div class="label-hindi justify-content-center">कुल स्टॉक (Total Stock)</div>
+                                <div class="value-hindi" style="font-size: 24px; color: #0acf97;">{{bachat.Stock}} <small class="fw-normal">{{bachat.unit_short}}</small></div>
+                            </div>
+
+                            <!-- Location Info -->
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-estate"></i> मिनी मधुबन</div>
+                                <div class="value-hindi" style="font-size: 13px;">{{bachat.mm_hin}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-map-marker"></i> राज्य</div>
+                                <div class="value-hindi" style="font-size: 13px;">{{bachat.state_hin}}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item / Subitem Details -->
+                    <div class="detail-section mb-4" *ngIf="item || subitem">
+                        <h5 class="section-title mb-3"><i class="uil uil-tag-alt me-2"></i>आइटम की जानकारी</h5>
+                        <div class="details-container">
+                            <!-- Names Section -->
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-character-alt"></i> हिंदी नाम</div>
+                                <div class="value-hindi">{{(item || subitem).item_hin || (item || subitem).subitem_hin || '-'}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-letter-hindi"></i> इंग्लिश नाम</div>
+                                <div class="value-hindi" style="font-size: 13px;">{{(item || subitem).item_eng || (item || subitem).subitem_eng || '-'}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-text"></i> रोमन नाम</div>
+                                <div class="value-hindi" style="font-size: 13px;">{{(item || subitem).item_rom || (item || subitem).subitem_rom || '-'}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-qrcode-scan"></i> आइटम कोड</div>
+                                <div class="value-hindi">{{(item || subitem).item_code || (item || subitem).subitem_code || '-'}}</div>
+                            </div>
+
+                            <!-- Unit & Category -->
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-balance-scale"></i> यूनिट (इकाई)</div>
+                                <div class="value-hindi">{{(item || subitem).unit_full || (item || subitem).unit_short || '-'}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-apps"></i> श्रेणियां</div>
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                    <span class="badge bg-soft-primary text-primary" *ngFor="let cat of ((item || subitem).icategories || (item || subitem).scategories)">
+                                        {{cat.category_hin}}
+                                    </span>
+                                    <span *ngIf="!((item || subitem).icategories?.length || (item || subitem).scategories?.length)">-</span>
+                                </div>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="full-width glass-card" *ngIf="(item || subitem).extra_note || (item || subitem).description">
+                                <div class="label-hindi"><i class="uil uil-notes"></i> विशेष टिप्पणी</div>
+                                <p class="small text-muted m-0">{{(item || subitem).extra_note || (item || subitem).description}}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aawak Details -->
+                    <div class="detail-section" *ngIf="aawak">
+                        <h5 class="section-title mb-3"><i class="uil uil-import me-2"></i>आवक विवरण</h5>
+                        <div class="details-container">
+                            <!-- MM Flow Section -->
+                            <div class="full-width glass-card">
+                                <div class="mm-flow-box">
+                                    <div class="mm-node">
+                                        <div class="label-hindi"><i class="uil uil-truck"></i> आवक एम.एम.</div>
+                                        <div class="value-hindi">{{aawak.aawak_mm_hin || 'Direct'}}</div>
+                                    </div>
+                                    <div class="mm-divider"><i class="uil uil-angle-right"></i></div>
+                                    <div class="mm-node right">
+                                        <div class="label-hindi justify-content-end">मिनी मधुबन <i class="uil uil-estate ms-1"></i></div>
+                                        <div class="value-hindi">{{aawak.mm_hin}}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Date & Pkt No -->
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-calendar-alt"></i> दिनांक</div>
+                                <div class="value-hindi">{{aawak.date | date:'dd MMM yyyy'}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-layers"></i> पैकेट नं.</div>
+                                <div class="value-hindi">{{aawak.pkt_num || '-'}}</div>
+                            </div>
+
+                            <!-- Qty & Condition -->
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-chart-pie"></i> मात्रा</div>
+                                <div class="value-hindi">{{aawak.qty}} <small class="fw-normal">{{aawak.unit_short}}</small></div>
+                                <div class="text-danger x-small mt-1" *ngIf="aawak.remaining_qty">बचत: {{aawak.remaining_qty}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-check-circle"></i> स्थिति</div>
+                                <div class="status-chip bg-soft-info text-info">
+                                    {{aawak.condition_hin}}
+                                </div>
+                            </div>
+
+                            <!-- Source & Type Tags -->
+                            <div class="full-width glass-card d-flex gap-3 flex-wrap">
+                                <div *ngIf="aawak.aawak_source_hin">
+                                    <div class="label-hindi">आवक स्रोत</div>
+                                    <div class="value-hindi" style="font-size: 13px;">{{aawak.aawak_source_hin}}</div>
+                                </div>
+                                <div *ngIf="aawak.aawak_type_hin">
+                                    <div class="label-hindi">आवक प्रकार</div>
+                                    <div class="value-hindi" style="font-size: 13px;">{{aawak.aawak_type_hin}}</div>
+                                </div>
+                                <div *ngIf="aawak.isbill">
+                                    <div class="label-hindi">बिल स्थिति</div>
+                                    <div class="status-chip bg-soft-warning text-warning">बिल उपलब्ध</div>
+                                </div>
+                            </div>
+
+                            <!-- Item Info -->
+                            <div class="full-width glass-card">
+                                <div class="label-hindi">आइटम विवरण</div>
+                                <div class="value-hindi">{{aawak.item_hin}} {{aawak.subitem_hin ? ' : ' + aawak.subitem_hin : ''}}</div>
+                                <div class="text-muted small mt-1">{{aawak.item_eng}} {{aawak.subitem_eng ? ' : ' + aawak.subitem_eng : ''}}</div>
+                            </div>
+
+                            <!-- Secondary Info (Optional) -->
+                            <div class="glass-card" *ngIf="aawak.pbk_hin">
+                                <div class="label-hindi">प्राप्तकर्ता (PBK)</div>
+                                <div class="value-hindi" style="font-size: 13px;">{{aawak.pbk_hin}}</div>
+                                <small class="text-muted">{{aawak.roll_no}}</small>
+                            </div>
+                            <div class="glass-card" *ngIf="aawak.company_name">
+                                <div class="label-hindi">कंपनी / ब्रांड</div>
+                                <div class="value-hindi" style="font-size: 13px;">{{aawak.company_name}}</div>
+                            </div>
+
+                            <!-- Pricing -->
+                            <div class="full-width glass-card d-flex justify-content-between" *ngIf="aawak.actual_amt">
+                                <div>
+                                    <div class="label-hindi">दर</div>
+                                    <div class="value-hindi">@{{aawak.rate}}</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="label-hindi justify-content-end">कुल राशि</div>
+                                    <div class="value-hindi text-success">{{aawak.actual_amt | currency:'INR'}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Jawak Details -->
+                    <div class="detail-section" *ngIf="jawak">
+                        <h5 class="section-title mb-3"><i class="uil uil-export me-2"></i>जावक विवरण</h5>
+                        <div class="details-container">
+                            <!-- MM Flow Section -->
+                            <div class="full-width glass-card">
+                                <div class="mm-flow-box" style="border-left-color: #f672a7; background: linear-gradient(90deg, rgba(246, 114, 167, 0.1) 0%, rgba(114, 124, 245, 0.1) 100%);">
+                                    <div class="mm-node">
+                                        <div class="label-hindi"><i class="uil uil-estate"></i> मिनी मधुबन</div>
+                                        <div class="value-hindi">{{jawak.mm_hin}}</div>
+                                    </div>
+                                    <div class="mm-divider"><i class="uil uil-angle-right"></i></div>
+                                    <div class="mm-node right">
+                                        <div class="label-hindi justify-content-end">जावक एम.एम. <i class="uil uil-map-marker ms-1"></i></div>
+                                        <div class="value-hindi">{{jawak.jawak_mm_hin || '-'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Date & Pkt No -->
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-calendar-alt"></i> दिनांक</div>
+                                <div class="value-hindi">{{jawak.date | date:'dd MMM yyyy'}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-layers"></i> पैकेट नं.</div>
+                                <div class="value-hindi">{{jawak.pkt_num || '-'}}</div>
+                            </div>
+
+                            <!-- Qty & Condition -->
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-chart-pie"></i> मात्रा</div>
+                                <div class="value-hindi">{{jawak.qty}} <small class="fw-normal">{{jawak.unit_short}}</small></div>
+                            </div>
+                            <div class="glass-card" *ngIf="jawak.condition_hin">
+                                <div class="label-hindi"><i class="uil uil-check-circle"></i> स्थिति</div>
+                                <div class="status-chip bg-soft-info text-info">
+                                    {{jawak.condition_hin}}
+                                </div>
+                            </div>
+
+                            <!-- Tags Row -->
+                            <div class="full-width glass-card d-flex gap-3 flex-wrap">
+                                <div *ngIf="jawak.aawak_source_hin">
+                                    <div class="label-hindi">आवक स्रोत</div>
+                                    <div class="value-hindi" style="font-size: 13px;">{{jawak.aawak_source_hin}}</div>
+                                </div>
+                                <div *ngIf="jawak.jawak_type_hin">
+                                    <div class="label-hindi">जावक प्रकार</div>
+                                    <div class="value-hindi" style="font-size: 13px;">{{jawak.jawak_type_hin}}</div>
+                                </div>
+                                <div *ngIf="jawak.usage_list_hin">
+                                    <div class="label-hindi">उपयोग सूची</div>
+                                    <div class="value-hindi" style="font-size: 13px;">{{jawak.usage_list_hin}}</div>
+                                </div>
+                            </div>
+
+                            <!-- Item Info -->
+                            <div class="full-width glass-card">
+                                <div class="label-hindi">आइटम विवरण</div>
+                                <div class="value-hindi">{{jawak.item_hin}} {{jawak.subitem_hin ? ' : ' + jawak.subitem_hin : ''}}</div>
+                                <div class="text-muted small mt-1">{{jawak.item_eng}} {{jawak.subitem_eng ? ' : ' + jawak.subitem_eng : ''}}</div>
+                            </div>
+
+                            <!-- Pricing -->
+                            <div class="full-width glass-card d-flex justify-content-between" *ngIf="jawak.rate">
+                                <div>
+                                    <div class="label-hindi">दर</div>
+                                    <div class="value-hindi">@{{jawak.rate}}</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="label-hindi justify-content-end">कुल राशि</div>
+                                    <div class="value-hindi text-success">{{jawak.actual_amt | currency:'INR'}}</div>
+                                </div>
+                            </div>
+
+                            <!-- Feedback -->
+                            <div class="full-width glass-card" *ngIf="jawak.usage_report?.date">
+                                <div class="label-hindi">उपयोग फीडबैक</div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <div class="rating-stars">
+                                        <span class="star" *ngFor="let star of [1,2,3,4,5]" [class.filled]="star <= jawak.usage_report.rating">★</span>
+                                    </div>
+                                    <small class="text-muted">{{jawak.usage_report.date | date:'dd MMM yyyy'}}</small>
+                                </div>
+                                <div class="mt-2 small">
+                                    <div *ngIf="jawak.usage_report.fayda" class="text-success"><i class="uil uil-smile me-1"></i> {{jawak.usage_report.fayda}}</div>
+                                    <div *ngIf="jawak.usage_report.nuksan" class="text-danger mt-1"><i class="uil uil-sad me-1"></i> {{jawak.usage_report.nuksan}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PBK Details -->
+                    <div class="detail-section" *ngIf="pbk">
+                        <h5 class="section-title mb-3"><i class="uil uil-user me-2"></i>PBK प्रोफाइल विवरण</h5>
+                        <div class="details-container">
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-venus-mars"></i> लिंग</div>
+                                <div class="value-hindi">{{pbk.gender || '-'}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-calendar-alt"></i> आयु</div>
+                                <div class="value-hindi">{{pbk.age || '-'}}</div>
+                            </div>
+                            <div class="full-width glass-card">
+                                <div class="label-hindi"><i class="uil uil-phone"></i> मोबाइल नंबर</div>
+                                <div class="value-hindi">{{pbk.mo_no || '-'}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-estate"></i> मिनी मधुबन</div>
+                                <div class="value-hindi" style="font-size: 13px;">{{pbk.mm_hin}}</div>
+                            </div>
+                            <div class="glass-card">
+                                <div class="label-hindi"><i class="uil uil-map-marker"></i> राज्य</div>
+                                <div class="value-hindi" style="font-size: 13px;">{{pbk.state_hin}}</div>
+                            </div>
+                            <div class="full-width glass-card">
+                                <div class="label-hindi"><i class="uil uil-location-pin-alt"></i> पूरा पता</div>
+                                <p class="small text-muted m-0">{{pbk.address || '-'}}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tracking Table (for Product) -->
+                    <div class="tracking-section mt-2" *ngIf="product?.tracking_detail?.length">
+                        <h5 class="section-title mb-3"><i class="uil uil-history me-2"></i>History</h5>
+                        <div class="table-responsive rounded-3 border border-secondary shadow-sm">
+                            <table class="table table-sm table-dark table-hover m-0">
+                                <thead class="bg-secondary-lighten" style="font-size: 10px;">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Pkt</th>
+                                        <th>MM</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody style="font-size: 11px;">
+                                    <tr *ngFor="let trk of product.tracking_detail">
+                                        <td>{{trk.date | date:'dd-MM-yy'}}</td>
+                                        <td>{{trk.pkt_num}}</td>
+                                        <td>{{trk.mm_hin}}</td>
+                                        <td>{{trk.jawak_mm_hin ? 'Sent' : 'Available'}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+</div>
+
+<style>
+.product-view-container {
+    padding: 1rem;
+    color: #e3e6f0;
+}
+
+.glass-panel {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #727cf5 0%, #0acf97 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+.main-preview {
+    transition: all 0.3s ease;
+    cursor: zoom-in;
+}
+
+.hover-actions {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.main-preview:hover .hover-actions {
+    opacity: 1;
+}
+
+.btn-fab {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.thumbnail-strip-container {
+    background: rgba(255,255,255,0.05);
+}
+
+.thumb-item {
+    min-width: 80px;
+    height: 80px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.thumb-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 2px solid transparent;
+}
+
+.thumb-item.active {
+    opacity: 1;
+}
+
+.thumb-item.active img {
+    border-color: #727cf5;
+    box-shadow: 0 0 10px rgba(114, 124, 245, 0.5);
+}
+
+.btn-remove-thumb {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
+    background: #f1556c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+}
+
+.thumb-item:hover .btn-remove-thumb {
+    opacity: 1;
+}
+
+.add-thumb-btn {
+    min-width: 80px;
+    height: 80px;
+    border: 2px dashed rgba(255,255,255,0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-thumb-btn:hover {
+    background: rgba(114, 124, 245, 0.1);
+    border-color: #727cf5;
+    color: #727cf5;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+}
+
+.col-span-2 {
+    grid-column: span 2;
+}
+
+.info-item label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #aab8c5;
+    margin-bottom: 0.2rem;
+    letter-spacing: 0.5px;
+}
+
+.info-item span {
+    font-weight: 600;
+    color: #fff;
+    font-size: 13px;
+}
+
+.section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #727cf5;
+    border-bottom: 1px solid rgba(114, 124, 245, 0.2);
+    padding-bottom: 0.5rem;
+}
+
+.bg-soft-info { background: rgba(57, 175, 209, 0.1); }
+.bg-soft-primary { background: rgba(114, 124, 245, 0.1); }
+
+/* Custom Scrollbar */
+.thumbnail-scroll::-webkit-scrollbar {
+    height: 4px;
+}
+.thumbnail-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+}
+
+.details-card::-webkit-scrollbar {
+    width: 4px;
+}
+.details-card::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+/* High-End Hindi Redesign Styles */
+.details-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+.full-width { grid-column: span 2; }
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 15px;
+    transition: all 0.3s ease;
+}
+.glass-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.label-hindi {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.label-hindi i { color: #727cf5; font-size: 14px; }
+
+.value-hindi {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.mm-flow-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(90deg, rgba(114, 124, 245, 0.1) 0%, rgba(10, 207, 151, 0.1) 100%);
+    padding: 12px;
+    border-radius: 10px;
+    border-left: 3px solid #727cf5;
+}
+.mm-node { flex: 1; }
+.mm-node.right { text-align: right; }
+.mm-divider { padding: 0 10px; opacity: 0.3; }
+
+.status-chip {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.rating-stars { color: #ffbc00; font-size: 14px; }
+.rating-stars .star { opacity: 0.2; }
+.rating-stars .star.filled { opacity: 1; }
+
+.stock-grid-compact {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+.stock-mini-card {
+    padding: 8px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+}
+.stock-mini-card .s-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    opacity: 0.5;
+    margin-bottom: 2px;
+}
+.stock-mini-card .s-value {
+    font-size: 13px;
+    font-weight: 700;
+}
+.s-used { border-bottom: 3px solid #727cf5; }
+.s-new { border-bottom: 3px solid #0acf97; }
+.s-old { border-bottom: 3px solid #f672a7; }
+.s-repair { border-bottom: 3px solid #ffbc00; }
+.s-defect { border-bottom: 3px solid #fa5c7c; }
+.s-scrap { border-bottom: 3px solid #adb5bd; }
+</style>

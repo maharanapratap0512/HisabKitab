@@ -173,9 +173,12 @@ class ExcelFunctions {
       active: 1
    }
    category_form = {
+      parent_id: null,
       category_eng: null,
       category_hin: null,
-      category_roman: null
+      category_roman: null,
+      alias: null,
+      sort_order: null,
    }
    jawak_form = {
       date: null,

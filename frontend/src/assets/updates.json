@@ -1,26 +1,34 @@
 [
     {
         "version": "31.3",
-        "date": "05-05-2026",
-        "summary": "High-Speed Jawak Import & DB Automation",
-        "summary_hin": "हाई-स्पीड जावक आयात और डीबी स्वचालन",
+        "date": "06-05-2026",
+        "summary": "Import Automation & Premium UI Redesign",
+        "summary_hin": "इंपोर्ट स्वचालन और नया प्रीमियम डिज़ाइन",
         "isNew": true,
         "items": [
             {
                 "type": "feature",
                 "module": "Jawak Import",
                 "title": "Streaming Jawak Excel Import",
-                "title_hin": "स्ट्रीमिंग जावक एक्सेल आयात",
-                "desc": "Ultra-fast bulk import for Jawak records using single-transaction streaming (SSE). Features automated voucher grouping and real-time progress updates.",
-                "desc_hin": "जावक रिकॉर्ड्स के लिए अल्ट्रा-फास्ट थोक आयात। इसमें ऑटोमैटिक वाउचर ग्रुपिंग और रियल-टाइम प्रोग्रेस अपडेट शामिल हैं।"
+                "title_hin": "जावक एक्सेल import",
+                "desc": "Ultra-fast bulk import for Jawak records.",
+                "desc_hin": "जावक रिकॉर्ड्स के लिए अल्ट्रा-फास्ट थोक आयात।"
             },
             {
                 "type": "feature",
                 "module": "Management Tools",
                 "title": "Automated DB Generate",
-                "title_hin": "स्वचालित डेटाबेस जनरेशन",
-                "desc": "Optimized DB generation with automated dependency handling for variant, attribute, and mapping tables.",
-                "desc_hin": "वेरिएंट, एट्रिब्यूट और मैपिंग टेबल्स के लिए ऑटोमैटिक डिपेंडेंसी हैंडलिंग के साथ बेहतर डेटाबेस जनरेशन।"
+                "title_hin": "Generate DB Improved.",
+                "desc": "Fully redesign and Optimized DB generation",
+                "desc_hin": "Generate DB Fully redesign and Optimized DB generation"
+            },
+            {
+                "type": "improvement",
+                "module": "UI/UX Redesign for Image View",
+                "title": "Image Add, select and View UI Improved",
+                "title_hin": "छवि जोड़ें, चुनें और देखें UI बेहतर",
+                "desc": "Improved layout for adding, selecting, and viewing images with a modern glass-morphic design. All details are now displayed in Hindi labels side-by-side (2 columns) for better readability and scannability.",
+                "desc_hin": "इमेज ऐड, सेलेक्ट और व्यू के लिए इम्प्रूव्ड लेआउट। अब सभी डिटेल्स हिंदी लेबल्स के साथ साइड-बाय-साइड (2 कॉलम) में दिखेंगी।"
             }
         ]
     },

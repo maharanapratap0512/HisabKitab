@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ExcelImportService } from '../services/excel-import.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import * as XLSX from 'xlsx';
@@ -85,6 +85,7 @@ export class ExcelImportComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService,
+    private cdr: ChangeDetectorRef
   ) {
     this.gs.observeList().subscribe(result => {
       this.itemAll = result.itemmix ? result.itemmix : [];
@@ -439,12 +440,22 @@ export class ExcelImportComponent implements OnInit {
     this.rejectedData = [];
     this.processedCount = 0;
     this.isLoader = true;
+    this.stepNo = 4;
+
+
+    const validData = await this.filterValidData();
+
+    if (validData.length === 0) {
+      this.isLoader = false;
+      this.toastr.warning("No valid data to import.");
+      return;
+    }
 
     const url = this.api.getUrl('EXCELIMPORT') + 'final_stream/' + this.auth.webUser.dept_id;
     const body = {
       importType: this.importType,
       headerList: this.headerList,
-      excelData: this.excelArrObj
+      excelData: validData
     };
 
     try {
@@ -456,49 +467,80 @@ export class ExcelImportComponent implements OnInit {
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
+      let buffer = '';
 
       if (!reader) throw new Error("Stream reader not available");
 
       while (true) {
+        console.log("[Stream] Waiting for data...");
         const { value, done } = await reader.read();
-        if (done) break;
+
+        if (done) {
+          console.log("[Stream] done = true (Server closed or reader cancelled)");
+          break;
+        }
 
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
+        console.log("[Stream] Received chunk size:", chunk.length);
+        buffer += chunk;
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = JSON.parse(line.replace('data: ', ''));
+          const trimmedLine = line.trim();
+          if (trimmedLine.startsWith('data: ')) {
+            this.isLoader = false;
+            try {
+              const data = JSON.parse(trimmedLine.replace('data: ', ''));
+              console.log(data);
 
-            if (data.done) {
-              this.isLoader = false;
-              this.stepNo = 4;
-              this.toastr.success("Import complete.");
-              break;
-            }
-
-            if (data.error) {
-              this.toastr.error(data.error);
-              this.isLoader = false;
-              break;
-            }
-
-            // Update Progress
-            this.processedCount = data.index;
-            this.progressStyle = "width:" + (this.processedCount * 100) / data.total + "%;";
-
-            // Process Result
-            const res = data.result;
-            if (res) {
-              switch (res.status) {
-                case 'inserted': this.newInsertedData.push(res.data.newData || res.data)
-                  break;
-                case 'update': this.willUpdateData.push(res.data)
-                  break;
-                case 'duplicate': this.duplicateDate.push(res.data)
-                  break;
-                default: this.rejectedData.push(res.data)
+              // Global Error Handling
+              if (data.error) {
+                console.error("[Stream] Global error received:", data.error);
+                this.isLoader = false;
+                this.processedCount = 0;
+                this.progressStyle = "width: 0%;";
+                this.newInsertedData = [];
+                this.willUpdateData = [];
+                this.duplicateDate = [];
+                this.rejectedData = [];
+                this.toastr.error("Import failed: " + data.error);
+                return;
               }
+
+              if (data.done) {
+                this.isLoader = false;
+                this.stepNo = 4;
+                this.toastr.success("Import complete.");
+                return;
+              }
+
+              if (data.error) {
+                this.toastr.error('Import failed: ' + data.error);
+                this.isLoader = false;
+                break;
+              }
+
+              // Update Progress
+              this.processedCount = data.index;
+              this.progressStyle = "width:" + (this.processedCount * 100) / data.total + "%;";
+
+              // Process Result
+              const res = data.result;
+              if (res) {
+                switch (res.status) {
+                  case 'inserted': this.newInsertedData.push(res.data.newData || res.data)
+                    break;
+                  case 'update': this.willUpdateData.push(res.data)
+                    break;
+                  case 'duplicate': this.duplicateDate.push(res.data)
+                    break;
+                  default: this.rejectedData.push(res.data)
+                }
+                this.cdr.detectChanges();
+              }
+            } catch (e) {
+              console.warn("JSON parse error on line:", trimmedLine);
             }
           }
         }
@@ -515,6 +557,7 @@ export class ExcelImportComponent implements OnInit {
         return true;
       }
     }
+
     for (let j in this.headerList) {
       if (this.headerList[j].not_null && !data[this.headerList[j].name]) {
         return true;
@@ -526,7 +569,19 @@ export class ExcelImportComponent implements OnInit {
         return true;
       }
     }
+
     return false;
+  }
+
+  filterValidData() {
+    return this.excelArrObj.filter((item: any) => {
+      const isRejected = this.verifyForRejection(item);
+      if (isRejected) {
+        this.rejectedData.push(item); // Keep track of why/what was rejected
+        return false; // Remove from the list being sent to server
+      }
+      return true; // Keep in the list
+    });
   }
 
   processUpdate(i: number = 0) {

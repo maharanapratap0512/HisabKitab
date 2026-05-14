@@ -269,7 +269,7 @@
                                                             <td>{{item.lot_no || '-'}}</td>
                                                             <td>
                                                                 <div class="item-info">
-                                                                    <span>{{item.item_hin}}</span> <br />
+                                                                    <span>{{item.item_hin}}</span> <i *ngIf="item.document?.images?.length" class="uil uil-image text-primary ms-1 cursor-pointer" (click)="showImages(item)"></i> <br />
                                                                     <small class="text-muted">{{item.item_eng}}</small>
                                                                 </div>
                                                             </td>
@@ -682,6 +682,7 @@
                                             <div class="item-info">
                                                 <span>{{item.item_hin}}</span>
                                                 <span *ngIf="item.subitem_hin"> - {{item.subitem_hin}}</span>
+                                                <i *ngIf="item.document?.images?.length" class="uil uil-image text-primary ms-1 cursor-pointer" (click)="showImages(item)"></i>
                                                 <br>
                                                 <small class="text-muted">{{item.item_eng}}</small>
                                                 <small class="text-muted" *ngIf="item.subitem_eng"> -
@@ -769,11 +770,11 @@
                     [excelFile]="excelFile" (response)="importResponse('jawak')"></app-excel-import>
 
                 <!-- <app-jawak-entry *ngIf="showModal == 'Add Jawak'" (response)='addJawakResponse($event)'
-                    [aawakRef]="editData"></app-jawak-entry>
+                    [aawakRef]="editData"></app-jawak-entry> -->
 
-                <app-product-view *ngIf="showModal == 'Show Images'" [aawak]="editData"></app-product-view>
+                <app-product-view *ngIf="showModal == 'Show Images'" [jawak]="editData"></app-product-view>
 
-                <app-data-view *ngIf="showModal == 'Show Jawak'" [getData]="viewData" Type="jawak"></app-data-view> -->
+                <!-- <app-data-view *ngIf="showModal == 'Show Jawak'" [getData]="viewData" Type="jawak"></app-data-view> -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" style="width: 120px;"

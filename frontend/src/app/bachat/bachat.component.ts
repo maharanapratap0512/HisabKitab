@@ -41,11 +41,10 @@ export class BachatComponent implements OnInit {
     subitem_id: [],
     condition_id: [],
   };
-  images: any = [];
-  imageNames: any = [];
+
   settings: any = {};
-  imagesToShow: any = [];
-  currentImage: any;
+  selectedItem: any;
+  selectedSubitem: any;
 
 
   constructor(
@@ -60,7 +59,6 @@ export class BachatComponent implements OnInit {
     private domSanitizer: DomSanitizer
   ) {
     this.settings = this.auth.webUser.settings.bachat;
-    this.getBase64Images();
   }
 
   ngOnInit(): void {
@@ -74,14 +72,7 @@ export class BachatComponent implements OnInit {
     });
   }
 
-  getBase64Images() {
-    this.http.put(this.api.getUrl('IMAGE64'), { type: 'item' }).subscribe((data: any) => {
-      if (data['success']) {
-        this.imageNames = data['filenames'];
-        this.images = data['files'];
-      }
-    });
-  }
+
 
   getbachatData() {
     this.isLoader = true;
@@ -97,28 +88,7 @@ export class BachatComponent implements OnInit {
     });
   }
 
-  openImageModal() {
-    $('#showImageModal').modal('show');
-  }
 
-  showImages(list: any) {
-    this.imagesToShow = [];
-    this.currentImage = null;
-    for (let i in list) {
-      let iname = list[i].split('/').pop();
-      for (let j in this.imageNames) {
-        if (iname == this.imageNames[j]) {
-          this.imagesToShow.push(this.domSanitizer.bypassSecurityTrustUrl(this.images[j]));
-          break;
-        }
-      }
-    }
-
-    if (this.imagesToShow.length > 0) {
-      this.currentImage = this.imagesToShow[0];
-    }
-    this.openImageModal();
-  }
 
   // openImage(data: any) {
   //   var image = new Image(1000, 700);
@@ -128,12 +98,14 @@ export class BachatComponent implements OnInit {
   // }
 
   setImages(data: any) {
-
-    if (data.sdocument && data.sdocument.images) {
-      this.showImages(data.sdocument.images)
-    } else if (data.idocument && data.idocument.images) {
-      this.showImages(data.idocument.images)
+    this.editData = { ...data };
+    if (data.subitem_id) {
+      this.editData.document = data.sdocument;
+    } else {
+      this.editData.document = data.idocument;
     }
+    this.showModal = 'View Product';
+    $('#showModal').modal('show');
   }
 
   stateSelected(ev: any) {

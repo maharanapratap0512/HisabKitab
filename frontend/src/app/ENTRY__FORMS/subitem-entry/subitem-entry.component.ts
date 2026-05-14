@@ -67,22 +67,24 @@ export class SubitemEntryComponent implements OnInit {
     this.settings = this.auth.webUser.settings;
   }
 
+  editDoc: any = {};
   ngOnChanges(changes: SimpleChanges) {
-    console.log("subitem-changes", changes);
-    if (changes.getData.currentValue) {
+    if (changes.getData && changes.getData.currentValue) {
+      const doc = changes.getData.currentValue.document || {};
       this.subitemForm.patchValue({
         subitem_list_id: changes.getData.currentValue.subitem_list_id,
         unit_id: changes.getData.currentValue.unit_id,
         item_id: changes.getData.currentValue.item_id,
         categories: changes.getData.currentValue.categories,
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
-        document: changes.getData.currentValue.document ? changes.getData.currentValue.document : [],
+        document: doc,
         restrict_month: changes.getData.currentValue.restrict_month ? changes.getData.currentValue.restrict_month : null,
         restrict_year: changes.getData.currentValue.restrict_year ? changes.getData.currentValue.restrict_year : null,
         min_rate: changes.getData.currentValue.min_rate ? changes.getData.currentValue.min_rate : 0,
         max_rate: changes.getData.currentValue.max_rate ? changes.getData.currentValue.max_rate : 0,
       });
-      this.imagepath = (changes.getData.currentValue.document && changes.getData.currentValue.document.images) ? changes.getData.currentValue.document.images[0] : null;
+      this.imagepath = doc.images || [];
+      this.editDoc = doc;
     }
   }
 

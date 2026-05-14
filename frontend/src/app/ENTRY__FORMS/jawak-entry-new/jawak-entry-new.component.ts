@@ -49,6 +49,7 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
   lotNos: any = [];
   keyword: any = 'lot_no';
   aawaksAll: any = [];
+  editDoc: any = {};
   aawaks: any = [];
   aawakFilter: any = {
     max_date: null,
@@ -399,10 +400,8 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
   }
 
   imagesSelectResponse(ev: any) {
-    console.log("awk image", ev);
     if (ev) {
       this.isLoader = true;
-      this.imagepath = ev;
       this.fs.jawakFormMain.jawaks[this.imageIndex].document = { images: ev }
       $('#bunchJawakEntryComponent > #addImages').modal('hide');
       this.showModal = '';

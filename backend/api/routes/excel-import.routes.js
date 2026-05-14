@@ -210,7 +210,7 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                             break;
                         case 'attribute': id = await fn.matchAttribute(name);
                             break;
-                        case 'attributes_value': 
+                        case 'attributes_value':
                             if (req.body.config[j].type == "array") {
                                 id = await fn.matchAttributeValues(name);
                             } else {
@@ -289,7 +289,7 @@ router.put('/final/:dept_id', async (req, res, next) => {
         } else if (req.body.importType.name == 'item') {
             const is = require('../services/item.service');
             let fdata = await fn.setFormData(fn.item_form, req.body.excelData);
-            result = await is.bulkCreateItems([fdata], req.userData);
+            result = await is.createItem(fdata, req.params.dept_id);
             result = { status: 'inserted', data: req.body.excelData, newData: result };
         } else {
             result = await fn.verifyAndInsert(req.body.importType, req.body.excelData, req.body.headerList);
@@ -301,23 +301,33 @@ router.put('/final/:dept_id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
-router.post('/final_stream/:dept_id', async (req, res, next) => {
-    res.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-        'X-Accel-Buffering': 'no' // Disable proxy buffering
-    });
 
-    const fn = new ExcelFunctions([], req.params.dept_id);
+router.post('/final_stream/:dept_id', async (req, res, next) => {
+    // 1. Headers: Using setHeader preserves CORS and other middleware headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
+
+    res.write(':ok\n\n');
+
+    let isFinished = false;
     const { importType, headerList, excelData } = req.body;
     const total = excelData.length;
+    const fn = new ExcelFunctions([], req.params.dept_id);
+    console.log(`[Excel Import] Starting ${importType.name} import. Total rows: ${total}`);
+
+    // Helper: Data ko stream format mein bhejne ke liye
+    const sendUpdate = (payload) => {
+        if (!isFinished) {
+            res.write(`data: ${JSON.stringify(payload)}\n\n`);
+        }
+    };
 
     try {
-        await Fn.begin();
-        
         if (importType.name === 'jawak') {
-            // Grouping logic for Jawak
+            // --- JAWAK LOGIC (Grouping) ---
             const groups = {};
             for (let row of excelData) {
                 const groupKey = `${row.date}_${row.mm_id}_${row.pbk_id || ''}_${row.jawak_mm_id || ''}_${row.pkt_num || ''}_${row.reg_pg_no || ''}_${row.nimitt_id || ''}`;
@@ -329,72 +339,101 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
             let processed = 0;
 
             for (const key in groups) {
+                if (isFinished) break;
                 const groupRows = groups[key];
                 const voucher_no = ++lastVoucherNo;
 
                 for (let row of groupRows) {
-                    let status = 'rejected';
-                    let newData = null;
+                    if (isFinished) break;
+                    let status = 'rejected', newData = null;
                     try {
+                        await Fn.begin();
                         let fdata = await fn.setFormData(fn.jawak_form, row);
                         fdata.voucher_no = voucher_no;
                         fdata.is_xl = 1;
                         fdata.dept_id = req.params.dept_id;
                         fdata.enz = { container_capacity: row.container_capacity || null };
                         fdata.usage_report = {
-                            date: row.date,
-                            reporter: row.reporter || null,
-                            usage_type_id: row.usage_type_id || null,
-                            fayda: row.fayda || null,
-                            nuksan: row.nuksan || null,
-                            rating: row.rating || null
+                            date: row.date, reporter: row.reporter || null,
+                            usage_type_id: row.usage_type_id || null, fayda: row.fayda || null,
+                            nuksan: row.nuksan || null, rating: row.rating || null
                         };
 
                         const insId = await Fn.insertAJ(fdata, 'jawak');
                         newData = await DB.getById('jawak', insId, { full: true });
                         status = 'inserted';
+                        await Fn.commit();
                     } catch (err) {
+                        await Fn.rollback();
+                        console.error(`[Excel Import] Jawak Error at row ${processed + 1}:`, err.message);
                         row.error = err.message;
                     }
-                    
                     processed++;
-                    res.write(`data: ${JSON.stringify({ index: processed, total, status, result: { status, data: { ...row, newData } } })}\n\n`);
+                    console.log(`[Excel Import] Jawak row ${processed}/${total} processed. Status: ${status}`);
+                    sendUpdate({ index: processed, total, status, result: { status, data: { ...row, newData } } });
+
+                    if (processed % 5 === 0) await new Promise(r => setImmediate(r));
                 }
             }
         } else {
-            // Generic tables / Variants / Items
-            for (let i = 0; i < excelData.length; i++) {
+            // --- OTHER IMPORTS (Item, Variant, Category) ---
+            const type = importType.name;
+            let service, form;
+            if (type === 'variant') {
+                service = require('../services/variant.service');
+                form = fn.variant_form;
+            } else if (type === 'item') {
+                service = require('../services/item.service');
+                form = fn.item_form;
+            } else if (type === 'category') {
+                service = require('../services/category.service');
+            }
+
+            for (let i = 0; i < total; i++) {
+                if (isFinished) break;
                 let row = excelData[i];
                 let result;
                 try {
-                    if (importType.name === 'variant') {
-                        const vs = require('../services/variant.service');
-                        let fdata = await fn.setFormData(fn.variant_form, row);
-                        let insResult = await vs.bulkCreateVariants(fdata.item_id, [fdata], req.userData);
+                    await Fn.begin();
+                    if (type === 'variant') {
+                        let fdata = await fn.setFormData(form, row);
+                        let insResult = await service.bulkCreateVariants(fdata.item_id, [fdata], req.userData);
                         result = { status: 'inserted', data: row, newData: insResult };
-                    } else if (importType.name === 'item') {
-                        const is = require('../services/item.service');
-                        let fdata = await fn.setFormData(fn.item_form, row);
-                        let insResult = await is.bulkCreateItems([fdata], req.userData);
+                    } else if (type === 'item') {
+                        // let fdata = await fn.setFormData(form, row);
+                        let item_id = await service.createItem(fdata, req.params.dept_id);
+                        let insResult = await service.getById(item_id, { full: true });
+                        result = { status: 'inserted', data: row, newData: fdata };
+                    } else if (type === 'category') {
+                        let insResult = await service.createCategory(row, req.params.dept_id);
                         result = { status: 'inserted', data: row, newData: insResult };
                     } else {
                         result = await fn.verifyAndInsert(importType, row, headerList);
                     }
+                    await Fn.commit();
                 } catch (err) {
+                    await Fn.rollback();
+                    console.error(`[Excel Import] ${type} Error at row ${i + 1}:`, err.message);
                     result = { status: 'rejected', data: row, error: err.message };
                 }
-                res.write(`data: ${JSON.stringify({ index: i + 1, total, status: result.status, result })}\n\n`);
+                console.log(`[Excel Import] ${type} row ${i + 1}/${total} processed. Status: ${result.status}`);
+                sendUpdate({ index: i + 1, total, status: result.status, result });
+
+                if ((i + 1) % 5 === 0) await new Promise(r => setImmediate(r));
             }
         }
 
-        await Fn.commit();
-        res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-        res.end();
+        console.log(`[Excel Import] Finished ${importType.name} import.`);
+        sendUpdate({ done: true });
 
     } catch (err) {
-        await Fn.rollback();
-        res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
-        res.end();
+        console.error('[Excel Import] Global Stream Error:', err);
+        sendUpdate({ error: err.message });
+    } finally {
+        if (!res.writableEnded) {
+            console.log(`[Excel Import] response closed.`);
+            res.end(); // Yeh hamesha pipeline band karega
+        }
     }
 });
 

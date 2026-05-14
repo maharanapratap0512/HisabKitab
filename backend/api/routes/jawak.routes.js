@@ -552,4 +552,39 @@ router.put('/ref-link/:id', async (req, res, next) => {
     } catch (err) { next(err) };
 });
 
+// jawak update single row (specifically for document/images updates from preview)
+router.put('/update-row', async (req, res, next) => {
+    if (req.body._id && req.body.document) {
+        try {
+            await Fn.begin();
+            let oldJwk = await DB.getById('jawak', req.body._id);
+            if (oldJwk) {
+                // Merge old data with new document/fields
+                let updatedDoc = {
+                    ...oldJwk,
+                    ...req.body
+                };
+                
+                // Fn.updateAJ handles parsing/stringifying and bachat sync if needed
+                await Fn.updateAJ(updatedDoc, 'jawak', oldJwk).then(async (resolve) => {
+                    await Fn.commit();
+                    res.json({
+                        success: true,
+                        message: 'Jawak row updated successfully'
+                    });
+                }, (reject) => {
+                    throw reject;
+                });
+            } else {
+                res.status(404).json({ success: false, message: 'Jawak record not found' });
+            }
+        } catch (err) {
+            await Fn.rollback();
+            return next(err);
+        }
+    } else {
+        res.status(400).json({ success: false, message: 'Required fields missing (_id, document)' });
+    }
+});
+
 module.exports = router;

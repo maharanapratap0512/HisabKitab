@@ -370,17 +370,16 @@ router.put('/condition/:dept_id', async (req, res, next) => {
             JSON_GROUP_ARRAY(bcht.t_u) as arr_sum_used,
             JSON_GROUP_ARRAY(bcht.t_b) as arr_sum_bachat,
             mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
-            it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_icategories,
-            sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_scategories,
+            it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_icategories,
+            sit.subitem_hin, sit.subitem_eng, sit.subitem_roman, sit.categories as arr_scategories,
             sl.list_name_hin, sl.list_name_eng,
             unit.unit_short, unit.unit_full,
             dept.dept_code, dept.dept_hin, dept.dept_eng from (select sum(total_aawak) as t_a, sum(jawak) as t_j, sum(used_jawak) as t_u, sum(bachat) as t_b, * from bachat_new ${conditionQuery1}        
             group by dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, month, year) bcht
             left join mm on mm._id = bcht.mm_id
             left join state st on st._id = mm.state_id
-            left join item it on it._id = bcht.item_id
-            left join subitem sit on sit._id = bcht.subitem_id
-            left join subitem_list sitl on sitl._id = sit.subitem_list_id
+            left join v_item it on it._id = bcht.item_id
+            left join v_subitem sit on sit._id = bcht.subitem_id
             left join support_list sl on sl._id = bcht.condition_id
             left join unit on unit._id = bcht.unit_id
             left join department dept on dept._id = bcht.dept_id

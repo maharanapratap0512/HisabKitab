@@ -259,10 +259,14 @@ export class JawakNewComponent implements OnInit {
   }
 
   editJawak(i: any, data: any): void {
-    this.editData = { ...data };
+    this.editData = JSON.parse(JSON.stringify(data));
     this.editIndex = i;
-    this.fs.patchFormJawak({ ...data });
     this.openModal('Edit Jawak');
+  }
+
+  showImages(row: any) {
+    this.editData = row;
+    this.openModal('Show Images');
   }
 
   closeModal(): void {

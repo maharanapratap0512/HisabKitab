@@ -446,6 +446,7 @@ module.exports = {
         _id: col.id(),
         category_hin: col.string().required(),
         category_eng: col.string(),
+        category_roman: col.string(),
         parent_id: col.ref('category._id', { as: 'parent' }),
         alias: col.json(),
         sort_order: col.number().default(0),

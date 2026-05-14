@@ -380,9 +380,9 @@
                            <ng-container
                               *ngFor="let data of bachatData | search:term | paginate: { itemsPerPage: itemsPerPage, currentPage: page }; let i=index"
                               class="accordion-item">
-                              <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i"
-                                 aria-expanded="true" [attr.aria-controls]="'#collapse-' + i"
-                                 (click)="rowClicked(data)">
+                               <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + i"
+                                  aria-expanded="true" [attr.aria-controls]="'#collapse-' + i"
+                                  (click)="rowClicked(data)" (contextmenu)="setImages(data); $event.preventDefault()">
                                  <!-- <td>
                                     <div> 
                                        <img [src]="data.image" class="img-fluid img-thumbnail mx-1 p-1 h-100" *ngIf="data.image"
@@ -650,56 +650,14 @@
             <!-- Import Bachat -->
             <app-excel-import *ngIf='showModal == "import"' importType="bachat" [excelFile]="excelFile"
                (response)="importResponse($event)"></app-excel-import>
+            <app-product-view *ngIf="showModal == 'View Product'" [item]="selectedItem" [subitem]="selectedSubitem">
+            </app-product-view>
             <!-- <app-aawak-entry *ngIf="showModal == 'Add Aawak'" (response)='addAawakResponse($event)'></app-aawak-entry>
             <app-aawak-entry *ngIf="showModal == 'Edit Aawak'" (response)='editAawakResponse($event)'
                [getData]="editData" [isEdit]="true"></app-aawak-entry> -->
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;" (click)="closeModal()">Close</button>
-         </div>
-      </div>
-   </div>
-
-</div>
-
-<!-- ImageModal -->
-<div class="modal fade" id="showImageModal" data-bs-backdrop="static" tabindex="-1"
-   aria-labelledby="exampleImageModalLabel" aria-hidden="true">
-   <div class="modal-dialog" style="width: 90%;">
-      <div class="modal-content">
-         <div class="modal-header">
-            <h5 class="modal-title" id="exampleImageModalLabel">Show Image</h5>
-            <button type="button" onclick="$('#showImageModal').modal('hide')" class="btn-close"
-               aria-label="Close"></button>
-         </div>
-         <div class="modal-body">
-            <div class="card-body">
-               <div class="row">
-                  <div class="col-lg-1" style="border-right: 0.5px #4c5763 dashed; height: 500px; overflow-y: auto;">
-                     <div>
-                        <a *ngFor="let img of imagesToShow; let i = index;" href="javascript: void(0);" class="mt-1"
-                           (click)="currentImage = img">
-                           <img [src]="img" class="img-fluid img-thumbnail mx-1 p-1 h-100"
-                              style="max-width: 75px; object-fit: cover;" alt="item-img + {{i}}" />
-                        </a>
-                     </div>
-                  </div>
-                  <div class="col-lg-11">
-
-                     <!-- Product image -->
-                     <div class="m-1 p-1" style="height:500px;border: 0.5px #3c454f solid;">
-                        <a class=" text-center mb-4">
-                           <img [src]="currentImage" class="img-fluid" style="height: 100%;width: 100%;
-                                  object-fit: contain;" alt="item-img" />
-                        </a>
-                     </div>
-                  </div>
-               </div>
-            </div>
-         </div>
-         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" style="width: 120px;"
-               onclick="$('#showImageModal').modal('hide')">Close</button>
          </div>
       </div>
    </div>

@@ -148,6 +148,7 @@ const category = {
         `select * from category ? limit @limit offset @offset`
     , insert:
         `insert into category (
+            parent_id,
             category_hin,
             category_eng,
             category_roman,

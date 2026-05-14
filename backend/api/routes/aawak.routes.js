@@ -791,4 +791,40 @@ router.delete('/voucher/:ids', async (req, res, next) => {
 });
 
 
+// aawak update single row (specifically for document/images updates from preview)
+router.put('/update-row', async (req, res, next) => {
+    if (req.body._id && req.body.document) {
+        try {
+            await Fn.begin();
+            let oldAwk = await DB.getById('aawak', req.body._id);
+            if (oldAwk) {
+                // Merge old data with new document
+                let updatedDoc = {
+                    ...oldAwk,
+                    ...req.body
+                };
+                
+                // Fn.updateAJ handles parsing/stringifying and bachat sync if needed
+                await Fn.updateAJ(updatedDoc, 'aawak', oldAwk).then(async (resolve) => {
+                    await Fn.commit();
+                    res.json({
+                        success: true,
+                        message: 'Aawak row updated successfully'
+                    });
+                }, (reject) => {
+                    throw reject;
+                });
+            } else {
+                res.status(404).json({ success: false, message: 'Aawak record not found' });
+            }
+        } catch (err) {
+            await Fn.rollback();
+            return next(err);
+        }
+    } else {
+        res.status(400).json({ success: false, message: 'Required fields missing (_id, document)' });
+    }
+});
+
+
 module.exports = router;

@@ -1,0 +1,2 @@
+1. make service funciton without transaction, and wrap all routers inside transaction... so we can use service funciton anywhere any time..
+category routes and service - task done... other need to verify..

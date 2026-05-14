@@ -47,6 +47,7 @@ export class AawakEntryNewComponent implements OnInit {
   lotNos: any = [];
   keyword: any = 'lot_no';
   editData: any;
+  editDoc: any = {};
   viewData: any;
   currentBatchRowIndex: any;
 
@@ -330,10 +331,8 @@ export class AawakEntryNewComponent implements OnInit {
   }
 
   imagesSelectResponse(ev: any) {
-    console.log("awk image", ev);
     if (ev) {
       this.isLoader = true;
-      this.imagepath = ev;
       this.fs.aawakFormMain.aawaks[this.imageIndex].document = { images: ev }
       $('#bunchAawakEntryComponent > #addImages').modal('hide');
       this.showModal = '';

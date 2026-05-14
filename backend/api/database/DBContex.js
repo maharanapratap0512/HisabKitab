@@ -398,7 +398,7 @@ class DBContex {
                     // 
                     let exporting = exportDB.transaction(() => {
                         exportDB.prepare(`attach '${this.path.resolve(this.DBFolder, 'Database.db')}' as mainDB;`).run();
-                        
+
                         // Fallback to original behavior if queriesObj is not passed (or empty)
                         if (Object.keys(queriesObj).length > 0) {
                             for (let tableName of Object.keys(queriesObj)) {

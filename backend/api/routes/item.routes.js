@@ -9,6 +9,8 @@ const Fn = require('../database/functions');
 
 
 const itemService = require('../services/item.service');
+const item = new BaseTable('item');
+const { sutramDB } = require('../database/db.model');
 
 // get item all
 router.get('/', async (req, res, next) => {
@@ -51,18 +53,25 @@ router.put('/itemmix/:dept_id', async (req, res, next) => {
 
 // post item
 router.post('/:dept_id', async (req, res, next) => {
-    try {
-        if (req.body && req.body.item_hin) {
-            const data = await itemService.createItem(req.body, req.userData || { dept_id: req.params.dept_id });
+    if (req.body && req.body.item_hin) {
+        try {
+            sutramDB.begin();
+            const item_id = await itemService.createItem(req.body, req.params.dept_id);
+            const data = await item.getById(item_id, { full: true });
+            sutramDB.commit();
             res.json({
                 success: true,
                 result: data || {}
             });
+
+        } catch (err) {
+            sutramDB.rollback();
+            next(err);
         }
-        else {
-            return next(new Error('Please fill required fields.'))
-        }
-    } catch (err) { next(err) };
+    }
+    else {
+        return next(new Error('Please fill required fields.'))
+    }
 });
 
 
@@ -116,7 +125,9 @@ router.put('/transfer/:dept_id', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     try {
         if (req.params.id) {
+            sutramDB.begin();
             const data = await itemService.deleteItem(req.params.id, req.userData || req);
+            sutramDB.commit();
             res.json({
                 success: true,
                 result: data
@@ -125,7 +136,10 @@ router.delete('/:id', async (req, res, next) => {
         else {
             return next(new Error('Id not found.'))
         }
-    } catch (err) { next(err) };
+    } catch (err) {
+        sutramDB.rollback();
+        next(err);
+    }
 });
 
 

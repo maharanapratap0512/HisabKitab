@@ -96,43 +96,100 @@ async function filterItems(deptId, body) {
 /**
  * Inserts a new item along with its category mappings.
  */
-async function createItem(data, userData) {
-    // Priority: userData (from auth/params) > data (body)
-    const dept_id = (userData && userData.dept_id) ? userData.dept_id :
-        (userData && userData.params && userData.params.dept_id) ? userData.params.dept_id :
-            data.dept_id;
+async function createItem(data, dept_id = null) {
     try {
-        sutramDB.begin();
-        // data._id = await getNextId('item', dept_id); // Disabled for now
+        checkItemConflict(data);
+        if (data.aliases) checkAliasConflict(data.aliases);
         data.active = 1;
         data.created_at = new Date().toISOString();
 
         // Handle categories array separately for junction table
-        const catIds = Array.isArray(data.categories) ? [...data.categories] : [];
+        let catIds = [];
+        if (Array.isArray(data.categories)) {
+            catIds = [...data.categories];
+        } else if (typeof data.categories === 'string') {
+            catIds = JSON.parse(data.categories);
+        }
+
+        let aliases = [];
+        if (Array.isArray(data.aliases)) {
+            aliases = [...data.aliases];
+        } else if (typeof data.aliases === 'string') {
+            aliases = JSON.parse(data.aliases);
+        }
 
         // BaseTable handles JSON fields (document, categories) automatically for INSERT/UPDATE
         const item_id = item.insert(data, false);
 
         if (item_id) {
             for (const cat_id of catIds) {
-                try { rel_item_cat.insert({ item_id, category_id: Number(cat_id) }, false); } catch (e) { }
+                rel_item_cat.insert({ item_id, category_id: Number(cat_id) }, false);
             }
+
+            for (const alias_str of aliases) {
+                if (alias_str && typeof alias_str === 'string') {
+                    Fn.db.prepare(`INSERT OR IGNORE INTO item_aliases (item_id, alias) VALUES (?, ?)`).run(item_id, alias_str.trim());
+                }
+            }
+
             if (dept_id) deptService.pushToConfig(dept_id, 'item', item_id);
         }
 
-        sutramDB.commit();
-        // Manual parse for full object because Fn.getList/getById might be used internally or result might be complex
-        const result = await item.getById(item_id, { full: true });
-        if (result) {
-            result.document = (result.document && result.document != "[null]" ? (typeof result.document === 'string' ? JSON.parse(result.document) : result.document) : []);
-            result.categories = (result.categories && result.categories != "[null]" ? (typeof result.categories === 'string' ? JSON.parse(result.categories) : result.categories) : []);
-            result.categories_hin = (result.categories_hin && result.categories_hin != "[null]" ? (typeof result.categories_hin === 'string' ? JSON.parse(result.categories_hin) : result.categories_hin) : []);
-            result.subitems = (result.subitems && result.subitems != "[null]" ? (typeof result.subitems === 'string' ? JSON.parse(result.subitems) : result.subitems) : []);
-        }
-        return result;
+        return item_id;
     } catch (err) {
-        sutramDB.rollback();
         throw err;
+    }
+}
+
+/**
+ * Universal checker for a single name/alias against the entire database.
+ */
+function checkSingleNameConflict(name, currentId = null, typeLabel = 'name') {
+    if (!name || !name.trim()) return;
+    const sanitized = name.trim().replace(/'/g, "''");
+
+    // 1. Check Primary Table (3 fields)
+    const conflictName = item.getOne(
+        `_id != ${currentId || 0} AND (item_hin = '${sanitized}' OR item_eng = '${sanitized}' OR item_roman = '${sanitized}')`,
+        { full: false }
+    );
+    if (conflictName) {
+        throw new Error(`Yeh ${typeLabel} '${name}' pehle se hi item '${conflictName.item_hin}' ka primary name hai.`);
+    }
+
+    // 2. Check Alias Table
+    const conflictAlias = Fn.db.prepare(`
+        SELECT item_id, item.item_hin FROM item_aliases 
+        LEFT JOIN item ON item._id = item_aliases.item_id
+        WHERE item_id != ? AND alias = ? LIMIT 1
+    `).get(currentId || 0, name.trim());
+    if (conflictAlias) {
+        throw new Error(`Yeh ${typeLabel} '${name}' pehle se hi item '${conflictAlias.item_hin}' ke aliases mein exist karta hai.`);
+    }
+}
+
+/**
+ * Validates primary item names (hin, eng, roman) against database.
+ */
+function checkItemConflict(data, currentId = null) {
+    const names = [data.item_hin, data.item_eng, data.item_roman];
+    for (const name of names) {
+        checkSingleNameConflict(name, currentId, 'name');
+    }
+}
+
+/**
+ * Validates an array of aliases against database.
+ */
+function checkAliasConflict(aliases, currentId = null) {
+    let aliasList = [];
+    if (Array.isArray(aliases)) aliasList = aliases;
+    else if (typeof aliases === 'string') {
+        try { aliasList = JSON.parse(aliases); } catch (e) { }
+    }
+
+    for (const alias of aliasList) {
+        checkSingleNameConflict(alias, currentId, 'alias');
     }
 }
 
@@ -140,11 +197,38 @@ async function createItem(data, userData) {
  * Updates an item.
  */
 async function updateItem(id, setData) {
-    if (setData.categories && Array.isArray(setData.categories)) {
+    checkItemConflict(setData, id);
+    if (setData.aliases) checkAliasConflict(setData.aliases, id);
+    let catIds = null;
+    if (setData.categories) {
+        if (Array.isArray(setData.categories)) catIds = setData.categories;
+        else if (typeof setData.categories === 'string') {
+            try { catIds = JSON.parse(setData.categories); } catch (e) { }
+        }
+    }
+
+    if (catIds && Array.isArray(catIds)) {
         // Sync junction table
         Fn.db.prepare(`DELETE FROM rel_item_category WHERE item_id = ?`).run([id]);
-        for (const cat_id of setData.categories) {
+        for (const cat_id of catIds) {
             try { rel_item_cat.insert({ item_id: id, category_id: Number(cat_id) }, false); } catch (e) { }
+        }
+    }
+
+    let aliases = null;
+    if (setData.aliases) {
+        if (Array.isArray(setData.aliases)) aliases = setData.aliases;
+        else if (typeof setData.aliases === 'string') {
+            try { aliases = JSON.parse(setData.aliases); } catch (e) { }
+        }
+    }
+
+    if (aliases && Array.isArray(aliases)) {
+        Fn.db.prepare(`DELETE FROM item_aliases WHERE item_id = ?`).run([id]);
+        for (const alias_str of aliases) {
+            if (alias_str && typeof alias_str === 'string') {
+                try { Fn.db.prepare(`INSERT OR IGNORE INTO item_aliases (item_id, alias) VALUES (?, ?)`).run(id, alias_str.trim()); } catch (e) { }
+            }
         }
     }
 

@@ -196,7 +196,8 @@
                               <td *ngIf="settings.document">
                                  <img *ngIf="data.document && data.document.images"
                                     [src]="baseurl + data.document.images[0]" height="60px"
-                                    style="padding: 5px; border-radius: 15px;">
+                                    style="padding: 5px; border-radius: 15px; cursor: pointer;"
+                                    (click)="showImages(data)">
                               </td>
                               <td *ngIf="settings.roll_no" style="color:red">{{data.roll_no ? data.roll_no : '______'}}
                               </td>
@@ -260,6 +261,8 @@
                [isEdit]="true"></app-pbk-entry>
 
             <app-excel-import *ngIf='showModal == "excel_import"' importType="pbk"></app-excel-import>
+
+            <app-product-view *ngIf="showModal == 'View Images'" [pbk]="editData"></app-product-view>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;" (click)="closeModal()">Close</button>

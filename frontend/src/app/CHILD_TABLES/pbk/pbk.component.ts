@@ -228,6 +228,11 @@ export class PbkComponent implements OnInit {
     this.openModal('Edit PBK');
   }
 
+  showImages(data: any) {
+    this.editData = data;
+    this.openModal('View Images');
+  }
+
   delete(i: any, id: any) {
     Swal.fire({
       title: 'Are you sure?',
