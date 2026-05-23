@@ -1,0 +1,175 @@
+<div class="fb-wrapper">
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-title" (click)="toggleOnline()">
+      Bug<em>Report</em> P2P
+      <div class="q-status" [class.on]="isOnline">{{isOnline ? 'ONLINE' : 'OFFLINE'}}</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" (click)="toggleOnline()" style="padding: 6px 16px; width: auto;">
+        {{isOnline ? '🛑 Go Offline' : '📡 Go Online'}}
+      </button>
+    </div>
+  </div>
+
+  <div class="desktop-layout">
+    
+    <!-- LEFT: Connectivity & Status -->
+    <div class="col side-col">
+      <div class="card" style="padding: 16px;">
+        <div class="seclbl" style="margin-top:0">My Identity</div>
+        <div class="fld">
+          <label>My Name</label>
+          <input [(ngModel)]="myName" placeholder="e.g. John Doe" (blur)="saveIdentity()">
+        </div>
+        <div class="fld">
+          <label>My Secret Code (Share this)</label>
+          <div style="font-size:16px; font-weight:800; font-family:var(--m); color:var(--blue); letter-spacing:1px; margin:4px 0;">
+            {{isOnline ? myId : 'OFFLINE'}}
+          </div>
+          <p style="font-size:10px; color:var(--txt2); margin-top:4px;">Share this code with others so they can link to you.</p>
+        </div>
+      </div>
+
+      <div class="card" style="padding: 16px;">
+        <div class="seclbl" style="margin-top:0">Link with Admin</div>
+        <div class="fld">
+          <label>Admin Secret Code</label>
+          <input [(ngModel)]="adminCodeInp" placeholder="Paste admin's code here">
+        </div>
+        <button class="btn btn-blue" (click)="linkAdmin()">Save & Connect</button>
+        <div *ngIf="adminCode" style="margin-top:10px; font-size:11px; color:var(--green); font-weight:bold; text-align:center;">
+          ✓ Linked to: {{adminCode}}
+        </div>
+      </div>
+
+      <div class="card" style="padding: 16px;">
+        <div class="seclbl" style="margin-top:0">Connected Contacts</div>
+        <div *ngIf="!getContactsKeys().length" class="empty" style="padding:10px;"><p style="font-size:12px; color:var(--txt3);">No contacts connected.</p></div>
+        
+        <div *ngFor="let k of getContactsKeys()" class="contact-row" 
+             [class.active-filter]="selectedContactFilter === k"
+             (click)="toggleContactFilter(k)">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="c-name">{{getContactName(k)}}</div>
+            <button class="ibtn-small" (click)="renameContact(k); $event.stopPropagation()">✏️</button>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="c-badge count">{{getIncomingMsgCount(k)}} Reports</div>
+            <div class="c-badge" [class.offline]="!isContactOnline(k)">{{isContactOnline(k) ? 'Online' : 'Offline'}}</div>
+          </div>
+        </div>
+        <div *ngIf="selectedContactFilter" style="text-align:center; padding:8px;">
+           <button class="btn btn-outline" style="font-size:10px; padding:4px;" (click)="selectedContactFilter = ''">Clear Filter</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIDDLE: Reporter (Submit) -->
+    <div class="col main-col">
+      <div class="card" style="padding: 16px;">
+        <div class="seclbl" style="margin-top:0">Submit New Issue / Suggestion</div>
+        <div class="fld">
+          <label>Title</label>
+          <input [(ngModel)]="reportTitle" placeholder="e.g. Login page error">
+        </div>
+        <div class="fld">
+          <label>Detail</label>
+          <textarea [(ngModel)]="reportDetail" rows="3" placeholder="Explain what happened or what you need..."></textarea>
+        </div>
+        <div class="fld">
+          <label>Attachment (Image)</label>
+          <input type="file" accept="image/*" (change)="onImageChange($event)">
+          <img *ngIf="imgPreviewUrl" [src]="imgPreviewUrl" style="max-height:80px; margin-top:8px; border-radius:8px;">
+        </div>
+        <button class="btn btn-blue" (click)="saveReport()">+ Save & Send Report</button>
+      </div>
+
+      <div class="seclbl" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>My Sent Submissions</span>
+        <label style="display:flex; align-items:center; gap:4px; font-size:10px; cursor:pointer; color:var(--blue); text-transform:none;">
+           <input type="checkbox" [(ngModel)]="showResolved"> Show Resolved
+        </label>
+      </div>
+      <div *ngIf="!getActiveReports().length" class="card"><div class="empty" style="padding:20px; text-align:center; color:var(--txt3);">No active reports.</div></div>
+      
+      <div *ngFor="let r of getActiveReports()" class="report-card" [class.expanded]="r.expanded" (click)="r.expanded = !r.expanded">
+        <div class="r-hdr">
+          <div class="r-title">{{r.title}} <span class="msg-count" *ngIf="r.messages?.length">💬 {{r.messages.length}}</span></div>
+          <div class="r-status" [ngClass]="(r.status || 'PENDING').toLowerCase()">{{r.status || 'PENDING'}}</div>
+        </div>
+        
+        <ng-container *ngIf="r.expanded">
+           <div class="r-detail">{{r.detail}}</div>
+           <img *ngIf="r.image" [src]="r.image" class="r-image">
+           <div class="r-meta">{{r.timestamp | date:'medium'}}</div>
+           
+           <!-- Thread -->
+           <div class="thread" (click)="$event.stopPropagation()">
+              <div class="thread-msgs">
+                 <div class="msg" *ngFor="let m of r.messages">
+                    <strong>{{m.senderName}}</strong> <span class="msg-time">{{m.timestamp | date:'shortTime'}}</span>
+                    <div class="msg-txt">{{m.text}}</div>
+                 </div>
+              </div>
+              <div class="reply-box">
+                 <input [(ngModel)]="r.newMsg" placeholder="Type a reply...">
+                 <button class="btn btn-blue" style="width:auto; padding:6px 12px" (click)="addMessage(r, false)">Send</button>
+              </div>
+              <div class="actions" style="margin-top:10px; display:flex; gap:10px;">
+                 <button class="btn btn-outline" style="border-color:var(--green); color:var(--green)" (click)="changeStatus(r, 'RESOLVED', false)">Mark Resolved</button>
+                 <button class="btn btn-outline" style="border-color:var(--amber); color:var(--amber)" (click)="changeStatus(r, 'PENDING', false)">Reopen</button>
+              </div>
+           </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- RIGHT: Admin (Received) -->
+    <div class="col main-col">
+      <div class="seclbl" style="display:flex; justify-content:space-between; align-items:center; margin-top:0;">
+        <span>Received Reports (Admin Hub) <span *ngIf="selectedContactFilter">- Filtered</span></span>
+        <label style="display:flex; align-items:center; gap:4px; font-size:10px; cursor:pointer; color:var(--blue); text-transform:none;">
+           <input type="checkbox" [(ngModel)]="showResolved"> Show Resolved
+        </label>
+      </div>
+      <div>
+        <div *ngIf="!getActiveReceivedReports().length" class="card"><div class="empty" style="padding:20px; text-align:center; color:var(--txt3);">No active reports received.</div></div>
+        
+        <div *ngFor="let r of getActiveReceivedReports()" class="report-card received" [class.expanded]="r.expanded" (click)="r.expanded = !r.expanded">
+          <div class="r-hdr">
+            <div class="r-title">{{r.title}} <span class="msg-count" *ngIf="r.messages?.length">💬 {{r.messages.length}}</span></div>
+            <div class="r-status" [ngClass]="(r.status || 'PENDING').toLowerCase()">{{r.status || 'PENDING'}}</div>
+          </div>
+          <div style="font-size:10px; color:var(--txt3); margin-top:2px;">From: {{getContactName(r.fromId)}}</div>
+          
+          <ng-container *ngIf="r.expanded">
+             <div class="r-detail">{{r.detail}}</div>
+             <img *ngIf="r.image" [src]="r.image" class="r-image">
+             <div class="r-meta">{{r.timestamp | date:'medium'}}</div>
+
+             <!-- Thread -->
+             <div class="thread" (click)="$event.stopPropagation()">
+                <div class="thread-msgs">
+                   <div class="msg" *ngFor="let m of r.messages">
+                      <strong>{{m.senderName}}</strong> <span class="msg-time">{{m.timestamp | date:'shortTime'}}</span>
+                      <div class="msg-txt">{{m.text}}</div>
+                   </div>
+                </div>
+                <div class="reply-box">
+                   <input [(ngModel)]="r.newMsg" placeholder="Type a reply...">
+                   <button class="btn btn-blue" style="width:auto; padding:6px 12px" (click)="addMessage(r, true)">Send</button>
+                </div>
+                <div class="actions" style="margin-top:10px; display:flex; gap:10px;">
+                   <button class="btn btn-outline" style="border-color:var(--blue); color:var(--blue)" (click)="changeStatus(r, 'COMPLETED', true)">Mark Complete</button>
+                </div>
+             </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" [class.show]="showToastMsg">{{toastMsg}}</div>
+</div>

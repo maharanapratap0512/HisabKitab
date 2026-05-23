@@ -91,6 +91,7 @@ export class FormService {
       // is_variable_qty: 0,
       is_process: 0,
       enz: {
+        _id: null,
         jawak_id: null,
         container_capacity: null,
       },
@@ -109,6 +110,8 @@ export class FormService {
       re_aawak_type_id: null,
       aawak_dept_id: null,
       aawak_type_id: null,
+      parchi_place: null,
+      sell_repair_place: null,
       filterObj: {},
       active: 1,
     };

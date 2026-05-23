@@ -145,6 +145,20 @@ export class HttpService {
     );
   }
 
+  downloadPostData(url: string, body: any) {
+    const httpOptions: any = {
+      headers: new HttpHeaders({
+        'content-type': 'application/json',
+      }),
+      responseType: 'blob',
+    };
+    return this.http.post(url, body, httpOptions).pipe(
+      tap(val => {
+        catchError(this.handleError);
+      })
+    );
+  }
+
   toUrlParams(obj: any) {
     let str = '';
     if (obj) {

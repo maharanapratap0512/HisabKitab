@@ -115,14 +115,18 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
     if (awk && awk._id) {
       this.fs.jawakFormMain.jawaks[i] = {
         ...this.fs.jawakFormMain.jawaks[i],
+        aawak_ref_id: awk._id,           // ✅ link the FK
         item_id: awk.item_id,
         subitem_id: awk.subitem_id,
         condition_id: awk.condition_id,
         unit_id: awk.unit_id,
         aawak_source_id: awk.aawak_source_id,
         company_name: awk.company_name,
+        product_id: awk.product_id,
+        lot_no: awk.lot_no,
         rate: typeof awk.rate == 'number' ? awk.rate : 0,
         remaining_qty: awk.remaining_qty,
+        aawak_ref_obj: awk
       }
 
       this.itemSubitemSelected(awk, i);
@@ -143,10 +147,31 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
       unit_id: null,
       aawak_source_id: null,
       company_name: null,
+      product_id: null,
+      lot_no: null,
       rate: null,
       remaining_qty: null,
+      aawak_ref_obj: null
     }
     this.itemSubitemSelected(null, i);
+  }
+
+  getConditionName(id: any) {
+    if (!id) return '';
+    const item = this.conditions.find((x: any) => x._id === id);
+    return item ? (item.list_name_hin || item.list_name_eng) : '';
+  }
+
+  getSourceName(id: any) {
+    if (!id) return '';
+    const item = this.aawak_sources.find((x: any) => x._id === id);
+    return item ? (item.list_name_hin || item.list_name_eng) : '';
+  }
+
+  getProductName(id: any) {
+    if (!id) return '';
+    const item = this.products.find((x: any) => x._id === id);
+    return item ? (item.product_code || item.sr_num || '') : '';
   }
 
   clearReport(i: any) {
@@ -162,12 +187,30 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
       this.fs.patchFormJawak(changes.getData.currentValue);
       this.fs.jawakFormStatusChanges()
       for (let i in this.fs.jawakFormMain.jawaks) {
-        if (this.fs.jawakFormMain.jawaks[i].item_id) {
-          this.itemSubitemSelected(this.fs.jawakFormMain.jawaks[i], i);
+        const jwk = this.fs.jawakFormMain.jawaks[i];
+        if (jwk.item_id) {
+          this.itemSubitemSelected(jwk, i);
+        }
+        if (jwk.aawak_ref_id) {
+          this.fetchAawakRefDetails(jwk.aawak_ref_id, i);
         }
       }
 
     }
+  }
+
+  fetchAawakRefDetails(aawakRefId: any, index: any) {
+    if (!aawakRefId) return;
+    const body = {
+      _id: aawakRefId,
+      limit: 1
+    };
+    this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, body).subscribe((res: any) => {
+      if (res && res.success && res.result && res.result.length > 0) {
+        const awk = res.result[0];
+        this.fs.jawakFormMain.jawaks[index].aawak_ref_obj = awk;
+      }
+    });
   }
 
   ngOnDestroy(): void {

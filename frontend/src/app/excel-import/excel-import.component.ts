@@ -222,6 +222,10 @@ export class ExcelImportComponent implements OnInit {
             //assign excel data to matched object key and prepare whole row object
             if (this.headerConfig[j].type == "array") {
               row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index] ? this.excelArr[i][this.headerConfig[j].index].split(",") : [];
+              // if array type with ref_table
+              // if (this.headerConfig[j].ref_table) {
+              //   row[this.headerConfig[j].col_name] = row[this.headerConfig[j].col_name].map((value: string) => ({ data: this.gs.cleanValue(value), _id: null }));
+              // } 
             } else {
               row[this.headerConfig[j].col_name] = this.gs.cleanValue(this.excelArr[i][this.headerConfig[j].index]);
             }
@@ -337,6 +341,19 @@ export class ExcelImportComponent implements OnInit {
             this.excelArrObj[i].subitem_hin = data.subitem.subitem_hin;
           }
 
+        }
+      }
+    } else if (data.isArray) {
+      // Array-type correction (e.g. categories): data.name is string[], data.ids is id[]
+      for (let i in this.excelArrObj) {
+        for (let j in conf) {
+          const rowVal = this.excelArrObj[i][conf[j].name];
+          // Match if the row's name array equals data.name array
+          if (Array.isArray(rowVal) && Array.isArray(data.name) &&
+            rowVal.length === data.name.length &&
+            rowVal.every((v: string, idx: number) => v === data.name[idx])) {
+            this.excelArrObj[i][conf[j].ref_field] = data.ids;
+          }
         }
       }
     } else {
@@ -624,11 +641,16 @@ export class ExcelImportComponent implements OnInit {
   }
 
   getSwHeaderList() {
-    return this.headerConfig.map((h: { name: any; ref_data: any; found: any; }) => {
-      if (h.found) {
+    return this.headerConfig
+      .filter((h: any) => h.found)
+      .map((h: { name: any; ref_data: any; found: any; }) => {
         return h.ref_data ? h.ref_data : h.name;
-      }
-    });
+      });
+  }
+
+  getValue(obj: any, path: string) {
+    if (!path || !obj) return null;
+    return path.split('.').reduce((o, i) => (o ? o[i] : null), obj);
   }
 
 

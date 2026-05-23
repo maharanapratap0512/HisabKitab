@@ -56,8 +56,7 @@ router.post('/:dept_id', async (req, res, next) => {
     if (req.body && req.body.item_hin) {
         try {
             sutramDB.begin();
-            const item_id = await itemService.createItem(req.body, req.params.dept_id);
-            const data = await item.getById(item_id, { full: true });
+            const data = await itemService.createItem(req.body, req.params.dept_id);
             sutramDB.commit();
             res.json({
                 success: true,
@@ -137,6 +136,7 @@ router.delete('/:id', async (req, res, next) => {
             return next(new Error('Id not found.'))
         }
     } catch (err) {
+        console.log(err);
         sutramDB.rollback();
         next(err);
     }

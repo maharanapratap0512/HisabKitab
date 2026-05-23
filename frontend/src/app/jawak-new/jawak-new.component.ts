@@ -152,18 +152,9 @@ export class JawakNewComponent implements OnInit {
     this.getFilteredData();
   }
 
-  onAawakRefSaved(updatedJawak: any, row: any) {
-    // If voucher view, update the specific jawak inside the voucher
-    if (this.settings.jawak.viewMode === 'voucher') {
-       const index = row.jawaks.findIndex((j: any) => j._id === updatedJawak._id);
-       if (index !== -1) {
-           row.jawaks[index].aawak_ref_id = updatedJawak.aawak_ref_id;
-           // Optionally fetch more details if needed, but for now we just link it
-       }
-    } else {
-        // Individual view
-        row.aawak_ref_id = updatedJawak.aawak_ref_id;
-    }
+  onAawakRefSaved(event: { jawakId: any, aawak_ref_id: any }, item: any) {
+    // Directly update the item's aawak_ref_id so the green-tick icon re-renders
+    item.aawak_ref_id = event.aawak_ref_id;
   }
 
   toggleUnlinkedFilter() {

@@ -131,7 +131,10 @@
     </ng-select>
 
     <!-- Overlay trigger for tiny mode -->
-    <div *ngIf="mode === 'tiny'" class="tiny-overlay d-flex align-items-center" (click)="select.open()">
-        <i class="uil" [ngClass]="selectedValue ? 'uil-check-circle text-success' : 'uil-link-h text-muted'" style="font-size: 18px;"></i>
+    <div *ngIf="mode === 'tiny'" class="tiny-overlay d-flex align-items-center" [class.ref-updated]="isJustUpdated" (click)="select.open()">
+        <i class="uil" [ngClass]="{
+            'uil-check-circle': selectedValue,
+            'uil-link-h text-muted': !selectedValue
+        }" [style.color]="selectedValue ? (isJustUpdated ? '' : '#28a745') : ''" style="font-size: 18px;"></i>
     </div>
 </div>

@@ -19,9 +19,13 @@ async function getCategories(deptId = null) {
 /**
  * Validates category names and aliases to prevent conflicts.
  */
-function checkCategoryConflict(data, currentId = null) {
+/**
+ * Internal helper to find conflicts without throwing.
+ * Returns { type, name, conflict } or null.
+ */
+function getCategoryConflict(data, currentId = null) {
     const names = [data.category_hin, data.category_eng, data.category_roman].filter(Boolean);
-    if (names.length === 0) return;
+    if (names.length === 0) return null;
 
     for (const name of names) {
         const sanitized = name.replace(/'/g, "''");
@@ -31,14 +35,26 @@ function checkCategoryConflict(data, currentId = null) {
             `_id != ${currentId || 0} AND (category_hin = '${sanitized}' OR category_eng = '${sanitized}' OR category_roman = '${sanitized}')`,
             { full: false }
         );
-        if (conflictName) throw new Error(`Yeh name '${name}' pehle se hi category '${conflictName.category_hin}' ka primary name hai.`);
+        if (conflictName) return { type: 'primary', name, conflict: conflictName };
 
         // 2. Check Alias Conflicts
         const conflictAlias = db.prepare(`
             SELECT _id, category_hin FROM category, json_each(category.alias) 
             WHERE _id != ? AND json_each.value = ? LIMIT 1
         `).get(currentId || 0, name);
-        if (conflictAlias) throw new Error(`Yeh name '${name}' pehle se hi category '${conflictAlias.category_hin}' ke aliases mein exist karta hai.`);
+        if (conflictAlias) return { type: 'alias', name, conflict: conflictAlias };
+    }
+    return null;
+}
+
+/**
+ * Validates category names and aliases to prevent conflicts. Throws if conflict found.
+ */
+function checkCategoryConflict(data, currentId = null) {
+    const result = getCategoryConflict(data, currentId);
+    if (result) {
+        const typeLabel = result.type === 'primary' ? 'primary name' : 'aliases';
+        throw new Error(`Yeh name '${result.name}' pehle se hi category '${result.conflict.category_hin}' ke ${typeLabel} mein exist karta hai.`);
     }
 }
 
@@ -60,7 +76,7 @@ async function createCategory(data, deptId) {
         await deptService.pushToConfig(deptId, 'category', insertedId);
     }
 
-    return Category.getById(insertedId, { full: false });
+    return Category.getById(insertedId, { full: true });
 }
 
 /**
@@ -85,22 +101,10 @@ async function updateAliases(id, aliases) {
     for (const alias of aliases) {
         const trimmed = alias.trim();
         if (!trimmed) continue;
-        const sanitized = trimmed.replace(/'/g, "''");
-
-        const conflict = Category.getOne(
-            `_id != ${id} AND (category_hin = '${sanitized}' OR category_eng = '${sanitized}' OR category_roman = '${sanitized}')`,
-            { full: false }
-        );
-        if (conflict) throw new Error(`Yeh alias '${trimmed}' pehle se hi category '${conflict.category_hin}' ka PRIMARY name hai.`);
-
-        const aliasConflict = db.prepare(`
-            SELECT _id, category_hin FROM category, json_each(category.alias) 
-            WHERE _id != ? AND json_each.value = ? LIMIT 1
-        `).get(id, trimmed);
-        if (aliasConflict) throw new Error(`Yeh alias '${trimmed}' pehle se hi category '${aliasConflict.category_hin}' ke aliases mein exist karta hai.`);
+        checkCategoryConflict({ category_hin: trimmed }, id);
     }
 
-    Category.updateById({ alias: JSON.stringify(aliases) }, id);
+    Category.updateById({ alias: aliases }, id);
     return aliases;
 }
 
@@ -139,5 +143,6 @@ module.exports = {
     updateAliases,
     deleteCategory,
     transferCategory,
-    checkCategoryConflict
+    checkCategoryConflict,
+    getCategoryConflict
 };

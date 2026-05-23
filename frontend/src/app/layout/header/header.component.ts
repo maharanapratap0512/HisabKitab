@@ -260,6 +260,7 @@ export class HeaderComponent implements AfterViewInit {
         children: [
           { title: 'Department', link: 'department', visible: this.auth.webUser.settings?.department?.visible },
           { title: 'NetDrop', link: 'netdrop', visible: true, target: '_blank' },
+          { title: 'FeedBack', link: 'feedback', visible: true },
         ]
       },
       { title: 'Points', icon: 'uil-layer-group', link: 'point', visible: this.auth.webUser.settings?.point?.visible },

@@ -398,15 +398,26 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                     if (type === 'variant') {
                         let fdata = await fn.setFormData(form, row);
                         let insResult = await service.bulkCreateVariants(fdata.item_id, [fdata], req.userData);
-                        result = { status: 'inserted', data: row, newData: insResult };
+                        row.newData = insResult;
+                        result = { status: 'inserted', data: row };
                     } else if (type === 'item') {
-                        // let fdata = await fn.setFormData(form, row);
-                        let item_id = await service.createItem(fdata, req.params.dept_id);
-                        let insResult = await service.getById(item_id, { full: true });
-                        result = { status: 'inserted', data: row, newData: fdata };
+                        const conflict = service.getItemConflict(row);
+                        if (conflict) {
+                            result = { status: 'duplicate', data: row };
+                        } else {
+                            let insResult = await service.createItem(row, req.params.dept_id);
+                            row.newData = insResult;
+                            result = { status: 'inserted', data: row };
+                        }
                     } else if (type === 'category') {
-                        let insResult = await service.createCategory(row, req.params.dept_id);
-                        result = { status: 'inserted', data: row, newData: insResult };
+                        const conflict = service.getCategoryConflict(row);
+                        if (conflict) {
+                            result = { status: 'duplicate', data: row };
+                        } else {
+                            let insResult = await service.createCategory(row, req.params.dept_id);
+                            row.newData = insResult;
+                            result = { status: 'inserted', data: row };
+                        }
                     } else {
                         result = await fn.verifyAndInsert(importType, row, headerList);
                     }
@@ -416,7 +427,6 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                     console.error(`[Excel Import] ${type} Error at row ${i + 1}:`, err.message);
                     result = { status: 'rejected', data: row, error: err.message };
                 }
-                console.log(`[Excel Import] ${type} row ${i + 1}/${total} processed. Status: ${result.status}`);
                 sendUpdate({ index: i + 1, total, status: result.status, result });
 
                 if ((i + 1) % 5 === 0) await new Promise(r => setImmediate(r));

@@ -628,7 +628,7 @@ const jawak_voucher = {
         dept.dept_eng, dept.dept_hin, dept.dept_code,
         nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, nst.state_hin as nimitt_state_hin, nst.state_eng as nimitt_state_eng,
         json_group_array(json_object(
-            '_id', jawak._id, 'lot_no', jawak.lot_no, 'item_id', jawak.item_id, 'subitem_id', jawak.subitem_id,
+            '_id', jawak._id, 'aawak_ref_id', jawak.aawak_ref_id, 'lot_no', jawak.lot_no, 'item_id', jawak.item_id, 'subitem_id', jawak.subitem_id,
             'product_id', jawak.product_id,'condition_id', jawak.condition_id, 'unit_id', jawak.unit_id,
             'aawak_source_id', jawak.aawak_source_id, 'jawak_type_id', jawak.jawak_type_id, 'item_detail', jawak.item_detail,
             'item_hin', item.item_hin, 'item_eng', item.item_eng, 'item_code', item.item_code, 'item_roman', item.item_roman,

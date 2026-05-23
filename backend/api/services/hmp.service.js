@@ -97,7 +97,7 @@ function injectSubitemList(entries, subitemListMap) {
 // Uses BaseTable.getAll() with a raw WHERE string — schema-driven joins
 // auto-build recipe + mm (hasOne) and inputs/outputs (hasMany) from schema.
 
-function getBatches({ dept_id, mm_id, recipe_id, item_id, date_from, date_to, year, pageNo }) {
+function getBatches({ dept_id, mm_id, recipe_id, item_id, date_from, date_to, year, pageNo, all = false, batchIds = [] }) {
     const PAGE_SIZE = 100;
     const page = (pageNo && pageNo > 0) ? Number(pageNo) : 1;
     const offset = (page - 1) * PAGE_SIZE;
@@ -107,6 +107,10 @@ function getBatches({ dept_id, mm_id, recipe_id, item_id, date_from, date_to, ye
         `hmp_batch.dept_id = ${Number(dept_id)}`,
         `hmp_batch.active = 1`,
     ];
+
+    if (batchIds && batchIds.length > 0) {
+        conds.push(`hmp_batch._id IN (${batchIds.map(id => Number(id)).join(',')})`);
+    }
 
     if (mm_id) conds.push(`hmp_batch.mm_id = ${Number(mm_id)}`);
     if (recipe_id) conds.push(`hmp_batch.recipe_id = ${Number(recipe_id)}`);
@@ -142,8 +146,8 @@ function getBatches({ dept_id, mm_id, recipe_id, item_id, date_from, date_to, ye
     //             └─ each child auto-includes its own hasOne: item, subitem, unit, condition
     const result = hmpBatch.getAll(where, {
         orderBy: 'hmp_batch.date DESC',
-        limit: PAGE_SIZE,
-        offset,
+        limit: all ? null : PAGE_SIZE,
+        offset: all ? null : offset,
     });
 
     const subitemListMap = buildSubitemListMap(subitemList.getAll());

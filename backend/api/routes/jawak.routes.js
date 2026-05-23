@@ -539,11 +539,14 @@ router.delete('/voucher/:ids', async (req, res, next) => {
 router.put('/ref-link/:id', async (req, res, next) => {
     try {
         if (req.params.id && req.body.aawak_ref_id !== undefined) {
-            await DB.update('jawak', { aawak_ref_id: req.body.aawak_ref_id }, req.params.id).then((data) => {
-                res.json({
-                    success: true,
-                    result: data || []
-                });
+            const sql = `UPDATE jawak SET aawak_ref_id = @aawak_ref_id, updated_at = datetime('now','localtime') WHERE _id = @_id`;
+            const result = DB.db.prepare(sql).run({
+                aawak_ref_id: req.body.aawak_ref_id,
+                _id: Number(req.params.id)
+            });
+            res.json({
+                success: true,
+                result: result
             });
         }
         else {

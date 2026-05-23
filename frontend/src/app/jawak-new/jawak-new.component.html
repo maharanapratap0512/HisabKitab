@@ -269,7 +269,10 @@
                                                             <td>{{item.lot_no || '-'}}</td>
                                                             <td>
                                                                 <div class="item-info">
-                                                                    <span>{{item.item_hin}}</span> <i *ngIf="item.document?.images?.length" class="uil uil-image text-primary ms-1 cursor-pointer" (click)="showImages(item)"></i> <br />
+                                                                    <span>{{item.item_hin}}</span> <i
+                                                                        *ngIf="item.document?.images?.length"
+                                                                        class="uil uil-image text-primary ms-1 cursor-pointer"
+                                                                        (click)="showImages(item)"></i> <br />
                                                                     <small class="text-muted">{{item.item_eng}}</small>
                                                                 </div>
                                                             </td>
@@ -596,16 +599,6 @@
                                             </app-popover-filter>
                                         </div>
                                     </th>
-                                    <th class="w-250">
-                                        <div class="d-flex align-items-center justify-content-between"
-                                            title="Show unlinked only">
-                                            <span>Ref. Aawak</span>
-                                            <input type="checkbox"
-                                                style="width: 12px; height: 12px; margin-left: 4px; cursor: pointer;"
-                                                [(ngModel)]="filterBody.unlinkedOnly" (change)="onHeaderFilterChange()"
-                                                title="Check to show only unlinked jawaks">
-                                        </div>
-                                    </th>
                                     <th class="w-400">Usage Report</th>
                                 </tr>
                             </thead>
@@ -682,7 +675,9 @@
                                             <div class="item-info">
                                                 <span>{{item.item_hin}}</span>
                                                 <span *ngIf="item.subitem_hin"> - {{item.subitem_hin}}</span>
-                                                <i *ngIf="item.document?.images?.length" class="uil uil-image text-primary ms-1 cursor-pointer" (click)="showImages(item)"></i>
+                                                <i *ngIf="item.document?.images?.length"
+                                                    class="uil uil-image text-primary ms-1 cursor-pointer"
+                                                    (click)="showImages(item)"></i>
                                                 <br>
                                                 <small class="text-muted">{{item.item_eng}}</small>
                                                 <small class="text-muted" *ngIf="item.subitem_eng"> -

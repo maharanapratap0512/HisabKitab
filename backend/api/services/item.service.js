@@ -5,6 +5,7 @@ const { sutramDB } = require('../database/db.model');
 
 const item = new BaseTable('item');
 const rel_item_cat = new BaseTable('rel_item_category');
+const item_aliases = new BaseTable('item_aliases');
 const deptService = require('./department.service');
 const HmpService = require('./hmp.service');
 const PrastavService = require('./prastav.service');
@@ -135,46 +136,78 @@ async function createItem(data, dept_id = null) {
             if (dept_id) deptService.pushToConfig(dept_id, 'item', item_id);
         }
 
-        return item_id;
+        return item.getById(item_id, { full: true });
     } catch (err) {
         throw err;
     }
 }
 
 /**
- * Universal checker for a single name/alias against the entire database.
+ * Internal helper to find conflicts for a single name or an entire item object.
+ * Highly optimized to check primary names and aliases in a single database roundtrip.
+ */
+function getItemConflict(data, currentId = null) {
+    const names = [data.item_hin, data.item_eng, data.item_roman];
+    let aliases = [];
+    if (Array.isArray(data.aliases)) aliases = data.aliases;
+    else if (typeof data.aliases === 'string') try { aliases = JSON.parse(data.aliases || '[]'); } catch (e) { }
+
+    const allNames = [...new Set([...names, ...aliases])].filter(n => n && n.trim());
+    if (allNames.length === 0) return null;
+
+    const cid = currentId || 0;
+    const namesJson = JSON.stringify(allNames);
+
+    // Using CTE and json_each for the cleanest and most efficient multi-name check
+    const sql = `
+        WITH input_names(name) AS (
+            SELECT value FROM json_each(?)
+        )
+        SELECT _id, item_hin, 'primary' as source, n.name as matched_name
+        FROM item
+        JOIN input_names n ON (item_hin = n.name OR item_eng = n.name OR item_roman = n.name)
+        WHERE _id != ?
+        UNION ALL
+        SELECT item_id as _id, item.item_hin, 'alias' as source, n.name as matched_name
+        FROM item_aliases
+        JOIN item ON item._id = item_aliases.item_id
+        JOIN input_names n ON item_aliases.alias = n.name
+        WHERE item_id != ?
+        LIMIT 1
+    `;
+
+    const conflict = Fn.db.prepare(sql).get(namesJson, cid, cid);
+    return conflict ? { type: conflict.source, name: conflict.matched_name, conflict } : null;
+}
+
+/**
+ * Optimized single name conflict checker.
+ */
+function getSingleNameConflict(name, currentId = null, typeLabel = 'name') {
+    const result = getItemConflict({ item_hin: name }, currentId);
+    if (result) result.typeLabel = typeLabel;
+    return result;
+}
+
+/**
+ * Universal checker for a single name/alias against the entire database. Throws error.
  */
 function checkSingleNameConflict(name, currentId = null, typeLabel = 'name') {
-    if (!name || !name.trim()) return;
-    const sanitized = name.trim().replace(/'/g, "''");
-
-    // 1. Check Primary Table (3 fields)
-    const conflictName = item.getOne(
-        `_id != ${currentId || 0} AND (item_hin = '${sanitized}' OR item_eng = '${sanitized}' OR item_roman = '${sanitized}')`,
-        { full: false }
-    );
-    if (conflictName) {
-        throw new Error(`Yeh ${typeLabel} '${name}' pehle se hi item '${conflictName.item_hin}' ka primary name hai.`);
-    }
-
-    // 2. Check Alias Table
-    const conflictAlias = Fn.db.prepare(`
-        SELECT item_id, item.item_hin FROM item_aliases 
-        LEFT JOIN item ON item._id = item_aliases.item_id
-        WHERE item_id != ? AND alias = ? LIMIT 1
-    `).get(currentId || 0, name.trim());
-    if (conflictAlias) {
-        throw new Error(`Yeh ${typeLabel} '${name}' pehle se hi item '${conflictAlias.item_hin}' ke aliases mein exist karta hai.`);
+    const result = getSingleNameConflict(name, currentId, typeLabel);
+    if (result) {
+        const typeMsg = result.type === 'primary' ? 'primary name' : 'aliases';
+        throw new Error(`Yeh ${typeLabel} '${result.name}' pehle se hi item '${result.conflict.item_hin}' ke ${typeMsg} mein exist karta hai.`);
     }
 }
 
 /**
- * Validates primary item names (hin, eng, roman) against database.
+ * Validates primary item names (hin, eng, roman) against database. Throws error.
  */
 function checkItemConflict(data, currentId = null) {
-    const names = [data.item_hin, data.item_eng, data.item_roman];
-    for (const name of names) {
-        checkSingleNameConflict(name, currentId, 'name');
+    const result = getItemConflict(data, currentId);
+    if (result) {
+        const typeLabel = result.type === 'primary' ? 'primary name' : 'aliases';
+        throw new Error(`Yeh name '${result.name}' pehle se hi item '${result.conflict.item_hin}' ke ${typeLabel} mein exist karta hai.`);
     }
 }
 
@@ -182,12 +215,7 @@ function checkItemConflict(data, currentId = null) {
  * Validates an array of aliases against database.
  */
 function checkAliasConflict(aliases, currentId = null) {
-    let aliasList = [];
-    if (Array.isArray(aliases)) aliasList = aliases;
-    else if (typeof aliases === 'string') {
-        try { aliasList = JSON.parse(aliases); } catch (e) { }
-    }
-
+    const aliasList = Array.isArray(aliases) ? aliases : (typeof aliases === 'string' ? JSON.parse(aliases || '[]') : []);
     for (const alias of aliasList) {
         checkSingleNameConflict(alias, currentId, 'alias');
     }
@@ -326,14 +354,12 @@ async function deleteItem(id, userData) {
     const dept_id = (userData && userData.dept_id) ? userData.dept_id :
         (userData && userData.params && userData.params.dept_id) ? userData.params.dept_id : null;
     try {
-        sutramDB.begin();
-        const res = item.deleteById(id);
         rel_item_cat.delete({ item_id: id });
+        item_aliases.delete({ item_id: id });
+        const res = item.deleteById(id);
         if (dept_id) deptService.removeFromConfig(dept_id, 'item', id);
-        sutramDB.commit();
         return res;
     } catch (err) {
-        sutramDB.rollback();
         throw err;
     }
 }
@@ -366,5 +392,7 @@ module.exports = {
     toggleLock,
     transferItemReferences,
     deleteItem,
-    bulkCreateItems
+    bulkCreateItems,
+    getItemConflict,
+    checkItemConflict
 };

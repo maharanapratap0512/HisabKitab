@@ -363,9 +363,31 @@ class ExcelFunctions {
 
    async matchCategories(data) {
       let arr = [];
+      let hasNull = false;
       if (data) {
          for (let cat of data) {
-            arr.push(await this.matchCategory(cat.trim().toLowerCase()));
+            let id = await this.matchCategory(cat.trim().toLowerCase());
+            arr.push(id);
+            if (id === null) hasNull = true;
+         }
+      }
+      if (hasNull) {
+         // Remove individually-added correction entries for each element;
+         // replace with a single array-level correction entry.
+         const nameArr = data.map(c => c.trim().toLowerCase());
+         // Remove any single-element entries that were just added by matchCategory
+         this.correctionList = this.correctionList.filter(
+            c => !(c.type === 'category' && nameArr.includes(c.name))
+         );
+         const key = nameArr.join(',');
+         if (!this.correctionList.some(c => c.type === 'category' && c.isArray && c.key === key)) {
+            this.correctionList.push({
+               type: 'category',
+               name: nameArr,   // array of strings for display
+               key: key,        // dedup key
+               isArray: true,
+               ids: arr          // partial ids (some may be null)
+            });
          }
       }
       return arr;
