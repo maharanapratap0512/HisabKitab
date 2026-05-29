@@ -28,3 +28,99 @@
         }
     }
 }
+
+// RESTRICTURED PREMIUM STYLES
+.unified-form-card {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    
+    &.theme-inputs {
+        border-left: 5px solid #00b4d8 !important;
+        background: rgba(0, 180, 216, 0.04);
+        box-shadow: 0 4px 20px rgba(0, 180, 216, 0.08);
+    }
+    
+    &.theme-outputs {
+        border-left: 5px solid #2ec4b6 !important;
+        background: rgba(46, 196, 182, 0.04);
+        box-shadow: 0 4px 20px rgba(46, 196, 182, 0.08);
+    }
+}
+
+.pill-toggle {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+    padding: 2px;
+    display: inline-flex;
+    
+    .btn {
+        border-radius: 18px !important;
+        border: none !important;
+        padding: 4px 14px;
+        font-weight: 600;
+        font-size: 11px;
+        transition: all 0.25s ease;
+    }
+}
+
+.batch-list-card {
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        transform: translateY(-2px);
+    }
+    
+    .card-header {
+        font-size: 13px;
+        letter-spacing: 0.5px;
+    }
+}
+
+.bg-info-lighten {
+    background-color: rgba(0, 180, 216, 0.15) !important;
+}
+
+.bg-success-lighten {
+    background-color: rgba(46, 196, 182, 0.15) !important;
+}
+
+.text-info {
+    color: #00b4d8 !important;
+}
+
+.text-success {
+    color: #2ec4b6 !important;
+}
+
+.border-info {
+    border-color: rgba(0, 180, 216, 0.3) !important;
+}
+
+.border-success {
+    border-color: rgba(46, 196, 182, 0.3) !important;
+}
+
+.btn-xs {
+    padding: 0.15rem 0.35rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+}
+
+.fs-7 {
+    font-size: 11px;
+}
+
+// GLOWING ROW BORDERS FOR AUTO ACTIONS
+.row-glowing-info {
+    border-left: 4px solid #00b4d8 !important;
+    box-shadow: inset 4px 0 8px rgba(0, 180, 216, 0.06);
+    transition: all 0.3s ease;
+}
+
+.row-glowing-success {
+    border-left: 4px solid #2ec4b6 !important;
+    box-shadow: inset 4px 0 8px rgba(46, 196, 182, 0.06);
+    transition: all 0.3s ease;
+}

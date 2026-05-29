@@ -296,6 +296,16 @@
                                        title="Check to show only unlinked jawaks">
                                  </div>
                               </th>
+                              <th style="width: 100px;">
+                                 <div class="d-flex align-items-center justify-content-between"
+                                    title="Show unreceived only">
+                                    <span>Received</span>
+                                    <input type="checkbox"
+                                       style="width: 12px; height: 12px; margin-left: 4px; cursor: pointer;"
+                                       [(ngModel)]="filterBody.notReceivedOnly" (change)="getJawakData(page=1)"
+                                       title="Check to show only unreceived jawaks">
+                                 </div>
+                              </th>
                               <th style="width: 150px;" *ngIf="!settings.defaultMM">MM</th>
                               <th style="width: 70px;" *ngIf="settings.jawak.pkt_num">Pkt No</th>
                               <th style="width: 101px;">Date</th>
@@ -344,6 +354,11 @@
                                     }" [(ngModel)]="data.aawak_ref_id" [autoSave]="true" [jawakId]="data._id"
                                     (saved)="onAawakRefSaved($event, i)" mode="tiny" size="sm">
                                  </app-aawak-ref-dropdown>
+                              </td>
+                              <td>
+                                 <div class="form-check form-switch">
+                                    <input type="checkbox" class="form-check-input" [checked]="data.is_recieved" (change)="toggleReceived(data)" style="cursor: pointer;">
+                                 </div>
                               </td>
                               <td *ngIf="!settings.defaultMM">
                                  <span>{{data.mm_hin}} {{data.mm_code ? '('+data.mm_code+')': ''}}</span> <br />

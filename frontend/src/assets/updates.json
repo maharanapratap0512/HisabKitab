@@ -21,6 +21,30 @@
                 "title_hin": "एडवांस PDF एक्सपोर्ट",
                 "desc": "Advanced pdf export feature for HMP batches. input/output and outputs destribution in one go.",
                 "desc_hin": "HMP बैच के लिए एडवांस PDF एक्सपोर्ट सुविधा।"
+            },
+            {
+                "type": "feature",
+                "module": "HMP Batch",
+                "title": "New Design for insert HMP batch",
+                "title_hin": "HMP बैच के लिए नया डिजाइन",
+                "desc": "New Design for insert HMP batch, auto aawak then jawak for input, aawak type and aawak ref selection added in hmp input.",
+                "desc_hin": "HMP बैच दर्ज करने के लिए नया डिजाइन। ऑटो आवक फिर इनपुट के लिए जावक, आवक प्रकार और आवक संदर्भ चयन एचएमपी इनपुट में जोड़ा गया।"
+            },
+            {
+                "type": "fix",
+                "module": "Bachat New",
+                "title": "Excel Export Improved.",
+                "title_hin": "बचत नई एक्सेल एक्सपोर्ट बेहतर।",
+                "desc": "category now visible in export, condition wise export solved and improve speed.",
+                "desc_hin": "category अब export में दिखाई दे रही हैं, condition wise export हल हो गया है और गति में सुधार हुआ है।"
+            },
+            {
+                "type": "improved",
+                "module": "Jawak & Jawak New",
+                "title": "Filter, Export, Modern UI (Bunch), is recived flag added.",
+                "title_hin": "फिल्टर, एक्सपोर्ट(kisko diya column), आधुनिक यूआई, is recived flag जोड़ा गया।",
+                "desc": "Filter added for jawak and jawak new, export added for jawak and jawak new, modern ui for jawak and jawak new, is recived flag added for jawak and jawak new.",
+                "desc_hin": "फिल्टर जोड़ा गया, एक्सपोर्ट जोड़ा गया, आधुनिक यूआई जोड़ा गया, is recived flag जोड़ा गया।"
             }
         ]
     },

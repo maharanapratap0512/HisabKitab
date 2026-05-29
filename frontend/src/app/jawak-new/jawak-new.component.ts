@@ -54,6 +54,7 @@ export class JawakNewComponent implements OnInit {
 
   // Filter/Search
   filterBody: any = {};
+  filteredItems: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -73,6 +74,7 @@ export class JawakNewComponent implements OnInit {
     this.gs.observeList().subscribe((result: any) => {
       this.mms = result.mm || [];
       this.items = result.itemmix || [];
+      this.filteredItems = this.items;
       this.units = result.unit || [];
       this.states = result.state || [];
       this.conditions = result.condition || [];
@@ -85,10 +87,49 @@ export class JawakNewComponent implements OnInit {
       this.categories = result.category || [];
       this.nimitts = result.nimitt || [];
       this.isLoader = true;
+      this.filterItemsByCategory();
     });
     this.filterBody.mm_id = this.settings.defaultMM ? [this.settings.defaultMM] : [];
     this.filterBody.unlinkedOnly = false;
     this.getFilteredData();
+  }
+
+  filterItemsByCategory() {
+    if (this.filterBody.categories && this.filterBody.categories.length > 0) {
+      this.filteredItems = this.items.map((i: any) => {
+        const itemMatches = i.categories && i.categories.some((c: any) => this.filterBody.categories.includes(c._id));
+        const matchingSubitems = i.subitems ? i.subitems.filter((sub: any) => 
+          sub.categories && sub.categories.some((c: any) => this.filterBody.categories.includes(c._id))
+        ) : [];
+        
+        if (itemMatches || matchingSubitems.length > 0) {
+          return {
+            ...i,
+            subitems: matchingSubitems,
+            matchesCategory: itemMatches
+          };
+        }
+        return null;
+      }).filter((i: any) => i !== null);
+    } else {
+      this.filteredItems = this.items;
+    }
+  }
+
+  getFilteredJawaks(jawaks: any[]): any[] {
+    if (!jawaks) return [];
+    if (this.filterBody.categories && this.filterBody.categories.length > 0) {
+      return jawaks.filter((item: any) => {
+        const scats = item.scategories || [];
+        const icats = item.icategories || [];
+        const scatIds = scats.map((c: any) => c._id);
+        const icatIds = icats.map((c: any) => c._id);
+        
+        return scatIds.some((id: any) => this.filterBody.categories.includes(id)) || 
+               (scats.length === 0 && icatIds.some((id: any) => this.filterBody.categories.includes(id)));
+      });
+    }
+    return jawaks;
   }
 
   getJawakData(): void {
@@ -99,22 +140,26 @@ export class JawakNewComponent implements OnInit {
           this.jawakAll = data.result;
           for (let i in this.jawakAll) {
             this.jawakAll[i].sr_no = i;
-            for (let j in this.jawakAll[i].aawaks) {
-              this.jawakAll[i].aawaks[j].categories_hin = '';
-              this.jawakAll[i].aawaks[j].categories_eng = '';
-              if (this.jawakAll[i].aawaks[j].scategories && this.jawakAll[i].aawaks[j].scategories.length > 0) {
+            for (let j in this.jawakAll[i].jawaks) {
+              this.jawakAll[i].jawaks[j].categories_hin = '';
+              this.jawakAll[i].jawaks[j].categories_eng = '';
+              const scats = this.jawakAll[i].jawaks[j].scategories || [];
+              const icats = this.jawakAll[i].jawaks[j].icategories || [];
+              const scatIds = scats.map((c: any) => c._id);
+              const icatIds = icats.map((c: any) => c._id);
 
+              if (scats.length > 0) {
                 for (let k in this.categories) {
-                  if (this.jawakAll[i].aawaks[j].scategories.includes(this.categories[k]._id)) {
-                    this.jawakAll[i].aawaks[j].categories_hin += this.categories[k].category_hin + ', ';
-                    this.jawakAll[i].aawaks[j].categories_eng += this.categories[k].category_eng + ', ';
+                  if (scatIds.includes(this.categories[k]._id)) {
+                    this.jawakAll[i].jawaks[j].categories_hin += this.categories[k].category_hin + ', ';
+                    this.jawakAll[i].jawaks[j].categories_eng += this.categories[k].category_eng + ', ';
                   }
                 }
               } else {
                 for (let k in this.categories) {
-                  if (this.jawakAll[i].aawaks[j].icategories.includes(this.categories[k]._id)) {
-                    this.jawakAll[i].aawaks[j].categories_hin += this.categories[k].category_hin + ', ';
-                    this.jawakAll[i].aawaks[j].categories_eng += this.categories[k].category_eng + ', ';
+                  if (icatIds.includes(this.categories[k]._id)) {
+                    this.jawakAll[i].jawaks[j].categories_hin += this.categories[k].category_hin + ', ';
+                    this.jawakAll[i].jawaks[j].categories_eng += this.categories[k].category_eng + ', ';
                   }
                 }
               }
@@ -157,6 +202,20 @@ export class JawakNewComponent implements OnInit {
     item.aawak_ref_id = event.aawak_ref_id;
   }
 
+  toggleReceived(data: any) {
+    const newStatus = data.is_recieved ? 0 : 1;
+    this.http.put(this.api.getUrl('JAWAK') + '/received/' + data._id, { is_recieved: newStatus }).subscribe((res: any) => {
+      if (res && res.success) {
+        data.is_recieved = newStatus;
+        this.toastr.success('Status updated successfully');
+      } else {
+        this.toastr.error('Failed to update status');
+      }
+    }, err => {
+      this.toastr.error('Failed to update status');
+    });
+  }
+
   toggleUnlinkedFilter() {
     this.filterBody.unlinkedOnly = !this.filterBody.unlinkedOnly;
     this.onHeaderFilterChange();
@@ -175,8 +234,18 @@ export class JawakNewComponent implements OnInit {
     this.getFilteredData();
   }
 
+  clearFilter() {
+    this.filterBody = {};
+    this.filterBody.mm_id = this.settings.defaultMM ? [this.settings.defaultMM] : [];
+    this.filterBody.unlinkedOnly = false;
+    this.pageNo = 1;
+    this.filterItemsByCategory();
+    this.getFilteredData();
+  }
+
   onHeaderFilterChange() {
     this.pageNo = 1;
+    this.filterItemsByCategory();
 
     // Handle Item-Subitem mixed selection
     if (this.filterBody.item_subitem_mix) {
@@ -220,22 +289,26 @@ export class JawakNewComponent implements OnInit {
         this.jawakAll = data['result'];
         for (let i in this.jawakAll) {
           this.jawakAll[i].sr_no = i;
-          for (let j in this.jawakAll[i].aawaks) {
-            this.jawakAll[i].aawaks[j].categories_hin = '';
-            this.jawakAll[i].aawaks[j].categories_eng = '';
-            if (this.jawakAll[i].aawaks[j].scategories && this.jawakAll[i].aawaks[j].scategories.length > 0) {
+          for (let j in this.jawakAll[i].jawaks) {
+            this.jawakAll[i].jawaks[j].categories_hin = '';
+            this.jawakAll[i].jawaks[j].categories_eng = '';
+            const scats = this.jawakAll[i].jawaks[j].scategories || [];
+            const icats = this.jawakAll[i].jawaks[j].icategories || [];
+            const scatIds = scats.map((c: any) => c._id);
+            const icatIds = icats.map((c: any) => c._id);
 
+            if (scats.length > 0) {
               for (let k in this.categories) {
-                if (this.jawakAll[i].aawaks[j].scategories.includes(this.categories[k]._id)) {
-                  this.jawakAll[i].aawaks[j].categories_hin += this.categories[k].category_hin + ', ';
-                  this.jawakAll[i].aawaks[j].categories_eng += this.categories[k].category_eng + ', ';
+                if (scatIds.includes(this.categories[k]._id)) {
+                  this.jawakAll[i].jawaks[j].categories_hin += this.categories[k].category_hin + ', ';
+                  this.jawakAll[i].jawaks[j].categories_eng += this.categories[k].category_eng + ', ';
                 }
               }
             } else {
               for (let k in this.categories) {
-                if (this.jawakAll[i].aawaks[j].icategories.includes(this.categories[k]._id)) {
-                  this.jawakAll[i].aawaks[j].categories_hin += this.categories[k].category_hin + ', ';
-                  this.jawakAll[i].aawaks[j].categories_eng += this.categories[k].category_eng + ', ';
+                if (icatIds.includes(this.categories[k]._id)) {
+                  this.jawakAll[i].jawaks[j].categories_hin += this.categories[k].category_hin + ', ';
+                  this.jawakAll[i].jawaks[j].categories_eng += this.categories[k].category_eng + ', ';
                 }
               }
             }

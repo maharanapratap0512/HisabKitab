@@ -199,10 +199,40 @@ async function insertUpdateBatch(data) {
             if (!inp.item_id || !inp.qty) continue;
             inp.batch_id = id;
 
-            // Handle Jawak Auto-creation (Global flag)
-            if (data.auto_jawak) {
+            // Handle Jawak Auto-creation (Global flag or row-level)
+            if (data.auto_jawak || inp.auto_jawak) {
+                // If auto_aawak is checked, create/update Aawak first
+                if (inp.auto_aawak) {
+                    let awk = {
+                        ...Fn.tbInterface.aawak,
+                        date: data.date,
+                        mm_id: data.mm_id,
+                        item_id: inp.item_id,
+                        subitem_id: inp.subitem_id,
+                        unit_id: inp.unit_id,
+                        condition_id: inp.condition_id,
+                        qty: inp.qty,
+                        rate: inp.rate,
+                        actual_amt: inp.qty * (inp.rate || 0),
+                        aawak_type_id: inp.aawak_type_id || 50,
+                        aawak_source_id: inp.aawak_source_id || null,
+                        dept_id: data.dept_id,
+                        description: `HMP Batch Input Auto-Aawak (Batch ID: ${id || ''})`,
+                        active: 1
+                    };
+
+                    if (inp.aawak_ref_id) {
+                        awk._id = inp.aawak_ref_id;
+                        await Fn.updateAJ(awk, 'aawak');
+                    } else {
+                        let aawakRefId = await Fn.insertAJ(awk, 'aawak');
+                        inp.aawak_ref_id = aawakRefId;
+                    }
+                }
+
                 let jwk = Fn.tbInterface.getJawakFromHmpInput(data, inp);
                 jwk.aawak_source_id = inp.aawak_source_id || null;
+                jwk.aawak_ref_id = inp.aawak_ref_id || null;
 
                 if (inp.jawak_ref_id) {
                     jwk._id = inp.jawak_ref_id;
@@ -226,8 +256,8 @@ async function insertUpdateBatch(data) {
 
             let hasJawaks = out.jawak_detail && out.jawak_detail.length > 0;
 
-            // Handle Aawak Auto-creation (Global flag or Jawak existence)
-            if (data.auto_aawak || hasJawaks) {
+            // Handle Aawak Auto-creation (Global flag or row-level or Jawak existence)
+            if (data.auto_aawak || out.auto_aawak || hasJawaks) {
                 let awk = Fn.tbInterface.getAawakFromHmpOutput(data, out);
 
                 if (out.aawak_ref_id) {
@@ -279,14 +309,14 @@ async function deleteBatch(id) {
         sutramDB.begin();
         const inputs = hmpBatchIn.getAll({ batch_id: id }, { full: false });
         for (const inp of inputs) {
-            if (inp.jawak_ref_id) await Fn.deleteAJ(inp.jawak_ref_id, 'jawak');
             hmpBatchIn.deleteById(inp._id);
+            if (inp.jawak_ref_id) await Fn.deleteAJ(inp.jawak_ref_id, 'jawak');
         }
 
         const outputs = hmpBatchOut.getAll({ batch_id: id }, { full: false });
         for (const out of outputs) {
-            if (out.aawak_ref_id) await Fn.deleteAJ(out.aawak_ref_id, 'aawak');
             hmpBatchOut.deleteById(out._id);
+            if (out.aawak_ref_id) await Fn.deleteAJ(out.aawak_ref_id, 'aawak');
         }
 
         hmpBatch.deleteById(id);
@@ -306,10 +336,11 @@ async function deleteBatchInput(id) {
             sutramDB.commit();
             return 0;
         }
-        if (inp.jawak_ref_id) {
-            await Fn.deleteAJ(inp.jawak_ref_id, 'jawak');
-        }
+        const jawakRefId = inp.jawak_ref_id;
         hmpBatchIn.deleteById(id);
+        if (jawakRefId) {
+            await Fn.deleteAJ(jawakRefId, 'jawak');
+        }
         sutramDB.commit();
         return 1;
     } catch (err) {
@@ -326,10 +357,11 @@ async function deleteBatchOutput(id) {
             sutramDB.commit();
             return 0;
         }
-        if (out.aawak_ref_id) {
-            await Fn.deleteAJ(out.aawak_ref_id, 'aawak');
-        }
+        const aawakRefId = out.aawak_ref_id;
         hmpBatchOut.deleteById(id);
+        if (aawakRefId) {
+            await Fn.deleteAJ(aawakRefId, 'aawak');
+        }
         sutramDB.commit();
         return 1;
     } catch (err) {

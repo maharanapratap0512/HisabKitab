@@ -2576,7 +2576,9 @@ class dbModal {
               UPDATE aawak 
               SET remaining_qty = round(remaining_qty - NEW.qty, 2) 
               WHERE _id = NEW.aawak_ref_id AND NEW.aawak_ref_id IS NOT NULL;
-          END;`
+          END;`,
+      add_aawak_type_id_hmp_batch_input: `ALTER TABLE hmp_batch_input ADD COLUMN aawak_type_id integer REFERENCES support_list(_id)`,
+      add_is_recieved_in_jawak: `ALTER TABLE jawak ADD COLUMN is_recieved tinyint DEFAULT 0`,
     }
     /* TODO cleanup task 
       1. remove table - closing.

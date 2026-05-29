@@ -78,8 +78,8 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                     GROUP BY mm_id, item_id, subitem_id, unit_id, condition_id
                 ) latest ON bn.mm_id = latest.mm_id 
                         AND bn.item_id = latest.item_id 
-                        AND IFNULL(bn.subitem_id, 0) = IFNULL(latest.subitem_id, 0)
-                        AND IFNULL(bn.condition_id, 0) = IFNULL(latest.condition_id, 0)
+                        AND bn.subitem_id IS latest.subitem_id
+                        AND bn.condition_id IS latest.condition_id
                         AND bn.unit_id = latest.unit_id
                         AND (bn.year * 12 + bn.month) = latest.latest_idx
                 WHERE ABS(IFNULL(bn.past_bachat, 0) + IFNULL(bn.bachat, 0)) > 0.0001
@@ -98,13 +98,13 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                     GROUP BY mm_id, item_id, subitem_id, unit_id, condition_id
                 ) latest ON u.mm_id = latest.mm_id 
                         AND u.item_id = latest.item_id 
-                        AND IFNULL(u.subitem_id, 0) = IFNULL(latest.subitem_id, 0)
-                        AND IFNULL(u.condition_id, 0) = IFNULL(latest.condition_id, 0)
+                        AND u.subitem_id IS latest.subitem_id
+                        AND u.condition_id IS latest.condition_id
                         AND u.unit_id = latest.unit_id
                 LEFT JOIN bachat_new bn ON u.mm_id = bn.mm_id 
                         AND u.item_id = bn.item_id 
-                        AND IFNULL(u.subitem_id, 0) = IFNULL(bn.subitem_id, 0)
-                        AND IFNULL(u.condition_id, 0) = IFNULL(bn.condition_id, 0)
+                        AND u.subitem_id IS bn.subitem_id
+                        AND u.condition_id IS bn.condition_id
                         AND u.unit_id = bn.unit_id
                         AND (bn.year * 12 + bn.month) = latest.latest_idx
             )
@@ -146,9 +146,9 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             LEFT JOIN bachat_new bn ON fg.year = bn.year 
                                    AND fg.month = bn.month 
                                    AND fg.item_id = bn.item_id 
-                                   AND IFNULL(fg.subitem_id, 0) = IFNULL(bn.subitem_id, 0)
+                                   AND fg.subitem_id IS bn.subitem_id
                                    AND fg.unit_id = bn.unit_id
-                                   AND IFNULL(fg.condition_id, 0) = IFNULL(bn.condition_id, 0)
+                                   AND fg.condition_id IS bn.condition_id
                                    AND fg.mm_id = bn.mm_id
                                    AND bn.dept_id = ${dept_id}
             

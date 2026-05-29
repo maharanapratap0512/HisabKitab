@@ -61,6 +61,63 @@ function formatItemName(row) {
 }
 
 /**
+ * Format metadata for input items
+ */
+function formatInputMetadata(row) {
+    if (!row) return '';
+    let parts = [];
+    if (row.condition) {
+        const hin = row.condition.list_name_hin || '';
+        const eng = row.condition.list_name_eng || '';
+        if (hin && eng) parts.push(`Cond: ${hin} (${eng})`);
+        else if (hin) parts.push(`Cond: ${hin}`);
+        else if (eng) parts.push(`Cond: ${eng}`);
+    }
+    if (row.aawak_source) {
+        const hin = row.aawak_source.list_name_hin || '';
+        const eng = row.aawak_source.list_name_eng || '';
+        if (hin && eng) parts.push(`Src: ${hin} (${eng})`);
+        else if (hin) parts.push(`Src: ${hin}`);
+        else if (eng) parts.push(`Src: ${eng}`);
+    }
+    if (row.lot_no) {
+        parts.push(`Lot: ${row.lot_no}`);
+    }
+    if (row.auto_jawak) {
+        if (row.auto_aawak) {
+            const typeHin = row.aawak_type?.list_name_hin || '';
+            const typeEng = row.aawak_type?.list_name_eng || '';
+            const typeStr = typeHin || typeEng ? ` (${typeHin || typeEng})` : '';
+            parts.push(`<span class="badge badge-success" style="font-size:7.5px;">Auto Awk${typeStr}</span>`);
+        } else {
+            parts.push(`<span class="badge badge-warning" style="font-size:7.5px;">Auto Jawk</span>`);
+        }
+    }
+    if (parts.length === 0) return '';
+    return `<div style="font-size: 8px; color: #7f8c8d; margin-top: 2px;">${parts.join(' | ')}</div>`;
+}
+
+/**
+ * Format metadata for output items
+ */
+function formatOutputMetadata(row) {
+    if (!row) return '';
+    let parts = [];
+    if (row.condition) {
+        const hin = row.condition.list_name_hin || '';
+        const eng = row.condition.list_name_eng || '';
+        if (hin && eng) parts.push(`Cond: ${hin} (${eng})`);
+        else if (hin) parts.push(`Cond: ${hin}`);
+        else if (eng) parts.push(`Cond: ${eng}`);
+    }
+    if (row.auto_aawak) {
+        parts.push(`<span class="badge badge-success" style="font-size:7.5px;">Auto Awk</span>`);
+    }
+    if (parts.length === 0) return '';
+    return `<div style="font-size: 8px; color: #7f8c8d; margin-top: 2px;">${parts.join(' | ')}</div>`;
+}
+
+/**
  * Format jawak party and destination information
  */
 function formatJawakParty(jw) {
@@ -592,7 +649,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                         htmlContent += `
                             <tr>
                                 <td>${idx + 1}</td>
-                                <td>${formatItemName(inp)}</td>
+                                <td>${formatItemName(inp)}${formatInputMetadata(inp)}</td>
                                 <td><strong>${inp.qty}</strong> <small class="eng-text">${inp.unit.unit_short || ''}</small></td>
                                 <td>${inp.rate || '-'}</td>
                             </tr>
@@ -631,7 +688,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                         htmlContent += `
                             <tr>
                                 <td>${idx + 1}</td>
-                                <td>${formatItemName(out)}</td>
+                                <td>${formatItemName(out)}${formatOutputMetadata(out)}</td>
                                 <td><strong>${out.qty}</strong> <small class="eng-text">${out.unit.unit_short || ''}</small></td>
                                 <td>${out.rate || '-'}</td>
                             </tr>
@@ -777,7 +834,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                         htmlContent += `
                             <tr>
                                 <td>${idx + 1}</td>
-                                <td>${formatItemName(inp)}</td>
+                                <td>${formatItemName(inp)}${formatInputMetadata(inp)}</td>
                                 <td><strong>${inp.qty}</strong> <small class="eng-text">${inp.unit.unit_short || ''}</small></td>
                                 <td>${inp.rate || '-'}</td>
                             </tr>
@@ -816,7 +873,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                         htmlContent += `
                             <tr>
                                 <td>${idx + 1}</td>
-                                <td>${formatItemName(out)}</td>
+                                <td>${formatItemName(out)}${formatOutputMetadata(out)}</td>
                                 <td><strong>${out.qty}</strong> <small class="eng-text">${out.unit.unit_short || ''}</small></td>
                                 <td>${out.rate || '-'}</td>
                             </tr>
@@ -889,7 +946,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                     const firstIn = inputs[0];
                     htmlContent += `
                         <td><span class="badge badge-in">↓ IN</span></td>
-                        <td>${formatItemName(firstIn)}</td>
+                        <td>${formatItemName(firstIn)}${formatInputMetadata(firstIn)}</td>
                         <td><strong>${firstIn.qty}</strong> <small class="eng-text">${firstIn.unit.unit_short || ''}</small></td>
                         <td>${firstIn.rate || '-'}</td>
                     `;
@@ -906,7 +963,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                     htmlContent += `
                         <tr>
                             <td><span class="badge badge-in">↓ IN</span></td>
-                            <td>${formatItemName(inp)}</td>
+                            <td>${formatItemName(inp)}${formatInputMetadata(inp)}</td>
                             <td><strong>${inp.qty}</strong> <small class="eng-text">${inp.unit.unit_short || ''}</small></td>
                             <td>${inp.rate || '-'}</td>
                         </tr>
@@ -920,7 +977,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                     htmlContent += `<tr class="${isSep ? 'grp-sep' : ''}">`;
                     htmlContent += `
                         <td><span class="badge badge-out">↑ OUT</span></td>
-                        <td>${formatItemName(firstOut)}</td>
+                        <td>${formatItemName(firstOut)}${formatOutputMetadata(firstOut)}</td>
                         <td><strong>${firstOut.qty}</strong> <small class="eng-text">${firstOut.unit.unit_short || ''}</small></td>
                         <td>${firstOut.rate || '-'}</td>
                     `;
@@ -931,7 +988,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                         htmlContent += `
                             <tr>
                                 <td><span class="badge badge-out">↑ OUT</span></td>
-                                <td>${formatItemName(out)}</td>
+                                <td>${formatItemName(out)}${formatOutputMetadata(out)}</td>
                                 <td><strong>${out.qty}</strong> <small class="eng-text">${out.unit.unit_short || ''}</small></td>
                                 <td>${out.rate || '-'}</td>
                             </tr>

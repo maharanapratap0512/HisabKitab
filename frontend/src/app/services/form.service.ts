@@ -90,6 +90,7 @@ export class FormService {
       // is_auto: 0,
       // is_variable_qty: 0,
       is_process: 0,
+      is_recieved: 0,
       enz: {
         _id: null,
         jawak_id: null,

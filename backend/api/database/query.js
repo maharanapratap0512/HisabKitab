@@ -525,12 +525,12 @@ const jawak = {
         voucher_no, date, date_sent, reg_pg_no, mm_id, pkt_num, lot_no, pbk_id, jawak_mm_id, item_id, usage_list_id,
         subitem_id, product_id, item_detail, condition_id, qty, rate, actual_amt, jawak_type_id, aawak_source_id,
         unit_id, description, sell_repair_place, parchi_place, nimitt_id, company_name, aawak_ref_id, dept_id, 
-        is_xl, hl, is_process, active)
+        is_xl, hl, is_process, active, is_recieved)
     values (
         @voucher_no, @date, @date_sent, @reg_pg_no, @mm_id, @pkt_num, @lot_no, @pbk_id, @jawak_mm_id, @item_id, @usage_list_id,
         @subitem_id, @product_id, @item_detail, @condition_id, @qty, @rate, @actual_amt, @jawak_type_id, @aawak_source_id,
         @unit_id, @description, @sell_repair_place, @parchi_place, @nimitt_id, @company_name, @aawak_ref_id, @dept_id, 
-        @is_xl, @hl, @is_process, @active)`
+        @is_xl, @hl, @is_process, @active, @is_recieved)`
     , update:
         `update jawak set 
         voucher_no=@voucher_no,
@@ -564,6 +564,7 @@ const jawak = {
         is_xl=@is_xl,
         hl=@hl,
         is_process=@is_process,
+        is_recieved=@is_recieved,
         updated_at=datetime('now','localtime')`
     , select_all_voucher:
         `select jawak.voucher_no, jawak.date, jawak.date_sent, jawak.pkt_num, jawak.reg_pg_no, jawak.mm_id, jawak.jawak_mm_id,
@@ -640,7 +641,7 @@ const jawak_voucher = {
             'condition_hin', sl.list_name_hin, 'condition_eng', sl.list_name_eng, 'condition_roman', sl.list_name_roman,
             'jawak_type_hin', slat.list_name_hin, 'jawak_type_eng', slat.list_name_eng, 'jawak_type_roman', slat.list_name_roman,
             'aawak_source_hin', slas.list_name_hin, 'aawak_source_eng', slas.list_name_eng, 'aawak_source_roman', slas.list_name_roman,
-            'hl', jawak.hl, 'active', jawak.active, 'is_xl', jawak.is_xl, 'is_process', jawak.is_process,
+            'hl', jawak.hl, 'active', jawak.active, 'is_xl', jawak.is_xl, 'is_process', jawak.is_process, 'is_recieved', jawak.is_recieved,
             'enz_id', enz._id, 'container_capacity', enz.container_capacity, 'usage_report_id', ur._id, 'date', ur.date, 'reporter', ur.reporter,
             'usage_type', ur.usage_type, 'usage_report_hin', ut.list_name_hin, 'fayda', ur.fayda, 'nuksan', ur.nuksan, 'rating', ur.rating
         )) as jawaks

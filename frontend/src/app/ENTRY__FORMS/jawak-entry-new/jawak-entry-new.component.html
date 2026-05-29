@@ -160,12 +160,12 @@
                             </div>
 
                             <ng-container *ngFor="let jwkForm of fs.jawakFormMain.jawaks; let i = index;">
-                                <div class="d-flex flex-nowrap align-items-end gap-3 border-bottom px-3 py-3"
+                                <div class="jwk-row d-flex flex-nowrap align-items-end gap-3 border-bottom px-3 py-3"
                                     ngModelGroup="{{i}}" #rowForm="ngModelGroup"
                                     [appContextMenu]="getContextMenuItems(jwkForm)"
                                     [contextMenuData]="{ i: i, hl: jwkForm.hl }"
-                                    [ngClass]="{'bg-primary bg-opacity-10': jwkForm.hl}"
-                                    style="background-color: inherit; transition: background-color 0.2s;">
+                                    [ngClass]="{'hl': jwkForm.hl}"
+                                    style="transition: all 0.2s;">
 
                                     <!-- 1. Index & Auto Awk -->
                                     <div class="d-flex flex-column align-items-center justify-content-center gap-2"
@@ -555,6 +555,13 @@
                                                 {{item.list_name_hin}} : {{item.list_name_roman}}
                                             </ng-option>
                                         </ng-select>
+                                    </div>
+
+                                    <div style="min-width: 100px; margin-bottom: 2px;">
+                                        <label class="fs-10 text-muted text-uppercase fw-semibold mb-1 d-block">Received / प्राप्त</label>
+                                        <div class="form-check form-switch pt-1">
+                                            <input type="checkbox" class="form-check-input" [(ngModel)]="jwkForm.is_recieved" name="is_recieved">
+                                        </div>
                                     </div>
 
                                     <div *ngIf="settings.jawak.item_detail"

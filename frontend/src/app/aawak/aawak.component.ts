@@ -842,6 +842,7 @@ export class AawakComponent implements OnInit {
             'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
             'Kaha Repaired/Becha': result[i].jawak_detail[j].sell_repair_place ? result[i].jawak_detail[j].sell_repair_place : '-',
             'Parchi Kaha': result[i].jawak_detail[j].parchi_place ? result[i].jawak_detail[j].parchi_place : '-',
+            'Item Detail': result[i].jawak_detail[j].item_detail ? result[i].jawak_detail[j].item_detail : '-',
             'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
           });
           footerRow['Qty'] += result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : 0;
