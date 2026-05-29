@@ -100,7 +100,7 @@ export class ItemComponent implements OnInit {
         "Subitem Hin": null,
         "Subitem Eng": null,
         "Subitem Roman": null,
-        "Categories": this.itemData[i].categories_hin.join(", "),
+        "Categories": this.itemData[i].categories.map((c: any) => c.category_hin).join(", "),
         "Unit": this.itemData[i].unit_short,
         "Extra Note": this.itemData[i].extra_note,
         "Min Rate": this.itemData[i].min_rate,
@@ -112,14 +112,14 @@ export class ItemComponent implements OnInit {
       for (let j in this.itemData[i].subitems) {
         item.push({
           No: counter++,
-          "Item Hin": null,
-          "Item Eng": null,
-          "Item Roman": null,
-          "Item Code": null,
+          "Item Hin": this.itemData[i].item_hin.trim(),
+          "Item Eng": this.itemData[i].item_eng,
+          "Item Roman": this.itemData[i].item_roman,
+          "Item Code": this.itemData[i].item_code,
           "Subitem Hin": this.itemData[i].subitems[j].subitem_hin,
           "Subitem Eng": this.itemData[i].subitems[j].subitem_eng,
           "Subitem Roman": this.itemData[i].subitems[j].subitem_roman,
-          "Categories": this.itemData[i].subitems[j].categories_hin.join(", "),
+          "Categories": this.itemData[i].subitems[j].categories.map((c: any) => c.category_hin).join(", "),
           "Unit": this.itemData[i].subitems[j].unit_short,
           "Extra Note": this.itemData[i].subitems[j].extra_note,
           "Min Rate": this.itemData[i].subitems[j].min_rate,
@@ -405,10 +405,10 @@ export class ItemComponent implements OnInit {
   }
 
   deleteResponse(ev: any) {
-    // this.toastr.success("deleted Successfully.");
     if (ev) {
       this.closeModal();
-      this.getItemData(this.conditionObj.pageNo || 1)
+      this.toastr.success((this.delType || 'Item') + " deleted successfully.");
+      this.getItemData(this.conditionObj.pageNo || 1);
     }
   }
 

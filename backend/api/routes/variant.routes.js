@@ -20,22 +20,6 @@ const variantCatMap = new BaseTable('variant_category_map');
 const subitemTable = new BaseTable('subitem');
 const itemAliasTable = new BaseTable('item_aliases');
 
-// GET /api/variants/items-minimal/:dept_id → ID + Name only (for dropdowns)
-router.get('/items-minimal/:dept_id', async (req, res, next) => {
-    try {
-        const result = db.prepare(`
-            SELECT i._id, i.item_hin, i.item_eng, i.item_code
-            FROM item i
-            WHERE i.active = 1 AND i._id IN (
-                SELECT json_each.value FROM department_config, json_each(config_value) 
-                WHERE dept_id = ? AND config_key = 'item'
-            )
-            ORDER BY i.item_hin ASC
-        `).all(req.params.dept_id);
-        res.json({ success: true, result });
-    } catch (e) { next(e); }
-});
-
 // ─── GET /api/variants/items/:dept_id  (initial full load) ──────────────────
 // Returns: all items with variants, item_aliases embedded.
 router.get('/items/:dept_id', async (req, res, next) => {
@@ -63,7 +47,9 @@ router.get('/items/:dept_id', async (req, res, next) => {
                         'max_rate', s.max_rate
                     ) FROM subitem s LEFT JOIN unit su ON su._id = s.unit_id WHERE s.variant_id = v._id LIMIT 1),
                     'attributes', (SELECT json_group_array(json_object(
+                        'attribute_id', a._id,
                         'attribute_hin', a.attribute_hin,
+                        'attribute_value_id', av._id,
                         'value_hin', av.attribute_value_hin
                     )) FROM variant_attribute_map vam 
                        JOIN attributes a ON a._id = vam.attribute_id
@@ -81,7 +67,7 @@ router.get('/items/:dept_id', async (req, res, next) => {
                     'max_rate', s.max_rate
                 )) FROM subitem s WHERE s.item_id = i._id AND s.variant_id IS NULL AND s.active = 1) as unlinked_subitems_json,
                 -- item aliases
-                (SELECT json_group_array(json_object('_id', ia._id, 'alias', ia.alias, 'language', ia.language))
+                (SELECT json_group_array(json_object('_id', ia._id, 'alias', ia.alias))
                  FROM item_aliases ia WHERE ia.item_id = i._id) as item_aliases_json,
                 -- categories
                 (SELECT json_group_array(json_object('_id', c._id, 'category_hin', c.category_hin, 'category_eng', c.category_eng))
@@ -189,7 +175,9 @@ router.put('/items/:dept_id', async (req, res, next) => {
                         'max_rate', s.max_rate
                     ) FROM subitem s LEFT JOIN unit su ON su._id = s.unit_id WHERE s.variant_id = v._id LIMIT 1),
                     'attributes', (SELECT json_group_array(json_object(
+                        'attribute_id', a._id,
                         'attribute_hin', a.attribute_hin,
+                        'attribute_value_id', av._id,
                         'value_hin', av.attribute_value_hin
                     )) FROM variant_attribute_map vam 
                        JOIN attributes a ON a._id = vam.attribute_id
@@ -207,7 +195,7 @@ router.put('/items/:dept_id', async (req, res, next) => {
                     'max_rate', s.max_rate
                 )) FROM subitem s WHERE s.item_id = i._id AND s.variant_id IS NULL AND s.active = 1) as unlinked_subitems_json,
                 -- item aliases
-                (SELECT json_group_array(json_object('_id', ia._id, 'alias', ia.alias, 'language', ia.language))
+                (SELECT json_group_array(json_object('_id', ia._id, 'alias', ia.alias))
                  FROM item_aliases ia WHERE ia.item_id = i._id) as item_aliases_json,
                 -- categories
                 (SELECT json_group_array(json_object('_id', c._id, 'category_hin', c.category_hin, 'category_eng', c.category_eng))
@@ -356,9 +344,9 @@ router.get('/item-aliases/:item_id', async (req, res, next) => {
 // POST /api/variants/item-aliases
 router.post('/item-aliases', async (req, res, next) => {
     try {
-        const { item_id, alias, language } = req.body;
-        if (!item_id || !alias || !language) return next(new Error('item_id, alias, language required'));
-        const result = vs.insertItemAlias({ item_id, alias, language });
+        const { item_id, alias } = req.body;
+        if (!item_id || !alias) return next(new Error('item_id and alias required'));
+        const result = vs.insertItemAlias({ item_id, alias });
         res.json({ success: true, result });
     } catch (e) { next(e); }
 });
@@ -404,7 +392,7 @@ router.post('/bulk', async (req, res, next) => {
             return next(new Error('item_id and variants[] required'));
         }
         const result = vs.bulkCreateVariants(item_id, variants, req.userData);
-        res.json({ success: true, result, created: result.length });
+        res.json({ success: true, ...result });
     } catch (e) { next(e); }
 });
 

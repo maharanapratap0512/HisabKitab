@@ -54,6 +54,16 @@
                     </div>
                 </div>
 
+                <!-- Right-click instruction -->
+                <div class="row mb-1">
+                    <div class="col-12">
+                        <small class="text-muted ps-1">
+                            <i class="uil uil-info-circle me-1 text-primary"></i>
+                            Right-click on items for more actions like Edit, Delete, etc. (आइटम पर राइट क्लिक करें एडिट, डिलीट आदि के लिए...)
+                        </small>
+                    </div>
+                </div>
+
                 <!-- ── Main Accordion Table ──────────────────────────────────── -->
                 <div class="table-responsive">
                     <table class="table table-hover dt-responsive nowrap mb-0">
@@ -121,7 +131,8 @@
 
                                 <!-- ── ITEM ROW (main) ─────────────────────────────────── -->
                                 <tr class="main-row" style="cursor:pointer;" (click)="toggleAccordion(item)"
-                                    [class.table-active]="isExpanded(item)">
+                                    [class.table-active]="isExpanded(item)"
+                                    [appContextMenu]="menuItems" [contextMenuData]="item">
 
                                     <!-- Expand arrow -->
                                     <td class="text-center">
@@ -429,6 +440,13 @@
                 <app-item-alias-entry *ngIf="showModal === 'Manage Item Aliases'" [getData]="editData"
                     (response)="onAliasSaved($event)">
                 </app-item-alias-entry>
+
+                <app-item-entry *ngIf="showModal === 'Edit Item'" [getData]="editData" [isEdit]="true"
+                    (response)="onItemEdited($event)">
+                </app-item-entry>
+
+                <app-delete *ngIf='showModal == "delete_item"' [Type]="delType" [ID]="delID"
+                    (response)="deleteResponse($event)"></app-delete>
 
             </div>
 

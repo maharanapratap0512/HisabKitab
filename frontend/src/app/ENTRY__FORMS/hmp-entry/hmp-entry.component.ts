@@ -130,14 +130,7 @@ export class HmpEntryComponent implements OnInit {
     }
     else if (event) {
       let recipe = this.recipes.find((x: any) => x._id == event);
-      for (let i in this.recipes) {
-        for (let j in this.recipes[i].inputs) {
-          this.recipes[i].inputs[j].item_subitem_id = this.recipes[i].inputs[j].subitem_id ? this.recipes[i].inputs[j].item_id + ":" + this.recipes[i].inputs[j].subitem_id : this.recipes[i].inputs[j].item_id;
-        }
-        for (let j in this.recipes[i].outputs) {
-          this.recipes[i].outputs[j].item_subitem_id = this.recipes[i].outputs[j].subitem_id ? this.recipes[i].outputs[j].item_id + ":" + this.recipes[i].outputs[j].subitem_id : this.recipes[i].outputs[j].item_id;
-        }
-      }
+      // IDs are already present in recipe inputs/outputs
 
       if (recipe) {
         this.fs.hmpBatchForm.recipe_id = event;
@@ -159,33 +152,22 @@ export class HmpEntryComponent implements OnInit {
   // --- Input Table Logic ---
 
   async itemSubitemSelected(ev: any, i: number, type: string) {
+    const row = this.fs.hmpBatchForm[type][i];
     if (ev) {
-      let item_id: any = null, subitem_id: any = null;
-      if (typeof ev == 'number') {
-        item_id = ev;
-        subitem_id = null;
-      } else {
-        item_id = parseInt(ev.split(':')[0]);
-        subitem_id = parseInt(ev.split(':')[1]) || null;
+      const item_id = ev.item_id || row.item_id;
+      const subitem_id = ev.subitem_id || row.subitem_id;
+      
+      let item = this.items.find((x: any) => x._id == item_id);
+      if (item) {
+        let subitem = item.subitems?.find((x: any) => x._id == subitem_id);
+        row.item_id = item_id;
+        row.subitem_id = subitem_id;
+        row.unit_id = subitem ? subitem.unit_id : item.unit_id;
       }
-
-      let item = await this.items.find((x: any) => x._id == item_id);
-      let subitem = await item?.subitems?.find((x: any) => x._id == subitem_id);
-
-
-      this.fs.hmpBatchForm[type][i].item_subitem_id = subitem_id ? item_id + ":" + subitem_id : item_id;
-      this.fs.hmpBatchForm[type][i].item_id = item_id;
-      this.fs.hmpBatchForm[type][i].subitem_id = subitem_id;
-      this.fs.hmpBatchForm[type][i].unit_id = subitem ? subitem.unit_id : item.unit_id;
-
-      // Filter Lot Nos
-      // this.lotNos = this.lotNoAll.filter((l: any) => l.item_id == item_id && (!subitem_id || l.subitem_id == subitem_id));
-
     } else {
-      this.fs.hmpBatchForm[type][i].item_id = null;
-      this.fs.hmpBatchForm[type][i].subitem_id = null;
-      this.fs.hmpBatchForm[type][i].unit_id = null;
-      // this.lotNos = this.lotNoAll;
+      row.item_id = null;
+      row.subitem_id = null;
+      row.unit_id = null;
     }
   }
 

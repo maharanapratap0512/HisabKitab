@@ -28,6 +28,7 @@ export class JawakComponent implements OnInit {
   toBeDelete: any = [];
 
   term: any;
+  loadingStatus: any = '';
   showModal: String = '';
   total_count: any = 0;
   jawakData: any = [];
@@ -68,8 +69,10 @@ export class JawakComponent implements OnInit {
     usage_list_id: [],
     condition_id: [],
     nimitt_id: null,
-    pkt_num: null
+    pkt_num: null,
+    unlinkedOnly: false
   };
+  selectedItemmix: any[] = [];
   cat: any;
   settings: any = {};
 
@@ -111,7 +114,7 @@ export class JawakComponent implements OnInit {
 
   exportExcel() {
     this.isLoader = true;
-    // this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
+    this.loadingStatus = "डाटा प्रोसेस हो रहा है... ";
     this.pageNo = 0;
     this.jwkCount = 0;
     this.allJwkData = [];
@@ -160,6 +163,7 @@ export class JawakComponent implements OnInit {
         footerRow['Amount'] += result[i].actual_amt ? result[i].actual_amt : 0;
       }
 
+      this.loadingStatus = `डाटा प्रोसेस हो रहा है... (${this.allJwkData.length} / ${this.total_count})`;
       if (this.allJwkData.length < this.total_count) {
         this.getMoreAJ();
       }
@@ -184,6 +188,7 @@ export class JawakComponent implements OnInit {
           this.pageNo = data["pageNo"];
         }
         this.total_count = data.total_count;
+        this.loadingStatus = `डाटा डाउनलोड हो रहा है... (API: ${this.pageNo})`;
         this.exportJwkdata$.next(data['result']);
         // this.isLoader = false;
       }
@@ -207,6 +212,9 @@ export class JawakComponent implements OnInit {
     if (!this.filterBody.jawak_mm_id.length && this.filterBody.jwk_mm_states) {
       this.filterBody.jawak_mm_id = this.mms.filter((m: { state_id: any; }) => this.filterBody.jwk_mm_states.includes(m.state_id)).map((mm: { _id: any; }) => mm._id);
     }
+    // Combined item-subitem logic
+    this.updateFilterItemSubitem(this.selectedItemmix);
+
     this.http.put(this.api.getUrl('JAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
       if (data['result'] && data['success']) {
         this.jawakData = data['result'];
@@ -249,6 +257,12 @@ export class JawakComponent implements OnInit {
     this.editData = data;
     this.showModal = 'Edit Jawak'
     $('#showModal').modal('show');
+  }
+
+  onAawakRefSaved(updatedJawak: any, index: number) {
+    if (updatedJawak && updatedJawak._id) {
+      this.jawakData[index].aawak_ref_id = updatedJawak.aawak_ref_id;
+    }
   }
 
   delete(i: any, id: any) {
@@ -422,4 +436,41 @@ export class JawakComponent implements OnInit {
     let product = this.products.find((p: { _id: any; }) => p._id == ev);
   }
 
+  updateFilterItemSubitem(ev: any) {
+    if (Array.isArray(ev)) {
+      this.filterBody.item_id = [];
+      this.filterBody.subitem_id = [];
+      ev.forEach((item: any) => {
+        let item_id, subitem_id;
+        if (typeof item === 'string') {
+          const parts = item.split(':');
+          item_id = parts[0] ? parseInt(parts[0]) : null;
+          subitem_id = parts[1] ? parseInt(parts[1]) : null;
+        } else {
+          item_id = item.item_id;
+          subitem_id = item.subitem_id;
+        }
+        if (item_id && !this.filterBody.item_id.includes(item_id)) {
+          this.filterBody.item_id.push(item_id);
+        }
+        if (subitem_id && !this.filterBody.subitem_id.includes(subitem_id)) {
+          this.filterBody.subitem_id.push(subitem_id);
+        }
+      });
+    } else {
+      this.filterBody.item_id = [];
+      this.filterBody.subitem_id = [];
+    }
+  }
+
+  getItemSubitemArray() {
+    const res: string[] = [];
+    this.filterBody.item_id.forEach((id: any) => res.push(id + ':'));
+    this.filterBody.subitem_id.forEach((sid: any) => {
+      // We need to find the parent item_id for this subitem to construct the correct string "itemId:subitemId"
+      // But in filterBody, we don't store the pairing.
+      // This is a limitation of the current filter structure if we combine them.
+    });
+    return res;
+  }
 }

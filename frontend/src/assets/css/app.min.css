@@ -22590,8 +22590,6 @@ Not supports in Firefox and IE */
    font-size: 12px;
 
    thead {
-      position: sticky;
-      top: 0;
       z-index: 10;
       background-color: #f1f5f9;
       /* Light mode header background */

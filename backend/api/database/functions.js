@@ -455,6 +455,20 @@ class Functions extends DBContex {
          return [];
       });
    }
+   async getAttributes(dept_id = null) {
+      return await this.getList('attribute', { dept_id: dept_id }).then(async (resolve) => {
+         return this.convertToLower(resolve.data || [], ['attribute_hin', 'attribute_eng', 'attribute_roman']);
+      }, (err) => {
+         return [];
+      });
+   }
+   async getAttributeValues(dept_id = null) {
+      return await this.getList('attributes_value', { dept_id: dept_id, full: true }).then(async (resolve) => {
+         return this.convertToLower(resolve.data || [], ['attribute_value_hin', 'attribute_value_eng', 'attribute_value_roman']);
+      }, (err) => {
+         return [];
+      });
+   }
    async getitems(dept_id = null) {
 
       return await this.getList('item', { dept_id: dept_id }).then(async (resolve) => {
@@ -545,16 +559,18 @@ class Functions extends DBContex {
 
    async insertExcelData(type, data, dept_id = null) {
       switch (type) {
-         case 'product': data.dept_id = dept_id ? dept_id : data.dept_id;
+         case 'product':
+            data.dept_id = dept_id ? dept_id : data.dept_id;
             return await this.insertProduct(data).then((result) => {
                console.log('insert', result);
                return result;
             })
             break;
-         default: return await this.insert(type.name, data, dept_id).then((result) => {
-            console.log('insert', result);
-            return result;
-         })
+         default:
+            return await this.insert(type.name, data, dept_id).then((result) => {
+               console.log('insert', result);
+               return result;
+            })
       }
    }
 

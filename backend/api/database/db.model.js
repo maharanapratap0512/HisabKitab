@@ -2498,6 +2498,86 @@ class dbModal {
         WHERE json_valid(b.categories);`,
       drop_subitem_backup: `drop table subitem_backup`
     },
+    // version 31 backup item table
+    {
+      closing_delete: `drop table if exists closing`,
+      variant_item_unique: `CREATE UNIQUE INDEX idx_variant_item_unique ON variant (item_id, display_name)`,
+      variant_fingerprint_col: `ALTER TABLE variant ADD COLUMN fingerprint varchar(500)`,
+      variant_fingerprint_unique: `CREATE UNIQUE INDEX idx_variant_fingerprint ON variant (item_id, fingerprint)`,
+      rename_item: `ALTER TABLE item RENAME TO item_backup`,
+      create_item: `CREATE TABLE item (
+        _id integer UNIQUE primary key AUTOINCREMENT,
+        item_hin varchar(150) unique not null,
+        item_eng varchar(150) unique null,
+        item_roman varchar(150) null,
+        item_code varchar(50) unique null,
+        unit_id integer null REFERENCES unit (_id),
+        extra_note text,
+        document json,
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime')),
+        updated_at timestamp default (datetime('now', 'localtime')),
+        restrict_month integer null,
+        restrict_year integer null,
+        min_rate decimal(7, 2) default 0,
+        max_rate decimal(7, 2) default 0,
+        add_by_dept_id integer references department (_id),
+        update_by_dept_id integer references department (_id),
+        verify tinyint default 0
+      )`,
+      copy_item: `INSERT INTO item (
+          _id, item_hin, item_eng, item_roman, item_code, 
+          unit_id, extra_note, document, active, created_at, 
+          updated_at, restrict_month, restrict_year, min_rate, 
+          max_rate, add_by_dept_id, update_by_dept_id, verify
+        )
+        SELECT 
+          _id, item_hin, item_eng, item_roman, item_code, 
+          unit_id, extra_note, document, active, created_at, 
+          updated_at, restrict_month, restrict_year, min_rate, 
+          max_rate, add_by_dept_id, update_by_dept_id, verify
+        FROM item_backup`,
+      truncate_rel_item_category: `DELETE FROM rel_item_category`,
+      copy_item_categories: `INSERT INTO rel_item_category (item_id, category_id)
+        SELECT 
+          b._id, 
+          json_each.value
+        FROM item_backup b, json_each(b.categories)
+        WHERE json_valid(b.categories)`,
+      drop_item_backup: `DROP TABLE item_backup`,
+      rename_item_alias: `ALTER TABLE item_aliases RENAME TO item_aliases_backup`,
+      create_item_aliases: `CREATE TABLE IF NOT EXISTS item_aliases(
+        _id INTEGER PRIMARY KEY AUTOINCREMENT,
+        item_id INTEGER NOT NULL REFERENCES item(_id),
+        alias VARCHAR(150) NOT NULL,
+        created_at TIMESTAMP DEFAULT(DATETIME('now', 'localtime')),
+        UNIQUE(alias)
+      )`,
+      copy_item_aliases: `INSERT INTO item_aliases (
+          _id, item_id, alias, created_at
+        ) SELECT 
+          _id, item_id, alias, created_at FROM item_aliases_backup`,
+      drop_item_aliases_backup: `DROP TABLE item_aliases_backup`,
+      category_add_alias: `ALTER TABLE category ADD COLUMN alias json`,
+    },
+    // VERSION 32
+    // trigger -> updated -> jwk_updt_avk_ref_updt
+    // {
+    //   drop_jwk_updt_avk_ref_updt: `DROP TRIGGER IF EXISTS "jwk_updt_avk_ref_updt"`,
+    //   create_jwk_updt_avk_ref_updt: `CREATE TRIGGER "jwk_updt_avk_ref_updt"
+    //       AFTER UPDATE ON "jawak"
+    //       FOR EACH ROW
+    //       BEGIN
+    //           -- If old reference existed, return the old qty
+    //           UPDATE aawak 
+    //           SET remaining_qty = round(remaining_qty + OLD.qty, 2) 
+    //           WHERE _id = OLD.aawak_ref_id AND OLD.aawak_ref_id IS NOT NULL;
+    //           -- If new reference exists, deduct the new qty
+    //           UPDATE aawak 
+    //           SET remaining_qty = round(remaining_qty - NEW.qty, 2) 
+    //           WHERE _id = NEW.aawak_ref_id AND NEW.aawak_ref_id IS NOT NULL;
+    //       END;`
+    // }
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.

@@ -55,7 +55,7 @@ router.get('/correction', async (req, res, next) => {
         // mm
         correctionList.push(...DB.db.prepare(`select DISTINCT mm as name, 'mm' as type, null as id, false as dictionary from temp_import where mm IS NOT NULL AND mm_id IS NULL`).all());
         // pbk
-        correctionList.push(...DB.db.prepare(`select DISTINCT pbk, 'pbk' as type, null as id, false as dictionary from temp_import where pbk IS NOT NULL AND pbk_id IS NULL`).all());
+        correctionList.push(...DB.db.prepare(`select DISTINCT pbk as name, 'pbk' as type, null as id, false as dictionary from temp_import where pbk IS NOT NULL AND pbk_id IS NULL`).all());
         // awk_type
         correctionList.push(...DB.db.prepare(`select DISTINCT aj_type as name, 'awk_type' as type, null as id, false as dictionary from temp_import where aj_type IS NOT NULL AND aj_type_id IS NULL AND temp_import.type='awk'`).all());
         // condition
@@ -75,9 +75,14 @@ router.get('/correction', async (req, res, next) => {
         correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.usage_list') as name, 'category' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.usage_list_id') IS NULL AND json_extract(json_each.value, '$.usage_list') IS NOT NULL`).all());
         // jwk_type
         correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_type') as name, 'jwk_type' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_type_id') IS NULL AND json_extract(json_each.value, '$.aj_type') IS NOT NULL`).all());
-        // jwk_nimitt
-        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.nimitt') as name, 'nimitt' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.nimitt_id') IS NULL AND json_extract(json_each.value, '$.nimitt') IS NOT NULL`).all());
+        //jwk_pbk - jawak detail kisiko diya as pbk object {name, roll_no}
+        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.pbk') as name, 'jwk_pbk' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.pbk_id') IS NULL AND json_extract(json_each.value, '$.pbk.name') IS NOT NULL`).all());
 
+        for (let i in correctionList) {
+            if (correctionList[i].type == 'pbk' || correctionList[i].type == 'jwk_pbk') {
+                correctionList[i].name = JSON.parse(correctionList[i].name || '{}');
+            }
+        }
         res.json({
             success: true,
             result: correctionList
@@ -97,7 +102,7 @@ router.put('/correction', async (req, res, next) => {
                 let type = null;
                 let stmt = null;
                 switch (req.body[i].type) {
-                    case 'pbk': req.body[i].pbk = req.body[i].pbk ? JSON.stringify(req.body[i].pbk) : null;
+                    case 'pbk': req.body[i].name = req.body[i].name ? JSON.stringify(req.body[i].name) : null;
                         break;
                     case 'aj_mm': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.aj_mm_id') IS NULL AND json_extract(json_each.value, '$.aj_mm') IS NOT NULL ;`);
                         type = 'aj_mm';
@@ -108,6 +113,12 @@ router.put('/correction', async (req, res, next) => {
                     case 'nimitt': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.nimitt_id') IS NULL AND json_extract(json_each.value, '$.nimitt') IS NOT NULL ;`);
                         type = 'nimitt';
                         break;
+                    case 'jwk_pbk':
+                        // req.body[i].name = req.body[i].name ? JSON.stringify(req.body[i].name) : null
+                        // pbk is an object {name, roll_no} - custom handling below
+                        stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.pbk_id') IS NULL AND json_extract(json_each.value, '$.pbk') IS NOT NULL ;`);
+                        type = 'pbk'; // special type flag
+                        break;
                     case 'usage_list': stmt = DB.db.prepare(`select distinct _id, jawak_detail from temp_import, json_each(jawak_detail) where  json_extract(json_each.value, '$.usage_list_id') IS NULL AND json_extract(json_each.value, '$.usage_list') IS NOT NULL ;`);
                         type = 'usage_list';
                         break;
@@ -115,10 +126,15 @@ router.put('/correction', async (req, res, next) => {
 
                 if (type && stmt) {
                     for (const row of stmt.all()) {
+                        ;
                         let obj = { _id: row._id, jawak_detail: [] }
                         obj.jawak_detail = JSON.parse(row.jawak_detail);
                         for (let j in obj.jawak_detail) {
-                            if (obj.jawak_detail[j][type] == req.body[i].name) {
+                            if (type == 'pbk') {
+                                if (obj.jawak_detail[j][type] && (obj.jawak_detail[j][type].name == req.body[i].name.name || obj.jawak_detail[j][type].roll_no == req.body[i].name.roll_no)) {
+                                    obj.jawak_detail[j][type + '_id'] = req.body[i].id;
+                                }
+                            } else if (obj.jawak_detail[j][type] == req.body[i].name) {
                                 obj.jawak_detail[j][type + '_id'] = req.body[i].id;
                             }
                         }
@@ -126,7 +142,7 @@ router.put('/correction', async (req, res, next) => {
                         await DB.runQuery('excel_correction', 'update_jawak', { obj: obj });
                     }
                 }
-                if (req.body[i].type == 'item' && req.body[i].extra_note) {
+                else if (req.body[i].type == 'item' && req.body[i].extra_note) {
                     let qname = 'update_subitem';
                     if (req.body[i].id && !req.body[i].id2) {
                         qname = 'update_ignore_subitem';
@@ -227,7 +243,7 @@ router.put('/process', async (req, res, next) => {
                     description: awkData.jawak_detail[i].description,
                     parchi_place: awkData.jawak_detail[i].parchi_place ? awkData.jawak_detail[i].parchi_place : null,
                     sell_repair_place: awkData.jawak_detail[i].sell_repair_place ? awkData.jawak_detail[i].sell_repair_place : null,
-                    nimitt_id: awkData.jawak_detail[i].nimitt_id,
+                    nimitt_id: null, // nimitt moved to pbk in jawak imports
                     company_name: awkData.company_name,
                     aawak_ref_id: awkData.awk_id,
                     dept_id: awkData.dept_id,
@@ -525,7 +541,7 @@ router.post('/', async (req, res, next) => {
                     // console.log("Exceldate", date);
                 }
                 req.body[i].type = 'awk';
-                req.body[i].pbk = ((req.body[i].pbk && (req.body[i].pbk.roll_no || req.body[i].pbk.pbk || req.body[i].pbk.relation || req.body[i].pbk.relative)) ? JSON.stringify(req.body[i].pbk) : null);
+                req.body[i].pbk = ((req.body[i].pbk && (req.body[i].pbk.roll_no || req.body[i].pbk.name || req.body[i].pbk.relation || req.body[i].pbk.relative)) ? JSON.stringify(req.body[i].pbk) : null);
                 for (let j in req.body[i].jawak_detail) {
                     if (typeof req.body[i].jawak_detail[j].date == "string") {
                         req.body[i].jawak_detail[j].date = Fn.StringToDate(req.body[i].jawak_detail[j].date).toISOString().split('T')[0];
@@ -536,6 +552,7 @@ router.post('/', async (req, res, next) => {
                     }
                 }
                 req.body[i].jawak_detail = (req.body[i].jawak_detail ? JSON.stringify(req.body[i].jawak_detail) : JSON.stringify([]))
+
 
                 let obj = { ...DB.tbInterface.temp_import, ...req.body[i] }
 

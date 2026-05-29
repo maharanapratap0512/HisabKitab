@@ -293,6 +293,15 @@ export class AawakNewComponent implements OnInit {
     return jawakArray;
   }
 
+  getCategoryString(obj: any): string {
+    if (obj.categories && Array.isArray(obj.categories)) {
+      return obj.categories.map((c: any) => c.category_hin).join(', ');
+    } else if (obj.categories_hin && Array.isArray(obj.categories_hin)) {
+      return obj.categories_hin.join(', ');
+    }
+    return '';
+  }
+
   exportAJData() {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
@@ -359,19 +368,12 @@ export class AawakNewComponent implements OnInit {
           awkObj.Relative = result[i].relative_name ? result[i].relative_name : '-';
         }
 
-        let cat = '';
         let item = this.gs.Lists.itemmix.find((it: { _id: any; }) => it._id == result[i].item_id);
-        if (item) {
-          if (result[i].subitem_id) {
-            let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
-            if (subitem) {
-              cat = subitem.categories_hin.join(', ');
-            } else {
-              cat = item.categories_hin.join(', ');
-            }
-          }
-          else {
-            cat = item.categories_hin.join(', ');
+        let cat = item ? this.getCategoryString(item) : '';
+        if (item && result[i].subitem_id) {
+          let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
+          if (subitem) {
+            cat = this.getCategoryString(subitem);
           }
         }
         awkObj = {
@@ -396,6 +398,7 @@ export class AawakNewComponent implements OnInit {
         this.allAJData.push(awkObj);
       }
 
+      this.loadingStatus = `डाटा प्रोसेस हो रहा है... (${this.allAJData.length} / ${this.total_count})`;
       if (this.allAJData.length < this.total_count) {
         this.getMoreAJ();
       }
@@ -454,13 +457,13 @@ export class AawakNewComponent implements OnInit {
           if (result[i].subitem_id) {
             let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
             if (subitem) {
-              cat = subitem.categories_hin.join(', ');
+              cat = this.getCategoryString(subitem);
             } else {
-              cat = item.categories_hin.join(', ');
+              cat = this.getCategoryString(item);
             }
           }
           else {
-            cat = item.categories_hin.join(', ');
+            cat = this.getCategoryString(item);
           }
         }
         awkObj = {
@@ -485,6 +488,7 @@ export class AawakNewComponent implements OnInit {
         this.allAJData.push(awkObj);
       }
 
+      this.loadingStatus = `डाटा प्रोसेस हो रहा है... (${this.allAJData.length} / ${this.export_total_count || this.total_count})`;
       if (this.allAJData.length < this.export_total_count) {
         this.getMoreAJ();
       }
@@ -541,13 +545,13 @@ export class AawakNewComponent implements OnInit {
           if (result[i].subitem_id) {
             let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
             if (subitem) {
-              cat = subitem.categories_hin.join(', ');
+              cat = this.getCategoryString(subitem);
             } else {
-              cat = item.categories_hin.join(', ');
+              cat = this.getCategoryString(item);
             }
           }
           else {
-            cat = item.categories_hin.join(', ');
+            cat = this.getCategoryString(item);
           }
         }
         awkObj = {
@@ -575,6 +579,7 @@ export class AawakNewComponent implements OnInit {
         this.allAJData.push(awkObj);
       }
 
+      this.loadingStatus = `डाटा प्रोसेस हो रहा है... (${this.allAJData.length} / ${this.total_count})`;
       if (this.allAJData.length < this.total_count) {
         this.getMoreAJ();
       }
@@ -647,6 +652,7 @@ export class AawakNewComponent implements OnInit {
         }
       }
       this.awkCount += result.length;
+      this.loadingStatus = `डाटा प्रोसेस हो रहा है... (${this.awkCount} / ${this.total_count})`;
 
       if (this.awkCount < this.total_count) {
         this.getMoreAJ();
@@ -673,6 +679,7 @@ export class AawakNewComponent implements OnInit {
           this.pageNo = data["pageNo"];
           this.export_total_count = data['total_count'];
         }
+        this.loadingStatus = `डाटा डाउनलोड हो रहा है... (API: ${this.pageNo})`;
         this.exportAJdata$.next(data['result']);
         // this.isLoader = false;
       }
@@ -1049,8 +1056,8 @@ export class AawakNewComponent implements OnInit {
           dept_id: this.auth.webUser.dept_id,
           jawak_detail: []
         };
-        //jawak form
-        let jwkobj: any = {};
+        //jawak form - reset every row, pbk is null until data is present
+        let jwkobj: any = { pbk: null };
 
         //loop through element of row and separating to aawak and jawak form
         for (let j = 0; j < columns.length; j++) {
@@ -1278,15 +1285,18 @@ export class AawakNewComponent implements OnInit {
                 break;
               case "kisko diya":
               case "person":
-              case "kisko_diya": jwkobj.nimitt = exceldata[i][j];
-                let getnimitt = this.nimitts.find((n: any) => [n.nimitt_hin, n.nimitt_eng, n.roll_no].includes(jwkobj.nimitt));
-                if (getnimitt) {
-                  jwkobj.nimitt_id = getnimitt._id;
-                  jwkobj.nimitt_hin = getnimitt.nimitt_hin;
-                  jwkobj.nimitt_state_hin = getnimitt.state_hin;
-                } else {
-                  let dictnimitt = this.dictionary.find((d: any) => d.type == "nimitt" && d.name == jwkobj.nimitt)
-                  jwkobj.nimitt_id = dictnimitt ? dictnimitt.id : null;
+              case "kisko_diya":
+                if (exceldata[i][j]) {
+                  // Create fresh pbk object only when data exists
+                  jwkobj.pbk = { name: exceldata[i][j] };
+                  let getpbk = this.pbks.find((n: any) => [n.pbk_hin, n.pbk_eng, n.roll_no].includes(jwkobj.pbk.name));
+                  if (getpbk) {
+                    jwkobj.pbk_id = getpbk._id;
+                    jwkobj.pbk_hin = getpbk.pbk_hin;
+                  } else {
+                    let dictpbk = this.dictionary.find((d: any) => d.type == "pbk" && d.name == jwkobj.pbk.name);
+                    jwkobj.pbk_id = dictpbk ? dictpbk.id : null;
+                  }
                 }
                 break;
               case "usage list":
@@ -1384,7 +1394,7 @@ export class AawakNewComponent implements OnInit {
         }
         // check for required Fields in jawak object
         // finalJson[finalJson.length - 1].jawak_detail.push(jwkobj);
-        if (jwkobj.qty && (jwkobj.aj_mm || jwkobj.nimitt)) {
+        if (jwkobj.qty && (jwkobj.aj_mm || jwkobj.pbk?.name)) {
 
           // auto calculate rate and amount based on coresponding values for jawak.
           if (jwkobj.qty && jwkobj.rate && !jwkobj.actual_amt) {

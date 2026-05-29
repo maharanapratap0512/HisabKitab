@@ -22,7 +22,6 @@ export class PrastavFormService {
   ) {
     this.jawakTemplate = {
       date: gs.dateString,
-      item_subitem_id: null,
       item_id: null,
       subitem_id: null,
       unit_id: null,
@@ -38,7 +37,6 @@ export class PrastavFormService {
     };
 
     this.lineTemplate = {
-      item_subitem_id: null,   // UI helper: "itemId:subitemId"
       item_id: null,
       subitem_id: null,
       unit_id: null,
@@ -114,10 +112,7 @@ export class PrastavFormService {
       lines = [structuredClone(this.lineTemplate)];
     } else {
       for (const row of lines) {
-        // UI helper for dropdowns
-        row.item_subitem_id = row.subitem_id
-          ? `${row.item_id}:${row.subitem_id}`
-          : (row.item_id ? String(row.item_id) : null);
+        // IDs are already present in the API object
 
         row.bachat = row.bachat ?? null;
         row.monthly_uses = row.monthly_uses ?? null;
@@ -127,7 +122,8 @@ export class PrastavFormService {
           row.jawaks = [structuredClone(this.jawakTemplate)];
         } else {
           for (const jw of row.jawaks) {
-            jw.item_subitem_id = row.item_subitem_id;
+            jw.item_id = row.item_id;
+            jw.subitem_id = row.subitem_id;
           }
         }
       }
@@ -151,23 +147,15 @@ export class PrastavFormService {
    * Auto-add blank line when all existing lines are valid
    */
   formStatusChanges() {
-    let valid = true;
+    // Auto-add line is disabled, user will manually click 'Add More'
+  }
 
-    for (const row of this.prastavForm.lines) {
-      if (!(row.item_id && row.qty && row.unit_id)) {
-        valid = false;
-        break;
-      }
-    }
-
-    if (valid && !this.submit) {
-      this.prastavForm.lines.push(structuredClone(this.lineTemplate));
-    }
+  addLine() {
+    this.prastavForm.lines.push(structuredClone(this.lineTemplate));
   }
 
   // Nested Jawak Handlers
   onJawakChange(line: any, jLine: any) {
-    this.resolveItemSubitem(jLine);
     const qty = Number(jLine.qty) || 0;
     const rate = Number(jLine.rate) || 0;
     jLine.amount = qty * rate || null;
@@ -182,7 +170,6 @@ export class PrastavFormService {
 
     if (valid && !this.submit) {
       const newJw = structuredClone(this.jawakTemplate);
-      newJw.item_subitem_id = line.item_subitem_id;
       newJw.item_id = line.item_id;
       newJw.subitem_id = line.subitem_id;
       newJw.unit_id = line.unit_id;
@@ -196,21 +183,6 @@ export class PrastavFormService {
     }
   }
 
-  /**
-   * item_subitem_id  →  item_id + subitem_id
-   * Called when user picks from item ng-select in a line row.
-   */
-  resolveItemSubitem(line: any) {
-    const val = line.item_subitem_id;
-    if (!val) {
-      line.item_id = null;
-      line.subitem_id = null;
-      return;
-    }
-    const parts = String(val).split(':');
-    line.item_id = parts[0] ? Number(parts[0]) : null;
-    line.subitem_id = parts[1] ? Number(parts[1]) : null;
-  }
 
   valid(): boolean {
     // ── Remove last invalid LINE (auto-added empty row) ──────

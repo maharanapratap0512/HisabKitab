@@ -1,7 +1,7 @@
 // services/hmp.service.js
 'use strict';
 
-const { dbmodal } = require('../database/db.model');
+const { dbmodal, sutramDB } = require('../database/db.model');
 const db = dbmodal.db;
 const BaseTable = require('../database/base.table');
 const Fn = require('../database/functions');
@@ -30,7 +30,8 @@ function getRecipesByDept(dept_id) {
 
 // Upsert recipe + clean-replace all inputs/outputs in one transaction.
 function insertUpdateRecipe(data) {
-    return BaseTable.transaction(() => {
+    try {
+        sutramDB.begin();
         let recipeId;
 
         if (data._id || data.recipe_id) {
@@ -52,16 +53,26 @@ function insertUpdateRecipe(data) {
             hmpRecipeOut.insert({ ...out, recipe_id: recipeId }, false);
         }
 
+        sutramDB.commit();
         return recipeId;
-    });
+    } catch (err) {
+        sutramDB.rollback();
+        throw err;
+    }
 }
 
 function deleteRecipe(id) {
-    return BaseTable.transaction(() => {
+    try {
+        sutramDB.begin();
         hmpRecipeIn.delete({ recipe_id: id });
         hmpRecipeOut.delete({ recipe_id: id });
-        return hmpRecipe.deleteById(id);
-    });
+        const res = hmpRecipe.deleteById(id);
+        sutramDB.commit();
+        return res;
+    } catch (err) {
+        sutramDB.rollback();
+        throw err;
+    }
 }
 
 
@@ -169,10 +180,8 @@ function getBatches({ dept_id, mm_id, recipe_id, item_id, date, date_from, date_
 // ─────────────────────────────────────────────────────────────
 
 async function insertUpdateBatch(data) {
-    // Need to handle AJ insertions outside of the sync BaseTable transaction,
-    // or wrap everything in Fn's async transaction.
     try {
-        await Fn.begin();
+        sutramDB.begin();
         let batchId;
 
         let id;
@@ -247,12 +256,12 @@ async function insertUpdateBatch(data) {
         }
 
         batchId = id;
-        await Fn.commit();
+        sutramDB.commit();
 
         // getById uses schema joins — returns full nested object automatically
         return hmpBatch.getById(batchId);
     } catch (err) {
-        await Fn.rollback();
+        sutramDB.rollback();
         throw err;
     }
 }
@@ -264,7 +273,7 @@ async function insertUpdateBatch(data) {
 
 async function deleteBatch(id) {
     try {
-        await Fn.begin();
+        sutramDB.begin();
         const inputs = hmpBatchIn.getAll({ batch_id: id }, { full: false });
         for (const inp of inputs) {
             if (inp.jawak_ref_id) await Fn.deleteAJ(inp.jawak_ref_id, 'jawak');
@@ -278,50 +287,50 @@ async function deleteBatch(id) {
         }
 
         hmpBatch.deleteById(id);
-        await Fn.commit();
+        sutramDB.commit();
         return 1;
     } catch (err) {
-        await Fn.rollback();
+        sutramDB.rollback();
         throw err;
     }
 }
 
 async function deleteBatchInput(id) {
     try {
-        await Fn.begin();
+        sutramDB.begin();
         const inp = hmpBatchIn.getOne({ _id: id }, { full: false });
         if (!inp) {
-            await Fn.commit();
+            sutramDB.commit();
             return 0;
         }
         if (inp.jawak_ref_id) {
             await Fn.deleteAJ(inp.jawak_ref_id, 'jawak');
         }
         hmpBatchIn.deleteById(id);
-        await Fn.commit();
+        sutramDB.commit();
         return 1;
     } catch (err) {
-        await Fn.rollback();
+        sutramDB.rollback();
         throw err;
     }
 }
 
 async function deleteBatchOutput(id) {
     try {
-        await Fn.begin();
+        sutramDB.begin();
         const out = hmpBatchOut.getOne({ _id: id }, { full: false });
         if (!out) {
-            await Fn.commit();
+            sutramDB.commit();
             return 0;
         }
         if (out.aawak_ref_id) {
             await Fn.deleteAJ(out.aawak_ref_id, 'aawak');
         }
         hmpBatchOut.deleteById(id);
-        await Fn.commit();
+        sutramDB.commit();
         return 1;
     } catch (err) {
-        await Fn.rollback();
+        sutramDB.rollback();
         throw err;
     }
 }

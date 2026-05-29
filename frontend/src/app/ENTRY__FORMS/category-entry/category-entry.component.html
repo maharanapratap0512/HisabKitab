@@ -45,6 +45,25 @@
                     </div>
                 </div>
 
+                <!-- Category Aliases Section -->
+                <div class="col-12 mb-3">
+                    <label class="form-label fw-bold">Aliases (Alternate Names)</label>
+                    <div class="input-group input-group-sm mb-2" style="max-width: 400px;">
+                        <input type="text" class="form-control" [(ngModel)]="newAlias" [ngModelOptions]="{standalone: true}" 
+                               placeholder="Add alias..." (keyup.enter)="addAlias()">
+                        <button class="btn btn-outline-primary" type="button" (click)="addAlias()">
+                            <i class="uil uil-plus"></i> Add
+                        </button>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span *ngFor="let a of aliases; let idx = index" class="badge bg-soft-secondary text-secondary d-flex align-items-center gap-1 p-2" style="font-size: 12px;">
+                            {{ a }}
+                            <i class="uil uil-times cursor-pointer text-danger" (click)="removeAlias(idx)"></i>
+                        </span>
+                        <small class="text-muted w-100" *ngIf="aliases.length === 0">No aliases added.</small>
+                    </div>
+                </div>
+
                 <div class="col-md-3 mb-3">
                     <button class="btn btn-primary submit mx-3" *ngIf="!isEdit" type="submit"
                         (click)="categoryFormSubmit()">Submit</button>

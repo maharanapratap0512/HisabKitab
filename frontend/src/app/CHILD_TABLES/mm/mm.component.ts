@@ -197,7 +197,22 @@ export class MmComponent implements OnInit {
   }
 
   deleteResponse(ev: any) {
-    this.toastr.success("deleted Successfully.");
+    if (ev) {
+      this.closeModal();
+      // Find and remove the deleted item from the local lists
+      const index = this.mmData.findIndex((m: any) => m._id === this.delID);
+      if (index > -1) {
+        this.mmData.splice(index, 1);
+      }
+      
+      const allIndex = this.mmAll.findIndex((m: any) => m._id === this.delID);
+      if (allIndex > -1) {
+        this.mmAll.splice(allIndex, 1);
+      }
+      
+      this.total_count -= 1;
+      this.toastr.success("deleted Successfully.");
+    }
   }
 
   deleteOld(i: any, id: any) {

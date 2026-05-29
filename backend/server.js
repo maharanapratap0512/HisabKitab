@@ -19,6 +19,6 @@ const io = new Server(server, {
 // Attach NetDrop signaling logic
 require('./api/sockets/netdrop.socket')(io);
 
-server.listen(port, () => {
+server.listen(port, '0.0.0.0', () => {
    console.log('Running server on port ' + port);
 });

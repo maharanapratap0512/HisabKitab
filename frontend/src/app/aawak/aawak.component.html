@@ -180,22 +180,13 @@
                               <div class="col-md-3 mb-3">
                                  <div class="form-group">
                                     <label class="form-label">Item & Subitem</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
-                                       [clearable]="false" [virtualScroll]="true" [(ngModel)]="filterBody.item_id"
-                                       (change)="itemSelected($event)" [multiple]="true" name="item_id"
-                                       [closeOnSelect]="false">
-                                       <ng-option selected="selected" disabled value="">Select Item</ng-option>
-                                       <ng-option *ngFor="let item of items" [value]="item._id">{{item.item_hin}} :
-                                          {{item.item_eng}} : {{item.item_code}}</ng-option>
-                                    </ng-select>
-                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select SubitemList"
-                                       [clearable]="false" [virtualScroll]="true" [multiple]="true"
-                                       [(ngModel)]="filterBody.subitem_id" name="subitem_id">
-                                       <ng-option selected="selected" disabled value="">Select Subitem</ng-option>
-                                       <ng-option *ngFor="let item of subitems" [value]="item._id">{{item.subitem_hin}}
-                                          :
-                                          {{item.subitem_eng}}</ng-option>
-                                    </ng-select>
+                                    <app-item-dropdown 
+                                       [items]="items" 
+                                       [(ngModel)]="selectedItemmix" 
+                                       [multiple]="true" 
+                                       [closeOnSelect]="false"
+                                       name="item_id"
+                                    ></app-item-dropdown>
                                  </div>
                               </div>
 
@@ -346,7 +337,7 @@
                                  condition_id: [],
                                  pkt_num:null,
                                  nimitt_id:[]
-                               };">Clear All</button>
+                               }; selectedItemmix = [];">Clear All</button>
                               </div>
                            </div>
                         </form>

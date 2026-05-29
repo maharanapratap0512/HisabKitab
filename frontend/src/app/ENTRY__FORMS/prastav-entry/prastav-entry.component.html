@@ -47,7 +47,7 @@
                 <div class="row g-3 align-items-center">
                   <div class="col-md-4 border-end pe-3">
                     <small class="text-uppercase opacity-50 fw-bold d-block mb-1">Requested Item</small>
-                    <div class="fw-bold fs-5 text-primary">{{getItemDisplay(line.item_subitem_id)}}</div>
+                    <div class="fw-bold fs-5 text-primary">{{getItemDisplay(line.item_id, line.subitem_id)}}</div>
                   </div>
                   <div class="col-md-8">
                     <div class="row g-2 text-center">
@@ -222,42 +222,29 @@
                     <td class="text-center align-middle">{{i+1}}</td>
 
                     <td>
-                      <ng-select class="custom-sm" style="width:100%;" placeholder="Select Item" [clearable]="true"
-                        [virtualScroll]="true" [(ngModel)]="line.item_subitem_id" [name]="'item_'+i"
-                        (change)="onItemChange(line)" [selectOnTab]="true">
-
-                        <ng-container *ngFor="let it of items | filterByDate:pfs.prastavForm.date">
-
-                          <ng-option [value]="it._id">
-                            {{it.item_hin}} : {{it.item_eng}} : {{it.item_code}}
-                          </ng-option>
-
-                          <ng-option *ngFor="let sub of it.subitems | filterByDate:pfs.prastavForm.date"
-                            [value]="it._id + ':' + sub._id">
-
-                            &nbsp;&nbsp;↳ {{sub.subitem_hin}} {{it.item_hin}}
-
-                          </ng-option>
-
-                        </ng-container>
-
-                      </ng-select>
+                      <app-item-dropdown size="sm" 
+                        [items]="items | filterByDate:pfs.prastavForm.date"
+                        [(itemId)]="line.item_id"
+                        [(subitemId)]="line.subitem_id"
+                        (change)="onItemChange(line)" [required]="true"
+                        placeholder="Item - Subitem">
+                      </app-item-dropdown>
                     </td>
 
                     <td>
                       <input type="number" class="form-control form-control-sm text-center" [(ngModel)]="line.qty_needs"
-                        [name]="'qty_needs_'+i">
+                        [name]="'qty_needs_'+i" placeholder="Req Qty">
                     </td>
 
                     <td>
                       <div class="d-flex">
 
-                        <input type="number" class="form-control-sm flex-fill" [(ngModel)]="line.qty" [name]="'qty_'+i"
-                          (ngModelChange)="onLineChange(line)">
+                        <input type="number" class="form-control form-control-sm flex-fill" [(ngModel)]="line.qty" [name]="'qty_'+i"
+                          (ngModelChange)="onLineChange(line)" placeholder="Qty">
 
                         <ng-select class="custom-sm border" style="min-width:80px;" [items]="units"
                           bindLabel="unit_short" bindValue="_id" [(ngModel)]="line.unit_id" [name]="'unit_'+i"
-                          (ngModelChange)="onUnitChange(line)">
+                          (ngModelChange)="onUnitChange(line)" placeholder="Unit">
                         </ng-select>
 
                       </div>
@@ -265,17 +252,17 @@
 
                     <td>
                       <input type="number" class="form-control form-control-sm text-center" [(ngModel)]="line.rate"
-                        [name]="'rate_'+i" (ngModelChange)="onLineChange(line)">
+                        [name]="'rate_'+i" (ngModelChange)="onLineChange(line)" placeholder="Rate">
                     </td>
 
                     <td>
                       <input type="number" class="form-control form-control-sm text-center" [(ngModel)]="line.amount"
-                        readonly>
+                        [name]="'amount_'+i" readonly placeholder="Amount">
                     </td>
 
                     <td>
                       <input type="text" class="form-control form-control-sm" [(ngModel)]="line.description"
-                        [name]="'desc_'+i">
+                        [name]="'desc_'+i" placeholder="Description">
                     </td>
 
                     <td class="text-center">
@@ -292,7 +279,7 @@
 
 
                   <!-- JAWAK ROW -->
-                  <tr *ngIf="line.item_id && (!jawakFocusMode || focusedLineIndex === i)">
+                  <tr *ngIf="jawakFocusMode && line.item_id && focusedLineIndex === i">
 
                     <td *ngIf="!jawakFocusMode"></td>
 
@@ -331,24 +318,13 @@
                               </td>
 
                               <td class="align-middle">
-                                <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Item"
-                                  [clearable]="true" [virtualScroll]="true" [(ngModel)]="jw.item_subitem_id"
-                                  [name]="'jw_item_' + i + '_' + j" (change)="onJawakItemChange(line, jw)"
-                                  [selectOnTab]="true">
-                                  <ng-container
-                                    *ngFor="let it of items | filterByDate: jw.date || pfs.prastavForm.date">
-                                    <ng-option [value]="it._id">
-                                      {{it.item_hin}} : {{it.item_eng}} : {{it.item_roman ? it.item_roman : ''}} :
-                                      {{it.item_code}}
-                                    </ng-option>
-                                    <ng-option
-                                      *ngFor="let sub of it.subitems | filterByDate: jw.date || pfs.prastavForm.date"
-                                      [value]="it._id + ':' + sub._id">
-                                      &nbsp;&nbsp;↳ {{sub.subitem_hin}} {{it.item_hin}} : {{sub.subitem_eng}}
-                                      {{it.item_eng}} : {{sub.subitem_roman ? sub.subitem_roman : ''}}
-                                    </ng-option>
-                                  </ng-container>
-                                </ng-select>
+                                <app-item-dropdown size="sm" 
+                                  [items]="items | filterByDate:pfs.prastavForm.date"
+                                  [(itemId)]="jw.item_id"
+                                  [(subitemId)]="jw.subitem_id"
+                                  (change)="onJawakItemChange(line, jw)" [required]="true"
+                                  placeholder="Select Item">
+                                </app-item-dropdown>
                               </td>
 
                               <td class="align-middle">
@@ -364,7 +340,7 @@
 
                               <td class="align-middle">
                                 <div class="d-flex align-items-center">
-                                  <input type="number" class="form-control-sm flex-fill px-1 text-center"
+                                  <input type="number" class="form-control form-control-sm flex-fill px-1 text-center"
                                     placeholder="Qty" [(ngModel)]="jw.qty" [name]="'jw_qty_' + i + '_' + j"
                                     (ngModelChange)="onJawakChange(line, jw)" min="0"
                                     [ngClass]="{'is-invalid': f.submitted && !jw.qty}">
@@ -401,7 +377,7 @@
 
                               <td class="text-center align-middle">
                                 <button
-                                  *ngIf="(jw.source_mm_id || jw.qty || jw.item_subitem_id) && line.jawaks.length > 1"
+                                  *ngIf="(jw.source_mm_id || jw.qty || jw.item_id) && line.jawaks.length > 1"
                                   type="button" class="btn btn-sm btn-danger"
                                   style="padding: 0.2rem 0.5rem; border-radius: 4px;" (click)="pfs.removeJawak(line, j)"
                                   title="Remove Jawak">
@@ -425,6 +401,12 @@
               </tbody>
 
             </table>
+
+            <div class="text-start mb-2 px-2" *ngIf="!jawakFocusMode">
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="pfs.addLine()">
+                <i class="uil uil-plus"></i> Add More
+              </button>
+            </div>
 
           </div>
 

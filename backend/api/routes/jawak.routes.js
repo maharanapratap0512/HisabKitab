@@ -58,7 +58,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
 
             conditionString = conditions.length > 0 ? `(${conditions.join(' OR ')})` : `1=1`;
         } else {
-            conditionString = `1=1 ${req.body.date ? ` AND jawak.date = '${req.body.date}'` : ''} ${req.body.year ? ` AND strftime('%Y', jawak.date) = '${req.body.year}'` : ''} ${req.body.month ? ` AND strftime('%m', jawak.date) = '${req.body.month.toString().padStart(2, '0')}'` : ''} ${req.body.mm_id && req.body.mm_id.length > 0 ? ` AND jawak.mm_id in (${req.body.mm_id.join(',')})` : ''} ${req.body.zone_id && req.body.zone_id.length > 0 ? ` AND mm_zone_id in (${req.body.zone_id.join(',')})` : ''} ${req.body.condition_id && req.body.condition_id.length > 0 ? ` AND jawak.condition_id in (${req.body.condition_id.join(',')})` : ''} ${req.body.item_id && req.body.item_id.length > 0 ? ` AND jawak.item_id in (${req.body.item_id.join(',')})` : ''} ${req.body.jawak_mm_id && req.body.jawak_mm_id.length > 0 ? ` AND jawak.jawak_mm_id in (${req.body.jawak_mm_id.join(',')})` : ''} ${req.body.jawak_type_id && req.body.jawak_type_id.length > 0 ? ` AND jawak.jawak_type_id in (${req.body.jawak_type_id.join(',')})` : ''} ${req.body.pbk_id && req.body.pbk_id.length > 0 ? ` AND jawak.pbk_id in (${req.body.pbk_id.join(',')})` : ''} ${req.body.subitem_id && req.body.subitem_id.length > 0 ? ` AND jawak.subitem_id in (${req.body.subitem_id.join(',')})` : ''} ${req.body.product_id && req.body.product_id.length > 0 ? ` AND jawak.product_id in (${req.body.product_id.join(',')})` : ''} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND jawak.nimitt_id in ${req.body.nimitt_id.join(',')}` : ''} ${req.body.pkt_num ? ` AND jawak.pkt_num LIKE '%${req.body.pkt_num}%'` : ''} ${req.body.voucher_no ? ` AND jawak.voucher_no LIKE '%${req.body.voucher_no}%'` : ''} ${req.body.reg_pg_no ? ` AND jawak.reg_pg_no LIKE '%${req.body.reg_pg_no}%'` : ''} ${req.body.usage_list_id && req.body.usage_list_id.length > 0 ? ` AND jawak.usage_list_id in (${req.body.usage_list_id.join(',')})` : ''}`
+            conditionString = `1=1 ${req.body.date ? ` AND jawak.date = '${req.body.date}'` : ''} ${req.body.year ? ` AND strftime('%Y', jawak.date) = '${req.body.year}'` : ''} ${req.body.month ? ` AND strftime('%m', jawak.date) = '${req.body.month.toString().padStart(2, '0')}'` : ''} ${req.body.mm_id && req.body.mm_id.length > 0 ? ` AND jawak.mm_id in (${req.body.mm_id.join(',')})` : ''} ${req.body.zone_id && req.body.zone_id.length > 0 ? ` AND mm_zone_id in (${req.body.zone_id.join(',')})` : ''} ${req.body.condition_id && req.body.condition_id.length > 0 ? ` AND jawak.condition_id in (${req.body.condition_id.join(',')})` : ''} ${req.body.item_id && req.body.item_id.length > 0 ? ` AND jawak.item_id in (${req.body.item_id.join(',')})` : ''} ${req.body.jawak_mm_id && req.body.jawak_mm_id.length > 0 ? ` AND jawak.jawak_mm_id in (${req.body.jawak_mm_id.join(',')})` : ''} ${req.body.jawak_type_id && req.body.jawak_type_id.length > 0 ? ` AND jawak.jawak_type_id in (${req.body.jawak_type_id.join(',')})` : ''} ${req.body.pbk_id && req.body.pbk_id.length > 0 ? ` AND jawak.pbk_id in (${req.body.pbk_id.join(',')})` : ''} ${req.body.subitem_id && req.body.subitem_id.length > 0 ? ` AND jawak.subitem_id in (${req.body.subitem_id.join(',')})` : ''} ${req.body.product_id && req.body.product_id.length > 0 ? ` AND jawak.product_id in (${req.body.product_id.join(',')})` : ''} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND jawak.nimitt_id in ${req.body.nimitt_id.join(',')}` : ''} ${req.body.pkt_num ? ` AND jawak.pkt_num LIKE '%${req.body.pkt_num}%'` : ''} ${req.body.voucher_no ? ` AND jawak.voucher_no LIKE '%${req.body.voucher_no}%'` : ''} ${req.body.reg_pg_no ? ` AND jawak.reg_pg_no LIKE '%${req.body.reg_pg_no}%'` : ''} ${req.body.usage_list_id && req.body.usage_list_id.length > 0 ? ` AND jawak.usage_list_id in (${req.body.usage_list_id.join(',')})` : ''} ${req.body.unlinkedOnly ? ` AND jawak.aawak_ref_id IS NULL` : ''}`
         }
 
         if (conditionString.trim() == `1=1`) {
@@ -74,6 +74,8 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             for (let i in resolve.data) {
                 resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
                 resolve.data[i].usage_report = (resolve.data[i].usage_report ? JSON.parse(resolve.data[i].usage_report) : {});
+                resolve.data[i].icategories = (resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []);
+                resolve.data[i].scategories = (resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : []);
             }
             res.json({
                 success: true,
@@ -125,6 +127,14 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
         conditions.push(`jawak.pkt_num LIKE '%${req.body.pkt_num}%'`)
     if (req.body.reg_pg_no)
         conditions.push(`jawak.reg_pg_no LIKE '%${req.body.reg_pg_no}%'`)
+    if (req.body.unlinkedOnly)
+        // Match vouchers that have at least one unlinked jawak item (or standalone unlinked jawaks)
+        conditions.push(`(
+            (jawak.voucher_no IS NOT NULL AND jawak.voucher_no IN (
+                SELECT DISTINCT voucher_no FROM jawak WHERE aawak_ref_id IS NULL AND voucher_no IS NOT NULL
+            ))
+            OR (jawak.voucher_no IS NULL AND jawak.aawak_ref_id IS NULL)
+        )`)
 
     conditionString = conditions.length > 0 ? conditions.join(' AND ') : "1=1"
 
@@ -529,5 +539,22 @@ router.delete('/voucher/:ids', async (req, res, next) => {
 // subitem_id: []
 
 
+
+// update jawak ref link only
+router.put('/ref-link/:id', async (req, res, next) => {
+    try {
+        if (req.params.id && req.body.aawak_ref_id !== undefined) {
+            await DB.update('jawak', { aawak_ref_id: req.body.aawak_ref_id }, req.params.id).then((data) => {
+                res.json({
+                    success: true,
+                    result: data || []
+                });
+            });
+        }
+        else {
+            return next(new Error('Id or aawak_ref_id not found.'))
+        }
+    } catch (err) { next(err) };
+});
 
 module.exports = router;

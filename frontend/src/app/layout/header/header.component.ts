@@ -204,8 +204,8 @@ export class HeaderComponent implements AfterViewInit {
         children: [
           { title: 'LOT Nos', link: 'view/lot_no', visible: this.auth.webUser.settings?.aawak?.lot_no },
           { title: 'Item', link: 'item', visible: this.auth.webUser.settings?.item?.visible },
-          { title: 'Variant', link: 'variant', visible: true },
-          { title: 'VariantNew', link: 'variantN', visible: true },
+          // { title: 'Variant', link: 'variant', visible: true },
+          { title: 'Variant', link: 'variantN', visible: true },
           { title: 'MM', link: 'mm', visible: this.auth.webUser.settings?.mm?.visible },
           { title: 'PBK', link: 'pbk', visible: this.auth.webUser.settings?.pbk?.visible },
           { title: 'Nimitt', link: 'nimitt', visible: this.auth.webUser.settings?.nimitt?.visible },

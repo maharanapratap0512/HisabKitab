@@ -93,7 +93,6 @@ export class PbkClosingEntryComponent implements OnInit {
       bachatList[i].pbk_bachat_id = bachatList[i]._id || null;
       bachatList[i].sw_bachat = bachatList[i].qty;
       bachatList[i].difference = bachatList[i].qty - bachatList[i].sw_bachat;
-      bachatList[i].item_subitem_id = bachatList[i].subitem_id ? bachatList[i].item_id + ":" + bachatList[i].subitem_id : bachatList[i].item_id;
       delete bachatList[i]._id;
     }
 
@@ -130,30 +129,24 @@ export class PbkClosingEntryComponent implements OnInit {
   }
 
   itemSubitemSelected(ev: any, i: any) {
+    const row = this.fs.pbkClosingFormMain.pbk_closings[i];
     if (ev) {
-      let item_id: any = null, subitem_id: any = null;
-      if (typeof ev == 'number') {
-        item_id = ev;
-        subitem_id = null;
-      } else {
-        item_id = parseInt(ev.split(':')[0]);
-        subitem_id = parseInt(ev.split(':')[1]) || null;
+      const item_id = ev.item_id || row.item_id;
+      const subitem_id = ev.subitem_id || row.subitem_id;
+      
+      let item: any = this.items.find((it: { _id: any; }) => it._id == item_id);
+      if (item) {
+        let subitem: any = item.subitems?.find((s: { _id: any; }) => s._id == subitem_id);
+        row.item_id = item_id;
+        row.subitem_id = subitem_id;
+        if (!this.isEdit) {
+          row.unit_id = subitem ? subitem.unit_id : item.unit_id;
+        }
       }
-
-      this.fs.pbkClosingFormMain.pbk_closings[i].item_id = item_id;
-      this.fs.pbkClosingFormMain.pbk_closings[i].subitem_id = subitem_id;
-
-      let item: any = this.items.find((i: { _id: any; }) => i._id == item_id);
-      let subitem: any = item.subitems.find((i: { _id: any; }) => i._id == subitem_id);
-
-      if (!this.isEdit && subitem)
-        this.fs.pbkClosingFormMain.pbk_closings[i].unit_id = subitem.unit_id;
-      else if (!this.isEdit)
-        this.fs.pbkClosingFormMain.pbk_closings[i].unit_id = item.unit_id;
     } else {
-      this.fs.pbkClosingFormMain.pbk_closings[i].item_id = null;
-      this.fs.pbkClosingFormMain.pbk_closings[i].subitem_id = null;
-      this.fs.pbkClosingFormMain.pbk_closings[i].unit_id = null;
+      row.item_id = null;
+      row.subitem_id = null;
+      row.unit_id = null;
     }
   }
 

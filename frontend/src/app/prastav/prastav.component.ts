@@ -33,6 +33,7 @@ export class PrastavComponent implements OnInit {
   // Filter Lists
   mms: any[] = [];
   pbks: any[] = [];
+  items: any[] = [];
 
   isEdit = false;
   selectedPrastav: any = null;
@@ -70,6 +71,7 @@ export class PrastavComponent implements OnInit {
     this.gs.observeList().subscribe((res: any) => {
       this.mms = res.mm || [];
       this.pbks = res.pbk || [];
+      this.items = res.item || [];
     });
   }
 
@@ -117,7 +119,8 @@ export class PrastavComponent implements OnInit {
           mm: p.mm,
           pbk: p.pbk,
           pbk_count: p.pbk_count,
-          note: p.note, // Capture note from the first item
+          note_details: p.note_details, // Capture note from the first item
+          is_noted: p.is_noted,
           items: [],
           expanded: true, // Default open for Voucher Mode
           totalAmount: 0,
@@ -239,7 +242,7 @@ export class PrastavComponent implements OnInit {
           unit: vr.isIFirst ? (vr.item.unit?.unit_short || '') : '',
           rate: vr.isIFirst ? (vr.item.rate || '') : '',
           amount: vr.isIFirst ? (vr.item.amount || '') : '',
-          note: vr.isIFirst ? (v.note || '') : '',
+          note: vr.isIFirst ? (v.note_details || '') : '',
           j_date: vr.jawak ? vr.jawak.date : '',
           j_source: vr.jawak ? vr.jawak.source_mm?.mm_hin : '',
           j_receiver: vr.jawak ? vr.jawak.kiske_dwara : '',
@@ -395,6 +398,28 @@ export class PrastavComponent implements OnInit {
             }
           });
       }
+    });
+  }
+
+  toggleStatus(jawak: any) {
+    if (!jawak) return;
+    const originalStatus = jawak.is_received;
+    jawak.is_received = jawak.is_received ? 0 : 1; // Toggle between 0 and 1
+
+    // Use the Prastav Jawak update API - only send necessary fields
+    this.http.post(this.api.getUrl('PRASTAV') + 'jawak', {
+      _id: jawak._id,
+      is_received: jawak.is_received
+    }).subscribe((res: any) => {
+      if (res.success) {
+        this.toastr.success(`Status updated to ${jawak.is_received ? 'RCV' : 'PND'}`);
+      } else {
+        jawak.is_received = originalStatus;
+        this.toastr.error('Status update failed');
+      }
+    }, err => {
+      jawak.is_received = originalStatus;
+      this.toastr.error('Status update failed');
     });
   }
 }

@@ -127,7 +127,9 @@ class ExcelFunctions {
       document: []
    }
    subitem_form = {
-      subitem_list_id: null,
+      subitem_hin: null,
+      subitem_eng: null,
+      subitem_roman: null,
       unit_id: null,
       item_id: null,
       categories: [],
@@ -137,6 +139,31 @@ class ExcelFunctions {
       restrict_year: null,
       min_rate: 0,
       max_rate: 0,
+   }
+   attribute_form = {
+      attribute_hin: null,
+      attribute_eng: null,
+      attribute_roman: null,
+      active: 1
+   }
+   attributes_value_form = {
+      attribute_id: null,
+      attribute_value_hin: null,
+      attribute_value_eng: null,
+      attribute_value_roman: null,
+      active: 1
+   }
+   variant_form = {
+      item_id: null,
+      display_name_hin: null,
+      display_name_eng: null,
+      display_name_roman: null,
+      attribute_values: [],
+      sku: null,
+      unit_id: null,
+      min_rate: 0,
+      max_rate: 0,
+      active: 1
    }
    support_list_form = {
       list_type: null,
@@ -203,6 +230,12 @@ class ExcelFunctions {
                break;
             case 'unit':
                this.unit = this.Fn.getUnits(dept_id);
+               break;
+            case 'attribute':
+               this.attribute = this.Fn.getAttributes(dept_id);
+               break;
+            case 'attributes_value':
+               this.attributes_value = this.Fn.getAttributeValues(dept_id);
                break;
             case 'support_list':
             case 'condition':
@@ -424,6 +457,63 @@ class ExcelFunctions {
          this.correctionList.push({ type: 'unit', name: data });
       }
       return null;
+   }
+
+   async matchAttribute(data) {
+      if (this.attribute instanceof Promise) {
+         this.attribute = await this.attribute.then((data) => { return data })
+      }
+      if (this.dict.attribute instanceof Promise) {
+         this.dict.attribute = await this.dict.attribute.then((data) => { return data });
+      }
+      if (!this.checkedButNotFound(data, 'attribute')) {
+         for (let i in this.attribute) {
+            if ([this.attribute[i].attribute_hin, this.attribute[i].attribute_eng, this.attribute[i].attribute_roman].includes(data)) {
+               return this.attribute[i]._id;
+            }
+         }
+         for (let i in this.dict.attribute) {
+            if (this.dict.attribute[i].name == data) {
+               return this.dict.attribute[i].id;
+            }
+         }
+         this.correctionList.push({ type: 'attribute', name: data });
+      }
+      return null;
+   }
+
+   async matchAttributeValue(data) {
+      if (this.attributes_value instanceof Promise) {
+         this.attributes_value = await this.attributes_value.then((data) => { return data })
+      }
+      if (this.dict.attributes_value instanceof Promise) {
+         this.dict.attributes_value = await this.dict.attributes_value.then((data) => { return data });
+      }
+      if (!this.checkedButNotFound(data, 'attributes_value')) {
+         for (let i in this.attributes_value) {
+            if ([this.attributes_value[i].attribute_value_hin, this.attributes_value[i].attribute_value_eng, this.attributes_value[i].attribute_value_roman].includes(data)) {
+               return { attribute_id: this.attributes_value[i].attribute_id, attribute_value_id: this.attributes_value[i]._id };
+            }
+         }
+         for (let i in this.dict.attributes_value) {
+            if (this.dict.attributes_value[i].name == data) {
+               return { attribute_id: this.dict.attributes_value[i].id, attribute_value_id: this.dict.attributes_value[i].id2 };
+            }
+         }
+         this.correctionList.push({ type: 'attributes_value', name: data });
+      }
+      return null;
+   }
+
+   async matchAttributeValues(data) {
+      let arr = [];
+      if (data) {
+         for (let val of data) {
+            let match = await this.matchAttributeValue(val.trim().toLowerCase());
+            if (match) arr.push(match);
+         }
+      }
+      return arr;
    }
 
    async matchNimitt(data) {

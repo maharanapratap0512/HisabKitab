@@ -81,7 +81,6 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
 
   /** item_subitem_id change → split into item_id / subitem_id, then auto-add row */
   onItemChange(line: any) {
-    this.pfs.resolveItemSubitem(line);
 
     // Auto-select unit if available
     if (line.item_id) {
@@ -99,8 +98,8 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
     // Sync item and unit to ALL jawaks
     if (line.jawaks && line.jawaks.length > 0) {
       for (const jw of line.jawaks) {
-        jw.item_subitem_id = line.item_subitem_id;
-        this.pfs.resolveItemSubitem(jw);
+        jw.item_id = line.item_id;
+        jw.subitem_id = line.subitem_id;
         jw.unit_id = line.unit_id;
       }
     }
@@ -129,7 +128,7 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
     if (line.jawaks && line.jawaks.length > 0) {
       for (const jw of line.jawaks) {
         // Only override jawak unit if it's currently matching the parent item
-        if (jw.item_subitem_id === line.item_subitem_id) {
+        if (jw.item_id === line.item_id && jw.subitem_id === line.subitem_id) {
           jw.unit_id = line.unit_id;
         }
       }
@@ -142,7 +141,6 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
   }
 
   onJawakItemChange(line: any, jw: any) {
-    this.pfs.resolveItemSubitem(jw);
 
     if (jw.item_id) {
       const parentItem = this.items.find((it: any) => it._id === jw.item_id);
@@ -228,17 +226,13 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
     return this.units.find(u => u._id === unitId)?.unit_short || '';
   }
 
-  getItemDisplay(itemSubitemId: any) {
-    if (!itemSubitemId) return '-';
-    const parts = String(itemSubitemId).split(':');
-    const itemId = Number(parts[0]);
-    const subitemId = parts[1] ? Number(parts[1]) : null;
-
-    const it = this.items.find(i => i._id === itemId);
+  getItemDisplay(item_id: any, subitem_id: any) {
+    if (!item_id) return '-';
+    const it = this.items.find(i => i._id === item_id);
     if (!it) return '-';
 
-    if (subitemId) {
-      const sub = it.subitems?.find((s: any) => s._id === subitemId);
+    if (subitem_id) {
+      const sub = it.subitems?.find((s: any) => s._id === subitem_id);
       return sub ? `${sub.subitem_hin} ${it.item_hin}` : it.item_hin;
     }
     return it.item_hin;

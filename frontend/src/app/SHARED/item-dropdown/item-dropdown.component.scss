@@ -1,0 +1,138 @@
+.item-dropdown {
+    ::ng-deep .ng-select-container {
+        background-color: transparent !important;
+        color: inherit !important;
+        border-color: rgba(128, 128, 128, 0.2) !important;
+    }
+
+    &.custom-sm {
+        ::ng-deep .ng-select-container {
+            min-height: 31px;
+            height: 31px;
+            font-size: 13px;
+        }
+    }
+}
+
+:host.validation {
+    border: none !important;
+
+    /* Remove global .validation border from host */
+    ::ng-deep .ng-select .ng-select-container {
+        border-color: #fa5c7c !important;
+    }
+}
+
+
+.item-option {
+    border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+    transition: all 0.2s ease;
+
+    &.subitem {
+        padding-left: 28px;
+    }
+
+    .option-content-single {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+
+        .hindi-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: inherit;
+            white-space: nowrap;
+            line-height: 1.6 !important;
+            overflow: visible;
+
+            .sub-prefix {
+                color: var(--bs-primary, #5b73e8);
+                font-weight: bold;
+                margin-right: 4px;
+            }
+
+            .parent-suffix {
+                font-weight: 400;
+                opacity: 0.6;
+                font-size: 11px;
+            }
+        }
+
+        .eng-name {
+            font-size: 11px;
+            opacity: 0.7;
+            white-space: nowrap;
+
+            .parent-suffix {
+                opacity: 0.6;
+                font-size: 10px;
+            }
+        }
+
+        .roman-name {
+            font-size: 11px;
+            font-style: italic;
+            opacity: 0.8;
+            white-space: nowrap;
+        }
+
+        .item-code {
+            font-size: 10px;
+            background: rgba(var(--bs-primary-rgb, 91, 115, 232), 0.15);
+            color: var(--bs-primary, #5b73e8);
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+    }
+}
+
+.selected-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+
+    .label-name {
+        font-weight: 600;
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        .subitem-text {
+            color: var(--bs-primary, #5b73e8);
+        }
+    }
+
+    .label-code {
+        font-size: 10px;
+        opacity: 0.6;
+        font-weight: normal;
+    }
+}
+
+// Ensure high visibility in dark mode or when marked/selected
+::ng-deep .ng-dropdown-panel .ng-option {
+    padding: 5px 10px !important;
+
+    &.ng-option-marked,
+    &.ng-option-selected {
+        .item-option {
+            background-color: transparent !important;
+
+            .hindi-name,
+            .eng-row {
+                color: inherit !important;
+            }
+
+            .item-code {
+                background: rgba(255, 255, 255, 0.2);
+                color: inherit;
+            }
+        }
+    }
+}

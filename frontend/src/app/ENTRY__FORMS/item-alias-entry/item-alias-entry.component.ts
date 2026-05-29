@@ -13,7 +13,7 @@ export class ItemAliasEntryComponent implements OnInit {
     @Input()  getData: any = null;   // the item object
     @Output() response = new EventEmitter<any>();
 
-    aliasForm = { alias: '', language: 'hin' };
+    aliasForm = { alias: '' };
     rows:     any[] = [];
 
     constructor(
@@ -27,7 +27,10 @@ export class ItemAliasEntryComponent implements OnInit {
     loadAliases() {
         if (!this.getData?._id) return;
         this.http.get(this.api.getUrl('VARIANT') + 'item-aliases/' + this.getData._id)
-            .subscribe((d: any) => { this.rows = d.success ? d.result : []; });
+            .subscribe((d: any) => { 
+                this.rows = d.success ? d.result : []; 
+                // Ensure rows only show alias and _id as per new schema
+            });
     }
 
     save() {
@@ -40,7 +43,12 @@ export class ItemAliasEntryComponent implements OnInit {
                     this.aliasForm.alias = '';
                     this.loadAliases();
                     this.response.emit({ reload: true });
+                } else {
+                    this.toastr.error(d.message || 'Kuch error aa gaya');
                 }
+            }, (err) => {
+                const msg = err.error?.message || err.message || 'Unique constraint ya server error';
+                this.toastr.error(msg);
             });
     }
 
@@ -48,6 +56,8 @@ export class ItemAliasEntryComponent implements OnInit {
         this.http.delete(this.api.getUrl('VARIANT') + 'item-aliases/' + row._id)
             .subscribe((d: any) => {
                 if (d.success) { this.loadAliases(); this.response.emit({ reload: true }); }
+            }, (err) => {
+                this.toastr.error(err.error?.message || err.message || 'Delete fail ho gaya');
             });
     }
 }

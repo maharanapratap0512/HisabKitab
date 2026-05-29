@@ -172,7 +172,9 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                 req.body.excelData[i][req.body.config[j].name] = data;
                 if (req.body.config[j].ref_table && (req.body.config[j].not_null || data)) {
                     let id = null, subitem_id = null, name;
-                    if (req.body.config[j].type != "array" && typeof data != "number") {
+                    if (data && req.body.config[j].type == "array" && typeof data == "string") {
+                        name = data.split(',').map(v => v.trim()).filter(Boolean);
+                    } else if (data && req.body.config[j].type != "array" && typeof data != "number") {
                         name = data.trim().toLowerCase().normalize('NFC');
                     } else {
                         name = data;
@@ -205,6 +207,15 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                         case 'nimitt': id = await fn.matchNimitt(name);
                             break;
                         case 'pbk': id = await fn.matchPbk(name);
+                            break;
+                        case 'attribute': id = await fn.matchAttribute(name);
+                            break;
+                        case 'attributes_value': 
+                            if (req.body.config[j].type == "array") {
+                                id = await fn.matchAttributeValues(name);
+                            } else {
+                                id = await fn.matchAttributeValue(name);
+                            }
                             break;
                         case 'item':
                             if (i == 6) {
@@ -263,7 +274,20 @@ router.put('/verify/:dept_id', async (req, res, next) => {
 router.put('/final/:dept_id', async (req, res, next) => {
     try {
         let fn = new ExcelFunctions([], req.params.dept_id);
-        let result = await fn.verifyAndInsert(req.body.importType, req.body.excelData, req.body.headerList);
+        let result;
+        if (req.body.importType.name == 'variant') {
+            const vs = require('../services/variant.service');
+            let fdata = await fn.setFormData(fn.variant_form, req.body.excelData);
+            result = await vs.bulkCreateVariants(fdata.item_id, [fdata], req.userData);
+            result = { status: 'inserted', data: req.body.excelData, newData: result };
+        } else if (req.body.importType.name == 'item') {
+            const is = require('../services/item.service');
+            let fdata = await fn.setFormData(fn.item_form, req.body.excelData);
+            result = await is.bulkCreateItems([fdata], req.userData);
+            result = { status: 'inserted', data: req.body.excelData, newData: result };
+        } else {
+            result = await fn.verifyAndInsert(req.body.importType, req.body.excelData, req.body.headerList);
+        }
         res.json({
             success: true,
             result: result

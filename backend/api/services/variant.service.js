@@ -3,8 +3,8 @@
 // variant.service.js
 // Pattern: exact same as hmp.service.js
 //   - BaseTable instances per table (schema-driven joins auto-handled)
-//   - BaseTable.transaction() for atomic operations
-//   - Fn.begin/commit/rollback for async AJ operations
+//   - sutramDB.begin/commit/rollback for atomic operations
+//   - Fn.begin/commit/rollback for async AJ operations (if needed)
 //   - NO raw db.prepare() queries anywhere
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -22,6 +22,7 @@ const variant_aliases = new BaseTable('variant_aliases');
 const item_aliases = new BaseTable('item_aliases');
 const subitem = new BaseTable('subitem');
 const rel_subitem_cat = new BaseTable('rel_subitem_category');
+const item = new BaseTable('item');
 
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -55,16 +56,28 @@ function updateAttribute(data) {
 
 function deleteAttribute(id) {
     // soft delete cascade — active=0 on attribute + all its values + all variant maps that use any of its values
-    return BaseTable.transaction(() => {
-        attributes.updateById({ active: 0 }, id);
-        // getAll with full:false for speed — we just need IDs
+    try {
+        sutramDB.begin();
+
+        // 1. Check if ANY value of this attribute is used in active variants
         const vals = attributes_value.getAll({ attribute_id: id }, { full: false });
         for (const v of vals) {
-            attributes_value.updateById({ active: 0 }, v._id);
-            variant_attr_map.update({ active: 0 }, { attribute_value_id: v._id });
+            const count = variant_attr_map.count({ attribute_value_id: v._id, active: 1 });
+            if (count > 0) {
+                throw new Error(`Is attribute ka value '${v.attribute_value_hin || v._id}' variants mein use ho raha hai. Delete nahi kar sakte.`);
+            }
         }
+
+        // 2. Hard delete attribute + values
+        attributes.deleteById(id);
+        attributes_value.delete({ attribute_id: id });
+
+        sutramDB.commit();
         return 1;
-    });
+    } catch (err) {
+        sutramDB.rollback();
+        throw err;
+    }
 }
 
 
@@ -105,11 +118,22 @@ function updateAttributeValue(data) {
 }
 
 function deleteAttributeValue(id) {
-    return BaseTable.transaction(() => {
-        attributes_value.updateById({ active: 0 }, id);
-        variant_attr_map.update({ active: 0 }, { attribute_value_id: id });
+    try {
+        sutramDB.begin();
+
+        // Check if used in active variants
+        const count = variant_attr_map.count({ attribute_value_id: id, active: 1 });
+        if (count > 0) {
+            throw new Error('Is value ko variants mein use kiya gaya hai. Delete nahi ho sakta.');
+        }
+
+        attributes_value.deleteById(id);
+        sutramDB.commit();
         return 1;
-    });
+    } catch (err) {
+        sutramDB.rollback();
+        throw err;
+    }
 }
 
 
@@ -118,14 +142,33 @@ function deleteAttributeValue(id) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function getItemAliases(item_id) {
-    return item_aliases.getAll({ item_id: Number(item_id) }, { orderBy: 'language ASC, alias ASC' });
+    return item_aliases.getAll({ item_id: Number(item_id) }, { orderBy: 'alias ASC' });
 }
 
 function insertItemAlias(data) {
+    const alias = data.alias.trim();
+    if (!alias) throw new Error('Alias required');
+
+    // NEW LOGIC: Check if alias exists in item names first using BaseTable.getOne
+    const conflict = item.getOne(
+        `item_hin = '${alias.replace(/'/g, "''")}' OR item_eng = '${alias.replace(/'/g, "''")}' OR item_roman = '${alias.replace(/'/g, "''")}'`,
+        { full: false }
+    );
+
+    if (conflict) {
+        throw new Error(`Yeh alias '${alias}' pehle se hi item '${conflict.item_hin}' ke name mein exist karta hai. Duplicate add nahi kar sakte.`);
+    }
+
+    // NEW LOGIC: Also check if alias exists in other items' aliases
+    const aliasConflict = item_aliases.getOne({ alias: alias }, { full: true });
+
+    if (aliasConflict && Number(aliasConflict.item_id) !== Number(data.item_id)) {
+        throw new Error(`Yeh alias '${alias}' pehle se hi item '${aliasConflict.item?.item_hin}' ke aliases mein exist karta hai.`);
+    }
+
     return item_aliases.insert({
         item_id: Number(data.item_id),
-        alias: data.alias,
-        language: data.language || 'hin',
+        alias: alias,
         created_at: new Date().toISOString(),
     });
 }
@@ -243,11 +286,67 @@ function _createOneVariant(item_id, data, dept_id) {
         unit_id, extra_note, min_rate, max_rate,
     } = data;
 
-    // 1. variant core
+    // 0. Fingerprint (unique combination of attribute values)
+    const fingerprint = (attribute_values ?? [])
+        .map(av => Number(av.attribute_value_id))
+        .filter(id => !isNaN(id))
+        .sort((a, b) => a - b)
+        .join('-');
+
+    // Check if variant with same fingerprint already exists for this item
+    const existing = variant.getOne({ item_id: Number(item_id), fingerprint, active: 1 });
+
+    if (existing) {
+        const vId = existing._id;
+        // UPDATE: update optional fields if provided
+        variant.update(vId, {
+            sku: sku || existing.sku,
+            unit_id: unit_id !== undefined ? unit_id : existing.unit_id,
+            display_name: display_name_hin || existing.display_name,
+            fingerprint: fingerprint || null,
+            min_rate: min_rate || existing.min_rate,
+            max_rate: max_rate || existing.max_rate,
+        });
+
+        // Update categories for existing variant
+        if (Array.isArray(category_ids)) {
+            sutramDB.run(`DELETE FROM variant_category_map WHERE variant_id = ?`, [vId]);
+            for (const catId of category_ids) {
+                variant_cat_map.insert({ variant_id: vId, category_id: Number(catId) }, false);
+            }
+        }
+
+        // Also sync subitem mirror
+        const existingSub = subitem.getOne({ variant_id: vId });
+        if (existingSub) {
+            subitem.update(existingSub._id, {
+                subitem_hin: display_name_hin || existingSub.subitem_hin,
+                subitem_eng: display_name_eng || existingSub.subitem_eng,
+                subitem_roman: display_name_roman || existingSub.subitem_roman,
+                unit_id: unit_id || existingSub.unit_id,
+                min_rate: min_rate || existingSub.min_rate,
+                max_rate: max_rate || existingSub.max_rate,
+                updated_at: new Date().toISOString(),
+            });
+
+            // categories mirror
+            if (Array.isArray(category_ids)) {
+                sutramDB.run(`DELETE FROM rel_subitem_category WHERE subitem_id = ?`, [existingSub._id]);
+                for (const catId of category_ids) {
+                    rel_subitem_cat.insert({ subitem_id: existingSub._id, category_id: Number(catId) }, false);
+                }
+            }
+        }
+
+        return { variant_id: vId, subitem_id: existingSub?._id };
+    }
+
+    // 1. variant core (NEW)
     const variant_id = variant.insert({
         item_id: Number(item_id),
         sku: sku || null,
         display_name: display_name_hin || null,
+        fingerprint: fingerprint || null,
         active: 1,
         created_at: new Date().toISOString(),
     }, false);  // full:false → returns id only (faster in bulk)
@@ -302,14 +401,31 @@ function _createOneVariant(item_id, data, dept_id) {
     return { variant_id, subitem_id };
 }
 
+
 // ─── Bulk create — main action from frontend, single DB transaction ───────────
 function bulkCreateVariants(item_id, variants_data, userData) {
     try {
         sutramDB.begin();
         const dept_id = userData ? userData.dept_id : null;
-        const result = variants_data.map(v => _createOneVariant(item_id, v, dept_id));
+
+        const created = [];
+        const skipped = [];
+
+        for (const vData of variants_data) {
+            try {
+                created.push(_createOneVariant(item_id, vData, dept_id));
+            } catch (err) {
+                // If it's a unique constraint violation (on fingerprint or display_name), we skip it
+                if (err.code === 'SQLITE_CONSTRAINT_UNIQUE' || (err.message && (err.message.includes('UNIQUE') || err.message.includes('unique')))) {
+                    skipped.push({ display_name: vData.display_name_hin, reason: 'Duplicate' });
+                } else {
+                    throw err; // Re-throw other errors
+                }
+            }
+        }
+
         sutramDB.commit();
-        return result;
+        return { created, skipped, createdCount: created.length, skippedCount: skipped.length };
     } catch (err) {
         sutramDB.rollback();
         throw err;
@@ -371,14 +487,16 @@ function updateVariant(variant_id, data, userData) {
     }
 }
 
-// ─── Delete variant (soft) ────────────────────────────────────────────────────
+// ─── Delete variant (hard) ────────────────────────────────────────────────────
 function deleteVariant(variant_id) {
     const id = Number(variant_id);
     try {
         sutramDB.begin();
-        variant.updateById({ active: 0 }, id);
-        subitem.update({ active: 0 }, { variant_id: id });
-        variant_attr_map.update({ active: 0 }, { variant_id: id });
+        variant.deleteById(id);
+        subitem.delete({ variant_id: id });
+        variant_attr_map.delete({ variant_id: id });
+        variant_aliases.delete({ variant_id: id });
+        variant_cat_map.delete({ variant_id: id });
         sutramDB.commit();
         return 1;
     } catch (err) {

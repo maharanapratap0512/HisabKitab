@@ -219,7 +219,7 @@ export class ExcelImportComponent implements OnInit {
           if (this.headerConfig[j].index) {
             //assign excel data to matched object key and prepare whole row object
             if (this.headerConfig[j].type == "array") {
-              row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index].split(",");
+              row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index] ? this.excelArr[i][this.headerConfig[j].index].split(",") : [];
             } else {
               row[this.headerConfig[j].col_name] = this.gs.cleanValue(this.excelArr[i][this.headerConfig[j].index]);
             }

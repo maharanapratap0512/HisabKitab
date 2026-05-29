@@ -18,7 +18,6 @@ export class HmpFormService {
     public auth: AuthService,
   ) {
     this.inputFormTemplate = {
-      item_subitem_id: null,
       item_id: null,
       subitem_id: null,
       unit_id: null,
@@ -32,7 +31,6 @@ export class HmpFormService {
     };
 
     this.outputFormTemplate = {
-      item_subitem_id: null,
       item_id: null,
       subitem_id: null,
       unit_id: null,
@@ -88,11 +86,11 @@ export class HmpFormService {
 
 
     for (let j in data.inputs) {
-      data.inputs[j].item_subitem_id = data.inputs[j].subitem_id ? data.inputs[j].item_id + ":" + data.inputs[j].subitem_id : data.inputs[j].item_id;
+      // IDs are already present
       if (data.inputs[j].jawak_ref_id) data.auto_jawak = true;
     }
     for (let j in data.outputs) {
-      data.outputs[j].item_subitem_id = data.outputs[j].subitem_id ? data.outputs[j].item_id + ":" + data.outputs[j].subitem_id : data.outputs[j].item_id;
+      // IDs are already present
       if (data.outputs[j].aawak_ref_id) data.auto_aawak = true;
     }
 

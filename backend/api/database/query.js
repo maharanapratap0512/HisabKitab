@@ -379,31 +379,31 @@ const item = {
         `select * from item ?`
     , select_full:
         `select item.*, json_group_array(distinct ct.category_hin) as categories_hin,
-        unit.unit_full, unit.unit_short from item, json_each(item.categories)
-        left join category ct on ct._id = json_each.value
+        unit.unit_full, unit.unit_short from item
+        left join rel_item_category ric on ric.item_id = item._id
+        left join category ct on ct._id = ric.category_id
         left join unit on unit._id = item.unit_id ? group by item._id limit @limit offset @offset`
     , insert:
         `insert into item (
-            item_hin, item_eng, item_roman, item_code, categories, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, active)
+            item_hin, item_eng, item_roman, item_code, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, active)
         values (
-            @item_hin, @item_eng, @item_roman, @item_code, @categories, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @active)`
+            @item_hin, @item_eng, @item_roman, @item_code, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @active)`
     , import:
         `insert into item (
-            item_hin, item_eng, item_roman, item_code, categories, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, created_at, updated_at, active) 
+            item_hin, item_eng, item_roman, item_code, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, created_at, updated_at, active) 
         values (
-            @item_hin, @item_eng, @item_roman, @item_code, @categories, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @created_at, @updated_at, @active)`
+            @item_hin, @item_eng, @item_roman, @item_code, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @created_at, @updated_at, @active)`
     , insert_ignore:
         `insert or ignore into item (
-            _id, item_hin, item_eng, item_roman, item_code, categories, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, created_at, updated_at, active) 
+            _id, item_hin, item_eng, item_roman, item_code, unit_id, extra_note, document, restrict_month, restrict_year, min_rate, max_rate, created_at, updated_at, active) 
         values (
-            @_id, @item_hin, @item_eng, @item_roman, @item_code, @categories, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @created_at, @updated_at, @active)`
+            @_id, @item_hin, @item_eng, @item_roman, @item_code, @unit_id, @extra_note, @document, @restrict_month, @restrict_year, @min_rate, @max_rate, @created_at, @updated_at, @active)`
     , import_update:
         `update item set 
         item_hin=@item_hin,
         item_eng=@item_eng,
         item_roman=@item_roman,
         item_code=@item_code,
-        categories=@categories,
         extra_note=@extra_note,
         document=@document,
         unit_id=@unit_id,
@@ -419,7 +419,6 @@ const item = {
         item_eng=@item_eng,
         item_roman=@item_roman,
         item_code=@item_code,
-        categories=@categories,
         extra_note=@extra_note,
         document=@document,
         unit_id=@unit_id,
@@ -464,7 +463,8 @@ const itemmix = {
         left join unit ut on ut._id = subitem.unit_id
         where subitem.item_id = item._id
         group by subitem._id
-    ) as si) as subitems
+    ) as si) as subitems,
+    (select json_group_array(json_object('_id', ia._id, 'alias', ia.alias)) from item_aliases ia where ia.item_id = item._id) as item_aliases
     from item
     left join rel_item_category ric on ric.item_id = item._id
     left join category ct on ct._id = ric.category_id
@@ -472,7 +472,8 @@ const itemmix = {
     group by item._id # limit @limit offset @offset`,
 
     order: `item_hin, item_eng`,
-    count: `select count(*) as total_count from (select count(*) from item, json_each(item.categories)
+    count: `select count(*) as total_count from (select item._id from item 
+        left join rel_item_category ric on ric.item_id = item._id
         left join subitem si on si.item_id = item._id ? group by item._id)`
 }
 
@@ -485,8 +486,8 @@ const jawak = {
         mst.zone_id as mm_zone_id, zn.zone_hin as mm_zone_hin, zn.zone_eng as mm_zone_eng,
         jmm.mm_hin as jawak_mm_hin, jmm.mm_eng as jawak_mm_eng, jmm.mm_code as jawak_mm_code,
         pbk.roll_no, pbk.pbk_hin, pbk.pbk_eng, pbk.relation, pbk.state_id as pbk_state_id, pst.state_hin as pbk_state_hin, pst.state_eng as pbk_state_eng,
-        it.item_hin, it.item_eng, it.item_code, it.item_roman,
-        si.subitem_hin, si.subitem_eng, si.subitem_roman,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as icategories,
+        si.subitem_hin, si.subitem_eng, si.subitem_roman, si.categories as scategories,
         slul.list_name_hin as usage_list_hin, slul.list_name_eng as usage_list_eng, slul.list_name_roman as usage_list_roman,
         sl.list_name_hin as condition_hin, sl.list_name_eng as condition_eng,
         dept.dept_eng, dept.dept_hin, dept.dept_code,
@@ -2097,8 +2098,9 @@ const subitem = {
     , insert:
         `insert into subitem (
         item_id,
-        subitem_list_id,
-        categories,
+        subitem_hin,
+        subitem_eng,
+        subitem_roman,
         unit_id,
         extra_note,
         document,
@@ -2109,8 +2111,9 @@ const subitem = {
         active)
     values (
         @item_id,
-        @subitem_list_id,
-        @categories,
+        @subitem_hin,
+        @subitem_eng,
+        @subitem_roman,
         @unit_id,
         @extra_note,
         @document,
@@ -2122,8 +2125,9 @@ const subitem = {
     , import:
         `insert into subitem (
         item_id,
-        subitem_list_id,
-        categories,
+        subitem_hin,
+        subitem_eng,
+        subitem_roman,,
         unit_id,
         extra_note,
         document,
@@ -2136,8 +2140,9 @@ const subitem = {
         active)
     values (
         @item_id,
-        @subitem_list_id,
-        @categories,
+        @subitem_hin,
+        @subitem_eng,
+        @subitem_roman,,
         @unit_id,
         @extra_note,
         @document,
@@ -2152,8 +2157,9 @@ const subitem = {
         `insert or ignore into subitem (
             _id,
             item_id,
-            subitem_list_id,
-            categories,
+            subitem_hin,
+            subitem_eng,
+            subitem_roman,
             unit_id,
             extra_note,
             document,
@@ -2167,8 +2173,9 @@ const subitem = {
         values (
             @_id,
             @item_id,
-            @subitem_list_id,
-            @categories,
+            @subitem_hin,
+            @subitem_eng,
+            @subitem_roman,
             @unit_id,
             @extra_note,
             @document,
@@ -2182,8 +2189,9 @@ const subitem = {
     , import_update:
         `update subitem set 
         item_id=@item_id,
-        subitem_list_id=@subitem_list_id,
-        categories=@categories,
+        subitem_hin=@subitem_hin,
+        subitem_eng=@subitem_eng,
+        subitem_roman=@subitem_roman,
         unit_id=@unit_id,
         extra_note=@extra_note,
         document=@document,
@@ -2196,8 +2204,9 @@ const subitem = {
     , update:
         `update subitem set 
         item_id=@item_id,
-        subitem_list_id=@subitem_list_id,
-        categories=@categories,
+        subitem_hin=@subitem_hin,
+        subitem_eng=@subitem_eng,
+        subitem_roman=@subitem_roman,
         unit_id=@unit_id,
         extra_note=@extra_note,
         document=@document,
@@ -2746,7 +2755,7 @@ const excel_correction = {
     update_condition: `update temp_import set condition_id = @id where condition = @name`,
     update_product: `update temp_import set product_id = @id where product = @name`,
     update_nimitt: `update temp_import set nimitt_id = @id where nimitt = @name`,
-    update_pbk: `update temp_import set pbk_id = @id where pbk = @pbk`,
+    update_pbk: `update temp_import set pbk_id = @id where pbk = @name`,
     update_unit: `update temp_import set unit_id = @id where unit = @name`,
     update_jawak: `update temp_import set jawak_detail = @jawak_detail where _id = @_id`,
 

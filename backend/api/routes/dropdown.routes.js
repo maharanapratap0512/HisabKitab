@@ -56,7 +56,13 @@ router.get('/all/:dept_id', async (req, res, next) => {
 
             // Assign with fallbacks
             lists.country = country || [];
-            lists.category = category || [];
+            lists.category = {
+                data: (category?.data || []).map(c => {
+                    c.alias = (c.alias && c.alias != "null" ? (typeof c.alias === 'string' ? JSON.parse(c.alias) : c.alias) : []);
+                    return c;
+                }),
+                total_count: category?.total_count || 0
+            };
             lists.city = city || [];
             lists.department = department || [];
             lists.departmen_config = departmen_config || [];
@@ -85,6 +91,7 @@ router.get('/all/:dept_id', async (req, res, next) => {
                     resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
                     resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
                     resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
+                    resolve.data[i].item_aliases = (resolve.data[i].item_aliases && resolve.data[i].item_aliases != "[null]" ? JSON.parse(resolve.data[i].item_aliases) : []);
                     // resolve.data[i].categories_hin = (resolve.data[i].categories_hin != "[null]" ? JSON.parse(resolve.data[i].categories_hin) : []);
                     for (let j in resolve.data[i].subitems) {
                         // resolve.data[i].subitems[j].categories = (resolve.data[i].subitems[j].categories != "[null]" ? JSON.parse(resolve.data[i].subitems[j].categories) : []);

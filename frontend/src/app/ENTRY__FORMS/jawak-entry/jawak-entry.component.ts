@@ -88,8 +88,8 @@ export class JawakEntryComponent implements OnInit {
       is_xl: [null],
       is_process: [null],
       dept_id: [this.auth.webUser.dept_id],
-      auto_awk: [this.settings.jawak.auto_awk],
-      auto_reawk: [this.settings.jawak.auto_reawk],
+      auto_awk: [null],
+      auto_reawk: [null],
       aawak_type_id: [null],
       aawak_dept_id: [this.auth.webUser.dept_id],
       aawak_date: [null],
@@ -199,14 +199,9 @@ export class JawakEntryComponent implements OnInit {
       }
 
       setTimeout(() => {
-        this.itemSelected(changes.getData.currentValue.item_id);
+        this.itemSelected(changes.getData.currentValue);
         if (changes.getData.currentValue.subitem_id) {
-          this.subitemSelected(changes.getData.currentValue.subitem_id);
-          setTimeout(() => {
-            this.jawakForm.patchValue({
-              subitem_id: changes.getData.currentValue.subitem_id
-            })
-          }, 50);
+          this.subitemSelected(changes.getData.currentValue);
         }
       }, 100);
     }
@@ -315,21 +310,18 @@ export class JawakEntryComponent implements OnInit {
   }
 
   itemSelected(ev: any) {
-    if (ev) {
-      console.log("ev", ev);
-      let item = this.items.find((i: { _id: any; }) => i._id == ev);
+    const item_id = ev && typeof ev === 'object' ? ev.item_id : ev;
+    if (item_id) {
+      let item = this.items.find((i: { _id: any; }) => i._id == item_id);
       if (item) {
-        if (this.cat) {
-          this.subitems = item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat);
-        }
-        else {
-          this.subitems = item.subitems;
-        }
+        this.subitems = this.cat ? item.subitems.filter((s: { category_id: any; }) => s.category_id == this.cat) : item.subitems;
+
         if (this.cat && this.cat != item.category_id) {
           this.jawakForm.setControl('subitem_id', this.fb.control(null, [Validators.required]));
         } else {
           this.jawakForm.setControl('subitem_id', this.fb.control(null));
         }
+
         if (!this.isEdit) {
           this.jawakForm.patchValue({
             unit_id: item.unit_id,
@@ -337,23 +329,20 @@ export class JawakEntryComponent implements OnInit {
           });
         }
       }
-    }
-    else {
+    } else {
       this.subitems = [];
       if (!this.isEdit) {
-        this.jawakForm.patchValue({
-          unit_id: null,
-          unit_short: null
-        });
+        this.jawakForm.patchValue({ unit_id: null, unit_short: null });
       }
     }
   }
 
   subitemSelected(ev: any) {
-    if (ev) {
-      let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
+    const subitem_id = ev && typeof ev === 'object' ? ev.subitem_id : ev;
+    if (subitem_id) {
+      let subitem = this.subitems.find((i: { _id: any; }) => i._id == subitem_id);
       if (subitem) {
-        this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
+        this.products = this.productsAll.filter((p: { subitem_id: any; }) => p.subitem_id == subitem_id);
         if (!this.isEdit) {
           this.jawakForm.patchValue({
             unit_id: subitem.unit_id,
@@ -361,9 +350,7 @@ export class JawakEntryComponent implements OnInit {
           });
         }
       }
-
-    }
-    else {
+    } else {
       this.products = this.productsAll;
     }
   }

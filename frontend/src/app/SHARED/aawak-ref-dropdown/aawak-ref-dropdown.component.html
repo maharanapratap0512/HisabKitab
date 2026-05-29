@@ -1,0 +1,137 @@
+<div class="aawak-ref-dropdown-container" [class.mode-tiny]="mode === 'tiny'" [class.custom-sm]="size === 'sm'">
+    <ng-select #select class="aawak-ref-dropdown" 
+        [items]="items"
+        [loading]="loading"
+        bindLabel="lot_no"
+        bindValue="_id"
+        [placeholder]="mode === 'tiny' ? '' : placeholder"
+        [virtualScroll]="true"
+        [appendTo]="'body'"
+        [(ngModel)]="selectedValue"
+        (open)="onDropdownOpen()"
+        (scrollToEnd)="onScrollToEnd()"
+        (change)="onSelectChange($event)"
+        [searchable]="true"
+        [readonly]="readonly"
+        [typeahead]="search$"
+        [searchFn]="alwaysTrue"
+        dropdownClass="aawak-ref-dropdown">
+
+        <!-- Custom Label (What shows in the box) -->
+        <ng-template ng-label-tmp let-item="item">
+            <div class="selected-label" *ngIf="mode === 'default'">
+                <span class="badge badge-soft-primary" *ngIf="item.lot_no">Lot: {{item.lot_no}}</span>
+                <span class="item-text">{{item.item_hin}}</span>
+                <span class="mm-text ml-1" *ngIf="item.mm_hin">@{{item.mm_hin}}</span>
+            </div>
+            <div class="selected-label-tiny" *ngIf="mode === 'tiny'">
+                <i class="uil uil-check-circle text-success fs-18"></i>
+            </div>
+        </ng-template>
+
+        <!-- Header for tiny mode to show search text -->
+        <ng-template ng-header-tmp *ngIf="mode === 'tiny'">
+             <div class="tiny-placeholder d-flex align-items-center bg-light p-1 border-bottom">
+                <i class="uil uil-search text-muted fs-14 me-1"></i>
+                <span *ngIf="select.searchTerm" class="text-primary fw-bold" style="font-size: 11px;">{{select.searchTerm}}</span>
+                <span *ngIf="!select.searchTerm" class="text-muted" style="font-size: 11px;">Type to search...</span>
+             </div>
+        </ng-template>
+
+        <!-- Option Template (Premium 2-line layout) -->
+        <ng-template ng-option-tmp let-item="item" let-index="index">
+            <div class="aawak-option-card">
+                <!-- Line 1: Metadata (Date, MM, PBK, Lot) -->
+                <div class="meta-line">
+                    <div class="meta-left">
+                        <span class="meta-item date-badge">
+                            <i class="uil uil-calendar-alt"></i>{{item.date | date:'dd-MM-yyyy'}}
+                        </span>
+                        <span class="meta-item mm-badge">
+                            <i class="uil uil-home"></i>{{item.mm_hin}} <small class="text-muted">({{item.mm_code}})</small>
+                            <span class="source-badge" *ngIf="item.aawak_mm_hin">
+                                <i class="uil uil-arrow-left"></i>{{item.aawak_mm_hin}}
+                            </span>
+                        </span>
+                        <span class="meta-item pbk-badge" *ngIf="item.pbk_hin">
+                            <i class="uil uil-user"></i>{{item.pbk_hin}}
+                        </span>
+                    </div>
+                    <div class="meta-right" *ngIf="item.lot_no">
+                        <span class="lot-badge">Lot: {{item.lot_no}}</span>
+                    </div>
+                </div>
+
+                <!-- Line 2: Main Info (Full Name -> Badges -> Stock) -->
+                <div class="main-line">
+                    <div class="product-section">
+                        <div class="product-title-row">
+                            <span class="item-hin">{{item.item_hin}}</span>
+                            <span class="subitem-hin" *ngIf="item.subitem_hin"> - {{item.subitem_hin}}</span>
+                            <small class="product-eng text-muted ml-1">
+                                {{item.item_eng}} <span *ngIf="item.subitem_eng">- {{item.subitem_eng}}</span>
+                            </small>
+                            
+                            <!-- Badges explicitly AFTER English name -->
+                            <span class="badge-row ml-2">
+                                <span class="badge condition-badge" 
+                                    [ngClass]="{'cond-new': item.condition_eng === 'New', 'cond-old': item.condition_eng === 'Old'}">
+                                    {{item.condition_hin}}
+                                </span>
+                                <span class="badge source-badge-pill" *ngIf="item.aawak_source_hin">
+                                    <i class="uil uil-share-alt"></i>{{item.aawak_source_hin}}
+                                </span>
+                                <span class="badge type-badge-pill" *ngIf="item.aawak_type_hin">
+                                    <i class="uil uil-tag-alt"></i>{{item.aawak_type_hin}}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="stock-section">
+                        <div class="stock-remaining">
+                            <span class="label">बचत:</span>
+                            <span class="value">{{item.remaining_qty}}</span>
+                            <span class="unit">{{item.unit_short}}</span>
+                        </div>
+                        <div class="stock-total">
+                            <small>कुल: {{item.qty}} {{item.unit_short}}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+
+        <!-- Not found template -->
+        <ng-template ng-notfound-tmp>
+            <div class="p-2 text-muted text-center" *ngIf="!mmId">
+                <i class="uil uil-info-circle me-1"></i> Please select MM & Jawak MM to load Aawak
+            </div>
+            <div class="p-2 text-muted text-center" *ngIf="mmId && items.length === 0">
+                No Aawak found.
+            </div>
+        </ng-template>
+
+        <!-- Type to search template (when search is empty and no items loaded) -->
+        <ng-template ng-typetosearch-tmp>
+            <div class="p-2 text-muted text-center" *ngIf="!mmId">
+                <i class="uil uil-info-circle me-1"></i> Please select MM & Jawak MM to load Aawak
+            </div>
+            <div class="p-2 text-muted text-center" *ngIf="mmId">
+                Type to search Aawak
+            </div>
+        </ng-template>
+
+        <!-- Custom Footer (Optional) -->
+        <ng-template ng-footer-tmp>
+            <div class="p-2 d-flex justify-content-between align-items-center bg-light border-top">
+                <small class="text-muted" *ngIf="totalCount > 0">Showing {{items.length}} of {{totalCount}} results</small>
+                <small class="text-info" *ngIf="loading">Loading more...</small>
+            </div>
+        </ng-template>
+    </ng-select>
+
+    <!-- Overlay trigger for tiny mode -->
+    <div *ngIf="mode === 'tiny'" class="tiny-overlay d-flex align-items-center" (click)="select.open()">
+        <i class="uil" [ngClass]="selectedValue ? 'uil-check-circle text-success' : 'uil-link-h text-muted'" style="font-size: 18px;"></i>
+    </div>
+</div>

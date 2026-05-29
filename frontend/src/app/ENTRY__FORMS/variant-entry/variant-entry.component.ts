@@ -79,6 +79,51 @@ export class VariantEntryComponent implements OnInit, OnChanges {
     this.separator = ' ';
     this.defaultUnit = this.selectedItem?.unit_id || null;
     this.defaultCatIds = [];
+    if (this.selectedItem?.variants?.length > 0) {
+      this.loadExistingConfig();
+    }
+  }
+
+  loadExistingConfig() {
+    const attrIds = new Set<number>();
+    const valueMap = new Map<number, Set<number>>(); // attrId -> Set of valueIds
+    const individualAttrIds = new Set<number>();
+
+    for (const v of this.selectedItem.variants) {
+      if (v.attributes) {
+        // If a variant has only one attribute, it means it's an "Individual" variant for that attribute
+        if (v.attributes.length === 1) {
+          individualAttrIds.add(v.attributes[0].attribute_id);
+        }
+
+        for (const av of v.attributes) {
+          if (av.attribute_id) {
+            attrIds.add(av.attribute_id);
+            if (!valueMap.has(av.attribute_id)) valueMap.set(av.attribute_id, new Set());
+            if (av.attribute_value_id) valueMap.get(av.attribute_id)!.add(av.attribute_value_id);
+          }
+        }
+      }
+    }
+
+    if (attrIds.size === 0) return;
+
+    // Populate selectedAttrs
+    this.selectedAttrs = this.allAttributes.filter(a => attrIds.has(a._id));
+
+    // Populate attrGroups
+    this.attrGroups = this.selectedAttrs.map(attr => {
+      const selectedValueIds = valueMap.get(attr._id);
+      const allValuesForAttr = this.attrValueMap[attr._id] || [];
+      const selectedValues = allValuesForAttr.filter((v: any) => selectedValueIds?.has(v._id));
+      return {
+        attr,
+        selectedValues,
+        isIndividual: individualAttrIds.has(attr._id)
+      };
+    });
+
+    this.recompute();
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -252,6 +297,28 @@ export class VariantEntryComponent implements OnInit, OnChanges {
         max_rate: prev?.max_rate ?? 0,
       };
     });
+
+    // Mark existing variants by fingerprint
+    const existingFingerprints = new Set((this.selectedItem.variants || []).map((v: any) => this.getFingerprint(v.attributes)));
+
+    this.combinations.forEach(v => {
+      v.exists = existingFingerprints.has(this.getFingerprint(v.attribute_values));
+      if (v.exists) v.selected = true; // Force selection for existing ones
+    });
+
+    // Sort: new at top, existing at bottom
+    this.combinations.sort((a, b) => {
+      if (a.exists === b.exists) return 0;
+      return a.exists ? 1 : -1;
+    });
+  }
+
+  getFingerprint(attribute_values: any[]) {
+    return (attribute_values ?? [])
+      .map(av => Number(av.attribute_value_id))
+      .filter(id => !isNaN(id))
+      .sort((a, b) => a - b)
+      .join('-');
   }
 
   // Powerset of an array (all subsets)
@@ -312,7 +379,7 @@ export class VariantEntryComponent implements OnInit, OnChanges {
     this.http.post(this.api.getUrl('VARIANT') + 'bulk', payload)
       .subscribe((d: any) => {
         this.isLoader = false;
-        if (d.success) this.response.emit({ reload: true, created: d.created });
+        if (d.success) this.response.emit({ reload: true, ...d });
       });
   }
 }

@@ -1,10 +1,100 @@
 [
     {
+        "version": "31.2",
+        "date": "02-05-2026",
+        "summary": "Reference Management, Dropdown Filters & More",
+        "summary_hin": "रेफरेंस मैनेजमेंट, फिल्टर ड्रॉपडाउन और बहुत कुछ",
+        "isNew": true,
+        "items": [
+            {
+                "type": "fix",
+                "module": "AJ Excel Import",
+                "title": "pbk in aawak and jawak row insert fixed.",
+                "title_hin": "आवक जावक पंक्ति में pbk प्रविष्टि ठीक हो गई।",
+                "desc": "pbk is now inserting in aawak and jawak row. ",
+                "desc_hin": "pbk अब आवक और जावक पंक्ति में इन्सर्ट हो रहा है।"
+            },
+            {
+                "type": "improvement",
+                "module": "Jawak - Aawak Reference",
+                "title": "Smart Linking & Unlinking",
+                "title_hin": "जावक - आवक रेफरेंस",
+                "desc": "Enhanced UI for managing Aawak references in Jawak. Includes: <br/> - Smart selection with filtering (Qty, MM, Subitem, Condition, Nimitt). <br/> - quick link-Unlink directly from table, jawak row without edit jawak. <br /> - jaawak-entry auto_aawak, auto_reaawak automatic selection removed and position changed.",
+                "desc_hin": "जावक में आवक रेफरेंस को मैनेज करने के लिए बेहतर UI। इसमें शामिल है: <br/> - फिल्टरिंग के साथ स्मार्ट सिलेक्शन (Qty, MM, Subitem, Condition, Nimitt)। <br/> - बिना जावक एडिट किए, सीधे टेबल से लिंक-अनलिंक की सुविधा। <br /> - जावक-एंट्री में ऑटो_आवक, ऑटो_रेआवक ऑटोमेटिक सिलेक्शन हटा दिए गए और पोजीशन बदल दी गई।"
+            },
+            {
+                "type": "improvement",
+                "module": "Category Management",
+                "title": "parent id and alias support.",
+                "title_hin": "Parent ID और Alias सपोर्ट",
+                "desc": "you can set category's parent category, and also create alias (alternative names) for category, which also works for unique restrictions ",
+                "desc_hin": "आप किसी भी कैटेगरी की पैरेंट कैटेगरी set कर सकते हैं, और उस कैटेगरी के लिए alias (alternative names) भी बना सकते हैं, जो unique restriction के लिए भी काम करेगा।"
+            },
+            {
+                "type": "improvement",
+                "module": "Excel Export",
+                "title": "Aawak & jawak excel export improved.",
+                "title_hin": "आवक जावक एक्सपोर्ट इंप्रूव्ड।",
+                "desc": "error solved,writing excel data counting displayed.",
+                "desc_hin": "एरर सॉल्व हो गयी है, एक्सपोर्ट करते समय कितने रिकॉर्ड्स प्रोसेस counting दिखाई देगा।"
+            },
+            {
+                "type": "fix",
+                "module": "Item Export",
+                "title": "export Format Changed",
+                "title_hin": "निर्यात प्रारूप बदला गया।",
+                "desc": "Every subitem row now export with item's data also. It solve subitem import problem.",
+                "desc_hin": "हर सबआइटम रो अब आइटम के डेटा के साथ एक्सपोर्ट होती है। इससे सबआइटम आयात समस्या हल हो गयी है।"
+            }
+        ]
+    },
+    {
+        "version": "31.1",
+        "date": "28-04-2026",
+        "summary": "Variant System Fixes & UI Optimizations",
+        "summary_hin": "वेरिएंट सिस्टम फिक्स और यूआई सुधार",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Variant Management",
+                "title": "Full Variant Workflow",
+                "title_hin": "वेरिएंट मैनेजमेंट पेज",
+                "desc": "Complete system to manage item variants (Size, Color, etc.). <br/> - Bulk generation of variants. <br/> - Attribute & Alias management. <br/> - Real-time variant count badges.",
+                "desc_hin": "आइटम के अलग-अलग प्रकारों (Size, Color आदि) को मैनेज करने का पूरा सिस्टम। <br/> - एक साथ कई वेरिएंट बनाने की सुविधा। <br/> - एट्रिब्यूट और निकनेम (Alias) मैनेजमेंट। <br/> - वेरिएंट की संख्या तुरंत अपडेट होने की सुविधा।"
+            },
+            {
+                "type": "improvement",
+                "module": "Item-Subitem Dropdown Redesign",
+                "title": "UI Improvements & Fixes",
+                "title_hin": "आवक, जावक, एचएमपी और प्रस्ताव में नया ड्रॉपडाउन",
+                "desc": "new optimised dropdown UI design",
+                "desc_hin": "आवक, जावक, एचएमपी और प्रस्ताव में नया ड्रॉपडाउन UI डिजाइन"
+            },
+            {
+                "type": "fix",
+                "module": "Aawak Jawak Check",
+                "title": "Item wise Filter Error solved",
+                "title_hin": "आवक जावक चेक: आइटम वाइज फिल्टर एरर सॉल्वड",
+                "desc": "<br/>",
+                "desc_hin": "आवक जावक चेक में आइटम वाइज फिल्टर काम नहीं कर रहा था, उसे सॉल्व कर दिया गया है। <br/>"
+            },
+            {
+                "type": "feature",
+                "module": "Management Tools",
+                "title": "Smart Deletion & Reference Transfer",
+                "title_hin": "स्मार्ट डिलीशन और रेफरेंस ट्रांसफर",
+                "desc": "Improved UI/UX for safe and fast entity management (MM, Items, etc.). <br/> - Proactive dependency checks across all tables. <br/> - Automated SWAL confirmation for clean deletions. <br/> - Secure reference transfer to avoid data loss.",
+                "desc_hin": "एमएम और आइटम मैनेजमेंट के लिए सुरक्षित और फ़ास्ट यूआई। <br/> - सभी टेबल्स में डिपेंडेंसी की ऑटोमैटिक चेकिंग। <br/> - क्लीन डिलीशन के लिए ऑटोमैटिक कन्फर्मेशन (SWAL)। <br/> - डेटा लॉस से बचने के लिए सुरक्षित रेफरेंस ट्रांसफर।"
+            }
+        ]
+    },
+    {
         "version": "30.0",
         "date": "22-04-2026",
         "summary": "Major Upgrade: Structure Optimization & UI Redesign & NetDrop P2P Offline File Sharing",
         "summary_hin": "नया अपग्रेड: स्ट्रक्चर सुधार और नया यूआई और नेटड्रॉप P2P शेयरिंग",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "warning",

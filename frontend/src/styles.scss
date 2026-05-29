@@ -62,6 +62,39 @@ tbody:before {
   min-width: 12.5rem !important;
 }
 
+// Width utilities (Strict width)
+.w-1 {
+  width: 1.5625rem !important;
+}
+
+.w-2 {
+  width: 3.125rem !important;
+}
+
+.w-3 {
+  width: 4.6875rem !important;
+}
+
+.w-4 {
+  width: 6.25rem !important;
+}
+
+.w-5 {
+  width: 7.8125rem !important;
+}
+
+.w-6 {
+  width: 9.375rem !important;
+}
+
+.w-7 {
+  width: 10.9375rem !important;
+}
+
+.w-8 {
+  width: 12.5rem !important;
+}
+
 .mw-9 {
   min-width: 14.0625rem !important;
 }
@@ -456,43 +489,7 @@ span.search-icon {
   }
 }
 
-[data-bs-theme="dark"] {
-  .ng-select.custom-sm {
-    .ng-select-container {
-      border-color: #404954 !important;
-      background-color: transparent !important;
-      color: #fff !important;
-    }
 
-    &.ng-select-multiple .ng-select-container .ng-value {
-      background-color: #404954 !important;
-      border-color: #505a66 !important;
-      color: #fff !important;
-
-      .ng-value-icon {
-        border-right-color: #505a66 !important;
-      }
-    }
-  }
-
-  .ng-dropdown-panel.custom-sm {
-    background-color: #2a3042 !important;
-    border-color: #404954 !important;
-
-    .ng-dropdown-panel-items .ng-option {
-      color: #fff !important;
-
-      &.ng-option-marked {
-        background-color: #404954 !important;
-      }
-
-      &.ng-option-selected {
-        background-color: #727cf5 !important;
-        color: #fff !important;
-      }
-    }
-  }
-}
 
 // Soft buttons
 .btn-soft-primary {
@@ -503,6 +500,10 @@ span.search-icon {
   &:hover {
     background-color: rgba(108, 95, 199, 0.2);
   }
+}
+
+.bg-soft-primary {
+  background-color: rgba(var(--bs-primary-rgb, 114, 124, 245), 0.12) !important;
 }
 
 .btn-soft-secondary {
@@ -633,6 +634,88 @@ span.search-icon {
   border-top: 3px solid var(--thead-accent-color) !important;
 }
 
+// Fix for text-muted visibility inside ng-select options on hover/mark
+.ng-dropdown-panel .ng-option.ng-option-marked .text-muted,
+.ng-dropdown-panel .ng-option.ng-option-selected .text-muted {
+  color: inherit !important;
+  opacity: 0.8 !important;
+}
+
 .card-theme-left {
   border-left: 3px solid var(--thead-accent-color) !important;
+}
+
+/* Item Dropdown Panel Styles */
+body .ng-dropdown-panel.item-dropdown,
+body .ng-dropdown-panel.item-dropdown-panel {
+  min-width: 600px !important;
+  width: 600px !important;
+  max-width: 90vw !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  background-color: var(--bs-body-bg) !important;
+  color: var(--bs-body-color) !important;
+  border: 1px solid var(--bs-border-color) !important;
+  z-index: 9999 !important;
+
+  .ng-option.ng-option-marked {
+    background-color: #3b445c !important; /* Solid color for visibility */
+    color: #ffffff !important;
+  }
+}
+
+/* Aawak Reference Dropdown Panel Styles */
+body .ng-dropdown-panel.aawak-ref-dropdown {
+  min-width: 750px !important;
+  width: 750px !important;
+  max-width: 95vw !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+  background-color: var(--bs-body-bg) !important;
+  color: var(--bs-body-color) !important;
+  border: 1px solid var(--bs-border-color) !important;
+  z-index: 99999 !important;
+
+  .ng-option {
+    border-bottom: 1px solid var(--bs-border-color-translucent) !important;
+
+    &:last-child {
+      border-bottom: none !important;
+    }
+
+    &.ng-option-marked {
+      background-color: #3b445c !important; /* Solid color for visibility */
+      color: #ffffff !important;
+    }
+
+    &.ng-option-selected {
+      background-color: rgba(var(--bs-primary-rgb), 0.15) !important;
+      color: var(--bs-primary) !important;
+    }
+  }
+}
+
+/* Theme overrides for light mode */
+body[data-bs-theme="light"] {
+
+  .ng-dropdown-panel.item-dropdown,
+  .ng-dropdown-panel.item-dropdown-panel,
+  .ng-dropdown-panel.aawak-ref-dropdown {
+    background-color: #ffffff !important;
+    border: 1px solid #dee2e6 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+
+    .ng-option {
+      color: #1e293b !important;
+      border-bottom-color: #e9ecef !important;
+
+      &.ng-option-marked {
+        background-color: #f1f3fa !important; /* Solid color to prevent overlap */
+        color: #1e293b !important;
+      }
+
+      &.ng-option-selected {
+        background-color: #e0e7ff !important; /* Solid color */
+        color: #1e293b !important;
+      }
+    }
+  }
 }

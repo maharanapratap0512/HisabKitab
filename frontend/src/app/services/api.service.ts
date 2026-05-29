@@ -8,9 +8,12 @@ import { Location } from '@angular/common';
 
 const currentHost = window.location.hostname;
 const host = window.location.host;
-const base_port = getPortFromHost(host) - 1000;
-// const base_url = `http://localhost:${base_port}/api/`;
-const base_url = `http://${currentHost}:${base_port}/api/`;
+const portMatch = host.match(/:(\d+)/);
+const fPort = portMatch ? +portMatch[1] : 4200;
+
+// Convention: Backend Port = Frontend Port - 1000
+const bPort = fPort - 1000;
+const base_url = `http://${currentHost}:${bPort}/api/`;
 
 @Injectable({
   providedIn: 'root'
