@@ -1,6 +1,6 @@
 <ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
    [fullScreen]="true">
-   <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
+   <p style="color: white"> {{loadingStatus}} </p>
 </ngx-spinner>
 
 <!-- Begin page -->
@@ -15,11 +15,11 @@
                <div class="card-body" style="overflow: auto;">
                   <div class="row d-flex justify-content-between">
                      <div class="col-2">
-                        <button class="btn btn-primary" (click)="openModal('Add Jawak')">
+                        <button class="btn btn-primary w-100" (click)="openModal('Add Jawak')">
                            <i class="dripicons-plus" style="font-size: large;"> </i>Add Jawak
                         </button>
                      </div>
-                     <div class="col-4">
+                     <div class="col-3">
                         <div class="form-group">
                            <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                               name="search">
@@ -32,16 +32,15 @@
                         </button>
                      </div>
 
-                     <div class="col-2">
-                        <!-- <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
-                           data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
-                        <div class="dropdown-menu">
-                           <a class="dropdown-item" (click)="exportExcel()">Jawak Only</a>
-                           <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
-                           <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
-                           <a class="dropdown-item" (click)="exportPendingData()">Pending Destribution</a>
-                        </div> -->
-                        <button type="button" class="btn btn-outline-success" (click)="exportExcel()"> Export To Excel
+                     <div class="col-3 d-flex">
+                        <button class="file btn btn-success w-50" style="font-weight: 700 !important;">
+                           <i class="uil uil-arrow-to-bottom"></i> Excel Import
+                           <input type="file" class="inputtag"
+                              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                              (change)="excelImport($event)" />
+                        </button>
+                        <button type="button" class="btn btn-outline-success ms-2 w-50" (click)="exportExcel()"> Export
+                           To Excel
                         </button>
                      </div>
                      <div class="col-2">
@@ -289,11 +288,23 @@
                               <th style="width: 40px;">No.</th>
                               <th style="width: 100px;">Manage</th>
                               <th style="width: 150px;">
-                                 <div class="d-flex align-items-center justify-content-between" title="Show unlinked only">
+                                 <div class="d-flex align-items-center justify-content-between"
+                                    title="Show unlinked only">
                                     <span>Ref. Aawak</span>
-                                    <input type="checkbox" style="width: 12px; height: 12px; margin-left: 4px; cursor: pointer;" 
-                                          [(ngModel)]="filterBody.unlinkedOnly" (change)="getJawakData(page=1)"
-                                          title="Check to show only unlinked jawaks">
+                                    <input type="checkbox"
+                                       style="width: 12px; height: 12px; margin-left: 4px; cursor: pointer;"
+                                       [(ngModel)]="filterBody.unlinkedOnly" (change)="getJawakData(page=1)"
+                                       title="Check to show only unlinked jawaks">
+                                 </div>
+                              </th>
+                              <th style="width: 100px;">
+                                 <div class="d-flex align-items-center justify-content-between"
+                                    title="Show unreceived only">
+                                    <span>Received</span>
+                                    <input type="checkbox"
+                                       style="width: 12px; height: 12px; margin-left: 4px; cursor: pointer;"
+                                       [(ngModel)]="filterBody.notReceivedOnly" (change)="getJawakData(page=1)"
+                                       title="Check to show only unreceived jawaks">
                                  </div>
                               </th>
                               <th style="width: 150px;" *ngIf="!settings.defaultMM">MM</th>
@@ -353,6 +364,11 @@
                                     }" [(ngModel)]="data.aawak_ref_id" [autoSave]="true" [jawakId]="data._id"
                                     (saved)="onAawakRefSaved($event, i)" mode="tiny" size="sm">
                                  </app-aawak-ref-dropdown>
+                              </td>
+                              <td>
+                                 <div class="form-check form-switch">
+                                    <input type="checkbox" class="form-check-input" [checked]="data.is_recieved" (change)="toggleReceived(data)" style="cursor: pointer;">
+                                 </div>
                               </td>
                               <td *ngIf="!settings.defaultMM">
                                  <span>{{data.mm_hin}} {{data.mm_code ? '('+data.mm_code+')': ''}}</span> <br />
@@ -473,6 +489,9 @@
             <app-jawak-entry (response)='editJawakResponse($event)' *ngIf="showModal == 'Edit Jawak'"
                [getData]="editData" isEdit="true">
             </app-jawak-entry>
+
+            <app-excel-import *ngIf='showModal == "ei_jawak"' importType="jawak" [lockType]="true"
+               [excelFile]="excelFile" (response)="importResponse('jawak')"></app-excel-import>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" style="width: 120px;"

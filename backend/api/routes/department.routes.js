@@ -22,6 +22,23 @@ router.get('/', async (req, res, next) => {
 });
 
 
+// download file
+router.get('/download', (req, res, next) => {
+    try {
+        const filePath = req.query.path;
+        if (!filePath) {
+            return res.status(400).json({ success: false, message: 'Path is required' });
+        }
+        res.download(filePath, (err) => {
+            if (err) {
+                console.error("Error downloading file:", err);
+            }
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
 // get department 
 router.get('/:dept_id', async (req, res, next) => {
     try {
@@ -76,15 +93,88 @@ router.post('/', async (req, res, next) => {
 });
 
 
-//  department DB download
-router.get('/dbfull/:dept_id', async (req, res, next) => {
+// get department config
+router.get('/dbgenerate/config', async (req, res, next) => {
     try {
-        DB.generateDB(req.params.dept_id).then((result) => {
+        const departmentService = require('../services/department.service');
+        res.json({
+            success: true,
+            result: departmentService.DB_GEN_CONFIG
+        });
+    } catch (err) { next(err) };
+});
+
+// get generic table data for DB generate modal
+router.get('/dbgenerate/data/:table_name', async (req, res, next) => {
+    try {
+        const tableName = req.params.table_name;
+        // Get all rows for the modal. We don't filter by dept_id here because 
+        // the modal is used to select rows for the department.
+        await DB.getList(tableName, { full: false }).then(resolve => {
+            res.json({
+                success: true,
+                result: resolve.data
+            });
+        });
+    } catch (err) { next(err) };
+});
+
+// Bulk update department configs
+router.put('/dbgenerate/config/bulk', async (req, res, next) => {
+    try {
+        const dept_id = req.body.dept_id;
+        const configs = req.body.configs; // format: { table_name: [id1, id2, ...] }
+
+        for (let config_key of Object.keys(configs)) {
+            let existing = await DB.getList('department_config', { conditionString: `dept_id = ${dept_id} and config_key = '${config_key}'` });
+            if (existing.data && existing.data.length > 0) {
+                await DB.update('department_config', { config_key: config_key, config_value: JSON.stringify(configs[config_key]) }, existing.data[0]._id);
+            } else {
+                await DB.insert('department_config', { dept_id, config_key, config_value: JSON.stringify(configs[config_key]) });
+            }
+        }
+        res.json({ success: true });
+    } catch (err) { next(err) };
+});
+
+//  department DB download
+router.post('/dbfull/:dept_id', async (req, res, next) => {
+    try {
+        let skipped_tables = req.body.skipped_tables || [];
+        let custom_selections = req.body.custom_selections || {};
+        const departmentService = require('../services/department.service');
+
+        let queriesObj = {};
+        for (let tableName of Object.keys(departmentService.DB_GEN_CONFIG)) {
+            if (skipped_tables.includes(tableName)) continue;
+            queriesObj[tableName] = departmentService.getQueriesForTable(tableName, custom_selections[tableName]);
+        }
+
+        DB.generateDB(req.params.dept_id, queriesObj).then((result) => {
             res.json({
                 success: true,
                 result: { path: result }
             })
-        });
+        }).catch(err => next(err));
+    } catch (err) { next(err) };
+});
+
+// old GET for backward compatibility
+router.get('/dbfull/:dept_id', async (req, res, next) => {
+    try {
+        const departmentService = require('../services/department.service');
+
+        let queriesObj = {};
+        for (let tableName of Object.keys(departmentService.DB_GEN_CONFIG)) {
+            queriesObj[tableName] = departmentService.getQueriesForTable(tableName);
+        }
+
+        DB.generateDB(req.params.dept_id, queriesObj).then((result) => {
+            res.json({
+                success: true,
+                result: { path: result }
+            })
+        }).catch(err => next(err));
     } catch (err) { next(err) };
 });
 

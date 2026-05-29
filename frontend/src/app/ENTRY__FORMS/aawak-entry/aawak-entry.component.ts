@@ -102,6 +102,7 @@ export class AawakEntryComponent implements OnInit {
 	// jwkArr: any = [];
 	settings: any = {};
 	imagepath: any;
+	editDoc: any = {};
 	editIndex: any = null;
 
 	constructor(private fb: FormBuilder,
@@ -183,7 +184,8 @@ export class AawakEntryComponent implements OnInit {
 			this.awkfg.remaining_qty = changes.getData.currentValue.remaining_qty
 			this.awkfg.company_name = changes.getData.currentValue.company_name ? changes.getData.currentValue.company_name : null
 			this.awkfg.isbill = changes.getData.currentValue.isbill ? changes.getData.currentValue.isbill : false;
-			this.awkfg.document = changes.getData.currentValue.document ? changes.getData.currentValue.document : []
+			const doc = changes.getData.currentValue.document || { images: [] };
+			this.awkfg.document = doc;
 			this.awkfg.is_xl = changes.getData.currentValue.is_xl ? changes.getData.currentValue.is_xl : 0
 			this.awkfg.hl = changes.getData.currentValue.hl ? changes.getData.currentValue.hl : 0
 			this.awkfg.is_auto_pd = changes.getData.currentValue.is_auto_pd ? changes.getData.currentValue.is_auto_pd : 0
@@ -194,7 +196,8 @@ export class AawakEntryComponent implements OnInit {
 
 			this.selDept_id = changes.getData.currentValue.dept_id;
 			this.oldQty = changes.getData.currentValue.qty;
-			this.imagepath = ((this.awkfg.document && this.awkfg.document.images && this.awkfg.document.images.length > 0) ? this.awkfg.document.images[0] : null);
+			this.imagepath = doc.images || [];
+			this.editDoc = doc;
 
 			// this.itemSelected(changes.getData.currentValue.item_id);
 			this.itemSubitemSelected(this.awkfg);

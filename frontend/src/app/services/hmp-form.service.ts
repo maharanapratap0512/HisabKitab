@@ -27,6 +27,10 @@ export class HmpFormService {
       lot_no: null,
       aawak_source_id: null,
       jawak_ref_id: null,
+      aawak_ref_id: null,
+      auto_jawak: false,
+      auto_aawak: false,
+      aawak_type_id: null,
       active: 1
     };
 
@@ -39,6 +43,7 @@ export class HmpFormService {
       rate: null,
       lot_no: null,
       aawak_ref_id: null,
+      auto_aawak: false,
       jawak_detail: [],
       active: 1
     };
@@ -86,19 +91,18 @@ export class HmpFormService {
 
 
     for (let j in data.inputs) {
-      // IDs are already present
       if (data.inputs[j].jawak_ref_id) data.auto_jawak = true;
     }
     for (let j in data.outputs) {
-      // IDs are already present
       if (data.outputs[j].aawak_ref_id) data.auto_aawak = true;
     }
 
     this.hmpBatchForm = structuredClone(data);
   }
 
-  // Logic to auto-add rows if the last row is valid
-  formStatusChanges() {
+  // Logic to auto-add rows if the last row is valid (handles both traditional and modern)
+  formStatusChanges(editorMode: string = 'traditional') {
+    if (editorMode === 'modern') return;
     console.log("fsc");
 
     let validInput = true;
@@ -124,19 +128,25 @@ export class HmpFormService {
     }
   }
 
-  valid() {
+  valid(editorMode: string = 'traditional') {
     // Basic Validation
     if (!this.hmpBatchForm.date || !this.hmpBatchForm.mm_id) return false;
 
-    // Remove trailing blank inputs row (auto-added by formStatusChanges)
-    const lastInput = this.hmpBatchForm.inputs[this.hmpBatchForm.inputs.length - 1];
-    if (lastInput && !lastInput.item_id) {
-      this.hmpBatchForm.inputs.splice(this.hmpBatchForm.inputs.length - 1, 1);
-    }
-    // Remove trailing blank outputs row
-    const lastOutput = this.hmpBatchForm.outputs[this.hmpBatchForm.outputs.length - 1];
-    if (lastOutput && !lastOutput.item_id) {
-      this.hmpBatchForm.outputs.splice(this.hmpBatchForm.outputs.length - 1, 1);
+    if (editorMode === 'traditional') {
+      // Remove trailing blank inputs row (auto-added by formStatusChanges)
+      const lastInput = this.hmpBatchForm.inputs[this.hmpBatchForm.inputs.length - 1];
+      if (lastInput && !lastInput.item_id) {
+        this.hmpBatchForm.inputs.splice(this.hmpBatchForm.inputs.length - 1, 1);
+      }
+      // Remove trailing blank outputs row
+      const lastOutput = this.hmpBatchForm.outputs[this.hmpBatchForm.outputs.length - 1];
+      if (lastOutput && !lastOutput.item_id) {
+        this.hmpBatchForm.outputs.splice(this.hmpBatchForm.outputs.length - 1, 1);
+      }
+    } else {
+      // Modern mode filtering
+      this.hmpBatchForm.inputs = this.hmpBatchForm.inputs.filter((row: any) => row.item_id && row.qty);
+      this.hmpBatchForm.outputs = this.hmpBatchForm.outputs.filter((row: any) => row.item_id && row.qty);
     }
 
     // At least 1 filled row each

@@ -173,6 +173,7 @@ module.exports = {
         amount: col.number(),
         active: col.boolean().default(1),
         lot_no: col.string(),
+        aawak_type_id: col.ref('support_list._id', { as: 'aawak_type', select: ['list_name_hin', 'list_name_eng'] }),
     }),
 
     ...defineTable('hmp_batch_output', {
@@ -446,6 +447,7 @@ module.exports = {
         _id: col.id(),
         category_hin: col.string().required(),
         category_eng: col.string(),
+        category_roman: col.string(),
         parent_id: col.ref('category._id', { as: 'parent' }),
         alias: col.json(),
         sort_order: col.number().default(0),

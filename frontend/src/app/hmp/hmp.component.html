@@ -81,16 +81,20 @@
               </div>
             </app-popover-filter>
           </div>
-          <div class="col-1 d-flex align-items-center gap-2">
-            <button type="button" class="badge badge-outline-success dropdown-toggle year-box mx-2"
-              data-bs-toggle="dropdown" aria-expanded="false"> Export To </button>
+          <div class="col-2 pt-2">
+            <button type="button" class="badge badge-outline-success dropdown-toggle year-box mx-2 w-100"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              Export To <span *ngIf="getSelectedCount() > 0">({{getSelectedCount()}} selected)</span>
+            </button>
             <div class="dropdown-menu">
               <a class="dropdown-item" (click)="exportToExcel()" style="cursor: pointer;">Excel</a>
-              <a class="dropdown-item" (click)="exportToPdf()" style="cursor: pointer;">Pdf</a>
+              <a class="dropdown-item" (click)="exportToPdf('normal')" style="cursor: pointer;">Pdf (Normal)</a>
+              <a class="dropdown-item" (click)="exportToPdf('advance')" style="cursor: pointer;"
+                [class.disabled]="getSelectedCount() === 0">Pdf (Advance Layout)</a>
             </div>
           </div>
-          <div class="col-2 text-center d-flex align-items-center gap-2">
-            <span><b>Total Count = {{total_count}}</b></span>
+          <div class="col-1 pt-2 text-center">
+            <span>Total - {{total_count}}</span>
           </div>
           <div class="col-5" *ngIf="batches.length">
             <pagination-controls class="pagi text-end" (pageChange)="getHmpPage(page = $event)" [autoHide]="true">
@@ -108,6 +112,11 @@
                 data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse' + batchIndex"
                 [attr.aria-expanded]="batchIndex === 0" [attr.aria-controls]="'collapse' + batchIndex"
                 style="background-color: #5c4cae; color: white;">
+                <div class="d-flex align-items-center me-2" (click)="$event.stopPropagation();">
+                  <input type="checkbox" class="form-check-input mt-0"
+                    style="width: 16px; height: 16px; border-color: rgba(255,255,255,0.6);"
+                    [checked]="isSelected(batch._id)" (change)="toggleSelection(batch._id)">
+                </div>
                 <div class="w-100 d-flex align-items-center justify-content-between pe-3">
                   <div class="d-flex align-items-center gap-3 flex-wrap fs-7">
                     <strong>{{batch.date | date:'dd-MM-yyyy'}}</strong>
@@ -266,6 +275,10 @@
           <table class="table-sm table-compact table-hover table-sticky-header mb-0">
             <thead>
               <tr>
+                <th style="width: 40px; text-align: center; vertical-align: middle;">
+                  <input type="checkbox" class="form-check-input" [checked]="isAllSelected()"
+                    (change)="toggleSelectAll($event)">
+                </th>
                 <th style="min-width: 50px;">#</th>
                 <th style="min-width: 140px;" class="text-start ps-2">Date</th>
                 <th style="min-width: 120px;">Recipe</th>
@@ -284,6 +297,12 @@
                 *ngFor="let batch of batches | search:term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i = index;">
                 <!-- First Row of Batch -->
                 <tr class="border-top-accent">
+                  <td
+                    [attr.rowspan]="(batch.inputs?.length || 1) + (batch.outputs?.length > 0 ? batch.outputs.length : 0)"
+                    style="vertical-align: middle; text-align: center; border-right: 1px solid #2e3250;">
+                    <input type="checkbox" class="form-check-input" [checked]="isSelected(batch._id)"
+                      (change)="toggleSelection(batch._id)">
+                  </td>
                   <td
                     [attr.rowspan]="(batch.inputs?.length || 1) + (batch.outputs?.length > 0 ? batch.outputs.length : 0)"
                     style="border-left: 3px solid #6c5fc7 !important; font-weight: 600; white-space: nowrap; vertical-align: middle; border-right: 1px solid #2e3250;">

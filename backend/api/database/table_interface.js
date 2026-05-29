@@ -104,6 +104,7 @@ class TableInterface {
       dept_id: null,
       auto_awk: 0,
       hl: 0,
+      is_recieved: 0,
       enz: {},
       usage_report: {},
 
@@ -263,6 +264,7 @@ class TableInterface {
          actual_amt: input.qty * (input.rate || 0),
          jawak_type_id: 40,
          dept_id: batch.dept_id,
+         aawak_ref_id: input.aawak_ref_id || null,
          description: `HMP Batch Consumption (Batch ID: ${batch._id || ''})`,
          active: 1
       }

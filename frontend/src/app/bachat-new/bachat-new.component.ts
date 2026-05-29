@@ -49,11 +49,10 @@ export class BachatNewComponent implements OnInit {
     to_year: null,
     to_month: null,
   };
-  images: any = [];
-  imageNames: any = [];
+
   settings: any = {};
-  imagesToShow: any = [];
-  currentImage: any;
+  selectedItem: any;
+  selectedSubitem: any;
   monthsFrom: any = [];
   monthsTo: any = [];
   monthsSel: any = []
@@ -77,7 +76,6 @@ export class BachatNewComponent implements OnInit {
     private domSanitizer: DomSanitizer
   ) {
     this.settings = this.auth.webUser.settings.bachat;
-    this.getBase64Images();
     // this.months = gs.months;
   }
 
@@ -98,14 +96,7 @@ export class BachatNewComponent implements OnInit {
     // this.filter();
   }
 
-  getBase64Images() {
-    this.http.put(this.api.getUrl('IMAGE64'), { type: 'item' }).subscribe((data: any) => {
-      if (data['success']) {
-        this.imageNames = data['filenames'];
-        this.images = data['files'];
-      }
-    });
-  }
+
 
   getbachatData() {
     this.isLoader = true;
@@ -121,28 +112,7 @@ export class BachatNewComponent implements OnInit {
     });
   }
 
-  openImageModal() {
-    $('#showImageModal').modal('show');
-  }
 
-  showImages(list: any) {
-    this.imagesToShow = [];
-    this.currentImage = null;
-    for (let i in list) {
-      let iname = list[i].split('/').pop();
-      for (let j in this.imageNames) {
-        if (iname == this.imageNames[j]) {
-          this.imagesToShow.push(this.domSanitizer.bypassSecurityTrustUrl(this.images[j]));
-          break;
-        }
-      }
-    }
-
-    if (this.imagesToShow.length > 0) {
-      this.currentImage = this.imagesToShow[0];
-    }
-    this.openImageModal();
-  }
 
   // openImage(data: any) {
   //   var image = new Image(1000, 700);
@@ -152,12 +122,25 @@ export class BachatNewComponent implements OnInit {
   // }
 
   setImages(data: any) {
-
-    if (data.sdocument && data.sdocument.images) {
-      this.showImages(data.sdocument.images)
-    } else if (data.idocument && data.idocument.images) {
-      this.showImages(data.idocument.images)
+    if (data.subitem_id) {
+      this.selectedSubitem = {
+        _id: data.subitem_id,
+        subitem_hin: data.subitem_hin,
+        subitem_eng: data.subitem_eng,
+        document: data.sdocument
+      };
+      this.selectedItem = null;
+    } else {
+      this.selectedItem = {
+        _id: data.item_id,
+        item_hin: data.item_hin,
+        item_eng: data.item_eng,
+        document: data.idocument
+      };
+      this.selectedSubitem = null;
     }
+    this.showModal = 'View Product';
+    $('#showModal').modal('show');
   }
 
   stateSelected(ev: any) {
@@ -225,6 +208,20 @@ export class BachatNewComponent implements OnInit {
     // this.isLoader = false;
   }
 
+  getCategoryString(row: any, lang: 'hin' | 'eng' = 'hin') {
+    if (!row) return '';
+    const categories = (row.arr_scategories && row.arr_scategories.length > 0)
+      ? row.arr_scategories
+      : row.arr_icategories;
+    if (categories && Array.isArray(categories)) {
+      if (lang === 'eng') {
+        return categories.map((c: any) => c.category_eng || '').filter(Boolean).join(', ');
+      }
+      return categories.map((c: any) => c.category_hin || c.category_eng || c).join(', ');
+    }
+    return '';
+  }
+
   excelExportBachatOnly() {
     this.isLoader = true;
     let bchtData: any = [];
@@ -242,7 +239,7 @@ export class BachatNewComponent implements OnInit {
         'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
         'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
         'MM': this.bachatData[i].mm_hin,
-        'Category': this.bachatData[i].categories_hin,
+        'Category': this.getCategoryString(this.bachatData[i], 'hin'),
         'Item': this.bachatData[i].item_hin,
         'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
         'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-',
@@ -293,7 +290,7 @@ export class BachatNewComponent implements OnInit {
         'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
         'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
         'MM': this.bachatData[i].mm_hin,
-        'Category': this.bachatData[i].categories_hin,
+        'Category': this.getCategoryString(this.bachatData[i], 'hin'),
         'Item': this.bachatData[i].item_hin,
         'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
       }
@@ -343,7 +340,7 @@ export class BachatNewComponent implements OnInit {
         'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
         'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
         'MM': this.bachatData[i].mm_hin,
-        'Category': this.bachatData[i].categories_hin,
+        'Category': this.getCategoryString(this.bachatData[i], 'hin'),
         'Item': this.bachatData[i].item_hin,
         'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
         'टोटल आवक': this.bachatData[i].total_aawak_all ? this.bachatData[i].total_aawak_all : 0,
@@ -382,7 +379,7 @@ export class BachatNewComponent implements OnInit {
         'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
         'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
         'MM': this.bachatData[i].mm_hin,
-        'Category': this.bachatData[i].categories_eng ? this.bachatData[i].categories_eng : this.bachatData[i].categories_hin,
+        'Category': this.getCategoryString(this.bachatData[i], 'eng'),
         'Item': this.bachatData[i].item_hin,
         'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
         'Condition': this.bachatData[i].condition_id ? this.bachatData[i].condition_hin : '-',
@@ -411,33 +408,71 @@ export class BachatNewComponent implements OnInit {
 
   async excelExportMonthlyConditionWise() {
     this.isLoader = true;
-    let bchtData: any = [];
-    for (let i = 0; i < this.bachatData.length; i++) {
-
-      let bachatRow: any = {
-        'No.': i + 1,
-        'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
-        'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
-        'MM': this.bachatData[i].mm_hin,
-        'Category': this.bachatData[i].categories_eng ? this.bachatData[i].categories_eng : this.bachatData[i].categories_hin,
-        'Item': this.bachatData[i].item_hin,
-        'Subitem': this.bachatData[i].subitem_id ? this.bachatData[i].subitem_hin : '-',
-        'unit': this.bachatData[i].unit_short,
-        'पिछला बचत': this.bachatData[i].past_bachat ? this.bachatData[i].past_bachat : 0,
-        'arr_sum_bachat': this.bachatData[i].arr_sum_bachat,
-      }
-
-      await new Promise<void>((resolve, reject) => {
-        this.http.put(this.api.getUrl('BACHATNEW') + 'condition/' + this.auth.webUser.dept_id, this.bachatData[i]).subscribe(async (data: any) => {
-          if (data['result'] && data['success']) {
-            bachatRow.arr_conditionReport = data['result'];
-          }
-          resolve(); // Resolve the promise when the HTTP request is complete
+    
+    // Group this.bachatData by unique key: mm_id-item_id-subitem_id-unit_id
+    const groupedMap = new Map<string, any>();
+    
+    this.bachatData.forEach((row: any) => {
+      const key = `${row.mm_id}-${row.item_id}-${row.subitem_id || 0}-${row.unit_id}`;
+      if (!groupedMap.has(key)) {
+        groupedMap.set(key, {
+          mm_id: row.mm_id,
+          item_id: row.item_id,
+          subitem_id: row.subitem_id,
+          unit_id: row.unit_id,
+          dept_hin: row.dept_hin,
+          state_hin: row.state_hin,
+          mm_hin: row.mm_hin,
+          category_hin: row.category_hin,
+          categories_hin: row.categories_hin,
+          categories_eng: row.categories_eng,
+          arr_scategories: row.arr_scategories,
+          arr_icategories: row.arr_icategories,
+          item_hin: row.item_hin,
+          subitem_hin: row.subitem_hin,
+          unit_short: row.unit_short,
+          past_bachat: 0,
+          arr_sum_bachat: null,
+          conditionsList: []
         });
+      }
+      
+      const group = groupedMap.get(key);
+      group.conditionsList.push(row);
+    });
+    
+    const bchtData: any = [];
+    let idx = 1;
+    
+    for (const [key, group] of groupedMap.entries()) {
+      const monthCount = this.monthsSel.length;
+      const totalBachatPerMonth = new Array(monthCount).fill(0);
+      let totalPastBachat = 0;
+      
+      group.conditionsList.forEach((condRow: any) => {
+        totalPastBachat += condRow.past_bachat || 0;
+        for (let m = 0; m < monthCount; m++) {
+          totalBachatPerMonth[m] += condRow.arr_sum_bachat[m] || 0;
+        }
       });
-
+      
+      let bachatRow: any = {
+        'No.': idx++,
+        'Department': group.dept_hin ? group.dept_hin : '-',
+        'State': group.state_hin ? group.state_hin : '-',
+        'MM': group.mm_hin,
+        'Category': this.getCategoryString(group, 'eng'),
+        'Item': group.item_hin,
+        'Subitem': group.subitem_id ? group.subitem_hin : '-',
+        'unit': group.unit_short,
+        'पिछला बचत': totalPastBachat,
+        'arr_sum_bachat': totalBachatPerMonth,
+        'arr_conditionReport': group.conditionsList
+      };
+      
       bchtData.push(bachatRow);
     }
+    
     let option: any = {};
     option.months = this.monthsSel;
     option.year = this.filterBody.year;

@@ -129,21 +129,35 @@ export class HttpService {
   //   );
   // }
 
-  // downloadData(url: string, options?: any) {
-  //   const httpOptions: any = {
-  //     headers: new HttpHeaders({
-  //       'Content-Type': 'application/octet-stream',
-  //       // Authorization: 'bearer ' + this.getToken(),
-  //     }),
-  //     params: options ? options.params : {},
-  //     responseType: 'arraybuffer',
-  //   };
-  //   return this.http.get(url, httpOptions).pipe(
-  //     tap(val => {
-  //       catchError(this.handleError);
-  //     })
-  //   );
-  // }
+  downloadData(url: string, options?: any) {
+    const httpOptions: any = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/octet-stream',
+        // Authorization: 'bearer ' + this.getToken(),
+      }),
+      params: options ? options.params : {},
+      responseType: 'blob', // Changing to blob for direct download
+    };
+    return this.http.get(url, httpOptions).pipe(
+      tap(val => {
+        catchError(this.handleError);
+      })
+    );
+  }
+
+  downloadPostData(url: string, body: any) {
+    const httpOptions: any = {
+      headers: new HttpHeaders({
+        'content-type': 'application/json',
+      }),
+      responseType: 'blob',
+    };
+    return this.http.post(url, body, httpOptions).pipe(
+      tap(val => {
+        catchError(this.handleError);
+      })
+    );
+  }
 
   toUrlParams(obj: any) {
     let str = '';

@@ -67,8 +67,8 @@ router.get('/all/:dept_id', async (req, res, next) => {
             lists.department = department || [];
             lists.departmen_config = departmen_config || [];
             lists.mm = mm || [];
-            lists.pbk = pbk || [];
-            lists.nimitt = nimitt || [];
+            lists.pbk = { data: (pbk?.data || []).map(p => { delete p.document; return p; }), total_count: pbk?.total_count || 0 };
+            lists.nimitt = { data: (nimitt?.data || []).map(n => { delete n.document; return n; }), total_count: nimitt?.total_count || 0 };
             lists.state = state || [];
             lists.zone = zone || [];
             lists.district = district || [];
@@ -89,13 +89,14 @@ router.get('/all/:dept_id', async (req, res, next) => {
                 let subitem_count = 0;
                 for (let i = 0; i < resolve.data.length; i++) {
                     resolve.data[i].subitems = (resolve.data[i].subitems != "[null]" ? JSON.parse(resolve.data[i].subitems) : []);
-                    resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
+                    // resolve.data[i].document = (resolve.data[i].document != "[null]" ? JSON.parse(resolve.data[i].document) : []);
+                    delete resolve.data[i].document; // Remove heavy document field
                     resolve.data[i].categories = (resolve.data[i].categories != "[null]" ? JSON.parse(resolve.data[i].categories) : []);
                     resolve.data[i].item_aliases = (resolve.data[i].item_aliases && resolve.data[i].item_aliases != "[null]" ? JSON.parse(resolve.data[i].item_aliases) : []);
-                    // resolve.data[i].categories_hin = (resolve.data[i].categories_hin != "[null]" ? JSON.parse(resolve.data[i].categories_hin) : []);
+
                     for (let j in resolve.data[i].subitems) {
-                        // resolve.data[i].subitems[j].categories = (resolve.data[i].subitems[j].categories != "[null]" ? JSON.parse(resolve.data[i].subitems[j].categories) : []);
                         resolve.data[i].subitems[j].categories = ((resolve.data[i].subitems[j].categories_hin && typeof resolve.data[i].subitems[j].categories_hin == "string" && resolve.data[i].subitems[j].categories_hin != "[null]") ? JSON.parse(resolve.data[i].subitems[j].categories_hin) : []);
+                        delete resolve.data[i].subitems[j].document; // Remove heavy document field from subitems
                     }
                     subitem_count += resolve.data[i].subitems.length;
                 }
@@ -116,7 +117,10 @@ router.get('/all/:dept_id', async (req, res, next) => {
                 result: lists
             })
         }
-    } catch (err) { next(err) };
+    } catch (err) {
+        console.log(err);
+        next(err)
+    };
 });
 
 //get as per department Done.

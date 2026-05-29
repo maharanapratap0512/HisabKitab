@@ -326,7 +326,7 @@ export class AawakNewComponent implements OnInit {
             'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
             'Usage List': result[i].jawak_detail[j].usage_list_id ? result[i].jawak_detail[j].usage_list_hin : '-',
             'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
-            'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
+            'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
             'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
             'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
             'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
@@ -637,7 +637,7 @@ export class AawakNewComponent implements OnInit {
             ...awkObj,
             'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
             'Usage List': result[i].jawak_detail[j].usage_list_id ? result[i].jawak_detail[j].usage_list_hin : '-',
-            'Kisko Diya': result[i].jawak_detail[j].nimitt_id ? result[i].jawak_detail[j].nimitt_hin + '(' + result[i].jawak_detail[j].nimitt_state_hin + ')' : '-',
+            'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
             'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
             'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
             'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
@@ -645,6 +645,7 @@ export class AawakNewComponent implements OnInit {
             'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
             'Kaha Repaired/Becha': result[i].jawak_detail[j].sell_repair_place ? result[i].jawak_detail[j].sell_repair_place : '-',
             'Parchi Kaha': result[i].jawak_detail[j].parchi_place ? result[i].jawak_detail[j].parchi_place : '-',
+            'Item Detail': result[i].jawak_detail[j].item_detail ? result[i].jawak_detail[j].item_detail : '-',
             'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
           });
           footerRow['Qty'] += result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : 0;

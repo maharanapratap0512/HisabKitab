@@ -17,6 +17,12 @@ class Functions extends DBContex {
    async insertAJ(obj, type) {
       return new Promise(async (resolve, reject) => {
          try {
+            if (obj.enz && typeof obj.enz === 'string') {
+               try { obj.enz = JSON.parse(obj.enz); } catch (e) { obj.enz = {}; }
+            }
+            if (obj.usage_report && typeof obj.usage_report === 'string') {
+               try { obj.usage_report = JSON.parse(obj.usage_report); } catch (e) { obj.usage_report = {}; }
+            }
             let stmtInsert = this.db.prepare(this.query[type].insert);
             obj = { ...this.tbInterface[type], ...obj };
             obj.document = JSON.stringify(obj.document ? obj.document : {});
@@ -136,6 +142,12 @@ class Functions extends DBContex {
    async updateAJ(obj, type, objOld = null) {
       return new Promise(async (resolve, reject) => {
          try {
+            if (obj.enz && typeof obj.enz === 'string') {
+               try { obj.enz = JSON.parse(obj.enz); } catch (e) { obj.enz = {}; }
+            }
+            if (obj.usage_report && typeof obj.usage_report === 'string') {
+               try { obj.usage_report = JSON.parse(obj.usage_report); } catch (e) { obj.usage_report = {}; }
+            }
             let stmtUpdate = this.db.prepare(this.query[type].update + ` where ${type}._id = ${obj._id}`);
             obj = { ...this.tbInterface[type], ...obj };
             obj.document = JSON.stringify(obj.document && typeof obj.document != 'string' ? obj.document : {});

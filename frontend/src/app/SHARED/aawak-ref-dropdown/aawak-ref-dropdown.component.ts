@@ -48,6 +48,8 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
 
   selectedValue: any = null;
   originalValue: any = null;
+  isJustUpdated = false;
+  private updateAnimTimer: any = null;
   private searchSub: Subscription;
 
   onChange: any = () => { };
@@ -84,10 +86,36 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
         this.totalCount = 0;
       }
     }
+    this.checkAndFetchSelectedAawak();
   }
 
   ngOnDestroy(): void {
     if (this.searchSub) this.searchSub.unsubscribe();
+    if (this.updateAnimTimer) clearTimeout(this.updateAnimTimer);
+  }
+
+  checkAndFetchSelectedAawak() {
+    if (this.selectedValue && this.deptId) {
+      if (!this.items.some(item => item._id === this.selectedValue)) {
+        this.fetchSingleAawak(this.selectedValue);
+      }
+    }
+  }
+
+  fetchSingleAawak(id: any) {
+    if (!this.deptId) return;
+    const body = {
+      _id: id,
+      limit: 1
+    };
+    this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.deptId, body).subscribe((res: any) => {
+      if (res && res.success && res.result && res.result.length > 0) {
+        const selectedItem = res.result[0];
+        if (!this.items.some(item => item._id === selectedItem._id)) {
+          this.items = [selectedItem, ...this.items];
+        }
+      }
+    });
   }
 
   // --- ControlValueAccessor ---
@@ -96,6 +124,7 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
     if (this.originalValue === null) {
       this.originalValue = value;
     }
+    this.checkAndFetchSelectedAawak();
   }
   registerOnChange(fn: any): void { this.onChange = fn; }
   registerOnTouched(fn: any): void { this.onTouched = fn; }
@@ -142,7 +171,7 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
 
   onSelectChange(event: any) {
     const newValue = event ? event._id : null;
-    
+
     // If autoSave is enabled, and there was already a reference saved
     if (this.autoSave && this.jawakId && this.originalValue && newValue !== this.originalValue) {
       Swal.fire({
@@ -178,13 +207,19 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
 
   saveRef(aawakRefId: any) {
     this.loading = true;
+    this.isJustUpdated = false; // reset so animation can replay
+    if (this.updateAnimTimer) clearTimeout(this.updateAnimTimer);
     this.http.put(this.api.getUrl('JAWAK') + 'ref-link/' + this.jawakId, { aawak_ref_id: aawakRefId })
       .subscribe((res: any) => {
         this.loading = false;
         if (res.success) {
           this.toastr.success('Aawak linked successfully');
-          this.originalValue = aawakRefId; // Update original value after successful save
-          this.saved.emit(res.result);
+          this.originalValue = aawakRefId;
+          this.isJustUpdated = true;
+          this.updateAnimTimer = setTimeout(() => {
+            this.isJustUpdated = false;
+          }, 2000);
+          this.saved.emit({ jawakId: this.jawakId, aawak_ref_id: aawakRefId });
         }
       }, err => {
         this.loading = false;

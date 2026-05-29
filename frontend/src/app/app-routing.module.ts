@@ -47,6 +47,7 @@ import { PbkBachatComponent } from './pbk-bachat/pbk-bachat.component';
 import { listsResolver } from './resolver/lists.resolver';
 import { NetdropUiComponent } from './modules/netdrop/components/netdrop-ui/netdrop-ui.component';
 import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.component';
+import { P2pFeedbackComponent } from './p2p-feedback/p2p-feedback.component';
 
 const routes: Routes = [
    {
@@ -101,6 +102,7 @@ const routes: Routes = [
          { path: "files", component: FilesViewComponent },
          { path: "import_export", component: ImportExportComponent },
          { path: "mysql", component: MysqlComponent },
+         { path: "feedback", component: P2pFeedbackComponent },
       ],
       resolve: {
          lists: listsResolver

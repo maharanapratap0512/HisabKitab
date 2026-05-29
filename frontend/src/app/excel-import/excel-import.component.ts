@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ExcelImportService } from '../services/excel-import.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import * as XLSX from 'xlsx';
@@ -19,6 +19,7 @@ declare var $: any;
 })
 export class ExcelImportComponent implements OnInit {
   @Input() importType: any;
+  @Input() lockType: boolean = false;
   @Input() stepNo: any = 0;
   @Input() excelFile: any;
   @Output() response = new EventEmitter();
@@ -84,6 +85,7 @@ export class ExcelImportComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService,
+    private cdr: ChangeDetectorRef
   ) {
     this.gs.observeList().subscribe(result => {
       this.itemAll = result.itemmix ? result.itemmix : [];
@@ -220,6 +222,10 @@ export class ExcelImportComponent implements OnInit {
             //assign excel data to matched object key and prepare whole row object
             if (this.headerConfig[j].type == "array") {
               row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index] ? this.excelArr[i][this.headerConfig[j].index].split(",") : [];
+              // if array type with ref_table
+              // if (this.headerConfig[j].ref_table) {
+              //   row[this.headerConfig[j].col_name] = row[this.headerConfig[j].col_name].map((value: string) => ({ data: this.gs.cleanValue(value), _id: null }));
+              // } 
             } else {
               row[this.headerConfig[j].col_name] = this.gs.cleanValue(this.excelArr[i][this.headerConfig[j].index]);
             }
@@ -238,6 +244,8 @@ export class ExcelImportComponent implements OnInit {
       this.excelArrObj = this.excelArrObj.filter((e: { subitem_hin: string | null; }) => e.subitem_hin)
     } else if (this.importType.name == 'bachat') {
       this.excelArrObj = this.excelArrObj.filter((e: { date: any; mm: any; item: any; qty: any; unit: any; }) => e.date && e.mm && e.item && e.qty != null && e.unit)
+    } else if (this.importType.name == 'jawak') {
+      this.excelArrObj = this.excelArrObj.filter((e: any) => e.date && e.mm && e.item && e.qty != null && e.unit && e.jawak_type)
     }
     this.stepNo = 2;
     this.isLoader = false;
@@ -335,6 +343,19 @@ export class ExcelImportComponent implements OnInit {
 
         }
       }
+    } else if (data.isArray) {
+      // Array-type correction (e.g. categories): data.name is string[], data.ids is id[]
+      for (let i in this.excelArrObj) {
+        for (let j in conf) {
+          const rowVal = this.excelArrObj[i][conf[j].name];
+          // Match if the row's name array equals data.name array
+          if (Array.isArray(rowVal) && Array.isArray(data.name) &&
+            rowVal.length === data.name.length &&
+            rowVal.every((v: string, idx: number) => v === data.name[idx])) {
+            this.excelArrObj[i][conf[j].ref_field] = data.ids;
+          }
+        }
+      }
     } else {
       for (let i in this.excelArrObj) {
         for (let j in conf) {
@@ -372,44 +393,188 @@ export class ExcelImportComponent implements OnInit {
     }
   }
 
+  /*
   async finalImport() {
-    this.newInsertedData = []
-    this.willUpdateData = []
-    this.duplicateDate = []
-    this.rejectedData = []
+    this.newInsertedData = [];
+    this.willUpdateData = [];
+    this.duplicateDate = [];
+    this.rejectedData = [];
     this.swHeaderList = this.getSwHeaderList();
     this.processedCount = 0;
 
-    this.import$.subscribe((res: any) => {
-      this.processedCount++;
-      this.progressStyle = "width:" + (this.processedCount * 100) / this.excelArrObj.length + "%;";
-      if (res) {
-        switch (res.result.status) {
-          case 'inserted': this.newInsertedData.push(res.result.data.newData)
-            break;
-          case 'update': this.willUpdateData.push(res.result.data)
-            break;
-          case 'duplicate': this.duplicateDate.push(res.result.data)
-            break;
-          default: this.rejectedData.push(res.result.data)
+    if (this.importType.name == 'jawak') {
+      this.isLoader = true;
+      this.http.put(this.api.getUrl('EXCELIMPORT') + 'final_bulk/' + this.auth.webUser.dept_id, {
+        importType: this.importType,
+        headerList: this.headerList,
+        excelData: this.excelArrObj
+      }).subscribe((res: any) => {
+        this.isLoader = false;
+        if (res.success) {
+          this.newInsertedData = res.result.inserted;
+          this.rejectedData = res.result.rejected;
+          this.stepNo = 4;
+          this.toastr.success("Bulk import complete.");
+        }
+      }, (err: any) => {
+        this.isLoader = false;
+        this.toastr.error("Error in bulk import.");
+      });
+    } else {
+      this.import$.subscribe((res: any) => {
+        this.processedCount++;
+        this.progressStyle = "width:" + (this.processedCount * 100) / this.excelArrObj.length + "%;";
+        if (res) {
+          switch (res.result.status) {
+            case 'inserted': this.newInsertedData.push(res.result.data.newData)
+              break;
+            case 'update': this.willUpdateData.push(res.result.data)
+              break;
+            case 'duplicate': this.duplicateDate.push(res.result.data)
+              break;
+            default: this.rejectedData.push(res.result.data)
+          }
+        }
+
+        if (this.excelArrObj.length > this.processedCount) {
+          this.processImport(this.processedCount);
+        } else {
+          this.import$.complete();
+          this.stepNo = 4;
+          this.toastr.success("import complete. test your result")
+        }
+      });
+
+      this.processImport(0);
+    }
+  }
+  */
+
+  async finalImport() {
+    this.newInsertedData = [];
+    this.willUpdateData = [];
+    this.duplicateDate = [];
+    this.rejectedData = [];
+    this.processedCount = 0;
+    this.isLoader = true;
+    this.stepNo = 4;
+
+
+    const validData = await this.filterValidData();
+
+    if (validData.length === 0) {
+      this.isLoader = false;
+      this.toastr.warning("No valid data to import.");
+      return;
+    }
+
+    const url = this.api.getUrl('EXCELIMPORT') + 'final_stream/' + this.auth.webUser.dept_id;
+    const body = {
+      importType: this.importType,
+      headerList: this.headerList,
+      excelData: validData
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      if (!reader) throw new Error("Stream reader not available");
+
+      while (true) {
+        console.log("[Stream] Waiting for data...");
+        const { value, done } = await reader.read();
+
+        if (done) {
+          console.log("[Stream] done = true (Server closed or reader cancelled)");
+          break;
+        }
+
+        const chunk = decoder.decode(value, { stream: true });
+        console.log("[Stream] Received chunk size:", chunk.length);
+        buffer += chunk;
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          if (trimmedLine.startsWith('data: ')) {
+            this.isLoader = false;
+            try {
+              const data = JSON.parse(trimmedLine.replace('data: ', ''));
+              console.log(data);
+
+              // Global Error Handling
+              if (data.error) {
+                console.error("[Stream] Global error received:", data.error);
+                this.isLoader = false;
+                this.processedCount = 0;
+                this.progressStyle = "width: 0%;";
+                this.newInsertedData = [];
+                this.willUpdateData = [];
+                this.duplicateDate = [];
+                this.rejectedData = [];
+                this.toastr.error("Import failed: " + data.error);
+                return;
+              }
+
+              if (data.done) {
+                this.isLoader = false;
+                this.stepNo = 4;
+                this.toastr.success("Import complete.");
+                return;
+              }
+
+              if (data.error) {
+                this.toastr.error('Import failed: ' + data.error);
+                this.isLoader = false;
+                break;
+              }
+
+              // Update Progress
+              this.processedCount = data.index;
+              this.progressStyle = "width:" + (this.processedCount * 100) / data.total + "%;";
+
+              // Process Result
+              const res = data.result;
+              if (res) {
+                switch (res.status) {
+                  case 'inserted': this.newInsertedData.push(res.data.newData || res.data)
+                    break;
+                  case 'update': this.willUpdateData.push(res.data)
+                    break;
+                  case 'duplicate': this.duplicateDate.push(res.data)
+                    break;
+                  default: this.rejectedData.push(res.data)
+                }
+                this.cdr.detectChanges();
+              }
+            } catch (e) {
+              console.warn("JSON parse error on line:", trimmedLine);
+            }
+          }
         }
       }
-
-      if (this.excelArrObj.length > this.processedCount) {
-        this.processImport(this.processedCount);
-      } else {
-        this.import$.complete();
-        this.stepNo = 4;
-        this.toastr.success("import complete. test your result")
-      }
-
-    });
-
-    await this.processImport();
-
+    } catch (err: any) {
+      this.isLoader = false;
+      this.toastr.error("Stream error: " + err.message);
+    }
   }
 
   verifyForRejection(data: any) {
+    if (this.importType.name == 'jawak') {
+      if (!data.pbk_id && !data.jawak_mm_id) {
+        return true;
+      }
+    }
+
     for (let j in this.headerList) {
       if (this.headerList[j].not_null && !data[this.headerList[j].name]) {
         return true;
@@ -421,7 +586,19 @@ export class ExcelImportComponent implements OnInit {
         return true;
       }
     }
+
     return false;
+  }
+
+  filterValidData() {
+    return this.excelArrObj.filter((item: any) => {
+      const isRejected = this.verifyForRejection(item);
+      if (isRejected) {
+        this.rejectedData.push(item); // Keep track of why/what was rejected
+        return false; // Remove from the list being sent to server
+      }
+      return true; // Keep in the list
+    });
   }
 
   processUpdate(i: number = 0) {
@@ -464,11 +641,16 @@ export class ExcelImportComponent implements OnInit {
   }
 
   getSwHeaderList() {
-    return this.headerConfig.map((h: { name: any; ref_data: any; found: any; }) => {
-      if (h.found) {
+    return this.headerConfig
+      .filter((h: any) => h.found)
+      .map((h: { name: any; ref_data: any; found: any; }) => {
         return h.ref_data ? h.ref_data : h.name;
-      }
-    });
+      });
+  }
+
+  getValue(obj: any, path: string) {
+    if (!path || !obj) return null;
+    return path.split('.').reduce((o, i) => (o ? o[i] : null), obj);
   }
 
 

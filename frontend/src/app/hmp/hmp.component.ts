@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import { ToastrService } from 'ngx-toastr';
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import { SelectionService } from '../services/selection.service';
 
 declare var $: any;
 
@@ -50,7 +51,8 @@ export class HmpComponent implements OnInit {
     public http: HttpService,
     public gs: GlobalService,
     public auth: AuthService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    public selection: SelectionService
   ) {
     this.settings = auth.webUser.settings;
     if (!this.settings.hmp) {
@@ -64,6 +66,7 @@ export class HmpComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.selection.clear('hmp');
     this.getBatches();
     this.getRecipes();
     this.gs.observeList().subscribe((result: any) => {
@@ -315,25 +318,69 @@ export class HmpComponent implements OnInit {
     Swal.close();
   }
 
-  exportToPdf() {
-    // Switch to Individual view mode temporarily for best print layout
-    const originalSettings = JSON.parse(JSON.stringify(this.settings));
-    this.settings.hmp.viewMode = 'voucher';
-    this.expandAll = false;
-    this.toggleExpandAll();
+  isSelected(batchId: number): boolean {
+    return this.selection.isSelected('hmp', batchId);
+  }
 
-    // Disable pagination temporarily to show all records in print
-    const originalItemsPerPage = this.itemsPerPage;
-    this.itemsPerPage = this.total_count > 0 ? this.total_count : 9999;
+  toggleSelection(batchId: number) {
+    this.selection.toggle('hmp', batchId);
+  }
 
-    // Give Angular a moment to render all rows into the DOM before printing
-    setTimeout(() => {
-      window.print();
+  isAllSelected(): boolean {
+    if (!this.batches || this.batches.length === 0) return false;
+    const selected = this.selection.getSelected('hmp');
+    return this.batches.every((b: any) => selected.includes(b._id));
+  }
 
-      // Restore original views after print dialog closes
-      this.settings.hmp.viewMode = originalSettings.hmp.viewMode;
-      this.itemsPerPage = originalItemsPerPage;
-    }, 500);
+  toggleSelectAll(event: any) {
+    const checked = event.target.checked;
+    const ids = this.batches.map((b: any) => b._id).filter((id: any) => !!id);
+    if (checked) {
+      this.selection.selectMany('hmp', ids);
+    } else {
+      this.selection.deselectMany('hmp', ids);
+    }
+  }
+
+  getSelectedCount(): number {
+    return this.selection.getSelected('hmp').length;
+  }
+
+  exportToPdf(exportType: 'normal' | 'advance' = 'normal') {
+    const selectedIds = this.selection.getSelected('hmp');
+    
+    if (exportType === 'advance' && selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one batch to perform Advance PDF export');
+      return;
+    }
+
+    Swal.fire({
+      title: 'Preparing PDF',
+      html: exportType === 'advance' ? 'Generating Advance Report...' : 'Generating report...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    const payload = {
+      ...this.filterBody,
+      viewMode: this.settings.hmp.viewMode,
+      exportType: exportType,
+      batchIds: selectedIds
+    };
+
+    this.http.downloadPostData(this.api.getUrl('HMP') + 'batch/export-pdf/' + this.auth.webUser.dept_id, payload)
+      .subscribe((blob: any) => {
+        Swal.close();
+        const dateStr = new Date().toLocaleDateString('en-IN').replace(/\//g, '-');
+        const filename = exportType === 'advance' ? `HMP_Batches_Advance_${dateStr}.pdf` : `HMP_Batches_${dateStr}.pdf`;
+        saveAs(blob, filename);
+      }, (error: any) => {
+        Swal.close();
+        this.toastr.error('Failed to generate PDF');
+        console.error(error);
+      });
   }
 
   openEntryModal(batch: any = null) {

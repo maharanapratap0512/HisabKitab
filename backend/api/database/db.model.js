@@ -2557,27 +2557,29 @@ class dbModal {
           _id, item_id, alias, created_at
         ) SELECT 
           _id, item_id, alias, created_at FROM item_aliases_backup`,
-      drop_item_aliases_backup: `DROP TABLE item_aliases_backup`,
+      drop_item_aliases_backup: `DROP TABLE if exists item_aliases_backup`,
       category_add_alias: `ALTER TABLE category ADD COLUMN alias json`,
     },
     // VERSION 32
     // trigger -> updated -> jwk_updt_avk_ref_updt
-    // {
-    //   drop_jwk_updt_avk_ref_updt: `DROP TRIGGER IF EXISTS "jwk_updt_avk_ref_updt"`,
-    //   create_jwk_updt_avk_ref_updt: `CREATE TRIGGER "jwk_updt_avk_ref_updt"
-    //       AFTER UPDATE ON "jawak"
-    //       FOR EACH ROW
-    //       BEGIN
-    //           -- If old reference existed, return the old qty
-    //           UPDATE aawak 
-    //           SET remaining_qty = round(remaining_qty + OLD.qty, 2) 
-    //           WHERE _id = OLD.aawak_ref_id AND OLD.aawak_ref_id IS NOT NULL;
-    //           -- If new reference exists, deduct the new qty
-    //           UPDATE aawak 
-    //           SET remaining_qty = round(remaining_qty - NEW.qty, 2) 
-    //           WHERE _id = NEW.aawak_ref_id AND NEW.aawak_ref_id IS NOT NULL;
-    //       END;`
-    // }
+    {
+      drop_jwk_updt_avk_ref_updt: `DROP TRIGGER IF EXISTS "jwk_updt_avk_ref_updt"`,
+      create_jwk_updt_avk_ref_updt: `CREATE TRIGGER "jwk_updt_avk_ref_updt"
+          AFTER UPDATE ON "jawak"
+          FOR EACH ROW
+          BEGIN
+              -- If old reference existed, return the old qty
+              UPDATE aawak 
+              SET remaining_qty = round(remaining_qty + OLD.qty, 2) 
+              WHERE _id = OLD.aawak_ref_id AND OLD.aawak_ref_id IS NOT NULL;
+              -- If new reference exists, deduct the new qty
+              UPDATE aawak 
+              SET remaining_qty = round(remaining_qty - NEW.qty, 2) 
+              WHERE _id = NEW.aawak_ref_id AND NEW.aawak_ref_id IS NOT NULL;
+          END;`,
+      add_aawak_type_id_hmp_batch_input: `ALTER TABLE hmp_batch_input ADD COLUMN aawak_type_id integer REFERENCES support_list(_id)`,
+      add_is_recieved_in_jawak: `ALTER TABLE jawak ADD COLUMN is_recieved tinyint DEFAULT 0`,
+    }
     /* TODO cleanup task 
       1. remove table - closing.
       2. remove usage_category_id column from awk, jwk.
@@ -2667,6 +2669,7 @@ class dbModal {
       let runMigration = this.db.transaction(() => {
         try {
           //getting current user version
+          // this.db.pragma('user_version = 30');
           let userVersion = this.db.pragma('user_version', { simple: true });
           console.log("current user version : ", userVersion);
           console.log(this.db.pragma('max_variable_number'));

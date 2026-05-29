@@ -37,6 +37,8 @@ router.delete('/recipe/:id', (req, res, next) => {
 });
 
 
+const hmpPdf = require('../services/hmp-pdf.service');
+
 // ── Batch List ────────────────────────────────────────────────
 
 // PUT /batch/:dept_id  — paginated + filtered batch list
@@ -48,6 +50,40 @@ router.put('/batch/:dept_id', (req, res, next) => {
             ...req.body,
         });
         res.json({ success: true, result, pageNo, total_count });
+    } catch (e) { next(e); }
+});
+
+const BaseTable = require('../database/base.table');
+
+// POST /batch/export-pdf/:dept_id — export filtered batches to PDF
+router.post('/batch/export-pdf/:dept_id', async (req, res, next) => {
+    try {
+        const { result } = hmp.getBatches({
+            dept_id: req.params.dept_id,
+            ...req.body,
+            all: true
+        });
+
+        // Load jawak distributions if advance design
+        if (req.body.exportType === 'advance') {
+            const jawakTable = new BaseTable('jawak');
+            for (const batch of result) {
+                if (batch.outputs && batch.outputs.length > 0) {
+                    for (const out of batch.outputs) {
+                        if (out.aawak_ref_id) {
+                            out.jawaks = jawakTable.getAll({ aawak_ref_id: out.aawak_ref_id, active: 1 });
+                        } else {
+                            out.jawaks = [];
+                        }
+                    }
+                }
+            }
+        }
+
+        const pdfBuffer = await hmpPdf.generateHmpPdf(result, req.params.dept_id, req.body);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=hmp_batches.pdf');
+        res.end(pdfBuffer, 'binary');
     } catch (e) { next(e); }
 });
 

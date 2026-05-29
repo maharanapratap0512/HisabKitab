@@ -8,6 +8,7 @@ import { HmpFormService } from 'src/app/services/hmp-form.service';
 import { error } from 'console';
 import { NgForm } from '@angular/forms';
 import { debounceTime } from 'rxjs';
+import Swal from 'sweetalert2';
 
 declare var $: any;
 
@@ -31,12 +32,36 @@ export class HmpEntryComponent implements OnInit {
   editJawakIndex: number | null = null;
   editData: any = {};
 
+  // --- Toggle between traditional and modern editors ---
+  editorMode: 'traditional' | 'modern' = 'traditional';
+
+  // --- Restructured Common Form State (Modern Mode) ---
+  entryMode: 'inputs' | 'outputs' = 'inputs';
+  formModel: any = {
+    item_id: null,
+    subitem_id: null,
+    unit_id: null,
+    condition_id: null,
+    qty: null,
+    rate: null,
+    aawak_source_id: null,
+    auto_jawak: false,
+    auto_aawak: false,
+    aawak_type_id: null,
+    jawak_ref_id: null,
+    aawak_ref_id: null,
+    jawak_detail: []
+  };
+  isEditingItem: boolean = false;
+  editingIndex: number | null = null;
+
   // Lists
   recipes: any = [];
   mms: any = [];
   items: any = [];
   units: any = [];
   conditions: any = [];
+  aawak_types: any = [];
 
   // Dropdown lists for Input/Output tables
   inputItems: any = [];
@@ -61,6 +86,7 @@ export class HmpEntryComponent implements OnInit {
       this.items = result.itemmix || [];
       this.units = result.unit || [];
       this.conditions = result.condition || [];
+      this.aawak_types = result.aawak_type || [];
     });
     this.fs.reset();
   }
@@ -72,7 +98,7 @@ export class HmpEntryComponent implements OnInit {
     setTimeout(() => {
       if (this.f) {
         this.f.statusChanges?.pipe(debounceTime(100)).subscribe(() => {
-          this.fs.formStatusChanges();
+          this.fs.formStatusChanges(this.editorMode);
         });
       }
     }, 500);
@@ -104,6 +130,12 @@ export class HmpEntryComponent implements OnInit {
       }
       this.isLoader = false;
 
+      // Filter out any blank template rows if loading into modern editor, otherwise preserve
+      if (this.editorMode === 'modern') {
+        if (data.inputs) data.inputs = data.inputs.filter((x: any) => x.item_id && x.qty);
+        if (data.outputs) data.outputs = data.outputs.filter((x: any) => x.item_id && x.qty);
+      }
+
       this.fs.patchForm(data);
     }
   }
@@ -126,37 +158,50 @@ export class HmpEntryComponent implements OnInit {
     if (event && event.label) {
       this.fs.hmpBatchForm.recipe_name = event.label;
       this.fs.hmpBatchForm.recipe_id = null;
-      // this.fs.hmpBatchForm.update_recipe = true; // New recipe likely
     }
     else if (event) {
       let recipe = this.recipes.find((x: any) => x._id == event);
-      // IDs are already present in recipe inputs/outputs
 
       if (recipe) {
         this.fs.hmpBatchForm.recipe_id = event;
         this.fs.hmpBatchForm.recipe_name = recipe.recipe_name;
         this.fs.hmpBatchForm.description = recipe.description;
-        this.fs.hmpBatchForm.inputs = structuredClone(recipe.inputs);
-        this.fs.hmpBatchForm.outputs = structuredClone(recipe.outputs);
+
+        const cleanInputs = structuredClone(recipe.inputs || []).map((x: any) => {
+          delete x._id;
+          delete x.recipe_id;
+          return x;
+        });
+
+        const cleanOutputs = structuredClone(recipe.outputs || []).map((x: any) => {
+          delete x._id;
+          delete x.recipe_id;
+          return x;
+        });
+
+        if (this.editorMode === 'modern') {
+          this.fs.hmpBatchForm.inputs = cleanInputs.filter((x: any) => x.item_id);
+          this.fs.hmpBatchForm.outputs = cleanOutputs.filter((x: any) => x.item_id);
+        } else {
+          this.fs.hmpBatchForm.inputs = cleanInputs;
+          this.fs.hmpBatchForm.outputs = cleanOutputs;
+        }
       } else {
         this.fs.reset();
       }
     } else {
       this.fs.reset();
     }
-    // this.fs.formStatusChanges();
-
-
+    this.fs.formStatusChanges(this.editorMode);
   }
 
-  // --- Input Table Logic ---
-
+  // --- Traditional Input Table Logic ---
   async itemSubitemSelected(ev: any, i: number, type: string) {
     const row = this.fs.hmpBatchForm[type][i];
     if (ev) {
       const item_id = ev.item_id || row.item_id;
       const subitem_id = ev.subitem_id || row.subitem_id;
-      
+
       let item = this.items.find((x: any) => x._id == item_id);
       if (item) {
         let subitem = item.subitems?.find((x: any) => x._id == subitem_id);
@@ -171,8 +216,170 @@ export class HmpEntryComponent implements OnInit {
     }
   }
 
+  // --- Modern Restructured Form Logic ---
+  selectEntryMode(mode: 'inputs' | 'outputs') {
+    this.entryMode = mode;
+    this.resetFormModel();
+  }
+
+  resetFormModel() {
+    this.formModel = {
+      item_id: null,
+      subitem_id: null,
+      unit_id: null,
+      condition_id: null,
+      qty: null,
+      rate: null,
+      aawak_source_id: null,
+      auto_jawak: false,
+      auto_aawak: false,
+      aawak_type_id: null,
+      jawak_ref_id: null,
+      aawak_ref_id: null,
+      jawak_detail: []
+    };
+    this.isEditingItem = false;
+    this.editingIndex = null;
+  }
+
+  commonFormItemSubitemSelected(ev: any) {
+    if (ev) {
+      const item_id = ev.item_id || this.formModel.item_id;
+      const subitem_id = ev.subitem_id || this.formModel.subitem_id;
+      
+      let item = this.items.find((x: any) => x._id == item_id);
+      if (item) {
+        let subitem = item.subitems?.find((x: any) => x._id == subitem_id);
+        this.formModel.item_id = item_id;
+        this.formModel.subitem_id = subitem_id;
+        this.formModel.unit_id = subitem ? subitem.unit_id : item.unit_id;
+      }
+    } else {
+      this.formModel.item_id = null;
+      this.formModel.subitem_id = null;
+      this.formModel.unit_id = null;
+    }
+  }
+
+  addOrUpdateItem() {
+    if (!this.formModel.item_id || !this.formModel.qty) {
+      this.toastr.warning('Please select item and fill quantity.');
+      return;
+    }
+
+    if (!this.fs.hmpBatchForm.inputs) this.fs.hmpBatchForm.inputs = [];
+    if (!this.fs.hmpBatchForm.outputs) this.fs.hmpBatchForm.outputs = [];
+
+    let row: any;
+    if (this.entryMode === 'inputs') {
+      row = {
+        _id: this.formModel._id || null,
+        item_id: this.formModel.item_id,
+        subitem_id: this.formModel.subitem_id,
+        unit_id: this.formModel.unit_id,
+        condition_id: this.formModel.condition_id,
+        qty: this.formModel.qty,
+        rate: this.formModel.rate,
+        aawak_source_id: this.formModel.aawak_source_id,
+        auto_jawak: this.formModel.auto_jawak,
+        auto_aawak: this.formModel.auto_aawak,
+        aawak_type_id: this.formModel.aawak_type_id || null,
+        aawak_ref_id: this.formModel.aawak_ref_id || null,
+        jawak_ref_id: this.formModel.jawak_ref_id || null,
+        active: 1
+      };
+    } else {
+      row = {
+        _id: this.formModel._id || null,
+        item_id: this.formModel.item_id,
+        subitem_id: this.formModel.subitem_id,
+        unit_id: this.formModel.unit_id,
+        condition_id: this.formModel.condition_id,
+        qty: this.formModel.qty,
+        rate: this.formModel.rate,
+        auto_aawak: this.formModel.auto_aawak,
+        aawak_ref_id: this.formModel.aawak_ref_id || null,
+        jawak_detail: this.formModel.jawak_detail || [],
+        active: 1
+      };
+    }
+
+    if (this.isEditingItem && this.editingIndex !== null) {
+      this.fs.hmpBatchForm[this.entryMode][this.editingIndex] = row;
+      this.toastr.success('Item updated successfully in batch');
+    } else {
+      this.fs.hmpBatchForm[this.entryMode].push(row);
+      this.toastr.success('Item added successfully to batch');
+    }
+
+    this.resetFormModel();
+  }
+
+  editItem(type: 'inputs' | 'outputs', index: number) {
+    const row = this.fs.hmpBatchForm[type][index];
+    this.entryMode = type;
+    this.isEditingItem = true;
+    this.editingIndex = index;
+    this.formModel = structuredClone(row);
+  }
+
+  deleteItem(type: 'inputs' | 'outputs', index: number) {
+    const row = this.fs.hmpBatchForm[type][index];
+    if (row && row._id) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'This will also delete the associated auto-generated Aawak/Jaway entries from the database!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.isLoader = true;
+          const urlType = type === 'inputs' ? 'input' : 'output';
+          this.http.delete(this.api.getUrl('HMP') + urlType + '/' + row._id).subscribe((data: any) => {
+            this.isLoader = false;
+            if (data.success || data.result) {
+              this.fs.hmpBatchForm[type].splice(index, 1);
+              this.fs.hmpBatchForm[type] = [...this.fs.hmpBatchForm[type]];
+              this.toastr.success('Item deleted successfully from database');
+            } else {
+              this.toastr.error('Failed to delete item');
+            }
+          }, err => {
+            this.isLoader = false;
+            this.toastr.error('Error occurred while deleting item');
+          });
+        }
+      });
+    } else {
+      this.fs.hmpBatchForm[type].splice(index, 1);
+      this.fs.hmpBatchForm[type] = [...this.fs.hmpBatchForm[type]];
+      this.toastr.success('Item removed');
+    }
+  }
+
+  toggleEditorMode(mode: 'traditional' | 'modern') {
+    this.editorMode = mode;
+    // Clean out or append template automatically depending on editor mode loaded
+    if (mode === 'modern') {
+      this.fs.hmpBatchForm.inputs = this.fs.hmpBatchForm.inputs.filter((x: any) => x.item_id);
+      this.fs.hmpBatchForm.outputs = this.fs.hmpBatchForm.outputs.filter((x: any) => x.item_id);
+    } else {
+      this.fs.formStatusChanges(mode);
+    }
+    this.toastr.info('Switched editor view to ' + (mode === 'traditional' ? 'Traditional' : 'Modern Preview'));
+  }
+
+  getName(list: any[], id: any, field: string): string {
+    if (!list || !id) return '';
+    const item = list.find((x: any) => x._id === id);
+    return item ? (item[field] || '') : '';
+  }
+
   onSubmit() {
-    if (this.fs.valid()) {
+    if (this.fs.valid(this.editorMode)) {
       if (this.isEdit) {
         // Update existing batch
         const id = this.fs.hmpBatchForm._id;
@@ -201,13 +408,48 @@ export class HmpEntryComponent implements OnInit {
   }
 
   deleteRow(type: string, index: number) {
-    // Remove row and reassign array reference so Angular fully re-renders all ngModelGroup rows
-    if (type === 'inputs' && this.fs.hmpBatchForm.inputs.length > 1) {
-      this.fs.hmpBatchForm.inputs.splice(index, 1);
-      this.fs.hmpBatchForm.inputs = [...this.fs.hmpBatchForm.inputs];
-    } else if (type === 'outputs' && this.fs.hmpBatchForm.outputs.length > 1) {
-      this.fs.hmpBatchForm.outputs.splice(index, 1);
-      this.fs.hmpBatchForm.outputs = [...this.fs.hmpBatchForm.outputs];
+    const arr = type === 'inputs' ? this.fs.hmpBatchForm.inputs : this.fs.hmpBatchForm.outputs;
+    const row = arr[index];
+    if (row && row._id) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'This will also delete the associated auto-generated Aawak/Jaway entries from the database!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.isLoader = true;
+          const urlType = type === 'inputs' ? 'input' : 'output';
+          this.http.delete(this.api.getUrl('HMP') + urlType + '/' + row._id).subscribe((data: any) => {
+            this.isLoader = false;
+            if (data.success || data.result) {
+              arr.splice(index, 1);
+              if (type === 'inputs') {
+                this.fs.hmpBatchForm.inputs = [...arr];
+              } else {
+                this.fs.hmpBatchForm.outputs = [...arr];
+              }
+              this.toastr.success('Item deleted successfully from database');
+            } else {
+              this.toastr.error('Failed to delete item');
+            }
+          }, err => {
+            this.isLoader = false;
+            this.toastr.error('Error occurred while deleting item');
+          });
+        }
+      });
+    } else {
+      if (type === 'inputs' && this.fs.hmpBatchForm.inputs.length > 1) {
+        this.fs.hmpBatchForm.inputs.splice(index, 1);
+        this.fs.hmpBatchForm.inputs = [...this.fs.hmpBatchForm.inputs];
+      } else if (type === 'outputs' && this.fs.hmpBatchForm.outputs.length > 1) {
+        this.fs.hmpBatchForm.outputs.splice(index, 1);
+        this.fs.hmpBatchForm.outputs = [...this.fs.hmpBatchForm.outputs];
+      }
     }
   }
 

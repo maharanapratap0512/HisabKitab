@@ -378,7 +378,7 @@ class DBContex {
         })
     }
 
-    async generateDB(dept_id) {
+    async generateDB(dept_id, queriesObj = {}) {
         return new Promise(async (resolve, reject) => {
             try {
                 let dept = await this.getList("department", { conditionString: `_id = ${dept_id}` });
@@ -398,8 +398,26 @@ class DBContex {
                     // 
                     let exporting = exportDB.transaction(() => {
                         exportDB.prepare(`attach '${this.path.resolve(this.DBFolder, 'Database.db')}' as mainDB;`).run();
-                        for (let key of Object.keys(this.query.genDeptDB)) {
-                            let result = exportDB.prepare(this.query.genDeptDB[key]).run({ dept_id: dept_id });
+
+                        // Fallback to original behavior if queriesObj is not passed (or empty)
+                        if (Object.keys(queriesObj).length > 0) {
+                            for (let tableName of Object.keys(queriesObj)) {
+                                const queries = queriesObj[tableName];
+                                for (let query of queries) {
+                                    try {
+                                        exportDB.prepare(query).run({ dept_id: dept_id });
+                                    } catch (qErr) {
+                                        console.error(`Error generating table ${tableName}:`, qErr.message);
+                                        console.error(`Query:`, query);
+                                        throw new Error(`Failed to generate table ${tableName}: ${qErr.message}`);
+                                    }
+                                }
+                            }
+                        } else {
+                            // old backward compatible behavior
+                            for (let key of Object.keys(this.query.genDeptDB || {})) {
+                                exportDB.prepare(this.query.genDeptDB[key]).run({ dept_id: dept_id });
+                            }
                         }
                     });
 

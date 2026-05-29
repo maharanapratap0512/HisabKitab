@@ -46,6 +46,8 @@ export class ProductEntryComponent implements OnInit {
   settings: any = {};
   product_code: any = null;
   sr_num: any = null;
+  editDoc: any = {};
+  imageIndex: any = null;
 
   constructor(private fb: FormBuilder,
     private http: HttpService,
@@ -237,20 +239,27 @@ export class ProductEntryComponent implements OnInit {
 
       });
 
-      this.imagepath = (changes.getData.currentValue.document.images ? changes.getData.currentValue.document.images : null)
+      this.imagepath = (changes.getData.currentValue.document?.images ? changes.getData.currentValue.document.images : null);
+      this.editDoc = changes.getData.currentValue;
     }
   }
 
   imagesSelectResponse(ev: any) {
-    console.log("prod", ev);
     if (ev) {
       this.isLoader = true;
+      if (this.imageIndex !== null) {
+        this.itemForms.controls[this.imageIndex].patchValue({
+          document: { images: ev }
+        });
+      } else {
+        this.imagepath = ev;
+        this.productForm.patchValue({
+          document: { images: ev }
+        });
+      }
       $('#productEntryComponent > #addImages').modal('hide');
       this.showModal = '';
-      this.imagepath = ev;
-      this.productForm.patchValue({
-        document: { images: ev }
-      });
+      this.imageIndex = null;
       this.isLoader = false;
     }
     else {

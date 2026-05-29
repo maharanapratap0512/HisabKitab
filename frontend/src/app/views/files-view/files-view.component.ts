@@ -16,19 +16,18 @@ declare var $: any;
 })
 export class FilesViewComponent implements OnInit {
 
-  imageName: any = [];
-  imageFolder: any = [];
-  selectedImges: any = [];
-  apiName: any = "IMAGE";
-  baseUrl: any;
-  isLoader: any;
-  renameFileName: any;
+  imageName: any[] = [];
+  imageFolder: string = "";
+  selectedImages: Set<string> = new Set();
+  apiName: string = "IMAGE";
+  baseUrl: string = "";
+  isLoader: boolean = false;
   docForm: FormGroup;
+  
   @Input() getData: any;
   @Input() type: any;
   @Input() isEdit: any;
-  @Output() response = new EventEmitter();
-  editDoc: any = [];
+  @Output() response = new EventEmitter<string[]>();
 
   constructor(
     private fb: FormBuilder,
@@ -38,163 +37,127 @@ export class FilesViewComponent implements OnInit {
     private gs: GlobalService,
     private spinner: NgxSpinnerService
   ) {
-    this.docForm = new FormGroup({
-      file: new FormArray([])
-    })
+    this.docForm = this.fb.group({
+      file: this.fb.array([])
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    // console.log("changes.getData.currentValue_________", changes.getData.currentValue);
-
     if (changes.type) {
-      this.type = changes.type.currentValue;
       this.baseUrl = this.api.getUrl('BASE');
-      // switch (changes.type.currentValue) {
-      //   case 'pbk': this.apiName = "PBKIMAGE";
-      //     break;
-      //   case 'product': this.apiName = "PRODUCTIMAGE";
-      //     break;
-      //   case 'aawak': this.apiName = "AAWAKIMAGE";
-      //     break;
-      //   case 'jawak': this.apiName = "JAWAKIMAGE";
-      //     break;
-      // }
     }
     if (changes.getData && changes.getData.currentValue) {
-      this.editDoc = changes.getData.currentValue
+      const docs = changes.getData.currentValue;
+      const images = docs.images || [];
+      this.selectedImages = new Set(images);
+      this.syncSelectionToImages();
     }
   }
 
   ngOnInit(): void {
-    this.getImages();
     this.baseUrl = this.api.getUrl('BASE');
+    this.getImages();
   }
 
   getImages() {
     this.isLoader = true;
     this.http.put(this.api.getUrl('IMAGE'), { type: this.type }).subscribe((data: any) => {
+      this.isLoader = false;
       if (data['result'] && data['success']) {
         this.imageName = data['result'];
-        // this.imageName.map((x: { isChecked: boolean; }) => (x.isChecked = false))
-        // console.log("be4 ischecked imageName", this.imageName);
-        this.patchDocForm(this.editDoc.images)
-        for (let j in this.editDoc.images) {
-          // console.log("this.editDoc", this.editDoc);
-          let str = this.editDoc.images[j].toString().split('//');
-          // console.log("str[str.length - 1]", str[str.length - 1]);
-          for (let i in this.imageName) {
-            // console.log("imgnm", this.imageName[i].doc);
-            if (this.imageName[i].doc == str[str.length - 1]) {
-              this.imageName[i].isChecked = true;
-              // console.log("match");
-            }
-          }
-        }
-        this.imageFolder = data['dirpath'];
-        this.isLoader = false;
+        this.imageFolder = data['dirpath'] || '';
+        this.syncSelectionToImages();
       }
-      // console.log("ischecked imageName", this.imageName);
-      this.isLoader = false;
+    }, () => this.isLoader = false);
+  }
+
+  syncSelectionToImages() {
+    if (!this.imageName) return;
+    this.imageName.forEach(img => {
+      const fullPath = this.imageFolder + img.doc;
+      img.isChecked = this.selectedImages.has(fullPath);
     });
+  }
+
+  toggleSelection(file: any) {
+    const fullPath = this.imageFolder + file.doc;
+    if (this.selectedImages.has(fullPath)) {
+      this.selectedImages.delete(fullPath);
+      file.isChecked = false;
+    } else {
+      this.selectedImages.add(fullPath);
+      file.isChecked = true;
+    }
   }
 
   changeDocument(event: any): void {
-    // this.doctfile = event.target.files[0];
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.isLoader = true;
     const formData = new FormData();
     formData.append('type', this.type);
-    formData.append('image', event.target.files[0]);
+    formData.append('image', file);
+
     this.http.postFormData(this.api.getUrl(this.apiName), formData).subscribe((data: any) => {
-      if (data) {
-        this.toastr.success("IMAGE added successully.")
-        this.imageName.unshift({doc:data['file'].split('\\').at(-1), isChecked: false});
-      }
-      else {
-        this.toastr.error(data['message']);
+      this.isLoader = false;
+      if (data && data.file) {
+        this.toastr.success("Image uploaded successfully.");
+        this.getImages(); // Refresh the list
+      } else {
+        this.toastr.error(data?.message || "Upload failed");
       }
     }, err => {
-      this.toastr.error(err['error']);
+      this.isLoader = false;
+      this.toastr.error(err?.error || "Error uploading image");
     });
   }
 
-
-  // imageClicked(path: any) {
-  //   this.selectedImges.push({ path: this.imageFolder + path, baseUrl: this.baseUrl })
-  //   console.log("this.selectedImges", this.selectedImges);
-  // }
-
   imageSubmit() {
-    console.log(this.docForm.value.file);
-    
-    this.response.emit(this.docForm.value.file);
-    this.toastr.success("Images Selected Successfully.")
+    const paths = Array.from(this.selectedImages);
+    this.response.emit(paths);
+    this.toastr.success("Images selected successfully.");
   }
 
-  imageDelete(name: any) {
-    let body = {
-      filename: name,
-      type: this.type
-    }
+  imageDelete(name: string) {
     Swal.fire({
       title: 'Are you sure?',
-      text: "You won't be able to revert this!",
+      text: "This image will be permanently deleted!",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
+      confirmButtonColor: '#5d59f0',
+      cancelButtonColor: '#f1556c',
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.isLoader = true
-        this.http.delete(this.api.getUrl(this.apiName), body).subscribe((data: any) => {
-          if (data['success'] && data['result']) {
-            this.toastr.success("Image Deleted Successfully.")
-            this.imageName.splice(this.imageName.indexOf((i: { doc: any; })=>i.doc == name), 1);
-            this.isLoader = false
+        this.isLoader = true;
+        this.http.delete(this.api.getUrl(this.apiName), { filename: name, type: this.type }).subscribe((data: any) => {
+          this.isLoader = false;
+          if (data['success']) {
+            this.toastr.success("Image deleted successfully.");
+            this.getImages();
+            // Also remove from selection if deleted
+            const fullPath = this.imageFolder + name;
+            this.selectedImages.delete(fullPath);
           }
-          this.isLoader = false
-        }, err => {
-          this.isLoader = false
-          this.toastr.error(err);
-        });
+        }, () => this.isLoader = false);
       }
-    })
-
+    });
   }
 
-
-  docArr(event: any, item: any) {
-    const formArray: FormArray = this.docForm.get('file') as FormArray
-    var obj = this.imageFolder + event.target.value;
-    // obj = {
-    //   path: this.imageFolder + event.target.value,
-    //   baseUrl: this.baseUrl
-    // }
-    if (event.target.checked) {
-      formArray.push(new FormControl(obj))
-    }
-    else {
-      let i: number = 0
-      formArray.controls.forEach((ctrl = new FormControl()) => {
-        if (ctrl.value == this.imageFolder + event.target.value) {
-          formArray.removeAt(i)
-          return
-        }
-        i++;
-      })
-    }
+  previewImage(file: any) {
+    const url = this.baseUrl + this.imageFolder + file.doc;
+    Swal.fire({
+      imageUrl: url,
+      imageAlt: file.doc,
+      showCloseButton: true,
+      showConfirmButton: false,
+      background: 'rgba(0,0,0,0.8)',
+      customClass: {
+        image: 'img-fluid rounded shadow'
+      }
+    });
   }
 
-  patchDocForm(data: any) {
-    if (data) {
-      const formArray: FormArray = this.docForm.get('file') as FormArray;
-      data.forEach((x: any) => {
-        formArray.push(new FormControl(x));
-        // formArray.push(this.fb.group({
-        //   path: x,
-        //   baseUrl: this.baseUrl
-        // }));
-      });
-    }
-  }
 
 }

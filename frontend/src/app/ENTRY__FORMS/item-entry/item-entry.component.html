@@ -115,19 +115,28 @@
                             [ngClass]="{'validation':itemForm.get('extra_note')?.errors && (itemForm.get('extra_note')?.touched || itemForm.get ('extra_note')?.dirty)}"></textarea>
                     </div>
                 </div>
-                <div class="col-md-2 mb-3" *ngIf="settings.document">
-                    <div class="form-group">
-                        <label class="form-label">Image</label>
-                        <div onclick="$('#itemComponent > #showModal').modal('show')"
-                            (click)="showModal='Add Image';editDoc=this.itemForm.value.document;" class="form-control"
-                            style="cursor: pointer;">
-                            <i class="uil-image-plus" *ngIf="!imagepath || (imagepath && imagepath.length < 1)"
-                                style="font-size:200%; "></i>
-                            <ng-container *ngFor="let img of imagepath">
-                                <img src="{{this.api.getUrl('BASE')+img}}" alt="image" height="25" width="25"
-                                    *ngIf="imagepath" style="object-fit: cover;">
+                <div class="col-md-4 mb-3" *ngIf="settings.document">
+                    <div class="form-group image-upload-group">
+                        <label class="form-label">Images / Documents</label>
+                        <div (click)="showModal='Add Image'; editDoc=itemForm.value.document"
+                             onclick="$('#itemComponent > #showModal').modal('show')"
+                             class="image-preview-container d-flex flex-wrap align-items-center gap-2 p-2 rounded">
+                            
+                            <ng-container *ngIf="imagepath && imagepath.length > 0; else noImages">
+                                <div class="preview-thumb" *ngFor="let img of imagepath">
+                                    <img [src]="api.getUrl('BASE') + img" alt="preview" loading="lazy" />
+                                </div>
+                                <div class="add-more-indicator ms-2">
+                                    <i class="mdi mdi-plus-circle-outline"></i>
+                                </div>
                             </ng-container>
-                            <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
+
+                            <ng-template #noImages>
+                                <div class="empty-state d-flex align-items-center gap-2 text-muted">
+                                    <i class="uil-image-plus"></i>
+                                    <span>Click to Add Images</span>
+                                </div>
+                            </ng-template>
                         </div>
                     </div>
                 </div>

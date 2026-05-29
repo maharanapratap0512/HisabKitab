@@ -292,16 +292,24 @@
                   <div class="col-md-2 mb-3" *ngIf="settings.product.document">
                      <div class="form-group">
                         <label class="form-label">Image</label>
-                        <a onclick="$('#productEntryComponent > #addImages').modal('show')"
-                           (click)="showModal='Add Image'" class="form-control" style="cursor: pointer;">
-                           <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
-                           <div *ngIf="imagepath && imagepath.length > 0">
-                              <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image" class="rounded m-1"
-                                 height="48" />
-                              x {{imagepath.length}}
+                        <div (click)="showModal='Add Image'; imageIndex = null" onclick="$('#productEntryComponent > #addImages').modal('show')" class="image-upload-group" style="cursor: pointer;">
+                           <div class="image-preview-container d-flex flex-wrap align-items-center gap-2 p-2 rounded border border-secondary bg-dark-lighten">
+                               <ng-container *ngIf="imagepath && imagepath.length > 0; else noImages">
+                                   <div class="preview-thumb" *ngFor="let img of imagepath.slice(0, 3)">
+                                       <img [src]="api.getUrl('BASE') + img" alt="preview" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" />
+                                   </div>
+                                   <div *ngIf="imagepath.length > 3" class="more-count" style="font-weight: bold; color: #727cf5;">
+                                       +{{imagepath.length - 3}}
+                                   </div>
+                               </ng-container>
+                               <ng-template #noImages>
+                                   <div class="empty-state d-flex flex-column align-items-center justify-content-center w-100 py-1 text-muted">
+                                       <i class="uil-image-plus fs-4"></i>
+                                       <span style="font-size: 11px;">Add Images</span>
+                                   </div>
+                               </ng-template>
                            </div>
-                           <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
-                        </a>
+                        </div>
                      </div>
                   </div>
 
@@ -549,16 +557,24 @@
                                     [ngClass]="{'validation':pdForm.get('product_detail')?.errors}"></textarea>
                               </td>
                               <td>
-                                 <a onclick="$('#productEntryComponent > #addImages').modal('show')"
-                                    (click)="showModal='Add Image'" class="form-control-sm" style="cursor: pointer;">
-                                    <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
-                                    <div *ngIf="imagepath && imagepath.length > 0">
-                                       <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image"
-                                          class="rounded m-1" height="48" />
-                                       x {{imagepath.length}}
+                                 <div (click)="showModal='Add Image'; imageIndex = i" onclick="$('#productEntryComponent > #addImages').modal('show')" class="image-upload-group" style="cursor: pointer; min-width: 100px;">
+                                    <div class="image-preview-container d-flex flex-wrap align-items-center gap-1 p-1 rounded border border-secondary">
+                                        <ng-container *ngIf="pdForm.value.document?.images && pdForm.value.document.images.length > 0; else noImagesBunch">
+                                            <div class="preview-thumb-sm" *ngFor="let img of pdForm.value.document.images.slice(0, 2)">
+                                                <img [src]="api.getUrl('BASE') + img" alt="preview" style="width: 24px; height: 24px; object-fit: cover; border-radius: 4px;" />
+                                            </div>
+                                            <div *ngIf="pdForm.value.document.images.length > 2" class="more-count" style="font-size: 10px; font-weight: bold;">
+                                                +{{pdForm.value.document.images.length - 2}}
+                                            </div>
+                                        </ng-container>
+                                        <ng-template #noImagesBunch>
+                                            <div class="empty-state d-flex align-items-center gap-1 text-muted" style="font-size: 11px;">
+                                                <i class="uil-image-plus"></i>
+                                                <span>Add</span>
+                                            </div>
+                                        </ng-template>
                                     </div>
-                                    <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
-                                 </a>
+                                 </div>
                               </td>
                            </tr>
                         </ng-container>
@@ -633,7 +649,7 @@
             </div>
             <div class="modal-body">
                <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)" type="product"
-                  [getData]="productForm.value.document">
+                  [getData]="imageIndex !== null ? itemForms.controls[imageIndex].value.document : productForm.value.document" [isEdit]="true">
                </app-files-view>
             </div>
             <div class="modal-footer">

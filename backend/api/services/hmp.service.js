@@ -97,7 +97,7 @@ function injectSubitemList(entries, subitemListMap) {
 // Uses BaseTable.getAll() with a raw WHERE string — schema-driven joins
 // auto-build recipe + mm (hasOne) and inputs/outputs (hasMany) from schema.
 
-function getBatches({ dept_id, mm_id, recipe_id, item_id, date, date_from, date_to, year, pageNo }) {
+function getBatches({ dept_id, mm_id, recipe_id, item_id, date, date_from, date_to, year, pageNo, all = false, batchIds = [] }) {
     const PAGE_SIZE = 100;
     const page = (pageNo && pageNo > 0) ? Number(pageNo) : 1;
     const offset = (page - 1) * PAGE_SIZE;
@@ -107,6 +107,10 @@ function getBatches({ dept_id, mm_id, recipe_id, item_id, date, date_from, date_
         `hmp_batch.dept_id = ${Number(dept_id)}`,
         `hmp_batch.active = 1`,
     ];
+
+    if (batchIds && batchIds.length > 0) {
+        conds.push(`hmp_batch._id IN (${batchIds.map(id => Number(id)).join(',')})`);
+    }
 
     if (mm_id) conds.push(`hmp_batch.mm_id = ${Number(mm_id)}`);
     if (recipe_id) conds.push(`hmp_batch.recipe_id = ${Number(recipe_id)}`);
@@ -143,8 +147,8 @@ function getBatches({ dept_id, mm_id, recipe_id, item_id, date, date_from, date_
     //             └─ each child auto-includes its own hasOne: item, subitem, unit, condition
     const result = hmpBatch.getAll(where, {
         orderBy: 'hmp_batch.date DESC',
-        limit: PAGE_SIZE,
-        offset,
+        limit: all ? null : PAGE_SIZE,
+        offset: all ? null : offset,
     });
 
     const subitemListMap = buildSubitemListMap(subitemList.getAll());
@@ -185,6 +189,7 @@ async function insertUpdateBatch(data) {
         let batchId;
 
         let id;
+        const isNewBatch = !data._id;
         if (data._id) {
             hmpBatch.updateById(data, data._id);
             id = Number(data._id);
@@ -195,11 +200,46 @@ async function insertUpdateBatch(data) {
         for (const inp of data.inputs ?? []) {
             if (!inp.item_id || !inp.qty) continue;
             inp.batch_id = id;
+            if (isNewBatch) {
+                delete inp._id;
+                delete inp.jawak_ref_id;
+                if (inp.auto_aawak) delete inp.aawak_ref_id;
+            }
 
-            // Handle Jawak Auto-creation (Global flag)
-            if (data.auto_jawak) {
+            // Handle Jawak Auto-creation (Global flag or row-level)
+            if (data.auto_jawak || inp.auto_jawak) {
+                // If auto_aawak is checked, create/update Aawak first
+                if (inp.auto_aawak) {
+                    let awk = {
+                        ...Fn.tbInterface.aawak,
+                        date: data.date,
+                        mm_id: data.mm_id,
+                        item_id: inp.item_id,
+                        subitem_id: inp.subitem_id,
+                        unit_id: inp.unit_id,
+                        condition_id: inp.condition_id,
+                        qty: inp.qty,
+                        rate: inp.rate,
+                        actual_amt: inp.qty * (inp.rate || 0),
+                        aawak_type_id: inp.aawak_type_id || 50,
+                        aawak_source_id: inp.aawak_source_id || null,
+                        dept_id: data.dept_id,
+                        description: `HMP Batch Input Auto-Aawak (Batch ID: ${id || ''})`,
+                        active: 1
+                    };
+
+                    if (inp.aawak_ref_id) {
+                        awk._id = inp.aawak_ref_id;
+                        await Fn.updateAJ(awk, 'aawak');
+                    } else {
+                        let aawakRefId = await Fn.insertAJ(awk, 'aawak');
+                        inp.aawak_ref_id = aawakRefId;
+                    }
+                }
+
                 let jwk = Fn.tbInterface.getJawakFromHmpInput(data, inp);
                 jwk.aawak_source_id = inp.aawak_source_id || null;
+                jwk.aawak_ref_id = inp.aawak_ref_id || null;
 
                 if (inp.jawak_ref_id) {
                     jwk._id = inp.jawak_ref_id;
@@ -220,11 +260,15 @@ async function insertUpdateBatch(data) {
         for (const out of data.outputs ?? []) {
             if (!out.item_id || !out.qty) continue;
             out.batch_id = id;
+            if (isNewBatch) {
+                delete out._id;
+                delete out.aawak_ref_id;
+            }
 
             let hasJawaks = out.jawak_detail && out.jawak_detail.length > 0;
 
-            // Handle Aawak Auto-creation (Global flag or Jawak existence)
-            if (data.auto_aawak || hasJawaks) {
+            // Handle Aawak Auto-creation (Global flag or row-level or Jawak existence)
+            if (data.auto_aawak || out.auto_aawak || hasJawaks) {
                 let awk = Fn.tbInterface.getAawakFromHmpOutput(data, out);
 
                 if (out.aawak_ref_id) {
@@ -239,6 +283,9 @@ async function insertUpdateBatch(data) {
             if (hasJawaks) {
                 for (let jwk of out.jawak_detail) {
                     jwk.aawak_ref_id = out.aawak_ref_id;
+                    if (isNewBatch) {
+                        delete jwk._id;
+                    }
 
                     if (jwk._id) {
                         await Fn.updateAJ(jwk, 'jawak');
@@ -276,14 +323,14 @@ async function deleteBatch(id) {
         sutramDB.begin();
         const inputs = hmpBatchIn.getAll({ batch_id: id }, { full: false });
         for (const inp of inputs) {
-            if (inp.jawak_ref_id) await Fn.deleteAJ(inp.jawak_ref_id, 'jawak');
             hmpBatchIn.deleteById(inp._id);
+            if (inp.jawak_ref_id) await Fn.deleteAJ(inp.jawak_ref_id, 'jawak');
         }
 
         const outputs = hmpBatchOut.getAll({ batch_id: id }, { full: false });
         for (const out of outputs) {
-            if (out.aawak_ref_id) await Fn.deleteAJ(out.aawak_ref_id, 'aawak');
             hmpBatchOut.deleteById(out._id);
+            if (out.aawak_ref_id) await Fn.deleteAJ(out.aawak_ref_id, 'aawak');
         }
 
         hmpBatch.deleteById(id);
@@ -303,10 +350,11 @@ async function deleteBatchInput(id) {
             sutramDB.commit();
             return 0;
         }
-        if (inp.jawak_ref_id) {
-            await Fn.deleteAJ(inp.jawak_ref_id, 'jawak');
-        }
+        const jawakRefId = inp.jawak_ref_id;
         hmpBatchIn.deleteById(id);
+        if (jawakRefId) {
+            await Fn.deleteAJ(jawakRefId, 'jawak');
+        }
         sutramDB.commit();
         return 1;
     } catch (err) {
@@ -323,10 +371,11 @@ async function deleteBatchOutput(id) {
             sutramDB.commit();
             return 0;
         }
-        if (out.aawak_ref_id) {
-            await Fn.deleteAJ(out.aawak_ref_id, 'aawak');
-        }
+        const aawakRefId = out.aawak_ref_id;
         hmpBatchOut.deleteById(id);
+        if (aawakRefId) {
+            await Fn.deleteAJ(aawakRefId, 'aawak');
+        }
         sutramDB.commit();
         return 1;
     } catch (err) {

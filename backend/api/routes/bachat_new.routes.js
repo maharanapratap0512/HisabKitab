@@ -122,8 +122,8 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                             GROUP BY mm_id, item_id, subitem_id, unit_id, condition_id
                         ) latest ON bn.mm_id = latest.mm_id 
                                 AND bn.item_id = latest.item_id 
-                                AND IFNULL(bn.subitem_id, 0) = IFNULL(latest.subitem_id, 0)
-                                AND IFNULL(bn.condition_id, 0) = IFNULL(latest.condition_id, 0)
+                                AND bn.subitem_id IS latest.subitem_id
+                                AND bn.condition_id IS latest.condition_id
                                 AND bn.unit_id = latest.unit_id
                                 AND (bn.year * 12 + bn.month) = latest.latest_idx
                         WHERE ABS(IFNULL(bn.past_bachat, 0) + IFNULL(bn.bachat, 0)) > 0.0001
@@ -142,13 +142,13 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                             GROUP BY mm_id, item_id, subitem_id, unit_id, condition_id
                         ) latest ON u.mm_id = latest.mm_id 
                                 AND u.item_id = latest.item_id 
-                                AND IFNULL(u.subitem_id, 0) = IFNULL(latest.subitem_id, 0)
-                                AND IFNULL(u.condition_id, 0) = IFNULL(latest.condition_id, 0)
+                                AND u.subitem_id IS latest.subitem_id
+                                AND u.condition_id IS latest.condition_id
                                 AND u.unit_id = latest.unit_id
                         LEFT JOIN bachat_new bn ON u.mm_id = bn.mm_id 
                                 AND u.item_id = bn.item_id 
-                                AND IFNULL(u.subitem_id, 0) = IFNULL(bn.subitem_id, 0)
-                                AND IFNULL(u.condition_id, 0) = IFNULL(bn.condition_id, 0)
+                                AND u.subitem_id IS bn.subitem_id
+                                AND u.condition_id IS bn.condition_id
                                 AND u.unit_id = bn.unit_id
                                 AND (bn.year * 12 + bn.month) = latest.latest_idx
                     )
@@ -190,9 +190,9 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                     LEFT JOIN bachat_new bn ON fg.year = bn.year 
                                             AND fg.month = bn.month 
                                             AND fg.item_id = bn.item_id 
-                                            AND IFNULL(fg.subitem_id, 0) = IFNULL(bn.subitem_id, 0)
+                                            AND fg.subitem_id IS bn.subitem_id
                                             AND fg.unit_id = bn.unit_id
-                                            AND IFNULL(fg.condition_id, 0) = IFNULL(bn.condition_id, 0)
+                                            AND fg.condition_id IS bn.condition_id
                                             AND fg.mm_id = bn.mm_id
                                             AND bn.dept_id = ${dept_id}
                     
@@ -204,8 +204,8 @@ router.put('/filter/:dept_id', async (req, res, next) => {
         
                     WHERE 1=1
                     ${category_id ? ` AND (
-                        EXISTS (SELECT 1 FROM json_each(vs.categories) WHERE json_extract(value, '$._id') = ${category_id}) OR
-                        (vs.categories = '[]' AND EXISTS (SELECT 1 FROM json_each(vi.categories) WHERE json_extract(value, '$._id') = ${category_id}))
+                        EXISTS (SELECT 1 FROM json_each(sit.categories) WHERE json_extract(value, '$._id') = ${category_id}) OR
+                        ((sit.categories IS NULL OR sit.categories = '[]') AND EXISTS (SELECT 1 FROM json_each(it.icategories) WHERE json_extract(value, '$._id') = ${category_id}))
                     )` : ''}
         
                     ORDER BY fg.mm_id, fg.item_id, fg.subitem_id, fg.unit_id, fg.condition_id, fg.year, fg.month
@@ -370,17 +370,16 @@ router.put('/condition/:dept_id', async (req, res, next) => {
             JSON_GROUP_ARRAY(bcht.t_u) as arr_sum_used,
             JSON_GROUP_ARRAY(bcht.t_b) as arr_sum_bachat,
             mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
-            it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_icategories,
-            sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_scategories,
+            it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_icategories,
+            sit.subitem_hin, sit.subitem_eng, sit.subitem_roman, sit.categories as arr_scategories,
             sl.list_name_hin, sl.list_name_eng,
             unit.unit_short, unit.unit_full,
             dept.dept_code, dept.dept_hin, dept.dept_eng from (select sum(total_aawak) as t_a, sum(jawak) as t_j, sum(used_jawak) as t_u, sum(bachat) as t_b, * from bachat_new ${conditionQuery1}        
             group by dept_id, mm_id, item_id, subitem_id, condition_id, unit_id, month, year) bcht
             left join mm on mm._id = bcht.mm_id
             left join state st on st._id = mm.state_id
-            left join item it on it._id = bcht.item_id
-            left join subitem sit on sit._id = bcht.subitem_id
-            left join subitem_list sitl on sitl._id = sit.subitem_list_id
+            left join v_item it on it._id = bcht.item_id
+            left join v_subitem sit on sit._id = bcht.subitem_id
             left join support_list sl on sl._id = bcht.condition_id
             left join unit on unit._id = bcht.unit_id
             left join department dept on dept._id = bcht.dept_id

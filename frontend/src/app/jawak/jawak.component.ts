@@ -147,7 +147,7 @@ export class JawakComponent implements OnInit {
           'Condition': result[i].condition_id ? result[i].condition_hin : '-',
           'Company': result[i].company_name ? result[i].company_name : '-',
           'Jawak MM': result[i].jawak_mm_id ? result[i].jawak_mm_hin : '-',
-          'Kisko Diya': result[i].nimitt_id ? result[i].nimitt_hin + '(' + result[i].nimitt_state_hin + ')' : '-',
+          'Kisko Diya': result[i].pbk_id ? result[i].roll_no || '_____' + result[i].pbk_hin : '-',
           'Qty': result[i].qty ? result[i].qty : '-',
           'Unit': result[i].unit_id ? result[i].unit_short : '-',
           'Rate': result[i].rate ? result[i].rate : '-',
@@ -177,6 +177,17 @@ export class JawakComponent implements OnInit {
         this.isLoader = false;
       }
     });
+  }
+
+  excelFile: any;
+  excelImport(event: any) {
+    this.excelFile = event;
+    this.showModal = 'ei_jawak';
+    $('#showModal').modal('show');
+  }
+
+  importResponse(type: any) {
+    this.getJawakData(1);
   }
 
   getMoreAJ() {
@@ -263,6 +274,20 @@ export class JawakComponent implements OnInit {
     if (updatedJawak && updatedJawak._id) {
       this.jawakData[index].aawak_ref_id = updatedJawak.aawak_ref_id;
     }
+  }
+
+  toggleReceived(data: any) {
+    const newStatus = data.is_recieved ? 0 : 1;
+    this.http.put(this.api.getUrl('JAWAK') + '/received/' + data._id, { is_recieved: newStatus }).subscribe((res: any) => {
+      if (res && res.success) {
+        data.is_recieved = newStatus;
+        this.toastr.success('Status updated successfully');
+      } else {
+        this.toastr.error('Failed to update status');
+      }
+    }, err => {
+      this.toastr.error('Failed to update status');
+    });
   }
 
   delete(i: any, id: any) {

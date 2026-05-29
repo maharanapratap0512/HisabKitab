@@ -248,16 +248,29 @@
 
                   </div>
                </div> -->
-            <div class="col-md-2 mb-3" *ngIf="settings.pbk.document">
-               <div class="form-group">
-                  <label class="form-label">Image</label>
-                  <a onclick="$('#pbkEntryComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
-                     class="form-control" style="cursor: pointer;">
-                     <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
-                     <img src="{{this.api.getUrl('BASE')+imagepath}}" alt="image" class="rounded m-1" height="48"
-                        *ngIf="imagepath">
-                     <i *ngIf="!imagepath">Click To Change</i>
-                  </a>
+            <div class="col-md-4 mb-3" *ngIf="settings.pbk.document">
+               <div class="form-group image-upload-group">
+                  <label class="form-label">Images / Documents</label>
+                  <div onclick="$('#pbkEntryComponent > #showModal').modal('show')"
+                     (click)="showModal='Add Image'; editDoc=this.pbkForm.value.document;"
+                     class="image-preview-container d-flex flex-wrap align-items-center gap-2 p-2 rounded">
+
+                     <ng-container *ngIf="imagepath && imagepath.length > 0; else noImages">
+                        <div class="preview-thumb" *ngFor="let img of imagepath">
+                           <img [src]="api.getUrl('BASE') + img" alt="preview" loading="lazy" />
+                        </div>
+                        <div class="add-more-indicator ms-2">
+                           <i class="mdi mdi-plus-circle-outline"></i>
+                        </div>
+                     </ng-container>
+
+                     <ng-template #noImages>
+                        <div class="empty-state d-flex align-items-center gap-2 text-muted">
+                           <i class="uil-image-plus"></i>
+                           <span>Click to Add Images</span>
+                        </div>
+                     </ng-template>
+                  </div>
                </div>
             </div>
             <div class="col-md-2 mb-3">
@@ -309,7 +322,8 @@
                   list_type="status"> </app-support-list-entry>
 
                <!-- Add Image -->
-               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)" type="pbk">
+               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)"
+                  [getData]="editDoc" [isEdit]="true" type="pbk">
                </app-files-view>
 
             </div>

@@ -293,9 +293,23 @@
                         </div>
                         <app-item-dropdown [items]="items" [itemId]="jawakForm.get('item_id')?.value"
                             [subitemId]="jawakForm.get('subitem_id')?.value"
-                            (change)="jawakForm.patchValue({item_id: $event.item_id, subitem_id: $event.subitem_id}); itemSelected($event.item_id); subitemSelected($event.subitem_id)"
-                            [readonly]="isEdit || ref_id" [required]="true">
+                            (change)="jawakForm.patchValue({item_id: $event.item_id, subitem_id: $event.subitem_id, aawak_ref_id: null}); itemSelected($event.item_id); subitemSelected($event.subitem_id)"
+                            [readonly]="ref_id" [required]="true">
                         </app-item-dropdown>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Link Aawak</label>
+                        <app-aawak-ref-dropdown [mmId]="jawakForm.get('mm_id')?.value"
+                            [maxDate]="jawakForm.get('date')?.value" [deptId]="auth.webUser.dept_id" [filterObj]="{
+                                item_id: jawakForm.get('item_id')?.value,
+                                subitem_id: jawakForm.get('subitem_id')?.value,
+                                condition_id: jawakForm.get('condition_id')?.value,
+                                aawak_source_id: jawakForm.get('aawak_source_id')?.value
+                            }" formControlName="aawak_ref_id" size="sm">
+                        </app-aawak-ref-dropdown>
                     </div>
                 </div>
 
@@ -444,6 +458,24 @@
                         </ng-select>
                     </div>
                 </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-group mt-4">
+                        <div class="form-check form-checkbox-primary">
+                            <input type="checkbox" class="form-check-input" id="chkReceived"
+                                formControlName="is_recieved">
+                            <label class="form-check-label" for="chkReceived">Received / प्राप्त</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-group mt-4">
+                        <div class="form-check form-checkbox-warning">
+                            <input type="checkbox" class="form-check-input" id="chkHighlight" formControlName="hl">
+                            <label class="form-check-label" for="chkHighlight">Highlight</label>
+                        </div>
+                    </div>
+                </div>
+
 
                 <div class="col-md-3 mb-3" *ngIf="settings.jawak.item_detail">
                     <div class="form-group">
@@ -510,18 +542,19 @@
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <div class="d-flex justify-content-between mt-3" *ngIf="!this.isEdit">
+                    <div class="d-flex justify-content-between mt-3">
 
-                        <button class="btn btn-primary mx-3" type="submit" (click)="jawakFormSubmit()">Submit</button>
+                        <button class="btn btn-primary mx-3" type="submit" *ngIf="!this.isEdit"
+                            (click)="jawakFormSubmit()">Submit</button>
                         <button class="btn btn-warning mt-3 mx-3" type="submit" *ngIf="this.isEdit"
                             (click)="jawakFormUpdate()">Update</button>
 
 
-                        <div class="form-check form-checkbox-primary">
+                        <div class="form-check form-checkbox-primary" *ngIf="!this.isEdit">
                             <input type="checkbox" class="form-check-input" id="chkAutoAwk" formControlName="auto_awk">
                             <label class="form-check-label" for="chkAutoAwk">Auto Aawak</label>
                         </div>
-                        <div class="form-check form-checkbox-primary">
+                        <div class="form-check form-checkbox-primary" *ngIf="!this.isEdit">
                             <input type="checkbox" class="form-check-input" id="chkAutoReAwk"
                                 formControlName="auto_reawk">
                             <label class="form-check-label" for="chkAutoReAwk">Auto Re-Aawak</label>

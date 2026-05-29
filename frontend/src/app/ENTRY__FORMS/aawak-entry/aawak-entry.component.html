@@ -88,19 +88,29 @@
                </div>
             </div>
 
-            <div class="col-md-2 mb-3" *ngIf="settings.aawak.document">
-               <div class="form-group">
-                  <!-- <label class="form-label">Image</label> -->
-                  <a onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
-                     class="form-control" style="cursor: pointer;">
-                     <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
-                     <div *ngIf="imagepath && imagepath.length > 0">
-                        <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image" class="rounded m-1"
-                           height="48" />
-                        x {{imagepath.length}}
-                     </div>
-                     <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
-                  </a>
+            <div class="col-md-4 mb-3" *ngIf="settings.aawak.document">
+               <div class="form-group image-upload-group">
+                  <label class="form-label">Images / Documents</label>
+                  <div onclick="$('#aawakEntryComponent > #showModal').modal('show')"
+                     (click)="showModal='Add Image'; editDoc=awkfg.document;"
+                     class="image-preview-container d-flex flex-wrap align-items-center gap-2 p-2 rounded">
+
+                     <ng-container *ngIf="imagepath && imagepath.length > 0; else noImages">
+                        <div class="preview-thumb" *ngFor="let img of imagepath">
+                           <img [src]="api.getUrl('BASE') + img" alt="preview" loading="lazy" />
+                        </div>
+                        <div class="add-more-indicator ms-2">
+                           <i class="mdi mdi-plus-circle-outline"></i>
+                        </div>
+                     </ng-container>
+
+                     <ng-template #noImages>
+                        <div class="empty-state d-flex align-items-center gap-2 text-muted">
+                           <i class="uil-image-plus"></i>
+                           <span>Click to Add Images</span>
+                        </div>
+                     </ng-template>
+                  </div>
                </div>
             </div>
 
@@ -482,19 +492,29 @@
                </div>
             </div> -->
 
-            <div class="col-md-2 mb-3" *ngIf="settings.aawak.document">
-               <div class="form-group">
-                  <label class="form-label">Image</label>
-                  <a onclick="$('#aawakEntryComponent > #showModal').modal('show')" (click)="showModal='Add Image'"
-                     class="form-control" style="cursor: pointer;">
-                     <i class="uil-image-plus" *ngIf="!imagepath" style="font-size:200%; "></i>
-                     <div *ngIf="imagepath && imagepath.length > 0">
-                        <img src="{{this.api.getUrl('BASE')+imagepath[0]}}" alt="image" class="rounded m-1"
-                           height="48" />
-                        x {{imagepath.length}}
-                     </div>
-                     <i *ngIf="!imagepath || (imagepath && imagepath.length < 1)">Click To Change</i>
-                  </a>
+            <div class="col-md-4 mb-3" *ngIf="settings.aawak.document">
+               <div class="form-group image-upload-group">
+                  <label class="form-label">Images / Documents</label>
+                  <div onclick="$('#aawakEntryComponent > #showModal').modal('show')"
+                     (click)="showModal='Add Image'; editDoc=awkfg.document;"
+                     class="image-preview-container d-flex flex-wrap align-items-center gap-2 p-2 rounded">
+
+                     <ng-container *ngIf="imagepath && imagepath.length > 0; else noImages">
+                        <div class="preview-thumb" *ngFor="let img of imagepath">
+                           <img [src]="api.getUrl('BASE') + img" alt="preview" loading="lazy" />
+                        </div>
+                        <div class="add-more-indicator ms-2">
+                           <i class="mdi mdi-plus-circle-outline"></i>
+                        </div>
+                     </ng-container>
+
+                     <ng-template #noImages>
+                        <div class="empty-state d-flex align-items-center gap-2 text-muted">
+                           <i class="uil-image-plus"></i>
+                           <span>Click to Add Images</span>
+                        </div>
+                     </ng-template>
+                  </div>
                </div>
             </div>
 
@@ -841,7 +861,8 @@
                   (response)='aawakSourceAddResponse($event)' list_type="aawak_source">
                </app-support-list-entry>
 
-               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)" type="aawak">
+               <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)"
+                  [getData]="editDoc" [isEdit]="true" type="aawak">
                </app-files-view>
 
             </div>

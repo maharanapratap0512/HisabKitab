@@ -1,62 +1,53 @@
 <ngx-spinner *ngIf="isLoader" bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-scale-multiple"
     [fullScreen]="true">
-    <p style="color: white"> मैं आत्मा शांत स्वरूप हूँ । </p>
+    <p style="color: white"> प्रोसेसिंग हो रही है... </p>
 </ngx-spinner>
 
-<div class="row" id="fileViewComponent">
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-2 mb-3">
-                <div class="add-container" (click)="uploadDocument.click()">
-                    <input type="file" class="form-control" #uploadDocument (change)="changeDocument($event)" hidden
-                        accept="image/*" />
-                    <i class="uil-image-plus" style="font-size:400%; "></i>
-                    <p class="add-title">ADD IMAGE</p>
-                    <div class="overlay"></div>
+<div id="fileViewComponent">
+    <div class="gallery-grid">
+        <!-- Upload Card -->
+        <div class="file-card upload-card" (click)="uploadDocument.click()">
+            <input type="file" #uploadDocument (change)="changeDocument($event)" hidden accept="image/*" />
+            <i class="uil-image-plus"></i>
+            <span>Add New</span>
+        </div>
 
-                </div>
+        <!-- Image Cards -->
+        <div class="file-card" *ngFor="let file of imageName; let i = index" [class.selected]="file.isChecked"
+            (click)="toggleSelection(file)">
+            
+            <!-- Selection Badge -->
+            <div class="selection-badge">
+                <i class="mdi mdi-check"></i>
             </div>
 
-            <div class="col-md-2 mb-3" *ngFor="let file of imageName;let i =index">
-                <div class="container">
-                    <img [src]="baseUrl+imageFolder+file.doc" alt="image" />
-                    <p class="title">{{file.doc}}</p>
-                    <div class="overlay"></div>
-                    <div class="close btn btn-sm btn-outline-danger" (click)="imageDelete(file.doc)">
-                        <i class="mdi mdi-trash-can-outline"></i>
-                    </div>
-                    <!--<div class="button btn btn-sm btn-outline-success" (click)="imageClicked(file)">
-                        <i class="mdi mdi-check"></i>
-                    </div> -->
-                </div>
+            <!-- Image Preview -->
+            <img [src]="baseUrl + imageFolder + file.doc" [alt]="file.doc" loading="lazy" />
+            
+            <!-- Overlay for Hover -->
+            <div class="card-overlay"></div>
 
-                <div class="card-footer" style="padding: .25rem 1.5rem;">
-                    <div [formGroup]="docForm" class="form-check form-checkbox-success">
-                        <input type="checkbox" class="form-check-input" [id]="i" value="{{file.doc}}"
-                            (change)="docArr($event,file.doc)" formArrayName="file"
-                            [attr.checked]="file.isChecked ? true : null">
-                        <!-- <label class="form-check-label" for="customCheckcolor2">Success Checkbox</label> -->
-                    </div>
-                </div>
+            <!-- Actions Bar -->
+            <div class="card-actions" (click)="$event.stopPropagation()">
+                <button class="action-btn preview-btn" title="Preview" (click)="previewImage(file)">
+                    <i class="mdi mdi-eye"></i>
+                </button>
+                <button class="action-btn delete-btn" title="Delete" (click)="imageDelete(file.doc)">
+                    <i class="mdi mdi-trash-can-outline"></i>
+                </button>
             </div>
 
-            <div class="col-md-2 d-flex align-items-center">
-                <button class="btn btn-primary" style="width: 100%;" type="submit"
-                    (click)="imageSubmit()">Submit</button>
+            <!-- File Name Info -->
+            <div class="file-info">
+                {{ file.doc }}
             </div>
         </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="footer-actions">
+        <button class="btn btn-primary btn-submit" type="button" (click)="imageSubmit()">
+            Confirm Selection
+        </button>
     </div>
 </div>
-
-<!-- <div class="wrapper">
-    <div class="content-page">
-        <div class="content">
-            <div class="container-fluid">
-
-
-
-                
-            </div>
-        </div>
-    </div>
-</div> -->

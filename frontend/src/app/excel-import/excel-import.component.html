@@ -15,7 +15,7 @@
                         <!-- <label class="form-label">Import Type</label> -->
                         <ng-select class="custom" style="width: 100%;" placeholder="Select Import Type"
                            [clearable]="true" (change)="importTypeChanged($event)" [virtualScroll]="true"
-                           [(ngModel)]="importType" [ngModelOptions]="{standalone: true}">
+                           [(ngModel)]="importType" [ngModelOptions]="{standalone: true}" [disabled]="lockType">
                            <ng-option selected="selected" disabled value="">Select Import Type</ng-option>
                            <ng-option *ngFor="let item of EIService.importList" [value]="item">
                               {{item.name}}</ng-option>
@@ -255,12 +255,12 @@
                               <tr
                                  *ngFor="let data of excelArrObj | paginate:{id:'excelPagi', itemsPerPage:itemsPerPage,currentPage:page_excel,totalItems:excelArrObj.length}; let i=index;">
                                  <td *ngFor="let header of headerList"
-                                    [ngClass]="{'marked': (header.not_null && !data[header.name]) || (header.ref_field && data[header.name] && (!data[header.ref_field] || data[header.ref_data])), 'success': data[header.ref_data] && data[header.name] }">
-                                    <span [ngClass]="{'line-through': data[header.ref_data]}">
+                                    [ngClass]="{'marked': (header.not_null && !data[header.name]) || (header.ref_field && data[header.name] && (!data[header.ref_field] || getValue(data, header.ref_data))), 'success': getValue(data, header.ref_data) && data[header.name] }">
+                                    <span [ngClass]="{'line-through': getValue(data, header.ref_data)}">
                                        {{data[header.name]}}
                                     </span> <br />
-                                    <span *ngIf="data[header.ref_data]">
-                                       {{data[header.ref_data]}}
+                                    <span *ngIf="getValue(data, header.ref_data)">
+                                       {{getValue(data, header.ref_data)}}
                                     </span>
                                  </td>
                               </tr>
@@ -270,7 +270,7 @@
                   </div>
 
                   <!-- correction -->
-                  <div class="tab-pane p-4 show active" id="correction" style="overflow: auto;">
+                  <div class="tab-pane p-4" id="correction" style="overflow: auto;">
                      <div class="row" *ngIf="unmatchedData.length > 0">
                         <pagination-controls id="unmatchedPagi" class="pagi text-end"
                            (pageChange)="page_unmatched=$event" [autoHide]="true">
@@ -295,7 +295,7 @@
                                  (blur)="toggleCorrection(((page_unmatched-1) * 25) + i, false)" tabindex="0">
                                  <td>{{((page_unmatched-1) * 25) + i+1}}</td>
                                  <td> {{data.type}} </td>
-                                 <td *ngIf="data.type != 'item'"> {{data.name}} </td>
+                                 <td *ngIf="data.type != 'item'"> {{data.isArray ? data.name.join(', ') : data.name}} </td>
                                  <td *ngIf="data.type == 'item'">
                                     {{data.name.item}} - {{data.name.subitem}}
                                  </td>
@@ -304,7 +304,7 @@
                                        <!-- mm dropdown -->
                                        <ng-select *ngIf="data.type == 'mm' || data.type == 'aj_mm'"
                                           class="custom custom-import" placeholder="Select MM" [virtualScroll]="true"
-                                          [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
+                                          [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select MM --</ng-option>
                                           <ng-option *ngFor="let item of mms"
                                              [value]="item._id">{{item.mm_hin}}:{{item.mm_eng}}
@@ -312,13 +312,24 @@
                                              {{item.mm_code}}</ng-option>
                                        </ng-select>
 
-                                       <!-- category dropdown -->
-                                       <div class="col-4">
-                                          <ng-select *ngIf="data.type == 'category'" class="custom custom-import"
+                                       <!-- category dropdown (single) -->
+                                       <div class="col-4" *ngIf="data.type == 'category' && !data.isArray">
+                                          <ng-select class="custom custom-import"
                                              placeholder="Select Category" [virtualScroll]="true" [(ngModel)]="data.id"
-                                             [ngModelOptions]="{standalone: true}">
+                                             [ngModelOptions]="{standalone: true}" appendTo="body">
                                              <ng-option selected="selected" disabled value="">-- Select Category
                                                 --</ng-option>
+                                             <ng-option *ngFor="let item of categories" [value]="item._id">
+                                                {{item.category_hin}}:{{item.category_eng}}</ng-option>
+                                          </ng-select>
+                                       </div>
+
+                                       <!-- category dropdown (multi / array type) -->
+                                       <div class="col-6" *ngIf="data.type == 'category' && data.isArray">
+                                          <ng-select class="custom custom-import"
+                                             placeholder="Select Categories" [virtualScroll]="true"
+                                             [multiple]="true" [(ngModel)]="data.ids"
+                                             [ngModelOptions]="{standalone: true}" appendTo="body">
                                              <ng-option *ngFor="let item of categories" [value]="item._id">
                                                 {{item.category_hin}}:{{item.category_eng}}</ng-option>
                                           </ng-select>
@@ -328,7 +339,8 @@
                                        <div class="col-4">
                                           <ng-select *ngIf="data.type == 'subitem_list'" class="custom custom-import"
                                              placeholder="Select Subitem List" [virtualScroll]="true"
-                                             [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}">
+                                             [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}"
+                                             appendTo="body">
                                              <ng-option selected="selected" disabled value="">-- Select Subitem List
                                                 --</ng-option>
                                              <ng-option *ngFor="let item of subitem_lists" [value]="item._id">
@@ -340,7 +352,7 @@
                                        <div class="d-flex justify-content-center" *ngIf="data.type == 'item'">
                                           <div class="col-4">
                                              <ng-select class="custom custom-import" placeholder="Select Category"
-                                                [virtualScroll]="true" (change)="catSelected($event)">
+                                                [virtualScroll]="true" (change)="catSelected($event)" appendTo="body">
                                                 <ng-option selected="selected" disabled value="">-- Select Category
                                                    --</ng-option>
                                                 <ng-option *ngFor="let item of categories" [value]="item._id">
@@ -351,7 +363,8 @@
                                           <div class="col-4 mx-1">
                                              <ng-select class="custom custom-import" placeholder="Select Item"
                                                 [virtualScroll]="true" [(ngModel)]="data.item"
-                                                [ngModelOptions]="{standalone: true}" (change)="data.id = $event._id; itemSelected($event)">
+                                                [ngModelOptions]="{standalone: true}"
+                                                (change)="data.id = $event._id; itemSelected($event)" appendTo="body">
                                                 <ng-option selected="selected" disabled value="">-- Select Item
                                                    --</ng-option>
                                                 <ng-option *ngFor="let item of items" [value]="item">
@@ -361,8 +374,9 @@
                                           <!-- subitem dropdown -->
                                           <div class="col-4">
                                              <ng-select class="custom custom-import" placeholder="Select Subitem"
-                                                [virtualScroll]="true" [(ngModel)]="data.subitem" (change)="data.id2 = $event._id"
-                                                [ngModelOptions]="{standalone: true}">
+                                                [virtualScroll]="true" [(ngModel)]="data.subitem"
+                                                (change)="data.id2 = $event._id" [ngModelOptions]="{standalone: true}"
+                                                appendTo="body">
                                                 <ng-option selected="selected" disabled value="">-- Select Subitem
                                                    --</ng-option>
                                                 <ng-option *ngFor="let item of subitems" [value]="item">
@@ -376,7 +390,7 @@
                                        <div class="col-4">
                                           <ng-select *ngIf="data.type == 'product'" class="custom custom-import"
                                              placeholder="Select Product" [virtualScroll]="true" [(ngModel)]="data.id"
-                                             [ngModelOptions]="{standalone: true}">
+                                             [ngModelOptions]="{standalone: true}" appendTo="body">
                                              <ng-option selected="selected" disabled value="">-- Select Product
                                                 --</ng-option>
                                              <ng-option *ngFor="let item of products" [value]="item._id">
@@ -387,7 +401,7 @@
                                        <!-- pbk dropdown -->
                                        <ng-select *ngIf="data.type == 'pbk'" class="custom custom-import"
                                           placeholder="Select Pbk" [virtualScroll]="true" [(ngModel)]="data.pbk_id"
-                                          [ngModelOptions]="{standalone: true}">
+                                          [ngModelOptions]="{standalone: true}" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Pbk --</ng-option>
                                           <ng-option *ngFor="let item of pbks" [value]="item._id">
                                              {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} :
@@ -398,7 +412,7 @@
                                        <!-- aawak type dropdown -->
                                        <ng-select *ngIf="data.type == 'awk_type'" class="custom custom-import"
                                           placeholder="Select Aawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
-                                          [ngModelOptions]="{standalone: true}">
+                                          [ngModelOptions]="{standalone: true}" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Aawak Type
                                              --</ng-option>
                                           <ng-option *ngFor="let item of aawak_types" [value]="item._id">
@@ -408,7 +422,7 @@
                                        <!-- jawak type dropdown -->
                                        <ng-select *ngIf="data.type == 'jwk_type'" class="custom custom-import"
                                           placeholder="Select Jawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
-                                          [ngModelOptions]="{standalone: true}">
+                                          [ngModelOptions]="{standalone: true}" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Jawak Type
                                              --</ng-option>
                                           <ng-option *ngFor="let item of jawak_types" [value]="item._id">
@@ -418,7 +432,7 @@
                                        <!-- Condition dropdown -->
                                        <ng-select *ngIf="data.type == 'condition'" class="custom custom-import"
                                           placeholder="Select Condition" [virtualScroll]="true" [(ngModel)]="data.id"
-                                          [ngModelOptions]="{standalone: true}">
+                                          [ngModelOptions]="{standalone: true}" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Condition
                                              --</ng-option>
                                           <ng-option *ngFor="let item of conditions" [value]="item._id">
@@ -428,7 +442,7 @@
                                        <!-- Nimitt dropdown -->
                                        <ng-select *ngIf="data.type == 'nimitt'" class="custom custom-import"
                                           placeholder="Select Nimitt" [virtualScroll]="true" [(ngModel)]="data.id"
-                                          [ngModelOptions]="{standalone: true}">
+                                          [ngModelOptions]="{standalone: true}" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Nimitt
                                              --</ng-option>
                                           <ng-option *ngFor="let item of nimitts" [value]="item._id">
@@ -438,7 +452,7 @@
                                        <!-- Unit dropdown -->
                                        <ng-select *ngIf="data.type == 'unit'" class="custom custom-import"
                                           placeholder="Select Unit" [virtualScroll]="true" [(ngModel)]="data.id"
-                                          [ngModelOptions]="{standalone: true}">
+                                          [ngModelOptions]="{standalone: true}" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Unit --</ng-option>
                                           <ng-option *ngFor="let item of units" [value]="item._id">
                                              {{item.unit_short}}:{{item.unit_full}}</ng-option>
@@ -447,7 +461,7 @@
                                        <!-- gender dropdown -->
                                        <ng-select *ngIf="data.type == 'gender'" class="custom custom-import"
                                           placeholder="Select Gender" [virtualScroll]="true" [(ngModel)]="data.id"
-                                          [ngModelOptions]="{standalone: true}">
+                                          [ngModelOptions]="{standalone: true}" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Gender
                                              --</ng-option>
                                           <ng-option *ngFor="let item of genders" [value]="item.list_name_eng">
@@ -457,7 +471,7 @@
                                        <!-- relation dropdown -->
                                        <ng-select *ngIf="data.type == 'relation'" class="custom custom-import"
                                           placeholder="Select Relation" [virtualScroll]="true" [(ngModel)]="data.id"
-                                          [ngModelOptions]="{standalone: true}">
+                                          [ngModelOptions]="{standalone: true}" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Relation
                                              --</ng-option>
                                           <ng-option *ngFor="let item of relations" [value]="item.list_name_eng">
@@ -467,7 +481,7 @@
                                        <!-- state dropdown -->
                                        <ng-select *ngIf="data.type == 'state'" class="custom custom-import"
                                           placeholder="Select State" [virtualScroll]="true" [(ngModel)]="data.id"
-                                          [ngModelOptions]="{standalone: true}">
+                                          [ngModelOptions]="{standalone: true}" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select State
                                              --</ng-option>
                                           <ng-option *ngFor="let item of states"
@@ -478,7 +492,7 @@
                                        <!-- district dropdown -->
                                        <ng-select *ngIf="data.type == 'district'" class="custom custom-import"
                                           placeholder="Select District" [virtualScroll]="true" [(ngModel)]="data.id"
-                                          [ngModelOptions]="{standalone: true}">
+                                          [ngModelOptions]="{standalone: true}" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select District
                                              --</ng-option>
                                           <ng-option *ngFor="let item of districts"
@@ -490,7 +504,7 @@
                                        <!-- city dropdown -->
                                        <ng-select *ngIf="data.type == 'city'" class="custom custom-import"
                                           placeholder="Select City" [virtualScroll]="true" [(ngModel)]="data.id"
-                                          [ngModelOptions]="{standalone: true}">
+                                          [ngModelOptions]="{standalone: true}" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select City --</ng-option>
                                           <ng-option *ngFor="let item of cities"
                                              [value]="item._id">{{item.city_hin}}:{{item.city_eng}}
@@ -539,8 +553,8 @@
                            <tbody>
                               <tr
                                  *ngFor="let data of newInsertedData | paginate:{id:'insertPagi', itemsPerPage:itemsPerPage,currentPage:page_in,totalItems:newInsertedData.length}; let i = index;">
-                                 <td *ngFor="let header of swHeaderList">
-                                    {{data[header]}}
+                                 <td *ngFor="let header of headerList">
+                                    {{data[header.name]}}
                                  </td>
                               </tr>
                            </tbody>

@@ -1,5 +1,87 @@
 [
     {
+        "version": "32.0",
+        "date": "20-05-2026",
+        "summary": "P2P Feedback & Issue Tracking",
+        "summary_hin": "P2P फीडबैक और बग रिपोर्टिंग सिस्टम",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Direct feedback and chat System",
+                "title": "Offline-First Feedback & Chat Tracker",
+                "title_hin": "ऑफ़लाइन फीडबैक और चैट ट्रैकर",
+                "desc": "Real-time direct feedback and chat system for issues and feedback. Works fully offline and syncs automatically upon connection.",
+                "desc_hin": "इश्यू और फीडबैक के लिए नया रीयल-टाइम डायरेक्ट फीडबैक और चैट सिस्टम। यह पूरी तरह से ऑफलाइन काम करता है और कनेक्ट होने पर अपने आप सिंक हो जाता है।"
+            },
+            {
+                "type": "feature",
+                "module": "HMP Batch",
+                "title": "Advance PDF export feature.",
+                "title_hin": "एडवांस PDF एक्सपोर्ट",
+                "desc": "Advanced pdf export feature for HMP batches. input/output and outputs destribution in one go.",
+                "desc_hin": "HMP बैच के लिए एडवांस PDF एक्सपोर्ट सुविधा।"
+            },
+            {
+                "type": "feature",
+                "module": "HMP Batch",
+                "title": "New Design for insert HMP batch",
+                "title_hin": "HMP बैच के लिए नया डिजाइन",
+                "desc": "New Design for insert HMP batch, auto aawak then jawak for input, aawak type and aawak ref selection added in hmp input.",
+                "desc_hin": "HMP बैच दर्ज करने के लिए नया डिजाइन। ऑटो आवक फिर इनपुट के लिए जावक, आवक प्रकार और आवक संदर्भ चयन एचएमपी इनपुट में जोड़ा गया।"
+            },
+            {
+                "type": "fix",
+                "module": "Bachat New",
+                "title": "Excel Export Improved.",
+                "title_hin": "बचत नई एक्सेल एक्सपोर्ट बेहतर।",
+                "desc": "category now visible in export, condition wise export solved and improve speed.",
+                "desc_hin": "category अब export में दिखाई दे रही हैं, condition wise export हल हो गया है और गति में सुधार हुआ है।"
+            },
+            {
+                "type": "improved",
+                "module": "Jawak & Jawak New",
+                "title": "Filter, Export, Modern UI (Bunch), is recived flag added.",
+                "title_hin": "फिल्टर, एक्सपोर्ट(kisko diya column), आधुनिक यूआई, is recived flag जोड़ा गया।",
+                "desc": "Filter added for jawak and jawak new, export added for jawak and jawak new, modern ui for jawak and jawak new, is recived flag added for jawak and jawak new.",
+                "desc_hin": "फिल्टर जोड़ा गया, एक्सपोर्ट जोड़ा गया, आधुनिक यूआई जोड़ा गया, is recived flag जोड़ा गया।"
+            }
+        ]
+    },
+    {
+        "version": "31.3",
+        "date": "06-05-2026",
+        "summary": "Import Automation & Premium UI Redesign",
+        "summary_hin": "इंपोर्ट स्वचालन और नया प्रीमियम डिज़ाइन",
+        "isNew": false,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Jawak Import",
+                "title": "Streaming Jawak Excel Import",
+                "title_hin": "जावक एक्सेल import",
+                "desc": "Ultra-fast bulk import for Jawak records.",
+                "desc_hin": "जावक रिकॉर्ड्स के लिए अल्ट्रा-फास्ट थोक आयात।"
+            },
+            {
+                "type": "feature",
+                "module": "Management Tools",
+                "title": "Automated DB Generate",
+                "title_hin": "Generate DB Improved.",
+                "desc": "Fully redesign and Optimized DB generation",
+                "desc_hin": "Generate DB Fully redesign and Optimized DB generation"
+            },
+            {
+                "type": "improvement",
+                "module": "UI/UX Redesign for Image View",
+                "title": "Image Add, select and View UI Improved",
+                "title_hin": "छवि जोड़ें, चुनें और देखें UI बेहतर",
+                "desc": "Improved layout for adding, selecting, and viewing images with a modern glass-morphic design. All details are now displayed in Hindi labels side-by-side (2 columns) for better readability and scannability.",
+                "desc_hin": "इमेज ऐड, सेलेक्ट और व्यू के लिए इम्प्रूव्ड लेआउट। अब सभी डिटेल्स हिंदी लेबल्स के साथ साइड-बाय-साइड (2 कॉलम) में दिखेंगी।"
+            }
+        ]
+    },
+    {
         "version": "31.2",
         "date": "02-05-2026",
         "summary": "Reference Management, Dropdown Filters & More",
