@@ -15,6 +15,10 @@
                     <input type="date" class="form-control" [(ngModel)]="fs.hmpBatchForm.date" name="date" required>
                 </div>
                 <div class="col-md-2">
+                    <label class="form-label">Batch No</label>
+                    <input type="text" class="form-control" [(ngModel)]="fs.hmpBatchForm.batch_no" name="batch_no" placeholder="Batch No">
+                </div>
+                <div class="col-md-2">
                     <label class="form-label">MM</label>
                     <ng-select class="custom mb-1" style="width: 100%;" placeholder="MM" [clearable]="true"
                         [virtualScroll]="true" [(ngModel)]="fs.hmpBatchForm.mm_id" #mm_id="ngModel"
@@ -30,7 +34,7 @@
                 </div>
 
                 <!-- Recipe Selection -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">Recipe</label>
                     <ng-select class="custom mb-1" [(ngModel)]="fs.hmpBatchForm.recipe_id" name="recipe_id"
                         (change)="onRecipeSelect($event)" [addTag]="true" placeholder="Select or Type New Recipe"
@@ -44,7 +48,7 @@
                         type="text" class="form-control" placeholder="Description"
                         [(ngModel)]="fs.hmpBatchForm.description" name="description">
                 </div>
-                <div class="col-md-4 text-center">
+                <div class="col-md-3 text-center">
                     <div class="d-flex">
                         <button class="btn-sm btn-secondary submit" (click)="fs.reset();">Cancel</button>
                         <button *ngIf="isEdit" class="btn-sm btn-warning submit mx-2" (click)="onSubmit()">Update
@@ -163,13 +167,13 @@
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="form-check form-switch mb-0">
-                                                <input class="form-check-input" type="checkbox" id="autoJawakRow_{{i}}" [(ngModel)]="row.auto_jawak" name="in_auto_jawak_{{i}}">
-                                                <label class="form-check-label mb-0" for="autoJawakRow_{{i}}"><small class="text-info fw-bold">Jawk</small></label>
-                                            </div>
-                                            <div class="form-check form-switch mb-0" *ngIf="row.auto_jawak">
-                                                <input class="form-check-input" type="checkbox" id="autoAawakRow_{{i}}" [(ngModel)]="row.auto_aawak" name="in_auto_aawak_{{i}}">
-                                                <label class="form-check-label mb-0" for="autoAawakRow_{{i}}"><small class="text-warning fw-bold">Awk</small></label>
-                                            </div>
+                                                 <input class="form-check-input" type="checkbox" id="autoJawakRow_{{i}}" [ngModel]="row.auto_jawak" (ngModelChange)="toggleAuto(row, 'jawak', $event)" name="in_auto_jawak_{{i}}">
+                                                 <label class="form-check-label mb-0" for="autoJawakRow_{{i}}"><small class="text-info fw-bold">Jawk</small></label>
+                                             </div>
+                                             <div class="form-check form-switch mb-0" *ngIf="row.auto_jawak">
+                                                 <input class="form-check-input" type="checkbox" id="autoAawakRow_{{i}}" [ngModel]="row.auto_aawak" (ngModelChange)="toggleAuto(row, 'aawak', $event)" name="in_auto_aawak_{{i}}">
+                                                 <label class="form-check-label mb-0" for="autoAawakRow_{{i}}"><small class="text-warning fw-bold">Awk</small></label>
+                                             </div>
                                         </div>
                                     </td>
                                     <!-- Ref. Aawak / Aawak Type -->
@@ -306,7 +310,7 @@
                                         <!-- Auto Awk (Row Wise) -->
                                         <td>
                                             <div class="form-check form-switch mb-0">
-                                                <input class="form-check-input" type="checkbox" id="outAutoAawakRow_{{i}}" [(ngModel)]="row.auto_aawak" name="out_auto_aawak_{{i}}">
+                                                <input class="form-check-input" type="checkbox" id="outAutoAawakRow_{{i}}" [ngModel]="row.auto_aawak" (ngModelChange)="toggleAuto(row, 'aawak', $event)" name="out_auto_aawak_{{i}}">
                                                 <label class="form-check-label mb-0" for="outAutoAawakRow_{{i}}"><small class="text-success fw-bold">Auto Awk</small></label>
                                             </div>
                                         </td>
@@ -453,19 +457,19 @@
                                     <div class="d-flex align-items-center gap-2" style="padding-bottom: 5px;">
                                         <!-- Auto Jawak switch for Input -->
                                         <div class="form-check form-switch mb-0" *ngIf="entryMode === 'inputs'">
-                                            <input class="form-check-input" type="checkbox" id="autoJawakRow" [(ngModel)]="formModel.auto_jawak" name="form_auto_jawak">
+                                            <input class="form-check-input" type="checkbox" id="autoJawakRow" [ngModel]="formModel.auto_jawak" (ngModelChange)="toggleAuto(formModel, 'jawak', $event)" name="form_auto_jawak">
                                             <label class="form-check-label text-info fw-bold mb-0" for="autoJawakRow" style="cursor: pointer;"><small>Auto Jawk</small></label>
                                         </div>
 
                                         <!-- Auto Aawak switch (Only when Auto Jawak is ON) -->
                                         <div class="form-check form-switch mb-0" *ngIf="entryMode === 'inputs' && formModel.auto_jawak">
-                                            <input class="form-check-input" type="checkbox" id="inputAutoAawakRow" [(ngModel)]="formModel.auto_aawak" name="form_input_auto_aawak">
+                                            <input class="form-check-input" type="checkbox" id="inputAutoAawakRow" [ngModel]="formModel.auto_aawak" (ngModelChange)="toggleAuto(formModel, 'aawak', $event)" name="form_input_auto_aawak">
                                             <label class="form-check-label text-warning fw-bold mb-0" for="inputAutoAawakRow" style="cursor: pointer;"><small>Auto Awk</small></label>
                                         </div>
 
                                         <!-- Auto Aawak switch for Output -->
                                         <div class="form-check form-switch mb-0" *ngIf="entryMode === 'outputs'">
-                                            <input class="form-check-input" type="checkbox" id="autoAawakRow" [(ngModel)]="formModel.auto_aawak" name="form_auto_aawak">
+                                            <input class="form-check-input" type="checkbox" id="autoAawakRow" [ngModel]="formModel.auto_aawak" (ngModelChange)="toggleAuto(formModel, 'aawak', $event)" name="form_auto_aawak">
                                             <label class="form-check-label text-success fw-bold mb-0" for="autoAawakRow" style="cursor: pointer;"><small>Auto Awk</small></label>
                                         </div>
                                     </div>

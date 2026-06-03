@@ -1,10 +1,68 @@
 [
     {
+        "version": "32.2",
+        "date": "04-06-2026",
+        "summary": "HMP and Item & variant improved",
+        "summary_hin": "",
+        "isNew": true,
+        "items": [
+            {
+                "type": "improved",
+                "module": "HMP Batch",
+                "title": "auto awk and auto jwk improved with UI.",
+                "title_hin": "",
+                "desc": "",
+                "desc_hin": ""
+            },
+            {
+                "type": "fix",
+                "module": "Item Component",
+                "title": "Edit item solved",
+                "title_hin": "",
+                "desc": "",
+                "desc_hin": ""
+            },
+            {
+                "type": "improved",
+                "module": "Variant Component",
+                "title": "Edit feature added in attribute & attribute value.",
+                "title_hin": "",
+                "desc": "",
+                "desc_hin": ""
+            }
+        ]
+    },
+    {
+        "version": "32.1",
+        "date": "30-05-2026",
+        "summary": "HMP and filter improved",
+        "summary_hin": "",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "HMP Batch",
+                "title": "batch no column added",
+                "title_hin": "",
+                "desc": "",
+                "desc_hin": ""
+            },
+            {
+                "type": "feature",
+                "module": "Aawak & Jawak",
+                "title": "Item Filter Improved with Item only Option.",
+                "title_hin": "",
+                "desc": "now we can filter items without subitems, in aawak, aawak-new, jawak and jawak-new.",
+                "desc_hin": ""
+            }
+        ]
+    },
+    {
         "version": "32.0",
         "date": "20-05-2026",
         "summary": "P2P Feedback & Issue Tracking",
         "summary_hin": "P2P फीडबैक और बग रिपोर्टिंग सिस्टम",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",

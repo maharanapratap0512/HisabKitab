@@ -2579,11 +2579,68 @@ class dbModal {
           END;`,
       add_aawak_type_id_hmp_batch_input: `ALTER TABLE hmp_batch_input ADD COLUMN aawak_type_id integer REFERENCES support_list(_id)`,
       add_is_recieved_in_jawak: `ALTER TABLE jawak ADD COLUMN is_recieved tinyint DEFAULT 0`,
+    },
+    // version 33
+    //  => HMP input and output recreate to make aawak_ref_id and jawak_ref_id to ON DELETE SET NULL (no restrict)
+    {
+      hmp_batch_input_rename: `ALTER TABLE hmp_batch_input RENAME TO hmp_batch_input_backup`,
+      hmp_batch_input_create: `CREATE TABLE hmp_batch_input(
+        _id integer primary key AUTOINCREMENT,
+        batch_id integer not null references hmp_batch(_id),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),
+        condition_id integer null references support_list(_id),
+        qty decimal(10,2) not null,
+        rate decimal(10,2),
+        amount decimal(10,2),
+        lot_no varchar(50),
+        jawak_ref_id integer references jawak(_id) ON DELETE SET NULL,
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime')),
+        aawak_source_id integer references support_list(_id),
+        aawak_type_id integer references support_list(_id),
+        is_auto_awk tinyint default 0,
+        is_auto_jwk tinyint default 0
+      )`,
+      hmp_batch_input_copy: `INSERT INTO hmp_batch_input (
+        _id, batch_id, item_id, subitem_id, unit_id, condition_id, qty, rate, amount, lot_no, jawak_ref_id, active, created_at, aawak_source_id, aawak_type_id, is_auto_awk, is_auto_jwk
+      )
+      SELECT 
+        _id, batch_id, item_id, subitem_id, unit_id, condition_id, qty, rate, amount, lot_no, jawak_ref_id, active, created_at, aawak_source_id, aawak_type_id,
+        0 as is_auto_awk,
+        CASE WHEN jawak_ref_id IS NOT NULL THEN 1 ELSE 0 END as is_auto_jwk
+      FROM hmp_batch_input_backup`,
+      hmp_batch_input_drop_backup: `DROP TABLE hmp_batch_input_backup`,
+
+      hmp_batch_output_rename: `ALTER TABLE hmp_batch_output RENAME TO hmp_batch_output_backup`,
+      hmp_batch_output_create: `CREATE TABLE hmp_batch_output(
+        _id integer primary key AUTOINCREMENT,
+        batch_id integer not null references hmp_batch(_id),
+        item_id integer not null references item(_id),
+        subitem_id integer null references subitem(_id),
+        unit_id integer not null references unit(_id),
+        condition_id integer null references support_list(_id),
+        qty decimal(10,2) not null,
+        rate decimal(10,2),
+        amount decimal(10,2),
+        lot_no varchar(50),
+        hmp_code varchar(50),
+        hmp_type integer null references support_list(_id),
+        aawak_ref_id integer references aawak(_id) ON DELETE SET NULL,
+        active tinyint default 1,
+        created_at timestamp default (datetime('now', 'localtime')),
+        is_auto_awk tinyint default 0
+      )`,
+      hmp_batch_output_copy: `INSERT INTO hmp_batch_output (
+        _id, batch_id, item_id, subitem_id, unit_id, condition_id, qty, rate, amount, lot_no, hmp_code, hmp_type, aawak_ref_id, active, created_at, is_auto_awk
+      )
+      SELECT 
+        _id, batch_id, item_id, subitem_id, unit_id, condition_id, qty, rate, amount, lot_no, hmp_code, hmp_type, aawak_ref_id, active, created_at,
+        CASE WHEN aawak_ref_id IS NOT NULL THEN 1 ELSE 0 END as is_auto_awk
+      FROM hmp_batch_output_backup`,
+      hmp_batch_output_drop_backup: `DROP TABLE hmp_batch_output_backup`
     }
-    /* TODO cleanup task 
-      1. remove table - closing.
-      2. remove usage_category_id column from awk, jwk.
-    */
   ];
 
   views = {

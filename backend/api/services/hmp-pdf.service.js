@@ -1,8 +1,45 @@
 // services/hmp-pdf.service.js
 'use strict';
 
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const fs = require('fs');
+const path = require('path');
 const BaseTable = require('../database/base.table');
+
+/**
+ * Automatically detect the path to Google Chrome or Chromium executable.
+ */
+function detectChromePath() {
+    const platform = process.platform;
+
+    if (platform === 'darwin') {
+        const macPath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+        if (fs.existsSync(macPath)) return macPath;
+        const macChromium = '/Applications/Chromium.app/Contents/MacOS/Chromium';
+        if (fs.existsSync(macChromium)) return macChromium;
+    } else if (platform === 'win32') {
+        const winPaths = [
+            path.join(process.env.PROGRAMFILES || 'C:\\Program Files', 'Google\\Chrome\\Application\\chrome.exe'),
+            path.join(process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)', 'Google\\Chrome\\Application\\chrome.exe'),
+            path.join(process.env.LOCALAPPDATA || '', 'Google\\Chrome\\Application\\chrome.exe')
+        ];
+        for (const p of winPaths) {
+            if (p && fs.existsSync(p)) return p;
+        }
+    } else if (platform === 'linux') {
+        const linuxPaths = [
+            '/usr/bin/google-chrome',
+            '/usr/bin/chromium-browser',
+            '/usr/bin/chromium',
+            '/usr/bin/chrome'
+        ];
+        for (const p of linuxPaths) {
+            if (fs.existsSync(p)) return p;
+        }
+    }
+    
+    return 'google-chrome'; // Default fallback (hope it is in PATH)
+}
 
 const departmentTable = new BaseTable('department');
 
@@ -1016,8 +1053,9 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
     </html>
     `;
 
-    // Launch puppeteer
+    // Launch puppeteer-core using local chrome
     const browser = await puppeteer.launch({
+        executablePath: detectChromePath(),
         headless: 'new',
         args: [
             '--no-sandbox',

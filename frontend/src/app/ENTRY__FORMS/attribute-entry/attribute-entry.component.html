@@ -20,8 +20,11 @@
             </div>
             <div class="col-2">
                 <div class="d-flex gap-1">
-                    <button class="btn btn-success btn-sm flex-grow-1" (click)="saveAttr()" [disabled]="isLoader">
-                        <i class="uil uil-plus"></i> Add
+                    <button class="btn btn-sm flex-grow-1" [class.btn-success]="!editAttrId" [class.btn-warning]="editAttrId" (click)="saveAttr()" [disabled]="isLoader">
+                        <i class="uil" [class.uil-plus]="!editAttrId" [class.uil-check]="editAttrId"></i> {{ editAttrId ? 'Update' : 'Add' }}
+                    </button>
+                    <button *ngIf="editAttrId" class="btn btn-outline-danger btn-sm" (click)="cancelEditAttr()" title="Cancel Edit">
+                        <i class="uil uil-multiply"></i>
                     </button>
                     <button class="btn btn-outline-secondary btn-sm" (click)="mode = 'attr_values'; loadRows()"
                         title="Back to values">
@@ -39,7 +42,7 @@
                         <th>Hindi</th>
                         <th>English</th>
                         <th>Roman</th>
-                        <th>Delete</th>
+                        <th style="width: 100px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,9 +52,14 @@
                         <td>{{ row.attribute_eng }}</td>
                         <td>{{ row.attribute_roman }}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-danger py-0" (click)="deleteAttr(row)">
-                                <i class="uil uil-trash"></i>
-                            </button>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-outline-primary py-0" (click)="editAttr(row)" title="Edit">
+                                    <i class="uil uil-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger py-0" (click)="deleteAttr(row)" title="Delete">
+                                    <i class="uil uil-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     <tr *ngIf="rows.length === 0">
@@ -106,9 +114,14 @@
                     placeholder="e.g. Red" />
             </div>
             <div class="col-2">
-                <button class="btn btn-success btn-sm w-100" (click)="saveAttrVal()" [disabled]="isLoader">
-                    <i class="uil uil-plus"></i> Add
-                </button>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm w-100" [class.btn-success]="!editAttrValId" [class.btn-warning]="editAttrValId" (click)="saveAttrVal()" [disabled]="isLoader">
+                        <i class="uil" [class.uil-plus]="!editAttrValId" [class.uil-check]="editAttrValId"></i> {{ editAttrValId ? 'Update' : 'Add' }}
+                    </button>
+                    <button *ngIf="editAttrValId" class="btn btn-outline-danger btn-sm" (click)="cancelEditAttrVal()" title="Cancel Edit">
+                        <i class="uil uil-multiply"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -121,7 +134,7 @@
                         <th>Hindi</th>
                         <th>English</th>
                         <th>Roman</th>
-                        <th>Delete</th>
+                        <th style="width: 100px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -136,9 +149,14 @@
                         <td>{{ row.attribute_value_eng }}</td>
                         <td>{{ row.attribute_value_roman }}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-danger py-0" (click)="deleteAttrVal(row)">
-                                <i class="uil uil-trash"></i>
-                            </button>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-outline-primary py-0" (click)="editAttrVal(row)" title="Edit">
+                                    <i class="uil uil-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger py-0" (click)="deleteAttrVal(row)" title="Delete">
+                                    <i class="uil uil-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     <tr *ngIf="rows.length === 0">

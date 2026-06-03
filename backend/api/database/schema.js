@@ -174,6 +174,8 @@ module.exports = {
         active: col.boolean().default(1),
         lot_no: col.string(),
         aawak_type_id: col.ref('support_list._id', { as: 'aawak_type', select: ['list_name_hin', 'list_name_eng'] }),
+        is_auto_awk: col.boolean().default(0),
+        is_auto_jwk: col.boolean().default(0),
     }),
 
     ...defineTable('hmp_batch_output', {
@@ -188,6 +190,7 @@ module.exports = {
         rate: col.number(),
         amount: col.number(),
         active: col.boolean().default(1),
+        is_auto_awk: col.boolean().default(0),
     }),
 
 

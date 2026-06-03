@@ -71,13 +71,26 @@ export class ItemEntryComponent implements OnInit {
       if (typeof changes.getData.currentValue.document == 'string') {
         changes.getData.currentValue.document = JSON.parse(changes.getData.currentValue.document.trim() != '' ? changes.getData.currentValue.document : '[]');
       }
+      let categoriesVal = changes.getData.currentValue.categories;
+      if (typeof categoriesVal === 'string') {
+        try {
+          categoriesVal = JSON.parse(categoriesVal);
+        } catch (e) { }
+      }
+      if (Array.isArray(categoriesVal)) {
+        categoriesVal = categoriesVal
+          .map((c: any) => (typeof c === 'object' && c !== null) ? c._id : c)
+          .filter((id: any) => id !== null && id !== undefined);
+      } else {
+        categoriesVal = [];
+      }
       this.itemForm.patchValue({
         item_hin: changes.getData.currentValue.item_hin,
         item_eng: changes.getData.currentValue.item_eng ? changes.getData.currentValue.item_eng : null,
         item_roman: changes.getData.currentValue.item_roman ? changes.getData.currentValue.item_roman : null,
         item_code: changes.getData.currentValue.item_code ? changes.getData.currentValue.item_code : null,
         unit_id: changes.getData.currentValue.unit_id ? changes.getData.currentValue.unit_id : null,
-        categories: typeof changes.getData.currentValue.categories == 'string' ? JSON.parse(changes.getData.currentValue.categories) : changes.getData.currentValue.categories,
+        categories: categoriesVal,
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
         restrict_month: changes.getData.currentValue.restrict_month ? changes.getData.currentValue.restrict_month : null,
         restrict_year: changes.getData.currentValue.restrict_year ? changes.getData.currentValue.restrict_year : null,

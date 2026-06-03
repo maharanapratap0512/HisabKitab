@@ -50,6 +50,7 @@ export class HmpFormService {
 
     this.hmpBatchForm = {
       date: gs.dateString,
+      batch_no: null,
       mm_id: auth.webUser.settings.defaultMM,
       recipe_id: null,
       recipe_name: null,
@@ -67,6 +68,7 @@ export class HmpFormService {
   reset() {
     this.hmpBatchForm = {
       date: this.hmpBatchForm.date,
+      batch_no: null,
       mm_id: this.hmpBatchForm.mm_id,
       recipe_id: null,
       recipe_name: null,
@@ -85,16 +87,24 @@ export class HmpFormService {
   patchForm(data: any) {
     console.log('data', data);
 
-    this.hmpBatchForm = {
-      ...this.hmpBatchForm,
-    };
-
-
     for (let j in data.inputs) {
-      if (data.inputs[j].jawak_ref_id) data.auto_jawak = true;
+      if (data.inputs[j].jawak_ref_id) {
+        data.inputs[j].auto_jawak = true;
+      }
+      if (data.inputs[j].is_auto_jwk) {
+        data.inputs[j].auto_jawak = true;
+      }
+      if (data.inputs[j].is_auto_awk) {
+        data.inputs[j].auto_aawak = true;
+      }
     }
     for (let j in data.outputs) {
-      if (data.outputs[j].aawak_ref_id) data.auto_aawak = true;
+      if (data.outputs[j].aawak_ref_id) {
+        data.outputs[j].auto_aawak = true;
+      }
+      if (data.outputs[j].is_auto_awk) {
+        data.outputs[j].auto_aawak = true;
+      }
     }
 
     this.hmpBatchForm = structuredClone(data);

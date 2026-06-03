@@ -187,6 +187,10 @@
                                        [closeOnSelect]="false"
                                        name="item_id"
                                     ></app-item-dropdown>
+                                    <div class="form-check mt-1">
+                                       <input type="checkbox" class="form-check-input" id="itemOnlyCheckawk" [(ngModel)]="filterBody.itemOnly" name="itemOnly">
+                                       <label class="form-check-label mb-0" for="itemOnlyCheckawk" style="cursor: pointer;"><small class="text-info fw-bold">Item Only (Subitem is Null)</small></label>
+                                    </div>
                                  </div>
                               </div>
 
@@ -336,7 +340,8 @@
                                  subitem_id: [],
                                  condition_id: [],
                                  pkt_num:null,
-                                 nimitt_id:[]
+                                 nimitt_id:[],
+                                 itemOnly: false
                                }; selectedItemmix = [];">Clear All</button>
                               </div>
                            </div>

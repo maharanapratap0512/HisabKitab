@@ -94,7 +94,8 @@
             <div class="dropdown-menu">
               <a class="dropdown-item" (click)="exportToExcel()" style="cursor: pointer;">Excel</a>
               <a class="dropdown-item" (click)="exportToPdf('normal')" style="cursor: pointer;">Pdf (Normal)</a>
-              <a class="dropdown-item" (click)="exportToPdf('advance')" style="cursor: pointer;" [class.disabled]="getSelectedCount() === 0">Pdf (Advance Layout)</a>
+              <a class="dropdown-item" (click)="exportToPdf('advance')" style="cursor: pointer;"
+                [class.disabled]="getSelectedCount() === 0">Pdf (Advance Layout)</a>
             </div>
           </div>
           <div class="col-1 pt-2 text-center">
@@ -117,13 +118,16 @@
                 [attr.aria-expanded]="batchIndex === 0" [attr.aria-controls]="'collapse' + batchIndex"
                 style="background-color: #5c4cae; color: white;">
                 <div class="d-flex align-items-center me-2" (click)="$event.stopPropagation();">
-                  <input type="checkbox" class="form-check-input mt-0" style="width: 16px; height: 16px; border-color: rgba(255,255,255,0.6);"
-                         [checked]="isSelected(batch._id)" (change)="toggleSelection(batch._id)">
+                  <input type="checkbox" class="form-check-input mt-0"
+                    style="width: 16px; height: 16px; border-color: rgba(255,255,255,0.6);"
+                    [checked]="isSelected(batch._id)" (change)="toggleSelection(batch._id)">
                 </div>
                 <div class="w-100 d-flex align-items-center justify-content-between pe-3">
                   <div class="d-flex align-items-center gap-3 flex-wrap fs-7">
                     <strong>{{batch.date | date:'dd-MM-yyyy'}}</strong>
                     <span style="opacity: 0.4;">|</span>
+                    <span class="badge badge-outline-secondary" *ngIf="batch.batch_no">Batch: {{batch.batch_no}}</span>
+                    <span style="opacity: 0.4;" *ngIf="batch.batch_no">|</span>
                     <strong>{{batch.recipe?.recipe_name}}</strong>
                     <span style="opacity: 0.4;">|</span>
                     <span style="opacity: 0.8;">{{batch.recipe?.description}}</span>
@@ -167,7 +171,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr *ngFor="let input of batch.inputs; let i = index">
+                          <tr *ngFor="let input of batch.inputs; let i = index" [class.row-auto-jwk]="input.is_auto_jwk" [class.row-auto-awk]="input.is_auto_awk">
                             <td class="ps-2">
                               {{i+1}}
                               <i class="uil uil-trash text-danger cursor-pointer fs-7" *ngIf="batch.inputs.length > 1"
@@ -213,7 +217,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr *ngFor="let output of batch.outputs; let i = index">
+                          <tr *ngFor="let output of batch.outputs; let i = index" [class.row-auto-awk]="output.is_auto_awk">
                             <td class="ps-2">
                               {{i+1}}
                               <i class="uil uil-trash text-danger cursor-pointer fs-7" *ngIf="batch.outputs.length > 1"
@@ -279,10 +283,12 @@
             <thead>
               <tr>
                 <th style="width: 40px; text-align: center; vertical-align: middle;">
-                  <input type="checkbox" class="form-check-input" [checked]="isAllSelected()" (change)="toggleSelectAll($event)">
+                  <input type="checkbox" class="form-check-input" [checked]="isAllSelected()"
+                    (change)="toggleSelectAll($event)">
                 </th>
                 <th style="min-width: 50px;">#</th>
                 <th style="min-width: 95px;">Date</th>
+                <th style="min-width: 90px;">Batch No</th>
                 <th style="min-width: 120px;">Recipe</th>
                 <th style="min-width: 110px;">MM</th>
                 <th style="min-width: 75px; text-align: center;">Status</th>
@@ -302,7 +308,8 @@
                   <td
                     [attr.rowspan]="(batch.inputs?.length || 1) + (batch.outputs?.length > 0 ? batch.outputs.length : 0)"
                     style="vertical-align: middle; text-align: center; border-right: 1px solid #2e3250;">
-                    <input type="checkbox" class="form-check-input" [checked]="isSelected(batch._id)" (change)="toggleSelection(batch._id)">
+                    <input type="checkbox" class="form-check-input" [checked]="isSelected(batch._id)"
+                      (change)="toggleSelection(batch._id)">
                   </td>
                   <td
                     [attr.rowspan]="(batch.inputs?.length || 1) + (batch.outputs?.length > 0 ? batch.outputs.length : 0)"
@@ -311,6 +318,11 @@
                   <td [attr.rowspan]=" (batch.inputs?.length || 1) + (batch.outputs?.length> 0 ? batch.outputs.length :
                     0)" style="vertical-align: middle; border-right: 1px solid #2e3250;">
                     {{batch.date | date:'dd-MM-yyyy'}}
+                  </td>
+                  <td
+                    [attr.rowspan]="(batch.inputs?.length || 1) + (batch.outputs?.length > 0 ? batch.outputs.length : 0)"
+                    style="vertical-align: middle; border-right: 1px solid #2e3250; font-weight: 600;">
+                    {{batch.batch_no || '-'}}
                   </td>
                   <td
                     [attr.rowspan]="(batch.inputs?.length || 1) + (batch.outputs?.length > 0 ? batch.outputs.length : 0)"
@@ -334,9 +346,9 @@
 
                   <!-- First Input Row or Empty Placeholder -->
                   <ng-container *ngIf="batch.inputs?.length > 0">
-                    <td><span class="badge badge-primary-lighten rounded-pill py-1 px-2">↓ IN</span>
+                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk" [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><span class="badge badge-primary-lighten rounded-pill py-1 px-2">↓ IN</span>
                     </td>
-                    <td>
+                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk" [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk">
                       <span
                         *ngIf="$any(batch.inputs[0])?.subitem?.subitem_list?.subitem_hin">{{$any(batch.inputs[0])?.subitem?.subitem_list?.subitem_hin}}
                       </span>{{$any(batch.inputs[0])?.item.item_hin}}
@@ -347,12 +359,12 @@
                         </span>{{$any(batch.inputs[0])?.item.item_eng}}
                       </small>
                     </td>
-                    <td><strong>{{$any(batch.inputs[0])?.qty}}</strong>
+                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk" [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><strong>{{$any(batch.inputs[0])?.qty}}</strong>
                       <small>{{$any(batch.inputs[0])?.unit_short}}</small>
                     </td>
-                    <td><span style="opacity: 0.6;">{{$any(batch.inputs[0])?.rate || '-'}}</span></td>
-                    <td><small style="color: #f0a500;">{{$any(batch.inputs[0])?.condition?.list_name_hin}}</small></td>
-                    <td style="text-align: center;">
+                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk" [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><span style="opacity: 0.6;">{{$any(batch.inputs[0])?.rate || '-'}}</span></td>
+                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk" [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><small style="color: #f0a500;">{{$any(batch.inputs[0])?.condition?.list_name_hin}}</small></td>
+                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk" [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk" style="text-align: center;">
                       <i class="uil uil-pen i-outline-primary me-1" (click)="openEntryModal(batch)" title="Edit"></i>
                       <i class="uil uil-trash i-outline-danger" (click)="deleteInput($any(batch.inputs[0])._id, 0)"
                         title="Delete Item"></i>
@@ -365,7 +377,9 @@
                 </tr>
 
                 <!-- Remaining Input Rows -->
-                <tr *ngFor="let input of $any(batch.inputs) | slice:1; let i = index">
+                <tr *ngFor="let input of $any(batch.inputs) | slice:1; let i = index"
+                  [class.row-auto-jwk]="$any(input).is_auto_jwk" 
+                  [class.row-auto-awk]="$any(input).is_auto_awk">
                   <td><span class="badge badge-primary-lighten rounded-pill py-1 px-2">↓ IN</span>
                   </td>
                   <td>
@@ -392,7 +406,8 @@
                 <!-- Output Rows -->
                 <ng-container *ngIf="batch.outputs?.length > 0">
                   <tr *ngFor="let output of batch.outputs; let i = index"
-                    [class.border-top-dashed]="i === 0 && (batch.inputs?.length > 0)">
+                    [class.border-top-dashed]="i === 0 && (batch.inputs?.length > 0)"
+                    [class.row-auto-awk]="$any(output).is_auto_awk">
                     <td><span class="badge badge-success-lighten rounded-pill py-1 px-2">↑ OUT</span>
                     </td>
                     <td>

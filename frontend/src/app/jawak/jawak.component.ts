@@ -70,7 +70,8 @@ export class JawakComponent implements OnInit {
     condition_id: [],
     nimitt_id: null,
     pkt_num: null,
-    unlinkedOnly: false
+    unlinkedOnly: false,
+    itemOnly: false
   };
   selectedItemmix: any[] = [];
   cat: any;

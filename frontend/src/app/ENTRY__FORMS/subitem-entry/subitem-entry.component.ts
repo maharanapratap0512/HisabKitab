@@ -71,11 +71,24 @@ export class SubitemEntryComponent implements OnInit {
   ngOnChanges(changes: SimpleChanges) {
     if (changes.getData && changes.getData.currentValue) {
       const doc = changes.getData.currentValue.document || {};
+      let categoriesVal = changes.getData.currentValue.categories;
+      if (typeof categoriesVal === 'string') {
+        try {
+          categoriesVal = JSON.parse(categoriesVal);
+        } catch (e) { }
+      }
+      if (Array.isArray(categoriesVal)) {
+        categoriesVal = categoriesVal
+          .map((c: any) => (typeof c === 'object' && c !== null) ? c._id : c)
+          .filter((id: any) => id !== null && id !== undefined);
+      } else {
+        categoriesVal = [];
+      }
       this.subitemForm.patchValue({
         subitem_list_id: changes.getData.currentValue.subitem_list_id,
         unit_id: changes.getData.currentValue.unit_id,
         item_id: changes.getData.currentValue.item_id,
-        categories: changes.getData.currentValue.categories,
+        categories: categoriesVal,
         extra_note: changes.getData.currentValue.extra_note ? changes.getData.currentValue.extra_note : null,
         document: doc,
         restrict_month: changes.getData.currentValue.restrict_month ? changes.getData.currentValue.restrict_month : null,
@@ -165,8 +178,19 @@ export class SubitemEntryComponent implements OnInit {
     if (ev) {
       let item = this.items.find((i: { _id: any; }) => i._id == ev);
       if (item) {
+        let itemCats = item.categories;
+        if (typeof itemCats === 'string') {
+          try { itemCats = JSON.parse(itemCats); } catch (e) {}
+        }
+        if (Array.isArray(itemCats)) {
+          itemCats = itemCats
+            .map((c: any) => (typeof c === 'object' && c !== null) ? c._id : c)
+            .filter((id: any) => id !== null && id !== undefined);
+        } else {
+          itemCats = [];
+        }
         this.subitemForm.patchValue({
-          categories: item.categories,
+          categories: itemCats,
           unit_id: item.unit_id
         });
       }

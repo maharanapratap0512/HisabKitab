@@ -25,3 +25,41 @@
 .accordion-button:not(.collapsed)::after {
     filter: brightness(0) invert(1);
 }
+
+@keyframes pulse-glow-awk {
+    0% {
+        box-shadow: inset 0 0 4px rgba(76, 175, 80, 0.2);
+    }
+    50% {
+        box-shadow: inset 0 0 12px rgba(76, 175, 80, 0.6);
+    }
+    100% {
+        box-shadow: inset 0 0 4px rgba(76, 175, 80, 0.2);
+    }
+}
+
+@keyframes pulse-glow-jwk {
+    0% {
+        box-shadow: inset 0 0 4px rgba(240, 165, 0, 0.2);
+    }
+    50% {
+        box-shadow: inset 0 0 12px rgba(240, 165, 0, 0.6);
+    }
+    100% {
+        box-shadow: inset 0 0 4px rgba(240, 165, 0, 0.2);
+    }
+}
+
+.row-auto-awk td, .cell-auto-awk {
+    animation: pulse-glow-awk 2s infinite ease-in-out;
+    border-top: 1px solid rgba(76, 175, 80, 0.5) !important;
+    border-bottom: 1px solid rgba(76, 175, 80, 0.5) !important;
+    background-color: rgba(76, 175, 80, 0.05) !important;
+}
+
+.row-auto-jwk td, .cell-auto-jwk {
+    animation: pulse-glow-jwk 2s infinite ease-in-out;
+    border-top: 1px solid rgba(240, 165, 0, 0.5) !important;
+    border-bottom: 1px solid rgba(240, 165, 0, 0.5) !important;
+    background-color: rgba(240, 165, 0, 0.05) !important;
+}

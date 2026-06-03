@@ -199,6 +199,10 @@ async function insertUpdateBatch(data) {
             if (!inp.item_id || !inp.qty) continue;
             inp.batch_id = id;
 
+            // Map frontend checkbox values to database columns
+            inp.is_auto_jwk = (data.auto_jawak || inp.auto_jawak) ? 1 : 0;
+            inp.is_auto_awk = (inp.auto_aawak) ? 1 : 0;
+
             // Handle Jawak Auto-creation (Global flag or row-level)
             if (data.auto_jawak || inp.auto_jawak) {
                 // If auto_aawak is checked, create/update Aawak first
@@ -217,11 +221,12 @@ async function insertUpdateBatch(data) {
                         aawak_type_id: inp.aawak_type_id || 50,
                         aawak_source_id: inp.aawak_source_id || null,
                         dept_id: data.dept_id,
-                        description: `HMP Batch Input Auto-Aawak (Batch ID: ${id || ''})`,
+                        description: `HMP Batch Input Auto-Aawak (Batch ID: ${id || ''}${data.batch_no ? ', Batch No: ' + data.batch_no : ''})`,
                         active: 1
                     };
 
-                    if (inp.aawak_ref_id) {
+                    let awkExists = inp.aawak_ref_id ? await Fn.getById('aawak', inp.aawak_ref_id) : null;
+                    if (inp.aawak_ref_id && awkExists) {
                         awk._id = inp.aawak_ref_id;
                         await Fn.updateAJ(awk, 'aawak');
                     } else {
@@ -234,7 +239,8 @@ async function insertUpdateBatch(data) {
                 jwk.aawak_source_id = inp.aawak_source_id || null;
                 jwk.aawak_ref_id = inp.aawak_ref_id || null;
 
-                if (inp.jawak_ref_id) {
+                let jwkExists = inp.jawak_ref_id ? await Fn.getById('jawak', inp.jawak_ref_id) : null;
+                if (inp.jawak_ref_id && jwkExists) {
                     jwk._id = inp.jawak_ref_id;
                     await Fn.updateAJ(jwk, 'jawak');
                 } else {
@@ -255,12 +261,16 @@ async function insertUpdateBatch(data) {
             out.batch_id = id;
 
             let hasJawaks = out.jawak_detail && out.jawak_detail.length > 0;
+            
+            // Map frontend checkbox values to database columns
+            out.is_auto_awk = (data.auto_aawak || out.auto_aawak || hasJawaks) ? 1 : 0;
 
             // Handle Aawak Auto-creation (Global flag or row-level or Jawak existence)
             if (data.auto_aawak || out.auto_aawak || hasJawaks) {
                 let awk = Fn.tbInterface.getAawakFromHmpOutput(data, out);
 
-                if (out.aawak_ref_id) {
+                let awkExists = out.aawak_ref_id ? await Fn.getById('aawak', out.aawak_ref_id) : null;
+                if (out.aawak_ref_id && awkExists) {
                     awk._id = out.aawak_ref_id;
                     await Fn.updateAJ(awk, 'aawak');
                 } else {
@@ -273,10 +283,13 @@ async function insertUpdateBatch(data) {
                 for (let jwk of out.jawak_detail) {
                     jwk.aawak_ref_id = out.aawak_ref_id;
 
-                    if (jwk._id) {
+                    let jwkExists = jwk._id ? await Fn.getById('jawak', jwk._id) : null;
+                    if (jwk._id && jwkExists) {
                         await Fn.updateAJ(jwk, 'jawak');
                     } else {
-                        await Fn.insertAJ(jwk, 'jawak');
+                        delete jwk._id;
+                        let jwkid = await Fn.insertAJ(jwk, 'jawak');
+                        jwk._id = jwkid;
                     }
                 }
             }

@@ -557,4 +557,66 @@ export class HmpEntryComponent implements OnInit {
     this.showModal = '';
     $('#jawakOffcanvas').offcanvas('hide');
   }
+
+  toggleAuto(rowOrModel: any, type: 'jawak' | 'aawak', isChecked: boolean) {
+    if (!isChecked) {
+      // User is turning OFF the checkbox
+      const refId = type === 'jawak' ? rowOrModel.jawak_ref_id : rowOrModel.aawak_ref_id;
+      if (refId) {
+        // Record is already created in the DB!
+        Swal.fire({
+          title: 'Delete Reference Record?',
+          text: type === 'jawak' 
+            ? 'Turning off Auto-Jawak will delete the already created Jawak record in the database! Are you sure?'
+            : 'Turning off Auto-Aawak will delete the already created Aawak record AND all associated Jawak distribution entries in the database! Are you sure?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.isLoader = true;
+            const urlPath = type === 'jawak' ? 'JAWAK' : 'AAWAK';
+            this.http.delete(this.api.getUrl(urlPath) + '/' + refId).subscribe((data: any) => {
+              this.isLoader = false;
+              if (data.success || data.result) {
+                if (type === 'jawak') {
+                  rowOrModel.jawak_ref_id = null;
+                  rowOrModel.auto_jawak = false;
+                } else {
+                  rowOrModel.aawak_ref_id = null;
+                  rowOrModel.auto_aawak = false;
+                  rowOrModel.jawak_detail = [];
+                }
+                this.toastr.success(`${type === 'jawak' ? 'Jawak' : 'Aawak'} record deleted successfully`);
+              } else {
+                this.toastr.error(`Failed to delete ${type === 'jawak' ? 'Jawak' : 'Aawak'} record`);
+                // Revert check
+                if (type === 'jawak') rowOrModel.auto_jawak = true;
+                else rowOrModel.auto_aawak = true;
+              }
+            }, err => {
+              this.isLoader = false;
+              this.toastr.error(`Error occurred while deleting ${type === 'jawak' ? 'Jawak' : 'Aawak'} record`);
+              // Revert check
+              if (type === 'jawak') rowOrModel.auto_jawak = true;
+              else rowOrModel.auto_aawak = true;
+            });
+          } else {
+            // User cancelled, revert the checkbox
+            if (type === 'jawak') rowOrModel.auto_jawak = true;
+            else rowOrModel.auto_aawak = true;
+          }
+        });
+        return;
+      }
+    }
+    // Standard toggling for unsaved/new items
+    if (type === 'jawak') {
+      rowOrModel.auto_jawak = isChecked;
+    } else {
+      rowOrModel.auto_aawak = isChecked;
+    }
+  }
 }

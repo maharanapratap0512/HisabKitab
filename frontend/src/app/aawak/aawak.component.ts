@@ -78,7 +78,8 @@ export class AawakComponent implements OnInit {
     condition_id: [],
     pkt_num: null,
     nimitt_id: [],
-    remaining_qty: false
+    remaining_qty: false,
+    itemOnly: false
   };
   cat: any;
   settings: any = {};

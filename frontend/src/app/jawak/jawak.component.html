@@ -114,6 +114,10 @@
                                     <app-item-dropdown [items]="items" [(ngModel)]="selectedItemmix" [multiple]="true"
                                        [closeOnSelect]="false" name="itemmix_ids"
                                        placeholder="Select Item & Subitem"></app-item-dropdown>
+                                    <div class="form-check mt-1">
+                                       <input type="checkbox" class="form-check-input" id="itemOnlyCheckJwk" [(ngModel)]="filterBody.itemOnly" name="itemOnly">
+                                       <label class="form-check-label mb-0" for="itemOnlyCheckJwk" style="cursor: pointer;"><small class="text-info fw-bold">Item Only (Subitem is Null)</small></label>
+                                    </div>
                                  </div>
                               </div>
 
@@ -245,7 +249,8 @@
                                        condition_id: [],
                                        usage_list_id: [],
                                        nimitt_id: null,
-                                       pkt_num: null
+                                       pkt_num: null,
+                                       itemOnly: false
                                      }; selectedItemmix = [];">Clear All</button>
                               </div>
                            </div>

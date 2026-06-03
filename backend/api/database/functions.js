@@ -163,10 +163,17 @@ class Functions extends DBContex {
                objOld = await this.getById(type, obj._id);
             }
 
+            if (!objOld) {
+               reject(new Error('no any records are updated (record not found).'));
+               return;
+            }
+
             // console.log(obj);
             let updtResult = stmtUpdate.run(obj);
-            if (updtResult.changes == 1) {
-               await this.updateBachatFromAJUpdate(obj, type, objOld);
+            if (updtResult.changes == 1 || updtResult.changes == 0) {
+               if (updtResult.changes == 1) {
+                  await this.updateBachatFromAJUpdate(obj, type, objOld);
+               }
                if (obj.enz) {
                   obj.enz[type + '_id'] = obj._id
                   if (obj.enz._id)
