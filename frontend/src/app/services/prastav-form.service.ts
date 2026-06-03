@@ -147,18 +147,11 @@ export class PrastavFormService {
    * Auto-add blank line when all existing lines are valid
    */
   formStatusChanges() {
-    let valid = true;
+    // Auto-add line is disabled, user will manually click 'Add More'
+  }
 
-    for (const row of this.prastavForm.lines) {
-      if (!(row.item_id && row.qty && row.unit_id)) {
-        valid = false;
-        break;
-      }
-    }
-
-    if (valid && !this.submit) {
-      this.prastavForm.lines.push(structuredClone(this.lineTemplate));
-    }
+  addLine() {
+    this.prastavForm.lines.push(structuredClone(this.lineTemplate));
   }
 
   // Nested Jawak Handlers

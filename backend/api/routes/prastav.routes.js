@@ -38,7 +38,7 @@ router.get('/', (req, res, next) => {
     try {
         const { active, mm_id, item_id, date, year } = req.query || {};
         const { result, total_count } = service.getPrastavs({
-            mm_id, item_id, year,
+            mm_id, item_id, year, date,
             active: (active === '1' || active === 'true' || active === true) ? 1 : null,
             itemsPerPage: 10000 // Return large set for legacy GET
         });
@@ -167,12 +167,15 @@ router.get('/jawak/:id', (req, res, next) => {
 router.post('/jawak', (req, res, next) => {
     try {
         const data = req.body || {};
+        console.log('Prastav Jawak Update Request:', data);
         const lineId = data._id
             ? PrastavJawak.updateById(data, Number(data._id), false)
             : PrastavJawak.insert(data, false);
 
+        console.log('Prastav Jawak Update Result ID:', lineId);
         res.status(200).json({ success: true, result: lineId });
     } catch (e) {
+        console.error('Prastav Jawak Update Error:', e);
         next(e);
     }
 });

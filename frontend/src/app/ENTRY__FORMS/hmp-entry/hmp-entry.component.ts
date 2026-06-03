@@ -166,12 +166,25 @@ export class HmpEntryComponent implements OnInit {
         this.fs.hmpBatchForm.recipe_id = event;
         this.fs.hmpBatchForm.recipe_name = recipe.recipe_name;
         this.fs.hmpBatchForm.description = recipe.description;
+
+        const cleanInputs = structuredClone(recipe.inputs || []).map((x: any) => {
+          delete x._id;
+          delete x.recipe_id;
+          return x;
+        });
+
+        const cleanOutputs = structuredClone(recipe.outputs || []).map((x: any) => {
+          delete x._id;
+          delete x.recipe_id;
+          return x;
+        });
+
         if (this.editorMode === 'modern') {
-          this.fs.hmpBatchForm.inputs = structuredClone(recipe.inputs || []).filter((x: any) => x.item_id);
-          this.fs.hmpBatchForm.outputs = structuredClone(recipe.outputs || []).filter((x: any) => x.item_id);
+          this.fs.hmpBatchForm.inputs = cleanInputs.filter((x: any) => x.item_id);
+          this.fs.hmpBatchForm.outputs = cleanOutputs.filter((x: any) => x.item_id);
         } else {
-          this.fs.hmpBatchForm.inputs = structuredClone(recipe.inputs);
-          this.fs.hmpBatchForm.outputs = structuredClone(recipe.outputs);
+          this.fs.hmpBatchForm.inputs = cleanInputs;
+          this.fs.hmpBatchForm.outputs = cleanOutputs;
         }
       } else {
         this.fs.reset();

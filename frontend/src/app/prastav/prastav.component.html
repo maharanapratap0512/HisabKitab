@@ -54,32 +54,36 @@
   </div>
 </div>
 
-<!-- Year Filter, Export and Total Count Row (Matching Jawak/HMP) -->
-<div class="row align-items-center mb-3">
-  <div class="col-md-5">
-    <div class="d-flex align-items-center gap-1">
-      <span class="badge year-box cursor-pointer"
-        [ngClass]="!filterBody.year ? 'badge-primary' : 'badge-outline-secondary'" (click)="yearClick(null)">All</span>
-      <span *ngFor="let y of gs.years" class="badge year-box cursor-pointer"
-        [ngClass]="filterBody.year == y ? 'badge-primary' : 'badge-outline-secondary'" (click)="yearClick(y)">
-        {{y}}
-      </span>
+<!-- Year Filter, Export and Total Count Row (Matching HMP/Jawak Style) -->
+<div class="row align-items-center mb-2 px-2">
+  <!-- Left: Year Selection -->
+  <div class="col-md-3">
+    <app-popover-year [selectedYear]="filterBody.year" (yearChanged)="yearClick($event)"></app-popover-year>
+  </div>
+
+  <!-- Center: Export & Total Count -->
+  <div class="col-md-6 d-flex justify-content-center align-items-center gap-4">
+    <div class="btn-group">
+      <button type="button" class="badge badge-outline-success dropdown-toggle year-box shadow-none border-success"
+        data-bs-toggle="dropdown" aria-expanded="false">
+        Export To <i class="uil uil-file-download-alt ms-1"></i>
+      </button>
+      <div class="dropdown-menu shadow-sm">
+        <a class="dropdown-item font-size-13 py-2" (click)="exportToExcel()" style="cursor: pointer;">
+          <i class="uil uil-file-info-alt me-2 text-success"></i> Excel Report
+        </a>
+      </div>
+    </div>
+
+    <div class="font-size-14 fw-bold text-dark">
+      Total Count : <span class="text-primary">{{total_count}}</span>
     </div>
   </div>
 
-  <div class="col-md-7 d-flex justify-content-end align-items-center gap-3">
-    <pagination-controls class="pagi text-end" (pageChange)="getPrastavPage($event)" [autoHide]="true"
+  <!-- Right: Pagination -->
+  <div class="col-md-3 d-flex justify-content-end">
+    <pagination-controls class="pagi mb-0" (pageChange)="getPrastavPage($event)" [autoHide]="true"
       *ngIf="total_count > 0"></pagination-controls>
-
-    <div class="btn-group">
-      <button type="button" class="btn btn-outline-success dropdown-toggle shadow-none" (click)="exportToExcel()">
-        Export To Excel <i class="uil uil-file-download-alt ms-1"></i>
-      </button>
-    </div>
-
-    <button type="button" class="btn btn-light fw-bold text-dark px-3 shadow-none border">
-      Total Count : {{total_count}}
-    </button>
   </div>
 </div>
 
@@ -95,7 +99,17 @@
               <th style="width: 40px;" class="py-2">#</th>
               <th style="width: 100px;" class="py-2">Manage</th>
               <th style="width: 100px;" class="py-2">Voucher #</th>
-              <th style="width: 110px;" class="py-2">Date</th>
+              <th style="width: 140px;" class="py-2 text-start ps-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span>Date</span>
+                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                    [isOpen]="filterBody.date ? true : false" (clear)="filterBody.date = null; applyFilter()"
+                    triggerOn="hover">
+                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date"
+                      (change)="applyFilter()">
+                  </app-popover-filter>
+                </div>
+              </th>
 
               <!-- MM Column with Filter -->
               <th style="min-width: 180px;" class="py-2 text-start ps-3">
@@ -133,7 +147,34 @@
                 </div>
               </th>
 
-              <th class="py-2 text-start ps-3">Note</th>
+              <th class="py-2 text-start ps-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span>Note</span>
+                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
+                    [isOpen]="filterBody.is_noted !== undefined && filterBody.is_noted !== null && filterBody.is_noted !== ''"
+                    (clear)="filterBody.is_noted = null; applyFilter()" triggerOn="hover">
+
+                    <div class="p-2" style="min-width: 130px;">
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="isNotedFilter" id="notedAll" [value]="null"
+                          [(ngModel)]="filterBody.is_noted" (change)="applyFilter()">
+                        <label class="form-check-label cursor-pointer" for="notedAll">All</label>
+                      </div>
+                      <div class="form-check mb-2 text-success">
+                        <input class="form-check-input" type="radio" name="isNotedFilter" id="notedYes" [value]="1"
+                          [(ngModel)]="filterBody.is_noted" (change)="applyFilter()">
+                        <label class="form-check-label cursor-pointer fw-bold" for="notedYes">Noted</label>
+                      </div>
+                      <div class="form-check text-danger">
+                        <input class="form-check-input" type="radio" name="isNotedFilter" id="notedNo" [value]="0"
+                          [(ngModel)]="filterBody.is_noted" (change)="applyFilter()">
+                        <label class="form-check-label cursor-pointer fw-bold" for="notedNo">Not Noted</label>
+                      </div>
+                    </div>
+
+                  </app-popover-filter>
+                </div>
+              </th>
               <th style="width: 80px;" class="py-2">Items</th>
               <th style="width: 100px;" class="py-2 text-end pe-3">Amount</th>
             </tr>
@@ -173,8 +214,12 @@
                   </div>
                 </td>
 
-                <td class="py-2 text-start ps-3 font-size-11 opacity-75">
-                  <div style="max-width: 350px;">{{v.note || '-'}}</div>
+                <td class="py-2 text-start ps-3 font-size-11">
+                  <div style="max-width: 350px;" [class.text-success]="v.is_noted" [class.fw-bold]="v.is_noted"
+                    [class.opacity-75]="!v.is_noted">
+                    <i class="uil uil-check-circle me-1" *ngIf="v.is_noted"></i>
+                    {{v.note_details || '-'}}
+                  </div>
                 </td>
                 <td class="py-2">
                   <span class="badge bg-soft-secondary text-secondary px-2 font-size-10 rounded-1">{{v.items?.length}}
@@ -193,6 +238,7 @@
                     <thead>
                       <tr>
                         <th style="width: 35px;" class="ps-2">Sr</th>
+                        <th style="width: 70px;">Act</th>
                         <th>Item-Subitem</th>
                         <th style="width: 90px;">Qty</th>
                         <th style="width: 80px;">Rate</th>
@@ -201,8 +247,7 @@
                         <th style="min-width: 120px;">कहाँ से भेजा</th>
                         <th style="min-width: 120px;">किसके द्वारा</th>
                         <th style="width: 70px;">J-Qty</th>
-                        <th style="width: 60px;">Stat</th>
-                        <th style="width: 60px;">Act</th>
+                        <th style="width: 60px;">Status</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -212,6 +257,15 @@
                           <!-- ITEM COLUMNS (Rowspan) -->
                           <ng-container *ngIf="vr.isIFirst">
                             <td [attr.rowspan]="vr.iRowSpan" class="fw-bold opacity-40 py-0 border-end">{{vr.sr}}</td>
+                            <td [attr.rowspan]="vr.iRowSpan" class="py-0 border-end" (click)="$event.stopPropagation()">
+                              <div class="d-flex justify-content-center gap-2 align-items-center">
+                                <i class="uil uil-truck text-info opacity-40 hover-opacity-100 cursor-pointer font-size-16"
+                                  title="Edit Deliveries (Jawak Focus)" (click)="openJawakEdit(v, vr.sr - 1)"></i>
+                                <i *ngIf="v.items?.length > 1"
+                                  class="uil uil-trash text-danger opacity-40 hover-opacity-100 cursor-pointer font-size-13"
+                                  title="Delete item" (click)="delete(vr.item._id)"></i>
+                              </div>
+                            </td>
                             <td [attr.rowspan]="vr.iRowSpan" class="text-start ps-3 py-0 border-end">
                               <div class="fw-bold text-dark lh-1 mt-1">{{vr.item.item?.item_hin || vr.item.item_id}}
                               </div>
@@ -245,7 +299,8 @@
                               {{vr.jawak.kiske_dwara || '-'}}</td>
                             <td class="border-end fw-bold">{{vr.jawak.qty}}</td>
                             <td class="border-end">
-                              <span class="badge px-1 py-0 rounded-1"
+                              <span class="badge px-1 py-0 rounded-1 cursor-pointer"
+                                (click)="toggleStatus(vr.jawak)"
                                 [ngClass]="vr.jawak.is_received ? 'bg-success' : 'bg-warning'" style="font-size: 8px;">
                                 {{vr.jawak.is_received ? 'RCV' : 'PND'}}
                               </span>
@@ -257,19 +312,7 @@
                               deliveries</td>
                           </ng-template>
 
-                          <!-- ACTION COLUMN (Linked to Item) -->
-                          <ng-container *ngIf="vr.isIFirst">
-                            <td [attr.rowspan]="vr.iRowSpan" class="py-0" (click)="$event.stopPropagation()">
-                              <div class="d-flex justify-content-center gap-2 align-items-center">
-                                <i class="uil uil-truck text-info opacity-40 hover-opacity-100 cursor-pointer font-size-16"
-                                  title="Edit Deliveries (Jawak Focus)" (click)="openJawakEdit(v, vr.sr - 1)"></i>
-                                <i class="uil uil-pen text-primary opacity-40 hover-opacity-100 cursor-pointer font-size-13"
-                                  title="Edit full voucher" (click)="editVoucher(v)"></i>
-                                <i class="uil uil-trash text-danger opacity-40 hover-opacity-100 cursor-pointer font-size-13"
-                                  title="Delete item" (click)="delete(vr.item._id)"></i>
-                              </div>
-                            </td>
-                          </ng-container>
+
                         </tr>
                       </ng-container>
                     </tbody>
@@ -283,123 +326,195 @@
       </div>
     </div>
 
-    <!-- INDIVIDUAL MODE (STICKY TABLE STYLE) -->
+    <!-- INDIVIDUAL MODE -->
     <div class="card border-0 shadow-sm overflow-hidden rounded-3" *ngIf="settings.prastav.viewMode === 'individual'">
       <div class="table-responsive" style="overflow-y: auto; max-height: calc(100vh - 250px); overflow-x: auto;">
-        <table class="table table-sm table-bordered mb-0 border-0"
-          style="min-width: 1500px; border-collapse: separate; border-spacing: 0;">
+        <table class="table table-bordered table-hover mb-0" style="min-width: 1900px;">
           <thead class="table-dark" style="position: sticky; top: 0; z-index: 20;">
-            <tr class="text-uppercase font-size-10 letter-spacing-1 align-middle">
-              <!-- Sticky Header Cols -->
-              <th style="width: 110px; position: sticky; left: 0; z-index: 21; background: var(--dark);"
-                class="py-2 border-end border-start">Voucher #</th>
-              <th style="width: 120px; position: sticky; left: 110px; z-index: 21; background: var(--dark);"
-                class="py-2 border-end">Date</th>
-              <th style="width: 160px; position: sticky; left: 230px; z-index: 21; background: var(--dark);"
-                class="py-2 border-end text-start ps-3">MM (Place)</th>
-              <th style="width: 160px; position: sticky; left: 390px; z-index: 21; background: var(--dark);"
-                class="py-2 border-end text-start ps-3">Person (PBK)</th>
-
-              <!-- Non-Sticky Cols -->
-              <th style="width: 40px;" class="py-2 border-end text-center">#</th>
-              <th style="min-width: 220px;" class="px-3 py-2 border-end text-start ps-3">Item Description</th>
-              <th style="width: 90px;" class="py-2 border-end text-center">Qty</th>
-              <th style="width: 90px;" class="py-2 border-end text-center">Rate</th>
-              <th style="width: 110px;" class="py-2 border-end text-end pe-3">Amount</th>
-              <th style="width: 80px;" class="py-2 border-end text-center">Act</th>
-              <th style="width: 95px;" class="py-2 border-end text-center text-primary text-uppercase opacity-85">Jwk
-                Date</th>
-              <th style="width: 150px;" class="py-2 border-end text-primary text-start ps-2 text-uppercase opacity-85">
-                Source MM</th>
-              <th style="width: 150px;" class="py-2 border-end text-primary text-start ps-2 text-uppercase opacity-85">
-                Receiver</th>
-              <th style="width: 70px;" class="py-2 text-center text-primary text-uppercase opacity-85">J-Qty</th>
-              <th style="width: 60px;" class="py-2 text-center text-primary border-start text-uppercase opacity-85">Stat
+            <tr class="text-uppercase font-size-10 letter-spacing-1 align-middle text-nowrap">
+              <th style="width: 50px;">No.</th>
+              <th style="width: 110px;" class="text-center">Act</th>
+              <th style="width: 110px;">Voucher #</th>
+              <th style="width: 120px;" class="text-start ps-2">
+                <div class="d-flex align-items-center justify-content-between pe-1">
+                  <span>Date</span>
+                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                    [isOpen]="filterBody.date ? true : false" (clear)="filterBody.date = null; applyFilter()"
+                    triggerOn="hover">
+                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date"
+                      (change)="applyFilter()">
+                  </app-popover-filter>
+                </div>
               </th>
+              <th style="width: 160px;" class="text-start ps-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span>MM (Place)</span>
+                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                    [isOpen]="filterBody.mm_id?.length > 0" (clear)="filterBody.mm_id = []; applyFilter()"
+                    triggerOn="hover">
+                    <ng-select [multiple]="true" placeholder="Select MM" class="custom-sm" dropdownClass="custom-sm"
+                      [(ngModel)]="filterBody.mm_id" (change)="applyFilter()" style="width: 100%; min-width: 180px;">
+                      <ng-option *ngFor="let item of mms" [value]="item._id">
+                        {{item.mm_hin}} : {{item.mm_eng}}
+                      </ng-option>
+                    </ng-select>
+                  </app-popover-filter>
+                </div>
+              </th>
+              <th style="width: 160px;" class="text-start ps-3">Person (PBK)</th>
+              <th style="min-width: 220px;" class="px-3 text-start ps-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span>Item Description</span>
+                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                    [isOpen]="filterBody.item_id?.length > 0" (clear)="filterBody.item_id = []; applyFilter()"
+                    triggerOn="hover">
+                    <ng-select [multiple]="true" placeholder="Select Item" class="custom-sm" dropdownClass="custom-sm"
+                      [(ngModel)]="filterBody.item_id" (change)="applyFilter()" style="width: 100%; min-width: 180px;">
+                      <ng-option *ngFor="let item of items" [value]="item._id">
+                        {{item.item_hin}} : {{item.item_eng}}
+                      </ng-option>
+                    </ng-select>
+                  </app-popover-filter>
+                </div>
+              </th>
+              <th style="width: 90px;" class="text-center">Qty</th>
+              <th style="width: 90px;" class="text-center">Rate</th>
+              <th style="width: 110px;" class="text-end pe-3">Amount</th>
+              <th style="width: 150px;" class="text-start ps-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span>Note</span>
+                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
+                    [isOpen]="filterBody.is_noted !== undefined && filterBody.is_noted !== null && filterBody.is_noted !== ''"
+                    (clear)="filterBody.is_noted = null; applyFilter()" triggerOn="hover">
+
+                    <div class="p-2" style="min-width: 130px; white-space: normal;">
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="isNotedFilterIndiv" id="notedAllIndiv"
+                          [value]="null" [(ngModel)]="filterBody.is_noted" (change)="applyFilter()">
+                        <label class="form-check-label cursor-pointer" for="notedAllIndiv">All</label>
+                      </div>
+                      <div class="form-check mb-2 text-success">
+                        <input class="form-check-input" type="radio" name="isNotedFilterIndiv" id="notedYesIndiv"
+                          [value]="1" [(ngModel)]="filterBody.is_noted" (change)="applyFilter()">
+                        <label class="form-check-label cursor-pointer fw-bold" for="notedYesIndiv">Noted</label>
+                      </div>
+                      <div class="form-check text-danger">
+                        <input class="form-check-input" type="radio" name="isNotedFilterIndiv" id="notedNoIndiv"
+                          [value]="0" [(ngModel)]="filterBody.is_noted" (change)="applyFilter()">
+                        <label class="form-check-label cursor-pointer fw-bold" for="notedNoIndiv">Not Noted</label>
+                      </div>
+                    </div>
+
+                  </app-popover-filter>
+                </div>
+              </th>
+              <th style="width: 95px;" class="text-primary text-uppercase opacity-85">
+                <div class="d-flex align-items-center justify-content-between pe-1">
+                  <span>Jwk Date</span>
+                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                    [isOpen]="filterBody.jawak_date ? true : false"
+                    (clear)="filterBody.jawak_date = null; applyFilter()" triggerOn="hover">
+                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.jawak_date"
+                      (change)="applyFilter()">
+                  </app-popover-filter>
+                </div>
+              </th>
+              <th style="width: 150px;" class="text-primary text-start ps-2 text-uppercase opacity-85">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span>Source MM</span>
+                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
+                    [isOpen]="filterBody.jawak_source_mm_id?.length > 0"
+                    (clear)="filterBody.jawak_source_mm_id = []; applyFilter()" triggerOn="hover">
+                    <ng-select [multiple]="true" placeholder="Select Source MM" class="custom-sm"
+                      dropdownClass="custom-sm" [(ngModel)]="filterBody.jawak_source_mm_id" (change)="applyFilter()"
+                      style="width: 100%; min-width: 180px;">
+                      <ng-option *ngFor="let item of mms" [value]="item._id">
+                        {{item.mm_hin}} : {{item.mm_eng}}
+                      </ng-option>
+                    </ng-select>
+                  </app-popover-filter>
+                </div>
+              </th>
+              <th style="width: 150px;" class="text-primary text-start ps-2 text-uppercase opacity-85">Receiver</th>
+              <th style="width: 70px;" class="text-center text-primary text-uppercase opacity-85">J-Qty</th>
+              <th style="width: 60px;" class="text-center text-primary text-uppercase opacity-85">Status</th>
             </tr>
           </thead>
-          <tbody style="font-size: 0.84rem;">
+          <tbody style="font-size: 0.90rem;">
             <ng-container
               *ngFor="let row of (individualRows | paginate:{itemsPerPage:itemsPerPage, currentPage:page, totalItems:total_count}); let rIdx = index">
               <tr class="align-middle border-bottom">
 
-                <!-- STICKY VOUCHER COLUMNS -->
-                <ng-container *ngIf="row.isVFirst">
-                  <td [attr.rowspan]="row.vRowSpan" class="text-center border-end fw-bold text-primary font-size-13"
-                    style="position: sticky; left: 0; z-index: 5; background: var(--card-bg); vertical-align: middle; border-left: 4px solid var(--thead-accent-color) !important;">
-                    #{{row.voucher.voucher_no || '-'}}
-                  </td>
-                  <td [attr.rowspan]="row.vRowSpan" class="text-center border-end font-size-11 fw-medium text-dark"
-                    style="position: sticky; left: 110px; z-index: 5; background: var(--card-bg); vertical-align: middle;">
-                    {{row.voucher.date | date:'dd-MM-yyyy'}}
-                  </td>
-                  <td [attr.rowspan]="row.vRowSpan" class="px-3 border-end fw-bold text-dark font-size-12"
-                    style="position: sticky; left: 230px; z-index: 5; background: var(--card-bg); vertical-align: middle;">
-                    <div style="max-width: 140px;" class="d-flex align-items-center justify-content-between pe-1">
-                      <div>{{row.voucher.mm?.mm_hin}}</div>
-                      <span class="badge bg-soft-info text-info px-1 py-0 rounded-pill font-size-8"
-                        *ngIf="row.voucher.pbk_count" title="Registered PBK count at this MM">
-                        {{row.voucher.pbk_count}}
-                      </span>
-                    </div>
-                  </td>
-                  <td [attr.rowspan]="row.vRowSpan" class="px-3 border-end font-size-11 text-muted fw-medium"
-                    style="position: sticky; left: 390px; z-index: 5; background: var(--card-bg); vertical-align: middle;">
-                    <div style="max-width: 140px;">{{row.voucher.pbk?.pbk_hin || '-'}}</div>
-                  </td>
-                </ng-container>
+                <td class="text-center fw-bold text-muted font-size-13 text-nowrap">
+                  {{ itemsPerPage * (page - 1) + (rIdx + 1) }}
+                </td>
+                <td class="text-center text-nowrap">
+                  <div class="d-flex justify-content-center gap-3 align-items-center opacity-60 hover-opacity-100">
+                    <i class="uil uil-truck text-info cursor-pointer font-size-16" title="Edit Deliveries (Jawak Focus)"
+                      (click)="openJawakEdit(row.voucher, row.sr - 1)"></i>
+                    <i *ngIf="row.voucher.items?.length > 1"
+                      class="uil uil-trash-alt text-danger cursor-pointer font-size-14" title="Delete item"
+                      (click)="delete(row.item._id)"></i>
+                  </div>
+                </td>
+
+                <!-- VOUCHER COLUMNS -->
+                <td class="text-center fw-bold text-primary font-size-13 text-nowrap">
+                  #{{row.voucher.voucher_no || '-'}}
+                </td>
+                <td class="text-center font-size-12 fw-medium text-dark text-nowrap">
+                  {{row.voucher.date | date:'dd-MM-yyyy'}}
+                </td>
+                <td class="px-3 fw-bold text-dark font-size-12">
+                  <div style="max-width: 140px;" class="d-flex align-items-center justify-content-between pe-1">
+                    <div class="text-wrap">{{row.voucher.mm?.mm_hin}}</div>
+                    <span class="badge bg-soft-info text-info px-1 py-0 rounded-pill font-size-8"
+                      *ngIf="row.voucher.pbk_count" title="Registered PBK count at this MM">
+                      {{row.voucher.pbk_count}}
+                    </span>
+                  </div>
+                </td>
+                <td class="px-3 font-size-12 text-muted fw-medium text-wrap" style="max-width: 150px;">
+                  {{row.voucher.pbk?.pbk_hin || '-'}}
+                </td>
 
                 <!-- ITEM COLUMNS -->
-                <ng-container *ngIf="row.isIFirst">
-                  <td [attr.rowspan]="row.iRowSpan" class="text-center border-end opacity-40 bg-soft-light"
-                    style="vertical-align: middle;">
-                    {{row.sr}}</td>
-                  <td [attr.rowspan]="row.iRowSpan" class="px-3 border-end" style="vertical-align: middle;">
-                    <div class="fw-bold text-dark font-size-13 lh-1 mb-1">{{row.item.item?.item_hin}}</div>
-                    <div class="font-size-10 text-muted" *ngIf="row.item.subitem?.subitem_list?.subitem_hin">
-                      ({{row.item.subitem.subitem_list?.subitem_hin}})</div>
-                  </td>
-                  <td [attr.rowspan]="row.iRowSpan" class="text-center border-end fw-bold text-theme font-size-13"
-                    style="vertical-align: middle;">
-                    {{row.item.qty}} <span
-                      class="font-size-10 fw-normal opacity-50">{{row.item.unit?.unit_short}}</span>
-                  </td>
-                  <td [attr.rowspan]="row.iRowSpan" class="text-center border-end text-muted"
-                    style="vertical-align: middle;">
-                    ₹{{row.item.rate || '-'}}</td>
-                  <td [attr.rowspan]="row.iRowSpan" class="text-end border-end fw-bold pe-3 text-dark font-size-13"
-                    style="vertical-align: middle;">₹{{row.item.amount || '-'}}</td>
-                  <td [attr.rowspan]="row.iRowSpan" class="text-center border-end" style="vertical-align: middle;">
-                    <div class="d-flex justify-content-center gap-3 align-items-center opacity-60 hover-opacity-100">
-                      <i class="uil uil-truck text-info cursor-pointer font-size-18"
-                        title="Edit Deliveries (Jawak Focus)" (click)="openJawakEdit(row.voucher, row.sr - 1)"></i>
-                      <i class="uil uil-pen text-primary cursor-pointer font-size-15" title="Edit full voucher"
-                        (click)="editVoucher(row.voucher)"></i>
-                      <i class="uil uil-trash-alt text-danger cursor-pointer font-size-15" title="Delete item"
-                        (click)="delete(row.item._id)"></i>
-                    </div>
-                  </td>
-                </ng-container>
+                <td class="px-3 text-wrap" style="min-width: 220px;">
+                  <div class="fw-bold text-dark font-size-14 lh-1 mb-1">{{row.item.item?.item_hin}}</div>
+                  <div class="font-size-11 text-muted" *ngIf="row.item.subitem?.subitem_list?.subitem_hin">
+                    ({{row.item.subitem.subitem_list?.subitem_hin}})</div>
+                </td>
+                <td class="text-center fw-bold text-theme font-size-13 text-nowrap">
+                  {{row.item.qty}} <span class="font-size-11 fw-normal opacity-50">{{row.item.unit?.unit_short}}</span>
+                </td>
+                <td class="text-center text-muted text-nowrap">
+                  ₹{{row.item.rate || '-'}}</td>
+                <td class="text-end fw-bold pe-3 text-dark font-size-13 text-nowrap">₹{{row.item.amount || '-'}}
+                </td>
+                <td class="px-3 font-size-12 text-wrap" style="max-width: 150px;">
+                  {{row.voucher.note_details || '-'}}
+                </td>
 
                 <!-- JAWAK COLUMNS -->
                 <ng-container *ngIf="row.jawak; else emptyJawakIndiv">
-                  <td class="text-center border-end py-1 text-primary fw-bold font-size-11 border-start">
-                    {{row.jawak.date | date:'dd-MMM'}}</td>
-                  <td class="px-2 border-end py-1 font-size-11 fw-bold text-success text-start ps-2">
+                  <td class="text-center text-primary fw-bold font-size-12 text-nowrap">
+                    {{row.jawak.date | date:'dd-MM-yyyy'}}</td>
+                  <td class="px-2 font-size-12 fw-bold text-success text-start ps-2 text-wrap"
+                    style="max-width: 150px;">
                     {{row.jawak.source_mm?.mm_hin}}</td>
-                  <td class="px-2 border-end py-1 font-size-11 opacity-60 text-start ps-2" style="max-width: 140px;">
+                  <td class="px-2 font-size-12 opacity-60 text-start ps-2 text-wrap" style="max-width: 140px;">
                     {{row.jawak.kiske_dwara || '-'}}</td>
-                  <td class="text-center py-1 fw-bold border-end">{{row.jawak.qty}}</td>
-                  <td class="text-center py-1">
-                    <span class="badge px-1 py-0 rounded-1"
-                      [ngClass]="row.jawak.is_received ? 'bg-success' : 'bg-warning'" style="font-size: 8px;">
+                  <td class="text-center fw-bold font-size-13 text-nowrap">{{row.jawak.qty}}</td>
+                  <td class="text-center text-nowrap">
+                    <span class="badge px-2 py-1 rounded-1 cursor-pointer"
+                      (click)="toggleStatus(row.jawak)"
+                      [ngClass]="row.jawak.is_received ? 'bg-success' : 'bg-warning'" style="font-size: 10px;">
                       {{row.jawak.is_received ? 'RCV' : 'PND'}}
                     </span>
                   </td>
                 </ng-container>
                 <ng-template #emptyJawakIndiv>
-                  <td colspan="5"
-                    class="text-center py-1 opacity-25 fst-italic font-size-10 bg-soft-light border-start">Not
+                  <td colspan="5" class="text-center opacity-25 fst-italic font-size-11 bg-soft-light text-nowrap">Not
                     Dispatched Yet
                   </td>
                 </ng-template>
@@ -418,7 +533,7 @@
 <div class="modal fade" id="prastavEntryModal" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static">
   <div class="modal-dialog" role="document" style="width: 98%">
     <div class="modal-content shadow-lg border-0" style="border-radius: 12px; overflow: hidden;">
-      <div class="modal-header border-0 pb-0 bg-light">
+      <div class="modal-header border-0 bg-light">
         <h5 class="modal-title fw-bold text-dark font-size-16">
           <i class="uil uil-file-edit-alt me-2 text-primary"></i>
           {{isEdit ? 'Refine Record' : 'Prastav Entry'}}

@@ -355,17 +355,13 @@
 
                <div class="card-body" style="overflow: auto; flex-direction: column;">
                   <div class="row">
-                     <div class="col-4 pt-2">
-                        <span class="badge year-box"
+                     <div class="col-4 pt-2 d-flex align-items-center gap-1">
+                        <span class="badge year-box cursor-pointer"
                            [ngClass]="{'badge-outline-danger':!isDeleting, 'bg-danger': isDeleting}"
                            (click)="deleteMultiple()"
                            title="Click for multiple delete selection & click same again to perform delete.">Delete</span>
-                        <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
-                           (click)="yearClick(null)">All</span>
-                        <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearClick(y)"
-                           [ngClass]="{'badge-outline-secondary':filterBody.year == y}">
-                           {{y}}
-                        </span>
+                        <app-popover-year [selectedYear]="filterBody.year"
+                           (yearChanged)="yearClick($event)"></app-popover-year>
                      </div>
                      <div class="col-8" *ngIf="aawakData.length">
                         <pagination-controls class="pagi text-end" (pageChange)="getAawakPage(page = $event)"
@@ -395,7 +391,16 @@
                                  Manage
                               </th>
                               <th style="width: 70px;" *ngIf="settings.aawak.pkt_num">Pkt No.</th>
-                              <th style="width: 101px;">Date</th>
+                              <th style="width: 140px;" class="text-start ps-2">
+                                <div class="d-flex align-items-center justify-content-between">
+                                  <span>Date</span>
+                                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                    [isOpen]="!!filterBody.date" (clear)="filterBody.date = null; getFilteredAawakData()"
+                                    triggerOn="hover">
+                                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date" (change)="getFilteredAawakData()">
+                                  </app-popover-filter>
+                                </div>
+                              </th>
                               <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
                               <th style="width: 150px;">Aawak Mm</th>
                               <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Pbk</th>

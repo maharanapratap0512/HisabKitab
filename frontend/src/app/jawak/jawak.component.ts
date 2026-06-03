@@ -208,6 +208,11 @@ export class JawakComponent implements OnInit {
     });
   }
 
+  yearClick(year: any) {
+    this.filterBody.year = year;
+    this.getJawakData(1);
+  }
+
   getJawakData(pageNo: any) {
     this.isLoader = true;
     this.filterBody.pageNo = pageNo;

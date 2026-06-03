@@ -121,13 +121,9 @@
 
                 <div class="card-body" style="overflow: auto; flex-direction: column;">
                     <div class="row">
-                        <div class="col-4 pt-2">
-                            <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
-                                (click)="yearClick(null)">All</span>
-                            <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearClick(y)"
-                                [ngClass]="{'badge-outline-secondary':filterBody.year == y}">
-                                {{y}}
-                            </span>
+                        <div class="col-4 pt-2 d-flex align-items-center gap-1">
+                            <app-popover-year [selectedYear]="filterBody.year"
+                                (yearChanged)="yearClick($event)"></app-popover-year>
                         </div>
                         <div class="col-3 pt-2 d-flex align-items-center gap-2">
                             <app-popover-filter *ngIf="settings.jawak.viewMode === 'voucher'" label="Filter"
@@ -166,7 +162,8 @@
                                                 [(ngModel)]="filterBody.item_subitem_mix"
                                                 (change)="onHeaderFilterChange()">
                                                 <ng-container *ngFor="let item of filteredItems">
-                                                    <ng-option *ngIf="item.matchesCategory !== false" [value]="item._id + ':'">
+                                                    <ng-option *ngIf="item.matchesCategory !== false"
+                                                        [value]="item._id + ':'">
                                                         {{item.item_hin}} : {{item.item_eng}}
                                                     </ng-option>
                                                     <ng-option *ngFor="let subitem of item.subitems"
@@ -452,7 +449,8 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <tr *ngFor="let item of getFilteredJawaks(row.jawaks); let j = index">
+                                                        <tr
+                                                            *ngFor="let item of getFilteredJawaks(row.jawaks); let j = index">
                                                             <td>{{j + 1}}</td>
                                                             <td>
                                                                 <button class="btn btn-xs btn-danger"
@@ -720,7 +718,8 @@
                                                     dropdownClass="custom-sm" [(ngModel)]="filterBody.item_subitem_mix"
                                                     (change)="onHeaderFilterChange()" style="width: 500px;">
                                                     <ng-container *ngFor="let item of filteredItems">
-                                                        <ng-option *ngIf="item.matchesCategory !== false" [value]="item._id + ':'">
+                                                        <ng-option *ngIf="item.matchesCategory !== false"
+                                                            [value]="item._id + ':'">
                                                             {{item.item_hin}} : {{item.item_eng}} : {{item.item_roman ?
                                                             item.item_roman : ''}}
                                                             : {{item.item_code}}

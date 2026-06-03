@@ -1,8 +1,11 @@
 .filter-popover {
   position: absolute;
   z-index: 1050;
-  background: var(--bg-color, #ffffff) !important;
-  border: 1px solid rgba(128, 128, 128, 0.25);
+  background-color: #2a3042 !important;
+  color: #ffffff !important;
+  border: 1px solid #404954;
+  // background: var(--bg-color, #ffffff) !important;
+  // border: 1px solid rgba(128, 128, 128, 0.25);
   border-radius: 4px;
   padding: 10px;
   min-width: 300px;

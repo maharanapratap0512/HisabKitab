@@ -11,7 +11,7 @@ const subitemList = new BaseTable('subitem_list');
 /**
  * Paginated, filtered Prastav list.
  */
-function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, year, pageNo, itemsPerPage, dept_id }) {
+function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, year, date, pageNo, itemsPerPage, dept_id, is_noted }) {
     const PAGE_SIZE = itemsPerPage ? Number(itemsPerPage) : 100;
     const page = (pageNo !== undefined && pageNo !== null) ? Number(pageNo) + 1 : 1;
     const offset = (page - 1) * PAGE_SIZE;
@@ -27,6 +27,14 @@ function getPrastavs({ mm_id, pbk_id, item_id, subitem_id, year, pageNo, itemsPe
 
     if (year) {
         conds.push(`strftime('%Y', prastav.date) = '${String(year)}'`);
+    }
+
+    if (date) {
+        conds.push(`prastav.date = '${String(date)}'`);
+    }
+
+    if (is_noted !== undefined && is_noted !== null && is_noted !== '') {
+        conds.push(`prastav.is_noted = ${Number(is_noted)}`);
     }
 
     const where = conds.join(' AND ');
@@ -73,7 +81,7 @@ function getVoucher(voucherNo) {
         mm_id: rows[0].mm_id,
         pbk_id: rows[0].pbk_id,
         pbk_count: rows[0].pbk_count,
-        note: rows[0].note,
+        note: rows[0].note_details,
         voucher_no: rows[0].voucher_no,
         lines: rows.map(r => ({
             ...r,

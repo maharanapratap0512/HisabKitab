@@ -94,6 +94,16 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="row mt-2">
+                  <div class="col-12 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
+                    <button type="submit" class="btn btn-primary btn-sm px-4" [disabled]="pfs.submit">
+                      {{ isEdit ? 'Update' : 'Save' }}
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
           </ng-container>
@@ -152,7 +162,7 @@
             </div>
           </div>
 
-          <div class="col-md-12 mb-3 d-flex align-items-end gap-3">
+          <div class="col-md-5 mb-3 d-flex align-items-end gap-3">
             <div class="form-check mb-2">
               <input class="form-check-input" type="checkbox" id="isNoted" [(ngModel)]="pfs.prastavForm.is_noted"
                 name="is_noted">
@@ -163,6 +173,13 @@
               <input type="text" class="form-control" placeholder="Note Details"
                 [(ngModel)]="pfs.prastavForm.note_details" name="note_details">
             </div>
+          </div>
+
+          <div class="col-md-7 mb-3 d-flex align-items-end justify-content-end gap-2">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
+            <button type="submit" class="btn btn-primary btn-sm px-4" [disabled]="pfs.submit">
+              {{ isEdit ? 'Update' : 'Save' }}
+            </button>
           </div>
 
         </div>
@@ -209,24 +226,25 @@
                         [items]="items | filterByDate:pfs.prastavForm.date"
                         [(itemId)]="line.item_id"
                         [(subitemId)]="line.subitem_id"
-                        (change)="onItemChange(line)" [required]="true">
+                        (change)="onItemChange(line)" [required]="true"
+                        placeholder="Item - Subitem">
                       </app-item-dropdown>
                     </td>
 
                     <td>
                       <input type="number" class="form-control form-control-sm text-center" [(ngModel)]="line.qty_needs"
-                        [name]="'qty_needs_'+i">
+                        [name]="'qty_needs_'+i" placeholder="Req Qty">
                     </td>
 
                     <td>
                       <div class="d-flex">
 
-                        <input type="number" class="form-control-sm flex-fill" [(ngModel)]="line.qty" [name]="'qty_'+i"
-                          (ngModelChange)="onLineChange(line)">
+                        <input type="number" class="form-control form-control-sm flex-fill" [(ngModel)]="line.qty" [name]="'qty_'+i"
+                          (ngModelChange)="onLineChange(line)" placeholder="Qty">
 
                         <ng-select class="custom-sm border" style="min-width:80px;" [items]="units"
                           bindLabel="unit_short" bindValue="_id" [(ngModel)]="line.unit_id" [name]="'unit_'+i"
-                          (ngModelChange)="onUnitChange(line)">
+                          (ngModelChange)="onUnitChange(line)" placeholder="Unit">
                         </ng-select>
 
                       </div>
@@ -234,17 +252,17 @@
 
                     <td>
                       <input type="number" class="form-control form-control-sm text-center" [(ngModel)]="line.rate"
-                        [name]="'rate_'+i" (ngModelChange)="onLineChange(line)">
+                        [name]="'rate_'+i" (ngModelChange)="onLineChange(line)" placeholder="Rate">
                     </td>
 
                     <td>
                       <input type="number" class="form-control form-control-sm text-center" [(ngModel)]="line.amount"
-                        readonly>
+                        [name]="'amount_'+i" readonly placeholder="Amount">
                     </td>
 
                     <td>
                       <input type="text" class="form-control form-control-sm" [(ngModel)]="line.description"
-                        [name]="'desc_'+i">
+                        [name]="'desc_'+i" placeholder="Description">
                     </td>
 
                     <td class="text-center">
@@ -261,7 +279,7 @@
 
 
                   <!-- JAWAK ROW -->
-                  <tr *ngIf="line.item_id && (!jawakFocusMode || focusedLineIndex === i)">
+                  <tr *ngIf="jawakFocusMode && line.item_id && focusedLineIndex === i">
 
                     <td *ngIf="!jawakFocusMode"></td>
 
@@ -304,7 +322,8 @@
                                   [items]="items | filterByDate:pfs.prastavForm.date"
                                   [(itemId)]="jw.item_id"
                                   [(subitemId)]="jw.subitem_id"
-                                  (change)="onJawakItemChange(line, jw)" [required]="true">
+                                  (change)="onJawakItemChange(line, jw)" [required]="true"
+                                  placeholder="Select Item">
                                 </app-item-dropdown>
                               </td>
 
@@ -321,7 +340,7 @@
 
                               <td class="align-middle">
                                 <div class="d-flex align-items-center">
-                                  <input type="number" class="form-control-sm flex-fill px-1 text-center"
+                                  <input type="number" class="form-control form-control-sm flex-fill px-1 text-center"
                                     placeholder="Qty" [(ngModel)]="jw.qty" [name]="'jw_qty_' + i + '_' + j"
                                     (ngModelChange)="onJawakChange(line, jw)" min="0"
                                     [ngClass]="{'is-invalid': f.submitted && !jw.qty}">
@@ -383,6 +402,12 @@
 
             </table>
 
+            <div class="text-start mb-2 px-2" *ngIf="!jawakFocusMode">
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="pfs.addLine()">
+                <i class="uil uil-plus"></i> Add More
+              </button>
+            </div>
+
           </div>
 
         </div>
@@ -391,15 +416,6 @@
 
 
 
-      <!-- ── Footer ───────────────────────────────────── -->
-      <div class="row mt-2">
-        <div class="col-12 d-flex justify-content-between">
-          <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
-          <button type="submit" class="btn btn-primary btn-sm" [disabled]="pfs.submit">
-            {{ isEdit ? 'Update' : 'Save' }}
-          </button>
-        </div>
-      </div>
 
     </form>
   </div>

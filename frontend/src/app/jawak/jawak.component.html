@@ -266,12 +266,13 @@
                <div class="card-body" style="overflow: auto;">
 
                   <div class="row">
-                     <div class="col-4 pt-2">
-                        <span class="badge year-box"
+                     <div class="col-4 pt-2 d-flex align-items-center gap-1">
+                        <span class="badge year-box cursor-pointer"
                            [ngClass]="{'badge-outline-danger':!isDeleting, 'bg-danger': isDeleting}"
                            (click)="deleteMultiple()"
                            title="Click for multiple delete selection & click same again to perform delete.">Delete
                            Multiple</span>
+                        <app-popover-year [selectedYear]="filterBody.year" (yearChanged)="yearClick($event)"></app-popover-year>
                      </div>
                      <div class="col-8" *ngIf="jawakData.length">
                         <pagination-controls class="pagi text-end" (pageChange)="getJawakData(page=$event)"
@@ -313,7 +314,16 @@
                               </th>
                               <th style="width: 150px;" *ngIf="!settings.defaultMM">MM</th>
                               <th style="width: 70px;" *ngIf="settings.jawak.pkt_num">Pkt No</th>
-                              <th style="width: 101px;">Date</th>
+                              <th style="width: 140px;" class="text-start ps-2">
+                                <div class="d-flex align-items-center justify-content-between">
+                                  <span>Date</span>
+                                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                    [isOpen]="!!filterBody.date" (clear)="filterBody.date = null; getJawakData(1)"
+                                    triggerOn="hover">
+                                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date" (change)="getJawakData(1)">
+                                  </app-popover-filter>
+                                </div>
+                              </th>
                               <th style="width: 300px;">कहाँ / किसको भेजा </th>
                               <th style="width: 150px;">Category</th>
                               <th style="width: 250px;">Item - Subitem</th>

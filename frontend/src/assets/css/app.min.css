@@ -6847,7 +6847,7 @@ fieldset:disabled .btn {
 @media (min-width:576px) {
    .modal-dialog {
       /* max-width: 500px; */
-      margin: 1.75rem auto
+      /* margin: 1.75rem auto */
    }
 
    .modal-dialog-scrollable {
@@ -8046,18 +8046,18 @@ fieldset:disabled .btn {
 }
 
 .shadow {
-   -webkit-box-shadow: 0 0 35px 0 rgba(154, 161, 171, .15) !important;
-   box-shadow: 0 0 35px 0 rgba(154, 161, 171, .15) !important
+   -webkit-box-shadow: 0 0 35px 0 rgba(134 143 255, .5) !important;
+   box-shadow: 0 0 35px 0 rgba(134 143 255, .5) !important
 }
 
 .shadow-sm {
-   -webkit-box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075) !important;
-   box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075) !important
+   -webkit-box-shadow: 0 .125rem .25rem rgba(134 143 255, .075) !important;
+   box-shadow: 0 .125rem .25rem rgba(134 143 255, .075) !important
 }
 
 .shadow-lg {
-   -webkit-box-shadow: 0 0 45px 0 rgba(0, 0, 0, .12) !important;
-   box-shadow: 0 0 45px 0 rgba(0, 0, 0, .12) !important
+   -webkit-box-shadow: 0 0 45px 0 rgba(134 143 255) !important;
+   box-shadow: 0 0 45px 0 rgba(134 143 255) !important;
 }
 
 .shadow-none {

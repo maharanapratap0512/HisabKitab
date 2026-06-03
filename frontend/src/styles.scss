@@ -298,7 +298,7 @@ span.search-icon {
   padding-top: 0.3rem;
   font-size: smaller;
   cursor: pointer;
-  margin-bottom: 1rem;
+  // margin-bottom: 1rem;
 }
 
 
@@ -708,12 +708,12 @@ body[data-bs-theme="light"] {
       border-bottom-color: #e9ecef !important;
 
       &.ng-option-marked {
-        background-color: rgba(99, 102, 241, 0.1) !important;
+        background-color: #f1f3fa !important; /* Solid color to prevent overlap */
         color: #1e293b !important;
       }
 
       &.ng-option-selected {
-        background-color: rgba(99, 102, 241, 0.2) !important;
+        background-color: #e0e7ff !important; /* Solid color */
         color: #1e293b !important;
       }
     }

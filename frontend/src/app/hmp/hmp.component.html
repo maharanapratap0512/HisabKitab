@@ -42,20 +42,15 @@
         <!-- top filter row -->
         <div class="row mb-2">
 
-          <div class="col-3 pt-2">
+          <div class="col-3 d-flex align-items-center gap-2">
             <button class="badge year-box badge-outline-secondary me-1" (click)="toggleExpandAll()"
               *ngIf="settings.hmp.viewMode === 'voucher'" title="Toggle Expand All">
               <i class="uil" [ngClass]="expandAll ? 'uil-compress-arrows' : 'uil-expand-arrows'"></i>
             </button>
-            <span class="badge year-box" [ngClass]="{'badge-outline-secondary':!filterBody.year}"
-              (click)="yearChanged(null)">All</span>
-            <span *ngFor="let y of gs.years" class="badge year-box" (click)="yearChanged(y)"
-              [ngClass]="{'badge-outline-secondary':filterBody.year == y}">
-              {{y}}
-            </span>
+            <app-popover-year [selectedYear]="filterBody.year" (yearChanged)="yearChanged($event)"></app-popover-year>
           </div>
           <!-- Filter Options -->
-          <div class="col-1 pt-2">
+          <div class="col-1 d-flex align-items-center gap-2">
             <app-popover-filter label="Filter" iconClass="uil uil-filter" direction="auto" (clear)="clearFilter()"
               clearButtonLabel="Clear Filter" triggerOn="hover">
               <div style="width: 300px;">
@@ -171,7 +166,8 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr *ngFor="let input of batch.inputs; let i = index" [class.row-auto-jwk]="input.is_auto_jwk" [class.row-auto-awk]="input.is_auto_awk">
+                          <tr *ngFor="let input of batch.inputs; let i = index" [class.row-auto-jwk]="input.is_auto_jwk"
+                            [class.row-auto-awk]="input.is_auto_awk">
                             <td class="ps-2">
                               {{i+1}}
                               <i class="uil uil-trash text-danger cursor-pointer fs-7" *ngIf="batch.inputs.length > 1"
@@ -217,7 +213,8 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr *ngFor="let output of batch.outputs; let i = index" [class.row-auto-awk]="output.is_auto_awk">
+                          <tr *ngFor="let output of batch.outputs; let i = index"
+                            [class.row-auto-awk]="output.is_auto_awk">
                             <td class="ps-2">
                               {{i+1}}
                               <i class="uil uil-trash text-danger cursor-pointer fs-7" *ngIf="batch.outputs.length > 1"
@@ -279,7 +276,7 @@
         <div class="table-responsive shadow-sm"
           style="border-radius: 8px; overflow-y: auto; max-height: calc(100vh - 250px);"
           *ngIf="settings.hmp.viewMode === 'individual'">
-          <table class="table-sm table-compact table-hover mb-0">
+          <table class="table-sm table-compact table-hover table-sticky-header mb-0">
             <thead>
               <tr>
                 <th style="width: 40px; text-align: center; vertical-align: middle;">
@@ -346,9 +343,12 @@
 
                   <!-- First Input Row or Empty Placeholder -->
                   <ng-container *ngIf="batch.inputs?.length > 0">
-                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk" [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><span class="badge badge-primary-lighten rounded-pill py-1 px-2">↓ IN</span>
+                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
+                      [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><span
+                        class="badge badge-primary-lighten rounded-pill py-1 px-2">↓ IN</span>
                     </td>
-                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk" [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk">
+                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
+                      [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk">
                       <span
                         *ngIf="$any(batch.inputs[0])?.subitem?.subitem_list?.subitem_hin">{{$any(batch.inputs[0])?.subitem?.subitem_list?.subitem_hin}}
                       </span>{{$any(batch.inputs[0])?.item.item_hin}}
@@ -359,12 +359,19 @@
                         </span>{{$any(batch.inputs[0])?.item.item_eng}}
                       </small>
                     </td>
-                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk" [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><strong>{{$any(batch.inputs[0])?.qty}}</strong>
+                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
+                      [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk">
+                      <strong>{{$any(batch.inputs[0])?.qty}}</strong>
                       <small>{{$any(batch.inputs[0])?.unit_short}}</small>
                     </td>
-                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk" [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><span style="opacity: 0.6;">{{$any(batch.inputs[0])?.rate || '-'}}</span></td>
-                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk" [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><small style="color: #f0a500;">{{$any(batch.inputs[0])?.condition?.list_name_hin}}</small></td>
-                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk" [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk" style="text-align: center;">
+                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
+                      [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><span
+                        style="opacity: 0.6;">{{$any(batch.inputs[0])?.rate || '-'}}</span></td>
+                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
+                      [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><small
+                        style="color: #f0a500;">{{$any(batch.inputs[0])?.condition?.list_name_hin}}</small></td>
+                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
+                      [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk" style="text-align: center;">
                       <i class="uil uil-pen i-outline-primary me-1" (click)="openEntryModal(batch)" title="Edit"></i>
                       <i class="uil uil-trash i-outline-danger" (click)="deleteInput($any(batch.inputs[0])._id, 0)"
                         title="Delete Item"></i>
@@ -378,8 +385,7 @@
 
                 <!-- Remaining Input Rows -->
                 <tr *ngFor="let input of $any(batch.inputs) | slice:1; let i = index"
-                  [class.row-auto-jwk]="$any(input).is_auto_jwk" 
-                  [class.row-auto-awk]="$any(input).is_auto_awk">
+                  [class.row-auto-jwk]="$any(input).is_auto_jwk" [class.row-auto-awk]="$any(input).is_auto_awk">
                   <td><span class="badge badge-primary-lighten rounded-pill py-1 px-2">↓ IN</span>
                   </td>
                   <td>

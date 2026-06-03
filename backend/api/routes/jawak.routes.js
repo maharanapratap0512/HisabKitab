@@ -619,7 +619,7 @@ router.put('/update-row', async (req, res, next) => {
                     ...oldJwk,
                     ...req.body
                 };
-                
+
                 // Fn.updateAJ handles parsing/stringifying and bachat sync if needed
                 await Fn.updateAJ(updatedDoc, 'jawak', oldJwk).then(async (resolve) => {
                     await Fn.commit();

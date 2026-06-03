@@ -97,7 +97,7 @@ function injectSubitemList(entries, subitemListMap) {
 // Uses BaseTable.getAll() with a raw WHERE string — schema-driven joins
 // auto-build recipe + mm (hasOne) and inputs/outputs (hasMany) from schema.
 
-function getBatches({ dept_id, mm_id, recipe_id, item_id, date_from, date_to, year, pageNo, all = false, batchIds = [] }) {
+function getBatches({ dept_id, mm_id, recipe_id, item_id, date, date_from, date_to, year, pageNo, all = false, batchIds = [] }) {
     const PAGE_SIZE = 100;
     const page = (pageNo && pageNo > 0) ? Number(pageNo) : 1;
     const offset = (page - 1) * PAGE_SIZE;
@@ -115,6 +115,7 @@ function getBatches({ dept_id, mm_id, recipe_id, item_id, date_from, date_to, ye
     if (mm_id) conds.push(`hmp_batch.mm_id = ${Number(mm_id)}`);
     if (recipe_id) conds.push(`hmp_batch.recipe_id = ${Number(recipe_id)}`);
     if (year) conds.push(`strftime('%Y', hmp_batch.date) = '${String(year)}'`);
+    if (date) conds.push(`hmp_batch.date = '${date}'`);
 
     if (date_from && date_to) {
         conds.push(`hmp_batch.date BETWEEN '${date_from}' AND '${date_to}'`);
@@ -188,6 +189,7 @@ async function insertUpdateBatch(data) {
         let batchId;
 
         let id;
+        const isNewBatch = !data._id;
         if (data._id) {
             hmpBatch.updateById(data, data._id);
             id = Number(data._id);
@@ -198,6 +200,11 @@ async function insertUpdateBatch(data) {
         for (const inp of data.inputs ?? []) {
             if (!inp.item_id || !inp.qty) continue;
             inp.batch_id = id;
+            if (isNewBatch) {
+                delete inp._id;
+                delete inp.jawak_ref_id;
+                if (inp.auto_aawak) delete inp.aawak_ref_id;
+            }
 
             // Map frontend checkbox values to database columns
             inp.is_auto_jwk = (data.auto_jawak || inp.auto_jawak) ? 1 : 0;
@@ -259,6 +266,10 @@ async function insertUpdateBatch(data) {
         for (const out of data.outputs ?? []) {
             if (!out.item_id || !out.qty) continue;
             out.batch_id = id;
+            if (isNewBatch) {
+                delete out._id;
+                delete out.aawak_ref_id;
+            }
 
             let hasJawaks = out.jawak_detail && out.jawak_detail.length > 0;
             
@@ -282,6 +293,9 @@ async function insertUpdateBatch(data) {
             if (hasJawaks) {
                 for (let jwk of out.jawak_detail) {
                     jwk.aawak_ref_id = out.aawak_ref_id;
+                    if (isNewBatch) {
+                        delete jwk._id;
+                    }
 
                     let jwkExists = jwk._id ? await Fn.getById('jawak', jwk._id) : null;
                     if (jwk._id && jwkExists) {

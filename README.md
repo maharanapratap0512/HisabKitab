@@ -28,6 +28,8 @@ or if --prod is unknown than
 ng build --configuration production
 
 
+pragma user_version = 30;
+
 
 
 
