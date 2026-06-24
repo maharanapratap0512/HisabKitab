@@ -61,6 +61,7 @@ export class HmpEntryComponent implements OnInit {
   items: any = [];
   units: any = [];
   conditions: any = [];
+  aawak_sources: any = [];
   aawak_types: any = [];
 
   // Dropdown lists for Input/Output tables
@@ -87,6 +88,7 @@ export class HmpEntryComponent implements OnInit {
       this.units = result.unit || [];
       this.conditions = result.condition || [];
       this.aawak_types = result.aawak_type || [];
+      this.aawak_sources = result.aawak_source || [];
     });
     this.fs.reset();
   }
@@ -246,7 +248,7 @@ export class HmpEntryComponent implements OnInit {
     if (ev) {
       const item_id = ev.item_id || this.formModel.item_id;
       const subitem_id = ev.subitem_id || this.formModel.subitem_id;
-      
+
       let item = this.items.find((x: any) => x._id == item_id);
       if (item) {
         let subitem = item.subitems?.find((x: any) => x._id == subitem_id);
@@ -579,7 +581,7 @@ export class HmpEntryComponent implements OnInit {
         // Record is already created in the DB!
         Swal.fire({
           title: 'Delete Reference Record?',
-          text: type === 'jawak' 
+          text: type === 'jawak'
             ? 'Turning off Auto-Jawak will delete the already created Jawak record in the database! Are you sure?'
             : 'Turning off Auto-Aawak will delete the already created Aawak record AND all associated Jawak distribution entries in the database! Are you sure?',
           icon: 'warning',

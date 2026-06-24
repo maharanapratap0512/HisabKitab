@@ -1,5 +1,30 @@
 [
     {
+        "version": "33.1",
+        "date": "24-06-2026",
+        "summary": "Small Problem Fixes",
+        "summary_hin": "",
+        "isNew": true,
+        "items": [
+            {
+                "type": "fix",
+                "module": "HMP Entry",
+                "title": "aawak source dropdown fixed...",
+                "title_hin": "",
+                "desc": "",
+                "desc_hin": ""
+            },
+            {
+                "type": "fix",
+                "module": "Jawak Entry & update",
+                "title": "Object error solved...",
+                "title_hin": "",
+                "desc": "",
+                "desc_hin": ""
+            }
+        ]
+    },
+    {
         "version": "32.2",
         "date": "04-06-2026",
         "summary": "HMP and Item & variant improved",

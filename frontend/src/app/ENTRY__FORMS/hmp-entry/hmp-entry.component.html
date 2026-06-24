@@ -16,7 +16,8 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Batch No</label>
-                    <input type="text" class="form-control" [(ngModel)]="fs.hmpBatchForm.batch_no" name="batch_no" placeholder="Batch No">
+                    <input type="text" class="form-control" [(ngModel)]="fs.hmpBatchForm.batch_no" name="batch_no"
+                        placeholder="Batch No">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">MM</label>
@@ -71,14 +72,15 @@
             <!-- Editor Mode Selector -->
             <div class="row mb-3 justify-content-center">
                 <div class="col-md-6 text-center">
-                    <div class="btn-group p-1 bg-light rounded" role="group" style="box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);">
-                        <button type="button" class="btn btn-sm px-3 rounded-pill fw-bold" 
-                            [ngClass]="editorMode === 'traditional' ? 'btn-secondary text-white shadow-sm' : 'btn-light text-muted bg-transparent border-0'" 
+                    <div class="btn-group p-1 bg-light rounded" role="group"
+                        style="box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);">
+                        <button type="button" class="btn btn-sm px-3 rounded-pill fw-bold"
+                            [ngClass]="editorMode === 'traditional' ? 'btn-secondary text-white shadow-sm' : 'btn-light text-muted bg-transparent border-0'"
                             (click)="toggleEditorMode('traditional')">
                             Traditional Inline Editor
                         </button>
-                        <button type="button" class="btn btn-sm px-3 rounded-pill fw-bold" 
-                            [ngClass]="editorMode === 'modern' ? 'btn-primary text-white shadow-sm' : 'btn-light text-muted bg-transparent border-0'" 
+                        <button type="button" class="btn btn-sm px-3 rounded-pill fw-bold"
+                            [ngClass]="editorMode === 'modern' ? 'btn-primary text-white shadow-sm' : 'btn-light text-muted bg-transparent border-0'"
                             (click)="toggleEditorMode('modern')">
                             Modern Card Editor (Preview)
                         </button>
@@ -118,12 +120,10 @@
                                     *ngFor="let row of fs.hmpBatchForm.inputs; let i = index; trackBy: trackByIndex">
                                     <td>{{i+1}}</td>
                                     <td>
-                                        <app-item-dropdown size="sm" 
-                                            [items]="items | filterByDate:fs.hmpBatchForm.date"
-                                            [(itemId)]="row.item_id"
-                                            [(subitemId)]="row.subitem_id"
-                                            (change)="itemSubitemSelected($event, i, 'inputs')"
-                                            [required]="true" appendTo="#hmpEntryForm">
+                                        <app-item-dropdown size="sm" [items]="items | filterByDate:fs.hmpBatchForm.date"
+                                            [(itemId)]="row.item_id" [(subitemId)]="row.subitem_id"
+                                            (change)="itemSubitemSelected($event, i, 'inputs')" [required]="true"
+                                            appendTo="#hmpEntryForm">
                                         </app-item-dropdown>
                                     </td>
                                     <!-- Qty & Unit -->
@@ -145,9 +145,11 @@
                                     </td>
                                     <!-- Condition -->
                                     <td>
-                                        <ng-select appendTo="#hmpEntryForm" class="custom-sm" [(ngModel)]="row.condition_id"
-                                            name="in_condition_{{i}}" [clearable]="false" placeholder="Select Condition">
-                                            <ng-option selected="selected" disabled value="">Select Condition</ng-option>
+                                        <ng-select appendTo="#hmpEntryForm" class="custom-sm"
+                                            [(ngModel)]="row.condition_id" name="in_condition_{{i}}" [clearable]="false"
+                                            placeholder="Select Condition">
+                                            <ng-option selected="selected" disabled value="">Select
+                                                Condition</ng-option>
                                             <ng-option *ngFor="let item of conditions"
                                                 [value]="item._id">{{item.list_name_hin}} :
                                                 {{item.list_name_eng}} </ng-option>
@@ -158,7 +160,7 @@
                                         <ng-select appendTo="#hmpEntryForm" class="custom-sm"
                                             [(ngModel)]="row.aawak_source_id" name="in_aawak_source_{{i}}"
                                             [clearable]="true" placeholder="Aawak Source">
-                                            <ng-option *ngFor="let item of conditions" [value]="item._id">
+                                            <ng-option *ngFor="let item of aawak_sources" [value]=" item._id">
                                                 {{item.list_name_hin}} : {{item.list_name_eng}}
                                             </ng-option>
                                         </ng-select>
@@ -167,22 +169,30 @@
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="form-check form-switch mb-0">
-                                                 <input class="form-check-input" type="checkbox" id="autoJawakRow_{{i}}" [ngModel]="row.auto_jawak" (ngModelChange)="toggleAuto(row, 'jawak', $event)" name="in_auto_jawak_{{i}}">
-                                                 <label class="form-check-label mb-0" for="autoJawakRow_{{i}}"><small class="text-info fw-bold">Jawk</small></label>
-                                             </div>
-                                             <div class="form-check form-switch mb-0" *ngIf="row.auto_jawak">
-                                                 <input class="form-check-input" type="checkbox" id="autoAawakRow_{{i}}" [ngModel]="row.auto_aawak" (ngModelChange)="toggleAuto(row, 'aawak', $event)" name="in_auto_aawak_{{i}}">
-                                                 <label class="form-check-label mb-0" for="autoAawakRow_{{i}}"><small class="text-warning fw-bold">Awk</small></label>
-                                             </div>
+                                                <input class="form-check-input" type="checkbox" id="autoJawakRow_{{i}}"
+                                                    [ngModel]="row.auto_jawak"
+                                                    (ngModelChange)="toggleAuto(row, 'jawak', $event)"
+                                                    name="in_auto_jawak_{{i}}">
+                                                <label class="form-check-label mb-0" for="autoJawakRow_{{i}}"><small
+                                                        class="text-info fw-bold">Jawk</small></label>
+                                            </div>
+                                            <div class="form-check form-switch mb-0" *ngIf="row.auto_jawak">
+                                                <input class="form-check-input" type="checkbox" id="autoAawakRow_{{i}}"
+                                                    [ngModel]="row.auto_aawak"
+                                                    (ngModelChange)="toggleAuto(row, 'aawak', $event)"
+                                                    name="in_auto_aawak_{{i}}">
+                                                <label class="form-check-label mb-0" for="autoAawakRow_{{i}}"><small
+                                                        class="text-warning fw-bold">Awk</small></label>
+                                            </div>
                                         </div>
                                     </td>
                                     <!-- Ref. Aawak / Aawak Type -->
                                     <td>
                                         <div *ngIf="row.auto_jawak">
                                             <!-- Aawak Type Dropdown when Auto Awk is Checked -->
-                                            <ng-select appendTo="#hmpEntryForm" class="custom-sm w-100" *ngIf="row.auto_aawak"
-                                                [(ngModel)]="row.aawak_type_id" name="in_aawak_type_{{i}}"
-                                                [clearable]="true" placeholder="Aawak Type">
+                                            <ng-select appendTo="#hmpEntryForm" class="custom-sm w-100"
+                                                *ngIf="row.auto_aawak" [(ngModel)]="row.aawak_type_id"
+                                                name="in_aawak_type_{{i}}" [clearable]="true" placeholder="Aawak Type">
                                                 <ng-option *ngFor="let type of aawak_types" [value]="type._id">
                                                     {{type.list_name_hin}} : {{type.list_name_eng}}
                                                 </ng-option>
@@ -190,27 +200,22 @@
 
                                             <!-- Ref Aawak Dropdown when Auto Awk is NOT Checked -->
                                             <app-aawak-ref-dropdown *ngIf="!row.auto_aawak"
-                                                [mmId]="fs.hmpBatchForm.mm_id"
-                                                [maxDate]="fs.hmpBatchForm.date" 
-                                                [deptId]="auth.webUser.dept_id"
-                                                [filterObj]="{
+                                                [mmId]="fs.hmpBatchForm.mm_id" [maxDate]="fs.hmpBatchForm.date"
+                                                [deptId]="auth.webUser.dept_id" [filterObj]="{
                                                     item_id: row.item_id,
                                                     subitem_id: row.subitem_id,
                                                     condition_id: row.condition_id,
                                                     aawak_source_id: row.aawak_source_id
-                                                }" 
-                                                [(ngModel)]="row.aawak_ref_id"
-                                                name="in_aawak_ref_id_{{i}}"
-                                                size="sm"
-                                                appendTo="#hmpEntryForm">
+                                                }" [(ngModel)]="row.aawak_ref_id" name="in_aawak_ref_id_{{i}}"
+                                                size="sm" appendTo="#hmpEntryForm">
                                             </app-aawak-ref-dropdown>
                                         </div>
                                         <span *ngIf="!row.auto_jawak">-</span>
                                     </td>
                                     <!-- Delete Action -->
                                     <td class="text-center align-middle">
-                                        <button *ngIf="row.item_id && fs.hmpBatchForm.inputs.length > 1"
-                                            type="button" class="btn btn-sm btn-danger" (click)="deleteRow('inputs', i)"
+                                        <button *ngIf="row.item_id && fs.hmpBatchForm.inputs.length > 1" type="button"
+                                            class="btn btn-sm btn-danger" (click)="deleteRow('inputs', i)"
                                             title="Delete this row" style="padding: 0.2rem 0.5rem; border-radius: 4px;">
                                             <i class="uil uil-times"></i>
                                         </button>
@@ -271,19 +276,18 @@
                                         </td>
                                         <!-- Item Dropdown -->
                                         <td>
-                                            <app-item-dropdown size="sm" 
+                                            <app-item-dropdown size="sm"
                                                 [items]="items | filterByDate:fs.hmpBatchForm.date"
-                                                [(itemId)]="row.item_id"
-                                                [(subitemId)]="row.subitem_id"
-                                                (change)="itemSubitemSelected($event, i, 'outputs')"
-                                                [required]="true" appendTo="#hmpEntryForm">
+                                                [(itemId)]="row.item_id" [(subitemId)]="row.subitem_id"
+                                                (change)="itemSubitemSelected($event, i, 'outputs')" [required]="true"
+                                                appendTo="#hmpEntryForm">
                                             </app-item-dropdown>
                                         </td>
                                         <!-- Qty & Unit -->
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <input type="number" class="form-control-sm flex-fill" [(ngModel)]="row.qty"
-                                                    name="out_qty_{{i}}">
+                                                <input type="number" class="form-control-sm flex-fill"
+                                                    [(ngModel)]="row.qty" name="out_qty_{{i}}">
                                                 <ng-select appendTo="#hmpEntryForm" class="custom-sm border mw-3"
                                                     [items]="units" bindLabel="unit_short" bindValue="_id"
                                                     [(ngModel)]="row.unit_id" name="out_unit_{{i}}" [clearable]="false"
@@ -292,8 +296,8 @@
                                         </td>
                                         <!-- Rate -->
                                         <td>
-                                            <input type="number" class="form-control form-control-sm" [(ngModel)]="row.rate"
-                                                name="out_rate_{{i}}">
+                                            <input type="number" class="form-control form-control-sm"
+                                                [(ngModel)]="row.rate" name="out_rate_{{i}}">
                                         </td>
                                         <!-- Condition -->
                                         <td>
@@ -310,8 +314,12 @@
                                         <!-- Auto Awk (Row Wise) -->
                                         <td>
                                             <div class="form-check form-switch mb-0">
-                                                <input class="form-check-input" type="checkbox" id="outAutoAawakRow_{{i}}" [ngModel]="row.auto_aawak" (ngModelChange)="toggleAuto(row, 'aawak', $event)" name="out_auto_aawak_{{i}}">
-                                                <label class="form-check-label mb-0" for="outAutoAawakRow_{{i}}"><small class="text-success fw-bold">Auto Awk</small></label>
+                                                <input class="form-check-input" type="checkbox"
+                                                    id="outAutoAawakRow_{{i}}" [ngModel]="row.auto_aawak"
+                                                    (ngModelChange)="toggleAuto(row, 'aawak', $event)"
+                                                    name="out_auto_aawak_{{i}}">
+                                                <label class="form-check-label mb-0" for="outAutoAawakRow_{{i}}"><small
+                                                        class="text-success fw-bold">Auto Awk</small></label>
                                             </div>
                                         </td>
                                         <!-- Delete Action -->
@@ -346,7 +354,8 @@
                                                         <tr *ngFor="let jwk of row.jawak_detail; let j = index">
                                                             <td style="width: 15%">{{jwk.date | date:'dd-MM-yyyy'}}</td>
                                                             <td style="width: 20%">{{jwk.jawak_mm_hin}}</td>
-                                                            <td style="width: 30%">{{jwk.pbk_hin}} {{jwk.pbk_state_hin ? '('
+                                                            <td style="width: 30%">{{jwk.pbk_hin}} {{jwk.pbk_state_hin ?
+                                                                '('
                                                                 + jwk.pbk_state_hin + ')' : ''}}</td>
                                                             <td style="width: 10%">{{jwk.qty}}</td>
                                                             <td style="width: 15%">{{jwk.jawak_type_hin}}</td>
@@ -378,18 +387,25 @@
             <!-- ============================================ -->
             <ng-container *ngIf="editorMode === 'modern'">
                 <!-- Unified Card Form -->
-                <div class="card mb-3 border-0 shadow-sm unified-form-card" [ngClass]="entryMode === 'inputs' ? 'theme-inputs' : 'theme-outputs'">
+                <div class="card mb-3 border-0 shadow-sm unified-form-card"
+                    [ngClass]="entryMode === 'inputs' ? 'theme-inputs' : 'theme-outputs'">
                     <div class="card-header d-flex justify-content-between align-items-center py-2 bg-transparent">
                         <span class="fw-bold fs-5" [ngClass]="entryMode === 'inputs' ? 'text-info' : 'text-success'">
-                            <i class="uil" [ngClass]="entryMode === 'inputs' ? 'uil-arrow-down-left' : 'uil-arrow-up-right'"></i> 
-                            {{ isEditingItem ? 'Edit' : 'Add' }} {{ entryMode === 'inputs' ? 'Input Consumption' : 'Output Production' }}
+                            <i class="uil"
+                                [ngClass]="entryMode === 'inputs' ? 'uil-arrow-down-left' : 'uil-arrow-up-right'"></i>
+                            {{ isEditingItem ? 'Edit' : 'Add' }} {{ entryMode === 'inputs' ? 'Input Consumption' :
+                            'Output Production' }}
                         </span>
                         <!-- Sliding Pill Toggle for Mode -->
                         <div class="btn-group pill-toggle" role="group">
-                            <button type="button" class="btn btn-sm" [ngClass]="entryMode === 'inputs' ? 'btn-info text-white active-toggle' : 'btn-outline-info'" (click)="selectEntryMode('inputs')">
+                            <button type="button" class="btn btn-sm"
+                                [ngClass]="entryMode === 'inputs' ? 'btn-info text-white active-toggle' : 'btn-outline-info'"
+                                (click)="selectEntryMode('inputs')">
                                 Input Consumption
                             </button>
-                            <button type="button" class="btn btn-sm" [ngClass]="entryMode === 'outputs' ? 'btn-success text-white active-toggle' : 'btn-outline-success'" (click)="selectEntryMode('outputs')">
+                            <button type="button" class="btn btn-sm"
+                                [ngClass]="entryMode === 'outputs' ? 'btn-success text-white active-toggle' : 'btn-outline-success'"
+                                (click)="selectEntryMode('outputs')">
                                 Output Production
                             </button>
                         </div>
@@ -400,12 +416,10 @@
                             <!-- Select Item -->
                             <div class="col-md-2">
                                 <label class="form-label mb-1 fw-semibold"><small>Select Item</small></label>
-                                <app-item-dropdown size="sm" 
-                                    [items]="items | filterByDate:fs.hmpBatchForm.date"
-                                    [(itemId)]="formModel.item_id"
-                                    [(subitemId)]="formModel.subitem_id"
-                                    (change)="commonFormItemSubitemSelected($event)"
-                                    [required]="false" appendTo="#hmpEntryForm">
+                                <app-item-dropdown size="sm" [items]="items | filterByDate:fs.hmpBatchForm.date"
+                                    [(itemId)]="formModel.item_id" [(subitemId)]="formModel.subitem_id"
+                                    (change)="commonFormItemSubitemSelected($event)" [required]="false"
+                                    appendTo="#hmpEntryForm">
                                 </app-item-dropdown>
                             </div>
 
@@ -413,9 +427,10 @@
                             <div class="col-md-2">
                                 <label class="form-label mb-1 fw-semibold"><small>Quantity</small></label>
                                 <div class="input-group input-group-sm">
-                                    <input type="number" class="form-control" [(ngModel)]="formModel.qty" name="form_qty" placeholder="Qty">
-                                    <ng-select appendTo="#hmpEntryForm" class="custom-sm mw-3 border" style="min-width: 70px;"
-                                        [items]="units" bindLabel="unit_short" bindValue="_id"
+                                    <input type="number" class="form-control" [(ngModel)]="formModel.qty"
+                                        name="form_qty" placeholder="Qty">
+                                    <ng-select appendTo="#hmpEntryForm" class="custom-sm mw-3 border"
+                                        style="min-width: 70px;" [items]="units" bindLabel="unit_short" bindValue="_id"
                                         [(ngModel)]="formModel.unit_id" name="form_unit" [clearable]="false"
                                         placeholder="Unit"></ng-select>
                                 </div>
@@ -424,14 +439,16 @@
                             <!-- Rate -->
                             <div class="col-md-1">
                                 <label class="form-label mb-1 fw-semibold"><small>Rate</small></label>
-                                <input type="number" class="form-control form-control-sm" [(ngModel)]="formModel.rate" name="form_rate" placeholder="Rate">
+                                <input type="number" class="form-control form-control-sm" [(ngModel)]="formModel.rate"
+                                    name="form_rate" placeholder="Rate">
                             </div>
 
                             <!-- Condition -->
                             <div class="col-md-1">
                                 <label class="form-label mb-1 fw-semibold"><small>Condition</small></label>
-                                <ng-select appendTo="#hmpEntryForm" class="custom-sm w-100" [(ngModel)]="formModel.condition_id"
-                                    name="form_condition" [clearable]="true" placeholder="Cond.">
+                                <ng-select appendTo="#hmpEntryForm" class="custom-sm w-100"
+                                    [(ngModel)]="formModel.condition_id" name="form_condition" [clearable]="true"
+                                    placeholder="Cond.">
                                     <ng-option *ngFor="let item of conditions" [value]="item._id">
                                         {{item.list_name_hin}}
                                     </ng-option>
@@ -457,45 +474,57 @@
                                     <div class="d-flex align-items-center gap-2" style="padding-bottom: 5px;">
                                         <!-- Auto Jawak switch for Input -->
                                         <div class="form-check form-switch mb-0" *ngIf="entryMode === 'inputs'">
-                                            <input class="form-check-input" type="checkbox" id="autoJawakRow" [ngModel]="formModel.auto_jawak" (ngModelChange)="toggleAuto(formModel, 'jawak', $event)" name="form_auto_jawak">
-                                            <label class="form-check-label text-info fw-bold mb-0" for="autoJawakRow" style="cursor: pointer;"><small>Auto Jawk</small></label>
+                                            <input class="form-check-input" type="checkbox" id="autoJawakRow"
+                                                [ngModel]="formModel.auto_jawak"
+                                                (ngModelChange)="toggleAuto(formModel, 'jawak', $event)"
+                                                name="form_auto_jawak">
+                                            <label class="form-check-label text-info fw-bold mb-0" for="autoJawakRow"
+                                                style="cursor: pointer;"><small>Auto Jawk</small></label>
                                         </div>
 
                                         <!-- Auto Aawak switch (Only when Auto Jawak is ON) -->
-                                        <div class="form-check form-switch mb-0" *ngIf="entryMode === 'inputs' && formModel.auto_jawak">
-                                            <input class="form-check-input" type="checkbox" id="inputAutoAawakRow" [ngModel]="formModel.auto_aawak" (ngModelChange)="toggleAuto(formModel, 'aawak', $event)" name="form_input_auto_aawak">
-                                            <label class="form-check-label text-warning fw-bold mb-0" for="inputAutoAawakRow" style="cursor: pointer;"><small>Auto Awk</small></label>
+                                        <div class="form-check form-switch mb-0"
+                                            *ngIf="entryMode === 'inputs' && formModel.auto_jawak">
+                                            <input class="form-check-input" type="checkbox" id="inputAutoAawakRow"
+                                                [ngModel]="formModel.auto_aawak"
+                                                (ngModelChange)="toggleAuto(formModel, 'aawak', $event)"
+                                                name="form_input_auto_aawak">
+                                            <label class="form-check-label text-warning fw-bold mb-0"
+                                                for="inputAutoAawakRow" style="cursor: pointer;"><small>Auto
+                                                    Awk</small></label>
                                         </div>
 
                                         <!-- Auto Aawak switch for Output -->
                                         <div class="form-check form-switch mb-0" *ngIf="entryMode === 'outputs'">
-                                            <input class="form-check-input" type="checkbox" id="autoAawakRow" [ngModel]="formModel.auto_aawak" (ngModelChange)="toggleAuto(formModel, 'aawak', $event)" name="form_auto_aawak">
-                                            <label class="form-check-label text-success fw-bold mb-0" for="autoAawakRow" style="cursor: pointer;"><small>Auto Awk</small></label>
+                                            <input class="form-check-input" type="checkbox" id="autoAawakRow"
+                                                [ngModel]="formModel.auto_aawak"
+                                                (ngModelChange)="toggleAuto(formModel, 'aawak', $event)"
+                                                name="form_auto_aawak">
+                                            <label class="form-check-label text-success fw-bold mb-0" for="autoAawakRow"
+                                                style="cursor: pointer;"><small>Auto Awk</small></label>
                                         </div>
                                     </div>
 
                                     <!-- Reference Aawak Dropdown (when Auto Jawak is ON and Auto Aawak is OFF) -->
-                                    <div style="min-width: 140px; flex: 1 1 0%;" *ngIf="entryMode === 'inputs' && formModel.auto_jawak && !formModel.auto_aawak">
-                                        <label class="form-label mb-1 fw-semibold"><small>Select Ref. Aawak</small></label>
-                                        <app-aawak-ref-dropdown 
-                                            [mmId]="fs.hmpBatchForm.mm_id"
-                                            [maxDate]="fs.hmpBatchForm.date" 
-                                            [deptId]="auth.webUser.dept_id"
+                                    <div style="min-width: 140px; flex: 1 1 0%;"
+                                        *ngIf="entryMode === 'inputs' && formModel.auto_jawak && !formModel.auto_aawak">
+                                        <label class="form-label mb-1 fw-semibold"><small>Select Ref.
+                                                Aawak</small></label>
+                                        <app-aawak-ref-dropdown [mmId]="fs.hmpBatchForm.mm_id"
+                                            [maxDate]="fs.hmpBatchForm.date" [deptId]="auth.webUser.dept_id"
                                             [filterObj]="{
                                                 item_id: formModel.item_id,
                                                 subitem_id: formModel.subitem_id,
                                                 condition_id: formModel.condition_id,
                                                 aawak_source_id: formModel.aawak_source_id
-                                            }" 
-                                            [(ngModel)]="formModel.aawak_ref_id"
-                                            name="form_aawak_ref_id"
-                                            size="sm"
+                                            }" [(ngModel)]="formModel.aawak_ref_id" name="form_aawak_ref_id" size="sm"
                                             appendTo="#hmpEntryForm">
                                         </app-aawak-ref-dropdown>
                                     </div>
 
                                     <!-- Aawak Type Dropdown (when Auto Jawak is ON and Auto Aawak is ON) -->
-                                    <div style="min-width: 140px; flex: 1 1 0%;" *ngIf="entryMode === 'inputs' && formModel.auto_jawak && formModel.auto_aawak">
+                                    <div style="min-width: 140px; flex: 1 1 0%;"
+                                        *ngIf="entryMode === 'inputs' && formModel.auto_jawak && formModel.auto_aawak">
                                         <label class="form-label mb-1 fw-semibold"><small>Aawak Type</small></label>
                                         <ng-select appendTo="#hmpEntryForm" class="custom-sm w-100"
                                             [(ngModel)]="formModel.aawak_type_id" name="form_aawak_type"
@@ -508,10 +537,13 @@
 
                                     <!-- Action Buttons inside form row -->
                                     <div class="d-flex gap-2" style="padding-bottom: 2px;">
-                                        <button type="button" class="btn btn-sm" [ngClass]="entryMode === 'inputs' ? 'btn-info' : 'btn-success'" (click)="addOrUpdateItem()">
+                                        <button type="button" class="btn btn-sm"
+                                            [ngClass]="entryMode === 'inputs' ? 'btn-info' : 'btn-success'"
+                                            (click)="addOrUpdateItem()">
                                             {{ isEditingItem ? 'Update' : 'Add' }}
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-secondary" *ngIf="isEditingItem" (click)="resetFormModel()">
+                                        <button type="button" class="btn btn-sm btn-secondary" *ngIf="isEditingItem"
+                                            (click)="resetFormModel()">
                                             Cancel
                                         </button>
                                     </div>
@@ -526,8 +558,10 @@
                     <!-- Left Card: Input Materials (Consumed) -->
                     <div class="col-md-6">
                         <div class="card border-info shadow-sm h-100 batch-list-card">
-                            <div class="card-header bg-info-lighten text-info d-flex justify-content-between align-items-center py-2">
-                                <h6 class="m-0 fw-bold"><i class="uil uil-arrow-down-left"></i> Consumed Materials (Inputs)</h6>
+                            <div
+                                class="card-header bg-info-lighten text-info d-flex justify-content-between align-items-center py-2">
+                                <h6 class="m-0 fw-bold"><i class="uil uil-arrow-down-left"></i> Consumed Materials
+                                    (Inputs)</h6>
                                 <span class="badge bg-info">{{ fs.hmpBatchForm.inputs?.length || 0 }} Items</span>
                             </div>
                             <div class="card-body p-2 overflow-auto" style="max-height: 350px;">
@@ -544,55 +578,59 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr *ngFor="let row of fs.hmpBatchForm.inputs; let i = index" [ngClass]="{'row-glowing-info': row.auto_jawak}">
+                                        <tr *ngFor="let row of fs.hmpBatchForm.inputs; let i = index"
+                                            [ngClass]="{'row-glowing-info': row.auto_jawak}">
                                             <td>{{i+1}}</td>
                                             <td>
                                                 <div class="fw-bold">{{ getName(items, row.item_id, 'item_hin') }}</div>
-                                                <div class="text-muted fs-7">{{ getName(items, row.item_id, 'item_eng') }}</div>
+                                                <div class="text-muted fs-7">{{ getName(items, row.item_id, 'item_eng')
+                                                    }}</div>
                                             </td>
-                                            <td>{{row.qty}} <span class="badge bg-secondary">{{ getName(units, row.unit_id, 'unit_short') }}</span></td>
+                                            <td>{{row.qty}} <span class="badge bg-secondary">{{ getName(units,
+                                                    row.unit_id, 'unit_short') }}</span></td>
                                             <td>{{row.rate || '-'}}</td>
                                             <td>
-                                                <span class="badge bg-light text-dark">{{ getName(conditions, row.condition_id, 'list_name_hin') }}</span>
+                                                <span class="badge bg-light text-dark">{{ getName(conditions,
+                                                    row.condition_id, 'list_name_hin') }}</span>
                                             </td>
                                             <td>
                                                 <div *ngIf="row.auto_jawak">
                                                     <!-- Auto Aawak indicator or type -->
                                                     <span *ngIf="row.auto_aawak" class="badge bg-warning text-dark">
-                                                        Auto Awk: {{ getName(aawak_types, row.aawak_type_id, 'list_name_hin') || 'Default' }}
+                                                        Auto Awk: {{ getName(aawak_types, row.aawak_type_id,
+                                                        'list_name_hin') || 'Default' }}
                                                     </span>
 
                                                     <!-- Manually Selected Dropdown -->
                                                     <app-aawak-ref-dropdown *ngIf="!row.auto_aawak"
-                                                        [mmId]="fs.hmpBatchForm.mm_id"
-                                                        [maxDate]="fs.hmpBatchForm.date" 
-                                                        [deptId]="auth.webUser.dept_id"
-                                                        [filterObj]="{
+                                                        [mmId]="fs.hmpBatchForm.mm_id" [maxDate]="fs.hmpBatchForm.date"
+                                                        [deptId]="auth.webUser.dept_id" [filterObj]="{
                                                             item_id: row.item_id,
                                                             subitem_id: row.subitem_id,
                                                             condition_id: row.condition_id,
                                                             aawak_source_id: row.aawak_source_id
-                                                        }" 
-                                                        [(ngModel)]="row.aawak_ref_id"
-                                                        [ngModelOptions]="{standalone: true}"
-                                                        size="sm">
+                                                        }" [(ngModel)]="row.aawak_ref_id"
+                                                        [ngModelOptions]="{standalone: true}" size="sm">
                                                     </app-aawak-ref-dropdown>
                                                 </div>
                                                 <span *ngIf="!row.auto_jawak">-</span>
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center gap-1">
-                                                    <button type="button" class="btn btn-xs btn-outline-primary" (click)="editItem('inputs', i)" title="Edit">
+                                                    <button type="button" class="btn btn-xs btn-outline-primary"
+                                                        (click)="editItem('inputs', i)" title="Edit">
                                                         <i class="uil uil-pen"></i>
                                                     </button>
-                                                    <button type="button" class="btn btn-xs btn-outline-danger" (click)="deleteItem('inputs', i)" title="Remove">
+                                                    <button type="button" class="btn btn-xs btn-outline-danger"
+                                                        (click)="deleteItem('inputs', i)" title="Remove">
                                                         <i class="uil uil-trash-alt"></i>
                                                     </button>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr *ngIf="!fs.hmpBatchForm.inputs || fs.hmpBatchForm.inputs.length === 0">
-                                            <td colspan="7" class="text-center text-muted py-3">No input materials added.</td>
+                                            <td colspan="7" class="text-center text-muted py-3">No input materials
+                                                added.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -603,8 +641,10 @@
                     <!-- Right Card: Output Products (Produced) -->
                     <div class="col-md-6">
                         <div class="card border-success shadow-sm h-100 batch-list-card">
-                            <div class="card-header bg-success-lighten text-success d-flex justify-content-between align-items-center py-2">
-                                <h6 class="m-0 fw-bold"><i class="uil uil-arrow-up-right"></i> Produced Products (Outputs)</h6>
+                            <div
+                                class="card-header bg-success-lighten text-success d-flex justify-content-between align-items-center py-2">
+                                <h6 class="m-0 fw-bold"><i class="uil uil-arrow-up-right"></i> Produced Products
+                                    (Outputs)</h6>
                                 <span class="badge bg-success">{{ fs.hmpBatchForm.outputs?.length || 0 }} Items</span>
                             </div>
                             <div class="card-body p-2 overflow-auto" style="max-height: 350px;">
@@ -625,13 +665,17 @@
                                             <tr [ngClass]="{'row-glowing-success': row.auto_aawak}">
                                                 <td>{{i+1}}</td>
                                                 <td>
-                                                    <div class="fw-bold">{{ getName(items, row.item_id, 'item_hin') }}</div>
-                                                    <div class="text-muted fs-7">{{ getName(items, row.item_id, 'item_eng') }}</div>
+                                                    <div class="fw-bold">{{ getName(items, row.item_id, 'item_hin') }}
+                                                    </div>
+                                                    <div class="text-muted fs-7">{{ getName(items, row.item_id,
+                                                        'item_eng') }}</div>
                                                 </td>
-                                                <td>{{row.qty}} <span class="badge bg-secondary">{{ getName(units, row.unit_id, 'unit_short') }}</span></td>
+                                                <td>{{row.qty}} <span class="badge bg-secondary">{{ getName(units,
+                                                        row.unit_id, 'unit_short') }}</span></td>
                                                 <td>{{row.rate || '-'}}</td>
                                                 <td>
-                                                    <span class="badge bg-light text-dark">{{ getName(conditions, row.condition_id, 'list_name_hin') }}</span>
+                                                    <span class="badge bg-light text-dark">{{ getName(conditions,
+                                                        row.condition_id, 'list_name_hin') }}</span>
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="d-flex align-items-center justify-content-center">
@@ -644,28 +688,35 @@
                                                             style="font-size: 9px; min-width: 35px; line-height: 1.2;"
                                                             (click)="row.show_jawak = !row.show_jawak"
                                                             [title]="'Total Jawak Qty: ' + getJawakQty(i)">
-                                                            <div style="font-weight: bold; padding: 1px 2px;">J - {{row.jawak_detail.length}}</div>
-                                                            <div style="border-top: 1px solid rgba(255,193,7,0.3); padding: 1px 2px;">Q - {{getJawakQty(i)}}</div>
+                                                            <div style="font-weight: bold; padding: 1px 2px;">J -
+                                                                {{row.jawak_detail.length}}</div>
+                                                            <div
+                                                                style="border-top: 1px solid rgba(255,193,7,0.3); padding: 1px 2px;">
+                                                                Q - {{getJawakQty(i)}}</div>
                                                         </button>
                                                     </div>
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <button type="button" class="btn btn-xs btn-outline-primary" (click)="editItem('outputs', i)" title="Edit">
+                                                        <button type="button" class="btn btn-xs btn-outline-primary"
+                                                            (click)="editItem('outputs', i)" title="Edit">
                                                             <i class="uil uil-pen"></i>
                                                         </button>
-                                                        <button type="button" class="btn btn-xs btn-outline-danger" (click)="deleteItem('outputs', i)" title="Remove">
+                                                        <button type="button" class="btn btn-xs btn-outline-danger"
+                                                            (click)="deleteItem('outputs', i)" title="Remove">
                                                             <i class="uil uil-trash-alt"></i>
                                                         </button>
                                                     </div>
                                                 </td>
                                             </tr>
                                             <!-- Nested Jawak Details Table -->
-                                            <tr *ngIf="row.show_jawak && row.jawak_detail && row.jawak_detail.length > 0">
+                                            <tr
+                                                *ngIf="row.show_jawak && row.jawak_detail && row.jawak_detail.length > 0">
                                                 <td></td>
                                                 <td colspan="6">
                                                     <div class="p-2 border rounded bg-transparent">
-                                                        <h6 class="mb-2 text-primary fs-7 fw-bold">Jawak Distribution</h6>
+                                                        <h6 class="mb-2 text-primary fs-7 fw-bold">Jawak Distribution
+                                                        </h6>
                                                         <table class="table table-sm table-bordered m-0 fs-7">
                                                             <thead>
                                                                 <tr>
@@ -681,14 +732,17 @@
                                                                 <tr *ngFor="let jwk of row.jawak_detail; let j = index">
                                                                     <td>{{jwk.date | date:'dd-MM-yyyy'}}</td>
                                                                     <td>{{jwk.jawak_mm_hin}}</td>
-                                                                    <td>{{jwk.pbk_hin}} {{jwk.pbk_state_hin ? '(' + jwk.pbk_state_hin + ')' : ''}}</td>
+                                                                    <td>{{jwk.pbk_hin}} {{jwk.pbk_state_hin ? '(' +
+                                                                        jwk.pbk_state_hin + ')' : ''}}</td>
                                                                     <td>{{jwk.qty}}</td>
                                                                     <td>{{jwk.jawak_type_hin}}</td>
                                                                     <td class="text-center align-middle">
                                                                         <i class="uil uil-edit-alt mx-1 text-primary cursor-pointer"
-                                                                            (click)="editJawakOfOutput(i, j)" title="Edit Jawak"></i>
+                                                                            (click)="editJawakOfOutput(i, j)"
+                                                                            title="Edit Jawak"></i>
                                                                         <i class="uil uil-trash text-danger cursor-pointer"
-                                                                            (click)="removeJawak(i, j, jwk._id)" title="Delete Jawak"></i>
+                                                                            (click)="removeJawak(i, j, jwk._id)"
+                                                                            title="Delete Jawak"></i>
                                                                     </td>
                                                                 </tr>
                                                             </tbody>
@@ -698,7 +752,8 @@
                                             </tr>
                                         </ng-container>
                                         <tr *ngIf="!fs.hmpBatchForm.outputs || fs.hmpBatchForm.outputs.length === 0">
-                                            <td colspan="5" class="text-center text-muted py-3">No output products added.</td>
+                                            <td colspan="5" class="text-center text-muted py-3">No output products
+                                                added.</td>
                                         </tr>
                                     </tbody>
                                 </table>

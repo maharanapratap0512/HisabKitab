@@ -222,12 +222,9 @@
                     <td class="text-center align-middle">{{i+1}}</td>
 
                     <td>
-                      <app-item-dropdown size="sm" 
-                        [items]="items | filterByDate:pfs.prastavForm.date"
-                        [(itemId)]="line.item_id"
-                        [(subitemId)]="line.subitem_id"
-                        (change)="onItemChange(line)" [required]="true"
-                        placeholder="Item - Subitem">
+                      <app-item-dropdown size="sm" [items]="items | filterByDate:pfs.prastavForm.date"
+                        [(itemId)]="line.item_id" [(subitemId)]="line.subitem_id" (change)="onItemChange(line)"
+                        [required]="true" placeholder="Item - Subitem">
                       </app-item-dropdown>
                     </td>
 
@@ -239,8 +236,8 @@
                     <td>
                       <div class="d-flex">
 
-                        <input type="number" class="form-control form-control-sm flex-fill" [(ngModel)]="line.qty" [name]="'qty_'+i"
-                          (ngModelChange)="onLineChange(line)" placeholder="Qty">
+                        <input type="number" class="form-control form-control-sm flex-fill" [(ngModel)]="line.qty"
+                          [name]="'qty_'+i" (ngModelChange)="onLineChange(line)" placeholder="Qty">
 
                         <ng-select class="custom-sm border" style="min-width:80px;" [items]="units"
                           bindLabel="unit_short" bindValue="_id" [(ngModel)]="line.unit_id" [name]="'unit_'+i"
@@ -318,12 +315,9 @@
                               </td>
 
                               <td class="align-middle">
-                                <app-item-dropdown size="sm" 
-                                  [items]="items | filterByDate:pfs.prastavForm.date"
-                                  [(itemId)]="jw.item_id"
-                                  [(subitemId)]="jw.subitem_id"
-                                  (change)="onJawakItemChange(line, jw)" [required]="true"
-                                  placeholder="Select Item">
+                                <app-item-dropdown size="sm" [items]="items | filterByDate:pfs.prastavForm.date"
+                                  [(itemId)]="jw.item_id" [(subitemId)]="jw.subitem_id"
+                                  (change)="onJawakItemChange(line, jw)" [required]="true" placeholder="Select Item">
                                 </app-item-dropdown>
                               </td>
 
@@ -376,8 +370,7 @@
                               </td>
 
                               <td class="text-center align-middle">
-                                <button
-                                  *ngIf="(jw.source_mm_id || jw.qty || jw.item_id) && line.jawaks.length > 1"
+                                <button *ngIf="(jw.source_mm_id || jw.qty || jw.item_id) && line.jawaks.length > 1"
                                   type="button" class="btn btn-sm btn-danger"
                                   style="padding: 0.2rem 0.5rem; border-radius: 4px;" (click)="pfs.removeJawak(line, j)"
                                   title="Remove Jawak">

@@ -307,7 +307,18 @@ router.put('/attribute-values', async (req, res, next) => {
     try {
         const { _id, attribute_id, attribute_value_hin, attribute_value_eng, attribute_value_roman } = req.body;
         if (!_id) return next(new Error('_id required'));
-        const result = vs.updateAttributeValue({ _id, attribute_id, attribute_value_hin, attribute_value_eng, attribute_value_roman });
+
+        const { sutramDB } = require('../database/db.model');
+        let result;
+        try {
+            sutramDB.begin();
+            result = vs.updateAttributeValue({ _id, attribute_id, attribute_value_hin, attribute_value_eng, attribute_value_roman });
+            sutramDB.commit();
+        } catch (err) {
+            sutramDB.rollback();
+            throw err;
+        }
+
         res.json({ success: true, result });
     } catch (e) { next(e); }
 });

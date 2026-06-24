@@ -109,12 +109,37 @@ function insertAttributeValue(data) {
 }
 
 function updateAttributeValue(data) {
-    return attributes_value.updateById({
+    const updated = attributes_value.updateById({
         attribute_id: Number(data.attribute_id),
         attribute_value_hin: data.attribute_value_hin,
         attribute_value_eng: data.attribute_value_eng || null,
         attribute_value_roman: data.attribute_value_roman || null,
     }, data._id);
+
+    // Propagate name changes to affected variants and subitems
+    const affectedMaps = variant_attr_map.getAll({ attribute_value_id: data._id, active: 1 });
+    const variantIds = [...new Set(affectedMaps.map(m => m.variant_id))];
+
+    for (const vId of variantIds) {
+        // Load all attribute values for this variant to reconstruct display name in original order
+        const maps = variant_attr_map.getAll({ variant_id: vId, active: 1 }, { orderBy: '_id ASC' });
+        const display_name_hin = maps.map(m => m.attribute_value?.attribute_value_hin).filter(Boolean).join(' ');
+        const display_name_eng = maps.map(m => m.attribute_value?.attribute_value_eng).filter(Boolean).join(' ');
+        const display_name_roman = maps.map(m => m.attribute_value?.attribute_value_roman).filter(Boolean).join(' ');
+
+        variant.updateById({
+            display_name: display_name_hin || null,
+        }, vId);
+
+        subitem.update({
+            subitem_hin: display_name_hin || null,
+            subitem_eng: display_name_eng || null,
+            subitem_roman: display_name_roman || null,
+            updated_at: new Date().toISOString(),
+        }, { variant_id: vId, active: 1 });
+    }
+
+    return updated;
 }
 
 function deleteAttributeValue(id) {

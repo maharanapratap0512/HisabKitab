@@ -34,6 +34,7 @@ class Functions extends DBContex {
             obj.is_variable_qty = obj.is_variable_qty ? 1 : 0;
             obj.is_proccess = obj.is_proccess ? 1 : 0;
             obj.is_xl = obj.is_xl ? 1 : 0;
+            obj.is_recieved = obj.is_recieved ? 1 : 0;
             let insResult = stmtInsert.run(obj);
             if (insResult.changes == 1 && insResult.lastInsertRowid) {
                obj._id = insResult.lastInsertRowid;
@@ -158,6 +159,7 @@ class Functions extends DBContex {
             obj.is_xl = obj.is_xl ? 1 : 0;
             obj.is_variable_qty = obj.is_variable_qty ? 1 : 0;
             obj.is_proccess = obj.is_proccess ? 1 : 0;
+            obj.is_recieved = obj.is_recieved ? 1 : 0;
 
             if (!objOld) {
                objOld = await this.getById(type, obj._id);
