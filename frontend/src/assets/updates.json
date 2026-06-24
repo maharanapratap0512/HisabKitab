@@ -50,9 +50,9 @@
             {
                 "type": "fix",
                 "module": "Jawak Entry & update",
-                "title": "Object error solved...",
+                "title": "",
                 "title_hin": "",
-                "desc": "",
+                "desc": "Object error solved.. and condition dropdown again display while edit jawak..",
                 "desc_hin": ""
             }
         ]
