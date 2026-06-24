@@ -1,5 +1,38 @@
 [
     {
+        "version": "34",
+        "date": "24-06-2026",
+        "summary": "HMP auto aawak & Jawak Type",
+        "summary_hin": "",
+        "isNew": true,
+        "items": [
+            {
+                "type": "fix",
+                "module": "HMP Component",
+                "title": "HMP Auto Aawak Jawak",
+                "title_hin": "",
+                "desc": "source MM copy into destination and new type created and set in auto entry.",
+                "desc_hin": ""
+            },
+            {
+                "type": "improved",
+                "module": "HMP Component",
+                "title": "Excel Export",
+                "title_hin": "",
+                "desc": "Excel Export Destribution of output added.",
+                "desc_hin": ""
+            },
+            {
+                "type": "improved",
+                "module": "HMP Component",
+                "title": "Fields Control",
+                "title_hin": "",
+                "desc": "condition and aawak source, auto awk jwk column can be hide/show in entry form, table and excel/pdf export.",
+                "desc_hin": ""
+            }
+        ]
+    },
+    {
         "version": "33.1",
         "date": "24-06-2026",
         "summary": "Small Problem Fixes",
@@ -29,7 +62,7 @@
         "date": "04-06-2026",
         "summary": "HMP and Item & variant improved",
         "summary_hin": "",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "improved",

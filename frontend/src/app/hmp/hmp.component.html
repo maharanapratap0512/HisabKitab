@@ -87,7 +87,7 @@
               Export To <span *ngIf="getSelectedCount() > 0">({{getSelectedCount()}} selected)</span>
             </button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" (click)="exportToExcel()" style="cursor: pointer;">Excel</a>
+              <a class="dropdown-item" (click)="exportToExcel()" style="cursor: pointer;">Excel (With Destribution)</a>
               <a class="dropdown-item" (click)="exportToPdf('normal')" style="cursor: pointer;">Pdf (Normal)</a>
               <a class="dropdown-item" (click)="exportToPdf('advance')" style="cursor: pointer;"
                 [class.disabled]="getSelectedCount() === 0">Pdf (Advance Layout)</a>
@@ -162,7 +162,7 @@
                             <th width="52%">Item</th>
                             <th width="20%">Qty</th>
                             <th width="10%">Rate</th>
-                            <th width="10%">Cond.</th>
+                            <th *ngIf="settings.hmp?.condition_id" width="10%">Cond.</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -184,10 +184,10 @@
                             </td>
                             <td><strong>{{input.qty}}</strong> <small>{{input.unit_short}}</small></td>
                             <td><span style="opacity: 0.6;">{{input.rate || '-'}}</span></td>
-                            <td><small style="color: #f0a500;">{{input.condition?.list_name_hin}}</small></td>
+                            <td *ngIf="settings.hmp?.condition_id"><small style="color: #f0a500;">{{input.condition?.list_name_hin}}</small></td>
                           </tr>
                           <tr *ngIf="!batch.inputs || batch.inputs.length === 0">
-                            <td colspan="5" class="text-center text-muted p-2">No inputs</td>
+                            <td [attr.colspan]="4 + (settings.hmp?.condition_id ? 1 : 0)" class="text-center text-muted p-2">No inputs</td>
                           </tr>
                         </tbody>
                       </table>
@@ -208,7 +208,7 @@
                             <th width="42%">Item</th>
                             <th width="20%">Qty</th>
                             <th width="10%">Rate</th>
-                            <th width="10%">Cond.</th>
+                            <th *ngIf="settings.hmp?.condition_id" width="10%">Cond.</th>
                             <th width="10%">Destr.</th>
                           </tr>
                         </thead>
@@ -231,7 +231,7 @@
                             </td>
                             <td><strong>{{output.qty}}</strong> <small>{{output.unit_short}}</small></td>
                             <td><span style="opacity: 0.6;">{{output.rate || '-'}}</span></td>
-                            <td><small style="color: #f0a500;">{{output.condition?.list_name_hin}}</small></td>
+                            <td *ngIf="settings.hmp?.condition_id"><small style="color: #f0a500;">{{output.condition?.list_name_hin}}</small></td>
                             <td>
                               <div class="d-flex align-items-center justify-content-center gap-1">
                                 <!-- Show + (Add) if no Aawak exists, OR if no Jawak exists, OR remaining_qty > 0 -->
@@ -260,7 +260,7 @@
                             </td>
                           </tr>
                           <tr *ngIf="!batch.outputs || batch.outputs.length === 0">
-                            <td colspan="6" class="text-center text-muted p-2">No outputs</td>
+                            <td [attr.colspan]="5 + (settings.hmp?.condition_id ? 1 : 0)" class="text-center text-muted p-2">No outputs</td>
                           </tr>
                         </tbody>
                       </table>
@@ -293,7 +293,7 @@
                 <th style="min-width: 200px;">Item (HIN · ENG)</th>
                 <th style="min-width: 75px;">Qty</th>
                 <th style="min-width: 60px;">Rate</th>
-                <th style="min-width: 100px;">Condition</th>
+                <th *ngIf="settings.hmp?.condition_id" style="min-width: 100px;">Condition</th>
                 <th style="min-width: 80px; text-align: center;">Action</th>
               </tr>
             </thead>
@@ -367,7 +367,7 @@
                     <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
                       [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><span
                         style="opacity: 0.6;">{{$any(batch.inputs[0])?.rate || '-'}}</span></td>
-                    <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
+                    <td *ngIf="settings.hmp?.condition_id" [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
                       [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk"><small
                         style="color: #f0a500;">{{$any(batch.inputs[0])?.condition?.list_name_hin}}</small></td>
                     <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
@@ -379,7 +379,7 @@
                   </ng-container>
 
                   <ng-container *ngIf="!batch.inputs || batch.inputs.length === 0">
-                    <td colspan="6" class="text-center text-muted" style="font-style: italic;">No Inputs</td>
+                    <td [attr.colspan]="5 + (settings.hmp?.condition_id ? 1 : 0)" class="text-center text-muted" style="font-style: italic;">No Inputs</td>
                   </ng-container>
                 </tr>
 
@@ -401,7 +401,7 @@
                   </td>
                   <td><strong>{{$any(input)?.qty}}</strong> <small>{{$any(input)?.unit_short}}</small></td>
                   <td><span style="opacity: 0.6;">{{$any(input)?.rate || '-'}}</span></td>
-                  <td><small style="color: #f0a500;">{{$any(input)?.condition?.list_name_hin}}</small></td>
+                  <td *ngIf="settings.hmp?.condition_id"><small style="color: #f0a500;">{{$any(input)?.condition?.list_name_hin}}</small></td>
                   <td style="text-align: center;">
                     <i class="uil uil-trash i-outline-danger" (click)="deleteInput($any(input)._id, i + 1)"
                       title="Delete Item">
@@ -429,7 +429,7 @@
                     </td>
                     <td><strong>{{$any(output)?.qty}}</strong> <small>{{$any(output)?.unit_short}}</small></td>
                     <td><span style="opacity: 0.6;">{{$any(output)?.rate || '-'}}</span></td>
-                    <td><small style="color: #f0a500;">{{$any(output)?.condition?.list_name_hin}}</small></td>
+                    <td *ngIf="settings.hmp?.condition_id"><small style="color: #f0a500;">{{$any(output)?.condition?.list_name_hin}}</small></td>
                     <td style="text-align: center;">
                       <i class="uil uil-trash i-outline-danger" (click)="deleteOutput($any(output)._id, i)"
                         title="Delete Item">

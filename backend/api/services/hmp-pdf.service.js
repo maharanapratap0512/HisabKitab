@@ -100,17 +100,17 @@ function formatItemName(row) {
 /**
  * Format metadata for input items
  */
-function formatInputMetadata(row) {
+function formatInputMetadata(row, settings = {}) {
     if (!row) return '';
     let parts = [];
-    if (row.condition) {
+    if (row.condition && settings.condition_id !== false) {
         const hin = row.condition.list_name_hin || '';
         const eng = row.condition.list_name_eng || '';
         if (hin && eng) parts.push(`Cond: ${hin} (${eng})`);
         else if (hin) parts.push(`Cond: ${hin}`);
         else if (eng) parts.push(`Cond: ${eng}`);
     }
-    if (row.aawak_source) {
+    if (row.aawak_source && settings.aawak_source_id !== false) {
         const hin = row.aawak_source.list_name_hin || '';
         const eng = row.aawak_source.list_name_eng || '';
         if (hin && eng) parts.push(`Src: ${hin} (${eng})`);
@@ -120,7 +120,7 @@ function formatInputMetadata(row) {
     if (row.lot_no) {
         parts.push(`Lot: ${row.lot_no}`);
     }
-    if (row.auto_jawak) {
+    if (row.auto_jawak && settings.auto_awk_jwk !== false) {
         if (row.auto_aawak) {
             const typeHin = row.aawak_type?.list_name_hin || '';
             const typeEng = row.aawak_type?.list_name_eng || '';
@@ -137,17 +137,17 @@ function formatInputMetadata(row) {
 /**
  * Format metadata for output items
  */
-function formatOutputMetadata(row) {
+function formatOutputMetadata(row, settings = {}) {
     if (!row) return '';
     let parts = [];
-    if (row.condition) {
+    if (row.condition && settings.condition_id !== false) {
         const hin = row.condition.list_name_hin || '';
         const eng = row.condition.list_name_eng || '';
         if (hin && eng) parts.push(`Cond: ${hin} (${eng})`);
         else if (hin) parts.push(`Cond: ${hin}`);
         else if (eng) parts.push(`Cond: ${eng}`);
     }
-    if (row.auto_aawak) {
+    if (row.auto_aawak && settings.auto_awk_jwk !== false) {
         parts.push(`<span class="badge badge-success" style="font-size:7.5px;">Auto Awk</span>`);
     }
     if (parts.length === 0) return '';
@@ -222,6 +222,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
     }
 
     const viewMode = filters.viewMode || 'voucher';
+    const settings = filters.settings || {};
 
     // Calculate summaries
     const totalCount = batches.length;
@@ -614,6 +615,20 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
         </div>
     `;
 
+    const hiddenNotes = [];
+    if (settings.condition_id === false) hiddenNotes.push('Condition');
+    if (settings.aawak_source_id === false) hiddenNotes.push('Aawak Source');
+    if (settings.auto_awk_jwk === false) hiddenNotes.push('Auto Jawk/Awk');
+    if (settings.aawak_ref_id === false) hiddenNotes.push('Ref. Aawak');
+
+    if (hiddenNotes.length > 0) {
+        htmlContent += `
+            <div style="margin-bottom: 15px; padding: 6px 12px; background-color: #fff9db; border: 1px solid #ffe3e3; border-radius: 4px; color: #c92a2a; font-size: 9px; font-weight: 600;">
+                ⚠️ Note: The following columns/data are hidden per UI settings: ${hiddenNotes.join(', ')}
+            </div>
+        `;
+    }
+
     const exportType = filters.exportType || 'normal';
 
     if (exportType === 'advance') {
@@ -686,7 +701,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                         htmlContent += `
                             <tr>
                                 <td>${idx + 1}</td>
-                                <td>${formatItemName(inp)}${formatInputMetadata(inp)}</td>
+                                <td>${formatItemName(inp)}${formatInputMetadata(inp, settings)}</td>
                                 <td><strong>${inp.qty}</strong> <small class="eng-text">${inp.unit.unit_short || ''}</small></td>
                                 <td>${inp.rate || '-'}</td>
                             </tr>
@@ -725,7 +740,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                         htmlContent += `
                             <tr>
                                 <td>${idx + 1}</td>
-                                <td>${formatItemName(out)}${formatOutputMetadata(out)}</td>
+                                <td>${formatItemName(out)}${formatOutputMetadata(out, settings)}</td>
                                 <td><strong>${out.qty}</strong> <small class="eng-text">${out.unit.unit_short || ''}</small></td>
                                 <td>${out.rate || '-'}</td>
                             </tr>
@@ -871,7 +886,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                         htmlContent += `
                             <tr>
                                 <td>${idx + 1}</td>
-                                <td>${formatItemName(inp)}${formatInputMetadata(inp)}</td>
+                                <td>${formatItemName(inp)}${formatInputMetadata(inp, settings)}</td>
                                 <td><strong>${inp.qty}</strong> <small class="eng-text">${inp.unit.unit_short || ''}</small></td>
                                 <td>${inp.rate || '-'}</td>
                             </tr>
@@ -910,7 +925,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                         htmlContent += `
                             <tr>
                                 <td>${idx + 1}</td>
-                                <td>${formatItemName(out)}${formatOutputMetadata(out)}</td>
+                                <td>${formatItemName(out)}${formatOutputMetadata(out, settings)}</td>
                                 <td><strong>${out.qty}</strong> <small class="eng-text">${out.unit.unit_short || ''}</small></td>
                                 <td>${out.rate || '-'}</td>
                             </tr>
@@ -983,7 +998,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                     const firstIn = inputs[0];
                     htmlContent += `
                         <td><span class="badge badge-in">↓ IN</span></td>
-                        <td>${formatItemName(firstIn)}${formatInputMetadata(firstIn)}</td>
+                        <td>${formatItemName(firstIn)}${formatInputMetadata(firstIn, settings)}</td>
                         <td><strong>${firstIn.qty}</strong> <small class="eng-text">${firstIn.unit.unit_short || ''}</small></td>
                         <td>${firstIn.rate || '-'}</td>
                     `;
@@ -1000,7 +1015,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                     htmlContent += `
                         <tr>
                             <td><span class="badge badge-in">↓ IN</span></td>
-                            <td>${formatItemName(inp)}${formatInputMetadata(inp)}</td>
+                            <td>${formatItemName(inp)}${formatInputMetadata(inp, settings)}</td>
                             <td><strong>${inp.qty}</strong> <small class="eng-text">${inp.unit.unit_short || ''}</small></td>
                             <td>${inp.rate || '-'}</td>
                         </tr>
@@ -1014,7 +1029,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                     htmlContent += `<tr class="${isSep ? 'grp-sep' : ''}">`;
                     htmlContent += `
                         <td><span class="badge badge-out">↑ OUT</span></td>
-                        <td>${formatItemName(firstOut)}${formatOutputMetadata(firstOut)}</td>
+                        <td>${formatItemName(firstOut)}${formatOutputMetadata(firstOut, settings)}</td>
                         <td><strong>${firstOut.qty}</strong> <small class="eng-text">${firstOut.unit.unit_short || ''}</small></td>
                         <td>${firstOut.rate || '-'}</td>
                     `;
@@ -1025,7 +1040,7 @@ async function generateHmpPdf(batches, dept_id, filters = {}) {
                         htmlContent += `
                             <tr>
                                 <td><span class="badge badge-out">↑ OUT</span></td>
-                                <td>${formatItemName(out)}${formatOutputMetadata(out)}</td>
+                                <td>${formatItemName(out)}${formatOutputMetadata(out, settings)}</td>
                                 <td><strong>${out.qty}</strong> <small class="eng-text">${out.unit.unit_short || ''}</small></td>
                                 <td>${out.rate || '-'}</td>
                             </tr>

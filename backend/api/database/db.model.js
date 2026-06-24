@@ -2640,6 +2640,13 @@ class dbModal {
         CASE WHEN aawak_ref_id IS NOT NULL THEN 1 ELSE 0 END as is_auto_awk
       FROM hmp_batch_output_backup`,
       hmp_batch_output_drop_backup: `DROP TABLE hmp_batch_output_backup`
+    },
+    // version 34
+    // => HMP IN and HMP out, aawak type and jawak type created for auto aawak, jawak entry
+    {
+      insert_support_list: `INSERT INTO support_list (_id, list_type, list_name_hin, list_name_eng, list_name_roman, lock) VALUES 
+      (150, 'aawak_type', 'एचएमपी आउट', 'HMP Out', 'HMP Out', 1),
+      (151, 'jawak_type', 'एचएमपी इन', 'HMP In', 'HMP In', 1)`
     }
   ];
 

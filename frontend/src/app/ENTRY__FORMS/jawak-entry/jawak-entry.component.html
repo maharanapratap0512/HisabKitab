@@ -168,8 +168,8 @@
                             + Add
                         </a>
                         <ng-select class="custom" style="width: 100%;" placeholder="MM" [clearable]="true"
-                            [virtualScroll]="true" formControlName="mm_id" [readonly]="isEdit"
-                            [ngClass]="{'validation':jawakForm.get('mm_id')?.errors && (jawakForm.get('mm_id')?.touched || jawakForm.get ('mm_id')?.dirty)}">
+                            [virtualScroll]="true" formControlName="mm_id" [readonly]="jawakForm.value.aawak_ref_id"
+                            [ngClass]="{'validation':jawakForm.get('mm_id')?.errors && (jawakForm.get('mm_id')?.touched || jawakForm.get('mm_id')?.dirty)}">
                             <ng-option selected="selected" disabled value="">MM</ng-option>
                             <ng-option *ngFor="let item of mms" [value]="item._id">
                                 {{item.mm_hin}} : {{item.mm_eng}}{{item.mm_code?' : '+item.mm_code:''}}</ng-option>

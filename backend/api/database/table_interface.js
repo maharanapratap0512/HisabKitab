@@ -255,6 +255,7 @@ class TableInterface {
          ...this.jawak,
          date: batch.date,
          mm_id: batch.mm_id,
+         jawak_mm_id: batch.mm_id,
          item_id: input.item_id,
          subitem_id: input.subitem_id,
          unit_id: input.unit_id,
@@ -262,10 +263,10 @@ class TableInterface {
          qty: input.qty,
          rate: input.rate,
          actual_amt: input.qty * (input.rate || 0),
-         jawak_type_id: 40,
+         jawak_type_id: 151,
          dept_id: batch.dept_id,
          aawak_ref_id: input.aawak_ref_id || null,
-         description: `HMP Batch Consumption (Batch ID: ${batch._id || ''}${batch.batch_no ? ', Batch No: ' + batch.batch_no : ''})`,
+         description: `HMP Batch Consumption (Batch ID: ${batch._id || ''}${batch.batch_no !== null && batch.batch_no !== 'null' ? ', Batch No: ' + batch.batch_no : ''})`,
          active: 1
       }
    }
@@ -275,6 +276,7 @@ class TableInterface {
          ...this.aawak,
          date: batch.date,
          mm_id: batch.mm_id,
+         aawak_mm_id: batch.mm_id,
          item_id: output.item_id,
          subitem_id: output.subitem_id,
          unit_id: output.unit_id,
@@ -282,9 +284,9 @@ class TableInterface {
          qty: output.qty,
          rate: output.rate,
          actual_amt: output.qty * (output.rate || 0),
-         aawak_type_id: 50,
+         aawak_type_id: 150,
          dept_id: batch.dept_id,
-         description: `HMP Batch Production (Batch ID: ${batch._id || ''}${batch.batch_no ? ', Batch No: ' + batch.batch_no : ''})`,
+         description: `HMP Batch Production (Batch ID: ${batch._id || ''}${batch.batch_no !== null && batch.batch_no !== 'null' ? ', Batch No: ' + batch.batch_no : ''})`,
          active: 1
       }
    }

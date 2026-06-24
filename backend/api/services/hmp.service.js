@@ -218,6 +218,7 @@ async function insertUpdateBatch(data) {
                         ...Fn.tbInterface.aawak,
                         date: data.date,
                         mm_id: data.mm_id,
+                        aawak_mm_id: data.mm_id,
                         item_id: inp.item_id,
                         subitem_id: inp.subitem_id,
                         unit_id: inp.unit_id,
@@ -225,10 +226,10 @@ async function insertUpdateBatch(data) {
                         qty: inp.qty,
                         rate: inp.rate,
                         actual_amt: inp.qty * (inp.rate || 0),
-                        aawak_type_id: inp.aawak_type_id || 50,
+                        aawak_type_id: inp.aawak_type_id || 150,
                         aawak_source_id: inp.aawak_source_id || null,
                         dept_id: data.dept_id,
-                        description: `HMP Batch Input Auto-Aawak (Batch ID: ${id || ''}${data.batch_no ? ', Batch No: ' + data.batch_no : ''})`,
+                        description: `HMP Batch Input Auto-Aawak (Batch ID: ${id || ''}${data.batch_no !== null && data.batch_no !== 'null' ? ', Batch No: ' + data.batch_no : ''})`,
                         active: 1
                     };
 
@@ -272,7 +273,7 @@ async function insertUpdateBatch(data) {
             }
 
             let hasJawaks = out.jawak_detail && out.jawak_detail.length > 0;
-            
+
             // Map frontend checkbox values to database columns
             out.is_auto_awk = (data.auto_aawak || out.auto_aawak || hasJawaks) ? 1 : 0;
 

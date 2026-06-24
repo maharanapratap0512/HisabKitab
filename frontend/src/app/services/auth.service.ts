@@ -119,6 +119,12 @@ export class AuthService {
       { colName: 'enz', title: 'Enzyme Container Columns.' },
       { colName: 'usage_report', title: 'Review About Item Usage.' },
     ],
+    hmp: [
+      { colName: 'condition_id', title: 'Condition' },
+      { colName: 'aawak_source_id', title: 'Aawak Source (Input)' },
+      { colName: 'auto_awk_jwk', title: 'Auto Jawk / Awk' },
+      { colName: 'aawak_ref_id', title: 'Ref. Aawak (Input)' },
+    ],
     repairing: [
       { colName: 'jwk_date', title: 'Jawak Date' },
       { colName: 'mm_id', title: 'MM' },

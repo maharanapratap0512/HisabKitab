@@ -108,10 +108,10 @@
                                     <th width="20%">Item</th>
                                     <th width="10%">Qty</th>
                                     <th width="8%">Rate</th>
-                                    <th width="10%">Condition</th>
-                                    <th width="10%">Aawak Source</th>
-                                    <th width="17%">Auto Jawk / Awk</th>
-                                    <th width="15%">Ref. Aawak</th>
+                                    <th *ngIf="auth.webUser.settings.hmp?.condition_id" width="10%">Condition</th>
+                                    <th *ngIf="auth.webUser.settings.hmp?.aawak_source_id" width="10%">Aawak Source</th>
+                                    <th *ngIf="auth.webUser.settings.hmp?.auto_awk_jwk" width="17%">Auto Jawk / Awk</th>
+                                    <th *ngIf="auth.webUser.settings.hmp?.aawak_ref_id" width="15%">Ref. Aawak</th>
                                     <th width="5%">Action</th>
                                 </tr>
                             </thead>
@@ -144,7 +144,7 @@
                                             name="in_rate_{{i}}">
                                     </td>
                                     <!-- Condition -->
-                                    <td>
+                                    <td *ngIf="auth.webUser.settings.hmp?.condition_id">
                                         <ng-select appendTo="#hmpEntryForm" class="custom-sm"
                                             [(ngModel)]="row.condition_id" name="in_condition_{{i}}" [clearable]="false"
                                             placeholder="Select Condition">
@@ -156,7 +156,7 @@
                                         </ng-select>
                                     </td>
                                     <!-- Aawak Source (Inputs Only) -->
-                                    <td>
+                                    <td *ngIf="auth.webUser.settings.hmp?.aawak_source_id">
                                         <ng-select appendTo="#hmpEntryForm" class="custom-sm"
                                             [(ngModel)]="row.aawak_source_id" name="in_aawak_source_{{i}}"
                                             [clearable]="true" placeholder="Aawak Source">
@@ -166,7 +166,7 @@
                                         </ng-select>
                                     </td>
                                     <!-- Auto Jawk / Awk -->
-                                    <td>
+                                    <td *ngIf="auth.webUser.settings.hmp?.auto_awk_jwk">
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="form-check form-switch mb-0">
                                                 <input class="form-check-input" type="checkbox" id="autoJawakRow_{{i}}"
@@ -187,7 +187,7 @@
                                         </div>
                                     </td>
                                     <!-- Ref. Aawak / Aawak Type -->
-                                    <td>
+                                    <td *ngIf="auth.webUser.settings.hmp?.aawak_ref_id">
                                         <div *ngIf="row.auto_jawak">
                                             <!-- Aawak Type Dropdown when Auto Awk is Checked -->
                                             <ng-select appendTo="#hmpEntryForm" class="custom-sm w-100"
@@ -242,8 +242,8 @@
                                     <th width="30%">Item</th>
                                     <th width="15%">Qty</th>
                                     <th width="15%">Rate</th>
-                                    <th width="15%">Condition</th>
-                                    <th width="15%">Auto Awk</th>
+                                    <th *ngIf="auth.webUser.settings.hmp?.condition_id" width="15%">Condition</th>
+                                    <th *ngIf="auth.webUser.settings.hmp?.auto_awk_jwk" width="15%">Auto Awk</th>
                                     <th width="5%">Action</th>
                                 </tr>
                             </thead>
@@ -300,7 +300,7 @@
                                                 [(ngModel)]="row.rate" name="out_rate_{{i}}">
                                         </td>
                                         <!-- Condition -->
-                                        <td>
+                                        <td *ngIf="auth.webUser.settings.hmp?.condition_id">
                                             <ng-select appendTo="#hmpEntryForm" class="custom-sm"
                                                 [(ngModel)]="row.condition_id" name="out_condition_{{i}}"
                                                 [clearable]="false" placeholder="Select Condition">
@@ -312,7 +312,7 @@
                                             </ng-select>
                                         </td>
                                         <!-- Auto Awk (Row Wise) -->
-                                        <td>
+                                        <td *ngIf="auth.webUser.settings.hmp?.auto_awk_jwk">
                                             <div class="form-check form-switch mb-0">
                                                 <input class="form-check-input" type="checkbox"
                                                     id="outAutoAawakRow_{{i}}" [ngModel]="row.auto_aawak"
@@ -336,7 +336,7 @@
                                     <!-- Nested Jawak Details Table -->
                                     <tr *ngIf="row.show_jawak && row.jawak_detail && row.jawak_detail.length > 0">
                                         <td></td>
-                                        <td colspan="6">
+                                        <td [attr.colspan]="4 + (auth.webUser.settings.hmp?.condition_id ? 1 : 0) + (auth.webUser.settings.hmp?.auto_awk_jwk ? 1 : 0)">
                                             <div class="p-2 border rounded" style="background: rgba(0,0,0,0.02);">
                                                 <h6 class="mb-2 text-primary">Jawak Distribution</h6>
                                                 <table class="table table-sm table-bordered m-0">
@@ -444,7 +444,7 @@
                             </div>
 
                             <!-- Condition -->
-                            <div class="col-md-1">
+                            <div class="col-md-1" *ngIf="auth.webUser.settings.hmp?.condition_id">
                                 <label class="form-label mb-1 fw-semibold"><small>Condition</small></label>
                                 <ng-select appendTo="#hmpEntryForm" class="custom-sm w-100"
                                     [(ngModel)]="formModel.condition_id" name="form_condition" [clearable]="true"
@@ -459,7 +459,7 @@
                             <div class="col-md-6">
                                 <div class="d-flex align-items-end gap-2 flex-wrap">
                                     <!-- Aawak Source (Input mode only) -->
-                                    <div style="min-width: 100px; flex: 1 1 0%;" *ngIf="entryMode === 'inputs'">
+                                    <div style="min-width: 100px; flex: 1 1 0%;" *ngIf="entryMode === 'inputs' && auth.webUser.settings.hmp?.aawak_source_id">
                                         <label class="form-label mb-1 fw-semibold"><small>Aawak Source</small></label>
                                         <ng-select appendTo="#hmpEntryForm" class="custom-sm w-100"
                                             [(ngModel)]="formModel.aawak_source_id" name="form_aawak_source"
@@ -473,7 +473,7 @@
                                     <!-- Auto Switches -->
                                     <div class="d-flex align-items-center gap-2" style="padding-bottom: 5px;">
                                         <!-- Auto Jawak switch for Input -->
-                                        <div class="form-check form-switch mb-0" *ngIf="entryMode === 'inputs'">
+                                        <div class="form-check form-switch mb-0" *ngIf="entryMode === 'inputs' && auth.webUser.settings.hmp?.auto_awk_jwk">
                                             <input class="form-check-input" type="checkbox" id="autoJawakRow"
                                                 [ngModel]="formModel.auto_jawak"
                                                 (ngModelChange)="toggleAuto(formModel, 'jawak', $event)"
@@ -484,7 +484,7 @@
 
                                         <!-- Auto Aawak switch (Only when Auto Jawak is ON) -->
                                         <div class="form-check form-switch mb-0"
-                                            *ngIf="entryMode === 'inputs' && formModel.auto_jawak">
+                                            *ngIf="entryMode === 'inputs' && formModel.auto_jawak && auth.webUser.settings.hmp?.auto_awk_jwk">
                                             <input class="form-check-input" type="checkbox" id="inputAutoAawakRow"
                                                 [ngModel]="formModel.auto_aawak"
                                                 (ngModelChange)="toggleAuto(formModel, 'aawak', $event)"
@@ -495,7 +495,7 @@
                                         </div>
 
                                         <!-- Auto Aawak switch for Output -->
-                                        <div class="form-check form-switch mb-0" *ngIf="entryMode === 'outputs'">
+                                        <div class="form-check form-switch mb-0" *ngIf="entryMode === 'outputs' && auth.webUser.settings.hmp?.auto_awk_jwk">
                                             <input class="form-check-input" type="checkbox" id="autoAawakRow"
                                                 [ngModel]="formModel.auto_aawak"
                                                 (ngModelChange)="toggleAuto(formModel, 'aawak', $event)"
@@ -507,7 +507,7 @@
 
                                     <!-- Reference Aawak Dropdown (when Auto Jawak is ON and Auto Aawak is OFF) -->
                                     <div style="min-width: 140px; flex: 1 1 0%;"
-                                        *ngIf="entryMode === 'inputs' && formModel.auto_jawak && !formModel.auto_aawak">
+                                        *ngIf="entryMode === 'inputs' && formModel.auto_jawak && !formModel.auto_aawak && auth.webUser.settings.hmp?.aawak_ref_id">
                                         <label class="form-label mb-1 fw-semibold"><small>Select Ref.
                                                 Aawak</small></label>
                                         <app-aawak-ref-dropdown [mmId]="fs.hmpBatchForm.mm_id"
@@ -524,7 +524,7 @@
 
                                     <!-- Aawak Type Dropdown (when Auto Jawak is ON and Auto Aawak is ON) -->
                                     <div style="min-width: 140px; flex: 1 1 0%;"
-                                        *ngIf="entryMode === 'inputs' && formModel.auto_jawak && formModel.auto_aawak">
+                                        *ngIf="entryMode === 'inputs' && formModel.auto_jawak && formModel.auto_aawak && auth.webUser.settings.hmp?.aawak_ref_id">
                                         <label class="form-label mb-1 fw-semibold"><small>Aawak Type</small></label>
                                         <ng-select appendTo="#hmpEntryForm" class="custom-sm w-100"
                                             [(ngModel)]="formModel.aawak_type_id" name="form_aawak_type"
@@ -572,8 +572,8 @@
                                             <th width="30%">Item</th>
                                             <th width="15%">Qty</th>
                                             <th width="10%">Rate</th>
-                                            <th width="15%">Cond.</th>
-                                            <th width="15%">Ref. Aawak / Auto</th>
+                                            <th *ngIf="auth.webUser.settings.hmp?.condition_id" width="15%">Cond.</th>
+                                            <th *ngIf="auth.webUser.settings.hmp?.aawak_ref_id" width="15%">Ref. Aawak / Auto</th>
                                             <th width="10%" class="text-center">Action</th>
                                         </tr>
                                     </thead>
@@ -589,11 +589,11 @@
                                             <td>{{row.qty}} <span class="badge bg-secondary">{{ getName(units,
                                                     row.unit_id, 'unit_short') }}</span></td>
                                             <td>{{row.rate || '-'}}</td>
-                                            <td>
+                                            <td *ngIf="auth.webUser.settings.hmp?.condition_id">
                                                 <span class="badge bg-light text-dark">{{ getName(conditions,
                                                     row.condition_id, 'list_name_hin') }}</span>
                                             </td>
-                                            <td>
+                                            <td *ngIf="auth.webUser.settings.hmp?.aawak_ref_id">
                                                 <div *ngIf="row.auto_jawak">
                                                     <!-- Auto Aawak indicator or type -->
                                                     <span *ngIf="row.auto_aawak" class="badge bg-warning text-dark">
@@ -629,7 +629,7 @@
                                             </td>
                                         </tr>
                                         <tr *ngIf="!fs.hmpBatchForm.inputs || fs.hmpBatchForm.inputs.length === 0">
-                                            <td colspan="7" class="text-center text-muted py-3">No input materials
+                                            <td [attr.colspan]="5 + (auth.webUser.settings.hmp?.condition_id ? 1 : 0) + (auth.webUser.settings.hmp?.aawak_ref_id ? 1 : 0)" class="text-center text-muted py-3">No input materials
                                                 added.</td>
                                         </tr>
                                     </tbody>
@@ -655,7 +655,7 @@
                                             <th width="30%">Item</th>
                                             <th width="15%">Qty</th>
                                             <th width="15%">Rate</th>
-                                            <th width="15%">Cond.</th>
+                                            <th *ngIf="auth.webUser.settings.hmp?.condition_id" width="15%">Cond.</th>
                                             <th width="15%" class="text-center">Jawak</th>
                                             <th width="10%" class="text-center">Action</th>
                                         </tr>
@@ -673,7 +673,7 @@
                                                 <td>{{row.qty}} <span class="badge bg-secondary">{{ getName(units,
                                                         row.unit_id, 'unit_short') }}</span></td>
                                                 <td>{{row.rate || '-'}}</td>
-                                                <td>
+                                                <td *ngIf="auth.webUser.settings.hmp?.condition_id">
                                                     <span class="badge bg-light text-dark">{{ getName(conditions,
                                                         row.condition_id, 'list_name_hin') }}</span>
                                                 </td>
@@ -713,54 +713,54 @@
                                             <tr
                                                 *ngIf="row.show_jawak && row.jawak_detail && row.jawak_detail.length > 0">
                                                 <td></td>
-                                                <td colspan="6">
+                                                <td [attr.colspan]="5 + (auth.webUser.settings.hmp?.condition_id ? 1 : 0)">
                                                     <div class="p-2 border rounded bg-transparent">
                                                         <h6 class="mb-2 text-primary fs-7 fw-bold">Jawak Distribution
                                                         </h6>
                                                         <table class="table table-sm table-bordered m-0 fs-7">
                                                             <thead>
-                                                                <tr>
-                                                                    <th>Date</th>
-                                                                    <th>Jawak MM</th>
-                                                                    <th>Person (PBK)</th>
-                                                                    <th>Qty</th>
-                                                                    <th>Type</th>
-                                                                    <th class="text-center">Actions</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <tr *ngFor="let jwk of row.jawak_detail; let j = index">
-                                                                    <td>{{jwk.date | date:'dd-MM-yyyy'}}</td>
-                                                                    <td>{{jwk.jawak_mm_hin}}</td>
-                                                                    <td>{{jwk.pbk_hin}} {{jwk.pbk_state_hin ? '(' +
-                                                                        jwk.pbk_state_hin + ')' : ''}}</td>
-                                                                    <td>{{jwk.qty}}</td>
-                                                                    <td>{{jwk.jawak_type_hin}}</td>
-                                                                    <td class="text-center align-middle">
-                                                                        <i class="uil uil-edit-alt mx-1 text-primary cursor-pointer"
-                                                                            (click)="editJawakOfOutput(i, j)"
-                                                                            title="Edit Jawak"></i>
-                                                                        <i class="uil uil-trash text-danger cursor-pointer"
-                                                                            (click)="removeJawak(i, j, jwk._id)"
-                                                                            title="Delete Jawak"></i>
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </ng-container>
-                                        <tr *ngIf="!fs.hmpBatchForm.outputs || fs.hmpBatchForm.outputs.length === 0">
-                                            <td colspan="5" class="text-center text-muted py-3">No output products
-                                                added.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                                                 <tr>
+                                                                     <th>Date</th>
+                                                                     <th>Jawak MM</th>
+                                                                     <th>Person (PBK)</th>
+                                                                     <th>Qty</th>
+                                                                     <th>Type</th>
+                                                                     <th class="text-center">Actions</th>
+                                                                 </tr>
+                                                             </thead>
+                                                             <tbody>
+                                                                 <tr *ngFor="let jwk of row.jawak_detail; let j = index">
+                                                                     <td>{{jwk.date | date:'dd-MM-yyyy'}}</td>
+                                                                     <td>{{jwk.jawak_mm_hin}}</td>
+                                                                     <td>{{jwk.pbk_hin}} {{jwk.pbk_state_hin ? '(' +
+                                                                         jwk.pbk_state_hin + ')' : ''}}</td>
+                                                                     <td>{{jwk.qty}}</td>
+                                                                     <td>{{jwk.jawak_type_hin}}</td>
+                                                                     <td class="text-center align-middle">
+                                                                         <i class="uil uil-edit-alt mx-1 text-primary cursor-pointer"
+                                                                             (click)="editJawakOfOutput(i, j)"
+                                                                             title="Edit Jawak"></i>
+                                                                         <i class="uil uil-trash text-danger cursor-pointer"
+                                                                             (click)="removeJawak(i, j, jwk._id)"
+                                                                             title="Delete Jawak"></i>
+                                                                     </td>
+                                                                 </tr>
+                                                             </tbody>
+                                                         </table>
+                                                     </div>
+                                                 </td>
+                                             </tr>
+                                         </ng-container>
+                                         <tr *ngIf="!fs.hmpBatchForm.outputs || fs.hmpBatchForm.outputs.length === 0">
+                                             <td [attr.colspan]="6 + (auth.webUser.settings.hmp?.condition_id ? 1 : 0)" class="text-center text-muted py-3">No output products
+                                                 added.</td>
+                                         </tr>
+                                     </tbody>
+                                 </table>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
             </ng-container>
 
             <!-- </div> -->

@@ -178,6 +178,43 @@ export class HmpComponent implements OnInit {
       }
     }
 
+
+    Swal.update({ html: 'Fetching Jawak Distributions...', title: 'Processing' });
+
+    const aawakRefIds = new Set<number>();
+    for (const batch of allBatches) {
+      if (batch.outputs) {
+        for (const out of batch.outputs) {
+          if (out.aawak_ref_id) {
+            aawakRefIds.add(out.aawak_ref_id);
+          }
+        }
+      }
+    }
+
+    const jawaksMap = new Map<number, any[]>();
+    const aawakRefIdsArray = Array.from(aawakRefIds);
+    const chunkSize = 15;
+    for (let i = 0; i < aawakRefIdsArray.length; i += chunkSize) {
+      const chunk = aawakRefIdsArray.slice(i, i + chunkSize);
+      await Promise.all(chunk.map(async (refId) => {
+        try {
+          const res: any = await new Promise((resolve, reject) => {
+            this.http.get(this.api.getUrl('JAWAKBYAWK') + refId)
+              .subscribe((res: any) => resolve(res), (err: any) => reject(err));
+          });
+          if (res && res.success && res.result) {
+            jawaksMap.set(refId, res.result);
+          }
+        } catch (e) {
+          console.error(`Failed to fetch jawaks for aawak_ref_id: ${refId}`, e);
+        }
+      }));
+      Swal.update({
+        html: `Fetching distributions... ${Math.min(i + chunkSize, aawakRefIdsArray.length)} / ${aawakRefIdsArray.length}`
+      });
+    }
+
     Swal.update({ html: 'Generating Excel File...', title: 'Processing' });
 
     const wb = new ExcelJS.Workbook();
@@ -187,8 +224,10 @@ export class HmpComponent implements OnInit {
     const headerFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F4E79' } };
     const inputFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCE6F1' } };
     const outputFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2EFDA' } };
+    const distFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE4D6' } };
     const colHdrFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFBDD7EE' } };
     const colHdrFillG: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC6EFCE' } };
+    const colHdrFillO: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8CBAD' } };
 
     const border: Partial<ExcelJS.Borders> = {
       top: { style: 'thin' }, left: { style: 'thin' },
@@ -215,6 +254,13 @@ export class HmpComponent implements OnInit {
       { width: 8 },   // L  Unit
       { width: 8 },   // M  Rate
       { width: 16 },  // N  Condition     }  OUTPUT block (cols H-N)
+      { width: 4 },   // O  #
+      { width: 12 },  // P  Date
+      { width: 24 },  // Q  Jawak MM
+      { width: 24 },  // R  PBK
+      { width: 8 },   // S  Qty
+      { width: 16 },  // T  Jawak Type
+      { width: 20 },  // U  Usage List    }  DISTRIBUTION block (cols O-U)
     ];
 
     let rowNum = 1;
@@ -232,11 +278,21 @@ export class HmpComponent implements OnInit {
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
 
+    const showCondition = this.settings.hmp?.condition_id !== false;
+    if (!showCondition) {
+      const noteRow = ws.getRow(rowNum++);
+      ws.mergeCells(`A${noteRow.number}:U${noteRow.number}`);
+      const noteCell = noteRow.getCell(1);
+      noteCell.value = `⚠️ Note: Condition column data is hidden per UI settings.`;
+      noteCell.font = { italic: true, size: 9.5, color: { argb: 'FFFF0000' } };
+      noteCell.alignment = { vertical: 'middle', horizontal: 'left' };
+    }
+
     for (const batch of sortedBatches) {
       // --- Batch header row (full width merge) ---
       const hdrRow = ws.getRow(rowNum++);
       hdrRow.height = 20;
-      ws.mergeCells(`A${hdrRow.number}:N${hdrRow.number}`);
+      ws.mergeCells(`A${hdrRow.number}:U${hdrRow.number}`);
       const hdrCell = hdrRow.getCell(1);
       const date = batch.date ? new Date(batch.date).toLocaleDateString('en-IN') : '';
       hdrCell.value = `📅 ${date}   |   🍃 ${batch.recipe?.recipe_name || ''}  (${batch.recipe?.description || ''})   |   🏠 ${batch.mm?.mm_hin || ''}  ${batch.mm?.mm_eng || ''}   |   Batch: ${batch.batch_no || ''}`;
@@ -245,31 +301,80 @@ export class HmpComponent implements OnInit {
       hdrCell.alignment = { vertical: 'middle', horizontal: 'left' };
       hdrCell.border = border;
 
-      // --- Sub-header: "INPUT MATERIALS" | "OUTPUT PRODUCTS" ---
+      // --- Sub-header: "INPUT MATERIALS" | "OUTPUT PRODUCTS" | "DISTRIBUTION" ---
       const subRow = ws.getRow(rowNum++);
       subRow.height = 16;
       ws.mergeCells(`A${subRow.number}:G${subRow.number}`);
       ws.mergeCells(`H${subRow.number}:N${subRow.number}`);
+      ws.mergeCells(`O${subRow.number}:U${subRow.number}`);
+
       const inputHdr = subRow.getCell(1);
       inputHdr.value = '⬇ Input Materials (Consumed)';
       inputHdr.fill = inputFill; inputHdr.font = boldDark; inputHdr.border = border;
       inputHdr.alignment = { vertical: 'middle', horizontal: 'center' };
+
       const outputHdr = subRow.getCell(8);
       outputHdr.value = '⬆ Output Products (Produced)';
       outputHdr.fill = outputFill; outputHdr.font = boldDark; outputHdr.border = border;
       outputHdr.alignment = { vertical: 'middle', horizontal: 'center' };
 
+      const distHdr = subRow.getCell(15);
+      distHdr.value = '➔ Distribution (Jawak)';
+      distHdr.fill = distFill; distHdr.font = boldDark; distHdr.border = border;
+      distHdr.alignment = { vertical: 'middle', horizontal: 'center' };
+
       // --- Column headers ---
       const colRow = ws.getRow(rowNum++);
       const inputCols = ['#', 'Item (HIN)', 'Item (ENG)', 'Qty', 'Unit', 'Rate', 'Condition'];
       const outputCols = ['#', 'Item (HIN)', 'Item (ENG)', 'Qty', 'Unit', 'Rate', 'Condition'];
+      const distCols = ['#', 'Date', 'Jawak MM', 'PBK', 'Qty', 'Jawak Type', 'Usage List'];
       inputCols.forEach((h, i) => addCell(colRow, i + 1, h, boldDark, colHdrFill, { vertical: 'middle', horizontal: 'center' }));
       outputCols.forEach((h, i) => addCell(colRow, i + 8, h, boldDark, colHdrFillG, { vertical: 'middle', horizontal: 'center' }));
+      distCols.forEach((h, i) => addCell(colRow, i + 15, h, boldDark, colHdrFillO, { vertical: 'middle', horizontal: 'center' }));
 
-      // --- Data rows (zip inputs + outputs) ---
+      // --- Data rows (zip inputs + outputs + jawaks) ---
       const inputs = batch.inputs || [];
       const outputs = batch.outputs || [];
-      const maxRows = Math.max(inputs.length, outputs.length);
+
+      // Build aligned output + jawak list
+      const outputRows: any[] = [];
+      for (let j = 0; j < outputs.length; j++) {
+        const out = outputs[j];
+        const jwks = out.aawak_ref_id ? (jawaksMap.get(out.aawak_ref_id) || []) : [];
+        const totalJwkQty = jwks.reduce((acc: any, curr: any) => acc + (Number(curr.qty) || 0), 0);
+        const remainingQty = (Number(out.qty) || 0) - totalJwkQty;
+
+        if (jwks.length === 0) {
+          outputRows.push({
+            output: out,
+            outputIndex: j + 1,
+            jawak: null,
+            jawakIndex: null,
+            isSummary: false
+          });
+        } else {
+          for (let k = 0; k < jwks.length; k++) {
+            outputRows.push({
+              output: k === 0 ? out : null,
+              outputIndex: k === 0 ? j + 1 : null,
+              jawak: jwks[k],
+              jawakIndex: k + 1,
+              isSummary: false
+            });
+          }
+          outputRows.push({
+            output: null,
+            outputIndex: null,
+            jawak: null,
+            jawakIndex: null,
+            isSummary: true,
+            totalJwkQty: totalJwkQty,
+            remainingQty: remainingQty
+          });
+        }
+      }
+
+      const maxRows = Math.max(inputs.length, outputRows.length);
 
       for (let i = 0; i < maxRows; i++) {
         const dataRow = ws.getRow(rowNum++);
@@ -285,25 +390,55 @@ export class HmpComponent implements OnInit {
           addCell(dataRow, 4, inp.qty, smallFont, undefined, { vertical: 'middle', horizontal: 'right' });
           addCell(dataRow, 5, inp.unit_short || inp.unit?.unit_short, smallFont);
           addCell(dataRow, 6, inp.rate || '', smallFont, undefined, { vertical: 'middle', horizontal: 'right' });
-          addCell(dataRow, 7, inp.condition?.list_name_hin || '', smallFont);
+          addCell(dataRow, 7, showCondition ? (inp.condition?.list_name_hin || '') : '', smallFont);
         } else {
           [1, 2, 3, 4, 5, 6, 7].forEach(c => addCell(dataRow, c, ''));
         }
 
-        // Output side
-        if (outputs[i]) {
-          const out = outputs[i];
-          const oHin = [(out.subitem?.subitem_hin || ''), out.item?.item_hin || ''].filter(Boolean).join(' ');
-          const oEng = [(out.subitem?.subitem_eng || ''), out.item?.item_eng || ''].filter(Boolean).join(' ');
-          addCell(dataRow, 8, i + 1, smallFont);
-          addCell(dataRow, 9, oHin, smallFont);
-          addCell(dataRow, 10, oEng, smallFont);
-          addCell(dataRow, 11, out.qty, smallFont, undefined, { vertical: 'middle', horizontal: 'right' });
-          addCell(dataRow, 12, out.unit_short || out.unit?.unit_short, smallFont);
-          addCell(dataRow, 13, out.rate || '', smallFont, undefined, { vertical: 'middle', horizontal: 'right' });
-          addCell(dataRow, 14, out.condition?.list_name_hin || '', smallFont);
+        // Output and Jawak side
+        if (outputRows[i]) {
+          const outRow = outputRows[i];
+
+          // Output part
+          if (outRow.output) {
+            const out = outRow.output;
+            const oHin = [(out.subitem?.subitem_hin || ''), out.item?.item_hin || ''].filter(Boolean).join(' ');
+            const oEng = [(out.subitem?.subitem_eng || ''), out.item?.item_eng || ''].filter(Boolean).join(' ');
+            addCell(dataRow, 8, outRow.outputIndex, smallFont);
+            addCell(dataRow, 9, oHin, smallFont);
+            addCell(dataRow, 10, oEng, smallFont);
+            addCell(dataRow, 11, out.qty, smallFont, undefined, { vertical: 'middle', horizontal: 'right' });
+            addCell(dataRow, 12, out.unit_short || out.unit?.unit_short, smallFont);
+            addCell(dataRow, 13, out.rate || '', smallFont, undefined, { vertical: 'middle', horizontal: 'right' });
+            addCell(dataRow, 14, showCondition ? (out.condition?.list_name_hin || '') : '', smallFont);
+          } else {
+            [8, 9, 10, 11, 12, 13, 14].forEach(c => addCell(dataRow, c, ''));
+          }
+
+          // Jawak part
+          if (outRow.isSummary) {
+            addCell(dataRow, 15, '', smallFont);
+            addCell(dataRow, 16, 'Total:', boldDark, undefined, { vertical: 'middle', horizontal: 'right' });
+            addCell(dataRow, 17, '', smallFont);
+            addCell(dataRow, 18, '', smallFont);
+            addCell(dataRow, 19, outRow.totalJwkQty, boldDark, undefined, { vertical: 'middle', horizontal: 'right' });
+            addCell(dataRow, 20, 'Remaining:', boldDark, undefined, { vertical: 'middle', horizontal: 'right' });
+            addCell(dataRow, 21, outRow.remainingQty, boldDark, undefined, { vertical: 'middle', horizontal: 'right' });
+          } else if (outRow.jawak) {
+            const jwk = outRow.jawak;
+            const jwkDate = jwk.date ? new Date(jwk.date).toLocaleDateString('en-IN') : '';
+            addCell(dataRow, 15, outRow.jawakIndex, smallFont);
+            addCell(dataRow, 16, jwkDate, smallFont);
+            addCell(dataRow, 17, jwk.jawak_mm_hin || '', smallFont);
+            addCell(dataRow, 18, jwk.pbk_hin || '', smallFont);
+            addCell(dataRow, 19, jwk.qty, smallFont, undefined, { vertical: 'middle', horizontal: 'right' });
+            addCell(dataRow, 20, jwk.jawak_type_hin || '', smallFont);
+            addCell(dataRow, 21, jwk.usage_list_hin || '', smallFont);
+          } else {
+            [15, 16, 17, 18, 19, 20, 21].forEach(c => addCell(dataRow, c, ''));
+          }
         } else {
-          [8, 9, 10, 11, 12, 13, 14].forEach(c => addCell(dataRow, c, ''));
+          [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21].forEach(c => addCell(dataRow, c, ''));
         }
       }
 
@@ -317,6 +452,7 @@ export class HmpComponent implements OnInit {
     saveAs(blob, `HMP_Batches_${dateStr}.xlsx`);
     Swal.close();
   }
+
 
   isSelected(batchId: number): boolean {
     return this.selection.isSelected('hmp', batchId);
@@ -348,7 +484,7 @@ export class HmpComponent implements OnInit {
 
   exportToPdf(exportType: 'normal' | 'advance' = 'normal') {
     const selectedIds = this.selection.getSelected('hmp');
-    
+
     if (exportType === 'advance' && selectedIds.length === 0) {
       this.toastr.warning('Please select at least one batch to perform Advance PDF export');
       return;
@@ -367,7 +503,8 @@ export class HmpComponent implements OnInit {
       ...this.filterBody,
       viewMode: this.settings.hmp.viewMode,
       exportType: exportType,
-      batchIds: selectedIds
+      batchIds: selectedIds,
+      settings: this.settings.hmp || {}
     };
 
     this.http.downloadPostData(this.api.getUrl('HMP') + 'batch/export-pdf/' + this.auth.webUser.dept_id, payload)
