@@ -86,6 +86,7 @@ import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { AawakNewComponent } from './aawak-new/aawak-new.component';
 import { RepairingComponent } from './repairing/repairing.component';
 import { ReportAjCheckComponent } from './reports/report-aj-check/report-aj-check.component';
+import { IntegrityCheckupComponent } from './reports/integrity-checkup/integrity-checkup.component';
 import { ReportLotNoComponent } from './reports/report-lot-no/report-lot-no.component';
 import { DistrictEntryComponent } from './ENTRY__FORMS/district-entry/district-entry.component';
 import { FltByCatPipe } from './pipe/flt-by-cat.pipe';
@@ -199,6 +200,7 @@ import { P2pFeedbackComponent } from './p2p-feedback/p2p-feedback.component';
     AawakNewComponent,
     RepairingComponent,
     ReportAjCheckComponent,
+    IntegrityCheckupComponent,
     ReportLotNoComponent,
     DistrictEntryComponent,
     FltByCatPipe,

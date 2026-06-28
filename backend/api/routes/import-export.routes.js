@@ -72,7 +72,7 @@ router.get('/correction', async (req, res, next) => {
         //jwk_mm        
         correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_mm') as name, 'aj_mm' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_mm_id') IS NULL AND json_extract(json_each.value, '$.aj_mm') IS NOT NULL`).all());
         //category        
-        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.usage_list') as name, 'category' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.usage_list_id') IS NULL AND json_extract(json_each.value, '$.usage_list') IS NOT NULL`).all());
+        correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.usage_list') as name, 'usage_list' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.usage_list_id') IS NULL AND json_extract(json_each.value, '$.usage_list') IS NOT NULL`).all());
         // jwk_type
         correctionList.push(...DB.db.prepare(`select distinct json_extract(json_each.value, '$.aj_type') as name, 'jwk_type' as type, null as id, false as dictionary from temp_import, json_each(jawak_detail) where json_extract(json_each.value, '$.aj_type_id') IS NULL AND json_extract(json_each.value, '$.aj_type') IS NOT NULL`).all());
         //jwk_pbk - jawak detail kisiko diya as pbk object {name, roll_no}
@@ -206,12 +206,24 @@ router.put('/process', async (req, res, next) => {
     if (req.body.data) {
         try {
             let awkData = req.body.data;
-            if (req.body.data.awk_id) {
+            let exists = false;
+            let copyIds = !!req.body.copyIds;
+            if (copyIds && awkData.awk_id) {
+                const existing = DB.db.prepare('select _id from aawak where _id = ?').get(awkData.awk_id);
+                if (existing) {
+                    exists = true;
+                }
+            } else if (!copyIds && awkData.awk_id) {
+                exists = true;
+            }
+
+            if (exists) {
                 req.body.data.ignored = true;
                 awkData.ignored = true;
             } else {
                 await Fn.begin();
                 let awkObj = {
+                    _id: (copyIds && awkData.awk_id) ? awkData.awk_id : null,
                     date: awkData.date, mm_id: awkData.mm_id, pkt_num: awkData.pkt_num, pbk_id: awkData.pbk_id, aawak_mm_id: awkData.aj_mm_id, item_id: awkData.item_id, subitem_id: awkData.subitem_id, product_id: awkData.product_id, item_detail: awkData.item_detail, condition_id: awkData.condition_id, qty: awkData.qty, rate: awkData.rate, actual_amt: awkData.actual_amt, aawak_type_id: awkData.aj_type_id, unit_id: awkData.unit_id, description: awkData.description, nimitt_id: awkData.nimitt_id, dept_id: awkData.dept_id, company_name: awkData.company_name, isbill: awkData.isbill, document: null, usage_list_id: awkData.usage_list_id, usage_list: awkData.usage_list, is_xl: 1, is_auto_pd: 0
                 };
                 await Fn.insertAJ(awkObj, 'aawak').then(async (resolve) => {
@@ -223,8 +235,21 @@ router.put('/process', async (req, res, next) => {
             }
 
             for (let i in awkData.jawak_detail) {
+                let jwkExists = false;
+                if (copyIds && awkData.jawak_detail[i]._id) {
+                    const existingJwk = DB.db.prepare('select _id from jawak where _id = ?').get(awkData.jawak_detail[i]._id);
+                    if (existingJwk) {
+                        jwkExists = true;
+                    }
+                }
+                if (jwkExists) {
+                    // Jawak already exists, skip inserting it!
+                    continue;
+                }
+
                 await Fn.begin();
                 let jwkObj = {
+                    _id: (copyIds && awkData.jawak_detail[i]._id) ? awkData.jawak_detail[i]._id : null,
                     date: awkData.jawak_detail[i].date ? awkData.jawak_detail[i].date : awkData.date,
                     mm_id: awkData.mm_id,
                     pkt_num: awkData.jawak_detail[i].pkt_num,

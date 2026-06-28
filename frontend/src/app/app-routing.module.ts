@@ -36,6 +36,7 @@ import { ReportKhAjsaarComponent } from './reports/report-kh-ajsaar/report-kh-aj
 import { DataViewComponent } from './views/data-view/data-view.component';
 import { AawakNewComponent } from './aawak-new/aawak-new.component';
 import { ReportAjCheckComponent } from './reports/report-aj-check/report-aj-check.component';
+import { IntegrityCheckupComponent } from './reports/integrity-checkup/integrity-checkup.component';
 import { MysqlComponent } from './MySQL/mysql.component';
 import { HmpComponent } from './hmp/hmp.component';
 import { PrastavComponent } from './prastav/prastav.component';
@@ -92,6 +93,7 @@ const routes: Routes = [
          { path: "view/:type", component: DataViewComponent },
 
          { path: "report-aj-check", component: ReportAjCheckComponent },
+         { path: "integrity-checkup", component: IntegrityCheckupComponent },
          { path: "report-at", component: ReportAwkTypeSaarComponent },
          { path: "report-jt", component: ReportJwkTypeSaarComponent },
          { path: "report-str-stk", component: ReportStoreStockComponent },

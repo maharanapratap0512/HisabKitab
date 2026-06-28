@@ -63,6 +63,7 @@ const pbkBachatRoutes = require('./api/routes/pbk_bachat.routes');
 const hmpRoutes = require('./api/routes/hmp.routes');
 const prastavRoutes = require('./api/routes/prastav.routes');
 const variantRoutes = require('./api/routes/variant.routes');
+const integrityCheckupRoutes = require('./api/routes/integrity-checkup.routes');
 const { sutramEngine } = require('./api/database/db.model');
 
 
@@ -107,6 +108,7 @@ app.use('/api/mysql', mysqlRoutes);
 app.use('/api/hmp', hmpRoutes);
 app.use('/api/prastav', prastavRoutes);
 app.use('/api/variants', variantRoutes);
+app.use('/api/integrity-checkup', integrityCheckupRoutes);
 
 
 

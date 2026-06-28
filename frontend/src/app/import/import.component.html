@@ -174,7 +174,7 @@
                                  <th>Amount</th>
                                  <th>पर्ची प्लेस</th>
                                  <th>कहाँ रिपेर/बेचा</th>
-                                 <th>जवाक केटेगरी</th>
+                                 <th>usage list</th>
                                  <th style="width:0px;">
                                     <div class="ribbon ribbon-secondary text-light float-end"> Destribution
                                     </div>
@@ -199,7 +199,7 @@
                                  <td>{{jwk.actual_amt}}</td>
                                  <td>{{jwk.parchi_place ? jwk.parchi_place : ''}}</td>
                                  <td>{{jwk.sell_repair_place ? jwk.sell_repair_place : ''}}</td>
-                                 <td [ngClass]="{'marked': jwk.usage_list && !data.usage_list_id}">
+                                 <td [ngClass]="{'marked': jwk.usage_list && !jwk.usage_list_id}">
                                     {{jwk.usage_list}}</td>
                                  <td></td>
 
@@ -347,6 +347,15 @@
                                  {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
                            </ng-select>
 
+                           <!-- Usage List dropdown -->
+                           <ng-select *ngIf="data.type == 'usage_list'" class="custom custom-import"
+                              placeholder="Select Usage List" [virtualScroll]="true" [(ngModel)]="data.id"
+                              [ngModelOptions]="{standalone: true}" appendTo="body">
+                              <ng-option selected="selected" disabled value="">-- Select Usage List --</ng-option>
+                              <ng-option *ngFor="let item of usage_lists" [value]="item._id">
+                                 {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
+                           </ng-select>
+
                            <!-- Nimitt dropdown -->
                            <ng-select *ngIf="data.type == 'nimitt'" class="custom custom-import"
                               placeholder="Select Nimitt" [virtualScroll]="true" [(ngModel)]="data.id"
@@ -413,7 +422,15 @@
                </div>
             </div>
             <div class="row mt-1">
-               <!-- <div class="col-md-3 mb-3">
+               <div class="col-md-6 mb-2">
+                  <div class="form-check form-switch">
+                     <input type="checkbox" class="form-check-input" id="copyIdsSwitch" formControlName="copyIds">
+                     <label class="form-check-label" for="copyIdsSwitch">Copy original IDs (_id) for Aawak &
+                        Jawak</label>
+                  </div>
+               </div>
+            </div>
+            <!-- <div class="col-md-3 mb-3">
                   <div class="form-group">
                      <label class="form-label">MM</label>                    
                      <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="false"
@@ -445,17 +462,16 @@
                      <ng-option *ngFor="let item of months" [value]="item.m">{{item.m}} : {{item.name}}</ng-option>
                   </ng-select>
                </div> -->
-               <!-- <div class="col-md-2 mb-3">
+            <!-- <div class="col-md-2 mb-3">
                   <div class="form-check form-switch">
                      <input type="checkbox" class="form-check-input" formControlName="autoUpdate">
                      <label class="form-check-label" for="customSwitch2">Update Jawak Only (where available)</label>
                   </div>
                </div> -->
 
-               <!-- <div class="col-10">
+            <!-- <div class="col-10">
                   कोई भी करेक्शन की जरूरत नहीं है, आगे डाटा वेरीफाई करके इम्पोर्ट करे ।
                </div> -->
-            </div>
          </form>
          <pagination-controls id="toBIPagination" class="pagi text-end" (pageChange)="pageTI = $event"
             [autoHide]="true">
@@ -551,7 +567,7 @@
                                  <th>amount</th>
                                  <th>पर्ची प्लेस</th>
                                  <th>कहा रिपेर/सेल</th>
-                                 <th>जवाक केटेगरी</th>
+                                 <th>usage list</th>
                                  <th style="width:0px;">
                                     <div class="ribbon ribbon-secondary text-light float-end"> Destribution
                                     </div>
@@ -577,7 +593,7 @@
                                  <td>{{jwk.actual_amt ? jwk.actual_amt : '-'}}</td>
                                  <td>{{jwk.parchi_place ? jwk.parchi_place : '-'}}</td>
                                  <td>{{jwk.sell_repair_place ? jwk.sell_repair_place : '-'}}</td>
-                                 <td [ngClass]="{'marked': jwk.usage_list && !data.usage_list_id}">
+                                 <td [ngClass]="{'marked': jwk.usage_list && !jwk.usage_list_id}">
                                     {{jwk.usage_list}}</td>
                                  <td></td>
                               </tr>

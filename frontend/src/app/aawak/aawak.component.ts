@@ -295,6 +295,7 @@ export class AawakComponent implements OnInit {
           if (result[i].jawak_detail.length) {
             for (let j in result[i].jawak_detail) {
               jawakArray.push({
+                '_id': result[i].jawak_detail[j]._id,
                 'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
                 'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
                 'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
@@ -305,6 +306,7 @@ export class AawakComponent implements OnInit {
             }
           } else {
             jawakArray.push({
+              '_id': '-',
               'Jawak MM': '-',
               'Kisko Diya': '-',
               'Jawak Type': '-',
@@ -315,6 +317,7 @@ export class AawakComponent implements OnInit {
           }
 
           let awkObj: any = {
+            '_id': result[i]._id,
             'No': i + 1,
             'Date': result[i].date ? this.gs.formatDisplayDate(result[i].date) : '-',
             'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
@@ -374,6 +377,7 @@ export class AawakComponent implements OnInit {
           if (result[i].jawak_detail.length) {
             for (let j in result[i].jawak_detail) {
               jawakArray.push({
+                '_id': result[i].jawak_detail[j]._id,
                 'Date': result[i].jawak_detail[j].date ? this.gs.formatDisplayDate(result[i].jawak_detail[j].date) : '-',
                 'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
                 'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
@@ -395,6 +399,7 @@ export class AawakComponent implements OnInit {
             }
           } else {
             jawakArray.push({
+              '_id': '-',
               'Date': '-',
               'Pkt No': '-',
               'Jawak MM': '-',
@@ -416,6 +421,7 @@ export class AawakComponent implements OnInit {
 
 
           let awkObj: any = {
+            '_id': result[i]._id,
             'No': i + 1,
             'Date': result[i].date ? this.gs.formatDisplayDate(result[i].date) : '-',
             'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
@@ -1588,6 +1594,10 @@ export class AawakComponent implements OnInit {
 
             //jwk switch
             switch (columns[j]) {
+              case "_id":
+              case "jwk_id":
+                jwkobj._id = exceldata[i][j];
+                break;
               case "date": jwkobj.date = exceldata[i][j];
                 break;
               case "jwk mm":

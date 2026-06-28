@@ -250,6 +250,7 @@ export class HeaderComponent implements AfterViewInit {
           { title: 'Khet Saar', link: 'report-kh-saar', visible: this.auth.webUser.settings?.report?.report_kh },
           { title: 'Khet Saar (Item Wise)', link: 'report-kh-itemwise', visible: this.auth.webUser.settings?.report?.report_kh },
           { title: 'Khet AJ saar', link: 'report-kh-ajsaar', visible: this.auth.webUser.settings?.report?.report_kh },
+          { title: 'Integrity Checkup', link: 'integrity-checkup', visible: true },
         ]
       },
       {

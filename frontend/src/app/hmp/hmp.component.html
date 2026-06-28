@@ -174,20 +174,20 @@
                                 (click)="deleteInput(input._id, i)"></i>
                             </td>
                             <td>
-                              <span
-                                *ngIf="input.subitem?.subitem_list?.subitem_hin">{{input.subitem?.subitem_list?.subitem_hin}}
+                              <span *ngIf="input.subitem?.subitem_hin">{{input.subitem?.subitem_hin}}
                               </span>{{input.item.item_hin}}
                               <span style="opacity: 0.5;"> : </span>
-                              <span
-                                *ngIf="input.subitem?.subitem_list?.subitem_eng">{{input.subitem?.subitem_list?.subitem_eng}}
+                              <span *ngIf="input.subitem?.subitem_eng">{{input.subitem?.subitem_eng}}
                               </span>{{input.item.item_eng}}
                             </td>
                             <td><strong>{{input.qty}}</strong> <small>{{input.unit_short}}</small></td>
                             <td><span style="opacity: 0.6;">{{input.rate || '-'}}</span></td>
-                            <td *ngIf="settings.hmp?.condition_id"><small style="color: #f0a500;">{{input.condition?.list_name_hin}}</small></td>
+                            <td *ngIf="settings.hmp?.condition_id"><small
+                                style="color: #f0a500;">{{input.condition?.list_name_hin}}</small></td>
                           </tr>
                           <tr *ngIf="!batch.inputs || batch.inputs.length === 0">
-                            <td [attr.colspan]="4 + (settings.hmp?.condition_id ? 1 : 0)" class="text-center text-muted p-2">No inputs</td>
+                            <td [attr.colspan]="4 + (settings.hmp?.condition_id ? 1 : 0)"
+                              class="text-center text-muted p-2">No inputs</td>
                           </tr>
                         </tbody>
                       </table>
@@ -221,17 +221,16 @@
                                 (click)="deleteOutput(output._id, i)"></i>
                             </td>
                             <td>
-                              <span
-                                *ngIf="output.subitem?.subitem_list?.subitem_hin">{{output.subitem?.subitem_list?.subitem_hin}}
+                              <span *ngIf="output.subitem?.subitem_hin">{{output.subitem?.subitem_hin}}
                               </span>{{output.item?.item_hin}}
                               <span style="opacity: 0.5;"> : </span>
-                              <span
-                                *ngIf="output.subitem?.subitem_list?.subitem_eng">{{output.subitem?.subitem_list?.subitem_eng}}
+                              <span *ngIf="output.subitem?.subitem_eng">{{output.subitem?.subitem_eng}}
                               </span>{{output.item?.item_eng}}
                             </td>
                             <td><strong>{{output.qty}}</strong> <small>{{output.unit_short}}</small></td>
                             <td><span style="opacity: 0.6;">{{output.rate || '-'}}</span></td>
-                            <td *ngIf="settings.hmp?.condition_id"><small style="color: #f0a500;">{{output.condition?.list_name_hin}}</small></td>
+                            <td *ngIf="settings.hmp?.condition_id"><small
+                                style="color: #f0a500;">{{output.condition?.list_name_hin}}</small></td>
                             <td>
                               <div class="d-flex align-items-center justify-content-center gap-1">
                                 <!-- Show + (Add) if no Aawak exists, OR if no Jawak exists, OR remaining_qty > 0 -->
@@ -260,7 +259,8 @@
                             </td>
                           </tr>
                           <tr *ngIf="!batch.outputs || batch.outputs.length === 0">
-                            <td [attr.colspan]="5 + (settings.hmp?.condition_id ? 1 : 0)" class="text-center text-muted p-2">No outputs</td>
+                            <td [attr.colspan]="5 + (settings.hmp?.condition_id ? 1 : 0)"
+                              class="text-center text-muted p-2">No outputs</td>
                           </tr>
                         </tbody>
                       </table>
@@ -350,12 +350,12 @@
                     <td [class.cell-auto-jwk]="$any(batch.inputs[0])?.is_auto_jwk"
                       [class.cell-auto-awk]="$any(batch.inputs[0])?.is_auto_awk">
                       <span
-                        *ngIf="$any(batch.inputs[0])?.subitem?.subitem_list?.subitem_hin">{{$any(batch.inputs[0])?.subitem?.subitem_list?.subitem_hin}}
+                        *ngIf="$any(batch.inputs[0])?.subitem?.subitem_hin">{{$any(batch.inputs[0])?.subitem?.subitem_hin}}
                       </span>{{$any(batch.inputs[0])?.item.item_hin}}
                       <br>
                       <small style="color: #6c7ab8;">
                         <span
-                          *ngIf="$any(batch.inputs[0])?.subitem?.subitem_list?.subitem_eng">{{$any(batch.inputs[0])?.subitem?.subitem_list?.subitem_eng}}
+                          *ngIf="$any(batch.inputs[0])?.subitem?.subitem_eng">{{$any(batch.inputs[0])?.subitem?.subitem_eng}}
                         </span>{{$any(batch.inputs[0])?.item.item_eng}}
                       </small>
                     </td>
@@ -379,7 +379,8 @@
                   </ng-container>
 
                   <ng-container *ngIf="!batch.inputs || batch.inputs.length === 0">
-                    <td [attr.colspan]="5 + (settings.hmp?.condition_id ? 1 : 0)" class="text-center text-muted" style="font-style: italic;">No Inputs</td>
+                    <td [attr.colspan]="5 + (settings.hmp?.condition_id ? 1 : 0)" class="text-center text-muted"
+                      style="font-style: italic;">No Inputs</td>
                   </ng-container>
                 </tr>
 
@@ -389,19 +390,18 @@
                   <td><span class="badge badge-primary-lighten rounded-pill py-1 px-2">↓ IN</span>
                   </td>
                   <td>
-                    <span
-                      *ngIf="$any(input)?.subitem?.subitem_list?.subitem_hin">{{$any(input)?.subitem?.subitem_list?.subitem_hin}}
+                    <span *ngIf="$any(input)?.subitem?.subitem_hin">{{$any(input)?.subitem?.subitem_hin}}
                     </span>{{$any(input)?.item?.item_hin}}
                     <br>
                     <small style="color: #6c7ab8;">
-                      <span
-                        *ngIf="$any(input)?.subitem?.subitem_list?.subitem_eng">{{$any(input)?.subitem?.subitem_list?.subitem_eng}}
+                      <span *ngIf="$any(input)?.subitem?.subitem_eng">{{$any(input)?.subitem?.subitem_eng}}
                       </span>{{$any(input)?.item?.item_eng}}
                     </small>
                   </td>
                   <td><strong>{{$any(input)?.qty}}</strong> <small>{{$any(input)?.unit_short}}</small></td>
                   <td><span style="opacity: 0.6;">{{$any(input)?.rate || '-'}}</span></td>
-                  <td *ngIf="settings.hmp?.condition_id"><small style="color: #f0a500;">{{$any(input)?.condition?.list_name_hin}}</small></td>
+                  <td *ngIf="settings.hmp?.condition_id"><small
+                      style="color: #f0a500;">{{$any(input)?.condition?.list_name_hin}}</small></td>
                   <td style="text-align: center;">
                     <i class="uil uil-trash i-outline-danger" (click)="deleteInput($any(input)._id, i + 1)"
                       title="Delete Item">
@@ -417,19 +417,18 @@
                     <td><span class="badge badge-success-lighten rounded-pill py-1 px-2">↑ OUT</span>
                     </td>
                     <td>
-                      <span
-                        *ngIf="$any(output)?.subitem?.subitem_list?.subitem_hin">{{$any(output)?.subitem?.subitem_list?.subitem_hin}}
+                      <span *ngIf="$any(output)?.subitem?.subitem_hin">{{$any(output)?.subitem?.subitem_hin}}
                       </span>{{$any(output)?.item?.item_hin}}
                       <br>
                       <small style="color: #6c7ab8;">
-                        <span
-                          *ngIf="$any(output)?.subitem?.subitem_list?.subitem_eng">{{$any(output)?.subitem?.subitem_list?.subitem_eng}}
+                        <span *ngIf="$any(output)?.subitem?.subitem_eng">{{$any(output)?.subitem?.subitem_eng}}
                         </span>{{$any(output)?.item?.item_eng}}
                       </small>
                     </td>
                     <td><strong>{{$any(output)?.qty}}</strong> <small>{{$any(output)?.unit_short}}</small></td>
                     <td><span style="opacity: 0.6;">{{$any(output)?.rate || '-'}}</span></td>
-                    <td *ngIf="settings.hmp?.condition_id"><small style="color: #f0a500;">{{$any(output)?.condition?.list_name_hin}}</small></td>
+                    <td *ngIf="settings.hmp?.condition_id"><small
+                        style="color: #f0a500;">{{$any(output)?.condition?.list_name_hin}}</small></td>
                     <td style="text-align: center;">
                       <i class="uil uil-trash i-outline-danger" (click)="deleteOutput($any(output)._id, i)"
                         title="Delete Item">

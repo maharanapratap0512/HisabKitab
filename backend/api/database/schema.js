@@ -150,7 +150,7 @@ module.exports = {
         recipe_id: col.ref('hmp_recipe._id', { as: 'recipe', select: ['recipe_name', 'recipe_code'] }),
         mm_id: col.ref('mm._id', { as: 'mm', select: ['mm_hin', 'mm_eng', 'mm_roman'] }),
         dept_id: col.ref('department._id', { as: 'dept', select: ['dept_hin', 'dept_eng', 'dept_code'] }),
-        batch_no: col.string().default(null),
+        batch_no: col.string(),
         date: col.string(),
         notes: col.string(),
         active: col.boolean().default(1),

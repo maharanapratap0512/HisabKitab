@@ -88,7 +88,8 @@ export class ApiService {
     REPORTAJ: base_url + 'reports/aj/',
     IMPORTHISTORY: base_url + 'import_history/',
     VEHICLE: base_url + 'vehicle/',
-    COMMENT: base_url + 'comment/'
+    COMMENT: base_url + 'comment/',
+    INTEGRITY: base_url + 'integrity-checkup/'
 
   };
 

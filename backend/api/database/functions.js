@@ -23,7 +23,19 @@ class Functions extends DBContex {
             if (obj.usage_report && typeof obj.usage_report === 'string') {
                try { obj.usage_report = JSON.parse(obj.usage_report); } catch (e) { obj.usage_report = {}; }
             }
-            let stmtInsert = this.db.prepare(this.query[type].insert);
+            let queryStr = this.query[type].insert;
+            if (obj._id) {
+               const firstParen = queryStr.indexOf('(');
+               if (firstParen !== -1) {
+                  queryStr = queryStr.substring(0, firstParen) + '(_id, ' + queryStr.substring(firstParen + 1);
+               }
+               const valuesMatch = queryStr.match(/values\s*\(/i);
+               if (valuesMatch) {
+                  const valuesIndex = queryStr.indexOf(valuesMatch[0]) + valuesMatch[0].indexOf('(');
+                  queryStr = queryStr.substring(0, valuesIndex) + '(@_id, ' + queryStr.substring(valuesIndex + 1);
+               }
+            }
+            let stmtInsert = this.db.prepare(queryStr);
             obj = { ...this.tbInterface[type], ...obj };
             obj.document = JSON.stringify(obj.document ? obj.document : {});
             obj.isbill = obj.isbill ? 1 : 0;

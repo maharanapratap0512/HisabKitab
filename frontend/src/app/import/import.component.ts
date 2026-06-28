@@ -45,6 +45,7 @@ export class ImportComponent implements OnInit {
   aawak_types: any = [];
   aawak_sources: any = [];
   jawak_types: any = [];
+  usage_lists: any = [];
   nimitts: any = [];
   settings: any = [];
   unmatchedData: any = [];
@@ -88,6 +89,7 @@ export class ImportComponent implements OnInit {
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
       this.aawak_sources = result.aawak_source ? result.aawak_source : [];
       this.jawak_types = result.jawak_type ? result.jawak_type : [];
+      this.usage_lists = result.usage_list ? result.usage_list : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
     this.settings = this.auth.webUser.settings;
@@ -100,7 +102,8 @@ export class ImportComponent implements OnInit {
       success_count: [0],
       fail_count: [0],
       import_count: [1],
-      autoUpdate: [false]
+      autoUpdate: [false],
+      copyIds: [false]
     });
 
   }
@@ -279,7 +282,11 @@ export class ImportComponent implements OnInit {
   }
 
   async processImport(i: number) {
-    await this.http.put(this.api.getUrl('IMPORTEXPORT') + 'process', { data: this.importData[i], autoUpdate: this.importForm.value.autoUpdate }).subscribe(async (data: any) => {
+    await this.http.put(this.api.getUrl('IMPORTEXPORT') + 'process', { 
+      data: this.importData[i], 
+      autoUpdate: this.importForm.value.autoUpdate,
+      copyIds: this.importForm.value.copyIds 
+    }).subscribe(async (data: any) => {
       this.import$.next(data);
       if (this.importData.length > i + 1) {
         await this.processImport(i + 1);
