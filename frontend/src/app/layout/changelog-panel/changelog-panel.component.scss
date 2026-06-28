@@ -117,27 +117,27 @@
 
 // Badge color themes (Modern & Vibrant)
 .badge-feature {
-    background: #d1f7ec;
+    background: rgba(10, 207, 151, 0.12);
     color: #0acf97;
-    border: 1px solid #0acf9755;
+    border: 1px solid rgba(10, 207, 151, 0.3);
 }
 
 .badge-fix {
-    background: #ffe4e8;
+    background: rgba(250, 92, 124, 0.12);
     color: #fa5c7c;
-    border: 1px solid #fa5c7c55;
+    border: 1px solid rgba(250, 92, 124, 0.3);
 }
 
 .badge-improvement {
-    background: #e0e2fe;
+    background: rgba(114, 124, 245, 0.12);
     color: #727cf5;
-    border: 1px solid #727cf555;
+    border: 1px solid rgba(114, 124, 245, 0.3);
 }
 
 .badge-coming_soon {
-    background: #fff4d5;
+    background: rgba(255, 188, 0, 0.12);
     color: #ffbc00;
-    border: 1px solid #ffbc0055;
+    border: 1px solid rgba(255, 188, 0, 0.3);
 }
 
 // Utility

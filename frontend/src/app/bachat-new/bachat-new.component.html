@@ -39,13 +39,17 @@
                         </button> -->
                      </div>
 
-                     <div class="col-2">
-                        <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
-                           data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
+                     <div class="col-2 d-flex flex-column align-items-center justify-content-center">
+                        <button type="button" class="btn btn-outline-success dropdown-toggle w-100 mb-1"
+                           data-bs-toggle="dropdown" aria-expanded="false"> Export </button>
                         <div class="dropdown-menu">
-                           <a class="dropdown-item" (click)="excelExportBachatOnly()">Bachat Only</a>
-                           <a class="dropdown-item" (click)="excelExportSaar()">Saar</a>
-                           <a class="dropdown-item" (click)="excelExportFull()">Full Saar</a>
+                           <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportBachatOnly()">Bachat Only</a>
+                           <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportSaar()">Saar</a>
+                           <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportFull()">Full Saar</a>
+                        </div>
+                        <div class="form-check mb-0">
+                           <input type="checkbox" class="form-check-input" id="ignoreDummyCheck" [(ngModel)]="ignoreDummy" name="ignoreDummy">
+                           <label class="form-check-label font-12" for="ignoreDummyCheck" style="white-space: nowrap; cursor: pointer;">Ignore Dummy</label>
                         </div>
                      </div>
                      <div class="col-2">
@@ -133,16 +137,19 @@
 
 
                <div class="col-md-2 mb-2" *ngIf="monthsSel.length > 0">
-                  <div class="form-group">
-                     <label class="form-label"></label>
-                     <button type="button" class="form-control btn btn-outline-success dropdown-toggle mx-2"
-                        data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
+                  <div class="form-group d-flex flex-column align-items-center">
+                     <label class="form-label mb-1"></label>
+                     <button type="button" class="form-control btn btn-outline-success dropdown-toggle mb-1"
+                        data-bs-toggle="dropdown" aria-expanded="false"> Export </button>
                      <div class="dropdown-menu">
-                        <a class="dropdown-item" (click)="excelExportMonthlyMain()">Main Saar</a>
-                        <a class="dropdown-item" (click)="excelExportMonthlyConditionWise()">Condition Wise</a>
+                        <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportMonthlyMain()">Main Saar</a>
+                        <a class="dropdown-item" style="cursor: pointer;" (click)="excelExportMonthlyConditionWise()">Condition Wise</a>
+                     </div>
+                     <div class="form-check mb-0">
+                        <input type="checkbox" class="form-check-input" id="ignoreDummyMonthlyCheck" [(ngModel)]="ignoreDummy" name="ignoreDummy">
+                        <label class="form-check-label font-12" for="ignoreDummyMonthlyCheck" style="white-space: nowrap; cursor: pointer;">Ignore Dummy</label>
                      </div>
                   </div>
-
                </div>
                <div class="col-md-2 mb-2">
                   <div class="form-group">

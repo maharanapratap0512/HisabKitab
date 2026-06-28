@@ -63,6 +63,7 @@ export class BachatNewComponent implements OnInit {
   ]
   subBachatData: any = []
   excelFile: any = null
+  ignoreDummy: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -222,6 +223,22 @@ export class BachatNewComponent implements OnInit {
     return '';
   }
 
+  isDummyRow(row: any): boolean {
+    if (!this.ignoreDummy) return false;
+    const totalAawak = row.total_aawak_all || 0;
+    const totalJawak = row.total_jawak_all || 0;
+    const totalBachat = row.total_bachat_all || 0;
+    const totalUsed = row.total_used_all || 0;
+    const pastBachat = row.past_bachat || 0;
+
+    const hasAawak = totalAawak !== 0 || (row.arr_sum_aawak && row.arr_sum_aawak.some((v: any) => v !== 0));
+    const hasJawak = totalJawak !== 0 || (row.arr_sum_jawak && row.arr_sum_jawak.some((v: any) => v !== 0));
+    const hasUsed = totalUsed !== 0 || (row.arr_sum_used && row.arr_sum_used.some((v: any) => v !== 0));
+    const hasBachat = totalBachat !== 0 || pastBachat !== 0 || (row.arr_sum_bachat && row.arr_sum_bachat.some((v: any) => v !== 0));
+
+    return !hasAawak && !hasJawak && !hasUsed && !hasBachat;
+  }
+
   excelExportBachatOnly() {
     this.isLoader = true;
     let bchtData: any = [];
@@ -229,13 +246,15 @@ export class BachatNewComponent implements OnInit {
     let uniqueMM = new Set();
     let uniqueUnit = new Set();
     let wholeTotal = 0;
+    let idx = 1;
 
     for (let i = 0; i < this.bachatData.length; i++) {
+      if (this.isDummyRow(this.bachatData[i])) continue;
       uniqueMM.add(this.bachatData[i].mm_id);
       uniqueUnit.add(this.bachatData[i].unit_id);
 
       let bachatRow: any = {
-        'No.': i + 1,
+        'No.': idx++,
         'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
         'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
         'MM': this.bachatData[i].mm_hin,
@@ -281,10 +300,12 @@ export class BachatNewComponent implements OnInit {
   excelExportFull() {
     this.isLoader = true;
     let bchtData: any = [];
+    let idx = 1;
     for (let i = 0; i < this.bachatData.length; i++) {
+      if (this.isDummyRow(this.bachatData[i])) continue;
 
       let bachatRow: any = {
-        'No.': i + 1,
+        'No.': idx++,
         'टोटल बचत': this.bachatData[i].total_bachat_all ? this.bachatData[i].total_bachat_all : 0,
         'Unit': this.bachatData[i].unit_id ? this.bachatData[i].unit_short : '-',
         'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
@@ -330,13 +351,15 @@ export class BachatNewComponent implements OnInit {
     }; // Object to store totals for footer
     let uniqueMM = new Set();
     let uniqueUnit = new Set();
+    let idx = 1;
 
     for (let i = 0; i < this.bachatData.length; i++) {
+      if (this.isDummyRow(this.bachatData[i])) continue;
       uniqueMM.add(this.bachatData[i].mm_id);
       uniqueUnit.add(this.bachatData[i].unit_id);
 
       let bachatRow: any = {
-        'No.': i + 1,
+        'No.': idx++,
         'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
         'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
         'MM': this.bachatData[i].mm_hin,
@@ -372,10 +395,12 @@ export class BachatNewComponent implements OnInit {
   excelExportMonthlyMain() {
     this.isLoader = true;
     let bchtData: any = [];
+    let idx = 1;
     for (let i = 0; i < this.bachatData.length; i++) {
+      if (this.isDummyRow(this.bachatData[i])) continue;
 
       let bachatRow: any = {
-        'No.': i + 1,
+        'No.': idx++,
         'Department': this.bachatData[i].dept_hin ? this.bachatData[i].dept_hin : '-',
         'State': this.bachatData[i].state_hin ? this.bachatData[i].state_hin : '-',
         'MM': this.bachatData[i].mm_hin,
@@ -413,6 +438,7 @@ export class BachatNewComponent implements OnInit {
     const groupedMap = new Map<string, any>();
     
     this.bachatData.forEach((row: any) => {
+      if (this.isDummyRow(row)) return;
       const key = `${row.mm_id}-${row.item_id}-${row.subitem_id || 0}-${row.unit_id}`;
       if (!groupedMap.has(key)) {
         groupedMap.set(key, {

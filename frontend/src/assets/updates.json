@@ -1,10 +1,35 @@
 [
     {
+        "version": "34.1",
+        "date": "28-06-2026",
+        "summary": "Integrity Chechup/ resolve & Bachat Export Dummy Ignore Fixed",
+        "summary_hin": "",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Integrity Chechup",
+                "title": "Integrity Chechup/ resolve",
+                "title_hin": "",
+                "desc": "check and verify references between aawak and jawak... and resolve issue....",
+                "desc_hin": ""
+            },
+            {
+                "type": "improved",
+                "module": "Bachat Component",
+                "title": "Bachat Export",
+                "title_hin": "",
+                "desc": "Dummy records removed from bachat export.",
+                "desc_hin": ""
+            }
+        ]
+    },
+    {
         "version": "34",
         "date": "24-06-2026",
         "summary": "HMP auto aawak & Jawak Type",
         "summary_hin": "",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "fix",
@@ -37,7 +62,7 @@
         "date": "24-06-2026",
         "summary": "Small Problem Fixes",
         "summary_hin": "",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "fix",
@@ -188,7 +213,7 @@
                 "desc_hin": "Generate DB Fully redesign and Optimized DB generation"
             },
             {
-                "type": "improvement",
+                "type": "improved",
                 "module": "UI/UX Redesign for Image View",
                 "title": "Image Add, select and View UI Improved",
                 "title_hin": "छवि जोड़ें, चुनें और देखें UI बेहतर",
@@ -213,7 +238,7 @@
                 "desc_hin": "pbk अब आवक और जावक पंक्ति में इन्सर्ट हो रहा है।"
             },
             {
-                "type": "improvement",
+                "type": "improved",
                 "module": "Jawak - Aawak Reference",
                 "title": "Smart Linking & Unlinking",
                 "title_hin": "जावक - आवक रेफरेंस",
@@ -221,7 +246,7 @@
                 "desc_hin": "जावक में आवक रेफरेंस को मैनेज करने के लिए बेहतर UI। इसमें शामिल है: <br/> - फिल्टरिंग के साथ स्मार्ट सिलेक्शन (Qty, MM, Subitem, Condition, Nimitt)। <br/> - बिना जावक एडिट किए, सीधे टेबल से लिंक-अनलिंक की सुविधा। <br /> - जावक-एंट्री में ऑटो_आवक, ऑटो_रेआवक ऑटोमेटिक सिलेक्शन हटा दिए गए और पोजीशन बदल दी गई।"
             },
             {
-                "type": "improvement",
+                "type": "improved",
                 "module": "Category Management",
                 "title": "parent id and alias support.",
                 "title_hin": "Parent ID और Alias सपोर्ट",
@@ -229,7 +254,7 @@
                 "desc_hin": "आप किसी भी कैटेगरी की पैरेंट कैटेगरी set कर सकते हैं, और उस कैटेगरी के लिए alias (alternative names) भी बना सकते हैं, जो unique restriction के लिए भी काम करेगा।"
             },
             {
-                "type": "improvement",
+                "type": "improved",
                 "module": "Excel Export",
                 "title": "Aawak & jawak excel export improved.",
                 "title_hin": "आवक जावक एक्सपोर्ट इंप्रूव्ड।",
@@ -262,7 +287,7 @@
                 "desc_hin": "आइटम के अलग-अलग प्रकारों (Size, Color आदि) को मैनेज करने का पूरा सिस्टम। <br/> - एक साथ कई वेरिएंट बनाने की सुविधा। <br/> - एट्रिब्यूट और निकनेम (Alias) मैनेजमेंट। <br/> - वेरिएंट की संख्या तुरंत अपडेट होने की सुविधा।"
             },
             {
-                "type": "improvement",
+                "type": "improved",
                 "module": "Item-Subitem Dropdown Redesign",
                 "title": "UI Improvements & Fixes",
                 "title_hin": "आवक, जावक, एचएमपी और प्रस्ताव में नया ड्रॉपडाउन",
@@ -311,7 +336,7 @@
                 "desc_hin": "एक ही आइटम के अलग-अलग प्रकारों (जैसे साइज, कलर, ब्रांड आदि) को मैनेज करने के लिए बड़ा अपग्रेड। <br/> - एट्रिब्यूट मैपिंग की सुविधा। <br/> - हर वेरिएंट का अलग स्टॉक मैनेजमेंट।"
             },
             {
-                "type": "improvement",
+                "type": "improved",
                 "module": "Inventory Core",
                 "title": "Structure Optimization",
                 "title_hin": "इन्वेंट्री स्ट्रक्चर सुधार",
@@ -319,7 +344,7 @@
                 "desc_hin": "कैटेगरी, आइटम और सब-आइटम स्ट्रक्चर को पहले से बेहतर बनाया गया है। आवक, जावक और अन्य पेजों को नए स्ट्रक्चर के हिसाब से अपडेट किया गया है।"
             },
             {
-                "type": "improvement",
+                "type": "improved",
                 "module": "Jawak Entry",
                 "title": "Smart Aawak Selection UI",
                 "title_hin": "स्मार्ट आवक सिलेक्शन यूआई",
@@ -354,7 +379,7 @@
                 "desc_hin": "कैटेगरी को अब आप पेरेंट-चाइल्ड (सीढ़ीनुमा) स्ट्रक्चर में व्यवस्थित कर सकते हैं। <br/> - नया ट्री यूआई, फोल्डर आइकॉन्स और ब्रांच लाइन्स के साथ। <br/> - एंट्री फॉर्म में कैटेगरी चुनना हुआ और भी आसान। <br/> - हर लेवल पर अपनी पसंद का क्रम (Sort Order) सेट करने की सुविधा।"
             },
             {
-                "type": "improvement",
+                "type": "improved",
                 "module": "UI/UX",
                 "title": "Bilingual Table Design",
                 "title_hin": "हिंदी-इंग्लिश टेबल डिजाइन",
@@ -434,7 +459,7 @@
                 "media": ""
             },
             {
-                "type": "improvement",
+                "type": "improved",
                 "module": "Report MM Stock, Khet Saar, Khet AJ Saar",
                 "title": "Report MM Stock, Khet Saar, Khet AJ Saar",
                 "title_hin": "रिपोर्ट एमएम स्टॉक, खेत सार, खेत एजे सार को All MM ke liye upgrade kar diya hai",

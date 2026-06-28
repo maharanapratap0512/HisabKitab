@@ -49,7 +49,8 @@ export class ChangelogPanelComponent implements OnInit, OnChanges {
         switch (type.toLowerCase()) {
             case 'feature': return 'uil-rocket';
             case 'fix': return 'uil-wrench';
-            case 'improvement': return 'uil-chart-growth';
+            case 'improvement':
+            case 'improved': return 'uil-chart-growth';
             case 'coming_soon': return 'uil-clock';
             case 'warning': return 'uil-exclamation-triangle';
             default: return 'uil-info-circle';
@@ -60,7 +61,8 @@ export class ChangelogPanelComponent implements OnInit, OnChanges {
         switch (type.toLowerCase()) {
             case 'feature': return 'badge-feature';
             case 'fix': return 'badge-fix';
-            case 'improvement': return 'badge-improvement';
+            case 'improvement':
+            case 'improved': return 'badge-improvement';
             case 'coming_soon': return 'badge-coming_soon';
             case 'warning': return 'badge-outline-warning';
             default: return 'bg-secondary';
