@@ -7,7 +7,6 @@ class ExcelFunctions {
    zone = null;
    item = null;
    subitem = null;
-   subitem_list = null;
    support_list = null;
    unit = null;
    nimitt = null;
@@ -106,12 +105,6 @@ class ExcelFunctions {
       document: null,
       active: 1
    }
-   subitem_list_form = {
-      subitem_eng: null,
-      subitem_hin: null,
-      subitem_roman: null,
-      active: 1
-   }
    item_form = {
       item_hin: null,
       item_eng: null,
@@ -139,6 +132,14 @@ class ExcelFunctions {
       restrict_year: null,
       min_rate: 0,
       max_rate: 0,
+   }
+   rel_item_category_form = {
+      item_id: null,
+      category_id: null
+   }
+   rel_subitem_category_form = {
+      subitem_id: null,
+      category_id: null
    }
    attribute_form = {
       attribute_hin: null,
@@ -251,10 +252,6 @@ class ExcelFunctions {
                break;
             case 'subitem':
                this.subitem = this.Fn.getSubitems(dept_id);
-               this.subitem_list = this.Fn.getSubiemList(dept_id);
-               break;
-            case 'subitem_list':
-               this.subitem_list = this.Fn.getSubiemList(dept_id);
                break;
             case 'state':
                this.state = this.Fn.getStates(dept_id);
@@ -639,26 +636,32 @@ class ExcelFunctions {
       }
       return null;
    }
-   async matchSubitemList(data) {
-      if (this.subitem_list instanceof Promise) {
-         this.subitem_list = await this.subitem_list.then((data) => { return data })
+   async matchSubitem(subitemStr, item_id, itemStr) {
+      if (this.subitem instanceof Promise) {
+         this.subitem = await this.subitem.then((data) => { return data })
       }
-      if (this.dict.subitem_list instanceof Promise) {
-         this.dict.subitem_list = await this.dict.subitem_list.then((data) => { return data });
+      if (this.dict.item instanceof Promise) {
+         this.dict.item = await this.dict.item.then((data) => { return data });
       }
-      // console.log("start matching", this.subitem_list);
-      if (!this.checkedButNotFound(data, 'subitem_list')) {
-         for (let i in this.subitem_list) {
-            if ([this.subitem_list[i].subitem_hin, this.subitem_list[i].subitem_eng, this.subitem_list[i].subitem_roman].includes(data)) {
-               return this.subitem_list[i]._id;
+      let data = {
+         subitem: subitemStr && typeof subitemStr == 'string' ? subitemStr.trim().toLowerCase().normalize('NFC') : subitemStr,
+         item: itemStr && typeof itemStr == 'string' ? itemStr.trim().toLowerCase().normalize('NFC') : itemStr,
+      }
+      if (!this.checkedButNotFound(data, 'subitem')) {
+         for (let i in this.subitem) {
+            if (this.subitem[i].item_id == item_id && [this.subitem[i].subitem_hin, this.subitem[i].subitem_eng, this.subitem[i].subitem_roman].includes(data.subitem)) {
+               return this.subitem[i]._id;
             }
          }
-         for (let i in this.dict.subitem_list) {
-            if (this.dict.subitem_list[i].name == data) {
-               return this.dict.subitem_list[i].id;
+         for (let i in this.dict.item) {
+            if (this.dict.item[i].name == data.item && this.dict.item[i].extra_note == data.subitem) {
+               return this.dict.item[i].id2;
             }
          }
-         this.correctionList.push({ type: 'subitem_list', name: data });
+         // Prevent duplicate correction entries
+         if (!this.correctionList.find(c => c.type === 'item' && c.name.item === data.item && c.name.subitem === data.subitem)) {
+             this.correctionList.push({ type: 'item', name: data, id: item_id, id2: null });
+         }
       }
       return null;
    }

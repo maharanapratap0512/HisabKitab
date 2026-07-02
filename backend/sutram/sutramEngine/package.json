@@ -12,7 +12,7 @@
     ],
     "peerDependencies": {
         "better-sqlite3": ">=9.0.0",
-        "sutramcore": "file:../sutramcore_fixed"
+        "sutramcore": "file:../sutramcore"
     },
     "devDependencies": {
         "better-sqlite3": "^9.0.0"

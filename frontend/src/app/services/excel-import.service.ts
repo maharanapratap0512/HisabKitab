@@ -12,7 +12,9 @@ export class ExcelImportService {
     { name: 'vehicle', secondHeader: false, autoUpdate: true },
     { name: 'nimitt', autoUpdate: true },
     { name: 'item', autoUpdate: true },
+    { name: 'rel_item_category', autoUpdate: true },
     { name: 'subitem', autoUpdate: true },
+    { name: 'rel_subitem_category', autoUpdate: true },
     { name: 'subitem_list', autoUpdate: true },
     { name: 'product', autoUpdate: true },
     { name: 'support_list', autoUpdate: true, note: 'list_type should be aawak_type, jawak_type, gender, relation, condition. MUST BE same spelling, lower case.' },
@@ -97,12 +99,6 @@ export class ExcelImportService {
       { col_name: 'relative_name', name: 'father_name', alt_names: ["father name", "relative name", "fathername"], not_null: false, },
       { col_name: 'townarea', name: 'townarea', alt_names: ["town area", "town_area", "गाव", "village"], not_null: false },
     ],
-    subitem_list: [
-      { col_name: 'subitem_hin', name: 'subitem_hin', alt_names: ["subitemhin", "subitem hin", "subitem"], not_null: true },
-      { col_name: 'subitem_eng', name: 'subitem_eng', alt_names: ["subitemeng", "subitem eng"], not_null: false, },
-      { col_name: 'subitem_roman', name: 'subitem_roman', alt_names: ["subitemroman", "subitem roman"], not_null: false, },
-
-    ],
     subitem: [
       { col_name: 'item_hin', name: 'item_hin', alt_names: ["itemhin", "item hin", "item"], not_null: true, ref_table: "item", ref_field: "item_id", ref_data: "item_hin" },
       { col_name: 'item_eng', name: 'item_eng', alt_names: ["itemeng", "item eng"], not_null: false, },
@@ -111,7 +107,6 @@ export class ExcelImportService {
       { col_name: 'subitem_hin', name: 'subitem_hin', alt_names: ["subitemhin", "subitem hin", "subitem"], not_null: true },
       { col_name: 'subitem_eng', name: 'subitem_eng', alt_names: ["subitemeng", "subitem eng"], not_null: false, },
       { col_name: 'subitem_roman', name: 'subitem_roman', alt_names: ["subitemroman", "subitem roman"], not_null: false, },
-      { col_name: 'arr_categories', name: 'categories', alt_names: ["category", "categories"], not_null: true, type: "array", ref_table: "category", ref_field: "categories", ref_data: "categories_hin" },
       { col_name: 'unit', name: 'unit', alt_names: [], not_null: false, },
       { col_name: 'extra_note', name: 'extra_note', alt_names: ["extra note", "extranote"], not_null: false, },
       { col_name: 'restrict_month', name: 'restrict_month', alt_names: ["restrict month"], not_null: false },
@@ -124,7 +119,6 @@ export class ExcelImportService {
       { col_name: 'item_eng', name: 'item_eng', alt_names: ["itemeng", "item eng"], not_null: false, },
       { col_name: 'item_roman', name: 'item_roman', alt_names: ["itemroman", "item roman"], not_null: false, },
       { col_name: 'item_code', name: 'item_code', alt_names: ["itemcode", "item code"], not_null: false, },
-      { col_name: 'arr_categories', name: 'categories', alt_names: ["category", "categories"], not_null: true, type: "array", ref_table: "category", ref_field: "categories", ref_data: "category_hin" },
       { col_name: 'aliases', name: 'aliases', alt_names: ["alternative names", "alias", "aliases"], not_null: false, type: "array" },
       { col_name: 'unit', name: 'unit', alt_names: ['default_unit', 'default unit'], not_null: false, ref_table: "unit", ref_field: "unit_id", ref_data: "unit.unit_short" },
       { col_name: 'extra_note', name: 'extra_note', alt_names: ["extra note", "extranote"], not_null: false, },
@@ -132,6 +126,15 @@ export class ExcelImportService {
       { col_name: 'restrict_year', name: 'restrict_year', alt_names: ["restrict year"], not_null: false },
       { col_name: 'min_rate', name: 'min_rate', alt_names: ["min rate"], not_null: false },
       { col_name: 'max_rate', name: 'max_rate', alt_names: ["max rate"], not_null: false },
+    ],
+    rel_item_category: [
+      { col_name: 'item_hin', name: 'item_hin', alt_names: ["itemhin", "item hin"], not_null: true, ref_table: 'item', ref_field: 'item_id', ref_data: 'item_hin' },
+      { col_name: 'category', name: 'categories', alt_names: ["category", "categories"], not_null: true, ref_table: 'category', ref_field: 'category_id', ref_data: 'category_hin' }
+    ],
+    rel_subitem_category: [
+      { col_name: 'item_hin', name: 'item_hin', alt_names: ["itemhin", "item hin"], not_null: true, ref_table: 'item', ref_field: 'item_id', ref_data: 'item_hin' },
+      { col_name: 'subitem_hin', name: 'subitem_hin', alt_names: ["subitemhin", "subitem hin", "subitem"], not_null: true, ref_table: 'subitem', ref_field: 'subitem_id', ref_data: 'subitem_hin' },
+      { col_name: 'category', name: 'categories', alt_names: ["category", "categories"], not_null: true, ref_table: 'category', ref_field: 'category_id', ref_data: 'category_hin' }
     ],
     support_list: [
       { col_name: 'list_type', name: 'list_type', alt_names: ["list type"], not_null: true },

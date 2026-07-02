@@ -35,7 +35,6 @@ export class ItemComponent implements OnInit {
   itemDataAll: any = [];
   itemData: any = [];
   categories: any = [];
-  subitem_lists: any = [];
   total_count: any = 0;
   si_total_count: any = 0;
   subitemData: any = [];
@@ -61,7 +60,6 @@ export class ItemComponent implements OnInit {
     this.getItemData(1);
     this.gs.observeList().subscribe(result => {
       this.categories = result.category ? result.category : [];
-      this.subitem_lists = result.subitem_list ? result.subitem_list : [];
     });
     this.baseurl = this.api.getUrl('BASE');
     this.settings = this.auth.webUser.settings.item;
@@ -159,26 +157,38 @@ export class ItemComponent implements OnInit {
     ev = null;
   }
 
-  importResponse(iType: any) {
+  importedItems: any = [];
+  importedSubitems: any = [];
+
+  importResponse(iType: any, data?: any) {
     switch (iType) {
-      case 'subitem_list':
-        this.importType = 'item';
-        this.openModal('ei_item');
+      case 'item':
+        if (data && Array.isArray(data)) this.importedItems = data;
+        this.importType = 'item_category';
+        this.openModal('ei_item_category');
         break;
 
-      case 'item':
+      case 'rel_item_category':
         this.importType = 'subitem';
         this.openModal('ei_subitem');
         break;
 
       case 'subitem':
+        if (data && Array.isArray(data)) this.importedSubitems = data;
+        this.importType = 'rel_subitem_category';
+        this.openModal('ei_subitem_category');
+        break;
+
+      case 'rel_subitem_category':
         this.importType = '';
         this.closeModal();
         break;
 
       default:
-        this.importType = 'subitem_list';
-        this.openModal('ei_subitem_list');
+        this.importedItems = [];
+        this.importedSubitems = [];
+        this.importType = 'item';
+        this.openModal('ei_item');
     }
   }
 
@@ -262,16 +272,7 @@ export class ItemComponent implements OnInit {
     }
   }
 
-  SubitemListSelected(ev: any) {
-    if (ev) {
-      this.conditionObj.subitem_list_id = ev;
-      this.getItemData(1);
-    }
-    else {
-      this.conditionObj.subitem_list_id = null;
-      this.getItemData(1);
-    }
-  }
+
 
   addSubitem(item: any) {
     this.editData = {

@@ -202,8 +202,6 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                             break;
                         case 'unit': id = await fn.matchUnit(name);
                             break;
-                        case 'subitem_list': id = await fn.matchSubitemList(name);
-                            break;
                         case 'nimitt': id = await fn.matchNimitt(name);
                             break;
                         case 'pbk': id = await fn.matchPbk(name);
@@ -233,19 +231,13 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                             //     subitem_id = await fn.matchSubitem(subitem, id);
                             // }
                             break;
-                        // case 'subitem': let sl_id = await fn.matchSubitemList(name);
-                        //     console.log("-------", sl_id, name);
-                        //     if (sl_id && req.body.excelData[i].item_id) {
-                        //         let data = {
-                        //             item: req.body.excelData[i].item,
-                        //             item_id: req.body.excelData[i].item_id,
-                        //             subitem: req.body.excelData[i].subitem,
-                        //             subitem_list_id: sl_id
-                        //         }
-                        //         id = await fn.matchSubitem(data);
-                        //         console.log("-------", id, data);
-                        //     }
-                        //     break;
+                        case 'subitem':
+                            if (req.body.excelData[i].item_id) {
+                                // Extract the item string based on what was provided in excelData (e.g. item_hin or item)
+                                let itemStr = req.body.excelData[i].item_hin || req.body.excelData[i].item || '';
+                                id = await fn.matchSubitem(name, req.body.excelData[i].item_id, itemStr);
+                            }
+                            break;
                         case 'condition': id = await fn.matchSupportList(name, 'condition');
                             break;
                         case 'aawak_type': id = await fn.matchSupportList(name, 'aawak_type');
@@ -554,17 +546,16 @@ router.post('/match_bachat/:dept_id', async (req, res, next) => {
                 select bcht._id, bi.date, bi.sn, bi.dept_id, bi.mm_id, bi.item_id, bi.subitem_id, bi.condition_id, bi.unit_id, IFNULL(bi.qty, 0) as qty, IFNULL(bcht.bachat, 0) as bachat, CASE WHEN bcht._id IS NOT NULL THEN 'MATCH' ELSE 'EXCEL' END AS status, IFNULL(bi.qty, 0) - IFNULL(bcht.bachat, 0) as difference,
                 bi.company_name, bi.actual_amt, bi.item_detail, bi.description, bi.nimitt_id,
                 mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
-                it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
-                sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+                it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
+                sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
                 slc.list_name_hin as condition_hin, slc.list_name_eng as condition_eng,
                 dept.dept_hin, dept.dept_eng, dept.dept_code,
                 unit.unit_short, unit.unit_full from bachat_import bi
                 LEFT JOIN bcht on bcht.mm_id = bi.mm_id AND bcht.item_id = bi.item_id AND IFNULL(bcht.subitem_id, 0) = IFNULL(bi.subitem_id, 0) AND IFNULL(bcht.condition_id, 0) = IFNULL(bi.condition_id, 0) AND bcht.unit_id = bi.unit_id
                 LEFT JOIN mm on mm._id = bi.mm_id
                 LEFT JOIN state st on st._id = mm.state_id
-                LEFT JOIN item it on it._id = bi.item_id
-                LEFT JOIN subitem sit on sit._id = bi.subitem_id
-                LEFT JOIN subitem_list sitl on sitl._id = sit.subitem_list_id
+                LEFT JOIN v_item it on it._id = bi.item_id
+                LEFT JOIN v_subitem sit on sit._id = bi.subitem_id
                 LEFT JOIN support_list slc on slc._id = bi.condition_id
                 LEFT JOIN department dept on dept._id = bi.dept_id
                 LEFT JOIN unit on unit._id = bi.unit_id order by status DESC`;
@@ -579,16 +570,15 @@ router.post('/match_bachat/:dept_id', async (req, res, next) => {
                 ) 
                 select bcht._id, bcht.dept_id, bcht.mm_id, bcht.item_id, bcht.subitem_id, bcht.condition_id, bcht.unit_id, 0 AS qty, IFNULL(bcht.bachat, 0) as bachat, 'DB' AS status, 0 - IFNULL(bcht.bachat, 0) as difference, 
                 mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
-                it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
-                sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+                it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
+                sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
                 slc.list_name_hin as condition_hin, slc.list_name_eng as condition_eng,
                 dept.dept_hin, dept.dept_eng, dept.dept_code,
                 unit.unit_short, unit.unit_full from bcht 
                 LEFT JOIN mm on mm._id = bcht.mm_id
                 LEFT JOIN state st on st._id = mm.state_id
-                LEFT JOIN item it on it._id = bcht.item_id
-                LEFT JOIN subitem sit on sit._id = bcht.subitem_id
-                LEFT JOIN subitem_list sitl on sitl._id = sit.subitem_list_id
+                LEFT JOIN v_item it on it._id = bcht.item_id
+                LEFT JOIN v_subitem sit on sit._id = bcht.subitem_id
                 LEFT JOIN support_list slc on slc._id = bcht.condition_id
                 LEFT JOIN department dept on dept._id = bcht.dept_id
                 LEFT JOIN unit on unit._id = bcht.unit_id

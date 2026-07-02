@@ -2827,6 +2827,8 @@ const conditions = {
     support_list_duplicate: `list_type = @list_type AND list_name_eng = @list_name_eng `,
     category_duplicate: `category_eng = @category_eng OR category_hin = @category_hin `,
     district_duplicate: `(district_eng = @district_eng OR district_hin = @district_hin) AND state_id = @state_id`,
+    rel_item_category_duplicate: `item_id = @item_id AND category_id = @category_id`,
+    rel_subitem_category_duplicate: `subitem_id = @subitem_id AND category_id = @category_id`,
 }
 
 genDeptDB = {
@@ -3011,11 +3013,23 @@ const prastav_jawak = {
     order: `prastav_jawak._id`
 }
 
+const rel_item_category = {
+    select: `select * from rel_item_category ?`,
+    select_full: `select * from rel_item_category ? limit @limit offset @offset`,
+    insert: `insert into rel_item_category(item_id, category_id) values(@item_id, @category_id)`
+}
+
+const rel_subitem_category = {
+    select: `select * from rel_subitem_category ?`,
+    select_full: `select * from rel_subitem_category ? limit @limit offset @offset`,
+    insert: `insert into rel_subitem_category(subitem_id, category_id) values(@subitem_id, @category_id)`
+}
+
 module.exports = {
     queryBuilder, country, city, category, department, department_config, item, itemmix, mm, nimitt, pbk, point, zone, district, state, subitem, subitem_list, support_list, unit, conditions,
     aawak, aawak_voucher, bachat, pbk_bachat, pbk_closing, jawak, jawak_voucher, bachat_new, temp_import, product, vehicle, vehicle_document,
     hmp_recipe, hmp_recipe_input, hmp_recipe_output, hmp_batch, hmp_batch_input, hmp_batch_output,
     aawak_enzyme, jawak_enzyme, usage_report,
     genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, test, report_comment,
-    prastav, prastav_jawak,
+    prastav, prastav_jawak, rel_item_category, rel_subitem_category
 };

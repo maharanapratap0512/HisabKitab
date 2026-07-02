@@ -22,6 +22,7 @@ export class ExcelImportComponent implements OnInit {
   @Input() lockType: boolean = false;
   @Input() stepNo: any = 0;
   @Input() excelFile: any;
+  @Input() importedData: any;
   @Output() response = new EventEmitter();
   showModal: any = ''
   itemsPerPage = 100;
@@ -136,7 +137,11 @@ export class ExcelImportComponent implements OnInit {
 
   finish() {
     this.import$.complete();
-    this.response.emit(true);
+    if (this.importType?.name === 'item' || this.importType?.name === 'subitem') {
+      this.response.emit([...this.newInsertedData, ...this.willUpdateData, ...this.duplicateDate]);
+    } else {
+      this.response.emit(true);
+    }
   }
 
   importTypeChanged(ev: any) {
@@ -246,7 +251,34 @@ export class ExcelImportComponent implements OnInit {
       this.excelArrObj = this.excelArrObj.filter((e: { date: any; mm: any; item: any; qty: any; unit: any; }) => e.date && e.mm && e.item && e.qty != null && e.unit)
     } else if (this.importType.name == 'jawak') {
       this.excelArrObj = this.excelArrObj.filter((e: any) => e.date && e.mm && e.item && e.qty != null && e.unit && e.jawak_type)
+    } else if (this.importType.name == 'rel_item_category' || this.importType.name == 'rel_subitem_category') {
+      let combinations: any[] = [];
+      for (let i of this.excelArrObj) {
+         if (this.importType.name == 'rel_subitem_category' && i.item_hin && !i.subitem_hin) {
+             continue;
+         }
+         if (i.category && typeof i.category === 'string') {
+             let cats = i.category.split(',');
+             let refItem = null;
+             if (this.importedData && this.importedData.length) {
+                 // Try to match the item by item_hin
+                 refItem = this.importedData.find((d: any) => d.item_hin === i.item_hin && (this.importType.name == 'rel_item_category' || d.subitem_hin === i.subitem_hin));
+             }
+             for (let cat of cats) {
+                 if(cat.trim()) {
+                     combinations.push({
+                         ...i,
+                         item_id: refItem ? refItem.item_id || refItem._id : null,
+                         subitem_id: refItem && this.importType.name == 'rel_subitem_category' ? refItem.subitem_id || refItem._id : null,
+                         categories: cat.trim()
+                     });
+                 }
+             }
+         }
+      }
+      this.excelArrObj = combinations;
     }
+
     this.stepNo = 2;
     this.isLoader = false;
   }

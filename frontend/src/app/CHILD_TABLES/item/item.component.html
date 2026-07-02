@@ -14,7 +14,7 @@
             <div class="row border-bottom border-secondary">
                <div class="card-body">
                   <div class="row">
-                     <div class="col-3 d-flex justify-content-between">
+                     <div class="col-4 d-flex justify-content-between">
                         <button class="btn btn-primary" onclick="$('#showModal').modal('show')"
                            (click)="showModal = 'Add Item'" *ngIf="settings.add">
                            <i class="dripicons-plus h4 icon-mx-1"> </i>Add Item
@@ -36,7 +36,7 @@
                            </ng-select>
                         </div>
                      </div>
-                     <div class="col-2">
+                     <!-- <div class="col-2">
                         <div class="form-group">
                            <ng-select class="custom" style="width: 100%;" placeholder="Select Subitem List"
                               [clearable]="true" [virtualScroll]="true" (change)="SubitemListSelected($event)"
@@ -45,7 +45,7 @@
                                  {{item.subitem_eng}} : {{item.subitem_roman ? item.subitem_roman : ''}}</ng-option>
                            </ng-select>
                         </div>
-                     </div>
+                     </div> -->
                      <div class="col-3 d-flex">
                         <button class="file btn btn-success" style="font-weight: 700 !important;">
                            <i class="uil uil-arrow-to-bottom"></i> Excel Import
@@ -309,12 +309,14 @@
             <app-subitem-entry *ngIf="showModal == 'Edit Subitem'" (response)='editSubitemResponse($event)'
                [getData]="editData" [isEdit]="true"></app-subitem-entry>
             <app-product-view *ngIf="showModal == 'View Product'" [item]="editData"></app-product-view>
-            <app-excel-import *ngIf='showModal == "ei_subitem_list"' importType="subitem_list" [excelFile]="excelFile"
-               (response)="importResponse('subitem_list')"></app-excel-import>
             <app-excel-import *ngIf='showModal == "ei_item"' importType="item" [excelFile]="excelFile"
-               (response)="importResponse('item')"></app-excel-import>
-            <app-excel-import *ngIf='showModal == "ei_subitem"' importType="subitem" [excelFile]="excelFile"
-               (response)="importResponse('subitem')"></app-excel-import>
+               (response)="importResponse('item', $event)"></app-excel-import>
+            <app-excel-import *ngIf='showModal == "ei_item_category"' importType="rel_item_category" [excelFile]="excelFile" [importedData]="importedItems"
+               (response)="importResponse('rel_item_category')"></app-excel-import>
+            <app-excel-import *ngIf='showModal == "ei_subitem"' importType="subitem" [excelFile]="excelFile" [importedData]="importedItems"
+               (response)="importResponse('subitem', $event)"></app-excel-import>
+            <app-excel-import *ngIf='showModal == "ei_subitem_category"' importType="rel_subitem_category" [excelFile]="excelFile" [importedData]="importedSubitems"
+               (response)="importResponse('rel_subitem_category')"></app-excel-import>
             <app-delete *ngIf='showModal == "delete_item"' [Type]="delType" [ID]="delID"
                (response)="deleteResponse($event)"></app-delete>
          </div>
