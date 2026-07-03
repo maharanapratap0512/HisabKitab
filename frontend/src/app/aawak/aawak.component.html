@@ -180,16 +180,14 @@
                               <div class="col-md-3 mb-3">
                                  <div class="form-group">
                                     <label class="form-label">Item & Subitem</label>
-                                    <app-item-dropdown 
-                                       [items]="items" 
-                                       [(ngModel)]="selectedItemmix" 
-                                       [multiple]="true" 
-                                       [closeOnSelect]="false"
-                                       name="item_id"
-                                    ></app-item-dropdown>
+                                    <app-item-dropdown [items]="items" [(ngModel)]="selectedItemmix" [multiple]="true"
+                                       [closeOnSelect]="false" name="item_id"></app-item-dropdown>
                                     <div class="form-check mt-1">
-                                       <input type="checkbox" class="form-check-input" id="itemOnlyCheckawk" [(ngModel)]="filterBody.itemOnly" name="itemOnly">
-                                       <label class="form-check-label mb-0" for="itemOnlyCheckawk" style="cursor: pointer;"><small class="text-info fw-bold">Item Only (Subitem is Null)</small></label>
+                                       <input type="checkbox" class="form-check-input" id="itemOnlyCheckawk"
+                                          [(ngModel)]="filterBody.itemOnly" name="itemOnly">
+                                       <label class="form-check-label mb-0" for="itemOnlyCheckawk"
+                                          style="cursor: pointer;"><small class="text-info fw-bold">Item Only (Subitem
+                                             is Null)</small></label>
                                     </div>
                                  </div>
                               </div>
@@ -392,14 +390,15 @@
                               </th>
                               <th style="width: 70px;" *ngIf="settings.aawak.pkt_num">Pkt No.</th>
                               <th style="width: 140px;" class="text-start ps-2">
-                                <div class="d-flex align-items-center justify-content-between">
-                                  <span>Date</span>
-                                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
-                                    [isOpen]="!!filterBody.date" (clear)="filterBody.date = null; getFilteredAawakData()"
-                                    triggerOn="hover">
-                                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date" (change)="getFilteredAawakData()">
-                                  </app-popover-filter>
-                                </div>
+                                 <div class="d-flex align-items-center justify-content-between">
+                                    <span>Date</span>
+                                    <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                       direction="right" [isOpen]="!!filterBody.date"
+                                       (clear)="filterBody.date = null; getFilteredAawakData()" triggerOn="hover">
+                                       <input type="date" class="form-control form-control-sm"
+                                          [(ngModel)]="filterBody.date" (change)="getFilteredAawakData()">
+                                    </app-popover-filter>
+                                 </div>
                               </th>
                               <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
                               <th style="width: 150px;">Aawak Mm</th>
@@ -647,7 +646,7 @@
 <!-- Modal -->
 <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel"
    aria-hidden="true">
-   <div class="modal-dialog" style="width: 90%;">
+   <div class="modal-dialog" style="width: 99%;">
       <div class="modal-content">
          <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>

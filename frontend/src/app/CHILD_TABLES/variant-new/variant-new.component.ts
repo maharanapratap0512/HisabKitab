@@ -436,6 +436,20 @@ export class VariantNewComponent implements OnInit {
     if (result?.reload) { this.loadAttributes(); }
   }
 
+  itemAddResponse(ev: any) {
+    this.closeModal();
+    if (ev) {
+      this.getItemData(1);
+    }
+  }
+
+  subitemAddResponse(ev: any) {
+    this.closeModal();
+    if (ev) {
+      this.getItemData(this.page);
+    }
+  }
+
   onAliasSaved(result: any) {
     if (!result?.reload) return;
     if (this.activeItem) this.refreshItemData(this.activeItem._id);

@@ -44,7 +44,9 @@ export class SubitemEntryComponent implements OnInit {
     public auth: AuthService
   ) {
     this.subitemForm = this.fb.group({
-      subitem_list_id: [null],
+      subitem_hin: [null, Validators.required],
+      subitem_eng: [null],
+      subitem_roman: [null],
       unit_id: [null],
       item_id: [null, Validators.required],
       categories: [[], Validators.required],
@@ -85,7 +87,9 @@ export class SubitemEntryComponent implements OnInit {
         categoriesVal = [];
       }
       this.subitemForm.patchValue({
-        subitem_list_id: changes.getData.currentValue.subitem_list_id,
+        subitem_hin: changes.getData.currentValue.subitem_hin,
+        subitem_eng: changes.getData.currentValue.subitem_eng,
+        subitem_roman: changes.getData.currentValue.subitem_roman,
         unit_id: changes.getData.currentValue.unit_id,
         item_id: changes.getData.currentValue.item_id,
         categories: categoriesVal,
@@ -140,7 +144,9 @@ export class SubitemEntryComponent implements OnInit {
         _id: this.getData._id
       }
       body.set = {
-        subitem_list_id: this.subitemForm.value.subitem_list_id,
+        subitem_hin: this.subitemForm.value.subitem_hin,
+        subitem_eng: this.subitemForm.value.subitem_eng,
+        subitem_roman: this.subitemForm.value.subitem_roman,
         unit_id: this.subitemForm.value.unit_id,
         item_id: this.subitemForm.value.item_id,
         categories: this.subitemForm.value.categories,
@@ -194,6 +200,16 @@ export class SubitemEntryComponent implements OnInit {
           unit_id: item.unit_id
         });
       }
+    }
+  }
+
+  onSubitemListChange(ev: any) {
+    if (ev) {
+      this.subitemForm.patchValue({
+        subitem_hin: ev.subitem_hin,
+        subitem_eng: ev.subitem_eng,
+        subitem_roman: ev.subitem_roman
+      });
     }
   }
 
@@ -252,13 +268,14 @@ export class SubitemEntryComponent implements OnInit {
   subitemListAddResponse(ev: any) {
     this.isLoader = true;
     console.log(ev);
-    if (ev._id) {
+    if (ev.subitem_hin) {
 
       $('#subitemComponent > #showModal').modal('hide');
       this.showModal = '';
-      // this.subitem_list.unshift(ev);
       this.subitemForm.patchValue({
-        subitem_list_id: ev._id
+        subitem_hin: ev.subitem_hin,
+        subitem_eng: ev.subitem_eng,
+        subitem_roman: ev.subitem_roman
       });
       this.isLoader = false;
     }

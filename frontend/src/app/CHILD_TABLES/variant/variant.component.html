@@ -53,13 +53,12 @@
                             <input type="text" class="form-control form-control-sm mb-1"
                                 placeholder="Item search karo..." #searchInput
                                 (keyup.enter)="onSearch(searchInput.value)" />
-                            <select class="form-select form-select-sm"
-                                (change)="onCatFilter($any($event.target).value)">
-                                <option value="">-- Sab Categories --</option>
-                                <option *ngFor="let c of categories; trackBy:trackById" [value]="c._id">
-                                    {{ c.category_hin }}
-                                </option>
-                            </select>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-outline-primary btn-sm flex-grow-1"
+                                    (click)="openModal('Add Item')">+ Item</button>
+                                <button class="btn btn-outline-secondary btn-sm flex-grow-1"
+                                    (click)="openModal('Add Subitem')">+ Subitem</button>
+                            </div>
                         </div>
 
                         <!-- Items count -->
@@ -365,6 +364,13 @@
                 <app-item-alias-entry *ngIf="showModal === 'Manage Item Aliases'" [getData]="editData"
                     (response)="onAliasSaved($event)">
                 </app-item-alias-entry>
+
+                <!-- Add Item  -->
+                <app-item-entry *ngIf="showModal === 'Add Item'" (response)="itemAddResponse($event)"></app-item-entry>
+
+                <!-- Add Subitem -->
+                <app-subitem-entry *ngIf="showModal === 'Add Subitem'"
+                    (response)="subitemAddResponse($event)"></app-subitem-entry>
 
             </div>
 

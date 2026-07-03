@@ -69,13 +69,13 @@ export class GlobalService {
     });
   }
 
-  observeList(): Observable<any> {
+  observeList(forceRefresh: boolean = false): Observable<any> {
     // if Lists already set, just emit it
-    if (this.Lists) {
+    if (this.Lists && !forceRefresh) {
       return of(this.Lists);
     }
 
-    if (!this.lists$) {
+    if (!this.lists$ || forceRefresh) {
       this.isLoader.next(true);
       this.lists$ = this.http
         .get(this.api.URLS['LISTALL'] + '/' + this.auth.webUser.dept_id)

@@ -22,19 +22,17 @@
                                     (keyup.enter)="onSearch(searchInput.value)" />
                             </div>
 
-                            <!-- Category filter (ng-select multi) -->
-                            <div class="col-3">
-                                <ng-select class="custom" placeholder="-- Categories filter --" [multiple]="true"
-                                    [virtualScroll]="true" [clearable]="true" (change)="onCatFilter($event)"
-                                    [ngModelOptions]="{standalone: true}" [(ngModel)]="conditionObj.categories">
-                                    <ng-option *ngFor="let c of categories" [value]="c._id">
-                                        {{ c.category_hin }}
-                                    </ng-option>
-                                </ng-select>
+                            <!-- Action Buttons -->
+                            <div class="col-3 d-flex gap-1">
+                                <button class="btn btn-outline-primary btn-sm flex-grow-1"
+                                    (click)="openModal('Add Item')">+ Item</button>
+                                <button class="btn btn-outline-secondary btn-sm flex-grow-1"
+                                    (click)="openModal('Add Subitem')">+ Subitem</button>
                             </div>
 
                             <div class="col-auto ms-auto d-flex gap-2">
-                                <button class="btn btn-outline-success btn-sm" (click)="exportToExcel()" title="Export list to Excel">
+                                <button class="btn btn-outline-success btn-sm" (click)="exportToExcel()"
+                                    title="Export list to Excel">
                                     <i class="uil uil-file-download-alt"></i> Excel
                                 </button>
                                 <button class="btn btn-outline-info btn-sm"
@@ -59,7 +57,8 @@
                     <div class="col-12">
                         <small class="text-muted ps-1">
                             <i class="uil uil-info-circle me-1 text-primary"></i>
-                            Right-click on items for more actions like Edit, Delete, etc. (आइटम पर राइट क्लिक करें एडिट, डिलीट आदि के लिए...)
+                            Right-click on items for more actions like Edit, Delete, etc. (आइटम पर राइट क्लिक करें एडिट,
+                            डिलीट आदि के लिए...)
                         </small>
                     </div>
                 </div>
@@ -76,7 +75,8 @@
                                         <span>Item Name (Hindi / Eng)</span>
                                         <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                             direction="left" [isOpen]="conditionObj.item_ids?.length > 0"
-                                            (clear)="conditionObj.item_ids = undefined; applyFilter()" triggerOn="hover">
+                                            (clear)="conditionObj.item_ids = undefined; applyFilter()"
+                                            triggerOn="hover">
                                             <ng-select class="custom-sm" [multiple]="true" placeholder="Select items"
                                                 [(ngModel)]="conditionObj.item_ids" (change)="applyFilter()"
                                                 style="width: 250px;">
@@ -131,8 +131,8 @@
 
                                 <!-- ── ITEM ROW (main) ─────────────────────────────────── -->
                                 <tr class="main-row" style="cursor:pointer;" (click)="toggleAccordion(item)"
-                                    [class.table-active]="isExpanded(item)"
-                                    [appContextMenu]="menuItems" [contextMenuData]="item">
+                                    [class.table-active]="isExpanded(item)" [appContextMenu]="menuItems"
+                                    [contextMenuData]="item">
 
                                     <!-- Expand arrow -->
                                     <td class="text-center">
@@ -405,7 +405,7 @@
   SINGLE MODAL — all entry forms inside
 ════════════════════════════════════════════════════════════════════════ -->
 <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1">
-    <div class="modal-dialog" [style.width]="showModal === 'Generate Variants' ? '90%' : '70%'" style="max-width:92%;">
+    <div class="modal-dialog">
         <div class="modal-content">
 
             <div class="modal-header py-2">
@@ -444,6 +444,12 @@
                 <app-item-entry *ngIf="showModal === 'Edit Item'" [getData]="editData" [isEdit]="true"
                     (response)="onItemEdited($event)">
                 </app-item-entry>
+
+                <app-item-entry *ngIf="showModal === 'Add Item'" (response)="itemAddResponse($event)">
+                </app-item-entry>
+
+                <app-subitem-entry *ngIf="showModal === 'Add Subitem'" (response)="subitemAddResponse($event)">
+                </app-subitem-entry>
 
                 <app-delete *ngIf='showModal == "delete_item"' [Type]="delType" [ID]="delID"
                     (response)="deleteResponse($event)"></app-delete>

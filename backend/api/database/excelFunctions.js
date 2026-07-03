@@ -125,7 +125,6 @@ class ExcelFunctions {
       subitem_roman: null,
       unit_id: null,
       item_id: null,
-      categories: [],
       extra_note: null,
       document: null,
       restrict_month: null,
@@ -647,6 +646,7 @@ class ExcelFunctions {
          subitem: subitemStr && typeof subitemStr == 'string' ? subitemStr.trim().toLowerCase().normalize('NFC') : subitemStr,
          item: itemStr && typeof itemStr == 'string' ? itemStr.trim().toLowerCase().normalize('NFC') : itemStr,
       }
+
       if (!this.checkedButNotFound(data, 'subitem')) {
          for (let i in this.subitem) {
             if (this.subitem[i].item_id == item_id && [this.subitem[i].subitem_hin, this.subitem[i].subitem_eng, this.subitem[i].subitem_roman].includes(data.subitem)) {
@@ -660,7 +660,7 @@ class ExcelFunctions {
          }
          // Prevent duplicate correction entries
          if (!this.correctionList.find(c => c.type === 'item' && c.name.item === data.item && c.name.subitem === data.subitem)) {
-             this.correctionList.push({ type: 'item', name: data, id: item_id, id2: null });
+            this.correctionList.push({ type: 'item', name: data, id: item_id, id2: null });
          }
       }
       return null;
@@ -778,6 +778,8 @@ class ExcelFunctions {
    async verifyAndInsert(type, data, headerList) {
       let status;
       let fdata = await this.setFormData(this[type.name + '_form'], data);
+      // console.log(fdata);
+
       let duplicate = await this.Fn.checkDuplication(type, fdata);
       if (duplicate) {
          let fullDuplicate = await this.checkFullDuplication(duplicate, data, headerList);
@@ -807,21 +809,22 @@ class ExcelFunctions {
    }
 
    async setFormData(formObj, data) {
-      for (const key of Object.keys(formObj)) {
+      let newFormObj = { ...formObj };
+      for (const key of Object.keys(newFormObj)) {
          if (data[key] == undefined || data[key] == `` || data[key] == '-')
             data[key] = null;
 
          if (this.jsonKey.includes(key)) {
-            formObj[key] = JSON.stringify(data[key] ? data[key] : formObj[key])
+            newFormObj[key] = JSON.stringify(data[key] ? data[key] : newFormObj[key])
          } else if (this.booleanKey.includes(key)) {
-            formObj[key] = data[key] ? 1 : 0;
+            newFormObj[key] = data[key] ? 1 : 0;
          } else {
-            formObj[key] = data[key]
+            newFormObj[key] = data[key]
          }
       }
-      formObj.is_xl = 1;
-      formObj.dept_id = this.dept_id;
-      return formObj;
+      newFormObj.is_xl = 1;
+      newFormObj.dept_id = this.dept_id;
+      return newFormObj;
    }
 
    async isObject(value) {

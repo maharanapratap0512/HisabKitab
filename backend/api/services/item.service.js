@@ -4,7 +4,9 @@ const Fn = require('../database/functions');
 const { sutramDB } = require('../database/db.model');
 
 const item = new BaseTable('item');
+const subitem = new BaseTable('subitem');
 const rel_item_cat = new BaseTable('rel_item_category');
+const rel_subitem_cat = new BaseTable('rel_subitem_category');
 const item_aliases = new BaseTable('item_aliases');
 const deptService = require('./department.service');
 const HmpService = require('./hmp.service');
@@ -140,6 +142,101 @@ async function createItem(data, dept_id = null) {
     } catch (err) {
         throw err;
     }
+}
+
+/**
+ * Checks if a subitem exists by subitem_hin under the same item_id.
+ */
+function getSubitemConflict(data, currentId = null) {
+    if (!data.subitem_hin || !data.item_id) return null;
+    const cid = currentId || -1;
+    const conflict = Fn.db.prepare(`
+        SELECT _id, subitem_hin
+        FROM subitem
+        WHERE item_id = ? AND subitem_hin = ? AND _id != ?
+        LIMIT 1
+    `).get(data.item_id, data.subitem_hin, cid);
+    return conflict ? { type: 'primary', name: conflict.subitem_hin, conflict } : null;
+}
+
+function checkSubitemConflict(data, currentId = null) {
+    const result = getSubitemConflict(data, currentId);
+    if (result) {
+        throw new Error(`Yeh subitem '${result.name}' pehle se hi exist karta hai.`);
+    }
+}
+
+async function createSubitem(data, dept_id = null) {
+    try {
+        checkSubitemConflict(data);
+        data.active = 1;
+        data.created_at = new Date().toISOString();
+
+        // Handle categories array separately for junction table
+        let catIds = [];
+        if (Array.isArray(data.categories)) {
+            catIds = [...data.categories];
+        } else if (typeof data.categories === 'string') {
+            try {
+                catIds = JSON.parse(data.categories);
+            } catch (e) {
+                catIds = [];
+            }
+        }
+
+        const subitem_id = subitem.insert(data, false);
+
+        if (subitem_id) {
+            for (const cat_id of catIds) {
+                rel_subitem_cat.insert({ subitem_id, category_id: Number(cat_id) }, false);
+            }
+            if (dept_id) deptService.pushToConfig(dept_id, 'subitem', subitem_id);
+        }
+
+        return subitem.getById(subitem_id, { full: true });
+    } catch (err) {
+        throw err;
+    }
+}
+
+/**
+ * Inserts a relation between an item and a category.
+ */
+async function createRelItemCategory(data) {
+    try {
+        rel_item_cat.insert(data, false);
+        return { ...data };
+    } catch (err) {
+        throw err;
+    }
+}
+
+/**
+ * Inserts a relation between a subitem and a category.
+ */
+async function createRelSubitemCategory(data) {
+    try {
+        rel_subitem_cat.insert(data, false);
+        return { ...data };
+    } catch (err) {
+        throw err;
+    }
+}
+
+/**
+ * Checks if a relation between a subitem and a category already exists.
+ */
+function getRelSubitemCategoryConflict(data) {
+    const conflict = Fn.db.prepare(`SELECT * FROM rel_subitem_category WHERE subitem_id = ? AND category_id = ?`).get(data.subitem_id, data.category_id);
+    return conflict ? { type: 'duplicate', name: 'Relation exists', conflict } : null;
+}
+
+/**
+ * Checks if a relation between an item and a category already exists.
+ */
+function getRelItemCategoryConflict(data) {
+    const conflict = Fn.db.prepare(`SELECT * FROM rel_item_category WHERE item_id = ? AND category_id = ?`).get(data.item_id, data.category_id);
+    return conflict ? { type: 'duplicate', name: 'Relation exists', conflict } : null;
 }
 
 /**
@@ -394,5 +491,12 @@ module.exports = {
     deleteItem,
     bulkCreateItems,
     getItemConflict,
-    checkItemConflict
+    checkItemConflict,
+    createRelItemCategory,
+    createRelSubitemCategory,
+    getRelItemCategoryConflict,
+    getRelSubitemCategoryConflict,
+    getSubitemConflict,
+    checkSubitemConflict,
+    createSubitem
 };

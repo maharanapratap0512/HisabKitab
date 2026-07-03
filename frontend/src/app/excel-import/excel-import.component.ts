@@ -361,7 +361,14 @@ export class ExcelImportComponent implements OnInit {
 
     if (data.type == 'item') {
       for (let i in this.excelArrObj) {
-        if (this.excelArrObj[i].item == data.name.item && this.excelArrObj[i].subitem == data.name.subitem) {
+        if (typeof data.name === 'string') {
+          if (this.excelArrObj[i].item == data.name) {
+            if (this.excelArrObj[i].item_id != data.item._id) {
+              this.excelArrObj[i].item_id = data.item._id;
+              this.excelArrObj[i].item_hin = data.item.item_hin;
+            }
+          }
+        } else if (this.excelArrObj[i].item == data.name.item && this.excelArrObj[i].subitem == data.name.subitem) {
           if (this.excelArrObj[i].item_id != data.item._id) {
             this.excelArrObj[i].item_id = data.item._id;
             this.excelArrObj[i].item_hin = data.item.item_hin;
@@ -372,7 +379,6 @@ export class ExcelImportComponent implements OnInit {
             this.excelArrObj[i].subitem_id = data.subitem._id;
             this.excelArrObj[i].subitem_hin = data.subitem.subitem_hin;
           }
-
         }
       }
     } else if (data.isArray) {

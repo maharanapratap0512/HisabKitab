@@ -224,6 +224,20 @@ export class VariantComponent implements OnInit {
     }
   }
 
+  itemAddResponse(ev: any) {
+    this.closeModal();
+    if (ev) {
+      this.getItemData(1);
+    }
+  }
+
+  subitemAddResponse(ev: any) {
+    this.closeModal();
+    if (ev) {
+      this.getItemData(this.page);
+    }
+  }
+
   // ════════════════════════════════════════════════════════════════════════
   //  DELETE VARIANT
   // ════════════════════════════════════════════════════════════════════════

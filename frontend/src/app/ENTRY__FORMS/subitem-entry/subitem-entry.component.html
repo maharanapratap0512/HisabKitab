@@ -19,23 +19,33 @@
             </div>
             <div class="col-md-3 mb-3">
                <div class="form-group">
-                  <label class="form-label">Subitem List</label>
-                  <div class="float-end">
-                     <a type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
-                        class="btn btn-sm btn-outline-primary" (click)="setView('Subitem List')"><i
-                           class=" dripicons-view-list"></i></a>
-                     <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end"
-                        onclick="$('#subitemComponent > #showModal').modal('show')"
-                        (click)="showModal = 'Add Subitem List'">+
-                        Add</a>
-                  </div>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Select SubitemList" [clearable]="false"
-                     [virtualScroll]="true" formControlName="subitem_list_id"
-                     [ngClass]="{'validation':subitemForm.get('subitem_list')?.errors && (subitemForm.get('subitem_list')?.touched || subitemForm.get ('subitem_list')?.dirty)}">
-                     <ng-option selected="selected" disabled value="">Select Subitem List</ng-option>
-                     <ng-option *ngFor="let item of subitem_list" [value]="item._id">{{item.subitem_hin}} :
+                  <label class="form-label">Auto-Fill Subitem</label>
+                  <ng-select class="custom" style="width: 100%;" placeholder="Select from list to auto-fill" [clearable]="true"
+                     [virtualScroll]="true" (change)="onSubitemListChange($event)">
+                     <ng-option *ngFor="let item of subitem_list" [value]="item">{{item.subitem_hin}} :
                         {{item.subitem_eng}} : {{item.subitem_roman}}</ng-option>
                   </ng-select>
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Subitem (Hindi) <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control custom" placeholder="Subitem Hin" formControlName="subitem_hin"
+                     [ngClass]="{'validation':subitemForm.get('subitem_hin')?.errors && (subitemForm.get('subitem_hin')?.touched || subitemForm.get ('subitem_hin')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Subitem (Eng)</label>
+                  <input type="text" class="form-control custom" placeholder="Subitem Eng" formControlName="subitem_eng"
+                     [ngClass]="{'validation':subitemForm.get('subitem_eng')?.errors && (subitemForm.get('subitem_eng')?.touched || subitemForm.get ('subitem_eng')?.dirty)}">
+               </div>
+            </div>
+            <div class="col-md-3 mb-3">
+               <div class="form-group">
+                  <label class="form-label">Subitem (Roman)</label>
+                  <input type="text" class="form-control custom" placeholder="Subitem Roman" formControlName="subitem_roman"
+                     [ngClass]="{'validation':subitemForm.get('subitem_roman')?.errors && (subitemForm.get('subitem_roman')?.touched || subitemForm.get ('subitem_roman')?.dirty)}">
                </div>
             </div>
             <div class="col-md-3 mb-3">
@@ -158,10 +168,6 @@
                <!-- Add Item  -->
                <app-item-entry *ngIf="showModal == 'Add Item'" (response)="itemAddResponse($event)"></app-item-entry>
 
-               <!-- Add Subitem_List  -->
-               <app-subitem-list-entry *ngIf="showModal == 'Add Subitem List'"
-                  (response)="subitemListAddResponse($event)">
-               </app-subitem-list-entry>
 
                <!-- Add Image -->
                <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)"

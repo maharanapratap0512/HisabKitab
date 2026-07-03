@@ -819,8 +819,21 @@ export class AawakComponent implements OnInit {
       for (let i = 0; i < result.length; i++) {
         uniqueMM.add(result[i].mm_id);
 
+        let cat = '';
+        let item = this.gs.Lists.itemmix.find((it: { _id: any; }) => it._id == result[i].item_id);
+        if (item) {
+          if (result[i].subitem_id) {
+            let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
+            cat = this.getCategoryString(subitem || item);
+          }
+          else {
+            cat = this.getCategoryString(item);
+          }
+        }
+
         let awkObj: any = {
           'MM': result[i].mm_hin,
+          'Category': cat,
           'Company': result[i].company_name ? result[i].company_name : '-',
         };
         if (this.itemSubitemMerge) {

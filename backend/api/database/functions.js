@@ -515,6 +515,8 @@ class Functions extends DBContex {
 
       return await this.getList('subitem', { dept_id: dept_id, full: true }).then(async (resolve) => {
          // return resolve.data || [];
+         // console.log(resolve.data);
+
          return this.convertToLower(resolve.data || [], ['subitem_hin', 'subitem_eng', 'subitem_roman']);
       }, (err) => {
          return [];

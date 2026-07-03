@@ -150,9 +150,6 @@ router.put('/verify/:dept_id', async (req, res, next) => {
                 refTableList.push(req.body.config[i].ref_table);
             }
         }
-        if (req.body.importType == "subitem") {
-
-        }
         let fn = new ExcelFunctions(refTableList, req.params.dept_id);
         for (let i in req.body.excelData) {
             for (let j in req.body.config) {
@@ -379,6 +376,11 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                 form = fn.item_form;
             } else if (type === 'category') {
                 service = require('../services/category.service');
+            } else if (type === 'rel_item_category' || type === 'rel_subitem_category' || type === 'subitem') {
+                service = require('../services/item.service');
+                if (type === 'subitem') {
+                    form = fn.subitem_form;
+                }
             }
 
             for (let i = 0; i < total; i++) {
@@ -410,13 +412,41 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                             row.newData = insResult;
                             result = { status: 'inserted', data: row };
                         }
+                    } else if (type === 'rel_item_category') {
+                        const conflict = service.getRelItemCategoryConflict(row);
+                        if (conflict) {
+                            result = { status: 'duplicate', data: row };
+                        } else {
+                            let insResult = await service.createRelItemCategory(row);
+                            row.newData = insResult;
+                            result = { status: 'inserted', data: row };
+                        }
+                    } else if (type === 'rel_subitem_category') {
+                        const conflict = service.getRelSubitemCategoryConflict(row);
+                        if (conflict) {
+                            result = { status: 'duplicate', data: row };
+                        } else {
+                            let insResult = await service.createRelSubitemCategory(row);
+                            row.newData = insResult;
+                            result = { status: 'inserted', data: row };
+                        }
+                    } else if (type === 'subitem') {
+                        let fdata = await fn.setFormData(form, row);
+                        const conflict = service.getSubitemConflict(fdata);
+                        if (conflict) {
+                            result = { status: 'duplicate', data: row };
+                        } else {
+                            let insResult = await service.createSubitem(fdata, req.params.dept_id);
+                            row.newData = insResult;
+                            result = { status: 'inserted', data: row };
+                        }
                     } else {
                         result = await fn.verifyAndInsert(importType, row, headerList);
                     }
                     await Fn.commit();
                 } catch (err) {
                     await Fn.rollback();
-                    console.error(`[Excel Import] ${type} Error at row ${i + 1}:`, err.message);
+                    console.error(`[Excel Import] ${type} Error at row ${i + 1}:`, err);
                     result = { status: 'rejected', data: row, error: err.message };
                 }
                 sendUpdate({ index: i + 1, total, status: result.status, result });

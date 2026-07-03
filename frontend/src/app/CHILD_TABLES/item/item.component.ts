@@ -164,8 +164,10 @@ export class ItemComponent implements OnInit {
     switch (iType) {
       case 'item':
         if (data && Array.isArray(data)) this.importedItems = data;
-        this.importType = 'item_category';
-        this.openModal('ei_item_category');
+        this.gs.observeList(true).subscribe(() => {
+          this.importType = 'item_category';
+          this.openModal('ei_item_category');
+        });
         break;
 
       case 'rel_item_category':
@@ -175,8 +177,10 @@ export class ItemComponent implements OnInit {
 
       case 'subitem':
         if (data && Array.isArray(data)) this.importedSubitems = data;
-        this.importType = 'rel_subitem_category';
-        this.openModal('ei_subitem_category');
+        this.gs.observeList(true).subscribe(() => {
+          this.importType = 'rel_subitem_category';
+          this.openModal('ei_subitem_category');
+        });
         break;
 
       case 'rel_subitem_category':

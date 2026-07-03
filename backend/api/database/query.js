@@ -2234,7 +2234,7 @@ const subitem = {
 
 const subitem_list = {
     select:
-        `select * from subitem_list ?`
+        `select min(_id) as _id, subitem_hin, subitem_eng, subitem_roman from subitem group by subitem_hin, subitem_eng, subitem_roman ?`
     , select_full:
         `select * from subitem_list ? limit @limit offset @offset`
     , insert:

@@ -113,6 +113,15 @@ export class JawakComponent implements OnInit {
     $('#showModal').modal('show');
   }
 
+  getCategoryString(obj: any): string {
+    if (obj.categories && Array.isArray(obj.categories)) {
+      return obj.categories.map((c: any) => c.category_hin).join(', ');
+    } else if (obj.categories_hin && Array.isArray(obj.categories_hin)) {
+      return obj.categories_hin.join(', ');
+    }
+    return '';
+  }
+
   exportExcel() {
     this.isLoader = true;
     this.loadingStatus = "डाटा प्रोसेस हो रहा है... ";
@@ -139,10 +148,27 @@ export class JawakComponent implements OnInit {
         uniqueJawakMM.add(result[i].jawak_mm_id);
         uniqueUnit.add(result[i].unit_id);
 
+        let cat = '';
+        let item = this.gs.Lists.itemmix.find((it: { _id: any; }) => it._id == result[i].item_id);
+        if (item) {
+          if (result[i].subitem_id) {
+            let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
+            if (subitem) {
+              cat = this.getCategoryString(subitem);
+            } else {
+              cat = this.getCategoryString(item);
+            }
+          }
+          else {
+            cat = this.getCategoryString(item);
+          }
+        }
+
         this.allJwkData.push({
           'Date': result[i].date ? this.gs.formatDisplayDate(result[i].date) : '-',
           'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
           'MM': result[i].mm_id ? result[i].mm_hin : '-',
+          'Category': cat,
           'Item': result[i].item_id ? result[i].item_hin : '-',
           'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
           'Condition': result[i].condition_id ? result[i].condition_hin : '-',

@@ -137,6 +137,7 @@
                      <table id="datatable-buttons" class="table table-hover dt-responsive" style="table-layout: auto;">
                         <thead>
                            <tr>
+                              <th>#</th>
                               <th style="width: fit-content;" *ngFor="let header of headerList">
                                  {{header.name}}
                               </th>
@@ -145,6 +146,7 @@
                         <tbody>
                            <tr
                               *ngFor="let data of excelArrObj | paginate:{itemsPerPage:itemsPerPage,currentPage:page2,totalItems:excelArrObj.length}; let i=index;">
+                              <td> {{(page2-1) * itemsPerPage + i+1}} </td>
                               <td *ngFor="let header of headerList">
                                  {{data[header.name]}}
                               </td>
@@ -295,9 +297,13 @@
                                  (blur)="toggleCorrection(((page_unmatched-1) * 25) + i, false)" tabindex="0">
                                  <td>{{((page_unmatched-1) * 25) + i+1}}</td>
                                  <td> {{data.type}} </td>
-                                 <td *ngIf="data.type != 'item'"> {{data.isArray ? data.name.join(', ') : data.name}} </td>
-                                 <td *ngIf="data.type == 'item'">
+                                 <td *ngIf="data.type != 'item'"> {{data.isArray ? data.name.join(', ') : data.name}}
+                                 </td>
+                                 <td *ngIf="data.type == 'item' && data.name.item">
                                     {{data.name.item}} - {{data.name.subitem}}
+                                 </td>
+                                 <td *ngIf="data.type == 'item' && !data.name.item">
+                                    {{data.name}}
                                  </td>
                                  <td>
                                     <div class="row" *ngIf="data.correction">
@@ -314,8 +320,8 @@
 
                                        <!-- category dropdown (single) -->
                                        <div class="col-4" *ngIf="data.type == 'category' && !data.isArray">
-                                          <ng-select class="custom custom-import"
-                                             placeholder="Select Category" [virtualScroll]="true" [(ngModel)]="data.id"
+                                          <ng-select class="custom custom-import" placeholder="Select Category"
+                                             [virtualScroll]="true" [(ngModel)]="data.id"
                                              [ngModelOptions]="{standalone: true}" appendTo="body">
                                              <ng-option selected="selected" disabled value="">-- Select Category
                                                 --</ng-option>
@@ -326,9 +332,8 @@
 
                                        <!-- category dropdown (multi / array type) -->
                                        <div class="col-6" *ngIf="data.type == 'category' && data.isArray">
-                                          <ng-select class="custom custom-import"
-                                             placeholder="Select Categories" [virtualScroll]="true"
-                                             [multiple]="true" [(ngModel)]="data.ids"
+                                          <ng-select class="custom custom-import" placeholder="Select Categories"
+                                             [virtualScroll]="true" [multiple]="true" [(ngModel)]="data.ids"
                                              [ngModelOptions]="{standalone: true}" appendTo="body">
                                              <ng-option *ngFor="let item of categories" [value]="item._id">
                                                 {{item.category_hin}}:{{item.category_eng}}</ng-option>
