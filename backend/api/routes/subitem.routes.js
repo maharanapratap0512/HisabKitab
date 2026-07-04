@@ -207,12 +207,22 @@ router.put('/transfer/:dept_id', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     try {
         if (req.params.id) {
-            await DB.delete('subitem', req.params.id).then((data) => {
-                res.json({
-                    success: true,
-                    result: data
-                });
-            })
+            let idStr = req.params.id;
+            if (idStr.includes(',')) {
+                await DB.deleteManyIds('subitem', idStr).then((data) => {
+                    res.json({
+                        success: true,
+                        result: data
+                    });
+                })
+            } else {
+                await DB.delete('subitem', idStr).then((data) => {
+                    res.json({
+                        success: true,
+                        result: data
+                    });
+                })
+            }
         }
         else {
             return next(new Error('Id not found.'))

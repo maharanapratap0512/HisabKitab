@@ -151,7 +151,7 @@ function getSubitemConflict(data, currentId = null) {
     if (!data.subitem_hin || !data.item_id) return null;
     const cid = currentId || -1;
     const conflict = Fn.db.prepare(`
-        SELECT _id, subitem_hin
+        SELECT *
         FROM subitem
         WHERE item_id = ? AND subitem_hin = ? AND _id != ?
         LIMIT 1
@@ -446,15 +446,22 @@ async function transferItemReferences(from_id, to_id, dept_id) {
 /**
  * Deletes an item.
  */
-async function deleteItem(id, userData) {
+async function deleteItem(idOrIds, userData) {
     // Priority: userData (from auth/params) > data (if passed)
     const dept_id = (userData && userData.dept_id) ? userData.dept_id :
         (userData && userData.params && userData.params.dept_id) ? userData.params.dept_id : null;
     try {
-        rel_item_cat.delete({ item_id: id });
-        item_aliases.delete({ item_id: id });
-        const res = item.deleteById(id);
-        if (dept_id) deptService.removeFromConfig(dept_id, 'item', id);
+        const ids = typeof idOrIds === 'string' && idOrIds.includes(',') ? idOrIds.split(',').map(Number) : (Array.isArray(idOrIds) ? idOrIds : [Number(idOrIds)]);
+        
+        rel_item_cat.delete({ item_id: ids });
+        item_aliases.delete({ item_id: ids });
+        const res = item.delete({ _id: ids });
+        
+        if (dept_id) {
+            for (const id of ids) {
+                deptService.removeFromConfig(dept_id, 'item', id);
+            }
+        }
         return res;
     } catch (err) {
         throw err;

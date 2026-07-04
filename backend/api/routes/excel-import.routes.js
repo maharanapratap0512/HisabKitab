@@ -434,7 +434,14 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                         let fdata = await fn.setFormData(form, row);
                         const conflict = service.getSubitemConflict(fdata);
                         if (conflict) {
-                            result = { status: 'duplicate', data: row };
+                            let fullDuplicate = await fn.checkFullDuplication([conflict.conflict], row, headerList);
+                            if (fullDuplicate.found) {
+                                result = { status: 'duplicate', data: row };
+                            } else {
+                                row.duplicate = fullDuplicate.list;
+                                row._id = conflict.conflict._id;
+                                result = { status: 'update', data: row };
+                            }
                         } else {
                             let insResult = await service.createSubitem(fdata, req.params.dept_id);
                             row.newData = insResult;

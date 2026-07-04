@@ -8,6 +8,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { ExcelExportService } from 'src/app/services/excel-export.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
+import { SelectionService } from 'src/app/services/selection.service';
 import Swal from 'sweetalert2';
 declare var $: any;
 
@@ -57,6 +58,7 @@ export class DeleteComponent {
     private excelExportService: ExcelExportService,
     public auth: AuthService,
     private spinner: NgxSpinnerService,
+    public selectionService: SelectionService,
     private route: ActivatedRoute) {
     this.apiMapping = {
       'AAWAK': api.URLS['AAWAK'] + 'filter/',
@@ -68,6 +70,7 @@ export class DeleteComponent {
       'BACHATNEW': api.URLS['BACHATNEW'] + 'filter/',
       'HMP': api.URLS['HMP'] + 'batch/',
       'PRASTAV': api.URLS['PRASTAV'] + 'filter/',
+      'VARIANT': api.URLS['VARIANT'] + 'filter/',
     }
   }
 
@@ -75,11 +78,11 @@ export class DeleteComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     console.log("changes", changes);
-    if (changes.Type.currentValue) {
-      this.Type = changes.Type.currentValue;
+    if (changes['Type'] && changes['Type'].currentValue) {
+      this.Type = changes['Type'].currentValue;
     }
-    if (changes.ID.currentValue) {
-      this.ID = changes.ID.currentValue;
+    if (changes['ID'] && changes['ID'].currentValue) {
+      this.ID = changes['ID'].currentValue;
     }
     this.configureData();
     console.log(this.ID, this.Type);
@@ -147,6 +150,22 @@ export class DeleteComponent {
           relatedTables: ['AAWAK', 'JAWAK', 'HMP', 'PRASTAV', 'ITEM', 'SUBITEM', 'PRODUCT'],
           transferAPI: 'UNIT',
           listAPI: 'UNIT'
+        },
+        'attribute': {
+          apiName: 'VARIANT',
+          apiPath: 'attributes/',
+          filterBody: { attribute_id: [this.ID] },
+          relatedTables: ['VARIANT'],
+          transferAPI: null,
+          listAPI: null
+        },
+        'attribute_value': {
+          apiName: 'VARIANT',
+          apiPath: 'attribute-values/',
+          filterBody: { attribute_value_id: [this.ID] },
+          relatedTables: ['VARIANT'],
+          transferAPI: null,
+          listAPI: null
         }
       };
 
@@ -174,10 +193,17 @@ export class DeleteComponent {
             }, err => { this.isLoader = false; });
             return; // Wait for async name fetch
           } else {
-            this.filterBody = { [sub.transferField]: [this.ID] };
+            this.filterBody = { [sub.transferField]: Array.isArray(this.ID) ? this.ID : [this.ID] };
           }
         } else {
-          this.filterBody = config.filterBody;
+          // If ID is an array, spread it or use it directly, but config.filterBody uses [this.ID] statically in the definition!
+          // We must dynamically map the filterBody arrays to use the selected IDs
+          this.filterBody = JSON.parse(JSON.stringify(config.filterBody));
+          for (let k in this.filterBody) {
+             if (Array.isArray(this.filterBody[k])) {
+                 this.filterBody[k] = Array.isArray(this.ID) ? this.ID : [this.ID];
+             }
+          }
         }
 
         // Load transfer list
@@ -214,6 +240,15 @@ export class DeleteComponent {
     this.canDelete = false;
     this.relatedData = {}
     this.selectedTable = '';
+    
+    if (!this.relatedTables || this.relatedTables.length === 0) {
+      this.isLoader = false;
+      this.canDelete = true;
+      // Auto-trigger SWAL if no related tables need checking on frontend
+      this.finalDelete();
+      return;
+    }
+
     for (let value of this.relatedTables) {
       console.log(value, this.apiMapping[value], this.apiMapping);
 
@@ -275,8 +310,13 @@ export class DeleteComponent {
       this.http.delete(this.api.getUrl('BACHATNEW') + 'many/' + this.auth.webUser.dept_id, this.filterBody).subscribe();
     }
 
+    const configKey = this.configMapping[this.Type] ? this.Type : 'support_list';
+    const config = this.configMapping[configKey];
+    const apiPath = config?.apiPath || '';
+
     // Main deletion
-    this.http.delete(this.api.getUrl(this.apiName) + this.ID).subscribe((data: any) => {
+    const finalId = Array.isArray(this.ID) ? this.ID.join(',') : this.ID;
+    this.http.delete(this.api.getUrl(this.apiName) + apiPath + finalId).subscribe((data: any) => {
       if (data['success']) {
         this.response.emit(true);
       } else {
@@ -306,6 +346,8 @@ export class DeleteComponent {
       case 'HMP': this.setHmpFields();
         break;
       case 'PRASTAV': this.setPrastavFields();
+        break;
+      case 'VARIANT': this.setVariantFields();
         break;
       default:
     }
@@ -464,6 +506,21 @@ export class DeleteComponent {
     ]
   }
 
+  setVariantFields() {
+    this.fields = [
+      {
+        title: "Item",
+        columns: ["item_hin", "item_eng"]
+      }, {
+        title: "Variant Name",
+        columns: ["display_name"]
+      }, {
+        title: "SKU",
+        columns: ["sku"]
+      }
+    ]
+  }
+
   setHmpFields() {
     this.fields = [
       {
@@ -576,6 +633,50 @@ export class DeleteComponent {
   deleteResponse(ev: any) {
     this.closeModal();
     this.getRelatedData();
+  }
+
+  deleteSelected() {
+    if (!this.selectedTable) return;
+    const selectedIds = this.selectionService.getSelected(this.selectedTable);
+    if (!selectedIds || selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one item to delete.');
+      return;
+    }
+
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `You want to delete ${selectedIds.length} selected items?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete them!'
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        this.isLoader = true;
+        const idsStr = selectedIds.join(',');
+        
+        let type = this.selectedTable ? this.selectedTable.toLowerCase() : '';
+        if (['subitem'].includes(type)) {
+          // If subitem, open delete modal for bulk? No, subitem API supports bulk now!
+          // We can just use the standard API call for all if backend supports it.
+        }
+
+        this.http.delete(this.api.getUrl(this.selectedTable) + '/' + idsStr).subscribe((data: any) => {
+          this.isLoader = false;
+          if (data['success']) {
+            this.selectionService.clear(this.selectedTable);
+            this.getRelatedData();
+            this.toastr.success('Selected items deleted successfully.');
+          } else {
+            this.toastr.error(data['message'] || 'Delete failed.');
+          }
+        }, err => {
+          this.isLoader = false;
+          this.toastr.error(err['error']?.message || 'Server error.');
+        });
+      }
+    });
   }
 
   transferReferences() {

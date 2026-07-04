@@ -79,11 +79,14 @@
             </ng-container>
 
             <div class="row p-2" style="overflow-y: auto; max-height: 30vw;" *ngIf="!canDelete">
-                <div class="col-12 text-end mb-2">
+                <div class="col-12 d-flex justify-content-between mb-2">
+                    <button class="btn btn-outline-danger btn-sm" (click)="deleteSelected()" *ngIf="selectionService.hasSelection(selectedTable)" title="Delete Selected">
+                        <i class="uil uil-trash"></i> Selected
+                    </button>
                     <pagination-controls id="del-pagi" (pageChange)="page = $event" [autoHide]="true"
                         size="small"></pagination-controls>
                 </div>
-                <table id="datatable-buttons" class="table table-hover dt-responsive" style="width:98%;">
+                <table id="datatable-buttons" class="table table-hover dt-responsive" style="width:98%;" [appTableSmartCheckbox]="selectedTable" [selectionData]="relatedData[selectedTable]">
                     <thead>
                         <tr>
                             <th style="width: 60px;">No.</th>
@@ -95,7 +98,7 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let data of relatedData[selectedTable] | search:term | paginate: { id: 'del-pagi', itemsPerPage: itemsPerPage, currentPage: page }; let i=index"
-                            [ngClass]="{'highlight': data.hl == true}">
+                            [ngClass]="{'highlight': data.hl == true}" [attr.data-id]="data._id">
                             <td>{{(page - 1) * itemsPerPage + i + 1}} </td>
                             <td>
                                 <button class="btn btn-sm btn-primary mx-1" type="button" (click)="edit(data)"><i

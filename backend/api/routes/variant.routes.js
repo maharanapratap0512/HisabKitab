@@ -233,6 +233,42 @@ function _safeJson(val, fallback) {
 // It loads variants+subitems for the expanded accordion row (still used).
 
 // ════════════════════════════════════════════════════════════════════════════
+//  FILTER VARIANTS
+// ════════════════════════════════════════════════════════════════════════════
+
+// PUT  /api/variants/filter/:dept_id      → get variants by attribute_id or attribute_value_id
+router.put('/filter/:dept_id', async (req, res, next) => {
+    try {
+        const { attribute_id, attribute_value_id } = req.body;
+        let variants = [];
+        
+        if (attribute_id && attribute_id.length > 0) {
+            const idsStr = attribute_id.join(',');
+            variants = db.prepare(`
+                SELECT v.*, i.item_hin, i.item_eng
+                FROM variant v
+                JOIN item i ON i._id = v.item_id
+                JOIN variant_attribute_map vam ON vam.variant_id = v._id
+                WHERE vam.attribute_id IN (${idsStr}) AND v.active = 1
+                GROUP BY v._id
+            `).all();
+        } else if (attribute_value_id && attribute_value_id.length > 0) {
+            const idsStr = attribute_value_id.join(',');
+            variants = db.prepare(`
+                SELECT v.*, i.item_hin, i.item_eng
+                FROM variant v
+                JOIN item i ON i._id = v.item_id
+                JOIN variant_attribute_map vam ON vam.variant_id = v._id
+                WHERE vam.attribute_value_id IN (${idsStr}) AND v.active = 1
+                GROUP BY v._id
+            `).all();
+        }
+        
+        res.json({ success: true, result: variants, total_count: variants.length });
+    } catch (e) { next(e); }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
 //  ATTRIBUTES
 // ════════════════════════════════════════════════════════════════════════════
 

@@ -46,7 +46,7 @@
                            </ng-select>
                         </div>
                      </div> -->
-                     <div class="col-3 d-flex">
+                     <div class="col-4 d-flex">
                         <button class="file btn btn-success" style="font-weight: 700 !important;">
                            <i class="uil uil-arrow-to-bottom"></i> Excel Import
                            <input type="file" class="inputtag"
@@ -55,6 +55,10 @@
                         </button>
                         <button type="button" class="btn btn-outline-success mx-2" (click)="exportToExcel()"> Export To
                            Excel
+                        </button>
+                        <button type="button" class="btn btn-danger mx-2" (click)="deleteSelected()"
+                           *ngIf="selectionService.hasSelection('item')" style="font-weight: 700 !important;">
+                           <i class="uil-trash"></i> Delete Selected
                         </button>
                      </div>
                      <div class="col-2">
@@ -90,9 +94,15 @@
             <div class="row" *ngIf="itemData.length">
                <div class="table-container">
                   <table id="datatable-buttons"
-                     class="table table-purple table-hover table-sticky-header dt-responsive nowrap">
+                     class="table table-purple table-hover table-sticky-header dt-responsive nowrap"
+                     appTableSmartCheckbox="item" [selectionData]="itemData">
                      <thead>
                         <tr>
+                           <th style="width: 40px;">
+                              <div class="form-check">
+                                 <input class="form-check-input smart-checkbox-select-all" type="checkbox">
+                              </div>
+                           </th>
                            <th style="width: 50px;" (click)="FilterActive()">No.</th>
                            <th style="width: 250px;">Manage</th>
                            <th style="width: 100px;" *ngIf="settings.document">Image</th>
@@ -113,6 +123,11 @@
                               [attr.aria-controls]="'#collapse-' + i" class="main-row"
                               [ngClass]="{'text-light':data.restrict_year}">
                               <!-- <tr data-bs-toggle="collapse" aria-expanded="true" class="main-row"> -->
+                              <td style="font-size: large;">
+                                 <div class="form-check" (click)="$event.stopPropagation()">
+                                    <input class="form-check-input smart-checkbox-row" type="checkbox" [value]="data._id">
+                                 </div>
+                              </td>
                               <td style="font-size: large;">
                                  {{itemsPerPage * (page - 1) + (i+1)}}
                                  <!-- <span class="mx-1"

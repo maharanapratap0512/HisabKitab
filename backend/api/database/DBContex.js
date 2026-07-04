@@ -315,6 +315,21 @@ class DBContex {
         })
     }
 
+    async deleteManyIds(tblname, ids) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                if (/^[\d,]+$/.test(ids)) {
+                    console.log(`delete from ${tblname} where _id IN (${ids})`);
+                    const result = this.db.prepare(`delete from ${tblname} where _id IN (${ids})`).run();
+                    return resolve(result);
+                } else {
+                    throw new Error("Invalid IDs format");
+                }
+            }
+            catch (err) { console.log(err); reject(err) }
+        })
+    }
+
     async deleteMany(tblname, conditionString = null) {
         return new Promise(async (resolve, reject) => {
             try {

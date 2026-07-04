@@ -107,7 +107,7 @@ export class ExcelImportService {
       { col_name: 'subitem_hin', name: 'subitem_hin', alt_names: ["subitemhin", "subitem hin", "subitem"], not_null: true },
       { col_name: 'subitem_eng', name: 'subitem_eng', alt_names: ["subitemeng", "subitem eng"], not_null: false, },
       { col_name: 'subitem_roman', name: 'subitem_roman', alt_names: ["subitemroman", "subitem roman"], not_null: false, },
-      { col_name: 'unit', name: 'unit', alt_names: [], not_null: false, },
+      { col_name: 'unit', name: 'unit', alt_names: [], not_null: false, ref_table: 'unit', ref_field: 'unit_id', ref_data: 'unit_short' },
       { col_name: 'extra_note', name: 'extra_note', alt_names: ["extra note", "extranote"], not_null: false, },
       { col_name: 'restrict_month', name: 'restrict_month', alt_names: ["restrict month"], not_null: false },
       { col_name: 'restrict_year', name: 'restrict_year', alt_names: ["restrict year"], not_null: false },

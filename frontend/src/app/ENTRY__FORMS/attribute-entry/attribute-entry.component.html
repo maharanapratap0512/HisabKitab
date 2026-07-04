@@ -26,6 +26,9 @@
                     <button *ngIf="editAttrId" class="btn btn-outline-danger btn-sm" (click)="cancelEditAttr()" title="Cancel Edit">
                         <i class="uil uil-multiply"></i>
                     </button>
+                    <button class="btn btn-outline-danger btn-sm" (click)="deleteSelectedAttr()" *ngIf="selectionService.hasSelection('attribute')" title="Delete Selected">
+                        <i class="uil uil-trash"></i> Selected
+                    </button>
                     <button class="btn btn-outline-secondary btn-sm" (click)="mode = 'attr_values'; loadRows()"
                         title="Back to values">
                         <i class="uil uil-arrow-left"></i>
@@ -35,9 +38,14 @@
         </div>
 
         <div class="table-responsive" style="max-height:50vh;overflow-y:auto;">
-            <table class="table table-sm table-hover">
+            <table class="table table-sm table-hover" appTableSmartCheckbox="attribute" [selectionData]="rows">
                 <thead>
                     <tr>
+                        <th style="width: 40px;">
+                            <div class="form-check">
+                                <input class="form-check-input smart-checkbox-select-all" type="checkbox">
+                            </div>
+                        </th>
                         <th>#</th>
                         <th>Hindi</th>
                         <th>English</th>
@@ -47,6 +55,11 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let row of rows; let i=index">
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input smart-checkbox-row" type="checkbox" [value]="row._id">
+                            </div>
+                        </td>
                         <td class="text-muted">{{ i+1 }}</td>
                         <td><strong>{{ row.attribute_hin }}</strong></td>
                         <td>{{ row.attribute_eng }}</td>
@@ -121,14 +134,22 @@
                     <button *ngIf="editAttrValId" class="btn btn-outline-danger btn-sm" (click)="cancelEditAttrVal()" title="Cancel Edit">
                         <i class="uil uil-multiply"></i>
                     </button>
+                    <button class="btn btn-outline-danger btn-sm" (click)="deleteSelectedAttrVal()" *ngIf="selectionService.hasSelection('attribute_value')" title="Delete Selected">
+                        <i class="uil uil-trash"></i> Selected
+                    </button>
                 </div>
             </div>
         </div>
 
         <div class="table-responsive" style="max-height:50vh;overflow-y:auto;">
-            <table class="table table-sm table-hover">
+            <table class="table table-sm table-hover" appTableSmartCheckbox="attribute_value" [selectionData]="rows">
                 <thead>
                     <tr>
+                        <th style="width: 40px;">
+                            <div class="form-check">
+                                <input class="form-check-input smart-checkbox-select-all" type="checkbox">
+                            </div>
+                        </th>
                         <th>#</th>
                         <th>Attribute</th>
                         <th>Hindi</th>
@@ -139,6 +160,11 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let row of rows; let i=index">
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input smart-checkbox-row" type="checkbox" [value]="row._id">
+                            </div>
+                        </td>
                         <td class="text-muted">{{ i+1 }}</td>
                         <td>
                             <span class="badge bg-soft-primary text-primary">
@@ -168,3 +194,5 @@
     </ng-container>
 
 </div>
+
+<app-delete *ngIf="showDelete" [Type]="delType" [ID]="delID" (response)="onDeleteRes($event)"></app-delete>

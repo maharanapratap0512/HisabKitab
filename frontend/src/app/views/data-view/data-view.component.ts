@@ -10,6 +10,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { ExcelExportService } from 'src/app/services/excel-export.service';
 import { TableFieldsService } from 'src/app/services/table-fields.service';
+import { SelectionService } from 'src/app/services/selection.service';
 declare var $: any;
 
 @Component({
@@ -47,6 +48,7 @@ export class DataViewComponent implements OnInit {
     private excelExportService: ExcelExportService,
     public auth: AuthService,
     private tableFieldsService: TableFieldsService,
+    public selectionService: SelectionService,
     private route: ActivatedRoute) {
   }
 
@@ -244,8 +246,20 @@ export class DataViewComponent implements OnInit {
     this.openModal('delete_advance');
   }
 
+  deleteSelected() {
+    const selectedIds = this.selectionService.getSelected('data-view-' + this.Type);
+    if (!selectedIds || selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one item to delete.');
+      return;
+    }
+    this.delID = selectedIds;
+    this.delType = this.Type;
+    this.openModal('delete_advance');
+  }
+
   deleteResponse(ev: any) {
     if (ev) {
+      this.selectionService.clear('data-view-' + this.Type);
       this.closeModal();
       this.toastr.success(this.Type + " deleted successfully.");
       this.getDataFromDB();

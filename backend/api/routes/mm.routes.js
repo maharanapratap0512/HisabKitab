@@ -207,8 +207,8 @@ router.put('/filter/:dept_id', async (req, res, next) => {
 // mm delete
 router.delete('/:id', (req, res, next) => {
     try {
-        const id = req.params.id;
-        const result = MM.deleteById(id);
+        const ids = req.params.id.split(',').map(Number);
+        const result = MM.delete({ _id: ids });
         res.status(200).json({ success: true, result });
     } catch (e) {
         next(e);

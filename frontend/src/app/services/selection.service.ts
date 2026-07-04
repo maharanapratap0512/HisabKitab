@@ -91,6 +91,13 @@ export class SelectionService {
         return this.getOrCreateSet(context).has(id);
     }
 
+    /**
+     * Check if a context has any selected IDs
+     */
+    hasSelection(context: string): boolean {
+        return this.getOrCreateSet(context).size > 0;
+    }
+
     private getOrCreateSet(context: string): Set<any> {
         if (!this.selectionCache.has(context)) {
             this.selectionCache.set(context, new Set());

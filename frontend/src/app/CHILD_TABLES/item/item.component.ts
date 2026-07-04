@@ -10,6 +10,7 @@ import { ExcelExportService } from 'src/app/services/excel-export.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
+import { SelectionService } from 'src/app/services/selection.service';
 declare var $: any;
 
 @Component({
@@ -52,6 +53,7 @@ export class ItemComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public auth: AuthService,
     private excelExportService: ExcelExportService,
+    public selectionService: SelectionService,
     private app: AppComponent
   ) { }
 
@@ -409,11 +411,23 @@ export class ItemComponent implements OnInit {
     this.openModal('delete_item');
   }
 
+  deleteSelected() {
+    const selectedIds = this.selectionService.getSelected('item');
+    if (!selectedIds || selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one item to delete.');
+      return;
+    }
+    this.delID = selectedIds;
+    this.delType = 'item';
+    this.openModal('delete_item');
+  }
+
   deleteResponse(ev: any) {
     if (ev) {
+      this.selectionService.clear('item');
       this.closeModal();
       this.toastr.success((this.delType || 'Item') + " deleted successfully.");
-      this.getItemData(this.conditionObj.pageNo || 1);
+      this.getItemData(this.currentPage);
     }
   }
 

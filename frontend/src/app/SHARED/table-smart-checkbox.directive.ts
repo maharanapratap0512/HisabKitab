@@ -54,8 +54,15 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
         this.initializeSelection();
     }
 
+    private getTableElement(): HTMLTableElement | null {
+        if (this.el.nativeElement.tagName.toLowerCase() === 'table') {
+            return this.el.nativeElement;
+        }
+        return this.el.nativeElement.querySelector('table');
+    }
+
     private removeCheckboxes() {
-        const table = this.el.nativeElement.querySelector('table');
+        const table = this.getTableElement();
         if (!table) return;
 
         // Remove header checkbox
@@ -64,11 +71,11 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
 
         // Remove row checkboxes
         const tds = table.querySelectorAll('.smart-selection-row');
-        tds.forEach((td: HTMLElement) => td.remove());
+        tds.forEach((td: any) => td.remove());
     }
 
     private initializeSelection() {
-        const table = this.el.nativeElement.querySelector('table');
+        const table = this.getTableElement();
         if (!table) return;
 
         // 1. Setup Header Checkbox
@@ -99,11 +106,11 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
     }
 
     private processRows() {
-        const table = this.el.nativeElement.querySelector('table');
+        const table = this.getTableElement();
         if (!table || !this.showCheckboxes) return;
 
         const rows = table.querySelectorAll('tbody tr');
-        rows.forEach((row: HTMLElement, index: number) => {
+        rows.forEach((row: any, index: number) => {
             if (row.querySelector('.smart-selection-row')) return;
 
             const td = this.renderer.createElement('td');
@@ -113,9 +120,13 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
             this.renderer.setAttribute(checkbox, 'type', 'checkbox');
             this.renderer.addClass(checkbox, 'form-check-input');
 
-            // Get ID from data
-            const rowData = this.selectionData[index];
-            const id = rowData ? rowData[this.idField] : null;
+            // Get ID from data-id attribute on the row if available (for client-side pagination/search)
+            // Fallback to index-based lookup if data-id is not provided
+            let id = row.getAttribute('data-id');
+            if (!id) {
+                const rowData = this.selectionData[index];
+                id = rowData ? rowData[this.idField] : null;
+            }
 
             if (id) {
                 checkbox.checked = this.selectionService.isSelected(this.selectionContext, id);
@@ -142,10 +153,10 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
         }
 
         // Update UI checkboxes manually for immediacy
-        const table = this.el.nativeElement.querySelector('table');
+        const table = this.getTableElement();
         if (table) {
             const rowCheckboxes = table.querySelectorAll('tbody .smart-selection-row input[type="checkbox"]');
-            rowCheckboxes.forEach((cb: HTMLInputElement) => cb.checked = checked);
+            rowCheckboxes.forEach((cb: any) => cb.checked = checked);
         }
     }
 
@@ -160,7 +171,7 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
     }
 
     private setupMutationObserver() {
-        const table = this.el.nativeElement.querySelector('table');
+        const table = this.getTableElement();
         if (!table) return;
 
         const tbody = table.querySelector('tbody');

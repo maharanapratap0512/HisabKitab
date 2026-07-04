@@ -3,6 +3,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
+import { SelectionService } from 'src/app/services/selection.service';
 
 @Component({
     selector: 'app-attribute-entry',
@@ -30,11 +31,16 @@ export class AttributeEntryComponent implements OnInit {
 
     rows: any[] = [];
     isLoader = false;
+    
+    delID: any = null;
+    delType: any = null;
+    showDelete: boolean = false;
 
     constructor(
         private http: HttpService,
         private api: ApiService,
         private toastr: ToastrService,
+        public selectionService: SelectionService
     ) { }
 
     ngOnInit(): void {
@@ -102,32 +108,9 @@ export class AttributeEntryComponent implements OnInit {
     }
 
     deleteAttr(row: any) {
-        Swal.fire({
-            title: 'Delete Attribute?',
-            text: 'Iske sab values bhi delete honge. Kya aap sure hain?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Haan, Delete Karo',
-            cancelButtonText: 'Nahi'
-        }).then(r => {
-            if (r.isConfirmed) {
-                this.http.delete(this.api.getUrl('VARIANT') + 'attributes/' + row._id)
-                    .subscribe((d: any) => {
-                        if (d.success) {
-                            this.toastr.success('Attribute delete ho gaya');
-                            if (this.editAttrId === row._id) {
-                                this.cancelEditAttr();
-                            }
-                            this.loadRows();
-                            this.response.emit({ reload: true });
-                        } else {
-                            this.toastr.error(d.message || 'Delete nahi ho saka');
-                        }
-                    }, (err: any) => {
-                        this.toastr.error(err.error?.message || 'Server error while deleting');
-                    });
-            }
-        });
+        this.delID = row._id;
+        this.delType = 'attribute';
+        this.showDelete = true;
     }
 
     editAttrVal(row: any) {
@@ -186,32 +169,41 @@ export class AttributeEntryComponent implements OnInit {
     }
 
     deleteAttrVal(row: any) {
-        Swal.fire({
-            title: 'Delete Value?',
-            text: 'Kya aap is value ko delete karna chahte hain?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Haan, Delete Karo',
-            cancelButtonText: 'Nahi'
-        }).then(r => {
-            if (r.isConfirmed) {
-                this.http.delete(this.api.getUrl('VARIANT') + 'attribute-values/' + row._id)
-                    .subscribe((d: any) => {
-                        if (d.success) {
-                            this.toastr.success('Value delete ho gayi');
-                            if (this.editAttrValId === row._id) {
-                                this.cancelEditAttrVal();
-                            }
-                            this.loadRows();
-                            this.response.emit({ reload: true });
-                        } else {
-                            this.toastr.error(d.message || 'Delete nahi ho saka');
-                        }
-                    }, (err: any) => {
-                        this.toastr.error(err.error?.message || 'Server error while deleting');
-                    });
-            }
-        });
+        this.delID = row._id;
+        this.delType = 'attribute_value';
+        this.showDelete = true;
+    }
+
+    deleteSelectedAttr() {
+        const selectedIds = this.selectionService.getSelected('attribute');
+        if (!selectedIds || selectedIds.length === 0) {
+            this.toastr.warning('Please select at least one attribute to delete.');
+            return;
+        }
+        this.delID = selectedIds;
+        this.delType = 'attribute';
+        this.showDelete = true;
+    }
+
+    deleteSelectedAttrVal() {
+        const selectedIds = this.selectionService.getSelected('attribute_value');
+        if (!selectedIds || selectedIds.length === 0) {
+            this.toastr.warning('Please select at least one value to delete.');
+            return;
+        }
+        this.delID = selectedIds;
+        this.delType = 'attribute_value';
+        this.showDelete = true;
+    }
+
+    onDeleteRes(res: any) {
+        this.showDelete = false;
+        if (res) {
+            this.selectionService.clear('attribute');
+            this.selectionService.clear('attribute_value');
+            this.loadRows();
+            this.response.emit({ reload: true });
+        }
     }
 
     onAttrValFilter(id: any) {

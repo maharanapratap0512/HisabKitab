@@ -54,13 +54,15 @@ function updateAttribute(data) {
     }, data._id);
 }
 
-function deleteAttribute(id) {
+function deleteAttribute(idOrIds) {
     // soft delete cascade — active=0 on attribute + all its values + all variant maps that use any of its values
     try {
+        const ids = typeof idOrIds === 'string' && idOrIds.includes(',') ? idOrIds.split(',').map(Number) : (Array.isArray(idOrIds) ? idOrIds : [Number(idOrIds)]);
+        
         sutramDB.begin();
 
-        // 1. Check if ANY value of this attribute is used in active variants
-        const vals = attributes_value.getAll({ attribute_id: id }, { full: false });
+        // 1. Check if ANY value of these attributes is used in active variants
+        const vals = attributes_value.getAll({ attribute_id: ids }, { full: false });
         for (const v of vals) {
             const count = variant_attr_map.count({ attribute_value_id: v._id, active: 1 });
             if (count > 0) {
@@ -69,8 +71,8 @@ function deleteAttribute(id) {
         }
 
         // 2. Hard delete attribute + values
-        attributes.deleteById(id);
-        attributes_value.delete({ attribute_id: id });
+        attributes.delete({ _id: ids });
+        attributes_value.delete({ attribute_id: ids });
 
         sutramDB.commit();
         return 1;
@@ -142,17 +144,18 @@ function updateAttributeValue(data) {
     return updated;
 }
 
-function deleteAttributeValue(id) {
+function deleteAttributeValue(idOrIds) {
     try {
+        const ids = typeof idOrIds === 'string' && idOrIds.includes(',') ? idOrIds.split(',').map(Number) : (Array.isArray(idOrIds) ? idOrIds : [Number(idOrIds)]);
         sutramDB.begin();
 
         // Check if used in active variants
-        const count = variant_attr_map.count({ attribute_value_id: id, active: 1 });
+        const count = variant_attr_map.count({ attribute_value_id: ids, active: 1 });
         if (count > 0) {
-            throw new Error('Is value ko variants mein use kiya gaya hai. Delete nahi ho sakta.');
+            throw new Error('In values mein se kuch ko variants mein use kiya gaya hai. Delete nahi ho sakta.');
         }
 
-        attributes_value.deleteById(id);
+        attributes_value.delete({ _id: ids });
         sutramDB.commit();
         return 1;
     } catch (err) {

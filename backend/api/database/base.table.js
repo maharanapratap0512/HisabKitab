@@ -397,15 +397,22 @@ class BaseTable {
         if (typeof where === 'object') {
             const keys = Object.keys(where);
             if (keys.length === 0) return { clause: '', params: [] };
+            const params = [];
             const clause = keys
                 .map(k => {
                     const col = prefixTable && !k.includes('.')
                         ? `${this.tableName}.${k}`
                         : k;
+                    if (Array.isArray(where[k])) {
+                        if (where[k].length === 0) return '1=0'; // Safe fallback for empty array
+                        params.push(...where[k]);
+                        return `${col} IN (${where[k].map(() => '?').join(', ')})`;
+                    }
+                    params.push(where[k]);
                     return `${col} = ?`;
                 })
                 .join(' AND ');
-            return { clause: `WHERE ${clause}`, params: Object.values(where) };
+            return { clause: `WHERE ${clause}`, params: params };
         }
 
         return { clause: '', params: [] };
