@@ -56,8 +56,12 @@
 
 <!-- Year Filter, Export and Total Count Row (Matching HMP/Jawak Style) -->
 <div class="row align-items-center mb-2 px-2">
-  <!-- Left: Year Selection -->
-  <div class="col-md-3">
+  <!-- Left: Year Selection & Accordion Toggle -->
+  <div class="col-md-3 d-flex align-items-center gap-2">
+    <button class="badge year-box badge-outline-secondary" (click)="toggleExpandAll()"
+      *ngIf="settings?.prastav?.viewMode === 'voucher'" title="Toggle Expand All">
+      <i class="uil" [ngClass]="expandAll ? 'uil-compress-arrows' : 'uil-expand-arrows'"></i>
+    </button>
     <app-popover-year [selectedYear]="filterBody.year" (yearChanged)="yearClick($event)"></app-popover-year>
   </div>
 
@@ -191,6 +195,9 @@
                   <div class="d-flex justify-content-center gap-2">
                     <i class="uil uil-pen text-primary opacity-60 hover-opacity-100 cursor-pointer font-size-16"
                       (click)="editVoucher(v)"></i>
+                    <i class="uil uil-truck text-success opacity-60 hover-opacity-100 cursor-pointer font-size-16"
+                      title="Jawak for all items"
+                      (click)="openAllJawakEdit(v)"></i>
                     <i class="uil uil-trash text-danger opacity-60 hover-opacity-100 cursor-pointer font-size-16"
                       (click)="deleteVoucher(v)"></i>
                   </div>
@@ -247,7 +254,16 @@
                         <th style="min-width: 120px;">कहाँ से भेजा</th>
                         <th style="min-width: 120px;">किसके द्वारा</th>
                         <th style="width: 70px;">J-Qty</th>
-                        <th style="width: 60px;">Status</th>
+                        <th style="width: 75px;">
+                          <div class="d-flex align-items-center justify-content-between">
+                            <span>Status</span>
+                            <i *ngIf="hasJawaks(v)"
+                              class="uil cursor-pointer font-size-13 ms-1"
+                              [ngClass]="isAllJawakReceived(v) ? 'uil-check-circle text-success' : 'uil-circle text-warning'"
+                              (click)="toggleAllJawakStatus(v)" 
+                              [title]="isAllJawakReceived(v) ? 'Mark All Pending' : 'Mark All Received'"></i>
+                          </div>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -543,7 +559,7 @@
       <div class="modal-body p-0">
         <div class="p-1">
           <app-prastav-entry [isEdit]="isEdit" [getData]="selectedPrastav" [jawakFocusMode]="jawakFocusMode"
-            [focusedLineIndex]="focusedLineIndex" (response)="onSaved($event)"></app-prastav-entry>
+            [focusedLineIndex]="focusedLineIndex" [allJawakMode]="allJawakMode" (response)="onSaved($event)"></app-prastav-entry>
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import { forkJoin } from 'rxjs';
 
 declare var $: any;
 
@@ -26,6 +27,8 @@ export class PrastavComponent implements OnInit {
   settings: any = {};
   filterBody: any = {};
 
+  expandAll = true;
+
   prastavs: any[] = []; // Raw flat data
   groupedVouchers: any[] = []; // Layered data for Voucher Mode
   individualRows: any[] = []; // Denormalized data for Individual Mode with rowspans
@@ -39,6 +42,7 @@ export class PrastavComponent implements OnInit {
   selectedPrastav: any = null;
   jawakFocusMode: boolean = false;
   focusedLineIndex: number = 0;
+  allJawakMode: boolean = false;
 
   constructor(
     public api: ApiService,
@@ -107,6 +111,13 @@ export class PrastavComponent implements OnInit {
     this.getPrastavs();
   }
 
+  toggleExpandAll() {
+    this.expandAll = !this.expandAll;
+    this.groupedVouchers.forEach(v => {
+      v.expanded = this.expandAll;
+    });
+  }
+
   processData() {
     // 1. Group by Voucher for Voucher Mode
     const vGroups = new Map();
@@ -122,7 +133,7 @@ export class PrastavComponent implements OnInit {
           note_details: p.note_details, // Capture note from the first item
           is_noted: p.is_noted,
           items: [],
-          expanded: true, // Default open for Voucher Mode
+          expanded: this.expandAll, // Default open for Voucher Mode
           totalAmount: 0,
           vRows: [] // Internal rows for this voucher (Item spans Jawak)
         });
@@ -302,7 +313,21 @@ export class PrastavComponent implements OnInit {
     } else if (v && !v.lines) {
       v.lines = [v]; // Individual mode fix
     }
+    this.allJawakMode = false;
     this.openEntryModal(v, true, lineIndex);
+  }
+
+  openAllJawakEdit(v: any) {
+    // Open modal with all items jawak mode
+    if (v && v.items && !v.lines) {
+      v.lines = v.items;
+    }
+    this.allJawakMode = true;
+    this.jawakFocusMode = false;
+    this.focusedLineIndex = 0;
+    this.isEdit = true;
+    this.selectedPrastav = v;
+    $('#prastavEntryModal').modal('show');
   }
 
   deleteVoucher(v: any) {
@@ -336,6 +361,7 @@ export class PrastavComponent implements OnInit {
     this.selectedPrastav = row;
     this.jawakFocusMode = jawakFocus;
     this.focusedLineIndex = lineIndex;
+    if (!jawakFocus) this.allJawakMode = false;
     $('#prastavEntryModal').modal('show');
   }
 
@@ -421,5 +447,54 @@ export class PrastavComponent implements OnInit {
       jawak.is_received = originalStatus;
       this.toastr.error('Status update failed');
     });
+  }
+
+  toggleAllJawakStatus(v: any) {
+    const jawaks = v.vRows.map((vr: any) => vr.jawak).filter((j: any) => j !== null);
+    if (jawaks.length === 0) return;
+
+    // Check if all are currently received
+    const allReceived = jawaks.every((j: any) => j.is_received === 1 || j.is_received === true);
+    const targetStatus = allReceived ? 0 : 1;
+
+    // Save original statuses in case of failure/rollback
+    const originalStatuses = jawaks.map((j: any) => ({ jawak: j, status: j.is_received }));
+
+    // Optimistic UI update
+    jawaks.forEach((j: any) => j.is_received = targetStatus);
+
+    // Call update API for each jawak in parallel
+    const requests = jawaks.map((j: any) => {
+      return this.http.post(this.api.getUrl('PRASTAV') + 'jawak', {
+        _id: j._id,
+        is_received: targetStatus
+      });
+    });
+
+    forkJoin(requests).subscribe(
+      (responses: any) => {
+        const allSuccess = responses.every((res: any) => res && res.success);
+        if (allSuccess) {
+          this.toastr.success(`Status of all items updated to ${targetStatus ? 'RCV' : 'PND'}`);
+        } else {
+          originalStatuses.forEach((item: any) => item.jawak.is_received = item.status);
+          this.toastr.error('Some status updates failed');
+        }
+      },
+      (err: any) => {
+        originalStatuses.forEach((item: any) => item.jawak.is_received = item.status);
+        this.toastr.error('Status update failed');
+      }
+    );
+  }
+
+  isAllJawakReceived(v: any): boolean {
+    const jawaks = v.vRows.map((vr: any) => vr.jawak).filter((j: any) => j !== null);
+    if (jawaks.length === 0) return false;
+    return jawaks.every((j: any) => j.is_received === 1 || j.is_received === true);
+  }
+
+  hasJawaks(v: any): boolean {
+    return v.vRows.some((vr: any) => vr.jawak !== null);
   }
 }
