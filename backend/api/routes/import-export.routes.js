@@ -99,6 +99,7 @@ router.put('/correction', async (req, res, next) => {
     try {
         if (req.body && req.body.length > 0) {
             for (let i in req.body) {
+
                 let type = null;
                 let stmt = null;
                 switch (req.body[i].type) {
@@ -124,9 +125,9 @@ router.put('/correction', async (req, res, next) => {
                         break;
                 }
 
+
                 if (type && stmt) {
                     for (const row of stmt.all()) {
-                        ;
                         let obj = { _id: row._id, jawak_detail: [] }
                         obj.jawak_detail = JSON.parse(row.jawak_detail);
                         for (let j in obj.jawak_detail) {
@@ -142,7 +143,7 @@ router.put('/correction', async (req, res, next) => {
                         await DB.runQuery('excel_correction', 'update_jawak', { obj: obj });
                     }
                 }
-                else if (req.body[i].type == 'item' && req.body[i].extra_note) {
+                if (req.body[i].type == 'item' && req.body[i].extra_note) {
                     let qname = 'update_subitem';
                     if (req.body[i].id && !req.body[i].id2) {
                         qname = 'update_ignore_subitem';
@@ -291,6 +292,7 @@ router.put('/process', async (req, res, next) => {
 
 
         } catch (err) {
+
             await Fn.rollback();
             req.body.data.error = err.message;
             res.json({

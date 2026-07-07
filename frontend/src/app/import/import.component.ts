@@ -282,10 +282,10 @@ export class ImportComponent implements OnInit {
   }
 
   async processImport(i: number) {
-    await this.http.put(this.api.getUrl('IMPORTEXPORT') + 'process', { 
-      data: this.importData[i], 
+    await this.http.put(this.api.getUrl('IMPORTEXPORT') + 'process', {
+      data: this.importData[i],
       autoUpdate: this.importForm.value.autoUpdate,
-      copyIds: this.importForm.value.copyIds 
+      copyIds: this.importForm.value.copyIds
     }).subscribe(async (data: any) => {
       this.import$.next(data);
       if (this.importData.length > i + 1) {
@@ -453,18 +453,18 @@ export class ImportComponent implements OnInit {
   private handleImportResult(result: any) {
     if (!result.success) {
       this.handleFailedImport(result);
-      return;
+    } else {
+      const { data } = result;
+      if (!data.ignored) {
+        this.addToHistory(data);
+      }
+      this.processJawakDetails(data);
     }
 
-    const { data } = result;
-    if (!data.ignored) {
-      this.addToHistory(data);
-    }
-
-    this.processJawakDetails(data);
     this.updateProgress();
 
     if (this.isImportComplete()) {
+      console.log('import complete');
       this.showCompletionAlert();
     }
   }
@@ -484,7 +484,6 @@ export class ImportComponent implements OnInit {
   private handleFailedImport(result: any) {
     const failedData = result.data || this.importData[this.processedCount];
     this.failImport.push(failedData);
-    this.processedCount++;
   }
 
   private updateProgress() {
@@ -493,6 +492,8 @@ export class ImportComponent implements OnInit {
   }
 
   private isImportComplete(): boolean {
+    console.log(this.processedCount, this.importData.length);
+
     return this.processedCount >= this.importData.length;
   }
 

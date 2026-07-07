@@ -139,6 +139,11 @@
                         </div>
                     </div>
                 </div>
+                <div class="alert alert-warning py-1 mb-3">
+                    <i class="dripicons-warning me-2"></i>
+                    To edit MM, Item, Unit, or other common fields, you must unlink the Aawak first. 
+                    <a href="javascript:void(0);" class="alert-link text-decoration-underline" (click)="unlinkAawak()">Click here to unlink</a>.
+                </div>
             </div>
             <div class="row">
 
@@ -308,7 +313,7 @@
                                 subitem_id: jawakForm.get('subitem_id')?.value,
                                 condition_id: jawakForm.get('condition_id')?.value,
                                 aawak_source_id: jawakForm.get('aawak_source_id')?.value
-                            }" formControlName="aawak_ref_id" size="sm">
+                            }" formControlName="aawak_ref_id" size="sm" (selectionChange)="onAawakRefChange($event)">
                         </app-aawak-ref-dropdown>
                     </div>
                 </div>

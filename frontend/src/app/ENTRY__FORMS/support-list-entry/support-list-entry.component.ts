@@ -103,7 +103,10 @@ export class SupportListEntryComponent implements OnInit {
       };
       this.http.put(this.api.getUrl('SUPPORTLIST'), body).subscribe((data: any) => {
         if (data && data['success']) {
-          this.gs.Lists[this.list_type].splice(this.gs.Lists[this.list_type].indexOf((i: { _id: any }) => i._id == this.getData._id), 1, data['result']);
+          const index = this.gs.Lists[this.list_type].findIndex((i: { _id: any }) => i._id == this.getData._id);
+          if (index !== -1) {
+            this.gs.Lists[this.list_type].splice(index, 1, data['result']);
+          }
           this.supportListForm.reset();
           this.isLoader = false;
           this.toastr.success("Updated successfully.");

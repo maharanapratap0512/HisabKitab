@@ -44,11 +44,6 @@
                 style="width:98%;" appTableSmartCheckbox="data-view-{{Type}}" [selectionData]="records">
                 <thead>
                     <tr>
-                        <th style="width: 40px;">
-                            <div class="form-check">
-                                <input class="form-check-input smart-checkbox-select-all" type="checkbox">
-                            </div>
-                        </th>
                         <th style="width: 60px;">No.</th>
                         <th style="width: 150px;">Manage</th>
                         <th *ngFor="let row of fields">
@@ -59,11 +54,6 @@
                 <tbody>
                     <tr *ngFor="let data of records | search:term; let i=index"
                         [ngClass]="{'highlight': data.hl == true}">
-                        <td>
-                            <div class="form-check">
-                                <input class="form-check-input smart-checkbox-row" type="checkbox" [value]="data._id">
-                            </div>
-                        </td>
                         <td>{{i+1}}
                             <br>
                             <div class="form-check form-switch" style="cursor: pointer;">

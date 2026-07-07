@@ -51,7 +51,8 @@ const DB_GEN_CONFIG = {
             // Step 1: insert all depts with blank settings
             `insert or ignore into department(_id, dept_eng, dept_hin, dept_code, settings, password, active, created_at, updated_at) 
             select _id, dept_eng, dept_hin, dept_code, '{}', password, active, created_at, updated_at 
-            from mainDB.department`,
+            from mainDB.department 
+            where _id = @dept_id`,
 
             // Step 2: update settings for the requesting dept itself
             `update department 

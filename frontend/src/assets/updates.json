@@ -1,5 +1,55 @@
 [
     {
+        "version": "34.3",
+        "date": "08-07-2026",
+        "summary": "Excel Import, Jawak Entry",
+        "summary_hin": "",
+        "isNew": true,
+        "items": [
+            {
+                "type": "fix",
+                "module": "Excel Import Component",
+                "title": "Correction fail fixed.",
+                "title_hin": "",
+                "desc": "aawak MM missing for corrected MM, solved.",
+                "desc_hin": ""
+            },
+            {
+                "type": "improved",
+                "module": "Jawak Edit Component",
+                "title": "UI Improved",
+                "title_hin": "",
+                "desc": "Aawak reference UI while edit and allowed full edit on unlink reference aawak.",
+                "desc_hin": ""
+            }
+        ]
+    },
+    {
+        "version": "34.2",
+        "date": "04-07-2026",
+        "summary": "Item-Subitem Import, Jawak Export, Variant Improved...",
+        "summary_hin": "",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Variant Component",
+                "title": "Add item, subitem and delete atribute and value...",
+                "title_hin": "",
+                "desc": "",
+                "desc_hin": ""
+            },
+            {
+                "type": "improved",
+                "module": "Bachat Component",
+                "title": "Bachat Export",
+                "title_hin": "",
+                "desc": "Dummy records removed from bachat export.",
+                "desc_hin": ""
+            }
+        ]
+    },
+    {
         "version": "34.1",
         "date": "28-06-2026",
         "summary": "Integrity Chechup/ resolve & Bachat Export Dummy Ignore Fixed",

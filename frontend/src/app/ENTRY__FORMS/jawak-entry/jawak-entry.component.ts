@@ -208,6 +208,10 @@ export class JawakEntryComponent implements OnInit {
           this.subitemSelected(changes.getData.currentValue);
         }
       }, 100);
+
+      if (changes.getData.currentValue.aawak_ref_id && !this.aawakRef) {
+        this.fetchAawakRef(changes.getData.currentValue.aawak_ref_id);
+      }
     }
     if (changes.aawakRef && changes.aawakRef.currentValue) {
       this.aawakRef = changes.aawakRef.currentValue;
@@ -246,6 +250,66 @@ export class JawakEntryComponent implements OnInit {
     this.http.get(this.api.getUrl('DEPT')).subscribe((data: any) => {
       this.departments = data['result'] || [];
     })
+  }
+
+  fetchAawakRef(id: string) {
+    const body = { _id: id, limit: 1 };
+    this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, body).subscribe((res: any) => {
+      if (res && res.success && res.result && res.result.length > 0) {
+        this.aawakRef = res.result[0];
+        this.jawakForm.patchValue({
+          date: this.aawakRef.date,
+          date_sent: this.aawakRef.date,
+          lot_no: this.aawakRef.lot_no,
+          mm_id: this.aawakRef.mm_id,
+          item_id: this.aawakRef.item_id,
+          subitem_id: this.aawakRef.subitem_id,
+          item_detail: this.aawakRef.item_detail,
+          product_id: this.aawakRef.product_id ? this.aawakRef.product_id : null,
+          condition_id: this.aawakRef.condition_id,
+          company_name: this.aawakRef.company_name,
+          unit_id: this.aawakRef.unit_id,
+          aawak_source_id: this.aawakRef.aawak_source_id,
+          nimitt_id: this.aawakRef.nimitt_id ? this.aawakRef.nimitt_id : null,
+          dept_id: this.aawakRef.dept_id,
+          unit_short: this.aawakRef.unit_short,
+          aawak_type_id: this.aawakRef.aawak_type_id ? this.aawakRef.aawak_type_id : null,
+        });
+      }
+    });
+  }
+
+  onAawakRefChange(ev: any) {
+    if (ev) {
+      this.aawakRef = ev;
+      this.jawakForm.patchValue({
+        date: ev.date,
+        date_sent: ev.date,
+        lot_no: ev.lot_no,
+        mm_id: ev.mm_id,
+        item_id: ev.item_id,
+        subitem_id: ev.subitem_id,
+        item_detail: ev.item_detail,
+        product_id: ev.product_id ? ev.product_id : null,
+        condition_id: ev.condition_id,
+        company_name: ev.company_name,
+        unit_id: ev.unit_id,
+        aawak_source_id: ev.aawak_source_id,
+        nimitt_id: ev.nimitt_id ? ev.nimitt_id : null,
+        dept_id: ev.dept_id,
+        unit_short: ev.unit_short,
+        aawak_type_id: ev.aawak_type_id ? ev.aawak_type_id : null,
+      });
+    } else {
+      this.aawakRef = null;
+    }
+  }
+
+  unlinkAawak() {
+    this.jawakForm.patchValue({
+      aawak_ref_id: null
+    });
+    this.onAawakRefChange(null);
   }
 
   loadProduct() {

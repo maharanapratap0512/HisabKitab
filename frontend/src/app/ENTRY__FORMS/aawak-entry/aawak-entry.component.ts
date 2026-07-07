@@ -273,8 +273,9 @@ export class AawakEntryComponent implements OnInit {
 				ev.item_hin = item.item_hin || null;
 			}
 			if (ev.subitem_id) {
-				let subitem = await this.subitems.find((s: { _id: any; }) => s._id == ev.subitem_id);
-				ev.subitem_hin = subitem.subitem_hin || null;
+				let subitems = this.subitems.length ? this.subitems : (this.awkfg.subitems || []);
+				let subitem = await subitems.find((s: { _id: any; }) => s._id == ev.subitem_id);
+				ev.subitem_hin = subitem?.subitem_hin || null;
 			}
 			if (ev.condition_id) {
 				let condition = await this.conditions.find((c: { _id: any; }) => c._id == ev.condition_id);
@@ -320,8 +321,9 @@ export class AawakEntryComponent implements OnInit {
 					ev.item_hin = item.item_hin || null;
 				}
 				if (ev.subitem_id) {
-					let subitem = await this.subitems.find((s: { _id: any; }) => s._id == ev.subitem_id);
-					ev.subitem_hin = subitem.subitem_hin || null;
+					let subitems = this.subitems.length ? this.subitems : (this.awkfg.subitems || []);
+					let subitem = await subitems.find((s: { _id: any; }) => s._id == ev.subitem_id);
+					ev.subitem_hin = subitem?.subitem_hin || null;
 				}
 				if (ev.condition_id) {
 					let condition = await this.conditions.find((c: { _id: any; }) => c._id == ev.condition_id);
@@ -367,7 +369,8 @@ export class AawakEntryComponent implements OnInit {
 			this.awkfg.item_hin = item ? (item.item_hin || item.item_eng) : '';
 		}
 		if (this.awkfg.subitem_id && !this.awkfg.subitem_hin) {
-			let subitem = this.subitems.find((s: any) => s._id == this.awkfg.subitem_id);
+			let subitems = this.subitems.length ? this.subitems : (this.awkfg.subitems || []);
+			let subitem = subitems.find((s: any) => s._id == this.awkfg.subitem_id);
 			this.awkfg.subitem_hin = subitem ? (subitem.subitem_hin || subitem.subitem_eng) : '';
 		}
 		if (this.awkfg.unit_id && !this.awkfg.unit_short) {
@@ -554,33 +557,80 @@ export class AawakEntryComponent implements OnInit {
 	aawakFormUpdate(updtawkform: NgForm) {
 		console.log("out of if updtawkform", updtawkform);
 		if (updtawkform.valid) {
-			this.isLoader = true;
-			let body = { query: {}, set: {} };
-			body.query = { _id: this.getData._id };
-			body.set = { _id: this.getData._id, ...this.awkfg };
-			this.http.put(this.api.getUrl('AAWAK') + 'new/', body).subscribe((data: any) => {
-				if (data && data['success']) {
-					this.jmm = null;
-					this.jqty = null;
-					this.jpbk = null;
-					this.imagepath = null;
-					this.isLoader = false;
-					this.toastr.success('Aawak Updated Successfully.');
-					updtawkform.resetForm();
-					this.awkfg.jawak_detail = []
-					this.response.emit(data['result']);
-				} else {
-					this.toastr.error(data['message']);
-					this.isLoader = false;
+			let hasCommonChanges = false;
+			if (this.isEdit && this.getData && this.getData.jawak_detail && this.getData.jawak_detail.length > 0) {
+				const commonFields = ['mm_id', 'item_id', 'subitem_id', 'unit_id', 'aawak_source_id', 'product_id', 'condition_id'];
+				for (let f of commonFields) {
+					if (this.awkfg[f] != this.getData[f]) {
+						hasCommonChanges = true;
+						break;
+					}
 				}
-			}, err => {
-				this.toastr.error(err['error']);
-				this.isLoader = false;
-			});
+			}
+
+			if (hasCommonChanges) {
+				Swal.fire({
+					title: 'Warning!',
+					text: "Changing these fields will also update the corresponding fields in all linked Jawak entries. Do you want to proceed?",
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonColor: '#3085d6',
+					cancelButtonColor: '#d33',
+					confirmButtonText: 'Yes, update all!'
+				}).then((result) => {
+					if (result.isConfirmed) {
+						this.proceedWithUpdate(updtawkform);
+					}
+				});
+			} else {
+				this.proceedWithUpdate(updtawkform);
+			}
 		}
 		else {
 			this.toastr.error("Form is Invalid.")
 		}
+	}
+
+	proceedWithUpdate(updtawkform: NgForm) {
+		this.isLoader = true;
+		
+		// Auto update jawak details locally so frontend reflects backend changes
+		const commonFields = ['mm_id', 'item_id', 'subitem_id', 'unit_id', 'aawak_source_id', 'product_id', 'condition_id'];
+		if (this.awkfg.jawak_detail && this.awkfg.jawak_detail.length > 0) {
+			for (let jwk of this.awkfg.jawak_detail) {
+				for (let f of commonFields) {
+					jwk[f] = this.awkfg[f];
+				}
+				// update text names too
+				jwk.item_hin = this.awkfg.item_hin;
+				jwk.subitem_hin = this.awkfg.subitem_hin;
+				jwk.unit_short = this.awkfg.unit_short;
+				jwk.aawak_source_hin = this.awkfg.aawak_source_hin;
+			}
+		}
+
+		let body = { query: {}, set: {} };
+		body.query = { _id: this.getData._id };
+		body.set = { _id: this.getData._id, ...this.awkfg };
+		this.http.put(this.api.getUrl('AAWAK') + 'new/', body).subscribe((data: any) => {
+			if (data && data['success']) {
+				this.jmm = null;
+				this.jqty = null;
+				this.jpbk = null;
+				this.imagepath = null;
+				this.isLoader = false;
+				this.toastr.success('Aawak Updated Successfully.');
+				updtawkform.resetForm();
+				this.awkfg.jawak_detail = []
+				this.response.emit(data['result']);
+			} else {
+				this.toastr.error(data['message']);
+				this.isLoader = false;
+			}
+		}, err => {
+			this.toastr.error(err['error']);
+			this.isLoader = false;
+		});
 	}
 
 	stateAddResponse(ev: any) {
