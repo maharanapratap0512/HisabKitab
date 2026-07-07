@@ -4,7 +4,7 @@
     <form #f="ngForm" (ngSubmit)="onSubmit()" id="prastavEntryForm">
 
       <!-- ── Focus Mode Overview (Simple Grid) ────────────────────── -->
-      <div *ngIf="jawakFocusMode" class="mb-4">
+      <div *ngIf="jawakFocusMode && !allJawakMode" class="mb-4">
         <!-- Main Row for Basic Info -->
         <div class="row g-2 mb-2">
           <div class="col-md-2">
@@ -107,6 +107,152 @@
               </div>
             </div>
           </ng-container>
+        </div>
+      </div>
+
+      <!-- ── All Items Jawak Mode ────────────────────── -->
+      <div *ngIf="allJawakMode" class="mb-3">
+
+        <!-- Voucher Header Summary -->
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+          <div class="d-flex align-items-center gap-3">
+            <div>
+              <span class="badge badge-theme font-size-11">Voucher #{{pfs.prastavForm.voucher_no || 'Draft'}}</span>
+            </div>
+            <div class="fw-bold font-size-13 text-dark">
+              <i class="uil uil-map-marker-alt me-1 text-danger"></i>{{getMMDisplay(pfs.prastavForm.mm_id)}}
+            </div>
+            <div class="text-muted font-size-12">
+              <i class="uil uil-calendar-alt me-1"></i>{{pfs.prastavForm.date | date:'dd-MMM-yyyy'}}
+            </div>
+            <div class="text-muted font-size-12" *ngIf="pfs.prastavForm.pbk_id">
+              <i class="uil uil-user me-1 text-success"></i>{{getPBKDisplay(pfs.prastavForm.pbk_id)}}
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
+            <button type="submit" class="btn btn-success btn-sm px-4" [disabled]="pfs.submit">
+              <i class="uil uil-save me-1"></i>{{ isEdit ? 'Update All' : 'Save All' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Per-Item Jawak Panels -->
+        <div *ngFor="let line of pfs.prastavForm.lines; let i = index">
+          <div *ngIf="line.item_id" class="card mb-3 border-0 shadow-sm">
+            <!-- Item Header -->
+            <div class="card-header d-flex align-items-center justify-content-between py-2"
+              style="background: rgba(var(--thead-accent-color-rgb), 0.07); border-radius: 8px 8px 0 0;">
+              <div class="d-flex align-items-center gap-3">
+                <span class="badge badge-soft-primary font-size-11">Item {{i+1}}</span>
+                <span class="fw-bold text-primary font-size-13">{{getItemDisplay(line.item_id, line.subitem_id)}}</span>
+              </div>
+              <div class="d-flex align-items-center gap-3 text-center">
+                <div>
+                  <div class="text-uppercase opacity-50 fw-bold" style="font-size: 9px;">Approved Qty</div>
+                  <div class="fw-bold text-success font-size-12">{{line.qty}} {{getUnitShort(line.unit_id)}}</div>
+                </div>
+                <div *ngIf="line.rate">
+                  <div class="text-uppercase opacity-50 fw-bold" style="font-size: 9px;">Rate</div>
+                  <div class="fw-bold text-primary font-size-12">₹{{line.rate}}</div>
+                </div>
+                <div>
+                  <div class="text-uppercase opacity-50 fw-bold" style="font-size: 9px;">Jawak Rows</div>
+                  <div class="fw-bold font-size-12">{{line.jawaks?.length || 0}}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Jawak Sub-entries Table -->
+            <div class="card-body p-2">
+              <table class="table table-sm table-bordered m-0">
+                <thead class="table-light">
+                  <tr>
+                    <th width="10%">Date *</th>
+                    <th width="13%">Source MM *</th>
+                    <th width="16%">Qty & Unit *</th>
+                    <th width="8%">Rate</th>
+                    <th width="8%">Amount</th>
+                    <th width="9%">Bori</th>
+                    <th width="10%">Kiske Dwara</th>
+                    <th width="5%">Rcvd?</th>
+                    <th width="4%"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let jw of line.jawaks; let j = index">
+                    <td class="align-middle text-center p-1">
+                      <input type="date" class="form-control form-control-sm px-1 text-center" [(ngModel)]="jw.date"
+                        [name]="'ajw_date_' + i + '_' + j" required [ngClass]="{'is-invalid': pfs.submit && !jw.date}">
+                    </td>
+
+                    <td class="align-middle">
+                      <ng-select class="custom-sm" style="width:100%;" placeholder="Source MM"
+                        [(ngModel)]="jw.source_mm_id" [name]="'ajw_mm_' + i + '_' + j"
+                        (ngModelChange)="onJawakChange(line, jw)" [selectOnTab]="true" appendTo="body">
+                        <ng-option *ngFor="let m of mms | filterByDate: pfs.prastavForm.date" [value]="m._id">
+                          {{m.mm_hin}} : {{m.mm_eng}}{{m.mm_code ? ' : ' + m.mm_code : ''}}
+                        </ng-option>
+                      </ng-select>
+                    </td>
+
+                    <td class="align-middle">
+                      <div class="d-flex align-items-center">
+                        <input type="number" class="form-control form-control-sm flex-fill px-1 text-center"
+                          placeholder="Qty" [(ngModel)]="jw.qty" [name]="'ajw_qty_' + i + '_' + j"
+                          (ngModelChange)="onJawakChange(line, jw)" min="0"
+                          [ngClass]="{'is-invalid': pfs.submit && !jw.qty}">
+                        <ng-select class="custom-sm border m-0" style="min-width: 60px;" [items]="units"
+                          bindLabel="unit_short" bindValue="_id" [(ngModel)]="jw.unit_id"
+                          [name]="'ajw_unit_' + i + '_' + j" [clearable]="false" placeholder="Unit"
+                          (ngModelChange)="onJawakChange(line, jw)"
+                          [ngClass]="{'is-invalid': pfs.submit && !jw.unit_id}"></ng-select>
+                      </div>
+                    </td>
+
+                    <td class="align-middle">
+                      <input type="number" class="form-control form-control-sm px-1 text-center" placeholder="Rate"
+                        [(ngModel)]="jw.rate" [name]="'ajw_rate_' + i + '_' + j"
+                        (ngModelChange)="onJawakChange(line, jw)" min="0">
+                    </td>
+
+                    <td class="align-middle text-center p-1 font-size-12 fw-bold">₹{{jw.amount || 0}}</td>
+
+                    <td class="align-middle p-1">
+                      <input type="text" class="form-control form-control-sm px-1 text-center" placeholder="Bori"
+                        [(ngModel)]="jw.bori_count" [name]="'ajw_bori_' + i + '_' + j">
+                    </td>
+
+                    <td class="align-middle p-1">
+                      <input type="text" class="form-control form-control-sm px-1" placeholder="Dwara"
+                        [(ngModel)]="jw.kiske_dwara" [name]="'ajw_dwara_' + i + '_' + j">
+                    </td>
+
+                    <td class="text-center align-middle">
+                      <input type="checkbox" class="form-check-input m-0" [(ngModel)]="jw.is_received"
+                        [name]="'ajw_recv_' + i + '_' + j" title="Received?">
+                    </td>
+
+                    <td class="text-center align-middle">
+                      <button *ngIf="(jw.source_mm_id || jw.qty) && line.jawaks.length > 1" type="button"
+                        class="btn btn-sm btn-danger" style="padding: 0.2rem 0.5rem; border-radius: 4px;"
+                        (click)="pfs.removeJawak(line, j)" title="Remove">
+                        <i class="uil uil-times"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Save Row -->
+        <div class="d-flex justify-content-end gap-2 pt-2">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
+          <button type="submit" class="btn btn-success btn-sm px-4" [disabled]="pfs.submit">
+            <i class="uil uil-save me-1"></i>{{ isEdit ? 'Update All' : 'Save All' }}
+          </button>
         </div>
       </div>
 

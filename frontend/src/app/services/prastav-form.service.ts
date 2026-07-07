@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { GlobalService } from './global.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +20,7 @@ export class PrastavFormService {
   constructor(
     public gs: GlobalService,
     public auth: AuthService,
+    private toastr: ToastrService
   ) {
     this.jawakTemplate = {
       date: gs.dateString,
@@ -126,6 +128,24 @@ export class PrastavFormService {
             jw.subitem_id = row.subitem_id;
           }
         }
+
+        // Auto-fill first jawak if it is empty/new
+        const firstJw = row.jawaks[0];
+        if (firstJw) {
+          if (!firstJw.source_mm_id && this.auth.webUser?.settings?.defaultMM) {
+            firstJw.source_mm_id = this.auth.webUser.settings.defaultMM;
+          }
+          if (!firstJw.qty) {
+            firstJw.qty = row.qty;
+            firstJw.rate = row.rate;
+            firstJw.amount = (Number(row.qty) || 0) * (Number(row.rate) || 0);
+          }
+          if (!firstJw.item_id) {
+            firstJw.item_id = row.item_id;
+            firstJw.subitem_id = row.subitem_id;
+            firstJw.unit_id = row.unit_id;
+          }
+        }
       }
     }
 
@@ -156,9 +176,47 @@ export class PrastavFormService {
 
   // Nested Jawak Handlers
   onJawakChange(line: any, jLine: any) {
-    const qty = Number(jLine.qty) || 0;
+    if (!jLine.rate && line.rate) {
+      jLine.rate = line.rate;
+    }
+    let qty = Number(jLine.qty) || 0;
     const rate = Number(jLine.rate) || 0;
+
+    // Ensure total jawak qty doesn't exceed parent line qty (aawak)
+    const jawaksCount = line.jawaks.length;
+    const lastJw = jawaksCount > 0 ? line.jawaks[jawaksCount - 1] : null;
+    const isLastPending = lastJw && lastJw !== jLine && (!lastJw.source_mm_id || !lastJw.qty);
+
+    const sumOtherQty = line.jawaks
+      .filter((jw: any) => jw !== jLine && !(isLastPending && jw === lastJw))
+      .reduce((sum: number, jw: any) => sum + (Number(jw.qty) || 0), 0);
+    const maxAllowedQty = Math.max(0, (Number(line.qty) || 0) - sumOtherQty);
+
+    if (qty > maxAllowedQty) {
+      qty = maxAllowedQty;
+      jLine.qty = maxAllowedQty || null;
+      this.toastr.warning(`Quantity capped to remaining approved amount: ${maxAllowedQty}`);
+    }
+
     jLine.amount = qty * rate || null;
+
+    // Recalculate remaining quantity and update the last pending row if it exists
+    if (jawaksCount > 1 && lastJw) {
+      // If the last row is pending/not fully filled, we recalculate its values
+      if (lastJw !== jLine && (!lastJw.source_mm_id || !lastJw.qty)) {
+        const sumPrevQty = line.jawaks.slice(0, -1).reduce((sum: number, jw: any) => sum + (Number(jw.qty) || 0), 0);
+        const remainingQty = (Number(line.qty) || 0) - sumPrevQty;
+        if (remainingQty > 0) {
+          lastJw.qty = remainingQty;
+          lastJw.rate = line.rate;
+          lastJw.amount = remainingQty * (Number(line.rate) || 0);
+        } else {
+          lastJw.qty = null;
+          lastJw.rate = null;
+          lastJw.amount = null;
+        }
+      }
+    }
 
     let valid = true;
     for (const jw of line.jawaks) {
@@ -169,11 +227,20 @@ export class PrastavFormService {
     }
 
     if (valid && !this.submit) {
-      const newJw = structuredClone(this.jawakTemplate);
-      newJw.item_id = line.item_id;
-      newJw.subitem_id = line.subitem_id;
-      newJw.unit_id = line.unit_id;
-      line.jawaks.push(newJw);
+      // Only auto-add a new row if there is still remaining qty to distribute
+      const sumPrevQty = line.jawaks.reduce((sum: number, jw: any) => sum + (Number(jw.qty) || 0), 0);
+      const remainingQty = (Number(line.qty) || 0) - sumPrevQty;
+
+      if (remainingQty > 0) {
+        const newJw = structuredClone(this.jawakTemplate);
+        newJw.item_id = line.item_id;
+        newJw.subitem_id = line.subitem_id;
+        newJw.unit_id = line.unit_id;
+        newJw.qty = remainingQty;
+        newJw.rate = line.rate;
+        newJw.amount = remainingQty * (Number(line.rate) || 0);
+        line.jawaks.push(newJw);
+      }
     }
   }
 

@@ -20,6 +20,7 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
   @Input() getData: any;
   @Input() jawakFocusMode: boolean = false;
   @Input() focusedLineIndex: number = 0;
+  @Input() allJawakMode: boolean = false;
 
   // Focus state triggers
   focusJawakLine: number | null = null;
@@ -55,6 +56,26 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
 
     if (changes['jawakFocusMode'] && changes['jawakFocusMode']?.currentValue === true) {
       this.focusLastJawak(this.focusedLineIndex);
+    }
+
+    if (changes['allJawakMode'] && changes['allJawakMode']?.currentValue === true) {
+      // Auto-populate first jawak row for all lines
+      setTimeout(() => {
+        const lines = this.pfs.prastavForm?.lines || [];
+        for (const line of lines) {
+          if (line.item_id && line.jawaks && line.jawaks.length > 0) {
+            const firstJw = line.jawaks[0];
+            if (firstJw && !firstJw.source_mm_id && this.auth.webUser?.settings?.defaultMM) {
+              firstJw.source_mm_id = this.auth.webUser.settings.defaultMM;
+            }
+            if (firstJw && !firstJw.qty) {
+              firstJw.qty = line.qty;
+              firstJw.rate = line.rate;
+              firstJw.amount = (Number(line.qty) || 0) * (Number(line.rate) || 0) || null;
+            }
+          }
+        }
+      }, 100);
     }
   }
 
@@ -102,6 +123,11 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
         jw.subitem_id = line.subitem_id;
         jw.unit_id = line.unit_id;
       }
+      // Autofill first jawak's source MM if empty
+      const firstJw = line.jawaks[0];
+      if (firstJw && !firstJw.source_mm_id && this.auth.webUser?.settings?.defaultMM) {
+        firstJw.source_mm_id = this.auth.webUser.settings.defaultMM;
+      }
     }
     this.pfs.formStatusChanges();
   }
@@ -114,13 +140,23 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
 
     this.pfs.formStatusChanges();
 
-    // Sync qty and rate only to the first jawak row
+    // Sync rate to all jawaks and quantity to the first jawak row
     if (line.jawaks && line.jawaks.length > 0) {
-      const jw = line.jawaks[0];
-      jw.qty = line.qty;
-      jw.rate = line.rate;
-      jw.amount = line.amount;
-      this.onJawakChange(line, jw);
+      for (const jw of line.jawaks) {
+        jw.rate = line.rate;
+        jw.amount = (Number(jw.qty) || 0) * (Number(jw.rate) || 0) || null;
+      }
+
+      // Sync qty only to the first jawak row if there is only 1 jawak row
+      if (line.jawaks.length === 1) {
+        const jw = line.jawaks[0];
+        jw.qty = line.qty;
+        jw.amount = line.amount;
+        if (!jw.source_mm_id && this.auth.webUser?.settings?.defaultMM) {
+          jw.source_mm_id = this.auth.webUser.settings.defaultMM;
+        }
+      }
+      this.onJawakChange(line, line.jawaks[0]);
     }
   }
 
