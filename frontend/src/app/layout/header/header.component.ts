@@ -243,14 +243,14 @@ export class HeaderComponent implements AfterViewInit {
         children: [
           { title: 'Bachat', link: 'bachat_new', visible: true },
           { title: 'All Time Bachat', link: 'bachat', visible: this.auth.webUser.settings?.bachat?.visible },
-          { title: 'Aawak Jawak Check', link: 'report-aj-check', visible: this.auth.webUser.settings?.report?.report_aj_check },
-          { title: 'Aawak Type Saar', link: 'report-at', visible: this.auth.webUser.settings?.report?.report_at },
-          { title: 'Jawak Type Saar', link: 'report-jt', visible: this.auth.webUser.settings?.report?.report_jt },
-          { title: 'Store Stock', link: 'report-str-stk', visible: this.auth.webUser.settings?.report?.report_str_stk },
-          { title: 'Khet Saar', link: 'report-kh-saar', visible: this.auth.webUser.settings?.report?.report_kh },
-          { title: 'Khet Saar (Item Wise)', link: 'report-kh-itemwise', visible: this.auth.webUser.settings?.report?.report_kh },
-          { title: 'Khet AJ saar', link: 'report-kh-ajsaar', visible: this.auth.webUser.settings?.report?.report_kh },
-          { title: 'Integrity Checkup', link: 'integrity-checkup', visible: true },
+          { title: 'Item Ledger', link: 'report/report-item-ledger', visible: true },
+          { title: 'Aawak Jawak Check', link: 'report/report-aj-check', visible: this.auth.webUser.settings?.report?.report_aj_check },
+          { title: 'Aawak Type Saar', link: 'report/report-at', visible: this.auth.webUser.settings?.report?.report_at },
+          { title: 'Jawak Type Saar', link: 'report/report-jt', visible: this.auth.webUser.settings?.report?.report_jt },
+          { title: 'Store Stock', link: 'report/report-str-stk', visible: this.auth.webUser.settings?.report?.report_str_stk },
+          { title: 'Khet Saar', link: 'report/report-kh-saar', visible: this.auth.webUser.settings?.report?.report_kh },
+          { title: 'Khet Saar (Item Wise)', link: 'report/report-kh-itemwise', visible: this.auth.webUser.settings?.report?.report_kh },
+          { title: 'Khet AJ saar', link: 'report/report-kh-ajsaar', visible: this.auth.webUser.settings?.report?.report_kh },
         ]
       },
       {
@@ -262,6 +262,7 @@ export class HeaderComponent implements AfterViewInit {
           { title: 'Department', link: 'department', visible: this.auth.webUser.settings?.department?.visible },
           { title: 'NetDrop', link: 'netdrop', visible: true, target: '_blank' },
           { title: 'FeedBack', link: 'feedback', visible: true },
+          { title: 'Integrity Checkup', link: 'integrity-checkup', visible: true },
         ]
       },
       { title: 'Points', icon: 'uil-layer-group', link: 'point', visible: this.auth.webUser.settings?.point?.visible },

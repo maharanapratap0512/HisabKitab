@@ -5,58 +5,27 @@
          <div class="container-fluid">
 
             <div class="row">
-               <div class="card-header">Generate Reports (Under Construction)</div>
+               <div class="card-header">Select Report</div>
                <div class="card-body">
-                  <div class="row">
-                     <div class="col-md-2 mb-2">
-                        <div class="form-group">
-                           <label class="form-label">Year</label>
-                           <ng-select class="custom" style="width: 100%;" placeholder="Select Year" [clearable]="true"
-                              [virtualScroll]="true" [(ngModel)]="filterBody.year" name="year"
-                              (change)="months = gs.yearChangedGetMonth($event)">
-                              <ng-option selected="selected" disabled value="">Select Year
-                              </ng-option>
-                              <ng-option *ngFor="let item of gs.years" [value]="item">{{item}}</ng-option>
-                           </ng-select>
-                        </div>
-                     </div>
-                     <div class="col-md-2 mb-2">
-                        <div class="form-group">
-                           <label class="form-label">Month</label>
-                           <ng-select class="custom" style="width: 100%;" placeholder="Select Month" [clearable]="true"
-                              [virtualScroll]="true" [(ngModel)]="filterBody.months" name="month" [multiple]="true"
-                              [ngModalOptions]="{standalone: true}">
-                              <ng-option selected="selected" disabled value="">Select Month
-                              </ng-option>
-                              <ng-option *ngFor="let item of months" [value]="item.m">{{item.name}}</ng-option>
-                           </ng-select>
-                        </div>
-                     </div>
-                     <div class="col-md-2 mb-2">
-                        <div class="form-group">
-                           <label class="form-label">MM Type</label>
-                           <ng-select class="custom" style="width: 100%;" placeholder="Select MM Type" [clearable]="true"
-                              [virtualScroll]="true" [(ngModel)]="filterBody.mm_type" name="month" [multiple]="true"
-                              [ngModalOptions]="{standalone: true}">
-                              <ng-option selected="selected" disabled value="">Select MM Type
-                              </ng-option>
-                              <ng-option *ngFor="let item of departments" [value]="item._id">{{item.dept_eng}} : {{item.dept_code   }}</ng-option>
-                           </ng-select>
-                        </div>
-                     </div>
-                     <div class="col-md-2 mb-2 mt-3">
-                        <div class="form-group">
-                           <label class="form-label"></label>
-                           <button class="btn btn-primary form-control" (click)="searchReports()">Generate Reports</button>
-                        </div>
-                     </div>
+                  <div class="d-flex flex-wrap gap-2 mb-3">
+                     <button *ngFor="let report of reports" 
+                             class="btn m-1" 
+                             [ngClass]="selectedReport?.id === report.id ? 'btn-primary' : 'btn-outline-primary'"
+                             (click)="selectReport(report)">
+                        {{ report.title }}
+                     </button>
                   </div>
                </div>
             </div>
 
+            <!-- Report content will be loaded here -->
+            <div class="row mt-4" *ngIf="selectedReport">
+               <div class="col-12">
+                  <router-outlet></router-outlet>
+               </div>
+            </div>
+
          </div>
-
-
       </div>
    </div>
 </div>

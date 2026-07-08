@@ -85,6 +85,7 @@ export class ApiService {
     REPORT_KH: base_url + 'reports/report_khet_saar/',
     REPORT_KH_IW: base_url + 'reports/report_khet_itemwise/',
     REPORT_KH_AJS: base_url + 'reports/report_khet_ajsaar/',
+    REPORT_ITEM_LEDGER: base_url + 'reports/item_ledger/',
     REPORTAJ: base_url + 'reports/aj/',
     IMPORTHISTORY: base_url + 'import_history/',
     VEHICLE: base_url + 'vehicle/',

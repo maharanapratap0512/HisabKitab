@@ -125,6 +125,7 @@ import { VariantEntryComponent } from './ENTRY__FORMS/variant-entry/variant-entr
 import { VariantNewComponent } from './CHILD_TABLES/variant-new/variant-new.component';
 import { DbGenerateComponent } from './department/db-generate/db-generate.component';
 import { P2pFeedbackComponent } from './p2p-feedback/p2p-feedback.component';
+import { ReportItemLedgerComponent } from './reports/report-item-ledger/report-item-ledger.component';
 
 
 // import { FilterPipeModule } from 'ngx-filter-pipe';
@@ -236,6 +237,7 @@ import { P2pFeedbackComponent } from './p2p-feedback/p2p-feedback.component';
     AawakRefDropdownComponent,
     DbGenerateComponent,
     P2pFeedbackComponent,
+    ReportItemLedgerComponent,
 
   ],
 

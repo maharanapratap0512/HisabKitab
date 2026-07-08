@@ -42,11 +42,29 @@
                                 </ng-select>
                             </div>
 
-                            <div class="col-md-1">
-                                <div class="form-group">
-                                    <label class="form-label"></label>
-                                    <button type="button" class="btn btn-theme mx-2" (click)="searchReports()"> Generate
-                                    </button>
+                            <div class="col-md-2 mt-1">
+                                <div class="d-flex align-items-end h-100">
+                                    <div class="flex-grow-1">
+                                        <label class="form-label"></label>
+                                        <button type="button" class="btn btn-theme w-100" (click)="searchReports()"> Generate</button>
+                                    </div>
+                                    <div class="ms-2 mb-1">
+                                        <app-popover-filter iconClass="uil uil-info-circle text-info" [btnOutline]="false" direction="left" [showClearButton]="false" triggerOn="hover">
+                                            <div style="width: 320px; padding: 10px; white-space: normal;">
+                                                <h6 class="mb-2 text-info border-bottom pb-1">Store Stock Report - Details / विवरण</h6>
+                                                <p class="mb-2 fs-7">
+                                                    <strong>What is this report for? (यह रिपोर्ट किस लिए है?)</strong><br> 
+                                                    Displays current available stock across different stores.<br>
+                                                    <span class="text-muted">विभिन्न स्टोर्स में उपलब्ध वर्तमान स्टॉक को दिखाता है।</span>
+                                                </p>
+                                                <p class="mb-0 fs-7">
+                                                    <strong>How to use: (कैसे उपयोग करें?)</strong><br> 
+                                                    Filter by item, subitem or specific stores to check stock levels.<br>
+                                                    <span class="text-muted">स्टॉक स्तर की जांच करने के लिए आइटम, सबआइटम या विशिष्ट स्टोर्स द्वारा फ़िल्टर करें।</span>
+                                                </p>
+                                            </div>
+                                        </app-popover-filter>
+                                    </div>
                                 </div>
                             </div>
 

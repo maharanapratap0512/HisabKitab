@@ -19,6 +19,109 @@ const Fn = require('../database/functions');
 
 
 // by condition + aj_types 
+router.put('/item_ledger/:dept_id', async (req, res, next) => {
+    try {
+        let from_month = parseInt(req.body.from.m);
+        let from_year = req.body.from.y;
+        let to_month = parseInt(req.body.to.m);
+        let to_year = req.body.to.y;
+        let bachatMonth = to_month - 1; 
+        
+        let from_str = `${from_year}-${from_month.toString().padStart(2, '0')}`;
+        let to_str = `${to_year}-${to_month.toString().padStart(2, '0')}`;
+        
+        let dept_id = req.params.dept_id;
+        let mm_id = req.body.mm_id;
+        let item_subitem_ids = req.body.item_subitem_ids || [];
+
+        let reportData = [];
+
+        let awkstmt = DB.db.prepare(`select aawak.*, mm.mm_hin as aawak_mm_hin, sl.list_name_hin as aawak_type_hin,
+        sl2.list_name_hin as condition_hin, sl3.list_name_hin as aawak_source_hin, sl4.list_name_hin as usage_list_hin,
+        unit.unit_short, pbk.pbk_hin, pbk.roll_no
+        from aawak 
+        left join mm on mm._id = aawak.aawak_mm_id
+        left join support_list sl on sl._id = aawak.aawak_type_id
+        left join support_list sl2 on sl2._id = aawak.condition_id
+        left join support_list sl3 on sl3._id = aawak.aawak_source_id
+        left join support_list sl4 on sl4._id = aawak.usage_list_id
+        left join unit on unit._id = aawak.unit_id
+        left join pbk on pbk._id = aawak.pbk_id
+        where aawak.dept_id = @dept_id 
+        ${mm_id ? `AND aawak.mm_id = ${mm_id}` : ''} 
+        AND aawak.item_id = @item_id AND ((aawak.subitem_id IS NULL AND @subitem_id IS NULL) OR aawak.subitem_id = @subitem_id) 
+        AND strftime('%Y-%m', aawak.date) >= '${from_str}' AND strftime('%Y-%m', aawak.date) <= '${to_str}'
+        order by aawak.date asc`);
+
+        let jwkstmt = DB.db.prepare(`select jawak.*, mm.mm_hin as jawak_mm_hin, sl.list_name_hin as jawak_type_hin,
+        sl2.list_name_hin as condition_hin, sl3.list_name_hin as aawak_source_hin, sl4.list_name_hin as usage_list_hin,
+        unit.unit_short, pbk.pbk_hin, pbk.roll_no
+        from jawak 
+        left join mm on mm._id = jawak.jawak_mm_id
+        left join support_list sl on sl._id = jawak.jawak_type_id
+        left join support_list sl2 on sl2._id = jawak.condition_id
+        left join support_list sl3 on sl3._id = jawak.aawak_source_id
+        left join support_list sl4 on sl4._id = jawak.usage_list_id
+        left join unit on unit._id = jawak.unit_id
+        left join pbk on pbk._id = jawak.pbk_id
+        where jawak.dept_id = @dept_id 
+        ${mm_id ? `AND jawak.mm_id = ${mm_id}` : ''} 
+        AND jawak.item_id = @item_id AND ((jawak.subitem_id IS NULL AND @subitem_id IS NULL) OR jawak.subitem_id = @subitem_id) 
+        AND strftime('%Y-%m', jawak.date) >= '${from_str}' AND strftime('%Y-%m', jawak.date) <= '${to_str}'
+        order by jawak.date asc`);
+
+        let bachatStmt = DB.db.prepare(`select sum(bcht.bachat) as bachat from bachat_new bcht 
+        where bcht.dept_id = @dept_id 
+        ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
+        AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
+        AND bcht.year = '${to_year}' AND bcht.month = '${bachatMonth}'`);
+
+        for (let item of item_subitem_ids) {
+            let rowParams = {
+                dept_id: dept_id,
+                item_id: item.item_id,
+                subitem_id: item.subitem_id || null
+            };
+
+            let aawaks = awkstmt.all(rowParams);
+            let jawaks = jwkstmt.all(rowParams);
+            let bachatRow = bachatStmt.get(rowParams);
+            
+            let total_aawak = aawaks.reduce((sum, a) => sum + (a.qty || 0), 0);
+            let total_jawak = jawaks.reduce((sum, j) => sum + (j.qty || 0), 0);
+            let current_bachat = bachatRow && bachatRow.bachat ? bachatRow.bachat : 0;
+            let unit_short = aawaks.length > 0 ? aawaks[0].unit_short : (jawaks.length > 0 ? jawaks[0].unit_short : '');
+
+            reportData.push({
+                item_id: item.item_id,
+                subitem_id: item.subitem_id,
+                item_hin: item.item_hin,
+                item_eng: item.item_eng,
+                subitem_hin: item.subitem_hin,
+                subitem_eng: item.subitem_eng,
+                unit_short: unit_short,
+                overview: {
+                    total_aawak: total_aawak,
+                    total_jawak: total_jawak,
+                    current_bachat: current_bachat
+                },
+                aawaks: aawaks,
+                jawaks: jawaks
+            });
+        }
+
+        res.json({
+            success: true,
+            data: reportData
+        });
+
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+});
+
+// by condition + aj_types 
 router.put('/aj/:dept_id', async (req, res, next) => {
     try {
         req.body.month -= 1;
@@ -382,14 +485,13 @@ router.put('/report_khet_itemwise/:dept_id', async (req, res, next) => {
         let sql = `select s_awk.*, JSON_GROUP_ARRAY(sum_qty) as arr_sum_qty, JSON_GROUP_ARRAY(s_awk.unit_id) as arr_unit_id,
         JSON_GROUP_ARRAY(unit_short) as arr_unit_short, sum(sum_amt) as total_amt,
         dept.dept_hin, dept.dept_eng, dept.dept_code,
-        item.item_hin, item.item_eng, item.categories as arr_item_categories,
-        sl.subitem_hin, sl.subitem_eng, subitem.categories as arr_subitem_categories
+        item.item_hin, item.item_eng, item.icategories as arr_item_categories,
+        si.subitem_hin, si.subitem_eng, si.categories as arr_subitem_categories
         from (select dept_id, aawak_mm_id, item_id, subitem_id, unit_id, avg(rate) as avg_rate, sum(actual_amt) as sum_amt, sum(qty) as sum_qty from aawak 
         where ${conditionString} 
         group by aawak.dept_id, aawak.item_id, aawak.subitem_id, aawak.unit_id) s_awk
-        left join item on item._id = s_awk.item_id 
-        left join subitem on subitem._id = s_awk.subitem_id 
-        left join subitem_list sl on sl._id = subitem.subitem_list_id
+        left join v_item item on item._id = s_awk.item_id 
+        left join v_subitem si on si._id = s_awk.subitem_id 
         left join unit on unit._id = s_awk.unit_id
         left join department dept on dept._id = s_awk.dept_id 
         group by s_awk.dept_id, s_awk.item_id, s_awk.subitem_id`;

@@ -48,10 +48,28 @@
                                 </div>
                             </div> -->
                             <div class="col-md-2 mb-2 mt-3">
-                                <div class="form-group">
-                                    <label class="form-label"></label>
-                                    <button class="btn btn-primary form-control" (click)="searchReports()">Generate
-                                        Reports</button>
+                                <div class="d-flex align-items-end h-100">
+                                    <div class="flex-grow-1">
+                                        <label class="form-label"></label>
+                                        <button class="btn btn-primary form-control" (click)="searchReports()">Generate Reports</button>
+                                    </div>
+                                    <div class="ms-2 mb-1">
+                                        <app-popover-filter iconClass="uil uil-info-circle text-info" [btnOutline]="false" direction="left" [showClearButton]="false" triggerOn="hover">
+                                            <div style="width: 320px; padding: 10px; white-space: normal;">
+                                                <h6 class="mb-2 text-info border-bottom pb-1">Aawak Type Saar - Details / विवरण</h6>
+                                                <p class="mb-2 fs-7">
+                                                    <strong>What is this report for? (यह रिपोर्ट किस लिए है?)</strong><br> 
+                                                    Summarizes Aawak entries categorized by their type.<br>
+                                                    <span class="text-muted">आवक प्रकार के आधार पर आवक एंट्रीज का सारांश दिखाता है।</span>
+                                                </p>
+                                                <p class="mb-0 fs-7">
+                                                    <strong>How to use: (कैसे उपयोग करें?)</strong><br> 
+                                                    Choose the specific Aawak type and date to view the summarized report.<br>
+                                                    <span class="text-muted">सारांश रिपोर्ट देखने के लिए विशिष्ट आवक प्रकार और दिनांक चुनें।</span>
+                                                </p>
+                                            </div>
+                                        </app-popover-filter>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-2 mb-2 mt-3">
