@@ -24,8 +24,9 @@ export class ReportStoreStockComponent {
   months: any = [];
   monthsSel: any = [];
   mms: any = [];
-  conditions: any = [];
+  selectedMms: any = [];
   categories: any = [];
+  items: any = [];
   mm_types: any = [];
 
   reportData: any = [];
@@ -45,10 +46,9 @@ export class ReportStoreStockComponent {
     this.spinner.show();
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];
-      this.conditions = result.condition ? result.condition : [];
       this.categories = result.category ? result.category : [];
       this.mm_types = result.mm_type ? result.mm_type : [];
-      this.filterBody.condition = this.conditions.map((c: { list_name_eng: any; }) => c.list_name_eng)
+      this.items = result.itemmix ? result.itemmix : [];
 
       this.isLoader = false;
       // this.searchReports();
@@ -76,17 +76,27 @@ export class ReportStoreStockComponent {
   }
 
   searchReports() {
-    if (this.filterBody.condition.length > 0 || this.filterBody.mm_id.length > 0) {
+    if (this.filterBody.mm_id && this.filterBody.mm_id.length > 0) {
 
       this.loadingStatus = 'Generating Report....'
       this.isLoader = true;
       this.http.put(this.api.getUrl('REPORT_STR_STK') + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
         if (data.success) {
           this.reportData = data.result;
+          this.selectedMms = this.mms.filter((m: { _id: any; }) => this.filterBody.mm_id.includes(m._id));
           this.setHeading();
           for (let i in this.reportData) {
             this.reportData[i].categories_hin = '';
             this.reportData[i].categories_eng = '';
+
+            let arr_mm_id = typeof this.reportData[i].arr_mm_id === 'string' ? JSON.parse(this.reportData[i].arr_mm_id) : this.reportData[i].arr_mm_id;
+            let arr_mm_stock = typeof this.reportData[i].arr_mm_stock === 'string' ? JSON.parse(this.reportData[i].arr_mm_stock) : this.reportData[i].arr_mm_stock;
+
+            for (let mm of this.selectedMms) {
+              let idx = arr_mm_id.indexOf(mm._id);
+              this.reportData[i]['mm_' + mm._id] = idx !== -1 ? arr_mm_stock[idx] : 0;
+            }
+
             if (this.reportData[i].arr_subitem_categories && this.reportData[i].arr_subitem_categories.length > 0) {
               for (let j in this.categories) {
                 if (this.reportData[i].arr_subitem_categories.includes(this.categories[j]._id)) {
@@ -105,14 +115,14 @@ export class ReportStoreStockComponent {
           }
           this.isLoader = false;
         }
-      }, (err) => {
+      }, (err: any) => {
         console.log(err);
         this.isLoader = false;
         this.toastr.error(err.message)
 
       });
     } else {
-      this.toastr.error('कम से कम एक MM और एक कन्डिशन को चुनना अनिवार्य है। ')
+      this.toastr.error('कम से कम एक MM को चुनना अनिवार्य है। ')
     }
   }
 
@@ -140,9 +150,10 @@ export class ReportStoreStockComponent {
         subitem_eng: this.reportData[i].subitem_eng,
         unit_short: this.reportData[i].unit_short,
       };
-      for (let cn of this.filterBody.condition) {
-        row[cn] = this.reportData[i][cn];
+      for (let mm of this.selectedMms) {
+        row['mm_' + mm._id] = this.reportData[i]['mm_' + mm._id];
       }
+      row['total'] = this.reportData[i].Stock;
       data.push(row)
     }
     let columns = [
@@ -153,9 +164,10 @@ export class ReportStoreStockComponent {
       { header: 'Subitem', dataKey: 'subitem_eng' },
       { header: 'Unit', dataKey: 'unit_short' },
     ];
-    for (let cn of this.filterBody.condition) {
-      columns.push({ header: cn, dataKey: cn });
+    for (let mm of this.selectedMms) {
+      columns.push({ header: mm.mm_eng || mm.mm_hin, dataKey: 'mm_' + mm._id });
     }
+    columns.push({ header: 'Total Qty', dataKey: 'total' });
     console.log(data);
 
     autoTable(doc, {
@@ -178,10 +190,10 @@ export class ReportStoreStockComponent {
         "सबआइटम": this.reportData[i].subitem_hin,
         "यूनिट": this.reportData[i].unit_short,
       };
-      for (let cn of this.filterBody.condition) {
-        let cn_hin = this.conditions.find((c: { list_name_eng: any; }) => c.list_name_eng == cn).list_name_hin;
-        row[cn_hin ? cn_hin : cn] = this.reportData[i][cn];
+      for (let mm of this.selectedMms) {
+        row[mm.mm_hin] = this.reportData[i]['mm_' + mm._id];
       }
+      row['कुल मात्रा'] = this.reportData[i].Stock;
       data.push(row)
     }
     this.excelExportService.exportAsExcelFile(data, this.auth.webUser.dept_code + "_" + this.reportHeading);
@@ -198,9 +210,10 @@ export class ReportStoreStockComponent {
         Subitem: this.reportData[i].subitem_eng,
         Unit: this.reportData[i].unit_short,
       };
-      for (let cn of this.filterBody.condition) {
-        row[cn] = this.reportData[i][cn];
+      for (let mm of this.selectedMms) {
+        row[mm.mm_eng || mm.mm_hin] = this.reportData[i]['mm_' + mm._id];
       }
+      row['Total Qty'] = this.reportData[i].Stock;
       data.push(row)
     }
     this.excelExportService.exportAsExcelFile(data, this.auth.webUser.dept_eng + "_" + this.reportHeading);

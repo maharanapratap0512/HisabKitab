@@ -5,6 +5,7 @@ const DB = new DBContex();
 const Fn = require('../database/functions');
 
 
+
 // get country all
 // router.get('/', async (req, res, next) => {
 //     await DB.getList('country').then(async (data) => {
@@ -25,11 +26,11 @@ router.put('/item_ledger/:dept_id', async (req, res, next) => {
         let from_year = req.body.from.y;
         let to_month = parseInt(req.body.to.m);
         let to_year = req.body.to.y;
-        let bachatMonth = to_month - 1; 
-        
+        let bachatMonth = to_month - 1;
+
         let from_str = `${from_year}-${from_month.toString().padStart(2, '0')}`;
         let to_str = `${to_year}-${to_month.toString().padStart(2, '0')}`;
-        
+
         let dept_id = req.params.dept_id;
         let mm_id = req.body.mm_id;
         let item_subitem_ids = req.body.item_subitem_ids || [];
@@ -70,11 +71,17 @@ router.put('/item_ledger/:dept_id', async (req, res, next) => {
         AND strftime('%Y-%m', jawak.date) >= '${from_str}' AND strftime('%Y-%m', jawak.date) <= '${to_str}'
         order by jawak.date asc`);
 
-        let bachatStmt = DB.db.prepare(`select sum(bcht.bachat) as bachat from bachat_new bcht 
+        let pastBachatStmt = DB.db.prepare(`select sum(IFNULL(bcht.past_bachat, 0)) as past_bachat from bachat_new bcht 
         where bcht.dept_id = @dept_id 
         ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
         AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
-        AND bcht.year = '${to_year}' AND bcht.month = '${bachatMonth}'`);
+        AND bcht.year = '${from_year}' AND bcht.month = '${from_month - 1}'`);
+
+        let currentBachatStmt = DB.db.prepare(`select sum(IFNULL(bcht.past_bachat, 0) + IFNULL(bcht.bachat, 0)) as bachat from bachat_new bcht 
+        where bcht.dept_id = @dept_id 
+        ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
+        AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
+        AND bcht.year = '${to_year}' AND bcht.month = '${to_month - 1}'`);
 
         for (let item of item_subitem_ids) {
             let rowParams = {
@@ -85,12 +92,53 @@ router.put('/item_ledger/:dept_id', async (req, res, next) => {
 
             let aawaks = awkstmt.all(rowParams);
             let jawaks = jwkstmt.all(rowParams);
-            let bachatRow = bachatStmt.get(rowParams);
             
+            let pastBachatRow = pastBachatStmt.get(rowParams);
+            let past_bachat = pastBachatRow && pastBachatRow.past_bachat !== null ? pastBachatRow.past_bachat : 0;
+            if (!pastBachatRow || pastBachatRow.past_bachat === null) {
+                let fallbackPastBachat = DB.db.prepare(`select sum(bcht.bachat) as bachat from bachat_new bcht 
+                where bcht.dept_id = @dept_id 
+                ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
+                AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
+                AND (bcht.year < '${from_year}' OR (bcht.year = '${from_year}' AND bcht.month < '${from_month - 1}'))`).get(rowParams);
+                past_bachat = fallbackPastBachat && fallbackPastBachat.bachat ? fallbackPastBachat.bachat : 0;
+            }
+
+            let currentBachatRow = currentBachatStmt.get(rowParams);
+            let current_bachat = currentBachatRow && currentBachatRow.bachat !== null ? currentBachatRow.bachat : 0;
+            if (!currentBachatRow || currentBachatRow.bachat === null) {
+                let fallbackCurrentBachat = DB.db.prepare(`select sum(bcht.bachat) as bachat from bachat_new bcht 
+                where bcht.dept_id = @dept_id 
+                ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
+                AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
+                AND (bcht.year < '${to_year}' OR (bcht.year = '${to_year}' AND bcht.month <= '${to_month - 1}'))`).get(rowParams);
+                current_bachat = fallbackCurrentBachat && fallbackCurrentBachat.bachat ? fallbackCurrentBachat.bachat : 0;
+            }
+
             let total_aawak = aawaks.reduce((sum, a) => sum + (a.qty || 0), 0);
             let total_jawak = jawaks.reduce((sum, j) => sum + (j.qty || 0), 0);
-            let current_bachat = bachatRow && bachatRow.bachat ? bachatRow.bachat : 0;
             let unit_short = aawaks.length > 0 ? aawaks[0].unit_short : (jawaks.length > 0 ? jawaks[0].unit_short : '');
+            
+            if (!unit_short) {
+                let unitRow = DB.db.prepare(`select unit.unit_short from item left join unit on unit._id = item.unit_id where item._id = @item_id`).get(rowParams);
+                unit_short = unitRow ? unitRow.unit_short : '';
+            }
+
+
+            // Prepend past bachat / opening balance as first row in aawak
+            let past_bachat_obj = {
+                date: `${from_year}-${from_month.toString().padStart(2, '0')}-01`,
+                lot_no: '-',
+                aawak_mm_hin: 'पिछली बचत (Opening Balance)',
+                condition_hin: '-',
+                qty: past_bachat,
+                unit_short: unit_short,
+                aawak_type_hin: 'शुरुआती स्टॉक',
+                rate: 0,
+                actual_amt: 0,
+                description: 'Past Bachat / Opening Balance'
+            };
+            aawaks.unshift(past_bachat_obj);
 
             reportData.push({
                 item_id: item.item_id,
@@ -101,6 +149,7 @@ router.put('/item_ledger/:dept_id', async (req, res, next) => {
                 subitem_eng: item.subitem_eng,
                 unit_short: unit_short,
                 overview: {
+                    past_bachat: past_bachat,
                     total_aawak: total_aawak,
                     total_jawak: total_jawak,
                     current_bachat: current_bachat
@@ -114,6 +163,172 @@ router.put('/item_ledger/:dept_id', async (req, res, next) => {
             success: true,
             data: reportData
         });
+
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+});
+
+const itemLedgerPdf = require('../services/item-ledger-pdf.service');
+const mmTable = new (require('../database/base.table'))('mm');
+
+router.post('/item_ledger_pdf/:dept_id', async (req, res, next) => {
+    try {
+        let from_month = parseInt(req.body.from.m);
+        let from_year = req.body.from.y;
+        let to_month = parseInt(req.body.to.m);
+        let to_year = req.body.to.y;
+
+        let from_str = `${from_year}-${from_month.toString().padStart(2, '0')}`;
+        let to_str = `${to_year}-${to_month.toString().padStart(2, '0')}`;
+
+        let dept_id = req.params.dept_id;
+        let mm_id = req.body.mm_id;
+        let item_subitem_ids = req.body.item_subitem_ids || [];
+
+        let reportData = [];
+
+        let awkstmt = DB.db.prepare(`select aawak.*, mm.mm_hin as aawak_mm_hin, sl.list_name_hin as aawak_type_hin,
+        sl2.list_name_hin as condition_hin, sl3.list_name_hin as aawak_source_hin, sl4.list_name_hin as usage_list_hin,
+        unit.unit_short, pbk.pbk_hin, pbk.roll_no
+        from aawak 
+        left join mm on mm._id = aawak.aawak_mm_id
+        left join support_list sl on sl._id = aawak.aawak_type_id
+        left join support_list sl2 on sl2._id = aawak.condition_id
+        left join support_list sl3 on sl3._id = aawak.aawak_source_id
+        left join support_list sl4 on sl4._id = aawak.usage_list_id
+        left join unit on unit._id = aawak.unit_id
+        left join pbk on pbk._id = aawak.pbk_id
+        where aawak.dept_id = @dept_id 
+        ${mm_id ? `AND aawak.mm_id = ${mm_id}` : ''} 
+        AND aawak.item_id = @item_id AND ((aawak.subitem_id IS NULL AND @subitem_id IS NULL) OR aawak.subitem_id = @subitem_id) 
+        AND strftime('%Y-%m', aawak.date) >= '${from_str}' AND strftime('%Y-%m', aawak.date) <= '${to_str}'
+        order by aawak.date asc`);
+
+        let jwkstmt = DB.db.prepare(`select jawak.*, mm.mm_hin as jawak_mm_hin, sl.list_name_hin as jawak_type_hin,
+        sl2.list_name_hin as condition_hin, sl3.list_name_hin as aawak_source_hin, sl4.list_name_hin as usage_list_hin,
+        unit.unit_short, pbk.pbk_hin, pbk.roll_no
+        from jawak 
+        left join mm on mm._id = jawak.jawak_mm_id
+        left join support_list sl on sl._id = jawak.jawak_type_id
+        left join support_list sl2 on sl2._id = jawak.condition_id
+        left join support_list sl3 on sl3._id = jawak.aawak_source_id
+        left join support_list sl4 on sl4._id = jawak.usage_list_id
+        left join unit on unit._id = jawak.unit_id
+        left join pbk on pbk._id = jawak.pbk_id
+        where jawak.dept_id = @dept_id 
+        ${mm_id ? `AND jawak.mm_id = ${mm_id}` : ''} 
+        AND jawak.item_id = @item_id AND ((jawak.subitem_id IS NULL AND @subitem_id IS NULL) OR jawak.subitem_id = @subitem_id) 
+        AND strftime('%Y-%m', jawak.date) >= '${from_str}' AND strftime('%Y-%m', jawak.date) <= '${to_str}'
+        order by jawak.date asc`);
+
+        let pastBachatStmt = DB.db.prepare(`select sum(IFNULL(bcht.past_bachat, 0)) as past_bachat from bachat_new bcht 
+        where bcht.dept_id = @dept_id 
+        ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
+        AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
+        AND bcht.year = '${from_year}' AND bcht.month = '${from_month - 1}'`);
+
+        let currentBachatStmt = DB.db.prepare(`select sum(IFNULL(bcht.past_bachat, 0) + IFNULL(bcht.bachat, 0)) as bachat from bachat_new bcht 
+        where bcht.dept_id = @dept_id 
+        ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
+        AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
+        AND bcht.year = '${to_year}' AND bcht.month = '${to_month - 1}'`);
+
+        for (let item of item_subitem_ids) {
+            let rowParams = {
+                dept_id: dept_id,
+                item_id: item.item_id,
+                subitem_id: item.subitem_id || null
+            };
+
+            let aawaks = awkstmt.all(rowParams);
+            let jawaks = jwkstmt.all(rowParams);
+            
+            let pastBachatRow = pastBachatStmt.get(rowParams);
+            let past_bachat = pastBachatRow && pastBachatRow.past_bachat !== null ? pastBachatRow.past_bachat : 0;
+            if (!pastBachatRow || pastBachatRow.past_bachat === null) {
+                let fallbackPastBachat = DB.db.prepare(`select sum(bcht.bachat) as bachat from bachat_new bcht 
+                where bcht.dept_id = @dept_id 
+                ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
+                AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
+                AND (bcht.year < '${from_year}' OR (bcht.year = '${from_year}' AND bcht.month < '${from_month - 1}'))`).get(rowParams);
+                past_bachat = fallbackPastBachat && fallbackPastBachat.bachat ? fallbackPastBachat.bachat : 0;
+            }
+
+            let currentBachatRow = currentBachatStmt.get(rowParams);
+            let current_bachat = currentBachatRow && currentBachatRow.bachat !== null ? currentBachatRow.bachat : 0;
+            if (!currentBachatRow || currentBachatRow.bachat === null) {
+                let fallbackCurrentBachat = DB.db.prepare(`select sum(bcht.bachat) as bachat from bachat_new bcht 
+                where bcht.dept_id = @dept_id 
+                ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
+                AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
+                AND (bcht.year < '${to_year}' OR (bcht.year = '${to_year}' AND bcht.month <= '${to_month - 1}'))`).get(rowParams);
+                current_bachat = fallbackCurrentBachat && fallbackCurrentBachat.bachat ? fallbackCurrentBachat.bachat : 0;
+            }
+
+            let total_aawak = aawaks.reduce((sum, a) => sum + (a.qty || 0), 0);
+            let total_jawak = jawaks.reduce((sum, j) => sum + (j.qty || 0), 0);
+            let unit_short = aawaks.length > 0 ? aawaks[0].unit_short : (jawaks.length > 0 ? jawaks[0].unit_short : '');
+            
+            if (!unit_short) {
+                let unitRow = DB.db.prepare(`select unit.unit_short from item left join unit on unit._id = item.unit_id where item._id = @item_id`).get(rowParams);
+                unit_short = unitRow ? unitRow.unit_short : '';
+            }
+
+
+            // Prepend past bachat / opening balance as first row in aawak
+            let past_bachat_obj = {
+                date: `${from_year}-${from_month.toString().padStart(2, '0')}-01`,
+                lot_no: '-',
+                aawak_mm_hin: 'पिछली बचत (Opening Balance)',
+                condition_hin: '-',
+                qty: past_bachat,
+                unit_short: unit_short,
+                aawak_type_hin: 'शुरुआती स्टॉक',
+                rate: 0,
+                actual_amt: 0,
+                description: 'Past Bachat / Opening Balance'
+            };
+            aawaks.unshift(past_bachat_obj);
+
+            if (total_aawak !== 0 || total_jawak !== 0 || current_bachat !== 0) {
+                reportData.push({
+                    item_id: item.item_id,
+                    subitem_id: item.subitem_id,
+                    item_hin: item.item_hin,
+                    item_eng: item.item_eng,
+                    subitem_hin: item.subitem_hin,
+                    subitem_eng: item.subitem_eng,
+                    unit_short: unit_short,
+                    overview: {
+                        past_bachat: past_bachat,
+                        total_aawak: total_aawak,
+                        total_jawak: total_jawak,
+                        current_bachat: current_bachat
+                    },
+                    aawaks: aawaks,
+                    jawaks: jawaks
+                });
+            }
+        }
+
+        let mmName = 'All MMs';
+        if (mm_id) {
+            let mmRow = mmTable.getById(mm_id);
+            if (mmRow) mmName = mmRow.mm_hin;
+        }
+
+        const pdfBuffer = await itemLedgerPdf.generateItemLedgerPdf(
+            reportData, 
+            req.body.from.name_hin, 
+            req.body.to.name_hin, 
+            mmName
+        );
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=item_ledger.pdf');
+        res.end(pdfBuffer, 'binary');
 
     } catch (err) {
         console.log(err);
@@ -374,25 +589,34 @@ router.put('/jwk_type_saar/', async (req, res, next) => {
 router.put('/report_store_stock/:dept_id', async (req, res, next) => {
     try {
 
-        let conditionString = `bachat.dept_id = ${req.params.dept_id} ${req.body.mm_id ? ` AND bachat.mm_id in (${req.body.mm_id.join(",")})` : ``}`;
-        let havingString = ``;
-        for (let cn of req.body.condition) {
-            havingString += havingString == `` ? `${cn} <> 0` : ` OR ${cn} <> 0`;
+        let conditionString = `bachat.dept_id = ${req.params.dept_id} ${req.body.mm_id && req.body.mm_id.length > 0 ? ` AND bachat.mm_id in (${req.body.mm_id.join(",")})` : ``}`;
+        if (req.body.item_subitem_ids && req.body.item_subitem_ids.length > 0) {
+            let itemSubConditions = req.body.item_subitem_ids.map(id => {
+                let parts = id.split(':');
+                if (parts[1]) {
+                    return `(bachat.item_id = ${parts[0]} AND bachat.subitem_id = ${parts[1]})`;
+                } else {
+                    return `(bachat.item_id = ${parts[0]})`;
+                }
+            });
+            conditionString += ` AND (${itemSubConditions.join(' OR ')})`;
         }
-        let sql = `select bachat.*, sum(New) as New, sum(Old) as Old, 
-        sum(Defective) as Defective, sum(Repairing) as UR, sum(Scrap) as Scrap,
-        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
-        sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+        if (req.body.category_id && req.body.category_id.length > 0) {
+            conditionString += ` AND (bachat.item_id IN (SELECT item_id FROM rel_item_category WHERE category_id IN (${req.body.category_id.join(',')})) OR bachat.subitem_id IN (SELECT subitem_id FROM rel_subitem_category WHERE category_id IN (${req.body.category_id.join(',')})))`;
+        }
+        let sql = `select bachat.dept_id, bachat.item_id, bachat.subitem_id, bachat.unit_id, sum(bachat.Stock) as Stock, 
+        JSON_GROUP_ARRAY(bachat.mm_id) as arr_mm_id, JSON_GROUP_ARRAY(bachat.Stock) as arr_mm_stock,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
+        sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
         unit.unit_short, unit.unit_full,
         department.dept_hin, department.dept_eng, department.dept_code
         from bachat
-        left join item it on it._id = bachat.item_id 
-        left join subitem sit on sit._id = bachat.subitem_id
-        left join subitem_list sitl on sitl._id = sit.subitem_list_id
+        left join v_item it on it._id = bachat.item_id 
+        left join v_subitem sit on sit._id = bachat.subitem_id
         left join unit on unit._id = bachat.unit_id
         left join department on department._id = bachat.dept_id where ${conditionString} 
         group by bachat.dept_id, bachat.item_id, bachat.subitem_id, bachat.unit_id 
-        ${havingString.trim() != `` ? `having ${havingString}` : ``}`;
+        having sum(bachat.Stock) <> 0`;
         console.log(sql);
         let stmt = DB.db.prepare(sql);
 

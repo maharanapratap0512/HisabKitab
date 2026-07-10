@@ -78,11 +78,11 @@ export class DeleteComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     console.log("changes", changes);
-    if (changes['Type'] && changes['Type'].currentValue) {
-      this.Type = changes['Type'].currentValue;
+    if (changes.Type.currentValue) {
+      this.Type = changes.Type.currentValue;
     }
-    if (changes['ID'] && changes['ID'].currentValue) {
-      this.ID = changes['ID'].currentValue;
+    if (changes.ID.currentValue) {
+      this.ID = changes.ID.currentValue;
     }
     this.configureData();
     console.log(this.ID, this.Type);
@@ -200,9 +200,9 @@ export class DeleteComponent {
           // We must dynamically map the filterBody arrays to use the selected IDs
           this.filterBody = JSON.parse(JSON.stringify(config.filterBody));
           for (let k in this.filterBody) {
-             if (Array.isArray(this.filterBody[k])) {
-                 this.filterBody[k] = Array.isArray(this.ID) ? this.ID : [this.ID];
-             }
+            if (Array.isArray(this.filterBody[k])) {
+              this.filterBody[k] = Array.isArray(this.ID) ? this.ID : [this.ID];
+            }
           }
         }
 
@@ -240,7 +240,7 @@ export class DeleteComponent {
     this.canDelete = false;
     this.relatedData = {}
     this.selectedTable = '';
-    
+
     if (!this.relatedTables || this.relatedTables.length === 0) {
       this.isLoader = false;
       this.canDelete = true;
@@ -655,7 +655,7 @@ export class DeleteComponent {
       if (result.isConfirmed) {
         this.isLoader = true;
         const idsStr = selectedIds.join(',');
-        
+
         let type = this.selectedTable ? this.selectedTable.toLowerCase() : '';
         if (['subitem'].includes(type)) {
           // If subitem, open delete modal for bulk? No, subitem API supports bulk now!

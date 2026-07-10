@@ -6,12 +6,11 @@
 
             <div class="row">
                <div class="card-header">Select Report</div>
-               <div class="card-body">
-                  <div class="d-flex flex-wrap gap-2 mb-3">
-                     <button *ngFor="let report of reports" 
-                             class="btn m-1" 
-                             [ngClass]="selectedReport?.id === report.id ? 'btn-primary' : 'btn-outline-primary'"
-                             (click)="selectReport(report)">
+               <div class="mt-1">
+                  <div class="d-flex flex-wrap gap-2 mb-1">
+                     <button *ngFor="let report of reports" class="btn btn-sm m-1"
+                        [ngClass]="selectedReport?.id === report.id ? 'btn-primary' : 'btn-outline-primary'"
+                        (click)="selectReport(report)">
                         {{ report.title }}
                      </button>
                   </div>
@@ -19,7 +18,7 @@
             </div>
 
             <!-- Report content will be loaded here -->
-            <div class="row mt-4" *ngIf="selectedReport">
+            <div class="row" *ngIf="selectedReport">
                <div class="col-12">
                   <router-outlet></router-outlet>
                </div>

@@ -191,26 +191,31 @@ export class ReportItemLedgerComponent implements OnInit {
       titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
       worksheet.getRow(1).height = 30;
 
-      // Summary View (Software Style: 3 Boxes)
-      worksheet.mergeCells('A3:C3');
-      worksheet.mergeCells('A4:C4');
-      worksheet.mergeCells('D3:F3');
-      worksheet.mergeCells('D4:F4');
-      worksheet.mergeCells('G3:I3');
-      worksheet.mergeCells('G4:I4');
+      // Summary View (Software Style: 4 Boxes)
+      worksheet.mergeCells('A3:B3');
+      worksheet.mergeCells('A4:B4');
+      worksheet.mergeCells('C3:E3');
+      worksheet.mergeCells('C4:E4');
+      worksheet.mergeCells('F3:H3');
+      worksheet.mergeCells('F4:H4');
+      worksheet.mergeCells('I3:K3');
+      worksheet.mergeCells('I4:K4');
 
-      worksheet.getCell('A3').value = 'Total Aawak (कुल आवक)';
-      worksheet.getCell('A4').value = `${report.overview.total_aawak} ${report.unit_short}`;
+      worksheet.getCell('A3').value = 'Past Bachat (पिछली बचत)';
+      worksheet.getCell('A4').value = `${report.overview.past_bachat || 0} ${report.unit_short}`;
+
+      worksheet.getCell('C3').value = 'Total Aawak (कुल आवक)';
+      worksheet.getCell('C4').value = `${report.overview.total_aawak} ${report.unit_short}`;
       
-      worksheet.getCell('D3').value = 'Total Jawak (कुल जावक)';
-      worksheet.getCell('D4').value = `${report.overview.total_jawak} ${report.unit_short}`;
+      worksheet.getCell('F3').value = 'Total Jawak (कुल जावक)';
+      worksheet.getCell('F4').value = `${report.overview.total_jawak} ${report.unit_short}`;
       
-      worksheet.getCell('G3').value = 'Current Bachat (वर्तमान बचत)';
-      worksheet.getCell('G4').value = `${report.overview.current_bachat} ${report.unit_short}`;
+      worksheet.getCell('I3').value = 'Current Bachat (वर्तमान बचत)';
+      worksheet.getCell('I4').value = `${report.overview.current_bachat} ${report.unit_short}`;
 
       // Styling Summary Boxes
-      let boxHeaders = ['A3', 'D3', 'G3'];
-      let boxValues = ['A4', 'D4', 'G4'];
+      let boxHeaders = ['A3', 'C3', 'F3', 'I3'];
+      let boxValues = ['A4', 'C4', 'F4', 'I4'];
       
       boxHeaders.forEach(c => {
           let cell = worksheet.getCell(c);
@@ -225,26 +230,49 @@ export class ReportItemLedgerComponent implements OnInit {
           cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
       });
 
+      // Past Bachat Box Color
+      worksheet.getCell('A3').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFE2E3E5'} };
+      worksheet.getCell('A4').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFE2E3E5'} };
+      worksheet.getCell('A3').font = { bold: true, color: { argb: 'FF41464B' } };
+      worksheet.getCell('A4').font = { bold: true, size: 14, color: { argb: 'FF41464B' } };
+
       // Aawak Box Color
-      worksheet.getCell('A3').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFD4EDDA'} };
-      worksheet.getCell('A4').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFD4EDDA'} };
-      worksheet.getCell('A3').font = { bold: true, color: { argb: 'FF0F5132' } };
-      worksheet.getCell('A4').font = { bold: true, size: 14, color: { argb: 'FF0F5132' } };
+      worksheet.getCell('C3').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFD4EDDA'} };
+      worksheet.getCell('C4').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFD4EDDA'} };
+      worksheet.getCell('C3').font = { bold: true, color: { argb: 'FF0F5132' } };
+      worksheet.getCell('C4').font = { bold: true, size: 14, color: { argb: 'FF0F5132' } };
 
       // Jawak Box Color
-      worksheet.getCell('D3').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFF8D7DA'} };
-      worksheet.getCell('D4').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFF8D7DA'} };
-      worksheet.getCell('D3').font = { bold: true, color: { argb: 'FF842029' } };
-      worksheet.getCell('D4').font = { bold: true, size: 14, color: { argb: 'FF842029' } };
+      worksheet.getCell('F3').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFF8D7DA'} };
+      worksheet.getCell('F4').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFF8D7DA'} };
+      worksheet.getCell('F3').font = { bold: true, color: { argb: 'FF842029' } };
+      worksheet.getCell('F4').font = { bold: true, size: 14, color: { argb: 'FF842029' } };
 
       // Bachat Box Color
-      worksheet.getCell('G3').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFD1ECF1'} };
-      worksheet.getCell('G4').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFD1ECF1'} };
-      worksheet.getCell('G3').font = { bold: true, color: { argb: 'FF055160' } };
-      worksheet.getCell('G4').font = { bold: true, size: 14, color: { argb: 'FF055160' } };
+      worksheet.getCell('I3').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFD1ECF1'} };
+      worksheet.getCell('I4').fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFD1ECF1'} };
+      worksheet.getCell('I3').font = { bold: true, color: { argb: 'FF055160' } };
+      worksheet.getCell('I4').font = { bold: true, size: 14, color: { argb: 'FF055160' } };
 
       worksheet.getRow(3).height = 25;
       worksheet.getRow(4).height = 30;
+
+      // Helper to format date YYYY-MM-DD to DD-MM-YYYY
+      const formatDate = (dateStr: string) => {
+        if (!dateStr) return '';
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+          return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+        return dateStr;
+      };
+
+      // Helper to sanitize numeric values
+      const getNumericValue = (val: any) => {
+        if (val === undefined || val === null || val === '') return '-';
+        const num = Number(val);
+        return isNaN(num) ? '-' : num;
+      };
 
       // Aawak Table
       let currentRow = 6;
@@ -252,7 +280,7 @@ export class ReportItemLedgerComponent implements OnInit {
       worksheet.getCell(`A${currentRow}`).font = { bold: true, color: { argb: 'FF0F5132' } };
       currentRow++;
       
-      const aawakHeaders = ['तारीख', 'लॉट नं.', 'कहाँ से आया', 'किसने दिया', 'कन्डिशन', 'क्वानटिटी', 'यूनिट', 'आवक टाइप', 'डिस्क्रिप्शन'];
+      const aawakHeaders = ['तारीख', 'लॉट नं.', 'कहाँ से आया', 'किसने दिया', 'कन्डिशन', 'क्वानटिटी', 'यूनिट', 'रेट', 'अमाउंट', 'आवक टाइप', 'डिस्क्रिप्शन'];
       worksheet.getRow(currentRow).values = aawakHeaders;
       worksheet.getRow(currentRow).font = { bold: true, color: { argb: 'FF0F5132' } };
       worksheet.getRow(currentRow).eachCell(c => c.fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFD4EDDA'} });
@@ -261,8 +289,8 @@ export class ReportItemLedgerComponent implements OnInit {
       if (report.aawaks && report.aawaks.length > 0) {
           for (let a of report.aawaks) {
               worksheet.getRow(currentRow).values = [
-                  a.date, a.lot_no, a.aawak_mm_hin, (a.roll_no ? a.roll_no + ' ' : '') + (a.pbk_hin ? a.pbk_hin : ''),
-                  a.condition_hin, a.qty, a.unit_short, a.aawak_type_hin, a.description
+                  formatDate(a.date), a.lot_no, a.aawak_mm_hin, (a.roll_no ? a.roll_no + ' ' : '') + (a.pbk_hin ? a.pbk_hin : ''),
+                  a.condition_hin, getNumericValue(a.qty), a.unit_short, getNumericValue(a.rate), getNumericValue(a.actual_amt), a.aawak_type_hin, a.description
               ];
               currentRow++;
           }
@@ -278,7 +306,7 @@ export class ReportItemLedgerComponent implements OnInit {
       worksheet.getCell(`A${currentRow}`).font = { bold: true, color: { argb: 'FF842029' } };
       currentRow++;
       
-      const jawakHeaders = ['तारीख', 'लॉट नं.', 'कहाँ भेजा', 'किसको दिया', 'कन्डिशन', 'क्वानटिटी', 'यूनिट', 'जावक टाइप', 'डिस्क्रिप्शन'];
+      const jawakHeaders = ['तारीख', 'लॉट नं.', 'कहाँ भेजा', 'किसको दिया', 'कन्डिशन', 'क्वानटिटी', 'यूनिट', 'रेट', 'अमाउंट', 'जावक टाइप', 'डिस्क्रिप्शन'];
       worksheet.getRow(currentRow).values = jawakHeaders;
       worksheet.getRow(currentRow).font = { bold: true, color: { argb: 'FF842029' } };
       worksheet.getRow(currentRow).eachCell(c => c.fill = { type: 'pattern', pattern:'solid', fgColor:{argb:'FFF8D7DA'} });
@@ -287,8 +315,8 @@ export class ReportItemLedgerComponent implements OnInit {
       if (report.jawaks && report.jawaks.length > 0) {
           for (let j of report.jawaks) {
               worksheet.getRow(currentRow).values = [
-                  j.date, j.lot_no, j.jawak_mm_hin, (j.roll_no ? j.roll_no + ' ' : '') + (j.pbk_hin ? j.pbk_hin : ''),
-                  j.condition_hin, j.qty, j.unit_short, j.jawak_type_hin, j.description
+                  formatDate(j.date), j.lot_no, j.jawak_mm_hin, (j.roll_no ? j.roll_no + ' ' : '') + (j.pbk_hin ? j.pbk_hin : ''),
+                  j.condition_hin, getNumericValue(j.qty), j.unit_short, getNumericValue(j.rate), getNumericValue(j.actual_amt), j.jawak_type_hin, j.description
               ];
               currentRow++;
           }
@@ -299,7 +327,7 @@ export class ReportItemLedgerComponent implements OnInit {
       
       // Set column widths
       worksheet.columns.forEach((col, i) => {
-          col.width = i === 0 ? 15 : (i === 8 ? 40 : 18);
+          col.width = i === 0 ? 15 : (i === 10 ? 40 : 18);
       });
     }
 
@@ -307,6 +335,68 @@ export class ReportItemLedgerComponent implements OnInit {
     const data: Blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     let title = 'Item_Ledger_' + this.filterBody.from.name.replace(' ', '') + '_to_' + this.filterBody.to.name.replace(' ', '');
     FileSaver.saveAs(data, title + '.xlsx');
+  }
+
+  exportToPDF() {
+    if (!this.reportData || this.reportData.length === 0) {
+      this.toastr.error('No data to export');
+      return;
+    }
+
+    // Auto-select items if category is chosen but item list is cleared
+    if ((!this.filterBody.item_subitem_ids || this.filterBody.item_subitem_ids.length === 0) && this.filterBody.category_id) {
+      this.filterBody.item_subitem_ids = this.getCategoryItems(this.filterBody.category_id);
+    }
+
+    if(!this.filterBody.item_subitem_ids || this.filterBody.item_subitem_ids.length === 0) {
+      this.toastr.error('Please select at least one item');
+      return;
+    }
+
+    let itemSubitemParsed = this.filterBody.item_subitem_ids.map((idStr: string) => {
+      let parts = idStr.split(':');
+      let i_id = Number(parts[0]);
+      let s_id = parts[1] ? Number(parts[1]) : null;
+      
+      let itemObj = this.items.find((i: any) => i._id === i_id);
+      let item_hin = itemObj ? itemObj.item_hin : '';
+      let item_eng = itemObj ? itemObj.item_eng : '';
+      let subitem_hin = '';
+      let subitem_eng = '';
+      if (itemObj && s_id) {
+         let subObj = itemObj.subitems.find((s: any) => s._id === s_id);
+         if (subObj) {
+            subitem_hin = subObj.subitem_hin;
+            subitem_eng = subObj.subitem_eng;
+         }
+      }
+
+      return {
+        item_id: i_id,
+        subitem_id: s_id,
+        item_hin: item_hin,
+        item_eng: item_eng,
+        subitem_hin: subitem_hin,
+        subitem_eng: subitem_eng
+      };
+    });
+
+    let body = { ...this.filterBody, item_subitem_ids: itemSubitemParsed };
+
+    this.isLoader = true;
+    this.loadingStatus = 'Generating PDF...';
+
+    this.http.downloadPostData(this.api.getUrl('REPORT') + 'item_ledger_pdf/' + this.auth.webUser.dept_id, body).subscribe((data: any) => {
+      let title = 'Item_Ledger_' + this.filterBody.from.name.replace(' ', '') + '_to_' + this.filterBody.to.name.replace(' ', '');
+      FileSaver.saveAs(data, title + '.pdf');
+      this.isLoader = false;
+      this.loadingStatus = 'Loading...';
+    }, (err: any) => {
+      console.error(err);
+      this.isLoader = false;
+      this.loadingStatus = 'Loading...';
+      this.toastr.error(err.message || 'Error generating PDF');
+    });
   }
 
   setActiveReport(index: number) {

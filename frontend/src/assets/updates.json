@@ -1,5 +1,30 @@
 [
     {
+        "version": "34.5",
+        "date": "10-07-2026",
+        "summary": "Report",
+        "summary_hin": "रिपोर्ट",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Store Stock Reports",
+                "title": "Multiple MM Stock Report",
+                "title_hin": "",
+                "desc": "Multiple MM, Store, Khet, Stock Currect Stock side by side qty....",
+                "desc_hin": ""
+            },
+            {
+                "type": "feature",
+                "module": "Item Ledger Reports",
+                "title": "Calculation Solved, PDF export added",
+                "title_hin": "",
+                "desc": "High featured Index PDF generation, and past bachat, rate, amount column added in report....",
+                "desc_hin": ""
+            }
+        ]
+    },
+    {
         "version": "34.4",
         "date": "09-07-2026",
         "summary": "Item Ledger Report & Dashboard Excel",

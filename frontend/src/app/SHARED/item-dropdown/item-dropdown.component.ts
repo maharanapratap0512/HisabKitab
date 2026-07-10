@@ -15,6 +15,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 })
 export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
   @Input() items: any[] = [];
+  @Input() categoryIds: any[] = [];
   @Input() placeholder: string = 'Select Item';
   @Input() appendTo: string = 'body';
   @Input() readonly: boolean = false;
@@ -37,7 +38,7 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
   onTouched: any = () => { };
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['items']) {
+    if (changes['items'] || changes['categoryIds']) {
       this.flattenItems();
     }
     if (changes['itemId'] || changes['subitemId']) {
@@ -50,6 +51,25 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
     if (!this.items) return;
 
     this.items.forEach(it => {
+      let itemMatches = true;
+      let matchingSubitems = it.subitems || [];
+
+      if (this.categoryIds && this.categoryIds.length > 0) {
+        itemMatches = it.categories && it.categories.some((c: any) => this.categoryIds.includes(c._id));
+        
+        if (!itemMatches && it.subitems && it.subitems.length > 0) {
+          matchingSubitems = it.subitems.filter((sub: any) => sub.categories && sub.categories.some((c: any) => this.categoryIds.includes(c._id)));
+        } else if (itemMatches) {
+          matchingSubitems = it.subitems || [];
+        } else {
+          matchingSubitems = [];
+        }
+      }
+
+      if (this.categoryIds && this.categoryIds.length > 0 && !itemMatches && matchingSubitems.length === 0) {
+        return; // skip entirely
+      }
+
       // Parent item
       const itemHin = it.item_hin ? it.item_hin.trim() : '';
       const itemEng = it.item_eng ? it.item_eng.trim() : '';
@@ -59,22 +79,24 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
           aliasTags = it.item_aliases.map((a: any) => a.alias).join(' ');
       }
       
-      flat.push({
-        id: `${it._id}:`,
-        item_id: it._id,
-        subitem_id: null,
-        item_hin: itemHin,
-        item_eng: itemEng,
-        item_code: it.item_code,
-        item_roman: it.item_roman,
-        item_aliases: it.item_aliases,
-        isSubitem: false,
-        item: it,
-        searchTags: `${itemHin} ${itemEng} ${it.item_code || ''} ${it.item_roman || ''} ${aliasTags}`.toLowerCase()
-      });
+      if (!this.categoryIds || this.categoryIds.length === 0 || itemMatches) {
+        flat.push({
+          id: `${it._id}:`,
+          item_id: it._id,
+          subitem_id: null,
+          item_hin: itemHin,
+          item_eng: itemEng,
+          item_code: it.item_code,
+          item_roman: it.item_roman,
+          item_aliases: it.item_aliases,
+          isSubitem: false,
+          item: it,
+          searchTags: `${itemHin} ${itemEng} ${it.item_code || ''} ${it.item_roman || ''} ${aliasTags}`.toLowerCase()
+        });
+      }
 
-      if (it.subitems && it.subitems.length > 0) {
-        it.subitems.forEach((sub: any) => {
+      if (matchingSubitems && matchingSubitems.length > 0) {
+        matchingSubitems.forEach((sub: any) => {
           const subitemHin = sub.subitem_hin ? String(sub.subitem_hin).trim() : '';
           const subitemEng = sub.subitem_eng ? String(sub.subitem_eng).trim() : '';
           

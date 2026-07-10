@@ -3,196 +3,221 @@
     <p style="color: white"> {{loadingStatus}} </p>
 </ngx-spinner>
 
-<div class="wrapper">
-    <div class="content-page">
-        <div class="content">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="card-body">
-                        <div class="row mb-2 mt-3">
-                            <div class="col-md-2 mb-2">
-                                <div class="form-group">
-                                    <label class="form-label">From Date</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select From"
-                                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.from"
-                                        name="from" [ngModelOptions]="{standalone: true}">
-                                        <ng-option selected="selected" disabled value="">Select From</ng-option>
-                                        <ng-option *ngFor="let item of monthYearOptions" [value]="item">{{item.name}}</ng-option>
-                                    </ng-select>
-                                </div>
+<div class="row">
+    <div class="m-1">
+        <div class="row mb-2 mt-3">
+            <div class="col-md-2 mb-2">
+                <div class="form-group">
+                    <label class="form-label">From Date</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select From" [clearable]="true"
+                        [virtualScroll]="true" [(ngModel)]="filterBody.from" name="from"
+                        [ngModelOptions]="{standalone: true}">
+                        <ng-option selected="selected" disabled value="">Select From</ng-option>
+                        <ng-option *ngFor="let item of monthYearOptions" [value]="item">{{item.name}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <div class="form-group">
+                    <label class="form-label">To Date</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select To" [clearable]="true"
+                        [virtualScroll]="true" [(ngModel)]="filterBody.to" name="to"
+                        [ngModelOptions]="{standalone: true}">
+                        <ng-option selected="selected" disabled value="">Select To</ng-option>
+                        <ng-option *ngFor="let item of monthYearOptions" [value]="item">{{item.name}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <div class="form-group">
+                    <label class="form-label">MM / Store</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="true"
+                        [multiple]="false" [virtualScroll]="true" [(ngModel)]="filterBody.mm_id"
+                        [ngModelOptions]="{standalone: true}">
+                        <ng-option *ngFor="let item of mms" [value]="item._id">
+                            {{item.mm_hin}} : {{item.mm_code}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-md-2 mb-2">
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <ng-select class="custom" style="width: 100%;" placeholder="Select Category" [clearable]="true"
+                        [multiple]="false" [virtualScroll]="true" [(ngModel)]="filterBody.category_id"
+                        [ngModelOptions]="{standalone: true}" (change)="categorySelected($event)">
+                        <ng-option *ngFor="let item of categories" [value]="item._id">
+                            {{item.category_hin}} : {{item.category_eng}}</ng-option>
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="form-group">
+                    <label class="form-label">Item - Subitem</label>
+                    <app-item-dropdown [items]="items" [(ngModel)]="filterBody.item_subitem_ids" [multiple]="true"
+                        placeholder="Select Items"></app-item-dropdown>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 mb-2">
+                <div class="d-flex align-items-end h-100">
+                    <div class="flex-grow-1">
+                        <button class="btn btn-primary form-control w-100" (click)="searchReports()">Generate
+                            Report</button>
+                    </div>
+                    <div class="ms-2 mb-1">
+                        <app-popover-filter iconClass="uil uil-info-circle text-info" [btnOutline]="false"
+                            direction="left" [showClearButton]="false" triggerOn="hover">
+                            <div style="width: 320px; padding: 10px; white-space: normal;">
+                                <h6 class="mb-2 text-info border-bottom pb-1">Item Ledger - Details /
+                                    विवरण</h6>
+                                <p class="mb-2 fs-7">
+                                    <strong>What is this report for? (यह रिपोर्ट किस लिए
+                                        है?)</strong><br>
+                                    Detailed ledger showing Aawak, Jawak and Bachat for selected
+                                    items.<br>
+                                    <span class="text-muted">चयनित वस्तुओं के लिए आवक, जावक और बचत
+                                        दिखाने वाला विस्तृत लेजर।</span>
+                                </p>
+                                <p class="mb-0 fs-7">
+                                    <strong>How to use: (कैसे उपयोग करें?)</strong><br>
+                                    Select Month/Year, Category, and Items to view the ledger. Export to
+                                    Excel for item-wise sheets.<br>
+                                    <span class="text-muted">लेजर देखने के लिए माह/वर्ष, श्रेणी और आइटम
+                                        चुनें। आइटम-वार शीट के लिए एक्सेल में निर्यात करें।</span>
+                                </p>
                             </div>
-                            <div class="col-md-2 mb-2">
-                                <div class="form-group">
-                                    <label class="form-label">To Date</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select To"
-                                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.to"
-                                        name="to" [ngModelOptions]="{standalone: true}">
-                                        <ng-option selected="selected" disabled value="">Select To</ng-option>
-                                        <ng-option *ngFor="let item of monthYearOptions" [value]="item">{{item.name}}</ng-option>
-                                    </ng-select>
-                                </div>
-                            </div>
-                            <div class="col-md-2 mb-2">
-                                <div class="form-group">
-                                    <label class="form-label">MM / Store</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select MM"
-                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
-                                        [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
-                                        <ng-option *ngFor="let item of mms" [value]="item._id">
-                                            {{item.mm_hin}} : {{item.mm_code}}</ng-option>
-                                    </ng-select>
-                                </div>
-                            </div>
-                            <div class="col-md-2 mb-2">
-                                <div class="form-group">
-                                    <label class="form-label">Category</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Category"
-                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
-                                        [(ngModel)]="filterBody.category_id" [ngModelOptions]="{standalone: true}"
-                                        (change)="categorySelected($event)">
-                                        <ng-option *ngFor="let item of categories" [value]="item._id">
-                                            {{item.category_hin}} : {{item.category_eng}}</ng-option>
-                                    </ng-select>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-2">
-                                <div class="form-group">
-                                    <label class="form-label">Item - Subitem</label>
-                                    <app-item-dropdown [items]="items" [(ngModel)]="filterBody.item_subitem_ids" [multiple]="true" placeholder="Select Items"></app-item-dropdown>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2 mb-2">
-                                <div class="d-flex align-items-end h-100">
-                                    <div class="flex-grow-1">
-                                        <button class="btn btn-primary form-control w-100" (click)="searchReports()">Generate Report</button>
-                                    </div>
-                                    <div class="ms-2 mb-1">
-                                        <app-popover-filter iconClass="uil uil-info-circle text-info" [btnOutline]="false" direction="left" [showClearButton]="false" triggerOn="hover">
-                                            <div style="width: 320px; padding: 10px; white-space: normal;">
-                                                <h6 class="mb-2 text-info border-bottom pb-1">Item Ledger - Details / विवरण</h6>
-                                                <p class="mb-2 fs-7">
-                                                    <strong>What is this report for? (यह रिपोर्ट किस लिए है?)</strong><br> 
-                                                    Detailed ledger showing Aawak, Jawak and Bachat for selected items.<br>
-                                                    <span class="text-muted">चयनित वस्तुओं के लिए आवक, जावक और बचत दिखाने वाला विस्तृत लेजर।</span>
-                                                </p>
-                                                <p class="mb-0 fs-7">
-                                                    <strong>How to use: (कैसे उपयोग करें?)</strong><br> 
-                                                    Select Month/Year, Category, and Items to view the ledger. Export to Excel for item-wise sheets.<br>
-                                                    <span class="text-muted">लेजर देखने के लिए माह/वर्ष, श्रेणी और आइटम चुनें। आइटम-वार शीट के लिए एक्सेल में निर्यात करें।</span>
-                                                </p>
-                                            </div>
-                                        </app-popover-filter>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-2 mb-2" *ngIf="reportData.length > 0">
-                                <button type="button" class="btn btn-outline-success w-100" (click)="exportToExcel()">
-                                    <i class="uil uil-export"></i> Export to Excel
-                                </button>
-                            </div>
-                        </div>
+                        </app-popover-filter>
                     </div>
                 </div>
+            </div>
+            <div class="col-md-2 mb-2" *ngIf="reportData.length > 0">
+                <button type="button" class="btn btn-outline-success w-100" (click)="exportToExcel()">
+                    <i class="uil uil-export"></i> Export to Excel
+                </button>
+            </div>
+            <div class="col-md-2 mb-2" *ngIf="reportData.length > 0">
+                <button type="button" class="btn btn-outline-danger w-100" (click)="exportToPDF()">
+                    <i class="uil uil-file-download"></i> Export to PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <div class="row mt-4" *ngIf="reportData.length">
-                    <div class="col-12 mb-3">
-                        <span *ngFor="let report of reportData; let i = index"
-                              class="badge rounded-pill me-1 mb-1 cursor-pointer"
-                              [ngClass]="activeReportIndex === i ? 'bg-primary border border-primary text-white' : 'bg-light text-dark border'"
-                              (click)="setActiveReport(i)"
-                              style="cursor: pointer; font-size: 0.85rem; padding: 0.4rem 0.6rem; font-weight: 500; display: inline-block;">
-                            {{report.item_hin}} {{report.subitem_hin ? '(' + report.subitem_hin + ')' : ''}}
-                        </span>
+<div class="row mt-4" *ngIf="reportData.length">
+    <div class="col-12 mb-3">
+        <span *ngFor="let report of reportData; let i = index" class="badge rounded-pill me-1 mb-1 cursor-pointer"
+            [ngClass]="activeReportIndex === i ? 'bg-primary border border-primary text-white' : 'bg-light text-dark border'"
+            (click)="setActiveReport(i)"
+            style="cursor: pointer; font-size: 0.85rem; padding: 0.4rem 0.6rem; font-weight: 500; display: inline-block;">
+            {{report.item_hin}} {{report.subitem_hin ? '(' + report.subitem_hin + ')' : ''}}
+        </span>
+    </div>
+</div>
+
+<div class="row" *ngIf="reportData.length">
+    <div class="col-12" *ngIf="reportData[activeReportIndex] as report">
+        <div class="card mb-4 border border-primary">
+            <div class="card-header bg-primary text-white fs-4">
+                {{report.item_hin}} {{report.subitem_hin ? '(' + report.subitem_hin + ')' : ''}}
+                | {{report.item_eng}} {{report.subitem_eng ? '(' + report.subitem_eng + ')' : ''}}
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="alert alert-secondary m-0 h-100 d-flex flex-column justify-content-center">
+                            <h5 class="alert-heading mb-1">Past Bachat (पिछली बचत)</h5>
+                            <h3 class="mb-0">{{report.overview.past_bachat}} <small
+                                    class="fs-6">{{report.unit_short}}</small></h3>
+                            <small>Start of selected month (चयनित महीने की शुरुआत में)</small>
+                        </div>
                     </div>
-                </div>
-
-                <div class="row" *ngIf="reportData.length">
-                    <div class="col-12" *ngIf="reportData[activeReportIndex] as report">
-                        <div class="card mb-4 border border-primary">
-                            <div class="card-header bg-primary text-white fs-4">
-                                {{report.item_hin}} {{report.subitem_hin ? '(' + report.subitem_hin + ')' : ''}} 
-                                | {{report.item_eng}} {{report.subitem_eng ? '(' + report.subitem_eng + ')' : ''}}
-                            </div>
-                            <div class="card-body">
-                                <div class="row mb-4">
-                                    <div class="col-md-4">
-                                        <div class="alert alert-success m-0 h-100 d-flex flex-column justify-content-center">
-                                            <h5 class="alert-heading mb-1">Total Aawak (कुल आवक)</h5>
-                                            <h3 class="mb-0">{{report.overview.total_aawak}} <small class="fs-6">{{report.unit_short}}</small></h3>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="alert alert-danger m-0 h-100 d-flex flex-column justify-content-center">
-                                            <h5 class="alert-heading mb-1">Total Jawak (कुल जावक)</h5>
-                                            <h3 class="mb-0">{{report.overview.total_jawak}} <small class="fs-6">{{report.unit_short}}</small></h3>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="alert alert-info m-0 h-100 d-flex flex-column justify-content-center">
-                                            <h5 class="alert-heading mb-1">Current Bachat (वर्तमान बचत)</h5>
-                                            <h3 class="mb-0">{{report.overview.current_bachat}} <small class="fs-6">{{report.unit_short}}</small></h3>
-                                            <small>End of selected month (चयनित महीने के अंत में)</small>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <h4 class="text-success border-bottom pb-2 mb-3">Aawak Entries (आवक)</h4>
-                                <table class="table table-bordered table-sm table-striped dt-responsive mb-4" *ngIf="report.aawaks.length > 0">
-                                    <thead class="table-success">
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Lot No.</th>
-                                            <th>From (कहाँ से आया)</th>
-                                            <th>Condition</th>
-                                            <th>Qty</th>
-                                            <th>Type</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr *ngFor="let a of report.aawaks">
-                                            <td>{{a.date | date:'dd-MMM-yyyy'}}</td>
-                                            <td>{{a.lot_no}}</td>
-                                            <td>{{a.aawak_mm_hin}} <br> <small>{{a.pbk_hin}} {{a.roll_no}}</small></td>
-                                            <td>{{a.condition_hin}}</td>
-                                            <td><strong>{{a.qty}}</strong> {{a.unit_short}}</td>
-                                            <td>{{a.aawak_type_hin}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <div class="alert alert-light" *ngIf="report.aawaks.length === 0">No Aawak entries found.</div>
-
-                                <h4 class="text-danger border-bottom pb-2 mb-3">Jawak Entries (जावक)</h4>
-                                <table class="table table-bordered table-sm table-striped dt-responsive mb-0" *ngIf="report.jawaks.length > 0">
-                                    <thead class="table-danger">
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Lot No.</th>
-                                            <th>To (कहाँ भेजा)</th>
-                                            <th>Condition</th>
-                                            <th>Qty</th>
-                                            <th>Type</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr *ngFor="let j of report.jawaks">
-                                            <td>{{j.date | date:'dd-MMM-yyyy'}}</td>
-                                            <td>{{j.lot_no}}</td>
-                                            <td>{{j.jawak_mm_hin}} <br> <small>{{j.pbk_hin}} {{j.roll_no}}</small></td>
-                                            <td>{{j.condition_hin}}</td>
-                                            <td><strong>{{j.qty}}</strong> {{j.unit_short}}</td>
-                                            <td>{{j.jawak_type_hin}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <div class="alert alert-light" *ngIf="report.jawaks.length === 0">No Jawak entries found.</div>
-
-                            </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-success m-0 h-100 d-flex flex-column justify-content-center">
+                            <h5 class="alert-heading mb-1">Total Aawak (कुल आवक)</h5>
+                            <h3 class="mb-0">{{report.overview.total_aawak}} <small
+                                    class="fs-6">{{report.unit_short}}</small></h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-danger m-0 h-100 d-flex flex-column justify-content-center">
+                            <h5 class="alert-heading mb-1">Total Jawak (कुल जावक)</h5>
+                            <h3 class="mb-0">{{report.overview.total_jawak}} <small
+                                    class="fs-6">{{report.unit_short}}</small></h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-info m-0 h-100 d-flex flex-column justify-content-center">
+                            <h5 class="alert-heading mb-1">Current Bachat (वर्तमान बचत)</h5>
+                            <h3 class="mb-0">{{report.overview.current_bachat}} <small
+                                    class="fs-6">{{report.unit_short}}</small></h3>
+                            <small>End of selected month (चयनित महीने के अंत में)</small>
                         </div>
                     </div>
                 </div>
 
+                <h4 class="text-success border-bottom pb-2 mb-3">Aawak Entries (आवक)</h4>
+                <table class="table table-bordered table-sm table-striped dt-responsive mb-4"
+                    *ngIf="report.aawaks.length > 0">
+                    <thead class="table-success">
+                        <tr>
+                            <th>Date</th>
+                            <th>Lot No.</th>
+                            <th>From (कहाँ से आया)</th>
+                            <th>Condition</th>
+                            <th>Qty</th>
+                            <th>Rate</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let a of report.aawaks">
+                            <td>{{a.date | date:'dd-MM-yyyy'}}</td>
+                            <td>{{a.lot_no}}</td>
+                            <td>{{a.aawak_mm_hin}} <br> <small>{{a.pbk_hin}} {{a.roll_no}}</small></td>
+                            <td>{{a.condition_hin}}</td>
+                            <td><strong>{{a.qty}}</strong> {{a.unit_short}}</td>
+                            <td>{{a.rate ? (a.rate | number:'1.2-2') : '-'}}</td>
+                            <td>{{a.actual_amt ? (a.actual_amt | number:'1.2-2') : '-'}}</td>
+                            <td>{{a.aawak_type_hin}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="alert alert-light" *ngIf="report.aawaks.length === 0">No Aawak entries
+                    found.</div>
+
+                <h4 class="text-danger border-bottom pb-2 mb-3">Jawak Entries (जावक)</h4>
+                <table class="table table-bordered table-sm table-striped dt-responsive mb-0"
+                    *ngIf="report.jawaks.length > 0">
+                    <thead class="table-danger">
+                        <tr>
+                            <th>Date</th>
+                            <th>Lot No.</th>
+                            <th>To (कहाँ भेजा)</th>
+                            <th>Condition</th>
+                            <th>Qty</th>
+                            <th>Rate</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let j of report.jawaks">
+                            <td>{{j.date | date:'dd-MM-yyyy'}}</td>
+                            <td>{{j.lot_no}}</td>
+                            <td>{{j.jawak_mm_hin}} <br> <small>{{j.pbk_hin}} {{j.roll_no}}</small></td>
+                            <td>{{j.condition_hin}}</td>
+                            <td><strong>{{j.qty}}</strong> {{j.unit_short}}</td>
+                            <td>{{j.rate ? (j.rate | number:'1.2-2') : '-'}}</td>
+                            <td>{{j.actual_amt ? (j.actual_amt | number:'1.2-2') : '-'}}</td>
+                            <td>{{j.jawak_type_hin}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="alert alert-light" *ngIf="report.jawaks.length === 0">No Jawak entries
+                    found.</div>
             </div>
         </div>
     </div>

@@ -23,7 +23,7 @@
                                         {{item.list_name_hin}}:{{item.list_name_eng}}</ng-option>
                                 </ng-select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-5">
                                 <ng-select class="custom" style="width: 100%;" placeholder="Select Store"
                                     [clearable]="true" [multiple]="true" [virtualScroll]="true"
                                     [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}"
@@ -32,35 +32,34 @@
                                         {{item.mm_hin}} : {{item.mm_code}} : {{item.mm_eng}}</ng-option>
                                 </ng-select>
                             </div>
-                            <div class="col-md-3">
-                                <ng-select class="custom" style="width: 100%;" placeholder="Select Condition"
-                                    [clearable]="true" [multiple]="true" [virtualScroll]="true"
-                                    [(ngModel)]="filterBody.condition" [ngModelOptions]="{standalone: true}"
-                                    [ngClass]="{'validation': !filterBody.condition || filterBody.condition.length < 1}">
-                                    <ng-option *ngFor="let item of conditions" [value]="item.list_name_eng">
-                                        {{item.list_name_hin}} : {{item.list_name_eng}}</ng-option>
-                                </ng-select>
-                            </div>
 
                             <div class="col-md-2 mt-1">
-                                <div class="d-flex align-items-end h-100">
+                                <div class="d-flex align-items-end">
                                     <div class="flex-grow-1">
                                         <label class="form-label"></label>
-                                        <button type="button" class="btn btn-theme w-100" (click)="searchReports()"> Generate</button>
+                                        <button type="button" class="btn btn-theme w-100" (click)="searchReports()">
+                                            Generate</button>
                                     </div>
                                     <div class="ms-2 mb-1">
-                                        <app-popover-filter iconClass="uil uil-info-circle text-info" [btnOutline]="false" direction="left" [showClearButton]="false" triggerOn="hover">
+                                        <app-popover-filter iconClass="uil uil-info-circle text-info"
+                                            [btnOutline]="false" direction="left" [showClearButton]="false"
+                                            triggerOn="hover">
                                             <div style="width: 320px; padding: 10px; white-space: normal;">
-                                                <h6 class="mb-2 text-info border-bottom pb-1">Store Stock Report - Details / विवरण</h6>
+                                                <h6 class="mb-2 text-info border-bottom pb-1">Store Stock Report -
+                                                    Details / विवरण</h6>
                                                 <p class="mb-2 fs-7">
-                                                    <strong>What is this report for? (यह रिपोर्ट किस लिए है?)</strong><br> 
+                                                    <strong>What is this report for? (यह रिपोर्ट किस लिए
+                                                        है?)</strong><br>
                                                     Displays current available stock across different stores.<br>
-                                                    <span class="text-muted">विभिन्न स्टोर्स में उपलब्ध वर्तमान स्टॉक को दिखाता है।</span>
+                                                    <span class="text-muted">विभिन्न स्टोर्स में उपलब्ध वर्तमान स्टॉक को
+                                                        दिखाता है।</span>
                                                 </p>
                                                 <p class="mb-0 fs-7">
-                                                    <strong>How to use: (कैसे उपयोग करें?)</strong><br> 
-                                                    Filter by item, subitem or specific stores to check stock levels.<br>
-                                                    <span class="text-muted">स्टॉक स्तर की जांच करने के लिए आइटम, सबआइटम या विशिष्ट स्टोर्स द्वारा फ़िल्टर करें।</span>
+                                                    <strong>How to use: (कैसे उपयोग करें?)</strong><br>
+                                                    Filter by item, subitem or specific stores to check stock
+                                                    levels.<br>
+                                                    <span class="text-muted">स्टॉक स्तर की जांच करने के लिए आइटम, सबआइटम
+                                                        या विशिष्ट स्टोर्स द्वारा फ़िल्टर करें।</span>
                                                 </p>
                                             </div>
                                         </app-popover-filter>
@@ -68,9 +67,8 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-1">
+                            <div class="col-md-1 mt-1">
                                 <div class="form-group">
-                                    <label class="form-label"></label>
                                     <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
                                         data-bs-toggle="dropdown" aria-expanded="false"> Export Data </button>
                                     <div class="dropdown-menu">
@@ -80,7 +78,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-2 mb-2 mt-3">
+                            <div class="col-md-2 mt-1">
                                 <button type="button" style="font-weight: 700 !important;"
                                     class="btn btn-light w-100">Total
                                     Count : {{reportData.length}}
@@ -109,11 +107,37 @@
                                     <tr>
                                         <td style="width: 70px;">No.</td>
                                         <td style="width: 100px;">Department</td>
-                                        <td>Category</td>
-                                        <td>Item</td>
-                                        <ng-container *ngFor="let cn of filterBody.condition;">
-                                            <td>{{cn}}</td>
+                                        <td style="min-width: 150px;">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>Category</span>
+                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                                    [isOpen]="filterBody.category_id?.length > 0" (clear)="filterBody.category_id = []; searchReports()"
+                                                    triggerOn="hover">
+                                                    <ng-select [multiple]="true" placeholder="Select Category" class="custom-sm" dropdownClass="custom-sm"
+                                                        [(ngModel)]="filterBody.category_id" (change)="searchReports()" style="width: 100%; min-width: 180px;">
+                                                        <ng-option *ngFor="let cat of categories" [value]="cat._id">
+                                                            {{cat.category_hin}} : {{cat.category_eng}}
+                                                        </ng-option>
+                                                    </ng-select>
+                                                </app-popover-filter>
+                                            </div>
+                                        </td>
+                                        <td style="min-width: 150px;">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>Item</span>
+                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                                    [isOpen]="filterBody.item_subitem_ids?.length > 0" (clear)="filterBody.item_subitem_ids = []; searchReports()"
+                                                    triggerOn="hover">
+                                                    <app-item-dropdown size="sm" [items]="items" [categoryIds]="filterBody.category_id" [(ngModel)]="filterBody.item_subitem_ids"
+                                                        [multiple]="true" (change)="searchReports()" placeholder="Select Item">
+                                                    </app-item-dropdown>
+                                                </app-popover-filter>
+                                            </div>
+                                        </td>
+                                        <ng-container *ngFor="let mm of selectedMms;">
+                                            <td>{{mm.mm_eng ? mm.mm_eng : mm.mm_hin}}</td>
                                         </ng-container>
+                                        <td>Total Qty</td>
 
                                     </tr>
 
@@ -129,13 +153,18 @@
                                                 ""}}<br />
                                                 {{data.item_eng}} {{data.subitem_eng ? " : " + data.subitem_eng : ""}}
                                             </td>
-                                            <ng-container *ngFor="let cn of filterBody.condition;">
+                                            <ng-container *ngFor="let mm of selectedMms;">
                                                 <td>
-                                                    <span [ngClass]="{'error': data[cn] < 0}">
-                                                        {{data[cn]}} {{data.unit_short}}
+                                                    <span [ngClass]="{'error': data['mm_' + mm._id] < 0}">
+                                                        {{data['mm_' + mm._id]}} {{data.unit_short}}
                                                     </span>
                                                 </td>
                                             </ng-container>
+                                            <td>
+                                                <span [ngClass]="{'error': data.Stock < 0}">
+                                                    {{data.Stock}} {{data.unit_short}}
+                                                </span>
+                                            </td>
                                         </tr>
                                     </ng-container>
                                 </tbody>
