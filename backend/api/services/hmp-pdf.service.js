@@ -37,7 +37,7 @@ function detectChromePath() {
             if (fs.existsSync(p)) return p;
         }
     }
-    
+
     return 'google-chrome'; // Default fallback (hope it is in PATH)
 }
 

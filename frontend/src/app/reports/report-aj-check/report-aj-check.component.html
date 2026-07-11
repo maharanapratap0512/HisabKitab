@@ -44,22 +44,17 @@
 
                             <div class="col-md-3 mb-2">
                                 <div class="form-group">
-                                    <label class="form-label">Item & Subitem</label>
-                                    <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                    <label class="form-label">Category & Item</label>
+                                    <ng-select class="custom mb-1" style="width: 100%;" placeholder="Select Category"
                                         [clearable]="true" [multiple]="false" [virtualScroll]="true"
-                                        [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}"
-                                        (change)="itemSelected($event)">
-                                        <ng-option *ngFor="let item of items" [value]="item._id">
-                                            {{item.item_hin}} : {{item.item_eng}} : {{item.item_roman ? item.item_roman
-                                            : ''}}</ng-option>
+                                        [(ngModel)]="filterBody.category_id" [ngModelOptions]="{standalone: true}"
+                                        (change)="categorySelected($event)">
+                                        <ng-option *ngFor="let item of categories" [value]="item._id">
+                                            {{item.category_hin}} : {{item.category_eng}}</ng-option>
                                     </ng-select>
-                                    <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Subitem"
-                                        [clearable]="true" [multiple]="false" [virtualScroll]="true"
-                                        [(ngModel)]="filterBody.subitem_id" [ngModelOptions]="{standalone: true}">
-                                        <ng-option *ngFor="let item of subitems" [value]="item._id">
-                                            {{item.subitem_hin}} : {{item.subitem_eng}} : {{item.subitem_roman ?
-                                            item.subitem_roman : ''}}</ng-option>
-                                    </ng-select>
+                                    <app-item-dropdown class="mt-1" [items]="items"
+                                        [(ngModel)]="filterBody.item_subitem_ids" [multiple]="true"
+                                        placeholder="Select Items"></app-item-dropdown>
                                 </div>
                             </div>
 
@@ -108,21 +103,29 @@
                                 <div class="d-flex align-items-end">
                                     <div class="flex-grow-1">
                                         <label class="form-label"></label>
-                                        <button class="btn btn-primary form-control" (click)="searchReports()">Generate Reports</button>
+                                        <button class="btn btn-primary form-control" (click)="searchReports()">Generate
+                                            Reports</button>
                                     </div>
                                     <div class="ms-2 mb-1">
-                                        <app-popover-filter iconClass="uil uil-info-circle text-info" [btnOutline]="false" direction="left" [showClearButton]="false" triggerOn="hover">
+                                        <app-popover-filter iconClass="uil uil-info-circle text-info"
+                                            [btnOutline]="false" direction="left" [showClearButton]="false"
+                                            triggerOn="hover">
                                             <div style="width: 320px; padding: 10px; white-space: normal;">
-                                                <h6 class="mb-2 text-info border-bottom pb-1">Aawak Jawak Check - Details / विवरण</h6>
+                                                <h6 class="mb-2 text-info border-bottom pb-1">Aawak Jawak Check -
+                                                    Details / विवरण</h6>
                                                 <p class="mb-2 fs-7">
-                                                    <strong>What is this report for? (यह रिपोर्ट किस लिए है?)</strong><br> 
+                                                    <strong>What is this report for? (यह रिपोर्ट किस लिए
+                                                        है?)</strong><br>
                                                     Cross-checks Aawak and Jawak entries for discrepancies.<br>
-                                                    <span class="text-muted">आवक और जावक एंट्रीज के बीच के अंतर की जांच करता है।</span>
+                                                    <span class="text-muted">आवक और जावक एंट्रीज के बीच के अंतर की जांच
+                                                        करता है।</span>
                                                 </p>
                                                 <p class="mb-0 fs-7">
-                                                    <strong>How to use: (कैसे उपयोग करें?)</strong><br> 
-                                                    Select the date range and click generate to view mismatched entries.<br>
-                                                    <span class="text-muted">आवक और जावक के बीच बेमेल एंट्रीज देखने के लिए दिनांक चुनें और जनरेट पर क्लिक करें।</span>
+                                                    <strong>How to use: (कैसे उपयोग करें?)</strong><br>
+                                                    Select the date range and click generate to view mismatched
+                                                    entries.<br>
+                                                    <span class="text-muted">आवक और जावक के बीच बेमेल एंट्रीज देखने के
+                                                        लिए दिनांक चुनें और जनरेट पर क्लिक करें।</span>
                                                 </p>
                                             </div>
                                         </app-popover-filter>
@@ -231,6 +234,7 @@
                                                 <td *ngIf="settings.aawak.pkt_num">Pkt num</td>
                                                 <td>Aawak MM</td>
                                                 <td *ngIf="settings.aawak.pbk_id">Aawak PBK</td>
+                                                <td>Category</td>
                                                 <td>Item - Subitem</td>
                                                 <td *ngIf="settings.aawak.condition_id">Condition</td>
                                                 <td>Quantity</td>
@@ -256,6 +260,7 @@
                                                 <td *ngIf="settings.aawak.pbk_id">{{data.pbk_id ? (data.roll_no ?
                                                     data.roll_no + '-' : '') +
                                                     data.pbk_hin : ''}}</td>
+                                                <td>{{data.categories_hin}}</td>
                                                 <td>{{data.item_hin}}
                                                     {{ data.subitem_id ? ' - ' + data.subitem_hin : ''}}
                                                 </td>
@@ -322,6 +327,7 @@
                                                 <td *ngIf="settings.jawak.pkt_num">Pkt num</td>
                                                 <td>Jawak MM</td>
                                                 <td *ngIf="settings.jawak.pbk_id">Jawak PBK</td>
+                                                <td>Category</td>
                                                 <td>Item - Subitem</td>
                                                 <td *ngIf="settings.jawak.condition_id">Condition</td>
                                                 <td>Quantity</td>
@@ -346,8 +352,9 @@
                                                 <td>{{data.jawak_mm_id ? data.jawak_mm_hin : ''}}</td>
                                                 <td *ngIf="settings.jawak.pbk_id">{{data.pbk_id ? data.roll_no + '-' +
                                                     data.pbk_hin : ''}}</td>
+                                                <td>{{data.categories_hin}}</td>
                                                 <td>{{data.item_hin}}
-                                                    {{ data.subitem_id ? + ' - ' + data.subitem_hin : ''}}
+                                                    {{ data.subitem_id ? ' - ' + data.subitem_hin : ''}}
                                                 </td>
                                                 <td *ngIf="settings.jawak.condition_id">{{data.condition_id ?
                                                     data.condition_hin : ''}}</td>

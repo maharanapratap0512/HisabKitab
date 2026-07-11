@@ -456,8 +456,68 @@ router.put('/awk_jwk_check/', async (req, res, next) => {
         let orderBy = req.body.orderBy ? req.body.orderBy : `_id`;
         let aawaks = [], jawaks = []
 
-        let awkConditionString = `1=1 ${req.body.date_from ? ` AND aawak.date >= '${req.body.date_from}'` : ``} ${req.body.date_to ? ` AND aawak.date <= '${req.body.date_to}'` : ``}  ${req.body.mm_id ? ` AND aawak.mm_id = ${req.body.mm_id}` : ``} ${req.body.aj_mm_id ? ` AND aawak_mm_id = '${req.body.aj_mm_id}'` : ``} ${req.body.item_id ? ` AND aawak.item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND aawak.subitem_id = ${req.body.subitem_id}` : ``}`;
-        let jwkConditionString = `1=1 ${req.body.date_from ? ` AND jawak.date >= '${req.body.date_from}'` : ``} ${req.body.date_to ? ` AND jawak.date <= '${req.body.date_to}'` : ``}  ${req.body.mm_id ? ` AND jawak.mm_id = ${req.body.mm_id}` : ``} ${req.body.aj_mm_id ? ` AND jawak_mm_id = '${req.body.aj_mm_id}'` : ``} ${req.body.item_id ? ` AND jawak.item_id = ${req.body.item_id}` : ``} ${req.body.subitem_id ? ` AND jawak.subitem_id = ${req.body.subitem_id}` : ``}`;
+        let awkConditionString = `1=1`;
+        let jwkConditionString = `1=1`;
+
+        if (req.body.date_from) {
+            awkConditionString += ` AND aawak.date >= '${req.body.date_from}'`;
+            jwkConditionString += ` AND jawak.date >= '${req.body.date_from}'`;
+        }
+        if (req.body.date_to) {
+            awkConditionString += ` AND aawak.date <= '${req.body.date_to}'`;
+            jwkConditionString += ` AND jawak.date <= '${req.body.date_to}'`;
+        }
+        if (req.body.mm_id) {
+            awkConditionString += ` AND aawak.mm_id = ${req.body.mm_id}`;
+            jwkConditionString += ` AND jawak.mm_id = ${req.body.mm_id}`;
+        }
+        if (req.body.aj_mm_id) {
+            awkConditionString += ` AND aawak_mm_id = '${req.body.aj_mm_id}'`;
+            jwkConditionString += ` AND jawak_mm_id = '${req.body.aj_mm_id}'`;
+        }
+
+        // Category filter
+        if (req.body.category_id) {
+            awkConditionString += ` AND (aawak.item_id IN (SELECT item_id FROM rel_item_category WHERE category_id = ${req.body.category_id}) OR aawak.subitem_id IN (SELECT subitem_id FROM rel_subitem_category WHERE category_id = ${req.body.category_id}))`;
+            jwkConditionString += ` AND (jawak.item_id IN (SELECT item_id FROM rel_item_category WHERE category_id = ${req.body.category_id}) OR jawak.subitem_id IN (SELECT subitem_id FROM rel_subitem_category WHERE category_id = ${req.body.category_id}))`;
+        }
+
+        // Item & Subitem Filter (Multiple support via app-item-dropdown)
+        if (req.body.item_subitem_ids && req.body.item_subitem_ids.length > 0) {
+            let awkParts = req.body.item_subitem_ids.map(idStr => {
+                let parts = idStr.split(':');
+                let i_id = parts[0];
+                let s_id = parts[1] || null;
+                if (s_id) {
+                    return `(aawak.item_id = ${i_id} AND aawak.subitem_id = ${s_id})`;
+                } else {
+                    return `(aawak.item_id = ${i_id} AND aawak.subitem_id IS NULL)`;
+                }
+            });
+            awkConditionString += ` AND (${awkParts.join(' OR ')})`;
+
+            let jwkParts = req.body.item_subitem_ids.map(idStr => {
+                let parts = idStr.split(':');
+                let i_id = parts[0];
+                let s_id = parts[1] || null;
+                if (s_id) {
+                    return `(jawak.item_id = ${i_id} AND jawak.subitem_id = ${s_id})`;
+                } else {
+                    return `(jawak.item_id = ${i_id} AND jawak.subitem_id IS NULL)`;
+                }
+            });
+            jwkConditionString += ` AND (${jwkParts.join(' OR ')})`;
+        } else {
+            // Backward compatibility for single dropdown
+            if (req.body.item_id) {
+                awkConditionString += ` AND aawak.item_id = ${req.body.item_id}`;
+                jwkConditionString += ` AND jawak.item_id = ${req.body.item_id}`;
+            }
+            if (req.body.subitem_id) {
+                awkConditionString += ` AND aawak.subitem_id = ${req.body.subitem_id}`;
+                jwkConditionString += ` AND jawak.subitem_id = ${req.body.subitem_id}`;
+            }
+        }
 
 
         await DB.getList('aawak', { full: true, dept_id: req.params.dept_id, conditionString: awkConditionString, orderBy: orderBy }).then(async (resolve) => {

@@ -80,31 +80,80 @@ export class ReportAjCheckComponent {
 
   }
 
+  categorySelected(ev: any) {
+    // Left empty: Items will be resolved automatically when Generate Report is clicked and items list is empty.
+  }
+
+  getCategoryItems(categoryId: any): string[] {
+      let matchingIds: string[] = [];
+      for (let item of this.items) {
+        let itemMatches = item.categories && item.categories.some((c: any) => c._id === categoryId);
+        if (item.subitems && item.subitems.length > 0) {
+          for (let sub of item.subitems) {
+            let subMatches = sub.categories && sub.categories.some((c: any) => c._id === categoryId);
+            if (itemMatches || subMatches) {
+              matchingIds.push(`${item._id}:${sub._id}`);
+            }
+          }
+        } else {
+          if (itemMatches) {
+            matchingIds.push(`${item._id}:`);
+          }
+        }
+      }
+      return matchingIds;
+  }
+
   searchReports() {
     this.isLoader = true;
-    this.http.put(this.api.getUrl('REPORT_AJ_CH'), this.filterBody).subscribe((data: any) => {
+    let body = { ...this.filterBody };
+
+    // Auto-select items if category is chosen but item list is empty
+    if ((!body.item_subitem_ids || body.item_subitem_ids.length === 0) && body.category_id) {
+      body.item_subitem_ids = this.getCategoryItems(body.category_id);
+    }
+
+    this.http.put(this.api.getUrl('REPORT_AJ_CH'), body).subscribe((data: any) => {
       if (data.success) {
         this.aawaks = data.aawaks;
         this.jawaks = data.jawaks;
 
-        for (let i in this.reportData) {
-          this.reportData[i].categories_hin = '';
-          this.reportData[i].categories_eng = '';
-          if (this.reportData[i].arr_subitem_categories && this.reportData[i].arr_subitem_categories.length > 0) {
-            for (let j in this.categories) {
-              if (this.reportData[i].arr_subitem_categories.includes(this.categories[j]._id)) {
-                this.reportData[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.reportData[i].categories_eng += this.categories[j].category_eng + ', ';
-              }
-            }
-          } else {
-            for (let j in this.categories) {
-              if (this.reportData[i].arr_item_categories.includes(this.categories[j]._id)) {
-                this.reportData[i].categories_hin += this.categories[j].category_hin + ', ';
-                this.reportData[i].categories_eng += this.categories[j].category_eng + ', ';
-              }
-            }
+        const parseCategories = (row: any) => {
+          row.categories_hin = '';
+          row.categories_eng = '';
+          let itemCatIds = [];
+          if (row.scategories) {
+            try {
+              let sc = typeof row.scategories === 'string' ? JSON.parse(row.scategories) : row.scategories;
+              itemCatIds = sc.map((c: any) => typeof c === 'object' ? c._id : c);
+            } catch(e){}
           }
+          if ((!itemCatIds || itemCatIds.length === 0) && row.icategories) {
+            try {
+              let ic = typeof row.icategories === 'string' ? JSON.parse(row.icategories) : row.icategories;
+              itemCatIds = ic.map((c: any) => typeof c === 'object' ? c._id : c);
+            } catch(e){}
+          }
+          if (itemCatIds && itemCatIds.length > 0) {
+            let hinArr = [];
+            let engArr = [];
+            for (let id of itemCatIds) {
+              let cat = this.categories.find((c: any) => c._id == id);
+              if (cat) {
+                hinArr.push(cat.category_hin);
+                engArr.push(cat.category_eng);
+              }
+            }
+            row.categories_hin = hinArr.join(', ');
+            row.categories_eng = engArr.join(', ');
+          }
+        };
+
+        for (let row of this.aawaks) {
+          parseCategories(row);
+        }
+        for (let row of this.jawaks) {
+          parseCategories(row);
         }
         this.isLoader = false;
       }

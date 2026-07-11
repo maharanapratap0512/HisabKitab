@@ -128,7 +128,7 @@
                     <div class="col-md-3">
                         <div class="alert alert-secondary m-0 h-100 d-flex flex-column justify-content-center">
                             <h5 class="alert-heading mb-1">Past Bachat (पिछली बचत)</h5>
-                            <h3 class="mb-0">{{report.overview.past_bachat}} <small
+                            <h3 class="mb-0">{{report.overview.past_bachat | number:'1.0-2'}} <small
                                     class="fs-6">{{report.unit_short}}</small></h3>
                             <small>Start of selected month (चयनित महीने की शुरुआत में)</small>
                         </div>
@@ -136,21 +136,21 @@
                     <div class="col-md-3">
                         <div class="alert alert-success m-0 h-100 d-flex flex-column justify-content-center">
                             <h5 class="alert-heading mb-1">Total Aawak (कुल आवक)</h5>
-                            <h3 class="mb-0">{{report.overview.total_aawak}} <small
+                            <h3 class="mb-0">{{report.overview.total_aawak | number:'1.0-2'}} <small
                                     class="fs-6">{{report.unit_short}}</small></h3>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-danger m-0 h-100 d-flex flex-column justify-content-center">
                             <h5 class="alert-heading mb-1">Total Jawak (कुल जावक)</h5>
-                            <h3 class="mb-0">{{report.overview.total_jawak}} <small
+                            <h3 class="mb-0">{{report.overview.total_jawak | number:'1.0-2'}} <small
                                     class="fs-6">{{report.unit_short}}</small></h3>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="alert alert-info m-0 h-100 d-flex flex-column justify-content-center">
                             <h5 class="alert-heading mb-1">Current Bachat (वर्तमान बचत)</h5>
-                            <h3 class="mb-0">{{report.overview.current_bachat}} <small
+                            <h3 class="mb-0">{{report.overview.current_bachat | number:'1.0-2'}} <small
                                     class="fs-6">{{report.unit_short}}</small></h3>
                             <small>End of selected month (चयनित महीने के अंत में)</small>
                         </div>
@@ -178,7 +178,7 @@
                             <td>{{a.lot_no}}</td>
                             <td>{{a.aawak_mm_hin}} <br> <small>{{a.pbk_hin}} {{a.roll_no}}</small></td>
                             <td>{{a.condition_hin}}</td>
-                            <td><strong>{{a.qty}}</strong> {{a.unit_short}}</td>
+                            <td><strong>{{a.qty | number:'1.0-2'}}</strong> {{a.unit_short}}</td>
                             <td>{{a.rate ? (a.rate | number:'1.2-2') : '-'}}</td>
                             <td>{{a.actual_amt ? (a.actual_amt | number:'1.2-2') : '-'}}</td>
                             <td>{{a.aawak_type_hin}}</td>
@@ -209,7 +209,7 @@
                             <td>{{j.lot_no}}</td>
                             <td>{{j.jawak_mm_hin}} <br> <small>{{j.pbk_hin}} {{j.roll_no}}</small></td>
                             <td>{{j.condition_hin}}</td>
-                            <td><strong>{{j.qty}}</strong> {{j.unit_short}}</td>
+                            <td><strong>{{j.qty | number:'1.0-2'}}</strong> {{j.unit_short}}</td>
                             <td>{{j.rate ? (j.rate | number:'1.2-2') : '-'}}</td>
                             <td>{{j.actual_amt ? (j.actual_amt | number:'1.2-2') : '-'}}</td>
                             <td>{{j.jawak_type_hin}}</td>

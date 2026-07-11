@@ -202,16 +202,16 @@ export class ReportItemLedgerComponent implements OnInit {
       worksheet.mergeCells('I4:K4');
 
       worksheet.getCell('A3').value = 'Past Bachat (पिछली बचत)';
-      worksheet.getCell('A4').value = `${report.overview.past_bachat || 0} ${report.unit_short}`;
+      worksheet.getCell('A4').value = `${Number(report.overview.past_bachat || 0).toFixed(2).replace(/\.00$/, '')} ${report.unit_short}`;
 
       worksheet.getCell('C3').value = 'Total Aawak (कुल आवक)';
-      worksheet.getCell('C4').value = `${report.overview.total_aawak} ${report.unit_short}`;
+      worksheet.getCell('C4').value = `${Number(report.overview.total_aawak || 0).toFixed(2).replace(/\.00$/, '')} ${report.unit_short}`;
       
       worksheet.getCell('F3').value = 'Total Jawak (कुल जावक)';
-      worksheet.getCell('F4').value = `${report.overview.total_jawak} ${report.unit_short}`;
+      worksheet.getCell('F4').value = `${Number(report.overview.total_jawak || 0).toFixed(2).replace(/\.00$/, '')} ${report.unit_short}`;
       
       worksheet.getCell('I3').value = 'Current Bachat (वर्तमान बचत)';
-      worksheet.getCell('I4').value = `${report.overview.current_bachat} ${report.unit_short}`;
+      worksheet.getCell('I4').value = `${Number(report.overview.current_bachat || 0).toFixed(2).replace(/\.00$/, '')} ${report.unit_short}`;
 
       // Styling Summary Boxes
       let boxHeaders = ['A3', 'C3', 'F3', 'I3'];
@@ -267,11 +267,11 @@ export class ReportItemLedgerComponent implements OnInit {
         return dateStr;
       };
 
-      // Helper to sanitize numeric values
+      // Helper to sanitize numeric values and round to 2 decimal places
       const getNumericValue = (val: any) => {
         if (val === undefined || val === null || val === '') return '-';
         const num = Number(val);
-        return isNaN(num) ? '-' : num;
+        return isNaN(num) ? '-' : Number(num.toFixed(2));
       };
 
       // Aawak Table

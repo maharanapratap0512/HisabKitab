@@ -36,7 +36,7 @@ function detectChromePath() {
             if (fs.existsSync(p)) return p;
         }
     }
-    
+
     return 'google-chrome'; // Default fallback
 }
 
@@ -268,7 +268,7 @@ async function generateItemLedgerPdf(reportData, fromName, toName, mmName) {
     reportData.forEach((report, i) => {
         const itemName = report.item_hin + (report.subitem_hin ? ` (${report.subitem_hin})` : '');
         const itemEngName = report.item_eng + (report.subitem_eng ? ` (${report.subitem_eng})` : '');
-        
+
         htmlContent += `
         <div class="item-section ${i < reportData.length - 1 ? 'page-break' : ''}" id="item-sec-${i}">
             <div class="header-title">
