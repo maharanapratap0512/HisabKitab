@@ -452,11 +452,11 @@ async function deleteItem(idOrIds, userData) {
         (userData && userData.params && userData.params.dept_id) ? userData.params.dept_id : null;
     try {
         const ids = typeof idOrIds === 'string' && idOrIds.includes(',') ? idOrIds.split(',').map(Number) : (Array.isArray(idOrIds) ? idOrIds : [Number(idOrIds)]);
-        
+
         rel_item_cat.delete({ item_id: ids });
         item_aliases.delete({ item_id: ids });
         const res = item.delete({ _id: ids });
-        
+
         if (dept_id) {
             for (const id of ids) {
                 deptService.removeFromConfig(dept_id, 'item', id);

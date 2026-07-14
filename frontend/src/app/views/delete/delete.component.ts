@@ -46,6 +46,7 @@ export class DeleteComponent {
   targetID: any = null;
   transferring: boolean = false;
   transferList: any[] = [];
+  items: any[] = [];
   configMapping: any = {};
   page: number = 1;
   itemsPerPage: number = 100;
@@ -74,7 +75,11 @@ export class DeleteComponent {
     }
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.gs.observeList().subscribe(result => {
+      this.items = result.itemmix ? result.itemmix : [];
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     console.log("changes", changes);
