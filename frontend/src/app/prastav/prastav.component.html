@@ -253,6 +253,8 @@
                         <th style="min-width: 120px;">कहाँ से भेजा</th>
                         <th style="min-width: 120px;">किसके द्वारा</th>
                         <th style="width: 70px;">J-Qty</th>
+                        <th style="width: 70px;">J-Rate</th>
+                        <th style="width: 80px;">J-Amount</th>
                         <th style="width: 75px;">
                           <div class="d-flex align-items-center justify-content-between">
                             <span>Status</span>
@@ -284,8 +286,8 @@
                               <div class="fw-bold text-dark lh-1 mt-1">{{vr.item.item?.item_hin || vr.item.item_id}}
                               </div>
                               <div class="font-size-9 opacity-50 pb-1"
-                                *ngIf="vr.item.subitem?.subitem_list?.subitem_hin">
-                                ({{vr.item.subitem.subitem_list?.subitem_hin}})</div>
+                                *ngIf="vr.item.subitem?.subitem_hin">
+                                ({{vr.item.subitem?.subitem_hin}})</div>
                             </td>
                             <td [attr.rowspan]="vr.iRowSpan" class="fw-bold py-0 border-end"
                               style="color: var(--thead-accent-color);">
@@ -312,6 +314,8 @@
                             <td class="text-start border-end" style="max-width: 100px;">
                               {{vr.jawak.kiske_dwara || '-'}}</td>
                             <td class="border-end fw-bold">{{vr.jawak.qty}}</td>
+                            <td class="border-end text-muted">₹{{vr.jawak.rate || '-'}}</td>
+                            <td class="border-end fw-bold text-theme">₹{{vr.jawak.amount || '-'}}</td>
                             <td class="border-end">
                               <span class="badge px-1 py-0 rounded-1 cursor-pointer" (click)="toggleStatus(vr.jawak)"
                                 [ngClass]="vr.jawak.is_received ? 'bg-success' : 'bg-warning'" style="font-size: 8px;">
@@ -320,7 +324,7 @@
                             </td>
                           </ng-container>
                           <ng-template #emptyJawakCompact>
-                            <td colspan="5"
+                            <td colspan="7"
                               class="py-0 text-center opacity-25 fst-italic font-size-10 bg-soft-light border-end">No
                               deliveries</td>
                           </ng-template>
@@ -346,8 +350,8 @@
           <thead class="table-dark" style="position: sticky; top: 0; z-index: 20;">
             <tr class="text-uppercase font-size-10 letter-spacing-1 align-middle text-nowrap">
               <th style="width: 50px;">No.</th>
-              <th style="width: 110px;" class="text-center">Act</th>
-              <th style="width: 110px;">Voucher #</th>
+              <th style="width: 80px;" class="text-center">Act</th>
+              <th style="width: 90px;">Voucher #</th>
               <th style="width: 120px;" class="text-start ps-2">
                 <div class="d-flex align-items-center justify-content-between pe-1">
                   <span>Date</span>
@@ -359,7 +363,7 @@
                   </app-popover-filter>
                 </div>
               </th>
-              <th style="width: 160px;" class="text-start ps-3">
+              <th style="min-width: 170px;" class="text-start ps-3">
                 <div class="d-flex align-items-center justify-content-between">
                   <span>MM (Place)</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
@@ -374,8 +378,8 @@
                   </app-popover-filter>
                 </div>
               </th>
-              <th style="width: 160px;" class="text-start ps-3">Person (PBK)</th>
-              <th style="min-width: 220px;" class="px-3 text-start ps-3">
+              <th style="min-width: 170px;" class="text-start ps-3">Person (PBK)</th>
+              <th style="min-width: 350px;" class="px-3 text-start ps-3">
                 <div class="d-flex align-items-center justify-content-between">
                   <span>Item Description</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
@@ -390,10 +394,10 @@
                   </app-popover-filter>
                 </div>
               </th>
-              <th style="width: 90px;" class="text-center">Qty</th>
+              <th style="width: 80px;" class="text-center">Qty</th>
               <th style="width: 90px;" class="text-center">Rate</th>
-              <th style="width: 110px;" class="text-end pe-3">Amount</th>
-              <th style="width: 150px;" class="text-start ps-3">
+              <th style="width: 100px;" class="text-end pe-3">Amount</th>
+              <th style="min-width: 200px;" class="text-start ps-3">
                 <div class="d-flex align-items-center justify-content-between">
                   <span>Note</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
@@ -421,7 +425,7 @@
                   </app-popover-filter>
                 </div>
               </th>
-              <th style="width: 95px;" class="text-primary text-uppercase opacity-85">
+              <th style="width: 110px;" class="text-primary text-uppercase opacity-85">
                 <div class="d-flex align-items-center justify-content-between pe-1">
                   <span>Jwk Date</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
@@ -432,7 +436,7 @@
                   </app-popover-filter>
                 </div>
               </th>
-              <th style="width: 150px;" class="text-primary text-start ps-2 text-uppercase opacity-85">
+              <th style="min-width: 180px;" class="text-primary text-start ps-2 text-uppercase opacity-85">
                 <div class="d-flex align-items-center justify-content-between">
                   <span>Source MM</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
@@ -448,9 +452,11 @@
                   </app-popover-filter>
                 </div>
               </th>
-              <th style="width: 150px;" class="text-primary text-start ps-2 text-uppercase opacity-85">Receiver</th>
-              <th style="width: 70px;" class="text-center text-primary text-uppercase opacity-85">J-Qty</th>
-              <th style="width: 60px;" class="text-center text-primary text-uppercase opacity-85">Status</th>
+              <th style="min-width: 150px;" class="text-primary text-start ps-2 text-uppercase opacity-85">Receiver</th>
+              <th style="width: 80px;" class="text-center text-primary text-uppercase opacity-85">J-Qty</th>
+              <th style="width: 80px;" class="text-center text-primary text-uppercase opacity-85">J-Rate</th>
+              <th style="width: 90px;" class="text-center text-primary text-uppercase opacity-85">J-Amount</th>
+              <th style="width: 70px;" class="text-center text-primary text-uppercase opacity-85">Status</th>
             </tr>
           </thead>
           <tbody style="font-size: 0.90rem;">
@@ -479,7 +485,7 @@
                   {{row.voucher.date | date:'dd-MM-yyyy'}}
                 </td>
                 <td class="px-3 fw-bold text-dark font-size-12">
-                  <div style="max-width: 140px;" class="d-flex align-items-center justify-content-between pe-1">
+                  <div style="max-width: 180px;" class="d-flex align-items-center justify-content-between pe-1">
                     <div class="text-wrap">{{row.voucher.mm?.mm_hin}}</div>
                     <span class="badge bg-soft-info text-info px-1 py-0 rounded-pill font-size-8"
                       *ngIf="row.voucher.pbk_count" title="Registered PBK count at this MM">
@@ -487,15 +493,14 @@
                     </span>
                   </div>
                 </td>
-                <td class="px-3 font-size-12 text-muted fw-medium text-wrap" style="max-width: 150px;">
+                <td class="px-3 font-size-12 text-muted fw-medium text-wrap" style="max-width: 200px;">
                   {{row.voucher.pbk?.pbk_hin || '-'}}
                 </td>
 
-                <!-- ITEM COLUMNS -->
-                <td class="px-3 text-wrap" style="min-width: 220px;">
+                <td class="px-3 text-wrap" style="min-width: 350px;">
                   <div class="fw-bold text-dark font-size-14 lh-1 mb-1">{{row.item.item?.item_hin}}</div>
-                  <div class="font-size-11 text-muted" *ngIf="row.item.subitem?.subitem_list?.subitem_hin">
-                    ({{row.item.subitem.subitem_list?.subitem_hin}})</div>
+                  <div class="font-size-11 text-muted" *ngIf="row.item.subitem?.subitem_hin">
+                    ({{row.item.subitem?.subitem_hin}})</div>
                 </td>
                 <td class="text-center fw-bold text-theme font-size-13 text-nowrap">
                   {{row.item.qty}} <span class="font-size-11 fw-normal opacity-50">{{row.item.unit?.unit_short}}</span>
@@ -504,7 +509,7 @@
                   ₹{{row.item.rate || '-'}}</td>
                 <td class="text-end fw-bold pe-3 text-dark font-size-13 text-nowrap">₹{{row.item.amount || '-'}}
                 </td>
-                <td class="px-3 font-size-12 text-wrap" style="max-width: 150px;">
+                <td class="px-3 font-size-12 text-wrap" style="max-width: 220px;">
                   {{row.voucher.note_details || '-'}}
                 </td>
 
@@ -513,11 +518,13 @@
                   <td class="text-center text-primary fw-bold font-size-12 text-nowrap">
                     {{row.jawak.date | date:'dd-MM-yyyy'}}</td>
                   <td class="px-2 font-size-12 fw-bold text-success text-start ps-2 text-wrap"
-                    style="max-width: 150px;">
+                    style="max-width: 200px;">
                     {{row.jawak.source_mm?.mm_hin}}</td>
-                  <td class="px-2 font-size-12 opacity-60 text-start ps-2 text-wrap" style="max-width: 140px;">
+                  <td class="px-2 font-size-12 opacity-60 text-start ps-2 text-wrap" style="max-width: 200px;">
                     {{row.jawak.kiske_dwara || '-'}}</td>
                   <td class="text-center fw-bold font-size-13 text-nowrap">{{row.jawak.qty}}</td>
+                  <td class="text-center text-muted font-size-12 text-nowrap">₹{{row.jawak.rate || '-'}}</td>
+                  <td class="text-center fw-bold text-theme font-size-13 text-nowrap">₹{{row.jawak.amount || '-'}}</td>
                   <td class="text-center text-nowrap">
                     <span class="badge px-2 py-1 rounded-1 cursor-pointer" (click)="toggleStatus(row.jawak)"
                       [ngClass]="row.jawak.is_received ? 'bg-success' : 'bg-warning'" style="font-size: 10px;">
@@ -526,7 +533,7 @@
                   </td>
                 </ng-container>
                 <ng-template #emptyJawakIndiv>
-                  <td colspan="5" class="text-center opacity-25 fst-italic font-size-11 bg-soft-light text-nowrap">Not
+                  <td colspan="7" class="text-center opacity-25 fst-italic font-size-11 bg-soft-light text-nowrap">Not
                     Dispatched Yet
                   </td>
                 </ng-template>

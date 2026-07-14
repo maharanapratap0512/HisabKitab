@@ -31,6 +31,21 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
   items: any[] = [];    // itemmix list (item + subitems combined)
   units: any[] = [];
 
+  commonSourceMM: any = null;
+
+  onCommonSourceMMChange() {
+    if (!this.commonSourceMM) return;
+    const lines = this.pfs.prastavForm?.lines || [];
+    for (const line of lines) {
+      if (line.jawaks && line.jawaks.length > 0) {
+        for (const jw of line.jawaks) {
+          jw.source_mm_id = this.commonSourceMM;
+          this.pfs.onJawakChange(line, jw);
+        }
+      }
+    }
+  }
+
   constructor(
     public pfs: PrastavFormService,
     public api: ApiService,
@@ -159,6 +174,34 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
       this.onJawakChange(line, line.jawaks[0]);
     }
   }
+
+  // -------------------------------------------------
+  /** amount change → auto-calculate rate (based on qty) */
+  onAmountChangeLine(line: any) {
+    const qty = Number(line.qty) || 0;
+    const amount = Number(line.amount) || 0;
+    line.rate = qty > 0 ? amount / qty : null;
+
+    // sync to jawaks
+    if (line.jawaks && line.jawaks.length) {
+      for (const jw of line.jawaks) {
+        jw.amount = line.amount;
+        jw.rate = line.rate;
+      }
+      this.onJawakChange(line, line.jawaks[0]);
+    }
+    this.pfs.formStatusChanges();
+  }
+
+  /** jawak amount change → recalc its rate */
+  onJawakAmountChange(line: any, jw: any) {
+    const qty = Number(jw.qty) || 0;
+    const amount = Number(jw.amount) || 0;
+    jw.rate = qty > 0 ? amount / qty : null;
+    this.onJawakChange(line, jw);
+    this.pfs.formStatusChanges();
+  }
+
 
   onUnitChange(line: any) {
     if (line.jawaks && line.jawaks.length > 0) {
