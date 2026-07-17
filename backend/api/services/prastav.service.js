@@ -183,27 +183,56 @@ function updateVoucher(voucherNo, data) {
 /**
  * Centralized reference transfer
  */
-async function transferReferences(list_type, from_id, to_id) {
+async function transferReferences(list_type, from_id, to_id_raw) {
     const fromIdNum = Number(from_id);
-    const toIdNum = Number(to_id);
 
-    // Find all vouchers that use this reference
-    let col = "";
-    switch (list_type) {
-        case 'mm': col = 'mm_id'; break;
-        case 'item': col = 'item_id'; break;
-        case 'subitem': col = 'subitem_id'; break;
-        case 'unit': col = 'unit_id'; break;
+    let to_item_id = null;
+    let to_subitem_id = null;
+    let toIdNum = null;
+
+    if (list_type === 'item' || list_type === 'subitem') {
+        if (typeof to_id_raw === 'string' && to_id_raw.includes(':')) {
+            const parts = to_id_raw.split(':');
+            to_item_id = parseInt(parts[0]) || null;
+            to_subitem_id = parts[1] !== 'null' ? parseInt(parts[1]) : null;
+            toIdNum = list_type === 'item' ? to_item_id : to_subitem_id;
+        } else {
+            toIdNum = parseInt(to_id_raw) || null;
+            if (list_type === 'item') to_item_id = toIdNum;
+            if (list_type === 'subitem') to_subitem_id = toIdNum;
+        }
+    } else {
+        toIdNum = Number(to_id_raw);
     }
 
-    if (!col) return;
+    if (!toIdNum && list_type !== 'item' && list_type !== 'subitem') return;
 
-    // Direct SQL updates for prastav as it has no complex relational business logic
-    db.prepare(`UPDATE prastav SET ${col} = ? WHERE ${col} = ?`).run(toIdNum, fromIdNum);
-    db.prepare(`UPDATE prastav_jawak SET ${col} = ? WHERE ${col} = ?`).run(toIdNum, fromIdNum);
+    if (list_type === 'item' || list_type === 'subitem') {
+        const col = list_type === 'item' ? 'item_id' : 'subitem_id';
+        const subitemCheck = list_type === 'item' ? ' AND subitem_id IS NULL' : '';
 
-    if (list_type === 'mm') {
-        db.prepare(`UPDATE prastav_jawak SET source_mm_id = ? WHERE source_mm_id = ?`).run(toIdNum, fromIdNum);
+        if (to_item_id) {
+            db.prepare(`UPDATE prastav SET item_id = ?, subitem_id = ? WHERE ${col} = ?${subitemCheck}`).run(to_item_id, to_subitem_id, fromIdNum);
+            db.prepare(`UPDATE prastav_jawak SET item_id = ?, subitem_id = ? WHERE ${col} = ?${subitemCheck}`).run(to_item_id, to_subitem_id, fromIdNum);
+        } else {
+            db.prepare(`UPDATE prastav SET subitem_id = ? WHERE subitem_id = ?`).run(to_subitem_id, fromIdNum);
+            db.prepare(`UPDATE prastav_jawak SET subitem_id = ? WHERE subitem_id = ?`).run(to_subitem_id, fromIdNum);
+        }
+    } else {
+        let col = "";
+        switch (list_type) {
+            case 'mm': col = 'mm_id'; break;
+            case 'unit': col = 'unit_id'; break;
+        }
+
+        if (col) {
+            db.prepare(`UPDATE prastav SET ${col} = ? WHERE ${col} = ?`).run(toIdNum, fromIdNum);
+            db.prepare(`UPDATE prastav_jawak SET ${col} = ? WHERE ${col} = ?`).run(toIdNum, fromIdNum);
+        }
+
+        if (list_type === 'mm') {
+            db.prepare(`UPDATE prastav_jawak SET source_mm_id = ? WHERE source_mm_id = ?`).run(toIdNum, fromIdNum);
+        }
     }
 }
 

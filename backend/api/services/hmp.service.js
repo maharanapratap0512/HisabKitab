@@ -31,7 +31,6 @@ function getRecipesByDept(dept_id) {
 // Upsert recipe + clean-replace all inputs/outputs in one transaction.
 function insertUpdateRecipe(data) {
     try {
-        sutramDB.begin();
         let recipeId;
 
         if (data._id || data.recipe_id) {
@@ -53,24 +52,19 @@ function insertUpdateRecipe(data) {
             hmpRecipeOut.insert({ ...out, recipe_id: recipeId }, false);
         }
 
-        sutramDB.commit();
         return recipeId;
     } catch (err) {
-        sutramDB.rollback();
         throw err;
     }
 }
 
 function deleteRecipe(id) {
     try {
-        sutramDB.begin();
         hmpRecipeIn.delete({ recipe_id: id });
         hmpRecipeOut.delete({ recipe_id: id });
         const res = hmpRecipe.deleteById(id);
-        sutramDB.commit();
         return res;
     } catch (err) {
-        sutramDB.rollback();
         throw err;
     }
 }
@@ -185,7 +179,6 @@ function getBatches({ dept_id, mm_id, recipe_id, item_id, date, date_from, date_
 
 async function insertUpdateBatch(data) {
     try {
-        sutramDB.begin();
         let batchId;
 
         let id;
@@ -317,12 +310,10 @@ async function insertUpdateBatch(data) {
         }
 
         batchId = id;
-        sutramDB.commit();
 
         // getById uses schema joins — returns full nested object automatically
         return hmpBatch.getById(batchId);
     } catch (err) {
-        sutramDB.rollback();
         throw err;
     }
 }
@@ -334,110 +325,181 @@ async function insertUpdateBatch(data) {
 
 async function deleteBatch(id) {
     try {
-        sutramDB.begin();
         const inputs = hmpBatchIn.getAll({ batch_id: id }, { full: false });
         for (const inp of inputs) {
             hmpBatchIn.deleteById(inp._id);
             if (inp.jawak_ref_id) await Fn.deleteAJ(inp.jawak_ref_id, 'jawak');
+            if (inp.aawak_ref_id) await Fn.deleteAJ(inp.aawak_ref_id, 'aawak');
         }
 
         const outputs = hmpBatchOut.getAll({ batch_id: id }, { full: false });
         for (const out of outputs) {
             hmpBatchOut.deleteById(out._id);
             if (out.aawak_ref_id) await Fn.deleteAJ(out.aawak_ref_id, 'aawak');
+            // Jawak cleanup handled by triggers or Fn.deleteAJ cascades
         }
 
-        hmpBatch.deleteById(id);
-        sutramDB.commit();
-        return 1;
+        const res = hmpBatch.deleteById(id);
+        return res;
     } catch (err) {
-        sutramDB.rollback();
         throw err;
     }
 }
 
 async function deleteBatchInput(id) {
     try {
-        sutramDB.begin();
-        const inp = hmpBatchIn.getOne({ _id: id }, { full: false });
+        const inp = hmpBatchIn.getById(id);
         if (!inp) {
-            sutramDB.commit();
-            return 0;
+            return false;
         }
-        const jawakRefId = inp.jawak_ref_id;
-        hmpBatchIn.deleteById(id);
-        if (jawakRefId) {
-            await Fn.deleteAJ(jawakRefId, 'jawak');
-        }
-        sutramDB.commit();
-        return 1;
+
+        const res = hmpBatchIn.deleteById(id);
+        if (inp.jawak_ref_id) await Fn.deleteAJ(inp.jawak_ref_id, 'jawak');
+        if (inp.aawak_ref_id) await Fn.deleteAJ(inp.aawak_ref_id, 'aawak');
+
+        return res;
     } catch (err) {
-        sutramDB.rollback();
         throw err;
     }
 }
 
 async function deleteBatchOutput(id) {
     try {
-        sutramDB.begin();
-        const out = hmpBatchOut.getOne({ _id: id }, { full: false });
+        const out = hmpBatchOut.getById(id);
         if (!out) {
-            sutramDB.commit();
-            return 0;
+            return false;
         }
-        const aawakRefId = out.aawak_ref_id;
-        hmpBatchOut.deleteById(id);
-        if (aawakRefId) {
-            await Fn.deleteAJ(aawakRefId, 'aawak');
-        }
-        sutramDB.commit();
-        return 1;
+
+        const res = hmpBatchOut.deleteById(id);
+        if (out.aawak_ref_id) await Fn.deleteAJ(out.aawak_ref_id, 'aawak');
+
+        return res;
     } catch (err) {
-        sutramDB.rollback();
         throw err;
     }
 }
 
 
 // Centralized reference transfer
-async function transferReferences(list_type, from_id, to_id, dept_id) {
+async function transferReferences(list_type, from_id, to_id_raw, dept_id) {
     const fromIdNum = Number(from_id);
-    const toIdNum = Number(to_id);
+
+    let to_item_id = null;
+    let to_subitem_id = null;
+    let toIdNum = null;
+
+    if (list_type === 'item' || list_type === 'subitem') {
+        if (typeof to_id_raw === 'string' && to_id_raw.includes(':')) {
+            const parts = to_id_raw.split(':');
+            to_item_id = parseInt(parts[0]) || null;
+            to_subitem_id = parts[1] !== 'null' ? parseInt(parts[1]) : null;
+            toIdNum = list_type === 'item' ? to_item_id : to_subitem_id;
+        } else {
+            toIdNum = parseInt(to_id_raw) || null;
+            if (list_type === 'item') to_item_id = toIdNum;
+            if (list_type === 'subitem') to_subitem_id = toIdNum;
+        }
+    } else {
+        toIdNum = Number(to_id_raw);
+    }
 
     // Find all batches that use this reference
     let condString = "";
     switch (list_type) {
         case 'mm': condString = `mm_id = ${fromIdNum}`; break;
-        case 'item': condString = `hmp_batch._id IN (SELECT batch_id FROM hmp_batch_input WHERE item_id = ${fromIdNum} UNION SELECT batch_id FROM hmp_batch_output WHERE item_id = ${fromIdNum})`; break;
+        case 'item': condString = `hmp_batch._id IN (SELECT batch_id FROM hmp_batch_input WHERE item_id = ${fromIdNum} AND (subitem_id IS NULL OR subitem_id = '' OR subitem_id = 0 OR subitem_id = 'null') UNION SELECT batch_id FROM hmp_batch_output WHERE item_id = ${fromIdNum} AND (subitem_id IS NULL OR subitem_id = '' OR subitem_id = 0 OR subitem_id = 'null'))`; break;
         case 'subitem': condString = `hmp_batch._id IN (SELECT batch_id FROM hmp_batch_input WHERE subitem_id = ${fromIdNum} UNION SELECT batch_id FROM hmp_batch_output WHERE subitem_id = ${fromIdNum})`; break;
         case 'unit': condString = `hmp_batch._id IN (SELECT batch_id FROM hmp_batch_input WHERE unit_id = ${fromIdNum} UNION SELECT batch_id FROM hmp_batch_output WHERE unit_id = ${fromIdNum})`; break;
     }
 
-    if (!condString) return;
+    if (condString) {
+        const batches = hmpBatch.getAll(`hmp_batch.dept_id = ${Number(dept_id)} AND hmp_batch.active = 1 AND ${condString}`);
+        for (const batch of batches) {
+            if (list_type === 'mm') {
+                batch.mm_id = toIdNum;
+            }
 
-    const batches = hmpBatch.getAll(`hmp_batch.dept_id = ${Number(dept_id)} AND hmp_batch.active = 1 AND ${condString}`);
+            // Update inputs/outputs
+            if (batch.inputs) {
+                batch.inputs.forEach(inp => {
+                    if (list_type === 'item' && Number(inp.item_id) === fromIdNum && (!inp.subitem_id || inp.subitem_id == 'null' || inp.subitem_id == 0)) {
+                        inp.item_id = to_item_id;
+                        inp.subitem_id = to_subitem_id;
+                    }
+                    if (list_type === 'subitem' && Number(inp.subitem_id) === fromIdNum) {
+                        if (to_item_id) inp.item_id = to_item_id;
+                        inp.subitem_id = to_subitem_id;
+                    }
+                    if (list_type === 'unit' && Number(inp.unit_id) === fromIdNum) inp.unit_id = toIdNum;
+                });
+            }
+            if (batch.outputs) {
+                batch.outputs.forEach(out => {
+                    if (list_type === 'item' && Number(out.item_id) === fromIdNum && (!out.subitem_id || out.subitem_id == 'null' || out.subitem_id == 0)) {
+                        out.item_id = to_item_id;
+                        out.subitem_id = to_subitem_id;
+                    }
+                    if (list_type === 'subitem' && Number(out.subitem_id) === fromIdNum) {
+                        if (to_item_id) out.item_id = to_item_id;
+                        out.subitem_id = to_subitem_id;
+                    }
+                    if (list_type === 'unit' && Number(out.unit_id) === fromIdNum) out.unit_id = toIdNum;
+                });
+            }
+            await insertUpdateBatch(batch);
+        }
+    }
 
-    for (const batch of batches) {
-        if (list_type === 'mm') {
-            batch.mm_id = toIdNum;
+    // Now update recipes
+    const recipes = getRecipesByDept(Number(dept_id));
+    for (const recipe of recipes) {
+        let changed = false;
+        
+        if (list_type === 'mm' && Number(recipe.mm_id) === fromIdNum) {
+            recipe.mm_id = toIdNum;
+            changed = true;
         }
 
-        // Update inputs/outputs
-        if (batch.inputs) {
-            batch.inputs.forEach(inp => {
-                if (list_type === 'item' && Number(inp.item_id) === fromIdNum) inp.item_id = toIdNum;
-                if (list_type === 'subitem' && Number(inp.subitem_id) === fromIdNum) inp.subitem_id = toIdNum;
-                if (list_type === 'unit' && Number(inp.unit_id) === fromIdNum) inp.unit_id = toIdNum;
-            });
+        if (recipe.inputs) {
+            for (let inp of recipe.inputs || []) {
+                if (list_type === 'item' && Number(inp.item_id) === fromIdNum && (!inp.subitem_id || inp.subitem_id == 'null' || inp.subitem_id == 0)) {
+                    inp.item_id = to_item_id;
+                    inp.subitem_id = to_subitem_id;
+                    changed = true;
+                }
+                if (list_type === 'subitem' && Number(inp.subitem_id) === fromIdNum) {
+                    if (to_item_id) inp.item_id = to_item_id;
+                    inp.subitem_id = to_subitem_id;
+                    changed = true;
+                }
+                if (list_type === 'unit' && Number(inp.unit_id) === fromIdNum) {
+                    inp.unit_id = toIdNum;
+                    changed = true;
+                }
+            }
         }
-        if (batch.outputs) {
-            batch.outputs.forEach(out => {
-                if (list_type === 'item' && Number(out.item_id) === fromIdNum) out.item_id = toIdNum;
-                if (list_type === 'subitem' && Number(out.subitem_id) === fromIdNum) out.subitem_id = toIdNum;
-                if (list_type === 'unit' && Number(out.unit_id) === fromIdNum) out.unit_id = toIdNum;
-            });
+        if (recipe.outputs) {
+            for (let out of recipe.outputs || []) {
+                if (list_type === 'item' && Number(out.item_id) === fromIdNum && (!out.subitem_id || out.subitem_id == 'null' || out.subitem_id == 0)) {
+                    out.item_id = to_item_id;
+                    out.subitem_id = to_subitem_id;
+                    changed = true;
+                }
+                if (list_type === 'subitem' && Number(out.subitem_id) === fromIdNum) {
+                    if (to_item_id) out.item_id = to_item_id;
+                    out.subitem_id = to_subitem_id;
+                    changed = true;
+                }
+                if (list_type === 'unit' && Number(out.unit_id) === fromIdNum) {
+                    out.unit_id = toIdNum;
+                    changed = true;
+                }
+            }
         }
-        await insertUpdateBatch(batch);
+        
+        if (changed) {
+            insertUpdateRecipe(recipe);
+        }
     }
 }
 

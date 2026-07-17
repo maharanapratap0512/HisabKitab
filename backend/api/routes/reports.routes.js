@@ -104,19 +104,9 @@ router.put('/item_ledger/:dept_id', async (req, res, next) => {
                 past_bachat = fallbackPastBachat && fallbackPastBachat.bachat ? fallbackPastBachat.bachat : 0;
             }
 
-            let currentBachatRow = currentBachatStmt.get(rowParams);
-            let current_bachat = currentBachatRow && currentBachatRow.bachat !== null ? currentBachatRow.bachat : 0;
-            if (!currentBachatRow || currentBachatRow.bachat === null) {
-                let fallbackCurrentBachat = DB.db.prepare(`select sum(bcht.bachat) as bachat from bachat_new bcht 
-                where bcht.dept_id = @dept_id 
-                ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
-                AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
-                AND (bcht.year < '${to_year}' OR (bcht.year = '${to_year}' AND bcht.month <= '${to_month - 1}'))`).get(rowParams);
-                current_bachat = fallbackCurrentBachat && fallbackCurrentBachat.bachat ? fallbackCurrentBachat.bachat : 0;
-            }
-
             let total_aawak = aawaks.reduce((sum, a) => sum + (a.qty || 0), 0);
             let total_jawak = jawaks.reduce((sum, j) => sum + (j.qty || 0), 0);
+            let current_bachat = past_bachat + total_aawak - total_jawak;
             let unit_short = aawaks.length > 0 ? aawaks[0].unit_short : (jawaks.length > 0 ? jawaks[0].unit_short : '');
             
             if (!unit_short) {
@@ -256,19 +246,9 @@ router.post('/item_ledger_pdf/:dept_id', async (req, res, next) => {
                 past_bachat = fallbackPastBachat && fallbackPastBachat.bachat ? fallbackPastBachat.bachat : 0;
             }
 
-            let currentBachatRow = currentBachatStmt.get(rowParams);
-            let current_bachat = currentBachatRow && currentBachatRow.bachat !== null ? currentBachatRow.bachat : 0;
-            if (!currentBachatRow || currentBachatRow.bachat === null) {
-                let fallbackCurrentBachat = DB.db.prepare(`select sum(bcht.bachat) as bachat from bachat_new bcht 
-                where bcht.dept_id = @dept_id 
-                ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
-                AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
-                AND (bcht.year < '${to_year}' OR (bcht.year = '${to_year}' AND bcht.month <= '${to_month - 1}'))`).get(rowParams);
-                current_bachat = fallbackCurrentBachat && fallbackCurrentBachat.bachat ? fallbackCurrentBachat.bachat : 0;
-            }
-
             let total_aawak = aawaks.reduce((sum, a) => sum + (a.qty || 0), 0);
             let total_jawak = jawaks.reduce((sum, j) => sum + (j.qty || 0), 0);
+            let current_bachat = past_bachat + total_aawak - total_jawak;
             let unit_short = aawaks.length > 0 ? aawaks[0].unit_short : (jawaks.length > 0 ? jawaks[0].unit_short : '');
             
             if (!unit_short) {

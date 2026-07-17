@@ -135,8 +135,21 @@ router.put('/lock/', async (req, res, next) => {
 router.put('/transfer/:dept_id', async (req, res, next) => {
     try {
         const { dept_id } = req.params;
-        const { from_id, to_id } = req.body;
-        if (!from_id || !to_id) return next(new Error('from_id and to_id are required'));
+        const { from_id, to_id: to_id_raw } = req.body;
+        if (!from_id || !to_id_raw) return next(new Error('from_id and to_id are required'));
+
+        let to_item_id = null;
+        let to_subitem_id = null;
+        
+        if (typeof to_id_raw === 'string' && to_id_raw.includes(':')) {
+            const parts = to_id_raw.split(':');
+            to_item_id = parseInt(parts[0]) || null;
+            to_subitem_id = parts[1] !== 'null' ? parseInt(parts[1]) : null;
+        } else {
+            to_subitem_id = parseInt(to_id_raw) || null;
+        }
+
+        if (!to_subitem_id && !to_item_id) throw new Error("Invalid target item/subitem");
 
         await Fn.begin();
 
@@ -144,7 +157,9 @@ router.put('/transfer/:dept_id', async (req, res, next) => {
         const aawaks = await DB.getList('aawak', { conditionString: `aawak.subitem_id = ${from_id} AND aawak.dept_id = ${dept_id}`, limit: -1 });
         if (aawaks.data) {
             for (let awk of aawaks.data) {
-                let awkNew = { ...awk, subitem_id: parseInt(to_id) };
+                let awkNew = { ...awk };
+                if (to_item_id) awkNew.item_id = to_item_id;
+                awkNew.subitem_id = to_subitem_id;
                 await Fn.updateAJ(awkNew, 'aawak', awk);
             }
         }
@@ -153,50 +168,50 @@ router.put('/transfer/:dept_id', async (req, res, next) => {
         const jawaks = await DB.getList('jawak', { conditionString: `jawak.subitem_id = ${from_id} AND jawak.dept_id = ${dept_id}`, limit: -1 });
         if (jawaks.data) {
             for (let jwk of jawaks.data) {
-                let jwkNew = { ...jwk, subitem_id: parseInt(to_id) };
+                let jwkNew = { ...jwk };
+                if (to_item_id) jwkNew.item_id = to_item_id;
+                jwkNew.subitem_id = to_subitem_id;
                 await Fn.updateAJ(jwkNew, 'jawak', jwk);
             }
         }
 
         // 3. Update prastav tables using PrastavService
         try {
-            await PrastavService.transferReferences('subitem', from_id, to_id);
+            await PrastavService.transferReferences('subitem', from_id, to_id_raw);
         } catch (e) {
             console.log(`Transfer (prastav service): error`, e.message);
         }
 
         // 4. Update HMP batches using HmpService
         try {
-            await HmpService.transferReferences('subitem', from_id, to_id, dept_id);
+            await HmpService.transferReferences('subitem', from_id, to_id_raw, dept_id);
         } catch (e) {
             console.log(`Transfer (hmp service): error`, e.message);
         }
 
         // 5. For other simple tables (keep dept_id check)
         const otherUpdates = [
-            { table: 'product', cols: ['subitem_id'] },
+            { table: 'product', hasSubitem: true },
         ];
 
         for (let u of otherUpdates) {
-            for (let col of u.cols) {
-                try {
-                    DB.db.prepare(
-                        `UPDATE ${u.table} SET ${col} = ? WHERE ${col} = ? AND dept_id = ?`
-                    ).run(parseInt(to_id), parseInt(from_id), parseInt(dept_id));
-                } catch (e) {
-                    console.log(`Transfer: skipping ${u.table}.${col}`, e.message);
+            try {
+                if (u.hasSubitem && to_item_id) {
+                     DB.db.prepare(`UPDATE ${u.table} SET item_id = ?, subitem_id = ? WHERE subitem_id = ? AND dept_id = ?`).run(to_item_id, to_subitem_id, parseInt(from_id), parseInt(dept_id));
+                } else {
+                     DB.db.prepare(`UPDATE ${u.table} SET subitem_id = ? WHERE subitem_id = ? AND dept_id = ?`).run(to_subitem_id, parseInt(from_id), parseInt(dept_id));
                 }
-            }
+            } catch (e) { console.error(e); }
         }
 
-        // 5. Cleanup bachat for old ID (pre-delete)
+        // 6. Cleanup bachat for old ID (pre-delete)
         try {
             DB.db.prepare(`DELETE FROM bachat WHERE subitem_id = ? AND dept_id = ?`).run(parseInt(from_id), parseInt(dept_id));
             DB.db.prepare(`DELETE FROM bachat_new WHERE subitem_id = ? AND dept_id = ?`).run(parseInt(from_id), parseInt(dept_id));
         } catch (e) { }
 
         await Fn.commit();
-        res.json({ success: true, message: `All references transferred from Subitem ${from_id} to Subitem ${to_id}` });
+        res.json({ success: true, message: `All references transferred from Subitem ${from_id} to target` });
     } catch (err) {
         await Fn.rollback();
         next(err);
