@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const hmp = require('../services/hmp.service');
+const { sutramDB } = require('../database/db.model');
 
 // ─────────────────────────────────────────────────────────────
 // IMPORTANT — Route order matters in Express.
@@ -23,17 +24,27 @@ router.get('/recipe/:dept_id', (req, res, next) => {
 // POST /recipe  — insert or update recipe + its inputs/outputs
 router.post('/recipe', (req, res, next) => {
     try {
+        sutramDB.begin();
         const recipeId = hmp.insertUpdateRecipe(req.body);
+        sutramDB.commit();
         res.json({ success: true, result: { _id: recipeId } });
-    } catch (e) { next(e); }
+    } catch (e) { 
+        sutramDB.rollback();
+        next(e); 
+    }
 });
 
 // DELETE /recipe/:id  — delete recipe + all its inputs/outputs
 router.delete('/recipe/:id', (req, res, next) => {
     try {
+        sutramDB.begin();
         const result = hmp.deleteRecipe(req.params.id);
+        sutramDB.commit();
         res.json({ success: true, result });
-    } catch (e) { next(e); }
+    } catch (e) { 
+        sutramDB.rollback();
+        next(e); 
+    }
 });
 
 
@@ -92,14 +103,19 @@ router.post('/batch/:dept_id', async (req, res, next) => {
     try {
         req.body.dept_id = req.params.dept_id;
 
+        sutramDB.begin();
         // upsert recipe first if needed
         if (!req.body.recipe_id || req.body.update_recipe) {
             req.body.recipe_id = hmp.insertUpdateRecipe({ ...req.body });
         }
 
         const batch = await hmp.insertUpdateBatch(req.body);
+        sutramDB.commit();
         res.json({ success: true, result: batch });
-    } catch (e) { next(e); }
+    } catch (e) { 
+        sutramDB.rollback();
+        next(e); 
+    }
 });
 
 
@@ -108,17 +124,27 @@ router.post('/batch/:dept_id', async (req, res, next) => {
 // DELETE /input/:id  — delete single batch input (+ linked jawak if auto_jawak)
 router.delete('/input/:id', async (req, res, next) => {
     try {
+        sutramDB.begin();
         const result = await hmp.deleteBatchInput(req.params.id);
+        sutramDB.commit();
         res.json({ success: true, result });
-    } catch (e) { next(e); }
+    } catch (e) { 
+        sutramDB.rollback();
+        next(e); 
+    }
 });
 
 // DELETE /output/:id  — delete single batch output (+ linked aawak if auto_aawak)
 router.delete('/output/:id', async (req, res, next) => {
     try {
+        sutramDB.begin();
         const result = await hmp.deleteBatchOutput(req.params.id);
+        sutramDB.commit();
         res.json({ success: true, result });
-    } catch (e) { next(e); }
+    } catch (e) { 
+        sutramDB.rollback();
+        next(e); 
+    }
 });
 
 
@@ -129,21 +155,31 @@ router.put('/:id', async (req, res, next) => {
     try {
         req.body._id = req.params.id;
 
+        sutramDB.begin();
         if (!req.body.recipe_id || req.body.update_recipe) {
             req.body.recipe_id = hmp.insertUpdateRecipe({ ...req.body });
         }
 
         const batch = await hmp.insertUpdateBatch(req.body);
+        sutramDB.commit();
         res.json({ success: true, result: batch });
-    } catch (e) { next(e); }
+    } catch (e) { 
+        sutramDB.rollback();
+        next(e); 
+    }
 });
 
 // DELETE /:id  — delete batch + all its inputs/outputs
 router.delete('/:id', async (req, res, next) => {
     try {
+        sutramDB.begin();
         const result = await hmp.deleteBatch(req.params.id);
+        sutramDB.commit();
         res.json({ success: true, result });
-    } catch (e) { next(e); }
+    } catch (e) { 
+        sutramDB.rollback();
+        next(e); 
+    }
 });
 
 

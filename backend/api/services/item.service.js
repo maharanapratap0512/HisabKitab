@@ -386,59 +386,73 @@ async function toggleLock(id, body) {
 /**
  * Transfers all item references from one item to another.
  */
-async function transferItemReferences(from_id, to_id, dept_id) {
+async function transferItemReferences(from_id, to_id_raw, dept_id) {
     try {
-        await Fn.begin();
+        let to_item_id = null;
+        let to_subitem_id = null;
+
+        if (typeof to_id_raw === 'string' && to_id_raw.includes(':')) {
+            const parts = to_id_raw.split(':');
+            to_item_id = parseInt(parts[0]) || null;
+            to_subitem_id = parts[1] !== 'null' ? parseInt(parts[1]) : null;
+        } else {
+            to_item_id = parseInt(to_id_raw) || null;
+        }
+
+        if (!to_item_id) throw new Error("Invalid target item");
+
+
 
         // 1. AAWAK
-        const aawaks = await Fn.getList('aawak', { conditionString: `aawak.item_id = ${from_id} AND aawak.dept_id = ${dept_id}`, limit: -1 });
+        const aawaks = await Fn.getList('aawak', { conditionString: `aawak.item_id = ${from_id} AND aawak.subitem_id IS NULL AND aawak.dept_id = ${dept_id}`, limit: -1 });
         if (aawaks.data) {
+            console.log("aawak", aawaks.data.length);
             for (let awk of aawaks.data) {
-                let awkNew = { ...awk, item_id: parseInt(to_id) };
+                let awkNew = { ...awk, item_id: to_item_id, subitem_id: to_subitem_id };
                 await Fn.updateAJ(awkNew, 'aawak', awk);
             }
         }
 
+
         // 2. JAWAK
-        const jawaks = await Fn.getList('jawak', { conditionString: `jawak.item_id = ${from_id} AND jawak.dept_id = ${dept_id}`, limit: -1 });
+        const jawaks = await Fn.getList('jawak', { conditionString: `jawak.item_id = ${from_id} AND jawak.subitem_id IS NULL AND jawak.dept_id = ${dept_id}`, limit: -1 });
         if (jawaks.data) {
             for (let jwk of jawaks.data) {
-                let jwkNew = { ...jwk, item_id: parseInt(to_id) };
+                let jwkNew = { ...jwk, item_id: to_item_id, subitem_id: to_subitem_id };
                 await Fn.updateAJ(jwkNew, 'jawak', jwk);
             }
         }
+        console.log("jawak", jawaks.data.length);
 
         // 3. Prastav
-        try { await PrastavService.transferReferences('item', from_id, to_id); } catch (e) { }
+        try { await PrastavService.transferReferences('item', from_id, to_id_raw); } catch (e) { }
 
         // 4. HMP
-        try { await HmpService.transferReferences('item', from_id, to_id, dept_id); } catch (e) { }
+        try { await HmpService.transferReferences('item', from_id, to_id_raw, dept_id); } catch (e) { }
 
         // 5. Other tables
         const otherUpdates = [
-            { table: 'product', cols: ['item_id'] },
-            { table: 'subitem', cols: ['item_id'] },
-            { table: 'hmp_batch', cols: ['item_id'] },
+            { table: 'product', hasSubitem: true }
         ];
 
         for (let u of otherUpdates) {
-            for (let col of u.cols) {
-                try {
-                    Fn.db.prepare(`UPDATE ${u.table} SET ${col} = ? WHERE ${col} = ? AND dept_id = ?`).run([parseInt(to_id), parseInt(from_id), parseInt(dept_id)]);
-                } catch (e) { }
-            }
+            try {
+                if (u.hasSubitem) {
+                    Fn.db.prepare(`UPDATE ${u.table} SET item_id = ?, subitem_id = ? WHERE item_id = ? AND subitem_id IS NULL AND dept_id = ?`).run([to_item_id, to_subitem_id, parseInt(from_id), parseInt(dept_id)]);
+                } else {
+                    Fn.db.prepare(`UPDATE ${u.table} SET item_id = ? WHERE item_id = ? AND dept_id = ?`).run([to_item_id, parseInt(from_id), parseInt(dept_id)]);
+                }
+            } catch (e) { console.error(e); }
         }
 
         // 6. Cleanup bachat
         try {
-            Fn.db.prepare(`DELETE FROM bachat WHERE item_id = ? AND dept_id = ?`).run([parseInt(from_id), parseInt(dept_id)]);
-            Fn.db.prepare(`DELETE FROM bachat_new WHERE item_id = ? AND dept_id = ?`).run([parseInt(from_id), parseInt(dept_id)]);
+            Fn.db.prepare(`DELETE FROM bachat WHERE item_id = ? AND subitem_id IS NULL AND dept_id = ?`).run([parseInt(from_id), parseInt(dept_id)]);
+            Fn.db.prepare(`DELETE FROM bachat_new WHERE item_id = ? AND subitem_id IS NULL AND dept_id = ?`).run([parseInt(from_id), parseInt(dept_id)]);
         } catch (e) { }
 
-        await Fn.commit();
         return true;
     } catch (err) {
-        await Fn.rollback();
         throw err;
     }
 }
@@ -452,6 +466,15 @@ async function deleteItem(idOrIds, userData) {
         (userData && userData.params && userData.params.dept_id) ? userData.params.dept_id : null;
     try {
         const ids = typeof idOrIds === 'string' && idOrIds.includes(',') ? idOrIds.split(',').map(Number) : (Array.isArray(idOrIds) ? idOrIds : [Number(idOrIds)]);
+
+        // Check for existing subitems
+        if (ids.length > 0) {
+            const idPlaceholders = ids.map(() => '?').join(',');
+            const existingSubitems = Fn.db.prepare(`SELECT _id FROM subitem WHERE item_id IN (${idPlaceholders}) LIMIT 1`).get(...ids);
+            if (existingSubitems) {
+                throw new Error("Cannot delete item. Please clear/delete all associated subitems first.");
+            }
+        }
 
         rel_item_cat.delete({ item_id: ids });
         item_aliases.delete({ item_id: ids });

@@ -113,9 +113,12 @@ router.put('/transfer/:dept_id', async (req, res, next) => {
         const { from_id, to_id } = req.body;
         if (!from_id || !to_id) return next(new Error('from_id and to_id are required'));
 
+        sutramDB.begin();
         await itemService.transferItemReferences(from_id, to_id, dept_id);
+        sutramDB.commit();
         res.json({ success: true, message: `All references transferred from Item ${from_id} to Item ${to_id}` });
     } catch (err) {
+        sutramDB.rollback();
         next(err);
     }
 });

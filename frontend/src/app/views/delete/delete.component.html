@@ -40,29 +40,42 @@
                             <span class="text-warning fw-bold">
                                 <i class="uil uil-exchange"></i> Transfer to:
                             </span>
-                            <ng-select class="custom" style="width: 100%; max-width: 400px;"
-                                placeholder="-- Select Target --" [clearable]="true" [virtualScroll]="true"
-                                [selectOnTab]="true" [(ngModel)]="targetID">
-                                <ng-option *ngFor="let m of transferList" [value]="m._id">
-                                    <span *ngIf="m.mm_hin">{{m.mm_hin}}</span>
-                                    <span *ngIf="m.item_hin">{{m.item_hin}}</span>
-                                    <span *ngIf="m.subitem_hin">{{m.subitem_hin}}</span>
-                                    <span *ngIf="m.list_name_hin">{{m.list_name_hin}}</span>
-                                    <span *ngIf="m.mm_eng || m.item_eng || m.subitem_eng || m.list_name_eng"> : </span>
-                                    <span *ngIf="m.mm_eng">{{m.mm_eng}}</span>
-                                    <span *ngIf="m.item_eng">{{m.item_eng}}</span>
-                                    <span *ngIf="m.subitem_eng">{{m.subitem_eng}}</span>
-                                    <span *ngIf="m.list_name_eng">{{m.list_name_eng}}</span>
-                                    <span *ngIf="m.mm_code"> : {{m.mm_code}}</span>
-                                    <span *ngIf="m.item_code"> : {{m.item_code}}</span>
-                                </ng-option>
-                            </ng-select>
+                            <ng-container *ngIf="Type === 'item' || Type === 'subitem'">
+                                <app-item-dropdown [items]="items" [(itemId)]="targetItem" [(subitemId)]="targetSubitem"
+                                    [multiple]="false">
+                                </app-item-dropdown>
+                            </ng-container>
+                            <ng-container *ngIf="Type !== 'item' && Type !== 'subitem'">
+                                <ng-select class="custom" style="width: 100%; max-width: 400px;"
+                                    placeholder="-- Select Target --" [clearable]="true" [virtualScroll]="true"
+                                    [selectOnTab]="true" [(ngModel)]="targetID">
+                                    <ng-option *ngFor="let m of transferList" [value]="m._id">
+                                        <span *ngIf="m.mm_hin">{{m.mm_hin}}</span>
+                                        <span *ngIf="m.item_hin">{{m.item_hin}}</span>
+                                        <span *ngIf="m.subitem_hin">{{m.subitem_hin}}</span>
+                                        <span *ngIf="m.list_name_hin">{{m.list_name_hin}}</span>
+                                        <span *ngIf="m.mm_eng || m.item_eng || m.subitem_eng || m.list_name_eng"> :
+                                        </span>
+                                        <span *ngIf="m.mm_eng">{{m.mm_eng}}</span>
+                                        <span *ngIf="m.item_eng">{{m.item_eng}}</span>
+                                        <span *ngIf="m.subitem_eng">{{m.subitem_eng}}</span>
+                                        <span *ngIf="m.list_name_eng">{{m.list_name_eng}}</span>
+                                        <span *ngIf="m.mm_code"> : {{m.mm_code}}</span>
+                                        <span *ngIf="m.item_code"> : {{m.item_code}}</span>
+                                    </ng-option>
+                                </ng-select>
+                            </ng-container>
                             <button class="btn btn-sm btn-warning" (click)="transferReferences()"
-                                [disabled]="transferring || !targetID">
+                                [disabled]="transferring || ( (Type === 'item' || Type === 'subitem') ? !targetItem : !targetID )">
                                 <i class="uil uil-arrow-right"></i>
                                 {{ transferring ? 'Transferring...' : 'Transfer All' }}
                             </button>
                             <small class="text-muted">Moves all related entries to selected target.</small>
+                            <div class="w-100"></div>
+                            <small class="text-danger mt-1" *ngIf="Type === 'item'">
+                                <i class="uil uil-exclamation-triangle"></i> Warning: Item transfer only moves data
+                                without a Subitem. Subitem data must be transferred individually.
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -109,14 +122,23 @@
                                         class="uil-trash"></i></button>
                             </td>
                             <td *ngFor="let row of fields">
-                                <ng-container *ngFor="let col of row.columns;let z = index">
-                                    <span *ngIf="z != row.columns.length-1">
-                                        {{data[col] ? data[col] + ' : ' : ''}}
-                                    </span>
-                                    <span *ngIf="z == row.columns.length-1">
-                                        {{(data[col] ? data[col]: '')}}
-                                    </span>
-                                    <br *ngIf="z != 0 && z%2==0" />
+                                <ng-container *ngIf="!row.isHmpIO">
+                                    <ng-container *ngFor="let col of row.columns;let z = index">
+                                        <span *ngIf="z != row.columns.length-1">
+                                            {{data[col] ? data[col] + ' : ' : ''}}
+                                        </span>
+                                        <span *ngIf="z == row.columns.length-1">
+                                            {{(data[col] ? data[col]: '')}}
+                                        </span>
+                                        <br *ngIf="z != 0 && z%2==0" />
+                                    </ng-container>
+                                </ng-container>
+                                <ng-container *ngIf="row.isHmpIO && data[row.columns[0]]">
+                                    <div *ngFor="let io of data[row.columns[0]]">
+                                        <span class="badge badge-soft-info mr-1">{{io.qty}} {{io.unit_short}}</span>
+                                        {{io.item_hin || io.item_eng}} 
+                                        <small *ngIf="io.subitem_hin || io.subitem_eng">({{io.subitem_hin || io.subitem_eng}})</small>
+                                    </div>
                                 </ng-container>
                             </td>
                         </tr>
@@ -131,7 +153,7 @@
 
 
         <!-- edit Modal -->
-        <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1"
+        <div class="modal fade" id="showModal_{{Type}}" data-bs-backdrop="static" tabindex="-1"
             aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog" style="width: 90%;">
                 <div class="modal-content">

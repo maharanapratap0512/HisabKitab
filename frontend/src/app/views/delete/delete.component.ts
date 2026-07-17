@@ -44,6 +44,8 @@ export class DeleteComponent {
   }
   mmList: any[] = [];
   targetID: any = null;
+  targetItem: any = null;
+  targetSubitem: any = null;
   transferring: boolean = false;
   transferList: any[] = [];
   items: any[] = [];
@@ -83,15 +85,17 @@ export class DeleteComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     console.log("changes", changes);
-    if (changes.Type.currentValue) {
+    if (changes.Type && changes.Type.currentValue) {
       this.Type = changes.Type.currentValue;
     }
-    if (changes.ID.currentValue) {
+    if (changes.ID && changes.ID.currentValue) {
       this.ID = changes.ID.currentValue;
     }
+    this.targetID = null;
+    this.targetItem = null;
+    this.targetSubitem = null;
     this.configureData();
     console.log(this.ID, this.Type);
-
   }
 
   async configureData() {
@@ -540,6 +544,14 @@ export class DeleteComponent {
       }, {
         title: "MM",
         columns: ["mm_hin", "mm_eng"]
+      }, {
+        title: "Inputs",
+        columns: ["inputs"],
+        isHmpIO: true
+      }, {
+        title: "Outputs",
+        columns: ["outputs"],
+        isHmpIO: true
       }
     ]
   }
@@ -567,7 +579,7 @@ export class DeleteComponent {
 
   closeModal() {
     this.showModal = "";
-    $('#deleteComponent' + this.Type + ' > #showModal').modal('hide');
+    $('#showModal_' + this.Type).modal('hide');
   }
 
   openModal(type: string) {
@@ -576,7 +588,9 @@ export class DeleteComponent {
     } else {
       this.showModal = type;
     }
-    $('#deleteComponent' + this.Type + ' > #showModal').modal('show');
+    setTimeout(() => {
+      $('#showModal_' + this.Type).modal('show');
+    }, 100);
   }
 
   edit(data: any) {
@@ -685,7 +699,17 @@ export class DeleteComponent {
   }
 
   transferReferences() {
-    if (!this.targetID) { this.toastr.warning('Please select target first.'); return; }
+    if (['item', 'subitem'].includes(this.Type.toLowerCase())) {
+      if (!this.targetItem) {
+        this.toastr.warning('Please select target first.');
+        return;
+      }
+    } else {
+      if (!this.targetID) {
+        this.toastr.warning('Please select target first.');
+        return;
+      }
+    }
     Swal.fire({
       title: 'Transfer References?',
       text: `All related entries will be moved to selected target. This cannot be undone.`,
@@ -732,6 +756,14 @@ export class DeleteComponent {
             }, err => { this.transferring = false; });
           } else {
             let body: any = { from_id: this.ID, to_id: this.targetID };
+            if (['item', 'subitem'].includes(this.Type.toLowerCase())) {
+              if (!this.targetItem) {
+                this.transferring = false;
+                this.toastr.warning('Please select item/subitem to transfer to.');
+                return;
+              }
+              body.to_id = `${this.targetItem}:${this.targetSubitem || 'null'}`;
+            }
             if (configKey === 'support_list') {
               body.list_type = this.Type;
             }
