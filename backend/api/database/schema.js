@@ -85,6 +85,8 @@ module.exports = {
         is_noted: col.boolean().default(0),
         note_details: col.string(),
         description: col.string(),
+        is_rejected: col.boolean().default(0),
+        reject_reason: col.string(),
         active: col.boolean().default(1),
     }, {
         jawaks: { hasMany: true, on: 'prastav_id', table: 'prastav_jawak', target: '_id', as: 'jawaks', select: '*' }
@@ -106,6 +108,11 @@ module.exports = {
         source_mm_id: col.ref('mm._id', { as: 'source_mm', select: ['mm_hin', 'mm_eng'] }),
         description: col.string(),
         is_received: col.boolean().default(0),
+        packing_date: col.string(),
+        pkt_no: col.string(),
+        received_date: col.string(),
+        review: col.boolean(),
+        review_reason: col.string(),
         active: col.boolean().default(1),
     }),
 

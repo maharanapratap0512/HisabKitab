@@ -2647,6 +2647,17 @@ class dbModal {
       insert_support_list: `INSERT INTO support_list (_id, list_type, list_name_hin, list_name_eng, list_name_roman, lock) VALUES 
       (150, 'aawak_type', 'एचएमपी आउट', 'HMP Out', 'HMP Out', 1),
       (151, 'jawak_type', 'एचएमपी इन', 'HMP In', 'HMP In', 1)`
+    },
+    // version 35
+    // => adding rejected fields to prastav, and packing/review fields to prastav_jawak
+    {
+      add_prastav_is_rejected: `ALTER TABLE prastav ADD COLUMN is_rejected TINYINT(1) DEFAULT 0`,
+      add_prastav_reject_reason: `ALTER TABLE prastav ADD COLUMN reject_reason TEXT`,
+      add_pj_packing_date: `ALTER TABLE prastav_jawak ADD COLUMN packing_date DATE`,
+      add_pj_pkt_no: `ALTER TABLE prastav_jawak ADD COLUMN pkt_no VARCHAR(50)`,
+      add_pj_received_date: `ALTER TABLE prastav_jawak ADD COLUMN received_date DATE`,
+      add_pj_review: `ALTER TABLE prastav_jawak ADD COLUMN review TINYINT(1) DEFAULT NULL`,
+      add_pj_review_reason: `ALTER TABLE prastav_jawak ADD COLUMN review_reason TEXT`
     }
   ];
 

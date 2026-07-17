@@ -319,12 +319,13 @@
               <thead class="table-light" *ngIf="!jawakFocusMode">
                 <tr>
                   <th width="3%" class="text-center">#</th>
-                  <th width="30%" class="text-center">Item - Subitem *</th>
+                  <th width="27%" class="text-center">Item - Subitem *</th>
                   <th width="8%" class="text-center">Req Qty</th>
                   <th width="20%" class="text-center">Prastav Qty & Unit *</th>
-                  <th width="10%" class="text-center">Rate</th>
-                  <th width="10%" class="text-center">Amount</th>
-                  <th width="15%" class="text-center">Description</th>
+                  <th width="9%" class="text-center">Rate</th>
+                  <th width="9%" class="text-center">Amount</th>
+                  <th width="12%" class="text-center">Description</th>
+                  <th width="8%" class="text-center">Reject?</th>
                   <th width="4%" class="text-center">Action</th>
                 </tr>
               </thead>
@@ -380,6 +381,15 @@
                         [name]="'desc_'+i" placeholder="Description">
                     </td>
 
+                    <td class="text-center align-middle">
+                      <div class="form-check form-switch m-0 d-flex justify-content-center">
+                        <input class="form-check-input" type="checkbox" [(ngModel)]="line.is_rejected"
+                          [name]="'reject_'+i">
+                      </div>
+                      <input *ngIf="line.is_rejected" type="text" class="form-control form-control-sm mt-1" [(ngModel)]="line.reject_reason"
+                        [name]="'reject_reason_'+i" placeholder="Reason">
+                    </td>
+
                     <td class="text-center">
 
                       <button *ngIf="line.item_id && pfs.prastavForm.lines.length>1" type="button"
@@ -406,22 +416,27 @@
                           Jawak Sub-Entries
                         </h6>
 
-                        <table class="table table-sm table-bordered m-0">
+                        <div class="table-responsive">
+                          <table class="table table-sm table-bordered m-0" style="min-width: 1400px;">
 
-                          <thead class="table-light">
-                            <tr>
-                              <th width="10%">Date *</th>
-                              <th width="20%">Item</th>
-                              <th width="13%">Source MM</th>
-                              <th width="16%">Qty & Unit *</th>
-                              <th width="8%">Rate</th>
-                              <th width="8%">Amount</th>
-                              <th width="8%">Bori</th>
-                              <th width="8%">Kiske Dwara</th>
-                              <th width="5%">Rcvd?</th>
-                              <th width="4%">Action</th>
-                            </tr>
-                          </thead>
+                            <thead class="table-light">
+                              <tr>
+                                <th width="8%">Date *</th>
+                                <th width="14%">Item</th>
+                                <th width="10%">Source MM</th>
+                                <th width="12%">Qty & Unit *</th>
+                                <th width="6%">Rate</th>
+                                <th width="6%">Amount</th>
+                                <th width="5%">Bori</th>
+                                <th width="7%">Kiske Dwara</th>
+                                <th width="7%">Pkg Dt</th>
+                                <th width="6%">Pkt No</th>
+                                <th width="7%">Rcv Dt</th>
+                                <th width="4%">Rcvd?</th>
+                                <th width="5%" class="text-center">Review</th>
+                                <th width="3%">Action</th>
+                              </tr>
+                            </thead>
 
                           <tbody>
 
@@ -482,13 +497,41 @@
                               </td>
 
                               <td class="align-middle p-1">
-                                <input type="text" class="form-control form-control-sm px-1" placeholder="Dwara"
+                                <input type="text" class="form-control form-control-sm px-1" placeholder="Kiske Dwara"
                                   [(ngModel)]="jw.kiske_dwara" [name]="'jw_dwara_' + i + '_' + j">
+                              </td>
+
+                              <td class="align-middle p-1">
+                                <input type="date" class="form-control form-control-sm px-1 text-center"
+                                  [(ngModel)]="jw.packing_date" [name]="'jw_pdate_' + i + '_' + j">
+                              </td>
+
+                              <td class="align-middle p-1">
+                                <input type="text" class="form-control form-control-sm px-1 text-center" placeholder="Pkt No"
+                                  [(ngModel)]="jw.pkt_no" [name]="'jw_pkt_' + i + '_' + j">
+                              </td>
+
+                              <td class="align-middle p-1">
+                                <input type="date" class="form-control form-control-sm px-1 text-center"
+                                  [(ngModel)]="jw.received_date" [name]="'jw_rdate_' + i + '_' + j">
                               </td>
 
                               <td class="text-center align-middle">
                                 <input type="checkbox" class="form-check-input m-0" [(ngModel)]="jw.is_received"
                                   [name]="'jw_recv_' + i + '_' + j" title="Received?">
+                              </td>
+
+                              <td class="text-center align-middle p-1">
+                                <div class="d-flex justify-content-center gap-1">
+                                  <button type="button" class="btn btn-sm p-1" [ngClass]="jw.review === 1 ? 'btn-success' : 'btn-outline-success'" (click)="jw.review = 1" title="Satisfied">
+                                    <i class="uil uil-thumbs-up"></i>
+                                  </button>
+                                  <button type="button" class="btn btn-sm p-1" [ngClass]="jw.review === 0 ? 'btn-danger' : 'btn-outline-danger'" (click)="jw.review = 0" title="Not Satisfied">
+                                    <i class="uil uil-thumbs-down"></i>
+                                  </button>
+                                </div>
+                                <input *ngIf="jw.review === 0" type="text" class="form-control form-control-sm mt-1 px-1" placeholder="Reason"
+                                  [(ngModel)]="jw.review_reason" [name]="'jw_reason_' + i + '_' + j">
                               </td>
 
                               <td class="text-center align-middle">
@@ -504,6 +547,7 @@
                           </tbody>
 
                         </table>
+                        </div>
 
                       </div>
 

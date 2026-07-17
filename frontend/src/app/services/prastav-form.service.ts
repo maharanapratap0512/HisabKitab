@@ -35,6 +35,11 @@ export class PrastavFormService {
       kiske_dwara: null,
       description: null,
       is_received: false,
+      packing_date: null,
+      pkt_no: null,
+      received_date: null,
+      review: 1,
+      review_reason: null,
       active: 1
     };
 
@@ -49,6 +54,8 @@ export class PrastavFormService {
       bachat: null,
       monthly_uses: null,
       description: null,
+      is_rejected: false,
+      reject_reason: null,
       active: 1,
       jawaks: [structuredClone(this.jawakTemplate)]
     };

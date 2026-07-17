@@ -805,3 +805,166 @@ body.dark-mode {
     }
   }
 }
+
+
+/* ============================================
+   AMOLED Mode — Deep Themed Dark Overrides
+   Theme color ka sabse deep/rich version use karta hai
+   Pure black nahi — har theme ka apna AMOLED feel
+   ============================================ */
+
+body.amoled-mode {
+  background-color: var(--amoled-body-bg, var(--bg-color)) !important;
+
+  // ── Page background ──
+  .page-content,
+  .content,
+  .main-content {
+    background-color: var(--amoled-body-bg, var(--bg-color)) !important;
+  }
+
+  // ── Cards ──
+  .card {
+    background-color: var(--amoled-card-bg, var(--bs-card-bg)) !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
+
+    .card-header {
+      background-color: var(--amoled-body-bg, var(--bg-color)) !important;
+      border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .card-footer {
+      background-color: var(--amoled-body-bg, var(--bg-color)) !important;
+      border-top-color: rgba(255, 255, 255, 0.05) !important;
+    }
+  }
+
+  // ── Modals ──
+  .modal-content {
+    background-color: var(--amoled-card-bg, var(--bs-modal-bg)) !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
+  }
+
+  .modal-header {
+    background-color: var(--amoled-body-bg, var(--bg-color)) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .modal-footer {
+    background-color: var(--amoled-body-bg, var(--bg-color)) !important;
+    border-top-color: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  // ── Form inputs ──
+  .form-control,
+  .form-select {
+    background-color: var(--amoled-input-bg, var(--bs-body-bg)) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+
+    &:focus {
+      border-color: rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.05) !important;
+    }
+
+    &:disabled,
+    &[readonly] {
+      background-color: var(--amoled-card-bg) !important;
+      opacity: 0.6;
+    }
+  }
+
+  // ── ng-select ──
+  .ng-select .ng-select-container {
+    background-color: var(--amoled-input-bg, var(--bs-body-bg)) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .ng-dropdown-panel {
+    background-color: var(--amoled-card-bg) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+
+    .ng-option {
+      background-color: var(--amoled-card-bg) !important;
+
+      &.ng-option-marked {
+        background-color: var(--amoled-input-bg) !important;
+        color: #fff !important;
+      }
+
+      &.ng-option-selected {
+        background-color: var(--amoled-input-bg) !important;
+      }
+    }
+  }
+
+  // ── Tables ──
+  .table {
+    --bs-table-bg: var(--amoled-body-bg);
+    --bs-table-striped-bg: var(--amoled-card-bg);
+    --bs-table-hover-bg: var(--amoled-input-bg);
+    --bs-table-border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .table-light thead,
+  thead.table-light {
+    background-color: var(--amoled-body-bg) !important;
+
+    th {
+      background-color: var(--amoled-body-bg) !important;
+      border-color: rgba(255, 255, 255, 0.06) !important;
+    }
+  }
+
+  // ── Sidebar / leftside-menu ──
+  .leftside-menu,
+  #leftside-menu-container,
+  .side-nav {
+    background-color: var(--amoled-body-bg, var(--bg-color)) !important;
+  }
+
+  // ── Dropdown menus ──
+  .dropdown-menu {
+    background-color: var(--amoled-card-bg) !important;
+    border-color: rgba(255, 255, 255, 0.07) !important;
+
+    .dropdown-item {
+      &:hover,
+      &:focus {
+        background-color: var(--amoled-input-bg) !important;
+      }
+    }
+
+    .dropdown-divider {
+      border-color: rgba(255, 255, 255, 0.06) !important;
+    }
+  }
+
+  // ── List groups ──
+  .list-group-item {
+    background-color: var(--amoled-card-bg) !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
+  }
+
+  // ── Tabs ──
+  .nav-tabs {
+    border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+
+    .nav-link.active {
+      background-color: var(--amoled-card-bg) !important;
+    }
+  }
+
+  // ── Accordion ──
+  .accordion-item {
+    background-color: var(--amoled-card-bg) !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
+  }
+
+  .accordion-button {
+    background-color: var(--amoled-body-bg) !important;
+
+    &:not(.collapsed) {
+      background-color: var(--amoled-input-bg) !important;
+    }
+  }
+}
