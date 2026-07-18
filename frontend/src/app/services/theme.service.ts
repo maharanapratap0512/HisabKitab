@@ -244,32 +244,6 @@ export class ThemeService implements OnInit {
 
     Object.entries(themeParams).forEach(([k, v]) => root.style.setProperty(k, v as string));
 
-    // ── Apply AMOLED body class for extra-dark CSS overrides ──
-    if (isDark && isAmoled) {
-      document.body.classList.add('amoled-mode');
-      // AMOLED = theme color ka sabse deep/rich dark shade
-      // Not pure black, but the theme's own color at maximum depth
-      const shades = this.getAmoledShades(themeParams['--bg-color']);
-      root.style.setProperty('--bs-body-bg', shades.body);
-      root.style.setProperty('--bs-card-bg', shades.card);
-      root.style.setProperty('--bs-modal-bg', shades.card);
-      root.style.setProperty('--bs-tertiary-bg', shades.input);
-      root.style.setProperty('--bs-secondary-bg', shades.input);
-      root.style.setProperty('--amoled-body-bg', shades.body);
-      root.style.setProperty('--amoled-card-bg', shades.card);
-      root.style.setProperty('--amoled-input-bg', shades.input);
-    } else {
-      document.body.classList.remove('amoled-mode');
-      root.style.removeProperty('--bs-body-bg');
-      root.style.removeProperty('--bs-card-bg');
-      root.style.removeProperty('--bs-modal-bg');
-      root.style.removeProperty('--bs-tertiary-bg');
-      root.style.removeProperty('--bs-secondary-bg');
-      root.style.removeProperty('--amoled-body-bg');
-      root.style.removeProperty('--amoled-card-bg');
-      root.style.removeProperty('--amoled-input-bg');
-    }
-
     // ── Show body after CSS loads ──
     const activeSheet = isDark ? darkTheme : lightTheme;
     if (activeSheet) {
@@ -300,28 +274,6 @@ export class ThemeService implements OnInit {
     }
     const root = document.documentElement;
     Object.entries(theme).forEach(([k, v]) => root.style.setProperty(k, v as string));
-    if (isDark && isAmoled) {
-      document.body.classList.add('amoled-mode');
-      const shades = this.getAmoledShades(theme['--bg-color']);
-      root.style.setProperty('--bs-body-bg', shades.body);
-      root.style.setProperty('--bs-card-bg', shades.card);
-      root.style.setProperty('--bs-modal-bg', shades.card);
-      root.style.setProperty('--bs-tertiary-bg', shades.input);
-      root.style.setProperty('--bs-secondary-bg', shades.input);
-      root.style.setProperty('--amoled-body-bg', shades.body);
-      root.style.setProperty('--amoled-card-bg', shades.card);
-      root.style.setProperty('--amoled-input-bg', shades.input);
-    } else {
-      document.body.classList.remove('amoled-mode');
-      root.style.removeProperty('--bs-body-bg');
-      root.style.removeProperty('--bs-card-bg');
-      root.style.removeProperty('--bs-modal-bg');
-      root.style.removeProperty('--bs-tertiary-bg');
-      root.style.removeProperty('--bs-secondary-bg');
-      root.style.removeProperty('--amoled-body-bg');
-      root.style.removeProperty('--amoled-card-bg');
-      root.style.removeProperty('--amoled-input-bg');
-    }
 
     // Save to user settings
     this.auth.webUser.settings.headerTheme = 'custom';
@@ -372,37 +324,6 @@ export class ThemeService implements OnInit {
         '--nav-shadow': `0 10px 30px rgba(${r},${g},${b},0.2)`
       };
     }
-  }
-
-  /**
-   * AMOLED shades — theme color ka sabse deep/rich dark version
-   * Pure black nahi, balki theme ke color ka most saturated dark shade
-   * e.g. Indigo → deep indigo-black, Cyan → deep cyan-black
-   */
-  private getAmoledShades(bgColor: string): { body: string, card: string, input: string } {
-    let r = 0, g = 0, b = 0;
-    if (!bgColor) return { body: '#090909', card: '#111111', input: '#161616' };
-
-    if (bgColor.startsWith('#') && bgColor.length >= 7) {
-      r = parseInt(bgColor.slice(1, 3), 16);
-      g = parseInt(bgColor.slice(3, 5), 16);
-      b = parseInt(bgColor.slice(5, 7), 16);
-    } else {
-      const match = bgColor.match(/\d+/g);
-      if (match && match.length >= 3) {
-        [r, g, b] = match.map(Number);
-      }
-    }
-
-    // AMOLED body = theme bg-color itself (already very deep)
-    // Card = ~50% brighter than body (still very dark but clearly themed)
-    // Input = ~80% brighter than body (darkest interactive element)
-    const clamp = (v: number) => Math.min(255, Math.max(0, v));
-    return {
-      body: `rgb(${clamp(Math.round(r * 0.8))}, ${clamp(Math.round(g * 0.8))}, ${clamp(Math.round(b * 0.8))})`,
-      card: `rgb(${clamp(Math.round(r * 1.4))}, ${clamp(Math.round(g * 1.4))}, ${clamp(Math.round(b * 1.4))})`,
-      input: `rgb(${clamp(Math.round(r * 1.9))}, ${clamp(Math.round(g * 1.9))}, ${clamp(Math.round(b * 1.9))})`
-    };
   }
 
   toggleDarkMode() {

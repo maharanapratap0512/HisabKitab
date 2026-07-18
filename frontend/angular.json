@@ -61,7 +61,9 @@
                      "src/styles.scss",
                      "node_modules/ngx-toastr/toastr.css"
                   ],
-                  "scripts": []
+                  "scripts": [
+                     "node_modules/jquery/dist/jquery.js"
+                  ]
                },
                "configurations": {
                   "production": {
