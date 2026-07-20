@@ -153,6 +153,7 @@ export class HttpService {
       responseType: 'blob',
     };
     return this.http.post(url, body, httpOptions).pipe(
+      timeout(900000), // Prevent large file downloads from timing out
       tap(val => {
         catchError(this.handleError);
       })

@@ -9,6 +9,7 @@ import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
 import { Workbook } from 'exceljs';
 import * as FileSaver from 'file-saver';
+import * as JSZip from 'jszip';
 
 @Component({
   selector: 'app-report-item-ledger',
@@ -33,6 +34,8 @@ export class ReportItemLedgerComponent implements OnInit {
   items: any = [];
   
   reportData: any = [];
+  groupedReportData: any = [];
+  activeCategoryIndex: number = 0;
   activeReportIndex: number = 0;
 
   constructor(
@@ -112,6 +115,14 @@ export class ReportItemLedgerComponent implements OnInit {
       this.filterBody.item_subitem_ids = this.getCategoryItems(this.filterBody.category_id);
     }
 
+    // Auto-select ALL items if both category and item list are cleared
+    if ((!this.filterBody.item_subitem_ids || this.filterBody.item_subitem_ids.length === 0) && !this.filterBody.category_id) {
+        this.filterBody.item_subitem_ids = [];
+        for (let cat of this.categories) {
+            this.filterBody.item_subitem_ids.push(...this.getCategoryItems(cat._id));
+        }
+    }
+
     if(!this.filterBody.item_subitem_ids || this.filterBody.item_subitem_ids.length === 0) {
       this.toastr.error('Please select at least one item');
       return;
@@ -151,10 +162,36 @@ export class ReportItemLedgerComponent implements OnInit {
             r.overview.current_bachat !== 0
         );
 
+        // Group reportData by category
+        this.groupedReportData = [];
+        for (let r of this.reportData) {
+           let itemObj = this.items.find((i: any) => i._id === r.item_id);
+           let catId = 'uncategorized';
+           if (itemObj) {
+               let subObj = itemObj.subitems && r.subitem_id ? itemObj.subitems.find((s: any) => s._id === r.subitem_id) : null;
+               if (subObj && subObj.categories && subObj.categories.length > 0) {
+                   catId = subObj.categories[0]._id;
+               } else if (itemObj.categories && itemObj.categories.length > 0) {
+                   catId = itemObj.categories[0]._id;
+               }
+           }
+           
+           let catObj = this.categories.find((c: any) => c._id === catId);
+           let catName = catObj ? (catObj.category_hin || catObj.category_eng) : 'Uncategorized';
+           
+           let group = this.groupedReportData.find((g: any) => g.category_id === catId);
+           if (!group) {
+               group = { category_id: catId, category_name: catName, reports: [] };
+               this.groupedReportData.push(group);
+           }
+           group.reports.push(r);
+        }
+
         if (this.reportData.length === 0) {
             this.toastr.info('No activity (Aawak/Jawak/Bachat) found for the selected items in this date range.');
         }
 
+        this.activeCategoryIndex = 0;
         this.activeReportIndex = 0;
         this.isLoader = false;
       }
@@ -165,19 +202,130 @@ export class ReportItemLedgerComponent implements OnInit {
     });
   }
 
-  async exportToExcel() {
-    if (!this.reportData || this.reportData.length === 0) {
+  async exportCurrentExcel() {
+    if (!this.groupedReportData || this.groupedReportData.length === 0) {
       this.toastr.error('No data to export');
       return;
     }
+    let currentGroup = this.groupedReportData[this.activeCategoryIndex];
+    if (!currentGroup || !currentGroup.reports || currentGroup.reports.length === 0) {
+      this.toastr.error('No data for this category');
+      return;
+    }
+    let catObj = this.categories.find((c: any) => c._id === currentGroup.category_id);
+    let { buffer, title } = await this.buildExcelBuffer(currentGroup.reports, catObj);
+    const data: Blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    FileSaver.saveAs(data, title + '.xlsx');
+  }
 
+  async exportBulkExcel() {
+    if (!this.filterBody.from || !this.filterBody.to || !this.filterBody.mm_id) {
+       this.toastr.error('Please select From Date, To Date, and MM for Bulk Export.');
+       return;
+    }
+    
+    let validCategories = this.categories.filter((c: any) => this.getCategoryItems(c._id).length > 0);
+    if (validCategories.length === 0) return;
+    
+    let zip = new JSZip();
+    let count = 0;
+    
+    for (let i = 0; i < validCategories.length; i++) {
+       let catObj = validCategories[i];
+       let items = this.getCategoryItems(catObj._id);
+       
+       this.isLoader = true;
+       this.loadingStatus = `Exporting Excel for ${catObj.category_hin}... (${i+1}/${validCategories.length})`;
+       
+       let itemSubitemParsed = items.map((idStr: string) => {
+         let parts = idStr.split(':');
+         let i_id = Number(parts[0]);
+         let s_id = parts[1] ? Number(parts[1]) : null;
+         let itemObj = this.items.find((item: any) => item._id === i_id);
+         let subitem_hin = '';
+         if (itemObj && s_id) {
+            let subObj = itemObj.subitems.find((s: any) => s._id === s_id);
+            if (subObj) subitem_hin = subObj.subitem_hin;
+         }
+         return { item_id: i_id, subitem_id: s_id, item_hin: itemObj?.item_hin || '', subitem_hin: subitem_hin };
+       });
+
+       let body = { ...this.filterBody, item_subitem_ids: itemSubitemParsed };
+       try {
+           let res: any = await this.http.put(this.api.getUrl('REPORT_ITEM_LEDGER') + this.auth.webUser.dept_id, body).toPromise();
+           if (res && res.success) {
+               let validReports = res.data.filter((r: any) => 
+                   r.overview.total_aawak !== 0 || r.overview.total_jawak !== 0 || r.overview.current_bachat !== 0
+               );
+               if (validReports.length > 0) {
+                   let { buffer, title } = await this.buildExcelBuffer(validReports, catObj);
+                   zip.file(title + '.xlsx', buffer);
+                   count++;
+               }
+           }
+       } catch (err) {
+           console.error(`Error exporting excel category ${catObj.category_hin}`, err);
+       }
+    }
+    
+    if (count > 0) {
+        this.loadingStatus = 'Zipping files...';
+        let zipBlob = await zip.generateAsync({ type: 'blob' });
+        FileSaver.saveAs(zipBlob, `Item_Ledger_Bulk_Excel_${Date.now()}.zip`);
+    } else {
+        this.toastr.info('No activity found to export.');
+    }
+    
+    this.isLoader = false;
+    this.loadingStatus = 'Loading...';
+  }
+
+  async buildExcelBuffer(reportsToExport: any[], categoryObj: any): Promise<{buffer: any, title: string}> {
     const workbook = new Workbook();
     
     let mmObj = this.mms.find((m:any) => m._id === this.filterBody.mm_id);
     let mmName = mmObj ? mmObj.mm_hin : 'All MMs';
 
+    // Create Index Sheet
+    const indexSheet = workbook.addWorksheet('Index');
+    indexSheet.mergeCells('A1:F1');
+    let indexTitleCell = indexSheet.getCell('A1');
+    indexTitleCell.value = `${this.filterBody.from.name_hin} से ${this.filterBody.to.name_hin} तक, ${mmName} का सार (Index)`;
+    indexTitleCell.font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
+    indexTitleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4E73DF' } };
+    indexTitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    indexSheet.getRow(1).height = 30;
+
+    const indexHeaders = ['No.', 'Item Name', 'Past Bachat', 'Total Aawak', 'Total Jawak', 'Current Bachat'];
+    indexSheet.getRow(3).values = indexHeaders;
+    indexSheet.getRow(3).font = { bold: true };
+    indexSheet.getRow(3).eachCell(c => {
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD3D3D3' } };
+        c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    });
+
+    let indexRow = 4;
+    for (let i = 0; i < reportsToExport.length; i++) {
+        let report = reportsToExport[i];
+        let itemName = report.item_hin + (report.subitem_hin ? ' (' + report.subitem_hin + ')' : '');
+        indexSheet.getRow(indexRow).values = [
+            i + 1,
+            itemName,
+            `${Number(report.overview.past_bachat || 0).toFixed(2).replace(/\\.00$/, '')} ${report.unit_short}`,
+            `${Number(report.overview.total_aawak || 0).toFixed(2).replace(/\\.00$/, '')} ${report.unit_short}`,
+            `${Number(report.overview.total_jawak || 0).toFixed(2).replace(/\\.00$/, '')} ${report.unit_short}`,
+            `${Number(report.overview.current_bachat || 0).toFixed(2).replace(/\\.00$/, '')} ${report.unit_short}`
+        ];
+        indexSheet.getRow(indexRow).eachCell(c => c.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} });
+        indexRow++;
+    }
+
+    indexSheet.columns.forEach((col, i) => {
+        col.width = i === 0 ? 8 : (i === 1 ? 40 : 20);
+    });
+
     // Process each item to create a separate sheet
-    for (let report of this.reportData) {
+    for (let report of reportsToExport) {
       let itemName = report.item_hin + (report.subitem_hin ? ' (' + report.subitem_hin + ')' : '');
       let safeSheetName = itemName.substring(0, 30).replace(/[\\*?:\[\]/]/g, '');
       const worksheet = workbook.addWorksheet(safeSheetName);
@@ -332,71 +480,162 @@ export class ReportItemLedgerComponent implements OnInit {
     }
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const data: Blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     let title = 'Item_Ledger_' + this.filterBody.from.name.replace(' ', '') + '_to_' + this.filterBody.to.name.replace(' ', '');
-    FileSaver.saveAs(data, title + '.xlsx');
+    if (categoryObj) {
+        let catName = categoryObj.category_eng || categoryObj.category_hin || '';
+        if (catName) title += '_' + catName.replace(/ /g, '_');
+    }
+    return { buffer: buffer, title: title };
   }
 
-  exportToPDF() {
-    if (!this.reportData || this.reportData.length === 0) {
+  exportCurrentPDF() {
+    if (!this.groupedReportData || this.groupedReportData.length === 0) {
       this.toastr.error('No data to export');
       return;
     }
-
-    // Auto-select items if category is chosen but item list is cleared
-    if ((!this.filterBody.item_subitem_ids || this.filterBody.item_subitem_ids.length === 0) && this.filterBody.category_id) {
-      this.filterBody.item_subitem_ids = this.getCategoryItems(this.filterBody.category_id);
-    }
-
-    if(!this.filterBody.item_subitem_ids || this.filterBody.item_subitem_ids.length === 0) {
-      this.toastr.error('Please select at least one item');
+    let currentGroup = this.groupedReportData[this.activeCategoryIndex];
+    if (!currentGroup || !currentGroup.reports || currentGroup.reports.length === 0) {
+      this.toastr.error('No data for this category');
       return;
     }
-
-    let itemSubitemParsed = this.filterBody.item_subitem_ids.map((idStr: string) => {
-      let parts = idStr.split(':');
-      let i_id = Number(parts[0]);
-      let s_id = parts[1] ? Number(parts[1]) : null;
-      
-      let itemObj = this.items.find((i: any) => i._id === i_id);
-      let item_hin = itemObj ? itemObj.item_hin : '';
-      let item_eng = itemObj ? itemObj.item_eng : '';
-      let subitem_hin = '';
-      let subitem_eng = '';
-      if (itemObj && s_id) {
-         let subObj = itemObj.subitems.find((s: any) => s._id === s_id);
-         if (subObj) {
-            subitem_hin = subObj.subitem_hin;
-            subitem_eng = subObj.subitem_eng;
-         }
-      }
-
-      return {
-        item_id: i_id,
-        subitem_id: s_id,
-        item_hin: item_hin,
-        item_eng: item_eng,
-        subitem_hin: subitem_hin,
-        subitem_eng: subitem_eng
-      };
+    let catObj = this.categories.find((c: any) => c._id === currentGroup.category_id);
+    
+    let itemSubitemParsed = currentGroup.reports.map((r: any) => {
+        return {
+            item_id: r.item_id, subitem_id: r.subitem_id,
+            item_hin: r.item_hin, subitem_hin: r.subitem_hin,
+            item_eng: r.item_eng, subitem_eng: r.subitem_eng
+        };
     });
+    
+    let title = 'Item_Ledger_' + this.filterBody.from.name.replace(' ', '') + '_to_' + this.filterBody.to.name.replace(' ', '');
+    if (catObj) {
+        let catName = catObj.category_eng || catObj.category_hin || '';
+        if (catName) title += '_' + catName.replace(/ /g, '_');
+    }
 
     let body = { ...this.filterBody, item_subitem_ids: itemSubitemParsed };
+    
+    this.downloadPdfBlobAsync(body, title).then(({blob, title}) => {
+        FileSaver.saveAs(blob, title + '.pdf');
+    }).catch(e => console.error(e));
+  }
 
-    this.isLoader = true;
-    this.loadingStatus = 'Generating PDF...';
+  async exportBulkPDF() {
+    if (!this.filterBody.from || !this.filterBody.to || !this.filterBody.mm_id) {
+       this.toastr.error('Please select From Date, To Date, and MM for Bulk Export.');
+       return;
+    }
+    
+    let validCategories = this.categories.filter((c: any) => this.getCategoryItems(c._id).length > 0);
+    if (validCategories.length === 0) return;
+    
+    let zip = new JSZip();
+    let count = 0;
+    
+    for (let i = 0; i < validCategories.length; i++) {
+       let catObj = validCategories[i];
+       let items = this.getCategoryItems(catObj._id);
+       
+       let itemSubitemParsed = items.map((idStr: string) => {
+         let parts = idStr.split(':');
+         let i_id = Number(parts[0]);
+         let s_id = parts[1] ? Number(parts[1]) : null;
+         let itemObj = this.items.find((i: any) => i._id === i_id);
+         let subitem_hin = '';
+         let subitem_eng = '';
+         if (itemObj && s_id) {
+            let subObj = itemObj.subitems.find((s: any) => s._id === s_id);
+            if (subObj) {
+                subitem_hin = subObj.subitem_hin;
+                subitem_eng = subObj.subitem_eng;
+            }
+         }
+         return { 
+             item_id: i_id, subitem_id: s_id, 
+             item_hin: itemObj?.item_hin || '', item_eng: itemObj?.item_eng || '',
+             subitem_hin: subitem_hin, subitem_eng: subitem_eng
+         };
+       });
 
-    this.http.downloadPostData(this.api.getUrl('REPORT') + 'item_ledger_pdf/' + this.auth.webUser.dept_id, body).subscribe((data: any) => {
-      let title = 'Item_Ledger_' + this.filterBody.from.name.replace(' ', '') + '_to_' + this.filterBody.to.name.replace(' ', '');
-      FileSaver.saveAs(data, title + '.pdf');
-      this.isLoader = false;
-      this.loadingStatus = 'Loading...';
-    }, (err: any) => {
-      console.error(err);
-      this.isLoader = false;
-      this.loadingStatus = 'Loading...';
-      this.toastr.error(err.message || 'Error generating PDF');
+       let title = 'Item_Ledger_' + this.filterBody.from.name.replace(' ', '') + '_to_' + this.filterBody.to.name.replace(' ', '');
+       let catName = catObj.category_eng || catObj.category_hin || '';
+       if (catName) title += '_' + catName.replace(/ /g, '_');
+
+       let body = { ...this.filterBody, item_subitem_ids: itemSubitemParsed };
+       
+       try {
+           let res: any = await this.http.put(this.api.getUrl('REPORT_ITEM_LEDGER') + this.auth.webUser.dept_id, body).toPromise();
+           if (res && res.success) {
+               let validReports = res.data.filter((r: any) => 
+                   r.overview.total_aawak !== 0 || r.overview.total_jawak !== 0 || r.overview.current_bachat !== 0
+               );
+               if (validReports.length > 0) {
+                   this.isLoader = true;
+                   this.loadingStatus = `Exporting PDF for ${catObj.category_hin}... (${i+1}/${validCategories.length})`;
+                   
+                   let { blob } = await this.downloadPdfBlobAsync(body, title, (statusMsg) => {
+                       this.loadingStatus = `Exporting PDF for ${catObj.category_hin}... (${i+1}/${validCategories.length}) - ${statusMsg}`;
+                   });
+                   zip.file(title + '.pdf', blob);
+                   count++;
+               }
+           }
+       } catch (err) {
+           console.error(`Error exporting pdf category ${catObj.category_hin}`, err);
+       }
+    }
+    
+    if (count > 0) {
+        this.loadingStatus = 'Zipping files...';
+        let zipBlob = await zip.generateAsync({ type: 'blob' });
+        FileSaver.saveAs(zipBlob, `Item_Ledger_Bulk_PDF_${Date.now()}.zip`);
+    } else {
+        this.toastr.info('No activity found to export.');
+    }
+    
+    this.isLoader = false;
+    this.loadingStatus = 'Loading...';
+  }
+
+  downloadPdfBlobAsync(body: any, title: string, progressCallback?: (status: string) => void): Promise<{blob: Blob, title: string}> {
+    return new Promise((resolve, reject) => {
+        let taskId = 'pdf_' + Date.now();
+        body.taskId = taskId;
+
+        this.isLoader = true;
+        if (!progressCallback) this.loadingStatus = 'Initializing PDF export...';
+
+        let progressInterval = setInterval(() => {
+          this.http.get(this.api.getUrl('REPORT') + 'pdf-progress/' + taskId).subscribe((res: any) => {
+            if (res && res.status) {
+              if (progressCallback) {
+                  progressCallback(res.status);
+              } else {
+                  this.loadingStatus = res.status;
+              }
+            }
+          }, err => {});
+        }, 1000);
+
+        this.http.downloadPostData(this.api.getUrl('REPORT') + 'item_ledger_pdf/' + this.auth.webUser.dept_id, body).subscribe((data: any) => {
+          clearInterval(progressInterval);
+          this.isLoader = false;
+          this.loadingStatus = 'Loading...';
+          resolve({ blob: data, title: title });
+        }, (err: any) => {
+          clearInterval(progressInterval);
+          this.isLoader = false;
+          this.loadingStatus = 'Loading...';
+          this.toastr.error(err.message || 'Error generating PDF');
+          resolve({ blob: new Blob([]), title: title }); // Resolve empty to not break bulk loop
+        });
     });
+  }
+
+  setActiveCategory(index: number) {
+    this.activeCategoryIndex = index;
+    this.activeReportIndex = 0;
   }
 
   setActiveReport(index: number) {

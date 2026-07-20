@@ -2,43 +2,9 @@
 'use strict';
 
 const puppeteer = require('puppeteer-core');
-const fs = require('fs');
+const os = require('os');
 const path = require('path');
-
-/**
- * Automatically detect the path to Google Chrome or Chromium executable.
- */
-function detectChromePath() {
-    const platform = process.platform;
-
-    if (platform === 'darwin') {
-        const macPath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-        if (fs.existsSync(macPath)) return macPath;
-        const macChromium = '/Applications/Chromium.app/Contents/MacOS/Chromium';
-        if (fs.existsSync(macChromium)) return macChromium;
-    } else if (platform === 'win32') {
-        const winPaths = [
-            path.join(process.env.PROGRAMFILES || 'C:\\Program Files', 'Google\\Chrome\\Application\\chrome.exe'),
-            path.join(process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)', 'Google\\Chrome\\Application\\chrome.exe'),
-            path.join(process.env.LOCALAPPDATA || '', 'Google\\Chrome\\Application\\chrome.exe')
-        ];
-        for (const p of winPaths) {
-            if (p && fs.existsSync(p)) return p;
-        }
-    } else if (platform === 'linux') {
-        const linuxPaths = [
-            '/usr/bin/google-chrome',
-            '/usr/bin/chromium-browser',
-            '/usr/bin/chromium',
-            '/usr/bin/chrome'
-        ];
-        for (const p of linuxPaths) {
-            if (fs.existsSync(p)) return p;
-        }
-    }
-
-    return 'google-chrome'; // Default fallback
-}
+const pdfEngine = require('./pdf-engine.service');
 
 /**
  * Format date from YYYY-MM-DD to DD-MM-YYYY
@@ -68,7 +34,7 @@ function formatNumber(val, decimals = 2) {
 /**
  * Generate Item Ledger PDF
  */
-async function generateItemLedgerPdf(reportData, fromName, toName, mmName) {
+async function generateItemLedgerPdf(reportData, fromName, toName, mmName, taskId) {
     let htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -400,25 +366,20 @@ async function generateItemLedgerPdf(reportData, fromName, toName, mmName) {
     </html>
     `;
 
-    // Launch Puppeteer-core
-    const browser = await puppeteer.launch({
-        executablePath: detectChromePath(),
-        headless: 'new',
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-gpu'
-        ]
-    });
-
+    // Get the shared Puppeteer browser
+    if (taskId) global.pdfProgress[taskId] = { status: 'Waiting for PDF engine...' };
+    const browser = await pdfEngine.getBrowser();
+    
+    let page = null;
     try {
-        const page = await browser.newPage();
-        await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
+        page = await browser.newPage();
+        if (taskId) global.pdfProgress[taskId] = { status: 'Rendering HTML to PDF...' };
+        await page.setContent(htmlContent, { waitUntil: 'domcontentloaded', timeout: 0 });
 
         // Generate the PDF buffer (no dynamic page number updates needed, leaving blank fields)
         const pdfBuffer = await page.pdf({
             format: 'A4',
+            timeout: 0,
             printBackground: true,
             margin: {
                 top: '15mm',
@@ -436,10 +397,10 @@ async function generateItemLedgerPdf(reportData, fromName, toName, mmName) {
             `
         });
 
-        await browser.close();
+        await page.close();
         return pdfBuffer;
     } catch (err) {
-        await browser.close();
+        if (page) await page.close().catch(() => {});
         throw err;
     }
 }

@@ -1,7 +1,7 @@
 [
     {
-        "version": "34.5",
-        "date": "10-07-2026",
+        "version": "35.1",
+        "date": "18-07-2026",
         "summary": "Report",
         "summary_hin": "रिपोर्ट",
         "isNew": true,
@@ -21,6 +21,14 @@
                 "title_hin": "",
                 "desc": "High featured Index PDF generation, and past bachat, rate, amount column added in report....",
                 "desc_hin": ""
+            },
+            {
+                "type": "feature",
+                "module": "Item Ledger Reports",
+                "title": "Universal Shared PDF Engine & ZIP Bulk Export",
+                "title_hin": "नया यूनिवर्सल पीडीएफ इंजन और ज़िप एक्सपोर्ट",
+                "desc": "Built a blazing fast shared PDF engine that stays in memory. Bulk exports for Excel and PDF are now bundled securely into a single ZIP download folder.",
+                "desc_hin": "एक बहुत ही तेज़ पीडीएफ इंजन बनाया गया है जो मेमोरी में सेव रहता है। एक्सेल और पीडीएफ के थोक निर्यात (Bulk Export) अब एक ही ज़िप (ZIP) फ़ोल्डर में डाउनलोड होते हैं।"
             }
         ]
     },

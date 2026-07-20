@@ -91,33 +91,55 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-2 mb-2" *ngIf="reportData.length > 0">
-                <button type="button" class="btn btn-outline-success w-100" (click)="exportToExcel()">
-                    <i class="uil uil-export"></i> Export to Excel
+            <div class="col-md-2 mb-2" *ngIf="groupedReportData.length > 0">
+                <button type="button" class="btn btn-outline-success w-100" (click)="exportCurrentExcel()">
+                    <i class="uil uil-export"></i> Excel (Current)
                 </button>
             </div>
-            <div class="col-md-2 mb-2" *ngIf="reportData.length > 0">
-                <button type="button" class="btn btn-outline-danger w-100" (click)="exportToPDF()">
-                    <i class="uil uil-file-download"></i> Export to PDF
+            <div class="col-md-2 mb-2" *ngIf="groupedReportData.length > 0">
+                <button type="button" class="btn btn-success w-100" (click)="exportBulkExcel()">
+                    <i class="uil uil-export"></i> Bulk Excel (All)
+                </button>
+            </div>
+            <div class="col-md-2 mb-2" *ngIf="groupedReportData.length > 0">
+                <button type="button" class="btn btn-outline-danger w-100" (click)="exportCurrentPDF()">
+                    <i class="uil uil-file-download"></i> PDF (Current)
+                </button>
+            </div>
+            <div class="col-md-2 mb-2" *ngIf="groupedReportData.length > 0">
+                <button type="button" class="btn btn-danger w-100" (click)="exportBulkPDF()">
+                    <i class="uil uil-file-download"></i> Bulk PDF (All)
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mt-4" *ngIf="reportData.length">
+<div class="row mt-4" *ngIf="groupedReportData.length > 0">
+    <div class="col-12">
+        <ul class="nav nav-tabs">
+            <li class="nav-item" *ngFor="let cat of groupedReportData; let i = index">
+                <a class="nav-link" [class.active]="activeCategoryIndex === i" (click)="setActiveCategory(i)" style="cursor: pointer;">
+                    {{cat.category_name}}
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="row mt-3" *ngIf="groupedReportData.length > 0 && groupedReportData[activeCategoryIndex]">
     <div class="col-12 mb-3">
-        <span *ngFor="let report of reportData; let i = index" class="badge rounded-pill me-1 mb-1 cursor-pointer"
-            [ngClass]="activeReportIndex === i ? 'bg-primary border border-primary text-white' : 'bg-light text-dark border'"
-            (click)="setActiveReport(i)"
+        <span *ngFor="let report of groupedReportData[activeCategoryIndex].reports; let j = index" class="badge rounded-pill me-1 mb-1"
+            [ngClass]="activeReportIndex === j ? 'bg-primary border border-primary text-white' : 'bg-light text-dark border'"
+            (click)="setActiveReport(j)"
             style="cursor: pointer; font-size: 0.85rem; padding: 0.4rem 0.6rem; font-weight: 500; display: inline-block;">
             {{report.item_hin}} {{report.subitem_hin ? '(' + report.subitem_hin + ')' : ''}}
         </span>
     </div>
 </div>
 
-<div class="row" *ngIf="reportData.length">
-    <div class="col-12" *ngIf="reportData[activeReportIndex] as report">
+<div class="row" *ngIf="groupedReportData.length > 0 && groupedReportData[activeCategoryIndex]">
+    <div class="col-12" *ngIf="groupedReportData[activeCategoryIndex].reports[activeReportIndex] as report">
         <div class="card mb-4 border border-primary">
             <div class="card-header bg-primary text-white fs-4">
                 {{report.item_hin}} {{report.subitem_hin ? '(' + report.subitem_hin + ')' : ''}}

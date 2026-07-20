@@ -4,7 +4,13 @@ const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 const Fn = require('../database/functions');
 
+global.pdfProgress = global.pdfProgress || {};
 
+router.get('/pdf-progress/:taskId', (req, res) => {
+    const taskId = req.params.taskId;
+    const status = global.pdfProgress[taskId] || { status: 'Preparing request...' };
+    res.json(status);
+});
 
 // get country all
 // router.get('/', async (req, res, next) => {
@@ -176,6 +182,9 @@ router.post('/item_ledger_pdf/:dept_id', async (req, res, next) => {
         let dept_id = req.params.dept_id;
         let mm_id = req.body.mm_id;
         let item_subitem_ids = req.body.item_subitem_ids || [];
+        let taskId = req.body.taskId;
+
+        if (taskId) global.pdfProgress[taskId] = { status: 'Fetching database records...' };
 
         let reportData = [];
 
@@ -299,18 +308,24 @@ router.post('/item_ledger_pdf/:dept_id', async (req, res, next) => {
             if (mmRow) mmName = mmRow.mm_hin;
         }
 
+        if (taskId) global.pdfProgress[taskId] = { status: 'Preparing PDF engine...' };
+
         const pdfBuffer = await itemLedgerPdf.generateItemLedgerPdf(
             reportData, 
             req.body.from.name_hin, 
             req.body.to.name_hin, 
-            mmName
+            mmName,
+            taskId
         );
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=item_ledger.pdf');
         res.end(pdfBuffer, 'binary');
 
+        if (taskId) delete global.pdfProgress[taskId];
+
     } catch (err) {
+        if (req.body && req.body.taskId) delete global.pdfProgress[req.body.taskId];
         console.log(err);
         next(err);
     }
