@@ -1,10 +1,37 @@
 [
     {
+        "version": "35.2",
+        "date": "22-07-2026",
+        "summary": "Interactive Page Tours & Universal Bulk Delete",
+        "summary_hin": "इंटरएक्टिव पेज टूर व बल्क डिलीट",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Interactive Tours",
+                "title": "Bilingual Guided Page Tours (Aawak, Jawak, HMP, Prastav)",
+                "title_hin": "द्विभाषी इंटरएक्टिव मार्गदर्शिका (आवक, जावक, एचएमपी, प्रस्ताव)",
+                "desc": "Interactive step-by-step Driver.js tours with bilingual Hindi & English guidance across main modules. Features unified spotlight focus halo on open filters & dropdowns, auto-triggering actions, and quick mini tours.",
+                "desc_hin": "मुख्य मॉड्यूल (आवक, जावक, एचएमपी, प्रस्ताव) के लिए हिंदी और अंग्रेजी में स्टेप-बाय-स्टेप इंटरएक्टिव मार्गदर्शिका। इसमें ओपन फ़िल्टर और ड्रॉपडाउन पर जॉइंट स्पॉटलाइट फोकस, ऑटो-एक्शन और त्वरित मिनी टूर शामिल हैं।"
+            },
+            {
+                "type": "feature",
+                "module": "Bulk Operations",
+                "title": "Universal Bulk Delete across Modules (Aawak, Jawak, HMP, Prastav)",
+                "title_hin": "सार्वभौमिक बल्क डिलीट (आवक, जावक, एचएमपी, प्रस्ताव)",
+                "desc": "Select multiple rows or all rows using smart table checkboxes to perform safe bulk delete with SweetAlert confirmation dialogs.",
+                "desc_hin": "स्मार्ट टेबल चेकबॉक्स का उपयोग करके एक साथ कई पंक्तियों को चुनें और स्वीटअलर्ट कन्फर्मेशन के साथ आसानी से बल्क डिलीट करें।"
+            }
+        ]
+    },
+
+    {
         "version": "35.1",
         "date": "18-07-2026",
         "summary": "Report",
         "summary_hin": "रिपोर्ट",
-        "isNew": true,
+        "isNew": false,
+
         "items": [
             {
                 "type": "feature",

@@ -1,6 +1,63 @@
-import { Directive, ElementRef, Input, OnDestroy, AfterViewInit, Renderer2, OnChanges, SimpleChanges } from '@angular/core';
+import { Directive, ElementRef, Input, OnDestroy, AfterViewInit, Renderer2, OnChanges, SimpleChanges, NgZone } from '@angular/core';
 import { SelectionService } from '../services/selection.service';
 
+/**
+ * ============================================================================
+ * TableSmartCheckboxDirective
+ * ============================================================================
+ * 
+ * Automatically injects a "Select All" checkbox into the table header and 
+ * individual checkboxes into each data row. It syncs the selection state 
+ * with the central `SelectionService`.
+ * 
+ * 💡 FEATURES:
+ * - No need to manually write `<input type="checkbox">` in your table HTML.
+ * - Automatically handles "Select All" / "Deselect All" logic.
+ * - Auto-syncs with `SelectionService` via a unique context string.
+ * 
+ * 🛠️ HOW TO USE:
+ * 
+ * <div class="table-container" 
+ *      [appTableSmartCheckbox]="'my-unique-context'" 
+ *      [selectionData]="myFlatArray" 
+ *      [idField]="'_id'" 
+ *      [rowSelector]="'tbody tr.selectable-row'">
+ *   <table class="table">
+ *     <thead>
+ *       <tr>
+ *         <!-- Directive injects <th> checkbox here -->
+ *         <th>Name</th>
+ *       </tr>
+ *     </thead>
+ *     <tbody>
+ *       <tr *ngFor="let item of myFlatArray" class="selectable-row" [attr.data-id]="item._id">
+ *         <!-- Directive injects <td> checkbox here -->
+ *         <td>{{item.name}}</td>
+ *       </tr>
+ *     </tbody>
+ *   </table>
+ * </div>
+ * 
+ * * ⚠️ COMMON PITFALLS & STRICT RULES:
+ * 1. [selectionData] MUST BE ACCURATE: The directive relies heavily on 
+ *    `selectionData`. If you change views (e.g., Voucher to Individual), 
+ *    ensure `selectionData` is repopulated. If `selectionData` is empty, 
+ *    the "Select All" button will do nothing (like a dummy button).
+ * 2. ROOT LEVEL ID: The objects inside `selectionData` MUST contain the 
+ *    property defined by `idField` (defaults to `_id`) at their ROOT level.
+ *    If your data has `{ item: { _id: 123 } }`, you MUST flatten it or add 
+ *    `_id` to the root (`{ _id: 123, item: {...} }`). Otherwise, 
+ *    "Select All" will fail to extract IDs and pass nothing to the service.
+ * 3. DOM data-id ATTRIBUTE: Your table rows matched by `rowSelector` MUST 
+ *    have `[attr.data-id]="item._id"`. This is how individual clicks know 
+ *    which ID to toggle. If omitted, it falls back to index mapping, which 
+ *    can easily break when pagination or DOM-filtering is applied.
+ * 4. DYNAMIC COLSPANS: Since this directive dynamically prepends a `<td>` and 
+ *    `<th>`, hardcoded colspans (e.g., `colspan="6"`) on full-width rows might 
+ *    break visually. Use larger colspans like `colspan="100"` for dynamic rows.
+ * 
+ * ============================================================================
+ */
 @Directive({
     selector: '[appTableSmartCheckbox]'
 })
@@ -10,15 +67,16 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
     @Input() selectionData: any[] = []; // The data array being displayed
     @Input() showCheckboxes: boolean = true;
     @Input() autoReset: boolean = true;
+    @Input() rowSelector: string = 'tbody tr';
 
     private observer: MutationObserver | null = null;
     private headerCheckbox: HTMLInputElement | null = null;
-    private initialized: boolean = false;
 
     constructor(
         private el: ElementRef,
         private renderer: Renderer2,
-        private selectionService: SelectionService
+        private selectionService: SelectionService,
+        private ngZone: NgZone
     ) { }
 
     ngAfterViewInit() {
@@ -26,16 +84,13 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
             this.selectionService.clear(this.selectionContext);
         }
 
-        // Wait a bit for the table to be rendered if it's dynamic
-        setTimeout(() => {
-            this.refreshUI();
-            this.setupMutationObserver();
-            this.initialized = true;
-        }, 500);
+        // Setup container-level observer immediately
+        this.setupMutationObserver();
+        this.refreshUI();
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (this.initialized && (changes['showCheckboxes'] || changes['selectionData'])) {
+        if (changes['showCheckboxes'] || changes['selectionData']) {
             this.refreshUI();
         }
     }
@@ -55,7 +110,7 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
     }
 
     private getTableElement(): HTMLTableElement | null {
-        if (this.el.nativeElement.tagName.toLowerCase() === 'table') {
+        if (this.el.nativeElement.tagName && this.el.nativeElement.tagName.toLowerCase() === 'table') {
             return this.el.nativeElement;
         }
         return this.el.nativeElement.querySelector('table');
@@ -93,7 +148,9 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
 
                 this.headerCheckbox = checkbox;
                 this.renderer.listen(checkbox, 'change', (event) => {
-                    this.toggleAll(event.target.checked);
+                    this.ngZone.run(() => {
+                        this.toggleAll(event.target.checked);
+                    });
                 });
 
                 this.renderer.appendChild(th, checkbox);
@@ -109,7 +166,7 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
         const table = this.getTableElement();
         if (!table || !this.showCheckboxes) return;
 
-        const rows = table.querySelectorAll('tbody tr');
+        const rows = table.querySelectorAll(this.rowSelector);
         rows.forEach((row: any, index: number) => {
             if (row.querySelector('.smart-selection-row')) return;
 
@@ -131,8 +188,10 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
             if (id) {
                 checkbox.checked = this.selectionService.isSelected(this.selectionContext, id);
                 this.renderer.listen(checkbox, 'change', () => {
-                    this.selectionService.toggle(this.selectionContext, id);
-                    this.updateHeaderCheckboxState();
+                    this.ngZone.run(() => {
+                        this.selectionService.toggle(this.selectionContext, id);
+                        this.updateHeaderCheckboxState();
+                    });
                 });
             }
 
@@ -171,19 +230,18 @@ export class TableSmartCheckboxDirective implements AfterViewInit, OnDestroy, On
     }
 
     private setupMutationObserver() {
-        const table = this.getTableElement();
-        if (!table) return;
-
-        const tbody = table.querySelector('tbody');
-        if (!tbody) return;
+        // Observe the root directive container so table insertion (*ngIf) is caught immediately
+        if (this.observer) {
+            this.observer.disconnect();
+        }
 
         this.observer = new MutationObserver(() => {
             if (this.showCheckboxes) {
-                this.processRows();
+                this.refreshUI();
                 this.updateHeaderCheckboxState();
             }
         });
 
-        this.observer.observe(tbody, { childList: true, subtree: true });
+        this.observer.observe(this.el.nativeElement, { childList: true, subtree: true });
     }
 }

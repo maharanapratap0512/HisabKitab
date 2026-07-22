@@ -11,6 +11,8 @@ import { AuthService } from '../services/auth.service';
 import { ExcelExportService } from '../services/excel-export.service';
 import { observable, Observable, of, Subject } from 'rxjs';
 import { SelectionService } from '../services/selection.service';
+import { TourService } from '../services/tour.service';
+import { AAWAK_TOUR_CONFIG } from './aawak.tour';
 declare var $: any;
 
 @Component({
@@ -28,8 +30,6 @@ export class AawakComponent implements OnInit {
   totalItems: any;
 
   isLoader: boolean = false;
-  isDeleting: boolean = false;
-  toBeDelete: any = [];
   term: any;
   bunch_entry: any = false;
   showModal: string = '';
@@ -140,9 +140,28 @@ export class AawakComponent implements OnInit {
     public auth: AuthService,
     private excelExportService: ExcelExportService,
     public selectionService: SelectionService,
+    private tourService: TourService,
   ) {
     this.settings = this.auth.webUser.settings;
     this.currentYear = new Date().getFullYear();
+  }
+
+  startTour(tourType: string = 'master') {
+    if (tourType === 'master') {
+      this.tourService.startTour(AAWAK_TOUR_CONFIG);
+    } else {
+      const miniTour = AAWAK_TOUR_CONFIG.miniTours?.find((m) => m.id === tourType);
+      if (miniTour) {
+        this.tourService.startTour(AAWAK_TOUR_CONFIG, miniTour.stepIndexes);
+      } else {
+        this.tourService.startTour(AAWAK_TOUR_CONFIG);
+      }
+    }
+  }
+
+  resetTourStatus() {
+    this.tourService.resetAllTours();
+    this.toastr.success('Tour progress reset successfully!', 'Guided Tour');
   }
 
   ngOnInit(): void {
@@ -1015,73 +1034,46 @@ export class AawakComponent implements OnInit {
     this.openModal('Edit Jawak');
   }
 
-  deleteSelection(i: any, id: any) {
-    console.log(this.aawakData[i].delete);
-
-    if (this.aawakData[i].delete) {
-      this.toBeDelete.push(id);
-    } else {
-      for (let j in this.toBeDelete) {
-        if (this.toBeDelete[j] == id) {
-          this.toBeDelete.splice(j, 1);
-          break;
-        }
-      }
-    }
-    console.log(this.toBeDelete);
-
-  }
-
-  deleteSelectAll() {
-    if (this.aawakData.length == this.toBeDelete.length) {
-      for (let i in this.aawakData) {
-        this.aawakData[i].delete = false;
-      }
-      this.toBeDelete = [];
-    } else {
-      for (let i in this.aawakData) {
-        this.aawakData[i].delete = true;
-        this.toBeDelete.push(this.aawakData[i]._id);
-      }
-    }
-    console.log(this.toBeDelete);
-
-  }
-
   deleteMultiple() {
-    if (!this.isDeleting) {
-      this.isDeleting = true;
-    } else {
-      Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          let s_count = 0;
-          for (let id of this.toBeDelete) {
-            let res: any = await this.fnDelete(id);
-            console.log(res);
-            if (res) {
-              s_count += 1;
-            }
-
-          }
-          let msg = s_count + " Deleted Successfully out of " + this.toBeDelete.length;
-
-          this.toBeDelete = [];
-          this.toastr.error(msg);
-          this.isDeleting = !this.isDeleting;
-        } else {
-          this.isDeleting = !this.isDeleting;
-        }
-      });
+    let selectedIds = this.selectionService.getSelected('aawak');
+    if (selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one item to delete');
+      return;
     }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `You won't be able to revert this! You are about to delete ${selectedIds.length} item(s).`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        let s_count = 0;
+        for (let id of selectedIds) {
+          let res: any = await this.fnDelete(id);
+          console.log(res);
+          if (res) {
+            s_count += 1;
+          }
 
+        }
+        let msg = s_count + " Deleted Successfully out of " + selectedIds.length;
+
+        this.selectionService.clear('aawak');
+        this.toastr.success(msg);
+      }
+    });
+  }
+
+  bulkEditMultiple() {
+    let selectedIds = this.selectionService.getSelected('aawak');
+    if (selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one item to edit');
+      return;
+    }
+    this.toastr.info(`Bulk edit for ${selectedIds.length} items will be implemented next.`);
   }
 
   delete(i: any, id: any) {
@@ -1115,10 +1107,9 @@ export class AawakComponent implements OnInit {
     return new Promise((resolve, reject) => {
       this.http.delete(this.api.getUrl('AAWAK') + '/' + id).subscribe((data: any) => {
         if (data['success']) {
-          for (let i in this.aawakData) {
-            if (this.aawakData[i]._id == id) {
-              this.aawakData.splice(i, 1);
-            }
+          let index = this.aawakData.findIndex((x: any) => x._id === id);
+          if (index !== -1) {
+            this.aawakData.splice(index, 1);
             this.total_count -= 1;
           }
           return resolve(true);

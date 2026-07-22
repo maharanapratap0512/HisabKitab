@@ -5,53 +5,80 @@
   <div class="col-md-6">
     <div class="position-relative">
       <i class="uil uil-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-      <input type="text" class="form-control ps-5 shadow-none border-soft"
+      <input id="tour-search-input" type="text" class="form-control ps-5 shadow-none border-soft"
         placeholder="Search Voucher, MM, PBK or Items..." [(ngModel)]="term" name="search">
     </div>
   </div>
   <div class="col-md-3 text-end d-flex justify-content-end align-items-center gap-2">
 
-    <app-popover-filter [btnOutline]="false" iconClass="dripicons-gear" direction="left" [showClearButton]="false"
-      triggerOn="hover">
-      <ul>
-        <li>
-          <h5>नया एंट्री फॉर्म</h5>
-          <div class="d-flex justify-content-between me-3 fs-6">
-            <div class="pl-2 form-check form-radio-info mb-1">
-              <input type="radio" [value]="true" [(ngModel)]="settings.prastav.samePageEntryForm"
-                class="form-check-input" (change)="UISettingsChanged()" name="samePageEntryForm" id="entryInPage">
-              <label class="form-check-label" for="entryInPage">इसी पेज
-                में</label>
+    <div id="tour-view-mode">
+      <app-popover-filter [btnOutline]="false" iconClass="dripicons-gear" direction="left" [showClearButton]="false"
+        triggerOn="hover">
+        <ul>
+          <li>
+            <h5>नया एंट्री फॉर्म</h5>
+            <div class="d-flex justify-content-between me-3 fs-6">
+              <div class="pl-2 form-check form-radio-info mb-1">
+                <input type="radio" [value]="true" [(ngModel)]="settings.prastav.samePageEntryForm"
+                  class="form-check-input" (change)="UISettingsChanged()" name="samePageEntryForm" id="entryInPage">
+                <label class="form-check-label" for="entryInPage">इसी पेज
+                  में</label>
+              </div>
+              <div class="pl-2 form-check form-radio-info mb-1">
+                <input type="radio" [value]="false" [(ngModel)]="settings.prastav.samePageEntryForm"
+                  class="form-check-input" (change)="UISettingsChanged()" name="samePageEntryForm" id="entryInModal">
+                <label class="form-check-label" for="entryInModal">मोडल में</label>
+              </div>
             </div>
-            <div class="pl-2 form-check form-radio-info mb-1">
-              <input type="radio" [value]="false" [(ngModel)]="settings.prastav.samePageEntryForm"
-                class="form-check-input" (change)="UISettingsChanged()" name="samePageEntryForm" id="entryInModal">
-              <label class="form-check-label" for="entryInModal">मोडल में</label>
+          </li>
+          <li>
+            <h5>डाटा टेबल मोड</h5>
+            <div class="d-flex justify-content-between me-3 fs-6">
+              <div class="pl-2 form-check form-radio-info mb-1">
+                <input type="radio" [value]="'individual'" [(ngModel)]="settings.prastav.viewMode"
+                  class="form-check-input" (change)="UISettingsChanged()" name="viewMode" id="entryInPage">
+                <label class="form-check-label" for="entryInPage">Single</label>
+              </div>
+              <div class="pl-2 form-check form-radio-info mb-1">
+                <input type="radio" [value]="'voucher'" [(ngModel)]="settings.prastav.viewMode" class="form-check-input"
+                  (change)="UISettingsChanged()" name="viewMode" id="entryInModal">
+                <label class="form-check-label" for="entryInModal">Voucher Wise
+                </label>
+              </div>
             </div>
-          </div>
-        </li>
-        <li>
-          <h5>डाटा टेबल मोड</h5>
-          <div class="d-flex justify-content-between me-3 fs-6">
-            <div class="pl-2 form-check form-radio-info mb-1">
-              <input type="radio" [value]="'individual'" [(ngModel)]="settings.prastav.viewMode"
-                class="form-check-input" (change)="UISettingsChanged()" name="viewMode" id="entryInPage">
-              <label class="form-check-label" for="entryInPage">Single</label>
-            </div>
-            <div class="pl-2 form-check form-radio-info mb-1">
-              <input type="radio" [value]="'voucher'" [(ngModel)]="settings.prastav.viewMode" class="form-check-input"
-                (change)="UISettingsChanged()" name="viewMode" id="entryInModal">
-              <label class="form-check-label" for="entryInModal">Voucher Wise
-              </label>
-            </div>
-          </div>
-        </li>
-      </ul>
-    </app-popover-filter>
-    <button class="btn btn-primary px-3 shadow-sm border-0" (click)="openEntryModal()">
+          </li>
+        </ul>
+      </app-popover-filter>
+    </div>
+    <button id="tour-add-prastav-btn" class="btn btn-primary px-3 shadow-sm border-0" (click)="openEntryModal()">
       <i class="uil uil-plus me-1 font-size-16"></i> Prastav
     </button>
+
+    <!-- Tour Hub Menu Dropdown -->
+    <div class="dropdown d-inline-block ms-1">
+       <button type="button" class="btn btn-outline-primary dropdown-toggle px-2" data-bs-toggle="dropdown" aria-expanded="false" title="Interactive Guided Tours">
+          <i class="uil-question-circle h4"></i>
+       </button>
+       <div class="dropdown-menu dropdown-menu-end shadow-lg py-2" style="min-width: 260px; z-index: 1050;">
+          <h6 class="dropdown-header text-primary fw-bold">🎓 Guided Page Tours / मार्गदर्शिका</h6>
+          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('master')">
+             <i class="uil-rocket me-2 text-primary"></i> <strong>Full Master Tour</strong> (8 steps)
+          </a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('add_filter')">
+             <i class="uil-search-plus me-2 text-info"></i> <strong>1. Settings & Filters / फ़िल्टर गाइड</strong>
+          </a>
+          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('table_data')">
+             <i class="uil-table me-2 text-warning"></i> <strong>2. Export & Table Features / टेबल फ़ीचर्स</strong>
+          </a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item py-1 text-muted cursor-pointer" (click)="resetTourStatus()">
+             <i class="uil-refresh me-2"></i> Reset Tour Progress
+          </a>
+       </div>
+    </div>
   </div>
+
 </div>
 
 <!-- Year Filter, Export and Total Count Row (Matching HMP/Jawak Style) -->
@@ -62,13 +89,13 @@
       *ngIf="settings?.prastav?.viewMode === 'voucher'" title="Toggle Expand All">
       <i class="uil" [ngClass]="expandAll ? 'uil-compress-arrows' : 'uil-expand-arrows'"></i>
     </button>
-    <app-popover-year [selectedYear]="filterBody.year" (yearChanged)="yearClick($event)"></app-popover-year>
+    <app-popover-year id="tour-year-badge" [selectedYear]="filterBody.year" (yearChanged)="yearClick($event)"></app-popover-year>
   </div>
 
   <!-- Center: Export & Total Count -->
   <div class="col-md-6 d-flex justify-content-center align-items-center gap-4">
-    <div class="btn-group">
-      <button type="button" class="badge badge-outline-success dropdown-toggle year-box shadow-none border-success"
+    <div class="btn-group" id="tour-export-container">
+      <button id="tour-export-btn" type="button" class="badge badge-outline-success dropdown-toggle year-box shadow-none border-success"
         data-bs-toggle="dropdown" aria-expanded="false">
         Export To <i class="uil uil-file-download-alt ms-1"></i>
       </button>
@@ -79,8 +106,12 @@
       </div>
     </div>
 
-    <div class="font-size-14 fw-bold text-dark">
-      Total Count : <span class="text-primary">{{total_count}}</span>
+    <div class="font-size-14 fw-bold text-dark d-flex align-items-center">
+      Total Count : <span class="text-primary ms-1">{{total_count}}</span>
+      <span class="badge year-box cursor-pointer badge-outline-danger ms-3"
+            *ngIf="selectionService.getSelected(settings.prastav.viewMode === 'voucher' ? 'prastav-voucher' : 'prastav-individual').length > 0"
+            (click)="deleteMultiple()"
+            title="Click to perform delete.">Delete ({{selectionService.getSelected(settings.prastav.viewMode === 'voucher' ? 'prastav-voucher' : 'prastav-individual').length}})</span>
     </div>
   </div>
 
@@ -97,13 +128,13 @@
     <!-- VOUCHER MODE -->
     <div *ngIf="settings.prastav.viewMode === 'voucher'">
       <div class="table-responsive" style="overflow-y: auto; max-height: calc(100vh - 250px); min-height: 250px;">
-        <table class="table table-sm mb-0 border-0" style="border-collapse: separate; border-spacing: 0;">
+        <table class="table table-sm mb-0 border-0" style="border-collapse: separate; border-spacing: 0;" appTableSmartCheckbox="prastav-voucher" rowSelector=".sub-row" [selectionData]="groupedVouchers">
           <thead class="table-dark" style="position: sticky; top: 0; z-index: 10;">
             <tr class="font-size-11 text-uppercase letter-spacing-1 text-center align-middle">
               <th style="width: 40px;" class="py-2">#</th>
               <th style="width: 100px;" class="py-2">Manage</th>
               <th style="width: 100px;" class="py-2">Voucher #</th>
-              <th style="width: 140px;" class="py-2 text-start ps-3">
+              <th style="width: 140px;" class="py-2 text-start ps-3" id="tour-col-filter-date">
                 <div class="d-flex align-items-center justify-content-between">
                   <span>Date</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
@@ -116,7 +147,7 @@
               </th>
 
               <!-- MM Column with Filter -->
-              <th style="min-width: 180px;" class="py-2 text-start ps-3">
+              <th style="min-width: 180px;" class="py-2 text-start ps-3" id="tour-col-filter-mm">
                 <div class="d-flex align-items-center justify-content-between">
                   <span>MM</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
@@ -133,7 +164,8 @@
               </th>
 
               <!-- PBK Column with Filter -->
-              <th style="min-width: 180px;" class="py-2 text-start ps-3">
+              <th style="min-width: 180px;" class="py-2 text-start ps-3" id="tour-col-filter-pbk">
+
                 <div class="d-flex align-items-center justify-content-between">
                   <span>PBK</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
@@ -189,9 +221,9 @@
               <!-- LEVEL 1: Voucher Row -->
               <tr class="align-middle text-center cursor-pointer sub-row border-bottom"
                 (click)="v.expanded = !v.expanded"
-                [style.background]="v.expanded ? 'rgba(var(--thead-accent-color-rgb), 0.08)' : 'transparent'">
+                [style.background]="v.expanded ? 'rgba(var(--thead-accent-color-rgb), 0.08)' : 'transparent'" [attr.data-id]="v._id">
                 <td class="py-2 fw-bold opacity-50">{{ (page - 1) * itemsPerPage + vIdx + 1 }}</td>
-                <td class="py-2" (click)="$event.stopPropagation()">
+                <td class="py-2" [id]="vIdx === 0 ? 'tour-row-manage' : null" (click)="$event.stopPropagation()">
                   <div class="d-flex justify-content-center gap-2">
                     <i class="uil uil-pen text-primary opacity-60 hover-opacity-100 cursor-pointer font-size-16"
                       (click)="editVoucher(v)"></i>
@@ -201,6 +233,7 @@
                       (click)="deleteVoucher(v)"></i>
                   </div>
                 </td>
+
                 <td class="py-2 fw-bold text-primary font-size-13">#{{v.voucher_no || '-'}}</td>
                 <td class="py-2 opacity-85 font-size-12 fw-medium text-dark">{{v.date | date:'dd-MM-yyyy'}}</td>
 
@@ -346,7 +379,7 @@
     <!-- INDIVIDUAL MODE -->
     <div class="card border-0 shadow-sm overflow-hidden rounded-3" *ngIf="settings.prastav.viewMode === 'individual'">
       <div class="table-responsive" style="overflow-y: auto; max-height: calc(100vh - 250px); overflow-x: auto;">
-        <table class="table table-bordered table-hover mb-0" style="min-width: 1900px;">
+        <table class="table table-bordered table-hover mb-0" style="min-width: 1900px;" appTableSmartCheckbox="prastav-individual" rowSelector=".indiv-row" [selectionData]="individualRows">
           <thead class="table-dark" style="position: sticky; top: 0; z-index: 20;">
             <tr class="text-uppercase font-size-10 letter-spacing-1 align-middle text-nowrap">
               <th style="width: 50px;">No.</th>
@@ -462,7 +495,7 @@
           <tbody style="font-size: 0.90rem;">
             <ng-container
               *ngFor="let row of (individualRows | paginate:{itemsPerPage:itemsPerPage, currentPage:page, totalItems:total_count}); let rIdx = index">
-              <tr class="align-middle border-bottom">
+              <tr class="align-middle border-bottom indiv-row" [attr.data-id]="row.item._id">
 
                 <td class="text-center fw-bold text-muted font-size-13 text-nowrap">
                   {{ itemsPerPage * (page - 1) + (rIdx + 1) }}

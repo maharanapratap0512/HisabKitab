@@ -1,0 +1,152 @@
+import { ComponentTourGroup } from '../tours/tour.model';
+
+export const AAWAK_NEW_TOUR_CONFIG: ComponentTourGroup = {
+  id: 'aawak_new_page_tour',
+  pageTitle: 'Aawak New Guidance / नई आवक सूची गाइड',
+  masterSteps: [
+    {
+      element: '#tour-add-aawak-btn',
+      popover: {
+        title: '➕ Add Bunch Aawak / आवक जोड़ें',
+        description: 'Click here to create a new bunch Aawak record. / नई बंच आवक प्रविष्टि बनाने के लिए यहाँ क्लिक करें।',
+        side: 'bottom',
+        align: 'start'
+      }
+    },
+    {
+      element: '#tour-search-input',
+      popover: {
+        title: '🔍 Quick Search / त्वरित खोज',
+        description: 'Type any item, party name, or packet number here to search. / किसी भी सामान, सेवाधारी का नाम या पैकेट नंबर से तुरंत खोजें।',
+        side: 'bottom',
+        align: 'center'
+      }
+    },
+    {
+      element: '#tour-adv-search-btn',
+      popover: {
+        title: '⚙️ Advance Search Toggle / एडवांस फ़िल्टर',
+        description: 'Clicking Next will automatically expand the advance filter panel. / अगला क्लिक करने पर एडवांस फ़िल्टर पैनल अपने आप खुल जाएगा।',
+        side: 'bottom',
+        align: 'center'
+      },
+      beforeShowAction: {
+        type: 'click',
+        target: '#tour-adv-search-btn',
+        delayMs: 300
+      }
+    },
+    {
+      element: '#collapseExample',
+      popover: {
+        title: '🎯 Advance Filter Fields / फ़िल्टर फ़ील्ड्स',
+        description: 'Filter entries by Month, Year, Sewadhari (PBK), Date, Pkt No, Nimitt, & Zone. / माह, वर्ष, सेवाधारी, दिनांक, पैकेट नंबर, निमित्त और ज़ोन द्वारा फ़िल्टर करें।',
+        side: 'top',
+        align: 'center'
+      },
+      afterHideAction: {
+        type: 'click',
+        target: '#tour-adv-search-btn',
+        delayMs: 300
+      }
+    },
+    {
+      element: '#tour-import-btn',
+      popover: {
+        title: '📥 Import Excel Data / एक्सेल इम्पोर्ट',
+        description: 'Upload Excel/CSV file to bulk import new Aawak records. / नए रिकॉर्ड्स को एक साथ अपलोड करने के लिए एक्सेल/CSV फ़ाइल चुनें।',
+        side: 'bottom',
+        align: 'center'
+      }
+    },
+    {
+      element: '#tour-export-container',
+      popover: {
+        title: '📤 Export To Excel / एक्सेल एक्सपोर्ट',
+        description: 'Export options: Distribution, Aawak Only, Jawak Only, & Pending. / डिस्ट्रीब्यूशन, आवक, या जावक रिकॉर्ड्स को एक्सेल में डाउनलोड करें।',
+        side: 'left',
+        align: 'start'
+      },
+      beforeShowAction: {
+        type: 'click',
+        target: '#tour-export-btn',
+        delayMs: 200
+      },
+      afterHideAction: {
+        type: 'click',
+        target: '#tour-export-btn',
+        delayMs: 200
+      }
+    },
+    {
+      element: '#tour-year-badge',
+      popover: {
+        title: '📅 Fiscal Year Filter / वर्ष फ़िल्टर',
+        description: 'Click to change active fiscal year filter. / चालू वित्तीय वर्ष फ़िल्टर बदलने के लिए यहाँ क्लिक करें।',
+        side: 'right',
+        align: 'center'
+      }
+    },
+    {
+      element: '.smart-selection-header',
+      popover: {
+        title: '☑️ Select All Checkbox / सभी चुनें',
+        description: 'Click to select or deselect all table rows. / सभी पंक्तियों को एक साथ चुनने या हटाने के लिए क्लिक करें।',
+        side: 'right',
+        align: 'center'
+      }
+    },
+    {
+      element: '.smart-selection-row',
+      popover: {
+        title: '☑️ Row Selection / पंक्ति चयन',
+        description: 'Check individual rows for bulk delete or edit. / बल्क डिलीट या एडिट के लिए व्यक्तिगत पंक्तियों को चुनें।',
+        side: 'right',
+        align: 'center'
+      },
+      beforeShowAction: {
+        type: 'select_row',
+        delayMs: 200
+      }
+    },
+    {
+      element: '#tour-bulk-actions',
+      popover: {
+        title: '🗑️ Bulk Actions Bar / बल्क कार्य',
+        description: 'Shows Delete & Bulk Edit buttons when rows are selected. / पंक्तियां चुनने पर बल्क डिलीट और एडिट बटन यहाँ दिखाई देते हैं।',
+        side: 'bottom',
+        align: 'start'
+      },
+      afterHideAction: {
+        type: 'select_row',
+        delayMs: 100
+      }
+    },
+    {
+      element: '#tour-row-manage',
+      popover: {
+        title: '🛠️ Row Actions / पंक्ति कार्य',
+        description: 'Edit (✏️) and Delete (🗑️) Aawak records. / आवक प्रविष्टि को संपादित या हटाएं।',
+        side: 'right',
+        align: 'center'
+      }
+    }
+  ],
+  miniTours: [
+    {
+      id: 'add_filter',
+      title: '➕ Add & Advance Filters / आवक व फ़िल्टर',
+      stepIndexes: [0, 1, 2, 3]
+    },
+    {
+      id: 'import_export',
+      title: '📥 Excel Import & Export / एक्सेल कार्य',
+      stepIndexes: [4, 5]
+    },
+    {
+      id: 'table_data',
+      title: '📊 Table Data & Bulk Operations / सारणी कार्य',
+      stepIndexes: [6, 7, 8, 9, 10]
+    }
+  ]
+};

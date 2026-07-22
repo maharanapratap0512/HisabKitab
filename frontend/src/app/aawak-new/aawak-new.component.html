@@ -14,64 +14,84 @@
                 <div class="row">
                     <div class="card-body">
                         <div class="row d-flex justify-content-between">
-                            <div class="col-2">
+                            <div class="col-2" id="tour-add-aawak-btn">
                                 <button class="btn btn-primary w-100" (click)="openModal('Add Bunch Aawak')">
                                     <i class="dripicons-plus h4 icon-mx-2"> </i> Aawak
                                 </button>
                             </div>
                             <div class="col-3">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                                    <input id="tour-search-input" type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
                                         name="search">
                                 </div>
                             </div>
                             <div class="col-2">
-                                <button class="btn btn-outline-info w-100" type="button" data-bs-toggle="collapse"
+                                <button id="tour-adv-search-btn" class="btn btn-outline-info w-100" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#collapseExample" aria-expanded="false"
                                     aria-controls="collapseExample"><i class="uil-search-plus h4 icon-mx-2"></i> Advance
                                     Search
                                 </button>
                             </div>
-                            <!-- <div class="col-3">
-                        <ng-select class="custom" style="width: 100%;" placeholder="Select MM" [clearable]="true"
-                           [virtualScroll]="true"  [(ngModel)]="conditionObj.mm_id" (change)="mmSelected($event)">
-                           <ng-option *ngFor="let item of mms" [value]="item._id">
-                              {{item.mm_hin}}:{{item.mm_eng}}</ng-option>
-                        </ng-select>
-                     </div> -->
                             <div class="col-3 d-flex">
-                                <button *ngIf="!gs.importPending" class="file btn btn-success"
+                                <button id="tour-import-btn" *ngIf="!gs.importPending" class="file btn btn-success"
                                     style="font-weight: 700 !important;">
                                     <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                                     <input type="file" class="inputtag"
                                         accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                                         (change)="excelImport($event)" />
                                 </button>
-                                <button *ngIf="gs.importPending" class="file btn btn-success"
+                                <button id="tour-import-btn" *ngIf="gs.importPending" class="file btn btn-success"
                                     (click)="openModal('import')" style="font-weight: 700 !important;">
                                     <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                                 </button>
 
-                                <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
-                                    data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
-                                    <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
-                                    <a class="dropdown-item" (click)="exportJawakData()">Jawak Only</a>
-                                    <a class="dropdown-item" (click)="exportPendingData()">Pending Destribution</a>
+                                <div id="tour-export-container">
+                                    <button id="tour-export-btn" type="button" class="btn btn-outline-success dropdown-toggle mx-2"
+                                        data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
+                                        <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
+                                        <a class="dropdown-item" (click)="exportJawakData()">Jawak Only</a>
+                                        <a class="dropdown-item" (click)="exportPendingData()">Pending Destribution</a>
+                                    </div>
                                 </div>
-                                <!-- <button class="btn btn-success mx-3" style="font-weight: 700 !important;"
-                           (click)="exportAJdataData()">
-                           <i class=" uil-top-arrow-from-top"></i> Export Aawak
-                        </button> -->
                             </div>
 
                             <div class="col-2">
-                                <button type="button" style="font-weight: 700 !important;"
-                                    class="btn btn-light w-100">Total
-                                    Count : {{total_count}}
-                                </button>
+                                <div class="d-flex">
+                                    <button id="tour-total-count" type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
+                                        Count : {{aawakData.length}}
+                                    </button>
+                                    <!-- Tour Hub Menu Dropdown -->
+                                    <div class="dropdown d-inline-block ms-1">
+                                       <button type="button" class="btn btn-outline-primary dropdown-toggle px-2" data-bs-toggle="dropdown" aria-expanded="false" title="Interactive Guided Tours">
+                                          <i class="uil-question-circle h4"></i>
+                                       </button>
+                                       <div class="dropdown-menu dropdown-menu-end shadow-lg py-2" style="min-width: 260px; z-index: 1050;">
+                                          <h6 class="dropdown-header text-primary fw-bold">🎓 Guided Page Tours / मार्गदर्शिका</h6>
+                                          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('master')">
+                                             <i class="uil-rocket me-2 text-primary"></i> <strong>Full Master Tour</strong> (11 steps)
+                                          </a>
+                                          <div class="dropdown-divider"></div>
+                                          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('add_filter')">
+                                             <i class="uil-search-plus me-2 text-info"></i> <strong>1. Add & Advance Filters</strong>
+                                          </a>
+                                          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('import_export')">
+                                             <i class="uil-export me-2 text-success"></i> <strong>2. Excel Import & Export</strong>
+                                          </a>
+                                          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('table_data')">
+                                             <i class="uil-table me-2 text-warning"></i> <strong>3. Table Data & Bulk Operations</strong>
+                                          </a>
+                                          <div class="dropdown-divider"></div>
+                                          <a class="dropdown-item py-1 text-muted cursor-pointer" (click)="resetTourStatus()">
+                                             <i class="uil-refresh me-2"></i> Reset Tour Progress
+                                          </a>
+                                       </div>
+
+                                    </div>
+                                </div>
                             </div>
+
                             <!-- <div class="col-2">
                         <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
                            aria-expanded="false"> Button 3 </button>
@@ -183,8 +203,12 @@
                                                         : ''}}</ng-option>
                                                 </ng-select>
                                                 <div class="form-check mt-1">
-                                                    <input type="checkbox" class="form-check-input" id="itemOnlyCheckawknew" [(ngModel)]="filterBody.itemOnly" name="itemOnly">
-                                                    <label class="form-check-label mb-0" for="itemOnlyCheckawknew" style="cursor: pointer;"><small class="text-info fw-bold">Item Only (Subitem is Null)</small></label>
+                                                    <input type="checkbox" class="form-check-input"
+                                                        id="itemOnlyCheckawknew" [(ngModel)]="filterBody.itemOnly"
+                                                        name="itemOnly">
+                                                    <label class="form-check-label mb-0" for="itemOnlyCheckawknew"
+                                                        style="cursor: pointer;"><small class="text-info fw-bold">Item
+                                                            Only (Subitem is Null)</small></label>
                                                 </div>
                                             </div>
                                         </div>
@@ -349,7 +373,18 @@
                     <div class="card-body" style="overflow: auto; flex-direction: column;">
                         <div class="row">
                             <div class="col-4 pt-2 d-flex align-items-center gap-1">
-                                <app-popover-year [selectedYear]="filterBody.year" (yearChanged)="yearClick($event)"></app-popover-year>
+                                <span id="tour-bulk-actions" class="d-inline-flex gap-1">
+                                    <span class="badge year-box cursor-pointer badge-outline-danger"
+                                        *ngIf="selectionService.getSelected('aawak-new').length > 0"
+                                        (click)="deleteMultiple()" title="Click to perform delete.">Delete
+                                        ({{selectionService.getSelected('aawak-new').length}})</span>
+                                    <span class="badge year-box cursor-pointer badge-outline-primary"
+                                        *ngIf="selectionService.getSelected('aawak-new').length > 0"
+                                        (click)="bulkEditMultiple()" title="Click to bulk edit.">Bulk Edit
+                                        ({{selectionService.getSelected('aawak-new').length}})</span>
+                                </span>
+                                <app-popover-year id="tour-year-badge" [selectedYear]="filterBody.year"
+                                    (yearChanged)="yearClick($event)"></app-popover-year>
                             </div>
                             <div class="col-8" *ngIf="aawakData.length">
                                 <pagination-controls class="pagi text-end" (pageChange)="getAawakPage(page = $event)"
@@ -357,7 +392,9 @@
                                 </pagination-controls>
                             </div>
                         </div>
-                        <div class="table-container" appHorizontalScrollWithArrows>
+                        <div class="table-container" appHorizontalScrollWithArrows [appTableSmartCheckbox]="'aawak-new'"
+                            [idField]="'temp_id'" [selectionData]="aawakData" [showCheckboxes]="true"
+                            [rowSelector]="'tbody > tr.main-row'">
                             <table id="datatable-buttons"
                                 class="table table-sm table-hover dt-responsive table-sticky-header" #TABLE
                                 *ngIf="aawakData.length">
@@ -373,14 +410,16 @@
                                         <th style="width: 110px;">Voucher No</th>
                                         <th style="width: 110px;" *ngIf="settings.aawak.pkt_num">Pkt No.</th>
                                         <th style="width: 140px;" class="text-start ps-2">
-                                          <div class="d-flex align-items-center justify-content-between">
-                                            <span>Date</span>
-                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
-                                              [isOpen]="!!filterBody.date" (clear)="filterBody.date = null; getFilteredData()"
-                                              triggerOn="hover">
-                                              <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date" (change)="getFilteredData()">
-                                            </app-popover-filter>
-                                          </div>
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>Date</span>
+                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                    direction="right" [isOpen]="!!filterBody.date"
+                                                    (clear)="filterBody.date = null; getFilteredData()"
+                                                    triggerOn="hover">
+                                                    <input type="date" class="form-control form-control-sm"
+                                                        [(ngModel)]="filterBody.date" (change)="getFilteredData()">
+                                                </app-popover-filter>
+                                            </div>
                                         </th>
                                         <th style="width: 250px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
                                         <th style="width: 250px;">Aawak Mm</th>
@@ -401,7 +440,7 @@
                                                     data-switch="none" (change)="hlChanged(data)" />
                                                 <label for="{{'hl_'+data._id}}" class="chk-sm"></label> -->
                                             </td>
-                                            <td>
+                                            <td [id]="i === 0 ? 'tour-row-manage' : null">
                                                 <div class="d-flex justify-content-between mb-1">
                                                     <button class="btn btn-sm btn-primary" type="button"
                                                         (click)="edit(data)"><i class="uil uil-pen"></i></button><br>
@@ -409,6 +448,7 @@
                                                         (click)="delete(i,data.voucher_no)" *ngIf="!data.is_auto_pd"><i
                                                             class="uil-trash"></i></button>
                                                 </div>
+
                                                 <!-- <div class="d-flex justify-content-between mb-1">
                                                     <button *ngIf="data.remaining_qty > 0" class="btn btn-sm btn-warning"
                                                         (click)="addJawak(data)">
@@ -454,8 +494,8 @@
                                         </tr>
                                         <ng-container *ngIf="data.aawaks && data.aawaks.length > 0">
                                             <tr class="collapse show ribbon-box">
-                                                <!-- <td style="border: none;"></td> -->
-                                                <td colspan="10" class="sub-row">
+                                                <td style="border: none;"></td>
+                                                <td colspan="100" class="sub-row">
                                                     <table
                                                         class="table-sm table-bordered table-hover dt-responsive w-100">
                                                         <tr class="aawak-header">

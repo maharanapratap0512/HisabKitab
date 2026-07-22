@@ -14,7 +14,7 @@
             <div class="row">
                <div class="card-body">
                   <div class="row d-flex justify-content-between">
-                     <div class="col-2">
+                     <div class="col-2" id="tour-add-aawak-btn">
                         <button *ngIf="!bunch_entry" class="btn btn-primary w-100" (click)="openModal('Add Aawak')">
                            <i class="dripicons-plus h4 icon-mx-2"> </i> Aawak
                         </button>
@@ -22,21 +22,21 @@
                            (click)="openModal('Add Bunch Aawak')">
                            <i class="dripicons-plus h4 icon-mx-2"> </i> Aawak
                         </button>
-                        <div class="form-check form-checkbox-primary">
+                        <div class="form-check form-checkbox-primary" id="tour-bunch-chk">
                            <input type="checkbox" class="form-check-input" id="chkAutoAwk" [(ngModel)]="bunch_entry">
                            <label class="form-check-label" for="chkAutoAwk">Bunch Entry</label>
                         </div>
                      </div>
                      <div class="col-3">
                         <div class="form-group">
-                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                              name="search">
+                           <input id="tour-search-input" type="text" class="form-control" placeholder="Search Here"
+                              [(ngModel)]="term" name="search">
                         </div>
                      </div>
                      <div class="col-2">
-                        <button class="btn btn-outline-info w-100" type="button" data-bs-toggle="collapse"
-                           data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i
-                              class="uil-search-plus h4 icon-mx-2"></i> Advance Search
+                        <button id="tour-adv-search-btn" class="btn btn-outline-info w-100" type="button"
+                           data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false"
+                           aria-controls="collapseExample"><i class="uil-search-plus h4 icon-mx-2"></i> Advance Search
                         </button>
                      </div>
                      <!-- <div class="col-3">
@@ -48,40 +48,44 @@
                      </div> -->
                      <div class="col-3 d-flex">
                         <div>
-                           <button *ngIf="!gs.importPending" class="file btn btn-success"
+                           <button id="tour-import-btn" *ngIf="!gs.importPending" class="file btn btn-success"
                               style="font-weight: 700 !important;">
                               <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                               <input type="file" class="inputtag"
                                  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                                  (change)="excelImport($event)" />
                            </button>
-                           <button *ngIf="gs.importPending" class="file btn btn-success" (click)="openModal('import')"
-                              style="font-weight: 700 !important;">
+                           <button id="tour-import-btn" *ngIf="gs.importPending" class="file btn btn-success"
+                              (click)="openModal('import')" style="font-weight: 700 !important;">
                               <i class="uil uil-arrow-to-bottom"></i> Import Aawak
                            </button>
                            <div></div>
                         </div>
 
                         <div>
-                           <button type="button" class="btn btn-outline-success dropdown-toggle mx-2"
-                              data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
-                           <div class="dropdown-menu">
-                              <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
-                              <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
-                              <a class="dropdown-item" (click)="exportJawakData()">Jawak Only</a>
-                              <a class="dropdown-item" (click)="exportPendingData()">Pending Destribution</a>
-                           </div>
-                           <div class="d-flex">
-                              <div class="form-check form-checkbox-primary ms-1"
-                                 title="click to merge item & subitem column">
-                                 <input type="checkbox" class="form-check-input" id="chkMergeIS"
-                                    [(ngModel)]="itemSubitemMerge">
-                                 <label class="form-check-label" for="chkMergeIS">Merge</label>
+                           <div id="tour-export-container">
+                              <button id="tour-export-btn" type="button"
+                                 class="btn btn-outline-success dropdown-toggle mx-2" data-bs-toggle="dropdown"
+                                 aria-expanded="false"> Export To Excel </button>
+                              <div class="dropdown-menu">
+                                 <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
+                                 <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
+                                 <a class="dropdown-item" (click)="exportJawakData()">Jawak Only</a>
+                                 <a class="dropdown-item" (click)="exportPendingData()">Pending Destribution</a>
                               </div>
-                              <div class="form-check form-checkbox-primary ms-1"
-                                 title="click to order by MM & category">
-                                 <input type="checkbox" class="form-check-input" id="chkOrderBy" [(ngModel)]="orderBy">
-                                 <label class="form-check-label" for="chkOrderBy">Sorting</label>
+                              <div class="d-flex" id="tour-merge-sort-container">
+                                 <div class="form-check form-checkbox-primary ms-1" id="tour-merge-chk"
+                                    title="click to merge item & subitem column">
+                                    <input type="checkbox" class="form-check-input" id="chkMergeIS"
+                                       [(ngModel)]="itemSubitemMerge">
+                                    <label class="form-check-label" for="chkMergeIS">Merge</label>
+                                 </div>
+                                 <div class="form-check form-checkbox-primary ms-1" id="tour-sort-chk"
+                                    title="click to order by MM & category">
+                                    <input type="checkbox" class="form-check-input" id="chkOrderBy"
+                                       [(ngModel)]="orderBy">
+                                    <label class="form-check-label" for="chkOrderBy">Sorting</label>
+                                 </div>
                               </div>
                            </div>
                         </div>
@@ -89,9 +93,46 @@
                      </div>
 
                      <div class="col-2">
-                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
-                           Count : {{total_count}}
-                        </button>
+                        <div class="d-flex">
+                           <button id="tour-total-count" type="button" style="font-weight: 700 !important;"
+                              class="btn btn-light w-100">Total
+                              Count : {{total_count}}
+                           </button>
+
+                           <!-- Tour Hub Menu Dropdown -->
+                           <div class="dropdown d-inline-block ms-1">
+                              <button type="button" class="btn btn-outline-primary dropdown-toggle px-2"
+                                 data-bs-toggle="dropdown" aria-expanded="false" title="Interactive Guided Tours">
+                                 <i class="uil-question-circle h4"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-end shadow-lg py-2"
+                                 style="min-width: 260px; z-index: 1050;">
+                                 <h6 class="dropdown-header text-primary fw-bold">🎓 Guided Page Tours</h6>
+                                 <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('master')">
+                                    <i class="uil-rocket me-2 text-primary"></i> <strong>Full Page Master Tour</strong>
+                                    (17 steps)
+                                 </a>
+                                 <div class="dropdown-divider"></div>
+                                 <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('add_filter')">
+                                    <i class="uil-search-plus me-2 text-info"></i> <strong>1. Add & Advance
+                                       Filters</strong>
+                                 </a>
+                                 <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('import_export')">
+                                    <i class="uil-export me-2 text-success"></i> <strong>2. Excel Import &
+                                       Export</strong>
+                                 </a>
+                                 <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('table_data')">
+                                    <i class="uil-table me-2 text-warning"></i> <strong>3. Table Data & Bulk
+                                       Operations</strong>
+                                 </a>
+                                 <div class="dropdown-divider"></div>
+                                 <a class="dropdown-item py-1 text-muted cursor-pointer" (click)="resetTourStatus()">
+                                    <i class="uil-refresh me-2"></i> Reset Tour Progress
+                                 </a>
+                              </div>
+
+                           </div>
+                        </div>
                         <button *ngIf="selectionService.getSelected('aawak').length" type="button"
                            style="font-weight: 700 !important;" class="btn btn-danger w-100 mt-1">
                            Selected : {{selectionService.getSelected('aawak').length}}
@@ -182,7 +223,7 @@
                                     <label class="form-label">Item & Subitem</label>
                                     <app-item-dropdown [items]="items" [(ngModel)]="selectedItemmix" [multiple]="true"
                                        [closeOnSelect]="false" name="item_id"></app-item-dropdown>
-                                    <div class="form-check mt-1">
+                                    <div class="form-check mt-1" id="tour-item-only-chk">
                                        <input type="checkbox" class="form-check-input" id="itemOnlyCheckawk"
                                           [(ngModel)]="filterBody.itemOnly" name="itemOnly">
                                        <label class="form-check-label mb-0" for="itemOnlyCheckawk"
@@ -313,14 +354,16 @@
                                     </ng-select>
                                  </div>
                               </div>
-                              <div class="col-md-3 mb-3 text-center">
-                                 <button class="btn btn-primary submit mx-2" type="submit"
-                                    (click)="getFilteredAawakData()">Filter Aawak</button>
+                              <div class="col-md-3 mb-3 text-center d-flex justify-content-center align-items-center">
+                                 <div id="tour-filter-action-btns" class="d-inline-flex gap-2 pt-3">
+                                    <button class="btn btn-primary px-3 py-2" type="submit"
+                                       (click)="getFilteredAawakData()">Filter Aawak</button>
 
-                                 <button class="btn btn-primary submit mx-2" type="submit"
-                                    (click)="getFilteredJawakData()">Filter Jawak</button>
-                                 <!-- (click)="filterFormSubmit(filterForm.value)">Submit</button> -->
+                                    <button class="btn btn-primary px-3 py-2" type="submit"
+                                       (click)="getFilteredJawakData()">Filter Jawak</button>
+                                 </div>
                               </div>
+
                               <div class="col-md-2 mb-3 text-center">
                                  <button class="btn btn-outline-secondary submit mx-2" type="button" (click)="filterBody= {
                                  type:'aawak',
@@ -353,12 +396,16 @@
 
                <div class="card-body" style="overflow: auto; flex-direction: column;">
                   <div class="row">
-                     <div class="col-4 pt-2 d-flex align-items-center gap-1">
-                        <span class="badge year-box cursor-pointer"
-                           [ngClass]="{'badge-outline-danger':!isDeleting, 'bg-danger': isDeleting}"
-                           (click)="deleteMultiple()"
-                           title="Click for multiple delete selection & click same again to perform delete.">Delete</span>
-                        <app-popover-year [selectedYear]="filterBody.year"
+                     <div class="col-4 pt-2 d-flex align-items-center gap-1" id="tour-bulk-actions">
+                        <span class="badge year-box cursor-pointer badge-outline-danger"
+                           *ngIf="selectionService.getSelected('aawak').length > 0" (click)="deleteMultiple()"
+                           title="Click to perform delete.">Delete
+                           ({{selectionService.getSelected('aawak').length}})</span>
+                        <span class="badge year-box cursor-pointer badge-outline-primary"
+                           *ngIf="selectionService.getSelected('aawak').length > 0" (click)="bulkEditMultiple()"
+                           title="Click to bulk edit.">Bulk Edit
+                           ({{selectionService.getSelected('aawak').length}})</span>
+                        <app-popover-year id="tour-year-badge" [selectedYear]="filterBody.year"
                            (yearChanged)="yearClick($event)"></app-popover-year>
                      </div>
                      <div class="col-8" *ngIf="aawakData.length">
@@ -368,18 +415,12 @@
                      </div>
                   </div>
                   <div class="table-container" appHorizontalScrollWithArrows [appTableSmartCheckbox]="'aawak'"
-                     [selectionData]="aawakData" [showCheckboxes]="isDeleting">
+                     [selectionData]="aawakData" [showCheckboxes]="true" [rowSelector]="'tbody > tr.main-row'">
                      <table id="datatable-buttons" class="table table-hover dt-responsive table-sticky-header" #TABLE
                         *ngIf="aawakData.length">
                         <thead>
                            <tr>
-                              <th style="width: 25px;" *ngIf="isDeleting">
-                                 <div class="form-check form-checkbox-danger mb-2">
-                                    <input type="checkbox" class="form-check-input" id="customCheckcolor5"
-                                       (change)="deleteSelectAll()">
-                                 </div>
-                              </th>
-                              <th style="width: 50px;">
+                              <th style="width: 50px;" id="tour-hl-switch">
                                  No.
                                  <input type="checkbox" id="hl_all" data-switch="none"
                                     (change)="hlFilter($event.target)" />
@@ -427,20 +468,15 @@
                               <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
                                  [ngClass]="{'auto':data.is_auto_pd, 'xl':data.is_xl, 'hl':data.hl}"
                                  aria-expanded="true" [attr.aria-controls]="'collapseExample-'+i" class="main-row">
-                                 <td *ngIf="isDeleting">
-                                    <div class="form-check form-checkbox-danger mb-2">
-                                       <input type="checkbox" [(ngModel)]="data.delete" class="form-check-input"
-                                          (change)="deleteSelection(i, data._id)">
-                                       <!-- <label class="form-check-label" for="customCheckcolor5">Danger Checkbox</label> -->
-                                    </div>
-                                 </td>
                                  <td>
                                     {{itemsPerPage * (page-1) + i+1}}
                                     <input type="checkbox" [(ngModel)]="data.hl" id="{{'hl_'+data._id}}"
                                        data-switch="none" (change)="hlChanged(data)" />
-                                    <label for="{{'hl_'+data._id}}" class="chk-sm"></label>
+                                    <label [id]="i === 0 ? 'tour-row-hl-switch' : null" for="{{'hl_'+data._id}}"
+                                       class="chk-sm"></label>
                                  </td>
-                                 <td>
+                                 <td [id]="i === 0 ? 'tour-row-manage' : null">
+
                                     <div class="d-flex justify-content-between mb-1">
                                        <button class="btn btn-sm btn-primary" type="button" (click)="edit(data)"><i
                                              class="uil uil-pen"></i></button><br>
@@ -565,7 +601,7 @@
                               <ng-container *ngIf="data.jawak_detail.length > 0">
                                  <tr class="collapse show ribbon-box">
                                     <td style="border: none;"></td>
-                                    <td colspan="11" class="sub-row">
+                                    <td colspan="10" class="sub-row">
                                        <table class="card-body" style="width: 99.7%;table-layout: fixed;">
                                           <tr>
                                              <th>No.</th>

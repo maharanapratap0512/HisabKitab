@@ -9,6 +9,9 @@ import Swal from 'sweetalert2';
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { forkJoin } from 'rxjs';
+import { SelectionService } from '../services/selection.service';
+import { TourService } from '../services/tour.service';
+import { PRASTAV_TOUR_CONFIG } from './prastav.tour';
 
 declare var $: any;
 
@@ -49,9 +52,30 @@ export class PrastavComponent implements OnInit {
     public http: HttpService,
     public gs: GlobalService,
     public auth: AuthService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    public selectionService: SelectionService,
+    private tourService: TourService
   ) {
   }
+
+  startTour(tourType: string = 'master') {
+    if (tourType === 'master') {
+      this.tourService.startTour(PRASTAV_TOUR_CONFIG);
+    } else {
+      const miniTour = PRASTAV_TOUR_CONFIG.miniTours?.find((m) => m.id === tourType);
+      if (miniTour) {
+        this.tourService.startTour(PRASTAV_TOUR_CONFIG, miniTour.stepIndexes);
+      } else {
+        this.tourService.startTour(PRASTAV_TOUR_CONFIG);
+      }
+    }
+  }
+
+  resetTourStatus() {
+    this.tourService.resetAllTours();
+    this.toastr.success('Tour progress reset successfully!', 'Guided Tour');
+  }
+
 
   UISettingsChanged() {
     this.auth.webUser.settings = this.settings;
@@ -122,9 +146,10 @@ export class PrastavComponent implements OnInit {
     // 1. Group by Voucher for Voucher Mode
     const vGroups = new Map();
     this.prastavs.forEach(p => {
-      const vKey = p.voucher_no || 'v_none_' + Math.random();
+      const vKey = p.voucher_no || 'temp_' + p._id;
       if (!vGroups.has(vKey)) {
         vGroups.set(vKey, {
+          _id: vKey,
           voucher_no: p.voucher_no,
           date: p.date,
           mm: p.mm,
@@ -153,6 +178,7 @@ export class PrastavComponent implements OnInit {
         if (item.jawaks && item.jawaks.length > 0) {
           item.jawaks.forEach((jawak: any, jIdx: number) => {
             vRows.push({
+              _id: item._id,
               item,
               jawak,
               iRowSpan,
@@ -163,6 +189,7 @@ export class PrastavComponent implements OnInit {
           });
         } else {
           vRows.push({
+            _id: item._id,
             item,
             jawak: null,
             iRowSpan,
@@ -424,6 +451,84 @@ export class PrastavComponent implements OnInit {
             }
           });
       }
+    });
+  }
+
+  deleteMultiple() {
+    let mode = this.settings.prastav.viewMode;
+    let context = mode === 'voucher' ? 'prastav-voucher' : 'prastav-individual';
+    let selectedIds = this.selectionService.getSelected(context);
+
+    if (selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one item to delete');
+      return;
+    }
+
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `You won't be able to revert this! You are about to delete ${selectedIds.length} ${mode === 'voucher' ? 'voucher(s)' : 'item(s)'}.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result: any) => {
+      if (result.isConfirmed) {
+        let s_count = 0;
+        for (let id of selectedIds) {
+          let res: any = mode === 'voucher' ? await this.fnDeleteVoucher(id) : await this.fnDeleteIndividual(id);
+          if (res) s_count += 1;
+        }
+        let msg = `${s_count} Deleted Successfully out of ${selectedIds.length}`;
+        this.selectionService.clear(context);
+        this.toastr.success(msg);
+      }
+    });
+  }
+
+  async fnDeleteVoucher(voucherNo: any) {
+    if (typeof voucherNo === 'string' && voucherNo.startsWith('temp_')) {
+      const vGroup = this.groupedVouchers.find((v: any) => v._id === voucherNo);
+      if (!vGroup) return false;
+      let successCount = 0;
+      for (let item of vGroup.items) {
+        let res = await this.fnDeleteIndividual(item._id);
+        if (res) successCount++;
+      }
+      return successCount > 0;
+    }
+
+    return new Promise((resolve) => {
+      const url = `${this.api.getUrl('PRASTAV')}/voucher/${voucherNo}`;
+      this.http.delete(url).subscribe((res: any) => {
+        if (res.success) {
+          // Remove all items for this voucher
+          this.prastavs = this.prastavs.filter(p => p.voucher_no !== voucherNo);
+          this.processData();
+          resolve(true);
+        } else {
+          this.toastr.error('Delete failed!');
+          resolve(false);
+        }
+      }, () => resolve(false));
+    });
+  }
+
+  async fnDeleteIndividual(id: any) {
+    return new Promise((resolve) => {
+      this.http.delete(this.api.getUrl('PRASTAV') + id).subscribe((data: any) => {
+        if (data.success) {
+          const idx = this.prastavs.findIndex(p => p._id === id);
+          if (idx !== -1) {
+            this.prastavs.splice(idx, 1);
+            this.processData();
+          }
+          resolve(true);
+        } else {
+          this.toastr.error('Delete failed');
+          resolve(false);
+        }
+      }, () => resolve(false));
     });
   }
 

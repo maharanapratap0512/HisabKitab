@@ -4,32 +4,59 @@
       <h4 class="mb-0">HMP Batches</h4>
       <div class="col-4">
         <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term" name="search">
+          <input id="tour-search-input" type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term" name="search">
         </div>
       </div>
       <div class="page-title-right d-flex gap-2">
-        <app-popover-filter [btnOutline]="false" iconClass="dripicons-gear" direction="left" [showClearButton]="false"
-          triggerOn="hover">
-          <ul class="list-unstyled p-2 mb-0">
-            <li>
-              <h5 class="fs-6 mb-2">डाटा टेबल मोड</h5>
-              <div class="d-flex justify-content-between gap-3">
-                <div class="form-check form-radio-info mb-0">
-                  <input type="radio" [value]="'individual'" [(ngModel)]="settings.hmp.viewMode"
-                    class="form-check-input" (change)="UISettingsChanged()" name="viewMode" id="viewSingle">
-                  <label class="form-check-label fs-7" for="viewSingle">Individual</label>
+        <div id="tour-view-mode">
+          <app-popover-filter [btnOutline]="false" iconClass="dripicons-gear" direction="left" [showClearButton]="false"
+            triggerOn="hover">
+            <ul class="list-unstyled p-2 mb-0">
+              <li>
+                <h5 class="fs-6 mb-2">डाटा टेबल मोड</h5>
+                <div class="d-flex justify-content-between gap-3">
+                  <div class="form-check form-radio-info mb-0">
+                    <input type="radio" [value]="'individual'" [(ngModel)]="settings.hmp.viewMode"
+                      class="form-check-input" (change)="UISettingsChanged()" name="viewMode" id="viewSingle">
+                    <label class="form-check-label fs-7" for="viewSingle">Individual</label>
+                  </div>
+                  <div class="form-check form-radio-info mb-0">
+                    <input type="radio" [value]="'voucher'" [(ngModel)]="settings.hmp.viewMode" class="form-check-input"
+                      (change)="UISettingsChanged()" name="viewMode" id="viewVoucher">
+                    <label class="form-check-label fs-7" for="viewVoucher">Voucher Wise</label>
+                  </div>
                 </div>
-                <div class="form-check form-radio-info mb-0">
-                  <input type="radio" [value]="'voucher'" [(ngModel)]="settings.hmp.viewMode" class="form-check-input"
-                    (change)="UISettingsChanged()" name="viewMode" id="viewVoucher">
-                  <label class="form-check-label fs-7" for="viewVoucher">Voucher Wise</label>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </app-popover-filter>
-        <button class="btn btn-primary btn-sm" (click)="openEntryModal()">+ Add HMP</button>
+              </li>
+            </ul>
+          </app-popover-filter>
+        </div>
+        <button id="tour-add-hmp-btn" class="btn btn-primary btn-sm" (click)="openEntryModal()">+ Add HMP</button>
+
+        <!-- Tour Hub Menu Dropdown -->
+        <div class="dropdown d-inline-block ms-1">
+           <button type="button" class="btn btn-outline-primary dropdown-toggle px-2 btn-sm" data-bs-toggle="dropdown" aria-expanded="false" title="Interactive Guided Tours">
+              <i class="uil-question-circle h4"></i>
+           </button>
+           <div class="dropdown-menu dropdown-menu-end shadow-lg py-2" style="min-width: 260px; z-index: 1050;">
+              <h6 class="dropdown-header text-primary fw-bold">🎓 Guided Page Tours / मार्गदर्शिका</h6>
+              <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('master')">
+                 <i class="uil-rocket me-2 text-primary"></i> <strong>Full Master Tour</strong> (8 steps)
+              </a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('add_filter')">
+                 <i class="uil-search-plus me-2 text-info"></i> <strong>1. Settings & Filters / फ़िल्टर गाइड</strong>
+              </a>
+              <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('table_data')">
+                 <i class="uil-table me-2 text-warning"></i> <strong>2. Export & Table Features / टेबल फ़ीचर्स</strong>
+              </a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item py-1 text-muted cursor-pointer" (click)="resetTourStatus()">
+                 <i class="uil-refresh me-2"></i> Reset Tour Progress
+              </a>
+           </div>
+        </div>
       </div>
+
     </div>
   </div>
 </div>
@@ -47,10 +74,10 @@
               *ngIf="settings.hmp.viewMode === 'voucher'" title="Toggle Expand All">
               <i class="uil" [ngClass]="expandAll ? 'uil-compress-arrows' : 'uil-expand-arrows'"></i>
             </button>
-            <app-popover-year [selectedYear]="filterBody.year" (yearChanged)="yearChanged($event)"></app-popover-year>
+            <app-popover-year id="tour-year-badge" [selectedYear]="filterBody.year" (yearChanged)="yearChanged($event)"></app-popover-year>
           </div>
           <!-- Filter Options -->
-          <div class="col-1 d-flex align-items-center gap-2">
+          <div class="col-1 d-flex align-items-center gap-2" id="tour-popover-filter">
             <app-popover-filter label="Filter" iconClass="uil uil-filter" direction="auto" (clear)="clearFilter()"
               clearButtonLabel="Clear Filter" triggerOn="hover">
               <div style="width: 300px;">
@@ -81,22 +108,29 @@
               </div>
             </app-popover-filter>
           </div>
-          <div class="col-2 pt-2">
-            <button type="button" class="badge badge-outline-success dropdown-toggle year-box mx-2 w-100"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              Export To <span *ngIf="getSelectedCount() > 0">({{getSelectedCount()}} selected)</span>
-            </button>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" (click)="exportToExcel()" style="cursor: pointer;">Excel (With Destribution)</a>
-              <a class="dropdown-item" (click)="exportToPdf('normal')" style="cursor: pointer;">Pdf (Normal)</a>
-              <a class="dropdown-item" (click)="exportToPdf('advance')" style="cursor: pointer;"
-                [class.disabled]="getSelectedCount() === 0">Pdf (Advance Layout)</a>
+          <div class="col-3 pt-2 d-flex align-items-center gap-2" id="tour-export-container">
+            <div class="dropdown">
+              <button type="button" class="badge badge-outline-success dropdown-toggle year-box"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                Export To <span *ngIf="selection.getSelected('hmp').length > 0">({{selection.getSelected('hmp').length}} selected)</span>
+              </button>
+
+              <div class="dropdown-menu">
+                <a class="dropdown-item" (click)="exportToExcel()" style="cursor: pointer;">Excel (With Destribution)</a>
+                <a class="dropdown-item" (click)="exportToPdf('normal')" style="cursor: pointer;">Pdf (Normal)</a>
+                <a class="dropdown-item" (click)="exportToPdf('advance')" style="cursor: pointer;"
+                  [class.disabled]="selection.getSelected('hmp').length === 0">Pdf (Advance Layout)</a>
+              </div>
             </div>
+            <span class="badge year-box cursor-pointer badge-outline-danger"
+               *ngIf="selection.getSelected('hmp').length > 0"
+               (click)="deleteMultiple()"
+               title="Click to perform delete.">Delete ({{selection.getSelected('hmp').length}})</span>
           </div>
           <div class="col-1 pt-2 text-center">
             <span>Total - {{total_count}}</span>
           </div>
-          <div class="col-5" *ngIf="batches.length">
+          <div class="col-4" *ngIf="batches.length">
             <pagination-controls class="pagi text-end" (pageChange)="getHmpPage(page = $event)" [autoHide]="true">
             </pagination-controls>
           </div>
@@ -115,7 +149,7 @@
                 <div class="d-flex align-items-center me-2" (click)="$event.stopPropagation();">
                   <input type="checkbox" class="form-check-input mt-0"
                     style="width: 16px; height: 16px; border-color: rgba(255,255,255,0.6);"
-                    [checked]="isSelected(batch._id)" (change)="toggleSelection(batch._id)">
+                    [checked]="selection.isSelected('hmp', batch._id)" (change)="selection.toggle('hmp', batch._id)">
                 </div>
                 <div class="w-100 d-flex align-items-center justify-content-between pe-3">
                   <div class="d-flex align-items-center gap-3 flex-wrap fs-7">
@@ -129,7 +163,7 @@
                     <span style="opacity: 0.4;">|</span>
                     <span>{{batch.mm?.mm_hin}} · {{batch.mm?.mm_eng}}</span>
                   </div>
-                  <div class="d-flex align-items-center gap-2">
+                  <div class="d-flex align-items-center gap-2" id="tour-hmp-manage">
                     <span class="badge py-1 px-2" *ngIf="batch.status === 'completed'"
                       [ngClass]="{'bg-success': batch.status === 'completed', 'bg-warning': batch.status === 'pending'}">
                       {{batch.status}}
@@ -149,7 +183,7 @@
               <div class="accordion-body p-0">
                 <div class="row g-0">
                   <!-- Inputs Table -->
-                  <div class="col-md-6" style="border-right: 1px solid #2e3250;">
+                  <div class="col-md-6" id="tour-hmp-inputs" style="border-right: 1px solid #2e3250;">
                     <div class="d-flex align-items-center px-2"
                       style="height: 25px; background: #162d50; color: #7ab3ff; border-left: 3px solid #4a9eff; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">
                       ⬇ &nbsp; INPUT MATERIALS
@@ -195,7 +229,8 @@
                   </div>
 
                   <!-- Outputs Table -->
-                  <div class="col-md-6">
+                  <div class="col-md-6" id="tour-hmp-outputs">
+
                     <div class="d-flex align-items-center px-2"
                       style="height: 25px; background: #132a14; color: #7de07d; border-left: 3px solid #4caf50; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">
                       ⬆ &nbsp; OUTPUT PRODUCTS
@@ -280,7 +315,7 @@
             <thead>
               <tr>
                 <th style="width: 40px; text-align: center; vertical-align: middle;">
-                  <input type="checkbox" class="form-check-input" [checked]="isAllSelected()"
+                  <input type="checkbox" class="form-check-input" [checked]="batches.length > 0 && selection.getSelected('hmp').length === batches.length"
                     (change)="toggleSelectAll($event)">
                 </th>
                 <th style="min-width: 50px;">#</th>
@@ -305,8 +340,8 @@
                   <td
                     [attr.rowspan]="(batch.inputs?.length || 1) + (batch.outputs?.length > 0 ? batch.outputs.length : 0)"
                     style="vertical-align: middle; text-align: center; border-right: 1px solid #2e3250;">
-                    <input type="checkbox" class="form-check-input" [checked]="isSelected(batch._id)"
-                      (change)="toggleSelection(batch._id)">
+                    <input type="checkbox" class="form-check-input" [checked]="selection.isSelected('hmp', batch._id)"
+                      (change)="selection.toggle('hmp', batch._id)">
                   </td>
                   <td
                     [attr.rowspan]="(batch.inputs?.length || 1) + (batch.outputs?.length > 0 ? batch.outputs.length : 0)"

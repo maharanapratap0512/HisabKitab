@@ -21,6 +21,7 @@
     "@ng-select/ng-select": "^11.1.0",
     "@types/wicg-file-system-access": "^2023.10.4",
     "angular-ng-autocomplete": "^2.0.12",
+    "driver.js": "^1.8.0",
     "exceljs": "^4.3.0",
     "file-saver": "^2.0.5",
     "hammerjs": "^2.0.8",

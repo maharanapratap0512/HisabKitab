@@ -11,6 +11,9 @@ import * as XLSX from 'xlsx';
 import { AuthService } from '../services/auth.service';
 import { ExcelExportService } from '../services/excel-export.service';
 import { observable, Observable, of, Subject } from 'rxjs';
+import { SelectionService } from '../services/selection.service';
+import { TourService } from '../services/tour.service';
+import { AAWAK_NEW_TOUR_CONFIG } from './aawak-new.tour';
 declare var $: any;
 
 @Component({
@@ -131,10 +134,31 @@ export class AawakNewComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public auth: AuthService,
     private excelExportService: ExcelExportService,
+    public selectionService: SelectionService,
+    private tourService: TourService
   ) {
     this.settings = this.auth.webUser.settings;
     this.currentYear = new Date().getFullYear();
   }
+
+  startTour(tourType: string = 'master') {
+    if (tourType === 'master') {
+      this.tourService.startTour(AAWAK_NEW_TOUR_CONFIG);
+    } else {
+      const miniTour = AAWAK_NEW_TOUR_CONFIG.miniTours?.find((m) => m.id === tourType);
+      if (miniTour) {
+        this.tourService.startTour(AAWAK_NEW_TOUR_CONFIG, miniTour.stepIndexes);
+      } else {
+        this.tourService.startTour(AAWAK_NEW_TOUR_CONFIG);
+      }
+    }
+  }
+
+  resetTourStatus() {
+    this.tourService.resetAllTours();
+    this.toastr.success('Tour progress reset successfully!', 'Guided Tour');
+  }
+
 
   ngOnInit(): void {
     this.spinner.show();
@@ -201,6 +225,7 @@ export class AawakNewComponent implements OnInit {
               }
             }
           }
+          this.aawakAll[i].temp_id = this.aawakAll[i].voucher_no || 'temp_' + i;
         }
         this.aawakData = this.aawakAll;
         this.total_count = data['total_count'];
@@ -265,6 +290,7 @@ export class AawakNewComponent implements OnInit {
               }
             }
           }
+          this.aawakAll[i].temp_id = this.aawakAll[i].voucher_no || 'temp_' + i;
         }
         this.aawakData = this.aawakAll;
         this.total_count = data['total_count'];
@@ -816,6 +842,66 @@ export class AawakNewComponent implements OnInit {
         }
       }
     })
+  }
+
+  deleteMultiple() {
+    let selectedIds = this.selectionService.getSelected('aawak-new');
+    if (selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one item to delete');
+      return;
+    }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `You won't be able to revert this! You are about to delete ${selectedIds.length} item(s).`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        let s_count = 0;
+        for (let temp_id of selectedIds) {
+          let res: any = await this.fnDelete(temp_id);
+          if (res) s_count += 1;
+        }
+        let msg = s_count + " Deleted Successfully out of " + selectedIds.length;
+        this.selectionService.clear('aawak-new');
+        this.toastr.success(msg);
+      }
+    });
+  }
+
+  bulkEditMultiple() {
+    let selectedIds = this.selectionService.getSelected('aawak-new');
+    if (selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one item to edit');
+      return;
+    }
+    this.toastr.info(`Bulk edit for ${selectedIds.length} items will be implemented next.`);
+  }
+
+  async fnDelete(temp_id: any) {
+    return new Promise(async (resolve, reject) => {
+      let index = this.aawakData.findIndex((x: any) => x.temp_id === temp_id);
+      if (index === -1) return reject(false);
+
+      let ids = await this.aawakData[index].aawaks.map((a: { _id: any; }) => a._id);
+      if (ids && ids.length > 0) {
+        this.http.delete(this.api.getUrl('AAWAK') + '/voucher/' + JSON.stringify(ids)).subscribe((data: any) => {
+          if (data['success']) {
+            this.aawakData.splice(index, 1);
+            this.total_count -= 1;
+            return resolve(true);
+          } else {
+            this.toastr.error(data['message']);
+            return reject(false);
+          }
+        }, (err) => reject(false));
+      } else {
+        return reject(false);
+      }
+    });
   }
 
   deleteOne(i: any, j: any, id: any) {

@@ -8,6 +8,9 @@ import { HttpService } from 'src/app/services/http.service';
 import Swal from 'sweetalert2';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormService } from 'src/app/services/form.service';
+import { SelectionService } from 'src/app/services/selection.service';
+import { TourService } from 'src/app/services/tour.service';
+import { JAWAK_NEW_TOUR_CONFIG } from './jawak-new.tour';
 declare var $: any;
 
 @Component({
@@ -24,13 +27,16 @@ export class JawakNewComponent implements OnInit {
   itemsPerPage = 100;
   totalItems: any;
 
-  isLoader = false;
+  isLoader: boolean = false;
   showModal = '';
   editData: any = null;
   editIndex: any = null;
   total_count: any = 0;
-  term: any = '';
+  term: any;
   loadingStatus: any = '';
+
+  
+  flatJawakItems: any[] = [];
   viewMode: 'voucher' | 'individual' = 'voucher';
 
   // Datasets
@@ -64,8 +70,29 @@ export class JawakNewComponent implements OnInit {
     private toastr: ToastrService,
     private spinner: NgxSpinnerService,
     public auth: AuthService,
-    public fs: FormService
+    public fs: FormService,
+    public selectionService: SelectionService,
+    private tourService: TourService
   ) { }
+
+  startTour(tourType: string = 'master') {
+    if (tourType === 'master') {
+      this.tourService.startTour(JAWAK_NEW_TOUR_CONFIG);
+    } else {
+      const miniTour = JAWAK_NEW_TOUR_CONFIG.miniTours?.find((m) => m.id === tourType);
+      if (miniTour) {
+        this.tourService.startTour(JAWAK_NEW_TOUR_CONFIG, miniTour.stepIndexes);
+      } else {
+        this.tourService.startTour(JAWAK_NEW_TOUR_CONFIG);
+      }
+    }
+  }
+
+  resetTourStatus() {
+    this.tourService.resetAllTours();
+    this.toastr.success('Tour progress reset successfully!', 'Guided Tour');
+  }
+
 
   ngOnInit(): void {
     this.spinner.show();
@@ -164,8 +191,11 @@ export class JawakNewComponent implements OnInit {
                 }
               }
             }
+            this.jawakAll[i].temp_id = this.jawakAll[i].voucher_no || 'temp_' + i;
+            this.jawakAll[i].expanded = this.expandAll;
           }
-          this.jawakData = [...this.jawakAll];
+          this.jawakData = this.jawakAll;
+          this.flatJawakItems = this.jawakData.reduce((acc: any[], row: any) => acc.concat(this.getFilteredJawaks(row.jawaks)), []);
           this.total_count = data['total_count'];
         }
         this.isLoader = false;
@@ -313,8 +343,9 @@ export class JawakNewComponent implements OnInit {
               }
             }
           }
+          this.jawakAll[i].temp_id = this.jawakAll[i].voucher_no || 'temp_' + i;
         }
-        this.jawakData = [...this.jawakAll];
+        this.jawakData = this.jawakAll;
         this.total_count = data['total_count'];
         this.isLoader = false;
       }
@@ -382,6 +413,98 @@ export class JawakNewComponent implements OnInit {
   }
 
 
+  deleteMultiple() {
+    let mode = this.settings.jawak.viewMode;
+    let context = mode === 'voucher' ? 'jawak-new-voucher' : 'jawak-new-individual';
+    let selectedIds = this.selectionService.getSelected(context);
+
+    if (selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one item to delete');
+      return;
+    }
+
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `You won't be able to revert this! You are about to delete ${selectedIds.length} ${mode === 'voucher' ? 'voucher(s)' : 'item(s)'}.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        let s_count = 0;
+        for (let id of selectedIds) {
+          let res: any = mode === 'voucher' ? await this.fnDeleteVoucher(id) : await this.fnDeleteIndividual(id);
+          if (res) s_count += 1;
+        }
+        let msg = `${s_count} Deleted Successfully out of ${selectedIds.length}`;
+        this.selectionService.clear(context);
+        this.toastr.success(msg);
+      }
+    });
+  }
+
+  bulkEditMultiple() {
+    let mode = this.settings.jawak.viewMode;
+    let context = mode === 'voucher' ? 'jawak-new-voucher' : 'jawak-new-individual';
+    let selectedIds = this.selectionService.getSelected(context);
+    if (selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one item to edit');
+      return;
+    }
+    this.toastr.info(`Bulk edit for ${selectedIds.length} items will be implemented next.`);
+  }
+
+  expandAll: boolean = true;
+
+  toggleExpandAll() {
+    this.expandAll = !this.expandAll;
+    this.jawakData.forEach(v => v.expanded = this.expandAll);
+  }
+
+  async fnDeleteVoucher(voucherNo: any) {
+    return new Promise((resolve, reject) => {
+      let index = this.jawakData.findIndex((x: any) => x.temp_id === voucherNo);
+      if (index === -1) return resolve(false);
+      let ids: any = JSON.stringify(this.jawakData[index].jawaks.map((j: { _id: any; }) => j._id));
+      this.http.delete(this.api.getUrl('JAWAK') + 'voucher/' + ids).subscribe((data: any) => {
+        if (data.success) {
+          this.jawakData.splice(index, 1);
+          this.flatJawakItems = this.jawakData.reduce((acc: any[], row: any) => acc.concat(this.getFilteredJawaks(row.jawaks)), []);
+          return resolve(true);
+        } else {
+          this.toastr.error(data.message || 'Error deleting.');
+          return resolve(false);
+        }
+      }, err => resolve(false));
+    });
+  }
+
+  async fnDeleteIndividual(id: any) {
+    return new Promise((resolve, reject) => {
+      this.http.delete(this.api.getUrl('JAWAK') + id).subscribe((data: any) => {
+        if (data.success) {
+          for (let i = 0; i < this.jawakData.length; i++) {
+            let j = this.jawakData[i].jawaks.findIndex((x: any) => x._id === id);
+            if (j !== -1) {
+              this.jawakData[i].jawaks.splice(j, 1);
+              if (this.jawakData[i].jawaks.length === 0) {
+                this.jawakData.splice(i, 1);
+              }
+              break;
+            }
+          }
+          this.flatJawakItems = this.jawakData.reduce((acc: any[], row: any) => acc.concat(this.getFilteredJawaks(row.jawaks)), []);
+          return resolve(true);
+        } else {
+          this.toastr.error(data.message || 'Error deleting record.');
+          return resolve(false);
+        }
+      }, err => resolve(false));
+    });
+  }
+
   deleteJawak(i: number, srNo: number): void {
     Swal.fire({
       title: 'Are you sure?',
@@ -399,6 +522,7 @@ export class JawakNewComponent implements OnInit {
           .subscribe((data: any) => {
             if (data.success) {
               this.jawakData.splice(i, 1);
+              this.flatJawakItems = this.jawakData.reduce((acc: any[], row: any) => acc.concat(this.getFilteredJawaks(row.jawaks)), []);
               this.toastr.success('Deleted Successfully');
             } else {
               this.toastr.error(data.message || 'Error deleting.');
@@ -423,6 +547,7 @@ export class JawakNewComponent implements OnInit {
           .subscribe((data: any) => {
             if (data.success) {
               this.jawakData[i].jawaks.splice(j, 1);
+              this.flatJawakItems = this.jawakData.reduce((acc: any[], row: any) => acc.concat(this.getFilteredJawaks(row.jawaks)), []);
               this.toastr.success('Deleted Successfully');
             } else {
               this.toastr.error(data.message || 'Error deleting record.');

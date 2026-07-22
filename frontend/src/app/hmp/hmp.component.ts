@@ -8,6 +8,8 @@ import { ToastrService } from 'ngx-toastr';
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { SelectionService } from '../services/selection.service';
+import { TourService } from '../services/tour.service';
+import { HMP_TOUR_CONFIG } from './hmp.tour';
 
 declare var $: any;
 
@@ -52,13 +54,33 @@ export class HmpComponent implements OnInit {
     public gs: GlobalService,
     public auth: AuthService,
     private toastr: ToastrService,
-    public selection: SelectionService
+    public selection: SelectionService,
+    private tourService: TourService
   ) {
     this.settings = auth.webUser.settings;
     if (!this.settings.hmp) {
       this.settings.hmp = { viewMode: 'voucher' };
     }
   }
+
+  startTour(tourType: string = 'master') {
+    if (tourType === 'master') {
+      this.tourService.startTour(HMP_TOUR_CONFIG);
+    } else {
+      const miniTour = HMP_TOUR_CONFIG.miniTours?.find((m) => m.id === tourType);
+      if (miniTour) {
+        this.tourService.startTour(HMP_TOUR_CONFIG, miniTour.stepIndexes);
+      } else {
+        this.tourService.startTour(HMP_TOUR_CONFIG);
+      }
+    }
+  }
+
+  resetTourStatus() {
+    this.tourService.resetAllTours();
+    this.toastr.success('Tour progress reset successfully!', 'Guided Tour');
+  }
+
 
   UISettingsChanged() {
     this.auth.webUser.settings = this.settings;
@@ -454,18 +476,47 @@ export class HmpComponent implements OnInit {
   }
 
 
-  isSelected(batchId: number): boolean {
-    return this.selection.isSelected('hmp', batchId);
+  deleteMultiple() {
+    let selectedIds = this.selection.getSelected('hmp');
+    if (selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one batch to delete');
+      return;
+    }
+
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `You won't be able to revert this! You are about to delete ${selectedIds.length} batch(es).`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result: any) => {
+      if (result.isConfirmed) {
+        let s_count = 0;
+        for (let id of selectedIds) {
+          let res: any = await new Promise((resolve) => {
+            this.http.delete(this.api.getUrl('HMP') + id).subscribe((data: any) => {
+              resolve(data.success);
+            }, () => resolve(false));
+          });
+          if (res) s_count += 1;
+        }
+        let msg = `${s_count} Deleted Successfully out of ${selectedIds.length}`;
+        this.selection.clear('hmp');
+        this.toastr.success(msg);
+        this.getBatches();
+      }
+    });
   }
 
-  toggleSelection(batchId: number) {
-    this.selection.toggle('hmp', batchId);
-  }
-
-  isAllSelected(): boolean {
-    if (!this.batches || this.batches.length === 0) return false;
-    const selected = this.selection.getSelected('hmp');
-    return this.batches.every((b: any) => selected.includes(b._id));
+  bulkEditMultiple() {
+    let selectedIds = this.selection.getSelected('hmp');
+    if (selectedIds.length === 0) {
+      this.toastr.warning('Please select at least one batch to edit');
+      return;
+    }
+    this.toastr.info(`Bulk edit for ${selectedIds.length} items will be implemented next.`);
   }
 
   toggleSelectAll(event: any) {
@@ -476,10 +527,6 @@ export class HmpComponent implements OnInit {
     } else {
       this.selection.deselectMany('hmp', ids);
     }
-  }
-
-  getSelectedCount(): number {
-    return this.selection.getSelected('hmp').length;
   }
 
   exportToPdf(exportType: 'normal' | 'advance' = 'normal') {
