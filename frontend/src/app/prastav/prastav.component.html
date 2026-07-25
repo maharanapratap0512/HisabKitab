@@ -56,26 +56,27 @@
 
     <!-- Tour Hub Menu Dropdown -->
     <div class="dropdown d-inline-block ms-1">
-       <button type="button" class="btn btn-outline-primary dropdown-toggle px-2" data-bs-toggle="dropdown" aria-expanded="false" title="Interactive Guided Tours">
-          <i class="uil-question-circle h4"></i>
-       </button>
-       <div class="dropdown-menu dropdown-menu-end shadow-lg py-2" style="min-width: 260px; z-index: 1050;">
-          <h6 class="dropdown-header text-primary fw-bold">🎓 Guided Page Tours / मार्गदर्शिका</h6>
-          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('master')">
-             <i class="uil-rocket me-2 text-primary"></i> <strong>Full Master Tour</strong> (8 steps)
-          </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('add_filter')">
-             <i class="uil-search-plus me-2 text-info"></i> <strong>1. Settings & Filters / फ़िल्टर गाइड</strong>
-          </a>
-          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('table_data')">
-             <i class="uil-table me-2 text-warning"></i> <strong>2. Export & Table Features / टेबल फ़ीचर्स</strong>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item py-1 text-muted cursor-pointer" (click)="resetTourStatus()">
-             <i class="uil-refresh me-2"></i> Reset Tour Progress
-          </a>
-       </div>
+      <button type="button" class="btn btn-outline-primary dropdown-toggle px-2" data-bs-toggle="dropdown"
+        aria-expanded="false" title="Interactive Guided Tours">
+        <i class="uil-question-circle h4"></i>
+      </button>
+      <div class="dropdown-menu dropdown-menu-end shadow-lg py-2" style="min-width: 260px; z-index: 1050;">
+        <h6 class="dropdown-header text-primary fw-bold">🎓 Guided Page Tours / मार्गदर्शिका</h6>
+        <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('master')">
+          <i class="uil-rocket me-2 text-primary"></i> <strong>Full Master Tour</strong> (8 steps)
+        </a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('add_filter')">
+          <i class="uil-search-plus me-2 text-info"></i> <strong>1. Settings & Filters / फ़िल्टर गाइड</strong>
+        </a>
+        <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('table_data')">
+          <i class="uil-table me-2 text-warning"></i> <strong>2. Export & Table Features / टेबल फ़ीचर्स</strong>
+        </a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item py-1 text-muted cursor-pointer" (click)="resetTourStatus()">
+          <i class="uil-refresh me-2"></i> Reset Tour Progress
+        </a>
+      </div>
     </div>
   </div>
 
@@ -89,13 +90,30 @@
       *ngIf="settings?.prastav?.viewMode === 'voucher'" title="Toggle Expand All">
       <i class="uil" [ngClass]="expandAll ? 'uil-compress-arrows' : 'uil-expand-arrows'"></i>
     </button>
-    <app-popover-year id="tour-year-badge" [selectedYear]="filterBody.year" (yearChanged)="yearClick($event)"></app-popover-year>
+    <app-popover-year id="tour-year-badge" [selectedYear]="filterBody.year"
+      (yearChanged)="yearClick($event)"></app-popover-year>
+
+    <!-- Month Filter -->
+    <app-popover-filter #monthPopover
+      [label]="filterBody.month ? 'Month: ' + getMonthName(filterBody.month) : 'Month: All'"
+      iconClass="uil uil-calendar-alt" direction="auto" [showClearButton]="false" triggerOn="hover"
+      [btnOutline]="!filterBody.month">
+      <div class="d-flex flex-wrap p-2 gap-2" style="width: 260px;">
+        <span class="badge year-box" style="font-size: 13px;"
+          [ngClass]="!filterBody.month ? 'bg-primary' : 'badge-outline-secondary'"
+          (click)="monthClick(null); monthPopover.closePopover()">All</span>
+        <span *ngFor="let m of months" class="badge year-box" style="font-size: 13px;"
+          [ngClass]="filterBody.month == m.value ? 'bg-primary' : 'badge-outline-secondary'"
+          (click)="monthClick(m.value); monthPopover.closePopover()">{{m.label}}</span>
+      </div>
+    </app-popover-filter>
   </div>
 
   <!-- Center: Export & Total Count -->
   <div class="col-md-6 d-flex justify-content-center align-items-center gap-4">
     <div class="btn-group" id="tour-export-container">
-      <button id="tour-export-btn" type="button" class="badge badge-outline-success dropdown-toggle year-box shadow-none border-success"
+      <button id="tour-export-btn" type="button"
+        class="badge badge-outline-success dropdown-toggle year-box shadow-none border-success"
         data-bs-toggle="dropdown" aria-expanded="false">
         Export To <i class="uil uil-file-download-alt ms-1"></i>
       </button>
@@ -109,9 +127,10 @@
     <div class="font-size-14 fw-bold text-dark d-flex align-items-center">
       Total Count : <span class="text-primary ms-1">{{total_count}}</span>
       <span class="badge year-box cursor-pointer badge-outline-danger ms-3"
-            *ngIf="selectionService.getSelected(settings.prastav.viewMode === 'voucher' ? 'prastav-voucher' : 'prastav-individual').length > 0"
-            (click)="deleteMultiple()"
-            title="Click to perform delete.">Delete ({{selectionService.getSelected(settings.prastav.viewMode === 'voucher' ? 'prastav-voucher' : 'prastav-individual').length}})</span>
+        *ngIf="selectionService.getSelected(settings.prastav.viewMode === 'voucher' ? 'prastav-voucher' : 'prastav-individual').length > 0"
+        (click)="deleteMultiple()" title="Click to perform delete.">Delete
+        ({{selectionService.getSelected(settings.prastav.viewMode === 'voucher' ? 'prastav-voucher' :
+        'prastav-individual').length}})</span>
     </div>
   </div>
 
@@ -127,13 +146,14 @@
 
     <!-- VOUCHER MODE -->
     <div *ngIf="settings.prastav.viewMode === 'voucher'">
-      <div class="table-responsive" style="overflow-y: auto; max-height: calc(100vh - 250px); min-height: 250px;">
-        <table class="table table-sm mb-0 border-0" style="border-collapse: separate; border-spacing: 0;" appTableSmartCheckbox="prastav-voucher" rowSelector=".sub-row" [selectionData]="groupedVouchers">
+      <div class="table-responsive" style="overflow-y: auto; max-height: calc(100vh - 200px); min-height: 250px;">
+        <table class="table table-sm mb-0 border-0"
+          style="min-width: 1700px; border-collapse: separate; border-spacing: 0;"
+          appTableSmartCheckbox="prastav-voucher" rowSelector=".sub-row" [selectionData]="groupedVouchers">
           <thead class="table-dark" style="position: sticky; top: 0; z-index: 10;">
             <tr class="font-size-11 text-uppercase letter-spacing-1 text-center align-middle">
               <th style="width: 40px;" class="py-2">#</th>
               <th style="width: 100px;" class="py-2">Manage</th>
-              <th style="width: 100px;" class="py-2">Voucher #</th>
               <th style="width: 140px;" class="py-2 text-start ps-3" id="tour-col-filter-date">
                 <div class="d-flex align-items-center justify-content-between">
                   <span>Date</span>
@@ -213,6 +233,7 @@
               </th>
               <th style="width: 80px;" class="py-2">Items</th>
               <th style="width: 100px;" class="py-2 text-end pe-3">Amount</th>
+              <th style="min-width: 120px;" class="py-2 text-start ps-3">Reject Rsn</th>
             </tr>
           </thead>
           <tbody style="font-size: 0.86rem;">
@@ -221,7 +242,8 @@
               <!-- LEVEL 1: Voucher Row -->
               <tr class="align-middle text-center cursor-pointer sub-row border-bottom"
                 (click)="v.expanded = !v.expanded"
-                [style.background]="v.expanded ? 'rgba(var(--thead-accent-color-rgb), 0.08)' : 'transparent'" [attr.data-id]="v._id">
+                [style.background]="v.expanded ? 'rgba(var(--thead-accent-color-rgb), 0.08)' : 'transparent'"
+                [attr.data-id]="v._id">
                 <td class="py-2 fw-bold opacity-50">{{ (page - 1) * itemsPerPage + vIdx + 1 }}</td>
                 <td class="py-2" [id]="vIdx === 0 ? 'tour-row-manage' : null" (click)="$event.stopPropagation()">
                   <div class="d-flex justify-content-center gap-2">
@@ -234,8 +256,7 @@
                   </div>
                 </td>
 
-                <td class="py-2 fw-bold text-primary font-size-13">#{{v.voucher_no || '-'}}</td>
-                <td class="py-2 opacity-85 font-size-12 fw-medium text-dark">{{v.date | date:'dd-MM-yyyy'}}</td>
+                <td class="py-2 opacity-85 font-size-12 fw-medium text-dark">{{v.date | date:'dd-MMM-yy'}}</td>
 
                 <td class="py-2 text-start ps-3">
                   <div class="fw-bold font-size-12 text-dark d-flex align-items-center justify-content-between pe-1">
@@ -267,6 +288,19 @@
                 <td class="py-2 text-end pe-3 fw-bold text-dark font-size-14">
                   ₹{{v.totalAmount | number:'1.0-0'}}
                 </td>
+                <td class="py-2 text-start ps-3" (click)="$event.stopPropagation()">
+                  <div class="d-flex align-items-start gap-2">
+                    <div class="form-check m-0" title="Reject Prastav">
+                      <input class="form-check-input cursor-pointer border-danger" type="checkbox"
+                        [checked]="v.is_rejected" (change)="onRejectVoucherToggle(v, $event)"
+                        [name]="'v_reject_' + vIdx">
+                    </div>
+                    <div class="text-danger font-size-11 fw-medium text-wrap"
+                      style="max-width: 120px; line-height: 1.2;">
+                      {{v.reject_reason || ''}}
+                    </div>
+                  </div>
+                </td>
               </tr>
 
               <!-- LEVEL 2 & 3: Integrated Internal Table -->
@@ -277,18 +311,22 @@
                     <thead>
                       <tr>
                         <th style="width: 35px;" class="ps-2">Sr</th>
-                        <th style="width: 70px;">Act</th>
-                        <th>Item-Subitem</th>
-                        <th style="width: 90px;">Qty</th>
-                        <th style="width: 80px;">Rate</th>
-                        <th style="width: 100px;">Amount</th>
-                        <th style="width: 85px;">Jwk Date</th>
-                        <th style="min-width: 120px;">कहाँ से भेजा</th>
-                        <th style="min-width: 120px;">किसके द्वारा</th>
-                        <th style="width: 70px;">J-Qty</th>
-                        <th style="width: 70px;">J-Rate</th>
-                        <th style="width: 80px;">J-Amount</th>
-                        <th style="width: 75px;">
+                        <th class="text-nowrap" style="width: 70px;">Act</th>
+                        <th class="text-nowrap" style="min-width: 250px;">Item-Subitem</th>
+                        <th class="text-nowrap" style="width: 90px;">Qty</th>
+                        <th class="text-nowrap" style="width: 80px;">Rate</th>
+                        <th class="text-nowrap" style="width: 100px;">Amount</th>
+                        <th class="text-nowrap" style="width: 85px;">Jwk Date</th>
+                        <th class="text-nowrap" style="min-width: 120px;">कहाँ से भेजा</th>
+                        <th class="text-nowrap" style="min-width: 120px;">किसके द्वारा</th>
+                        <th class="text-nowrap" style="width: 80px;">Pack Dt</th>
+                        <th class="text-nowrap" style="width: 70px;">Pkt #</th>
+                        <th class="text-nowrap" style="width: 80px;">Rcv Dt</th>
+                        <th class="text-nowrap" style="min-width: 130px;">Review</th>
+                        <th class="text-nowrap" style="width: 70px;">J-Qty</th>
+                        <th class="text-nowrap" style="width: 70px;">J-Rate</th>
+                        <th class="text-nowrap" style="width: 80px;">J-Amount</th>
+                        <th class="text-nowrap" style="width: 75px;">
                           <div class="d-flex align-items-center justify-content-between">
                             <span>Status</span>
                             <i *ngIf="hasJawaks(v)" class="uil cursor-pointer font-size-13 ms-1"
@@ -318,8 +356,7 @@
                             <td [attr.rowspan]="vr.iRowSpan" class="text-start ps-3 py-0 border-end">
                               <div class="fw-bold text-dark lh-1 mt-1">{{vr.item.item?.item_hin || vr.item.item_id}}
                               </div>
-                              <div class="font-size-9 opacity-50 pb-1"
-                                *ngIf="vr.item.subitem?.subitem_hin">
+                              <div class="font-size-9 opacity-50 pb-1" *ngIf="vr.item.subitem?.subitem_hin">
                                 ({{vr.item.subitem?.subitem_hin}})</div>
                             </td>
                             <td [attr.rowspan]="vr.iRowSpan" class="fw-bold py-0 border-end"
@@ -337,15 +374,35 @@
 
                           <!-- JAWAK COLUMNS -->
                           <ng-container *ngIf="vr.jawak; else emptyJawakCompact">
-                            <td class="border-end text-primary" style="font-size: 0.78rem;">
+                            <td class="border-end text-primary text-nowrap" style="font-size: 0.78rem;">
                               {{vr.jawak.date
                               |
-                              date:'dd-MMM'}}</td>
+                              date:'dd-MMM-yy'}}</td>
                             <td class="text-start border-end text-success">
                               {{vr.jawak.source_mm?.mm_hin}}
                             </td>
                             <td class="text-start border-end" style="max-width: 100px;">
                               {{vr.jawak.kiske_dwara || '-'}}</td>
+                            <td class="border-end text-muted text-nowrap" style="font-size: 0.78rem;">
+                              {{ (vr.jawak.packing_date | date:'dd-MMM-yy') || '-' }}
+                            </td>
+                            <td class="border-end text-muted">{{vr.jawak.pkt_no || '-'}}</td>
+                            <td class="border-end text-muted text-nowrap" style="font-size: 0.78rem;">
+                              {{ (vr.jawak.received_date | date:'dd-MMM-yy') || '-' }}
+                            </td>
+                            <td class="text-start border-end">
+                              <div *ngIf="vr.jawak.review !== undefined && vr.jawak.review !== null">
+                                <span class="badge" [ngClass]="vr.jawak.review ? 'bg-success' : 'bg-danger'">
+                                  {{vr.jawak.review ? 'Satisfied' : 'Unsatisfied'}}
+                                </span>
+                                <div class="font-size-9 text-danger mt-1 text-wrap lh-1" style="max-width: 120px;"
+                                  *ngIf="!vr.jawak.review && vr.jawak.review_reason">
+                                  {{vr.jawak.review_reason}}
+                                </div>
+                              </div>
+                              <div *ngIf="vr.jawak.review === undefined || vr.jawak.review === null"
+                                class="text-muted opacity-50 font-size-10">-</div>
+                            </td>
                             <td class="border-end fw-bold">{{vr.jawak.qty}}</td>
                             <td class="border-end text-muted">₹{{vr.jawak.rate || '-'}}</td>
                             <td class="border-end fw-bold text-theme">₹{{vr.jawak.amount || '-'}}</td>
@@ -357,7 +414,7 @@
                             </td>
                           </ng-container>
                           <ng-template #emptyJawakCompact>
-                            <td colspan="7"
+                            <td colspan="11"
                               class="py-0 text-center opacity-25 fst-italic font-size-10 bg-soft-light border-end">No
                               deliveries</td>
                           </ng-template>
@@ -379,12 +436,12 @@
     <!-- INDIVIDUAL MODE -->
     <div class="card border-0 shadow-sm overflow-hidden rounded-3" *ngIf="settings.prastav.viewMode === 'individual'">
       <div class="table-responsive" style="overflow-y: auto; max-height: calc(100vh - 250px); overflow-x: auto;">
-        <table class="table table-bordered table-hover mb-0" style="min-width: 1900px;" appTableSmartCheckbox="prastav-individual" rowSelector=".indiv-row" [selectionData]="individualRows">
+        <table class="table table-bordered table-hover mb-0" style="min-width: 1900px;"
+          appTableSmartCheckbox="prastav-individual" rowSelector=".indiv-row" [selectionData]="individualRows">
           <thead class="table-dark" style="position: sticky; top: 0; z-index: 20;">
             <tr class="text-uppercase font-size-10 letter-spacing-1 align-middle text-nowrap">
-              <th style="width: 50px;">No.</th>
+              <th style="width: 70px;">No.</th>
               <th style="width: 80px;" class="text-center">Act</th>
-              <th style="width: 90px;">Voucher #</th>
               <th style="width: 120px;" class="text-start ps-2">
                 <div class="d-flex align-items-center justify-content-between pe-1">
                   <span>Date</span>
@@ -458,6 +515,7 @@
                   </app-popover-filter>
                 </div>
               </th>
+              <th style="min-width: 150px;" class="text-start ps-3 text-danger opacity-85">Reject Rsn</th>
               <th style="width: 110px;" class="text-primary text-uppercase opacity-85">
                 <div class="d-flex align-items-center justify-content-between pe-1">
                   <span>Jwk Date</span>
@@ -486,6 +544,10 @@
                 </div>
               </th>
               <th style="min-width: 150px;" class="text-primary text-start ps-2 text-uppercase opacity-85">Receiver</th>
+              <th style="width: 100px;" class="text-center text-primary text-uppercase opacity-85">Pack Dt</th>
+              <th style="width: 80px;" class="text-center text-primary text-uppercase opacity-85">Pkt #</th>
+              <th style="width: 100px;" class="text-center text-primary text-uppercase opacity-85">Rcv Dt</th>
+              <th style="min-width: 130px;" class="text-start ps-2 text-primary text-uppercase opacity-85">Review</th>
               <th style="width: 80px;" class="text-center text-primary text-uppercase opacity-85">J-Qty</th>
               <th style="width: 80px;" class="text-center text-primary text-uppercase opacity-85">J-Rate</th>
               <th style="width: 90px;" class="text-center text-primary text-uppercase opacity-85">J-Amount</th>
@@ -511,11 +573,8 @@
                 </td>
 
                 <!-- VOUCHER COLUMNS -->
-                <td class="text-center fw-bold text-primary font-size-13 text-nowrap">
-                  #{{row.voucher.voucher_no || '-'}}
-                </td>
                 <td class="text-center font-size-12 fw-medium text-dark text-nowrap">
-                  {{row.voucher.date | date:'dd-MM-yyyy'}}
+                  {{row.voucher.date | date:'dd-MMM-yy'}}
                 </td>
                 <td class="px-3 fw-bold text-dark font-size-12">
                   <div style="max-width: 180px;" class="d-flex align-items-center justify-content-between pe-1">
@@ -545,16 +604,46 @@
                 <td class="px-3 font-size-12 text-wrap" style="max-width: 220px;">
                   {{row.voucher.note_details || '-'}}
                 </td>
+                <td class="px-3">
+                  <div class="d-flex align-items-start gap-2">
+                    <div class="form-check m-0" title="Reject Prastav">
+                      <input class="form-check-input cursor-pointer border-danger" type="checkbox"
+                        [checked]="row.voucher.is_rejected" (change)="onRejectVoucherToggle(row.voucher, $event)"
+                        [name]="'i_reject_' + rIdx">
+                    </div>
+                    <div class="text-danger font-size-11 text-wrap" style="max-width: 120px; line-height: 1.2;">
+                      {{row.voucher.reject_reason || ''}}
+                    </div>
+                  </div>
+                </td>
 
                 <!-- JAWAK COLUMNS -->
                 <ng-container *ngIf="row.jawak; else emptyJawakIndiv">
                   <td class="text-center text-primary fw-bold font-size-12 text-nowrap">
-                    {{row.jawak.date | date:'dd-MM-yyyy'}}</td>
+                    {{row.jawak.date | date:'dd-MMM-yy'}}</td>
                   <td class="px-2 font-size-12 fw-bold text-success text-start ps-2 text-wrap"
                     style="max-width: 200px;">
                     {{row.jawak.source_mm?.mm_hin}}</td>
                   <td class="px-2 font-size-12 opacity-60 text-start ps-2 text-wrap" style="max-width: 200px;">
                     {{row.jawak.kiske_dwara || '-'}}</td>
+                  <td class="text-center text-primary fw-bold font-size-12 text-nowrap">
+                    {{ (row.jawak.packing_date | date:'dd-MMM-yy') || '-'}}</td>
+                  <td class="text-center fw-bold font-size-13 text-nowrap">{{row.jawak.pkt_no || '-'}}</td>
+                  <td class="text-center text-primary fw-bold font-size-12 text-nowrap">
+                    {{ (row.jawak.received_date | date:'dd-MMM-yy') || '-'}}</td>
+                  <td class="text-start px-2">
+                    <div *ngIf="row.jawak.review !== undefined && row.jawak.review !== null">
+                      <span class="badge px-2 py-1 rounded-1" [ngClass]="row.jawak.review ? 'bg-success' : 'bg-danger'">
+                        {{row.jawak.review ? 'Satisfied' : 'Unsatisfied'}}
+                      </span>
+                      <div class="font-size-11 text-danger mt-1 text-wrap lh-1" style="max-width: 120px;"
+                        *ngIf="!row.jawak.review && row.jawak.review_reason">
+                        {{row.jawak.review_reason}}
+                      </div>
+                    </div>
+                    <div *ngIf="row.jawak.review === undefined || row.jawak.review === null"
+                      class="text-muted font-size-11">-</div>
+                  </td>
                   <td class="text-center fw-bold font-size-13 text-nowrap">{{row.jawak.qty}}</td>
                   <td class="text-center text-muted font-size-12 text-nowrap">₹{{row.jawak.rate || '-'}}</td>
                   <td class="text-center fw-bold text-theme font-size-13 text-nowrap">₹{{row.jawak.amount || '-'}}</td>
@@ -566,7 +655,7 @@
                   </td>
                 </ng-container>
                 <ng-template #emptyJawakIndiv>
-                  <td colspan="7" class="text-center opacity-25 fst-italic font-size-11 bg-soft-light text-nowrap">Not
+                  <td colspan="11" class="text-center opacity-25 fst-italic font-size-11 bg-soft-light text-nowrap">Not
                     Dispatched Yet
                   </td>
                 </ng-template>

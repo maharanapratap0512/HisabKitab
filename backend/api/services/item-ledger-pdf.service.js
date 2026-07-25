@@ -183,7 +183,7 @@ async function generateItemLedgerPdf(reportData, fromName, toName, mmName, taskI
     <body>
         <!-- 1st Page: Clickable Index Page Table -->
         <div class="toc-container page-break">
-            <div class="toc-title">${categoryName ? categoryName + ' का सार (Item Ledger Index)' : 'Item Ledger Report Index / अनुक्रमणिका'}</div>
+            <div class="toc-title">${categoryName ? categoryName + ' का सार (Item Ledger Report)' : 'Item Ledger Report Index / अनुक्रमणिका'}</div>
             <div style="text-align: center; margin-bottom: 5px; font-size: 12px; color: #555;">
                 अवधि: ${fromName} से ${toName} | MM / Store: ${mmName}${categoryName ? ` | Category: ${categoryName}` : ''}
             </div>
@@ -204,18 +204,14 @@ async function generateItemLedgerPdf(reportData, fromName, toName, mmName, taskI
     `;
 
     reportData.forEach((report, i) => {
-        const itemName = (report.item_hin || '') + (report.subitem_hin ? ` (${report.subitem_hin})` : '');
-        const itemEng = (report.item_eng && report.item_eng !== 'undefined') ? report.item_eng : '';
-        const subitemEng = (report.subitem_eng && report.subitem_eng !== 'undefined') ? report.subitem_eng : '';
-        const itemEngName = itemEng + (subitemEng ? ` (${subitemEng})` : '');
-        const fullItemDisplay = itemEngName ? `${itemName} | ${itemEngName}` : itemName;
-
+        const itemName = report.item_hin + (report.subitem_hin ? ` (${report.subitem_hin})` : '');
+        const itemEngName = report.item_eng + (report.subitem_eng ? ` (${report.subitem_eng})` : '');
         htmlContent += `
             <tr>
                 <td style="text-align: center;">${i + 1}</td>
                 <td>
                     <a href="#item-sec-${i}" style="text-decoration: none; color: #4e73df; font-weight: bold;">
-                        ${fullItemDisplay}
+                        ${itemName} | ${itemEngName}
                     </a>
                 </td>
                 <td style="text-align: right; font-weight: bold;">
@@ -236,11 +232,8 @@ async function generateItemLedgerPdf(reportData, fromName, toName, mmName, taskI
 
     // Ledger Pages for every item
     reportData.forEach((report, i) => {
-        const itemName = (report.item_hin || '') + (report.subitem_hin ? ` (${report.subitem_hin})` : '');
-        const itemEng = (report.item_eng && report.item_eng !== 'undefined') ? report.item_eng : '';
-        const subitemEng = (report.subitem_eng && report.subitem_eng !== 'undefined') ? report.subitem_eng : '';
-        const itemEngName = itemEng + (subitemEng ? ` (${subitemEng})` : '');
-        const fullItemDisplay = itemEngName ? `${itemName} | ${itemEngName}` : itemName;
+        const itemName = report.item_hin + (report.subitem_hin ? ` (${report.subitem_hin})` : '');
+        const itemEngName = report.item_eng + (report.subitem_eng ? ` (${report.subitem_eng})` : '');
 
         htmlContent += `
         <div class="item-section ${i < reportData.length - 1 ? 'page-break' : ''}" id="item-sec-${i}">
@@ -248,7 +241,7 @@ async function generateItemLedgerPdf(reportData, fromName, toName, mmName, taskI
                 ${fromName} से ${toName} तक, ${mmName} के ${itemName} का सार
             </div>
             <div class="item-title">
-                ${fullItemDisplay}
+                ${itemName} | ${itemEngName}
             </div>
             
             <div class="overview-row">
@@ -376,7 +369,7 @@ async function generateItemLedgerPdf(reportData, fromName, toName, mmName, taskI
     // Get the shared Puppeteer browser
     if (taskId) global.pdfProgress[taskId] = { status: 'Waiting for PDF engine...' };
     const browser = await pdfEngine.getBrowser();
-    
+
     let page = null;
     try {
         page = await browser.newPage();
@@ -407,7 +400,7 @@ async function generateItemLedgerPdf(reportData, fromName, toName, mmName, taskI
         await page.close();
         return pdfBuffer;
     } catch (err) {
-        if (page) await page.close().catch(() => {});
+        if (page) await page.close().catch(() => { });
         throw err;
     }
 }

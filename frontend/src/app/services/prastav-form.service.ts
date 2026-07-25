@@ -54,8 +54,6 @@ export class PrastavFormService {
       bachat: null,
       monthly_uses: null,
       description: null,
-      is_rejected: false,
-      reject_reason: null,
       active: 1,
       jawaks: [structuredClone(this.jawakTemplate)]
     };
@@ -67,6 +65,8 @@ export class PrastavFormService {
       pbk_count: null,
       is_noted: 0,
       note_details: null,
+      is_rejected: 0,
+      reject_reason: null,
       lines: [structuredClone(this.lineTemplate)],
       active: 1
     };
@@ -80,6 +80,8 @@ export class PrastavFormService {
       pbk_count: null,
       is_noted: 0,
       note_details: null,
+      is_rejected: 0,
+      reject_reason: null,
       lines: [structuredClone(this.lineTemplate)],
       active: 1
     };
@@ -114,6 +116,8 @@ export class PrastavFormService {
       voucher_no: data.voucher_no ?? null,
       is_noted: data.is_noted ?? 0,
       note_details: data.note_details ?? null,
+      is_rejected: data.is_rejected ?? 0,
+      reject_reason: data.reject_reason ?? null,
       active: data.active ?? 1
     };
 

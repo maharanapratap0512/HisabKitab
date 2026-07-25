@@ -280,20 +280,33 @@
             </div>
           </div>
 
-          <div class="col-md-5 mb-3 d-flex align-items-end gap-3">
-            <div class="form-check mb-2">
-              <input class="form-check-input" type="checkbox" id="isNoted" [(ngModel)]="pfs.prastavForm.is_noted"
-                name="is_noted">
-              <label class="form-check-label" for="isNoted">Noted</label>
-            </div>
+          <div class="col-md-7 mb-3 d-flex flex-wrap align-items-end gap-3">
+            <div class="d-flex gap-3 w-100">
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="isNoted" [(ngModel)]="pfs.prastavForm.is_noted"
+                  name="is_noted">
+                <label class="form-check-label" for="isNoted">Noted</label>
+              </div>
 
-            <div class="flex-fill" *ngIf="pfs.prastavForm.is_noted">
-              <input type="text" class="form-control" placeholder="Note Details"
-                [(ngModel)]="pfs.prastavForm.note_details" name="note_details">
+              <div class="flex-fill" *ngIf="pfs.prastavForm.is_noted">
+                <input type="text" class="form-control" placeholder="Note Details"
+                  [(ngModel)]="pfs.prastavForm.note_details" name="note_details">
+              </div>
+
+              <div class="form-check mb-2 ms-3">
+                <input class="form-check-input" type="checkbox" id="isRejected" [(ngModel)]="pfs.prastavForm.is_rejected"
+                  name="is_rejected">
+                <label class="form-check-label text-danger fw-bold" for="isRejected">Reject</label>
+              </div>
+
+              <div class="flex-fill" *ngIf="pfs.prastavForm.is_rejected">
+                <input type="text" class="form-control border-danger text-danger" placeholder="Reject Reason"
+                  [(ngModel)]="pfs.prastavForm.reject_reason" name="reject_reason">
+              </div>
             </div>
           </div>
 
-          <div class="col-md-7 mb-3 d-flex align-items-end justify-content-end gap-2">
+          <div class="col-md-5 mb-3 d-flex align-items-end justify-content-end gap-2">
             <button type="button" class="btn btn-secondary btn-sm" (click)="closeModal()">Close</button>
             <button type="submit" class="btn btn-primary btn-sm px-4" [disabled]="pfs.submit">
               {{ isEdit ? 'Update' : 'Save' }}
@@ -381,14 +394,7 @@
                         [name]="'desc_'+i" placeholder="Description">
                     </td>
 
-                    <td class="text-center align-middle">
-                      <div class="form-check form-switch m-0 d-flex justify-content-center">
-                        <input class="form-check-input" type="checkbox" [(ngModel)]="line.is_rejected"
-                          [name]="'reject_'+i">
-                      </div>
-                      <input *ngIf="line.is_rejected" type="text" class="form-control form-control-sm mt-1" [(ngModel)]="line.reject_reason"
-                        [name]="'reject_reason_'+i" placeholder="Reason">
-                    </td>
+
 
                     <td class="text-center">
 

@@ -32,6 +32,17 @@ export class PrastavComponent implements OnInit {
 
   expandAll = true;
 
+  months = [
+    { value: 1, label: 'Jan' }, { value: 2, label: 'Feb' }, { value: 3, label: 'Mar' },
+    { value: 4, label: 'Apr' }, { value: 5, label: 'May' }, { value: 6, label: 'Jun' },
+    { value: 7, label: 'Jul' }, { value: 8, label: 'Aug' }, { value: 9, label: 'Sep' },
+    { value: 10, label: 'Oct' }, { value: 11, label: 'Nov' }, { value: 12, label: 'Dec' }
+  ];
+
+  getMonthName(m: number): string {
+    return this.months.find(x => x.value == m)?.label || String(m);
+  }
+
   prastavs: any[] = []; // Raw flat data
   groupedVouchers: any[] = []; // Layered data for Voucher Mode
   individualRows: any[] = []; // Denormalized data for Individual Mode with rowspans
@@ -124,6 +135,12 @@ export class PrastavComponent implements OnInit {
     this.getPrastavs();
   }
 
+  monthClick(month: any) {
+    this.filterBody.month = month;
+    this.pageNo = 0;
+    this.getPrastavs();
+  }
+
   applyFilter() {
     this.pageNo = 0;
     this.getPrastavs();
@@ -157,6 +174,8 @@ export class PrastavComponent implements OnInit {
           pbk_count: p.pbk_count,
           note_details: p.note_details, // Capture note from the first item
           is_noted: p.is_noted,
+          is_rejected: p.is_rejected || 0,
+          reject_reason: p.reject_reason || null,
           items: [],
           expanded: this.expandAll, // Default open for Voucher Mode
           totalAmount: 0,
@@ -529,6 +548,61 @@ export class PrastavComponent implements OnInit {
           resolve(false);
         }
       }, () => resolve(false));
+    });
+  }
+
+  onRejectVoucherToggle(v: any, event: any) {
+    const isChecked = event.target.checked;
+    
+    if (isChecked) {
+      Swal.fire({
+        title: 'Reject Prastav',
+        text: 'Please enter the reason for rejection:',
+        input: 'text',
+        inputPlaceholder: 'Reject reason...',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Reject',
+        inputValidator: (value: any) => {
+          if (!value) {
+            return 'You need to provide a reason!';
+          }
+          return null;
+        }
+      }).then((result: any) => {
+        if (result.isConfirmed) {
+          v.is_rejected = 1;
+          v.reject_reason = result.value;
+          this.updateVoucherReject(v);
+        } else {
+          v.is_rejected = 0;
+          event.target.checked = false;
+        }
+      });
+    } else {
+      v.is_rejected = 0;
+      v.reject_reason = null;
+      this.updateVoucherReject(v);
+    }
+  }
+
+  updateVoucherReject(v: any) {
+    const payload = {
+      voucher_no: v.voucher_no,
+      is_rejected: v.is_rejected,
+      reject_reason: v.reject_reason
+    };
+    this.http.post(this.api.getUrl('PRASTAV') + 'reject-voucher', payload).subscribe((res: any) => {
+      if (res.success) {
+        this.toastr.success(`Prastav ${v.is_rejected ? 'Rejected' : 'Restored'}`);
+      } else {
+        this.toastr.error('Update failed');
+        this.getPrastavs();
+      }
+    }, err => {
+      this.toastr.error('Update failed');
+      this.getPrastavs();
     });
   }
 
