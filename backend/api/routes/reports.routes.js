@@ -81,13 +81,7 @@ router.put('/item_ledger/:dept_id', async (req, res, next) => {
         where bcht.dept_id = @dept_id 
         ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
         AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
-        AND bcht.year = '${from_year}' AND bcht.month = '${from_month - 1}'`);
-
-        let currentBachatStmt = DB.db.prepare(`select sum(IFNULL(bcht.past_bachat, 0) + IFNULL(bcht.bachat, 0)) as bachat from bachat_new bcht 
-        where bcht.dept_id = @dept_id 
-        ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
-        AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
-        AND bcht.year = '${to_year}' AND bcht.month = '${to_month - 1}'`);
+        AND CAST(bcht.year AS INTEGER) = ${from_year} AND CAST(bcht.month AS INTEGER) = ${from_month}`);
 
         for (let item of item_subitem_ids) {
             let rowParams = {
@@ -100,14 +94,29 @@ router.put('/item_ledger/:dept_id', async (req, res, next) => {
             let jawaks = jwkstmt.all(rowParams);
             
             let pastBachatRow = pastBachatStmt.get(rowParams);
-            let past_bachat = pastBachatRow && pastBachatRow.past_bachat !== null ? pastBachatRow.past_bachat : 0;
-            if (!pastBachatRow || pastBachatRow.past_bachat === null) {
-                let fallbackPastBachat = DB.db.prepare(`select sum(bcht.bachat) as bachat from bachat_new bcht 
-                where bcht.dept_id = @dept_id 
-                ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
-                AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
-                AND (bcht.year < '${from_year}' OR (bcht.year = '${from_year}' AND bcht.month < '${from_month - 1}'))`).get(rowParams);
-                past_bachat = fallbackPastBachat && fallbackPastBachat.bachat ? fallbackPastBachat.bachat : 0;
+            let past_bachat = (pastBachatRow && pastBachatRow.past_bachat !== null) ? pastBachatRow.past_bachat : null;
+            if (past_bachat === null) {
+                let fallbackPastBachat = DB.db.prepare(`select sum(latest_val) as past_bachat from (
+                    select (IFNULL(bn.past_bachat, 0) + IFNULL(bn.bachat, 0)) as latest_val
+                    from bachat_new bn
+                    inner join (
+                        select IFNULL(condition_id, 0) as cond_id, IFNULL(unit_id, 0) as u_id, MAX(CAST(year AS INTEGER) * 12 + CAST(month AS INTEGER)) as max_period
+                        from bachat_new
+                        where dept_id = @dept_id
+                        ${mm_id ? `AND mm_id = ${mm_id}` : ''}
+                        AND item_id = @item_id
+                        AND ((subitem_id IS NULL AND @subitem_id IS NULL) OR subitem_id = @subitem_id)
+                        AND (CAST(year AS INTEGER) * 12 + CAST(month AS INTEGER)) < (${from_year} * 12 + ${from_month})
+                        group by IFNULL(condition_id, 0), IFNULL(unit_id, 0)
+                    ) latest on IFNULL(bn.condition_id, 0) = latest.cond_id 
+                            and IFNULL(bn.unit_id, 0) = latest.u_id 
+                            and (CAST(bn.year AS INTEGER) * 12 + CAST(bn.month AS INTEGER)) = latest.max_period
+                    where bn.dept_id = @dept_id
+                    ${mm_id ? `AND bn.mm_id = ${mm_id}` : ''}
+                    AND bn.item_id = @item_id
+                    AND ((bn.subitem_id IS NULL AND @subitem_id IS NULL) OR bn.subitem_id = @subitem_id)
+                )`).get(rowParams);
+                past_bachat = (fallbackPastBachat && fallbackPastBachat.past_bachat !== null) ? fallbackPastBachat.past_bachat : 0;
             }
 
             let total_aawak = aawaks.reduce((sum, a) => sum + (a.qty || 0), 0);
@@ -226,13 +235,7 @@ router.post('/item_ledger_pdf/:dept_id', async (req, res, next) => {
         where bcht.dept_id = @dept_id 
         ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
         AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
-        AND bcht.year = '${from_year}' AND bcht.month = '${from_month - 1}'`);
-
-        let currentBachatStmt = DB.db.prepare(`select sum(IFNULL(bcht.past_bachat, 0) + IFNULL(bcht.bachat, 0)) as bachat from bachat_new bcht 
-        where bcht.dept_id = @dept_id 
-        ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
-        AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
-        AND bcht.year = '${to_year}' AND bcht.month = '${to_month - 1}'`);
+        AND CAST(bcht.year AS INTEGER) = ${from_year} AND CAST(bcht.month AS INTEGER) = ${from_month}`);
 
         for (let item of item_subitem_ids) {
             let rowParams = {
@@ -245,14 +248,29 @@ router.post('/item_ledger_pdf/:dept_id', async (req, res, next) => {
             let jawaks = jwkstmt.all(rowParams);
             
             let pastBachatRow = pastBachatStmt.get(rowParams);
-            let past_bachat = pastBachatRow && pastBachatRow.past_bachat !== null ? pastBachatRow.past_bachat : 0;
-            if (!pastBachatRow || pastBachatRow.past_bachat === null) {
-                let fallbackPastBachat = DB.db.prepare(`select sum(bcht.bachat) as bachat from bachat_new bcht 
-                where bcht.dept_id = @dept_id 
-                ${mm_id ? `AND bcht.mm_id = ${mm_id}` : ''} 
-                AND bcht.item_id = @item_id AND ((bcht.subitem_id IS NULL AND @subitem_id IS NULL) OR bcht.subitem_id = @subitem_id) 
-                AND (bcht.year < '${from_year}' OR (bcht.year = '${from_year}' AND bcht.month < '${from_month - 1}'))`).get(rowParams);
-                past_bachat = fallbackPastBachat && fallbackPastBachat.bachat ? fallbackPastBachat.bachat : 0;
+            let past_bachat = (pastBachatRow && pastBachatRow.past_bachat !== null) ? pastBachatRow.past_bachat : null;
+            if (past_bachat === null) {
+                let fallbackPastBachat = DB.db.prepare(`select sum(latest_val) as past_bachat from (
+                    select (IFNULL(bn.past_bachat, 0) + IFNULL(bn.bachat, 0)) as latest_val
+                    from bachat_new bn
+                    inner join (
+                        select IFNULL(condition_id, 0) as cond_id, IFNULL(unit_id, 0) as u_id, MAX(CAST(year AS INTEGER) * 12 + CAST(month AS INTEGER)) as max_period
+                        from bachat_new
+                        where dept_id = @dept_id
+                        ${mm_id ? `AND mm_id = ${mm_id}` : ''}
+                        AND item_id = @item_id
+                        AND ((subitem_id IS NULL AND @subitem_id IS NULL) OR subitem_id = @subitem_id)
+                        AND (CAST(year AS INTEGER) * 12 + CAST(month AS INTEGER)) < (${from_year} * 12 + ${from_month})
+                        group by IFNULL(condition_id, 0), IFNULL(unit_id, 0)
+                    ) latest on IFNULL(bn.condition_id, 0) = latest.cond_id 
+                            and IFNULL(bn.unit_id, 0) = latest.u_id 
+                            and (CAST(bn.year AS INTEGER) * 12 + CAST(bn.month AS INTEGER)) = latest.max_period
+                    where bn.dept_id = @dept_id
+                    ${mm_id ? `AND bn.mm_id = ${mm_id}` : ''}
+                    AND bn.item_id = @item_id
+                    AND ((bn.subitem_id IS NULL AND @subitem_id IS NULL) OR bn.subitem_id = @subitem_id)
+                )`).get(rowParams);
+                past_bachat = (fallbackPastBachat && fallbackPastBachat.past_bachat !== null) ? fallbackPastBachat.past_bachat : 0;
             }
 
             let total_aawak = aawaks.reduce((sum, a) => sum + (a.qty || 0), 0);
