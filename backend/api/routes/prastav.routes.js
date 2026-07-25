@@ -138,6 +138,31 @@ router.post('/', (req, res, next) => {
     }
 });
 
+// Create / update single prastav line
+router.post('/item', (req, res, next) => {
+    try {
+        const data = req.body || {};
+        const lineId = data._id
+            ? Prastav.updateById(data, Number(data._id), false)
+            : Prastav.insert(data, false);
+        res.status(200).json({ success: true, result: lineId });
+    } catch (e) {
+        next(e);
+    }
+});
+
+// Reject entire voucher
+router.post('/reject-voucher', (req, res, next) => {
+    try {
+        const { voucher_no, is_rejected, reject_reason } = req.body;
+        db.prepare(`UPDATE prastav SET is_rejected = ?, reject_reason = ? WHERE voucher_no = ?`)
+          .run(is_rejected ? 1 : 0, reject_reason || null, voucher_no);
+        res.status(200).json({ success: true });
+    } catch (e) {
+        next(e);
+    }
+});
+
 // Delete prastav (and its jawaks)
 router.delete('/:id', (req, res, next) => {
     try {
