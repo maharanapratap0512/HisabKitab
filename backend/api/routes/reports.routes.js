@@ -326,6 +326,8 @@ router.post('/item_ledger_pdf/:dept_id', async (req, res, next) => {
             if (mmRow) mmName = mmRow.mm_hin;
         }
 
+        let category_name = req.body.category_name || '';
+
         if (taskId) global.pdfProgress[taskId] = { status: 'Preparing PDF engine...' };
 
         const pdfBuffer = await itemLedgerPdf.generateItemLedgerPdf(
@@ -333,7 +335,8 @@ router.post('/item_ledger_pdf/:dept_id', async (req, res, next) => {
             req.body.from.name_hin, 
             req.body.to.name_hin, 
             mmName,
-            taskId
+            taskId,
+            category_name
         );
 
         res.setHeader('Content-Type', 'application/pdf');

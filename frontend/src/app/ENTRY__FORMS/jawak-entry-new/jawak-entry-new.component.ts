@@ -361,7 +361,7 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
         this.getProductData(item_id);
         jwk.subitems = item.subitems || [];
 
-        if (!this.isEdit || !jwk.aawak_ref_id) {
+        if (!this.isEdit && !jwk.aawak_ref_id) {
           if (subitem) jwk.unit_id = subitem.unit_id;
           else jwk.unit_id = item.unit_id;
         }
