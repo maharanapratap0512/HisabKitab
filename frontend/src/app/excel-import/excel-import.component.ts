@@ -24,7 +24,53 @@ export class ExcelImportComponent implements OnInit {
   @Input() excelFile: any;
   @Input() importedData: any;
   @Output() response = new EventEmitter();
-  showModal: any = ''
+  showModal: any = '';
+  showAddModal: string = '';
+  activeCorrectionRow: any = null;
+
+  handleAddOption(val: any, data: any, modalTitle: string) {
+    if (val === '+add') {
+      this.activeCorrectionRow = data;
+      data.id = null;
+      this.showAddModal = modalTitle;
+      setTimeout(() => {
+        $('#showAddModal').modal('show');
+      }, 100);
+    }
+  }
+
+  onItemChange(ev: any, data: any) {
+    if (ev === '+add') {
+      this.handleAddOption('+add', data, 'Add Item');
+    } else if (ev) {
+      data.id = ev._id;
+      this.itemSelected(ev);
+    }
+  }
+
+  onSubitemChange(ev: any, data: any) {
+    if (ev === '+add') {
+      this.handleAddOption('+add', data, 'Add Subitem');
+    } else if (ev) {
+      data.id2 = ev._id;
+    }
+  }
+
+  onAddResponse(res: any) {
+    if (res) {
+      const newId = res._id || (res.data && res.data._id) || res;
+      if (this.activeCorrectionRow && typeof newId === 'string') {
+        this.activeCorrectionRow.id = newId;
+      }
+    }
+    this.closeAddModal();
+  }
+
+  closeAddModal() {
+    $('#showAddModal').modal('hide');
+    this.showAddModal = '';
+    this.activeCorrectionRow = null;
+  }
   itemsPerPage = 100;
   page1: any = 1;
   page2: any = 1;

@@ -96,7 +96,7 @@
                             <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
                             </ng-option>
                             <ng-option *ngFor="let item of pbks" [value]="item._id">
-                                {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :
+                                {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} : {{item.relation}} :
                                 {{item.relative_name}}
                             </ng-option>
                         </ng-select>
@@ -395,6 +395,7 @@
                                                 placeholder="Product" [clearable]="true" [virtualScroll]="true"
                                                 [(ngModel)]="jwkForm.product_id" name="product_id" #product_id="ngModel"
                                                 (change)="productSelected($event, i)" [selectOnTab]="true">
+                                                <ng-option value="+add" class="text-primary fw-bold">+ Add Product</ng-option>
                                                 <ng-option *ngFor="let item of products" [value]="item._id">
                                                     {{item.product_code ? item.product_code : ''}} : {{item.sr_num ?
                                                     item.sr_num : ''}}
@@ -409,7 +410,8 @@
                                             <ng-select class="custom-sm" style="width: 100%;" placeholder="Condition"
                                                 [clearable]="true" [virtualScroll]="true"
                                                 [(ngModel)]="jwkForm.condition_id" name="condition_id"
-                                                #condition_id="ngModel" [selectOnTab]="true" appendTo="body">
+                                                #condition_id="ngModel" (change)="conditionSelected($event, i)" [selectOnTab]="true" appendTo="body">
+                                                <ng-option value="+add" class="text-primary fw-bold">+ Add Condition</ng-option>
                                                 <ng-option *ngFor="let item of conditions"
                                                     [value]="item._id">{{item.list_name_hin}} : {{item.list_name_roman}}
                                                     : {{item.list_name_eng}} </ng-option>
@@ -433,7 +435,8 @@
                                             <ng-select class="custom-sm" style="width: 100%;" placeholder="Source"
                                                 [clearable]="true" [virtualScroll]="true"
                                                 [(ngModel)]="jwkForm.aawak_source_id" name="aawak_source_id"
-                                                #aawak_source_id="ngModel" [selectOnTab]="true" appendTo="body">
+                                                #aawak_source_id="ngModel" (change)="aawakSourceSelected($event, i)" [selectOnTab]="true" appendTo="body">
+                                                <ng-option value="+add" class="text-primary fw-bold">+ Add Aawak Source</ng-option>
                                                 <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
                                                     {{item.list_name_hin}} : {{item.list_name_roman}} :
                                                     {{item.list_name_eng}}
@@ -1018,19 +1021,20 @@
                                                 </ng-select>
                                             </td>
                                             <td>
-                                                <ng-select class="custom-sm" style="width: 100%;"
-                                                    placeholder="Jawak Type" [clearable]="true" [virtualScroll]="true"
-                                                    [(ngModel)]="jwkForm.jawak_type_id" name="jawak_type_id"
-                                                    #jawak_type_id="ngModel" [selectOnTab]="true" appendTo="body"
-                                                    [ngClass]="{'validation' : (jawak_type_id?.touched || fMain.submitted) && jawak_type_id.errors?.['required']}"
-                                                    required>
-                                                    <ng-option selected="selected" disabled value="">Jawak Type
-                                                    </ng-option>
-                                                    <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                                        {{item.list_name_hin}} : {{item.list_name_roman}} :
-                                                        {{item.list_name_eng}}
-                                                    </ng-option>
-                                                </ng-select>
+                                                <div style="min-width: 140px; margin-bottom: 2px;">
+                                                    <label class="fs-10 text-muted text-uppercase fw-semibold mb-1 d-block">Jawak Type <span class="text-danger">*</span></label>
+                                                    <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Type"
+                                                        [clearable]="true" [virtualScroll]="true"
+                                                        [(ngModel)]="jwkForm.jawak_type_id" name="jawak_type_id"
+                                                        #jawak_type_id="ngModel" (change)="jawakTypeSelected($event, i)" [selectOnTab]="true" appendTo="body"
+                                                        [ngClass]="{'validation' : (jawak_type_id?.touched || fMain.submitted) && jawak_type_id.errors?.['required']}"
+                                                        required>
+                                                        <ng-option value="+add" class="text-primary fw-bold">+ Add Jawak Type</ng-option>
+                                                        <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                                            {{item.list_name_hin}} : {{item.list_name_roman}} : {{item.list_name_eng}}
+                                                        </ng-option>
+                                                    </ng-select>
+                                                </div>
                                             </td>
                                             <td *ngIf="settings.jawak.usage_list_id">
                                                 <ng-select class="custom-sm" style="width: 100%;"
@@ -1240,11 +1244,14 @@
                         type="aawak" [getData]="fs.jawakFormMain.jawaks[imageIndex].document">
                     </app-files-view>
 
+                    <app-product-entry *ngIf="showModal == 'Add Product'" (response)="addProductResponse($event)"></app-product-entry>
+                    <app-support-list-entry *ngIf="showModal == 'Add Condition'" [list_type]="'condition'" (response)="addConditionResponse($event)"></app-support-list-entry>
+                    <app-support-list-entry *ngIf="showModal == 'Add Aawak Source'" [list_type]="'aawak_source'" (response)="addAawakSourceResponse($event)"></app-support-list-entry>
+                    <app-support-list-entry *ngIf="showModal == 'Add Jawak Type'" [list_type]="'jawak_type'" (response)="addJawakTypeResponse($event)"></app-support-list-entry>
+
                     <!-- Add Usage Type -->
                     <app-support-list-entry *ngIf="showModal == 'Add Usage Type'"
                         (response)='usageTypeAddResponse($event)' list_type="usage_type"> </app-support-list-entry>
-
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" style="width: 120px;"

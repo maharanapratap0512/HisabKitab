@@ -398,15 +398,23 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
   }
 
   productSelected(ev: any, i: any) {
+    if (ev === '+add') {
+      this.fs.jawakFormMain.jawaks[i].product_id = null;
+      this.activeRowIndex = i;
+      this.openModal('Add Product');
+      return;
+    }
     // this.isCondition = true;
     let product = this.products.find((p: { _id: any; }) => p._id == ev);
-    this.fs.jawakFormMain.jawaks[i].condition_id = product ? product.condition_id : null;
-    this.fs.jawakFormMain.jawaks[i].item_id = product.item_id;
-    this.fs.jawakFormMain.jawaks[i].subitem_id = product.subitem_id;
-    this.fs.jawakFormMain.jawaks[i].qty = 1;
-    this.fs.jawakFormMain.jawaks[i].unit_id = 1;
-    this.fs.jawakFormMain.jawaks[i].rate = product.price ? product.price : null;
-    this.rateClick(i);
+    if (product) {
+      this.fs.jawakFormMain.jawaks[i].condition_id = product ? product.condition_id : null;
+      this.fs.jawakFormMain.jawaks[i].item_id = product.item_id;
+      this.fs.jawakFormMain.jawaks[i].subitem_id = product.subitem_id;
+      this.fs.jawakFormMain.jawaks[i].qty = 1;
+      this.fs.jawakFormMain.jawaks[i].unit_id = 1;
+      this.fs.jawakFormMain.jawaks[i].rate = product.price ? product.price : null;
+      this.rateClick(i);
+    }
   }
 
   qtyClick(i: any) {
@@ -489,5 +497,71 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
       this.fs.jawakFormMain.jawaks[this.insertIndex].usage_report.usage_type = ev._id;
       this.closeModal();
     }
+  }
+
+  activeRowIndex: any = null;
+
+  conditionSelected(ev: any, i: any) {
+    if (ev === '+add') {
+      this.fs.jawakFormMain.jawaks[i].condition_id = null;
+      this.activeRowIndex = i;
+      this.openModal('Add Condition');
+    }
+  }
+
+  aawakSourceSelected(ev: any, i: any) {
+    if (ev === '+add') {
+      this.fs.jawakFormMain.jawaks[i].aawak_source_id = null;
+      this.activeRowIndex = i;
+      this.openModal('Add Aawak Source');
+    }
+  }
+
+  jawakTypeSelected(ev: any, i: any) {
+    if (ev === '+add') {
+      this.fs.jawakFormMain.jawaks[i].jawak_type_id = null;
+      this.activeRowIndex = i;
+      this.openModal('Add Jawak Type');
+    }
+  }
+
+  addProductResponse(ev: any) {
+    if (ev && ev._id) {
+      if (this.activeRowIndex !== null && this.activeRowIndex !== undefined) {
+        this.fs.jawakFormMain.jawaks[this.activeRowIndex].product_id = ev._id;
+      }
+    }
+    this.closeModal();
+    this.activeRowIndex = null;
+  }
+
+  addConditionResponse(ev: any) {
+    if (ev && ev._id) {
+      if (this.activeRowIndex !== null && this.activeRowIndex !== undefined) {
+        this.fs.jawakFormMain.jawaks[this.activeRowIndex].condition_id = ev._id;
+      }
+    }
+    this.closeModal();
+    this.activeRowIndex = null;
+  }
+
+  addAawakSourceResponse(ev: any) {
+    if (ev && ev._id) {
+      if (this.activeRowIndex !== null && this.activeRowIndex !== undefined) {
+        this.fs.jawakFormMain.jawaks[this.activeRowIndex].aawak_source_id = ev._id;
+      }
+    }
+    this.closeModal();
+    this.activeRowIndex = null;
+  }
+
+  addJawakTypeResponse(ev: any) {
+    if (ev && ev._id) {
+      if (this.activeRowIndex !== null && this.activeRowIndex !== undefined) {
+        this.fs.jawakFormMain.jawaks[this.activeRowIndex].jawak_type_id = ev._id;
+      }
+    }
+    this.closeModal();
+    this.activeRowIndex = null;
   }
 }

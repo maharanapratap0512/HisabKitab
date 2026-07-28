@@ -288,8 +288,33 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
     }
   }
 
+  showModal: string = '';
+
+  openModal(title: string) {
+    this.showModal = title;
+    setTimeout(() => {
+      $('#prastavEntryComponent > #showModal').modal('show');
+    }, 100);
+  }
+
   closeModal() {
     $('#prastavEntryModal').modal('hide');
+    $('#prastavEntryComponent > #showModal').modal('hide');
+    this.showModal = '';
+  }
+
+  addMMResponse(ev: any) {
+    if (ev && ev._id) {
+      this.pfs.prastavForm.mm_id = ev._id;
+    }
+    this.closeModal();
+  }
+
+  addPbkResponse(ev: any) {
+    if (ev && ev._id) {
+      this.pfs.prastavForm.pbk_id = ev._id;
+    }
+    this.closeModal();
   }
 
   // ── Display Helpers for Jawak Focus Mode ──────────────
@@ -298,7 +323,9 @@ export class PrastavEntryComponent implements OnInit, OnChanges {
   }
 
   getPBKDisplay(pbkId: any) {
-    return this.pbks.find(p => p._id === pbkId)?.pbk_hin || '-';
+    const p = this.pbks.find(item => item._id === pbkId);
+    if (!p) return '-';
+    return `${p.pbk_hin}${p.pbk_eng ? ' : ' + p.pbk_eng : ''}`;
   }
 
   getUnitShort(unitId: any) {

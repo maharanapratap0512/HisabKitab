@@ -250,7 +250,7 @@
                             <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
                             </ng-option>
                             <ng-option *ngFor="let item of pbks" [value]="item._id">
-                                {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :
+                                {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} : {{item.relation}} :
                                 {{item.relative_name}}
                             </ng-option>
                         </ng-select>

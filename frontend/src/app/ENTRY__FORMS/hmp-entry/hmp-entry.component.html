@@ -21,6 +21,7 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">MM</label>
+                    <a style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end" (click)="openModal('Add MM')">+ Add</a>
                     <ng-select class="custom mb-1" style="width: 100%;" placeholder="MM" [clearable]="true"
                         [virtualScroll]="true" [(ngModel)]="fs.hmpBatchForm.mm_id" #mm_id="ngModel"
                         [ngClass]="{ 'validation': (mm_id?.touched || f.submitted) && mm_id.errors?.['required']}"
@@ -792,5 +793,20 @@
 
         <app-jawak-entry *ngIf="showModal == 'Edit Jawak'" (response)="editJawakResponse($event)" [noAPICall]="true"
             [isEdit]="true" [getData]="editData"></app-jawak-entry>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{showModal}}</h5>
+                <button type="button" class="btn-close" (click)="closeModal()"></button>
+            </div>
+            <div class="modal-body">
+                <app-mm-entry *ngIf="showModal == 'Add MM'" (response)="addMMResponse($event)"></app-mm-entry>
+            </div>
+        </div>
     </div>
 </div>

@@ -1,7 +1,34 @@
-<ng-select class="item-dropdown" dropdownClass="item-dropdown-panel" [class.custom-sm]="size === 'sm'" [items]="options" bindLabel="searchTags"
-  [(ngModel)]="selectedValue" (change)="onSelectChange($event)" [placeholder]="placeholder" [clearable]="true"
-  [virtualScroll]="true" [appendTo]="appendTo" [readonly]="readonly" [required]="required" [searchFn]="customSearch"
-  [multiple]="multiple" [closeOnSelect]="closeOnSelect" [compareWith]="compareById" dropdownPosition="auto">
+<ng-select class="item-dropdown" dropdownClass="item-dropdown-panel" [class.custom-sm]="size === 'sm'" [items]="options"
+  bindLabel="searchTags" [(ngModel)]="selectedValue" (change)="onSelectChange($event)" [placeholder]="placeholder"
+  [clearable]="true" [virtualScroll]="true" [appendTo]="appendTo" [readonly]="readonly" [required]="required"
+  [searchFn]="customSearch" [multiple]="multiple" [closeOnSelect]="closeOnSelect" [compareWith]="compareById"
+  dropdownPosition="auto">
+
+  <ng-template ng-header-tmp>
+    <div *ngIf="!multiple"
+      class="d-flex justify-content-between align-items-center px-2 py-1 border-bottom bg-light gap-1">
+      <button type="button" class="btn btn-xs btn-outline-primary fw-bold text-nowrap py-1 px-2 font-size-11 flex-fill"
+        (mousedown)="$event.preventDefault()" (click)="onAddItemClick($event)">
+        + Add Item
+      </button>
+      <button type="button" class="btn btn-xs btn-outline-success fw-bold text-nowrap py-1 px-2 font-size-11 flex-fill"
+        (mousedown)="$event.preventDefault()" (click)="onAddSubitemClick($event)">
+        + Add Subitem
+      </button>
+    </div>
+    <div *ngIf="multiple"
+      class="d-flex justify-content-between align-items-center px-2 py-1 border-bottom bg-light gap-1">
+      <button type="button" class="btn btn-xs btn-outline-primary fw-bold text-nowrap py-1 px-2 font-size-11 flex-fill"
+        (mousedown)="$event.preventDefault()" (click)="selectAll()">
+        <i class="uil uil-check-square me-1"></i>Select All ({{options.length}})
+      </button>
+      <button type="button" class="btn btn-xs btn-outline-secondary font-size-11 text-nowrap py-1 px-2 flex-fill"
+        (mousedown)="$event.preventDefault()" (click)="deselectAll()">
+        <i class="uil uil-square-full me-1"></i>Deselect All
+      </button>
+    </div>
+  </ng-template>
+
   <ng-template ng-option-tmp let-item="item" let-index="index">
     <div class="item-option" [class.subitem]="item.isSubitem">
       <div class="option-content-single">
@@ -18,7 +45,8 @@
           <span class="roman-name" *ngIf="item.item_roman || item.subitem_roman">
             {{item.subitem_roman || item.item_roman}}
           </span>
-          <span class="label-alias" *ngIf="item.item_aliases && !item.isSubitem" style="font-size: 11px; opacity: 0.6; font-style: italic;">
+          <span class="label-alias" *ngIf="item.item_aliases && !item.isSubitem"
+            style="font-size: 11px; opacity: 0.6; font-style: italic;">
             {{item.item_aliases | joinObj:'alias'}}
           </span>
           <span class="item-code" *ngIf="item.item_code || item.subitem_code">
@@ -38,9 +66,27 @@
       <span class="label-code" *ngIf="item.item_code || item.subitem_code">
         #{{item.subitem_code || item.item_code}}
       </span>
-      <span class="label-alias" *ngIf="item.item_aliases && !item.isSubitem" style="font-size: 10px; opacity: 0.6; font-style: italic;">
+      <span class="label-alias" *ngIf="item.item_aliases && !item.isSubitem"
+        style="font-size: 10px; opacity: 0.6; font-style: italic;">
         {{item.item_aliases | joinObj:'alias'}}
       </span>
     </div>
   </ng-template>
 </ng-select>
+
+<!-- Self-contained Modal Container for Item & Subitem Creation -->
+<div class="modal fade" [id]="modalId" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog" style="width: 99%;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{showModal}}</h5>
+        <button type="button" class="btn-close" (click)="closeSelfModal()"></button>
+      </div>
+      <div class="modal-body">
+        <app-item-entry *ngIf="showModal === 'Add Item'" (response)="onSelfItemCreated($event)"></app-item-entry>
+        <app-subitem-entry *ngIf="showModal === 'Add Subitem'"
+          (response)="onSelfSubitemCreated($event)"></app-subitem-entry>
+      </div>
+    </div>
+  </div>
+</div>

@@ -244,6 +244,7 @@
           <div class="col-md-3 mb-3">
             <div class="form-group">
               <label class="form-label">MM <strong class="text-danger">*</strong></label>
+              <a style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end" (click)="openModal('Add MM')">+ Add</a>
 
               <ng-select class="custom" style="width:100%;" placeholder="Select MM" [clearable]="false"
                 [virtualScroll]="true" [(ngModel)]="pfs.prastavForm.mm_id" name="mm_id" required
@@ -260,12 +261,13 @@
           <div class="col-md-3 mb-3">
             <div class="form-group">
               <label class="form-label">PBK</label>
+              <a style="padding: 1px 6px !important;" class="btn btn-outline-primary float-end" (click)="openModal('Add PBK')">+ Add</a>
 
               <ng-select class="custom" style="width:100%;" placeholder="Select PBK" [clearable]="true"
                 [virtualScroll]="true" [(ngModel)]="pfs.prastavForm.pbk_id" name="pbk_id">
 
                 <ng-option *ngFor="let p of pbks | filterByDate: pfs.prastavForm.date" [value]="p._id">
-                  {{p.pbk_hin}} : {{p.pbk_eng}}
+                  {{p.roll_no ? p.roll_no : '______'}} - {{p.pbk_hin}}{{p.pbk_eng ? ' : ' + p.pbk_eng : ''}} : {{p.relation}} : {{p.relative_name}}
                 </ng-option>
 
               </ng-select>
@@ -584,4 +586,21 @@
 
     </form>
   </div>
+
+  <!-- Add Modal Container -->
+  <div class="modal fade" id="showModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{showModal}}</h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          <app-mm-entry *ngIf="showModal == 'Add MM'" (response)="addMMResponse($event)"></app-mm-entry>
+          <app-pbk-entry *ngIf="showModal == 'Add PBK'" (response)="addPbkResponse($event)"></app-pbk-entry>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>

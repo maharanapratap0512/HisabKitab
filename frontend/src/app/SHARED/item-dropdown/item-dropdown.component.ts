@@ -1,5 +1,8 @@
 import { Component, Input, Output, EventEmitter, forwardRef, OnChanges, SimpleChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { GlobalService } from 'src/app/services/global.service';
+
+declare var $: any;
 
 @Component({
   selector: 'app-item-dropdown',
@@ -30,12 +33,20 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
   @Output() itemIdChange = new EventEmitter<any>();
   @Output() subitemIdChange = new EventEmitter<any>();
   @Output() change = new EventEmitter<any>();
+  @Output() addItem = new EventEmitter<void>();
+  @Output() addSubitem = new EventEmitter<void>();
+  @Output() addClick = new EventEmitter<string>();
 
   options: any[] = [];
   selectedValue: any = null;
 
+  showModal: string = '';
+  modalId: string = 'itemDropModal_' + Math.random().toString(36).substring(2, 9);
+
   onChange: any = () => { };
   onTouched: any = () => { };
+
+  constructor(public gs: GlobalService) { }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['items'] || changes['categoryIds']) {
@@ -192,5 +203,103 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
   customSearch(term: string, item: any) {
     term = term.toLowerCase();
     return item.searchTags.indexOf(term) > -1;
+  }
+
+  onAddItemClick(e: Event) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    this.addItem.emit();
+    this.addClick.emit('Add Item');
+    this.showModal = 'Add Item';
+    setTimeout(() => {
+      if (typeof $ !== 'undefined') {
+        $('#' + this.modalId).modal('show');
+      }
+    }, 50);
+  }
+
+  onAddSubitemClick(e: Event) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    this.addSubitem.emit();
+    this.addClick.emit('Add Subitem');
+    this.showModal = 'Add Subitem';
+    setTimeout(() => {
+      if (typeof $ !== 'undefined') {
+        $('#' + this.modalId).modal('show');
+      }
+    }, 50);
+  }
+
+  closeSelfModal() {
+    if (typeof $ !== 'undefined') {
+      $('#' + this.modalId).modal('hide');
+    }
+    this.showModal = '';
+  }
+
+  onSelfItemCreated(ev: any) {
+    if (ev && ev._id) {
+      if (!this.items) {
+        this.items = [];
+      }
+      const exists = this.items.some((it: any) => it._id === ev._id);
+      if (!exists) {
+        this.items.push(ev);
+      }
+      this.flattenItems();
+
+      this.itemId = ev._id;
+      this.subitemId = null;
+      this.syncSelectedValue();
+      if (this.selectedValue) {
+        this.onSelectChange(this.selectedValue);
+      }
+    }
+    this.closeSelfModal();
+  }
+
+  onSelfSubitemCreated(ev: any) {
+    if (ev && ev._id) {
+      if (!this.items) {
+        this.items = [];
+      }
+      const parentItem = this.items.find((it: any) => it._id === ev.item_id);
+      if (parentItem) {
+        if (!parentItem.subitems) {
+          parentItem.subitems = [];
+        }
+        const subExists = parentItem.subitems.some((s: any) => s._id === ev._id);
+        if (!subExists) {
+          parentItem.subitems.push(ev);
+        }
+      }
+      this.flattenItems();
+
+      this.itemId = ev.item_id;
+      this.subitemId = ev._id;
+      this.syncSelectedValue();
+      if (this.selectedValue) {
+        this.onSelectChange(this.selectedValue);
+      }
+    }
+    this.closeSelfModal();
+  }
+
+  selectAll() {
+    this.selectedValue = [...this.options];
+    const ids = this.options.map(o => o.id);
+    this.onChange(ids);
+    this.change.emit(ids);
+  }
+
+  deselectAll() {
+    this.selectedValue = [];
+    this.onChange([]);
+    this.change.emit([]);
   }
 }

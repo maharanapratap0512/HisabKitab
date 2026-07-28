@@ -1,10 +1,35 @@
 [
     {
+        "version": "35.3",
+        "date": "28-07-2026",
+        "summary": "Inline Creation in Form Dropdowns & English PBK Display",
+        "summary_hin": "फॉर्म ड्रॉपडाउन में इनलाइन निर्माण व अंग्रेजी PBK नाम",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Entry Forms & Import",
+                "title": "Add New Option Across Dropdowns with Self-Contained Modals",
+                "title_hin": "सभी फॉर्म व इम्पोर्ट ड्रॉपडाउन में नए निर्माण विकल्प (+ Add)",
+                "desc": "Quickly create master records (+ Add Item, + Add Subitem, + Add MM, + Add PBK, Condition, Aawak Type, Aawak Source, Usage List, etc.) directly inside form dropdowns and import correction tabs with instant auto-selection.",
+                "desc_hin": "एंट्री फॉर्म और इम्पोर्ट करेक्शन टैब में ड्रॉपडाउन से ही सीधे नए रिकॉर्ड बनाने और स्वतः चुने जाने की सुविधा।"
+            },
+            {
+                "type": "feature",
+                "module": "Master Data",
+                "title": "English PBK Name Display Across Dropdowns",
+                "title_hin": "PBK ड्रॉपडाउन में अंग्रेजी PBK नाम का प्रदर्शन",
+                "desc": "PBK dropdowns now display both Hindi and English names for clearer identification and search.",
+                "desc_hin": "आसानी से खोजने और चुनने के लिए PBK ड्रॉपडाउन में अब हिंदी के साथ अंग्रेजी PBK नाम भी प्रदर्शित होते हैं।"
+            }
+        ]
+    },
+    {
         "version": "35.2",
         "date": "22-07-2026",
         "summary": "Interactive Page Tours & Universal Bulk Delete",
         "summary_hin": "इंटरएक्टिव पेज टूर व बल्क डिलीट",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",

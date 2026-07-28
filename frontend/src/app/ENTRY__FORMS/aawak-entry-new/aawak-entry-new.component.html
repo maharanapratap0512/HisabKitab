@@ -72,7 +72,7 @@
                             <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
                             </ng-option>
                             <ng-option *ngFor="let item of pbks" [value]="item._id">
-                                {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}} : {{item.relation}} :
+                                {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} : {{item.relation}} :
                                 {{item.relative_name}}
                             </ng-option>
                         </ng-select>
@@ -197,6 +197,7 @@
                                             [selectOnTab]="true"
                                             [ngClass]="{'validation' : (item_id?.touched || fMain.submitted) && item_id.errors?.['required']}"
                                             required>
+                                            <ng-option value="+add" class="text-primary fw-bold">+ Add Item</ng-option>
                                             <ng-option *ngFor="let item of items | filterByDate:fs.aawakFormMain.date"
                                                 [value]="item._id">{{item.item_hin}} :
                                                 {{item.item_eng}} : {{item.item_roman ? item.item_roman : ''}} :
@@ -208,6 +209,7 @@
                                             placeholder="Select SubitemList" [clearable]="true" [virtualScroll]="true"
                                             [(ngModel)]="awkForm.subitem_id" name="subitem_id" #subitem_id="ngModel"
                                             (change)="subitemSelected($event, i)" [selectOnTab]="true">
+                                            <ng-option value="+add" class="text-primary fw-bold">+ Add Subitem</ng-option>
                                             <ng-option
                                                 *ngFor="let item of awkForm.subitems | filterByDate:fs.aawakFormMain.date"
                                                 [value]="item._id">{{item.subitem_hin}}
@@ -218,9 +220,9 @@
                                     <td *ngIf="settings.aawak.product_id">
                                         <ng-select class="custom-sm" style="width: 100%;" placeholder="Select Product"
                                             [clearable]="true" [virtualScroll]="true" [(ngModel)]="awkForm.product_id"
-                                            name="product_id" #product_id="ngModel"
-                                            (change)="productSelected($event, i)" [selectOnTab]="true">
-                                            <ng-option selected="selected" disabled value="">Select Product</ng-option>
+                                            name="product_id" #product_id="ngModel" (change)="productSelected($event, i)"
+                                            [selectOnTab]="true">
+                                            <ng-option value="+add" class="text-primary fw-bold">+ Add Product</ng-option>
                                             <ng-option *ngFor="let item of products" [value]="item._id">
                                                 {{item.product_code ? item.product_code : ''}} : {{item.sr_num ?
                                                 item.sr_num : ''}}
@@ -231,9 +233,10 @@
                                         <ng-select class="custom-sm mt-1" style="width: 100%;"
                                             placeholder="Select Condition" [clearable]="true" [virtualScroll]="true"
                                             [(ngModel)]="awkForm.condition_id" name="condition_id"
-                                            #condition_id="ngModel" [selectOnTab]="true">
+                                            #condition_id="ngModel" (change)="conditionSelected($event, i)" [selectOnTab]="true">
                                             <ng-option selected="selected" disabled value="">Select
                                                 Condition</ng-option>
+                                            <ng-option value="+add" class="text-primary fw-bold">+ Add Condition</ng-option>
                                             <ng-option *ngFor="let item of conditions"
                                                 [value]="item._id">{{item.list_name_hin}} : {{item.list_name_roman}} :
                                                 {{item.list_name_eng}} </ng-option>
@@ -283,9 +286,10 @@
                                         <ng-select class="custom-sm" style="width: 100%;" placeholder="Aawak Source"
                                             [clearable]="true" [virtualScroll]="true"
                                             [(ngModel)]="awkForm.aawak_source_id" name="aawak_source_id"
-                                            #aawak_source_id="ngModel" [selectOnTab]="true">
+                                            #aawak_source_id="ngModel" (change)="aawakSourceSelected($event, i)" [selectOnTab]="true">
                                             <ng-option selected="selected" disabled value="">Aawak Source
                                             </ng-option>
+                                            <ng-option value="+add" class="text-primary fw-bold">+ Add Aawak Source</ng-option>
                                             <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
                                                 {{item.list_name_hin}} : {{item.list_name_roman}} :
                                                 {{item.list_name_eng}}
@@ -296,11 +300,12 @@
                                         <ng-select class="custom-sm" style="width: 100%;" placeholder="Aawak Type"
                                             [clearable]="true" [virtualScroll]="true"
                                             [(ngModel)]="awkForm.aawak_type_id" name="aawak_type_id"
-                                            #aawak_type_id="ngModel" [selectOnTab]="true"
+                                            #aawak_type_id="ngModel" (change)="aawakTypeSelected($event, i)" [selectOnTab]="true"
                                             [ngClass]="{'validation' : (aawak_type_id?.touched || fMain.submitted) && aawak_type_id.errors?.['required']}"
                                             required>
                                             <ng-option selected="selected" disabled value="">Aawak Type
                                             </ng-option>
+                                            <ng-option value="+add" class="text-primary fw-bold">+ Add Aawak Type</ng-option>
                                             <ng-option *ngFor="let item of aawak_types" [value]="item._id">
                                                 {{item.list_name_hin}} : {{item.list_name_roman}} :
                                                 {{item.list_name_eng}}
@@ -311,10 +316,11 @@
                                         <ng-select class="custom-sm" style="width: 100%;" placeholder="Usage List"
                                             [clearable]="true" [virtualScroll]="true"
                                             [(ngModel)]="awkForm.usage_list_id" name="usage_list_id"
-                                            #usage_list_id="ngModel" [selectOnTab]="true"
+                                            #usage_list_id="ngModel" (change)="usageListSelected($event, i)" [selectOnTab]="true"
                                             [ngClass]="{'validation' : (usage_list_id?.touched || fMain.submitted) && usage_list_id.errors?.['required']}">
                                             <ng-option selected="selected" disabled value="">Usage List
                                             </ng-option>
+                                            <ng-option value="+add" class="text-primary fw-bold">+ Add Usage List</ng-option>
                                             <ng-option *ngFor="let item of usage_lists" [value]="item._id">
                                                 {{item.list_name_hin}} : {{item.list_name_roman}} :
                                                 {{item.list_name_eng}}
@@ -424,6 +430,17 @@
 
                     <app-data-view *ngIf="showModal == 'Show Jawak'" [getData]="viewData" Type="jawak"
                         [isLocal]="true"></app-data-view>
+
+                    <app-mm-entry *ngIf="showModal == 'Add MM'" (response)='addMMResponse($event)'></app-mm-entry>
+                    <app-pbk-entry *ngIf="showModal == 'Add PBK'" (response)='addPbkResponse($event)'></app-pbk-entry>
+                    <app-nimitt-entry *ngIf="showModal == 'Add Nimitt'" (response)='addNimittResponse($event)'></app-nimitt-entry>
+                    <app-item-entry *ngIf="showModal == 'Add Item'" (response)='addItemResponse($event)'></app-item-entry>
+                    <app-subitem-entry *ngIf="showModal == 'Add Subitem'" (response)='addSubitemResponse($event)'></app-subitem-entry>
+                    <app-product-entry *ngIf="showModal == 'Add Product'" (response)='addProductResponse($event)'></app-product-entry>
+                    <app-support-list-entry *ngIf="showModal == 'Add Condition'" [list_type]="'condition'" (response)="addConditionResponse($event)"></app-support-list-entry>
+                    <app-support-list-entry *ngIf="showModal == 'Add Aawak Source'" [list_type]="'aawak_source'" (response)="addAawakSourceResponse($event)"></app-support-list-entry>
+                    <app-support-list-entry *ngIf="showModal == 'Add Aawak Type'" [list_type]="'aawak_type'" (response)="addAawakTypeResponse($event)"></app-support-list-entry>
+                    <app-support-list-entry *ngIf="showModal == 'Add Usage List'" [list_type]="'usage_list'" (response)="addUsageListResponse($event)"></app-support-list-entry>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" style="width: 120px;"

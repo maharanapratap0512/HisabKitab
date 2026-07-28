@@ -66,12 +66,12 @@ export class VehicleEntryComponent implements OnInit {
 
   openModal(name: any) {
     this.showModal = name;
-    $('#vehEntryComponent > #' + name).modal('show')
+    $('#vehEntryComponent > #showModal').modal('show');
   }
 
-  closeModal(name: any) {
-    this.showModal = name;
-    $('#vehEntryComponent > #' + this.showModal).modal('hide')
+  closeModal() {
+    $('#vehEntryComponent > #showModal').modal('hide');
+    this.showModal = '';
   }
 
   formatDate(d: any) {
@@ -200,5 +200,10 @@ export class VehicleEntryComponent implements OnInit {
     }
   }
 
-
+  addMMResponse(ev: any) {
+    if (ev && ev._id) {
+      this.vehForm.patchValue({ mm_id: ev._id });
+    }
+    this.closeModal();
+  }
 }

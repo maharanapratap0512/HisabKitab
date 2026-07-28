@@ -33,10 +33,10 @@ export class GlobalService {
     { m: 5, name: 'May', name_hin: 'मई' },
     { m: 6, name: 'June', name_hin: 'जून' },
     { m: 7, name: 'July', name_hin: 'जुलाई' },
-    { m: 8, name: 'August', name_hin: 'ऑगस्ट' },
-    { m: 9, name: 'September', name_hin: 'सप्टेम्बर' },
+    { m: 8, name: 'August', name_hin: 'अगस्त' },
+    { m: 9, name: 'September', name_hin: 'सितंबर' },
     { m: 10, name: 'October', name_hin: 'अक्टूबर' },
-    { m: 11, name: 'November', name_hin: 'नवम्बर' },
+    { m: 11, name: 'November', name_hin: 'नवंबर' },
     { m: 12, name: 'December', name_hin: 'दिसंबर' },
   ];
 

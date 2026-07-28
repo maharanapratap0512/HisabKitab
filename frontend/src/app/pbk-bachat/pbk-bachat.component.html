@@ -56,7 +56,7 @@
                                 <ng-select class="custom" [items]="pbks" bindLabel="pbk_hin" bindValue="_id"
                                     placeholder="Select PBK" [(ngModel)]="filterBody.pbk_id" (change)="filterChange()">
                                     <ng-template ng-option-tmp let-item="item">
-                                        {{item.pbk_hin}} ({{item.roll_no}})
+                                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}}
                                     </ng-template>
                                 </ng-select>
                             </div>

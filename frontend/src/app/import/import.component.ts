@@ -12,6 +12,8 @@ import { ExcelExportService } from '../services/excel-export.service';
 import { GlobalService } from '../services/global.service';
 import { HttpService } from '../services/http.service';
 
+declare var $: any;
+
 @Component({
   selector: 'app-import',
   templateUrl: './import.component.html',
@@ -58,6 +60,57 @@ export class ImportComponent implements OnInit {
   uData: any = {};
   years: any = [];
   months: any = [];
+  showAddModal: string = '';
+  activeCorrectionRow: any = null;
+
+  handleAddOption(val: any, data: any, modalTitle: string) {
+    if (val === '+add') {
+      this.activeCorrectionRow = data;
+      data.id = null;
+      this.showAddModal = modalTitle;
+      setTimeout(() => {
+        $('#showAddModal').modal('show');
+      }, 100);
+    }
+  }
+
+  onCategoryChange(ev: any, data: any) {
+    if (ev === '+add') {
+      this.handleAddOption('+add', data, 'Add Category');
+    } else if (ev) {
+      this.catSelected(ev, data.type);
+    }
+  }
+
+  onItemChange(ev: any, data: any) {
+    if (ev === '+add') {
+      this.handleAddOption('+add', data, 'Add Item');
+    } else if (ev) {
+      this.itemSelected(ev);
+    }
+  }
+
+  onSubitemChange(ev: any, data: any) {
+    if (ev === '+add') {
+      this.handleAddOption('+add', data, 'Add Subitem');
+    }
+  }
+
+  onAddResponse(res: any) {
+    if (res) {
+      const newId = res._id || (res.data && res.data._id) || res;
+      if (this.activeCorrectionRow && typeof newId === 'string') {
+        this.activeCorrectionRow.id = newId;
+      }
+    }
+    this.closeAddModal();
+  }
+
+  closeAddModal() {
+    $('#showAddModal').modal('hide');
+    this.showAddModal = '';
+    this.activeCorrectionRow = null;
+  }
   failImport: any = [];
   importHistory: any = [];
   import$ = new Subject();

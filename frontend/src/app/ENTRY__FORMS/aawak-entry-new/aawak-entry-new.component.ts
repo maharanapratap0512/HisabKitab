@@ -245,29 +245,42 @@ export class AawakEntryNewComponent implements OnInit {
     }
   }
 
+  activeRowIndex: any = null;
+
   itemSelected(ev: any, i: any) {
+    if (ev === '+add') {
+      this.fs.aawakFormMain.aawaks[i].item_id = null;
+      this.activeRowIndex = i;
+      this.openModal('Add Item');
+      return;
+    }
     if (ev) {
-      let item = this.items.find((i: { _id: any; }) => i._id == ev);
+      let item = this.items.find((it: { _id: any; }) => it._id == ev);
       this.lotNos = this.lotNoAll.filter((l: { item_id: any; }) => l.item_id == ev);
       this.getProductData(ev);
-      // this.subitems = item.subitems || [];
-      this.fs.aawakFormMain.aawaks[i].subitems = item.subitems || [];
+      this.fs.aawakFormMain.aawaks[i].subitems = item ? (item.subitems || []) : [];
 
-      if (!this.isEdit)
+      if (!this.isEdit && item)
         this.fs.aawakFormMain.aawaks[i].unit_id = item.unit_id;
     }
     else {
       this.subitems = [];
       this.lotNos = this.lotNoAll;
-      this.fs.aawakFormMain.aawaks[i].unit_id = null
-      this.fs.aawakFormMain.aawaks[i].subitem_id = null
+      this.fs.aawakFormMain.aawaks[i].unit_id = null;
+      this.fs.aawakFormMain.aawaks[i].subitem_id = null;
       this.fs.aawakFormMain.aawaks[i].lot_no = null;
     }
   }
 
   subitemSelected(ev: any, i: any) {
+    if (ev === '+add') {
+      this.fs.aawakFormMain.aawaks[i].subitem_id = null;
+      this.activeRowIndex = i;
+      this.openModal('Add Subitem');
+      return;
+    }
     if (ev) {
-      let subitem = this.subitems.find((i: { _id: any; }) => i._id == ev);
+      let subitem = this.subitems.find((it: { _id: any; }) => it._id == ev);
       this.lotNos = this.lotNos.filter((l: { subitem_id: any; }) => l.subitem_id == ev);
       this.products = this.products.filter((p: { subitem_id: any; }) => p.subitem_id == ev);
       if (!this.isEdit && subitem)
@@ -278,7 +291,7 @@ export class AawakEntryNewComponent implements OnInit {
         this.products = this.getProductData(this.fs.aawakFormMain.aawaks[i].item_id);
         this.lotNos = this.lotNoAll.filter((l: { item_id: any; }) => l.item_id == this.fs.aawakFormMain.aawaks[i].item_id);
       } else {
-        this.products = []
+        this.products = [];
         this.lotNos = this.lotNoAll;
         this.fs.aawakFormMain.aawaks[i].lot_no = null;
       }
@@ -286,15 +299,145 @@ export class AawakEntryNewComponent implements OnInit {
   }
 
   productSelected(ev: any, i: any) {
-    // this.isCondition = true;
+    if (ev === '+add') {
+      this.fs.aawakFormMain.aawaks[i].product_id = null;
+      this.activeRowIndex = i;
+      this.openModal('Add Product');
+      return;
+    }
     let product = this.products.find((p: { _id: any; }) => p._id == ev);
-    this.fs.aawakFormMain.aawaks[i].condition_id = product ? product.condition_id : null;
-    this.fs.aawakFormMain.aawaks[i].item_id = product.item_id;
-    this.fs.aawakFormMain.aawaks[i].subitem_id = product.subitem_id;
-    this.fs.aawakFormMain.aawaks[i].qty = 1;
-    this.fs.aawakFormMain.aawaks[i].unit_id = 1;
-    this.fs.aawakFormMain.aawaks[i].rate = product.price ? product.price : null;
-    this.rateClick(i);
+    if (product) {
+      this.fs.aawakFormMain.aawaks[i].condition_id = product ? product.condition_id : null;
+      this.fs.aawakFormMain.aawaks[i].item_id = product.item_id;
+      this.fs.aawakFormMain.aawaks[i].subitem_id = product.subitem_id;
+      this.fs.aawakFormMain.aawaks[i].qty = 1;
+      this.fs.aawakFormMain.aawaks[i].unit_id = 1;
+      this.fs.aawakFormMain.aawaks[i].rate = product.price ? product.price : null;
+      this.rateClick(i);
+    }
+  }
+
+  addMMResponse(ev: any) {
+    if (ev && ev._id) {
+      this.fs.aawakFormMain.aawak_mm_id = ev._id;
+    }
+    this.closeModal();
+  }
+
+  addPbkResponse(ev: any) {
+    if (ev && ev._id) {
+      this.fs.aawakFormMain.pbk_id = ev._id;
+    }
+    this.closeModal();
+  }
+
+  addNimittResponse(ev: any) {
+    if (ev && ev._id) {
+      this.fs.aawakFormMain.nimitt_id = ev._id;
+    }
+    this.closeModal();
+  }
+
+  addItemResponse(ev: any) {
+    if (ev && ev._id) {
+      if (this.activeRowIndex !== null && this.activeRowIndex !== undefined) {
+        this.fs.aawakFormMain.aawaks[this.activeRowIndex].item_id = ev._id;
+      }
+    }
+    this.closeModal();
+    this.activeRowIndex = null;
+  }
+
+  addSubitemResponse(ev: any) {
+    if (ev && ev._id) {
+      if (this.activeRowIndex !== null && this.activeRowIndex !== undefined) {
+        this.fs.aawakFormMain.aawaks[this.activeRowIndex].subitem_id = ev._id;
+      }
+    }
+    this.closeModal();
+    this.activeRowIndex = null;
+  }
+
+  addProductResponse(ev: any) {
+    if (ev && ev._id) {
+      if (this.activeRowIndex !== null && this.activeRowIndex !== undefined) {
+        this.fs.aawakFormMain.aawaks[this.activeRowIndex].product_id = ev._id;
+      }
+    }
+    this.closeModal();
+    this.activeRowIndex = null;
+  }
+
+  conditionSelected(ev: any, i: any) {
+    if (ev === '+add') {
+      this.fs.aawakFormMain.aawaks[i].condition_id = null;
+      this.activeRowIndex = i;
+      this.openModal('Add Condition');
+    }
+  }
+
+  aawakSourceSelected(ev: any, i: any) {
+    if (ev === '+add') {
+      this.fs.aawakFormMain.aawaks[i].aawak_source_id = null;
+      this.activeRowIndex = i;
+      this.openModal('Add Aawak Source');
+    }
+  }
+
+  aawakTypeSelected(ev: any, i: any) {
+    if (ev === '+add') {
+      this.fs.aawakFormMain.aawaks[i].aawak_type_id = null;
+      this.activeRowIndex = i;
+      this.openModal('Add Aawak Type');
+    }
+  }
+
+  usageListSelected(ev: any, i: any) {
+    if (ev === '+add') {
+      this.fs.aawakFormMain.aawaks[i].usage_list_id = null;
+      this.activeRowIndex = i;
+      this.openModal('Add Usage List');
+    }
+  }
+
+  addConditionResponse(ev: any) {
+    if (ev && ev._id) {
+      if (this.activeRowIndex !== null && this.activeRowIndex !== undefined) {
+        this.fs.aawakFormMain.aawaks[this.activeRowIndex].condition_id = ev._id;
+      }
+    }
+    this.closeModal();
+    this.activeRowIndex = null;
+  }
+
+  addAawakSourceResponse(ev: any) {
+    if (ev && ev._id) {
+      if (this.activeRowIndex !== null && this.activeRowIndex !== undefined) {
+        this.fs.aawakFormMain.aawaks[this.activeRowIndex].aawak_source_id = ev._id;
+      }
+    }
+    this.closeModal();
+    this.activeRowIndex = null;
+  }
+
+  addAawakTypeResponse(ev: any) {
+    if (ev && ev._id) {
+      if (this.activeRowIndex !== null && this.activeRowIndex !== undefined) {
+        this.fs.aawakFormMain.aawaks[this.activeRowIndex].aawak_type_id = ev._id;
+      }
+    }
+    this.closeModal();
+    this.activeRowIndex = null;
+  }
+
+  addUsageListResponse(ev: any) {
+    if (ev && ev._id) {
+      if (this.activeRowIndex !== null && this.activeRowIndex !== undefined) {
+        this.fs.aawakFormMain.aawaks[this.activeRowIndex].usage_list_id = ev._id;
+      }
+    }
+    this.closeModal();
+    this.activeRowIndex = null;
   }
 
   qtyClick(i: any) {

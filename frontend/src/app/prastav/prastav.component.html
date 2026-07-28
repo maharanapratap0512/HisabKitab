@@ -195,7 +195,7 @@
                       dropdownClass="custom-sm" [(ngModel)]="filterBody.pbk_id" (change)="applyFilter()"
                       style="width: 100%;">
                       <ng-option *ngFor="let item of pbks" [value]="item._id">
-                        {{item.pbk_hin}} : {{item.pbk_eng}}
+                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} : {{item.relation}} : {{item.relative_name}}
                       </ng-option>
                     </ng-select>
                   </app-popover-filter>

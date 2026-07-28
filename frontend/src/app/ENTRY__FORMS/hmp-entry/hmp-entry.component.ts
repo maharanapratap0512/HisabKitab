@@ -460,8 +460,8 @@ export class HmpEntryComponent implements OnInit {
   }
 
   closeModal() {
-    // Close logic handled by parent or jquery
-    $('#hmpEntryModal').modal('hide'); // Assuming ID
+    $('#hmpEntryComponent > #showModal').modal('hide');
+    this.showModal = '';
   }
 
   getJawakQty(i: any) {
@@ -633,5 +633,19 @@ export class HmpEntryComponent implements OnInit {
     } else {
       rowOrModel.auto_aawak = isChecked;
     }
+  }
+
+  openModal(title: string) {
+    this.showModal = title;
+    setTimeout(() => {
+      $('#hmpEntryComponent > #showModal').modal('show');
+    }, 100);
+  }
+
+  addMMResponse(ev: any) {
+    if (ev && ev._id) {
+      this.fs.hmpBatchForm.mm_id = ev._id;
+    }
+    this.closeModal();
   }
 }
