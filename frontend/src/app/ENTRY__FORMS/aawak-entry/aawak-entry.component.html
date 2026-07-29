@@ -749,10 +749,10 @@
                               [virtualScroll]="true" [(ngModel)]="jtype" [ngModelOptions]="{standalone: true}" required>
                               <ng-option selected="selected" disabled value="">Jawak Type
                               </ng-option>
-                              <ng-option *ngFor="let item of jawak_types"
-                                 [value]="{ id: item._id, list_name_hin: item.list_name_hin}">
-                                 {{item.list_name_hin}} : {{item.list_name_eng}}
-                              </ng-option>
+                               <ng-option *ngFor="let item of jawak_types"
+                                  [value]="{ id: item._id, list_name_hin: item.list_name_hin, list_name_eng: item.list_name_eng, list_name_roman: item.list_name_roman}">
+                                  {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
+                               </ng-option>
                            </ng-select>
                         </div>
                      </div>

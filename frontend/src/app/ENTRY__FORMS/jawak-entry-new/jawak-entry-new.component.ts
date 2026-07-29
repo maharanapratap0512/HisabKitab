@@ -525,6 +525,20 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
     }
   }
 
+  addPbkResponse(ev: any) {
+    if (ev && ev._id) {
+      this.fs.jawakFormMain.pbk_id = ev._id;
+    }
+    this.closeModal();
+  }
+
+  addMMResponse(ev: any) {
+    if (ev && ev._id) {
+      this.fs.jawakFormMain.jawak_mm_id = ev._id;
+    }
+    this.closeModal();
+  }
+
   addProductResponse(ev: any) {
     if (ev && ev._id) {
       if (this.activeRowIndex !== null && this.activeRowIndex !== undefined) {

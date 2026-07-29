@@ -67,7 +67,7 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
 
       if (this.categoryIds && this.categoryIds.length > 0) {
         itemMatches = it.categories && it.categories.some((c: any) => this.categoryIds.includes(c._id));
-        
+
         if (!itemMatches && it.subitems && it.subitems.length > 0) {
           matchingSubitems = it.subitems.filter((sub: any) => sub.categories && sub.categories.some((c: any) => this.categoryIds.includes(c._id)));
         } else if (itemMatches) {
@@ -84,12 +84,12 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
       // Parent item
       const itemHin = it.item_hin ? it.item_hin.trim() : '';
       const itemEng = it.item_eng ? it.item_eng.trim() : '';
-      
+
       let aliasTags = '';
       if (it.item_aliases && Array.isArray(it.item_aliases)) {
-          aliasTags = it.item_aliases.map((a: any) => a.alias).join(' ');
+        aliasTags = it.item_aliases.map((a: any) => a.alias).join(' ');
       }
-      
+
       if (!this.categoryIds || this.categoryIds.length === 0 || itemMatches) {
         flat.push({
           id: `${it._id}:`,
@@ -110,7 +110,7 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
         matchingSubitems.forEach((sub: any) => {
           const subitemHin = sub.subitem_hin ? String(sub.subitem_hin).trim() : '';
           const subitemEng = sub.subitem_eng ? String(sub.subitem_eng).trim() : '';
-          
+
           flat.push({
             id: `${it._id}:${sub._id}`,
             item_id: it._id,
@@ -130,7 +130,7 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
       }
     });
     this.options = flat;
-    
+
     // After flattening, we might need to re-sync the selected object
     if (this.itemId !== undefined || this.subitemId !== undefined) {
       this.syncSelectedValue();

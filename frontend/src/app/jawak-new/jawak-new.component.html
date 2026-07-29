@@ -37,7 +37,8 @@
                                                             [(ngModel)]="settings.jawak.samePageEntryForm"
                                                             class="form-check-input" (change)="UISettingsChanged()"
                                                             name="samePageEntryForm" id="entryInModal">
-                                                        <label class="form-check-label" for="entryInModal">मोडल में</label>
+                                                        <label class="form-check-label" for="entryInModal">मोडल
+                                                            में</label>
                                                     </div>
                                                 </div>
                                             </li>
@@ -46,15 +47,16 @@
                                                 <div class="d-flex justify-content-between me-3 fs-6">
                                                     <div class="pl-2 form-check form-radio-info mb-1">
                                                         <input type="radio" [value]="'individual'"
-                                                            [(ngModel)]="settings.jawak.viewMode" class="form-check-input"
-                                                            (change)="UISettingsChanged()" name="viewMode" id="entryInPage">
+                                                            [(ngModel)]="settings.jawak.viewMode"
+                                                            class="form-check-input" (change)="UISettingsChanged()"
+                                                            name="viewMode" id="entryInPage">
                                                         <label class="form-check-label" for="entryInPage">Single</label>
                                                     </div>
                                                     <div class="pl-2 form-check form-radio-info mb-1">
                                                         <input type="radio" [value]="'voucher'"
-                                                            [(ngModel)]="settings.jawak.viewMode" class="form-check-input"
-                                                            (change)="UISettingsChanged()" name="viewMode"
-                                                            id="entryInModal">
+                                                            [(ngModel)]="settings.jawak.viewMode"
+                                                            class="form-check-input" (change)="UISettingsChanged()"
+                                                            name="viewMode" id="entryInModal">
                                                         <label class="form-check-label" for="entryInModal">Voucher Wise
                                                         </label>
                                                     </div>
@@ -66,29 +68,39 @@
 
                                 <!-- Tour Hub Menu Dropdown -->
                                 <div class="dropdown d-inline-block ms-1">
-                                   <button type="button" class="btn btn-outline-primary dropdown-toggle px-2" data-bs-toggle="dropdown" aria-expanded="false" title="Interactive Guided Tours">
-                                      <i class="uil-question-circle h4"></i>
-                                   </button>
-                                   <div class="dropdown-menu dropdown-menu-end shadow-lg py-2" style="min-width: 260px; z-index: 1050;">
-                                      <h6 class="dropdown-header text-primary fw-bold">🎓 Guided Page Tours / मार्गदर्शिका</h6>
-                                      <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('master')">
-                                         <i class="uil-rocket me-2 text-primary"></i> <strong>Full Master Tour</strong> (10 steps)
-                                      </a>
-                                      <div class="dropdown-divider"></div>
-                                      <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('add_filter')">
-                                         <i class="uil-search-plus me-2 text-info"></i> <strong>1. Settings & Filters</strong>
-                                      </a>
-                                      <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('import_export')">
-                                         <i class="uil-export me-2 text-success"></i> <strong>2. Excel Import & Export</strong>
-                                      </a>
-                                      <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('table_data')">
-                                         <i class="uil-table me-2 text-warning"></i> <strong>3. Table Data & Bulk Operations</strong>
-                                      </a>
-                                      <div class="dropdown-divider"></div>
-                                      <a class="dropdown-item py-1 text-muted cursor-pointer" (click)="resetTourStatus()">
-                                         <i class="uil-refresh me-2"></i> Reset Tour Progress
-                                      </a>
-                                   </div>
+                                    <button type="button" class="btn btn-outline-primary dropdown-toggle px-2"
+                                        data-bs-toggle="dropdown" aria-expanded="false"
+                                        title="Interactive Guided Tours">
+                                        <i class="uil-question-circle h4"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-end shadow-lg py-2"
+                                        style="min-width: 260px; z-index: 1050;">
+                                        <h6 class="dropdown-header text-primary fw-bold">🎓 Guided Page Tours /
+                                            मार्गदर्शिका</h6>
+                                        <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('master')">
+                                            <i class="uil-rocket me-2 text-primary"></i> <strong>Full Master
+                                                Tour</strong> (10 steps)
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('add_filter')">
+                                            <i class="uil-search-plus me-2 text-info"></i> <strong>1. Settings &
+                                                Filters</strong>
+                                        </a>
+                                        <a class="dropdown-item py-2 cursor-pointer"
+                                            (click)="startTour('import_export')">
+                                            <i class="uil-export me-2 text-success"></i> <strong>2. Excel Import &
+                                                Export</strong>
+                                        </a>
+                                        <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('table_data')">
+                                            <i class="uil-table me-2 text-warning"></i> <strong>3. Table Data & Bulk
+                                                Operations</strong>
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item py-1 text-muted cursor-pointer"
+                                            (click)="resetTourStatus()">
+                                            <i class="uil-refresh me-2"></i> Reset Tour Progress
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -111,22 +123,24 @@
                         </div>
                         <div class="col-4">
                             <div class="form-group">
-                                <input id="tour-search-input" type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                                    name="search">
+                                <input id="tour-search-input" type="text" class="form-control" placeholder="Search Here"
+                                    [(ngModel)]="term" name="search">
                             </div>
                         </div>
                         <div class="col-auto">
                         </div>
                         <div class="col-4 d-flex">
-                            <button id="tour-import-btn" class="file btn btn-success w-50" style="font-weight: 700 !important;">
+                            <button id="tour-import-btn" class="file btn btn-success w-50"
+                                style="font-weight: 700 !important;">
                                 <i class="uil uil-arrow-to-bottom"></i> Excel Import
                                 <input type="file" class="inputtag"
                                     accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                                     (change)="excelImport($event)" />
                             </button>
                             <div id="tour-export-container" class="w-50 ms-2">
-                                <button id="tour-export-btn" type="button" class="btn btn-outline-success dropdown-toggle w-100"
-                                    data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
+                                <button id="tour-export-btn" type="button"
+                                    class="btn btn-outline-success dropdown-toggle w-100" data-bs-toggle="dropdown"
+                                    aria-expanded="false"> Export To Excel </button>
                                 <div class="dropdown-menu">
                                 </div>
                             </div>
@@ -134,7 +148,8 @@
                         </div>
 
                         <div class="col-2">
-                            <button id="tour-total-count" type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
+                            <button id="tour-total-count" type="button" style="font-weight: 700 !important;"
+                                class="btn btn-light w-100">Total
                                 Count : {{total_count}}
                             </button>
                         </div>
@@ -246,7 +261,7 @@
                                                 [(ngModel)]="filterBody.jawak_type_id"
                                                 (change)="onHeaderFilterChange()">
                                                 <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                                    {{item.list_name_hin}} : {{item.list_name_eng}}
+                                                    {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
                                                 </ng-option>
                                             </ng-select>
 
@@ -271,13 +286,15 @@
                                 Not Received
                             </button>
                             <span class="badge year-box cursor-pointer badge-outline-danger ms-2"
-                               *ngIf="selectionService.getSelected(settings.jawak.viewMode === 'voucher' ? 'jawak-new-voucher' : 'jawak-new-individual').length > 0"
-                               (click)="deleteMultiple()"
-                               title="Click to perform delete.">Delete ({{selectionService.getSelected(settings.jawak.viewMode === 'voucher' ? 'jawak-new-voucher' : 'jawak-new-individual').length}})</span>
+                                *ngIf="selectionService.getSelected(settings.jawak.viewMode === 'voucher' ? 'jawak-new-voucher' : 'jawak-new-individual').length > 0"
+                                (click)="deleteMultiple()" title="Click to perform delete.">Delete
+                                ({{selectionService.getSelected(settings.jawak.viewMode === 'voucher' ?
+                                'jawak-new-voucher' : 'jawak-new-individual').length}})</span>
                             <span class="badge year-box cursor-pointer badge-outline-primary ms-1"
-                               *ngIf="selectionService.getSelected(settings.jawak.viewMode === 'voucher' ? 'jawak-new-voucher' : 'jawak-new-individual').length > 0"
-                               (click)="bulkEditMultiple()"
-                               title="Click to bulk edit.">Bulk Edit ({{selectionService.getSelected(settings.jawak.viewMode === 'voucher' ? 'jawak-new-voucher' : 'jawak-new-individual').length}})</span>
+                                *ngIf="selectionService.getSelected(settings.jawak.viewMode === 'voucher' ? 'jawak-new-voucher' : 'jawak-new-individual').length > 0"
+                                (click)="bulkEditMultiple()" title="Click to bulk edit.">Bulk Edit
+                                ({{selectionService.getSelected(settings.jawak.viewMode === 'voucher' ?
+                                'jawak-new-voucher' : 'jawak-new-individual').length}})</span>
                         </div>
                         <div class="col-5 d-flex justify-content-end align-items-center" *ngIf="jawakData.length">
                             <pagination-controls class="pagi text-end" (pageChange)="getJawakPage(page = $event)"
@@ -288,7 +305,9 @@
 
 
                     <!-- Voucher View Table -->
-                    <div class="table-container" *ngIf="settings.jawak.viewMode === 'voucher'" [appTableSmartCheckbox]="'jawak-new-voucher'" [idField]="'temp_id'" [selectionData]="jawakData" [showCheckboxes]="true" [rowSelector]="'tbody > tr.voucher-row'">
+                    <div class="table-container" *ngIf="settings.jawak.viewMode === 'voucher'"
+                        [appTableSmartCheckbox]="'jawak-new-voucher'" [idField]="'temp_id'" [selectionData]="jawakData"
+                        [showCheckboxes]="true" [rowSelector]="'tbody > tr.voucher-row'">
                         <table class="table table-striped table-hover table-sticky-header jawak-data-table">
                             <thead class="table-dark">
                                 <tr>
@@ -377,7 +396,9 @@
                                                     [(ngModel)]="filterBody.pbk_id" (change)="onHeaderFilterChange()"
                                                     style="width: 250px;">
                                                     <ng-option *ngFor="let item of pbks" [value]="item._id">
-                                                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} : {{item.relation}} : {{item.relative_name}}
+                                                        {{item.roll_no ? item.roll_no : '______'}} -
+                                                        {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} :
+                                                        {{item.relation}} : {{item.relative_name}}
                                                     </ng-option>
                                                 </ng-select>
                                             </app-popover-filter>
@@ -574,6 +595,7 @@
                                                                         aawak_source_id: item.aawak_source_id
                                                                     }" [(ngModel)]="item.aawak_ref_id"
                                                                     [autoSave]="true" [jawakId]="item._id"
+                                                                    [showAdd]="false"
                                                                     (saved)="onAawakRefSaved($event, row)" size="sm">
                                                                 </app-aawak-ref-dropdown>
                                                             </td>
@@ -611,7 +633,8 @@
 
                     <!-- Individual Combined View Table -->
                     <div class="table-container" *ngIf="settings.jawak.viewMode === 'individual'"
-                        appHorizontalScrollWithArrows [appTableSmartCheckbox]="'jawak-new-individual'" [selectionData]="flatJawakItems" [showCheckboxes]="true" [rowSelector]="'tbody > tr'">
+                        appHorizontalScrollWithArrows [appTableSmartCheckbox]="'jawak-new-individual'"
+                        [selectionData]="flatJawakItems" [showCheckboxes]="true" [rowSelector]="'tbody > tr'">
                         <table class="table table-striped table-hover table-sticky-header jawak-data-table">
                             <thead class="table-dark">
                                 <tr>
@@ -724,7 +747,9 @@
                                                     [(ngModel)]="filterBody.pbk_id" (change)="onHeaderFilterChange()"
                                                     style="width: 100%;">
                                                     <ng-option *ngFor="let item of pbks" [value]="item._id">
-                                                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} : {{item.relation}} : {{item.relative_name}}
+                                                        {{item.roll_no ? item.roll_no : '______'}} -
+                                                        {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} :
+                                                        {{item.relation}} : {{item.relative_name}}
                                                     </ng-option>
                                                 </ng-select>
                                             </app-popover-filter>
@@ -859,7 +884,7 @@
                                                     [(ngModel)]="filterBody.jawak_type_id"
                                                     (change)="onHeaderFilterChange()" style="width: 100%;">
                                                     <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                                        {{item.list_name_hin}} : {{item.list_name_eng}}
+                                                        {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
                                                     </ng-option>
                                                 </ng-select>
                                             </app-popover-filter>
@@ -889,7 +914,8 @@
                             <tbody>
                                 <ng-container
                                     *ngFor="let row of jawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i = index">
-                                    <tr *ngFor="let item of getFilteredJawaks(row.jawaks); let j = index" [attr.data-id]="item._id">
+                                    <tr *ngFor="let item of getFilteredJawaks(row.jawaks); let j = index"
+                                        [attr.data-id]="item._id">
                                         <td class="w-50">{{i + 1}}.{{j + 1}}</td>
                                         <td class="w-80">
                                             <button class="btn btn-xs btn-primary" title="Edit Item"

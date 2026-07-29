@@ -9,6 +9,8 @@ import { ApiService } from 'src/app/services/api.service';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 
+declare var $: any;
+
 @Component({
   selector: 'app-aawak-ref-dropdown',
   templateUrl: './aawak-ref-dropdown.component.html',
@@ -30,6 +32,9 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
   @Input() size: 'sm' | 'default' = 'default';
   @Input() mode: 'default' | 'tiny' = 'default';
   @Input() readonly: boolean = false;
+  @Input() isAdd: boolean = true;
+  @Input() showAdd: boolean = true;
+  @Input() isAddButton: boolean = true;
 
   // Auto-save related
   @Input() autoSave: boolean = false;
@@ -43,6 +48,9 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
   page = 1;
   search$ = new Subject<string>();
   currentSearchTerm = '';
+  showModal = false;
+  modalId: string = 'aawakRefDropModal_' + Math.random().toString(36).substring(2, 9);
+  presetAawakData: any = null;
 
   @ViewChild('select') select!: NgSelectComponent;
 
@@ -51,6 +59,8 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
   isJustUpdated = false;
   private updateAnimTimer: any = null;
   private searchSub: Subscription;
+  private previousFilterJson = '';
+  private fetchingSingleIds = new Set<string>();
 
   onChange: any = () => { };
   onTouched: any = () => { };
@@ -79,14 +89,29 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['mmId'] || changes['filterObj']) {
-      // Clear items if MM changes to prevent cross-contamination, but only if not just initializing
-      if (!changes['mmId']?.firstChange) {
-        this.items = [];
-        this.totalCount = 0;
+    let mmChanged = false;
+    let filterChanged = false;
+
+    if (changes['mmId'] && !changes['mmId'].firstChange && changes['mmId'].previousValue !== changes['mmId'].currentValue) {
+      mmChanged = true;
+    }
+
+    if (changes['filterObj']) {
+      const currentJson = JSON.stringify(changes['filterObj'].currentValue || {});
+      if (currentJson !== this.previousFilterJson) {
+        filterChanged = true;
+        this.previousFilterJson = currentJson;
       }
     }
-    this.checkAndFetchSelectedAawak();
+
+    if (mmChanged) {
+      this.items = [];
+      this.totalCount = 0;
+    }
+
+    if (mmChanged || filterChanged) {
+      this.checkAndFetchSelectedAawak();
+    }
   }
 
   ngOnDestroy(): void {
@@ -96,24 +121,38 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
 
   checkAndFetchSelectedAawak() {
     if (this.selectedValue && this.deptId) {
-      if (!this.items.some(item => item._id === this.selectedValue)) {
-        this.fetchSingleAawak(this.selectedValue);
+      const targetId = typeof this.selectedValue === 'object' ? this.selectedValue._id : this.selectedValue;
+      if (targetId && !this.items.some(item => item._id === targetId)) {
+        this.fetchSingleAawak(targetId);
       }
     }
   }
 
   fetchSingleAawak(id: any) {
-    if (!this.deptId) return;
+    const targetId = typeof id === 'object' ? id?._id : id;
+    if (!targetId || !this.deptId) return;
+
+    const idStr = String(targetId);
+    if (this.fetchingSingleIds.has(idStr)) {
+      return;
+    }
+
+    this.fetchingSingleIds.add(idStr);
     const body = {
-      _id: id,
+      _id: targetId,
       limit: 1
     };
-    this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.deptId, body).subscribe((res: any) => {
-      if (res && res.success && res.result && res.result.length > 0) {
-        const selectedItem = res.result[0];
-        if (!this.items.some(item => item._id === selectedItem._id)) {
-          this.items = [selectedItem, ...this.items];
+    this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.deptId, body).subscribe({
+      next: (res: any) => {
+        if (res && res.success && res.result && res.result.length > 0) {
+          const selectedItem = res.result[0];
+          if (!this.items.some(item => item._id === selectedItem._id)) {
+            this.items = [selectedItem, ...this.items];
+          }
         }
+      },
+      error: () => {
+        this.fetchingSingleIds.delete(idStr);
       }
     });
   }
@@ -225,5 +264,68 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
         this.loading = false;
         this.toastr.error('Failed to link Aawak');
       });
+  }
+
+  onAddAawakClick(e: Event) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+
+    const data: any = {};
+    if (this.mmId) {
+      data.aawak_mm_id = this.mmId;
+    }
+    if (this.filterObj) {
+      if (this.filterObj.pbk_id) data.pbk_id = this.filterObj.pbk_id;
+      if (this.filterObj.aawak_mm_id) data.aawak_mm_id = this.filterObj.aawak_mm_id;
+      if (this.filterObj.nimitt_id) data.nimitt_id = this.filterObj.nimitt_id;
+      if (this.filterObj.item_id) data.item_id = this.filterObj.item_id;
+      if (this.filterObj.subitem_id) data.subitem_id = this.filterObj.subitem_id;
+      if (this.filterObj.condition_id) data.condition_id = this.filterObj.condition_id;
+      if (this.filterObj.aawak_source_id) data.aawak_source_id = this.filterObj.aawak_source_id;
+      if (this.filterObj.aawak_type_id) data.aawak_type_id = this.filterObj.aawak_type_id;
+      if (this.filterObj.product_id) data.product_id = this.filterObj.product_id;
+    }
+
+    this.presetAawakData = data;
+    this.showModal = true;
+    setTimeout(() => {
+      if (typeof $ !== 'undefined') {
+        $('#' + this.modalId).modal('show');
+      }
+    }, 50);
+  }
+
+  closeSelfModal() {
+    if (typeof $ !== 'undefined') {
+      $('#' + this.modalId).modal('hide');
+    }
+    this.showModal = false;
+    this.presetAawakData = null;
+  }
+
+  onSelfAawakCreated(ev: any) {
+    if (ev) {
+      let createdItem: any = null;
+      if (Array.isArray(ev)) {
+        createdItem = ev[0];
+      } else if (ev.aawaks && Array.isArray(ev.aawaks)) {
+        createdItem = ev.aawaks[0];
+      } else if (ev.result && Array.isArray(ev.result)) {
+        createdItem = ev.result[0];
+      } else {
+        createdItem = ev;
+      }
+
+      if (createdItem && createdItem._id) {
+        if (!this.items.some((i: any) => i._id === createdItem._id)) {
+          this.items.unshift(createdItem);
+        }
+        this.selectedValue = createdItem._id;
+        this.commitChange(createdItem._id, createdItem);
+      }
+    }
+    this.closeSelfModal();
   }
 }

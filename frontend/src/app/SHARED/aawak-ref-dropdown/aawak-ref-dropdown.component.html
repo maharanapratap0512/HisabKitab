@@ -1,27 +1,19 @@
 <div class="aawak-ref-dropdown-container" [class.mode-tiny]="mode === 'tiny'" [class.custom-sm]="size === 'sm'">
-    <ng-select #select class="aawak-ref-dropdown" 
-        [items]="items"
-        [loading]="loading"
-        bindLabel="lot_no"
-        bindValue="_id"
-        [placeholder]="mode === 'tiny' ? '' : placeholder"
-        [virtualScroll]="true"
-        [appendTo]="'body'"
-        [(ngModel)]="selectedValue"
-        (open)="onDropdownOpen()"
-        (scrollToEnd)="onScrollToEnd()"
-        (change)="onSelectChange($event)"
-        [searchable]="true"
-        [readonly]="readonly"
-        [typeahead]="search$"
-        [searchFn]="alwaysTrue"
-        dropdownClass="aawak-ref-dropdown">
+    <ng-select #select class="aawak-ref-dropdown" [items]="items" [loading]="loading" bindLabel="lot_no" bindValue="_id"
+        [placeholder]="mode === 'tiny' ? '' : placeholder" [virtualScroll]="true" [appendTo]="'body'"
+        [(ngModel)]="selectedValue" (open)="onDropdownOpen()" (scrollToEnd)="onScrollToEnd()"
+        (change)="onSelectChange($event)" [searchable]="true" [readonly]="readonly" [typeahead]="search$"
+        [searchFn]="alwaysTrue" dropdownClass="aawak-ref-dropdown">
 
         <!-- Custom Label (What shows in the box) -->
         <ng-template ng-label-tmp let-item="item">
             <div class="selected-label" *ngIf="mode === 'default'">
                 <span class="badge badge-soft-primary" *ngIf="item.lot_no">Lot: {{item.lot_no}}</span>
-                <span class="item-text">{{item.item_hin}}</span>
+                <span class="item-text">{{item.item_hin}} <span *ngIf="item.subitem_hin">-
+                        {{item.subitem_hin}}</span></span>
+                <span class="roman-text text-muted font-size-11 fst-italic ms-1"
+                    *ngIf="item.item_roman || item.subitem_roman">({{item.subitem_roman ? item.subitem_roman +
+                    (item.item_roman ? ' ' + item.item_roman : '') : item.item_roman}})</span>
                 <span class="mm-text ml-1" *ngIf="item.mm_hin">@{{item.mm_hin}}</span>
             </div>
             <div class="selected-label-tiny" *ngIf="mode === 'tiny'">
@@ -29,13 +21,22 @@
             </div>
         </ng-template>
 
-        <!-- Header for tiny mode to show search text -->
-        <ng-template ng-header-tmp *ngIf="mode === 'tiny'">
-             <div class="tiny-placeholder d-flex align-items-center bg-light p-1 border-bottom">
+        <!-- Header Template: Add Aawak button and tiny mode search -->
+        <ng-template ng-header-tmp>
+            <div class="d-flex justify-content-between align-items-center px-2 py-1 border-bottom bg-light gap-1"
+                *ngIf="!readonly && showAdd">
+                <button type="button"
+                    class="btn btn-xs btn-outline-primary fw-bold text-nowrap py-1 px-2 font-size-11 flex-fill"
+                    (mousedown)="$event.preventDefault()" (click)="onAddAawakClick($event)">
+                    + Add Aawak
+                </button>
+            </div>
+            <div *ngIf="mode === 'tiny'" class="tiny-placeholder d-flex align-items-center bg-light p-1 border-bottom">
                 <i class="uil uil-search text-muted fs-14 me-1"></i>
-                <span *ngIf="select.searchTerm" class="text-primary fw-bold" style="font-size: 11px;">{{select.searchTerm}}</span>
+                <span *ngIf="select.searchTerm" class="text-primary fw-bold"
+                    style="font-size: 11px;">{{select.searchTerm}}</span>
                 <span *ngIf="!select.searchTerm" class="text-muted" style="font-size: 11px;">Type to search...</span>
-             </div>
+            </div>
         </ng-template>
 
         <!-- Option Template (Premium 2-line layout) -->
@@ -48,7 +49,8 @@
                             <i class="uil uil-calendar-alt"></i>{{item.date | date:'dd-MM-yyyy'}}
                         </span>
                         <span class="meta-item mm-badge">
-                            <i class="uil uil-home"></i>{{item.mm_hin}} <small class="text-muted">({{item.mm_code}})</small>
+                            <i class="uil uil-home"></i>{{item.mm_hin}} <small
+                                class="text-muted">({{item.mm_code}})</small>
                             <span class="source-badge" *ngIf="item.aawak_mm_hin">
                                 <i class="uil uil-arrow-left"></i>{{item.aawak_mm_hin}}
                             </span>
@@ -68,13 +70,18 @@
                         <div class="product-title-row">
                             <span class="item-hin">{{item.item_hin}}</span>
                             <span class="subitem-hin" *ngIf="item.subitem_hin"> - {{item.subitem_hin}}</span>
-                            <small class="product-eng text-muted ml-1">
+                            <small class="product-eng text-muted ml-1" *ngIf="item.item_eng || item.subitem_eng">
                                 {{item.item_eng}} <span *ngIf="item.subitem_eng">- {{item.subitem_eng}}</span>
                             </small>
-                            
+                            <small class="product-roman text-muted fst-italic ml-1"
+                                *ngIf="item.item_roman || item.subitem_roman">
+                                ({{item.subitem_roman ? item.subitem_roman + (item.item_roman ? ' ' + item.item_roman :
+                                '') : item.item_roman}})
+                            </small>
+
                             <!-- Badges explicitly AFTER English name -->
                             <span class="badge-row ml-2">
-                                <span class="badge condition-badge" 
+                                <span class="badge condition-badge"
                                     [ngClass]="{'cond-new': item.condition_eng === 'New', 'cond-old': item.condition_eng === 'Old'}">
                                     {{item.condition_hin}}
                                 </span>
@@ -124,17 +131,35 @@
         <!-- Custom Footer (Optional) -->
         <ng-template ng-footer-tmp>
             <div class="p-2 d-flex justify-content-between align-items-center bg-light border-top">
-                <small class="text-muted" *ngIf="totalCount > 0">Showing {{items.length}} of {{totalCount}} results</small>
+                <small class="text-muted" *ngIf="totalCount > 0">Showing {{items.length}} of {{totalCount}}
+                    results</small>
                 <small class="text-info" *ngIf="loading">Loading more...</small>
             </div>
         </ng-template>
     </ng-select>
 
     <!-- Overlay trigger for tiny mode -->
-    <div *ngIf="mode === 'tiny'" class="tiny-overlay d-flex align-items-center" [class.ref-updated]="isJustUpdated" (click)="select.open()">
+    <div *ngIf="mode === 'tiny'" class="tiny-overlay d-flex align-items-center" [class.ref-updated]="isJustUpdated"
+        (click)="select.open()">
         <i class="uil" [ngClass]="{
             'uil-check-circle': selectedValue,
             'uil-link-h text-muted': !selectedValue
         }" [style.color]="selectedValue ? (isJustUpdated ? '' : '#28a745') : ''" style="font-size: 18px;"></i>
+    </div>
+</div>
+
+<!-- Self-contained Modal Container for Aawak Entry -->
+<div class="modal fade" [id]="modalId" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" style="width: 99%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Aawak</h5>
+                <button type="button" class="btn-close" (click)="closeSelfModal()"></button>
+            </div>
+            <div class="modal-body p-2">
+                <app-aawak-entry *ngIf="showModal" [getData]="presetAawakData"
+                    (response)="onSelfAawakCreated($event)"></app-aawak-entry>
+            </div>
+        </div>
     </div>
 </div>

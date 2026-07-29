@@ -312,7 +312,7 @@
                                                     <ng-option selected="selected" disabled value="">Aawak Type
                                                     </ng-option>
                                                     <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                                        {{item.list_name_hin}} : {{item.list_name_eng}}
+                                                        {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
                                                     </ng-option>
                                                 </ng-select>
                                             </div>

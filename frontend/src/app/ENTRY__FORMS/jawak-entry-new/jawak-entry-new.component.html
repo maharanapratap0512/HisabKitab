@@ -506,7 +506,7 @@
                                             [ngClass]="{'validation' : (jawak_type_id?.touched || fMain.submitted) && jawak_type_id.errors?.['required']}"
                                             required>
                                             <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                                {{item.list_name_hin}} : {{item.list_name_roman}}
+                                                {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
                                             </ng-option>
                                         </ng-select>
                                     </div>
@@ -1031,7 +1031,7 @@
                                                         required>
                                                         <ng-option value="+add" class="text-primary fw-bold">+ Add Jawak Type</ng-option>
                                                         <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                                            {{item.list_name_hin}} : {{item.list_name_roman}} : {{item.list_name_eng}}
+                                                            {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
                                                         </ng-option>
                                                     </ng-select>
                                                 </div>
@@ -1235,15 +1235,17 @@
         <div class="modal-dialog" style="width:95%">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Select Images</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">{{showModal}}</h5>
                     <button type="button" class="btn-close"
-                        onclick="$('#bunchAawakEntryComponent > #showModal').modal('hide')" aria-label="Close"></button>
+                        onclick="$('#bunchJawakEntryComponent > #showModal').modal('hide')" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <app-files-view *ngIf="showModal == 'Add Image'" (response)="imagesSelectResponse($event)"
                         type="aawak" [getData]="fs.jawakFormMain.jawaks[imageIndex].document">
                     </app-files-view>
 
+                    <app-pbk-entry *ngIf="showModal == 'Add PBK'" (response)="addPbkResponse($event)"></app-pbk-entry>
+                    <app-mm-entry *ngIf="showModal == 'Add MM'" (response)="addMMResponse($event)"></app-mm-entry>
                     <app-product-entry *ngIf="showModal == 'Add Product'" (response)="addProductResponse($event)"></app-product-entry>
                     <app-support-list-entry *ngIf="showModal == 'Add Condition'" [list_type]="'condition'" (response)="addConditionResponse($event)"></app-support-list-entry>
                     <app-support-list-entry *ngIf="showModal == 'Add Aawak Source'" [list_type]="'aawak_source'" (response)="addAawakSourceResponse($event)"></app-support-list-entry>
@@ -1255,7 +1257,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" style="width: 120px;"
-                        onclick="$('#bunchAawakEntryComponent > #showModal').modal('hide')">Close</button>
+                        onclick="$('#bunchJawakEntryComponent > #showModal').modal('hide')">Close</button>
                 </div>
             </div>
         </div>

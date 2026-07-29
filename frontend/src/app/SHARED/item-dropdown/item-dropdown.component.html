@@ -43,7 +43,8 @@
         </span>
         <div class="ms-auto d-flex align-items-center gap-2">
           <span class="roman-name" *ngIf="item.item_roman || item.subitem_roman">
-            {{item.subitem_roman || item.item_roman}}
+            {{item.isSubitem ? (item.subitem_roman ? item.subitem_roman + (item.item_roman ? ' (' + item.item_roman +
+            ')' : '') : item.item_roman) : item.item_roman}}
           </span>
           <span class="label-alias" *ngIf="item.item_aliases && !item.isSubitem"
             style="font-size: 11px; opacity: 0.6; font-style: italic;">
@@ -57,11 +58,17 @@
     </div>
   </ng-template>
 
-  <ng-template ng-label-tmp let-item="item">
-    <div class="selected-label">
+  <ng-template ng-label-tmp let-item="item" let-clear="clear">
+    <span class="ng-value-icon left" (click)="clear(item)" aria-hidden="true" *ngIf="multiple">×</span>
+    <span class="selected-label">
       <span class="label-name">
         <span *ngIf="item.isSubitem" class="subitem-text">{{item.subitem_hin}} </span>
         <span class="item-text">{{item.item_hin}}</span>
+      </span>
+      <span class="label-roman" *ngIf="item.item_roman || item.subitem_roman"
+        style="font-size: 11px; opacity: 0.7; font-style: italic;">
+        ({{item.isSubitem ? (item.subitem_roman ? item.subitem_roman + (item.item_roman ? ' ' + item.item_roman : '') :
+        item.item_roman) : item.item_roman}})
       </span>
       <span class="label-code" *ngIf="item.item_code || item.subitem_code">
         #{{item.subitem_code || item.item_code}}
@@ -70,7 +77,7 @@
         style="font-size: 10px; opacity: 0.6; font-style: italic;">
         {{item.item_aliases | joinObj:'alias'}}
       </span>
-    </div>
+    </span>
   </ng-template>
 </ng-select>
 
