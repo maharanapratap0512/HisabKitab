@@ -99,7 +99,10 @@ export class PrastavComponent implements OnInit {
       this.settings.prastav.view_mode = this.settings?.prastav?.view_mode || 'voucher';
       this.settings.prastav.samePageEntryForm = this.settings?.prastav?.samePageEntryForm || false;
     } else {
-      this.settings.prastav = { view_mode: "voucher", samePageEntryForm: false }
+      this.settings.prastav = { view_mode: "voucher", samePageEntryForm: false };
+    }
+    if (this.auth.webUser?.settings?.defaultMM) {
+      this.filterBody.mm_id = [this.auth.webUser.settings.defaultMM];
     }
     this.getPrastavs();
     this.getFilterLists();

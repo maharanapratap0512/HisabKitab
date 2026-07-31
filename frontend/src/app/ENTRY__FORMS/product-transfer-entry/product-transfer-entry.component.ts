@@ -44,7 +44,7 @@ export class ProductTransferEntryComponent implements OnInit {
     this.prdctTrnsfrForm = this.fb.group({
       product_id: [null, Validators.required],
       date: [null, Validators.required,],
-      mm_id: [null, Validators.required],
+      mm_id: [this.auth.webUser.settings?.defaultMM, Validators.required],
       entry_type: [null, Validators.required],
       aj_mm_id: [null],
       pkt_num: [null],

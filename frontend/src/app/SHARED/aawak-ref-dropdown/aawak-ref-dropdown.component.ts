@@ -42,6 +42,9 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
   @Output() saved = new EventEmitter<any>();
   @Output() selectionChange = new EventEmitter<any>();
 
+  @Input() allowSplit: boolean = true;
+  @Output() splitsChange = new EventEmitter<any>();
+
   items: any[] = [];
   loading = false;
   totalCount = 0;
@@ -51,6 +54,13 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
   showModal = false;
   modalId: string = 'aawakRefDropModal_' + Math.random().toString(36).substring(2, 9);
   presetAawakData: any = null;
+
+  // Multi-split modal properties
+  showSplitModal = false;
+  splitModalId: string = 'aawakSplitModal_' + Math.random().toString(36).substring(2, 9);
+  splitList: any[] = [];
+  totalSplitQty = 0;
+  selectedSplitsData: any[] = [];
 
   @ViewChild('select') select!: NgSelectComponent;
 

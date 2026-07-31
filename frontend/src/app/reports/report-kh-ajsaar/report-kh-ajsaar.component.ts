@@ -53,6 +53,9 @@ export class ReportKhAjsaarComponent {
       this.conditions = result.condition ? result.condition : [];
       this.categories = result.category ? result.category : [];
       this.mm_types = result.mm_type ? result.mm_type : [];
+      if (this.auth.webUser?.settings?.defaultMM) {
+        this.filterBody.mm_id = this.auth.webUser.settings.defaultMM;
+      }
       this.isLoader = false;
       // this.searchReports();
     });

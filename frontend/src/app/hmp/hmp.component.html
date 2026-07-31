@@ -10,7 +10,7 @@
       <div class="page-title-right d-flex gap-2">
         <div id="tour-view-mode">
           <app-popover-filter [btnOutline]="false" iconClass="dripicons-gear" direction="left" [showClearButton]="false"
-            triggerOn="hover">
+            triggerOn="click">
             <ul class="list-unstyled p-2 mb-0">
               <li>
                 <h5 class="fs-6 mb-2">डाटा टेबल मोड</h5>
@@ -79,7 +79,7 @@
           <!-- Filter Options -->
           <div class="col-1 d-flex align-items-center gap-2" id="tour-popover-filter">
             <app-popover-filter label="Filter" iconClass="uil uil-filter" direction="auto" (clear)="clearFilter()"
-              clearButtonLabel="Clear Filter" triggerOn="hover">
+              clearButtonLabel="Clear Filter" triggerOn="click">
               <div style="width: 300px;">
                 <!-- Date From -->
                 <label class="form-label mb-1"><small>Date From</small></label>

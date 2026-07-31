@@ -89,6 +89,9 @@ export class HmpComponent implements OnInit {
 
   ngOnInit(): void {
     this.selection.clear('hmp');
+    if (this.auth.webUser?.settings?.defaultMM) {
+      this.filterBody.mm_id = [this.auth.webUser.settings.defaultMM];
+    }
     this.getBatches();
     this.getRecipes();
     this.gs.observeList().subscribe((result: any) => {

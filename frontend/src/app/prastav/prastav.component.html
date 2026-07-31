@@ -13,7 +13,7 @@
 
     <div id="tour-view-mode">
       <app-popover-filter [btnOutline]="false" iconClass="dripicons-gear" direction="left" [showClearButton]="false"
-        triggerOn="hover">
+        triggerOn="click">
         <ul>
           <li>
             <h5>नया एंट्री फॉर्म</h5>
@@ -96,7 +96,7 @@
     <!-- Month Filter -->
     <app-popover-filter #monthPopover
       [label]="filterBody.month ? 'Month: ' + getMonthName(filterBody.month) : 'Month: All'"
-      iconClass="uil uil-calendar-alt" direction="auto" [showClearButton]="false" triggerOn="hover"
+      iconClass="uil uil-calendar-alt" direction="auto" [showClearButton]="false" triggerOn="click"
       [btnOutline]="!filterBody.month">
       <div class="d-flex flex-wrap p-2 gap-2" style="width: 260px;">
         <span class="badge year-box" style="font-size: 13px;"
@@ -159,7 +159,7 @@
                   <span>Date</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
                     [isOpen]="filterBody.date ? true : false" (clear)="filterBody.date = null; applyFilter()"
-                    triggerOn="hover">
+                    triggerOn="click">
                     <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date"
                       (change)="applyFilter()">
                   </app-popover-filter>
@@ -172,7 +172,7 @@
                   <span>MM</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
                     [isOpen]="filterBody.mm_id?.length > 0" (clear)="filterBody.mm_id = []; applyFilter()"
-                    triggerOn="hover">
+                    triggerOn="click">
                     <ng-select [multiple]="true" placeholder="Select MM" class="custom-sm" dropdownClass="custom-sm"
                       [(ngModel)]="filterBody.mm_id" (change)="applyFilter()" style="width: 100%;">
                       <ng-option *ngFor="let item of mms" [value]="item._id">
@@ -190,7 +190,7 @@
                   <span>PBK</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
                     [isOpen]="filterBody.pbk_id?.length > 0" (clear)="filterBody.pbk_id = []; applyFilter()"
-                    triggerOn="hover">
+                    triggerOn="click">
                     <ng-select [multiple]="true" placeholder="Select Sewadhari" class="custom-sm"
                       dropdownClass="custom-sm" [(ngModel)]="filterBody.pbk_id" (change)="applyFilter()"
                       style="width: 100%;">
@@ -208,7 +208,7 @@
                   <span>Note</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
                     [isOpen]="filterBody.is_noted !== undefined && filterBody.is_noted !== null && filterBody.is_noted !== ''"
-                    (clear)="filterBody.is_noted = null; applyFilter()" triggerOn="hover">
+                    (clear)="filterBody.is_noted = null; applyFilter()" triggerOn="click">
 
                     <div class="p-2" style="min-width: 130px;">
                       <div class="form-check mb-2">
@@ -447,7 +447,7 @@
                   <span>Date</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
                     [isOpen]="filterBody.date ? true : false" (clear)="filterBody.date = null; applyFilter()"
-                    triggerOn="hover">
+                    triggerOn="click">
                     <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.date"
                       (change)="applyFilter()">
                   </app-popover-filter>
@@ -458,7 +458,7 @@
                   <span>MM (Place)</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
                     [isOpen]="filterBody.mm_id?.length > 0" (clear)="filterBody.mm_id = []; applyFilter()"
-                    triggerOn="hover">
+                    triggerOn="click">
                     <ng-select [multiple]="true" placeholder="Select MM" class="custom-sm" dropdownClass="custom-sm"
                       [(ngModel)]="filterBody.mm_id" (change)="applyFilter()" style="width: 100%; min-width: 180px;">
                       <ng-option *ngFor="let item of mms" [value]="item._id">
@@ -474,7 +474,7 @@
                   <span>Item Description</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
                     [isOpen]="filterBody.item_id?.length > 0" (clear)="filterBody.item_id = []; applyFilter()"
-                    triggerOn="hover">
+                    triggerOn="click">
                     <ng-select [multiple]="true" placeholder="Select Item" class="custom-sm" dropdownClass="custom-sm"
                       [(ngModel)]="filterBody.item_id" (change)="applyFilter()" style="width: 100%; min-width: 180px;">
                       <ng-option *ngFor="let item of items" [value]="item._id">
@@ -492,7 +492,7 @@
                   <span>Note</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
                     [isOpen]="filterBody.is_noted !== undefined && filterBody.is_noted !== null && filterBody.is_noted !== ''"
-                    (clear)="filterBody.is_noted = null; applyFilter()" triggerOn="hover">
+                    (clear)="filterBody.is_noted = null; applyFilter()" triggerOn="click">
 
                     <div class="p-2" style="min-width: 130px; white-space: normal;">
                       <div class="form-check mb-2">
@@ -521,7 +521,7 @@
                   <span>Jwk Date</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
                     [isOpen]="filterBody.jawak_date ? true : false"
-                    (clear)="filterBody.jawak_date = null; applyFilter()" triggerOn="hover">
+                    (clear)="filterBody.jawak_date = null; applyFilter()" triggerOn="click">
                     <input type="date" class="form-control form-control-sm" [(ngModel)]="filterBody.jawak_date"
                       (change)="applyFilter()">
                   </app-popover-filter>
@@ -532,7 +532,7 @@
                   <span>Source MM</span>
                   <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="left"
                     [isOpen]="filterBody.jawak_source_mm_id?.length > 0"
-                    (clear)="filterBody.jawak_source_mm_id = []; applyFilter()" triggerOn="hover">
+                    (clear)="filterBody.jawak_source_mm_id = []; applyFilter()" triggerOn="click">
                     <ng-select [multiple]="true" placeholder="Select Source MM" class="custom-sm"
                       dropdownClass="custom-sm" [(ngModel)]="filterBody.jawak_source_mm_id" (change)="applyFilter()"
                       style="width: 100%; min-width: 180px;">

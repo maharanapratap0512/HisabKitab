@@ -19,7 +19,7 @@
                             <div class="d-flex gap-2">
                                 <div id="tour-view-mode">
                                     <app-popover-filter [btnOutline]="false" iconClass="dripicons-gear" direction="left"
-                                        [showClearButton]="false" triggerOn="hover">
+                                        [showClearButton]="false" triggerOn="click">
                                         <ul>
                                             <li>
                                                 <h5>नया एंट्री फॉर्म</h5>
@@ -175,7 +175,7 @@
                         <div class="col-3 pt-2 d-flex align-items-center gap-2" id="tour-popover-filter">
                             <app-popover-filter *ngIf="settings.jawak.viewMode === 'voucher'" label="Filter"
                                 iconClass="uil uil-filter" direction="auto" (clear)="clearFilter()"
-                                clearButtonLabel="Clear Filter" triggerOn="hover">
+                                clearButtonLabel="Clear Filter" triggerOn="click">
 
                                 <div style="width: 580px;">
                                     <div class="row g-2">
@@ -318,7 +318,7 @@
                                             <span>Voucher No</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 (clear)="filterBody.voucher_no = null; onHeaderFilterChange()"
-                                                [isOpen]="!!filterBody.voucher_no" triggerOn="hover">
+                                                [isOpen]="!!filterBody.voucher_no" triggerOn="click">
                                                 <input type="number" class="form-control form-control-sm"
                                                     [(ngModel)]="filterBody.voucher_no"
                                                     (change)="onHeaderFilterChange()" placeholder="Voucher No...">
@@ -331,7 +331,7 @@
                                             <span>Pkt No</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 (clear)="filterBody.pkt_num = null; onHeaderFilterChange()"
-                                                [isOpen]="!!filterBody.pkt_num" triggerOn="hover">
+                                                [isOpen]="!!filterBody.pkt_num" triggerOn="click">
                                                 <input type="number" class="form-control form-control-sm"
                                                     [(ngModel)]="filterBody.pkt_num" (change)="onHeaderFilterChange()"
                                                     placeholder="Pkt No...">
@@ -343,7 +343,7 @@
                                             <span>Reg Page</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 (clear)="filterBody.reg_pg_no = null; onHeaderFilterChange()"
-                                                [isOpen]="!!filterBody.reg_pg_no" triggerOn="hover">
+                                                [isOpen]="!!filterBody.reg_pg_no" triggerOn="click">
                                                 <input type="number" class="form-control form-control-sm"
                                                     [(ngModel)]="filterBody.reg_pg_no" (change)="onHeaderFilterChange()"
                                                     placeholder="Page No...">
@@ -356,7 +356,7 @@
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 [isOpen]="filterBody.mm_id?.length > 0"
                                                 (clear)="filterBody.mm_id = []; onHeaderFilterChange()"
-                                                triggerOn="hover">
+                                                triggerOn="click">
                                                 <ng-select [multiple]="true" placeholder="Select MM" class="custom-sm"
                                                     dropdownClass="custom-sm" [(ngModel)]="filterBody.mm_id"
                                                     (change)="onHeaderFilterChange()" style="width: 250px;">
@@ -373,7 +373,7 @@
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 [isOpen]="filterBody.aj_mm_id?.length > 0"
                                                 (clear)="filterBody.aj_mm_id = []; onHeaderFilterChange()"
-                                                triggerOn="hover">
+                                                triggerOn="click">
                                                 <ng-select [multiple]="true" placeholder="Select MM" class="custom-sm"
                                                     dropdownClass="custom-sm" [(ngModel)]="filterBody.aj_mm_id"
                                                     (change)="onHeaderFilterChange()" style="width: 250px;">
@@ -390,7 +390,7 @@
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 [isOpen]="filterBody.pbk_id?.length > 0"
                                                 (clear)="filterBody.pbk_id = []; onHeaderFilterChange()"
-                                                triggerOn="hover">
+                                                triggerOn="click">
                                                 <ng-select [multiple]="true" placeholder="Select Sewadhari"
                                                     class="custom-sm" dropdownClass="custom-sm"
                                                     [(ngModel)]="filterBody.pbk_id" (change)="onHeaderFilterChange()"
@@ -410,7 +410,7 @@
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 [isOpen]="filterBody.nimitt_id?.length > 0"
                                                 (clear)="filterBody.nimitt_id = []; onHeaderFilterChange()"
-                                                triggerOn="hover">
+                                                triggerOn="click">
                                                 <ng-select [multiple]="true" placeholder="Select Nimitt"
                                                     class="custom-sm" dropdownClass="custom-sm"
                                                     [(ngModel)]="filterBody.nimitt_id" (change)="onHeaderFilterChange()"
@@ -628,6 +628,13 @@
                                     </tr>
                                 </ng-container>
                             </tbody>
+                            <tbody *ngIf="!jawakData || !jawakData.length">
+                                <tr>
+                                    <td colspan="100%" class="text-center text-muted py-4">
+                                        <h5 class="mb-0"><i class="uil uil-folder-open text-muted me-2"></i>No Data Found</h5>
+                                    </td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
 
@@ -666,7 +673,7 @@
                                             <span>Voucher</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 (clear)="filterBody.voucher_no = null; onHeaderFilterChange()"
-                                                [isOpen]="!!filterBody.voucher_no" triggerOn="hover">
+                                                [isOpen]="!!filterBody.voucher_no" triggerOn="click">
                                                 <input type="number" class="form-control form-control-sm"
                                                     [(ngModel)]="filterBody.voucher_no"
                                                     (change)="onHeaderFilterChange()" placeholder="Voucher No...">
@@ -679,7 +686,7 @@
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 (clear)="filterBody.date_from = null; filterBody.date_to = null; onHeaderFilterChange()"
                                                 [isOpen]="!!filterBody.date_from || !!filterBody.date_to"
-                                                triggerOn="hover">
+                                                triggerOn="click">
                                                 <div style="width: 200px;">
                                                     <label class="form-label mb-1"><small>Date From</small></label>
                                                     <input type="date" class="form-control form-control-sm mb-2"
@@ -698,7 +705,7 @@
                                             <span>Pkt No</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 (clear)="filterBody.pkt_num = null; onHeaderFilterChange()"
-                                                [isOpen]="!!filterBody.pkt_num" triggerOn="hover">
+                                                [isOpen]="!!filterBody.pkt_num" triggerOn="click">
                                                 <input type="number" class="form-control form-control-sm"
                                                     [(ngModel)]="filterBody.pkt_num" (change)="onHeaderFilterChange()"
                                                     placeholder="Pkt No...">
@@ -710,7 +717,7 @@
                                             <span>Reg Page</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 (clear)="filterBody.reg_pg_no = null; onHeaderFilterChange()"
-                                                [isOpen]="!!filterBody.reg_pg_no" triggerOn="hover">
+                                                [isOpen]="!!filterBody.reg_pg_no" triggerOn="click">
                                                 <input type="number" class="form-control form-control-sm"
                                                     [(ngModel)]="filterBody.reg_pg_no" (change)="onHeaderFilterChange()"
                                                     placeholder="Page No...">
@@ -724,7 +731,7 @@
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 direction="left" [isOpen]="filterBody.aj_mm_id?.length > 0"
                                                 (clear)="filterBody.aj_mm_id = []; onHeaderFilterChange()"
-                                                triggerOn="hover">
+                                                triggerOn="click">
                                                 <ng-select [multiple]="true" placeholder="Select MM" class="custom-sm"
                                                     dropdownClass="custom-sm" [(ngModel)]="filterBody.aj_mm_id"
                                                     (change)="onHeaderFilterChange()" style="width: 100%;">
@@ -741,7 +748,7 @@
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 direction="left" [isOpen]="filterBody.pbk_id?.length > 0"
                                                 (clear)="filterBody.pbk_id = []; onHeaderFilterChange()"
-                                                triggerOn="hover">
+                                                triggerOn="click">
                                                 <ng-select [multiple]="true" placeholder="Select Sewadhari"
                                                     class="custom-sm" dropdownClass="custom-sm"
                                                     [(ngModel)]="filterBody.pbk_id" (change)="onHeaderFilterChange()"
@@ -761,7 +768,7 @@
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 direction="left" [isOpen]="filterBody.categories?.length > 0"
                                                 (clear)="filterBody.categories = []; onHeaderFilterChange()"
-                                                triggerOn="hover">
+                                                triggerOn="click">
                                                 <ng-select [multiple]="true" placeholder="Select Category"
                                                     class="custom-sm" dropdownClass="custom-sm"
                                                     [(ngModel)]="filterBody.categories"
@@ -777,7 +784,7 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Item</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left" triggerOn="hover"
+                                                direction="left" triggerOn="click"
                                                 (clear)="filterBody.item_subitem_mix = []; onHeaderFilterChange()"
                                                 [isOpen]="filterBody.item_subitem_mix?.length > 0">
                                                 <ng-select [multiple]="true" placeholder="Select Item" class="custom-sm"
@@ -808,7 +815,7 @@
                                             <span>Lot No</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                                 (clear)="filterBody.lot_no = null; onHeaderFilterChange()"
-                                                [isOpen]="!!filterBody.lot_no" triggerOn="hover">
+                                                [isOpen]="!!filterBody.lot_no" triggerOn="click">
                                                 <input type="text" class="form-control form-control-sm"
                                                     [(ngModel)]="filterBody.lot_no" (change)="onHeaderFilterChange()"
                                                     placeholder="Lot No...">
@@ -822,7 +829,7 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Product</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left" triggerOn="hover"
+                                                direction="left" triggerOn="click"
                                                 (clear)="filterBody.product_id = []; onHeaderFilterChange()"
                                                 [isOpen]="filterBody.product_id?.length > 0">
                                                 <ng-select [multiple]="true" placeholder="Select Product"
@@ -840,7 +847,7 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Condition</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left" triggerOn="hover"
+                                                direction="left" triggerOn="click"
                                                 (clear)="filterBody.condition_id = []; onHeaderFilterChange()"
                                                 [isOpen]="filterBody.condition_id?.length > 0">
                                                 <ng-select [multiple]="true" class="custom-sm" dropdownClass="custom-sm"
@@ -858,7 +865,7 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Aawak Source</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left" triggerOn="hover"
+                                                direction="left" triggerOn="click"
                                                 (clear)="filterBody.aawak_source_id = []; onHeaderFilterChange()"
                                                 [isOpen]="filterBody.aawak_source_id?.length > 0">
                                                 <ng-select [multiple]="true" placeholder="Select Aawak Source"
@@ -876,7 +883,7 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Jawak Type</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left" triggerOn="hover"
+                                                direction="left" triggerOn="click"
                                                 (clear)="filterBody.jawak_type_id = []; onHeaderFilterChange()"
                                                 [isOpen]="filterBody.jawak_type_id?.length > 0">
                                                 <ng-select [multiple]="true" placeholder="Select Jawak Type"
@@ -894,7 +901,7 @@
                                         <div class="d-flex justify-content-between align-items-center px-2 py-1">
                                             <span>Usage</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="left" triggerOn="hover"
+                                                direction="left" triggerOn="click"
                                                 (clear)="filterBody.usage_list_id = []; onHeaderFilterChange()"
                                                 [isOpen]="filterBody.usage_list_id?.length > 0">
                                                 <ng-select [multiple]="true" placeholder="Select Usage"
@@ -1048,6 +1055,13 @@
                                         </td>
                                     </tr>
                                 </ng-container>
+                            </tbody>
+                            <tbody *ngIf="!flatJawakItems || !flatJawakItems.length">
+                                <tr>
+                                    <td colspan="100%" class="text-center text-muted py-4">
+                                        <h5 class="mb-0"><i class="uil uil-folder-open text-muted me-2"></i>No Data Found</h5>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

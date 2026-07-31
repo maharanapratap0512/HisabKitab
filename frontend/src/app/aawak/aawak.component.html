@@ -261,8 +261,9 @@
 
                               <div class="col-md-2 mb-3">
                                  <div class="form-group">
-                                    <label class="form-label">Date & Pkt No</label>
-                                    <input type="date" class="form-control" [(ngModel)]="filterBody.date" name="date">
+                                    <label class="form-label">Date Range & Pkt No</label>
+                                    <input type="date" class="form-control mb-1" placeholder="From Date" [(ngModel)]="filterBody.date_from" name="date_from">
+                                    <input type="date" class="form-control mb-1" placeholder="To Date" [(ngModel)]="filterBody.date_to" name="date_to">
                                     <input type="text" class="form-control mt-1" placeholder="Pkt No."
                                        [(ngModel)]="filterBody.pkt_num" name="pkt_num">
                                  </div>
@@ -416,8 +417,7 @@
                   </div>
                   <div class="table-container" appHorizontalScrollWithArrows [appTableSmartCheckbox]="'aawak'"
                      [selectionData]="aawakData" [showCheckboxes]="true" [rowSelector]="'tbody > tr.main-row'">
-                     <table id="datatable-buttons" class="table table-hover dt-responsive table-sticky-header" #TABLE
-                        *ngIf="aawakData.length">
+                     <table id="datatable-buttons" class="table table-hover dt-responsive table-sticky-header" #TABLE>
                         <thead>
                            <tr>
                               <th style="width: 50px;" id="tour-hl-switch">
@@ -434,10 +434,16 @@
                                  <div class="d-flex align-items-center justify-content-between">
                                     <span>Date</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                       direction="right" [isOpen]="!!filterBody.date"
-                                       (clear)="filterBody.date = null; getFilteredAawakData()" triggerOn="hover">
-                                       <input type="date" class="form-control form-control-sm"
-                                          [(ngModel)]="filterBody.date" (change)="getFilteredAawakData()">
+                                       direction="right" [isOpen]="!!filterBody.date_from || !!filterBody.date_to || !!filterBody.date"
+                                       (clear)="filterBody.date = null; filterBody.date_from = null; filterBody.date_to = null; getFilteredAawakData()" triggerOn="click">
+                                       <div style="width: 180px;">
+                                          <label class="form-label mb-1"><small>Date From</small></label>
+                                          <input type="date" class="form-control form-control-sm mb-2"
+                                             [(ngModel)]="filterBody.date_from" (change)="getFilteredAawakData()">
+                                          <label class="form-label mb-1"><small>Date To</small></label>
+                                          <input type="date" class="form-control form-control-sm"
+                                             [(ngModel)]="filterBody.date_to" (change)="getFilteredAawakData()">
+                                       </div>
                                     </app-popover-filter>
                                  </div>
                               </th>
@@ -571,14 +577,22 @@
                                     </div>
                                     <span *ngIf="!data.nimitt_id">-</span>
                                  </td>
-                                 <td *ngIf="settings.aawak.item_detail">{{data.item_detail?data.item_detail:'-'}}</td>
+                                 <td *ngIf="settings.aawak.item_detail">
+                                     <div style="max-height: 80px; overflow-y: auto; word-break: break-word;" [title]="data.item_detail || ''">
+                                        {{data.item_detail?data.item_detail:'-'}}
+                                     </div>
+                                  </td>
                                  <td *ngIf="settings.aawak.isbill">{{data.isbill ? 'हाँ' : 'नहीं'}} </td>
                                  <td *ngIf="settings.aawak.document">
                                     <img *ngIf="data.document && data.document.images" (click)="showImages(data)"
                                        [src]="baseurl + data.document.images[0]" height="50px"
                                        style="cursor: pointer; border-radius: 10px;">
                                  </td>
-                                 <td *ngIf="settings.aawak.description">{{data.description?data.description:'-'}}</td>
+                                 <td *ngIf="settings.aawak.description">
+                                     <div style="max-height: 80px; overflow-y: auto; word-break: break-word;" [title]="data.description || ''">
+                                        {{data.description?data.description:'-'}}
+                                     </div>
+                                  </td>
                                  <td *ngIf="settings.aawak.enz">
                                     <div class="d-flex justify-content-between">
                                        <div>
@@ -650,15 +664,20 @@
                               </ng-container>
                            </ng-container>
                         </tbody>
+                         <tbody *ngIf="!aawakData || !aawakData.length">
+                            <tr>
+                               <td colspan="100%" class="text-center text-muted py-4">
+                                  <h5 class="mb-0"><i class="uil uil-folder-open text-muted me-2"></i>No Data Found</h5>
+                               </td>
+                            </tr>
+                         </tbody>
                      </table>
                   </div>
                </div>
                <pagination-controls class="pagi text-center" (pageChange)="getaawakData(page = $event)"
-                  [autoHide]="true" *ngIf="aawakData.length">
+                  [autoHide]="true" *ngIf="aawakData && aawakData.length">
                </pagination-controls>
             </div>
-
-            <h2 class="text-center m-5" *ngIf="!aawakData.length">No Data!</h2>
          </div>
       </div>
    </div>

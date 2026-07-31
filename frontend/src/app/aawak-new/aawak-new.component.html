@@ -21,13 +21,13 @@
                             </div>
                             <div class="col-3">
                                 <div class="form-group">
-                                    <input id="tour-search-input" type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                                        name="search">
+                                    <input id="tour-search-input" type="text" class="form-control"
+                                        placeholder="Search Here" [(ngModel)]="term" name="search">
                                 </div>
                             </div>
                             <div class="col-2">
-                                <button id="tour-adv-search-btn" class="btn btn-outline-info w-100" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseExample" aria-expanded="false"
+                                <button id="tour-adv-search-btn" class="btn btn-outline-info w-100" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false"
                                     aria-controls="collapseExample"><i class="uil-search-plus h4 icon-mx-2"></i> Advance
                                     Search
                                 </button>
@@ -46,8 +46,9 @@
                                 </button>
 
                                 <div id="tour-export-container">
-                                    <button id="tour-export-btn" type="button" class="btn btn-outline-success dropdown-toggle mx-2"
-                                        data-bs-toggle="dropdown" aria-expanded="false"> Export To Excel </button>
+                                    <button id="tour-export-btn" type="button"
+                                        class="btn btn-outline-success dropdown-toggle mx-2" data-bs-toggle="dropdown"
+                                        aria-expanded="false"> Export To Excel </button>
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item" (click)="exportAJData()">Distribution</a>
                                         <a class="dropdown-item" (click)="exportAawakData()">Aawak Only</a>
@@ -59,34 +60,47 @@
 
                             <div class="col-2">
                                 <div class="d-flex">
-                                    <button id="tour-total-count" type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
+                                    <button id="tour-total-count" type="button" style="font-weight: 700 !important;"
+                                        class="btn btn-light w-100">Total
                                         Count : {{aawakData.length}}
                                     </button>
                                     <!-- Tour Hub Menu Dropdown -->
                                     <div class="dropdown d-inline-block ms-1">
-                                       <button type="button" class="btn btn-outline-primary dropdown-toggle px-2" data-bs-toggle="dropdown" aria-expanded="false" title="Interactive Guided Tours">
-                                          <i class="uil-question-circle h4"></i>
-                                       </button>
-                                       <div class="dropdown-menu dropdown-menu-end shadow-lg py-2" style="min-width: 260px; z-index: 1050;">
-                                          <h6 class="dropdown-header text-primary fw-bold">🎓 Guided Page Tours / मार्गदर्शिका</h6>
-                                          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('master')">
-                                             <i class="uil-rocket me-2 text-primary"></i> <strong>Full Master Tour</strong> (11 steps)
-                                          </a>
-                                          <div class="dropdown-divider"></div>
-                                          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('add_filter')">
-                                             <i class="uil-search-plus me-2 text-info"></i> <strong>1. Add & Advance Filters</strong>
-                                          </a>
-                                          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('import_export')">
-                                             <i class="uil-export me-2 text-success"></i> <strong>2. Excel Import & Export</strong>
-                                          </a>
-                                          <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('table_data')">
-                                             <i class="uil-table me-2 text-warning"></i> <strong>3. Table Data & Bulk Operations</strong>
-                                          </a>
-                                          <div class="dropdown-divider"></div>
-                                          <a class="dropdown-item py-1 text-muted cursor-pointer" (click)="resetTourStatus()">
-                                             <i class="uil-refresh me-2"></i> Reset Tour Progress
-                                          </a>
-                                       </div>
+                                        <button type="button" class="btn btn-outline-primary dropdown-toggle px-2"
+                                            data-bs-toggle="dropdown" aria-expanded="false"
+                                            title="Interactive Guided Tours">
+                                            <i class="uil-question-circle h4"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-end shadow-lg py-2"
+                                            style="min-width: 260px; z-index: 1050;">
+                                            <h6 class="dropdown-header text-primary fw-bold">🎓 Guided Page Tours /
+                                                मार्गदर्शिका</h6>
+                                            <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('master')">
+                                                <i class="uil-rocket me-2 text-primary"></i> <strong>Full Master
+                                                    Tour</strong> (11 steps)
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item py-2 cursor-pointer"
+                                                (click)="startTour('add_filter')">
+                                                <i class="uil-search-plus me-2 text-info"></i> <strong>1. Add & Advance
+                                                    Filters</strong>
+                                            </a>
+                                            <a class="dropdown-item py-2 cursor-pointer"
+                                                (click)="startTour('import_export')">
+                                                <i class="uil-export me-2 text-success"></i> <strong>2. Excel Import &
+                                                    Export</strong>
+                                            </a>
+                                            <a class="dropdown-item py-2 cursor-pointer"
+                                                (click)="startTour('table_data')">
+                                                <i class="uil-table me-2 text-warning"></i> <strong>3. Table Data & Bulk
+                                                    Operations</strong>
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item py-1 text-muted cursor-pointer"
+                                                (click)="resetTourStatus()">
+                                                <i class="uil-refresh me-2"></i> Reset Tour Progress
+                                            </a>
+                                        </div>
 
                                     </div>
                                 </div>
@@ -168,7 +182,8 @@
                                                         Pbk name
                                                     </ng-option>
                                                     <ng-option *ngFor="let item of pbks" [value]="item._id">
-                                                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} :
+                                                        {{item.roll_no ? item.roll_no : '______'}} -
+                                                        {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} :
                                                         {{item.relation}} :
                                                         {{item.relative_name}}
                                                     </ng-option>
@@ -242,9 +257,11 @@
 
                                         <div class="col-md-2 mb-3">
                                             <div class="form-group">
-                                                <label class="form-label">Date & Pkt No</label>
-                                                <input type="date" class="form-control" [(ngModel)]="filterBody.date"
-                                                    name="date">
+                                                <label class="form-label">Date Range & Pkt No</label>
+                                                <input type="date" class="form-control mb-1" placeholder="From Date"
+                                                    [(ngModel)]="filterBody.date_from" name="date_from">
+                                                <input type="date" class="form-control mb-1" placeholder="To Date"
+                                                    [(ngModel)]="filterBody.date_to" name="date_to">
                                                 <input type="text" class="form-control mt-1" placeholder="Pkt No."
                                                     [(ngModel)]="filterBody.pkt_num" name="pkt_num">
                                             </div>
@@ -312,7 +329,9 @@
                                                     <ng-option selected="selected" disabled value="">Aawak Type
                                                     </ng-option>
                                                     <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                                        {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
+                                                        {{item.list_name_hin}}{{item.list_name_eng ? ' : ' +
+                                                        item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' +
+                                                        item.list_name_roman : ''}}
                                                     </ng-option>
                                                 </ng-select>
                                             </div>
@@ -396,8 +415,7 @@
                             [idField]="'temp_id'" [selectionData]="aawakData" [showCheckboxes]="true"
                             [rowSelector]="'tbody > tr.main-row'">
                             <table id="datatable-buttons"
-                                class="table table-sm table-hover dt-responsive table-sticky-header" #TABLE
-                                *ngIf="aawakData.length">
+                                class="table table-sm table-hover dt-responsive table-sticky-header" #TABLE>
                                 <thead>
                                     <tr>
                                         <th style="width: 50px;">
@@ -413,11 +431,20 @@
                                             <div class="d-flex align-items-center justify-content-between">
                                                 <span>Date</span>
                                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    direction="right" [isOpen]="!!filterBody.date"
-                                                    (clear)="filterBody.date = null; getFilteredData()"
-                                                    triggerOn="hover">
-                                                    <input type="date" class="form-control form-control-sm"
-                                                        [(ngModel)]="filterBody.date" (change)="getFilteredData()">
+                                                    direction="right"
+                                                    [isOpen]="!!filterBody.date_from || !!filterBody.date_to || !!filterBody.date"
+                                                    (clear)="filterBody.date = null; filterBody.date_from = null; filterBody.date_to = null; getFilteredData()"
+                                                    triggerOn="click">
+                                                    <div style="width: 280px;">
+                                                        <label class="form-label mb-1"><small>Date From</small></label>
+                                                        <input type="date" class="form-control form-control-sm mb-2"
+                                                            [(ngModel)]="filterBody.date_from"
+                                                            (change)="getFilteredData()">
+                                                        <label class="form-label mb-1"><small>Date To</small></label>
+                                                        <input type="date" class="form-control form-control-sm"
+                                                            [(ngModel)]="filterBody.date_to"
+                                                            (change)="getFilteredData()">
+                                                    </div>
                                                 </app-popover-filter>
                                             </div>
                                         </th>
@@ -587,8 +614,10 @@
                                                                 {{awk.usage_list_id ? awk.list_name_hin : ''}}
                                                             </td>
                                                             <td *ngIf="settings.aawak.item_detail">
-                                                                {{awk.item_detail?awk.item_detail:'-'}}
-                                                            </td>
+                                                                 <div style="max-height: 80px; overflow-y: auto; word-break: break-word;" [title]="awk.item_detail || ''">
+                                                                    {{awk.item_detail?awk.item_detail:'-'}}
+                                                                 </div>
+                                                             </td>
                                                             <td *ngIf="settings.aawak.document"><img
                                                                     *ngIf="awk.document && awk.document.images"
                                                                     (click)="showImages(awk)"
@@ -626,15 +655,20 @@
                                         </ng-container>
                                     </ng-container>
                                 </tbody>
+                                <tbody *ngIf="!aawakData || !aawakData.length">
+                                    <tr>
+                                        <td colspan="100%" class="text-center text-muted py-4">
+                                            <h5 class="mb-0"><i class="uil uil-folder-open text-muted me-2"></i>No Data Found</h5>
+                                        </td>
+                                    </tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
                     <pagination-controls class="pagi text-center" (pageChange)="getaawakData(page = $event)"
-                        [autoHide]="true" *ngIf="aawakData.length">
+                        [autoHide]="true" *ngIf="aawakData && aawakData.length">
                     </pagination-controls>
                 </div>
-
-                <h2 class="text-center m-5" *ngIf="!aawakData.length">No Data!</h2>
             </div>
         </div>
     </div>

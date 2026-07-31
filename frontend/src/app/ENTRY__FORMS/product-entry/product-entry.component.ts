@@ -91,7 +91,7 @@ export class ProductEntryComponent implements OnInit {
     this.productFormMain = this.fb.group({
       purchase_date: [null],
       purchased_by: [null],
-      mm_id: [null, Validators.required],
+      mm_id: [auth.webUser.settings?.defaultMM, Validators.required],
       dept_id: [this.auth.webUser.dept_id],
       nimitt_id: [null],
       items: [[]],

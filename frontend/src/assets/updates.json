@@ -1,10 +1,51 @@
 [
     {
+        "version": "35.4",
+        "date": "31-07-2026",
+        "summary": "Date Range Filter, Auto MM Selection & Click-to-Open Filters",
+        "summary_hin": "तारीख रेंज फ़िल्टर, ऑटो डिफ़ॉल्ट MM चुनाव व क्लिक पर फ़िल्टर",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Aawak & Jawak Modules",
+                "title": "Date Range Filtering (From Date to To Date)",
+                "title_hin": "तारीख से तारीख (Date Range) फ़िल्टर",
+                "desc": "Filter entries between any two dates easily in Aawak and Jawak tables and header filters.",
+                "desc_hin": "आवक और जावक में किसी भी दो तारीखों (From Date से To Date) के बीच का रिकॉर्ड आसानी से फ़िल्टर करें।"
+            },
+            {
+                "type": "improved",
+                "module": "Reports & Entry Forms",
+                "title": "Auto-Selection & Filtering by Default MM",
+                "title_hin": "डिफ़ॉल्ट महामहीना (MM) का स्वतः चुनाव",
+                "desc": "Your default MM is now automatically pre-selected in entry forms, reports, dashboard, and initial page loads for faster work.",
+                "desc_hin": "एंट्री फॉर्म, रिपोर्ट, डैशबोर्ड और पेज खोलते ही आपकी डिफ़ॉल्ट MM अपने आप चुन ली जाएगी।"
+            },
+            {
+                "type": "improved",
+                "module": "Table Column Filters",
+                "title": "Click-to-Open Table Column Filters",
+                "title_hin": "क्लिक करने पर फ़िल्टर पॉपअप",
+                "desc": "Table header filters now open smoothly on click instead of hover, avoiding accidental popups while moving the mouse cursor.",
+                "desc_hin": "टेबल हेडर के फ़िल्टर अब माउस घुमाने पर नहीं, बल्कि केवल क्लिक करने पर खुलेंगे।"
+            },
+            {
+                "type": "improved",
+                "module": "Table Displays",
+                "title": "Visible Headers & Clean 'No Data Found' Display",
+                "title_hin": "स्पष्ट 'No Data Found' संदेश व टेबल हेडर",
+                "desc": "Table headers and filter icons now stay visible even when no records match, showing a clear 'No Data Found' message in the table.",
+                "desc_hin": "डेटा न मिलने पर भी टेबल हेडर और फ़िल्टर दिखाई देंगे, और टेबल के अंदर 'No Data Found' का स्पष्ट संदेश दिखेगा।"
+            }
+        ]
+    },
+    {
         "version": "35.3",
         "date": "28-07-2026",
         "summary": "Inline Creation in Form Dropdowns & English PBK Display",
         "summary_hin": "फॉर्म ड्रॉपडाउन में इनलाइन निर्माण व अंग्रेजी PBK नाम",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",

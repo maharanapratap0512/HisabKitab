@@ -254,7 +254,7 @@
                                     <span>M M</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                        (clear)="filterBody.mm_id = []; onHeaderFilterChange()"
-                                       [isOpen]="!!filterBody.mm_id.length" triggerOn="hover">
+                                       [isOpen]="!!filterBody.mm_id.length" triggerOn="click">
                                        <ng-select class="custom-sm" placeholder="Select MM" [multiple]="true"
                                           [clearable]="true" [virtualScroll]="true" (change)="onHeaderFilterChange()"
                                           [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
@@ -269,7 +269,7 @@
                                     <span>Category</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                        (clear)="filterBody.category_id = null; onHeaderFilterChange()"
-                                       [isOpen]="!!filterBody.category_id" triggerOn="hover">
+                                       [isOpen]="!!filterBody.category_id" triggerOn="click">
                                        <ng-select class="custom-sm" placeholder="Select Category" [clearable]="true"
                                           [virtualScroll]="true" (change)="catSelected($event)"
                                           [(ngModel)]="filterBody.category_id" [ngModelOptions]="{standalone: true}">
@@ -284,7 +284,7 @@
                                     <span>Item</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                        (clear)="filterBody.item_id = []; onHeaderFilterChange()"
-                                       [isOpen]="!!(filterBody.item_id && filterBody.item_id.length)" triggerOn="hover">
+                                       [isOpen]="!!(filterBody.item_id && filterBody.item_id.length)" triggerOn="click">
                                        <ng-select class="custom-sm" placeholder="Select Item" [multiple]="true"
                                           [clearable]="true" [virtualScroll]="true" (change)="itemSelected($event)"
                                           [(ngModel)]="filterBody.item_id" [ngModelOptions]="{standalone: true}">
@@ -323,7 +323,7 @@
                                        <span>Mini_Madhuban</span>
                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                           (clear)="filterBody.mm_id = []; onHeaderFilterChange()"
-                                          [isOpen]="!!(filterBody.mm_id && filterBody.mm_id.length)" triggerOn="hover">
+                                          [isOpen]="!!(filterBody.mm_id && filterBody.mm_id.length)" triggerOn="click">
                                           <ng-select class="custom-sm" placeholder="Select MM" [multiple]="true"
                                              [clearable]="true" [virtualScroll]="true" (change)="onHeaderFilterChange()"
                                              [(ngModel)]="filterBody.mm_id" [ngModelOptions]="{standalone: true}">
@@ -338,7 +338,7 @@
                                        <span>Category</span>
                                        <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                           (clear)="filterBody.category_id = null; onHeaderFilterChange()"
-                                          [isOpen]="!!filterBody.category_id" triggerOn="hover">
+                                          [isOpen]="!!filterBody.category_id" triggerOn="click">
                                           <ng-select class="custom-sm" placeholder="Select Category" [clearable]="true"
                                              [virtualScroll]="true" (change)="catSelected($event)"
                                              [(ngModel)]="filterBody.category_id" [ngModelOptions]="{standalone: true}">

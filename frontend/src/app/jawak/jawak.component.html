@@ -192,8 +192,11 @@
 
                               <div class="col-md-2 mb-3">
                                  <div class="form-group">
-                                    <label class="form-label">Date & Pkt No</label>
-                                    <input type="date" class="form-control" [(ngModel)]="filterBody.date" name="date">
+                                    <label class="form-label">Date Range & Pkt No</label>
+                                    <input type="date" class="form-control mb-1" placeholder="From Date"
+                                       [(ngModel)]="filterBody.date_from" name="date_from">
+                                    <input type="date" class="form-control mb-1" placeholder="To Date"
+                                       [(ngModel)]="filterBody.date_to" name="date_to">
                                     <input type="text" class="form-control mt-1" placeholder="Pkt No."
                                        [(ngModel)]="filterBody.pkt_num" name="pkt_num">
                                  </div>
@@ -246,7 +249,8 @@
                                        <ng-option selected="selected" disabled value="">Jawak Type
                                        </ng-option>
                                        <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                          {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
+                                          {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng :
+                                          ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
                                        </ng-option>
                                     </ng-select>
                                     <ng-select class="custom mt-1" style="width: 100%;" placeholder="Select Zone"
@@ -364,10 +368,18 @@
                                  <div class="d-flex align-items-center justify-content-between">
                                     <span>Date</span>
                                     <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                       direction="right" [isOpen]="!!filterBody.date"
-                                       (clear)="filterBody.date = null; getJawakData(1)" triggerOn="hover">
-                                       <input type="date" class="form-control form-control-sm"
-                                          [(ngModel)]="filterBody.date" (change)="getJawakData(1)">
+                                       direction="right"
+                                       [isOpen]="!!filterBody.date_from || !!filterBody.date_to || !!filterBody.date"
+                                       (clear)="filterBody.date = null; filterBody.date_from = null; filterBody.date_to = null; getJawakData(1)"
+                                       triggerOn="click">
+                                       <div style="width: 100%;">
+                                          <label class="form-label mb-1"><small>Date From</small></label>
+                                          <input type="date" class="form-control form-control-sm mb-2"
+                                             [(ngModel)]="filterBody.date_from" (change)="getJawakData(1)">
+                                          <label class="form-label mb-1"><small>Date To</small></label>
+                                          <input type="date" class="form-control form-control-sm"
+                                             [(ngModel)]="filterBody.date_to" (change)="getJawakData(1)">
+                                       </div>
                                     </app-popover-filter>
                                  </div>
                               </th>
@@ -504,16 +516,21 @@
                                  <span *ngIf="!data.usage_report?.date">-</span>
                               </td>
                            </tr>
-                        </tbody>
-                     </table>
+                         </tbody>
+                         <tbody *ngIf="!jawakData || !jawakData.length">
+                            <tr>
+                               <td colspan="100%" class="text-center text-muted py-4">
+                                  <h5 class="mb-0"><i class="uil uil-folder-open text-muted me-2"></i>No Data Found</h5>
+                               </td>
+                            </tr>
+                         </tbody>
+                      </table>
                   </div>
 
                </div>
-               <pagination-controls class="pagi text-center" (pageChange)="getJawakData(page=$event)" [autoHide]="true">
+               <pagination-controls class="pagi text-center" (pageChange)="getJawakData(page=$event)" [autoHide]="true" *ngIf="jawakData && jawakData.length">
                </pagination-controls>
             </div>
-
-            <h2 class="text-center m-5" *ngIf="!jawakData.length">No Data!</h2>
          </div>
       </div>
    </div>

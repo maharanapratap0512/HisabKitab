@@ -63,6 +63,9 @@ export class BachatComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
+    if (this.auth.webUser?.settings?.defaultMM) {
+      this.filterBody.mm_id = [this.auth.webUser.settings.defaultMM];
+    }
     this.getbachatData();
     this.gs.observeList().subscribe(result => {
       this.states = result.state ? result.state : [];
@@ -81,7 +84,11 @@ export class BachatComponent implements OnInit {
 
         this.bachatAll = data['result'];
         this.total_count = data['total_count'];
-        this.bachatData = this.bachatAll;
+        if (this.filterBody.mm_id && this.filterBody.mm_id.length > 0) {
+          this.bachatData = this.bachatAll.filter((b: any) => this.filterBody.mm_id.includes(b.mm_id));
+        } else {
+          this.bachatData = this.bachatAll;
+        }
         this.isLoader = false;
       }
       this.isLoader = false;

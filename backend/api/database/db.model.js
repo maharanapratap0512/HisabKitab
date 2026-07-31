@@ -2658,6 +2658,39 @@ class dbModal {
       add_pj_received_date: `ALTER TABLE prastav_jawak ADD COLUMN received_date DATE`,
       add_pj_review: `ALTER TABLE prastav_jawak ADD COLUMN review TINYINT(1) DEFAULT NULL`,
       add_pj_review_reason: `ALTER TABLE prastav_jawak ADD COLUMN review_reason TEXT`
+    },
+    // version 36
+    // => triggers for rel_aawak_jawak to automatically update aawak.remaining_qty
+    {
+      drop_raj_ins_avk_rem_qty: `DROP TRIGGER IF EXISTS "raj_ins_avk_rem_qty"`,
+      create_raj_ins_avk_rem_qty: `CREATE TRIGGER "raj_ins_avk_rem_qty"
+          AFTER INSERT ON "rel_aawak_jawak"
+          FOR EACH ROW
+          BEGIN
+              UPDATE aawak 
+              SET remaining_qty = round(remaining_qty - NEW.split_qty, 2)
+              WHERE _id = NEW.aawak_id AND NEW.aawak_id IS NOT NULL;
+          END;`,
+      drop_raj_updt_avk_rem_qty: `DROP TRIGGER IF EXISTS "raj_updt_avk_rem_qty"`,
+      create_raj_updt_avk_rem_qty: `CREATE TRIGGER "raj_updt_avk_rem_qty"
+          AFTER UPDATE ON "rel_aawak_jawak"
+          FOR EACH ROW
+          BEGIN
+              UPDATE aawak 
+              SET remaining_qty = round(remaining_qty + OLD.split_qty - NEW.split_qty, 2)
+              WHERE _id = OLD.aawak_id AND OLD.aawak_id IS NOT NULL;
+          END;`,
+      drop_raj_del_avk_rem_qty: `DROP TRIGGER IF EXISTS "raj_del_avk_rem_qty"`,
+      create_raj_del_avk_rem_qty: `CREATE TRIGGER "raj_del_avk_rem_qty"
+          AFTER DELETE ON "rel_aawak_jawak"
+          FOR EACH ROW
+          BEGIN
+              UPDATE aawak 
+              SET remaining_qty = round(remaining_qty + OLD.split_qty, 2)
+              WHERE _id = OLD.aawak_id AND OLD.aawak_id IS NOT NULL;
+          END;`,
+      idx_raj_aawak_id: `CREATE INDEX IF NOT EXISTS idx_raj_aawak_id ON rel_aawak_jawak(aawak_id)`,
+      idx_raj_jawak_id: `CREATE INDEX IF NOT EXISTS idx_raj_jawak_id ON rel_aawak_jawak(jawak_id)`
     }
   ];
 

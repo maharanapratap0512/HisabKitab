@@ -74,7 +74,7 @@ export class ReportAjCheckComponent {
     this.settings = this.auth.webUser.settings;
 
     this.filterBody = {
-      mm_id: this.auth.webUser.defaultMM
+      mm_id: this.auth.webUser?.settings?.defaultMM
     }
     this.searchReports();
 

@@ -67,6 +67,8 @@ export class AawakNewComponent implements OnInit {
     month: null,
     year: null,
     date: null,
+    date_from: null,
+    date_to: null,
     mm_id: [],
     aj_mm_id: [],
     aawak_type_id: [],
@@ -162,6 +164,9 @@ export class AawakNewComponent implements OnInit {
 
   ngOnInit(): void {
     this.spinner.show();
+    if (this.auth.webUser?.settings?.defaultMM) {
+      this.filterBody.mm_id = [this.auth.webUser.settings.defaultMM];
+    }
 
     this.gs.observeList().subscribe(result => {
       this.mms = result.mm ? result.mm : [];

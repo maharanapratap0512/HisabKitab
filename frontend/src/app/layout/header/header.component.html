@@ -173,7 +173,7 @@
                      <div class="account-position mt-1">
                         <app-popover-filter [label]="defaultMM" clearButtonLabel="Log Out" direction="left"
                            (clear)="logout()" btnClass="btn btn-theme" [btnOutline]="false"
-                           title="Click to Change default MM" triggerOn="hover">
+                           title="Click to Change default MM" triggerOn="click">
 
                            <ng-select class="custom-sm text-start w-100" placeholder="Default MM" [clearable]="true"
                               [virtualScroll]="true" [(ngModel)]="auth.webUser.settings.defaultMM"

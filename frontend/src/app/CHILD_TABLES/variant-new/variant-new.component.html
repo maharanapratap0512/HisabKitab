@@ -76,7 +76,7 @@
                                         <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                             direction="left" [isOpen]="conditionObj.item_ids?.length > 0"
                                             (clear)="conditionObj.item_ids = undefined; applyFilter()"
-                                            triggerOn="hover">
+                                            triggerOn="click">
                                             <ng-select class="custom-sm" [multiple]="true" placeholder="Select items"
                                                 [(ngModel)]="conditionObj.item_ids" (change)="applyFilter()"
                                                 style="width: 250px;">
@@ -96,7 +96,7 @@
                                         <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                             direction="left" [isOpen]="conditionObj.categories?.length > 0"
                                             (clear)="conditionObj.categories = undefined; applyFilter()"
-                                            triggerOn="hover">
+                                            triggerOn="click">
                                             <ng-select class="custom-sm" [multiple]="true"
                                                 placeholder="Select categories" [(ngModel)]="conditionObj.categories"
                                                 (change)="applyFilter()">
@@ -113,7 +113,7 @@
                                         <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
                                             direction="left" [isOpen]="conditionObj.aliasSearch?.length > 0"
                                             (clear)="conditionObj.aliasSearch = undefined; applyFilter()"
-                                            triggerOn="hover">
+                                            triggerOn="click">
                                             <input type="text" class="form-control form-control-sm"
                                                 placeholder="Alias search..." [(ngModel)]="conditionObj.aliasSearch"
                                                 (keyup.enter)="applyFilter()" />

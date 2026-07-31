@@ -43,7 +43,7 @@
                                     <div class="ms-2 mb-1">
                                         <app-popover-filter iconClass="uil uil-info-circle text-info"
                                             [btnOutline]="false" direction="left" [showClearButton]="false"
-                                            triggerOn="hover">
+                                            triggerOn="click">
                                             <div style="width: 320px; padding: 10px; white-space: normal;">
                                                 <h6 class="mb-2 text-info border-bottom pb-1">Store Stock Report -
                                                     Details / विवरण</h6>
@@ -112,7 +112,7 @@
                                                 <span>Category</span>
                                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
                                                     [isOpen]="filterBody.category_id?.length > 0" (clear)="filterBody.category_id = []; searchReports()"
-                                                    triggerOn="hover">
+                                                    triggerOn="click">
                                                     <ng-select [multiple]="true" placeholder="Select Category" class="custom-sm" dropdownClass="custom-sm"
                                                         [(ngModel)]="filterBody.category_id" (change)="searchReports()" style="width: 100%; min-width: 180px;">
                                                         <ng-option *ngFor="let cat of categories" [value]="cat._id">
@@ -127,7 +127,7 @@
                                                 <span>Item</span>
                                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
                                                     [isOpen]="filterBody.item_subitem_ids?.length > 0" (clear)="filterBody.item_subitem_ids = []; searchReports()"
-                                                    triggerOn="hover">
+                                                    triggerOn="click">
                                                     <app-item-dropdown size="sm" [items]="items" [categoryIds]="filterBody.category_id" [(ngModel)]="filterBody.item_subitem_ids"
                                                         [multiple]="true" (change)="searchReports()" placeholder="Select Item">
                                                     </app-item-dropdown>

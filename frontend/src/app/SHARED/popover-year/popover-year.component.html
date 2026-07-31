@@ -1,5 +1,5 @@
 <app-popover-filter #popover [label]="selectedYear ? 'Years: ' + selectedYear : 'Years: All'" iconClass="uil uil-calendar-alt"
-    direction="auto" [showClearButton]="false" triggerOn="hover" [btnOutline]="!selectedYear">
+    direction="auto" [showClearButton]="false" triggerOn="click" [btnOutline]="!selectedYear">
     <div class="d-flex flex-wrap p-2 gap-2" style="width: 250px;">
         <span class="badge year-box" style="font-size: 13px;"
             [ngClass]="selectedYear === null ? 'bg-primary' : 'badge-outline-secondary'"

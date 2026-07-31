@@ -67,6 +67,8 @@ export class AawakComponent implements OnInit {
     month: null,
     year: null,
     date: null,
+    date_from: null,
+    date_to: null,
     mm_id: (this.auth.webUser.settings && this.auth.webUser.settings.defaultMM) ? [this.auth.webUser.settings.defaultMM] : [],
     zone_id: [],
     aj_mm_id: [],

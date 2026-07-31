@@ -88,6 +88,9 @@ export class DashboardComponent implements OnInit {
     });
     this.months = this.gs.months;
     this.settings = this.auth.webUser.settings;
+    if (this.auth.webUser?.settings?.defaultMM) {
+      this.filterObj.mm_id = [this.auth.webUser.settings.defaultMM];
+    }
     this.getBachat();
     this.getImportHistory();
     // this.getPendingAawak();
@@ -172,6 +175,7 @@ export class DashboardComponent implements OnInit {
           }
         }
         this.bachatData = this.bachatDataAll;
+        this.filterBachat();
         this.isLoader = false;
       }
       this.isLoader = false;

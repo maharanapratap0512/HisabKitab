@@ -58,7 +58,7 @@ export class ReportItemLedgerComponent implements OnInit {
 
       this.buildMonthYearOptions();
 
-      this.filterBody.mm_id = this.auth.webUser.defaultMM;
+      this.filterBody.mm_id = this.auth.webUser?.settings?.defaultMM;
 
       this.isLoader = false;
     });

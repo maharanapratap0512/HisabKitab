@@ -285,7 +285,7 @@
                      <!-- Filter Button with Popover -->
                      <app-popover-filter
                         [iconClass]="(selDept_id != null || cat != null) ? 'uil uil-check' : 'uil uil-filter'"
-                        (clear)="clearItemFilters()" triggerOn="hover">
+                        (clear)="clearItemFilters()" triggerOn="click">
                         <div class="mb-2">
                            <label class="form-label" style="font-size: 0.875rem; margin-bottom: 5px;">Department</label>
                            <ng-select *ngIf="departments.length > 0" class="custom" style="width: 100%;"

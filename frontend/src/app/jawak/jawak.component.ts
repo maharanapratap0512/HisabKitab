@@ -57,6 +57,8 @@ export class JawakComponent implements OnInit {
   jwkCount: any = 0;
   filterBody: any = {
     date: null,
+    date_from: null,
+    date_to: null,
     month: null,
     year: null,
     pbk_id: [],

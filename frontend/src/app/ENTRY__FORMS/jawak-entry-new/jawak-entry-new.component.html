@@ -67,7 +67,7 @@
                         <div class="float-end">
                             <!-- Filter Button with Popover -->
                             <app-popover-filter [iconClass]="'uil uil-filter'" (clear)="stateSelected(null)"
-                                triggerOn="hover">
+                                triggerOn="click">
                                 <div class="mb-2">
                                     <label class="form-label"
                                         style="font-size: 0.875rem; margin-bottom: 5px;">State</label>
@@ -175,7 +175,7 @@
                                             <app-popover-filter direction="auto" [showClearButton]="false"
                                                 [iconClass]="'uil uil-sliders-v-alt p-1'" [btnOutline]="false"
                                                 [btnClass]="(jwkForm.auto_awk || jwkForm.auto_reawk ? 'btn btn-primary btn-sm rounded-pill px-2 py-0 fs-10' : 'btn btn-outline-secondary btn-sm rounded-pill px-2 py-0 fs-10')"
-                                                triggerOn="hover">
+                                                triggerOn="click">
                                                 <div style="width: 450px; padding: 10px; text-align: left;">
                                                     <div class="mb-1 border" style="border-radius: 4px;">
                                                         <div (click)="jwkForm.auto_awk = !jwkForm.auto_awk;"
@@ -620,7 +620,7 @@
                                         <label
                                             class="fs-10 text-muted text-uppercase fw-semibold mb-1 d-block">Report</label>
                                         <app-popover-filter label="Usage Report" direction="left"
-                                            (clear)="clearReport(i)" clearButtonLabel="Done" triggerOn="hover"
+                                            (clear)="clearReport(i)" clearButtonLabel="Done" triggerOn="click"
                                             [btnClass]="'btn btn-outline-secondary btn-sm w-100'">
                                             <div class="row" style="width: 80vw;">
                                                 <div class="col-md-2 mb-3">
@@ -783,7 +783,7 @@
                                                 <app-popover-filter direction="auto" [showClearButton]="false"
                                                     [iconClass]="'uil uil-sliders-v-alt p-1'" [btnOutline]="false"
                                                     [btnClass]="(jwkForm.auto_awk || jwkForm.auto_reawk ? 'btn btn-soft-primary' : 'btn btn-soft-secondary')"
-                                                    triggerOn="hover">
+                                                    triggerOn="click">
                                                     <div style="width: 450px; padding: 10px;">
                                                         <div class="mb-1 border" style="border-radius: 4px;">
                                                             <div (click)="jwkForm.auto_awk = !jwkForm.auto_awk;"
@@ -1107,7 +1107,7 @@
                                             </td>
                                             <td *ngIf="settings.jawak.usage_report">
                                                 <app-popover-filter label="Usage Report" direction="left"
-                                                    (clear)="clearReport(i)" clearButtonLabel="Done" triggerOn="hover">
+                                                    (clear)="clearReport(i)" clearButtonLabel="Done" triggerOn="click">
                                                     <div class="row" style="width: 80vw;">
                                                         <div class="col-md-2 mb-3">
                                                             <div class="form-group">
