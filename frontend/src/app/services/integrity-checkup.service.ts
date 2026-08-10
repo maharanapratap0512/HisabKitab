@@ -17,18 +17,33 @@ export class IntegrityCheckupService {
     return this.http.get(this.api.getUrl('INTEGRITY') + 'tests');
   }
 
-  scan(): Observable<any> {
-    return this.http.post(this.api.getUrl('INTEGRITY') + 'scan', {});
+  scan(testId?: string): Observable<any> {
+    return this.http.post(this.api.getUrl('INTEGRITY') + 'scan', { testId });
   }
 
-  resolveStream(mismatches: any[]): Promise<ReadableStream<Uint8Array> | null> {
+  resolveStream(mismatches: any[], testId?: string): Promise<ReadableStream<Uint8Array> | null> {
     const url = this.api.getUrl('INTEGRITY') + 'resolve';
     return fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ mismatches })
+      body: JSON.stringify({ mismatches, testId })
+    }).then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.body;
+    });
+  }
+
+  rebuildBachatStream(): Promise<ReadableStream<Uint8Array> | null> {
+    const url = this.api.getUrl('INTEGRITY') + 'rebuild-bachat';
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
     }).then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok');

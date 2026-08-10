@@ -80,27 +80,27 @@ export class DataViewComponent implements OnInit {
   configureType() {
     this.settings = null;
     let tableName = this.Type;
-    
+
     switch (this.Type) {
       case 'mm': this.settings = this.auth.webUser.settings.mm;
         this.apiName = 'MM';
         break;
-      case 'country': 
+      case 'country':
         this.apiName = 'COUNTRY';
         break;
-      case 'zone': 
+      case 'zone':
         this.apiName = 'ZONE';
         break;
-      case 'district': 
+      case 'district':
         this.apiName = 'DISTRICT';
         break;
-      case 'state': 
+      case 'state':
         this.apiName = 'STATE';
         break;
       case 'category': this.settings = this.auth.webUser.settings.category;
         this.apiName = 'CATEGORY';
         break;
-      case 'unit': 
+      case 'unit':
         this.apiName = 'UNIT';
         break;
       case 'gender':
@@ -122,17 +122,17 @@ export class DataViewComponent implements OnInit {
       case 'department': this.settings = this.auth.webUser.settings.department;
         this.apiName = 'DEPARTMENT';
         break;
-      case 'jawak': 
+      case 'jawak':
         this.apiName = 'JAWAK';
         break;
-      case 'lot_no': 
+      case 'lot_no':
         this.apiName = 'LIST';
         break;
-      case 'dict': 
+      case 'dict':
         this.apiName = 'DICT';
         break;
     }
-    
+
     // Use the central service for fields setup
     this.fields = this.tableFieldsService.getFieldsForTable(tableName, this.settings);
     if (!this.importType) {
@@ -240,18 +240,86 @@ export class DataViewComponent implements OnInit {
   }
 
 
-  delete(i: any, id: any) {
+  async delete(i: any, id: any) {
+    if (this.Type && this.Type.toLowerCase() === 'jawak') {
+      const confirm = await Swal.fire({
+        title: 'Delete Jawak Entry?',
+        text: 'Are you sure you want to delete this Jawak entry? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+      });
+
+      if (confirm.isConfirmed) {
+        this.isLoader = true;
+        this.http.delete(this.api.getUrl('JAWAK') + id).subscribe((res: any) => {
+          this.isLoader = false;
+          if (res && res.success) {
+            this.toastr.success('Jawak deleted successfully.');
+            if (Array.isArray(this.records)) {
+              this.records = this.records.filter((r: any) => r._id != id);
+            }
+            this.response.emit({ action: 'delete', id });
+          } else {
+            this.toastr.error(res?.message || 'Failed to delete Jawak.');
+          }
+        }, err => {
+          this.isLoader = false;
+          this.toastr.error('Error deleting Jawak.');
+        });
+      }
+      return;
+    }
+
     this.delID = id;
     this.delType = this.Type;
     this.openModal('delete_advance');
   }
 
-  deleteSelected() {
+  async deleteSelected() {
     const selectedIds = this.selectionService.getSelected('data-view-' + this.Type);
     if (!selectedIds || selectedIds.length === 0) {
       this.toastr.warning('Please select at least one item to delete.');
       return;
     }
+
+    if (this.Type && this.Type.toLowerCase() === 'jawak') {
+      const confirm = await Swal.fire({
+        title: `Delete ${selectedIds.length} Selected Jawak Entries?`,
+        text: 'Are you sure you want to delete these Jawak entries? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete them!'
+      });
+
+      if (confirm.isConfirmed) {
+        this.isLoader = true;
+        let deletedCount = 0;
+        const promises = selectedIds.map((id: any) =>
+          this.http.delete(this.api.getUrl('JAWAK') + id).toPromise()
+        );
+
+        try {
+          await Promise.all(promises);
+          this.isLoader = false;
+          this.toastr.success(`${selectedIds.length} Jawak entries deleted successfully.`);
+          if (Array.isArray(this.records)) {
+            this.records = this.records.filter((r: any) => !selectedIds.includes(r._id));
+          }
+          this.selectionService.clear('data-view-' + this.Type);
+          this.response.emit({ action: 'deleteSelected', ids: selectedIds });
+        } catch (e) {
+          this.isLoader = false;
+          this.toastr.error('Error deleting selected Jawak entries.');
+        }
+      }
+      return;
+    }
+
     this.delID = selectedIds;
     this.delType = this.Type;
     this.openModal('delete_advance');

@@ -82,14 +82,26 @@
                             </span>
                         </td>
                         <td *ngFor="let row of fields">
-                            <ng-container *ngFor="let col of row.columns;let z = index">
-                                <span *ngIf="z != row.columns.length-1">
-                                    {{data[col] ? data[col] + ' : ' : ''}}
+                            <ng-container *ngIf="row.title !== 'Qty' || Type !== 'jawak'">
+                                <ng-container *ngFor="let col of row.columns;let z = index">
+                                    <span *ngIf="z != row.columns.length-1">
+                                        {{data[col] ? data[col] + ' : ' : ''}}
+                                    </span>
+                                    <span *ngIf="z == row.columns.length-1">
+                                        {{(data[col] ? data[col]: '')}}
+                                    </span>
+                                    <br *ngIf="z != 0 && z%2==0" />
+                                </ng-container>
+                            </ng-container>
+
+                            <!-- Custom Qty Display for Jawak (Identical to Aawak Component Distribution Section) -->
+                            <ng-container *ngIf="row.title === 'Qty' && Type === 'jawak'">
+                                <span *ngIf="data.is_split === 1 || (data.split_qty !== null && data.split_qty !== undefined && data.split_qty !== data.qty)">
+                                    <b class="text-warning font-13">{{data.allocated_qty || data.split_qty}}</b> <small class="text-muted font-11">({{data.qty}} total)</small> {{data.unit_short || ''}}
                                 </span>
-                                <span *ngIf="z == row.columns.length-1">
-                                    {{(data[col] ? data[col]: '')}}
+                                <span *ngIf="!(data.is_split === 1 || (data.split_qty !== null && data.split_qty !== undefined && data.split_qty !== data.qty))">
+                                    {{data.qty}} {{data.unit_short || ''}}
                                 </span>
-                                <br *ngIf="z != 0 && z%2==0" />
                             </ng-container>
                         </td>
                     </tr>

@@ -260,8 +260,19 @@ export class DeleteComponent {
 
     for (let value of this.relatedTables) {
       console.log(value, this.apiMapping[value], this.apiMapping);
+      const endpointUrl = this.apiMapping[value] || this.api.getUrl(value);
+      if (!endpointUrl) {
+        console.warn(`[DeleteComponent] No API URL defined for related table: ${value}`);
+        this.relatedData[value] = [];
+        if (this.getCounter == 0) {
+          this.selectedTable = value;
+          this.configureFields(value);
+        }
+        this.isDeleteCheck();
+        continue;
+      }
 
-      this.http.put((this.apiMapping[value] || this.api.getUrl(value)) + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+      this.http.put(endpointUrl + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
         if (data['success'] && data['result'] && data['result'].length > 0) {
           this.relatedData[value] = data['result'];
           this.relatedData[value + '_count'] = data['total_count'] || data['result'].length;

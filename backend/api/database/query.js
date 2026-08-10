@@ -1105,7 +1105,7 @@ const bachat = {
         where mm_id = @mm_id AND item_id = @item_id AND dept_id = @dept_id AND IFNULL(subitem_id, 0) = IFNULL(@subitem_id, 0) AND unit_id = @unit_id;`
     , insert_jawak_ins:
         `insert into bachat(mm_id, item_id, subitem_id, Stock, New, Old, Defective, Repairing, Scrap, difference, unit_id, dept_id) 
-        values(@mm_id, @item_id, @subitem_id, @qty, (CASE WHEN @condition_id = 33 THEN 0-@qty ELSE 0 END), (CASE WHEN @condition_id = 34 THEN 0-@qty ELSE 0 END), (CASE WHEN @condition_id = 35 THEN 0-@qty ELSE 0 END), (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN 0-@qty ELSE 0 END), (CASE WHEN @condition_id = 36 THEN 0-@qty ELSE 0 END), 0-@difference, @unit_id, @dept_id);`
+        values(@mm_id, @item_id, @subitem_id, 0-@qty, (CASE WHEN @condition_id = 33 THEN 0-@qty ELSE 0 END), (CASE WHEN @condition_id = 34 THEN 0-@qty ELSE 0 END), (CASE WHEN @condition_id = 35 THEN 0-@qty ELSE 0 END), (CASE WHEN(select list_name_eng from support_list where _id = @condition_id) LIKE '%Repairing%' THEN 0-@qty ELSE 0 END), (CASE WHEN @condition_id = 36 THEN 0-@qty ELSE 0 END), 0-@difference, @unit_id, @dept_id);`
     , update_jawak_ins:
         `update bachat set 
         Stock = round(Stock - @qty, 3),

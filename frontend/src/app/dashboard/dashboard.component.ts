@@ -58,6 +58,7 @@ export class DashboardComponent implements OnInit {
     items: [],
     category_id: null
   }
+  historySelectedMM: any = null;
   loadingStatus: any = "मैं आत्मा शांत स्वरूप हूँ ।";
   dictionary: any = [];
 
@@ -87,9 +88,11 @@ export class DashboardComponent implements OnInit {
       this.nimitts = result.nimitt ? result.nimitt : [];
     });
     this.months = this.gs.months;
-    this.settings = this.auth.webUser.settings;
+    this.settings = this.auth.webUser?.settings || {};
     if (this.auth.webUser?.settings?.defaultMM) {
-      this.filterObj.mm_id = [this.auth.webUser.settings.defaultMM];
+      const defMM = this.auth.webUser.settings.defaultMM;
+      this.filterObj.mm_id = [defMM];
+      this.historySelectedMM = defMM;
     }
     this.getBachat();
     this.getImportHistory();
@@ -122,6 +125,7 @@ export class DashboardComponent implements OnInit {
     this.isLoader = true;
     this.http.get(this.api.getUrl('IMPORTHISTORY') + this.auth.webUser.dept_id).subscribe((data: any) => {
       if (data['result'] && data['success']) {
+        this.historyDataAll = [];
         for (let row of data['result']) {
           let monthly_detail: any = {};
           for (let m = 1; m <= 12; m++) {
@@ -138,9 +142,11 @@ export class DashboardComponent implements OnInit {
           }
           this.historyDataAll.push({ ...row, ...monthly_detail });
         }
-        this.historyData = this.historyDataAll;
-
-        this.isLoader = false;
+        if (this.historySelectedMM) {
+          this.historyData = this.historyDataAll.filter((h: { mm_id: any; }) => h.mm_id == this.historySelectedMM);
+        } else {
+          this.historyData = this.historyDataAll;
+        }
       }
       this.isLoader = false;
     });
@@ -183,20 +189,27 @@ export class DashboardComponent implements OnInit {
   }
 
   filterBachat() {
+    const mmIds = (this.filterObj.mm_id || []).map((id: any) => String(id));
+    const itemIds = (this.filterObj.items || []).map((id: any) => String(id));
 
-    if (this.filterObj.mm_id.length > 0 && this.filterObj.items.length > 0) {
-      this.bachatData = this.bachatDataAll.filter((b: { mm_id: any, item_id: any; }) => this.filterObj.mm_id.includes(b.mm_id) && this.filterObj.items.includes(b.item_id));
+    if (mmIds.length > 0 && itemIds.length > 0) {
+      this.bachatData = this.bachatDataAll.filter((b: { mm_id: any, item_id: any; }) =>
+        mmIds.includes(String(b.mm_id)) && itemIds.includes(String(b.item_id))
+      );
     }
-    else if (this.filterObj.mm_id.length > 0) {
-      this.bachatData = this.bachatDataAll.filter((b: { mm_id: any; }) => this.filterObj.mm_id.includes(b.mm_id));
+    else if (mmIds.length > 0) {
+      this.bachatData = this.bachatDataAll.filter((b: { mm_id: any; }) =>
+        mmIds.includes(String(b.mm_id))
+      );
     }
-    else if (this.filterObj.items.length > 0) {
-      this.bachatData = this.bachatDataAll.filter((b: { item_id: any; }) => this.filterObj.items.includes(b.item_id));
+    else if (itemIds.length > 0) {
+      this.bachatData = this.bachatDataAll.filter((b: { item_id: any; }) =>
+        itemIds.includes(String(b.item_id))
+      );
     }
     else {
       this.bachatData = this.bachatDataAll;
     }
-
   }
 
   itemSelected(ev: any) {
@@ -215,13 +228,13 @@ export class DashboardComponent implements OnInit {
   }
 
   mmHistorySelected(ev: any) {
+    this.historySelectedMM = ev;
     if (ev) {
       this.historyData = this.historyDataAll.filter((h: { mm_id: any; }) => h.mm_id == ev);
     }
     else {
       this.historyData = this.historyDataAll;
     }
-
   }
 
   mmSelected(ev: any) {

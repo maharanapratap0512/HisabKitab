@@ -226,11 +226,23 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
 // get jawak by aawak id
 router.get('/byaawak/:aawak_ref_id', async (req, res, next) => {
     try {
-        let conditionString = ` aawak_ref_id = ${req.params.aawak_ref_id}`;
+        const awkId = Number(req.params.aawak_ref_id);
+        let conditionString = `(jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${awkId}) OR jawak.aawak_ref_id = ${awkId})`;
         // options = { dept_id = null, conditionString = null, orderBy = null, limit = -1, offset = -1 }
         await DB.getList('jawak', { full: true, conditionString: conditionString }).then((resolve) => {
             for (let i in resolve.data) {
                 resolve.data[i].enz = (resolve.data[i].enz ? JSON.parse(resolve.data[i].enz) : {});
+                if (typeof resolve.data[i].aawak_splits === 'string') {
+                    try { resolve.data[i].aawak_splits = JSON.parse(resolve.data[i].aawak_splits); } catch (e) { }
+                }
+                if (Array.isArray(resolve.data[i].aawak_splits)) {
+                    const matchedSplit = resolve.data[i].aawak_splits.find((s) => Number(s.aawak_id) === awkId);
+                    if (matchedSplit) {
+                        resolve.data[i].split_qty = matchedSplit.split_qty;
+                        resolve.data[i].allocated_qty = matchedSplit.split_qty || matchedSplit.qty;
+                        resolve.data[i].is_split = matchedSplit.is_split;
+                    }
+                }
             }
             res.json({
                 success: true,

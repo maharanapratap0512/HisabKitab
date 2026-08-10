@@ -25,6 +25,15 @@
                   Loading tests...
                </div>
             </div>
+            <hr class="my-3">
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm w-100 py-2 d-flex align-items-center justify-content-center"
+                    [disabled]="isScanning || isResolving"
+                    (click)="rebuildFullBachat()">
+               <i class="uil-sync me-1" *ngIf="!isResolving"></i>
+               <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" *ngIf="isResolving"></span>
+               <span>Rebuild All Bachat Summary</span>
+            </button>
          </div>
       </div>
    </div>
@@ -82,7 +91,8 @@
                </div>
 
                <div class="table-responsive" style="max-height: 400px;" *ngIf="mismatches.length > 0">
-                  <table class="table table-bordered table-centered mb-0 font-12">
+                  <!-- Table for Jawak Reference Mismatch -->
+                  <table class="table table-bordered table-centered mb-0 font-12" *ngIf="selectedTest?.id === 'jawak-aawak-ref-mismatch'">
                      <thead class="table-dark">
                         <tr>
                            <th>Voucher / Date</th>
@@ -98,6 +108,10 @@
                               <td class="font-weight-bold">
                                  <div>V: {{ m.jawak_voucher_no || 'N/A' }}</div>
                                  <div class="text-muted font-11">{{ m.jawak_date }}</div>
+                                 <div>
+                                    <span *ngIf="m.split_count > 1 || m.is_split" class="badge bg-warning text-dark font-11 mt-1"><i class="uil-share-alt me-1"></i>Split ({{ m.split_count }} Aawaks)</span>
+                                    <span *ngIf="!(m.split_count > 1 || m.is_split)" class="badge bg-light text-muted border font-11 mt-1">Single Aawak</span>
+                                 </div>
                               </td>
                               <td class="font-weight-bold text-danger">Main MM</td>
                               <td>
@@ -112,6 +126,10 @@
                               <td *ngIf="m.jawak_mm_id === m.aawak_mm_id" class="font-weight-bold">
                                  <div>V: {{ m.jawak_voucher_no || 'N/A' }}</div>
                                  <div class="text-muted font-11">{{ m.jawak_date }}</div>
+                                 <div>
+                                    <span *ngIf="m.split_count > 1 || m.is_split" class="badge bg-warning text-dark font-11 mt-1"><i class="uil-share-alt me-1"></i>Split ({{ m.split_count }} Aawaks)</span>
+                                    <span *ngIf="!(m.split_count > 1 || m.is_split)" class="badge bg-light text-muted border font-11 mt-1">Single Aawak</span>
+                                 </div>
                               </td>
                               <td *ngIf="m.jawak_mm_id !== m.aawak_mm_id" class="border-top-0 text-muted"></td>
                               <td class="font-weight-bold text-danger">Item</td>
@@ -127,6 +145,10 @@
                               <td *ngIf="m.jawak_mm_id === m.aawak_mm_id && m.jawak_item_id === m.aawak_item_id" class="font-weight-bold">
                                  <div>V: {{ m.jawak_voucher_no || 'N/A' }}</div>
                                  <div class="text-muted font-11">{{ m.jawak_date }}</div>
+                                 <div>
+                                    <span *ngIf="m.split_count > 1 || m.is_split" class="badge bg-warning text-dark font-11 mt-1"><i class="uil-share-alt me-1"></i>Split ({{ m.split_count }} Aawaks)</span>
+                                    <span *ngIf="!(m.split_count > 1 || m.is_split)" class="badge bg-light text-muted border font-11 mt-1">Single Aawak</span>
+                                 </div>
                               </td>
                               <td *ngIf="m.jawak_mm_id !== m.aawak_mm_id || m.jawak_item_id !== m.aawak_item_id" class="border-top-0 text-muted"></td>
                               <td class="font-weight-bold text-danger">Subitem</td>
@@ -142,6 +164,10 @@
                               <td *ngIf="m.jawak_mm_id === m.aawak_mm_id && m.jawak_item_id === m.aawak_item_id && (m.jawak_subitem_id || 0) === (m.aawak_subitem_id || 0)" class="font-weight-bold">
                                  <div>V: {{ m.jawak_voucher_no || 'N/A' }}</div>
                                  <div class="text-muted font-11">{{ m.jawak_date }}</div>
+                                 <div>
+                                    <span *ngIf="m.split_count > 1 || m.is_split" class="badge bg-warning text-dark font-11 mt-1"><i class="uil-share-alt me-1"></i>Split ({{ m.split_count }} Aawaks)</span>
+                                    <span *ngIf="!(m.split_count > 1 || m.is_split)" class="badge bg-light text-muted border font-11 mt-1">Single Aawak</span>
+                                 </div>
                               </td>
                               <td *ngIf="m.jawak_mm_id !== m.aawak_mm_id || m.jawak_item_id !== m.aawak_item_id || (m.jawak_subitem_id || 0) !== (m.aawak_subitem_id || 0)" class="border-top-0 text-muted"></td>
                               <td class="font-weight-bold text-danger">Unit</td>
@@ -153,6 +179,88 @@
                               </td>
                            </tr>
                         </ng-container>
+                     </tbody>
+                  </table>
+
+                  <!-- Table for Aawak Remaining Qty Mismatch -->
+                  <table class="table table-bordered table-centered mb-0 font-12" *ngIf="selectedTest?.id === 'aawak-remaining-qty-mismatch'">
+                     <thead class="table-dark">
+                        <tr>
+                           <th>Aawak Voucher / Date</th>
+                           <th>Item / Subitem / MM</th>
+                           <th>Total Aawak Qty</th>
+                           <th>Deducted Qty (Jawaks)</th>
+                           <th>Stored Remaining Qty</th>
+                           <th>Correct Remaining Qty</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let m of mismatches" class="table-warning-light">
+                           <td class="font-weight-bold">
+                              <div>V: {{ m.aawak_voucher_no || 'N/A' }} (ID: {{ m.aawak_id }})</div>
+                              <div class="text-muted font-11">{{ m.aawak_date }}</div>
+                              <div *ngIf="m.split_jawak_count > 0" class="badge bg-warning text-dark font-11 mt-1">
+                                 <i class="uil-share-alt me-1"></i>Has {{ m.split_jawak_count }} Split Jawak(s)
+                              </div>
+                           </td>
+                           <td>
+                              <div>{{ m.aawak_item_hin || 'Item ID: ' + m.aawak_item_id }} <span *ngIf="m.aawak_subitem_hin">({{ m.aawak_subitem_hin }})</span></div>
+                              <div class="text-muted font-11">MM: {{ m.aawak_mm_hin || 'N/A' }}</div>
+                           </td>
+                           <td class="font-weight-bold">{{ m.aawak_total_qty }} {{ m.aawak_unit_short || '' }}</td>
+                           <td class="text-primary font-weight-bold">
+                              <div>{{ m.total_used_qty }} {{ m.aawak_unit_short || '' }}</div>
+                              <div class="text-muted font-11">({{ m.total_jawak_count }} Jawak entry/entries)</div>
+                           </td>
+                           <td>
+                              <span class="badge bg-danger-lighten text-danger font-12">{{ m.stored_remaining_qty }} {{ m.aawak_unit_short || '' }}</span>
+                           </td>
+                           <td>
+                              <span class="badge bg-success-lighten text-success font-12">{{ m.expected_remaining_qty }} {{ m.aawak_unit_short || '' }}</span>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <!-- Table for Bachat Stock Mismatch -->
+                  <table class="table table-bordered table-centered mb-0 font-12" *ngIf="selectedTest?.id === 'bachat-stock-mismatch'">
+                     <thead class="table-dark">
+                        <tr>
+                           <th>Department / MM</th>
+                           <th>Item / Subitem</th>
+                           <th>Stored Stock</th>
+                           <th>Expected Stock</th>
+                           <th>Stored Used</th>
+                           <th>Expected Used</th>
+                           <th>Condition Breakdown (New / Old / Defective / Scrap)</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr *ngFor="let m of mismatches" class="table-warning-light">
+                           <td class="font-weight-bold">
+                              <div>{{ m.dept_hin || 'Dept ID: ' + m.dept_id }}</div>
+                              <div class="text-muted font-11">MM: {{ m.mm_hin || 'ID: ' + m.mm_id }}</div>
+                           </td>
+                           <td>
+                              <div class="font-weight-bold">{{ m.item_hin || 'Item ID: ' + m.item_id }} <span *ngIf="m.subitem_hin">({{ m.subitem_hin }})</span></div>
+                              <div class="text-muted font-11">Unit: {{ m.unit_short || 'N/A' }}</div>
+                           </td>
+                           <td>
+                              <span class="badge bg-danger-lighten text-danger font-12">{{ m.stored_stock }} {{ m.unit_short || '' }}</span>
+                           </td>
+                           <td>
+                              <span class="badge bg-success-lighten text-success font-12">{{ m.expected_stock }} {{ m.unit_short || '' }}</span>
+                           </td>
+                           <td>
+                              <span class="badge bg-danger-lighten text-danger font-12">{{ m.stored_used }} {{ m.unit_short || '' }}</span>
+                           </td>
+                           <td>
+                              <span class="badge bg-success-lighten text-success font-12">{{ m.expected_used }} {{ m.unit_short || '' }}</span>
+                           </td>
+                           <td class="font-11">
+                              <div>Stored: N:{{m.stored_new}} | O:{{m.stored_old}} | D:{{m.stored_defective}} | S:{{m.stored_scrap}}</div>
+                              <div class="text-success font-weight-bold">Expected: N:{{m.expected_new}} | O:{{m.expected_old}} | D:{{m.expected_defective}} | S:{{m.expected_scrap}}</div>
+                           </td>
+                        </tr>
                      </tbody>
                   </table>
                </div>
