@@ -352,6 +352,7 @@ export class AawakNewComponent implements OnInit {
           'Amount': 0
         };
         for (let j in result[i].jawak_detail) {
+          const splitQty = (result[i].jawak_detail[j].allocated_qty !== undefined ? result[i].jawak_detail[j].allocated_qty : (result[i].jawak_detail[j].split_qty !== null && result[i].jawak_detail[j].split_qty !== undefined ? result[i].jawak_detail[j].split_qty : result[i].jawak_detail[j].qty));
           jawakArray.push({
             'Date': result[i].jawak_detail[j].date ? this.gs.formatDisplayDate(result[i].jawak_detail[j].date) : '-',
             'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
@@ -360,7 +361,8 @@ export class AawakNewComponent implements OnInit {
             'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
             'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
             'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
-            'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+            'Total Jawak Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+            'Split Jawak Qty': splitQty ? splitQty : '-',
             'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
             'Rate': result[i].jawak_detail[j].rate ? result[i].jawak_detail[j].rate : '-',
             'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
@@ -679,6 +681,7 @@ export class AawakNewComponent implements OnInit {
         for (let j in result[i].jawak_detail) {
           uniqueJawakMM.add(result[i].jawak_detail[j].jawak_mm_id);
           uniqueUnit.add(result[i].jawak_detail[j].unit_id);
+          const splitQty = (result[i].jawak_detail[j].allocated_qty !== undefined ? result[i].jawak_detail[j].allocated_qty : (result[i].jawak_detail[j].split_qty !== null && result[i].jawak_detail[j].split_qty !== undefined ? result[i].jawak_detail[j].split_qty : result[i].jawak_detail[j].qty));
 
           this.allAJData.push({
             'Date': result[i].jawak_detail[j].date ? this.gs.formatDisplayDate(result[i].jawak_detail[j].date) : '-',
@@ -688,7 +691,8 @@ export class AawakNewComponent implements OnInit {
             'Usage List': result[i].jawak_detail[j].usage_list_id ? result[i].jawak_detail[j].usage_list_hin : '-',
             'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
             'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
-            'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+            'Total Jawak Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+            'Split Jawak Qty': splitQty ? splitQty : '-',
             'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
             'Rate': result[i].jawak_detail[j].rate ? result[i].jawak_detail[j].rate : '-',
             'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
@@ -975,10 +979,11 @@ export class AawakNewComponent implements OnInit {
     let qty = 0;
     if (awk.jawak_detail) {
       awk.jawak_detail.forEach((j: any) => {
-        qty += j.qty;
+        const itemQty = j.allocated_qty !== undefined ? Number(j.allocated_qty) : (j.split_qty !== null && j.split_qty !== undefined ? Number(j.split_qty) : Number(j.qty));
+        qty += itemQty;
       });
     }
-    return qty;
+    return Number(qty.toFixed(2));
   }
 
   showJawak(data: any) {

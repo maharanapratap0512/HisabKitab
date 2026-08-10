@@ -1,10 +1,43 @@
 [
     {
+        "version": "36.0",
+        "date": "10-08-2026",
+        "summary": "Multi-Aawak Selection & Easy Split Quantity Allocation",
+        "summary_hin": "एक साथ कई आवक चुनने और मात्रा बांटने की आसान सुविधा",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Jawak Form & Entry",
+                "title": "Select Multiple Aawaks & Auto-Split Quantity",
+                "title_hin": "एक साथ कई आवक चुनें और मात्रा स्वतः बांटें",
+                "desc": "In Jawak entry, you can now select multiple Aawak bills at once. The system automatically calculates total quantity and lets you modify or reset selections easily with Edit (✏️) and Clear (❌) buttons.",
+                "desc_hin": "जावक की प्रविष्टि करते समय अब आप एक साथ कई आवक चुन सकते हैं। कुल मात्रा का जोड़ अपने आप हो जाएगा, और आप पेंसिल (✏️) व क्रॉस (❌) बटन से आसानी से बदलाव या रीसेट कर सकते हैं।"
+            },
+            {
+                "type": "improved",
+                "module": "Aawak Selection List",
+                "title": "Smart Matching of Items and Stock Conditions",
+                "title_hin": "सामान और कंडीशन के हिसाब से सही स्टॉक का चुनाव",
+                "desc": "When selecting Aawaks, the list automatically highlights matching items, sub-items, and conditions (New/Old) so you always pick the exact right stock.",
+                "desc_hin": "आवक चुनते समय सूची में आपके चुने हुए सामान (Item), सब-आइटम और कंडीशन (नया/पुराना) के अनुसार सही स्टॉक अपने आप दिखाई देगा।"
+            },
+            {
+                "type": "feature",
+                "module": "Item Ledger PDF Export",
+                "title": "Quick 'Back to Index' Link on Every PDF Page",
+                "title_hin": "पीडीएफ के हर पन्ने पर 'Back to Index' की सुविधा",
+                "desc": "In Item Ledger PDF reports, every page now includes a clickable 'Back to Index' link, allowing you to jump back to the main index instantly from any page.",
+                "desc_hin": "आइटम लेजर पीडीएफ रिपोर्ट के हर पन्ने पर अब 'Back to Index' का बटन मिलेगा, जिससे आप किसी भी पन्ने से तुरंत मुख्य इंडेक्स सूची पर वापस जा सकते हैं।"
+            }
+        ]
+    },
+    {
         "version": "35.4",
         "date": "31-07-2026",
         "summary": "Date Range Filter, Auto MM Selection & Click-to-Open Filters",
         "summary_hin": "तारीख रेंज फ़िल्टर, ऑटो डिफ़ॉल्ट MM चुनाव व क्लिक पर फ़िल्टर",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",
@@ -90,14 +123,12 @@
             }
         ]
     },
-
     {
         "version": "35.1",
         "date": "18-07-2026",
         "summary": "Report",
         "summary_hin": "रिपोर्ट",
         "isNew": false,
-
         "items": [
             {
                 "type": "feature",

@@ -309,14 +309,15 @@
                 <div class="col-md-3 mb-3">
                     <div class="form-group">
                         <label class="form-label">Link Aawak</label>
-                        <app-aawak-ref-dropdown [mmId]="jawakForm.get('mm_id')?.value"
+                        <app-aawak-ref [mmId]="jawakForm.get('mm_id')?.value"
                             [maxDate]="jawakForm.get('date')?.value" [deptId]="auth.webUser.dept_id" [filterObj]="{
                                 item_id: jawakForm.get('item_id')?.value,
                                 subitem_id: jawakForm.get('subitem_id')?.value,
                                 condition_id: jawakForm.get('condition_id')?.value,
                                 aawak_source_id: jawakForm.get('aawak_source_id')?.value
-                            }" formControlName="aawak_ref_id" size="sm" (selectionChange)="onAawakRefChange($event)">
-                        </app-aawak-ref-dropdown>
+                            }" formControlName="aawak_ref_id" size="sm" (selectionChange)="onAawakRefChange($event)"
+                            (splitsSelected)="onAawakSplitsSelected($event)" [jawakId]="getData?._id" [selectedSplitsData]="aawak_splits">
+                        </app-aawak-ref>
                     </div>
                 </div>
 

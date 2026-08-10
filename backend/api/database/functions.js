@@ -55,6 +55,7 @@ class Functions extends DBContex {
                   obj.enz.jawak_id = insResult.lastInsertRowid;
                   obj.usage_report.jawak_id = insResult.lastInsertRowid;
                   await this.insertUsageReport(obj.usage_report);
+                  await this.processRelAawakJawak(insResult.lastInsertRowid, obj.aawak_splits, obj.qty);
                } else if (type == 'aawak') {
                   obj.enz.aawak_id = insResult.lastInsertRowid;
                }
@@ -183,6 +184,10 @@ class Functions extends DBContex {
             }
 
             // console.log(obj);
+            const rawRefId = obj.aawak_ref_id;
+            if (type == 'jawak') {
+               obj.aawak_ref_id = null;
+            }
             let updtResult = stmtUpdate.run(obj);
             if (updtResult.changes == 1 || updtResult.changes == 0) {
                if (updtResult.changes == 1) {
@@ -195,14 +200,16 @@ class Functions extends DBContex {
                   else
                      await this.insertAJEnzyme(obj.enz, type);
                }
-               if (type == 'jawak' && obj.usage_report) {
-                  obj.usage_report.jawak_id = obj._id;
-                  if (obj.usage_report._id) {
-                     await this.updateUsageReport(obj.usage_report)
-                  } else {
-                     await this.insertUsageReport(obj.usage_report);
+               if (type == 'jawak') {
+                  if (obj.usage_report) {
+                     obj.usage_report.jawak_id = obj._id;
+                     if (obj.usage_report._id) {
+                        await this.updateUsageReport(obj.usage_report)
+                     } else {
+                        await this.insertUsageReport(obj.usage_report);
+                     }
                   }
-
+                  await this.processRelAawakJawak(obj._id, obj.aawak_splits, obj.qty);
                }
                resolve(true);
             } else {
@@ -224,6 +231,7 @@ class Functions extends DBContex {
                await this.deleteAJEnzyme(id, type);
                if (type == 'jawak') {
                   await this.deleteUsageReportByRef(id);
+                  await this.processRelAawakJawak(id);
                }
                let delResult = stmtDelete.run({ _id: id });
                if (delResult.changes == 1) {
@@ -675,10 +683,46 @@ class Functions extends DBContex {
 
 
 
-   // PBK Closing Functions relocated to pbk.service.js
+   async processRelAawakJawak(jawakId, aawakSplits, qty) {
+      return new Promise(async (resolve, reject) => {
+         try {
+            if (!jawakId) return resolve(false);
+
+            if (typeof aawakSplits === 'string') {
+               try { aawakSplits = JSON.parse(aawakSplits); } catch (e) { aawakSplits = []; }
+            }
+
+            const BaseTable = require('./base.table');
+            const relAawakJawakModel = new BaseTable('rel_aawak_jawak');
+
+            // Delete all existing rel_aawak_jawak rows for this jawak
+            relAawakJawakModel.delete({ jawak_id: jawakId });
+
+            // Insert new split or 1:1 relation rows
+            if (Array.isArray(aawakSplits) && aawakSplits.length > 0) {
+               const isSplit = aawakSplits.length > 1 ? 1 : 0;
+               for (const s of aawakSplits) {
+                  const awkId = s.aawak_id || s._id;
+                  const itemSplitQty = Number(s.split_qty) || 0;
+                  if (awkId && itemSplitQty > 0) {
+                     relAawakJawakModel.insert({
+                        aawak_id: awkId,
+                        jawak_id: jawakId,
+                        qty: qty || itemSplitQty,
+                        split_qty: isSplit === 1 ? itemSplitQty : null,
+                        is_split: isSplit
+                     }, false);
+                  }
+               }
+            }
+
+            resolve(true);
+         } catch (err) {
+            reject(err);
+         }
+      });
+   }
 }
-
-
 
 module.exports = new Functions();
 

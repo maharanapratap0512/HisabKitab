@@ -2,6 +2,8 @@ const router = require('express').Router();
 const DBContex = require('../database/DBContex');
 const DB = new DBContex();
 const Fn = require('../database/functions');
+const BaseTable = require('../database/base.table');
+const relAawakJawakModel = new BaseTable('rel_aawak_jawak');
 
 
 // get jawak
@@ -80,6 +82,8 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                 resolve.data[i].usage_report = (resolve.data[i].usage_report ? JSON.parse(resolve.data[i].usage_report) : {});
                 resolve.data[i].icategories = (resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []);
                 resolve.data[i].scategories = (resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : []);
+                if (typeof resolve.data[i].aawak_ref_obj === 'string') resolve.data[i].aawak_ref_obj = JSON.parse(resolve.data[i].aawak_ref_obj);
+                if (typeof resolve.data[i].aawak_splits === 'string') resolve.data[i].aawak_splits = JSON.parse(resolve.data[i].aawak_splits);
             }
             res.json({
                 success: true,
@@ -203,6 +207,8 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
                     'nuksan': resolve.data[i].jawaks[j].nuksan,
                     'rating': resolve.data[i].jawaks[j].rating
                 }
+                if (typeof resolve.data[i].jawaks[j].aawak_ref_obj === 'string') resolve.data[i].jawaks[j].aawak_ref_obj = JSON.parse(resolve.data[i].jawaks[j].aawak_ref_obj);
+                if (typeof resolve.data[i].jawaks[j].aawak_splits === 'string') resolve.data[i].jawaks[j].aawak_splits = JSON.parse(resolve.data[i].jawaks[j].aawak_splits);
             }
         }
         res.json({
@@ -280,9 +286,6 @@ router.post('/new/:dept_id', async (req, res, next) => {
             await Fn.begin();
             await Fn.insertAJ(req.body, 'jawak').then(async (resolve) => {
                 if (resolve) {
-                    if (req.body.aawak_splits || req.body.aawak_ref_id) {
-                        saveJawakAawakSplits(resolve, req.body.aawak_splits, req.body.aawak_ref_id, req.body.qty);
-                    }
                     if (req.body.auto_awk) {
                         let awk = DB.tbInterface.getAawakFromJawak(req.body);
                         awk.dept_id = req.body.aawak_dept_id;
@@ -333,9 +336,6 @@ router.put('/new', async (req, res, next) => {
         if (req.body.set && req.body.query) {
             await Fn.updateAJ(req.body.set, 'jawak').then(async (resolve) => {
                 if (resolve) {
-                    if (req.body.set.aawak_splits !== undefined || req.body.set.aawak_ref_id !== undefined) {
-                        saveJawakAawakSplits(req.body.set._id, req.body.set.aawak_splits, req.body.set.aawak_ref_id, req.body.set.qty);
-                    }
                     let jawak = await DB.getById('jawak', req.body.set._id, { full: true });
                     jawak.enz = (jawak.enz ? JSON.parse(jawak.enz) : {});
                     res.json({
@@ -572,65 +572,22 @@ router.delete('/voucher/:ids', async (req, res, next) => {
 
 
 
-// Helper to save aawak splits for a jawak
-function saveJawakAawakSplits(jawakId, splits, singleRefId, jawakQty) {
-    if (!jawakId) return;
-    // 1. Delete existing rel_aawak_jawak entries (trigger will automatically restore remaining_qty in aawak!)
-    DB.db.prepare(`DELETE FROM rel_aawak_jawak WHERE jawak_id = ?`).run(jawakId);
-
-    // 2. Insert new splits if provided
-    if (Array.isArray(splits) && splits.length > 0) {
-        const stmt = DB.db.prepare(`INSERT INTO rel_aawak_jawak (aawak_id, jawak_id, split_qty, is_split) VALUES (?, ?, ?, ?)`);
-        const isSplit = splits.length > 1 ? 1 : 0;
-        for (const s of splits) {
-            const awkId = s.aawak_id || s._id;
-            const sQty = Number(s.split_qty !== undefined ? s.split_qty : s.remaining_qty);
-            if (awkId && !isNaN(sQty)) {
-                stmt.run(awkId, jawakId, sQty, isSplit);
-            }
-        }
-        DB.db.prepare(`UPDATE jawak SET aawak_ref_id = NULL, updated_at = datetime('now','localtime') WHERE _id = ?`).run(jawakId);
-    } else if (singleRefId) {
-        const stmt = DB.db.prepare(`INSERT INTO rel_aawak_jawak (aawak_id, jawak_id, split_qty, is_split) VALUES (?, ?, ?, 0)`);
-        stmt.run(singleRefId, jawakId, Number(jawakQty || 0), 0);
-        DB.db.prepare(`UPDATE jawak SET aawak_ref_id = NULL, updated_at = datetime('now','localtime') WHERE _id = ?`).run(jawakId);
-    } else {
-        DB.db.prepare(`UPDATE jawak SET aawak_ref_id = NULL, updated_at = datetime('now','localtime') WHERE _id = ?`).run(jawakId);
-    }
-}
-
-// get jawak aawak splits
-router.get('/splits/:jawak_id', async (req, res, next) => {
-    try {
-        const splits = DB.db.prepare(`
-            SELECT raj.*, a.date, a.pkt_num, a.lot_no, a.qty as aawak_qty, a.remaining_qty,
-                   a.item_id, a.subitem_id, a.condition_id, a.unit_id,
-                   item.item_hin, item.item_eng, subitem.subitem_hin, subitem.subitem_eng
-            FROM rel_aawak_jawak raj
-            JOIN aawak a ON a._id = raj.aawak_id
-            LEFT JOIN item ON item._id = a.item_id
-            LEFT JOIN subitem ON subitem._id = a.subitem_id
-            WHERE raj.jawak_id = ?
-        `).all(req.params.jawak_id);
-        res.json({ success: true, result: splits });
-    } catch (err) { next(err); }
-});
-
-// update jawak ref link only (supports both single aawak_ref_id and aawak_splits array)
+// update jawak ref link only
 router.put('/ref-link/:id', async (req, res, next) => {
     try {
-        const jawakId = Number(req.params.id);
-        if (jawakId) {
-            const jawakRow = DB.db.prepare(`SELECT qty FROM jawak WHERE _id = ?`).get(jawakId);
-            const jawakQty = jawakRow ? jawakRow.qty : 0;
-            saveJawakAawakSplits(jawakId, req.body.aawak_splits, req.body.aawak_ref_id, jawakQty);
+        if (req.params.id && req.body.aawak_ref_id !== undefined) {
+            const sql = `UPDATE jawak SET aawak_ref_id = @aawak_ref_id, updated_at = datetime('now','localtime') WHERE _id = @_id`;
+            const result = DB.db.prepare(sql).run({
+                aawak_ref_id: req.body.aawak_ref_id,
+                _id: Number(req.params.id)
+            });
             res.json({
                 success: true,
-                message: 'Aawak reference splits updated successfully'
+                result: result
             });
         }
         else {
-            return next(new Error('Jawak Id not found.'))
+            return next(new Error('Id or aawak_ref_id not found.'))
         }
     } catch (err) { next(err) };
 });
@@ -688,6 +645,47 @@ router.put('/update-row', async (req, res, next) => {
         }
     } else {
         res.status(400).json({ success: false, message: 'Required fields missing (_id, document)' });
+    }
+});
+
+async function processJawakSplits(jawakId, aawakSplits, qty) {
+    return await Fn.processRelAawakJawak(jawakId, aawakSplits, qty);
+}
+
+router.get('/splits/:jawak_id', async (req, res, next) => {
+    try {
+        const jawakId = req.params.jawak_id;
+        const sql = `
+            SELECT raj.*, 
+                   IFNULL(raj.split_qty, raj.qty) AS effective_split_qty,
+                   a.date, a.lot_no, a.pkt_num, a.remaining_qty, a.qty AS aawak_total_qty, 
+                   i.item_hin, s.subitem_hin, u.unit_short
+            FROM rel_aawak_jawak raj
+            JOIN aawak a ON a._id = raj.aawak_id
+            LEFT JOIN item i ON i._id = a.item_id
+            LEFT JOIN subitem s ON s._id = a.subitem_id
+            LEFT JOIN unit u ON u._id = a.unit_id
+            WHERE raj.jawak_id = ${jawakId}
+            ORDER BY a.date ASC, a._id ASC
+        `;
+        const splits = DB.db.prepare(sql).all();
+        res.json({ success: true, result: splits || [] });
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.put('/ref-link/:jawak_id', async (req, res, next) => {
+    try {
+        const jawakId = req.params.jawak_id;
+        const { aawak_splits, qty } = req.body;
+        await Fn.begin();
+        await processJawakSplits(jawakId, aawak_splits, qty);
+        await Fn.commit();
+        res.json({ success: true, message: 'Splits updated successfully' });
+    } catch (err) {
+        await Fn.rollback();
+        next(err);
     }
 });
 

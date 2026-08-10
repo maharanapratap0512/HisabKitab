@@ -182,7 +182,7 @@ async function generateItemLedgerPdf(reportData, fromName, toName, mmName, taskI
     </head>
     <body>
         <!-- 1st Page: Clickable Index Page Table -->
-        <div class="toc-container page-break">
+        <div class="toc-container page-break" id="index-page">
             <div class="toc-title">${categoryName ? categoryName + ' का सार (Item Ledger Report)' : 'Item Ledger Report Index / अनुक्रमणिका'}</div>
             <div style="text-align: center; margin-bottom: 5px; font-size: 12px; color: #555;">
                 अवधि: ${fromName} से ${toName} | MM / Store: ${mmName}${categoryName ? ` | Category: ${categoryName}` : ''}
@@ -357,6 +357,11 @@ async function generateItemLedgerPdf(reportData, fromName, toName, mmName, taskI
         }
 
         htmlContent += `
+            <div style="margin-top: 25px; text-align: right; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
+                <a href="#index-page" style="text-decoration: none; color: #4e73df; font-weight: bold; font-size: 11px; background-color: #f8fafc; padding: 5px 12px; border: 1px solid #cbd5e1; border-radius: 4px; display: inline-block;">
+                    ⬆️ अनुक्रमणिका पर जाएं / Go to Index
+                </a>
+            </div>
         </div>
         `;
     });

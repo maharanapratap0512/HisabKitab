@@ -301,7 +301,8 @@ module.exports = {
         is_received: col.boolean(),
         container_qty: col.number()
     }, {
-        enzymes: { hasMany: true, on: 'jawak_id', table: 'jawak_enzyme', target: '_id', as: 'enzymes' }
+        enzymes: { hasMany: true, on: 'jawak_id', table: 'jawak_enzyme', target: '_id', as: 'enzymes' },
+        aawak_splits: { hasMany: true, on: 'jawak_id', table: 'rel_aawak_jawak', target: '_id', as: 'aawak_splits', select: '*' }
     }),
 
     ...defineTable('jawak_enzyme', {
@@ -649,6 +650,17 @@ module.exports = {
         _id: col.id(),
         item_id: col.number(),
         category_id: col.number(),
+    }),
+
+    ...defineTable('rel_aawak_jawak', {
+        _id: col.id(),
+        aawak_id: col.ref('aawak._id', { as: 'aawak', select: ['date', 'lot_no', 'pkt_num', 'remaining_qty', 'qty'] }),
+        jawak_id: col.ref('jawak._id', { as: 'jawak', select: ['date', 'lot_no', 'qty'] }),
+        qty: col.number(),
+        split_qty: col.number(),
+        is_split: col.boolean().default(0),
+        created_at: col.string(),
+        updated_at: col.string(),
     }),
 
 };

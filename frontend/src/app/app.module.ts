@@ -114,6 +114,7 @@ import { SmartFocusDirective } from './SHARED/smart-focus.directive';
 import { JoinObjPipe } from './pipe/formatter/join-obj.pipe';
 import { ItemDropdownComponent } from './SHARED/item-dropdown/item-dropdown.component';
 import { AawakRefDropdownComponent } from './SHARED/aawak-ref-dropdown/aawak-ref-dropdown.component';
+import { AawakRefComponent } from './SHARED/aawak-ref/aawak-ref.component';
 
 
 import { VariantComponent }               from './CHILD_TABLES/variant/variant.component';
@@ -235,6 +236,7 @@ import { ReportItemLedgerComponent } from './reports/report-item-ledger/report-i
     VariantNewComponent,
     ItemDropdownComponent,
     AawakRefDropdownComponent,
+    AawakRefComponent,
     DbGenerateComponent,
     P2pFeedbackComponent,
     ReportItemLedgerComponent,

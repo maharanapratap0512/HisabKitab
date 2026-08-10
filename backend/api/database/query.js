@@ -498,7 +498,55 @@ const jawak = {
         nmt.nimitt_hin, nmt.nimitt_eng, nmt.relative_name as father_name, nmt.state_id as nimitt_state_id, nst.state_hin as nimitt_state_hin, nst.state_eng as nimitt_state_eng,
         JSON_Object('_id', enz._id, 'jawak_id', enz.jawak_id, 'container_capacity', enz.container_capacity) as enz,
         JSON_Object('_id', ur._id, 'jawak_id', ur.jawak_id, 'date', ur.date, 'reporter', ur.reporter, 'usage_type', ur.usage_type,
-        'usage_report_hin', ut.list_name_hin, 'fayda', ur.fayda, 'nuksan', ur.nuksan, 'rating', ur.rating) as usage_report
+        'usage_report_hin', ut.list_name_hin, 'fayda', ur.fayda, 'nuksan', ur.nuksan, 'rating', ur.rating) as usage_report,
+        (SELECT JSON_Object(
+            '_id', awk._id,
+            'date', awk.date,
+            'lot_no', awk.lot_no,
+            'pkt_num', awk.pkt_num,
+            'remaining_qty', awk.remaining_qty,
+            'item_id', awk.item_id,
+            'subitem_id', awk.subitem_id,
+            'condition_id', awk.condition_id,
+            'unit_id', awk.unit_id,
+            'aawak_source_id', awk.aawak_source_id,
+            'company_name', awk.company_name,
+            'product_id', awk.product_id,
+            'rate', awk.rate
+        ) FROM rel_aawak_jawak raj LEFT JOIN aawak awk ON awk._id = raj.aawak_id WHERE raj.jawak_id = jawak._id LIMIT 1) as aawak_ref_obj,
+        (SELECT JSON_Group_Array(JSON_Object(
+            'rel_id', raj._id,
+            'aawak_id', raj.aawak_id,
+            'jawak_id', raj.jawak_id,
+            'qty', raj.qty,
+            'split_qty', raj.split_qty,
+            'is_split', raj.is_split,
+            'date', awk.date,
+            'lot_no', awk.lot_no,
+            'pkt_num', awk.pkt_num,
+            'remaining_qty', awk.remaining_qty,
+            'item_id', awk.item_id,
+            'subitem_id', awk.subitem_id,
+            'condition_id', awk.condition_id,
+            'unit_id', awk.unit_id,
+            'aawak_source_id', awk.aawak_source_id,
+            'company_name', awk.company_name,
+            'product_id', awk.product_id,
+            'aawak_obj', JSON_Object(
+                '_id', awk._id,
+                'date', awk.date,
+                'lot_no', awk.lot_no,
+                'pkt_num', awk.pkt_num,
+                'remaining_qty', awk.remaining_qty,
+                'item_id', awk.item_id,
+                'subitem_id', awk.subitem_id,
+                'condition_id', awk.condition_id,
+                'unit_id', awk.unit_id,
+                'aawak_source_id', awk.aawak_source_id,
+                'company_name', awk.company_name,
+                'product_id', awk.product_id
+            )
+        )) FROM rel_aawak_jawak raj LEFT JOIN aawak awk ON awk._id = raj.aawak_id WHERE raj.jawak_id = jawak._id) as aawak_splits
         from jawak
         left join jawak_enzyme enz on enz.jawak_id = jawak._id
         left join usage_report ur on ur.jawak_id = jawak._id 
@@ -595,7 +643,55 @@ const jawak = {
         jslas.list_name_hin as aawak_source_hin, jslas.list_name_eng as aawak_source_eng,
         JSON_Object('_id', enz._id, 'jawak_id', enz.jawak_id, 'container_capacity', enz.container_capacity) as enz,
         JSON_Object('_id', ur._id, 'jawak_id', ur.jawak_id, 'date', ur.date, 'reporter', ur.reporter, 'usage_type', ur.usage_type, 
-        'usage_report_hin', ut.list_name_hin, 'fayda', ur.fayda, 'nuksan', ur.nuksan, 'rating', ur.rating) as usage_report
+        'usage_report_hin', ut.list_name_hin, 'fayda', ur.fayda, 'nuksan', ur.nuksan, 'rating', ur.rating) as usage_report,
+        (SELECT JSON_Object(
+            '_id', awk._id,
+            'date', awk.date,
+            'lot_no', awk.lot_no,
+            'pkt_num', awk.pkt_num,
+            'remaining_qty', awk.remaining_qty,
+            'item_id', awk.item_id,
+            'subitem_id', awk.subitem_id,
+            'condition_id', awk.condition_id,
+            'unit_id', awk.unit_id,
+            'aawak_source_id', awk.aawak_source_id,
+            'company_name', awk.company_name,
+            'product_id', awk.product_id,
+            'rate', awk.rate
+        ) FROM rel_aawak_jawak raj LEFT JOIN aawak awk ON awk._id = raj.aawak_id WHERE raj.jawak_id = jawak._id LIMIT 1) as aawak_ref_obj,
+        (SELECT JSON_Group_Array(JSON_Object(
+            'rel_id', raj._id,
+            'aawak_id', raj.aawak_id,
+            'jawak_id', raj.jawak_id,
+            'qty', raj.qty,
+            'split_qty', raj.split_qty,
+            'is_split', raj.is_split,
+            'date', awk.date,
+            'lot_no', awk.lot_no,
+            'pkt_num', awk.pkt_num,
+            'remaining_qty', awk.remaining_qty,
+            'item_id', awk.item_id,
+            'subitem_id', awk.subitem_id,
+            'condition_id', awk.condition_id,
+            'unit_id', awk.unit_id,
+            'aawak_source_id', awk.aawak_source_id,
+            'company_name', awk.company_name,
+            'product_id', awk.product_id,
+            'aawak_obj', JSON_Object(
+                '_id', awk._id,
+                'date', awk.date,
+                'lot_no', awk.lot_no,
+                'pkt_num', awk.pkt_num,
+                'remaining_qty', awk.remaining_qty,
+                'item_id', awk.item_id,
+                'subitem_id', awk.subitem_id,
+                'condition_id', awk.condition_id,
+                'unit_id', awk.unit_id,
+                'aawak_source_id', awk.aawak_source_id,
+                'company_name', awk.company_name,
+                'product_id', awk.product_id
+            )
+        )) FROM rel_aawak_jawak raj LEFT JOIN aawak awk ON awk._id = raj.aawak_id WHERE raj.jawak_id = jawak._id) as aawak_splits
         from jawak 
         left join jawak_enzyme enz on enz.jawak_id = jawak._id
         left join usage_report ur on ur.jawak_id = jawak._id
@@ -643,7 +739,9 @@ const jawak_voucher = {
             'aawak_source_hin', slas.list_name_hin, 'aawak_source_eng', slas.list_name_eng, 'aawak_source_roman', slas.list_name_roman,
             'hl', jawak.hl, 'active', jawak.active, 'is_xl', jawak.is_xl, 'is_process', jawak.is_process, 'is_recieved', jawak.is_recieved,
             'enz_id', enz._id, 'container_capacity', enz.container_capacity, 'usage_report_id', ur._id, 'date', ur.date, 'reporter', ur.reporter,
-            'usage_type', ur.usage_type, 'usage_report_hin', ut.list_name_hin, 'fayda', ur.fayda, 'nuksan', ur.nuksan, 'rating', ur.rating
+            'usage_type', ur.usage_type, 'usage_report_hin', ut.list_name_hin, 'fayda', ur.fayda, 'nuksan', ur.nuksan, 'rating', ur.rating,
+            'aawak_ref_obj', (SELECT JSON_Object('_id', awk._id, 'date', awk.date, 'lot_no', awk.lot_no, 'pkt_num', awk.pkt_num, 'remaining_qty', awk.remaining_qty) FROM rel_aawak_jawak raj LEFT JOIN aawak awk ON awk._id = raj.aawak_id WHERE raj.jawak_id = jawak._id LIMIT 1),
+            'aawak_splits', (SELECT JSON_Group_Array(JSON_Object('rel_id', raj._id, 'aawak_id', raj.aawak_id, 'jawak_id', raj.jawak_id, 'qty', raj.qty, 'split_qty', raj.split_qty, 'is_split', raj.is_split, 'date', awk.date, 'lot_no', awk.lot_no, 'pkt_num', awk.pkt_num, 'remaining_qty', awk.remaining_qty)) FROM rel_aawak_jawak raj LEFT JOIN aawak awk ON awk._id = raj.aawak_id WHERE raj.jawak_id = jawak._id)
         )) as jawaks
         from jawak
         left join jawak_enzyme enz on enz.jawak_id = jawak._id
@@ -3025,11 +3123,17 @@ const rel_subitem_category = {
     insert: `insert into rel_subitem_category(subitem_id, category_id) values(@subitem_id, @category_id)`
 }
 
+const rel_aawak_jawak = {
+    select: `select * from rel_aawak_jawak ?`,
+    select_full: `select * from rel_aawak_jawak ? limit @limit offset @offset`,
+    insert: `insert into rel_aawak_jawak(aawak_id, jawak_id, qty, split_qty, is_split) values(@aawak_id, @jawak_id, @qty, @split_qty, @is_split)`
+}
+
 module.exports = {
     queryBuilder, country, city, category, department, department_config, item, itemmix, mm, nimitt, pbk, point, zone, district, state, subitem, subitem_list, support_list, unit, conditions,
     aawak, aawak_voucher, bachat, pbk_bachat, pbk_closing, jawak, jawak_voucher, bachat_new, temp_import, product, vehicle, vehicle_document,
     hmp_recipe, hmp_recipe_input, hmp_recipe_output, hmp_batch, hmp_batch_input, hmp_batch_output,
     aawak_enzyme, jawak_enzyme, usage_report,
     genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, test, report_comment,
-    prastav, prastav_jawak, rel_item_category, rel_subitem_category
+    prastav, prastav_jawak, rel_item_category, rel_subitem_category, rel_aawak_jawak
 };

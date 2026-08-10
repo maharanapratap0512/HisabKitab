@@ -115,7 +115,7 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
     if (awk && awk._id) {
       this.fs.jawakFormMain.jawaks[i] = {
         ...this.fs.jawakFormMain.jawaks[i],
-        aawak_ref_id: awk._id,           // ✅ link the FK
+        aawak_ref_id: awk._id || awk.aawak_id,
         item_id: awk.item_id,
         subitem_id: awk.subitem_id,
         condition_id: awk.condition_id,
@@ -126,6 +126,7 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
         lot_no: awk.lot_no,
         rate: typeof awk.rate == 'number' ? awk.rate : 0,
         remaining_qty: awk.remaining_qty,
+        qty: awk.allocated_qty || awk.total_split_qty || this.fs.jawakFormMain.jawaks[i].qty,
         aawak_ref_obj: awk
       }
 
@@ -134,13 +135,52 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
     } else {
       this.clearAawak(i);
     }
+  }
 
+  async onAawakSplitsSelected(event: any, i: any) {
+    if (event && event.splits && event.splits.length > 0) {
+      const primary = event.primaryAawak || event.splits[0].aawak_obj || event.splits[0];
+      const totalSplitQty = event.totalQty;
+      const totalRemaining = event.splits.reduce((sum: number, s: any) => sum + (Number(s.remaining_qty !== undefined ? s.remaining_qty : s.aawak_obj?.remaining_qty) || 0), 0);
+      const lotNos = event.splits.map((s: any) => s.lot_no).filter((l: any) => l).join(', ');
+
+      const compositeRefObj = {
+        ...primary,
+        qty: totalSplitQty,
+        remaining_qty: event.splits.length > 1 ? totalRemaining : primary.remaining_qty,
+        total_split_qty: totalSplitQty,
+        splits_count: event.splits.length,
+        lot_no: event.splits.length > 1 ? (lotNos ? `Lot: ${lotNos}` : `${event.splits.length} Aawaks`) : primary.lot_no
+      };
+
+      this.fs.jawakFormMain.jawaks[i] = {
+        ...this.fs.jawakFormMain.jawaks[i],
+        aawak_ref_id: primary._id || primary.aawak_id,
+        aawak_splits: event.splits,
+        qty: totalSplitQty, // auto-populate total sum into jawak qty field
+        item_id: primary.item_id,
+        subitem_id: primary.subitem_id,
+        condition_id: primary.condition_id,
+        unit_id: primary.unit_id,
+        aawak_source_id: primary.aawak_source_id,
+        company_name: primary.company_name,
+        product_id: primary.product_id,
+        lot_no: compositeRefObj.lot_no,
+        rate: typeof primary.rate == 'number' ? primary.rate : 0,
+        remaining_qty: compositeRefObj.remaining_qty,
+        aawak_ref_obj: compositeRefObj
+      };
+      this.itemSubitemSelected(primary, i);
+    } else {
+      this.clearAawak(i);
+    }
   }
 
   clearAawak(i: any) {
     this.fs.jawakFormMain.jawaks[i] = {
       ...this.fs.jawakFormMain.jawaks[i],
       aawak_ref_id: null,
+      aawak_splits: [],
       item_id: null,
       subitem_id: null,
       condition_id: null,
@@ -191,7 +231,12 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
         if (jwk.item_id) {
           this.itemSubitemSelected(jwk, i);
         }
-        if (jwk.aawak_ref_id) {
+        if (jwk.aawak_splits && jwk.aawak_splits.length > 0) {
+          const primary = jwk.aawak_splits[0]?.aawak_obj || jwk.aawak_splits[0];
+          if (primary) {
+            jwk.aawak_ref_obj = primary;
+          }
+        } else if (jwk.aawak_ref_id) {
           this.fetchAawakRefDetails(jwk.aawak_ref_id, i);
         }
       }
@@ -418,6 +463,11 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
   }
 
   qtyClick(i: any) {
+    const row = this.fs.jawakFormMain.jawaks[i];
+    if (row && row.aawak_splits && row.aawak_splits.length > 0) {
+      this.adjustSplitsForQty(row);
+    }
+
     if (this.fs.jawakFormMain.jawaks[i].qty && this.fs.jawakFormMain.jawaks[i].rate) {
       let actual_amt = this.fs.jawakFormMain.jawaks[i].qty * this.fs.jawakFormMain.jawaks[i].rate
       this.fs.jawakFormMain.jawaks[i].actual_amt = actual_amt.toFixed(2);
@@ -425,6 +475,37 @@ export class JawakEntryNewComponent implements OnInit, OnDestroy {
     else if (this.fs.jawakFormMain.jawaks[i].qty && this.fs.jawakFormMain.jawaks[i].actual_amt) {
       let rate = this.fs.jawakFormMain.jawaks[i].actual_amt / this.fs.jawakFormMain.jawaks[i].qty
       this.fs.jawakFormMain.jawaks[i].rate = rate.toFixed(2);
+    }
+  }
+
+  adjustSplitsForQty(jwkRow: any) {
+    if (!jwkRow || !jwkRow.aawak_splits || jwkRow.aawak_splits.length === 0) return;
+    const newQty = Number(jwkRow.qty) || 0;
+    if (newQty <= 0) return;
+
+    // FIFO Priority: Sort by date (oldest first) and fill full remaining_qty first
+    const sortedSplits = [...jwkRow.aawak_splits].sort((a: any, b: any) => {
+      const dateA = a.date || a.aawak_obj?.date ? new Date(a.date || a.aawak_obj?.date).getTime() : 0;
+      const dateB = b.date || b.aawak_obj?.date ? new Date(b.date || b.aawak_obj?.date).getTime() : 0;
+      if (dateA !== dateB) return dateA - dateB;
+      return (a.aawak_id || a._id) - (b.aawak_id || b._id);
+    });
+
+    let remainingNeeded = newQty;
+
+    sortedSplits.forEach((s: any) => {
+      const availStock = Number(s.remaining_qty !== undefined ? s.remaining_qty : s.aawak_obj?.remaining_qty) || Number(s.qty) || 0;
+      if (remainingNeeded > 0) {
+        const allocated = Math.min(remainingNeeded, availStock > 0 ? availStock : remainingNeeded);
+        s.split_qty = Math.round(allocated * 100) / 100;
+        remainingNeeded -= s.split_qty;
+      } else {
+        s.split_qty = 0;
+      }
+    });
+
+    if (jwkRow.aawak_ref_obj) {
+      jwkRow.aawak_ref_obj.total_split_qty = newQty;
     }
   }
 

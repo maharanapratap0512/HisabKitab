@@ -320,7 +320,8 @@ export class AawakComponent implements OnInit {
                 'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
                 'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
                 'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
-                'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+                'Total Jawak Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+                'Split Jawak Qty': (result[i].jawak_detail[j].allocated_qty !== undefined ? result[i].jawak_detail[j].allocated_qty : (result[i].jawak_detail[j].split_qty !== null && result[i].jawak_detail[j].split_qty !== undefined ? result[i].jawak_detail[j].split_qty : result[i].jawak_detail[j].qty)) || '-',
                 'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
                 'Bachat': (result[i].remaining_qty ? result[i].remaining_qty : 0) + '-' + (result[i].unit_id ? result[i].unit_short : '-'),
               });
@@ -331,7 +332,8 @@ export class AawakComponent implements OnInit {
               'Jawak MM': '-',
               'Kisko Diya': '-',
               'Jawak Type': '-',
-              'Qty': '-',
+              'Total Jawak Qty': '-',
+              'Split Jawak Qty': '-',
               'Unit': '-',
               'Bachat': '-',
             });
@@ -406,17 +408,15 @@ export class AawakComponent implements OnInit {
                 'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
                 'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
                 'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
-                'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+                'Total Jawak Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+                'Split Jawak Qty': (result[i].jawak_detail[j].allocated_qty !== undefined ? result[i].jawak_detail[j].allocated_qty : (result[i].jawak_detail[j].split_qty !== null && result[i].jawak_detail[j].split_qty !== undefined ? result[i].jawak_detail[j].split_qty : result[i].jawak_detail[j].qty)) || '-',
                 'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
                 'Rate': result[i].jawak_detail[j].rate ? result[i].jawak_detail[j].rate : '-',
                 'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
                 'Kaha Repaired/Becha': result[i].jawak_detail[j].sell_repair_place ? result[i].jawak_detail[j].sell_repair_place : '-',
                 'Parchi Kaha': result[i].jawak_detail[j].parchi_place ? result[i].jawak_detail[j].parchi_place : '-',
                 'Bachat': (result[i].remaining_qty ? result[i].remaining_qty : 0) + '-' + (result[i].unit_id ? result[i].unit_short : '-'),
-                // 'Bachat': bachat
               });
-              // jwkFooter['Qty'] += result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : 0;
-              // jwkFooter['Amount'] += result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : 0;
             }
           } else {
             jawakArray.push({
@@ -428,7 +428,8 @@ export class AawakComponent implements OnInit {
               'Jawak Detail': '-',
               'Kisko Diya': '-',
               'Jawak Type': '-',
-              'Qty': '-',
+              'Total Jawak Qty': '-',
+              'Split Jawak Qty': '-',
               'Unit': '-',
               'Rate': '-',
               'Amount': '-',
@@ -533,7 +534,8 @@ export class AawakComponent implements OnInit {
                 'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
                 'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
                 'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
-                'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+                'Total Jawak Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+                'Split Jawak Qty': (result[i].jawak_detail[j].allocated_qty !== undefined ? result[i].jawak_detail[j].allocated_qty : (result[i].jawak_detail[j].split_qty !== null && result[i].jawak_detail[j].split_qty !== undefined ? result[i].jawak_detail[j].split_qty : result[i].jawak_detail[j].qty)) || '-',
                 'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
                 'Bachat': (result[i].remaining_qty ? result[i].remaining_qty : 0) + '-' + (result[i].unit_id ? result[i].unit_short : '-'),
               });
@@ -543,7 +545,8 @@ export class AawakComponent implements OnInit {
               'Jawak MM': '-',
               'Kisko Diya': '-',
               'Jawak Type': '-',
-              'Qty': '-',
+              'Total Jawak Qty': '-',
+              'Split Jawak Qty': '-',
               'Unit': '-',
               'Bachat': '-',
             });
@@ -617,7 +620,8 @@ export class AawakComponent implements OnInit {
                 'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
                 'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
                 'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
-                'Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+                'Total Jawak Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
+                'Split Jawak Qty': (result[i].jawak_detail[j].allocated_qty !== undefined ? result[i].jawak_detail[j].allocated_qty : (result[i].jawak_detail[j].split_qty !== null && result[i].jawak_detail[j].split_qty !== undefined ? result[i].jawak_detail[j].split_qty : result[i].jawak_detail[j].qty)) || '-',
                 'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
                 'Rate': result[i].jawak_detail[j].rate ? result[i].jawak_detail[j].rate : '-',
                 'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
@@ -637,7 +641,8 @@ export class AawakComponent implements OnInit {
               'Jawak Detail': '-',
               'Kisko Diya': '-',
               'Jawak Type': '-',
-              'Qty': '-',
+              'Total Jawak Qty': '-',
+              'Split Jawak Qty': '-',
               'Unit': '-',
               'Rate': '-',
               'Amount': '-',

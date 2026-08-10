@@ -84,6 +84,7 @@ export class JawakEntryComponent implements OnInit {
       parchi_place: [null],
       sell_repair_place: [null],
       aawak_ref_id: [null],
+      aawak_splits: [[]],
       nimitt_id: [null],
       is_xl: [null],
       is_process: [null],
@@ -179,6 +180,7 @@ export class JawakEntryComponent implements OnInit {
         parchi_place: changes.getData.currentValue.parchi_place ? changes.getData.currentValue.parchi_place : null,
         sell_repair_place: changes.getData.currentValue.sell_repair_place ? changes.getData.currentValue.sell_repair_place : null,
         aawak_ref_id: changes.getData.currentValue.aawak_ref_id,
+        aawak_splits: changes.getData.currentValue.aawak_splits || [],
         nimitt_id: changes.getData.currentValue.nimitt_id,
         dept_id: changes.getData.currentValue.dept_id,
         is_xl: changes.getData.currentValue.is_xl ? changes.getData.currentValue.is_xl : 0,
@@ -209,15 +211,21 @@ export class JawakEntryComponent implements OnInit {
         }
       }, 100);
 
-      if (changes.getData.currentValue.aawak_ref_id && !this.aawakRef) {
-        this.fetchAawakRef(changes.getData.currentValue.aawak_ref_id);
+      const aawakId = (changes.getData.currentValue.aawak_splits && changes.getData.currentValue.aawak_splits.length > 0)
+        ? changes.getData.currentValue.aawak_splits[0].aawak_id
+        : changes.getData.currentValue.aawak_ref_id;
+
+      if (changes.getData.currentValue.aawak_splits && changes.getData.currentValue.aawak_splits.length > 0) {
+        this.aawak_splits = changes.getData.currentValue.aawak_splits;
+      }
+
+      if (aawakId) {
+        this.fetchAawakRef(aawakId);
       }
     }
     if (changes.aawakRef && changes.aawakRef.currentValue) {
       this.aawakRef = changes.aawakRef.currentValue;
       this.jawakForm.patchValue({
-        date: this.aawakRef.date,
-        date_sent: this.aawakRef.date,
         lot_no: this.aawakRef.lot_no,
         mm_id: this.aawakRef.mm_id,
         item_id: this.aawakRef.item_id,
@@ -257,24 +265,24 @@ export class JawakEntryComponent implements OnInit {
     this.http.put(this.api.getUrl('AAWAK') + 'filter/' + this.auth.webUser.dept_id, body).subscribe((res: any) => {
       if (res && res.success && res.result && res.result.length > 0) {
         this.aawakRef = res.result[0];
-        this.jawakForm.patchValue({
-          date: this.aawakRef.date,
-          date_sent: this.aawakRef.date,
-          lot_no: this.aawakRef.lot_no,
-          mm_id: this.aawakRef.mm_id,
-          item_id: this.aawakRef.item_id,
-          subitem_id: this.aawakRef.subitem_id,
-          item_detail: this.aawakRef.item_detail,
-          product_id: this.aawakRef.product_id ? this.aawakRef.product_id : null,
-          condition_id: this.aawakRef.condition_id,
-          company_name: this.aawakRef.company_name,
-          unit_id: this.aawakRef.unit_id,
-          aawak_source_id: this.aawakRef.aawak_source_id,
-          nimitt_id: this.aawakRef.nimitt_id ? this.aawakRef.nimitt_id : null,
-          dept_id: this.aawakRef.dept_id,
-          unit_short: this.aawakRef.unit_short,
-          aawak_type_id: this.aawakRef.aawak_type_id ? this.aawakRef.aawak_type_id : null,
-        });
+        if (!this.getData?._id) {
+          this.jawakForm.patchValue({
+            lot_no: this.aawakRef.lot_no,
+            mm_id: this.aawakRef.mm_id,
+            item_id: this.aawakRef.item_id,
+            subitem_id: this.aawakRef.subitem_id,
+            item_detail: this.aawakRef.item_detail,
+            product_id: this.aawakRef.product_id ? this.aawakRef.product_id : null,
+            condition_id: this.aawakRef.condition_id,
+            company_name: this.aawakRef.company_name,
+            unit_id: this.aawakRef.unit_id,
+            aawak_source_id: this.aawakRef.aawak_source_id,
+            nimitt_id: this.aawakRef.nimitt_id ? this.aawakRef.nimitt_id : null,
+            dept_id: this.aawakRef.dept_id,
+            unit_short: this.aawakRef.unit_short,
+            aawak_type_id: this.aawakRef.aawak_type_id ? this.aawakRef.aawak_type_id : null,
+          });
+        }
       }
     });
   }
@@ -283,8 +291,6 @@ export class JawakEntryComponent implements OnInit {
     if (ev) {
       this.aawakRef = ev;
       this.jawakForm.patchValue({
-        date: ev.date,
-        date_sent: ev.date,
         lot_no: ev.lot_no,
         mm_id: ev.mm_id,
         item_id: ev.item_id,
@@ -305,9 +311,33 @@ export class JawakEntryComponent implements OnInit {
     }
   }
 
+  aawak_splits: any[] = [];
+
+  onAawakSplitsSelected(event: any) {
+    if (event && event.splits && event.splits.length > 0) {
+      const primary = event.primaryAawak || event.splits[0].aawak_obj || event.splits[0];
+      this.aawak_splits = event.splits;
+      this.jawakForm.patchValue({
+        aawak_ref_id: primary._id || primary.aawak_id,
+        aawak_splits: event.splits,
+        qty: event.totalQty || this.jawakForm.get('qty')?.value
+      });
+      this.onAawakRefChange(primary);
+    } else {
+      this.aawak_splits = [];
+      this.jawakForm.patchValue({
+        aawak_ref_id: null,
+        aawak_splits: []
+      });
+      this.onAawakRefChange(null);
+    }
+  }
+
   unlinkAawak() {
+    this.aawak_splits = [];
     this.jawakForm.patchValue({
-      aawak_ref_id: null
+      aawak_ref_id: null,
+      aawak_splits: []
     });
     this.onAawakRefChange(null);
   }

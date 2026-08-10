@@ -42,9 +42,6 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
   @Output() saved = new EventEmitter<any>();
   @Output() selectionChange = new EventEmitter<any>();
 
-  @Input() allowSplit: boolean = true;
-  @Output() splitsChange = new EventEmitter<any>();
-
   items: any[] = [];
   loading = false;
   totalCount = 0;
@@ -54,13 +51,6 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
   showModal = false;
   modalId: string = 'aawakRefDropModal_' + Math.random().toString(36).substring(2, 9);
   presetAawakData: any = null;
-
-  // Multi-split modal properties
-  showSplitModal = false;
-  splitModalId: string = 'aawakSplitModal_' + Math.random().toString(36).substring(2, 9);
-  splitList: any[] = [];
-  totalSplitQty = 0;
-  selectedSplitsData: any[] = [];
 
   @ViewChild('select') select!: NgSelectComponent;
 
@@ -196,7 +186,10 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
     this.loading = true;
     this.page++;
     this.fetchData(this.currentSearchTerm, this.page).subscribe((res: any) => {
-      this.items = [...this.items, ...(res.result || [])];
+      const newItems = res.result || [];
+      const existingIds = new Set(this.items.map((i: any) => i._id));
+      const uniqueNew = newItems.filter((i: any) => !existingIds.has(i._id));
+      this.items = [...this.items, ...uniqueNew];
       this.loading = false;
     });
   }
@@ -212,6 +205,7 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
       mm_id: Array.isArray(this.mmId) ? this.mmId : (this.mmId ? [this.mmId] : []),
       max_date: this.maxDate,
       search: search,
+      page: page,
       pageNo: page,
       limit: 30
     };

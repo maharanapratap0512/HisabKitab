@@ -266,11 +266,8 @@
                                     </div>
 
                                     <!-- 2. Select Aawak Reference -->
-                                    <div *ngIf="settings.jawak.aawak_ref_id"
-                                        style="min-width: 140px; margin-bottom: 2px;">
-                                        <label class="fs-10 text-muted text-uppercase fw-semibold mb-1 d-block">Link
-                                            Aawak</label>
-                                        <app-aawak-ref-dropdown [mmId]="fs.jawakFormMain.mm_id"
+                                    <div *ngIf="settings.jawak.aawak_ref_id" style="min-width: 240px; margin-bottom: 2px;">
+                                        <app-aawak-ref [mmId]="fs.jawakFormMain.mm_id"
                                             [maxDate]="fs.jawakFormMain.date" [deptId]="auth.webUser.dept_id"
                                             [filterObj]="{
                                                 item_id: jwkForm.item_id,
@@ -279,9 +276,11 @@
                                                 aawak_source_id: jwkForm.aawak_source_id,
                                                 remaining_qty: true
                                             }" [(ngModel)]="jwkForm.aawak_ref_id"
-                                            (selectionChange)="refAawakSelected($event, i)" size="sm"
-                                            placeholder="Select Aawak">
-                                        </app-aawak-ref-dropdown>
+                                            [selectedSplitsData]="jwkForm.aawak_splits" [totalSplitQty]="jwkForm.qty"
+                                            (selectionChange)="refAawakSelected($event, i)"
+                                            (splitsChange)="onAawakSplitsSelected($event, i)" size="sm"
+                                            placeholder="Select Aawak / Split">
+                                        </app-aawak-ref>
                                     </div>
 
                                     <!-- Divider -->
@@ -478,7 +477,7 @@
                                         <div class="input-group input-group-sm">
                                             <input type="number" class="form-control" placeholder="0"
                                                 [(ngModel)]="jwkForm.qty" name="qty" #qty="ngModel"
-                                                (focusout)="qtyClick(i)"
+                                                (input)="qtyClick(i)" (focusout)="qtyClick(i)"
                                                 [ngClass]="{'validation' : ((qty?.touched || fMain.submitted) && qty.errors?.['required'])}"
                                                 required>
                                             <span class="input-group-text border-secondary p-0"
@@ -884,19 +883,22 @@
                                                 </app-popover-filter>
                                             </td>
                                             <td *ngIf="settings.jawak.aawak_ref_id">
-
-                                                <app-aawak-ref-dropdown [mmId]="fs.jawakFormMain.mm_id"
-                                                    [maxDate]="fs.jawakFormMain.date" [deptId]="auth.webUser.dept_id"
-                                                    [filterObj]="{
-                                                    item_id: jwkForm.item_id,
-                                                    subitem_id: jwkForm.subitem_id,
-                                                    condition_id: jwkForm.condition_id,
-                                                    aawak_source_id: jwkForm.aawak_source_id,
-                                                    remaining_qty: true
-                                                }" [(ngModel)]="jwkForm.aawak_ref_id"
-                                                    (selectionChange)="refAawakSelected($event, i)" size="sm"
-                                                    placeholder="Select Aawak">
-                                                </app-aawak-ref-dropdown>
+                                                 <div style="min-width: 240px; margin-bottom: 2px;">
+                                                     <app-aawak-ref [mmId]="fs.jawakFormMain.mm_id"
+                                                         [maxDate]="fs.jawakFormMain.date" [deptId]="auth.webUser.dept_id"
+                                                         [filterObj]="{
+                                                             item_id: jwkForm.item_id,
+                                                             subitem_id: jwkForm.subitem_id,
+                                                             condition_id: jwkForm.condition_id,
+                                                             aawak_source_id: jwkForm.aawak_source_id,
+                                                             remaining_qty: true
+                                                         }" [(ngModel)]="jwkForm.aawak_ref_id"
+                                                         [selectedSplitsData]="jwkForm.aawak_splits" [totalSplitQty]="jwkForm.qty"
+                                                         (selectionChange)="refAawakSelected($event, i)"
+                                                         (splitsChange)="onAawakSplitsSelected($event, i)" size="sm"
+                                                         placeholder="Select Aawak / Split">
+                                                     </app-aawak-ref>
+                                                 </div>
                                             </td>
                                             <td *ngIf="settings.jawak.lot_no">
 

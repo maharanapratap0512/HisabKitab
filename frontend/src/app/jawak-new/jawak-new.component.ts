@@ -35,7 +35,7 @@ export class JawakNewComponent implements OnInit {
   term: any;
   loadingStatus: any = '';
 
-  
+
   flatJawakItems: any[] = [];
   viewMode: 'voucher' | 'individual' = 'voucher';
 
@@ -125,10 +125,10 @@ export class JawakNewComponent implements OnInit {
     if (this.filterBody.categories && this.filterBody.categories.length > 0) {
       this.filteredItems = this.items.map((i: any) => {
         const itemMatches = i.categories && i.categories.some((c: any) => this.filterBody.categories.includes(c._id));
-        const matchingSubitems = i.subitems ? i.subitems.filter((sub: any) => 
+        const matchingSubitems = i.subitems ? i.subitems.filter((sub: any) =>
           sub.categories && sub.categories.some((c: any) => this.filterBody.categories.includes(c._id))
         ) : [];
-        
+
         if (itemMatches || matchingSubitems.length > 0) {
           return {
             ...i,
@@ -151,9 +151,9 @@ export class JawakNewComponent implements OnInit {
         const icats = item.icategories || [];
         const scatIds = scats.map((c: any) => c._id);
         const icatIds = icats.map((c: any) => c._id);
-        
-        return scatIds.some((id: any) => this.filterBody.categories.includes(id)) || 
-               (scats.length === 0 && icatIds.some((id: any) => this.filterBody.categories.includes(id)));
+
+        return scatIds.some((id: any) => this.filterBody.categories.includes(id)) ||
+          (scats.length === 0 && icatIds.some((id: any) => this.filterBody.categories.includes(id)));
       });
     }
     return jawaks;
@@ -227,9 +227,8 @@ export class JawakNewComponent implements OnInit {
     this.getFilteredData();
   }
 
-  onAawakRefSaved(event: { jawakId: any, aawak_ref_id: any }, item: any) {
-    // Directly update the item's aawak_ref_id so the green-tick icon re-renders
-    item.aawak_ref_id = event.aawak_ref_id;
+  onAawakRefSaved(event: any, item: any) {
+    item.aawak_ref_id = null;
   }
 
   toggleReceived(data: any) {

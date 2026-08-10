@@ -413,15 +413,15 @@
                                        class="uil-trash"></i></button>
                               </td>
                               <td [id]="i === 0 ? 'tour-ref-aawak-cell' : null">
-                                 <app-aawak-ref-dropdown [mmId]="data.mm_id" [maxDate]="data.date"
+                                 <app-aawak-ref [mmId]="data.mm_id" [maxDate]="data.date"
                                     [deptId]="auth.webUser.dept_id" [filterObj]="{
                                         item_id: data.item_id,
                                         subitem_id: data.subitem_id,
                                         condition_id: data.condition_id,
                                         aawak_source_id: data.aawak_source_id
-                                    }" [(ngModel)]="data.aawak_ref_id" [autoSave]="true" [jawakId]="data._id"
-                                    (saved)="onAawakRefSaved($event, i)" mode="tiny" size="sm" [showAdd]="false">
-                                 </app-aawak-ref-dropdown>
+                                    }" [(ngModel)]="data.aawak_ref_id" [selectedSplitsData]="data.aawak_splits" [totalSplitQty]="data.qty" [autoSave]="true" [jawakId]="data._id"
+                                    (saved)="onAawakRefSaved($event, i)" mode="tiny" size="sm">
+                                 </app-aawak-ref>
                               </td>
                               <td [id]="i === 0 ? 'tour-recieved-switch' : null">
                                  <div class="form-check form-switch">
@@ -516,19 +516,20 @@
                                  <span *ngIf="!data.usage_report?.date">-</span>
                               </td>
                            </tr>
-                         </tbody>
-                         <tbody *ngIf="!jawakData || !jawakData.length">
-                            <tr>
-                               <td colspan="100%" class="text-center text-muted py-4">
-                                  <h5 class="mb-0"><i class="uil uil-folder-open text-muted me-2"></i>No Data Found</h5>
-                               </td>
-                            </tr>
-                         </tbody>
-                      </table>
+                        </tbody>
+                        <tbody *ngIf="!jawakData || !jawakData.length">
+                           <tr>
+                              <td colspan="100%" class="text-center text-muted py-4">
+                                 <h5 class="mb-0"><i class="uil uil-folder-open text-muted me-2"></i>No Data Found</h5>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
                   </div>
 
                </div>
-               <pagination-controls class="pagi text-center" (pageChange)="getJawakData(page=$event)" [autoHide]="true" *ngIf="jawakData && jawakData.length">
+               <pagination-controls class="pagi text-center" (pageChange)="getJawakData(page=$event)" [autoHide]="true"
+                  *ngIf="jawakData && jawakData.length">
                </pagination-controls>
             </div>
          </div>

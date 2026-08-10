@@ -6,6 +6,33 @@ const Fn = require('../database/functions');
 const query = require('../database/query');
 const DB = new DBContex();
 
+async function getJawakDetailForAawak(aawakId, deptId = null, extraCondition = null) {
+    try {
+        let conditionString = ` jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${aawakId})`;
+        if (extraCondition) {
+            conditionString = `${extraCondition} AND ${conditionString}`;
+        }
+        const options = { full: true, conditionString, orderBy: `jawak._id` };
+        if (deptId) options.dept_id = deptId;
+        const jwkdata = await DB.getList('jawak', options);
+        const list = jwkdata.data || [];
+        for (let jwk of list) {
+            const raj = DB.db.prepare(`SELECT split_qty, is_split FROM rel_aawak_jawak WHERE aawak_id = ? AND jawak_id = ?`).get(aawakId, jwk._id);
+            if (raj) {
+                jwk.split_qty = raj.split_qty;
+                jwk.is_split = raj.is_split;
+                jwk.allocated_qty = (raj.is_split === 1 && raj.split_qty !== null) ? raj.split_qty : jwk.qty;
+            } else {
+                jwk.allocated_qty = jwk.qty;
+            }
+        }
+        return list;
+    } catch (e) {
+        console.error('getJawakDetailForAawak error:', e);
+        return [];
+    }
+}
+
 
 //aawak post with dept
 router.post('/new/:dept_id', async (req, res, next) => {
@@ -116,13 +143,7 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
                             aawaks[i].enz = (aawaks[i].enz ? JSON.parse(aawaks[i].enz) : {});
                             aawaks[i].icategories = (aawaks[i].icategories ? JSON.parse(aawaks[i].icategories) : {});
                             aawaks[i].scategories = (aawaks[i].scategories ? JSON.parse(aawaks[i].scategories) : {});
-                            let jwkconditionString = ` jawak.aawak_ref_id = ${aawaks[i]._id}`;
-                            await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then(async (jwkdata) => {
-                                aawaks[i].jawak_detail = jwkdata.data;
-                            }, (err) => {
-                                aawaks[i].jawak_detail = []
-                                throw err;
-                            });
+                            aawaks[i].jawak_detail = await getJawakDetailForAawak(aawaks[i]._id, req.params.dept_id);
                         }
                         data[i].aawaks = aawaks;
 
@@ -250,14 +271,7 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
                             'container_capacity': resolve.data[i].aawaks[j].container_capacity,
                             'container_qty': resolve.data[i].aawaks[j].container_qty
                         }
-                        let jwkconditionString = `aawak_ref_id = ${resolve.data[i].aawaks[j]._id}`;
-
-                        await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString, orderBy: `jawak._id` }).then((jwkdata) => {
-                            resolve.data[i].aawaks[j].jawak_detail = jwkdata.data;
-                        }, (err) => {
-                            resolve.data[i].aawaks[j].jawak_detail = []
-                            console.log('jawak', err);
-                        });
+                        resolve.data[i].aawaks[j].jawak_detail = await getJawakDetailForAawak(resolve.data[i].aawaks[j]._id, req.params.dept_id);
                     }
                 }
                 await Fn.commit();
@@ -293,14 +307,7 @@ router.get('/:dept_id', async (req, res, next) => {
             resolve.data[i].icategories = (resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []);
             resolve.data[i].scategories = (resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : []);
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
-            let jwkconditionString = ` jawak.aawak_ref_id = ${resolve.data[i]._id}`;
-
-            await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then(async (jwkdata) => {
-                resolve.data[i].jawak_detail = jwkdata.data;
-            }, (err) => {
-                resolve.data[i].jawak_detail = []
-                console.log("jawak", err);
-            });
+            resolve.data[i].jawak_detail = await getJawakDetailForAawak(resolve.data[i]._id, req.params.dept_id);
         }
         res.json({
             success: true,
@@ -321,14 +328,7 @@ router.get('/pending/:dept_id', async (req, res, next) => {
             resolve.data[i].icategories = (resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []);
             resolve.data[i].scategories = (resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : []);
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
-            let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
-
-            await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString }).then((jwkdata) => {
-                resolve.data[i].jawak_detail = jwkdata.data;
-            }, (err) => {
-                resolve.data[i].jawak_detail = [];
-                console.log('jawak', err);
-            });
+            resolve.data[i].jawak_detail = await getJawakDetailForAawak(resolve.data[i]._id, req.params.dept_id);
         }
         res.json({
             success: true,
@@ -347,14 +347,7 @@ router.put('/pending/:dept_id', async (req, res, next) => {
             resolve.data[i].icategories = (resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []);
             resolve.data[i].scategories = (resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : []);
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
-            let jwkconditionString = ` aawak_ref_id = ${resolve.data[i]._id}`;
-
-            await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString, orderBy: `jawak._id` }).then((jwkdata) => {
-                resolve.data[i].jawak_detail = jwkdata.data;
-            }, (err) => {
-                resolve.data[i].jawak_detail = [];
-                console.log('jawak', err);
-            });
+            resolve.data[i].jawak_detail = await getJawakDetailForAawak(resolve.data[i]._id, req.params.dept_id);
         }
         res.json({
             success: true,
@@ -427,12 +420,7 @@ router.put('/new', async (req, res, next) => {
                         data.data[i].icategories = (data.data[i].icategories ? JSON.parse(data.data[i].icategories) : []);
                         data.data[i].scategories = (data.data[i].scategories ? JSON.parse(data.data[i].scategories) : []);
                         data.data[i].isbill = data.data[i].isbill ? true : false;
-
-                        let jwkconditionString = ` jawak.aawak_ref_id = ${data.data[i]._id}`;
-
-                        await DB.getList('jawak', { full: true, conditionString: jwkconditionString }).then(async (jwkdata) => {
-                            data.data[i].jawak_detail = jwkdata.data;
-                        });
+                        data.data[i].jawak_detail = await getJawakDetailForAawak(data.data[i]._id);
                     }
                     await Fn.commit();
                     res.json({
@@ -462,7 +450,7 @@ router.put('/new', async (req, res, next) => {
 router.put('/dropdown/:dept_id', async (req, res, next) => {
     try {
         const limit = req.body.limit || 30;
-        const page = req.body.page || 1;
+        const page = req.body.page || req.body.pageNo || 1;
         const offset = (page - 1) * limit;
         const search = (req.body.search || '').trim().toLowerCase();
 
@@ -593,15 +581,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             resolve.data[i].icategories = (resolve.data[i].icategories ? JSON.parse(resolve.data[i].icategories) : []);
             resolve.data[i].scategories = (resolve.data[i].scategories ? JSON.parse(resolve.data[i].scategories) : []);
             resolve.data[i].isbill = resolve.data[i].isbill ? true : false;
-            let jwkconditionString = `${jwkIds && jwkIds.length > 0 ? ` jawak._id in (${jwkIds}) AND ` : ``} aawak_ref_id = ${resolve.data[i]._id}`;
-
-            await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString, orderBy: `jawak._id` }).then((jwkdata) => {
-                resolve.data[i].jawak_detail = jwkdata.data;
-            }, (err) => {
-                resolve.data[i].jawak_detail = []
-                console.log('jawak', err);
-                // return next(err)
-            });
+            resolve.data[i].jawak_detail = await getJawakDetailForAawak(resolve.data[i]._id, req.params.dept_id, jwkIds && jwkIds.length > 0 ? `jawak._id IN (${jwkIds})` : null);
         }
         res.json({
             success: true,
@@ -660,15 +640,7 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
                     'container_capacity': resolve.data[i].aawaks[j].container_capacity,
                     'container_qty': resolve.data[i].aawaks[j].container_qty
                 }
-                let jwkconditionString = `${jwkIds && jwkIds.length > 0 ? ` jawak._id in (${jwkIds}) AND ` : ``} aawak_ref_id = ${resolve.data[i].aawaks[j]._id}`;
-
-                await DB.getList('jawak', { full: true, dept_id: req.params.dept_id, conditionString: jwkconditionString, orderBy: `jawak._id` }).then((jwkdata) => {
-                    resolve.data[i].aawaks[j].jawak_detail = jwkdata.data;
-                }, (err) => {
-                    resolve.data[i].aawaks[j].jawak_detail = []
-                    console.log('jawak', err);
-                    // return next(err)
-                });
+                resolve.data[i].aawaks[j].jawak_detail = await getJawakDetailForAawak(resolve.data[i].aawaks[j]._id, req.params.dept_id, jwkIds && jwkIds.length > 0 ? `jawak._id IN (${jwkIds})` : null);
             }
         }
         res.json({

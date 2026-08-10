@@ -656,7 +656,14 @@
                                              </td>
                                              <!-- <td>{{jwk.category_hin}}{{jwk.category_eng ? " : "+jwk.category_eng :
                                                 ''}}</td> -->
-                                             <td>{{jwk.qty}} {{jwk.unit_short}}</td>
+                                             <td>
+                                                <span *ngIf="jwk.is_split === 1 || (jwk.split_qty !== null && jwk.split_qty !== undefined && jwk.split_qty !== jwk.qty)">
+                                                   <b class="text-warning">{{jwk.allocated_qty || jwk.split_qty}}</b> <small class="text-muted">({{jwk.qty}} total)</small> {{jwk.unit_short}}
+                                                </span>
+                                                <span *ngIf="!(jwk.is_split === 1 || (jwk.split_qty !== null && jwk.split_qty !== undefined && jwk.split_qty !== jwk.qty))">
+                                                   {{jwk.qty}} {{jwk.unit_short}}
+                                                </span>
+                                             </td>
                                           </tr>
                                        </table>
                                     </td>

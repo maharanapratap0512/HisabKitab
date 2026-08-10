@@ -2660,37 +2660,49 @@ class dbModal {
       add_pj_review_reason: `ALTER TABLE prastav_jawak ADD COLUMN review_reason TEXT`
     },
     // version 36
-    // => triggers for rel_aawak_jawak to automatically update aawak.remaining_qty
+    // => rel_aawak_jawak table creation, data migration from older jawak entries, and stock update triggers
     {
+      drop_rel_aawak_jawak: `DROP TABLE IF EXISTS "rel_aawak_jawak"`,
+      create_tb_rel_aawak_jawak: `CREATE TABLE IF NOT EXISTS "rel_aawak_jawak" (
+          _id INTEGER PRIMARY KEY AUTOINCREMENT,
+          aawak_id INTEGER REFERENCES aawak (_id),
+          jawak_id INTEGER REFERENCES jawak (_id),
+          qty DECIMAL(10, 2),
+          split_qty DECIMAL(10, 2) DEFAULT NULL,
+          is_split TINYINT(1) DEFAULT 0,
+          created_at TIMESTAMP DEFAULT (datetime('now', 'localtime')),
+          updated_at TIMESTAMP DEFAULT (datetime('now', 'localtime'))
+      )`,
+      migrate_existing_jawak_refs: `INSERT INTO rel_aawak_jawak (aawak_id, jawak_id, qty, split_qty, is_split)
+          SELECT aawak_ref_id, _id, qty, NULL, 0
+          FROM jawak
+          WHERE aawak_ref_id IS NOT NULL
+            AND _id NOT IN (SELECT DISTINCT jawak_id FROM rel_aawak_jawak WHERE jawak_id IS NOT NULL)`,
+      nullify_old_jawak_aawak_ref_ids: `UPDATE jawak SET aawak_ref_id = NULL WHERE aawak_ref_id IS NOT NULL`,
+      drop_old_jwk_del_updt_ref_awk: `DROP TRIGGER IF EXISTS "jwk_del_updt_ref_awk"`,
+      drop_old_jwk_ins_avk_ref_updt: `DROP TRIGGER IF EXISTS "jwk_ins_avk_ref_updt"`,
+      drop_old_jwk_updt_avk_ref_updt: `DROP TRIGGER IF EXISTS "jwk_updt_avk_ref_updt"`,
+      idx_raj_aawak_id: `CREATE INDEX IF NOT EXISTS idx_raj_aawak_id ON rel_aawak_jawak(aawak_id)`,
+      idx_raj_jawak_id: `CREATE INDEX IF NOT EXISTS idx_raj_jawak_id ON rel_aawak_jawak(jawak_id)`,
       drop_raj_ins_avk_rem_qty: `DROP TRIGGER IF EXISTS "raj_ins_avk_rem_qty"`,
       create_raj_ins_avk_rem_qty: `CREATE TRIGGER "raj_ins_avk_rem_qty"
           AFTER INSERT ON "rel_aawak_jawak"
           FOR EACH ROW
           BEGIN
               UPDATE aawak 
-              SET remaining_qty = round(remaining_qty - NEW.split_qty, 2)
+              SET remaining_qty = round(remaining_qty - IFNULL(NEW.split_qty, NEW.qty), 2)
               WHERE _id = NEW.aawak_id AND NEW.aawak_id IS NOT NULL;
           END;`,
       drop_raj_updt_avk_rem_qty: `DROP TRIGGER IF EXISTS "raj_updt_avk_rem_qty"`,
-      create_raj_updt_avk_rem_qty: `CREATE TRIGGER "raj_updt_avk_rem_qty"
-          AFTER UPDATE ON "rel_aawak_jawak"
-          FOR EACH ROW
-          BEGIN
-              UPDATE aawak 
-              SET remaining_qty = round(remaining_qty + OLD.split_qty - NEW.split_qty, 2)
-              WHERE _id = OLD.aawak_id AND OLD.aawak_id IS NOT NULL;
-          END;`,
       drop_raj_del_avk_rem_qty: `DROP TRIGGER IF EXISTS "raj_del_avk_rem_qty"`,
       create_raj_del_avk_rem_qty: `CREATE TRIGGER "raj_del_avk_rem_qty"
           AFTER DELETE ON "rel_aawak_jawak"
           FOR EACH ROW
           BEGIN
               UPDATE aawak 
-              SET remaining_qty = round(remaining_qty + OLD.split_qty, 2)
+              SET remaining_qty = round(remaining_qty + IFNULL(OLD.split_qty, OLD.qty), 2)
               WHERE _id = OLD.aawak_id AND OLD.aawak_id IS NOT NULL;
-          END;`,
-      idx_raj_aawak_id: `CREATE INDEX IF NOT EXISTS idx_raj_aawak_id ON rel_aawak_jawak(aawak_id)`,
-      idx_raj_jawak_id: `CREATE INDEX IF NOT EXISTS idx_raj_jawak_id ON rel_aawak_jawak(jawak_id)`
+          END;`
     }
   ];
 

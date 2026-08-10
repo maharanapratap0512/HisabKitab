@@ -1,0 +1,251 @@
+<div class="aawak-ref-container d-flex align-items-center gap-1" [class.mode-tiny]="mode === 'tiny'"
+    [class.custom-sm]="size === 'sm'">
+
+    <!-- Default / Standard Mode Trigger Bar -->
+    <ng-container *ngIf="mode === 'default'">
+        <!-- Case A: No Aawak selected yet -->
+        <button type="button" *ngIf="!selectedValue && (!selectedSplitsData || selectedSplitsData.length === 0)"
+            class="btn btn-outline-warning text-dark border-warning fw-bold d-flex align-items-center justify-content-between w-100 px-2 py-1 shadow-sm"
+            style="min-height: 31px; font-size: 12px; border-radius: 4px;" [disabled]="readonly"
+            (mousedown)="$event.preventDefault()" (click)="openSplitModal($event)">
+            <span class="d-flex align-items-center opacity-85">
+                <i class="uil uil-share-alt me-1 text-warning font-size-14"></i>
+                <span>Select Aawak / Split</span>
+            </span>
+            <i class="uil uil-angle-down opacity-50"></i>
+        </button>
+
+        <!-- Case B: Aawak(s) linked -->
+        <div *ngIf="selectedValue || (selectedSplitsData && selectedSplitsData.length > 0)"
+            class="linked-aawak-card d-flex align-items-center justify-content-between p-1 px-2 rounded border border-warning shadow-sm w-100"
+            style="min-height: 31px; font-size: 12px; background-color: var(--bs-card-bg, var(--bs-body-bg)); color: var(--bs-body-color);">
+
+            <div class="d-flex align-items-center gap-1 text-truncate cursor-pointer flex-fill me-1"
+                (click)="openSplitModal($event)" title="Click to view/edit allocation">
+                <span class="badge bg-warning text-dark fw-bold font-size-11" *ngIf="selectedSplitsData && selectedSplitsData.length > 1">
+                    🔀 {{selectedSplitsData.length}} Aawaks ({{totalSplitQty}})
+                </span>
+                <span class="badge bg-success text-white fw-bold font-size-11" *ngIf="selectedSplitsData && selectedSplitsData.length === 1">
+                    🔗 {{selectedSplitsData[0].item_hin || selectedSplitsData[0].aawak_obj?.item_hin || '1 Aawak'}} ({{totalSplitQty}})
+                </span>
+                <span class="badge bg-success text-white fw-bold font-size-11"
+                    *ngIf="(!selectedSplitsData || selectedSplitsData.length === 0) && selectedValue">
+                    🔗 Linked Aawak
+                </span>
+                <span class="text-truncate font-size-11 opacity-85 ms-1"
+                    *ngIf="selectedSplitsData && selectedSplitsData.length === 1 && (selectedSplitsData[0].lot_no || selectedSplitsData[0].aawak_obj?.lot_no)">
+                    Lot: {{selectedSplitsData[0].lot_no || selectedSplitsData[0].aawak_obj?.lot_no}}
+                </span>
+            </div>
+
+            <div class="d-flex align-items-center gap-1 flex-shrink-0" *ngIf="!readonly">
+                <button type="button" class="btn btn-xs btn-outline-warning text-dark p-0 px-1" title="Edit Allocation"
+                    (click)="openSplitModal($event)">
+                    <i class="uil uil-edit font-size-12"></i>
+                </button>
+                <button type="button" class="btn btn-xs btn-outline-danger p-0 px-1" title="Clear Allocation"
+                    (click)="clearAllSelectionsAndSave($event)">
+                    <i class="uil uil-times font-size-12"></i>
+                </button>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Tiny Mode Trigger Bar (For compact table cells) -->
+    <ng-container *ngIf="mode === 'tiny'">
+        <div class="tiny-overlay d-flex align-items-center cursor-pointer" [class.ref-updated]="isJustUpdated"
+            (click)="openSplitModal($event)">
+            <i class="uil" [ngClass]="{
+                'uil-check-circle text-success': selectedValue || (selectedSplitsData && selectedSplitsData.length > 0),
+                'uil-link-h text-muted': !selectedValue && (!selectedSplitsData || selectedSplitsData.length === 0)
+            }" style="font-size: 18px;" [title]="(selectedValue || (selectedSplitsData && selectedSplitsData.length > 0)) ? 'Linked to Aawak' : 'Link Aawak'"></i>
+        </div>
+    </ng-container>
+
+</div>
+
+<!-- Multi-Aawak Split Allocation Modal -->
+<div class="modal fade" [id]="splitModalId" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header py-2">
+                <h6 class="modal-title font-size-14 m-0 d-flex align-items-center">
+                    <i class="uil uil-share-alt me-2 font-size-16 text-warning"></i> Multi-Aawak Split Allocation
+                </h6>
+                <button type="button" class="btn-close" (click)="closeSplitModal()"></button>
+            </div>
+            <div class="modal-body p-3 style-scroll" (scroll)="onSplitScroll($event)">
+
+                <!-- Live Search Box -->
+                <div class="input-group mb-2 shadow-sm">
+                    <span class="input-group-text"><i class="uil uil-search opacity-75"></i></span>
+                    <input type="text" class="form-control font-size-13"
+                        placeholder="Type to search by Lot No, Item, Subitem, Party (PBK), MM..."
+                        [(ngModel)]="splitSearchTerm" (input)="onSplitSearchInput()">
+                    <button class="btn btn-outline-secondary btn-sm" type="button" *ngIf="splitSearchTerm"
+                        (click)="splitSearchTerm=''; onSplitSearchInput()">Clear</button>
+                </div>
+
+                <div
+                    class="alert alert-info py-1 px-3 mb-2 font-size-12 d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="uil uil-info-circle me-1"></i> Click anywhere on a card to select. <b>Remaining
+                            Qty</b> auto-fills into <b>Split Qty</b>.
+                    </div>
+                    <div class="badge bg-warning text-dark font-size-12">
+                        Total Sum: <span class="fw-bold font-size-13 ms-1">{{totalSplitQty}}</span>
+                    </div>
+                </div>
+
+                <!-- Auto-filter lock banner when 1st item is selected -->
+                <div *ngIf="getFirstSelectedItem()"
+                    class="alert alert-warning py-1 px-3 mb-2 font-size-12 d-flex justify-content-between align-items-center border-warning">
+                    <div>
+                        <i class="uil uil-lock me-1 fw-bold"></i> <b>Filtered to match 1st selected item:</b>
+                        <span class="ms-1 fw-bold">{{getFirstSelectedItem().item_hin}}</span>
+                        <span *ngIf="getFirstSelectedItem().subitem_hin"> -
+                            {{getFirstSelectedItem().subitem_hin}}</span>
+                        <span *ngIf="getFirstSelectedItem().condition_hin"
+                            class="ms-1 badge bg-light text-dark">{{getFirstSelectedItem().condition_hin}}</span>
+                        <span *ngIf="getFirstSelectedItem().aawak_source_hin"
+                            class="ms-1 badge bg-info text-white">{{getFirstSelectedItem().aawak_source_hin}}</span>
+                        <span *ngIf="getFirstSelectedItem().unit_short"
+                            class="ms-1 font-size-11">({{getFirstSelectedItem().unit_short}})</span>
+                    </div>
+                    <button type="button" class="btn btn-xs btn-outline-dark fw-bold" (click)="clearAllSelections()">
+                        <i class="uil uil-times me-1"></i> Reset Filter
+                    </button>
+                </div>
+
+                <!-- Rich Card Item List (Auto-filtered to match 1st selection) -->
+                <div class="split-cards-container">
+                    <div *ngFor="let item of getVisibleSplitList(); let i = index"
+                        class="split-card-item mb-2 rounded d-flex align-items-center gap-2 cursor-pointer transition-all shadow-sm"
+                        [class.selected]="item.selected" (click)="onSplitCardClick(item, $event)">
+
+                        <!-- Row Number & Checkbox -->
+                        <div class="d-flex align-items-center gap-1">
+                            <span class="text-primary me-1" style="min-width: 24px; text-align: center;"
+                                title="Row #{{i + 1}}">{{i + 1}}</span>
+                            <div class="form-check m-0 p-0 d-flex align-items-center">
+                                <input type="checkbox" class="form-check-input"
+                                    style="width: 18px; height: 18px; cursor: pointer;" [(ngModel)]="item.selected"
+                                    (change)="onSplitCheckToggle(item)" (click)="$event.stopPropagation()">
+                            </div>
+                        </div>
+
+                        <!-- Card Detail Content -->
+                        <div class="aawak-option-card flex-fill pe-2"
+                            style="border: none; background: transparent; padding: 0;">
+                            <!-- Line 1: Metadata (Date, MM, PBK, Lot) -->
+                            <div class="meta-line d-flex justify-content-between align-items-center mb-1">
+                                <div class="meta-left d-flex align-items-center gap-2 font-size-11 flex-wrap">
+                                    <span class="meta-item date-badge">
+                                        <i class="uil uil-calendar-alt me-1"></i>{{item.date | date:'dd-MM-yyyy'}}
+                                    </span>
+                                    <span class="meta-item mm-badge" *ngIf="item.mm_hin">
+                                        <i class="uil uil-home me-1"></i>{{item.mm_hin}} <small
+                                            class="opacity-75">({{item.mm_code}})</small>
+                                        <span class="source-badge ms-1" *ngIf="item.aawak_mm_hin">
+                                            <i class="uil uil-arrow-left"></i>{{item.aawak_mm_hin}}
+                                        </span>
+                                    </span>
+                                    <span class="meta-item pbk-badge" *ngIf="item.pbk_hin">
+                                        <i class="uil uil-user me-1"></i>{{item.pbk_hin}}
+                                    </span>
+                                </div>
+                                <div class="meta-right" *ngIf="item.lot_no">
+                                    <span class="lot-badge">Lot: {{item.lot_no}}</span>
+                                </div>
+                            </div>
+
+                            <!-- Line 2: Product Name -> Badges -> Stock -->
+                            <div class="main-line d-flex justify-content-between align-items-center flex-wrap gap-1">
+                                <div class="product-section">
+                                    <div
+                                        class="product-title-row d-flex align-items-center flex-wrap gap-1 font-size-12">
+                                        <span class="item-hin fw-bold">{{item.item_hin}}</span>
+                                        <span class="subitem-hin opacity-75" *ngIf="item.subitem_hin"> -
+                                            {{item.subitem_hin}}</span>
+                                        <small class="product-eng opacity-50 ms-1"
+                                            *ngIf="item.item_eng || item.subitem_eng">
+                                            ({{item.item_eng}}<span *ngIf="item.subitem_eng"> -
+                                                {{item.subitem_eng}}</span>)
+                                        </small>
+                                        <small class="product-roman opacity-50 fst-italic ms-1"
+                                            *ngIf="item.item_roman || item.subitem_roman">
+                                            ({{item.subitem_roman ? item.subitem_roman + (item.item_roman ? ' ' +
+                                            item.item_roman : '') : item.item_roman}})
+                                        </small>
+
+                                        <span class="badge-row ms-2">
+                                            <span class="badge condition-badge" *ngIf="item.condition_hin"
+                                                [ngClass]="{'cond-new': item.condition_eng === 'New', 'cond-old': item.condition_eng === 'Old'}">
+                                                {{item.condition_hin}}
+                                            </span>
+                                            <span class="badge source-badge-pill" *ngIf="item.aawak_source_hin">
+                                                <i class="uil uil-share-alt me-1"></i>{{item.aawak_source_hin}}
+                                            </span>
+                                            <span class="badge type-badge-pill" *ngIf="item.aawak_type_hin">
+                                                <i class="uil uil-tag-alt me-1"></i>{{item.aawak_type_hin}}
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="stock-section text-end ms-auto">
+                                    <div class="stock-remaining font-size-12">
+                                        <span class="label opacity-75">बचत: </span>
+                                        <span class="value fw-bold font-size-13">{{item.remaining_qty}}</span>
+                                        <span class="unit opacity-75 ms-1 font-size-11">{{item.unit_short}}</span>
+                                    </div>
+                                    <div class="stock-total font-size-10 opacity-75">
+                                        (कुल: {{item.qty}} {{item.unit_short}})
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Split Qty Input Box (Shown only after selecting > 1 row) -->
+                        <div *ngIf="getSelectedCount() > 1" class="split-qty-box ps-2 border-start border-2"
+                            style="min-width: 120px;" (click)="$event.stopPropagation()">
+                            <label
+                                class="form-label font-size-10 text-uppercase opacity-75 fw-bold mb-0 d-block text-end">Split
+                                Qty</label>
+                            <input type="number" step="any"
+                                class="form-control form-control-sm text-end fw-bold font-size-13 border-warning"
+                                [disabled]="!item.selected" [(ngModel)]="item.split_qty" (input)="onSplitQtyChange()"
+                                placeholder="0">
+                        </div>
+                    </div>
+
+                    <div *ngIf="splitLoading" class="text-center py-2 text-primary">
+                        <i class="uil uil-spinner-alt spin me-1"></i> Loading Aawaks...
+                    </div>
+
+                    <div *ngIf="splitList.length === 0 && !splitLoading" class="text-center opacity-75 py-4">
+                        <i class="uil uil-search-h fs-24 mb-1 d-block"></i> No matching available Aawaks found.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer py-2 justify-content-between">
+                <div class="fw-bold font-size-13 text-primary d-flex align-items-center gap-2 flex-wrap">
+                    <span>Total Aawaks: <span class="badge bg-secondary font-size-12">{{splitTotalCount ||
+                            splitList.length}}</span></span>
+                    <span class="opacity-50">|</span>
+                    <span>Selected: <span class="badge bg-primary font-size-12">{{getSelectedCount()}}</span></span>
+                    <span class="opacity-50">|</span>
+                    <span>Total Jawak Qty: <span class="fs-15 text-danger fw-bold ms-1">{{totalSplitQty}}</span></span>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-secondary btn-sm me-2"
+                        (click)="closeSplitModal()">Cancel</button>
+                    <button type="button" class="btn btn-success btn-sm fw-bold" [disabled]="getSelectedCount() === 0"
+                        (click)="applySplitSelection()">
+                        <i class="uil me-1" [ngClass]="getSelectedCount() > 1 ? 'uil-share-alt' : 'uil-check'"></i>
+                        {{ getSelectedCount() > 1 ? 'Apply & Split Qty' : 'Apply Selection' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
