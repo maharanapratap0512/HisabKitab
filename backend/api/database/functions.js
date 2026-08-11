@@ -184,10 +184,6 @@ class Functions extends DBContex {
             }
 
             // console.log(obj);
-            const rawRefId = obj.aawak_ref_id;
-            if (type == 'jawak') {
-               obj.aawak_ref_id = null;
-            }
             let updtResult = stmtUpdate.run(obj);
             if (updtResult.changes == 1 || updtResult.changes == 0) {
                if (updtResult.changes == 1) {

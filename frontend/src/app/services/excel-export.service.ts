@@ -159,16 +159,15 @@ export class ExcelExportService {
   }
 
 
-  generateExcel(json: any[], excelFileName: string, options = {}): void {
-    let workbook = new Workbook();
-    var worksheet = workbook.addWorksheet('Sheet1');
+  populateDistributionWorksheet(worksheet: any, json: any[], sheetTitle: string = 'आवक जावक बुक'): void {
+    if (!json || !json.length) return;
 
     let colCount = Object.keys(json[0]).length;
     let Subtitle = ['Aawak Detail'];
-    let Header = [];
+    let Header: any[] = [];
 
     for (let key of Object.keys(json[0])) {
-      if (typeof json[0][key] == "object" && json[0][key].length > 0) {
+      if (typeof json[0][key] == "object" && json[0][key] && json[0][key].length > 0) {
         colCount += Object.keys(json[0][key][0]).length;
         Subtitle.push(key);
       }
@@ -179,12 +178,9 @@ export class ExcelExportService {
 
     /*TITLE*/
     worksheet.mergeCells([1, 1, 1, colCount - Subtitle.length + 1]);
-    worksheet.getCell('A1').value = 'आवक जावक बुक'
-    worksheet.getRow(1).font = { name: 'Corbel', family: 4, size: 20, };
+    worksheet.getCell('A1').value = sheetTitle;
+    worksheet.getRow(1).font = { name: 'Corbel', family: 4, size: 20, bold: true };
     worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-    // worksheet.getCell(1,1).fill = {
-    //   type: 'pattern', pattern: 'solid', fgColor: { argb: '96C8FB' }, bgColor: { argb: '96C8FB' }
-    // };
 
     /*SUBTITLE*/
     let endCell = 1;
@@ -198,7 +194,6 @@ export class ExcelExportService {
       worksheet.getCell(2, startCell).value = Subtitle[i];
       worksheet.getCell(2, startCell).fill = {
         type: 'pattern', pattern: 'solid', fgColor: { argb: '96C8FB' }, bgColor: { argb: '96C8FB' }
-        //adding fields to header
       };
       startCell = endCell + 1;
       if (i == 0) {
@@ -211,45 +206,30 @@ export class ExcelExportService {
         }
       }
     }
-    worksheet.getRow(2).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+    worksheet.getRow(2).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
 
     /*Column headers*/
-    console.log(Header);
-
     worksheet.getRow(3).values = Header.map(h => h.Header);
     worksheet.getRow(3).font = {
-      // name: 'Arial Black',
-      // color: { argb: '96C8FB' },
       family: 2,
       size: 12,
       bold: true,
     };
     worksheet.columns = Header;
 
-    /* Now we use the keys we defined earlier to insert your data by iterating through arrData and calling worksheet.addRow()*/
+    /* Data rows */
     let rowNum = 3;
     json.forEach(function (item, i) {
-      // for (let j = 0; j < Subtitle.length; j++) {
-      //   if(j>0 && json[i][Subtitle[j]].length > 0){          
-      //     for (let key of Object.keys(json[i][Subtitle[j]][0])) {
-      //       json[i][Subtitle[j].substring(0,1) + '_' + key] = json[i][Subtitle[j]][0][key];
-      //     } 
-      //     json[i][Subtitle[j]].shift();
-      //   }
-      // }      
-      // worksheet.addRow(json[i]);
       let jwklength = 0;
       for (let j = 0; j < Subtitle.length; j++) {
-
-        if (j > 0) {
+        if (j > 0 && json[i][Subtitle[j]]) {
           json[i][Subtitle[j]].forEach(function (subrow: any, si: number) {
-
             let row: any = {};
             for (let key of Object.keys(subrow)) {
               row[Subtitle[j].substring(0, 1) + '_' + key] = subrow[key];
             }
             if (si == 0) {
-              worksheet.addRow({ ...json[i], ...row })
+              worksheet.addRow({ ...json[i], ...row });
             } else {
               worksheet.addRow(row);
             }
@@ -260,8 +240,8 @@ export class ExcelExportService {
       }
 
       if (jwklength > 1) {
-        for (let i = 0; i < awkendcell; i++) {
-          worksheet.mergeCells((rowNum - jwklength + 1), 1 + i, rowNum, 1 + i);
+        for (let c = 0; c < awkendcell; c++) {
+          worksheet.mergeCells((rowNum - jwklength + 1), 1 + c, rowNum, 1 + c);
         }
         worksheet.mergeCells((rowNum - jwklength + 1), jwkendcell, rowNum, jwkendcell);
       }
@@ -274,22 +254,27 @@ export class ExcelExportService {
       };
     });
 
-    worksheet.eachRow({ includeEmpty: true }, function (row, rowNumber) {
-      row.eachCell({ includeEmpty: false }, function (cell, colNumber) {
+    worksheet.eachRow({ includeEmpty: true }, function (row: any, rowNumber: number) {
+      row.eachCell({ includeEmpty: false }, function (cell: any, colNumber: number) {
         cell.border = {
           top: { style: "thin" },
           left: { style: "thin" },
           bottom: { style: "thin" },
           right: { style: "thin" }
-        };;
+        };
       });
     });
+  }
+
+  generateExcel(json: any[], excelFileName: string, options = {}): void {
+    let workbook = new Workbook();
+    var worksheet = workbook.addWorksheet('Sheet1');
+
+    this.populateDistributionWorksheet(worksheet, json, 'आवक जावक बुक');
 
     let fileName = excelFileName + ".xlsx";
-    const excelBuffer: any = workbook.xlsx.writeBuffer();
     workbook.xlsx.writeBuffer()
       .then(function (buffer: any) {
-        // done buffering
         const data: Blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         FileSaver.saveAs(data, fileName);
       });

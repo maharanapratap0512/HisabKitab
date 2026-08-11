@@ -334,4 +334,36 @@ export class DataViewComponent implements OnInit {
     }
   }
 
+  autoAssignZones() {
+    Swal.fire({
+      title: 'Auto Assign Zones?',
+      text: 'This will remove all existing zones, reset state zone assignments to NULL, then auto-create standard Indian Zones and assign states. Continue?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ffbc00',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, Reset & Auto Assign'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.isLoader = true;
+        this.http.post(this.api.getUrl('ZONE') + 'auto-assign', {}).subscribe({
+          next: (res: any) => {
+            this.isLoader = false;
+            if (res && res.success) {
+              this.toastr.success(res.message || 'Zones auto assigned successfully.');
+              this.getDataFromDB();
+              this.gs.observeList(true).subscribe();
+            } else {
+              this.toastr.error(res.message || 'Failed to auto assign zones.');
+            }
+          },
+          error: (err: any) => {
+            this.isLoader = false;
+            this.toastr.error(err.error?.message || 'Error occurred while auto assigning zones.');
+          }
+        });
+      }
+    });
+  }
+
 }

@@ -407,7 +407,7 @@ async function transferReferences(list_type, from_id, to_id_raw, dept_id) {
     let condString = "";
     switch (list_type) {
         case 'mm': condString = `mm_id = ${fromIdNum}`; break;
-        case 'item': condString = `hmp_batch._id IN (SELECT batch_id FROM hmp_batch_input WHERE item_id = ${fromIdNum} AND (subitem_id IS NULL OR subitem_id = '' OR subitem_id = 0 OR subitem_id = 'null') UNION SELECT batch_id FROM hmp_batch_output WHERE item_id = ${fromIdNum} AND (subitem_id IS NULL OR subitem_id = '' OR subitem_id = 0 OR subitem_id = 'null'))`; break;
+        case 'item': condString = `hmp_batch._id IN (SELECT batch_id FROM hmp_batch_input WHERE item_id = ${fromIdNum} AND subitem_id IS NULL UNION SELECT batch_id FROM hmp_batch_output WHERE item_id = ${fromIdNum} AND subitem_id IS NULL)`; break;
         case 'subitem': condString = `hmp_batch._id IN (SELECT batch_id FROM hmp_batch_input WHERE subitem_id = ${fromIdNum} UNION SELECT batch_id FROM hmp_batch_output WHERE subitem_id = ${fromIdNum})`; break;
         case 'unit': condString = `hmp_batch._id IN (SELECT batch_id FROM hmp_batch_input WHERE unit_id = ${fromIdNum} UNION SELECT batch_id FROM hmp_batch_output WHERE unit_id = ${fromIdNum})`; break;
     }
@@ -422,7 +422,7 @@ async function transferReferences(list_type, from_id, to_id_raw, dept_id) {
             // Update inputs/outputs
             if (batch.inputs) {
                 batch.inputs.forEach(inp => {
-                    if (list_type === 'item' && Number(inp.item_id) === fromIdNum && (!inp.subitem_id || inp.subitem_id == 'null' || inp.subitem_id == 0)) {
+                    if (list_type === 'item' && Number(inp.item_id) === fromIdNum && inp.subitem_id == null) {
                         inp.item_id = to_item_id;
                         inp.subitem_id = to_subitem_id;
                     }
@@ -435,7 +435,7 @@ async function transferReferences(list_type, from_id, to_id_raw, dept_id) {
             }
             if (batch.outputs) {
                 batch.outputs.forEach(out => {
-                    if (list_type === 'item' && Number(out.item_id) === fromIdNum && (!out.subitem_id || out.subitem_id == 'null' || out.subitem_id == 0)) {
+                    if (list_type === 'item' && Number(out.item_id) === fromIdNum && out.subitem_id == null) {
                         out.item_id = to_item_id;
                         out.subitem_id = to_subitem_id;
                     }
@@ -454,15 +454,15 @@ async function transferReferences(list_type, from_id, to_id_raw, dept_id) {
     const recipes = getRecipesByDept(Number(dept_id));
     for (const recipe of recipes) {
         let changed = false;
-        
+
         if (list_type === 'mm' && Number(recipe.mm_id) === fromIdNum) {
             recipe.mm_id = toIdNum;
             changed = true;
         }
 
         if (recipe.inputs) {
-            for (let inp of recipe.inputs || []) {
-                if (list_type === 'item' && Number(inp.item_id) === fromIdNum && (!inp.subitem_id || inp.subitem_id == 'null' || inp.subitem_id == 0)) {
+            recipe.inputs.forEach(inp => {
+                if (list_type === 'item' && Number(inp.item_id) === fromIdNum && inp.subitem_id == null) {
                     inp.item_id = to_item_id;
                     inp.subitem_id = to_subitem_id;
                     changed = true;
@@ -476,11 +476,11 @@ async function transferReferences(list_type, from_id, to_id_raw, dept_id) {
                     inp.unit_id = toIdNum;
                     changed = true;
                 }
-            }
+            });
         }
         if (recipe.outputs) {
-            for (let out of recipe.outputs || []) {
-                if (list_type === 'item' && Number(out.item_id) === fromIdNum && (!out.subitem_id || out.subitem_id == 'null' || out.subitem_id == 0)) {
+            recipe.outputs.forEach(out => {
+                if (list_type === 'item' && Number(out.item_id) === fromIdNum && out.subitem_id == null) {
                     out.item_id = to_item_id;
                     out.subitem_id = to_subitem_id;
                     changed = true;
@@ -494,9 +494,9 @@ async function transferReferences(list_type, from_id, to_id_raw, dept_id) {
                     out.unit_id = toIdNum;
                     changed = true;
                 }
-            }
+            });
         }
-        
+
         if (changed) {
             insertUpdateRecipe(recipe);
         }

@@ -186,10 +186,7 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
     this.loading = true;
     this.page++;
     this.fetchData(this.currentSearchTerm, this.page).subscribe((res: any) => {
-      const newItems = res.result || [];
-      const existingIds = new Set(this.items.map((i: any) => i._id));
-      const uniqueNew = newItems.filter((i: any) => !existingIds.has(i._id));
-      this.items = [...this.items, ...uniqueNew];
+      this.items = [...this.items, ...(res.result || [])];
       this.loading = false;
     });
   }

@@ -14,6 +14,9 @@ import { observable, Observable, of, Subject } from 'rxjs';
 import { SelectionService } from '../services/selection.service';
 import { TourService } from '../services/tour.service';
 import { AAWAK_NEW_TOUR_CONFIG } from './aawak-new.tour';
+import { Workbook } from 'exceljs';
+import * as FileSaver from 'file-saver';
+import * as JSZip from 'jszip';
 declare var $: any;
 
 @Component({
@@ -203,6 +206,52 @@ export class AawakNewComponent implements OnInit {
     this.isLoader = false;
   }
 
+  formatJawakDetailForExport(jItem: any, awkItem: any): any {
+    let allocatedQty = (jItem.allocated_qty !== undefined ? jItem.allocated_qty : (jItem.split_qty !== null && jItem.split_qty !== undefined ? jItem.split_qty : jItem.qty)) || '-';
+    let isSplit = jItem.is_split === 1 || (allocatedQty !== '-' && jItem.qty !== undefined && Number(allocatedQty) !== Number(jItem.qty));
+    let totalJawakQty = isSplit ? (jItem.qty ? jItem.qty : '-') : '-';
+
+    return {
+      '_id': jItem._id || '-',
+      'Date': jItem.date ? this.gs.formatDisplayDate(jItem.date) : '-',
+      'Pkt No': jItem.pkt_num ? jItem.pkt_num : '-',
+      'Jawak MM': jItem.jawak_mm_id ? jItem.jawak_mm_hin : '-',
+      'Usage List': jItem.usage_list_id ? jItem.usage_list_hin : '-',
+      'Jawak Detail': jItem.description ? jItem.description : '-',
+      'Kisko Diya': jItem.pbk_id ? jItem.pbk_hin + '(' + jItem.pbk_state_hin + ')' : '-',
+      'Jawak Type': jItem.jawak_type_id ? jItem.jawak_type_hin : '-',
+      'Qty': allocatedQty,
+      'Total Jawak Qty': totalJawakQty,
+      'Unit': jItem.unit_id ? jItem.unit_short : '-',
+      'Rate': jItem.rate ? jItem.rate : '-',
+      'Amount': jItem.actual_amt ? jItem.actual_amt : '-',
+      'Kaha Repaired/Becha': jItem.sell_repair_place ? jItem.sell_repair_place : '-',
+      'Parchi Kaha': jItem.parchi_place ? jItem.parchi_place : '-',
+      'Bachat': (awkItem.remaining_qty ? awkItem.remaining_qty : 0) + '-' + (awkItem.unit_id ? awkItem.unit_short : '-'),
+    };
+  }
+
+  getEmptyJawakDetailForExport(awkItem: any): any {
+    return {
+      '_id': '-',
+      'Date': '-',
+      'Pkt No': '-',
+      'Jawak MM': '-',
+      'Usage List': '-',
+      'Jawak Detail': '-',
+      'Kisko Diya': '-',
+      'Jawak Type': '-',
+      'Qty': '-',
+      'Total Jawak Qty': '-',
+      'Unit': '-',
+      'Rate': '-',
+      'Amount': '-',
+      'Kaha Repaired/Becha': '-',
+      'Parchi Kaha': '-',
+      'Bachat': '-',
+    };
+  }
+
   getaawakData(pageNo: any = null) {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
@@ -351,27 +400,13 @@ export class AawakNewComponent implements OnInit {
           'Qty': 0,
           'Amount': 0
         };
-        for (let j in result[i].jawak_detail) {
-          const splitQty = (result[i].jawak_detail[j].allocated_qty !== undefined ? result[i].jawak_detail[j].allocated_qty : (result[i].jawak_detail[j].split_qty !== null && result[i].jawak_detail[j].split_qty !== undefined ? result[i].jawak_detail[j].split_qty : result[i].jawak_detail[j].qty));
-          jawakArray.push({
-            'Date': result[i].jawak_detail[j].date ? this.gs.formatDisplayDate(result[i].jawak_detail[j].date) : '-',
-            'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
-            'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
-            'Usage List': result[i].jawak_detail[j].usage_list_id ? result[i].jawak_detail[j].usage_list_hin : '-',
-            'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
-            'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
-            'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
-            'Total Jawak Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
-            'Split Jawak Qty': splitQty ? splitQty : '-',
-            'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
-            'Rate': result[i].jawak_detail[j].rate ? result[i].jawak_detail[j].rate : '-',
-            'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
-            'Kaha Repaired/Becha': result[i].jawak_detail[j].sell_repair_place ? result[i].jawak_detail[j].sell_repair_place : '-',
-            'Parchi Kaha': result[i].jawak_detail[j].parchi_place ? result[i].jawak_detail[j].parchi_place : '-',
-            // 'Bachat': bachat
-          });
-          // jwkFooter['Qty'] += result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : 0;
-          jwkFooter['Amount'] += result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : 0;
+        if (result[i].jawak_detail && result[i].jawak_detail.length) {
+          for (let j in result[i].jawak_detail) {
+            jawakArray.push(this.formatJawakDetailForExport(result[i].jawak_detail[j], result[i]));
+            jwkFooter['Amount'] += result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : 0;
+          }
+        } else {
+          jawakArray.push(this.getEmptyJawakDetailForExport(result[i]));
         }
         jawakArray.push({
           'Date': '',
@@ -533,6 +568,183 @@ export class AawakNewComponent implements OnInit {
     });
   }
 
+  sanitizeSheetName(name: string, usedNames: Set<string>): string {
+    if (!name) name = 'Sheet';
+    let cleanName = name.replace(/[\\/*?:\[\]]/g, ' ').trim();
+    if (!cleanName) cleanName = 'Sheet';
+    if (cleanName.length > 28) {
+      cleanName = cleanName.substring(0, 28);
+    }
+    let finalName = cleanName;
+    let counter = 1;
+    while (usedNames.has(finalName.toLowerCase())) {
+      finalName = `${cleanName}_${counter}`;
+      counter++;
+    }
+    usedNames.add(finalName.toLowerCase());
+    return finalName;
+  }
+
+  sanitizeFileName(name: string): string {
+    if (!name) return 'Zone';
+    return name.replace(/[\\/*?:"<>|]/g, '_').trim() || 'Zone';
+  }
+
+  exportAJZoneWiseData() {
+    this.isLoader = true;
+    this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
+    this.pageNo = 0;
+    this.allAJData = [];
+    this.exportAJdata$ = new Subject();
+
+    this.filterBody.orderBy = "zone_hin, mm_state_hin, mm.mm_hin, icategories, scategories, item_hin, subitem_hin, aawak.date";
+    this.getMoreAJ();
+
+    this.exportAJdata$.subscribe(async (result: any) => {
+      for (let i = 0; i < result.length; i++) {
+        let jawakArray = [];
+        if (result[i].jawak_detail && result[i].jawak_detail.length) {
+          for (let j in result[i].jawak_detail) {
+            jawakArray.push(this.formatJawakDetailForExport(result[i].jawak_detail[j], result[i]));
+          }
+        } else {
+          jawakArray.push(this.getEmptyJawakDetailForExport(result[i]));
+        }
+
+        let awkObj: any = {
+          '_id': result[i]._id,
+          '_zone_name': result[i].mm_zone_hin || result[i].zone_hin || result[i].mm_zone_eng || result[i].zone_eng || 'अन्य Zone',
+          '_mm_name': result[i].mm_hin || result[i].mm_eng || 'Unknown MM',
+          'No': i + 1,
+          'Date': result[i].date ? this.gs.formatDisplayDate(result[i].date) : '-',
+          'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
+          'Zone': result[i].zone_hin ? result[i].zone_hin : '-',
+          'State': result[i].mm_state_hin ? result[i].mm_state_hin : '-',
+          'MM': result[i].mm_hin,
+          'Aawak MM': result[i].aawak_mm_id ? result[i].aawak_mm_hin : '-',
+        };
+        if (this.settings.aawak.pbk_id) {
+          awkObj['Roll No'] = result[i].roll_no ? result[i].roll_no : '-';
+          awkObj.Pbk = result[i].pbk_hin ? result[i].pbk_hin : '-';
+          awkObj.Relation = result[i].relation ? result[i].relation : '-';
+          awkObj.Relative = result[i].relative_name ? result[i].relative_name : '-';
+        }
+
+        let cat = '';
+        let item = this.gs.Lists.itemmix.find((it: { _id: any; }) => it._id == result[i].item_id);
+        if (item) {
+          if (result[i].subitem_id) {
+            let subitem = item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id);
+            cat = this.getCategoryString(subitem || item);
+          }
+          else {
+            cat = this.getCategoryString(item);
+          }
+        }
+        awkObj = {
+          ...awkObj,
+          'Category': cat,
+          'Item': result[i].item_id ? result[i].item_hin : '-',
+          'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
+          'Product Code': result[i].product_code ? result[i].product_code : '-',
+          'Sr No': result[i].sr_num ? result[i].sr_num : '-',
+          'Company': result[i].company_name ? result[i].company_name : '-',
+          'Condition': result[i].condition_id ? result[i].condition_hin : '-',
+          'Bill': result[i].isbill ? 'है' : '-',
+          'Qty': result[i].qty ? result[i].qty : '-',
+          'Unit': result[i].unit_id ? result[i].unit_short : '-',
+          'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
+          'Aawak Type': result[i].aawak_type_id ? result[i].aawak_type_hin : '-',
+          'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
+          'Description': result[i].description ? result[i].description : '-',
+          'Jawak Detail': jawakArray,
+        };
+        this.allAJData.push(awkObj);
+      }
+
+      this.loadingStatus = `डाटा प्रोसेस हो रहा है... (${this.allAJData.length} / ${this.export_total_count || this.total_count})`;
+      if (this.allAJData.length < this.export_total_count) {
+        this.getMoreAJ();
+      }
+      else {
+        this.filterBody.orderBy = null;
+        await this.exportZoneWiseZip(this.allAJData);
+      }
+    });
+  }
+
+  async exportZoneWiseZip(allData: any[]) {
+    if (!allData || allData.length === 0) {
+      this.toastr.info('No data found to export.');
+      this.isLoader = false;
+      this.loadingStatus = 'Loading...';
+      return;
+    }
+
+    this.loadingStatus = 'Zone Data Grouping...';
+
+    // Group by Zone
+    let zoneGroups: { [key: string]: any[] } = {};
+    allData.forEach(item => {
+      let zName = item._zone_name || 'अन्य Zone';
+      if (!zoneGroups[zName]) {
+        zoneGroups[zName] = [];
+      }
+      zoneGroups[zName].push(item);
+    });
+
+    let zip = new JSZip();
+    let zoneCount = 0;
+
+    for (let zName of Object.keys(zoneGroups)) {
+      let zoneItems = zoneGroups[zName];
+      let workbook = new Workbook();
+
+      // Group zone items by MM
+      let mmGroups: { [key: string]: any[] } = {};
+      zoneItems.forEach(item => {
+        let mName = item._mm_name || 'Unknown MM';
+        if (!mmGroups[mName]) {
+          mmGroups[mName] = [];
+        }
+        let cleanObj = { ...item };
+        delete cleanObj._zone_name;
+        delete cleanObj._mm_name;
+        mmGroups[mName].push(cleanObj);
+      });
+
+      let usedSheetNames = new Set<string>();
+      let sheetCount = 0;
+
+      for (let mName of Object.keys(mmGroups)) {
+        let mmItems = mmGroups[mName];
+        let sheetName = this.sanitizeSheetName(mName, usedSheetNames);
+        let worksheet = workbook.addWorksheet(sheetName);
+        this.excelExportService.populateDistributionWorksheet(worksheet, mmItems, `${mName} - आवक जावक बुक`);
+        sheetCount++;
+      }
+
+      if (sheetCount > 0) {
+        let buffer: any = await workbook.xlsx.writeBuffer();
+        let fileName = this.sanitizeFileName(zName);
+        zip.file(fileName + '.xlsx', buffer);
+        zoneCount++;
+      }
+    }
+
+    if (zoneCount > 0) {
+      this.loadingStatus = 'Zipping Zone Files...';
+      let zipBlob = await zip.generateAsync({ type: 'blob' });
+      FileSaver.saveAs(zipBlob, `Distribution_Zone_Wise_${Date.now()}.zip`);
+      this.toastr.success('Zone wise distribution zip exported successfully.');
+    } else {
+      this.toastr.info('No activity found to export.');
+    }
+
+    this.isLoader = false;
+    this.loadingStatus = 'Loading...';
+  }
+
   exportAawakData() {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
@@ -681,25 +893,27 @@ export class AawakNewComponent implements OnInit {
         for (let j in result[i].jawak_detail) {
           uniqueJawakMM.add(result[i].jawak_detail[j].jawak_mm_id);
           uniqueUnit.add(result[i].jawak_detail[j].unit_id);
-          const splitQty = (result[i].jawak_detail[j].allocated_qty !== undefined ? result[i].jawak_detail[j].allocated_qty : (result[i].jawak_detail[j].split_qty !== null && result[i].jawak_detail[j].split_qty !== undefined ? result[i].jawak_detail[j].split_qty : result[i].jawak_detail[j].qty));
+          const jItem = result[i].jawak_detail[j];
+          const allocatedQty = (jItem.allocated_qty !== undefined ? jItem.allocated_qty : (jItem.split_qty !== null && jItem.split_qty !== undefined ? jItem.split_qty : jItem.qty)) || '-';
+          const isSplit = jItem.is_split === 1 || (allocatedQty !== '-' && jItem.qty !== undefined && Number(allocatedQty) !== Number(jItem.qty));
 
           this.allAJData.push({
-            'Date': result[i].jawak_detail[j].date ? this.gs.formatDisplayDate(result[i].jawak_detail[j].date) : '-',
-            'Pkt No': result[i].jawak_detail[j].pkt_num ? result[i].jawak_detail[j].pkt_num : '-',
+            'Date': jItem.date ? this.gs.formatDisplayDate(jItem.date) : '-',
+            'Pkt No': jItem.pkt_num ? jItem.pkt_num : '-',
             ...awkObj,
-            'Jawak MM': result[i].jawak_detail[j].jawak_mm_id ? result[i].jawak_detail[j].jawak_mm_hin : '-',
-            'Usage List': result[i].jawak_detail[j].usage_list_id ? result[i].jawak_detail[j].usage_list_hin : '-',
-            'Kisko Diya': result[i].jawak_detail[j].pbk_id ? result[i].jawak_detail[j].pbk_hin + '(' + result[i].jawak_detail[j].pbk_state_hin + ')' : '-',
-            'Jawak Type': result[i].jawak_detail[j].jawak_type_id ? result[i].jawak_detail[j].jawak_type_hin : '-',
-            'Total Jawak Qty': result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : '-',
-            'Split Jawak Qty': splitQty ? splitQty : '-',
-            'Unit': result[i].jawak_detail[j].unit_id ? result[i].jawak_detail[j].unit_short : '-',
-            'Rate': result[i].jawak_detail[j].rate ? result[i].jawak_detail[j].rate : '-',
-            'Amount': result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : '-',
-            'Kaha Repaired/Becha': result[i].jawak_detail[j].sell_repair_place ? result[i].jawak_detail[j].sell_repair_place : '-',
-            'Parchi Kaha': result[i].jawak_detail[j].parchi_place ? result[i].jawak_detail[j].parchi_place : '-',
-            'Item Detail': result[i].jawak_detail[j].item_detail ? result[i].jawak_detail[j].item_detail : '-',
-            'Jawak Detail': result[i].jawak_detail[j].description ? result[i].jawak_detail[j].description : '-',
+            'Jawak MM': jItem.jawak_mm_id ? jItem.jawak_mm_hin : '-',
+            'Usage List': jItem.usage_list_id ? jItem.usage_list_hin : '-',
+            'Kisko Diya': jItem.pbk_id ? jItem.pbk_hin + '(' + jItem.pbk_state_hin + ')' : '-',
+            'Jawak Type': jItem.jawak_type_id ? jItem.jawak_type_hin : '-',
+            'Qty': allocatedQty,
+            'Total Jawak Qty': isSplit ? (jItem.qty ? jItem.qty : '-') : '-',
+            'Unit': jItem.unit_id ? jItem.unit_short : '-',
+            'Rate': jItem.rate ? jItem.rate : '-',
+            'Amount': jItem.actual_amt ? jItem.actual_amt : '-',
+            'Kaha Repaired/Becha': jItem.sell_repair_place ? jItem.sell_repair_place : '-',
+            'Parchi Kaha': jItem.parchi_place ? jItem.parchi_place : '-',
+            'Item Detail': jItem.item_detail ? jItem.item_detail : '-',
+            'Jawak Detail': jItem.description ? jItem.description : '-',
           });
           footerRow['Qty'] += result[i].jawak_detail[j].qty ? result[i].jawak_detail[j].qty : 0;
           footerRow['Amount'] += result[i].jawak_detail[j].actual_amt ? result[i].jawak_detail[j].actual_amt : 0;

@@ -26,6 +26,10 @@
                 <button type="button" class="btn btn-outline-success mx-2" (click)="exportToExcel()"> Export To
                     Excel
                 </button>
+                <button *ngIf="Type === 'zone'" type="button" class="btn btn-warning mx-2" (click)="autoAssignZones()"
+                    style="font-weight: 700 !important;" title="Reset all zones & states, then auto-create 6 Indian Zones & assign states">
+                    <i class="uil uil-sliders-v"></i> Auto Assign Zones
+                </button>
                 <button type="button" class="btn btn-danger mx-2" (click)="deleteSelected()"
                     *ngIf="selectionService.hasSelection('data-view-' + Type)" style="font-weight: 700 !important;">
                     <i class="uil-trash"></i> Delete Selected

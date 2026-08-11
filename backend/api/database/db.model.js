@@ -2849,8 +2849,6 @@ class dbModal {
       //   subitem_id: null,
       //   unit_id: 1,
       //   dept_id: 1,
-      //   condition_id: null,
-      // }));
     }
     catch (ex) {
       console.log("error db model", ex);
