@@ -50,6 +50,7 @@ export class HmpEntryComponent implements OnInit {
     aawak_type_id: null,
     jawak_ref_id: null,
     aawak_ref_id: null,
+    aawak_splits: [],
     jawak_detail: []
   };
   isEditingItem: boolean = false;
@@ -238,10 +239,30 @@ export class HmpEntryComponent implements OnInit {
       aawak_type_id: null,
       jawak_ref_id: null,
       aawak_ref_id: null,
+      aawak_splits: [],
       jawak_detail: []
     };
     this.isEditingItem = false;
     this.editingIndex = null;
+  }
+
+  onAawakSplitsSelected(event: any, rowOrModel: any) {
+    if (event && event.splits && event.splits.length > 0) {
+      const primary = event.primaryAawak || event.splits[0].aawak_obj || event.splits[0];
+      rowOrModel.aawak_ref_id = primary._id || primary.aawak_id || null;
+      rowOrModel.aawak_splits = event.splits;
+    } else if (event && Array.isArray(event)) {
+      rowOrModel.aawak_splits = event;
+      if (event.length > 0) {
+        const primary = event[0].aawak_obj || event[0];
+        rowOrModel.aawak_ref_id = primary._id || primary.aawak_id || null;
+      } else {
+        rowOrModel.aawak_ref_id = null;
+      }
+    } else {
+      rowOrModel.aawak_ref_id = null;
+      rowOrModel.aawak_splits = [];
+    }
   }
 
   commonFormItemSubitemSelected(ev: any) {
@@ -287,6 +308,7 @@ export class HmpEntryComponent implements OnInit {
         auto_aawak: this.formModel.auto_aawak,
         aawak_type_id: this.formModel.aawak_type_id || null,
         aawak_ref_id: this.formModel.aawak_ref_id || null,
+        aawak_splits: this.formModel.aawak_splits || [],
         jawak_ref_id: this.formModel.jawak_ref_id || null,
         active: 1
       };

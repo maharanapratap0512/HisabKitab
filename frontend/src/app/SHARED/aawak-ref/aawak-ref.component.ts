@@ -27,7 +27,7 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
   @Input() filterObj: any = {};
   @Input() placeholder: string = 'Select Aawak';
   @Input() size: 'sm' | 'default' = 'default';
-  @Input() mode: 'default' | 'tiny' = 'default';
+  @Input() mode: 'default' | 'tiny' | 'compact' = 'default';
   @Input() readonly: boolean = false;
 
   // Auto-save related

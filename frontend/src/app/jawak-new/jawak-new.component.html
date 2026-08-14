@@ -116,9 +116,9 @@
             <div class="row">
                 <div class="card-body">
                     <div class="row d-flex justify-content-between">
-                        <div class="col-1" id="tour-add-jawak-btn">
+                        <div class="col-2" id="tour-add-jawak-btn">
                             <button class="btn btn-primary w-100" (click)="openModal('Add Jawak')">
-                                <i class="dripicons-plus h4 icon-mx-1"> </i> Jawak
+                                <i class="dripicons-plus icon-mx-1"> </i> Jawak
                             </button>
                         </div>
                         <div class="col-4">
@@ -126,8 +126,6 @@
                                 <input id="tour-search-input" type="text" class="form-control" placeholder="Search Here"
                                     [(ngModel)]="term" name="search">
                             </div>
-                        </div>
-                        <div class="col-auto">
                         </div>
                         <div class="col-4 d-flex">
                             <button id="tour-import-btn" class="file btn btn-success w-50"
@@ -577,7 +575,7 @@
                                                                     <span>{{item.jawak_type_hin}}</span> <br />
                                                                     <small
                                                                         class="text-muted">{{item.jawak_type_eng}}</small>
-                                                </div>
+                                                                </div>
                                                             </td>
                                                             <td>
                                                                 <small class="text-muted">{{item.usage_list_eng ||
@@ -594,11 +592,13 @@
                                                                         subitem_id: item.subitem_id,
                                                                         condition_id: item.condition_id,
                                                                         aawak_source_id: item.aawak_source_id
-                                                                    }" [(ngModel)]="item.aawak_ref_id" [selectedSplitsData]="item.aawak_splits" [totalSplitQty]="item.qty"
-                                                                    [autoSave]="true" [jawakId]="item._id"
+                                                                    }" [(ngModel)]="item.aawak_ref_id"
+                                                                    [selectedSplitsData]="item.aawak_splits"
+                                                                    [totalSplitQty]="item.qty" [autoSave]="true"
+                                                                    [jawakId]="item._id"
                                                                     (saved)="onAawakRefSaved($event, row)" size="sm">
                                                                 </app-aawak-ref>
-                                                           </td>
+                                                            </td>
                                                             <td>
                                                                 <div *ngIf="item.usage_report?.date"
                                                                     class="usage-report-detailed">
@@ -951,9 +951,10 @@
                                                     subitem_id: item.subitem_id,
                                                     condition_id: item.condition_id,
                                                     aawak_source_id: item.aawak_source_id
-                                                }" [(ngModel)]="item.aawak_ref_id" [selectedSplitsData]="item.aawak_splits" [totalSplitQty]="item.qty" [autoSave]="true"
-                                                [jawakId]="item._id" (saved)="onAawakRefSaved($event, item)" mode="tiny"
-                                                size="sm">
+                                                }" [(ngModel)]="item.aawak_ref_id"
+                                                [selectedSplitsData]="item.aawak_splits" [totalSplitQty]="item.qty"
+                                                [autoSave]="true" [jawakId]="item._id"
+                                                (saved)="onAawakRefSaved($event, item)" mode="tiny" size="sm">
                                             </app-aawak-ref>
                                         </td>
                                         <td class="w-100"><strong>#{{row.voucher_no}}</strong></td>

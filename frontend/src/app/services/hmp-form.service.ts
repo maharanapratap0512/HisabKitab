@@ -28,6 +28,7 @@ export class HmpFormService {
       aawak_source_id: null,
       jawak_ref_id: null,
       aawak_ref_id: null,
+      aawak_splits: [],
       auto_jawak: false,
       auto_aawak: false,
       aawak_type_id: null,
@@ -97,6 +98,7 @@ export class HmpFormService {
       if (data.inputs[j].is_auto_awk) {
         data.inputs[j].auto_aawak = true;
       }
+      data.inputs[j].aawak_splits = data.inputs[j].aawak_splits || [];
     }
     for (let j in data.outputs) {
       if (data.outputs[j].aawak_ref_id) {

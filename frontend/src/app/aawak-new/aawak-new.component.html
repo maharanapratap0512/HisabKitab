@@ -7,107 +7,106 @@
 <div class="wrapper">
     <div class="content-page">
         <div class="content">
-            <div class="container-fluid">
 
-                <!-- First Row -->
-                <!-- Add Button, Search Field, Filter button, Total Count -->
-                <div class="row">
-                    <div class="card-body">
-                        <div class="row d-flex justify-content-between">
-                            <div class="col-2" id="tour-add-aawak-btn">
-                                <button class="btn btn-primary w-100" (click)="openModal('Add Bunch Aawak')">
-                                    <i class="dripicons-plus h4 icon-mx-2"> </i> Aawak
-                                </button>
+            <!-- First Row -->
+            <!-- Add Button, Search Field, Filter button, Total Count -->
+            <div class="row">
+                <div class="card-body">
+                    <div class="row d-flex justify-content-between">
+                        <div class="col-2" id="tour-add-aawak-btn">
+                            <button class="btn btn-primary w-100" (click)="openModal('Add Bunch Aawak')">
+                                <i class="dripicons-plus h4 icon-mx-2"> </i> Aawak
+                            </button>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <input id="tour-search-input" type="text" class="form-control" placeholder="Search Here"
+                                    [(ngModel)]="term" name="search">
                             </div>
-                            <div class="col-3">
-                                <div class="form-group">
-                                    <input id="tour-search-input" type="text" class="form-control"
-                                        placeholder="Search Here" [(ngModel)]="term" name="search">
+                        </div>
+                        <div class="col-2">
+                            <button id="tour-adv-search-btn" class="btn btn-outline-info w-100" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false"
+                                aria-controls="collapseExample"><i class="uil-search-plus h4 icon-mx-2"></i> Advance
+                                Search
+                            </button>
+                        </div>
+                        <div class="col-3 d-flex">
+                            <button id="tour-import-btn" *ngIf="!gs.importPending" class="file btn btn-success"
+                                style="font-weight: 700 !important;">
+                                <i class="uil uil-arrow-to-bottom"></i> Import Aawak
+                                <input type="file" class="inputtag"
+                                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                    (change)="excelImport($event)" />
+                            </button>
+                            <button id="tour-import-btn" *ngIf="gs.importPending" class="file btn btn-success"
+                                (click)="openModal('import')" style="font-weight: 700 !important;">
+                                <i class="uil uil-arrow-to-bottom"></i> Import Aawak
+                            </button>
+
+                            <div id="tour-export-container">
+                                <button id="tour-export-btn" type="button"
+                                    class="btn btn-outline-success dropdown-toggle mx-2" data-bs-toggle="dropdown"
+                                    aria-expanded="false"> Export To Excel </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item cursor-pointer" (click)="exportAJData()">Distribution</a>
+                                    <a class="dropdown-item cursor-pointer"
+                                        (click)="exportAJZoneWiseData()">Distribution Zone Wise</a>
+                                    <a class="dropdown-item cursor-pointer" (click)="exportAawakData()">Aawak Only</a>
+                                    <a class="dropdown-item cursor-pointer" (click)="exportJawakData()">Jawak Only</a>
+                                    <a class="dropdown-item cursor-pointer" (click)="exportPendingData()">Pending
+                                        Destribution</a>
                                 </div>
                             </div>
-                            <div class="col-2">
-                                <button id="tour-adv-search-btn" class="btn btn-outline-info w-100" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false"
-                                    aria-controls="collapseExample"><i class="uil-search-plus h4 icon-mx-2"></i> Advance
-                                    Search
-                                </button>
-                            </div>
-                            <div class="col-3 d-flex">
-                                <button id="tour-import-btn" *ngIf="!gs.importPending" class="file btn btn-success"
-                                    style="font-weight: 700 !important;">
-                                    <i class="uil uil-arrow-to-bottom"></i> Import Aawak
-                                    <input type="file" class="inputtag"
-                                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                                        (change)="excelImport($event)" />
-                                </button>
-                                <button id="tour-import-btn" *ngIf="gs.importPending" class="file btn btn-success"
-                                    (click)="openModal('import')" style="font-weight: 700 !important;">
-                                    <i class="uil uil-arrow-to-bottom"></i> Import Aawak
-                                </button>
+                        </div>
 
-                                <div id="tour-export-container">
-                                    <button id="tour-export-btn" type="button"
-                                        class="btn btn-outline-success dropdown-toggle mx-2" data-bs-toggle="dropdown"
-                                        aria-expanded="false"> Export To Excel </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item cursor-pointer" (click)="exportAJData()">Distribution</a>
-                                        <a class="dropdown-item cursor-pointer" (click)="exportAJZoneWiseData()">Distribution Zone Wise</a>
-                                        <a class="dropdown-item cursor-pointer" (click)="exportAawakData()">Aawak Only</a>
-                                        <a class="dropdown-item cursor-pointer" (click)="exportJawakData()">Jawak Only</a>
-                                        <a class="dropdown-item cursor-pointer" (click)="exportPendingData()">Pending Destribution</a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-2">
-                                <div class="d-flex">
-                                    <button id="tour-total-count" type="button" style="font-weight: 700 !important;"
-                                        class="btn btn-light w-100">Total
-                                        Count : {{aawakData.length}}
+                        <div class="col-2">
+                            <div class="d-flex">
+                                <button id="tour-total-count" type="button" style="font-weight: 700 !important;"
+                                    class="btn btn-light w-100">Total
+                                    Count : {{aawakData.length}}
+                                </button>
+                                <!-- Tour Hub Menu Dropdown -->
+                                <div class="dropdown d-inline-block ms-1">
+                                    <button type="button" class="btn btn-outline-primary dropdown-toggle px-2"
+                                        data-bs-toggle="dropdown" aria-expanded="false"
+                                        title="Interactive Guided Tours">
+                                        <i class="uil-question-circle h4"></i>
                                     </button>
-                                    <!-- Tour Hub Menu Dropdown -->
-                                    <div class="dropdown d-inline-block ms-1">
-                                        <button type="button" class="btn btn-outline-primary dropdown-toggle px-2"
-                                            data-bs-toggle="dropdown" aria-expanded="false"
-                                            title="Interactive Guided Tours">
-                                            <i class="uil-question-circle h4"></i>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-end shadow-lg py-2"
-                                            style="min-width: 260px; z-index: 1050;">
-                                            <h6 class="dropdown-header text-primary fw-bold">🎓 Guided Page Tours /
-                                                मार्गदर्शिका</h6>
-                                            <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('master')">
-                                                <i class="uil-rocket me-2 text-primary"></i> <strong>Full Master
-                                                    Tour</strong> (11 steps)
-                                            </a>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item py-2 cursor-pointer"
-                                                (click)="startTour('add_filter')">
-                                                <i class="uil-search-plus me-2 text-info"></i> <strong>1. Add & Advance
-                                                    Filters</strong>
-                                            </a>
-                                            <a class="dropdown-item py-2 cursor-pointer"
-                                                (click)="startTour('import_export')">
-                                                <i class="uil-export me-2 text-success"></i> <strong>2. Excel Import &
-                                                    Export</strong>
-                                            </a>
-                                            <a class="dropdown-item py-2 cursor-pointer"
-                                                (click)="startTour('table_data')">
-                                                <i class="uil-table me-2 text-warning"></i> <strong>3. Table Data & Bulk
-                                                    Operations</strong>
-                                            </a>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item py-1 text-muted cursor-pointer"
-                                                (click)="resetTourStatus()">
-                                                <i class="uil-refresh me-2"></i> Reset Tour Progress
-                                            </a>
-                                        </div>
-
+                                    <div class="dropdown-menu dropdown-menu-end shadow-lg py-2"
+                                        style="min-width: 260px; z-index: 1050;">
+                                        <h6 class="dropdown-header text-primary fw-bold">🎓 Guided Page Tours /
+                                            मार्गदर्शिका</h6>
+                                        <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('master')">
+                                            <i class="uil-rocket me-2 text-primary"></i> <strong>Full Master
+                                                Tour</strong> (11 steps)
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('add_filter')">
+                                            <i class="uil-search-plus me-2 text-info"></i> <strong>1. Add & Advance
+                                                Filters</strong>
+                                        </a>
+                                        <a class="dropdown-item py-2 cursor-pointer"
+                                            (click)="startTour('import_export')">
+                                            <i class="uil-export me-2 text-success"></i> <strong>2. Excel Import &
+                                                Export</strong>
+                                        </a>
+                                        <a class="dropdown-item py-2 cursor-pointer" (click)="startTour('table_data')">
+                                            <i class="uil-table me-2 text-warning"></i> <strong>3. Table Data & Bulk
+                                                Operations</strong>
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item py-1 text-muted cursor-pointer"
+                                            (click)="resetTourStatus()">
+                                            <i class="uil-refresh me-2"></i> Reset Tour Progress
+                                        </a>
                                     </div>
+
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- <div class="col-2">
+                        <!-- <div class="col-2">
                         <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
                            aria-expanded="false"> Button 3 </button>
                         <div class="dropdown-menu">
@@ -115,124 +114,122 @@
                            <a class="dropdown-item" href="#">Dropdown link</a>
                         </div>
                      </div> -->
-                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- fliter collapse -->
-                <div class="collapse" id="collapseExample">
-                    <div class="card card-body">
-                        <div class="row">
-                            <div class="card-body">
-                                <form #filterForm="ngForm">
-                                    <div class="row">
-                                        <div class="col-md-3 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">Month</label>
-                                                <ng-select class="custom" style="width: 100%;"
-                                                    placeholder="Select Month" [clearable]="true" [virtualScroll]="true"
-                                                    [(ngModel)]="filterBody.month" name="month">
-                                                    <ng-option selected="selected" disabled value="">Select Month
-                                                    </ng-option>
-                                                    <ng-option value="01">1 : January</ng-option>
-                                                    <ng-option value="02">2 : February</ng-option>
-                                                    <ng-option value="03">3 : March</ng-option>
-                                                    <ng-option value="04">4 : April</ng-option>
-                                                    <ng-option value="05">5 : May</ng-option>
-                                                    <ng-option value="06">6 : June</ng-option>
-                                                    <ng-option value="07">7 : July</ng-option>
-                                                    <ng-option value="08">8 : August</ng-option>
-                                                    <ng-option value="09">9 : September</ng-option>
-                                                    <ng-option value="10">10 : October</ng-option>
-                                                    <ng-option value="11">11 : November</ng-option>
-                                                    <ng-option value="12">12 : December</ng-option>
-                                                </ng-select>
-                                                <ng-select class="custom mt-1" style="width: 100%;"
-                                                    placeholder="Select Year" [clearable]="true" [virtualScroll]="true"
-                                                    [(ngModel)]="filterBody.year" name="year">
-                                                    <ng-option selected="selected" disabled value="">Select Year
-                                                    </ng-option>
-                                                    <ng-option [value]="currentYear">{{currentYear}}</ng-option>
-                                                    <ng-option [value]="currentYear-1">{{currentYear-1}}</ng-option>
-                                                    <ng-option [value]="currentYear-2">{{currentYear-2}}</ng-option>
-                                                    <!-- <ng-option [value]="currentYear-3">{{currentYear-3}}</ng-option> -->
-                                                    <!-- <ng-option [value]="currentYear-4">{{currentYear-4}}</ng-option> -->
-                                                </ng-select>
+            <!-- fliter collapse -->
+            <div class="collapse" id="collapseExample">
+                <div class="card card-body">
+                    <div class="row">
+                        <div class="card-body">
+                            <form #filterForm="ngForm">
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Month</label>
+                                            <ng-select class="custom" style="width: 100%;" placeholder="Select Month"
+                                                [clearable]="true" [virtualScroll]="true" [(ngModel)]="filterBody.month"
+                                                name="month">
+                                                <ng-option selected="selected" disabled value="">Select Month
+                                                </ng-option>
+                                                <ng-option value="01">1 : January</ng-option>
+                                                <ng-option value="02">2 : February</ng-option>
+                                                <ng-option value="03">3 : March</ng-option>
+                                                <ng-option value="04">4 : April</ng-option>
+                                                <ng-option value="05">5 : May</ng-option>
+                                                <ng-option value="06">6 : June</ng-option>
+                                                <ng-option value="07">7 : July</ng-option>
+                                                <ng-option value="08">8 : August</ng-option>
+                                                <ng-option value="09">9 : September</ng-option>
+                                                <ng-option value="10">10 : October</ng-option>
+                                                <ng-option value="11">11 : November</ng-option>
+                                                <ng-option value="12">12 : December</ng-option>
+                                            </ng-select>
+                                            <ng-select class="custom mt-1" style="width: 100%;"
+                                                placeholder="Select Year" [clearable]="true" [virtualScroll]="true"
+                                                [(ngModel)]="filterBody.year" name="year">
+                                                <ng-option selected="selected" disabled value="">Select Year
+                                                </ng-option>
+                                                <ng-option [value]="currentYear">{{currentYear}}</ng-option>
+                                                <ng-option [value]="currentYear-1">{{currentYear-1}}</ng-option>
+                                                <ng-option [value]="currentYear-2">{{currentYear-2}}</ng-option>
+                                                <!-- <ng-option [value]="currentYear-3">{{currentYear-3}}</ng-option> -->
+                                                <!-- <ng-option [value]="currentYear-4">{{currentYear-4}}</ng-option> -->
+                                            </ng-select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Sewadhari</label>
+                                            <ng-select class="custom" style="width: 100%;"
+                                                placeholder="Filter PBK by State" [clearable]="true"
+                                                [virtualScroll]="true" (change)="stateSelected($event)">
+                                                <ng-option selected="selected" disabled value="">Select State to
+                                                    Filter Pbk
+                                                </ng-option>
+                                                <ng-option *ngFor="let item of states" [value]="item._id">
+                                                    {{item.state_hin}} : {{item.state_eng}}
+                                                </ng-option>
+                                            </ng-select>
+                                            <ng-select class="custom mt-1" style="width: 100%;"
+                                                placeholder="Select Roll no. or Pbk name" [clearable]="false"
+                                                [virtualScroll]="true" [multiple]="true" [(ngModel)]="filterBody.pbk_id"
+                                                name="pbk_id" [closeOnSelect]="false">
+                                                <ng-option selected="selected" disabled value="">Select Roll no. or
+                                                    Pbk name
+                                                </ng-option>
+                                                <ng-option *ngFor="let item of pbks" [value]="item._id">
+                                                    {{item.roll_no ? item.roll_no : '______'}} -
+                                                    {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} :
+                                                    {{item.relation}} :
+                                                    {{item.relative_name}}
+                                                </ng-option>
+                                            </ng-select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Item & Subitem</label>
+                                            <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
+                                                [clearable]="false" [virtualScroll]="true"
+                                                [(ngModel)]="filterBody.item_id" (change)="itemSelected($event)"
+                                                [multiple]="true" name="item_id" [closeOnSelect]="false">
+                                                <ng-option selected="selected" disabled value="">Select
+                                                    Item</ng-option>
+                                                <ng-option *ngFor="let item of items"
+                                                    [value]="item._id">{{item.item_hin}} :
+                                                    {{item.item_eng}} : {{item.item_roman ? item.item_roman : ''}} :
+                                                    {{item.item_code}}</ng-option>
+                                            </ng-select>
+                                            <ng-select class="custom mt-1" style="width: 100%;"
+                                                placeholder="Select SubitemList" [clearable]="false"
+                                                [virtualScroll]="true" [multiple]="true"
+                                                [(ngModel)]="filterBody.subitem_id" name="subitem_id">
+                                                <ng-option selected="selected" disabled value="">Select
+                                                    Subitem</ng-option>
+                                                <ng-option *ngFor="let item of subitems"
+                                                    [value]="item._id">{{item.subitem_hin}}
+                                                    :
+                                                    {{item.subitem_eng}} : {{item.subitem_roman ? item.subitem_roman
+                                                    : ''}}</ng-option>
+                                            </ng-select>
+                                            <div class="form-check mt-1">
+                                                <input type="checkbox" class="form-check-input" id="itemOnlyCheckawknew"
+                                                    [(ngModel)]="filterBody.itemOnly" name="itemOnly">
+                                                <label class="form-check-label mb-0" for="itemOnlyCheckawknew"
+                                                    style="cursor: pointer;"><small class="text-info fw-bold">Item
+                                                        Only (Subitem is Null)</small></label>
                                             </div>
                                         </div>
+                                    </div>
 
-                                        <div class="col-md-3 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">Sewadhari</label>
-                                                <ng-select class="custom" style="width: 100%;"
-                                                    placeholder="Filter PBK by State" [clearable]="true"
-                                                    [virtualScroll]="true" (change)="stateSelected($event)">
-                                                    <ng-option selected="selected" disabled value="">Select State to
-                                                        Filter Pbk
-                                                    </ng-option>
-                                                    <ng-option *ngFor="let item of states" [value]="item._id">
-                                                        {{item.state_hin}} : {{item.state_eng}}
-                                                    </ng-option>
-                                                </ng-select>
-                                                <ng-select class="custom mt-1" style="width: 100%;"
-                                                    placeholder="Select Roll no. or Pbk name" [clearable]="false"
-                                                    [virtualScroll]="true" [multiple]="true"
-                                                    [(ngModel)]="filterBody.pbk_id" name="pbk_id"
-                                                    [closeOnSelect]="false">
-                                                    <ng-option selected="selected" disabled value="">Select Roll no. or
-                                                        Pbk name
-                                                    </ng-option>
-                                                    <ng-option *ngFor="let item of pbks" [value]="item._id">
-                                                        {{item.roll_no ? item.roll_no : '______'}} -
-                                                        {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} :
-                                                        {{item.relation}} :
-                                                        {{item.relative_name}}
-                                                    </ng-option>
-                                                </ng-select>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-3 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">Item & Subitem</label>
-                                                <ng-select class="custom" style="width: 100%;" placeholder="Select Item"
-                                                    [clearable]="false" [virtualScroll]="true"
-                                                    [(ngModel)]="filterBody.item_id" (change)="itemSelected($event)"
-                                                    [multiple]="true" name="item_id" [closeOnSelect]="false">
-                                                    <ng-option selected="selected" disabled value="">Select
-                                                        Item</ng-option>
-                                                    <ng-option *ngFor="let item of items"
-                                                        [value]="item._id">{{item.item_hin}} :
-                                                        {{item.item_eng}} : {{item.item_roman ? item.item_roman : ''}} :
-                                                        {{item.item_code}}</ng-option>
-                                                </ng-select>
-                                                <ng-select class="custom mt-1" style="width: 100%;"
-                                                    placeholder="Select SubitemList" [clearable]="false"
-                                                    [virtualScroll]="true" [multiple]="true"
-                                                    [(ngModel)]="filterBody.subitem_id" name="subitem_id">
-                                                    <ng-option selected="selected" disabled value="">Select
-                                                        Subitem</ng-option>
-                                                    <ng-option *ngFor="let item of subitems"
-                                                        [value]="item._id">{{item.subitem_hin}}
-                                                        :
-                                                        {{item.subitem_eng}} : {{item.subitem_roman ? item.subitem_roman
-                                                        : ''}}</ng-option>
-                                                </ng-select>
-                                                <div class="form-check mt-1">
-                                                    <input type="checkbox" class="form-check-input"
-                                                        id="itemOnlyCheckawknew" [(ngModel)]="filterBody.itemOnly"
-                                                        name="itemOnly">
-                                                    <label class="form-check-label mb-0" for="itemOnlyCheckawknew"
-                                                        style="cursor: pointer;"><small class="text-info fw-bold">Item
-                                                            Only (Subitem is Null)</small></label>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-3 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">Condition</label>
-                                                <!-- <ng-select class="custom" style="width: 100%;" placeholder="Select Product"
+                                    <div class="col-md-3 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Condition</label>
+                                            <!-- <ng-select class="custom" style="width: 100%;" placeholder="Select Product"
                                        [clearable]="true" [virtualScroll]="true" [multiple]="true"
                                        [closeOnSelect]="false" [(ngModel)]="filterBody.product_id" name="product_id"
                                        (change)="productSelected($event)">
@@ -243,126 +240,125 @@
                                           : ''}}
                                        </ng-option>
                                     </ng-select> -->
-                                                <ng-select class="custom mt-1" style="width: 100%;"
-                                                    placeholder="Select Condition" [clearable]="false"
-                                                    [virtualScroll]="true" [multiple]="true" [closeOnSelect]="false"
-                                                    [(ngModel)]="filterBody.condition_id" name="condition_id">
-                                                    <ng-option selected="selected" disabled value="">Select
-                                                        Condition</ng-option>
-                                                    <ng-option *ngFor="let item of conditions" [value]="item._id">
-                                                        {{item.list_name_hin}} :
-                                                        {{item.list_name_eng}} </ng-option>
-                                                </ng-select>
-                                            </div>
+                                            <ng-select class="custom mt-1" style="width: 100%;"
+                                                placeholder="Select Condition" [clearable]="false"
+                                                [virtualScroll]="true" [multiple]="true" [closeOnSelect]="false"
+                                                [(ngModel)]="filterBody.condition_id" name="condition_id">
+                                                <ng-option selected="selected" disabled value="">Select
+                                                    Condition</ng-option>
+                                                <ng-option *ngFor="let item of conditions" [value]="item._id">
+                                                    {{item.list_name_hin}} :
+                                                    {{item.list_name_eng}} </ng-option>
+                                            </ng-select>
                                         </div>
+                                    </div>
 
-                                        <div class="col-md-2 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">Date Range & Pkt No</label>
-                                                <input type="date" class="form-control mb-1" placeholder="From Date"
-                                                    [(ngModel)]="filterBody.date_from" name="date_from">
-                                                <input type="date" class="form-control mb-1" placeholder="To Date"
-                                                    [(ngModel)]="filterBody.date_to" name="date_to">
-                                                <input type="text" class="form-control mt-1" placeholder="Pkt No."
-                                                    [(ngModel)]="filterBody.pkt_num" name="pkt_num">
-                                            </div>
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Date Range & Pkt No</label>
+                                            <input type="date" class="form-control mb-1" placeholder="From Date"
+                                                [(ngModel)]="filterBody.date_from" name="date_from">
+                                            <input type="date" class="form-control mb-1" placeholder="To Date"
+                                                [(ngModel)]="filterBody.date_to" name="date_to">
+                                            <input type="text" class="form-control mt-1" placeholder="Pkt No."
+                                                [(ngModel)]="filterBody.pkt_num" name="pkt_num">
                                         </div>
+                                    </div>
 
-                                        <div class="col-md-2 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">State & MM</label>
-                                                <ng-select class="custom" style="width: 100%;"
-                                                    placeholder="Select State" [clearable]="true" [virtualScroll]="true"
-                                                    name="mm_state" [multiple]="true" [closeOnSelect]="true"
-                                                    [(ngModel)]="filterBody.mm_states" #state="ngModel">
-                                                    <ng-option *ngFor="let item of states" [value]="item._id">
-                                                        {{item.state_hin}} : {{item.state_eng}}</ng-option>
-                                                </ng-select>
-                                                <ng-select class="custom mt-1" style="width: 100%;" placeholder="MM"
-                                                    [clearable]="true" [virtualScroll]="true" name="mm_id"
-                                                    [multiple]="true" [closeOnSelect]="false"
-                                                    [(ngModel)]="filterBody.mm_id" #mm_id="ngModel">
-                                                    <ng-option *ngFor="let item of mms" [value]="item._id">
-                                                        {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
-                                                </ng-select>
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">State & MM</label>
+                                            <ng-select class="custom" style="width: 100%;" placeholder="Select State"
+                                                [clearable]="true" [virtualScroll]="true" name="mm_state"
+                                                [multiple]="true" [closeOnSelect]="true"
+                                                [(ngModel)]="filterBody.mm_states" #state="ngModel">
+                                                <ng-option *ngFor="let item of states" [value]="item._id">
+                                                    {{item.state_hin}} : {{item.state_eng}}</ng-option>
+                                            </ng-select>
+                                            <ng-select class="custom mt-1" style="width: 100%;" placeholder="MM"
+                                                [clearable]="true" [virtualScroll]="true" name="mm_id" [multiple]="true"
+                                                [closeOnSelect]="false" [(ngModel)]="filterBody.mm_id" #mm_id="ngModel">
+                                                <ng-option *ngFor="let item of mms" [value]="item._id">
+                                                    {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                            </ng-select>
 
-                                            </div>
                                         </div>
+                                    </div>
 
-                                        <div class="col-md-2 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">State & AJ MM</label>
-                                                <ng-select class="custom" style="width: 100%;"
-                                                    placeholder="Select State" [clearable]="true" [virtualScroll]="true"
-                                                    name="awk_mm_states" [multiple]="true" [closeOnSelect]="true"
-                                                    [(ngModel)]="filterBody.awk_mm_states" #state="ngModel">
-                                                    <ng-option *ngFor="let item of states" [value]="item._id">
-                                                        {{item.state_hin}} : {{item.state_eng}}</ng-option>
-                                                </ng-select>
-                                                <ng-select class="custom mt-1" style="width: 100%;"
-                                                    placeholder="Aawak MM" [clearable]="true" [virtualScroll]="true"
-                                                    name="aj_mm_id" [multiple]="true" [closeOnSelect]="false"
-                                                    [(ngModel)]="filterBody.aj_mm_id" #aj_mm_id="ngModel">
-                                                    <ng-option *ngFor="let item of mms" [value]="item._id">
-                                                        {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
-                                                </ng-select>
-                                            </div>
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">State & AJ MM</label>
+                                            <ng-select class="custom" style="width: 100%;" placeholder="Select State"
+                                                [clearable]="true" [virtualScroll]="true" name="awk_mm_states"
+                                                [multiple]="true" [closeOnSelect]="true"
+                                                [(ngModel)]="filterBody.awk_mm_states" #state="ngModel">
+                                                <ng-option *ngFor="let item of states" [value]="item._id">
+                                                    {{item.state_hin}} : {{item.state_eng}}</ng-option>
+                                            </ng-select>
+                                            <ng-select class="custom mt-1" style="width: 100%;" placeholder="Aawak MM"
+                                                [clearable]="true" [virtualScroll]="true" name="aj_mm_id"
+                                                [multiple]="true" [closeOnSelect]="false"
+                                                [(ngModel)]="filterBody.aj_mm_id" #aj_mm_id="ngModel">
+                                                <ng-option *ngFor="let item of mms" [value]="item._id">
+                                                    {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                                            </ng-select>
                                         </div>
+                                    </div>
 
 
-                                        <div class="col-md-2 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">Aawak & Jawak Type</label>
-                                                <ng-select class="custom" style="width: 100%;" placeholder="Aawak Type"
-                                                    [clearable]="false" [virtualScroll]="true" [multiple]="true"
-                                                    [closeOnSelect]="false" [(ngModel)]="filterBody.aawak_type_id"
-                                                    name="aawak_type_id">
-                                                    <ng-option selected="selected" disabled value="">Aawak Type
-                                                    </ng-option>
-                                                    <ng-option *ngFor="let item of aawak_types" [value]="item._id">
-                                                        {{item.list_name_hin}} : {{item.list_name_eng}}
-                                                    </ng-option>
-                                                </ng-select>
-                                                <ng-select class="custom mt-1" style="width: 100%;"
-                                                    placeholder="Aawak Type" [clearable]="false" [virtualScroll]="true"
-                                                    [multiple]="true" [closeOnSelect]="false"
-                                                    [(ngModel)]="filterBody.jawak_type_id" name="jawak_type_id">
-                                                    <ng-option selected="selected" disabled value="">Aawak Type
-                                                    </ng-option>
-                                                    <ng-option *ngFor="let item of jawak_types" [value]="item._id">
-                                                        {{item.list_name_hin}}{{item.list_name_eng ? ' : ' +
-                                                        item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' +
-                                                        item.list_name_roman : ''}}
-                                                    </ng-option>
-                                                </ng-select>
-                                            </div>
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Aawak & Jawak Type</label>
+                                            <ng-select class="custom" style="width: 100%;" placeholder="Aawak Type"
+                                                [clearable]="false" [virtualScroll]="true" [multiple]="true"
+                                                [closeOnSelect]="false" [(ngModel)]="filterBody.aawak_type_id"
+                                                name="aawak_type_id">
+                                                <ng-option selected="selected" disabled value="">Aawak Type
+                                                </ng-option>
+                                                <ng-option *ngFor="let item of aawak_types" [value]="item._id">
+                                                    {{item.list_name_hin}} : {{item.list_name_eng}}
+                                                </ng-option>
+                                            </ng-select>
+                                            <ng-select class="custom mt-1" style="width: 100%;" placeholder="Aawak Type"
+                                                [clearable]="false" [virtualScroll]="true" [multiple]="true"
+                                                [closeOnSelect]="false" [(ngModel)]="filterBody.jawak_type_id"
+                                                name="jawak_type_id">
+                                                <ng-option selected="selected" disabled value="">Aawak Type
+                                                </ng-option>
+                                                <ng-option *ngFor="let item of jawak_types" [value]="item._id">
+                                                    {{item.list_name_hin}}{{item.list_name_eng ? ' : ' +
+                                                    item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' +
+                                                    item.list_name_roman : ''}}
+                                                </ng-option>
+                                            </ng-select>
                                         </div>
+                                    </div>
 
-                                        <div class="col-md-2 mb-3">
-                                            <div class="form-group">
-                                                <label class="form-label">Nimitt</label>
-                                                <ng-select class="custom" style="width: 100%;" placeholder="Nimitt"
-                                                    [clearable]="false" [virtualScroll]="true" [multiple]="true"
-                                                    [closeOnSelect]="false" [(ngModel)]="filterBody.nimitt_id"
-                                                    name="nimitt_id">
-                                                    <ng-option selected="selected" disabled value="">Nimitt
-                                                    </ng-option>
-                                                    <ng-option *ngFor="let item of nimitts" [value]="item._id">
-                                                        {{item.nimitt_hin}} : {{item.nimitt_eng}} ({{item.state_hin}})
-                                                    </ng-option>
-                                                </ng-select>
-                                            </div>
+                                    <div class="col-md-2 mb-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Nimitt</label>
+                                            <ng-select class="custom" style="width: 100%;" placeholder="Nimitt"
+                                                [clearable]="false" [virtualScroll]="true" [multiple]="true"
+                                                [closeOnSelect]="false" [(ngModel)]="filterBody.nimitt_id"
+                                                name="nimitt_id">
+                                                <ng-option selected="selected" disabled value="">Nimitt
+                                                </ng-option>
+                                                <ng-option *ngFor="let item of nimitts" [value]="item._id">
+                                                    {{item.nimitt_hin}} : {{item.nimitt_eng}} ({{item.state_hin}})
+                                                </ng-option>
+                                            </ng-select>
                                         </div>
-                                        <div class="col-md-3 mb-3 text-center">
-                                            <button class="btn btn-primary submit mx-2" type="submit"
-                                                (click)="getFilteredAawakData()">Filter Aawak</button>
+                                    </div>
+                                    <div class="col-md-3 mb-3 text-center">
+                                        <button class="btn btn-primary submit mx-2" type="submit"
+                                            (click)="getFilteredAawakData()">Filter Aawak</button>
 
-                                            <button class="btn btn-primary submit mx-2" type="submit"
-                                                (click)="getFilteredJawakData()">Filter Jawak</button>
-                                            <!-- (click)="filterFormSubmit(filterForm.value)">Submit</button> -->
-                                        </div>
-                                        <div class="col-md-2 mb-3 text-center">
-                                            <button class="btn btn-outline-secondary submit mx-2" type="button" (click)="filterBody= {
+                                        <button class="btn btn-primary submit mx-2" type="submit"
+                                            (click)="getFilteredJawakData()">Filter Jawak</button>
+                                        <!-- (click)="filterFormSubmit(filterForm.value)">Submit</button> -->
+                                    </div>
+                                    <div class="col-md-2 mb-3 text-center">
+                                        <button class="btn btn-outline-secondary submit mx-2" type="button" (click)="filterBody= {
                                  type:'aawak',
                                  month:null,
                                  year:null,
@@ -380,104 +376,102 @@
                                  nimitt_id:[],
                                  itemOnly: false
                                };">Clear All</button>
-                                        </div>
                                     </div>
-                                </form>
-                            </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="row">
+            <div class="row">
 
-                    <div class="card-body" style="overflow: auto; flex-direction: column;">
-                        <div class="row">
-                            <div class="col-4 pt-2 d-flex align-items-center gap-1">
-                                <span id="tour-bulk-actions" class="d-inline-flex gap-1">
-                                    <span class="badge year-box cursor-pointer badge-outline-danger"
-                                        *ngIf="selectionService.getSelected('aawak-new').length > 0"
-                                        (click)="deleteMultiple()" title="Click to perform delete.">Delete
-                                        ({{selectionService.getSelected('aawak-new').length}})</span>
-                                    <span class="badge year-box cursor-pointer badge-outline-primary"
-                                        *ngIf="selectionService.getSelected('aawak-new').length > 0"
-                                        (click)="bulkEditMultiple()" title="Click to bulk edit.">Bulk Edit
-                                        ({{selectionService.getSelected('aawak-new').length}})</span>
-                                </span>
-                                <app-popover-year id="tour-year-badge" [selectedYear]="filterBody.year"
-                                    (yearChanged)="yearClick($event)"></app-popover-year>
-                            </div>
-                            <div class="col-8" *ngIf="aawakData.length">
-                                <pagination-controls class="pagi text-end" (pageChange)="getAawakPage(page = $event)"
-                                    [autoHide]="true">
-                                </pagination-controls>
-                            </div>
+                <div class="card-body" style="overflow: auto; flex-direction: column;">
+                    <div class="row">
+                        <div class="col-4 pt-2 d-flex align-items-center gap-1">
+                            <span id="tour-bulk-actions" class="d-inline-flex gap-1">
+                                <span class="badge year-box cursor-pointer badge-outline-danger"
+                                    *ngIf="selectionService.getSelected('aawak-new').length > 0"
+                                    (click)="deleteMultiple()" title="Click to perform delete.">Delete
+                                    ({{selectionService.getSelected('aawak-new').length}})</span>
+                                <span class="badge year-box cursor-pointer badge-outline-primary"
+                                    *ngIf="selectionService.getSelected('aawak-new').length > 0"
+                                    (click)="bulkEditMultiple()" title="Click to bulk edit.">Bulk Edit
+                                    ({{selectionService.getSelected('aawak-new').length}})</span>
+                            </span>
+                            <app-popover-year id="tour-year-badge" [selectedYear]="filterBody.year"
+                                (yearChanged)="yearClick($event)"></app-popover-year>
                         </div>
-                        <div class="table-container" appHorizontalScrollWithArrows [appTableSmartCheckbox]="'aawak-new'"
-                            [idField]="'temp_id'" [selectionData]="aawakData" [showCheckboxes]="true"
-                            [rowSelector]="'tbody > tr.main-row'">
-                            <table id="datatable-buttons"
-                                class="table table-sm table-hover dt-responsive table-sticky-header" #TABLE>
-                                <thead>
-                                    <tr>
-                                        <th style="width: 50px;">
-                                            No.
-                                            <!-- <input type="checkbox" id="hl_all" data-switch="none"
+                        <div class="col-8" *ngIf="aawakData.length">
+                            <pagination-controls class="pagi text-end" (pageChange)="getAawakPage(page = $event)"
+                                [autoHide]="true">
+                            </pagination-controls>
+                        </div>
+                    </div>
+                    <div class="table-container" appHorizontalScrollWithArrows [appTableSmartCheckbox]="'aawak-new'"
+                        [idField]="'temp_id'" [selectionData]="aawakData" [showCheckboxes]="true"
+                        [rowSelector]="'tbody > tr.main-row'">
+                        <table id="datatable-buttons"
+                            class="table table-sm table-hover dt-responsive table-sticky-header" #TABLE>
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">
+                                        No.
+                                        <!-- <input type="checkbox" id="hl_all" data-switch="none"
                                                 (change)="hlFilter($event.target)" />
                                             <label for="hl_all" class="chk-sm"></label> -->
-                                        </th>
-                                        <th style="width: 110px;">Manage</th>
-                                        <th style="width: 110px;">Voucher No</th>
-                                        <th style="width: 110px;" *ngIf="settings.aawak.pkt_num">Pkt No.</th>
-                                        <th style="width: 140px;" class="text-start ps-2">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <span>Date</span>
-                                                <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                    direction="right"
-                                                    [isOpen]="!!filterBody.date_from || !!filterBody.date_to || !!filterBody.date"
-                                                    (clear)="filterBody.date = null; filterBody.date_from = null; filterBody.date_to = null; getFilteredData()"
-                                                    triggerOn="click">
-                                                    <div style="width: 280px;">
-                                                        <label class="form-label mb-1"><small>Date From</small></label>
-                                                        <input type="date" class="form-control form-control-sm mb-2"
-                                                            [(ngModel)]="filterBody.date_from"
-                                                            (change)="getFilteredData()">
-                                                        <label class="form-label mb-1"><small>Date To</small></label>
-                                                        <input type="date" class="form-control form-control-sm"
-                                                            [(ngModel)]="filterBody.date_to"
-                                                            (change)="getFilteredData()">
-                                                    </div>
-                                                </app-popover-filter>
-                                            </div>
-                                        </th>
-                                        <th style="width: 250px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
-                                        <th style="width: 250px;">Aawak Mm</th>
-                                        <th style="width: 300px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
-                                        <th style="width: 350px;" *ngIf="settings.aawak.description">Description</th>
-                                        <th style="width: 250px;" *ngIf="settings.aawak.nimitt_id">Nimitt</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <ng-container
-                                        *ngFor="let data of aawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
-                                        <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
-                                            aria-expanded="true" [attr.aria-controls]="'collapseExample-'+i"
-                                            class="main-row">
-                                            <td>
-                                                {{itemsPerPage * (page-1) + i+1}}
-                                                <!-- <input type="checkbox" [(ngModel)]="data.hl" id="{{'hl_'+data._id}}"
+                                    </th>
+                                    <th style="width: 110px;">Manage</th>
+                                    <th style="width: 110px;">Voucher No</th>
+                                    <th style="width: 110px;" *ngIf="settings.aawak.pkt_num">Pkt No.</th>
+                                    <th style="width: 140px;" class="text-start ps-2">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Date</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="right"
+                                                [isOpen]="!!filterBody.date_from || !!filterBody.date_to || !!filterBody.date"
+                                                (clear)="filterBody.date = null; filterBody.date_from = null; filterBody.date_to = null; getFilteredData()"
+                                                triggerOn="click">
+                                                <div style="width: 280px;">
+                                                    <label class="form-label mb-1"><small>Date From</small></label>
+                                                    <input type="date" class="form-control form-control-sm mb-2"
+                                                        [(ngModel)]="filterBody.date_from" (change)="getFilteredData()">
+                                                    <label class="form-label mb-1"><small>Date To</small></label>
+                                                    <input type="date" class="form-control form-control-sm"
+                                                        [(ngModel)]="filterBody.date_to" (change)="getFilteredData()">
+                                                </div>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th style="width: 250px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
+                                    <th style="width: 250px;">Aawak Mm</th>
+                                    <th style="width: 300px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
+                                    <th style="width: 350px;" *ngIf="settings.aawak.description">Description</th>
+                                    <th style="width: 250px;" *ngIf="settings.aawak.nimitt_id">Nimitt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container
+                                    *ngFor="let data of aawakData | search: term | paginate:{itemsPerPage:itemsPerPage,currentPage:page,totalItems:total_count}; let i=index">
+                                    <tr data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseExample-'+i"
+                                        aria-expanded="true" [attr.aria-controls]="'collapseExample-'+i"
+                                        class="main-row">
+                                        <td>
+                                            {{itemsPerPage * (page-1) + i+1}}
+                                            <!-- <input type="checkbox" [(ngModel)]="data.hl" id="{{'hl_'+data._id}}"
                                                     data-switch="none" (change)="hlChanged(data)" />
                                                 <label for="{{'hl_'+data._id}}" class="chk-sm"></label> -->
-                                            </td>
-                                            <td [id]="i === 0 ? 'tour-row-manage' : null">
-                                                <div class="d-flex justify-content-between mb-1">
-                                                    <button class="btn btn-sm btn-primary" type="button"
-                                                        (click)="edit(data)"><i class="uil uil-pen"></i></button><br>
-                                                    <button class="btn btn-sm btn-danger" type="button"
-                                                        (click)="delete(i,data.voucher_no)" *ngIf="!data.is_auto_pd"><i
-                                                            class="uil-trash"></i></button>
-                                                </div>
+                                        </td>
+                                        <td [id]="i === 0 ? 'tour-row-manage' : null">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <button class="btn btn-sm btn-primary" type="button"
+                                                    (click)="edit(data)"><i class="uil uil-pen"></i></button><br>
+                                                <button class="btn btn-sm btn-danger" type="button"
+                                                    (click)="delete(i,data.voucher_no)" *ngIf="!data.is_auto_pd"><i
+                                                        class="uil-trash"></i></button>
+                                            </div>
 
-                                                <!-- <div class="d-flex justify-content-between mb-1">
+                                            <!-- <div class="d-flex justify-content-between mb-1">
                                                     <button *ngIf="data.remaining_qty > 0" class="btn btn-sm btn-warning"
                                                         (click)="addJawak(data)">
                                                         <i class="mdi mdi-plus noti-icon"></i>
@@ -487,189 +481,187 @@
                                                         <i class="dripicons-view-list noti-icon"></i>
                                                     </button>
                                                 </div> -->
-                                            </td>
+                                        </td>
 
-                                            <td>{{data.voucher_no?data.voucher_no:'-'}}</td>
-                                            <td *ngIf="settings.aawak.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
-                                            <td>{{data.date | date:'dd-MM-yyyy'}}</td>
-                                            <td *ngIf="auth.webUser.dept_id != 2">
-                                                <span>{{data.mm_hin}} - {{data.mm_code}}</span> <br />
-                                                <small class="text-muted">{{data.mm_eng}}</small>
-                                            </td>
-                                            <td>
-                                                <div *ngIf="data.aawak_mm_id">
-                                                    <span>{{data.aawak_mm_hin}} - {{data.aawak_mm_code}}</span> <br />
-                                                    <small class="text-muted">{{data.aawak_mm_eng}}</small>
-                                                </div>
-                                                <span *ngIf="!data.aawak_mm_id">-</span>
-                                            </td>
-                                            <td *ngIf="settings.aawak.pbk_id">
-                                                <div *ngIf="data.pbk_id">
-                                                    <span>{{data.roll_no ? data.roll_no : '___'}} -
-                                                        {{data.pbk_hin}}</span> <br />
-                                                    <small class="text-muted">{{data.relation}} {{data.relative_name ? "
-                                                        - "+data.relative_name: ''}}</small>
-                                                </div>
-                                                <span *ngIf="!data.pbk_id">-</span>
-                                            </td>
-                                            <td *ngIf="settings.aawak.description">
-                                                {{data.description?data.description:'-'}}
-                                            </td>
-                                            <td *ngIf="settings.aawak.nimitt_id">
-                                                {{data.nimitt_id?data.nimitt_hin:'-'}}<br />
-                                                {{data.nimitt_id? '(' + data.nimitt_state_hin + ')': ''}}
-                                            </td>
-                                        </tr>
-                                        <ng-container *ngIf="data.aawaks && data.aawaks.length > 0">
-                                            <tr class="collapse show ribbon-box">
-                                                <td style="border: none;"></td>
-                                                <td colspan="100" class="sub-row">
-                                                    <table
-                                                        class="table-sm table-bordered table-hover dt-responsive w-100">
-                                                        <tr class="aawak-header">
-                                                            <th style="width: 80px;">Manage</th>
-                                                            <th *ngIf="settings.aawak.lot_no">Lot No</th>
-                                                            <th>Item - Subitem</th>
-                                                            <th *ngIf="settings.aawak.product_id">Product</th>
-                                                            <th *ngIf="settings.aawak.condition_id">Condition</th>
-                                                            <th *ngIf="settings.aawak.company_name">Company</th>
-                                                            <th>Quantity</th>
-                                                            <th *ngIf="settings.aawak.actual_amt">Actual Amt</th>
-                                                            <th>Usage List</th>
-                                                            <th *ngIf="settings.aawak.item_detail">Item Detail</th>
-                                                            <th *ngIf="settings.aawak.document">Images</th>
-                                                            <th>Flags</th>
-                                                            <th *ngIf="settings.aawak.enz">Enzyme Container Details</th>
-
-                                                        </tr>
-                                                        <tr *ngFor="let awk of data.aawaks; let j = index;"
-                                                            class="aawak-row" title="Click on Row to Edit"
-                                                            [ngClass]="{'hl': awk.hl}">
-                                                            <td class="text-center p-1">
-                                                                <div
-                                                                    class="d-flex align-items-center justify-content-between p-0 px-1">
-                                                                    <span class="text-muted"
-                                                                        style="font-size: 10px;">#{{j+1}}</span>
-                                                                    <i class="uil uil-trash text-danger p-0 cursor-pointer"
-                                                                        title="Delete Row"
-                                                                        (click)="deleteOne(i, j, awk._id)"></i>
-                                                                </div>
-                                                                <div
-                                                                    class="d-flex align-items-center justify-content-center p-0 pt-1">
-                                                                    <i class="mdi mdi-plus i-outline-warning cursor-pointer me-1"
-                                                                        title="Add Jawak" *ngIf="awk.remaining_qty > 0"
-                                                                        style="font-size: 12px;"
-                                                                        (click)=" addJawak(awk)"> Jawak </i>
-
-                                                                    <button *ngIf="awk.jawak_detail?.length > 0"
-                                                                        class="btn btn-sm btn-outline-warning p-0 py-1 lh-1 d-flex align-items-center justify-content-center"
-                                                                        style="font-size: 10px; min-width: 48px; border-radius: 3px;"
-                                                                        (click)="showJawak(awk)"
-                                                                        [title]="'Total Jawak Qty: ' + getJawakQty(awk)">
-                                                                        <span class="px-1"
-                                                                            style="font-weight: 600;">J-{{awk.jawak_detail.length}}</span>
-                                                                        <span class="px-1"
-                                                                            style="border-left: 1px solid rgba(255,193,7,0.3); font-weight: 600;">Q-{{getJawakQty(awk)}}</span>
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                            <td *ngIf="settings.aawak.lot_no">{{awk.lot_no ? awk.lot_no
-                                                                :
-                                                                '-'}}</td>
-                                                            <td>
-                                                                <span>{{awk.item_hin}} {{awk.subitem_id ? ' : ' +
-                                                                    awk.subitem_hin : ''}}</span> <br />
-                                                                <small class="text-muted">{{awk.item_eng}}
-                                                                    {{awk.subitem_id ? ' : ' +
-                                                                    awk.subitem_eng : ''}}</small>
-                                                            </td>
-                                                            <td *ngIf="settings.aawak.product_id">
-                                                                {{awk.product_id ? (awk.product_code ? awk.product_code
-                                                                :
-                                                                '') : ''}} <br />
-                                                                {{(awk.product_id ? (awk.sr_num ? awk.sr_num : '') :
-                                                                '')}}
-                                                            </td>
-                                                            <td *ngIf="settings.aawak.condition_id">
-                                                                <div *ngIf="awk.condition_id">
-                                                                    <span>{{awk.condition_hin}}</span> <br />
-                                                                    <small
-                                                                        class="text-muted">{{awk.condition_eng}}</small>
-                                                                </div>
-                                                            </td>
-                                                            <td *ngIf="settings.aawak.company_name">
-                                                                {{awk.company_name ? awk.company_name : ''}}
-                                                            </td>
-                                                            <td>
-                                                                {{awk.qty}} {{awk.unit_short}} <br />
-                                                                <span style="font-weight:bold; color: red;"
-                                                                    *ngIf="awk.remaining_qty != 0">
-                                                                    बचत: {{awk.remaining_qty}}
-                                                                </span>
-                                                            </td>
-                                                            <td *ngIf="settings.aawak.actual_amt">
-                                                                @ {{awk.rate?awk.rate:'-'}} <br>
-                                                                = {{awk.actual_amt?awk.actual_amt:'-'}}
-                                                            </td>
-                                                            <td>
-                                                                {{awk.usage_list_id ? awk.list_name_hin : ''}}
-                                                            </td>
-                                                            <td *ngIf="settings.aawak.item_detail">
-                                                                 <div style="max-height: 80px; overflow-y: auto; word-break: break-word;" [title]="awk.item_detail || ''">
-                                                                    {{awk.item_detail?awk.item_detail:'-'}}
-                                                                 </div>
-                                                             </td>
-                                                            <td *ngIf="settings.aawak.document"><img
-                                                                    *ngIf="awk.document && awk.document.images"
-                                                                    (click)="showImages(awk)"
-                                                                    [src]="baseurl + awk.document.images[0]"
-                                                                    height="50px"
-                                                                    style="cursor: pointer; border-radius: 10px;"></td>
-                                                            <td>Flags</td>
-                                                            <td class="d-flex justify-content-between">
-                                                                <div>
-                                                                    <span class="badge badge-outline-secondary">Awk
-                                                                        Src</span>
-                                                                    {{awk.enz && awk.enz.container_aawak_source_id?
-                                                                    awk.enz.container_aawak_source_hin:'-'}} <br />
-                                                                    <span class="badge badge-outline-secondary">Enz
-                                                                        No</span> {{awk.enz &&
-                                                                    awk.enz.container_enz_no
-                                                                    ?
-                                                                    awk.enz.container_enz_no : ''}}
-                                                                </div>
-                                                                <div>
-                                                                    <span
-                                                                        class="badge badge-outline-secondary">Capacity</span>
-                                                                    {{awk.enz && awk.enz.container_capacity?
-                                                                    awk.enz.container_capacity + " Ltr":'-'}} <br />
-                                                                    <span
-                                                                        class="badge badge-outline-secondary">Quantity</span>
-                                                                    {{awk.enz && awk.enz.container_qty ?
-                                                                    awk.enz.container_qty + "Ltr": ''}}
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </ng-container>
-                                    </ng-container>
-                                </tbody>
-                                <tbody *ngIf="!aawakData || !aawakData.length">
-                                    <tr>
-                                        <td colspan="100%" class="text-center text-muted py-4">
-                                            <h5 class="mb-0"><i class="uil uil-folder-open text-muted me-2"></i>No Data Found</h5>
+                                        <td>{{data.voucher_no?data.voucher_no:'-'}}</td>
+                                        <td *ngIf="settings.aawak.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
+                                        <td>{{data.date | date:'dd-MM-yyyy'}}</td>
+                                        <td *ngIf="auth.webUser.dept_id != 2">
+                                            <span>{{data.mm_hin}} - {{data.mm_code}}</span> <br />
+                                            <small class="text-muted">{{data.mm_eng}}</small>
+                                        </td>
+                                        <td>
+                                            <div *ngIf="data.aawak_mm_id">
+                                                <span>{{data.aawak_mm_hin}} - {{data.aawak_mm_code}}</span> <br />
+                                                <small class="text-muted">{{data.aawak_mm_eng}}</small>
+                                            </div>
+                                            <span *ngIf="!data.aawak_mm_id">-</span>
+                                        </td>
+                                        <td *ngIf="settings.aawak.pbk_id">
+                                            <div *ngIf="data.pbk_id">
+                                                <span>{{data.roll_no ? data.roll_no : '___'}} -
+                                                    {{data.pbk_hin}}</span> <br />
+                                                <small class="text-muted">{{data.relation}} {{data.relative_name ? "
+                                                    - "+data.relative_name: ''}}</small>
+                                            </div>
+                                            <span *ngIf="!data.pbk_id">-</span>
+                                        </td>
+                                        <td *ngIf="settings.aawak.description">
+                                            {{data.description?data.description:'-'}}
+                                        </td>
+                                        <td *ngIf="settings.aawak.nimitt_id">
+                                            {{data.nimitt_id?data.nimitt_hin:'-'}}<br />
+                                            {{data.nimitt_id? '(' + data.nimitt_state_hin + ')': ''}}
                                         </td>
                                     </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                                    <ng-container *ngIf="data.aawaks && data.aawaks.length > 0">
+                                        <tr class="collapse show ribbon-box">
+                                            <td style="border: none;"></td>
+                                            <td colspan="100" class="sub-row">
+                                                <table class="table-sm table-bordered table-hover dt-responsive w-100">
+                                                    <tr class="aawak-header">
+                                                        <th style="width: 80px;">Manage</th>
+                                                        <th *ngIf="settings.aawak.lot_no">Lot No</th>
+                                                        <th>Item - Subitem</th>
+                                                        <th *ngIf="settings.aawak.product_id">Product</th>
+                                                        <th *ngIf="settings.aawak.condition_id">Condition</th>
+                                                        <th *ngIf="settings.aawak.company_name">Company</th>
+                                                        <th>Quantity</th>
+                                                        <th *ngIf="settings.aawak.actual_amt">Actual Amt</th>
+                                                        <th>Usage List</th>
+                                                        <th *ngIf="settings.aawak.item_detail">Item Detail</th>
+                                                        <th *ngIf="settings.aawak.document">Images</th>
+                                                        <th>Flags</th>
+                                                        <th *ngIf="settings.aawak.enz">Enzyme Container Details</th>
+
+                                                    </tr>
+                                                    <tr *ngFor="let awk of data.aawaks; let j = index;"
+                                                        class="aawak-row" title="Click on Row to Edit"
+                                                        [ngClass]="{'hl': awk.hl}">
+                                                        <td class="text-center p-1">
+                                                            <div
+                                                                class="d-flex align-items-center justify-content-between p-0 px-1">
+                                                                <span class="text-muted"
+                                                                    style="font-size: 10px;">#{{j+1}}</span>
+                                                                <i class="uil uil-trash text-danger p-0 cursor-pointer"
+                                                                    title="Delete Row"
+                                                                    (click)="deleteOne(i, j, awk._id)"></i>
+                                                            </div>
+                                                            <div
+                                                                class="d-flex align-items-center justify-content-center p-0 pt-1">
+                                                                <i class="mdi mdi-plus i-outline-warning cursor-pointer me-1"
+                                                                    title="Add Jawak" *ngIf="awk.remaining_qty > 0"
+                                                                    style="font-size: 12px;" (click)=" addJawak(awk)">
+                                                                    Jawak </i>
+
+                                                                <button *ngIf="awk.jawak_detail?.length > 0"
+                                                                    class="btn btn-sm btn-outline-warning p-0 py-1 lh-1 d-flex align-items-center justify-content-center"
+                                                                    style="font-size: 10px; min-width: 48px; border-radius: 3px;"
+                                                                    (click)="showJawak(awk)"
+                                                                    [title]="'Total Jawak Qty: ' + getJawakQty(awk)">
+                                                                    <span class="px-1"
+                                                                        style="font-weight: 600;">J-{{awk.jawak_detail.length}}</span>
+                                                                    <span class="px-1"
+                                                                        style="border-left: 1px solid rgba(255,193,7,0.3); font-weight: 600;">Q-{{getJawakQty(awk)}}</span>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                        <td *ngIf="settings.aawak.lot_no">{{awk.lot_no ? awk.lot_no
+                                                            :
+                                                            '-'}}</td>
+                                                        <td>
+                                                            <span>{{awk.item_hin}} {{awk.subitem_id ? ' : ' +
+                                                                awk.subitem_hin : ''}}</span> <br />
+                                                            <small class="text-muted">{{awk.item_eng}}
+                                                                {{awk.subitem_id ? ' : ' +
+                                                                awk.subitem_eng : ''}}</small>
+                                                        </td>
+                                                        <td *ngIf="settings.aawak.product_id">
+                                                            {{awk.product_id ? (awk.product_code ? awk.product_code
+                                                            :
+                                                            '') : ''}} <br />
+                                                            {{(awk.product_id ? (awk.sr_num ? awk.sr_num : '') :
+                                                            '')}}
+                                                        </td>
+                                                        <td *ngIf="settings.aawak.condition_id">
+                                                            <div *ngIf="awk.condition_id">
+                                                                <span>{{awk.condition_hin}}</span> <br />
+                                                                <small class="text-muted">{{awk.condition_eng}}</small>
+                                                            </div>
+                                                        </td>
+                                                        <td *ngIf="settings.aawak.company_name">
+                                                            {{awk.company_name ? awk.company_name : ''}}
+                                                        </td>
+                                                        <td>
+                                                            {{awk.qty}} {{awk.unit_short}} <br />
+                                                            <span style="font-weight:bold; color: red;"
+                                                                *ngIf="awk.remaining_qty != 0">
+                                                                बचत: {{awk.remaining_qty}}
+                                                            </span>
+                                                        </td>
+                                                        <td *ngIf="settings.aawak.actual_amt">
+                                                            @ {{awk.rate?awk.rate:'-'}} <br>
+                                                            = {{awk.actual_amt?awk.actual_amt:'-'}}
+                                                        </td>
+                                                        <td>
+                                                            {{awk.usage_list_id ? awk.list_name_hin : ''}}
+                                                        </td>
+                                                        <td *ngIf="settings.aawak.item_detail">
+                                                            <div style="max-height: 80px; overflow-y: auto; word-break: break-word;"
+                                                                [title]="awk.item_detail || ''">
+                                                                {{awk.item_detail?awk.item_detail:'-'}}
+                                                            </div>
+                                                        </td>
+                                                        <td *ngIf="settings.aawak.document"><img
+                                                                *ngIf="awk.document && awk.document.images"
+                                                                (click)="showImages(awk)"
+                                                                [src]="baseurl + awk.document.images[0]" height="50px"
+                                                                style="cursor: pointer; border-radius: 10px;"></td>
+                                                        <td>Flags</td>
+                                                        <td class="d-flex justify-content-between">
+                                                            <div>
+                                                                <span class="badge badge-outline-secondary">Awk
+                                                                    Src</span>
+                                                                {{awk.enz && awk.enz.container_aawak_source_id?
+                                                                awk.enz.container_aawak_source_hin:'-'}} <br />
+                                                                <span class="badge badge-outline-secondary">Enz
+                                                                    No</span> {{awk.enz &&
+                                                                awk.enz.container_enz_no
+                                                                ?
+                                                                awk.enz.container_enz_no : ''}}
+                                                            </div>
+                                                            <div>
+                                                                <span
+                                                                    class="badge badge-outline-secondary">Capacity</span>
+                                                                {{awk.enz && awk.enz.container_capacity?
+                                                                awk.enz.container_capacity + " Ltr":'-'}} <br />
+                                                                <span
+                                                                    class="badge badge-outline-secondary">Quantity</span>
+                                                                {{awk.enz && awk.enz.container_qty ?
+                                                                awk.enz.container_qty + "Ltr": ''}}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
+                                </ng-container>
+                            </tbody>
+                            <tbody *ngIf="!aawakData || !aawakData.length">
+                                <tr>
+                                    <td colspan="100%" class="text-center text-muted py-4">
+                                        <h5 class="mb-0"><i class="uil uil-folder-open text-muted me-2"></i>No Data
+                                            Found</h5>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <pagination-controls class="pagi text-center" (pageChange)="getaawakData(page = $event)"
-                        [autoHide]="true" *ngIf="aawakData && aawakData.length">
-                    </pagination-controls>
                 </div>
+                <pagination-controls class="pagi text-center" (pageChange)="getaawakData(page = $event)"
+                    [autoHide]="true" *ngIf="aawakData && aawakData.length">
+                </pagination-controls>
             </div>
         </div>
     </div>

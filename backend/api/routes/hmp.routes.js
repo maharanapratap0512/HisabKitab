@@ -82,7 +82,7 @@ router.post('/batch/export-pdf/:dept_id', async (req, res, next) => {
                 if (batch.outputs && batch.outputs.length > 0) {
                     for (const out of batch.outputs) {
                         if (out.aawak_ref_id) {
-                            out.jawaks = jawakTable.getAll({ aawak_ref_id: out.aawak_ref_id, active: 1 });
+                            out.jawaks = jawakTable.getAll(`(jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${out.aawak_ref_id}) OR jawak.aawak_ref_id = ${out.aawak_ref_id}) AND jawak.active = 1`);
                         } else {
                             out.jawaks = [];
                         }

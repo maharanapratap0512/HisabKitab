@@ -149,19 +149,66 @@ function getBatches({ dept_id, mm_id, recipe_id, item_id, date, date_from, date_
 
     for (const batch of result) {
         injectSubitemList(batch.inputs || [], subitemListMap);
-        injectSubitemList(batch.outputs || [], subitemListMap);
+        if (batch.inputs && batch.inputs.length > 0) {
+            for (const inp of batch.inputs) {
+                if (inp.jawak_ref_id) {
+                    const jwkObj = jawak.getById(inp.jawak_ref_id);
+                    if (jwkObj) {
+                        inp.aawak_ref_id = jwkObj.aawak_ref_id || null;
+                        const rajRows = db.prepare(
+                            `SELECT raj.*, awk.lot_no, awk.pkt_num, awk.remaining_qty,
+                                    (SELECT item_hin FROM item WHERE item._id = awk.item_id) as item_hin
+                             FROM rel_aawak_jawak raj
+                             LEFT JOIN aawak awk ON awk._id = raj.aawak_id
+                             WHERE raj.jawak_id = ?`
+                        ).all(inp.jawak_ref_id);
+
+                        if (rajRows && rajRows.length > 0) {
+                            inp.aawak_splits = rajRows.map(r => ({
+                                rel_id: r._id,
+                                aawak_id: r.aawak_id,
+                                jawak_id: r.jawak_id,
+                                split_qty: Number(r.is_split === 1 && r.split_qty !== null ? r.split_qty : r.qty),
+                                qty: Number(r.qty),
+                                is_split: r.is_split,
+                                lot_no: r.lot_no,
+                                pkt_num: r.pkt_num,
+                                remaining_qty: r.remaining_qty,
+                                item_hin: r.item_hin,
+                                aawak_obj: {
+                                    _id: r.aawak_id,
+                                    lot_no: r.lot_no,
+                                    pkt_num: r.pkt_num,
+                                    remaining_qty: r.remaining_qty
+                                }
+                            }));
+                            if (!inp.aawak_ref_id) {
+                                inp.aawak_ref_id = rajRows[0].aawak_id;
+                            }
+                        } else if (jwkObj.aawak_ref_id) {
+                            inp.aawak_splits = [{
+                                aawak_id: jwkObj.aawak_ref_id,
+                                split_qty: Number(inp.qty),
+                                qty: Number(inp.qty)
+                            }];
+                        } else {
+                            inp.aawak_splits = [];
+                        }
+                    }
+                } else {
+                    inp.aawak_splits = inp.aawak_splits || [];
+                }
+            }
+        }
         if (batch.outputs && batch.outputs.length > 0) {
             for (const out of batch.outputs) {
                 if (out.aawak_ref_id) {
                     const aawak_detail = aawak.getById(out.aawak_ref_id);
+                    if (aawak_detail) {
+                        const conditionString = `(jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${out.aawak_ref_id}) OR jawak.aawak_ref_id = ${out.aawak_ref_id})`;
+                        aawak_detail.jawak_detail = jawak.getAll(conditionString);
+                    }
                     out.aawak_detail = aawak_detail;
-                    // if (aawak) {
-                    //     aawak.jawak_detail = jawak.getAll({ aawak_ref_id: out.aawak_ref_id });
-                    //     out.aawak_detail = aawak;
-                    //     out.jawak_detail = aawak.jawak_detail;
-                    // } else {
-                    //     out.jawak_detail = [];
-                    // }
                 } else {
                     out.aawak_detail = null;
                 }
@@ -238,7 +285,18 @@ async function insertUpdateBatch(data) {
 
                 let jwk = Fn.tbInterface.getJawakFromHmpInput(data, inp);
                 jwk.aawak_source_id = inp.aawak_source_id || null;
-                jwk.aawak_ref_id = inp.aawak_ref_id || null;
+
+                if (Array.isArray(inp.aawak_splits) && inp.aawak_splits.length > 0) {
+                    jwk.aawak_splits = inp.aawak_splits;
+                    const primaryId = inp.aawak_splits[0].aawak_id || inp.aawak_splits[0]._id;
+                    jwk.aawak_ref_id = inp.aawak_ref_id || primaryId || null;
+                } else if (inp.aawak_ref_id) {
+                    jwk.aawak_ref_id = inp.aawak_ref_id;
+                    jwk.aawak_splits = [{ aawak_id: inp.aawak_ref_id, split_qty: inp.qty, qty: inp.qty }];
+                } else {
+                    jwk.aawak_ref_id = null;
+                    jwk.aawak_splits = [];
+                }
 
                 let jwkExists = inp.jawak_ref_id ? await Fn.getById('jawak', inp.jawak_ref_id) : null;
                 if (inp.jawak_ref_id && jwkExists) {
@@ -287,6 +345,9 @@ async function insertUpdateBatch(data) {
             if (hasJawaks) {
                 for (let jwk of out.jawak_detail) {
                     jwk.aawak_ref_id = out.aawak_ref_id;
+                    if (out.aawak_ref_id) {
+                        jwk.aawak_splits = [{ aawak_id: out.aawak_ref_id, split_qty: jwk.qty, qty: jwk.qty }];
+                    }
                     if (isNewBatch) {
                         delete jwk._id;
                     }

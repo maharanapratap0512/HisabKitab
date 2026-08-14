@@ -22,11 +22,14 @@
 
             <div class="d-flex align-items-center gap-1 text-truncate cursor-pointer flex-fill me-1"
                 (click)="openSplitModal($event)" title="Click to view/edit allocation">
-                <span class="badge bg-warning text-dark fw-bold font-size-11" *ngIf="selectedSplitsData && selectedSplitsData.length > 1">
+                <span class="badge bg-warning text-dark fw-bold font-size-11"
+                    *ngIf="selectedSplitsData && selectedSplitsData.length > 1">
                     🔀 {{selectedSplitsData.length}} Aawaks ({{totalSplitQty}})
                 </span>
-                <span class="badge bg-success text-white fw-bold font-size-11" *ngIf="selectedSplitsData && selectedSplitsData.length === 1">
-                    🔗 {{selectedSplitsData[0].item_hin || selectedSplitsData[0].aawak_obj?.item_hin || '1 Aawak'}} ({{totalSplitQty}})
+                <span class="badge bg-success text-white fw-bold font-size-11"
+                    *ngIf="selectedSplitsData && selectedSplitsData.length === 1">
+                    🔗 {{selectedSplitsData[0].item_hin || selectedSplitsData[0].aawak_obj?.item_hin || '1 Aawak'}}
+                    ({{totalSplitQty}})
                 </span>
                 <span class="badge bg-success text-white fw-bold font-size-11"
                     *ngIf="(!selectedSplitsData || selectedSplitsData.length === 0) && selectedValue">
@@ -51,6 +54,52 @@
         </div>
     </ng-container>
 
+    <!-- Compact Mode Trigger Bar (Minimal UI for HMP Modern Form) -->
+    <ng-container *ngIf="mode === 'compact'">
+        <!-- Case A: No Aawak selected yet -->
+        <button type="button" *ngIf="!selectedValue && (!selectedSplitsData || selectedSplitsData.length === 0)"
+            class="btn btn-xs btn-outline-warning text-dark border-warning fw-semibold d-inline-flex align-items-center justify-content-center px-2 py-1 shadow-sm text-nowrap"
+            style="font-size: 11px; border-radius: 4px; line-height: 1.2;" [disabled]="readonly"
+            (mousedown)="$event.preventDefault()" (click)="openSplitModal($event)" title="Select Ref Aawak">
+            <i class="uil uil-share-alt me-1 text-warning font-size-12"></i>
+            <span>Aawak</span>
+        </button>
+
+        <!-- Case B: Aawak(s) linked -->
+        <div *ngIf="selectedValue || (selectedSplitsData && selectedSplitsData.length > 0)"
+            class="linked-aawak-card d-inline-flex align-items-center justify-content-between p-0 px-1 m-0 rounded border border-warning shadow-sm text-nowrap"
+            style="font-size: 10px; background-color: var(--bs-card-bg, var(--bs-body-bg)); color: var(--bs-body-color); line-height: 1.1; min-height: 22px;">
+
+            <div class="d-flex align-items-center gap-1 cursor-pointer me-1 text-truncate"
+                (click)="openSplitModal($event)"
+                [title]="'Linked Aawak (Qty: ' + totalSplitQty + '). Click to edit allocation.'">
+                <span class="badge bg-warning text-dark fw-bold" style="font-size: 10px; padding: 1px 3px;"
+                    *ngIf="selectedSplitsData && selectedSplitsData.length > 1">
+                    🔀 {{selectedSplitsData.length}} ({{totalSplitQty}})
+                </span>
+                <span class="badge bg-success text-white fw-bold" style="font-size: 10px; padding: 1px 3px;"
+                    *ngIf="selectedSplitsData && selectedSplitsData.length === 1">
+                    🔗 ({{totalSplitQty}})
+                </span>
+                <span class="badge bg-success text-white fw-bold" style="font-size: 10px; padding: 1px 3px;"
+                    *ngIf="(!selectedSplitsData || selectedSplitsData.length === 0) && selectedValue">
+                    🔗 Aawak
+                </span>
+            </div>
+
+            <div class="d-flex align-items-center gap-1 flex-shrink-0" *ngIf="!readonly">
+                <button type="button" class="btn btn-xs btn-outline-warning text-dark p-0" title="Edit Allocation"
+                    (click)="openSplitModal($event)" style="padding: 0px 2px !important; line-height: 1;">
+                    <i class="uil uil-pen" style="font-size: 10px;"></i>
+                </button>
+                <button type="button" class="btn btn-xs btn-outline-danger p-0" title="Clear Allocation"
+                    (click)="clearAllSelectionsAndSave($event)" style="padding: 0px 2px !important; line-height: 1;">
+                    <i class="uil uil-times" style="font-size: 10px;"></i>
+                </button>
+            </div>
+        </div>
+    </ng-container>
+
     <!-- Tiny Mode Trigger Bar (For compact table cells) -->
     <ng-container *ngIf="mode === 'tiny'">
         <div class="tiny-overlay d-flex align-items-center cursor-pointer" [class.ref-updated]="isJustUpdated"
@@ -58,7 +107,8 @@
             <i class="uil" [ngClass]="{
                 'uil-check-circle text-success': selectedValue || (selectedSplitsData && selectedSplitsData.length > 0),
                 'uil-link-h text-muted': !selectedValue && (!selectedSplitsData || selectedSplitsData.length === 0)
-            }" style="font-size: 18px;" [title]="(selectedValue || (selectedSplitsData && selectedSplitsData.length > 0)) ? 'Linked to Aawak' : 'Link Aawak'"></i>
+            }" style="font-size: 18px;"
+                [title]="(selectedValue || (selectedSplitsData && selectedSplitsData.length > 0)) ? 'Linked to Aawak' : 'Link Aawak'"></i>
         </div>
     </ng-container>
 
