@@ -84,14 +84,33 @@ export class ReportItemLedgerComponent implements OnInit {
     // The items will only be auto-selected when Generate Report is clicked and the items list is empty.
   }
 
+  getItemCategories(item: any): any[] {
+    if (!item || !item.categories || !Array.isArray(item.categories)) return [];
+    return item.categories.filter((c: any) => c && c._id);
+  }
+
+  getSubitemCategories(subitem: any, parentItem: any): any[] {
+    if (!subitem) return [];
+    let subCats = subitem.categories && Array.isArray(subitem.categories)
+      ? subitem.categories.filter((c: any) => c && c._id)
+      : [];
+    if (subCats.length > 0) {
+      return subCats;
+    }
+    return this.getItemCategories(parentItem);
+  }
+
   getCategoryItems(categoryId: any): string[] {
     let matchingIds: string[] = [];
     for (let item of this.items) {
-      let itemMatches = item.categories && item.categories.some((c: any) => c._id === categoryId);
+      let itemCats = this.getItemCategories(item);
+      let itemMatches = itemCats.some((c: any) => c._id === categoryId);
+
       if (item.subitems && item.subitems.length > 0) {
         for (let sub of item.subitems) {
-          let subMatches = sub.categories && sub.categories.some((c: any) => c._id === categoryId);
-          if (itemMatches || subMatches) {
+          let subCats = this.getSubitemCategories(sub, item);
+          let subMatches = subCats.some((c: any) => c._id === categoryId);
+          if (subMatches) {
             matchingIds.push(`${item._id}:${sub._id}`);
           }
         }
@@ -173,13 +192,12 @@ export class ReportItemLedgerComponent implements OnInit {
         this.groupedReportData = [];
         for (let r of this.reportData) {
           let itemObj = this.items.find((i: any) => i._id === r.item_id);
-          let catId = 'uncategorized';
+          let catId: any = 'uncategorized';
           if (itemObj) {
             let subObj = itemObj.subitems && r.subitem_id ? itemObj.subitems.find((s: any) => s._id === r.subitem_id) : null;
-            if (subObj && subObj.categories && subObj.categories.length > 0) {
-              catId = subObj.categories[0]._id;
-            } else if (itemObj.categories && itemObj.categories.length > 0) {
-              catId = itemObj.categories[0]._id;
+            let effectiveCats = subObj ? this.getSubitemCategories(subObj, itemObj) : this.getItemCategories(itemObj);
+            if (effectiveCats.length > 0) {
+              catId = effectiveCats[0]._id;
             }
           }
 
@@ -192,6 +210,26 @@ export class ReportItemLedgerComponent implements OnInit {
             this.groupedReportData.push(group);
           }
           group.reports.push(r);
+        }
+
+        // Sort groupedReportData based on the master order of this.categories
+        this.groupedReportData.sort((a: any, b: any) => {
+          if (a.category_id === 'uncategorized') return 1;
+          if (b.category_id === 'uncategorized') return -1;
+          let idxA = this.categories.findIndex((c: any) => c._id === a.category_id);
+          let idxB = this.categories.findIndex((c: any) => c._id === b.category_id);
+          if (idxA === -1) idxA = 9999;
+          if (idxB === -1) idxB = 9999;
+          return idxA - idxB;
+        });
+
+        // Sort reports inside each category group alphabetically by item/subitem name
+        for (let group of this.groupedReportData) {
+          group.reports.sort((a: any, b: any) => {
+            let nameA = (a.item_hin || '') + (a.subitem_hin ? ' ' + a.subitem_hin : '');
+            let nameB = (b.item_hin || '') + (b.subitem_hin ? ' ' + b.subitem_hin : '');
+            return nameA.localeCompare(nameB, 'hi');
+          });
         }
 
         if (this.reportData.length === 0) {

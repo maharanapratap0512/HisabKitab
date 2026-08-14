@@ -84,24 +84,43 @@ export class ReportAjCheckComponent {
     // Left empty: Items will be resolved automatically when Generate Report is clicked and items list is empty.
   }
 
+  getItemCategories(item: any): any[] {
+    if (!item || !item.categories || !Array.isArray(item.categories)) return [];
+    return item.categories.filter((c: any) => c && c._id);
+  }
+
+  getSubitemCategories(subitem: any, parentItem: any): any[] {
+    if (!subitem) return [];
+    let subCats = subitem.categories && Array.isArray(subitem.categories)
+      ? subitem.categories.filter((c: any) => c && c._id)
+      : [];
+    if (subCats.length > 0) {
+      return subCats;
+    }
+    return this.getItemCategories(parentItem);
+  }
+
   getCategoryItems(categoryId: any): string[] {
-      let matchingIds: string[] = [];
-      for (let item of this.items) {
-        let itemMatches = item.categories && item.categories.some((c: any) => c._id === categoryId);
-        if (item.subitems && item.subitems.length > 0) {
-          for (let sub of item.subitems) {
-            let subMatches = sub.categories && sub.categories.some((c: any) => c._id === categoryId);
-            if (itemMatches || subMatches) {
-              matchingIds.push(`${item._id}:${sub._id}`);
-            }
-          }
-        } else {
-          if (itemMatches) {
-            matchingIds.push(`${item._id}:`);
+    let matchingIds: string[] = [];
+    for (let item of this.items) {
+      let itemCats = this.getItemCategories(item);
+      let itemMatches = itemCats.some((c: any) => c._id === categoryId);
+
+      if (item.subitems && item.subitems.length > 0) {
+        for (let sub of item.subitems) {
+          let subCats = this.getSubitemCategories(sub, item);
+          let subMatches = subCats.some((c: any) => c._id === categoryId);
+          if (subMatches) {
+            matchingIds.push(`${item._id}:${sub._id}`);
           }
         }
+      } else {
+        if (itemMatches) {
+          matchingIds.push(`${item._id}:`);
+        }
       }
-      return matchingIds;
+    }
+    return matchingIds;
   }
 
   searchReports() {

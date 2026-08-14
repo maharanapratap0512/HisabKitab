@@ -134,6 +134,15 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
 
   ngOnDestroy(): void {
     if (this.splitSearchSub) this.splitSearchSub.unsubscribe();
+    if (typeof $ !== 'undefined') {
+      const $modal = $('#' + this.splitModalId);
+      if ($modal.length) {
+        $modal.modal('hide');
+        $modal.remove();
+      }
+      $('.modal-backdrop').remove();
+      $('body').removeClass('modal-open').css('padding-right', '');
+    }
   }
 
   fetchJawakSplits(callback?: Function) {
@@ -191,11 +200,28 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
       if (first.aawak_source_id) autoFilterObj.aawak_source_id = [first.aawak_source_id];
       if (first.unit_id) autoFilterObj.unit_id = [first.unit_id];
     }
+
+    const includeIds: number[] = [];
+    if (this.selectedValue) {
+      const val = Number(this.selectedValue);
+      if (!isNaN(val) && val > 0) includeIds.push(val);
+    }
+    if (this.selectedSplitsData && this.selectedSplitsData.length > 0) {
+      this.selectedSplitsData.forEach((s: any) => {
+        const id = Number(s.aawak_id || s._id);
+        if (!isNaN(id) && id > 0 && !includeIds.includes(id)) {
+          includeIds.push(id);
+        }
+      });
+    }
+
     const body = {
       ...this.filterObj,
       ...autoFilterObj,
       mm_id: Array.isArray(this.mmId) ? this.mmId : (this.mmId ? [this.mmId] : []),
       max_date: this.maxDate,
+      include_ids: includeIds,
+      remaining_qty: true,
       search: search,
       page: page,
       pageNo: page,
@@ -251,6 +277,18 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
     this.splitPage = 1;
     this.splitLoading = true;
     this.noMoreSplitItems = false;
+    this.showSplitModal = true;
+
+    if (typeof $ !== 'undefined') {
+      const $modal = $('#' + this.splitModalId);
+      if ($modal.length) {
+        if ($modal.parent()[0] !== document.body) {
+          $modal.appendTo('body');
+        }
+        $modal.modal('show');
+      }
+    }
+
     this.fetchData('', 1).subscribe((res: any) => {
       this.splitLoading = false;
       let fetched = res.result || [];
@@ -294,12 +332,6 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
       });
 
       this.onSplitQtyChange();
-      this.showSplitModal = true;
-      setTimeout(() => {
-        if (typeof $ !== 'undefined') {
-          $('#' + this.splitModalId).modal('show');
-        }
-      }, 50);
     }, () => {
       this.splitLoading = false;
       this.toastr.error('Failed to load Aawaks for split');
@@ -332,7 +364,10 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
 
   closeSplitModal() {
     if (typeof $ !== 'undefined') {
-      $('#' + this.splitModalId).modal('hide');
+      const $modal = $('#' + this.splitModalId);
+      if ($modal.length) {
+        $modal.modal('hide');
+      }
     }
     this.showSplitModal = false;
   }

@@ -197,10 +197,19 @@ export class AawakRefDropdownComponent implements ControlValueAccessor, OnChange
       this.totalCount = 0;
       return of({ success: true, result: [], total_count: 0 });
     }
+
+    const includeIds: number[] = [];
+    if (this.selectedValue) {
+      const val = Number(this.selectedValue);
+      if (!isNaN(val) && val > 0) includeIds.push(val);
+    }
+
     const body = {
       ...this.filterObj,
       mm_id: Array.isArray(this.mmId) ? this.mmId : (this.mmId ? [this.mmId] : []),
       max_date: this.maxDate,
+      include_ids: includeIds,
+      remaining_qty: true,
       search: search,
       page: page,
       pageNo: page,

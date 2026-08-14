@@ -454,19 +454,89 @@ router.put('/dropdown/:dept_id', async (req, res, next) => {
         const offset = (page - 1) * limit;
         const search = (req.body.search || '').trim().toLowerCase();
 
-        // Build condition string from filters
+        // Extract include_ids (already selected/linked Aawaks)
+        let includeIds = [];
+        if (req.body.include_ids && Array.isArray(req.body.include_ids)) {
+            includeIds = req.body.include_ids.map(id => Number(id)).filter(id => !isNaN(id) && id > 0);
+        } else if (req.body.include_ids && !isNaN(Number(req.body.include_ids))) {
+            includeIds = [Number(req.body.include_ids)];
+        }
+
+        // Build standard filter conditions
+        let filterConditions = [];
+
+        if (req.body.mm_id) {
+            const mmIds = Array.isArray(req.body.mm_id) ? req.body.mm_id.map(v => Number(v)).filter(v => !isNaN(v) && v > 0) : [Number(req.body.mm_id)];
+            if (mmIds.length > 0) {
+                filterConditions.push(`aawak.mm_id in (${mmIds.join(',')})`);
+            }
+        }
+
+        // Helper to format numeric single/array input
+        const buildFieldCondition = (field, val) => {
+            if (val === null || val === undefined || val === '') return null;
+            if (Array.isArray(val)) {
+                const nums = val.map(v => Number(v)).filter(v => !isNaN(v) && v > 0);
+                if (nums.length === 1) return `${field} = ${nums[0]}`;
+                if (nums.length > 1) return `${field} IN (${nums.join(',')})`;
+                return null;
+            }
+            const num = Number(val);
+            if (!isNaN(num) && num > 0) return `${field} = ${num}`;
+            return null;
+        };
+
+        const itemCond = buildFieldCondition('aawak.item_id', req.body.item_id);
+        if (itemCond) filterConditions.push(itemCond);
+
+        const subitemCond = buildFieldCondition('aawak.subitem_id', req.body.subitem_id);
+        if (subitemCond) filterConditions.push(subitemCond);
+
+        const condCond = buildFieldCondition('aawak.condition_id', req.body.condition_id);
+        if (condCond) filterConditions.push(condCond);
+
+        const sourceCond = buildFieldCondition('aawak.aawak_source_id', req.body.aawak_source_id);
+        if (sourceCond) filterConditions.push(sourceCond);
+
+        const typeCond = buildFieldCondition('aawak.aawak_type_id', req.body.aawak_type_id);
+        if (typeCond) filterConditions.push(typeCond);
+
+        // Stock availability & date filter logic
+        if (req.body.remaining_qty) {
+            filterConditions.push(`remaining_qty <> 0`);
+        } else if (req.body.max_date) {
+            filterConditions.push(`aawak.date <= '${req.body.max_date}'`);
+        }
+
+        // Server-side text search by tags (split by space)
+        if (search) {
+            let tags = search.split(/\s+/).filter(t => t.length > 0);
+            tags.forEach(tag => {
+                filterConditions.push(`(
+                    aawak.item_id IN (SELECT _id FROM v_item WHERE LOWER(item_hin) LIKE '%${tag}%' OR LOWER(item_eng) LIKE '%${tag}%') OR
+                    aawak.subitem_id IN (SELECT _id FROM v_subitem WHERE LOWER(subitem_hin) LIKE '%${tag}%' OR LOWER(subitem_eng) LIKE '%${tag}%') OR
+                    aawak.mm_id IN (SELECT _id FROM mm WHERE LOWER(mm_hin) LIKE '%${tag}%' OR LOWER(mm_code) LIKE '%${tag}%' OR LOWER(mm_eng) LIKE '%${tag}%') OR
+                    aawak.aawak_mm_id IN (SELECT _id FROM mm WHERE LOWER(mm_hin) LIKE '%${tag}%' OR LOWER(mm_eng) LIKE '%${tag}%' OR LOWER(mm_code) LIKE '%${tag}%') OR
+                    CAST(aawak.lot_no AS TEXT) LIKE '%${tag}%' OR
+                    aawak.aawak_type_id IN (SELECT _id FROM support_list WHERE LOWER(list_name_hin) LIKE '%${tag}%' OR LOWER(list_name_eng) LIKE '%${tag}%') OR
+                    aawak.aawak_source_id IN (SELECT _id FROM support_list WHERE LOWER(list_name_hin) LIKE '%${tag}%' OR LOWER(list_name_eng) LIKE '%${tag}%') OR
+                    aawak.condition_id IN (SELECT _id FROM support_list WHERE LOWER(list_name_hin) LIKE '%${tag}%' OR LOWER(list_name_eng) LIKE '%${tag}%')
+                )`);
+            });
+        }
+
         let conditions = [`1=1`];
+        const filterClause = filterConditions.length > 0 ? filterConditions.join(' AND ') : null;
 
-        if (req.body.max_date) conditions.push(`aawak.date <= '${req.body.max_date}'`);
-        if (req.body.mm_id && req.body.mm_id.length > 0) conditions.push(`aawak.mm_id in (${req.body.mm_id.join(',')})`);
-        if (req.body.remaining_qty) conditions.push(`remaining_qty <> 0`);
-
-        // Row-level filters (from filterObj)
-        if (req.body.item_id) conditions.push(`aawak.item_id = ${req.body.item_id}`);
-        if (req.body.subitem_id) conditions.push(`aawak.subitem_id = ${req.body.subitem_id}`);
-        if (req.body.condition_id) conditions.push(`aawak.condition_id = ${req.body.condition_id}`);
-        if (req.body.aawak_source_id) conditions.push(`aawak.aawak_source_id = ${req.body.aawak_source_id}`);
-        if (req.body.aawak_type_id) conditions.push(`aawak.aawak_type_id = ${req.body.aawak_type_id}`);
+        if (includeIds.length > 0) {
+            if (filterClause) {
+                conditions.push(`(aawak._id IN (${includeIds.join(',')}) OR (${filterClause}))`);
+            } else {
+                conditions.push(`aawak._id IN (${includeIds.join(',')})`);
+            }
+        } else if (filterClause) {
+            conditions.push(filterClause);
+        }
 
         // Server-side text search by tags (split by space)
         if (search) {

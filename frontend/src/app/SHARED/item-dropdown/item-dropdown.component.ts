@@ -66,12 +66,17 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
       let matchingSubitems = it.subitems || [];
 
       if (this.categoryIds && this.categoryIds.length > 0) {
-        itemMatches = it.categories && it.categories.some((c: any) => this.categoryIds.includes(c._id));
+        const itemCats = it.categories && Array.isArray(it.categories) ? it.categories.filter((c: any) => c && c._id) : [];
+        itemMatches = itemCats.some((c: any) => this.categoryIds.includes(c._id));
 
-        if (!itemMatches && it.subitems && it.subitems.length > 0) {
-          matchingSubitems = it.subitems.filter((sub: any) => sub.categories && sub.categories.some((c: any) => this.categoryIds.includes(c._id)));
-        } else if (itemMatches) {
-          matchingSubitems = it.subitems || [];
+        if (it.subitems && it.subitems.length > 0) {
+          matchingSubitems = it.subitems.filter((sub: any) => {
+            const subCats = sub.categories && Array.isArray(sub.categories) ? sub.categories.filter((c: any) => c && c._id) : [];
+            if (subCats.length > 0) {
+              return subCats.some((c: any) => this.categoryIds.includes(c._id));
+            }
+            return itemMatches;
+          });
         } else {
           matchingSubitems = [];
         }
