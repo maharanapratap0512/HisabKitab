@@ -55,6 +55,7 @@ export class AawakNewComponent implements OnInit {
   subitems: any = [];
   pbks: any = [];
   aawak_types: any = [];
+  aawak_sources: any = [];
   jawak_types: any = [];
   products: any = [];
   categories: any = [];
@@ -68,6 +69,8 @@ export class AawakNewComponent implements OnInit {
     type: 'aawak',
     pbk_id: [],
     month: null,
+    month_from: null,
+    month_to: null,
     year: null,
     date: null,
     date_from: null,
@@ -85,6 +88,7 @@ export class AawakNewComponent implements OnInit {
     remaining_qty: false,
     itemOnly: false
   };
+  selectedItemmix: any[] = [];
   cat: any;
   settings: any = {};
   exportAJdata$ = new Subject();
@@ -180,6 +184,7 @@ export class AawakNewComponent implements OnInit {
       this.departments = result.department ? result.department : [];
       this.pbks = result.pbk ? result.pbk : [];
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
+      this.aawak_sources = result.aawak_source ? result.aawak_source : [];
       this.usage_lists = result.usage_list ? result.usage_list : [];
       this.jawak_types = result.jawak_type ? result.jawak_type : [];
       this.products = result.product ? result.product : [];
@@ -295,6 +300,71 @@ export class AawakNewComponent implements OnInit {
     });
   }
 
+  onMonthRangeChange() {
+    let year = this.filterBody.year;
+    let mFrom = this.filterBody.month_from;
+    let mTo = this.filterBody.month_to || mFrom;
+
+    if (mFrom) {
+      let yr = year || new Date().getFullYear();
+      let startDate = `${yr}-${mFrom.toString().padStart(2, '0')}-01`;
+      let lastDay = new Date(yr, mTo, 0).getDate();
+      let endDate = `${yr}-${mTo.toString().padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`;
+      this.filterBody.date_from = startDate;
+      this.filterBody.date_to = endDate;
+    } else {
+      this.filterBody.date_from = null;
+      this.filterBody.date_to = null;
+    }
+  }
+
+  isAllExpanded: boolean = false;
+
+  toggleExpandAll() {
+    this.isAllExpanded = !this.isAllExpanded;
+    const elements = document.querySelectorAll('.sub-row-collapse');
+    elements.forEach((el: any) => {
+      if (this.isAllExpanded) {
+        el.classList.add('show');
+      } else {
+        el.classList.remove('show');
+      }
+    });
+  }
+
+  clearFilter() {
+    this.filterBody = {
+      type: 'aawak',
+      pbk_id: [],
+      month: null,
+      month_from: null,
+      month_to: null,
+      year: null,
+      date: null,
+      date_from: null,
+      date_to: null,
+      mm_id: [],
+      aj_mm_id: [],
+      aawak_type_id: [],
+      aawak_source_id: [],
+      jawak_type_id: [],
+      product_id: [],
+      item_id: [],
+      subitem_id: [],
+      condition_id: [],
+      usage_list_id: [],
+      company_name: null,
+      lot_no: null,
+      pkt_num: null,
+      nimitt_id: [],
+      remaining_qty: false,
+      itemOnly: false
+    };
+    this.selectedItemmix = [];
+    this.cat = null;
+    this.getFilteredData();
+  }
+
   yearClick(year: any) {
     this.filterBody.year = year;
     this.pageNo = 0;
@@ -308,9 +378,24 @@ export class AawakNewComponent implements OnInit {
     }
   }
 
+  updateFilterItemSubitem(selectedItemmix: any[]) {
+    this.filterBody.item_id = [];
+    this.filterBody.subitem_id = [];
+    if (selectedItemmix && selectedItemmix.length > 0) {
+      selectedItemmix.forEach((x: any) => {
+        if (x.subitem_id) {
+          this.filterBody.subitem_id.push(x.subitem_id);
+        } else if (x.item_id) {
+          this.filterBody.item_id.push(x.item_id);
+        }
+      });
+    }
+  }
+
   getFilteredData(pageNo: any = null) {
     this.isLoader = true;
     this.loadingStatus = "मैं आत्मा शांत स्वरूप हूँ ।";
+    this.updateFilterItemSubitem(this.selectedItemmix);
     this.filterBody.pageNo = this.pageNo;
     // AUTO select all mm if mm not selected and state selected for mm.
     if (!this.filterBody.mm_id.length && this.filterBody.mm_states) {

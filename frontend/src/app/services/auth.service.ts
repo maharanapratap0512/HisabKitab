@@ -131,7 +131,6 @@ export class AuthService {
       { colName: 'jwk_mm_id', title: 'Jawak MM' },
       { colName: 'product_code', title: 'Product' },
       { colName: 'srv_code', title: 'srv Code' },
-      { colName: 'srv_code', title: 'srv Code' },
       { colName: 'repair_from', title: 'Repair From' },
       { colName: 'repairer_info', title: 'Repairer Info' },
       { colName: 'problem_detail', title: 'Problem Detail' },

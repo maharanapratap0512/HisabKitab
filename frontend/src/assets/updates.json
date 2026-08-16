@@ -1,10 +1,51 @@
 [
     {
+        "version": "36.1",
+        "date": "16-08-2026",
+        "summary": "Attribute & Value Import, Redesigned Aawak Table, Advanced Filters & Improved Excel Import UI",
+        "summary_hin": "एट्रीब्यूट व वैल्यू इम्पोर्ट, नया आवक टेबल रीडिजाइन, एडवांस्ड फ़िल्टर एवं एक्सेल इम्पोर्ट सुधार",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Attribute Entry & Import",
+                "title": "Excel Import Support for Attributes & Attribute Values",
+                "title_hin": "एट्रीब्यूट एवं एट्रीब्यूट वैल्यू एक्सेल इम्पोर्ट सुविधा",
+                "desc": "Bulk import attributes and attribute values directly from Excel sheets with automatic template download, header mapping, duplicate checking, and auto-refreshing lists.",
+                "desc_hin": "एक्सेल फ़ाइल से सीधे एट्रीब्यूट और एट्रीब्यूट वैल्यू इम्पोर्ट करने, स्वचालित डुप्लीकेट जाँच और लिस्ट ऑटो-रिफ्रेश की सुविधा।"
+            },
+            {
+                "type": "improved",
+                "module": "Aawak New Component",
+                "title": "Redesigned Aawak New Table & Field Settings",
+                "title_hin": "आवक न्यू टेबल रीडिजाइन एवं फ़ील्ड सेटिंग्स सुधार",
+                "desc": "Redesigned Aawak-New table layout with seamless dark/light theme inheritance, optimized column settings, clean child sub-table display, and improved field arrangements.",
+                "desc_hin": "ऑटोमैटिक थीम सपोर्ट के साथ आवक-न्यू टेबल का नया लेआउट, बेहतर कॉलम सेटिंग्स, साफ़ सुथरा सब-टेबल डिस्प्ले और फ़ील्ड व्यवस्था में सुधार।"
+            },
+            {
+                "type": "feature",
+                "module": "Aawak & Aawak New",
+                "title": "Top Popover Filters & Advanced Field Search",
+                "title_hin": "टॉप पॉपओवर फ़िल्टर एवं एडवांस्ड फ़ील्ड सर्च",
+                "desc": "Comprehensive top popover filter toolbar developed for Aawak and Aawak-New components with side-by-side 2-column layout for Item-Subitem, Lot No, Condition, Company, Usage List, and Aawak Type/Source.",
+                "desc_hin": "आवक और आवक-न्यू में शीर्ष पर 2-कॉलम साइड-बाय-साइड पॉपओवर फ़िल्टर, जिसमें आइटम-सबआइटम, लॉट नंबर, कंडीशन, कंपनी, यूसेज लिस्ट और टाइप/सोर्स के लिए संपूर्ण खोज सुविधा।"
+            },
+            {
+                "type": "improved",
+                "module": "Excel Import Component",
+                "title": "Enhanced Excel Import UI & Correction Dropdown Stability",
+                "title_hin": "एक्सेल इम्पोर्ट UI सुधार एवं करेक्शन ड्रॉपडाउन स्थिरता",
+                "desc": "Improved Excel Import UI with stable open-state dropdown handling in Correction tab, body-appended option menus, responsive modal views, and instant master data (+ Add) popups.",
+                "desc_hin": "एक्सेल इम्पोर्ट UI में सुधार, करेक्शन टैब में ड्रॉपडाउन के खुलने और चुनने पर स्थिरता, बेहतर पॉपअप व्यू और इनलाइन रिकॉर्ड जोड़ने की सुविधा।"
+            }
+        ]
+    },
+    {
         "version": "36.0",
         "date": "10-08-2026",
         "summary": "Multi-Aawak Selection & Easy Split Quantity Allocation",
         "summary_hin": "एक साथ कई आवक चुनने और मात्रा बांटने की आसान सुविधा",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "feature",

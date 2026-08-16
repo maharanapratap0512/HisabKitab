@@ -68,6 +68,8 @@ export class AawakComponent implements OnInit {
     type: 'aawak',
     pbk_id: [],
     month: null,
+    month_from: null,
+    month_to: null,
     year: null,
     date: null,
     date_from: null,
@@ -76,6 +78,8 @@ export class AawakComponent implements OnInit {
     zone_id: [],
     aj_mm_id: [],
     aawak_type_id: [],
+    aawak_source_id: [],
+    usage_list_id: [],
     jawak_type_id: [],
     product_id: [],
     item_id: [],
@@ -301,6 +305,24 @@ export class AawakComponent implements OnInit {
     this.http.get(this.api.getUrl('DICT')).subscribe((data: any) => {
       this.dictionary = data['result'] || [];
     });
+  }
+
+  onMonthRangeChange() {
+    let year = this.filterBody.year;
+    let mFrom = this.filterBody.month_from;
+    let mTo = this.filterBody.month_to || mFrom;
+
+    if (mFrom) {
+      let yr = year || new Date().getFullYear();
+      let startDate = `${yr}-${mFrom.toString().padStart(2, '0')}-01`;
+      let lastDay = new Date(yr, mTo, 0).getDate();
+      let endDate = `${yr}-${mTo.toString().padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`;
+      this.filterBody.date_from = startDate;
+      this.filterBody.date_to = endDate;
+    } else {
+      this.filterBody.date_from = null;
+      this.filterBody.date_to = null;
+    }
   }
 
   yearClick(year: any) {

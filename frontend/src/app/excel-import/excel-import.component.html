@@ -311,6 +311,7 @@
                                        <ng-select *ngIf="data.type == 'mm' || data.type == 'aj_mm'"
                                           class="custom custom-import" placeholder="Select MM" [virtualScroll]="true"
                                           [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                           (change)="handleAddOption($event, data, 'Add MM')" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select MM --</ng-option>
                                           <ng-option value="+add" class="text-primary fw-bold">+ Add MM</ng-option>
@@ -325,6 +326,7 @@
                                           <ng-select class="custom custom-import" placeholder="Select Category"
                                              [virtualScroll]="true" [(ngModel)]="data.id"
                                              [ngModelOptions]="{standalone: true}"
+                                             (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                              (change)="handleAddOption($event, data, 'Add Category')" appendTo="body">
                                              <ng-option selected="selected" disabled value="">-- Select Category
                                                 --</ng-option>
@@ -338,7 +340,8 @@
                                        <div class="col-6" *ngIf="data.type == 'category' && data.isArray">
                                           <ng-select class="custom custom-import" placeholder="Select Categories"
                                              [virtualScroll]="true" [multiple]="true" [(ngModel)]="data.ids"
-                                             [ngModelOptions]="{standalone: true}" appendTo="body">
+                                             [ngModelOptions]="{standalone: true}"
+                                             (open)="onDropdownOpen()" (close)="onDropdownClose()" appendTo="body">
                                              <ng-option *ngFor="let item of categories" [value]="item._id">
                                                 {{item.category_hin}}:{{item.category_eng}}</ng-option>
                                           </ng-select>
@@ -349,6 +352,7 @@
                                           <ng-select *ngIf="data.type == 'subitem_list'" class="custom custom-import"
                                              placeholder="Select Subitem List" [virtualScroll]="true"
                                              [(ngModel)]="data.id" [ngModelOptions]="{standalone: true}"
+                                             (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                              appendTo="body">
                                              <ng-option selected="selected" disabled value="">-- Select Subitem List
                                                 --</ng-option>
@@ -361,7 +365,8 @@
                                        <div class="d-flex justify-content-center" *ngIf="data.type == 'item'">
                                           <div class="col-4">
                                              <ng-select class="custom custom-import" placeholder="Select Category"
-                                                [virtualScroll]="true" (change)="catSelected($event)" appendTo="body">
+                                                [virtualScroll]="true" (change)="catSelected($event)" 
+                                                (open)="onDropdownOpen()" (close)="onDropdownClose()" appendTo="body">
                                                 <ng-option selected="selected" disabled value="">-- Select Category
                                                    --</ng-option>
                                                 <ng-option *ngFor="let item of categories" [value]="item._id">
@@ -373,6 +378,7 @@
                                              <ng-select class="custom custom-import" placeholder="Select Item"
                                                 [virtualScroll]="true" [(ngModel)]="data.item"
                                                 [ngModelOptions]="{standalone: true}"
+                                                (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                                 (change)="onItemChange($event, data)" appendTo="body">
                                                 <ng-option selected="selected" disabled value="">-- Select Item
                                                    --</ng-option>
@@ -385,6 +391,7 @@
                                           <div class="col-4">
                                              <ng-select class="custom custom-import" placeholder="Select Subitem"
                                                 [virtualScroll]="true" [(ngModel)]="data.subitem"
+                                                (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                                 (change)="onSubitemChange($event, data)" [ngModelOptions]="{standalone: true}"
                                                 appendTo="body">
                                                 <ng-option selected="selected" disabled value="">-- Select Subitem
@@ -402,6 +409,7 @@
                                           <ng-select *ngIf="data.type == 'product'" class="custom custom-import"
                                              placeholder="Select Product" [virtualScroll]="true" [(ngModel)]="data.id"
                                              [ngModelOptions]="{standalone: true}"
+                                             (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                              (change)="handleAddOption($event, data, 'Add Product')" appendTo="body">
                                              <ng-option selected="selected" disabled value="">-- Select Product
                                                 --</ng-option>
@@ -415,6 +423,7 @@
                                        <ng-select *ngIf="data.type == 'pbk'" class="custom custom-import"
                                           placeholder="Select Pbk" [virtualScroll]="true" [(ngModel)]="data.pbk_id"
                                           [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                           (change)="handleAddOption($event, data, 'Add PBK')" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Pbk --</ng-option>
                                           <ng-option value="+add" class="text-primary fw-bold">+ Add PBK</ng-option>
@@ -428,6 +437,7 @@
                                        <ng-select *ngIf="data.type == 'awk_type'" class="custom custom-import"
                                           placeholder="Select Aawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
                                           [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                           (change)="handleAddOption($event, data, 'Add Aawak Type')" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Aawak Type
                                              --</ng-option>
@@ -440,6 +450,7 @@
                                        <ng-select *ngIf="data.type == 'jwk_type'" class="custom custom-import"
                                           placeholder="Select Jawak Type" [virtualScroll]="true" [(ngModel)]="data.id"
                                           [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                           (change)="handleAddOption($event, data, 'Add Jawak Type')" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Jawak Type
                                              --</ng-option>
@@ -452,6 +463,7 @@
                                        <ng-select *ngIf="data.type == 'condition'" class="custom custom-import"
                                           placeholder="Select Condition" [virtualScroll]="true" [(ngModel)]="data.id"
                                           [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                           (change)="handleAddOption($event, data, 'Add Condition')" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Condition
                                              --</ng-option>
@@ -464,6 +476,7 @@
                                        <ng-select *ngIf="data.type == 'nimitt'" class="custom custom-import"
                                           placeholder="Select Nimitt" [virtualScroll]="true" [(ngModel)]="data.id"
                                           [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                           (change)="handleAddOption($event, data, 'Add Nimitt')" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Nimitt
                                              --</ng-option>
@@ -476,6 +489,7 @@
                                        <ng-select *ngIf="data.type == 'unit'" class="custom custom-import"
                                           placeholder="Select Unit" [virtualScroll]="true" [(ngModel)]="data.id"
                                           [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                           (change)="handleAddOption($event, data, 'Add Unit')" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Unit --</ng-option>
                                           <ng-option value="+add" class="text-primary fw-bold">+ Add Unit</ng-option>
@@ -486,7 +500,8 @@
                                        <!-- gender dropdown -->
                                        <ng-select *ngIf="data.type == 'gender'" class="custom custom-import"
                                           placeholder="Select Gender" [virtualScroll]="true" [(ngModel)]="data.id"
-                                          [ngModelOptions]="{standalone: true}" appendTo="body">
+                                          [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Gender
                                              --</ng-option>
                                           <ng-option *ngFor="let item of genders" [value]="item.list_name_eng">
@@ -496,7 +511,8 @@
                                        <!-- relation dropdown -->
                                        <ng-select *ngIf="data.type == 'relation'" class="custom custom-import"
                                           placeholder="Select Relation" [virtualScroll]="true" [(ngModel)]="data.id"
-                                          [ngModelOptions]="{standalone: true}" appendTo="body">
+                                          [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select Relation
                                              --</ng-option>
                                           <ng-option *ngFor="let item of relations" [value]="item.list_name_eng">
@@ -507,6 +523,7 @@
                                        <ng-select *ngIf="data.type == 'state'" class="custom custom-import"
                                           placeholder="Select State" [virtualScroll]="true" [(ngModel)]="data.id"
                                           [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                           (change)="handleAddOption($event, data, 'Add State')" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select State
                                              --</ng-option>
@@ -520,6 +537,7 @@
                                        <ng-select *ngIf="data.type == 'district'" class="custom custom-import"
                                           placeholder="Select District" [virtualScroll]="true" [(ngModel)]="data.id"
                                           [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                           (change)="handleAddOption($event, data, 'Add District')" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select District
                                              --</ng-option>
@@ -534,11 +552,25 @@
                                        <ng-select *ngIf="data.type == 'city'" class="custom custom-import"
                                           placeholder="Select City" [virtualScroll]="true" [(ngModel)]="data.id"
                                           [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()"
                                           (change)="handleAddOption($event, data, 'Add City')" appendTo="body">
                                           <ng-option selected="selected" disabled value="">-- Select City --</ng-option>
                                           <ng-option value="+add" class="text-primary fw-bold">+ Add City</ng-option>
                                           <ng-option *ngFor="let item of cities"
                                              [value]="item._id">{{item.city_hin}}:{{item.city_eng}}
+                                          </ng-option>
+                                       </ng-select>
+
+                                       <!-- attribute dropdown -->
+                                       <ng-select *ngIf="data.type == 'attribute'" class="custom custom-import"
+                                          placeholder="Select Attribute" [virtualScroll]="true" [(ngModel)]="data.id"
+                                          [ngModelOptions]="{standalone: true}"
+                                          (open)="onDropdownOpen()" (close)="onDropdownClose()"
+                                          (change)="handleAddOption($event, data, 'Add Attribute')" appendTo="body">
+                                          <ng-option selected="selected" disabled value="">-- Select Attribute --</ng-option>
+                                          <ng-option value="+add" class="text-primary fw-bold">+ Add Attribute</ng-option>
+                                          <ng-option *ngFor="let item of attributes"
+                                             [value]="item._id">{{item.attribute_hin}}{{item.attribute_eng ? ' : ' + item.attribute_eng : ''}}
                                           </ng-option>
                                        </ng-select>
 
@@ -765,6 +797,7 @@
                         <app-support-list-entry *ngIf="showAddModal == 'Add Jawak Type'" [list_type]="'jawak_type'" (response)="onAddResponse($event)"></app-support-list-entry>
                         <app-support-list-entry *ngIf="showAddModal == 'Add Condition'" [list_type]="'condition'" (response)="onAddResponse($event)"></app-support-list-entry>
                         <app-support-list-entry *ngIf="showAddModal == 'Add Usage List'" [list_type]="'usage_list'" (response)="onAddResponse($event)"></app-support-list-entry>
+                        <app-attribute-entry *ngIf="showAddModal == 'Add Attribute'" [mode]="'attributes'" (response)="onAddResponse($event)"></app-attribute-entry>
                      </div>
                   </div>
                </div>

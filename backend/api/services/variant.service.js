@@ -567,6 +567,34 @@ function deleteVariantAlias(id) {
 }
 
 
+function getAttributeConflict(data, currentId = null) {
+    const names = [data.attribute_hin, data.attribute_eng, data.attribute_roman].filter(Boolean);
+    if (names.length === 0) return null;
+    for (const name of names) {
+        const sanitized = String(name).replace(/'/g, "''");
+        const conflict = attributes.getOne(
+            `_id != ${currentId || 0} AND (attribute_hin = '${sanitized}' OR attribute_eng = '${sanitized}' OR attribute_roman = '${sanitized}') AND active = 1`,
+            { full: false }
+        );
+        if (conflict) return { type: 'primary', name, conflict };
+    }
+    return null;
+}
+
+function getAttributeValueConflict(data, currentId = null) {
+    const names = [data.attribute_value_hin, data.attribute_value_eng, data.attribute_value_roman].filter(Boolean);
+    if (names.length === 0 || !data.attribute_id) return null;
+    for (const name of names) {
+        const sanitized = String(name).replace(/'/g, "''");
+        const conflict = attributes_value.getOne(
+            `_id != ${currentId || 0} AND attribute_id = ${Number(data.attribute_id)} AND (attribute_value_hin = '${sanitized}' OR attribute_value_eng = '${sanitized}' OR attribute_value_roman = '${sanitized}') AND active = 1`,
+            { full: false }
+        );
+        if (conflict) return { type: 'primary', name, conflict };
+    }
+    return null;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 module.exports = {
     // attributes
@@ -574,12 +602,14 @@ module.exports = {
     insertAttribute,
     updateAttribute,
     deleteAttribute,
+    getAttributeConflict,
     // attribute values
     getAttributeValues,
     getAllAttributeValues,
     insertAttributeValue,
     updateAttributeValue,
     deleteAttributeValue,
+    getAttributeValueConflict,
     // item aliases
     getItemAliases,
     insertItemAlias,

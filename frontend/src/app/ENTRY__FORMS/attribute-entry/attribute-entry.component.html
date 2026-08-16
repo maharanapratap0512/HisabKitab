@@ -1,5 +1,19 @@
 <div class="p-3">
 
+    <!-- ── EXCEL IMPORT VIEW ────────────────────────────────────────────────── -->
+    <ng-container *ngIf="showImportModal">
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+            <h5 class="mb-0 text-primary fw-bold">
+                <i class="uil uil-file-upload me-1"></i> Import {{ importType === 'attribute' ? 'Attributes' : 'Attribute Values' }} Excel
+            </h5>
+            <button class="btn btn-outline-secondary btn-sm" (click)="closeImport()">
+                <i class="uil uil-arrow-left me-1"></i> Back
+            </button>
+        </div>
+        <app-excel-import [importType]="importType" [lockType]="true" (response)="onImportResponse($event)"></app-excel-import>
+    </ng-container>
+
+    <ng-container *ngIf="!showImportModal">
     <!-- ── ATTRIBUTES mode ───────────────────────────────────────────────── -->
     <ng-container *ngIf="mode === 'attributes'">
         <div class="row g-2 align-items-end mb-3 border-bottom pb-3">
@@ -13,18 +27,21 @@
                 <input type="text" class="form-control form-control-sm" [(ngModel)]="attrForm.attribute_eng"
                     placeholder="e.g. Color" />
             </div>
-            <div class="col-3">
+            <div class="col-2">
                 <label class="form-label">Roman</label>
                 <input type="text" class="form-control form-control-sm" [(ngModel)]="attrForm.attribute_roman"
                     placeholder="e.g. Color" />
             </div>
-            <div class="col-2">
+            <div class="col-3">
                 <div class="d-flex gap-1">
                     <button class="btn btn-sm flex-grow-1" [class.btn-success]="!editAttrId" [class.btn-warning]="editAttrId" (click)="saveAttr()" [disabled]="isLoader">
                         <i class="uil" [class.uil-plus]="!editAttrId" [class.uil-check]="editAttrId"></i> {{ editAttrId ? 'Update' : 'Add' }}
                     </button>
                     <button *ngIf="editAttrId" class="btn btn-outline-danger btn-sm" (click)="cancelEditAttr()" title="Cancel Edit">
                         <i class="uil uil-multiply"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm" (click)="openImport('attribute')" title="Import Attributes Excel">
+                        <i class="uil uil-file-upload"></i> Import
                     </button>
                     <button class="btn btn-outline-danger btn-sm" (click)="deleteSelectedAttr()" *ngIf="selectionService.hasSelection('attribute')" title="Delete Selected">
                         <i class="uil uil-trash"></i> Selected
@@ -128,11 +145,14 @@
             </div>
             <div class="col-2">
                 <div class="d-flex gap-1">
-                    <button class="btn btn-sm w-100" [class.btn-success]="!editAttrValId" [class.btn-warning]="editAttrValId" (click)="saveAttrVal()" [disabled]="isLoader">
+                    <button class="btn btn-sm" [class.btn-success]="!editAttrValId" [class.btn-warning]="editAttrValId" (click)="saveAttrVal()" [disabled]="isLoader">
                         <i class="uil" [class.uil-plus]="!editAttrValId" [class.uil-check]="editAttrValId"></i> {{ editAttrValId ? 'Update' : 'Add' }}
                     </button>
                     <button *ngIf="editAttrValId" class="btn btn-outline-danger btn-sm" (click)="cancelEditAttrVal()" title="Cancel Edit">
                         <i class="uil uil-multiply"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm" (click)="openImport('attributes_value')" title="Import Attribute Values Excel">
+                        <i class="uil uil-file-upload"></i> Import
                     </button>
                     <button class="btn btn-outline-danger btn-sm" (click)="deleteSelectedAttrVal()" *ngIf="selectionService.hasSelection('attribute_value')" title="Delete Selected">
                         <i class="uil uil-trash"></i> Selected
@@ -191,6 +211,7 @@
                 </tbody>
             </table>
         </div>
+    </ng-container>
     </ng-container>
 
 </div>

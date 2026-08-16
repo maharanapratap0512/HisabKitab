@@ -368,9 +368,11 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
             // --- OTHER IMPORTS (Item, Variant, Category) ---
             const type = importType.name;
             let service, form;
-            if (type === 'variant') {
+            if (type === 'variant' || type === 'attribute' || type === 'attributes_value') {
                 service = require('../services/variant.service');
-                form = fn.variant_form;
+                if (type === 'variant') form = fn.variant_form;
+                else if (type === 'attribute') form = fn.attribute_form;
+                else if (type === 'attributes_value') form = fn.attributes_value_form;
             } else if (type === 'item') {
                 service = require('../services/item.service');
                 form = fn.item_form;
@@ -394,6 +396,26 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                         let insResult = await service.bulkCreateVariants(fdata.item_id, [fdata], req.userData);
                         row.newData = insResult;
                         result = { status: 'inserted', data: row };
+                    } else if (type === 'attribute') {
+                        let fdata = await fn.setFormData(form, row);
+                        const conflict = service.getAttributeConflict(fdata);
+                        if (conflict) {
+                            result = { status: 'duplicate', data: row };
+                        } else {
+                            let insResult = await service.insertAttribute(fdata);
+                            row.newData = insResult;
+                            result = { status: 'inserted', data: row };
+                        }
+                    } else if (type === 'attributes_value') {
+                        let fdata = await fn.setFormData(form, row);
+                        const conflict = service.getAttributeValueConflict(fdata);
+                        if (conflict) {
+                            result = { status: 'duplicate', data: row };
+                        } else {
+                            let insResult = await service.insertAttributeValue(fdata);
+                            row.newData = insResult;
+                            result = { status: 'inserted', data: row };
+                        }
                     } else if (type === 'item') {
                         const conflict = service.getItemConflict(row);
                         if (conflict) {

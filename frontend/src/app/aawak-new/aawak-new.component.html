@@ -399,8 +399,97 @@
                                     (click)="bulkEditMultiple()" title="Click to bulk edit.">Bulk Edit
                                     ({{selectionService.getSelected('aawak-new').length}})</span>
                             </span>
-                            <app-popover-year id="tour-year-badge" [selectedYear]="filterBody.year"
-                                (yearChanged)="yearClick($event)"></app-popover-year>
+                            <app-popover-year id="tour-year-badge" class="badge year-box"
+                                [selectedYear]="filterBody.year" (yearChanged)="yearClick($event)"></app-popover-year>
+                            <app-popover-filter label="Filter" iconClass="uil uil-filter" direction="auto" (clear)="clearFilter()"
+                                clearButtonLabel="Clear Filter" triggerOn="click" class="ms-1"
+                                [isOpen]="(selectedItemmix && selectedItemmix.length > 0) || !!filterBody.itemOnly || (filterBody.product_id && filterBody.product_id.length > 0) || (filterBody.condition_id && filterBody.condition_id.length > 0) || (filterBody.usage_list_id && filterBody.usage_list_id.length > 0) || !!filterBody.company_name || !!filterBody.lot_no || (filterBody.aawak_type_id && filterBody.aawak_type_id.length > 0) || (filterBody.aawak_source_id && filterBody.aawak_source_id.length > 0)">
+                                <div style="width: 520px;" class="p-2">
+                                    <div class="row g-2">
+                                        <div class="col-12 mb-1">
+                                            <label class="form-label mb-1"><small class="fw-bold">Item & Subitem</small></label>
+                                            <app-item-dropdown [items]="items" [(ngModel)]="selectedItemmix"
+                                                (ngModelChange)="getFilteredData()" [multiple]="true"
+                                                [closeOnSelect]="false" name="top_hdr_item_mix" appendTo="body"></app-item-dropdown>
+                                            <div class="form-check mt-1">
+                                                <input type="checkbox" class="form-check-input" id="topHdrItemOnlyCheck"
+                                                    [(ngModel)]="filterBody.itemOnly" (change)="getFilteredData()" name="topHdrItemOnly">
+                                                <label class="form-check-label mb-0" for="topHdrItemOnlyCheck" style="cursor: pointer;">
+                                                    <small class="text-info fw-bold">Item Only (Subitem is Null)</small>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 mb-1" *ngIf="settings.aawak.product_id">
+                                            <label class="form-label mb-1"><small class="fw-bold">Product</small></label>
+                                            <ng-select [multiple]="true" placeholder="Select Product" class="custom-sm" appendTo="body"
+                                                [(ngModel)]="filterBody.product_id" (change)="getFilteredData()">
+                                                <ng-option *ngFor="let item of products" [value]="item._id">
+                                                    {{item.product_code ? item.product_code : ''}} {{item.sr_num ? item.sr_num : ''}}
+                                                </ng-option>
+                                            </ng-select>
+                                        </div>
+
+                                        <div class="col-6 mb-1" *ngIf="settings.aawak.condition_id">
+                                            <label class="form-label mb-1"><small class="fw-bold">Condition</small></label>
+                                            <ng-select [multiple]="true" placeholder="Select Condition" class="custom-sm" appendTo="body"
+                                                [(ngModel)]="filterBody.condition_id" (change)="getFilteredData()">
+                                                <ng-option *ngFor="let item of conditions" [value]="item._id">
+                                                    {{item.list_name_hin}} : {{item.list_name_eng}}
+                                                </ng-option>
+                                            </ng-select>
+                                        </div>
+
+                                        <div class="col-6 mb-1" *ngIf="settings.aawak.lot_no">
+                                            <label class="form-label mb-1"><small class="fw-bold">Lot No</small></label>
+                                            <input type="text" class="form-control form-control-sm" placeholder="Lot No..."
+                                                [(ngModel)]="filterBody.lot_no" (change)="getFilteredData()">
+                                        </div>
+
+                                        <div class="col-6 mb-1" *ngIf="settings.aawak.company_name">
+                                            <label class="form-label mb-1"><small class="fw-bold">Company Name</small></label>
+                                            <input type="text" class="form-control form-control-sm" placeholder="Company..."
+                                                [(ngModel)]="filterBody.company_name" (change)="getFilteredData()">
+                                        </div>
+
+                                        <div class="col-6 mb-1" *ngIf="settings.aawak.usage_list_id">
+                                            <label class="form-label mb-1"><small class="fw-bold">Usage List</small></label>
+                                            <ng-select [multiple]="true" placeholder="Select Usage List" class="custom-sm" appendTo="body"
+                                                [(ngModel)]="filterBody.usage_list_id" (change)="getFilteredData()">
+                                                <ng-option *ngFor="let item of usage_lists" [value]="item._id">
+                                                    {{item.list_name_hin}} : {{item.list_name_eng}}
+                                                </ng-option>
+                                            </ng-select>
+                                        </div>
+
+                                        <div class="col-6 mb-1" *ngIf="settings.aawak.aawak_type_id">
+                                            <label class="form-label mb-1"><small class="fw-bold">Aawak Type</small></label>
+                                            <ng-select [multiple]="true" placeholder="Aawak Type" class="custom-sm" appendTo="body"
+                                                [(ngModel)]="filterBody.aawak_type_id" (change)="getFilteredData()">
+                                                <ng-option *ngFor="let item of aawak_types" [value]="item._id">
+                                                    {{item.list_name_hin}} : {{item.list_name_eng}}
+                                                </ng-option>
+                                            </ng-select>
+                                        </div>
+
+                                        <div class="col-6 mb-1" *ngIf="settings.aawak.aawak_source_id">
+                                            <label class="form-label mb-1"><small class="fw-bold">Aawak Source</small></label>
+                                            <ng-select [multiple]="true" placeholder="Aawak Source" class="custom-sm" appendTo="body"
+                                                [(ngModel)]="filterBody.aawak_source_id" (change)="getFilteredData()">
+                                                <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
+                                                    {{item.list_name_hin}} : {{item.list_name_eng}}
+                                                </ng-option>
+                                            </ng-select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </app-popover-filter>
+                            <span class="badge year-box cursor-pointer badge-outline-info ms-2"
+                                (click)="toggleExpandAll()">
+                                <i class="uil me-1"
+                                    [ngClass]="isAllExpanded ? 'uil-compress-lines' : 'uil-expand-arrows'"></i>
+                                {{isAllExpanded ? 'Collapse All' : 'Expand All'}}
+                            </span>
                         </div>
                         <div class="col-8" *ngIf="aawakData.length">
                             <pagination-controls class="pagi text-end" (pageChange)="getAawakPage(page = $event)"
@@ -408,9 +497,9 @@
                             </pagination-controls>
                         </div>
                     </div>
-                    <div class="table-container" appHorizontalScrollWithArrows [appTableSmartCheckbox]="'aawak-new'"
-                        [idField]="'temp_id'" [selectionData]="aawakData" [showCheckboxes]="true"
-                        [rowSelector]="'tbody > tr.main-row'">
+                    <div class="table-container" style="min-height: 450px;" appHorizontalScrollWithArrows
+                        [appTableSmartCheckbox]="'aawak-new'" [idField]="'temp_id'" [selectionData]="aawakData"
+                        [showCheckboxes]="true" [rowSelector]="'tbody > tr.main-row'">
                         <table id="datatable-buttons"
                             class="table table-sm table-hover dt-responsive table-sticky-header" #TABLE>
                             <thead>
@@ -423,31 +512,155 @@
                                     </th>
                                     <th style="width: 110px;">Manage</th>
                                     <th style="width: 110px;">Voucher No</th>
-                                    <th style="width: 110px;" *ngIf="settings.aawak.pkt_num">Pkt No.</th>
-                                    <th style="width: 140px;" class="text-start ps-2">
+                                    <th style="width: 110px;" *ngIf="settings.aawak.pkt_num">
                                         <div class="d-flex align-items-center justify-content-between">
-                                            <span>Date</span>
+                                            <span>Pkt No.</span>
                                             <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
-                                                direction="right"
-                                                [isOpen]="!!filterBody.date_from || !!filterBody.date_to || !!filterBody.date"
-                                                (clear)="filterBody.date = null; filterBody.date_from = null; filterBody.date_to = null; getFilteredData()"
+                                                direction="right" [isOpen]="!!filterBody.pkt_num"
+                                                (clear)="filterBody.pkt_num = null; getFilteredData()"
                                                 triggerOn="click">
-                                                <div style="width: 280px;">
-                                                    <label class="form-label mb-1"><small>Date From</small></label>
-                                                    <input type="date" class="form-control form-control-sm mb-2"
-                                                        [(ngModel)]="filterBody.date_from" (change)="getFilteredData()">
-                                                    <label class="form-label mb-1"><small>Date To</small></label>
-                                                    <input type="date" class="form-control form-control-sm"
-                                                        [(ngModel)]="filterBody.date_to" (change)="getFilteredData()">
+                                                <div style="width: 160px;">
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        placeholder="Pkt No..." [(ngModel)]="filterBody.pkt_num"
+                                                        (change)="getFilteredData()">
                                                 </div>
                                             </app-popover-filter>
                                         </div>
                                     </th>
-                                    <th style="width: 250px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
-                                    <th style="width: 250px;">Aawak Mm</th>
-                                    <th style="width: 300px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
+                                    <th style="width: 160px;" class="text-start ps-2">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Date</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="right"
+                                                [isOpen]="!!filterBody.date_from || !!filterBody.date_to || !!filterBody.date || !!filterBody.year || !!filterBody.month_from || !!filterBody.month_to"
+                                                (clear)="filterBody.date = null; filterBody.date_from = null; filterBody.date_to = null; filterBody.year = null; filterBody.month_from = null; filterBody.month_to = null; getFilteredData()"
+                                                triggerOn="click">
+                                                <div style="width: 290px;" class="p-1">
+                                                    <div class="row g-2 mb-2">
+                                                        <div class="col-6">
+                                                            <label class="form-label mb-1"><small class="fw-bold">Date
+                                                                    From</small></label>
+                                                            <input type="date" class="form-control form-control-sm"
+                                                                [(ngModel)]="filterBody.date_from"
+                                                                (change)="getFilteredData()">
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label class="form-label mb-1"><small class="fw-bold">Date
+                                                                    To</small></label>
+                                                            <input type="date" class="form-control form-control-sm"
+                                                                [(ngModel)]="filterBody.date_to"
+                                                                (change)="getFilteredData()">
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="form-label mb-1"><small
+                                                                class="fw-bold">Year</small></label>
+                                                        <ng-select placeholder="Select Year" class="custom-sm"
+                                                            [clearable]="true" appendTo="body"
+                                                            [(ngModel)]="filterBody.year"
+                                                            (change)="onMonthRangeChange(); getFilteredData()">
+                                                            <ng-option *ngFor="let yr of gs.years"
+                                                                [value]="yr">{{yr}}</ng-option>
+                                                        </ng-select>
+                                                    </div>
+                                                    <div class="row g-2">
+                                                        <div class="col-6">
+                                                            <label class="form-label mb-1"><small class="fw-bold">From
+                                                                    Month</small></label>
+                                                            <ng-select placeholder="From Month" class="custom-sm"
+                                                                [clearable]="true" appendTo="body"
+                                                                [(ngModel)]="filterBody.month_from"
+                                                                (change)="onMonthRangeChange(); getFilteredData()">
+                                                                <ng-option *ngFor="let m of gs.months"
+                                                                    [value]="m.m">{{m.m}} - {{m.name_hin}}</ng-option>
+                                                            </ng-select>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label class="form-label mb-1"><small class="fw-bold">To
+                                                                    Month</small></label>
+                                                            <ng-select placeholder="To Month" class="custom-sm"
+                                                                [clearable]="true" appendTo="body"
+                                                                [(ngModel)]="filterBody.month_to"
+                                                                (change)="onMonthRangeChange(); getFilteredData()">
+                                                                <ng-option *ngFor="let m of gs.months"
+                                                                    [value]="m.m">{{m.m}} - {{m.name_hin}}</ng-option>
+                                                            </ng-select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th style="width: 250px;" *ngIf="auth.webUser.dept_id != 2">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Mm</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="right"
+                                                [isOpen]="filterBody.mm_id && filterBody.mm_id.length > 0"
+                                                (clear)="filterBody.mm_id = []; getFilteredData()" triggerOn="click">
+                                                <ng-select [multiple]="true" placeholder="Select MM" class="custom-sm"
+                                                    style="width: 220px;" appendTo="body" [(ngModel)]="filterBody.mm_id"
+                                                    (change)="getFilteredData()">
+                                                    <ng-option *ngFor="let item of mms" [value]="item._id">
+                                                        {{item.mm_hin}} : {{item.mm_eng}}
+                                                    </ng-option>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th style="width: 250px;">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Aawak Mm</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="right"
+                                                [isOpen]="filterBody.aj_mm_id && filterBody.aj_mm_id.length > 0"
+                                                (clear)="filterBody.aj_mm_id = []; getFilteredData()" triggerOn="click">
+                                                <ng-select [multiple]="true" placeholder="Select Aawak MM"
+                                                    class="custom-sm" style="width: 220px;" appendTo="body"
+                                                    [(ngModel)]="filterBody.aj_mm_id" (change)="getFilteredData()">
+                                                    <ng-option *ngFor="let item of mms" [value]="item._id">
+                                                        {{item.mm_hin}} : {{item.mm_eng}}
+                                                    </ng-option>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
+                                    <th style="width: 300px;" *ngIf="settings.aawak.pbk_id">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Pbk</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="right"
+                                                [isOpen]="filterBody.pbk_id && filterBody.pbk_id.length > 0"
+                                                (clear)="filterBody.pbk_id = []; getFilteredData()" triggerOn="click">
+                                                <ng-select [multiple]="true" placeholder="Select PBK" class="custom-sm"
+                                                    style="width: 250px;" appendTo="body"
+                                                    [(ngModel)]="filterBody.pbk_id" (change)="getFilteredData()">
+                                                    <ng-option *ngFor="let item of pbks" [value]="item._id">
+                                                        {{item.roll_no ? item.roll_no + ' - ' : ''}}{{item.pbk_hin}}
+                                                    </ng-option>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
                                     <th style="width: 350px;" *ngIf="settings.aawak.description">Description</th>
-                                    <th style="width: 250px;" *ngIf="settings.aawak.nimitt_id">Nimitt</th>
+                                    <th style="width: 250px;" *ngIf="settings.aawak.nimitt_id">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Nimitt</span>
+                                            <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter"
+                                                direction="right"
+                                                [isOpen]="filterBody.nimitt_id && filterBody.nimitt_id.length > 0"
+                                                (clear)="filterBody.nimitt_id = []; getFilteredData()"
+                                                triggerOn="click">
+                                                <ng-select [multiple]="true" placeholder="Select Nimitt"
+                                                    class="custom-sm" style="width: 220px;" appendTo="body"
+                                                    [(ngModel)]="filterBody.nimitt_id" (change)="getFilteredData()">
+                                                    <ng-option *ngFor="let item of nimitts" [value]="item._id">
+                                                        {{item.nimitt_hin}} : {{item.nimitt_eng}}
+                                                    </ng-option>
+                                                </ng-select>
+                                            </app-popover-filter>
+                                        </div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -457,192 +670,206 @@
                                         aria-expanded="true" [attr.aria-controls]="'collapseExample-'+i"
                                         class="main-row">
                                         <td>
-                                            {{itemsPerPage * (page-1) + i+1}}
-                                            <!-- <input type="checkbox" [(ngModel)]="data.hl" id="{{'hl_'+data._id}}"
-                                                    data-switch="none" (change)="hlChanged(data)" />
-                                                <label for="{{'hl_'+data._id}}" class="chk-sm"></label> -->
-                                        </td>
-                                        <td [id]="i === 0 ? 'tour-row-manage' : null">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <button class="btn btn-sm btn-primary" type="button"
-                                                    (click)="edit(data)"><i class="uil uil-pen"></i></button><br>
-                                                <button class="btn btn-sm btn-danger" type="button"
-                                                    (click)="delete(i,data.voucher_no)" *ngIf="!data.is_auto_pd"><i
-                                                        class="uil-trash"></i></button>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <i class="uil uil-chevron-down collapse-icon text-primary me-1"
+                                                    style="font-size: 15px; transition: transform 0.2s;"></i>
+                                                <span class="fw-semibold">{{itemsPerPage * (page-1) + i+1}}</span>
                                             </div>
-
-                                            <!-- <div class="d-flex justify-content-between mb-1">
-                                                    <button *ngIf="data.remaining_qty > 0" class="btn btn-sm btn-warning"
-                                                        (click)="addJawak(data)">
-                                                        <i class="mdi mdi-plus noti-icon"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-warning"
-                                                        (click)="showJawak(data._id)">
-                                                        <i class="dripicons-view-list noti-icon"></i>
-                                                    </button>
-                                                </div> -->
+                                        </td>
+                                        <td [id]="i === 0 ? 'tour-row-manage' : null"
+                                            (click)="$event.stopPropagation()">
+                                            <div class="d-flex align-items-center gap-1">
+                                                <button class="btn btn-action-icon btn-primary" type="button"
+                                                    title="Edit Voucher" (click)="edit(data)"><i
+                                                        class="uil uil-pen"></i></button>
+                                                <button class="btn btn-action-icon btn-danger" type="button"
+                                                    title="Delete Voucher" (click)="delete(i,data.voucher_no)"
+                                                    *ngIf="!data.is_auto_pd"><i class="uil uil-trash-alt"></i></button>
+                                            </div>
                                         </td>
 
-                                        <td>{{data.voucher_no?data.voucher_no:'-'}}</td>
-                                        <td *ngIf="settings.aawak.pkt_num">{{data.pkt_num?data.pkt_num:'-'}}</td>
-                                        <td>{{data.date | date:'dd-MM-yyyy'}}</td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary fw-bold px-2 py-1"
+                                                style="font-size: 12px;">
+                                                {{data.voucher_no ? data.voucher_no : '-'}}
+                                            </span>
+                                        </td>
+                                        <td *ngIf="settings.aawak.pkt_num">{{data.pkt_num ? data.pkt_num : '-'}}</td>
+                                        <td class="fw-semibold">{{data.date | date:'dd-MM-yyyy'}}</td>
                                         <td *ngIf="auth.webUser.dept_id != 2">
-                                            <span>{{data.mm_hin}} - {{data.mm_code}}</span> <br />
+                                            <span class="fw-bold">{{data.mm_hin}} - {{data.mm_code}}</span> <br />
                                             <small class="text-muted">{{data.mm_eng}}</small>
                                         </td>
                                         <td>
                                             <div *ngIf="data.aawak_mm_id">
-                                                <span>{{data.aawak_mm_hin}} - {{data.aawak_mm_code}}</span> <br />
+                                                <span class="fw-bold">{{data.aawak_mm_hin}} -
+                                                    {{data.aawak_mm_code}}</span> <br />
                                                 <small class="text-muted">{{data.aawak_mm_eng}}</small>
                                             </div>
-                                            <span *ngIf="!data.aawak_mm_id">-</span>
+                                            <span *ngIf="!data.aawak_mm_id" class="text-muted">-</span>
                                         </td>
                                         <td *ngIf="settings.aawak.pbk_id">
                                             <div *ngIf="data.pbk_id">
-                                                <span>{{data.roll_no ? data.roll_no : '___'}} -
+                                                <span class="fw-bold">{{data.roll_no ? data.roll_no : '___'}} -
                                                     {{data.pbk_hin}}</span> <br />
-                                                <small class="text-muted">{{data.relation}} {{data.relative_name ? "
-                                                    - "+data.relative_name: ''}}</small>
+                                                <small class="text-muted">{{data.relation}} {{data.relative_name ? "- "
+                                                    + data.relative_name : ''}}</small>
                                             </div>
-                                            <span *ngIf="!data.pbk_id">-</span>
+                                            <span *ngIf="!data.pbk_id" class="text-muted">-</span>
                                         </td>
-                                        <td *ngIf="settings.aawak.description">
-                                            {{data.description?data.description:'-'}}
+                                        <td *ngIf="settings.aawak.description" style="max-width: 250px;">
+                                            <div style="max-width: 250px; max-height: 60px; overflow-y: auto; word-break: break-word; overflow-wrap: anywhere;"
+                                                [title]="data.description || ''">
+                                                {{data.description ? data.description : '-'}}
+                                            </div>
                                         </td>
                                         <td *ngIf="settings.aawak.nimitt_id">
-                                            {{data.nimitt_id?data.nimitt_hin:'-'}}<br />
-                                            {{data.nimitt_id? '(' + data.nimitt_state_hin + ')': ''}}
+                                            <span class="fw-semibold">{{data.nimitt_id ? data.nimitt_hin :
+                                                '-'}}</span><br />
+                                            <small class="text-muted">{{data.nimitt_id ? '(' + data.nimitt_state_hin +
+                                                ')' : ''}}</small>
                                         </td>
                                     </tr>
                                     <ng-container *ngIf="data.aawaks && data.aawaks.length > 0">
-                                        <tr class="collapse show ribbon-box">
+                                        <tr class="collapse sub-row-collapse" [id]="'collapseExample-'+i">
                                             <td style="border: none;"></td>
                                             <td colspan="100" class="sub-row">
-                                                <table class="table-sm table-bordered table-hover dt-responsive w-100">
-                                                    <tr class="aawak-header">
-                                                        <th style="width: 80px;">Manage</th>
-                                                        <th *ngIf="settings.aawak.lot_no">Lot No</th>
-                                                        <th>Item - Subitem</th>
-                                                        <th *ngIf="settings.aawak.product_id">Product</th>
-                                                        <th *ngIf="settings.aawak.condition_id">Condition</th>
-                                                        <th *ngIf="settings.aawak.company_name">Company</th>
-                                                        <th>Quantity</th>
-                                                        <th *ngIf="settings.aawak.actual_amt">Actual Amt</th>
-                                                        <th>Usage List</th>
-                                                        <th *ngIf="settings.aawak.item_detail">Item Detail</th>
-                                                        <th *ngIf="settings.aawak.document">Images</th>
-                                                        <th>Flags</th>
-                                                        <th *ngIf="settings.aawak.enz">Enzyme Container Details</th>
-
-                                                    </tr>
-                                                    <tr *ngFor="let awk of data.aawaks; let j = index;"
-                                                        class="aawak-row" title="Click on Row to Edit"
-                                                        [ngClass]="{'hl': awk.hl}">
-                                                        <td class="text-center p-1">
-                                                            <div
-                                                                class="d-flex align-items-center justify-content-between p-0 px-1">
-                                                                <span class="text-muted"
-                                                                    style="font-size: 10px;">#{{j+1}}</span>
-                                                                <i class="uil uil-trash text-danger p-0 cursor-pointer"
-                                                                    title="Delete Row"
-                                                                    (click)="deleteOne(i, j, awk._id)"></i>
-                                                            </div>
-                                                            <div
-                                                                class="d-flex align-items-center justify-content-center p-0 pt-1">
-                                                                <i class="mdi mdi-plus i-outline-warning cursor-pointer me-1"
-                                                                    title="Add Jawak" *ngIf="awk.remaining_qty > 0"
-                                                                    style="font-size: 12px;" (click)=" addJawak(awk)">
-                                                                    Jawak </i>
-
-                                                                <button *ngIf="awk.jawak_detail?.length > 0"
-                                                                    class="btn btn-sm btn-outline-warning p-0 py-1 lh-1 d-flex align-items-center justify-content-center"
-                                                                    style="font-size: 10px; min-width: 48px; border-radius: 3px;"
-                                                                    (click)="showJawak(awk)"
-                                                                    [title]="'Total Jawak Qty: ' + getJawakQty(awk)">
-                                                                    <span class="px-1"
-                                                                        style="font-weight: 600;">J-{{awk.jawak_detail.length}}</span>
-                                                                    <span class="px-1"
-                                                                        style="border-left: 1px solid rgba(255,193,7,0.3); font-weight: 600;">Q-{{getJawakQty(awk)}}</span>
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                        <td *ngIf="settings.aawak.lot_no">{{awk.lot_no ? awk.lot_no
-                                                            :
-                                                            '-'}}</td>
-                                                        <td>
-                                                            <span>{{awk.item_hin}} {{awk.subitem_id ? ' : ' +
-                                                                awk.subitem_hin : ''}}</span> <br />
-                                                            <small class="text-muted">{{awk.item_eng}}
-                                                                {{awk.subitem_id ? ' : ' +
-                                                                awk.subitem_eng : ''}}</small>
-                                                        </td>
-                                                        <td *ngIf="settings.aawak.product_id">
-                                                            {{awk.product_id ? (awk.product_code ? awk.product_code
-                                                            :
-                                                            '') : ''}} <br />
-                                                            {{(awk.product_id ? (awk.sr_num ? awk.sr_num : '') :
-                                                            '')}}
-                                                        </td>
-                                                        <td *ngIf="settings.aawak.condition_id">
-                                                            <div *ngIf="awk.condition_id">
-                                                                <span>{{awk.condition_hin}}</span> <br />
-                                                                <small class="text-muted">{{awk.condition_eng}}</small>
-                                                            </div>
-                                                        </td>
-                                                        <td *ngIf="settings.aawak.company_name">
-                                                            {{awk.company_name ? awk.company_name : ''}}
-                                                        </td>
-                                                        <td>
-                                                            {{awk.qty}} {{awk.unit_short}} <br />
-                                                            <span style="font-weight:bold; color: red;"
-                                                                *ngIf="awk.remaining_qty != 0">
-                                                                बचत: {{awk.remaining_qty}}
-                                                            </span>
-                                                        </td>
-                                                        <td *ngIf="settings.aawak.actual_amt">
-                                                            @ {{awk.rate?awk.rate:'-'}} <br>
-                                                            = {{awk.actual_amt?awk.actual_amt:'-'}}
-                                                        </td>
-                                                        <td>
-                                                            {{awk.usage_list_id ? awk.list_name_hin : ''}}
-                                                        </td>
-                                                        <td *ngIf="settings.aawak.item_detail">
-                                                            <div style="max-height: 80px; overflow-y: auto; word-break: break-word;"
-                                                                [title]="awk.item_detail || ''">
-                                                                {{awk.item_detail?awk.item_detail:'-'}}
-                                                            </div>
-                                                        </td>
-                                                        <td *ngIf="settings.aawak.document"><img
-                                                                *ngIf="awk.document && awk.document.images"
-                                                                (click)="showImages(awk)"
-                                                                [src]="baseurl + awk.document.images[0]" height="50px"
-                                                                style="cursor: pointer; border-radius: 10px;"></td>
-                                                        <td>Flags</td>
-                                                        <td class="d-flex justify-content-between">
-                                                            <div>
-                                                                <span class="badge badge-outline-secondary">Awk
-                                                                    Src</span>
-                                                                {{awk.enz && awk.enz.container_aawak_source_id?
-                                                                awk.enz.container_aawak_source_hin:'-'}} <br />
-                                                                <span class="badge badge-outline-secondary">Enz
-                                                                    No</span> {{awk.enz &&
-                                                                awk.enz.container_enz_no
-                                                                ?
-                                                                awk.enz.container_enz_no : ''}}
-                                                            </div>
-                                                            <div>
-                                                                <span
-                                                                    class="badge badge-outline-secondary">Capacity</span>
-                                                                {{awk.enz && awk.enz.container_capacity?
-                                                                awk.enz.container_capacity + " Ltr":'-'}} <br />
-                                                                <span
-                                                                    class="badge badge-outline-secondary">Quantity</span>
-                                                                {{awk.enz && awk.enz.container_qty ?
-                                                                awk.enz.container_qty + "Ltr": ''}}
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                </table>
+                                                <div class="aawak-sub-table p-0">
+                                                    <table class=" table-compact table-hover w-100 mb-0">
+                                                        <thead>
+                                                            <tr class="aawak-header">
+                                                                <th style="width: 145px;">Manage</th>
+                                                                <th *ngIf="settings.aawak.lot_no">Lot No</th>
+                                                                <th>Item - Subitem</th>
+                                                                <th *ngIf="settings.aawak.product_id">Product</th>
+                                                                <th *ngIf="settings.aawak.condition_id">Condition</th>
+                                                                <th *ngIf="settings.aawak.company_name">Company</th>
+                                                                <th>Quantity</th>
+                                                                <th *ngIf="settings.aawak.actual_amt">Actual Amt</th>
+                                                                <th *ngIf="settings.aawak.usage_list_id">Usage List</th>
+                                                                <th *ngIf="settings.aawak.item_detail">Item Detail</th>
+                                                                <th *ngIf="settings.aawak.document">Images</th>
+                                                                <th>Flags</th>
+                                                                <th *ngIf="settings.aawak.enz">Enzyme Container Details</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr *ngFor="let awk of data.aawaks; let j = index;"
+                                                                class="aawak-row" title="Click on Row to Edit"
+                                                                [ngClass]="{'hl': awk.hl}">
+                                                                <td class="p-1"
+                                                                    style="vertical-align: middle; white-space: nowrap;">
+                                                                    <div class="d-flex align-items-center gap-1">
+                                                                        <span
+                                                                            class="badge bg-secondary-subtle text-secondary px-1"
+                                                                            style="font-size: 10px;">#{{j+1}}</span>
+                                                                        <button *ngIf="awk.remaining_qty > 0"
+                                                                            class="btn btn-xs btn-outline-warning py-0 px-2 font-size-12 fw-bold"
+                                                                            title="Add Jawak"
+                                                                            (click)="$event.stopPropagation(); addJawak(awk)">
+                                                                            +
+                                                                        </button>
+                                                                        <button *ngIf="awk.jawak_detail?.length > 0"
+                                                                            class="btn btn-xs btn-outline-warning p-0 px-1 text-center"
+                                                                            style="font-size: 10px; line-height: 1.1; border-radius: 4px; white-space: nowrap !important;"
+                                                                            (click)="$event.stopPropagation(); showJawak(awk)"
+                                                                            [title]="'Total Jawak Qty: ' + getJawakQty(awk)">
+                                                                            <div
+                                                                                style="font-weight: 700; white-space: nowrap;">
+                                                                                J-{{awk.jawak_detail.length}}</div>
+                                                                            <div
+                                                                                style="font-weight: 600; font-size: 9px; opacity: 0.9; white-space: nowrap;">
+                                                                                Q-{{getJawakQty(awk)}}</div>
+                                                                        </button>
+                                                                        <i class="uil uil-trash-alt text-danger ms-auto cursor-pointer font-size-14"
+                                                                            title="Delete Row"
+                                                                            (click)="$event.stopPropagation(); deleteOne(i, j, awk._id)"></i>
+                                                                    </div>
+                                                                </td>
+                                                                <td *ngIf="settings.aawak.lot_no">{{awk.lot_no ?
+                                                                    awk.lot_no : '-'}}</td>
+                                                                <td>
+                                                                    <span class="fw-semibold">{{awk.item_hin}}
+                                                                        {{awk.subitem_id ? ' : ' + awk.subitem_hin :
+                                                                        ''}}</span> <br />
+                                                                    <small class="text-muted">{{awk.item_eng}}
+                                                                        {{awk.subitem_id ? ' : ' + awk.subitem_eng :
+                                                                        ''}}</small>
+                                                                </td>
+                                                                <td *ngIf="settings.aawak.product_id">
+                                                                    {{awk.product_id ? (awk.product_code ?
+                                                                    awk.product_code : '') : ''}} <br />
+                                                                    <small class="text-muted">{{(awk.product_id ?
+                                                                        (awk.sr_num ? awk.sr_num : '') : '')}}</small>
+                                                                </td>
+                                                                <td *ngIf="settings.aawak.condition_id">
+                                                                    <div *ngIf="awk.condition_id">
+                                                                        <span>{{awk.condition_hin}}</span> <br />
+                                                                        <small
+                                                                            class="text-muted">{{awk.condition_eng}}</small>
+                                                                    </div>
+                                                                </td>
+                                                                <td *ngIf="settings.aawak.company_name">
+                                                                    {{awk.company_name ? awk.company_name : '-'}}
+                                                                </td>
+                                                                <td>
+                                                                    <div class="fw-bold">{{awk.qty}} <small
+                                                                            class="text-muted">{{awk.unit_short}}</small>
+                                                                    </div>
+                                                                    <span class="badge-stock mt-1 d-inline-block"
+                                                                        *ngIf="awk.remaining_qty != 0">
+                                                                        बचत: {{awk.remaining_qty}}
+                                                                    </span>
+                                                                </td>
+                                                                <td *ngIf="settings.aawak.actual_amt">
+                                                                    <small class="text-muted">@</small> {{awk.rate ?
+                                                                    awk.rate : '-'}} <br>
+                                                                    <small class="text-muted">=</small> {{awk.actual_amt
+                                                                    ? awk.actual_amt : '-'}}
+                                                                </td>
+                                                                <td>
+                                                                    {{awk.usage_list_id ? awk.list_name_hin : '-'}}
+                                                                </td>
+                                                                <td *ngIf="settings.aawak.item_detail"
+                                                                    style="max-width: 250px;">
+                                                                    <div style="max-width: 250px; max-height: 60px; overflow-y: auto; word-break: break-word; overflow-wrap: anywhere;"
+                                                                        [title]="awk.item_detail || ''">
+                                                                        {{awk.item_detail ? awk.item_detail : '-'}}
+                                                                    </div>
+                                                                </td>
+                                                                <td *ngIf="settings.aawak.document">
+                                                                    <img *ngIf="awk.document && awk.document.images"
+                                                                        (click)="$event.stopPropagation(); showImages(awk)"
+                                                                        [src]="baseurl + awk.document.images[0]"
+                                                                        height="45px"
+                                                                        style="cursor: pointer; border-radius: 6px;">
+                                                                </td>
+                                                                <td>Flags</td>
+                                                                <td *ngIf="settings.aawak.enz">
+                                                                    <div class="d-flex flex-column gap-1"
+                                                                        style="font-size: 11px;">
+                                                                        <div><span
+                                                                                class="badge bg-secondary-subtle text-secondary me-1">Awk
+                                                                                Src</span> {{awk.enz &&
+                                                                            awk.enz.container_aawak_source_id ?
+                                                                            awk.enz.container_aawak_source_hin : '-'}}
+                                                                        </div>
+                                                                        <div><span
+                                                                                class="badge bg-secondary-subtle text-secondary me-1">Enz
+                                                                                No</span> {{awk.enz &&
+                                                                            awk.enz.container_enz_no ?
+                                                                            awk.enz.container_enz_no : '-'}}</div>
+                                                                        <div><span
+                                                                                class="badge bg-secondary-subtle text-secondary me-1">Capacity</span>
+                                                                            {{awk.enz && awk.enz.container_capacity ?
+                                                                            awk.enz.container_capacity + " Ltr" : '-'}}
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </td>
                                         </tr>
                                     </ng-container>

@@ -241,7 +241,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
     try {
         const { attribute_id, attribute_value_id } = req.body;
         let variants = [];
-        
+
         if (attribute_id && attribute_id.length > 0) {
             const idsStr = attribute_id.join(',');
             variants = db.prepare(`
@@ -263,7 +263,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
                 GROUP BY v._id
             `).all();
         }
-        
+
         res.json({ success: true, result: variants, total_count: variants.length });
     } catch (e) { next(e); }
 });

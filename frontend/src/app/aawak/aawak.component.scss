@@ -1,5 +1,5 @@
 .sub-row {
-   background-color: #4956f108;
+    background-color: #4956f108;
 }
 
 // .main-row {
@@ -8,26 +8,26 @@
 // }
 
 .file {
-   position: relative;
-   overflow: hidden;
+    position: relative;
+    overflow: hidden;
 }
 
 .inputtag {
-   position: absolute;
-   // font-size: 50px;
-   opacity: 0;
-   right: 0;
-   top: 0;
+    position: absolute;
+    // font-size: 50px;
+    opacity: 0;
+    right: 0;
+    top: 0;
 }
 
 .auto {
-   border-left: 4px solid #00586a;
-   background-color: rgba(0, 88, 106, 0.1);
+    border-left: 4px solid #00586a;
+    background-color: rgba(0, 88, 106, 0.1);
 }
 
 .xl {
-   border-left: 4px solid #61f383;
-   background-color: rgba(97, 243, 131, 0.1);
+    border-left: 4px solid #61f383;
+    background-color: rgba(97, 243, 131, 0.1);
 }
 
 // .hl {
@@ -44,35 +44,35 @@
 // }
 
 .chk-sm {
-   width: 40px;
-   height: 19px;
-   background-color: #dfdaeb;
-   background-image: none;
-   border-radius: 2rem;
-   cursor: pointer;
-   display: inline-block;
-   text-align: center;
-   position: relative;
-   -webkit-transition: all .1s ease-in-out;
-   transition: all .1s ease-in-out;
+    width: 40px;
+    height: 19px;
+    background-color: #dfdaeb;
+    background-image: none;
+    border-radius: 2rem;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    position: relative;
+    -webkit-transition: all .1s ease-in-out;
+    transition: all .1s ease-in-out;
 }
 
 .chk-sm:after {
-   content: '';
-   position: absolute;
-   left: 4px;
-   // background-color: #aab8c5;
-   -webkit-box-shadow: none;
-   box-shadow: none;
-   border-radius: 2rem;
-   height: 13px;
-   width: 13px;
-   top: 3px;
-   -webkit-transition: all .1s ease-in-out;
-   transition: all .1s ease-in-out;
+    content: '';
+    position: absolute;
+    left: 4px;
+    // background-color: #aab8c5;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    border-radius: 2rem;
+    height: 13px;
+    width: 13px;
+    top: 3px;
+    -webkit-transition: all .1s ease-in-out;
+    transition: all .1s ease-in-out;
 }
 
 input[type="checkbox"]:checked+label.chk-sm:after {
-   left: 24px !important;
-   // background-color: #404954;
+    left: 24px !important;
+    // background-color: #404954;
 }

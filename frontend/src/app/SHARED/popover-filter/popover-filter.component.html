@@ -6,7 +6,7 @@
         <span *ngIf="label" class="ms-1">{{label}}</span>
     </button>
 
-    <div class="popover-container" style="position: absolute; top: 100%; z-index: 1050;" *ngIf="isOpen">
+    <div class="popover-container" style="position: absolute; top: 100%; z-index: 9999;" *ngIf="isOpen">
         <div class="filter-backdrop" (click)="closePopover()" *ngIf="triggerOn === 'click'"></div>
         <div class="filter-popover" [ngStyle]="popoverPosition" (mouseenter)="triggerOn === 'hover' && openPopover()"
             (mouseleave)="triggerOn === 'hover' && hoverClose()">

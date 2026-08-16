@@ -71,7 +71,8 @@
                      <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
                      </ng-option>
                      <ng-option *ngFor="let item of pbks" [value]="item._id">
-                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} : {{item.relation}} :
+                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' +
+                        item.pbk_eng : ''}} : {{item.relation}} :
                         {{item.relative_name}}
                      </ng-option>
                   </ng-select>
@@ -248,7 +249,8 @@
                      <ng-option selected="selected" disabled value="">Select Roll no. or Pbk name
                      </ng-option>
                      <ng-option *ngFor="let item of pbks" [value]="item._id">
-                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' + item.pbk_eng : ''}} : {{item.relation}} :
+                        {{item.roll_no ? item.roll_no : '______'}} - {{item.pbk_hin}}{{item.pbk_eng ? ' : ' +
+                        item.pbk_eng : ''}} : {{item.relation}} :
                         {{item.relative_name}}
                      </ng-option>
                   </ng-select>
@@ -403,7 +405,7 @@
                </div>
             </div>
 
-            <div class="col-md-2 mb-3">
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.rate">
                <div class="form-group">
                   <label class="form-label">Rate</label>
                   <div class="input-group">
@@ -414,7 +416,7 @@
                </div>
             </div>
 
-            <div class="col-md-2 mb-3">
+            <div class="col-md-2 mb-3" *ngIf="settings.aawak.actual_amt">
                <div class="form-group">
                   <label class="form-label">Amount</label>
                   <input type="text" class="form-control" placeholder="Amount" [(ngModel)]="awkfg.actual_amt"
@@ -438,9 +440,9 @@
                         + Type
                      </a>
                   </div>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Aawak Source" [clearable]="true"
-                     [virtualScroll]="true" [(ngModel)]="awkfg.aawak_source_id" name="aawak_source_id"
-                     #aawak_source_id="ngModel">
+                  <ng-select *ngIf="settings.aawak.aawak_source_id" class="custom" style="width: 100%;"
+                     placeholder="Aawak Source" [clearable]="true" [virtualScroll]="true"
+                     [(ngModel)]="awkfg.aawak_source_id" name="aawak_source_id" #aawak_source_id="ngModel">
                      <ng-option selected="selected" disabled value="">Aawak Source
                      </ng-option>
                      <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
@@ -461,7 +463,7 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-3 mb-3" *ngIf="settings.aawak.usage_list_id">
                <div class="form-group">
                   <label class="form-label">Usage List</label>
                   <ng-select class="custom" style="width: 100%;" placeholder="Usage List" [clearable]="true"
@@ -564,42 +566,44 @@
                </div>
             </div>
 
-            <div class="col-md-3 mb-3">
-               <div class="form-group">
-                  <label class="form-label">Container Aawak Source</label>
-                  <ng-select class="custom" style="width: 100%;" placeholder="Select Container Aawak Source"
-                     [clearable]="true" [virtualScroll]="true" [(ngModel)]="awkfg.enz.container_aawak_source_id"
-                     name="container_aawak_source_id">
-                     <ng-option selected="selected" disabled value="">Select Container Aawak Source</ng-option>
-                     <ng-option *ngFor="let item of aawak_sources" [value]="item._id">{{item.list_name_hin}} :
-                        {{item.list_name_eng}}</ng-option>
-                  </ng-select>
+            <ng-container *ngIf="settings.aawak.enz">
+               <div class="col-md-3 mb-3">
+                  <div class="form-group">
+                     <label class="form-label">Container Aawak Source</label>
+                     <ng-select class="custom" style="width: 100%;" placeholder="Select Container Aawak Source"
+                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="awkfg.enz.container_aawak_source_id"
+                        name="container_aawak_source_id">
+                        <ng-option selected="selected" disabled value="">Select Container Aawak Source</ng-option>
+                        <ng-option *ngFor="let item of aawak_sources" [value]="item._id">{{item.list_name_hin}} :
+                           {{item.list_name_eng}}</ng-option>
+                     </ng-select>
+                  </div>
                </div>
-            </div>
 
-            <div class="col-md-2 mb-3">
-               <div class="form-group">
-                  <label class="form-label">Container Enz No</label>
-                  <input type="text" class="form-control" placeholder="Container Enz No"
-                     [(ngModel)]="awkfg.enz.container_enz_no" name="container_enz_no">
+               <div class="col-md-2 mb-3">
+                  <div class="form-group">
+                     <label class="form-label">Container Enz No</label>
+                     <input type="text" class="form-control" placeholder="Container Enz No"
+                        [(ngModel)]="awkfg.enz.container_enz_no" name="container_enz_no">
+                  </div>
                </div>
-            </div>
 
-            <div class="col-md-2 mb-3">
-               <div class="form-group">
-                  <label class="form-label">Container Capacity</label>
-                  <input type="number" class="form-control" placeholder="Container Capacity"
-                     [(ngModel)]="awkfg.enz.container_capacity" name="container_capacity">
+               <div class="col-md-2 mb-3">
+                  <div class="form-group">
+                     <label class="form-label">Container Capacity</label>
+                     <input type="number" class="form-control" placeholder="Container Capacity"
+                        [(ngModel)]="awkfg.enz.container_capacity" name="container_capacity">
+                  </div>
                </div>
-            </div>
 
-            <div class="col-md-2 mb-3">
-               <div class="form-group">
-                  <label class="form-label">Container Qty</label>
-                  <input type="number" class="form-control" placeholder="Container Qty"
-                     [(ngModel)]="awkfg.enz.container_qty" name="container_qty">
+               <div class="col-md-2 mb-3">
+                  <div class="form-group">
+                     <label class="form-label">Container Qty</label>
+                     <input type="number" class="form-control" placeholder="Container Qty"
+                        [(ngModel)]="awkfg.enz.container_qty" name="container_qty">
+                  </div>
                </div>
-            </div>
+            </ng-container>
 
             <div class="col-md-3 mb-3">
                <div class="form-group">
@@ -749,10 +753,11 @@
                               [virtualScroll]="true" [(ngModel)]="jtype" [ngModelOptions]="{standalone: true}" required>
                               <ng-option selected="selected" disabled value="">Jawak Type
                               </ng-option>
-                               <ng-option *ngFor="let item of jawak_types"
-                                  [value]="{ id: item._id, list_name_hin: item.list_name_hin, list_name_eng: item.list_name_eng, list_name_roman: item.list_name_roman}">
-                                  {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng : ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
-                               </ng-option>
+                              <ng-option *ngFor="let item of jawak_types"
+                                 [value]="{ id: item._id, list_name_hin: item.list_name_hin, list_name_eng: item.list_name_eng, list_name_roman: item.list_name_roman}">
+                                 {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng :
+                                 ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
+                              </ng-option>
                            </ng-select>
                         </div>
                      </div>

@@ -62,6 +62,9 @@ export class ExcelImportComponent implements OnInit {
       if (this.activeCorrectionRow && typeof newId === 'string') {
         this.activeCorrectionRow.id = newId;
       }
+      if (this.showAddModal === 'Add Attribute') {
+        this.loadAttributes();
+      }
     }
     this.closeAddModal();
   }
@@ -107,6 +110,7 @@ export class ExcelImportComponent implements OnInit {
   aawak_types: any = [];
   jawak_types: any = [];
   nimitts: any = [];
+  attributes: any = [];
   excelArr: any = [];
   excelArrObj: any = [];
   headerList: any = [];
@@ -152,11 +156,21 @@ export class ExcelImportComponent implements OnInit {
       this.aawak_types = result.aawak_type ? result.aawak_type : [];
       this.jawak_types = result.jawak_type ? result.jawak_type : [];
       this.nimitts = result.nimitt ? result.nimitt : [];
+      if (result.attribute) this.attributes = result.attribute;
     });
     this.settings = this.auth.webUser.settings;
   }
 
+  loadAttributes() {
+    this.http.get(this.api.getUrl('VARIANT') + 'attributes').subscribe((d: any) => {
+      if (d && d.success) {
+        this.attributes = d.result || [];
+      }
+    });
+  }
+
   ngOnInit(): void {
+    this.loadAttributes();
     if (this.importType) {
       for (let i in this.EIService.importList) {
         if (this.EIService.importList[i].name == this.importType) {
@@ -352,20 +366,35 @@ export class ExcelImportComponent implements OnInit {
     this.isLoader = false;
   }
 
-  toggleCorrection(i: any, action: boolean) {
-    this.unmatchedData[i].correction = action;
+  isDropdownOpen: boolean = false;
 
-    if (action) {
-      if (this.unmatchedData[i].type == 'item' && this.unmatchedData[i].item) {
-        this.itemSelected(this.unmatchedData[i].item);
-      } else if (this.unmatchedData[i].type == 'item' && this.unmatchedData[i].id) {
-        let item = this.items.find((it: { _id: any; }) => it._id == this.unmatchedData[i].id);
-        this.unmatchedData[i].item = item;
-        this.itemSelected(this.unmatchedData[i].item);
+  onDropdownOpen() {
+    this.isDropdownOpen = true;
+  }
+
+  onDropdownClose() {
+    this.isDropdownOpen = false;
+  }
+
+  toggleCorrection(i: any, action: boolean) {
+    if (this.isDropdownOpen) {
+      return;
+    }
+    if (this.unmatchedData && this.unmatchedData[i]) {
+      this.unmatchedData[i].correction = action;
+
+      if (action) {
+        if (this.unmatchedData[i].type == 'item' && this.unmatchedData[i].item) {
+          this.itemSelected(this.unmatchedData[i].item);
+        } else if (this.unmatchedData[i].type == 'item' && this.unmatchedData[i].id) {
+          let item = this.items.find((it: { _id: any; }) => it._id == this.unmatchedData[i].id);
+          this.unmatchedData[i].item = item;
+          this.itemSelected(this.unmatchedData[i].item);
+        }
+      } else {
+        this.items = this.itemAll;
+        this.subitems = [];
       }
-    } else {
-      this.items = this.itemAll;
-      this.subitems = [];
     }
   }
 

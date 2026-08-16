@@ -31,10 +31,28 @@ export class AttributeEntryComponent implements OnInit {
 
     rows: any[] = [];
     isLoader = false;
-    
+
     delID: any = null;
     delType: any = null;
     showDelete: boolean = false;
+
+    showImportModal: boolean = false;
+    importType: string = 'attribute';
+
+    openImport(type: string) {
+        this.importType = type;
+        this.showImportModal = true;
+    }
+
+    closeImport() {
+        this.showImportModal = false;
+        this.loadRows();
+    }
+
+    onImportResponse(res: any) {
+        this.loadRows();
+        this.response.emit({ reload: true });
+    }
 
     constructor(
         private http: HttpService,

@@ -2927,6 +2927,8 @@ const conditions = {
     district_duplicate: `(district_eng = @district_eng OR district_hin = @district_hin) AND state_id = @state_id`,
     rel_item_category_duplicate: `item_id = @item_id AND category_id = @category_id`,
     rel_subitem_category_duplicate: `subitem_id = @subitem_id AND category_id = @category_id`,
+    attribute_duplicate: `attribute_hin = @attribute_hin OR (attribute_eng IS NOT NULL AND attribute_eng = @attribute_eng AND @attribute_eng != '') OR (attribute_roman IS NOT NULL AND attribute_roman = @attribute_roman AND @attribute_roman != '')`,
+    attributes_value_duplicate: `attribute_id = @attribute_id AND (attribute_value_hin = @attribute_value_hin OR (attribute_value_eng IS NOT NULL AND attribute_value_eng = @attribute_value_eng AND @attribute_value_eng != '') OR (attribute_value_roman IS NOT NULL AND attribute_value_roman = @attribute_value_roman AND @attribute_value_roman != ''))`,
 }
 
 genDeptDB = {
@@ -3129,11 +3131,30 @@ const rel_aawak_jawak = {
     insert: `insert into rel_aawak_jawak(aawak_id, jawak_id, qty, split_qty, is_split) values(@aawak_id, @jawak_id, @qty, @split_qty, @is_split)`
 }
 
+const attribute = {
+    select: `select * from attributes ?`,
+    select_full: `select * from attributes ? limit @limit offset @offset`,
+    insert: `insert into attributes(attribute_hin, attribute_eng, attribute_roman, active) values(@attribute_hin, @attribute_eng, @attribute_roman, @active)`,
+    import: `insert into attributes(attribute_hin, attribute_eng, attribute_roman, created_at, active) values(@attribute_hin, @attribute_eng, @attribute_roman, datetime('now','localtime'), @active)`,
+    update: `update attributes set attribute_hin=@attribute_hin, attribute_eng=@attribute_eng, attribute_roman=@attribute_roman, active=@active`
+}
+
+const attributes = attribute;
+
+const attributes_value = {
+    select: `select * from attributes_value ?`,
+    select_full: `select attributes_value.*, attr.attribute_hin, attr.attribute_eng from attributes_value left join attributes attr on attributes_value.attribute_id = attr._id ? limit @limit offset @offset`,
+    insert: `insert into attributes_value(attribute_id, attribute_value_hin, attribute_value_eng, attribute_value_roman, active) values(@attribute_id, @attribute_value_hin, @attribute_value_eng, @attribute_value_roman, @active)`,
+    import: `insert into attributes_value(attribute_id, attribute_value_hin, attribute_value_eng, attribute_value_roman, created_at, active) values(@attribute_id, @attribute_value_hin, @attribute_value_eng, @attribute_value_roman, datetime('now','localtime'), @active)`,
+    update: `update attributes_value set attribute_id=@attribute_id, attribute_value_hin=@attribute_value_hin, attribute_value_eng=@attribute_value_eng, attribute_value_roman=@attribute_value_roman, active=@active`
+}
+
 module.exports = {
     queryBuilder, country, city, category, department, department_config, item, itemmix, mm, nimitt, pbk, point, zone, district, state, subitem, subitem_list, support_list, unit, conditions,
     aawak, aawak_voucher, bachat, pbk_bachat, pbk_closing, jawak, jawak_voucher, bachat_new, temp_import, product, vehicle, vehicle_document,
     hmp_recipe, hmp_recipe_input, hmp_recipe_output, hmp_batch, hmp_batch_input, hmp_batch_output,
     aawak_enzyme, jawak_enzyme, usage_report,
     genDeptDB, excel_correction, dictionary, merge_history, reports, import_history, test, report_comment,
-    prastav, prastav_jawak, rel_item_category, rel_subitem_category, rel_aawak_jawak
+    prastav, prastav_jawak, rel_item_category, rel_subitem_category, rel_aawak_jawak,
+    attribute, attributes, attributes_value
 };

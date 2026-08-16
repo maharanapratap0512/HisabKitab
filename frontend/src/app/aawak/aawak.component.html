@@ -415,8 +415,9 @@
                      </pagination-controls>
                   </div>
                </div>
-               <div class="table-container" appHorizontalScrollWithArrows [appTableSmartCheckbox]="'aawak'"
-                  [selectionData]="aawakData" [showCheckboxes]="true" [rowSelector]="'tbody > tr.main-row'">
+               <div class="table-container" style="min-height: 450px;" appHorizontalScrollWithArrows
+                  [appTableSmartCheckbox]="'aawak'" [selectionData]="aawakData" [showCheckboxes]="true"
+                  [rowSelector]="'tbody > tr.main-row'">
                   <table id="datatable-buttons" class="table table-hover dt-responsive table-sticky-header" #TABLE>
                      <thead>
                         <tr>
@@ -429,38 +430,267 @@
                            <th style="width: 110px;">
                               Manage
                            </th>
-                           <th style="width: 70px;" *ngIf="settings.aawak.pkt_num">Pkt No.</th>
-                           <th style="width: 140px;" class="text-start ps-2">
+                           <th style="width: 100px;" *ngIf="settings.aawak.pkt_num">
                               <div class="d-flex align-items-center justify-content-between">
-                                 <span>Date</span>
+                                 <span>Pkt No.</span>
                                  <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
-                                    [isOpen]="!!filterBody.date_from || !!filterBody.date_to || !!filterBody.date"
-                                    (clear)="filterBody.date = null; filterBody.date_from = null; filterBody.date_to = null; getFilteredAawakData()"
-                                    triggerOn="click">
-                                    <div style="width: 180px;">
-                                       <label class="form-label mb-1"><small>Date From</small></label>
-                                       <input type="date" class="form-control form-control-sm mb-2"
-                                          [(ngModel)]="filterBody.date_from" (change)="getFilteredAawakData()">
-                                       <label class="form-label mb-1"><small>Date To</small></label>
-                                       <input type="date" class="form-control form-control-sm"
-                                          [(ngModel)]="filterBody.date_to" (change)="getFilteredAawakData()">
+                                    [isOpen]="!!filterBody.pkt_num"
+                                    (clear)="filterBody.pkt_num = null; getFilteredAawakData()" triggerOn="click">
+                                    <div style="width: 160px;">
+                                       <input type="text" class="form-control form-control-sm" placeholder="Pkt No..."
+                                          [(ngModel)]="filterBody.pkt_num" (change)="getFilteredAawakData()">
                                     </div>
                                  </app-popover-filter>
                               </div>
                            </th>
-                           <th style="width: 150px;" *ngIf="auth.webUser.dept_id != 2">Mm</th>
-                           <th style="width: 150px;">Aawak Mm</th>
-                           <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">Pbk</th>
-                           <th style="width: 180px;">Aawak Type / Source</th>
-                           <th style="width: 150px;">Category</th>
-                           <th style="width: 180px;">Item - Subitem</th>
-                           <th style="width: 150px;" *ngIf="settings.aawak.condition_id || settings.aawak.product_id">
-                              Product</th>
+                           <th style="width: 160px;" class="text-start ps-2">
+                              <div class="d-flex align-items-center justify-content-between">
+                                 <span>Date</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                    [isOpen]="!!filterBody.date_from || !!filterBody.date_to || !!filterBody.date || !!filterBody.year || !!filterBody.month_from || !!filterBody.month_to"
+                                    (clear)="filterBody.date = null; filterBody.date_from = null; filterBody.date_to = null; filterBody.year = null; filterBody.month_from = null; filterBody.month_to = null; getFilteredAawakData()"
+                                    triggerOn="click">
+                                    <div style="width: 290px;" class="p-1">
+                                       <div class="row g-2 mb-2">
+                                          <div class="col-6">
+                                             <label class="form-label mb-1"><small class="fw-bold">Date
+                                                   From</small></label>
+                                             <input type="date" class="form-control form-control-sm"
+                                                [(ngModel)]="filterBody.date_from" (change)="getFilteredAawakData()">
+                                          </div>
+                                          <div class="col-6">
+                                             <label class="form-label mb-1"><small class="fw-bold">Date
+                                                   To</small></label>
+                                             <input type="date" class="form-control form-control-sm"
+                                                [(ngModel)]="filterBody.date_to" (change)="getFilteredAawakData()">
+                                          </div>
+                                       </div>
+                                       <div class="mb-2">
+                                          <label class="form-label mb-1"><small class="fw-bold">Year</small></label>
+                                          <ng-select placeholder="Select Year" class="custom-sm" [clearable]="true"
+                                             appendTo="body" [(ngModel)]="filterBody.year"
+                                             (change)="onMonthRangeChange(); getFilteredAawakData()">
+                                             <ng-option *ngFor="let yr of gs.years" [value]="yr">{{yr}}</ng-option>
+                                          </ng-select>
+                                       </div>
+                                       <div class="row g-2">
+                                          <div class="col-6">
+                                             <label class="form-label mb-1"><small class="fw-bold">From
+                                                   Month</small></label>
+                                             <ng-select placeholder="From Month" class="custom-sm" [clearable]="true"
+                                                appendTo="body" [(ngModel)]="filterBody.month_from"
+                                                (change)="onMonthRangeChange(); getFilteredAawakData()">
+                                                <ng-option *ngFor="let m of gs.months" [value]="m.m">{{m.m}} -
+                                                   {{m.name_hin}}</ng-option>
+                                             </ng-select>
+                                          </div>
+                                          <div class="col-6">
+                                             <label class="form-label mb-1"><small class="fw-bold">To
+                                                   Month</small></label>
+                                             <ng-select placeholder="To Month" class="custom-sm" [clearable]="true"
+                                                appendTo="body" [(ngModel)]="filterBody.month_to"
+                                                (change)="onMonthRangeChange(); getFilteredAawakData()">
+                                                <ng-option *ngFor="let m of gs.months" [value]="m.m">{{m.m}} -
+                                                   {{m.name_hin}}</ng-option>
+                                             </ng-select>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
+                           <th style="width: 170px;" *ngIf="auth.webUser.dept_id != 2">
+                              <div class="d-flex align-items-center justify-content-between">
+                                 <span>Mm</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                    [isOpen]="filterBody.mm_id && filterBody.mm_id.length > 0"
+                                    (clear)="filterBody.mm_id = []; getFilteredAawakData()" triggerOn="click">
+                                    <ng-select [multiple]="true" placeholder="Select MM" class="custom-sm"
+                                       style="width: 220px;" appendTo="body" [(ngModel)]="filterBody.mm_id"
+                                       (change)="getFilteredAawakData()">
+                                       <ng-option *ngFor="let item of mms" [value]="item._id">
+                                          {{item.mm_hin}} : {{item.mm_eng}}
+                                       </ng-option>
+                                    </ng-select>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
+                           <th style="width: 170px;">
+                              <div class="d-flex align-items-center justify-content-between">
+                                 <span>Aawak Mm</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                    [isOpen]="filterBody.aj_mm_id && filterBody.aj_mm_id.length > 0"
+                                    (clear)="filterBody.aj_mm_id = []; getFilteredAawakData()" triggerOn="click">
+                                    <ng-select [multiple]="true" placeholder="Select Aawak MM" class="custom-sm"
+                                       style="width: 220px;" appendTo="body" [(ngModel)]="filterBody.aj_mm_id"
+                                       (change)="getFilteredAawakData()">
+                                       <ng-option *ngFor="let item of mms" [value]="item._id">
+                                          {{item.mm_hin}} : {{item.mm_eng}}
+                                       </ng-option>
+                                    </ng-select>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
+                           <th style="width: 200px;" *ngIf="settings.aawak.pbk_id">
+                              <div class="d-flex align-items-center justify-content-between">
+                                 <span>Pbk</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                    [isOpen]="filterBody.pbk_id && filterBody.pbk_id.length > 0"
+                                    (clear)="filterBody.pbk_id = []; getFilteredAawakData()" triggerOn="click">
+                                    <ng-select [multiple]="true" placeholder="Select PBK" class="custom-sm"
+                                       style="width: 250px;" appendTo="body" [(ngModel)]="filterBody.pbk_id"
+                                       (change)="getFilteredAawakData()">
+                                       <ng-option *ngFor="let item of pbks" [value]="item._id">
+                                          {{item.roll_no ? item.roll_no + ' - ' : ''}}{{item.pbk_hin}}
+                                       </ng-option>
+                                    </ng-select>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
+                           <th style="width: 200px;"
+                              *ngIf="settings.aawak.aawak_type_id || settings.aawak.aawak_source_id">
+                              <div class="d-flex align-items-center justify-content-between">
+                                 <span>Aawak Type / Source</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                    [isOpen]="(filterBody.aawak_type_id && filterBody.aawak_type_id.length > 0) || (settings.aawak.aawak_source_id && filterBody.aawak_source_id && filterBody.aawak_source_id.length > 0)"
+                                    (clear)="filterBody.aawak_type_id = []; filterBody.aawak_source_id = []; getFilteredAawakData()"
+                                    triggerOn="click">
+                                    <div style="width: 220px;">
+                                       <div class="mb-2" *ngIf="settings.aawak.aawak_type_id">
+                                          <label class="form-label mb-1"><small>Aawak Type</small></label>
+                                          <ng-select [multiple]="true" placeholder="Aawak Type" class="custom-sm"
+                                             appendTo="body" [(ngModel)]="filterBody.aawak_type_id"
+                                             (change)="getFilteredAawakData()">
+                                             <ng-option *ngFor="let item of aawak_types" [value]="item._id">
+                                                {{item.list_name_hin}} : {{item.list_name_eng}}
+                                             </ng-option>
+                                          </ng-select>
+                                       </div>
+                                       <div class="mb-1" *ngIf="settings.aawak.aawak_source_id">
+                                          <label class="form-label mb-1"><small>Aawak Source</small></label>
+                                          <ng-select [multiple]="true" placeholder="Aawak Source" class="custom-sm"
+                                             appendTo="body" [(ngModel)]="filterBody.aawak_source_id"
+                                             (change)="getFilteredAawakData()">
+                                             <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
+                                                {{item.list_name_hin}} : {{item.list_name_eng}}
+                                             </ng-option>
+                                          </ng-select>
+                                       </div>
+                                    </div>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
+                           <th style="width: 170px;">
+                              <div class="d-flex align-items-center justify-content-between">
+                                 <span>Category</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                    [isOpen]="!!cat" (clear)="cat = null; catSelected(null); getFilteredAawakData()"
+                                    triggerOn="click">
+                                    <ng-select placeholder="Select Category" class="custom-sm" style="width: 200px;"
+                                       appendTo="body" [(ngModel)]="cat"
+                                       (change)="catSelected($event); getFilteredAawakData()">
+                                       <ng-option *ngFor="let item of categories" [value]="item._id">
+                                          {{item.category_hin}} : {{item.category_eng}}
+                                       </ng-option>
+                                    </ng-select>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
+                           <th style="width: 240px;">
+                              <div class="d-flex align-items-center justify-content-between">
+                                 <span>Item - Subitem</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                    [isOpen]="(selectedItemmix && selectedItemmix.length > 0) || !!filterBody.itemOnly"
+                                    (clear)="selectedItemmix = []; filterBody.itemOnly = false; getFilteredAawakData()"
+                                    triggerOn="click">
+                                    <div style="width: 280px;" class="p-1">
+                                       <label class="form-label mb-1"><small class="fw-bold">Item &
+                                             Subitem</small></label>
+                                       <app-item-dropdown [items]="items" [(ngModel)]="selectedItemmix"
+                                          (ngModelChange)="getFilteredAawakData()" [multiple]="true"
+                                          [closeOnSelect]="false" name="hdr_item_mix"
+                                          appendTo="body"></app-item-dropdown>
+                                       <div class="form-check mt-2">
+                                          <input type="checkbox" class="form-check-input" id="hdrItemOnlyCheck"
+                                             [(ngModel)]="filterBody.itemOnly" (change)="getFilteredAawakData()"
+                                             name="hdrItemOnly">
+                                          <label class="form-check-label mb-0" for="hdrItemOnlyCheck"
+                                             style="cursor: pointer;">
+                                             <small class="text-info fw-bold">Item Only (Subitem is Null)</small>
+                                          </label>
+                                       </div>
+                                    </div>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
+                           <th style="width: 170px;" *ngIf="settings.aawak.condition_id || settings.aawak.product_id">
+                              <div class="d-flex align-items-center justify-content-between">
+                                 <span>Product / Condition</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                    [isOpen]="(settings.aawak.product_id && filterBody.product_id && filterBody.product_id.length > 0) || (settings.aawak.condition_id && filterBody.condition_id && filterBody.condition_id.length > 0)"
+                                    (clear)="filterBody.product_id = []; filterBody.condition_id = []; getFilteredAawakData()"
+                                    triggerOn="click">
+                                    <div style="width: 220px;">
+                                       <div class="mb-2" *ngIf="settings.aawak.product_id">
+                                          <label class="form-label mb-1"><small>Product</small></label>
+                                          <ng-select [multiple]="true" placeholder="Select Product" class="custom-sm"
+                                             appendTo="body" [(ngModel)]="filterBody.product_id"
+                                             (change)="getFilteredAawakData()">
+                                             <ng-option *ngFor="let item of products" [value]="item._id">
+                                                {{item.product_code ? item.product_code : ''}} {{item.sr_num ?
+                                                item.sr_num : ''}}
+                                             </ng-option>
+                                          </ng-select>
+                                       </div>
+                                       <div class="mb-1" *ngIf="settings.aawak.condition_id">
+                                          <label class="form-label mb-1"><small>Condition</small></label>
+                                          <ng-select [multiple]="true" placeholder="Select Condition" class="custom-sm"
+                                             appendTo="body" [(ngModel)]="filterBody.condition_id"
+                                             (change)="getFilteredAawakData()">
+                                             <ng-option *ngFor="let item of conditions" [value]="item._id">
+                                                {{item.list_name_hin}} : {{item.list_name_eng}}
+                                             </ng-option>
+                                          </ng-select>
+                                       </div>
+                                    </div>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
                            <th style="width: 100px;" *ngIf="settings.aawak.company_name">Company</th>
                            <th style="width: 100px;">Qty</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.actual_amt">Actual Amt</th>
-                           <th style="width: 120px;" *ngIf="settings.aawak.usage_list_id">Usage List</th>
-                           <th style="width: 100px;" *ngIf="settings.aawak.nimitt_id">Nimitt</th>
+                           <th style="width: 140px;" *ngIf="settings.aawak.usage_list_id">
+                              <div class="d-flex align-items-center justify-content-between">
+                                 <span>Usage List</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                    [isOpen]="filterBody.usage_list_id && filterBody.usage_list_id.length > 0"
+                                    (clear)="filterBody.usage_list_id = []; getFilteredAawakData()" triggerOn="click">
+                                    <ng-select [multiple]="true" placeholder="Select Usage List" class="custom-sm"
+                                       style="width: 220px;" appendTo="body" [(ngModel)]="filterBody.usage_list_id"
+                                       (change)="getFilteredAawakData()">
+                                       <ng-option *ngFor="let item of usage_lists" [value]="item._id">
+                                          {{item.list_name_hin}} : {{item.list_name_eng}}
+                                       </ng-option>
+                                    </ng-select>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
+                           <th style="width: 140px;" *ngIf="settings.aawak.nimitt_id">
+                              <div class="d-flex align-items-center justify-content-between">
+                                 <span>Nimitt</span>
+                                 <app-popover-filter [btnOutline]="false" iconClass="uil uil-filter" direction="right"
+                                    [isOpen]="filterBody.nimitt_id && filterBody.nimitt_id.length > 0"
+                                    (clear)="filterBody.nimitt_id = []; getFilteredAawakData()" triggerOn="click">
+                                    <ng-select [multiple]="true" placeholder="Select Nimitt" class="custom-sm"
+                                       style="width: 220px;" appendTo="body" [(ngModel)]="filterBody.nimitt_id"
+                                       (change)="getFilteredAawakData()">
+                                       <ng-option *ngFor="let item of nimitts" [value]="item._id">
+                                          {{item.nimitt_hin}} : {{item.nimitt_eng}}
+                                       </ng-option>
+                                    </ng-select>
+                                 </app-popover-filter>
+                              </div>
+                           </th>
                            <th style="width: 200px;" *ngIf="settings.aawak.item_detail">Item Detail</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.isbill">IsBill</th>
                            <th style="width: 100px;" *ngIf="settings.aawak.document">Images</th>
