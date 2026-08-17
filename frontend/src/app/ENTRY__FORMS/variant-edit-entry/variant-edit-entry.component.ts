@@ -4,6 +4,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { HttpService } from 'src/app/services/http.service';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-variant-edit-entry',
@@ -97,5 +98,36 @@ export class VariantEditEntryComponent implements OnInit, OnChanges {
                 this.isLoader = false;
                 if (d.success) this.response.emit({ reload: true });
             });
+    }
+
+    deleteVariant() {
+        if (!this.getData?._id) return;
+        Swal.fire({
+            title: 'Delete Variant?',
+            text: `"${this.formData.display_name_hin || 'This variant'}" aur iska subitem delete hoga.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Haan, delete karo',
+            cancelButtonText: 'Cancel'
+        }).then(r => {
+            if (!r.isConfirmed) return;
+            this.isLoader = true;
+            this.http.delete(this.api.getUrl('VARIANT') + this.getData._id)
+                .subscribe({
+                    next: (d: any) => {
+                        this.isLoader = false;
+                        if (d.success) {
+                            this.toastr.success('Variant delete ho gaya!');
+                            this.response.emit({ reload: true, closeModal: true });
+                        } else {
+                            this.toastr.error(d.message || 'Failed to delete variant.');
+                        }
+                    },
+                    error: (err: any) => {
+                        this.isLoader = false;
+                        this.toastr.error(err?.error?.message || err?.error || 'Failed to delete variant.');
+                    }
+                });
+        });
     }
 }

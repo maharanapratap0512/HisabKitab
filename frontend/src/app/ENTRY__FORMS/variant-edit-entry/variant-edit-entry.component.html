@@ -88,8 +88,11 @@
     </div>
 
     <!-- Actions -->
-    <div class="d-flex justify-content-end gap-2 border-top pt-3">
-        <button type="button" class="btn btn-primary" [disabled]="isLoader" (click)="save()">
+    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+        <button type="button" class="btn btn-outline-danger btn-sm" *ngIf="isEdit && getData?._id" (click)="deleteVariant()" [disabled]="isLoader">
+            <i class="uil uil-trash-alt me-1"></i> Delete Variant
+        </button>
+        <button type="button" class="btn btn-primary ms-auto" [disabled]="isLoader" (click)="save()">
             <span *ngIf="isLoader" class="spinner-border spinner-border-sm me-1"></span>
             <i *ngIf="!isLoader" class="uil uil-save me-1"></i>
             Save Karo

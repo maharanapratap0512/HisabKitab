@@ -258,13 +258,9 @@
                                                             <!-- Actions -->
                                                             <td style="padding:5px 4px;"
                                                                 (click)="$event.stopPropagation()">
-                                                                <i class="uil uil-pen i-outline-primary me-2"
+                                                                <i class="uil uil-trash text-danger"
                                                                     style="cursor:pointer; font-size:15px;"
-                                                                    (click)="openEditVariant(v, item)"
-                                                                    *ngIf="settings.edit" title="Edit variant"></i>
-                                                                <i class="uil uil-trash i-outline-danger"
-                                                                    style="cursor:pointer; font-size:15px;"
-                                                                    (click)="deleteVariant(v)" *ngIf="settings.delete"
+                                                                    (click)="deleteVariant(v)"
                                                                     title="Delete variant"></i>
                                                             </td>
 
