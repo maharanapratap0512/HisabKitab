@@ -280,6 +280,12 @@
                                 </div>
                             </app-popover-filter>
                             <button class="btn btn-xs rounded-pill"
+                                [ngClass]="filterBody.unlinkedOnly ? 'btn-info' : 'btn-outline-info'"
+                                (click)="filterBody.unlinkedOnly = !filterBody.unlinkedOnly; onHeaderFilterChange()"
+                                title="Show unlinked Ref. Aawak only">
+                                Unlinked Ref
+                            </button>
+                            <button class="btn btn-xs rounded-pill ms-1"
                                 [ngClass]="filterBody.notReceivedOnly ? 'btn-warning' : 'btn-outline-warning'"
                                 (click)="filterBody.notReceivedOnly = !filterBody.notReceivedOnly; onHeaderFilterChange()"
                                 title="Show unreceived only">

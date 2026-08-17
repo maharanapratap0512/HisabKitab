@@ -65,7 +65,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
 
             conditionString = conditions.length > 0 ? `(${conditions.join(' OR ')})` : `1=1`;
         } else {
-            conditionString = `1=1 ${req.body.date ? ` AND jawak.date = '${req.body.date}'` : ''} ${req.body.date_from ? ` AND jawak.date >= '${req.body.date_from}'` : ''} ${req.body.date_to ? ` AND jawak.date <= '${req.body.date_to}'` : ''} ${req.body.year ? ` AND strftime('%Y', jawak.date) = '${req.body.year}'` : ''} ${req.body.month ? ` AND strftime('%m', jawak.date) = '${req.body.month.toString().padStart(2, '0')}'` : ''} ${req.body.mm_id && req.body.mm_id.length > 0 ? ` AND jawak.mm_id in (${req.body.mm_id.join(',')})` : ''} ${req.body.zone_id && req.body.zone_id.length > 0 ? ` AND mm_zone_id in (${req.body.zone_id.join(',')})` : ''} ${req.body.condition_id && req.body.condition_id.length > 0 ? ` AND jawak.condition_id in (${req.body.condition_id.join(',')})` : ''} ${req.body.item_id && req.body.item_id.length > 0 ? ` AND jawak.item_id in (${req.body.item_id.join(',')}) ${req.body.itemOnly ? ' AND (jawak.subitem_id IS NULL OR jawak.subitem_id = 0)' : ''}` : ''} ${req.body.jawak_mm_id && req.body.jawak_mm_id.length > 0 ? ` AND jawak.jawak_mm_id in (${req.body.jawak_mm_id.join(',')})` : ''} ${req.body.jawak_type_id && req.body.jawak_type_id.length > 0 ? ` AND jawak.jawak_type_id in (${req.body.jawak_type_id.join(',')})` : ''} ${req.body.pbk_id && req.body.pbk_id.length > 0 ? ` AND jawak.pbk_id in (${req.body.pbk_id.join(',')})` : ''} ${req.body.subitem_id && req.body.subitem_id.length > 0 && !req.body.itemOnly ? ` AND jawak.subitem_id in (${req.body.subitem_id.join(',')})` : ''} ${req.body.product_id && req.body.product_id.length > 0 ? ` AND jawak.product_id in (${req.body.product_id.join(',')})` : ''} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND jawak.nimitt_id in ${req.body.nimitt_id.join(',')}` : ''} ${req.body.pkt_num ? ` AND jawak.pkt_num LIKE '%${req.body.pkt_num}%'` : ''} ${req.body.voucher_no ? ` AND jawak.voucher_no LIKE '%${req.body.voucher_no}%'` : ''} ${req.body.reg_pg_no ? ` AND jawak.reg_pg_no LIKE '%${req.body.reg_pg_no}%'` : ''} ${req.body.lot_no ? ` AND jawak.lot_no LIKE '%${req.body.lot_no}%'` : ''} ${req.body.usage_list_id && req.body.usage_list_id.length > 0 ? ` AND jawak.usage_list_id in (${req.body.usage_list_id.join(',')})` : ''} ${req.body.unlinkedOnly ? ` AND jawak.aawak_ref_id IS NULL` : ''} ${req.body.notReceivedOnly ? ` AND (jawak.is_recieved = 0 OR jawak.is_recieved IS NULL)` : ''} ${req.body.categories && req.body.categories.length > 0 ? ` AND (jawak.item_id IN (SELECT item_id FROM rel_item_category WHERE category_id IN (${req.body.categories.join(',')})) OR jawak.subitem_id IN (SELECT subitem_id FROM rel_subitem_category WHERE category_id IN (${req.body.categories.join(',')})))` : ''}`
+            conditionString = `1=1 ${req.body.date ? ` AND jawak.date = '${req.body.date}'` : ''} ${req.body.date_from ? ` AND jawak.date >= '${req.body.date_from}'` : ''} ${req.body.date_to ? ` AND jawak.date <= '${req.body.date_to}'` : ''} ${req.body.year ? ` AND strftime('%Y', jawak.date) = '${req.body.year}'` : ''} ${req.body.month ? ` AND strftime('%m', jawak.date) = '${req.body.month.toString().padStart(2, '0')}'` : ''} ${req.body.mm_id && req.body.mm_id.length > 0 ? ` AND jawak.mm_id in (${req.body.mm_id.join(',')})` : ''} ${req.body.zone_id && req.body.zone_id.length > 0 ? ` AND mm_zone_id in (${req.body.zone_id.join(',')})` : ''} ${req.body.condition_id && req.body.condition_id.length > 0 ? ` AND jawak.condition_id in (${req.body.condition_id.join(',')})` : ''} ${req.body.item_id && req.body.item_id.length > 0 ? ` AND jawak.item_id in (${req.body.item_id.join(',')}) ${req.body.itemOnly ? ' AND (jawak.subitem_id IS NULL OR jawak.subitem_id = 0)' : ''}` : ''} ${req.body.jawak_mm_id && req.body.jawak_mm_id.length > 0 ? ` AND jawak.jawak_mm_id in (${req.body.jawak_mm_id.join(',')})` : ''} ${req.body.jawak_type_id && req.body.jawak_type_id.length > 0 ? ` AND jawak.jawak_type_id in (${req.body.jawak_type_id.join(',')})` : ''} ${req.body.pbk_id && req.body.pbk_id.length > 0 ? ` AND jawak.pbk_id in (${req.body.pbk_id.join(',')})` : ''} ${req.body.subitem_id && req.body.subitem_id.length > 0 && !req.body.itemOnly ? ` AND jawak.subitem_id in (${req.body.subitem_id.join(',')})` : ''} ${req.body.product_id && req.body.product_id.length > 0 ? ` AND jawak.product_id in (${req.body.product_id.join(',')})` : ''} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND jawak.nimitt_id in ${req.body.nimitt_id.join(',')}` : ''} ${req.body.pkt_num ? ` AND jawak.pkt_num LIKE '%${req.body.pkt_num}%'` : ''} ${req.body.voucher_no ? ` AND jawak.voucher_no LIKE '%${req.body.voucher_no}%'` : ''} ${req.body.reg_pg_no ? ` AND jawak.reg_pg_no LIKE '%${req.body.reg_pg_no}%'` : ''} ${req.body.lot_no ? ` AND jawak.lot_no LIKE '%${req.body.lot_no}%'` : ''} ${req.body.usage_list_id && req.body.usage_list_id.length > 0 ? ` AND jawak.usage_list_id in (${req.body.usage_list_id.join(',')})` : ''} ${req.body.unlinkedOnly ? ` AND jawak._id NOT IN (SELECT jawak_id FROM rel_aawak_jawak WHERE jawak_id IS NOT NULL)` : ''} ${req.body.notReceivedOnly ? ` AND (jawak.is_recieved = 0 OR jawak.is_recieved IS NULL)` : ''} ${req.body.categories && req.body.categories.length > 0 ? ` AND (jawak.item_id IN (SELECT item_id FROM rel_item_category WHERE category_id IN (${req.body.categories.join(',')})) OR jawak.subitem_id IN (SELECT subitem_id FROM rel_subitem_category WHERE category_id IN (${req.body.categories.join(',')})))` : ''}`
         }
 
         if (conditionString.trim() == `1=1`) {
@@ -150,9 +150,9 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
         // Match vouchers that have at least one unlinked jawak item (or standalone unlinked jawaks)
         conditions.push(`(
             (jawak.voucher_no IS NOT NULL AND jawak.voucher_no IN (
-                SELECT DISTINCT voucher_no FROM jawak WHERE aawak_ref_id IS NULL AND voucher_no IS NOT NULL
+                SELECT DISTINCT voucher_no FROM jawak WHERE (_id NOT IN (SELECT jawak_id FROM rel_aawak_jawak WHERE jawak_id IS NOT NULL)) AND voucher_no IS NOT NULL
             ))
-            OR (jawak.voucher_no IS NULL AND jawak.aawak_ref_id IS NULL)
+            OR (jawak.voucher_no IS NULL AND (jawak._id NOT IN (SELECT jawak_id FROM rel_aawak_jawak WHERE jawak_id IS NOT NULL)))
         )`)
     if (req.body.notReceivedOnly)
         // Match vouchers that have at least one unreceived jawak item
@@ -584,23 +584,40 @@ router.delete('/voucher/:ids', async (req, res, next) => {
 
 
 
-// update jawak ref link only
+// update jawak ref link only via rel_aawak_jawak
 router.put('/ref-link/:id', async (req, res, next) => {
     try {
-        if (req.params.id && req.body.aawak_ref_id !== undefined) {
-            const sql = `UPDATE jawak SET aawak_ref_id = @aawak_ref_id, updated_at = datetime('now','localtime') WHERE _id = @_id`;
-            const result = DB.db.prepare(sql).run({
-                aawak_ref_id: req.body.aawak_ref_id,
-                _id: Number(req.params.id)
-            });
-            res.json({
-                success: true,
-                result: result
-            });
+        const jawakId = Number(req.params.id);
+        if (!jawakId) {
+            return next(new Error('Invalid jawak ID'));
         }
-        else {
-            return next(new Error('Id or aawak_ref_id not found.'))
+
+        let splits = [];
+        if (Array.isArray(req.body.aawak_splits)) {
+            splits = req.body.aawak_splits;
+        } else if (Array.isArray(req.body.splits)) {
+            splits = req.body.splits;
+        } else if (req.body.aawak_id) {
+            splits = [{ aawak_id: req.body.aawak_id, split_qty: req.body.qty || 1 }];
         }
+
+        // Process rel_aawak_jawak entries (if splits is empty [], deletes all links => unlinks)
+        await Fn.processRelAawakJawak(jawakId, splits);
+
+        // Reset legacy aawak_ref_id column on jawak table
+        if (splits.length === 0) {
+            DB.db.prepare(`UPDATE jawak SET aawak_ref_id = NULL, updated_at = datetime('now','localtime') WHERE _id = ?`).run(jawakId);
+        } else {
+            const firstAawakId = splits[0]?.aawak_id || splits[0]?._id;
+            if (firstAawakId) {
+                DB.db.prepare(`UPDATE jawak SET aawak_ref_id = ?, updated_at = datetime('now','localtime') WHERE _id = ?`).run(firstAawakId, jawakId);
+            }
+        }
+
+        return res.json({
+            success: true,
+            message: splits.length > 0 ? 'Reference splits updated successfully' : 'Unlinked successfully'
+        });
     } catch (err) { next(err) };
 });
 

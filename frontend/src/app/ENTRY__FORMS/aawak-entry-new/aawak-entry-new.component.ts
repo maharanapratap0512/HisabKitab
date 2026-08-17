@@ -247,6 +247,30 @@ export class AawakEntryNewComponent implements OnInit {
 
   activeRowIndex: any = null;
 
+  itemSubitemSelected(ev: any, i: any) {
+    const item_id = this.fs.aawakFormMain.aawaks[i].item_id;
+    const subitem_id = this.fs.aawakFormMain.aawaks[i].subitem_id;
+
+    if (item_id) {
+      let item = this.items.find((it: { _id: any; }) => it._id == item_id);
+      this.lotNos = this.lotNoAll.filter((l: { item_id: any; }) => l.item_id == item_id);
+      this.getProductData(item_id);
+      this.fs.aawakFormMain.aawaks[i].subitems = item ? (item.subitems || []) : [];
+
+      let subitem = item?.subitems?.find((s: any) => s._id == subitem_id);
+
+      if (!this.isEdit) {
+        this.fs.aawakFormMain.aawaks[i].unit_id = subitem ? subitem.unit_id : (item ? item.unit_id : null);
+      }
+    } else {
+      this.subitems = [];
+      this.lotNos = this.lotNoAll;
+      this.fs.aawakFormMain.aawaks[i].unit_id = null;
+      this.fs.aawakFormMain.aawaks[i].subitem_id = null;
+      this.fs.aawakFormMain.aawaks[i].lot_no = null;
+    }
+  }
+
   itemSelected(ev: any, i: any) {
     if (ev === '+add') {
       this.fs.aawakFormMain.aawaks[i].item_id = null;

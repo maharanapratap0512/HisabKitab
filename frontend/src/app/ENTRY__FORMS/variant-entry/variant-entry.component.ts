@@ -41,11 +41,87 @@ interface AttrGroup {
 export class VariantEntryComponent implements OnInit, OnChanges {
 
   @Input() selectedItem: any = null;
+  @Input() items: any[] = [];
   @Input() allAttributes: any[] = [];
   @Input() attrValueMap: any = {};
   @Input() units: any[] = [];
   @Input() categories: any[] = [];
   @Output() response = new EventEmitter<any>();
+
+  // ── Tab state ─────────────────────────────────────────────────────────────
+  activeTab: 'single' | 'bulk' = 'single';
+
+  // ── Quick Single Form (Prastav Concept) ───────────────────────────────────
+  singleAttrValues: any[] = [null];
+  singleForm: any = {
+    display_name_hin: '',
+    display_name_eng: '',
+    display_name_roman: '',
+    sku: '',
+    unit_id: null,
+    min_rate: 0,
+    max_rate: 0,
+    category_ids: []
+  };
+
+  addLine() {
+    this.singleAttrValues.push(null);
+  }
+
+  removeLine(index: number) {
+    if (this.singleAttrValues.length > 1) {
+      this.singleAttrValues.splice(index, 1);
+    } else {
+      this.singleAttrValues[0] = null;
+    }
+    this.recomputeSingleGeneratedName();
+  }
+
+  onAttrValueChange(val: any, index: number) {
+    this.singleAttrValues[index] = val;
+    this.recomputeSingleGeneratedName();
+  }
+
+  recomputeSingleGeneratedName() {
+    const item = this.selectedItem;
+    const selectedVals = this.singleAttrValues.filter(v => v != null);
+
+    const prefixHin = item?.item_hin ? item.item_hin.trim() + ' ' : '';
+    const prefixEng = item?.item_eng ? item.item_eng.trim() + ' ' : '';
+    const prefixRoman = item?.item_roman ? item.item_roman.trim() + ' ' : '';
+
+    const hinVals = selectedVals.map(v => v.attribute_value_hin).filter(Boolean).join(' ');
+    const engVals = selectedVals.map(v => v.attribute_value_eng || v.attribute_value_hin).filter(Boolean).join(' ');
+    const romanVals = selectedVals.map(v => v.attribute_value_roman || v.attribute_value_hin).filter(Boolean).join(' ');
+
+    this.singleForm.display_name_hin = (prefixHin + hinVals).trim();
+    this.singleForm.display_name_eng = (prefixEng + engVals).trim();
+    this.singleForm.display_name_roman = (prefixRoman + romanVals).trim();
+  }
+
+  compareAttrValue(a: any, b: any) {
+    return a && b ? (a._id === b._id) : (a === b);
+  }
+
+  allAttributeValuesGrouped: any[] = [];
+
+  rebuildAttrValueOptions() {
+    const list: any[] = [];
+    if (this.allAttributes && this.attrValueMap) {
+      for (const a of this.allAttributes) {
+        const vals = this.attrValueMap[a._id] || [];
+        for (const v of vals) {
+          list.push({
+            ...v,
+            attr_hin: a.attribute_hin,
+            attr_eng: a.attribute_eng,
+            searchLabel: `${a.attribute_hin || ''} ${v.attribute_value_hin || ''} ${v.attribute_value_eng || ''} ${v.attribute_value_roman || ''}`
+          });
+        }
+      }
+    }
+    this.allAttributeValuesGrouped = list;
+  }
 
   // ── Top controls ─────────────────────────────────────────────────────────
   separators = SEPARATORS;
@@ -69,8 +145,19 @@ export class VariantEntryComponent implements OnInit, OnChanges {
     private toastr: ToastrService,
   ) { }
 
-  ngOnInit() { this.reset(); }
-  ngOnChanges(c: SimpleChanges) { if (c['selectedItem']) this.reset(); }
+  ngOnInit() {
+    this.reset();
+    this.rebuildAttrValueOptions();
+  }
+
+  ngOnChanges(c: SimpleChanges) {
+    if (c['selectedItem'] || c['items']) {
+      this.reset();
+    }
+    if (c['allAttributes'] || c['attrValueMap']) {
+      this.rebuildAttrValueOptions();
+    }
+  }
 
   reset() {
     this.selectedAttrs = [];
@@ -79,9 +166,83 @@ export class VariantEntryComponent implements OnInit, OnChanges {
     this.separator = ' ';
     this.defaultUnit = this.selectedItem?.unit_id || null;
     this.defaultCatIds = [];
+    this.rebuildAttrValueOptions();
+    this.resetSingleForm();
     if (this.selectedItem?.variants?.length > 0) {
       this.loadExistingConfig();
     }
+  }
+
+  resetSingleForm() {
+    const item = this.selectedItem;
+    let catIds: any[] = [];
+    if (item?.categories && Array.isArray(item.categories)) {
+      catIds = item.categories.map((c: any) => c._id || c.category_id || c);
+    } else if (item?.category_ids && Array.isArray(item.category_ids)) {
+      catIds = [...item.category_ids];
+    }
+
+    this.singleForm = {
+      display_name_hin: item?.item_hin || '',
+      display_name_eng: item?.item_eng || '',
+      display_name_roman: item?.item_roman || '',
+      sku: '',
+      unit_id: item?.unit_id || null,
+      min_rate: 0,
+      max_rate: 0,
+      category_ids: catIds
+    };
+    this.singleAttrValues = [null];
+  }
+
+  saveSingleVariant() {
+    if (!this.selectedItem?._id) {
+      this.toastr.warning('Item not selected.');
+      return;
+    }
+    if (!this.singleForm.display_name_hin?.trim()) {
+      this.toastr.warning('Generated name is required.');
+      return;
+    }
+
+    const selectedVals = this.singleAttrValues.filter(v => v != null);
+
+    const payload = {
+      item_id: this.selectedItem._id,
+      variants: [{
+        display_name_hin: this.singleForm.display_name_hin.trim(),
+        display_name_eng: this.singleForm.display_name_eng?.trim() || null,
+        display_name_roman: this.singleForm.display_name_roman?.trim() || null,
+        sku: this.singleForm.sku?.trim() || null,
+        unit_id: this.singleForm.unit_id || null,
+        min_rate: this.singleForm.min_rate || 0,
+        max_rate: this.singleForm.max_rate || 0,
+        category_ids: this.singleForm.category_ids || [],
+        attribute_values: selectedVals.map((v: any) => ({
+          attribute_id: v.attribute_id,
+          attribute_value_id: v._id
+        }))
+      }]
+    };
+
+    this.isLoader = true;
+    this.http.post(this.api.getUrl('VARIANT') + 'bulk', payload)
+      .subscribe({
+        next: (d: any) => {
+          this.isLoader = false;
+          if (d.success) {
+            this.toastr.success('Variant create/update ho gaya!');
+            this.resetSingleForm();
+            this.response.emit({ reload: true, closeModal: false, ...d });
+          } else {
+            this.toastr.error(d.message || 'Error occurred while saving variant.');
+          }
+        },
+        error: (err: any) => {
+          this.isLoader = false;
+          this.toastr.error(err?.error?.message || err?.error || err?.message || 'Error occurred while saving variant.');
+        }
+      });
   }
 
   loadExistingConfig() {

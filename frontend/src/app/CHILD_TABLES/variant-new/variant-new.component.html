@@ -420,7 +420,7 @@
 
             <div class="modal-body p-0">
 
-                <app-variant-entry *ngIf="showModal === 'Generate Variants'" [selectedItem]="activeItem"
+                <app-variant-entry *ngIf="showModal === 'Generate Variants'" [selectedItem]="activeItem" [items]="itemData"
                     [allAttributes]="allAttributes" [attrValueMap]="attrValueMap" [units]="units"
                     [categories]="categories" (response)="onVariantsGenerated($event)">
                 </app-variant-entry>

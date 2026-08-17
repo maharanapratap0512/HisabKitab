@@ -343,9 +343,13 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                         fdata.dept_id = req.params.dept_id;
                         fdata.enz = { container_capacity: row.container_capacity || null };
                         fdata.usage_report = {
-                            date: row.date, reporter: row.reporter || null,
-                            usage_type_id: row.usage_type_id || null, fayda: row.fayda || null,
-                            nuksan: row.nuksan || null, rating: row.rating || null
+                            date: row.date || null,
+                            reporter: row.reporter || null,
+                            usage_type: row.usage_type || row.usage_type_id || null,
+                            usage_type_id: row.usage_type_id || row.usage_type || null,
+                            fayda: row.fayda || null,
+                            nuksan: row.nuksan || null,
+                            rating: row.rating || null
                         };
 
                         const insId = await Fn.insertAJ(fdata, 'jawak');

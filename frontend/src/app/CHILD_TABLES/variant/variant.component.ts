@@ -196,9 +196,13 @@ export class VariantComponent implements OnInit {
   onVariantsGenerated(result: any) {
     // result: { created: number } from variant-generator-entry
     if (result?.reload) {
-      this.toastr.success(`${result.created} variant${result.created > 1 ? 's' : ''} create ho gaye!`);
-      this.closeModal();
-      this.loadItemVariantData(this.selectedItem._id);
+      this.toastr.success(`${result.created || result.createdCount || ''} variant(s) create ho gaye!`);
+      if (result.closeModal !== false) {
+        this.closeModal();
+      }
+      if (this.selectedItem?._id) {
+        this.loadItemVariantData(this.selectedItem._id);
+      }
       this.getItemData(this.page);   // refresh subitem count in left panel
     }
   }
@@ -207,7 +211,9 @@ export class VariantComponent implements OnInit {
     if (result?.reload) {
       this.toastr.success('Variant update ho gaya!');
       this.closeModal();
-      this.loadItemVariantData(this.selectedItem._id);
+      if (this.selectedItem?._id) {
+        this.loadItemVariantData(this.selectedItem._id);
+      }
     }
   }
 

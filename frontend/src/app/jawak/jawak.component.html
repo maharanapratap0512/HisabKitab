@@ -343,7 +343,7 @@
                                  <span>Ref. Aawak</span>
                                  <input type="checkbox"
                                     style="width: 12px; height: 12px; margin-left: 4px; cursor: pointer;"
-                                    [(ngModel)]="filterBody.unlinkedOnly" (change)="getJawakData(page=1)"
+                                    [(ngModel)]="filterBody.unlinkedOnly" (change)="getJawakData(1)"
                                     title="Check to show only unlinked jawaks">
                               </div>
                            </th>
@@ -353,7 +353,7 @@
                                  <span>Received</span>
                                  <input type="checkbox"
                                     style="width: 12px; height: 12px; margin-left: 4px; cursor: pointer;"
-                                    [(ngModel)]="filterBody.notReceivedOnly" (change)="getJawakData(page=1)"
+                                    [(ngModel)]="filterBody.notReceivedOnly" (change)="getJawakData(1)"
                                     title="Check to show only unreceived jawaks">
                               </div>
                            </th>

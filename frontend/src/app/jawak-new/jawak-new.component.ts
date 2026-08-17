@@ -145,8 +145,9 @@ export class JawakNewComponent implements OnInit {
 
   getFilteredJawaks(jawaks: any[]): any[] {
     if (!jawaks) return [];
+    let list = jawaks;
     if (this.filterBody.categories && this.filterBody.categories.length > 0) {
-      return jawaks.filter((item: any) => {
+      list = list.filter((item: any) => {
         const scats = item.scategories || [];
         const icats = item.icategories || [];
         const scatIds = scats.map((c: any) => c._id);
@@ -156,7 +157,13 @@ export class JawakNewComponent implements OnInit {
           (scats.length === 0 && icatIds.some((id: any) => this.filterBody.categories.includes(id)));
       });
     }
-    return jawaks;
+    if (this.filterBody.unlinkedOnly) {
+      list = list.filter((item: any) => !item.aawak_splits || !Array.isArray(item.aawak_splits) || item.aawak_splits.length === 0);
+    }
+    if (this.filterBody.notReceivedOnly) {
+      list = list.filter((item: any) => !item.is_recieved);
+    }
+    return list;
   }
 
   getJawakData(): void {
@@ -228,7 +235,12 @@ export class JawakNewComponent implements OnInit {
   }
 
   onAawakRefSaved(event: any, item: any) {
-    item.aawak_ref_id = null;
+    if (event) {
+      item.aawak_ref_id = event;
+    }
+    if (this.filterBody.unlinkedOnly) {
+      this.getFilteredData();
+    }
   }
 
   toggleReceived(data: any) {

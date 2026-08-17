@@ -521,9 +521,28 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
   applySplitSelection() {
     const selected = this.splitList.filter((i: any) => i.selected && Number(i.split_qty) > 0);
     if (selected.length === 0) {
-      this.toastr.warning('Please select at least one Aawak');
+      // Unlink all references
+      this.selectedSplitsData = [];
+      this.selectedValue = null;
+      this.onChange(null);
+
+      const payload = {
+        splits: [],
+        totalQty: 0,
+        primaryAawak: null
+      };
+
+      this.splitsChange.emit(payload);
+      this.splitsSelected.emit(payload);
+      this.selectionChange.emit(null);
+
+      if (this.autoSave && this.jawakId) {
+        this.saveRefSplits([]);
+      }
+      this.closeSplitModal();
       return;
     }
+
     this.selectedSplitsData = selected.map((i: any) => ({
       aawak_id: i._id,
       split_qty: Number(i.split_qty),
@@ -576,12 +595,13 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
       .subscribe((res: any) => {
         this.splitLoading = false;
         if (res.success) {
-          this.toastr.success('Multi-Aawak splits saved successfully');
+          const msg = (splits && splits.length > 0) ? 'Ref Aawak updated successfully' : 'Unlinked successfully';
+          this.toastr.success(msg);
           this.saved.emit({ jawakId: this.jawakId, aawak_splits: splits });
         }
       }, err => {
         this.splitLoading = false;
-        this.toastr.error('Failed to save splits');
+        this.toastr.error('Failed to update reference link');
       });
   }
 }

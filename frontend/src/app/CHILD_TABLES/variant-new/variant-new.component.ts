@@ -384,15 +384,25 @@ export class VariantNewComponent implements OnInit {
     
     if (result.createdCount > 0) {
       this.toastr.success(`${result.createdCount} variant(s) create ho gaye!`);
+    } else if (result.created > 0) {
+      this.toastr.success(`${result.created} variant(s) create ho gaye!`);
+    } else {
+      this.toastr.success(`Variants create ho gaye!`);
     }
     
     if (result.skippedCount > 0) {
       this.toastr.warning(`${result.skippedCount} variant(s) already exist karte hain (skipped).`);
     }
 
-    this.closeModal();
-    // Refresh the specific item to show new variants
-    this.refreshItemData(this.activeItem._id);
+    if (result.closeModal !== false) {
+      this.closeModal();
+    }
+    // Refresh the specific item to show new variants if activeItem exists
+    if (this.activeItem?._id) {
+      this.refreshItemData(this.activeItem._id);
+    } else {
+      this.getItemData(this.page);
+    }
   }
 
   refreshItemData(itemId: number) {

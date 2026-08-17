@@ -623,12 +623,107 @@
             <div class="col-md-12 mb-3" *ngIf="settings.aawak.jawak">
                <div class=" card card-body">
                   <h5 class="card-title">Jawak Details</h5>
-
-                  <button class="btn btn-sm btn-primary" (click)="addJawak()" *ngIf="f.valid">
-                     <i class="dripicons-plus h4 icon-mx-2"></i> Jawak
-                  </button>
                   <h5 *ngIf="!f.valid" class="d-flex justify-content-center text-danger">Please Complete Aawak Entry
                      First</h5>
+
+                  <!-- Jawak Details array -->
+                  <div class="col-md-12 mb-3" *ngIf="settings.aawak.jawak">
+
+                     <div class="row">
+
+                        <div class="col-md-2 mb-3">
+                           <label for="example-date" class="form-label">Date</label>
+                           <input class="form-control" id="example-date" type="date" [(ngModel)]="jdate"
+                              [ngModelOptions]="{standalone: true}" required>
+                        </div>
+
+                        <div class="col-md-3 mb-1">
+                           <div class="form-group">
+                              <label class="form-label">Jawak MM</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Jawak MM" [clearable]="true"
+                                 [virtualScroll]="true" (change)="jwkmmChanged($event)" [(ngModel)]="jmm"
+                                 [ngModelOptions]="{standalone: true}">
+                                 <ng-option selected="selected" disabled value="">Jawak MM</ng-option>
+                                 <ng-option *ngFor="let item of mms" [value]="{ id: item._id, mm_hin: item.mm_hin}">
+                                    {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">किसको दिया</label>
+                              <ng-select class="custom" style="width: 100%;" placeholder="Select Person"
+                                 [clearable]="true" [virtualScroll]="true" [(ngModel)]="jpbk"
+                                 [ngModelOptions]="{standalone: true}">
+                                 <ng-option selected="selected" disabled value="">Select Person</ng-option>
+                                 <ng-option *ngFor="let item of pbks"
+                                    [value]="{id:item._id,roll_no:item.roll_no,pbk_hin:item.pbk_hin,state_hin:item.state_hin}">
+                                    {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
+                                    item.state_hin + ')'}}</ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <div class="col-md-2 mb-1">
+                           <div class="form-group">
+                              <label class="form-label">Quantity</label>
+                              <input type="text" class="form-control" placeholder="Quantity" [(ngModel)]="jqty"
+                                 [ngModelOptions]="{standalone: true}">
+                           </div>
+                        </div>
+
+                        <div class="col-md-2 mb-3">
+                           <div class="form-group">
+                              <label class="form-label">Jawak Type</label>
+                              <!-- <div class="float-end">
+                              <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
+                                 class="btn btn-sm btn-outline-primary" (click)="setView('aawak_type')"><i
+                                    class=" dripicons-view-list"></i></button>
+                              <button type="button" style="padding: 1px 6px !important;"
+                                 class="btn btn-outline-primary float-end" (click)="openModal('Add Aawak Type')">+
+                                 Add</button>
+                           </div> -->
+                              <ng-select class="custom" style="width: 100%;" placeholder="Jawak Type" [clearable]="true"
+                                 [virtualScroll]="true" [(ngModel)]="jtype" [ngModelOptions]="{standalone: true}"
+                                 required>
+                                 <ng-option selected="selected" disabled value="">Jawak Type
+                                 </ng-option>
+                                 <ng-option *ngFor="let item of jawak_types"
+                                    [value]="{ id: item._id, list_name_hin: item.list_name_hin, list_name_eng: item.list_name_eng, list_name_roman: item.list_name_roman}">
+                                    {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng :
+                                    ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
+                                 </ng-option>
+                              </ng-select>
+                           </div>
+                        </div>
+
+                        <!-- <div class="col-1 mb-1">
+                        <label class="form-label">Clear</label>
+                     </div> -->
+                        <button type="button"
+                           [disabled]="(jmm === null && jpbk === null) || jdate === null || jqty === null"
+                           class="btn btn-primary mt-3" (click)="add_jwk()">+ Add</button>
+                        <button class="btn btn-sm btn-outline-info" (click)="addJawak()">Add Full Jawak</button>
+                     </div>
+
+                     <!-- <div class="mt-3 p-2" style="max-height: 200px;overflow-y: auto;" *ngIf="false">
+                     <div class="row mb-2 border-secondary border-bottom"
+                        *ngFor="let f of awkfg.jawak_detail;let i=index">
+                        <div class="col-md-1">{{i+1}}</div>
+                        <div class="col-md-2">{{f.date}}</div>
+                        <div class="col-md-2">{{f.jawak_mm_hin}}</div>
+                        <div class="col-md-2">{{f.pbk_hin}} ({{f.pbk_state_hin}})</div>
+                        <div class="col-md-1">{{f.qty}}</div>
+                        <div class="col-md-2">{{f.jawak_type_hin}}</div>
+                        <div class="col-md-1">
+                           <button class="btn btn-sm btn-light mb-1" style="font-size: small;line-height: 8px;"
+                              type="button" (click)="remove(i,f._id)">X</button>
+                        </div>
+                     </div>
+                  </div> -->
+
+                  </div>
                   <table id="tbl" #tbl class="table-sm table-striped table-bordered dt-responsive mt-1">
                      <thead>
                         <tr>
@@ -688,102 +783,6 @@
                      </tbody>
                   </table>
 
-               </div>
-            </div>
-
-            <!-- Jawak Details array -->
-            <div class="col-md-12 mb-3" *ngIf="settings.aawak.jawak">
-               <div class=" card card-body">
-                  <h5 class="card-title">Jawak Details</h5>
-                  <div class="row">
-
-                     <div class="col-md-2 mb-3">
-                        <label for="example-date" class="form-label">Date</label>
-                        <input class="form-control" id="example-date" type="date" [(ngModel)]="jdate"
-                           [ngModelOptions]="{standalone: true}" required>
-                     </div>
-
-                     <div class="col-md-3 mb-1">
-                        <div class="form-group">
-                           <label class="form-label">Jawak MM</label>
-                           <ng-select class="custom" style="width: 100%;" placeholder="Jawak MM" [clearable]="true"
-                              [virtualScroll]="true" (change)="jwkmmChanged($event)" [(ngModel)]="jmm"
-                              [ngModelOptions]="{standalone: true}">
-                              <ng-option selected="selected" disabled value="">Jawak MM</ng-option>
-                              <ng-option *ngFor="let item of mms" [value]="{ id: item._id, mm_hin: item.mm_hin}">
-                                 {{item.mm_hin}}:{{item.mm_eng}} : {{item.mm_code}}</ng-option>
-                           </ng-select>
-                        </div>
-                     </div>
-
-                     <div class="col-md-3 mb-3">
-                        <div class="form-group">
-                           <label class="form-label">किसको दिया</label>
-                           <ng-select class="custom" style="width: 100%;" placeholder="Select Person" [clearable]="true"
-                              [virtualScroll]="true" [(ngModel)]="jpbk" [ngModelOptions]="{standalone: true}">
-                              <ng-option selected="selected" disabled value="">Select Person</ng-option>
-                              <ng-option *ngFor="let item of pbks"
-                                 [value]="{id:item._id,roll_no:item.roll_no,pbk_hin:item.pbk_hin,state_hin:item.state_hin}">
-                                 {{item.pbk_hin}}{{item.pbk_eng ? ' : '+ item.pbk_eng : ''}}{{' ('+
-                                 item.state_hin + ')'}}</ng-option>
-                           </ng-select>
-                        </div>
-                     </div>
-
-                     <div class="col-md-2 mb-1">
-                        <div class="form-group">
-                           <label class="form-label">Quantity</label>
-                           <input type="text" class="form-control" placeholder="Quantity" [(ngModel)]="jqty"
-                              [ngModelOptions]="{standalone: true}">
-                        </div>
-                     </div>
-
-                     <div class="col-md-2 mb-3">
-                        <div class="form-group">
-                           <label class="form-label">Jawak Type</label>
-                           <!-- <div class="float-end">
-                              <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;"
-                                 class="btn btn-sm btn-outline-primary" (click)="setView('aawak_type')"><i
-                                    class=" dripicons-view-list"></i></button>
-                              <button type="button" style="padding: 1px 6px !important;"
-                                 class="btn btn-outline-primary float-end" (click)="openModal('Add Aawak Type')">+
-                                 Add</button>
-                           </div> -->
-                           <ng-select class="custom" style="width: 100%;" placeholder="Jawak Type" [clearable]="true"
-                              [virtualScroll]="true" [(ngModel)]="jtype" [ngModelOptions]="{standalone: true}" required>
-                              <ng-option selected="selected" disabled value="">Jawak Type
-                              </ng-option>
-                              <ng-option *ngFor="let item of jawak_types"
-                                 [value]="{ id: item._id, list_name_hin: item.list_name_hin, list_name_eng: item.list_name_eng, list_name_roman: item.list_name_roman}">
-                                 {{item.list_name_hin}}{{item.list_name_eng ? ' : ' + item.list_name_eng :
-                                 ''}}{{item.list_name_roman ? ' : ' + item.list_name_roman : ''}}
-                              </ng-option>
-                           </ng-select>
-                        </div>
-                     </div>
-
-                     <!-- <div class="col-1 mb-1">
-                        <label class="form-label">Clear</label>
-                     </div> -->
-                  </div>
-                  <button type="button" [disabled]="(jmm === null && jpbk === null) || jdate === null || jqty === null"
-                     class="btn btn-primary mt-3" (click)="add_jwk()">+ Add</button>
-                  <button class="btn btn-sm btn-outline-info" (click)="addJawak()">Add Full Jawak</button>
-                  <!-- <div class="mt-3 p-2" style="max-height: 200px;overflow-y: auto;" *ngIf="false">
-                     <div class="row mb-2 border-secondary border-bottom"
-                        *ngFor="let f of awkfg.jawak_detail;let i=index">
-                        <div class="col-md-1">{{i+1}}</div>
-                        <div class="col-md-2">{{f.date}}</div>
-                        <div class="col-md-2">{{f.jawak_mm_hin}}</div>
-                        <div class="col-md-2">{{f.pbk_hin}} ({{f.pbk_state_hin}})</div>
-                        <div class="col-md-1">{{f.qty}}</div>
-                        <div class="col-md-2">{{f.jawak_type_hin}}</div>
-                        <div class="col-md-1">
-                           <button class="btn btn-sm btn-light mb-1" style="font-size: small;line-height: 8px;"
-                              type="button" (click)="remove(i,f._id)">X</button>
-                        </div>
-                     </div>
-                  </div> -->
                </div>
             </div>
 

@@ -221,6 +221,7 @@ class ExcelFunctions {
    usage_report_form = {
       date: null,
       reporter: null,
+      usage_type: null,
       usage_type_id: null,
       fayda: null,
       nuksan: null,

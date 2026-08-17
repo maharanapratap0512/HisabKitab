@@ -14,12 +14,20 @@ export class PopoverFilterComponent {
   @Input() clearButtonLabel: string = 'Clear Filter';
   @Input() label: string = '';
   @Input() direction: 'left' | 'right' | 'auto' = 'auto';
-  @Input() isOpen: boolean = false;
   @Input() triggerOn: 'click' | 'hover' = 'click';
   @Output() clear = new EventEmitter<void>();
 
-  private _hoverTimeout: any = null;
+  // Active filter state
+  isActive: boolean = false;
 
+  @Input() set isOpen(val: any) {
+    this.isActive = !!val;
+  }
+
+  // Panel visibility state
+  showPanel: boolean = false;
+
+  private _hoverTimeout: any = null;
 
   popoverPosition: { left?: string; right?: string } = {};
 
@@ -37,29 +45,29 @@ export class PopoverFilterComponent {
 
   togglePopover(event: Event) {
     event.stopPropagation();
-    this.isOpen = !this.isOpen;
+    this.showPanel = !this.showPanel;
 
-    if (this.isOpen && this.direction == 'left') {
+    if (this.showPanel && this.direction == 'left') {
       this.popoverPosition = { right: '0' };
-    } else if (this.isOpen && this.direction === 'right') {
+    } else if (this.showPanel && this.direction === 'right') {
       this.popoverPosition = { left: '0' };
     }
 
-    if (this.isOpen) this.focusFirst();
+    if (this.showPanel) this.focusFirst();
   }
 
   openPopover() {
     if (this._hoverTimeout) { clearTimeout(this._hoverTimeout); this._hoverTimeout = null; }
-    this.isOpen = true;
+    this.showPanel = true;
     this.focusFirst();
   }
 
   hoverClose() {
-    this._hoverTimeout = setTimeout(() => { this.isOpen = false; }, 120);
+    this._hoverTimeout = setTimeout(() => { this.showPanel = false; }, 120);
   }
 
   closePopover() {
-    this.isOpen = false;
+    this.showPanel = false;
   }
 
   onClear() {

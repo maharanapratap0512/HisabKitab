@@ -1,12 +1,15 @@
 <div style="position: relative; display: inline-block;" (mouseenter)="triggerOn === 'hover' && openPopover()"
     (mouseleave)="triggerOn === 'hover' && hoverClose()">
     <button type="button" style="padding: 1px 6px !important; margin-right: 2px !important;" [class]="btnClass"
-        [class.btn-outline-secondary]="btnOutline" (click)="triggerOn === 'click' && togglePopover($event)">
-        <i [class]="iconClass"></i>
+        [class.btn-outline-secondary]="btnOutline && !isActive"
+        [class.btn-outline-warning]="btnOutline && isActive"
+        [class.text-warning]="isActive"
+        (click)="triggerOn === 'click' && togglePopover($event)">
+        <i [class]="iconClass" [class.text-warning]="isActive"></i>
         <span *ngIf="label" class="ms-1">{{label}}</span>
     </button>
 
-    <div class="popover-container" style="position: absolute; top: 100%; z-index: 9999;" *ngIf="isOpen">
+    <div class="popover-container" style="position: absolute; top: 100%; z-index: 9999;" *ngIf="showPanel">
         <div class="filter-backdrop" (click)="closePopover()" *ngIf="triggerOn === 'click'"></div>
         <div class="filter-popover" [ngStyle]="popoverPosition" (mouseenter)="triggerOn === 'hover' && openPopover()"
             (mouseleave)="triggerOn === 'hover' && hoverClose()">
