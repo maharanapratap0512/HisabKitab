@@ -117,7 +117,7 @@ export class VariantEditEntryComponent implements OnInit, OnChanges {
                     next: (d: any) => {
                         this.isLoader = false;
                         if (d.success) {
-                            this.toastr.success('Variant delete ho gaya!');
+                            this.toastr.success('Variant successfully deleted!');
                             this.response.emit({ reload: true, closeModal: true });
                         } else {
                             this.toastr.error(d.message || 'Failed to delete variant.');
@@ -125,7 +125,7 @@ export class VariantEditEntryComponent implements OnInit, OnChanges {
                     },
                     error: (err: any) => {
                         this.isLoader = false;
-                        this.toastr.error(err?.error?.message || err?.error || 'Failed to delete variant.');
+                        this.toastr.error(err?.error?.message || err?.error || err?.message || 'Failed to delete variant.');
                     }
                 });
         });

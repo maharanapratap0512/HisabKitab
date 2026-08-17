@@ -471,16 +471,23 @@ export class VariantNewComponent implements OnInit {
   deleteVariant(v: any) {
     Swal.fire({
       title: 'Delete Variant?', text: `"${v.display_name}" aur iska subitem delete hoga.`,
-      icon: 'warning', showCancelButton: true, confirmButtonText: 'Haan', cancelButtonText: 'Nahi'
+      icon: 'warning', showCancelButton: true, confirmButtonText: 'Haan, delete karo', cancelButtonText: 'Cancel'
     })
       .then(r => {
         if (!r.isConfirmed) return;
         this.http.delete(this.api.getUrl('VARIANT') + v._id)
-          .subscribe((d: any) => {
-            if (d.success) {
-              this.toastr.success('Deleted!');
-              this.expandedVariants = this.expandedVariants.filter((x: any) => x._id !== v._id);
-              this.getItemData(this.page);
+          .subscribe({
+            next: (d: any) => {
+              if (d.success) {
+                this.toastr.success('Variant successfully deleted!');
+                this.expandedVariants = this.expandedVariants.filter((x: any) => x._id !== v._id);
+                this.getItemData(this.page);
+              } else {
+                this.toastr.error(d.message || 'Failed to delete variant.');
+              }
+            },
+            error: (err: any) => {
+              this.toastr.error(err?.error?.message || err?.error || err?.message || 'Failed to delete variant.');
             }
           });
       });

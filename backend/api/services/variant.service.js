@@ -517,11 +517,19 @@ function deleteVariant(variant_id) {
     const id = Number(variant_id);
     try {
         sutramDB.begin();
-        variant.deleteById(id);
+        // 1. Delete linked subitem category relations
+        const subs = subitem.getAll({ variant_id: id });
+        for (const s of subs) {
+            rel_subitem_cat.delete({ subitem_id: s._id });
+        }
+        // 2. Delete linked subitem mirror rows FIRST to prevent Foreign Key constraint failure
         subitem.delete({ variant_id: id });
+        // 3. Delete variant attribute mappings, aliases, and category mappings
         variant_attr_map.delete({ variant_id: id });
         variant_aliases.delete({ variant_id: id });
         variant_cat_map.delete({ variant_id: id });
+        // 4. Finally delete variant row
+        variant.deleteById(id);
         sutramDB.commit();
         return 1;
     } catch (err) {
