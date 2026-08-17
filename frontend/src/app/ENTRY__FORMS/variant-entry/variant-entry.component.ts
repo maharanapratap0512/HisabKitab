@@ -83,20 +83,15 @@ export class VariantEntryComponent implements OnInit, OnChanges {
   }
 
   recomputeSingleGeneratedName() {
-    const item = this.selectedItem;
     const selectedVals = this.singleAttrValues.filter(v => v != null);
-
-    const prefixHin = item?.item_hin ? item.item_hin.trim() + ' ' : '';
-    const prefixEng = item?.item_eng ? item.item_eng.trim() + ' ' : '';
-    const prefixRoman = item?.item_roman ? item.item_roman.trim() + ' ' : '';
 
     const hinVals = selectedVals.map(v => v.attribute_value_hin).filter(Boolean).join(' ');
     const engVals = selectedVals.map(v => v.attribute_value_eng || v.attribute_value_hin).filter(Boolean).join(' ');
     const romanVals = selectedVals.map(v => v.attribute_value_roman || v.attribute_value_hin).filter(Boolean).join(' ');
 
-    this.singleForm.display_name_hin = (prefixHin + hinVals).trim();
-    this.singleForm.display_name_eng = (prefixEng + engVals).trim();
-    this.singleForm.display_name_roman = (prefixRoman + romanVals).trim();
+    this.singleForm.display_name_hin = hinVals.trim();
+    this.singleForm.display_name_eng = engVals.trim();
+    this.singleForm.display_name_roman = romanVals.trim();
   }
 
   compareAttrValue(a: any, b: any) {
@@ -183,9 +178,9 @@ export class VariantEntryComponent implements OnInit, OnChanges {
     }
 
     this.singleForm = {
-      display_name_hin: item?.item_hin || '',
-      display_name_eng: item?.item_eng || '',
-      display_name_roman: item?.item_roman || '',
+      display_name_hin: '',
+      display_name_eng: '',
+      display_name_roman: '',
       sku: '',
       unit_id: item?.unit_id || null,
       min_rate: 0,
@@ -231,7 +226,6 @@ export class VariantEntryComponent implements OnInit, OnChanges {
         next: (d: any) => {
           this.isLoader = false;
           if (d.success) {
-            this.toastr.success('Variant create/update ho gaya!');
             this.resetSingleForm();
             this.response.emit({ reload: true, closeModal: false, ...d });
           } else {

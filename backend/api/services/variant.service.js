@@ -58,7 +58,7 @@ function deleteAttribute(idOrIds) {
     // soft delete cascade — active=0 on attribute + all its values + all variant maps that use any of its values
     try {
         const ids = typeof idOrIds === 'string' && idOrIds.includes(',') ? idOrIds.split(',').map(Number) : (Array.isArray(idOrIds) ? idOrIds : [Number(idOrIds)]);
-        
+
         sutramDB.begin();
 
         // 1. Check if ANY value of these attributes is used in active variants
@@ -326,19 +326,16 @@ function _createOneVariant(item_id, data, dept_id) {
 
     if (existing) {
         const vId = existing._id;
-        // UPDATE: update optional fields if provided
-        variant.update(vId, {
+        // UPDATE: update variant core table
+        variant.update({ _id: vId }, {
             sku: sku || existing.sku,
-            unit_id: unit_id !== undefined ? unit_id : existing.unit_id,
             display_name: display_name_hin || existing.display_name,
             fingerprint: fingerprint || null,
-            min_rate: min_rate || existing.min_rate,
-            max_rate: max_rate || existing.max_rate,
         });
 
         // Update categories for existing variant
         if (Array.isArray(category_ids)) {
-            sutramDB.run(`DELETE FROM variant_category_map WHERE variant_id = ?`, [vId]);
+            variant_cat_map.delete({ variant_id: vId });
             for (const catId of category_ids) {
                 variant_cat_map.insert({ variant_id: vId, category_id: Number(catId) }, false);
             }
@@ -347,7 +344,7 @@ function _createOneVariant(item_id, data, dept_id) {
         // Also sync subitem mirror
         const existingSub = subitem.getOne({ variant_id: vId });
         if (existingSub) {
-            subitem.update(existingSub._id, {
+            subitem.update({ _id: existingSub._id }, {
                 subitem_hin: display_name_hin || existingSub.subitem_hin,
                 subitem_eng: display_name_eng || existingSub.subitem_eng,
                 subitem_roman: display_name_roman || existingSub.subitem_roman,
@@ -359,7 +356,7 @@ function _createOneVariant(item_id, data, dept_id) {
 
             // categories mirror
             if (Array.isArray(category_ids)) {
-                sutramDB.run(`DELETE FROM rel_subitem_category WHERE subitem_id = ?`, [existingSub._id]);
+                rel_subitem_cat.delete({ subitem_id: existingSub._id });
                 for (const catId of category_ids) {
                     rel_subitem_cat.insert({ subitem_id: existingSub._id, category_id: Number(catId) }, false);
                 }

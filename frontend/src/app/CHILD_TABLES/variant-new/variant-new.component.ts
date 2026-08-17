@@ -382,12 +382,11 @@ export class VariantNewComponent implements OnInit {
     }
     if (!result?.reload) return;
     
-    if (result.createdCount > 0) {
-      this.toastr.success(`${result.createdCount} variant(s) create ho gaye!`);
-    } else if (result.created > 0) {
-      this.toastr.success(`${result.created} variant(s) create ho gaye!`);
+    const createdCount = result.createdCount !== undefined ? result.createdCount : (result.created !== undefined ? result.created : (result.result?.length || 1));
+    if (createdCount > 0) {
+      this.toastr.success(`${createdCount} variant(s) create ho gaye!`);
     } else {
-      this.toastr.success(`Variants create ho gaye!`);
+      this.toastr.success(`Variant saved successfully!`);
     }
     
     if (result.skippedCount > 0) {
