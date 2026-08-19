@@ -41,6 +41,7 @@ interface AttrGroup {
 export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
 
   @ViewChild('itemDropdown') itemDropdown: any;
+  @ViewChild('firstAttrValueSelect') firstAttrValueSelect: any;
 
   @Input() selectedItem: any = null;
   @Input() items: any[] = [];
@@ -108,15 +109,19 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
       this.selectedItem = null;
     }
     this.reset();
-    this.focusItemDropdown();
+    this.focusFirstAttrValue();
+  }
+
+  focusFirstAttrValue() {
+    setTimeout(() => {
+      if (this.firstAttrValueSelect) {
+        this.firstAttrValueSelect.focus();
+      }
+    }, 100);
   }
 
   focusItemDropdown() {
-    setTimeout(() => {
-      if (this.itemDropdown) {
-        this.itemDropdown.focus();
-      }
-    }, 100);
+    this.focusFirstAttrValue();
   }
 
   allAttributeValuesGrouped: any[] = [];
