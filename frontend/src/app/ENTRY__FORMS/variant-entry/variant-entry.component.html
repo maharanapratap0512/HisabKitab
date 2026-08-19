@@ -19,7 +19,7 @@
     </ul>
 
     <!-- ══ TAB 1: QUICK SINGLE ENTRY FORM ═════════════════════════════════ -->
-    <div *ngIf="activeTab === 'single'" class="p-3" style="flex:1; overflow-y:auto;">
+    <div *ngIf="activeTab === 'single'" class="p-3" style="flex:1; overflow-y:auto;" (keydown)="onSingleFormKeyDown($event)">
 
         <!-- 0. Item Selection Section -->
         <div class="mb-3">
@@ -136,7 +136,7 @@
                 [searchable]="true" [clearable]="true" [(ngModel)]="singleForm.category_ids"
                 [ngModelOptions]="{standalone: true}">
                 <ng-option *ngFor="let c of categories" [value]="c._id">
-                    {{ c.category_hin }} <span class="text-muted small" *ngIf="c.category_eng">: {{ c.category_eng }}</span>
+                    {{ c.category_hin }} <span class="text-muted small" *ngIf="c.category_eng">: {{ c.category_eng }}</span> <small class="text-muted fst-italic" *ngIf="c.category_roman">: {{ c.category_roman }}</small>
                 </ng-option>
             </ng-select>
         </div>
@@ -388,8 +388,7 @@
                                 [searchable]="true" [clearable]="true" [disabled]="!c.selected" [(ngModel)]="c.category_ids"
                                 [ngModelOptions]="{standalone: true}" [tabToSelect]="true">
                                 <ng-option *ngFor="let cat of categories" [value]="cat._id">
-                                    {{ cat.category_hin }} <span class="text-muted small" *ngIf="cat.category_eng"> : {{
-                                        cat.category_eng }}</span>
+                                    {{ cat.category_hin }} <span class="text-muted small" *ngIf="cat.category_eng"> : {{ cat.category_eng }}</span> <small class="text-muted fst-italic" *ngIf="cat.category_roman">: {{ cat.category_roman }}</small>
                                 </ng-option>
                             </ng-select>
                         </td>

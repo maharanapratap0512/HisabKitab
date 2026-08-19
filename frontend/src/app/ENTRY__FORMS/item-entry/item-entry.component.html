@@ -67,8 +67,9 @@
                             [virtualScroll]="true" [multiple]="true" formControlName="categories"
                             [ngClass]="{'validation':itemForm.get('categories')?.errors && (itemForm.get('categories')?.touched || itemForm.get ('categories')?.dirty)}">
                             <ng-option selected="selected" disabled value="">Select Category</ng-option>
-                            <ng-option *ngFor="let item of categories" [value]="item._id">{{item.category_hin}} :
-                                {{item.category_eng}}</ng-option>
+                            <ng-option *ngFor="let item of categories" [value]="item._id">
+                                {{item.category_hin}} <span class="text-muted small" *ngIf="item.category_eng">: {{item.category_eng}}</span> <small class="text-muted fst-italic" *ngIf="item.category_roman">: {{item.category_roman}}</small>
+                            </ng-option>
                         </ng-select>
                     </div>
                 </div>

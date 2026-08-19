@@ -75,13 +75,35 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
   removeLine(index: number) {
     if (this.singleAttrValues.length > 1) {
       this.singleAttrValues.splice(index, 1);
+      const targetIndex = Math.max(0, index - 1);
+      this.focusAttrValueIndex(targetIndex);
     } else {
       this.singleAttrValues[0] = null;
+      this.focusAttrValueIndex(0);
     }
     this.recomputeSingleGeneratedName();
   }
 
+  lastSelectTime = 0;
+
+  onSingleFormKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      // If a dropdown selection just happened in the last 400ms, DO NOT submit form
+      if (Date.now() - this.lastSelectTime < 400) {
+        return;
+      }
+
+      const isAnySelectOpen = this.attrValueSelects && this.attrValueSelects.some((s: any) => s.isOpen);
+      if (!isAnySelectOpen) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.saveSingleVariant();
+      }
+    }
+  }
+
   onAttrValueChange(val: any, index: number) {
+    this.lastSelectTime = Date.now();
     this.singleAttrValues[index] = val;
     this.recomputeSingleGeneratedName();
   }
@@ -103,6 +125,7 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   onItemDropdownChange(event: any) {
+    this.lastSelectTime = Date.now();
     if (event && event.item_id) {
       const selectedObj = event.item || (this.items || []).find((i: any) => i._id === event.item_id) || this.selectedItem;
       this.selectedItem = selectedObj;
