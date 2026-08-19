@@ -186,8 +186,8 @@ export class HeaderComponent implements AfterViewInit {
         children: [
           { title: 'Aawak', link: 'aawak', visible: this.auth.webUser.settings?.aawak?.visible },
           { title: 'Aawak (Bunch)', link: 'aawakN', visible: this.auth.webUser.settings?.aawak?.visible },
-          { title: 'Jawak', link: 'jawak', visible: this.auth.webUser.settings?.jawak?.visible },
-          { title: 'Jawak (Bunch)', link: 'jawakN', visible: this.auth.webUser.settings?.jawak?.visible },
+          // { title: 'Jawak', link: 'jawak', visible: this.auth.webUser.settings?.jawak?.visible },
+          { title: 'Jawak', link: 'jawakN', visible: this.auth.webUser.settings?.jawak?.visible },
           { title: 'HMP', link: 'hmp', visible: true },
           { title: 'Prastav', link: 'prastav', visible: true },
           { title: 'PBK Closing', link: 'pbk_closing', visible: true },

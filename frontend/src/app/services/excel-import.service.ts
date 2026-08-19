@@ -170,15 +170,15 @@ export class ExcelImportService {
       { col_name: 'nimmit', name: 'nimmit', alt_names: ["निमित्त"], not_null: false, ref_table: 'nimitt', ref_field: 'nimitt_id', ref_data: 'nimitt_hin' },
     ],
     attribute: [
-      { col_name: 'attribute_hin', name: 'attribute_hin', alt_names: ['attribute hin', 'attr hin'], not_null: true },
-      { col_name: 'attribute_eng', name: 'attribute_eng', alt_names: ['attribute eng', 'attr eng'], not_null: false },
-      { col_name: 'attribute_roman', name: 'attribute_roman', alt_names: ['attribute roman', 'attr roman'], not_null: false },
+      { col_name: 'attribute_hin', name: 'attribute_hin', alt_names: ['attribute hin', 'attr hin', 'attribute_name', 'attribute name', 'attribute', 'एट्रीब्यूट'], not_null: true },
+      { col_name: 'attribute_eng', name: 'attribute_eng', alt_names: ['attribute eng', 'attr eng', 'attribute name eng'], not_null: false },
+      { col_name: 'attribute_roman', name: 'attribute_roman', alt_names: ['attribute roman', 'attr roman', 'attribute name roman'], not_null: false },
     ],
     attributes_value: [
-      { col_name: 'attribute', name: 'attribute', alt_names: ['attribute_hin', 'attribute hin', 'attr'], not_null: true, ref_table: 'attribute', ref_field: 'attribute_id', ref_data: 'attribute_hin' },
-      { col_name: 'attribute_value_hin', name: 'attribute_value_hin', alt_names: ['value hin', 'value_hin'], not_null: true },
-      { col_name: 'attribute_value_eng', name: 'attribute_value_eng', alt_names: ['value eng', 'value_eng'], not_null: false },
-      { col_name: 'attribute_value_roman', name: 'attribute_value_roman', alt_names: ['value roman', 'value_roman'], not_null: false },
+      { col_name: 'attribute', name: 'attribute', alt_names: ['attribute_hin', 'attribute hin', 'attr', 'attribute_id', 'attribute id', 'एट्रीब्यूट'], not_null: true, ref_table: 'attribute', ref_field: 'attribute_id', ref_data: 'attribute_hin' },
+      { col_name: 'attribute_value_hin', name: 'attribute_value_hin', alt_names: ['value hin', 'value_hin', 'attribute value hin', 'attr value hin', 'attribute_value', 'attribute value', 'value', 'नाम', 'वैल्यू'], not_null: true },
+      { col_name: 'attribute_value_eng', name: 'attribute_value_eng', alt_names: ['value eng', 'value_eng', 'attribute value eng', 'attr value eng'], not_null: false },
+      { col_name: 'attribute_value_roman', name: 'attribute_value_roman', alt_names: ['value roman', 'value_roman', 'attribute value roman', 'attr value roman'], not_null: false },
     ],
     variant: [
       { col_name: 'item', name: 'item', alt_names: ["item_hin", "item hin", "item name"], not_null: true, ref_table: "item", ref_field: "item_id", ref_data: "item_hin" },

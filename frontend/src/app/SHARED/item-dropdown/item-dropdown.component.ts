@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter, forwardRef, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, forwardRef, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NgSelectComponent } from '@ng-select/ng-select';
 import { GlobalService } from 'src/app/services/global.service';
 
 declare var $: any;
@@ -17,12 +18,20 @@ declare var $: any;
   ]
 })
 export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
+  @ViewChild(NgSelectComponent) selectComponent: any;
+
   @Input() items: any[] = [];
   @Input() categoryIds: any[] = [];
   @Input() placeholder: string = 'Select Item';
   @Input() appendTo: string = 'body';
   @Input() readonly: boolean = false;
   @Input() required: boolean = false;
+
+  focus() {
+    if (this.selectComponent) {
+      this.selectComponent.focus();
+    }
+  }
   @Input() size: 'sm' | 'default' = 'default';
   @Input() multiple: boolean = false;
   @Input() closeOnSelect: boolean = true;

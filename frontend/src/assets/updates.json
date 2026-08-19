@@ -2,25 +2,33 @@
     {
         "version": "36.1",
         "date": "16-08-2026",
-        "summary": "Attribute & Value Import, Redesigned Aawak Table, Advanced Filters & Improved Excel Import UI",
-        "summary_hin": "एट्रीब्यूट व वैल्यू इम्पोर्ट, नया आवक टेबल रीडिजाइन, एडवांस्ड फ़िल्टर एवं एक्सेल इम्पोर्ट सुधार",
+        "summary": "Attribute & Value Import, Redesigned Aawak Table, Advanced Filters, Excel Export Improvements & Navigation Update",
+        "summary_hin": "एट्रीब्यूट व वैल्यू इम्पोर्ट, आवक टेबल रीडिजाइन, एडवांस्ड फ़िल्टर, एक्सेल एक्सपोर्ट सुधार एवं नेविगेशन अपडेट",
         "isNew": true,
         "items": [
             {
-                "type": "feature",
-                "module": "Attribute Entry & Import",
-                "title": "Excel Import Support for Attributes & Attribute Values",
-                "title_hin": "एट्रीब्यूट एवं एट्रीब्यूट वैल्यू एक्सेल इम्पोर्ट सुविधा",
-                "desc": "Bulk import attributes and attribute values directly from Excel sheets with automatic template download, header mapping, duplicate checking, and auto-refreshing lists.",
-                "desc_hin": "एक्सेल फ़ाइल से सीधे एट्रीब्यूट और एट्रीब्यूट वैल्यू इम्पोर्ट करने, स्वचालित डुप्लीकेट जाँच और लिस्ट ऑटो-रिफ्रेश की सुविधा।"
+                "type": "improved",
+                "module": "Excel Import Component",
+                "title": "Excel Import Enhancements for Attributes & Master Data",
+                "title_hin": "एट्रीब्यूट एवं मास्टर डेटा हेतु एक्सेल इम्पोर्ट सुधार",
+                "desc": "Bulk import support for attributes and attribute values directly from Excel sheets, with stable correction tab dropdowns, body-appended menus, template downloads, duplicate checks, and instant (+ Add) popups.",
+                "desc_hin": "एट्रीब्यूट और एट्रीब्यूट वैल्यू को सीधे एक्सेल से इम्पोर्ट करने की सुविधा, करेक्शन टैब में ड्रॉपडाउन स्थिरता और त्वरित इनलाइन मास्टर डेटा जोड़ने की सुविधा।"
             },
             {
                 "type": "improved",
                 "module": "Aawak New Component",
-                "title": "Redesigned Aawak New Table & Field Settings",
-                "title_hin": "आवक न्यू टेबल रीडिजाइन एवं फ़ील्ड सेटिंग्स सुधार",
-                "desc": "Redesigned Aawak-New table layout with seamless dark/light theme inheritance, optimized column settings, clean child sub-table display, and improved field arrangements.",
-                "desc_hin": "ऑटोमैटिक थीम सपोर्ट के साथ आवक-न्यू टेबल का नया लेआउट, बेहतर कॉलम सेटिंग्स, साफ़ सुथरा सब-टेबल डिस्प्ले और फ़ील्ड व्यवस्था में सुधार।"
+                "title": "Redesigned Aawak New Table, Field Settings & Excel Export Controls",
+                "title_hin": "आवक न्यू टेबल रीडिजाइन, सेटिंग्स एवं एक्सेल एक्सपोर्ट विकल्प",
+                "desc": "Redesigned Aawak-New table layout with seamless dark/light theme inheritance, optimized column settings, clean child sub-table display, and added Excel Export controls (Item-Subitem Merge & MM/Category Sorting checkboxes).",
+                "desc_hin": "ऑटोमैटिक थीम सपोर्ट के साथ आवक-न्यू का नया लेआउट, बेहतर कॉलम सेटिंग्स, साफ़ सब-टेबल डिस्प्ले और एक्सेल एक्सपोर्ट के लिए मर्ज व सॉर्टिंग चेकबॉक्स विकल्प।"
+            },
+            {
+                "type": "improved",
+                "module": "Jawak New Component",
+                "title": "Full Excel Export & Data Summary Support",
+                "title_hin": "जावक-न्यू एक्सेल एक्सपोर्ट एवं सारांश एक्सपोर्ट सुविधा",
+                "desc": "Integrated full Excel export into Jawak-New component with streaming paginated API fetch, formatted column export, and auto-computed total summary row (Quantities, Amounts, Unique MMs/Units).",
+                "desc_hin": "जावक-न्यू में सम्पूर्ण एक्सेल एक्सपोर्ट सुविधा का एकीकरण, जिसके द्वारा डेटा पेजिनेशन, कॉलम फॉर्मेटिंग और ऑटोमैटिक सारांश (मात्रा, राशि, यूनिक MM) एक्सेल फ़ाइल में डाउनलोड किया जा सकता है।"
             },
             {
                 "type": "feature",
@@ -31,12 +39,12 @@
                 "desc_hin": "आवक और आवक-न्यू में शीर्ष पर 2-कॉलम साइड-बाय-साइड पॉपओवर फ़िल्टर, जिसमें आइटम-सबआइटम, लॉट नंबर, कंडीशन, कंपनी, यूसेज लिस्ट और टाइप/सोर्स के लिए संपूर्ण खोज सुविधा।"
             },
             {
-                "type": "improved",
-                "module": "Excel Import Component",
-                "title": "Enhanced Excel Import UI & Correction Dropdown Stability",
-                "title_hin": "एक्सेल इम्पोर्ट UI सुधार एवं करेक्शन ड्रॉपडाउन स्थिरता",
-                "desc": "Improved Excel Import UI with stable open-state dropdown handling in Correction tab, body-appended option menus, responsive modal views, and instant master data (+ Add) popups.",
-                "desc_hin": "एक्सेल इम्पोर्ट UI में सुधार, करेक्शन टैब में ड्रॉपडाउन के खुलने और चुनने पर स्थिरता, बेहतर पॉपअप व्यू और इनलाइन रिकॉर्ड जोड़ने की सुविधा।"
+                "type": "warning",
+                "module": "Navigation & Header Menu",
+                "title": "Simple Jawak Menu Removed",
+                "title_hin": "पुराना जावक मेनू हटाया गया",
+                "desc": "Simple Jawak menu removed. Jawak Bunch now onwards available as Jawak.",
+                "desc_hin": "पुराना जावक मेनू हटा दिया गया है। जावक बंच (Jawak Bunch) ही अब आगे से मुख्य जावक (Jawak) के रूप में उपलब्ध रहेगा।"
             }
         ]
     },

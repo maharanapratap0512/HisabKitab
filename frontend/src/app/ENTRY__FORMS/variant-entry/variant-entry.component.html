@@ -5,7 +5,7 @@
     <!-- ══ NAV TABS ════════════════════════════════════════════════════════ -->
     <ul class="nav nav-tabs nav-tabs-custom mb-0 px-3 pt-2 bg-light border-bottom" style="flex-shrink:0;">
         <li class="nav-item">
-            <a class="nav-link py-2" [class.active]="activeTab === 'single'" (click)="activeTab = 'single'"
+            <a class="nav-link py-2" [class.active]="activeTab === 'single'" (click)="activeTab = 'single'; focusItemDropdown()"
                 style="cursor:pointer; font-weight:600;">
                 <i class="uil uil-plus-circle me-1"></i> Quick Single Entry
             </a>
@@ -20,6 +20,14 @@
 
     <!-- ══ TAB 1: QUICK SINGLE ENTRY FORM ═════════════════════════════════ -->
     <div *ngIf="activeTab === 'single'" class="p-3" style="flex:1; overflow-y:auto;">
+
+        <!-- 0. Item Selection Section -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold mb-1" style="font-size:12px;">Item</label>
+            <app-item-dropdown #itemDropdown [items]="items" [itemId]="selectedItem?._id"
+                (change)="onItemDropdownChange($event)" placeholder="Select Item...">
+            </app-item-dropdown>
+        </div>
 
         <!-- 1. Attribute Values Section (Prastav Concept) -->
         <div class="mb-3">
@@ -135,7 +143,7 @@
 
         <!-- 4. Submit Buttons -->
         <div class="d-flex justify-content-end gap-2 pt-2 border-top">
-            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="resetSingleForm()">
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="onResetSingleClick()">
                 Reset
             </button>
             <button type="button" class="btn btn-success btn-sm" [disabled]="isLoader" (click)="saveSingleVariant()">

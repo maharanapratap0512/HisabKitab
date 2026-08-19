@@ -493,7 +493,7 @@ class Functions extends DBContex {
       });
    }
    async getAttributes(dept_id = null) {
-      return await this.getList('attribute', { dept_id: dept_id }).then(async (resolve) => {
+      return await this.getList('attributes', { dept_id: dept_id }).then(async (resolve) => {
          return this.convertToLower(resolve.data || [], ['attribute_hin', 'attribute_eng', 'attribute_roman']);
       }, (err) => {
          return [];

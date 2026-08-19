@@ -265,8 +265,34 @@ router.put('/verify/:dept_id', async (req, res, next) => {
     } catch (err) { console.log(err); next(err) };
 });
 
-//  verify all and insert
-router.put('/final/:dept_id', async (req, res, next) => {
+async function processAttributeRow(service, fn, form, row) {
+    let fdata = await fn.setFormData(form, row);
+    if (!fdata.attribute_hin) {
+        fdata.attribute_hin = row.attribute_hin || row.attribute || null;
+    }
+    const conflict = service.getAttributeConflict(fdata);
+    if (conflict) {
+        return { status: 'duplicate', data: row };
+    } else {
+        let insResult = service.insertAttribute(fdata);
+        row.newData = insResult;
+        return { status: 'inserted', data: row };
+    }
+}
+
+async function processAttributeValueRow(service, fn, form, row) {
+    let fdata = await fn.setFormData(form, row);
+    const conflict = service.getAttributeValueConflict(fdata);
+    if (conflict) {
+        return { status: 'duplicate', data: row };
+    } else {
+        let insResult = service.insertAttributeValue(fdata);
+        row.newData = insResult;
+        return { status: 'inserted', data: row };
+    }
+}
+
+router.post('/final_insert/:dept_id', async (req, res, next) => {
     try {
         let fn = new ExcelFunctions([], req.params.dept_id);
         let result;
@@ -280,6 +306,22 @@ router.put('/final/:dept_id', async (req, res, next) => {
             let fdata = await fn.setFormData(fn.item_form, req.body.excelData);
             result = await is.createItem(fdata, req.params.dept_id);
             result = { status: 'inserted', data: req.body.excelData, newData: result };
+        } else if (req.body.importType.name == 'attribute') {
+            const vs = require('../services/variant.service');
+            const dataArr = Array.isArray(req.body.excelData) ? req.body.excelData : [req.body.excelData];
+            let results = [];
+            for (let row of dataArr) {
+                results.push(await processAttributeRow(vs, fn, fn.attribute_form, row));
+            }
+            result = Array.isArray(req.body.excelData) ? results : results[0];
+        } else if (req.body.importType.name == 'attributes_value') {
+            const vs = require('../services/variant.service');
+            const dataArr = Array.isArray(req.body.excelData) ? req.body.excelData : [req.body.excelData];
+            let results = [];
+            for (let row of dataArr) {
+                results.push(await processAttributeValueRow(vs, fn, fn.attributes_value_form, row));
+            }
+            result = Array.isArray(req.body.excelData) ? results : results[0];
         } else {
             result = await fn.verifyAndInsert(req.body.importType, req.body.excelData, req.body.headerList);
         }
@@ -401,25 +443,9 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                         row.newData = insResult;
                         result = { status: 'inserted', data: row };
                     } else if (type === 'attribute') {
-                        let fdata = await fn.setFormData(form, row);
-                        const conflict = service.getAttributeConflict(fdata);
-                        if (conflict) {
-                            result = { status: 'duplicate', data: row };
-                        } else {
-                            let insResult = await service.insertAttribute(fdata);
-                            row.newData = insResult;
-                            result = { status: 'inserted', data: row };
-                        }
+                        result = await processAttributeRow(service, fn, form, row);
                     } else if (type === 'attributes_value') {
-                        let fdata = await fn.setFormData(form, row);
-                        const conflict = service.getAttributeValueConflict(fdata);
-                        if (conflict) {
-                            result = { status: 'duplicate', data: row };
-                        } else {
-                            let insResult = await service.insertAttributeValue(fdata);
-                            row.newData = insResult;
-                            result = { status: 'inserted', data: row };
-                        }
+                        result = await processAttributeValueRow(service, fn, form, row);
                     } else if (type === 'item') {
                         const conflict = service.getItemConflict(row);
                         if (conflict) {

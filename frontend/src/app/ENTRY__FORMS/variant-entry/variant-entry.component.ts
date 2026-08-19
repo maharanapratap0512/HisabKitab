@@ -12,7 +12,7 @@
 //      → LCD 32" black, LCD 40" black ... (full 3-way)
 //      → all possible subsets that include at least one value from each group
 
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { HttpService } from 'src/app/services/http.service';
@@ -38,7 +38,9 @@ interface AttrGroup {
   templateUrl: './variant-entry.component.html',
   styleUrls: ['./variant-entry.component.scss'],
 })
-export class VariantEntryComponent implements OnInit, OnChanges {
+export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
+
+  @ViewChild('itemDropdown') itemDropdown: any;
 
   @Input() selectedItem: any = null;
   @Input() items: any[] = [];
@@ -98,6 +100,25 @@ export class VariantEntryComponent implements OnInit, OnChanges {
     return a && b ? (a._id === b._id) : (a === b);
   }
 
+  onItemDropdownChange(event: any) {
+    if (event && event.item_id) {
+      const selectedObj = event.item || (this.items || []).find((i: any) => i._id === event.item_id) || this.selectedItem;
+      this.selectedItem = selectedObj;
+    } else {
+      this.selectedItem = null;
+    }
+    this.reset();
+    this.focusItemDropdown();
+  }
+
+  focusItemDropdown() {
+    setTimeout(() => {
+      if (this.itemDropdown) {
+        this.itemDropdown.focus();
+      }
+    }, 100);
+  }
+
   allAttributeValuesGrouped: any[] = [];
 
   rebuildAttrValueOptions() {
@@ -145,6 +166,12 @@ export class VariantEntryComponent implements OnInit, OnChanges {
     this.rebuildAttrValueOptions();
   }
 
+  ngAfterViewInit() {
+    if (this.activeTab === 'single') {
+      this.focusItemDropdown();
+    }
+  }
+
   ngOnChanges(c: SimpleChanges) {
     if (c['selectedItem'] || c['items']) {
       this.reset();
@@ -190,9 +217,15 @@ export class VariantEntryComponent implements OnInit, OnChanges {
     this.singleAttrValues = [null];
   }
 
+  onResetSingleClick() {
+    this.resetSingleForm();
+    this.focusItemDropdown();
+  }
+
   saveSingleVariant() {
     if (!this.selectedItem?._id) {
       this.toastr.warning('Item not selected.');
+      this.focusItemDropdown();
       return;
     }
     if (!this.singleForm.display_name_hin?.trim()) {
@@ -227,6 +260,7 @@ export class VariantEntryComponent implements OnInit, OnChanges {
           this.isLoader = false;
           if (d.success) {
             this.resetSingleForm();
+            this.focusItemDropdown();
             this.response.emit({ reload: true, closeModal: false, ...d });
           } else {
             this.toastr.error(d.message || 'Error occurred while saving variant.');
