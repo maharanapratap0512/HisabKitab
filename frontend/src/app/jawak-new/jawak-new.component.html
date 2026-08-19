@@ -136,11 +136,8 @@
                                     (change)="excelImport($event)" />
                             </button>
                             <div id="tour-export-container" class="w-50 ms-2">
-                                <button id="tour-export-btn" type="button"
-                                    class="btn btn-outline-success dropdown-toggle w-100" data-bs-toggle="dropdown"
-                                    aria-expanded="false"> Export To Excel </button>
-                                <div class="dropdown-menu">
-                                </div>
+                                <button id="tour-export-btn" type="button" class="btn btn-outline-success w-100"
+                                    (click)="exportExcel()"> Export To Excel </button>
                             </div>
 
                         </div>

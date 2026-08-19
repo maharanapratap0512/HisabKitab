@@ -11,6 +11,8 @@ import { FormService } from 'src/app/services/form.service';
 import { SelectionService } from 'src/app/services/selection.service';
 import { TourService } from 'src/app/services/tour.service';
 import { JAWAK_NEW_TOUR_CONFIG } from './jawak-new.tour';
+import { Subject } from 'rxjs';
+import { ExcelExportService } from 'src/app/services/excel-export.service';
 declare var $: any;
 
 @Component({
@@ -34,6 +36,11 @@ export class JawakNewComponent implements OnInit {
   total_count: any = 0;
   term: any;
   loadingStatus: any = '';
+
+  // Export to Excel
+  exportJwkdata$ = new Subject();
+  allJwkData: any = [];
+  jwkCount: any = 0;
 
 
   flatJawakItems: any[] = [];
@@ -71,6 +78,7 @@ export class JawakNewComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public auth: AuthService,
     public fs: FormService,
+    public excelExportService: ExcelExportService,
     public selectionService: SelectionService,
     private tourService: TourService
   ) { }
@@ -572,5 +580,120 @@ export class JawakNewComponent implements OnInit {
 
   toggleExpand(voucher: any): void {
     voucher.expanded = !voucher.expanded;
+  }
+
+  getCategoryString(obj: any): string {
+    if (obj.categories && Array.isArray(obj.categories)) {
+      return obj.categories.map((c: any) => c.category_hin).join(', ');
+    } else if (obj.categories_hin && Array.isArray(obj.categories_hin)) {
+      return obj.categories_hin.join(', ');
+    }
+    return '';
+  }
+
+  exportExcel() {
+    this.isLoader = true;
+    this.loadingStatus = "डाटा प्रोसेस हो रहा है... ";
+    this.pageNo = 0;
+    this.jwkCount = 0;
+    this.allJwkData = [];
+    this.exportJwkdata$ = new Subject();
+    let footerRow: any = {
+      'Date': '*',
+      'Pkt No': 'Total',
+      'Jawak MM': 0,
+      'Qty': 0,
+      'Amount': 0,
+    }; // Object to store totals for footer
+    let uniqueMM = new Set();
+    let uniqueJawakMM = new Set();
+    let uniqueUnit = new Set();
+
+    this.getMoreAJ();
+
+    this.exportJwkdata$.subscribe(async (result: any) => {
+      for (let i = 0; i < result.length; i++) {
+        uniqueMM.add(result[i].mm_id);
+        uniqueJawakMM.add(result[i].jawak_mm_id);
+        uniqueUnit.add(result[i].unit_id);
+
+        let cat = '';
+        let item = this.gs.Lists.itemmix ? this.gs.Lists.itemmix.find((it: { _id: any; }) => it._id == result[i].item_id) : null;
+        if (item) {
+          if (result[i].subitem_id) {
+            let subitem = item.subitems ? item.subitems.find((s: { _id: any; }) => s._id == result[i].subitem_id) : null;
+            if (subitem) {
+              cat = this.getCategoryString(subitem);
+            } else {
+              cat = this.getCategoryString(item);
+            }
+          }
+          else {
+            cat = this.getCategoryString(item);
+          }
+        }
+
+        this.allJwkData.push({
+          'Date': result[i].date ? this.gs.formatDisplayDate(result[i].date) : '-',
+          'Pkt No': result[i].pkt_num ? result[i].pkt_num : '-',
+          'MM': result[i].mm_id ? result[i].mm_hin : '-',
+          'Category': cat,
+          'Item': result[i].item_id ? result[i].item_hin : '-',
+          'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
+          'Condition': result[i].condition_id ? result[i].condition_hin : '-',
+          'Company': result[i].company_name ? result[i].company_name : '-',
+          'Jawak MM': result[i].jawak_mm_id ? result[i].jawak_mm_hin : '-',
+          'Kisko Diya': result[i].pbk_id ? result[i].roll_no || '_____' + result[i].pbk_hin : '-',
+          'Qty': result[i].qty ? result[i].qty : '-',
+          'Unit': result[i].unit_id ? result[i].unit_short : '-',
+          'Rate': result[i].rate ? result[i].rate : '-',
+          'Amount': result[i].actual_amt ? result[i].actual_amt : '-',
+          'Jawak Type': result[i].jawak_type_id ? result[i].jawak_type_hin : '-',
+          'kaha Becha/Repaired': result[i].sell_repair_place ? result[i].sell_repair_place : '-',
+          'kaha parchi shown': result[i].parchi_place ? result[i].parchi_place : '-',
+          'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
+          'Jawak Detail': result[i].description ? result[i].description : '-',
+        });
+
+        footerRow['Qty'] += result[i].qty ? result[i].qty : 0;
+        footerRow['Amount'] += result[i].actual_amt ? result[i].actual_amt : 0;
+      }
+
+      this.loadingStatus = `डाटा प्रोसेस हो रहा है... (${this.allJwkData.length} / ${this.total_count})`;
+      if (this.allJwkData.length < this.total_count) {
+        this.getMoreAJ();
+      }
+      else {
+        footerRow['MM'] = uniqueMM.size + ' MMs';
+        footerRow['Unit'] = uniqueUnit.size + ' Units';
+        footerRow['Jawak MM'] = uniqueJawakMM.size + ' Mms';
+        this.allJwkData.push(footerRow);
+        let date = new Date();
+        this.excelExportService.exportAsExcelFile(this.allJwkData, "Jawak_" + this.auth.webUser.dept_eng + '_' + date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear() + '.xlsx');
+        this.isLoader = false;
+      }
+    });
+  }
+
+  getMoreAJ() {
+    this.filterBody.pageNo = this.pageNo + 1;
+    if (this.filterBody.aj_mm_id && (!this.filterBody.jawak_mm_id || !this.filterBody.jawak_mm_id.length)) {
+      this.filterBody.jawak_mm_id = this.filterBody.aj_mm_id;
+    }
+    this.http.put(this.api.getUrl('JAWAK') + 'filter/' + this.auth.webUser.dept_id, this.filterBody).subscribe((data: any) => {
+      if (data['result'] && data["result"].length) {
+        if (data["pageNo"]) {
+          this.pageNo = data["pageNo"];
+        }
+        this.total_count = data.total_count;
+        this.loadingStatus = `डाटा डाउनलोड हो रहा है... (API: ${this.pageNo})`;
+        this.exportJwkdata$.next(data['result']);
+      } else {
+        this.isLoader = false;
+      }
+    }, err => {
+      this.isLoader = false;
+      this.toastr.error('Failed to export Jawak data');
+    });
   }
 }

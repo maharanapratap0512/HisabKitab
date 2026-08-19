@@ -31,7 +31,7 @@
                                 Search
                             </button>
                         </div>
-                        <div class="col-3 d-flex">
+                        <div class="col-3 d-flex pb-2">
                             <button id="tour-import-btn" *ngIf="!gs.importPending" class="file btn btn-success"
                                 style="font-weight: 700 !important;">
                                 <i class="uil uil-arrow-to-bottom"></i> Import Aawak
@@ -56,6 +56,20 @@
                                     <a class="dropdown-item cursor-pointer" (click)="exportJawakData()">Jawak Only</a>
                                     <a class="dropdown-item cursor-pointer" (click)="exportPendingData()">Pending
                                         Destribution</a>
+                                </div>
+                                <div class="d-flex" id="tour-merge-sort-container">
+                                    <div class="form-check form-checkbox-primary ms-1" id="tour-merge-chk"
+                                        title="click to merge item & subitem column">
+                                        <input type="checkbox" class="form-check-input" id="chkMergeIS"
+                                            [(ngModel)]="itemSubitemMerge">
+                                        <label class="form-check-label" for="chkMergeIS">Merge</label>
+                                    </div>
+                                    <div class="form-check form-checkbox-primary ms-1" id="tour-sort-chk"
+                                        title="click to order by MM & category">
+                                        <input type="checkbox" class="form-check-input" id="chkOrderBy"
+                                            [(ngModel)]="orderBy">
+                                        <label class="form-check-label" for="chkOrderBy">Sorting</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>

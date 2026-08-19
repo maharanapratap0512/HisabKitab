@@ -65,6 +65,8 @@ export class AawakNewComponent implements OnInit {
   states: any = [];
   baseurl: any;
   departments: any = [];
+  itemSubitemMerge: any = false;
+  orderBy: any = false;
   filterBody: any = {
     type: 'aawak',
     pbk_id: [],
@@ -475,6 +477,7 @@ export class AawakNewComponent implements OnInit {
     this.allAJData = [];
     this.exportAJdata$ = new Subject();
 
+    this.filterBody.orderBy = this.orderBy ? "zone_hin, mm_state_hin, mm.mm_hin, icategories, scategories, item_hin, subitem_hin, aawak.date" : null;
     this.getMoreAJ();
 
     this.exportAJdata$.subscribe(async (result: any) => {
@@ -530,11 +533,16 @@ export class AawakNewComponent implements OnInit {
             cat = this.getCategoryString(subitem);
           }
         }
+        awkObj['Category'] = cat;
+        if (this.itemSubitemMerge) {
+          awkObj['Item Hin'] = (result[i].item_id ? result[i].item_hin : '-') + (result[i].subitem_id ? ' : ' + result[i].subitem_hin : '');
+          awkObj['Item Eng'] = (result[i].item_id ? result[i].item_eng : '-') + (result[i].subitem_id ? ' : ' + result[i].subitem_eng : '');
+        } else {
+          awkObj['Item'] = result[i].item_id ? result[i].item_hin : '-';
+          awkObj['Subitem'] = result[i].subitem_id ? result[i].subitem_hin : '-';
+        }
         awkObj = {
           ...awkObj,
-          'Category': cat,
-          'Item': result[i].item_id ? result[i].item_hin : '-',
-          'Subitem': result[i].subitem_id ? result[i].subitem_hin : '-',
           'Product Code': result[i].product_code ? result[i].product_code : '-',
           'Sr No': result[i].sr_num ? result[i].sr_num : '-',
           'Company': result[i].company_name ? result[i].company_name : '-',
@@ -546,7 +554,6 @@ export class AawakNewComponent implements OnInit {
           'Aawak Type': result[i].aawak_type_id ? result[i].aawak_type_hin : '-',
           'Item Detail': result[i].item_detail ? result[i].item_detail : '-',
           'Description': result[i].description ? result[i].description : '-',
-          // 'बचत':result[i].remaining_qty ? result[i].remaining_qty : 0,       
           'Jawak Detail': jawakArray,
         };
         this.allAJData.push(awkObj);
