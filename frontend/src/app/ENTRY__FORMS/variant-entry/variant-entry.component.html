@@ -50,7 +50,7 @@
                 <div *ngFor="let valObj of singleAttrValues; let i = index; let isLast = last" class="d-flex align-items-center gap-2">
                     <span class="text-muted fw-bold" style="font-size:11px; width:20px;">{{ i + 1 }}.</span>
                     <div class="flex-grow-1">
-                        <ng-select #firstAttrValueSelect class="custom" [items]="allAttributeValuesGrouped" bindLabel="searchLabel"
+                        <ng-select #attrValueSelect class="custom" [items]="allAttributeValuesGrouped" bindLabel="searchLabel"
                             [compareWith]="compareAttrValue" [searchable]="true" [clearable]="true"
                             [tabToSelect]="true" placeholder="Select Attribute Value..."
                             [ngModel]="singleAttrValues[i]" [ngModelOptions]="{standalone: true}"

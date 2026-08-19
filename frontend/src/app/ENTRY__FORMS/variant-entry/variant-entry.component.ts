@@ -12,7 +12,7 @@
 //      → LCD 32" black, LCD 40" black ... (full 3-way)
 //      → all possible subsets that include at least one value from each group
 
-import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, ViewChild, ViewChildren } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { HttpService } from 'src/app/services/http.service';
@@ -41,7 +41,7 @@ interface AttrGroup {
 export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
 
   @ViewChild('itemDropdown') itemDropdown: any;
-  @ViewChild('firstAttrValueSelect') firstAttrValueSelect: any;
+  @ViewChildren('attrValueSelect') attrValueSelects!: QueryList<any>;
 
   @Input() selectedItem: any = null;
   @Input() items: any[] = [];
@@ -69,6 +69,7 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
 
   addLine() {
     this.singleAttrValues.push(null);
+    this.focusAttrValueIndex(this.singleAttrValues.length - 1);
   }
 
   removeLine(index: number) {
@@ -109,19 +110,35 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
       this.selectedItem = null;
     }
     this.reset();
-    this.focusFirstAttrValue();
+    this.focusAttrValueIndex(0);
+  }
+
+  focusAttrValueIndex(index: number = 0) {
+    setTimeout(() => {
+      if (this.attrValueSelects) {
+        const arr = this.attrValueSelects.toArray();
+        const target = (index >= 0 && index < arr.length) ? arr[index] : arr[arr.length - 1];
+        if (target) {
+          if (typeof target.focus === 'function') {
+            try { target.focus(); } catch (e) { }
+          }
+          if (target.elementRef && target.elementRef.nativeElement) {
+            const input = target.elementRef.nativeElement.querySelector('input');
+            if (input) {
+              try { input.focus(); } catch (e) { }
+            }
+          }
+        }
+      }
+    }, 150);
   }
 
   focusFirstAttrValue() {
-    setTimeout(() => {
-      if (this.firstAttrValueSelect) {
-        this.firstAttrValueSelect.focus();
-      }
-    }, 100);
+    this.focusAttrValueIndex(0);
   }
 
   focusItemDropdown() {
-    this.focusFirstAttrValue();
+    this.focusAttrValueIndex(0);
   }
 
   allAttributeValuesGrouped: any[] = [];

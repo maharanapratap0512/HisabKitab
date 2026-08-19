@@ -29,7 +29,17 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
 
   focus() {
     if (this.selectComponent) {
-      this.selectComponent.focus();
+      try {
+        if (typeof this.selectComponent.focus === 'function') {
+          this.selectComponent.focus();
+        }
+        if (this.selectComponent.elementRef && this.selectComponent.elementRef.nativeElement) {
+          const input = this.selectComponent.elementRef.nativeElement.querySelector('input');
+          if (input) {
+            input.focus();
+          }
+        }
+      } catch (e) { }
     }
   }
   @Input() size: 'sm' | 'default' = 'default';
