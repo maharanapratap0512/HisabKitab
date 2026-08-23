@@ -201,6 +201,14 @@ export class ImportComponent implements OnInit {
           } else {
             this.importData[i].valid = false;
           }
+          const awkSourceId = this.importData[i].aawak_source_id || this.importData[i].awk_source_id;
+          if (awkSourceId && (!this.importData[i].aawak_source_hin && !this.importData[i].awk_source_hin)) {
+            let getawk_source = this.aawak_sources.find((m: { _id: any; }) => m._id == awkSourceId);
+            if (getawk_source) {
+              this.importData[i].aawak_source_hin = getawk_source.list_name_hin;
+              this.importData[i].awk_source_hin = getawk_source.list_name_hin;
+            }
+          }
           for (let j in this.importData[i].jawak_detail) {
             if (this.importData[i].jawak_detail[j].aj_mm_id && this.importData[i].jawak_detail[j].qty && this.importData[i].jawak_detail[j].aj_type_id) {
               this.importData[i].jawak_detail[j].valid = true;
@@ -229,10 +237,12 @@ export class ImportComponent implements OnInit {
                 this.importData[i].jawak_detail[j].aj_type_hin = getaj_type.list_name_hin;
               }
             }
-            if (this.importData[i].jawak_detail[j].awk_source_id && !this.importData[i].jawak_detail[j].awk_source_hin) {
-              let getawk_source = this.jawak_types.find((m: { _id: any; }) => m._id == this.importData[i].jawak_detail[j].awk_source_id);
+            const jwkSourceId = this.importData[i].jawak_detail[j].aawak_source_id || this.importData[i].jawak_detail[j].awk_source_id;
+            if (jwkSourceId && (!this.importData[i].jawak_detail[j].awk_source_hin && !this.importData[i].jawak_detail[j].aawak_source_hin)) {
+              let getawk_source = this.aawak_sources.find((m: { _id: any; }) => m._id == jwkSourceId);
               if (getawk_source) {
                 this.importData[i].jawak_detail[j].awk_source_hin = getawk_source.list_name_hin;
+                this.importData[i].jawak_detail[j].aawak_source_hin = getawk_source.list_name_hin;
               }
             }
             if (this.importData[i].jawak_detail[j].unit_id && !this.importData[i].jawak_detail[j].unit_short) {

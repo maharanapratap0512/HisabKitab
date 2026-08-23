@@ -58,6 +58,8 @@ router.get('/correction', async (req, res, next) => {
         correctionList.push(...DB.db.prepare(`select DISTINCT pbk as name, 'pbk' as type, null as id, false as dictionary from temp_import where pbk IS NOT NULL AND pbk_id IS NULL`).all());
         // awk_type
         correctionList.push(...DB.db.prepare(`select DISTINCT aj_type as name, 'awk_type' as type, null as id, false as dictionary from temp_import where aj_type IS NOT NULL AND aj_type_id IS NULL AND temp_import.type='awk'`).all());
+        // aawak_source
+        correctionList.push(...DB.db.prepare(`select DISTINCT aawak_source as name, 'aawak_source' as type, null as id, false as dictionary from temp_import where aawak_source IS NOT NULL AND aawak_source_id IS NULL AND temp_import.type='awk'`).all());
         // condition
         correctionList.push(...DB.db.prepare(`select DISTINCT condition as name, 'condition' as type, null as id, false as dictionary from temp_import where condition IS NOT NULL AND condition_id IS NULL`).all());
         // product
@@ -225,7 +227,7 @@ router.put('/process', async (req, res, next) => {
                 await Fn.begin();
                 let awkObj = {
                     _id: (copyIds && awkData.awk_id) ? awkData.awk_id : null,
-                    date: awkData.date, mm_id: awkData.mm_id, pkt_num: awkData.pkt_num, pbk_id: awkData.pbk_id, aawak_mm_id: awkData.aj_mm_id, item_id: awkData.item_id, subitem_id: awkData.subitem_id, product_id: awkData.product_id, item_detail: awkData.item_detail, condition_id: awkData.condition_id, qty: awkData.qty, rate: awkData.rate, actual_amt: awkData.actual_amt, aawak_type_id: awkData.aj_type_id, unit_id: awkData.unit_id, description: awkData.description, nimitt_id: awkData.nimitt_id, dept_id: awkData.dept_id, company_name: awkData.company_name, isbill: awkData.isbill, document: null, usage_list_id: awkData.usage_list_id, usage_list: awkData.usage_list, is_xl: 1, is_auto_pd: 0
+                    date: awkData.date, mm_id: awkData.mm_id, pkt_num: awkData.pkt_num, pbk_id: awkData.pbk_id, aawak_mm_id: awkData.aj_mm_id, item_id: awkData.item_id, subitem_id: awkData.subitem_id, product_id: awkData.product_id, item_detail: awkData.item_detail, condition_id: awkData.condition_id, qty: awkData.qty, rate: awkData.rate, actual_amt: awkData.actual_amt, aawak_type_id: awkData.aj_type_id, aawak_source_id: awkData.aawak_source_id || awkData.awk_source_id || null, unit_id: awkData.unit_id, description: awkData.description, nimitt_id: awkData.nimitt_id, dept_id: awkData.dept_id, company_name: awkData.company_name, isbill: awkData.isbill, document: null, usage_list_id: awkData.usage_list_id, usage_list: awkData.usage_list, is_xl: 1, is_auto_pd: 0
                 };
                 await Fn.insertAJ(awkObj, 'aawak').then(async (resolve) => {
                     awkData.awk_id = resolve;

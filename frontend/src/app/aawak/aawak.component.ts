@@ -1600,6 +1600,8 @@ export class AawakComponent implements OnInit {
           unit_id: null,
           aj_type: null,
           aj_type_id: null,
+          aawak_source: null,
+          aawak_source_id: null,
           awk_source: null,
           awk_source_id: null,
           nimitt: null,
@@ -1752,12 +1754,15 @@ export class AawakComponent implements OnInit {
               case "awk source":
               case "awk_source":
               case "aawak_source": obj.awk_source = exceldata[i][j];
+                obj.aawak_source = exceldata[i][j];
                 let getaawak_source = this.aawak_sources.find((c: any) => this.gs.stringCompare(c.list_name_hin, obj.awk_source) || this.gs.stringCompare(c.list_name_eng, obj.awk_source));
                 if (getaawak_source) {
                   obj.awk_source_id = getaawak_source._id;
+                  obj.aawak_source_id = getaawak_source._id;
                 } else {
-                  let dictawk_source = this.dictionary.find((d: any) => d.type == "awk_source" && d.name == obj.awk_source)
+                  let dictawk_source = this.dictionary.find((d: any) => (d.type == "awk_source" || d.type == "aawak_source") && d.name == obj.awk_source)
                   obj.awk_source_id = dictawk_source ? dictawk_source.id : null;
+                  obj.aawak_source_id = dictawk_source ? dictawk_source.id : null;
                 }
                 break;
               case "qty":

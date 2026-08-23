@@ -100,6 +100,7 @@
                   <th style="width: 70px;">Rate</th>
                   <th style="width: 70px;">Amount</th>
                   <th style="width: 80px;">Aawak Type</th>
+                  <th style="width: 80px;" *ngIf="settings.aawak.aawak_source_id">Aawak Source</th>
                   <th style="width: 70px;">Bill</th>
                   <th style="width: 80px;">Nimitt</th>
                   <th style="width: 80px;">Dept</th>
@@ -147,6 +148,9 @@
                      <td>{{data.actual_amt?data.actual_amt:'-'}}</td>
                      <td [ngClass]="{'marked': !data.aj_type_id}">
                         {{data.aj_type?data.aj_type:'-'}}
+                     </td>
+                     <td *ngIf="settings.aawak.aawak_source_id" [ngClass]="{'marked': (data.awk_source || data.aawak_source) && !data.awk_source_id && !data.aawak_source_id}">
+                        {{data.aawak_source || data.awk_source || '-'}}
                      </td>
                      <td>{{data.isbill?'है':'नहीं'}}</td>
                      <td [ngClass]="{'marked': data.nimitt && !data.nimitt_id}">
@@ -328,7 +332,7 @@
                            </ng-select>
 
                            <!-- aawak source dropdown -->
-                           <ng-select *ngIf="data.type == 'awk_source'" class="custom custom-import"
+                           <ng-select *ngIf="data.type == 'awk_source' || data.type == 'aawak_source'" class="custom custom-import"
                               placeholder="Select Aawak Source" [virtualScroll]="true" [(ngModel)]="data.id"
                               [ngModelOptions]="{standalone: true}" (change)="handleAddOption($event, data, 'Add Aawak Source')" appendTo="body">
                               <ng-option selected="selected" disabled value="">-- Select Aawak Source --</ng-option>
