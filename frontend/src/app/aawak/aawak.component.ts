@@ -1945,7 +1945,7 @@ export class AawakComponent implements OnInit {
           obj.item_id = dictitem ? dictitem.id : null;
           obj.subitem_id = dictitem ? dictitem.id2 : null;
         }
-        // console.log(obj);
+        console.log(obj);
 
         // auto calculate rate and amount based on coresponding values for aawak.
         if (obj.qty && obj.rate && !obj.actual_amt) {

@@ -296,10 +296,23 @@ export class VariantNewComponent implements OnInit {
   openModal(type: string) { this.showModal = type; $('#showModal').modal('show'); }
 
   closeModal() {
+    const isAttrOrVariantModal = this.showModal === 'Manage Attributes' ||
+      this.showModal === 'Manage Attribute Values' ||
+      this.showModal === 'Generate Variants' ||
+      this.showModal === 'Edit Variant';
     $('#showModal').modal('hide');
     this.showModal = '';
     this.editData = null;
     this.isEdit = false;
+
+    if (isAttrOrVariantModal) {
+      this.loadAttributes();
+      if (this.activeItem?._id) {
+        this.refreshItemData(this.activeItem._id);
+      } else {
+        this.getItemData(this.page);
+      }
+    }
     this.activeItem = null;
   }
 
@@ -442,7 +455,14 @@ export class VariantNewComponent implements OnInit {
   }
 
   onAttributeSaved(result: any) {
-    if (result?.reload) { this.loadAttributes(); }
+    if (result?.reload || result?.refreshAttributes) {
+      this.loadAttributes();
+      if (this.activeItem?._id) {
+        this.refreshItemData(this.activeItem._id);
+      } else {
+        this.getItemData(this.page);
+      }
+    }
   }
 
   itemAddResponse(ev: any) {

@@ -30,6 +30,7 @@ export class AttributeEntryComponent implements OnInit {
     attrValFilter: any = null;   // filter table by attribute
 
     rows: any[] = [];
+    term: string = '';
     isLoader = false;
 
     delID: any = null;

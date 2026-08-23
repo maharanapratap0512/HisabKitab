@@ -54,6 +54,17 @@
             </div>
         </div>
 
+        <!-- Search bar for Attributes -->
+        <div class="mb-2">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light"><i class="uil uil-search"></i></span>
+                <input type="text" class="form-control" [(ngModel)]="term" placeholder="Attributes me search karo..." />
+                <button *ngIf="term" class="btn btn-outline-secondary" type="button" (click)="term = ''">
+                    <i class="uil uil-times"></i>
+                </button>
+            </div>
+        </div>
+
         <div class="table-responsive" style="max-height:50vh;overflow-y:auto;">
             <table class="table table-sm table-hover" appTableSmartCheckbox="attribute" [selectionData]="rows">
                 <thead>
@@ -71,7 +82,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let row of rows; let i=index">
+                    <tr *ngFor="let row of rows | search: term; let i=index">
                         <td>
                             <div class="form-check">
                                 <input class="form-check-input smart-checkbox-row" type="checkbox" [value]="row._id">
@@ -102,16 +113,7 @@
 
     <!-- ── ATTR VALUES mode ───────────────────────────────────────────────── -->
     <ng-container *ngIf="mode === 'attr_values'">
-        <!-- Filter by attribute -->
-        <div class="mb-2">
-            <ng-select class="custom" [clearable]="true" [virtualScroll]="true" placeholder="-- Sab Attributes --"
-                [ngModel]="attrValFilter" (change)="onAttrValFilter($event)" [tabToSelect]="true">
-                <ng-option *ngFor="let a of allAttributes" [value]="a._id">
-                    {{ a.attribute_hin }} <small class="text-muted" *ngIf="a.attribute_eng"> : {{ a.attribute_eng }}</small>
-                </ng-option>
-            </ng-select>
-        </div>
-
+        <!-- Entry Form (separate top) -->
         <div class="row g-2 align-items-end mb-3 border-bottom pb-3">
             <div class="col-3">
                 <label class="form-label d-flex justify-content-between align-items-center mb-1">
@@ -161,6 +163,27 @@
             </div>
         </div>
 
+        <!-- Filter by attribute & Search bar (full row right above table) -->
+        <div class="row g-2 mb-2">
+            <div class="col-6">
+                <ng-select class="custom" [clearable]="true" [virtualScroll]="true" placeholder="-- Sab Attributes --"
+                    [ngModel]="attrValFilter" (change)="onAttrValFilter($event)" [tabToSelect]="true">
+                    <ng-option *ngFor="let a of allAttributes" [value]="a._id">
+                        {{ a.attribute_hin }} <small class="text-muted" *ngIf="a.attribute_eng"> : {{ a.attribute_eng }}</small>
+                    </ng-option>
+                </ng-select>
+            </div>
+            <div class="col-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light"><i class="uil uil-search"></i></span>
+                    <input type="text" class="form-control" [(ngModel)]="term" placeholder="Attribute Values me search karo..." />
+                    <button *ngIf="term" class="btn btn-outline-secondary" type="button" (click)="term = ''">
+                        <i class="uil uil-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div class="table-responsive" style="max-height:50vh;overflow-y:auto;">
             <table class="table table-sm table-hover" appTableSmartCheckbox="attribute_value" [selectionData]="rows">
                 <thead>
@@ -179,7 +202,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let row of rows; let i=index">
+                    <tr *ngFor="let row of rows | search: term; let i=index">
                         <td>
                             <div class="form-check">
                                 <input class="form-check-input smart-checkbox-row" type="checkbox" [value]="row._id">

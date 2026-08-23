@@ -218,9 +218,11 @@ export class VariantComponent implements OnInit {
   }
 
   onAttributeSaved(result: any) {
-    if (result?.reload) {
+    if (result?.reload || result?.refreshAttributes) {
       this.loadAttributes();
-      this.loadItemVariantData(this.selectedItem?._id ?? 0);
+      if (this.selectedItem?._id) {
+        this.loadItemVariantData(this.selectedItem._id);
+      }
     }
   }
 

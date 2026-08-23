@@ -412,12 +412,15 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
     setTimeout(() => {
       this.attrModalMode = '';
       this.attrModalInitialId = null;
+      this.response.emit({ refreshAttributes: true, reload: true });
+      this.rebuildAttrValueOptions();
     }, 300);
   }
 
   onAttrSaved(res: any) {
-    if (res?.reload) {
-      this.response.emit({ refreshAttributes: true });
+    if (res?.reload || res?.refreshAttributes) {
+      this.response.emit({ refreshAttributes: true, reload: true });
+      this.rebuildAttrValueOptions();
     }
   }
 

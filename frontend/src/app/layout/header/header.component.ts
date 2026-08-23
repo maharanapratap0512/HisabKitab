@@ -232,7 +232,7 @@ export class HeaderComponent implements AfterViewInit {
           { title: 'Dictionary', link: 'view/dict', visible: true },
           { title: 'Gender', link: 'view/gender', visible: true },
           { title: 'Relation', link: 'view/relation', visible: true },
-          { title: 'Word Correction', link: 'view/word_correction', visible: true },
+          // { title: 'Word Correction', link: 'view/word_correction', visible: true },
         ]
       },
       {
