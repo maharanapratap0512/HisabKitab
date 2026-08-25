@@ -361,15 +361,14 @@ router.put('/aj/:dept_id', async (req, res, next) => {
         let stmt = DB.db.prepare(`select bcht.*, json_group_array(condition_id) as condition_ids, json_group_array(bachat) as bachats,
         json_group_array(sl.list_name_hin) as condition_hin, json_group_array(sl.list_name_eng) as condition_eng, 
         mm.mm_hin, mm.mm_eng, mm.mm_code, mm.state_id, st.state_hin, st.state_eng,
-        it.item_hin, it.item_eng, it.item_code, it.categories as arr_item_categories,
-        sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+        it.item_hin, it.item_eng, it.item_code, it.icategories as arr_item_categories,
+        sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
         unit.unit_short, unit.unit_full,
         dept.dept_code, dept.dept_hin, dept.dept_eng from bachat_new bcht 
         left join mm on mm._id = bcht.mm_id
         left join state st on st._id = mm.state_id
-        left join item it on it._id = bcht.item_id
-        left join subitem sit on sit._id = bcht.subitem_id
-        left join subitem_list sitl on sitl._id = sit.subitem_list_id
+        left join v_item it on it._id = bcht.item_id
+        left join v_subitem sit on sit._id = bcht.subitem_id
         left join unit on unit._id = bcht.unit_id
         left join support_list sl on sl._id = bcht.condition_id
         left join department dept on dept._id = bcht.dept_id where ${conditionString}
@@ -575,16 +574,15 @@ router.put('/awk_type_saar/', async (req, res, next) => {
         }
         let sql = `select JSON_GROUP_ARRAY(awk.month) as arr_months, 
         JSON_GROUP_ARRAY(awk.sum_qty) as arr_sum_qty, 
-        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
-        sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
+        sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
         sl.list_name_hin as aawak_type_hin, sl.list_name_eng as aawak_type_eng,
         unit.unit_short, unit.unit_full,
         department.dept_hin, department.dept_eng, department.dept_code
         from (select sum(qty) as sum_qty, strftime('%Y', date) as year, strftime('%m', date) as month, * from aawak 
         where ${conditionString} group by dept_id, item_id, subitem_id, unit_id, aawak_type_id, month ) awk
-        left join item it on it._id = awk.item_id 
-        left join subitem sit on sit._id = awk.subitem_id
-        left join subitem_list sitl on sitl._id = sit.subitem_list_id
+        left join v_item it on it._id = awk.item_id 
+        left join v_subitem sit on sit._id = awk.subitem_id
         left join unit on unit._id = awk.unit_id
         left join department on department._id = awk.dept_id
         left join support_list sl on sl._id = awk.aawak_type_id
@@ -624,16 +622,15 @@ router.put('/jwk_type_saar/', async (req, res, next) => {
         }
         let sql = `select JSON_GROUP_ARRAY(jwk.month) as arr_months, 
         JSON_GROUP_ARRAY(jwk.sum_qty) as arr_sum_qty, 
-        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
-        sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+        it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
+        sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
         sl.list_name_hin as jawak_type_hin, sl.list_name_eng as jawak_type_eng,
         unit.unit_short, unit.unit_full,
         department.dept_hin, department.dept_eng, department.dept_code
         from (select sum(qty) as sum_qty, strftime('%Y', date) as year, strftime('%m', date) as month, * from jawak 
         where ${conditionString} group by dept_id, item_id, subitem_id, unit_id, jawak_type_id, month ) jwk
-        left join item it on it._id = jwk.item_id 
-        left join subitem sit on sit._id = jwk.subitem_id
-        left join subitem_list sitl on sitl._id = sit.subitem_list_id
+        left join v_item it on it._id = jwk.item_id 
+        left join v_subitem sit on sit._id = jwk.subitem_id
         left join unit on unit._id = jwk.unit_id
         left join department on department._id = jwk.dept_id
         left join support_list sl on sl._id = jwk.jawak_type_id
@@ -739,14 +736,13 @@ router.put('/report_khet_saar/:dept_id', async (req, res, next) => {
             sql = `select aawak.*, round(avg(rate), 2) as avg_rate, round(sum(actual_amt), 2) as sum_amt, round(sum(qty), 2) as sum_qty,
             dept.dept_hin, dept.dept_eng, dept.dept_code,
             mm.mm_hin, mm.mm_eng, mm.state_id as mm_state_id,
-            it.item_hin, it.item_eng, it.item_code, it.item_roman, it.categories as arr_item_categories,
-            sitl.subitem_hin, sitl.subitem_eng, sit.categories as arr_subitem_categories,
+            it.item_hin, it.item_eng, it.item_code, it.item_roman, it.icategories as arr_item_categories,
+            sit.subitem_hin, sit.subitem_eng, sit.categories as arr_subitem_categories,
             unit.unit_short, unit.unit_full
             from aawak 
             left join mm on mm._id = aawak.aawak_mm_id 
-            left join item it on it._id = aawak.item_id 
-            left join subitem sit on sit._id = aawak.subitem_id
-            left join subitem_list sitl on sitl._id = sit.subitem_list_id
+            left join v_item it on it._id = aawak.item_id 
+            left join v_subitem sit on sit._id = aawak.subitem_id
             left join unit on unit._id = aawak.unit_id
             left join department dept on dept._id = aawak.dept_id where ${conditionString}
             group by aawak.dept_id, aawak.item_id, aawak.subitem_id, aawak.unit_id`;
@@ -850,14 +846,13 @@ router.put('/report_khet_ajsaar/:dept_id', async (req, res, next) => {
         let sql = `select s_awk.*, JSON_GROUP_ARRAY(sum_qty) as arr_sum_qty, JSON_GROUP_ARRAY(s_awk.unit_id) as arr_unit_id,
         JSON_GROUP_ARRAY(unit_short) as arr_unit_short, sum(sum_amt) as total_amt, JSON_GROUP_ARRAY(s_awk._ids) as arr_awk_ids,
         dept.dept_hin, dept.dept_eng, dept.dept_code,
-        item.item_hin, item.item_eng, item.categories as arr_item_categories,
-        sl.subitem_hin, sl.subitem_eng, subitem.categories as arr_subitem_categories
+        item.item_hin, item.item_eng, item.icategories as arr_item_categories,
+        subitem.subitem_hin, subitem.subitem_eng, subitem.categories as arr_subitem_categories
         from (select dept_id, aawak_mm_id, item_id, subitem_id, unit_id, avg(rate) as avg_rate, sum(actual_amt) as sum_amt, sum(qty) as sum_qty, GROUP_CONCAT(_id) as _ids from aawak 
         where ${conditionString} 
         group by aawak.dept_id, aawak.item_id, aawak.subitem_id, aawak.unit_id) s_awk
-        left join item on item._id = s_awk.item_id 
-        left join subitem on subitem._id = s_awk.subitem_id 
-        left join subitem_list sl on sl._id = subitem.subitem_list_id
+        left join v_item item on item._id = s_awk.item_id 
+        left join v_subitem subitem on subitem._id = s_awk.subitem_id
         left join unit on unit._id = s_awk.unit_id
         left join department dept on dept._id = s_awk.dept_id 
         group by s_awk.dept_id, s_awk.item_id, s_awk.subitem_id`;
