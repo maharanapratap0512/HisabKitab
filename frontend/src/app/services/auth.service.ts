@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
+import { Subject } from 'rxjs';
 // import { LOCAL_STORAGE, WINDOW } from '@ng-toolkit/universal';
 import { settings } from 'cluster';
 import { ApiService } from './api.service';
@@ -11,6 +12,11 @@ import { HttpService } from './http.service';
 export class AuthService {
   user: any;
   webUser: any = {};
+  public settingsUpdated$ = new Subject<any>();
+
+  get isVariantMode(): boolean {
+    return this.webUser?.settings?.item?.item_mode === 'variant';
+  }
   // settings: any = {};
   settingsUI = {
     pageList: [
@@ -165,11 +171,28 @@ export class AuthService {
       { colName: 'item_roman', title: 'Name (Roman)' },
       { colName: 'item_code', title: 'Item Code' },
       { colName: 'price_range', title: 'Price Range' },
+      { colName: 'sku', title: 'SKU' },
       { colName: 'extra_note', title: 'Extra Note' },
       { colName: 'document', title: 'Images' },
       { colName: 'subitem_eng', title: 'Subitem (Eng)' },
       { colName: 'subitem_roman', title: 'Subitem (Roman)' },
+      { colName: 'attribute_name_eng', title: 'Attribute Name (Eng)' },
+      { colName: 'attribute_name_roman', title: 'Attribute Name (Roman)' },
+      { colName: 'attribute_val_eng', title: 'Attribute Value (Eng)' },
+      { colName: 'attribute_val_roman', title: 'Attribute Value (Roman)' },
     ],
+    ui_settings: {
+      item: [
+        {
+          key: 'item_mode',
+          title: 'Item Structure Mode',
+          options: [
+            { label: 'Subitem Mode', value: 'subitem' },
+            { label: 'Variant Mode', value: 'variant' }
+          ]
+        }
+      ]
+    },
     bachat: [],
     pbk_closing: [],
     category: [
@@ -218,6 +241,7 @@ export class AuthService {
     // this.localStorage.setItem('WebUser', JSON.stringify(user));
     window.sessionStorage.setItem('WebUser', JSON.stringify(user));
     this.webUser = user;
+    this.settingsUpdated$.next(this.webUser?.settings);
   }
 
   // async updateMainSettings(setting: any) {

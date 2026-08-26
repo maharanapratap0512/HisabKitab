@@ -44,7 +44,7 @@ router.post('/new/:dept_id', async (req, res, next) => {
             await Fn.insertAJ(req.body, 'aawak').then(async (resolve) => {
                 if (resolve) {
                     for (let jwk of req.body.jawak_detail) {
-                        jwk.aawak_ref_id = resolve;
+                        jwk.aawak_splits = [{ aawak_id: resolve, split_qty: jwk.qty, qty: jwk.qty }];
                         jwk.aawak_source_id = req.body.aawak_source_id;
                         await Fn.insertAJ(jwk, 'jawak').then(async (jwkResult) => {
                             if (jwkResult) {
@@ -70,12 +70,7 @@ router.post('/new/:dept_id', async (req, res, next) => {
                             data.data[i].icategories = (data.data[i].icategories ? JSON.parse(data.data[i].icategories) : []);
                             data.data[i].scategories = (data.data[i].scategories ? JSON.parse(data.data[i].scategories) : []);
                             data.data[i].isbill = data.data[i].isbill ? true : false;
-
-                            let jwkconditionString = ` jawak.aawak_ref_id = ${data.data[i]._id}`;
-
-                            await DB.getList('jawak', { full: true, conditionString: jwkconditionString }).then(async (jwkdata) => {
-                                data.data[i].jawak_detail = jwkdata.data;
-                            });
+                            data.data[i].jawak_detail = await getJawakDetailForAawak(data.data[i]._id, req.params.dept_id);
                         }
                         Fn.commit();
                         res.json({
@@ -119,7 +114,7 @@ router.post('/bunch/:dept_id', async (req, res, next) => {
                     if (resolve && aawak.jawak_detail && aawak.jawak_detail.length > 0) {
                         let jwk_voucher_no = await Fn.getLastVoucherNo('jawak') + 1;
                         for (let i in aawak.jawak_detail) {
-                            aawak.jawak_detail[i].aawak_ref_id = resolve;
+                            aawak.jawak_detail[i].aawak_splits = [{ aawak_id: resolve, split_qty: aawak.jawak_detail[i].qty, qty: aawak.jawak_detail[i].qty }];
                             aawak.jawak_detail[i].voucher_no = jwk_voucher_no;
                             await Fn.insertAJ(aawak.jawak_detail[i], 'jawak').then(async (jwkResult) => {
                             }, (err) => {
@@ -191,7 +186,7 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
                 if (aawak._id) {
                     let oldAwk = await DB.getById('aawak', aawak._id);
                     await Fn.updateAJ(aawak, 'aawak', oldAwk).then(async (resolve) => {
-                        await DB.getList('jawak', { conditionString: ` aawak_ref_id = ${oldAwk._id}` }).then(async (jwkdata) => {
+                        await DB.getList('jawak', { conditionString: ` (jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${oldAwk._id}) OR jawak.aawak_ref_id = ${oldAwk._id})` }).then(async (jwkdata) => {
                             if (jwkdata.data) {
                                 for (let jwk of jwkdata.data) {
                                     let jwkNew = {
@@ -220,7 +215,7 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
                         if (aawak.jawak_detail) {
                             for (let i = 0; i < aawak.jawak_detail.length; i++) {
                                 if (!aawak.jawak_detail[i]._id) {
-                                    aawak.jawak_detail[i].aawak_ref_id = oldAwk._id;
+                                    aawak.jawak_detail[i].aawak_splits = [{ aawak_id: oldAwk._id, split_qty: aawak.jawak_detail[i].qty, qty: aawak.jawak_detail[i].qty }];
                                     aawak.jawak_detail[i].aawak_source_id = aawak.aawak_source_id;
                                     await Fn.insertAJ(aawak.jawak_detail[i], 'jawak').then(async (jwkResult) => {
                                     }, (err) => {
@@ -238,7 +233,7 @@ router.put('/bunch/:dept_id', async (req, res, next) => {
                         if (resolve && aawak.jawak_detail && aawak.jawak_detail.length > 0) {
                             let jwk_voucher_no = await Fn.getLastVoucherNo('jawak') + 1;
                             for (let i in aawak.jawak_detail) {
-                                aawak.jawak_detail[i].aawak_ref_id = resolve;
+                                aawak.jawak_detail[i].aawak_splits = [{ aawak_id: resolve, split_qty: aawak.jawak_detail[i].qty, qty: aawak.jawak_detail[i].qty }];
                                 aawak.jawak_detail[i].voucher_no = jwk_voucher_no;
                                 await Fn.insertAJ(aawak.jawak_detail[i], 'jawak').then(async (jwkResult) => {
                                 }, (err) => {
@@ -364,7 +359,7 @@ router.put('/new', async (req, res, next) => {
             // await updateAawak(req.body.set);
             let oldAwk = await DB.getById('aawak', req.body.set._id);
             await Fn.updateAJ(req.body.set, 'aawak', oldAwk).then(async (resolve) => {
-                await DB.getList('jawak', { conditionString: ` aawak_ref_id = ${oldAwk._id}` }).then(async (jwkdata) => {
+                await DB.getList('jawak', { conditionString: ` (jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${oldAwk._id}) OR jawak.aawak_ref_id = ${oldAwk._id})` }).then(async (jwkdata) => {
                     if (jwkdata.data) {
                         for (let jwk of jwkdata.data) {
                             let jwkNew = {
@@ -392,7 +387,7 @@ router.put('/new', async (req, res, next) => {
 
                 for (let jwk of req.body.set.jawak_detail) {
                     if (!jwk._id) {
-                        jwk.aawak_ref_id = oldAwk._id;
+                        jwk.aawak_splits = [{ aawak_id: oldAwk._id, split_qty: jwk.qty, qty: jwk.qty }];
                         jwk.aawak_source_id = req.body.set.aawak_source_id;
                         await Fn.insertAJ(jwk, 'jawak').then(async (jwkResult) => {
                             if (jwkResult) {
@@ -596,7 +591,7 @@ router.put('/filter/:dept_id', async (req, res, next) => {
             jwkIds = jwkIds.map(j => j._id).join(',');
         }
 
-        conditionString = ` aawak._id in (select aawak_ref_id from jawak where jawak._id in (${jwkIds}))`;
+        conditionString = ` aawak._id in (select aawak_id from rel_aawak_jawak where jawak_id in (${jwkIds}))`;
 
     } else {
         if (req.body.or) {
@@ -674,7 +669,7 @@ router.put('/voucher/:dept_id', async (req, res, next) => {
             jwkIds = jwkIds.map(j => j._id).join(',');
         }
 
-        conditionString = ` aawak._id in (select aawak_ref_id from jawak where jawak._id in (${jwkIds}))`;
+        conditionString = ` aawak._id in (select aawak_id from rel_aawak_jawak where jawak_id in (${jwkIds}))`;
 
     } else {
         conditionString = `1=1 ${req.body._id ? ` AND aawak._id = ${req.body._id}` : ``} ${req.body.date ? ` AND date = '${req.body.date}'` : ''} ${req.body.date_from ? ` AND aawak.date >= '${req.body.date_from}'` : ''} ${req.body.date_to ? ` AND aawak.date <= '${req.body.date_to}'` : ''} ${req.body.month ? ` AND strftime('%m', aawak.date) = '${req.body.month}'` : ``} ${req.body.year ? ` AND strftime('%Y', aawak.date) = '${req.body.year}'` : ``} ${(req.body.mm_id && req.body.mm_id.length > 0) ? ` AND aawak.mm_id in (${req.body.mm_id.join(',')})` : ``} ${(req.body.aj_mm_id && req.body.aj_mm_id.length > 0) ? ` AND aawak.aawak_mm_id in (${req.body.aj_mm_id.join(',')})` : ``} ${(req.body.pbk_id && req.body.pbk_id.length > 0) ? ` AND aawak.pbk_id in (${req.body.pbk_id.join(',')})` : ``} ${(req.body.item_id && req.body.item_id.length > 0) ? ` AND aawak.item_id in (${req.body.item_id.join(',')}) ${req.body.itemOnly ? ' AND (aawak.subitem_id IS NULL OR aawak.subitem_id = 0)' : ''}` : ``} ${(req.body.subitem_id && req.body.subitem_id.length > 0 && !req.body.itemOnly) ? ` AND aawak.subitem_id in (${req.body.subitem_id.join(',')})` : ``} ${(req.body.aawak_type_id && req.body.aawak_type_id.length > 0) ? ` AND aawak.aawak_type_id in (${req.body.aawak_type_id.join(',')})` : ``} ${(req.body.product_id && req.body.product_id.length > 0) ? ` AND aawak.product_id in (${req.body.product_id.join(',')})` : ``} ${(req.body.condition_id && req.body.condition_id.length > 0) ? ` AND aawak.condition_id in (${req.body.condition_id.join(',')})` : ``} ${req.body.pkt_num ? ` AND aawak.pkt_num = '${req.body.pkt_num}'` : ``} ${(req.body.nimitt_id && req.body.nimitt_id.length > 0) ? ` AND aawak.nimitt_id in (${req.body.nimitt_id.join(',')})` : ``} ${req.body.remaining_qty ? `AND remaining_qty <> 0` : ``}`;
@@ -746,7 +741,7 @@ router.put('/', async (req, res, next) => {
                 if (!jawaks[i]._id) {
 
                     let jwkconditionString = `jawak._id = ${jawaks[i]._id}`;
-                    jawaks[i].aawak_ref_id = data._id;
+                    jawaks[i].aawak_splits = [{ aawak_id: data._id, split_qty: jawaks[i].qty, qty: jawaks[i].qty }];
                     await DB.insert('jawak', jawaks[i], data.dept_id).then((jwkdata) => {
                         data.remaining_qty = data.remaining_qty - jwkdata.qty;
                         data.jawak_detail.push(jwkdata);
@@ -777,7 +772,7 @@ router.delete('/:id', async (req, res, next) => {
         // let condition = '_id = ' + req.params.id;
         try {
             await Fn.begin();
-            await DB.getList('jawak', { conditionString: ` aawak_ref_id = ${req.params.id}` }).then(async (jwkdata) => {
+            await DB.getList('jawak', { conditionString: ` jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${req.params.id})` }).then(async (jwkdata) => {
                 if (jwkdata.data) {
                     for (let i in jwkdata.data) {
                         await Fn.deleteAJ(jwkdata.data[i]._id, 'jawak', jwkdata.data[i]);
@@ -811,8 +806,8 @@ router.delete('/voucher/:ids', async (req, res, next) => {
         try {
             await Fn.begin();
             let ids = JSON.parse(req.params.ids);
-            for (let id of ids) {
-                await DB.getList('jawak', { conditionString: ` aawak_ref_id = ${id}` }).then(async (jwkdata) => {
+            for (let aawakId of ids) {
+                await DB.getList('jawak', { conditionString: ` jawak._id IN (SELECT jawak_id FROM rel_aawak_jawak WHERE aawak_id = ${aawakId})` }).then(async (jwkdata) => {
                     if (jwkdata.data) {
                         for (let i in jwkdata.data) {
                             await Fn.deleteAJ(jwkdata.data[i]._id, 'jawak', jwkdata.data[i]);
@@ -850,7 +845,7 @@ router.put('/update-row', async (req, res, next) => {
                     ...oldAwk,
                     ...req.body
                 };
-                
+
                 // Fn.updateAJ handles parsing/stringifying and bachat sync if needed
                 await Fn.updateAJ(updatedDoc, 'aawak', oldAwk).then(async (resolve) => {
                     await Fn.commit();

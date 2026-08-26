@@ -51,7 +51,7 @@
             <div class="p-4 content-scroll">
 
                 <!-- Section 1: UI Modes (Entry Form & Table Mode) -->
-                <!-- <div class="ui-modes-block mb-4" *ngIf="activeUISettings.length > 0">
+                <div class="ui-modes-block mb-4" *ngIf="activeUISettings.length > 0">
                     <h6 class="group-title mb-3">UI & Data Interaction</h6>
                     <div class="row">
                         <div class="col-md-6 mb-3" *ngFor="let ui of activeUISettings">
@@ -59,10 +59,11 @@
                                 <label class="d-block fw-bold mb-2 small text-muted">{{ui.title}}</label>
                                 <div class="btn-group btn-group-sm w-100 p-1 bg-light rounded-pill">
                                     <button *ngFor="let opt of ui.options"
+                                        type="button"
                                         class="btn border-0 rounded-pill transition-all"
-                                        [class.btn-white]="getUIMode(activeKey!, ui.key) === opt.value"
-                                        [class.shadow-sm]="getUIMode(activeKey!, ui.key) === opt.value"
-                                        [class.text-primary]="getUIMode(activeKey!, ui.key) === opt.value"
+                                        [class.btn-white]="(getUIMode(activeKey!, ui.key) || 'subitem') === opt.value"
+                                        [class.shadow-sm]="(getUIMode(activeKey!, ui.key) || 'subitem') === opt.value"
+                                        [class.text-primary]="(getUIMode(activeKey!, ui.key) || 'subitem') === opt.value"
                                         (click)="setUIMode(activeKey!, ui.key, opt.value)">
                                         {{opt.label}}
                                     </button>
@@ -70,7 +71,7 @@
                             </div>
                         </div>
                     </div>
-                </div> -->
+                </div>
 
                 <!-- Section 2: Column Visibility -->
                 <div class="columns-block" *ngIf="activeColumns.length > 0">

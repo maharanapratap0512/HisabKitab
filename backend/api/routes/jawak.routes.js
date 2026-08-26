@@ -604,7 +604,6 @@ router.put('/ref-link/:id', async (req, res, next) => {
         // Process rel_aawak_jawak entries (if splits is empty [], deletes all links => unlinks)
         await Fn.processRelAawakJawak(jawakId, splits);
 
-        // Reset legacy aawak_ref_id column on jawak table
         if (splits.length === 0) {
             DB.db.prepare(`UPDATE jawak SET aawak_ref_id = NULL, updated_at = datetime('now','localtime') WHERE _id = ?`).run(jawakId);
         } else {

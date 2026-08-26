@@ -3,6 +3,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { GlobalService } from 'src/app/services/global.service';
 
+import { AuthService } from 'src/app/services/auth.service';
+
 declare var $: any;
 
 @Component({
@@ -54,6 +56,7 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
   @Output() change = new EventEmitter<any>();
   @Output() addItem = new EventEmitter<void>();
   @Output() addSubitem = new EventEmitter<void>();
+  @Output() addVariant = new EventEmitter<void>();
   @Output() addClick = new EventEmitter<string>();
 
   options: any[] = [];
@@ -65,7 +68,10 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
   onChange: any = () => { };
   onTouched: any = () => { };
 
-  constructor(public gs: GlobalService) { }
+  constructor(
+    public gs: GlobalService,
+    public auth: AuthService
+  ) { }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['items'] || changes['categoryIds']) {
@@ -259,11 +265,41 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
     }, 50);
   }
 
+  onAddVariantClick(e: Event) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    this.addVariant.emit();
+    this.addClick.emit('Add Variant');
+    this.showModal = 'Add Variant';
+    setTimeout(() => {
+      if (typeof $ !== 'undefined') {
+        $('#' + this.modalId).modal('show');
+      }
+    }, 50);
+  }
+
   closeSelfModal() {
     if (typeof $ !== 'undefined') {
       $('#' + this.modalId).modal('hide');
     }
     this.showModal = '';
+  }
+
+  onSelfVariantCreated(ev: any) {
+    if (ev) {
+      this.flattenItems();
+      if (ev._id) {
+        this.itemId = ev.item_id || ev._id;
+        this.subitemId = null;
+        this.syncSelectedValue();
+        if (this.selectedValue) {
+          this.onSelectChange(this.selectedValue);
+        }
+      }
+    }
+    this.closeSelfModal();
   }
 
   onSelfItemCreated(ev: any) {

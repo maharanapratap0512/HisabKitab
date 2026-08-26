@@ -244,7 +244,18 @@ export class JawakNewComponent implements OnInit {
 
   onAawakRefSaved(event: any, item: any) {
     if (event) {
-      item.aawak_ref_id = event;
+      if (Array.isArray(event.aawak_splits)) {
+        item.aawak_splits = event.aawak_splits;
+        item.aawak_ref_id = event.aawak_splits.length > 0 ? (event.aawak_splits[0].aawak_id || event.aawak_splits[0]._id) : null;
+      } else if (typeof event === 'number' || typeof event === 'string') {
+        item.aawak_ref_id = event;
+      } else {
+        item.aawak_splits = [];
+        item.aawak_ref_id = null;
+      }
+    } else {
+      item.aawak_splits = [];
+      item.aawak_ref_id = null;
     }
     if (this.filterBody.unlinkedOnly) {
       this.getFilteredData();

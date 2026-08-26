@@ -7,48 +7,33 @@
 <div class="wrapper">
    <div class="content-page">
       <div class="content">
-         <div class="container-fluid">
 
             <!-- First Row -->
             <!-- Add Button, Search Field, Filter button, Total Count -->
-            <div class="row border-bottom border-secondary">
-               <div class="card-body" style="overflow: auto;">
-                  <div class="row justify-content-between">
-                     <div class="col-2">
-                        <button class="btn btn-primary w-100" *ngIf="settings.add"
-                           onclick="$('#showModal').modal('show')" (click)="showModal = 'Add Category'">
-                           <i class="dripicons-plus h4 icon-mx-2"> </i>Add Category
-                        </button>
-                     </div>
-                     <div class="col-5">
-                        <!-- <div class="input-group">
-                           <input type="text" class="form-control dropdown-toggle" placeholder="Search..."
-                              id="top-search" [(ngModel)]="term" name="search">
-                           <span class="mdi mdi-magnify search-icon"></span>
-                           <button class="input-group-text btn-primary" type="submit">Search</button>
-                        </div> -->
-                        <div class="form-group">
-                           <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
-                              name="search">
-                        </div>
-                     </div>
-                     <div class="col-3">
-                        <div class="d-flex justify-content-between">
-                           <button class="btn btn-outline-success" (click)="exportToExcel()">Export To Excel</button>
-                           <button class="file btn btn-success" style="font-weight: 700 !important;">
-                              <i class="uil uil-arrow-to-bottom"></i> Import
-                              <input type="file" class="inputtag"
-                                 accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                                 (change)="excelImport($event)" />
-                           </button>
-                        </div>
-                     </div>
-                     <div class="col-2">
-                        <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
-                           Count : {{categoryData.length?categoryData.length:'-'}}
-                        </button>
-                     </div>
-                  </div>
+            <div class="row align-items-center py-2 px-1 border-bottom mb-1">
+               <div class="col-md-2">
+                  <button class="btn btn-primary w-100" *ngIf="settings.add"
+                     onclick="$('#showModal').modal('show')" (click)="showModal = 'Add Category'">
+                     <i class="dripicons-plus h4 icon-mx-2"> </i>Add Category
+                  </button>
+               </div>
+               <div class="col-md-5">
+                  <input type="text" class="form-control" placeholder="Search Here" [(ngModel)]="term"
+                     name="search">
+               </div>
+               <div class="col-md-3 d-flex">
+                  <button class="file btn btn-success flex-fill" style="font-weight: 700 !important;">
+                     <i class="uil uil-arrow-to-bottom"></i> Import
+                     <input type="file" class="inputtag"
+                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                        (change)="excelImport($event)" />
+                  </button>
+                  <button class="btn btn-outline-success flex-fill ms-2" (click)="exportToExcel()">Export To Excel</button>
+               </div>
+               <div class="col-md-2">
+                  <button type="button" style="font-weight: 700 !important;" class="btn btn-light w-100">Total
+                     Count : {{categoryData.length?categoryData.length:'-'}}
+                  </button>
                </div>
             </div>
 
@@ -119,7 +104,6 @@
                   </div>
                </div>
             </div>
-         </div>
       </div>
    </div>
 </div>

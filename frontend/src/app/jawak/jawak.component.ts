@@ -321,9 +321,17 @@ export class JawakComponent implements OnInit {
     $('#showModal').modal('show');
   }
 
-  onAawakRefSaved(updatedJawak: any, index: number) {
-    if (updatedJawak && updatedJawak._id) {
-      this.jawakData[index].aawak_ref_id = updatedJawak.aawak_ref_id;
+  onAawakRefSaved(event: any, index: number) {
+    if (this.jawakData && this.jawakData[index]) {
+      if (event && Array.isArray(event.aawak_splits)) {
+        this.jawakData[index].aawak_splits = event.aawak_splits;
+        this.jawakData[index].aawak_ref_id = event.aawak_splits.length > 0 ? (event.aawak_splits[0].aawak_id || event.aawak_splits[0]._id) : null;
+      } else if (event && (typeof event === 'number' || typeof event === 'string')) {
+        this.jawakData[index].aawak_ref_id = event;
+      } else {
+        this.jawakData[index].aawak_splits = [];
+        this.jawakData[index].aawak_ref_id = null;
+      }
     }
   }
 

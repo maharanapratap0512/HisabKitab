@@ -873,7 +873,7 @@ router.put('/report_khet_ajsaar/:dept_id', async (req, res, next) => {
             left join mm on mm._id = jawak.jawak_mm_id 
             left join state on state._id = mm.state_id
             left join unit on unit._id = jawak.unit_id
-            left join department dept on dept._id = jawak.dept_id where aawak_ref_id in (${kh_saar[i].arr_awk_ids.join(',')})
+            left join department dept on dept._id = jawak.dept_id where (jawak._id in (select jawak_id from rel_aawak_jawak where aawak_id in (${kh_saar[i].arr_awk_ids.join(',')})) or jawak.aawak_ref_id in (${kh_saar[i].arr_awk_ids.join(',')}))
             group by jawak.jawak_mm_id, jawak.unit_id`;
             let jawakData = await DB.db.prepare(sql).all();
 

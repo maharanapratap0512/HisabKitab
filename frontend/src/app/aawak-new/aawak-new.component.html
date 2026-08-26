@@ -11,7 +11,7 @@
             <!-- First Row -->
             <!-- Add Button, Search Field, Filter button, Total Count -->
             <div class="row">
-                <div class="card-body">
+                <div class="card-body pb-0">
                     <div class="row d-flex justify-content-between">
                         <div class="col-2" id="tour-add-aawak-btn">
                             <button class="btn btn-primary w-100" (click)="openModal('Add Bunch Aawak')">
@@ -31,44 +31,49 @@
                                 Search
                             </button>
                         </div>
-                        <div class="col-3 d-flex pb-2">
-                            <button id="tour-import-btn" *ngIf="!gs.importPending" class="file btn btn-success"
-                                style="font-weight: 700 !important;">
-                                <i class="uil uil-arrow-to-bottom"></i> Import Aawak
-                                <input type="file" class="inputtag"
-                                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                                    (change)="excelImport($event)" />
-                            </button>
-                            <button id="tour-import-btn" *ngIf="gs.importPending" class="file btn btn-success"
-                                (click)="openModal('import')" style="font-weight: 700 !important;">
-                                <i class="uil uil-arrow-to-bottom"></i> Import Aawak
-                            </button>
+                        <div class="col-3 d-flex">
+                            <div>
+                                <button id="tour-import-btn" *ngIf="!gs.importPending" class="file btn btn-success"
+                                    style="font-weight: 700 !important;">
+                                    <i class="uil uil-arrow-to-bottom"></i> Import Aawak
+                                    <input type="file" class="inputtag"
+                                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                        (change)="excelImport($event)" />
+                                </button>
+                                <button id="tour-import-btn" *ngIf="gs.importPending" class="file btn btn-success"
+                                    (click)="openModal('import')" style="font-weight: 700 !important;">
+                                    <i class="uil uil-arrow-to-bottom"></i> Import Aawak
+                                </button>
+                                <div></div>
+                            </div>
 
-                            <div id="tour-export-container">
-                                <button id="tour-export-btn" type="button"
-                                    class="btn btn-outline-success dropdown-toggle mx-2" data-bs-toggle="dropdown"
-                                    aria-expanded="false"> Export To Excel </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item cursor-pointer" (click)="exportAJData()">Distribution</a>
-                                    <a class="dropdown-item cursor-pointer"
-                                        (click)="exportAJZoneWiseData()">Distribution Zone Wise</a>
-                                    <a class="dropdown-item cursor-pointer" (click)="exportAawakData()">Aawak Only</a>
-                                    <a class="dropdown-item cursor-pointer" (click)="exportJawakData()">Jawak Only</a>
-                                    <a class="dropdown-item cursor-pointer" (click)="exportPendingData()">Pending
-                                        Destribution</a>
-                                </div>
-                                <div class="d-flex" id="tour-merge-sort-container">
-                                    <div class="form-check form-checkbox-primary ms-1" id="tour-merge-chk"
-                                        title="click to merge item & subitem column">
-                                        <input type="checkbox" class="form-check-input" id="chkMergeIS"
-                                            [(ngModel)]="itemSubitemMerge">
-                                        <label class="form-check-label" for="chkMergeIS">Merge</label>
+                            <div>
+                                <div id="tour-export-container">
+                                    <button id="tour-export-btn" type="button"
+                                        class="btn btn-outline-success dropdown-toggle mx-2" data-bs-toggle="dropdown"
+                                        aria-expanded="false"> Export To Excel </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item cursor-pointer" (click)="exportAJData()">Distribution</a>
+                                        <a class="dropdown-item cursor-pointer"
+                                            (click)="exportAJZoneWiseData()">Distribution Zone Wise</a>
+                                        <a class="dropdown-item cursor-pointer" (click)="exportAawakData()">Aawak Only</a>
+                                        <a class="dropdown-item cursor-pointer" (click)="exportJawakData()">Jawak Only</a>
+                                        <a class="dropdown-item cursor-pointer" (click)="exportPendingData()">Pending
+                                            Destribution</a>
                                     </div>
-                                    <div class="form-check form-checkbox-primary ms-1" id="tour-sort-chk"
-                                        title="click to order by MM & category">
-                                        <input type="checkbox" class="form-check-input" id="chkOrderBy"
-                                            [(ngModel)]="orderBy">
-                                        <label class="form-check-label" for="chkOrderBy">Sorting</label>
+                                    <div class="d-flex" id="tour-merge-sort-container">
+                                        <div class="form-check form-checkbox-primary ms-1" id="tour-merge-chk"
+                                            title="click to merge item & subitem column">
+                                            <input type="checkbox" class="form-check-input" id="chkMergeIS"
+                                                [(ngModel)]="itemSubitemMerge">
+                                            <label class="form-check-label" for="chkMergeIS">Merge</label>
+                                        </div>
+                                        <div class="form-check form-checkbox-primary ms-1" id="tour-sort-chk"
+                                            title="click to order by MM & category">
+                                            <input type="checkbox" class="form-check-input" id="chkOrderBy"
+                                                [(ngModel)]="orderBy">
+                                            <label class="form-check-label" for="chkOrderBy">Sorting</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -134,7 +139,7 @@
 
             <!-- fliter collapse -->
             <div class="collapse" id="collapseExample">
-                <div class="card card-body">
+                <div class="card card-body ">
                     <div class="row">
                         <div class="card-body">
                             <form #filterForm="ngForm">
@@ -400,7 +405,7 @@
 
             <div class="row">
 
-                <div class="card-body" style="overflow: auto; flex-direction: column;">
+                <div class="card-body pt-0" style="overflow: auto; flex-direction: column;">
                     <div class="row">
                         <div class="col-4 pt-2 d-flex align-items-center gap-1">
                             <span id="tour-bulk-actions" class="d-inline-flex gap-1">
@@ -415,39 +420,48 @@
                             </span>
                             <app-popover-year id="tour-year-badge" class="badge year-box"
                                 [selectedYear]="filterBody.year" (yearChanged)="yearClick($event)"></app-popover-year>
-                            <app-popover-filter label="Filter" iconClass="uil uil-filter" direction="auto" (clear)="clearFilter()"
-                                clearButtonLabel="Clear Filter" triggerOn="click" class="ms-1"
+                            <app-popover-filter label="Filter" iconClass="uil uil-filter" direction="auto"
+                                (clear)="clearFilter()" clearButtonLabel="Clear Filter" triggerOn="click" class="ms-1"
                                 [isOpen]="(selectedItemmix && selectedItemmix.length > 0) || !!filterBody.itemOnly || (filterBody.product_id && filterBody.product_id.length > 0) || (filterBody.condition_id && filterBody.condition_id.length > 0) || (filterBody.usage_list_id && filterBody.usage_list_id.length > 0) || !!filterBody.company_name || !!filterBody.lot_no || (filterBody.aawak_type_id && filterBody.aawak_type_id.length > 0) || (filterBody.aawak_source_id && filterBody.aawak_source_id.length > 0)">
                                 <div style="width: 520px;" class="p-2">
                                     <div class="row g-2">
                                         <div class="col-12 mb-1">
-                                            <label class="form-label mb-1"><small class="fw-bold">Item & Subitem</small></label>
+                                            <label class="form-label mb-1"><small class="fw-bold">Item &
+                                                    Subitem</small></label>
                                             <app-item-dropdown [items]="items" [(ngModel)]="selectedItemmix"
                                                 (ngModelChange)="getFilteredData()" [multiple]="true"
-                                                [closeOnSelect]="false" name="top_hdr_item_mix" appendTo="body"></app-item-dropdown>
+                                                [closeOnSelect]="false" name="top_hdr_item_mix"
+                                                appendTo="body"></app-item-dropdown>
                                             <div class="form-check mt-1">
                                                 <input type="checkbox" class="form-check-input" id="topHdrItemOnlyCheck"
-                                                    [(ngModel)]="filterBody.itemOnly" (change)="getFilteredData()" name="topHdrItemOnly">
-                                                <label class="form-check-label mb-0" for="topHdrItemOnlyCheck" style="cursor: pointer;">
+                                                    [(ngModel)]="filterBody.itemOnly" (change)="getFilteredData()"
+                                                    name="topHdrItemOnly">
+                                                <label class="form-check-label mb-0" for="topHdrItemOnlyCheck"
+                                                    style="cursor: pointer;">
                                                     <small class="text-info fw-bold">Item Only (Subitem is Null)</small>
                                                 </label>
                                             </div>
                                         </div>
 
                                         <div class="col-6 mb-1" *ngIf="settings.aawak.product_id">
-                                            <label class="form-label mb-1"><small class="fw-bold">Product</small></label>
-                                            <ng-select [multiple]="true" placeholder="Select Product" class="custom-sm" appendTo="body"
-                                                [(ngModel)]="filterBody.product_id" (change)="getFilteredData()">
+                                            <label class="form-label mb-1"><small
+                                                    class="fw-bold">Product</small></label>
+                                            <ng-select [multiple]="true" placeholder="Select Product" class="custom-sm"
+                                                appendTo="body" [(ngModel)]="filterBody.product_id"
+                                                (change)="getFilteredData()">
                                                 <ng-option *ngFor="let item of products" [value]="item._id">
-                                                    {{item.product_code ? item.product_code : ''}} {{item.sr_num ? item.sr_num : ''}}
+                                                    {{item.product_code ? item.product_code : ''}} {{item.sr_num ?
+                                                    item.sr_num : ''}}
                                                 </ng-option>
                                             </ng-select>
                                         </div>
 
                                         <div class="col-6 mb-1" *ngIf="settings.aawak.condition_id">
-                                            <label class="form-label mb-1"><small class="fw-bold">Condition</small></label>
-                                            <ng-select [multiple]="true" placeholder="Select Condition" class="custom-sm" appendTo="body"
-                                                [(ngModel)]="filterBody.condition_id" (change)="getFilteredData()">
+                                            <label class="form-label mb-1"><small
+                                                    class="fw-bold">Condition</small></label>
+                                            <ng-select [multiple]="true" placeholder="Select Condition"
+                                                class="custom-sm" appendTo="body" [(ngModel)]="filterBody.condition_id"
+                                                (change)="getFilteredData()">
                                                 <ng-option *ngFor="let item of conditions" [value]="item._id">
                                                     {{item.list_name_hin}} : {{item.list_name_eng}}
                                                 </ng-option>
@@ -456,20 +470,25 @@
 
                                         <div class="col-6 mb-1" *ngIf="settings.aawak.lot_no">
                                             <label class="form-label mb-1"><small class="fw-bold">Lot No</small></label>
-                                            <input type="text" class="form-control form-control-sm" placeholder="Lot No..."
-                                                [(ngModel)]="filterBody.lot_no" (change)="getFilteredData()">
+                                            <input type="text" class="form-control form-control-sm"
+                                                placeholder="Lot No..." [(ngModel)]="filterBody.lot_no"
+                                                (change)="getFilteredData()">
                                         </div>
 
                                         <div class="col-6 mb-1" *ngIf="settings.aawak.company_name">
-                                            <label class="form-label mb-1"><small class="fw-bold">Company Name</small></label>
-                                            <input type="text" class="form-control form-control-sm" placeholder="Company..."
-                                                [(ngModel)]="filterBody.company_name" (change)="getFilteredData()">
+                                            <label class="form-label mb-1"><small class="fw-bold">Company
+                                                    Name</small></label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                placeholder="Company..." [(ngModel)]="filterBody.company_name"
+                                                (change)="getFilteredData()">
                                         </div>
 
                                         <div class="col-6 mb-1" *ngIf="settings.aawak.usage_list_id">
-                                            <label class="form-label mb-1"><small class="fw-bold">Usage List</small></label>
-                                            <ng-select [multiple]="true" placeholder="Select Usage List" class="custom-sm" appendTo="body"
-                                                [(ngModel)]="filterBody.usage_list_id" (change)="getFilteredData()">
+                                            <label class="form-label mb-1"><small class="fw-bold">Usage
+                                                    List</small></label>
+                                            <ng-select [multiple]="true" placeholder="Select Usage List"
+                                                class="custom-sm" appendTo="body" [(ngModel)]="filterBody.usage_list_id"
+                                                (change)="getFilteredData()">
                                                 <ng-option *ngFor="let item of usage_lists" [value]="item._id">
                                                     {{item.list_name_hin}} : {{item.list_name_eng}}
                                                 </ng-option>
@@ -477,9 +496,11 @@
                                         </div>
 
                                         <div class="col-6 mb-1" *ngIf="settings.aawak.aawak_type_id">
-                                            <label class="form-label mb-1"><small class="fw-bold">Aawak Type</small></label>
-                                            <ng-select [multiple]="true" placeholder="Aawak Type" class="custom-sm" appendTo="body"
-                                                [(ngModel)]="filterBody.aawak_type_id" (change)="getFilteredData()">
+                                            <label class="form-label mb-1"><small class="fw-bold">Aawak
+                                                    Type</small></label>
+                                            <ng-select [multiple]="true" placeholder="Aawak Type" class="custom-sm"
+                                                appendTo="body" [(ngModel)]="filterBody.aawak_type_id"
+                                                (change)="getFilteredData()">
                                                 <ng-option *ngFor="let item of aawak_types" [value]="item._id">
                                                     {{item.list_name_hin}} : {{item.list_name_eng}}
                                                 </ng-option>
@@ -487,9 +508,11 @@
                                         </div>
 
                                         <div class="col-6 mb-1" *ngIf="settings.aawak.aawak_source_id">
-                                            <label class="form-label mb-1"><small class="fw-bold">Aawak Source</small></label>
-                                            <ng-select [multiple]="true" placeholder="Aawak Source" class="custom-sm" appendTo="body"
-                                                [(ngModel)]="filterBody.aawak_source_id" (change)="getFilteredData()">
+                                            <label class="form-label mb-1"><small class="fw-bold">Aawak
+                                                    Source</small></label>
+                                            <ng-select [multiple]="true" placeholder="Aawak Source" class="custom-sm"
+                                                appendTo="body" [(ngModel)]="filterBody.aawak_source_id"
+                                                (change)="getFilteredData()">
                                                 <ng-option *ngFor="let item of aawak_sources" [value]="item._id">
                                                     {{item.list_name_hin}} : {{item.list_name_eng}}
                                                 </ng-option>
@@ -764,7 +787,8 @@
                                                                 <th *ngIf="settings.aawak.item_detail">Item Detail</th>
                                                                 <th *ngIf="settings.aawak.document">Images</th>
                                                                 <th>Flags</th>
-                                                                <th *ngIf="settings.aawak.enz">Enzyme Container Details</th>
+                                                                <th *ngIf="settings.aawak.enz">Enzyme Container Details
+                                                                </th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>

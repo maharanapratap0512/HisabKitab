@@ -21,8 +21,8 @@
                         </button>
 
                         <button class="btn btn-success mx-3" onclick="$('#showModal').modal('show')"
-                           (click)="showModal = 'Add Subitem'" *ngIf="settings.add">
-                           <i class="dripicons-plus h4 icon-mx-1"> </i>Add Subitem
+                           (click)="showModal = auth.isVariantMode ? 'Add Variant' : 'Add Subitem'" *ngIf="settings.add">
+                           <i class="dripicons-plus h4 icon-mx-1"> </i>{{ auth.isVariantMode ? 'Add Variant' : 'Add Subitem' }}
                         </button>
                      </div>
 
@@ -317,6 +317,8 @@
 
             <app-subitem-entry *ngIf="showModal == 'Add Subitem'" (response)='addSubitemResponse($event)'>
             </app-subitem-entry>
+            <app-variant-entry *ngIf="showModal == 'Add Variant'" (response)='addSubitemResponse($event)'>
+            </app-variant-entry>
             <app-subitem-entry *ngIf="showModal == 'Add Subitem From Item'" (response)='addSubitemResponse($event)'
                [getData]="editData"></app-subitem-entry>
             <app-item-entry *ngIf="showModal == 'Clone Item'" (response)='cloneItemResponse($event)'

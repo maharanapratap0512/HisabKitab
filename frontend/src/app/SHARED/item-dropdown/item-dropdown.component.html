@@ -11,9 +11,13 @@
         (mousedown)="$event.preventDefault()" (click)="onAddItemClick($event)">
         + Add Item
       </button>
-      <button type="button" class="btn btn-xs btn-outline-success fw-bold text-nowrap py-1 px-2 font-size-11 flex-fill"
+      <button *ngIf="!auth.isVariantMode" type="button" class="btn btn-xs btn-outline-success fw-bold text-nowrap py-1 px-2 font-size-11 flex-fill"
         (mousedown)="$event.preventDefault()" (click)="onAddSubitemClick($event)">
         + Add Subitem
+      </button>
+      <button *ngIf="auth.isVariantMode" type="button" class="btn btn-xs btn-outline-info fw-bold text-nowrap py-1 px-2 font-size-11 flex-fill"
+        (mousedown)="$event.preventDefault()" (click)="onAddVariantClick($event)">
+        + Add Variant
       </button>
     </div>
     <div *ngIf="multiple"
@@ -81,7 +85,7 @@
   </ng-template>
 </ng-select>
 
-<!-- Self-contained Modal Container for Item & Subitem Creation -->
+<!-- Self-contained Modal Container for Item, Subitem & Variant Creation -->
 <div class="modal fade" [id]="modalId" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog" style="width: 99%;">
     <div class="modal-content">
@@ -93,6 +97,8 @@
         <app-item-entry *ngIf="showModal === 'Add Item'" (response)="onSelfItemCreated($event)"></app-item-entry>
         <app-subitem-entry *ngIf="showModal === 'Add Subitem'"
           (response)="onSelfSubitemCreated($event)"></app-subitem-entry>
+        <app-variant-entry *ngIf="showModal === 'Add Variant'"
+          (response)="onSelfVariantCreated($event)"></app-variant-entry>
       </div>
     </div>
   </div>

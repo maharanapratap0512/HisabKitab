@@ -169,6 +169,14 @@ export class AawakRefComponent implements ControlValueAccessor, OnInit, OnChange
           totalQty: this.totalSplitQty,
           primaryAawak: this.selectedSplitsData[0]?.aawak_obj
         });
+      } else {
+        this.selectedSplitsData = [];
+        this.totalSplitQty = 0;
+        this.selectedValue = null;
+        this.onChange(null);
+        this.splitsChange.emit({ splits: [], totalQty: 0, primaryAawak: null });
+        this.splitsSelected.emit({ splits: [], totalQty: 0, primaryAawak: null });
+        this.selectionChange.emit(null);
       }
       if (callback) callback();
     }, () => {

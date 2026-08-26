@@ -273,7 +273,7 @@ router.put('/process', async (req, res, next) => {
                     sell_repair_place: awkData.jawak_detail[i].sell_repair_place ? awkData.jawak_detail[i].sell_repair_place : null,
                     nimitt_id: null, // nimitt moved to pbk in jawak imports
                     company_name: awkData.company_name,
-                    aawak_ref_id: awkData.awk_id,
+                    aawak_splits: [{ aawak_id: awkData.awk_id, split_qty: awkData.jawak_detail[i].qty, qty: awkData.jawak_detail[i].qty }],
                     dept_id: awkData.dept_id,
                     usage_list_id: awkData.jawak_detail[i].usage_list_id,
                     is_xl: 1,

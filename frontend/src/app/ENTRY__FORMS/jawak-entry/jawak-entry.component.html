@@ -294,8 +294,8 @@
                             </a>
                             <a type="button" style="padding: 1px 6px !important;" class="btn btn-outline-primary mx-1"
                                 onclick="$('#jawakEntryComponent > #showModal').modal('show')"
-                                (click)="showModal = 'Add Subitem'">
-                                + Subitem
+                                (click)="showModal = auth.isVariantMode ? 'Add Variant' : 'Add Subitem'">
+                                {{ auth.isVariantMode ? '+ Variant' : '+ Subitem' }}
                             </a>
                         </div>
                         <app-item-dropdown [items]="items" [itemId]="jawakForm.get('item_id')?.value"
@@ -640,6 +640,8 @@
                     <!-- Add Subitem_List  -->
                     <app-subitem-entry *ngIf="showModal == 'Add Subitem'" (response)="subitemAddResponse($event)">
                     </app-subitem-entry>
+                    <app-variant-entry *ngIf="showModal == 'Add Variant'" (response)="subitemAddResponse($event)">
+                    </app-variant-entry>
 
                     <!-- Add Condition -->
                     <app-support-list-entry *ngIf="showModal == 'Add Condition'"

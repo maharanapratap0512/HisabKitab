@@ -86,6 +86,12 @@ export class ContextSettingsPanelComponent implements OnInit, OnChanges {
     }
 
     private ensureKey(key: string) {
+        if (!this.auth.webUser) {
+            this.auth.webUser = {};
+        }
+        if (!this.auth.webUser.settings) {
+            this.auth.webUser.settings = {};
+        }
         if (!this.auth.webUser.settings[key]) {
             this.auth.webUser.settings[key] = {};
         }

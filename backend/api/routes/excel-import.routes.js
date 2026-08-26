@@ -719,7 +719,7 @@ router.put('/final_bachat/:dept_id', async (req, res, next) => {
                 let newIds = [], conditionString = `remaining_qty <> 0 AND mm_id = ${obj.mm_id} AND item_id = ${obj.item_id} AND IFNULL(subitem_id, 0) = IFNULL(${obj.subitem_id}, 0) AND IFNULL(condition_id, 0) = IFNULL(${obj.condition_id}, 0) AND unit_id = ${obj.unit_id}`
                 await DB.getList('aawak', { conditionString: conditionString, order: ` date desc` }).then(async (data) => {
                     for (let i in data.data) {
-                        obj.aawak_ref_id = data.data[i]._id;
+                        obj.aawak_splits = [{ aawak_id: data.data[i]._id, split_qty: obj.qty, qty: obj.qty }];
                         if (jwkQty > data.data[i].remaining_qty) {
                             obj.qty = data.data[i].remaining_qty;
                             jwkQty = jwkQty - obj.qty;

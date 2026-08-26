@@ -699,7 +699,7 @@ class Functions extends DBContex {
                const isSplit = aawakSplits.length > 1 ? 1 : 0;
                for (const s of aawakSplits) {
                   const awkId = s.aawak_id || s._id;
-                  const itemSplitQty = Number(s.split_qty) || 0;
+                  const itemSplitQty = Number(s.split_qty) || Number(s.qty) || Number(qty) || 0;
                   if (awkId && itemSplitQty > 0) {
                      relAawakJawakModel.insert({
                         aawak_id: awkId,

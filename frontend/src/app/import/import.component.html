@@ -278,24 +278,11 @@
                                  <ng-option *ngFor="let item of categories" [value]="item._id">
                                     {{item.category_hin}}:{{item.category_eng}}</ng-option>
                               </ng-select>
-                              <!-- item dropdown -->
-                              <ng-select *ngIf="data.type == 'item'" class="custom custom-import mx-2"
-                                 placeholder="Select Item" [virtualScroll]="true" [(ngModel)]="data.id"
-                                 [ngModelOptions]="{standalone: true}" (change)="onItemChange($event, data)" appendTo="body">
-                                 <ng-option selected="selected" disabled value="">-- Select Item --</ng-option>
-                                 <ng-option value="+add" class="text-primary fw-bold">+ Add Item</ng-option>
-                                 <ng-option *ngFor="let item of items" [value]="item._id">
-                                    {{item.item_hin}}:{{item.item_eng}}</ng-option>
-                              </ng-select>
-                              <!-- subitem dropdown -->
-                              <ng-select *ngIf="data.type == 'item'" class="custom custom-import"
-                                 placeholder="Select Subitem" [virtualScroll]="true" [(ngModel)]="data.id2"
-                                 [ngModelOptions]="{standalone: true}" (change)="onSubitemChange($event, data)" appendTo="body">
-                                 <ng-option selected="selected" disabled value="">-- Select Subitem --</ng-option>
-                                 <ng-option value="+add" class="text-primary fw-bold">+ Add Subitem</ng-option>
-                                 <ng-option *ngFor="let item of subitems" [value]="item._id">
-                                    {{item.subitem_hin}}:{{item.subitem_eng}}</ng-option>
-                              </ng-select>
+                              <!-- single item-dropdown for item & subitem / variant -->
+                               <app-item-dropdown *ngIf="data.type == 'item'" class="custom-import mx-2" style="min-width: 250px;"
+                                  [items]="items" [(itemId)]="data.id" [(subitemId)]="data.id2"
+                                  (change)="data.id = $event.item_id; data.id2 = $event.subitem_id" appendTo="body">
+                               </app-item-dropdown>
                            </div>
 
                            <!-- product dropdown -->

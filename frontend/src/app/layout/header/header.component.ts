@@ -56,10 +56,14 @@ export class HeaderComponent implements AfterViewInit {
     'category': 'category',
     'department': 'department',
     'item': 'item',
+    'variant': 'item',
+    'variantN': 'item',
     'product': 'product',
     'repairing': 'repairing',
     'report': 'report',
     'point': 'point',
+    'vehicle': 'vehicle',
+    'support_list': 'support_list'
   };
 
   constructor(
@@ -121,6 +125,10 @@ export class HeaderComponent implements AfterViewInit {
     this.initMenu();
     this.loadUpdates();
 
+    this.auth.settingsUpdated$.subscribe(() => {
+      this.initMenu();
+    });
+
     // Auto-detect context key from router URL
     this.detectContextKey(this.router.url);
     this.router.events.pipe(
@@ -176,6 +184,11 @@ export class HeaderComponent implements AfterViewInit {
   }
 
   initMenu() {
+    const isVariantMode = this.auth.isVariantMode;
+    const itemOrVariantChild = isVariantMode
+      ? { title: 'Item - Variant', link: 'variantN', visible: this.auth.webUser.settings?.item?.visible ?? true }
+      : { title: 'Item - Subitem', link: 'item', visible: this.auth.webUser.settings?.item?.visible ?? true };
+
     this.menuItems = [
       { title: 'Home', icon: 'uil-home-alt', link: 'dashboard', visible: true },
       {
@@ -203,9 +216,7 @@ export class HeaderComponent implements AfterViewInit {
         visible: true,
         children: [
           { title: 'LOT Nos', link: 'view/lot_no', visible: this.auth.webUser.settings?.aawak?.lot_no },
-          { title: 'Item', link: 'item', visible: this.auth.webUser.settings?.item?.visible },
-          // { title: 'Variant', link: 'variant', visible: true },
-          { title: 'Variant', link: 'variantN', visible: true },
+          itemOrVariantChild,
           { title: 'MM', link: 'mm', visible: this.auth.webUser.settings?.mm?.visible },
           { title: 'PBK', link: 'pbk', visible: this.auth.webUser.settings?.pbk?.visible },
           { title: 'Nimitt', link: 'nimitt', visible: this.auth.webUser.settings?.nimitt?.visible },
@@ -214,7 +225,7 @@ export class HeaderComponent implements AfterViewInit {
           { title: 'District', link: 'view/district', visible: true },
           { title: 'Unit', link: 'view/unit', visible: true },
           { title: 'Category', link: 'category', visible: this.auth.webUser.settings?.category?.visible },
-          { title: 'Subitem List', link: 'view/subitem_list', visible: true },
+          { title: 'Subitem List', link: 'view/subitem_list', visible: !isVariantMode },
         ]
       },
       {
