@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, forwardRef, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter, forwardRef, OnChanges, SimpleChanges, ViewChild, OnDestroy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { GlobalService } from 'src/app/services/global.service';
@@ -19,7 +19,7 @@ declare var $: any;
     }
   ]
 })
-export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
+export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, OnDestroy {
   @ViewChild(NgSelectComponent) selectComponent: any;
 
   @Input() items: any[] = [];
@@ -235,6 +235,15 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
     return item.searchTags.indexOf(term) > -1;
   }
 
+  openSelfModal(type: string) {
+    this.showModal = type;
+    setTimeout(() => {
+      if (typeof $ !== 'undefined') {
+        $('#' + this.modalId).appendTo('body').modal('show');
+      }
+    }, 50);
+  }
+
   onAddItemClick(e: Event) {
     if (e) {
       e.stopPropagation();
@@ -242,12 +251,7 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
     }
     this.addItem.emit();
     this.addClick.emit('Add Item');
-    this.showModal = 'Add Item';
-    setTimeout(() => {
-      if (typeof $ !== 'undefined') {
-        $('#' + this.modalId).modal('show');
-      }
-    }, 50);
+    this.openSelfModal('Add Item');
   }
 
   onAddSubitemClick(e: Event) {
@@ -257,12 +261,7 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
     }
     this.addSubitem.emit();
     this.addClick.emit('Add Subitem');
-    this.showModal = 'Add Subitem';
-    setTimeout(() => {
-      if (typeof $ !== 'undefined') {
-        $('#' + this.modalId).modal('show');
-      }
-    }, 50);
+    this.openSelfModal('Add Subitem');
   }
 
   onAddVariantClick(e: Event) {
@@ -272,12 +271,7 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
     }
     this.addVariant.emit();
     this.addClick.emit('Add Variant');
-    this.showModal = 'Add Variant';
-    setTimeout(() => {
-      if (typeof $ !== 'undefined') {
-        $('#' + this.modalId).modal('show');
-      }
-    }, 50);
+    this.openSelfModal('Add Variant');
   }
 
   closeSelfModal() {
@@ -361,5 +355,12 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges {
     this.selectedValue = [];
     this.onChange([]);
     this.change.emit([]);
+  }
+
+  ngOnDestroy(): void {
+    if (typeof $ !== 'undefined' && this.modalId) {
+      $('#' + this.modalId).modal('hide');
+      $('#' + this.modalId).remove();
+    }
   }
 }

@@ -814,7 +814,7 @@ router.delete('/voucher/:ids', async (req, res, next) => {
                         }
                     }
                 });
-                await Fn.deleteAJ(id, 'aawak');
+                await Fn.deleteAJ(aawakId, 'aawak');
             }
             Fn.commit();
             res.json({
