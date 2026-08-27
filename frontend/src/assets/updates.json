@@ -1,10 +1,51 @@
 [
     {
+        "version": "36.2",
+        "date": "26-08-2026",
+        "summary": "Dynamic Item/Variant Mode Toggle, Centralized Field Settings, Entry Form Adaptations & Unified Import Dropdown",
+        "summary_hin": "डायनामिक आइटम/वेरिएंट मोड टॉगल, सेंट्रलाइज्ड फ़ील्ड सेटिंग्स, एंट्री फॉर्म अनुकूलन एवं एकीकृत इम्पोर्ट ड्रॉपडाउन",
+        "isNew": true,
+        "items": [
+            {
+                "type": "feature",
+                "module": "Context Settings & Header Navigation",
+                "title": "Dynamic Department Mode Switcher (Subitem ↔ Variant Mode)",
+                "title_hin": "विभाग अनुसार डायनामिक आइटम सरंचना मोड (सबआइटम ↔ वेरिएंट)",
+                "desc": "Added Item Structure Mode toggle in Department Settings (Subitem Mode vs Variant Mode). When toggled, the header menu instantly updates in real-time to display 'Item - Variant' (pointing to Variant component) or 'Item - Subitem' (pointing to Item component) without page refresh.",
+                "desc_hin": "डिपार्टमेंट सेटिंग्स में सबआइटम मोड व वेरिएंट मोड स्विच करने की सुविधा। मोड बदलने पर हेडर मेनू रियल-टाइम में स्वतः अपडेट होकर 'Item - Variant' या 'Item - Subitem' प्रदर्शित करता है।"
+            },
+            {
+                "type": "improved",
+                "module": "Settings UI & Field Schema",
+                "title": "Expanded Item Field Settings (SKU, Price Range & Attribute Columns)",
+                "title_hin": "विस्तारित आइटम फ़ील्ड सेटिंग्स (SKU, प्राइस रेंज एवं एट्रीब्यूट कॉलम)",
+                "desc": "Updated Item Settings schema with field toggles for SKU, Price Range, Subitem Eng/Roman, and Attribute Name/Value Eng & Roman columns for customized department view controls.",
+                "desc_hin": "आइटम सेटिंग्स में SKU, प्राइस रेंज, सबआइटम तथा एट्रीब्यूट नाम व वैल्यू (Eng & Roman) कॉलम्स को ऑन/ऑफ करने हेतु विस्तृत सेटिंग्स अपडेट।"
+            },
+            {
+                "type": "improved",
+                "module": "Item Dropdown & Entry Forms",
+                "title": "Centralized Variant Mode Adaptation & Quick Generator Modals",
+                "title_hin": "एंट्री फॉर्म एवं ड्रॉपडाउन में वेरिएंट मोड अनुकूलन तथा इनलाइन जनरेटर",
+                "desc": "Centralized auth.isVariantMode detection across ItemDropdownComponent and entry forms (Aawak, Jawak, Product, Item). Automatically switches dropdown buttons to (+ Add Variant), opening the variant generator modal on demand.",
+                "desc_hin": "सभी एंट्री फॉर्म (आवक, जावक, प्रोडक्ट, आइटम) तथा आइटम ड्रॉपडाउन में ऑटोमैटिक मोड डिटेक्शन, जिससे टॉगल ऑन होने पर सीधे वेरिएंट इनलाइन जोड़ने की सुविधा मिलती है।"
+            },
+            {
+                "type": "improved",
+                "module": "Import & Excel Import Components",
+                "title": "Unified Item-Subitem Dropdown & Category Filter Preservation",
+                "title_hin": "इम्पोर्ट कम्पोनेंट में एकीकृत आइटम-सबआइटम ड्रॉपडाउन एवं कैटेगरी फ़िल्टर",
+                "desc": "Replaced separate traditional item and subitem dropdowns in Import & Excel-Import components with the unified Item-Dropdown component, retaining the category filter dropdown alongside full search capabilities.",
+                "desc_hin": "इम्पोर्ट एवं एक्सेल-इम्पोर्ट में अलग-अलग ड्रॉपडाउन के स्थान पर एकीकृत आइटम ड्रॉपडाउन का उपयोग, जिसमें कैटेगरी फ़िल्टर के साथ आइटम, सबआइटम व वेरिएंट खोजना सुगम हुआ है।"
+            }
+        ]
+    },
+    {
         "version": "36.1",
         "date": "16-08-2026",
         "summary": "Attribute & Value Import, Redesigned Aawak Table, Advanced Filters, Excel Export Improvements & Navigation Update",
         "summary_hin": "एट्रीब्यूट व वैल्यू इम्पोर्ट, आवक टेबल रीडिजाइन, एडवांस्ड फ़िल्टर, एक्सेल एक्सपोर्ट सुधार एवं नेविगेशन अपडेट",
-        "isNew": true,
+        "isNew": false,
         "items": [
             {
                 "type": "improved",
