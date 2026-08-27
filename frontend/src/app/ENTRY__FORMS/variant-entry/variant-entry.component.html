@@ -5,8 +5,8 @@
     <!-- ══ NAV TABS ════════════════════════════════════════════════════════ -->
     <ul class="nav nav-tabs nav-tabs-custom mb-0 px-3 pt-2 bg-light border-bottom" style="flex-shrink:0;">
         <li class="nav-item">
-            <a class="nav-link py-2" [class.active]="activeTab === 'single'" (click)="activeTab = 'single'; focusFirstAttrValue()"
-                style="cursor:pointer; font-weight:600;">
+            <a class="nav-link py-2" [class.active]="activeTab === 'single'"
+                (click)="activeTab = 'single'; focusFirstAttrValue()" style="cursor:pointer; font-weight:600;">
                 <i class="uil uil-plus-circle me-1"></i> Quick Single Entry
             </a>
         </li>
@@ -19,21 +19,22 @@
     </ul>
 
     <!-- ══ TAB 1: QUICK SINGLE ENTRY FORM ═════════════════════════════════ -->
-    <div *ngIf="activeTab === 'single'" class="p-3" style="flex:1; overflow-y:auto;" (keydown)="onSingleFormKeyDown($event)">
+    <div *ngIf="activeTab === 'single'" class="p-3" style="flex:1; overflow-y:auto;"
+        (keydown)="onSingleFormKeyDown($event)">
 
         <!-- 0. Item Selection Section -->
         <div class="mb-3">
             <label class="form-label fw-semibold mb-1" style="font-size:12px;">Item</label>
             <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="true"
-                [virtualScroll]="true" [items]="items" bindLabel="item_hin" [(ngModel)]="selectedItem"
-                (change)="onItemSelectChange($event)">
-                <ng-template ng-option-tmp let-item="item">
-                    <div>
-                        <strong>{{item.item_hin}}</strong>
-                        <span *ngIf="item.item_eng" class="text-muted ms-1">: {{item.item_eng}}</span>
-                        <span *ngIf="item.item_code" class="text-muted ms-1">: {{item.item_code}}</span>
-                    </div>
-                </ng-template>
+                [virtualScroll]="true" [(ngModel)]="selectedItem" (change)="onItemSelectChange($event)">
+                <ng-option selected="selected" disabled value="">Select Item</ng-option>
+                <ng-option *ngFor="let item of items" [value]="item">
+                    {{item.item_hin}}
+                    <ng-container *ngIf="item.item_eng"> : {{item.item_eng}}</ng-container>
+                    <ng-container *ngIf="item.item_roman"> : {{item.item_roman}}</ng-container>
+                    <ng-container *ngIf="item.item_code"> : {{item.item_code}}</ng-container>
+                    <ng-container *ngIf="getItemAliasesString(item)"> : [{{getItemAliasesString(item)}}]</ng-container>
+                </ng-option>
             </ng-select>
         </div>
 
@@ -55,32 +56,35 @@
 
             <!-- List of Attribute Value Rows -->
             <div class="d-flex flex-column gap-2 mt-2">
-                <div *ngFor="let valObj of singleAttrValues; let i = index; let isLast = last" class="d-flex align-items-center gap-2">
+                <div *ngFor="let valObj of singleAttrValues; let i = index; let isLast = last"
+                    class="d-flex align-items-center gap-2">
                     <span class="text-muted fw-bold" style="font-size:11px; width:20px;">{{ i + 1 }}.</span>
                     <div class="flex-grow-1">
-                        <ng-select #attrValueSelect class="custom" [items]="allAttributeValuesGrouped" bindLabel="searchLabel"
-                            [compareWith]="compareAttrValue" [searchable]="true" [clearable]="true"
-                            [tabToSelect]="true" placeholder="Select Attribute Value..."
+                        <ng-select #attrValueSelect class="custom" [items]="allAttributeValuesGrouped"
+                            bindLabel="searchLabel" [compareWith]="compareAttrValue" [searchable]="true"
+                            [clearable]="true" [tabToSelect]="true" placeholder="Select Attribute Value..."
                             [ngModel]="singleAttrValues[i]" [ngModelOptions]="{standalone: true}"
                             (change)="onAttrValueChange($event, i)">
                             <ng-template ng-option-tmp let-item="item">
                                 <strong class="text-primary">{{ item.attr_hin }}: </strong>
                                 {{ item.attribute_value_hin }}
-                                <small class="text-muted" *ngIf="item.attribute_value_eng"> : {{ item.attribute_value_eng }}</small>
-                                <small class="text-muted fst-italic" *ngIf="item.attribute_value_roman"> : {{ item.attribute_value_roman }}</small>
+                                <small class="text-muted" *ngIf="item.attribute_value_eng"> : {{
+                                    item.attribute_value_eng }}</small>
+                                <small class="text-muted fst-italic" *ngIf="item.attribute_value_roman"> : {{
+                                    item.attribute_value_roman }}</small>
                             </ng-template>
                             <ng-template ng-label-tmp let-item="item">
                                 <strong class="text-primary">{{ item.attr_hin }}: </strong>
                                 {{ item.attribute_value_hin }}
-                                <small class="text-muted" *ngIf="item.attribute_value_eng"> : {{ item.attribute_value_eng }}</small>
+                                <small class="text-muted" *ngIf="item.attribute_value_eng"> : {{
+                                    item.attribute_value_eng }}</small>
                             </ng-template>
                         </ng-select>
                     </div>
 
                     <!-- Remove Row Button -->
-                    <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2"
-                        (click)="removeLine(i)" title="Remove"
-                        [disabled]="singleAttrValues.length === 1 && singleAttrValues[0] === null">
+                    <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2" (click)="removeLine(i)"
+                        title="Remove" [disabled]="singleAttrValues.length === 1 && singleAttrValues[0] === null">
                         <i class="uil uil-times"></i>
                     </button>
 
@@ -118,7 +122,8 @@
                     [ngModelOptions]="{standalone: true}" placeholder="SKU Code" />
             </div>
             <div class="col-md-3">
-                <label class="form-label mb-1" style="font-size:12px;">Unit <small class="text-muted">(auto)</small></label>
+                <label class="form-label mb-1" style="font-size:12px;">Unit <small
+                        class="text-muted">(auto)</small></label>
                 <ng-select class="custom custom-sm" [(ngModel)]="singleForm.unit_id"
                     [ngModelOptions]="{standalone: true}" [searchable]="true" [clearable]="true" placeholder="Unit">
                     <ng-option [value]="null">Item Default Unit</ng-option>
@@ -139,12 +144,14 @@
 
         <!-- 3. Categories -->
         <div class="mb-3">
-            <label class="form-label mb-1" style="font-size:12px;">Categories <small class="text-muted">(auto)</small></label>
-            <ng-select class="custom" placeholder="Categories..." [multiple]="true"
-                [searchable]="true" [clearable]="true" [(ngModel)]="singleForm.category_ids"
-                [ngModelOptions]="{standalone: true}">
+            <label class="form-label mb-1" style="font-size:12px;">Categories <small
+                    class="text-muted">(auto)</small></label>
+            <ng-select class="custom" placeholder="Categories..." [multiple]="true" [searchable]="true"
+                [clearable]="true" [(ngModel)]="singleForm.category_ids" [ngModelOptions]="{standalone: true}">
                 <ng-option *ngFor="let c of categories" [value]="c._id">
-                    {{ c.category_hin }} <span class="text-muted small" *ngIf="c.category_eng">: {{ c.category_eng }}</span> <small class="text-muted fst-italic" *ngIf="c.category_roman">: {{ c.category_roman }}</small>
+                    {{ c.category_hin }} <span class="text-muted small" *ngIf="c.category_eng">: {{ c.category_eng
+                        }}</span> <small class="text-muted fst-italic" *ngIf="c.category_roman">: {{ c.category_roman
+                        }}</small>
                 </ng-option>
             </ng-select>
         </div>
@@ -183,8 +190,8 @@
                             <i class="uil uil-plus"></i>
                         </button>
                     </div>
-                    <ng-select class="custom" placeholder="Attributes select karo..." [multiple]="true" [searchable]="true"
-                        [clearable]="true" [virtualScroll]="true" [(ngModel)]="selectedAttrs"
+                    <ng-select class="custom" placeholder="Attributes select karo..." [multiple]="true"
+                        [searchable]="true" [clearable]="true" [virtualScroll]="true" [(ngModel)]="selectedAttrs"
                         [ngModelOptions]="{standalone: true}" (change)="onAttrChange($event)" [tabToSelect]="true">
                         <ng-option *ngFor="let a of allAttributes" [value]="a">
                             {{ a.attribute_hin }}
@@ -244,8 +251,9 @@
                             <!-- Checkbox for whole group individual variants -->
                             <div class="form-check form-check-inline m-0 p-0 d-flex align-items-center"
                                 title="Is attribute ke har value ka ek individual variant bhi banega">
-                                <input type="checkbox" id="ind_{{ai}}" [(ngModel)]="g.isIndividual" (change)="recompute()"
-                                    class="form-check-input m-0" style="width:13px; height:13px; cursor:pointer;" />
+                                <input type="checkbox" id="ind_{{ai}}" [(ngModel)]="g.isIndividual"
+                                    (change)="recompute()" class="form-check-input m-0"
+                                    style="width:13px; height:13px; cursor:pointer;" />
                                 <label for="ind_{{ai}}" class="ms-1 mb-0 text-primary fw-semibold"
                                     style="font-size:9px; cursor:pointer; user-select:none;">Ind.</label>
                             </div>
@@ -290,11 +298,13 @@
                 </span>
                 <div class="ms-auto d-flex align-items-center gap-1">
                     <small class="text-muted text-nowrap">Default Cat:</small>
-                    <ng-select class="custom" style="min-width:200px; font-size:11px;" placeholder="Categories (all combos)"
-                        [multiple]="true" [searchable]="true" [clearable]="true" [(ngModel)]="defaultCatIds"
-                        [ngModelOptions]="{standalone: true}" (change)="applyDefaultsToAll()" [tabToSelect]="true">
+                    <ng-select class="custom" style="min-width:200px; font-size:11px;"
+                        placeholder="Categories (all combos)" [multiple]="true" [searchable]="true" [clearable]="true"
+                        [(ngModel)]="defaultCatIds" [ngModelOptions]="{standalone: true}"
+                        (change)="applyDefaultsToAll()" [tabToSelect]="true">
                         <ng-option *ngFor="let c of categories" [value]="c._id">
-                            {{ c.category_hin }} <span class="text-muted small" *ngIf="c.category_eng"> : {{ c.category_eng
+                            {{ c.category_hin }} <span class="text-muted small" *ngIf="c.category_eng"> : {{
+                                c.category_eng
                                 }}</span>
                         </ng-option>
                     </ng-select>
@@ -393,10 +403,12 @@
                         <!-- Categories (ng-select per row) -->
                         <td>
                             <ng-select class="custom custom-sm" placeholder="Categories..." [multiple]="true"
-                                [searchable]="true" [clearable]="true" [disabled]="!c.selected" [(ngModel)]="c.category_ids"
-                                [ngModelOptions]="{standalone: true}" [tabToSelect]="true">
+                                [searchable]="true" [clearable]="true" [disabled]="!c.selected"
+                                [(ngModel)]="c.category_ids" [ngModelOptions]="{standalone: true}" [tabToSelect]="true">
                                 <ng-option *ngFor="let cat of categories" [value]="cat._id">
-                                    {{ cat.category_hin }} <span class="text-muted small" *ngIf="cat.category_eng"> : {{ cat.category_eng }}</span> <small class="text-muted fst-italic" *ngIf="cat.category_roman">: {{ cat.category_roman }}</small>
+                                    {{ cat.category_hin }} <span class="text-muted small" *ngIf="cat.category_eng"> : {{
+                                        cat.category_eng }}</span> <small class="text-muted fst-italic"
+                                        *ngIf="cat.category_roman">: {{ cat.category_roman }}</small>
                                 </ng-option>
                             </ng-select>
                         </td>
@@ -409,8 +421,8 @@
         <!-- /COMBINATION TABLE -->
 
         <!-- ══ BOTTOM BAR ══════════════════════════════════════════════════════ -->
-        <div *ngIf="combinations.length > 0" class="px-3 py-2 border-top d-flex justify-content-between align-items-center"
-            style="flex-shrink:0;">
+        <div *ngIf="combinations.length > 0"
+            class="px-3 py-2 border-top d-flex justify-content-between align-items-center" style="flex-shrink:0;">
             <small class="text-muted">
                 {{ selectedCount }} of {{ combinations.length }} selected
             </small>

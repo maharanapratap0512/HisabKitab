@@ -142,6 +142,17 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
     this.onItemSelectChange(event?.item || event?.item_id || event);
   }
 
+  getItemAliasesString(item: any): string {
+    if (!item) return '';
+    if (Array.isArray(item.item_aliases)) {
+      return item.item_aliases.map((a: any) => (typeof a === 'object' ? a.alias : a)).filter(Boolean).join(', ');
+    }
+    if (typeof item.item_aliases === 'string') {
+      return item.item_aliases;
+    }
+    return '';
+  }
+
   customItemSearch(term: string, item: any) {
     term = term ? term.toLowerCase().trim() : '';
     if (!term) return true;
