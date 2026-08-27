@@ -423,7 +423,8 @@ function _createOneVariant(item_id, data, dept_id) {
         }, false);
     }
 
-    return { variant_id, subitem_id };
+    const createdSubitem = subitem.getById(subitem_id);
+    return { variant_id, subitem_id, ...createdSubitem };
 }
 
 

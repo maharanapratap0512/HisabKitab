@@ -96,6 +96,33 @@ export class GlobalService {
     return this.lists$;
   }
 
+  addVariantsToItemmix(item_id: any, newVariants: any[]) {
+    if (this.Lists && this.Lists.itemmix && Array.isArray(newVariants)) {
+      const item = this.Lists.itemmix.find((i: any) => String(i._id) === String(item_id));
+      if (item) {
+        if (!item.subitems) {
+          item.subitems = [];
+        }
+        newVariants.forEach((v: any) => {
+          const subId = v._id || v.subitem_id;
+          const subObj = {
+            ...v,
+            _id: subId,
+            item_id: item_id,
+            subitem_hin: v.subitem_hin || v.display_name_hin || '',
+            subitem_eng: v.subitem_eng || v.display_name_eng || '',
+            subitem_roman: v.subitem_roman || v.display_name_roman || '',
+            variant_id: v.variant_id
+          };
+          const exists = item.subitems.some((s: any) => String(s._id) === String(subObj._id));
+          if (!exists && subObj._id) {
+            item.subitems.push(subObj);
+          }
+        });
+      }
+    }
+  }
+
   // observeList(): Observable<any> {
   //   let data = new Observable<any>(observer => {
   //     if (!this.Lists) {

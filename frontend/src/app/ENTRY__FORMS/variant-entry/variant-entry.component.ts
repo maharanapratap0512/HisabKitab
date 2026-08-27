@@ -16,6 +16,7 @@ import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Outpu
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from 'src/app/services/api.service';
 import { HttpService } from 'src/app/services/http.service';
+import { GlobalService } from 'src/app/services/global.service';
 
 declare var $: any;
 
@@ -204,11 +205,49 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
     private http: HttpService,
     private api: ApiService,
     private toastr: ToastrService,
+    private gs: GlobalService
   ) { }
 
   ngOnInit() {
+    this.gs.observeList().subscribe((r: any) => {
+      if (!this.items || this.items.length === 0) {
+        this.items = r.itemmix || r.items || [];
+      }
+      if (!this.units || this.units.length === 0) {
+        this.units = r.unit || [];
+      }
+      if (!this.categories || this.categories.length === 0) {
+        this.categories = r.category || [];
+      }
+    });
+
+    if (!this.allAttributes || this.allAttributes.length === 0) {
+      this.loadAttributes();
+    }
+
     this.reset();
     this.rebuildAttrValueOptions();
+  }
+
+  loadAttributes() {
+    this.http.get(this.api.getUrl('VARIANT') + 'attributes')
+      .subscribe((d: any) => {
+        if (d.success) {
+          this.allAttributes = d.result || [];
+          this.rebuildAttrValueOptions();
+        }
+      });
+    this.http.get(this.api.getUrl('VARIANT') + 'attribute-values')
+      .subscribe((d: any) => {
+        if (d.success) {
+          this.attrValueMap = {};
+          for (const av of (d.result || [])) {
+            if (!this.attrValueMap[av.attribute_id]) this.attrValueMap[av.attribute_id] = [];
+            this.attrValueMap[av.attribute_id].push(av);
+          }
+          this.rebuildAttrValueOptions();
+        }
+      });
   }
 
   ngAfterViewInit() {
@@ -304,6 +343,9 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
         next: (d: any) => {
           this.isLoader = false;
           if (d.success) {
+            if (d.created && Array.isArray(d.created)) {
+              this.gs.addVariantsToItemmix(this.selectedItem._id, d.created);
+            }
             this.resetSingleForm();
             this.focusItemDropdown();
             this.response.emit({ reload: true, closeModal: false, ...d });
@@ -408,19 +450,19 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   closeAttrModal() {
-    $('#variantAttrModal').modal('hide');
+    if (typeof $ !== 'undefined') {
+      $('#variantAttrModal').modal('hide');
+    }
     setTimeout(() => {
       this.attrModalMode = '';
       this.attrModalInitialId = null;
-      this.response.emit({ refreshAttributes: true, reload: true });
-      this.rebuildAttrValueOptions();
+      this.loadAttributes();
     }, 300);
   }
 
   onAttrSaved(res: any) {
     if (res?.reload || res?.refreshAttributes) {
-      this.response.emit({ refreshAttributes: true, reload: true });
-      this.rebuildAttrValueOptions();
+      this.loadAttributes();
     }
   }
 
@@ -616,7 +658,12 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
     this.http.post(this.api.getUrl('VARIANT') + 'bulk', payload)
       .subscribe((d: any) => {
         this.isLoader = false;
-        if (d.success) this.response.emit({ reload: true, ...d });
+        if (d.success) {
+          if (d.created && Array.isArray(d.created)) {
+            this.gs.addVariantsToItemmix(this.selectedItem._id, d.created);
+          }
+          this.response.emit({ reload: true, ...d });
+        }
       });
   }
 }

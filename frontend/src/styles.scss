@@ -778,6 +778,10 @@ span.search-icon {
   border-top: 3px solid var(--thead-accent-color) !important;
 }
 
+.card-theme-left {
+  border-left: 3px solid var(--thead-accent-color) !important;
+}
+
 // Fix for text-muted visibility inside ng-select options on hover/mark
 .ng-dropdown-panel .ng-option.ng-option-marked .text-muted,
 .ng-dropdown-panel .ng-option.ng-option-selected .text-muted {
@@ -785,8 +789,70 @@ span.search-icon {
   opacity: 0.8 !important;
 }
 
-.card-theme-left {
-  border-left: 3px solid var(--thead-accent-color) !important;
+/* ── Card Header & Body Theme Utilities ── */
+.card-header-theme,
+.card-header.bg-theme {
+  background: var(--card-header-bg, var(--thead-bg)) !important;
+  color: var(--card-header-color, var(--thead-color)) !important;
+  border-top: var(--thead-border-top) !important;
+  border-bottom: var(--card-header-border, var(--thead-border-bottom)) !important;
+  box-shadow: var(--thead-box-shadow) !important;
+  transition: all 0.35s ease;
+
+  .card-title,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  label,
+  span,
+  i {
+    color: var(--card-header-color, var(--thead-color)) !important;
+  }
+}
+
+.card-body-theme,
+.card-body.bg-theme-soft {
+  background: var(--card-header-bg, var(--thead-bg)) !important;
+  color: var(--card-header-color, var(--thead-color)) !important;
+  border-bottom: var(--card-header-border, var(--thead-border-bottom)) !important;
+  transition: all 0.35s ease;
+
+  .card-title,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  label {
+    color: var(--card-header-color, var(--thead-color)) !important;
+  }
+}
+
+.card-theme-full {
+  border-top: 3px solid var(--thead-accent-color) !important;
+  transition: all 0.35s ease;
+
+  .card-header {
+    background: var(--card-header-bg, var(--thead-bg)) !important;
+    color: var(--card-header-color, var(--thead-color)) !important;
+    border-bottom: var(--card-header-border, var(--thead-border-bottom)) !important;
+    box-shadow: var(--thead-box-shadow) !important;
+
+    .card-title,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    label {
+      color: var(--card-header-color, var(--thead-color)) !important;
+    }
+  }
 }
 
 /* Item Dropdown Panel Styles */
@@ -839,6 +905,9 @@ body .ng-dropdown-panel.aawak-ref-dropdown {
     }
   }
 }
+
+/* Theme & AMOLED Mode Page Background */
+
 
 /* Theme overrides for light mode */
 body[data-bs-theme="light"] {

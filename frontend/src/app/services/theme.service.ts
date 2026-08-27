@@ -35,6 +35,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': '1px solid rgba(91,91,214,0.3)',
         '--thead-box-shadow': '0 -1px 10px rgba(91,91,214,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
         '--thead-accent-color': '#5b5bd6',
+        '--card-header-bg': 'linear-gradient(180deg, #2a2850 0%, #1e1d3f 100%)',
+        '--card-header-color': '#e2e1ff',
+        '--card-header-border': '1px solid rgba(91,91,214,0.3)',
         '--nav-bg': 'linear-gradient(to right, #0f0c29, #302b63, #24243e)',
         '--nav-border': 'rgba(91,91,214,0.25)',
         '--nav-shadow': '0 10px 30px rgba(91,91,214,0.2)'
@@ -47,6 +50,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': '2px solid rgba(99,102,241,0.25)',
         '--thead-box-shadow': 'none',
         '--thead-accent-color': '#6366f1',
+        '--card-header-bg': 'rgba(99,102,241,0.1)',
+        '--card-header-color': '#3730a3',
+        '--card-header-border': '2px solid rgba(99,102,241,0.25)',
         '--nav-bg': 'linear-gradient(to right, #0f0c29, #302b63, #24243e)',
         '--nav-border': 'rgba(91,91,214,0.25)',
         '--nav-shadow': '0 10px 30px rgba(91,91,214,0.2)'
@@ -62,6 +68,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': '1px solid rgba(147,51,234,0.3)',
         '--thead-box-shadow': '0 -1px 10px rgba(147,51,234,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
         '--thead-accent-color': '#9333ea',
+        '--card-header-bg': 'linear-gradient(180deg, #2e1f4a 0%, #1e1535 100%)',
+        '--card-header-color': '#e9d5ff',
+        '--card-header-border': '1px solid rgba(147,51,234,0.3)',
         '--nav-bg': 'linear-gradient(to right, #1a0a2e, #3b1f6b, #2a1a4e)',
         '--nav-border': 'rgba(147,51,234,0.25)',
         '--nav-shadow': '0 10px 30px rgba(147,51,234,0.2)'
@@ -74,6 +83,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': '2px solid rgba(147,51,234,0.25)',
         '--thead-box-shadow': 'none',
         '--thead-accent-color': '#9333ea',
+        '--card-header-bg': 'rgba(147,51,234,0.1)',
+        '--card-header-color': '#6b21a8',
+        '--card-header-border': '2px solid rgba(147,51,234,0.25)',
         '--nav-bg': 'linear-gradient(to right, #1a0a2e, #3b1f6b, #2a1a4e)',
         '--nav-border': 'rgba(147,51,234,0.25)',
         '--nav-shadow': '0 10px 30px rgba(147,51,234,0.2)'
@@ -89,6 +101,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': '1px solid rgba(6,182,212,0.3)',
         '--thead-box-shadow': '0 -1px 10px rgba(6,182,212,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
         '--thead-accent-color': '#06b6d4',
+        '--card-header-bg': 'linear-gradient(180deg, #0f2d35 0%, #0a1f26 100%)',
+        '--card-header-color': '#cffafe',
+        '--card-header-border': '1px solid rgba(6,182,212,0.3)',
         '--nav-bg': 'linear-gradient(to right, #030f14, #0a2d38, #061e26)',
         '--nav-border': 'rgba(6,182,212,0.25)',
         '--nav-shadow': '0 10px 30px rgba(6,182,212,0.15)'
@@ -101,6 +116,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': '2px solid rgba(6,182,212,0.25)',
         '--thead-box-shadow': 'none',
         '--thead-accent-color': '#06b6d4',
+        '--card-header-bg': 'rgba(6,182,212,0.1)',
+        '--card-header-color': '#0e7490',
+        '--card-header-border': '2px solid rgba(6,182,212,0.25)',
         '--nav-bg': 'linear-gradient(to right, #030f14, #0a2d38, #061e26)',
         '--nav-border': 'rgba(6,182,212,0.25)',
         '--nav-shadow': '0 10px 30px rgba(6,182,212,0.15)'
@@ -116,6 +134,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': '1px solid rgba(16,185,129,0.3)',
         '--thead-box-shadow': '0 -1px 10px rgba(16,185,129,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
         '--thead-accent-color': '#10b981',
+        '--card-header-bg': 'linear-gradient(180deg, #0f2d22 0%, #0a1f18 100%)',
+        '--card-header-color': '#d1fae5',
+        '--card-header-border': '1px solid rgba(16,185,129,0.3)',
         '--nav-bg': 'linear-gradient(to right, #030f09, #0a2e1c, #061f14)',
         '--nav-border': 'rgba(16,185,129,0.25)',
         '--nav-shadow': '0 10px 30px rgba(16,185,129,0.15)'
@@ -128,6 +149,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': '2px solid rgba(16,185,129,0.25)',
         '--thead-box-shadow': 'none',
         '--thead-accent-color': '#10b981',
+        '--card-header-bg': 'rgba(16,185,129,0.1)',
+        '--card-header-color': '#065f46',
+        '--card-header-border': '2px solid rgba(16,185,129,0.25)',
         '--nav-bg': 'linear-gradient(to right, #030f09, #0a2e1c, #061f14)',
         '--nav-border': 'rgba(16,185,129,0.25)',
         '--nav-shadow': '0 10px 30px rgba(16,185,129,0.15)'
@@ -143,6 +167,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': '1px solid rgba(244,63,94,0.3)',
         '--thead-box-shadow': '0 -1px 10px rgba(244,63,94,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
         '--thead-accent-color': '#f43f5e',
+        '--card-header-bg': 'linear-gradient(180deg, #2d0f1a 0%, #1f0a12 100%)',
+        '--card-header-color': '#ffe4e6',
+        '--card-header-border': '1px solid rgba(244,63,94,0.3)',
         '--nav-bg': 'linear-gradient(to right, #150308, #3d0f1a, #29080f)',
         '--nav-border': 'rgba(244,63,94,0.25)',
         '--nav-shadow': '0 10px 30px rgba(244,63,94,0.15)'
@@ -155,6 +182,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': '2px solid rgba(244,63,94,0.25)',
         '--thead-box-shadow': 'none',
         '--thead-accent-color': '#f43f5e',
+        '--card-header-bg': 'rgba(244,63,94,0.08)',
+        '--card-header-color': '#9f1239',
+        '--card-header-border': '2px solid rgba(244,63,94,0.25)',
         '--nav-bg': 'linear-gradient(to right, #150308, #3d0f1a, #29080f)',
         '--nav-border': 'rgba(244,63,94,0.25)',
         '--nav-shadow': '0 10px 30px rgba(244,63,94,0.15)'
@@ -170,6 +200,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': '1px solid rgba(245,158,11,0.3)',
         '--thead-box-shadow': '0 -1px 10px rgba(245,158,11,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
         '--thead-accent-color': '#f59e0b',
+        '--card-header-bg': 'linear-gradient(180deg, #2d1f0a 0%, #1f1508 100%)',
+        '--card-header-color': '#fef3c7',
+        '--card-header-border': '1px solid rgba(245,158,11,0.3)',
         '--nav-bg': 'linear-gradient(to right, #150e03, #3d2a08, #291c05)',
         '--nav-border': 'rgba(245,158,11,0.25)',
         '--nav-shadow': '0 10px 30px rgba(245,158,11,0.15)'
@@ -182,6 +215,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': '2px solid rgba(245,158,11,0.25)',
         '--thead-box-shadow': 'none',
         '--thead-accent-color': '#f59e0b',
+        '--card-header-bg': 'rgba(245,158,11,0.1)',
+        '--card-header-color': '#92400e',
+        '--card-header-border': '2px solid rgba(245,158,11,0.25)',
         '--nav-bg': 'linear-gradient(to right, #150e03, #3d2a08, #291c05)',
         '--nav-border': 'rgba(245,158,11,0.25)',
         '--nav-shadow': '0 10px 30px rgba(245,158,11,0.15)'
@@ -303,6 +339,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': `1px solid rgba(${r},${g},${b},0.3)`,
         '--thead-box-shadow': `0 -1px 10px rgba(${r},${g},${b},0.4), inset 0 1px 0 rgba(255,255,255,0.05)`,
         '--thead-accent-color': hex,
+        '--card-header-bg': `linear-gradient(180deg, ${bgLight} 0%, ${bgDark} 100%)`,
+        '--card-header-color': `rgb(${textR},${textG},${textB})`,
+        '--card-header-border': `1px solid rgba(${r},${g},${b},0.3)`,
         '--nav-bg': `linear-gradient(to right, ${navDark}, ${navMid}, ${navDark})`,
         '--nav-border': `rgba(${r},${g},${b},0.25)`,
         '--nav-shadow': `0 10px 30px rgba(${r},${g},${b},0.2)`
@@ -319,6 +358,9 @@ export class ThemeService implements OnInit {
         '--thead-border-bottom': `2px solid rgba(${r},${g},${b},0.25)`,
         '--thead-box-shadow': 'none',
         '--thead-accent-color': hex,
+        '--card-header-bg': `rgba(${r},${g},${b},0.1)`,
+        '--card-header-color': `rgb(${Math.round(r * 0.4)},${Math.round(g * 0.4)},${Math.round(b * 0.4)})`,
+        '--card-header-border': `2px solid rgba(${r},${g},${b},0.25)`,
         '--nav-bg': `linear-gradient(to right, ${navDark}, ${navMid}, ${navDark})`,
         '--nav-border': `rgba(${r},${g},${b},0.25)`,
         '--nav-shadow': `0 10px 30px rgba(${r},${g},${b},0.2)`

@@ -274,26 +274,45 @@ export class ItemDropdownComponent implements ControlValueAccessor, OnChanges, O
     this.openSelfModal('Add Variant');
   }
 
+  get selectedItemObj(): any {
+    if (this.itemId) {
+      return (this.items || []).find((i: any) => i._id === this.itemId || i.id === this.itemId) || null;
+    }
+    return null;
+  }
+
   closeSelfModal() {
     if (typeof $ !== 'undefined') {
       $('#' + this.modalId).modal('hide');
     }
     this.showModal = '';
+    this.refreshMasterList();
   }
 
-  onSelfVariantCreated(ev: any) {
-    if (ev) {
-      this.flattenItems();
-      if (ev._id) {
-        this.itemId = ev.item_id || ev._id;
-        this.subitemId = null;
+  refreshMasterList() {
+    this.gs.observeList(true).subscribe((result: any) => {
+      if (result && result.itemmix) {
+        this.items = result.itemmix;
+        this.flattenItems();
         this.syncSelectedValue();
         if (this.selectedValue) {
           this.onSelectChange(this.selectedValue);
         }
       }
+    });
+  }
+
+  onSelfVariantCreated(ev: any) {
+    if (ev && ev.refreshAttributes) {
+      return;
     }
-    this.closeSelfModal();
+    if (this.gs.Lists && this.gs.Lists.itemmix) {
+      this.items = this.gs.Lists.itemmix;
+    }
+    this.flattenItems();
+    if (ev && ev.closeModal !== false) {
+      this.closeSelfModal();
+    }
   }
 
   onSelfItemCreated(ev: any) {

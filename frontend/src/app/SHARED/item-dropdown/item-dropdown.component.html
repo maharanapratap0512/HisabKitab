@@ -101,6 +101,8 @@
         <app-subitem-entry *ngIf="showModal === 'Add Subitem'"
           (response)="onSelfSubitemCreated($event)"></app-subitem-entry>
         <app-variant-entry *ngIf="showModal === 'Add Variant'"
+          [items]="items"
+          [selectedItem]="selectedItemObj"
           (response)="onSelfVariantCreated($event)"></app-variant-entry>
       </div>
     </div>
