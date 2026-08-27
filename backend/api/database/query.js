@@ -2783,30 +2783,30 @@ const dictionary = {
     insert: `insert or ignore into dictionary(type, name, extra_note, id, id2) values(@type, @name, @extra_note, @id, @id2)`,
     select: `select * from dictionary ?`,
     select_full:
-        `select dict.*,
-        CASE WHEN dict.type in ('awk_type', 'jwk_type', 'condition' ) THEN spl.list_name_hin || ' : ' || spl.list_name_eng 
-        WHEN dict.type = 'aj_mm' THEN mm.mm_hin || ' : ' || mm.mm_eng
-        WHEN dict.type = 'state' THEN state.state_hin || ' : ' || state.state_eng
-        WHEN dict.type = 'district' THEN district.district_hin || ' : ' || district.district_eng
-        WHEN dict.type = 'zone' THEN zone.zone_hin || ' : ' || zone.zone_eng
-        WHEN dict.type = 'city' THEN city.city_hin || ' : ' || city.city_eng
-        WHEN dict.type = 'category' THEN ct.category_hin || ' : ' || ct.category_eng
-        WHEN dict.type = 'unit' THEN unit.unit_short || ' : ' || unit.unit_full
-        WHEN dict.type = 'item' THEN item.item_hin || ' : ' || item.item_eng
+        `select dictionary.*,
+        CASE WHEN dictionary.type in ('awk_type', 'jwk_type', 'condition' ) THEN spl.list_name_hin || ' : ' || spl.list_name_eng 
+        WHEN dictionary.type = 'aj_mm' THEN mm.mm_hin || ' : ' || mm.mm_eng
+        WHEN dictionary.type = 'state' THEN state.state_hin || ' : ' || state.state_eng
+        WHEN dictionary.type = 'district' THEN district.district_hin || ' : ' || district.district_eng
+        WHEN dictionary.type = 'zone' THEN zone.zone_hin || ' : ' || zone.zone_eng
+        WHEN dictionary.type = 'city' THEN city.city_hin || ' : ' || city.city_eng
+        WHEN dictionary.type = 'category' THEN ct.category_hin || ' : ' || ct.category_eng
+        WHEN dictionary.type = 'unit' THEN unit.unit_short || ' : ' || unit.unit_full
+        WHEN dictionary.type = 'item' THEN item.item_hin || ' : ' || item.item_eng
         ELSE NULL END as original_name,
-        CASE WHEN dict.type = 'item' THEN si.subitem_hin || ' : ' || si.subitem_eng
+        CASE WHEN dictionary.type = 'item' THEN si.subitem_hin || ' : ' || si.subitem_eng
         ELSE NULL END as sub_name
-         from dictionary dict
-        left join mm on dict.type = 'aj_mm' AND mm._id = dict.id
-        left join support_list spl on dict.type in ('awk_type', 'jwk_type', 'condition' ) AND spl._id = dict.id
-        left join state on dict.type = 'state' AND state._id = dict.id
-        left join district on dict.type = 'district' AND district._id = dict.id
-        left join zone on dict.type = 'zone' AND zone._id = dict.id
-        left join city on dict.type = 'city' AND city._id = dict.id
-        left join category ct on dict.type = 'category' AND ct._id = dict.id
-        left join unit on dict.type = 'unit' AND unit._id = dict.id
-        left join item on dict.type = 'item' AND item._id = dict.id
-        left join subitem si on dict.type = 'item' AND si._id = dict.id2
+         from dictionary
+        left join mm on dictionary.type = 'aj_mm' AND mm._id = dictionary.id
+        left join support_list spl on dictionary.type in ('awk_type', 'jwk_type', 'condition' ) AND spl._id = dictionary.id
+        left join state on dictionary.type = 'state' AND state._id = dictionary.id
+        left join district on dictionary.type = 'district' AND district._id = dictionary.id
+        left join zone on dictionary.type = 'zone' AND zone._id = dictionary.id
+        left join city on dictionary.type = 'city' AND city._id = dictionary.id
+        left join category ct on dictionary.type = 'category' AND ct._id = dictionary.id
+        left join unit on dictionary.type = 'unit' AND unit._id = dictionary.id
+        left join item on dictionary.type = 'item' AND item._id = dictionary.id
+        left join subitem si on dictionary.type = 'item' AND si._id = dictionary.id2
          ?
         `,
     update: `update dictionary set 

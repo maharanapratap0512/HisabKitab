@@ -289,13 +289,9 @@
                               </tr>
                            </thead>
                            <tbody>
-                              <tr *ngFor="let data of unmatchedData | paginate:{id:'unmatchedPagi', itemsPerPage:25,currentPage:page_unmatched,totalItems:unmatchedData.length}; let i=index;"
-                                 [ngClass]="{'ignored':data.ignore, 'success':data.done}"
-                                 (mouseover)="toggleCorrection(((page_unmatched-1) * 25) + i, true)"
-                                 (mouseleave)="toggleCorrection(((page_unmatched-1) * 25) + i, false)"
-                                 (focus)="toggleCorrection(((page_unmatched-1) * 25) + i, true)"
-                                 (blur)="toggleCorrection(((page_unmatched-1) * 25) + i, false)" tabindex="0">
-                                 <td>{{((page_unmatched-1) * 25) + i+1}}</td>
+                              <tr *ngFor="let data of unmatchedData | paginate:{id:'unmatchedPagi', itemsPerPage:10,currentPage:page_unmatched,totalItems:unmatchedData.length}; let i=index;"
+                                 [ngClass]="{'ignored':data.ignore, 'success':data.done}">
+                                 <td>{{((page_unmatched-1) * 10) + i+1}}</td>
                                  <td> {{data.type}} </td>
                                  <td *ngIf="data.type != 'item'"> {{data.isArray ? data.name.join(', ') : data.name}}
                                  </td>
@@ -306,7 +302,7 @@
                                     {{data.name}}
                                  </td>
                                  <td>
-                                    <div class="row" *ngIf="data.correction">
+                                    <div class="row">
                                        <!-- mm dropdown -->
                                        <ng-select *ngIf="data.type == 'mm' || data.type == 'aj_mm'"
                                           class="custom custom-import" placeholder="Select MM" [virtualScroll]="true"
@@ -379,7 +375,7 @@
                                                 [filterObj]="{ category_id: cat }" [(itemId)]="data.item_id"
                                                 [(subitemId)]="data.subitem_id" (open)="onDropdownOpen()"
                                                 (close)="onDropdownClose()"
-                                                (change)="data.id = $event.item_id; data.item_id = $event.item_id; data.subitem_id = $event.subitem_id; data.item = $event.item; data.subitem = $event.subitem"
+                                                (change)="data.id = $event.item_id; data.id2 = $event.subitem_id; data.item_id = $event.item_id; data.subitem_id = $event.subitem_id; data.item = $event.item; data.subitem = $event.subitem"
                                                 appendTo="body">
                                              </app-item-dropdown>
                                           </div>
@@ -574,10 +570,10 @@
                                        [ngModelOptions]="{standalone: true}" [disabled]="data.type=='product'">
                                  </td>
                                  <td>
-                                    <button *ngIf="!data.id && !data.ignore" class="btn btn-warning"
-                                       (click)="ignoreCorrection(data, ((page_unmatched-1) * 25) + i)">Ignore</button>
-                                    <button *ngIf="data.id" class="btn btn-success"
-                                       (click)="correctionSubmit(data, ((page_unmatched-1) * 25) + i)">Correct</button>
+                                    <button *ngIf="!(data.id || data.item_id) && !data.ignore" class="btn btn-warning"
+                                       (click)="ignoreCorrection(data, ((page_unmatched-1) * 10) + i)">Ignore</button>
+                                    <button *ngIf="data.id || data.item_id" class="btn btn-success"
+                                       (click)="correctionSubmit(data, ((page_unmatched-1) * 10) + i)">Correct</button>
                                     <span *ngIf="data.ignore" class="text-warning"> Ignored</span>
                                  </td>
                               </tr>

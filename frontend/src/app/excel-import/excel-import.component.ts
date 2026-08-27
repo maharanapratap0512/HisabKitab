@@ -435,24 +435,32 @@ export class ExcelImportComponent implements OnInit {
     // console.log(this.excelArrObj);
 
     if (data.type == 'item') {
+      const selectedItem = data.item || (data.raw ? data.raw.item : null);
+      const selectedSubitem = data.subitem || (data.raw ? data.raw.subitem : null);
+
       for (let i in this.excelArrObj) {
         if (typeof data.name === 'string') {
           if (this.excelArrObj[i].item == data.name) {
-            if (this.excelArrObj[i].item_id != data.item._id) {
-              this.excelArrObj[i].item_id = data.item._id;
-              this.excelArrObj[i].item_hin = data.item.item_hin;
+            if (selectedItem) {
+              this.excelArrObj[i].item_id = selectedItem._id;
+              this.excelArrObj[i].item_hin = selectedItem.item_hin;
+            }
+            if (selectedSubitem) {
+              this.excelArrObj[i].subitem_id = selectedSubitem._id;
+              this.excelArrObj[i].subitem_hin = selectedSubitem.subitem_hin;
+              this.excelArrObj[i].subitem_corrected = true;
             }
           }
-        } else if (this.excelArrObj[i].item == data.name.item && this.excelArrObj[i].subitem == data.name.subitem) {
-          if (this.excelArrObj[i].item_id != data.item._id) {
-            this.excelArrObj[i].item_id = data.item._id;
-            this.excelArrObj[i].item_hin = data.item.item_hin;
+        } else if (data.name && typeof data.name === 'object' && this.excelArrObj[i].item == data.name.item && this.excelArrObj[i].subitem == data.name.subitem) {
+          if (selectedItem) {
+            this.excelArrObj[i].item_id = selectedItem._id;
+            this.excelArrObj[i].item_hin = selectedItem.item_hin;
           }
           this.excelArrObj[i].subitem_corrected = true;
           this.excelArrObj[i].subitem_hin = '-';
-          if (data.subitem) {
-            this.excelArrObj[i].subitem_id = data.subitem._id;
-            this.excelArrObj[i].subitem_hin = data.subitem.subitem_hin;
+          if (selectedSubitem) {
+            this.excelArrObj[i].subitem_id = selectedSubitem._id;
+            this.excelArrObj[i].subitem_hin = selectedSubitem.subitem_hin;
           }
         }
       }
