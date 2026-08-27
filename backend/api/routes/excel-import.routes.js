@@ -451,6 +451,7 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                     } else if (type === 'item') {
                         const conflict = service.getItemConflict(row);
                         if (conflict) {
+                            row.duplicateItem = conflict.conflict;
                             result = { status: 'duplicate', data: row };
                         } else {
                             let insResult = await service.createItem(row, req.params.dept_id);
@@ -460,6 +461,7 @@ router.post('/final_stream/:dept_id', async (req, res, next) => {
                     } else if (type === 'category') {
                         const conflict = service.getCategoryConflict(row);
                         if (conflict) {
+                            row.duplicateCategory = conflict.conflict;
                             result = { status: 'duplicate', data: row };
                         } else {
                             let insResult = await service.createCategory(row, req.params.dept_id);

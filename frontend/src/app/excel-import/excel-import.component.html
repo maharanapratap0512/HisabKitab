@@ -248,6 +248,7 @@
                            style="table-layout: auto;">
                            <thead>
                               <tr>
+                                 <th>#</th>
                                  <th *ngFor="let header of headerList">
                                     {{header.name}}
                                  </th>
@@ -256,14 +257,21 @@
                            <tbody>
                               <tr
                                  *ngFor="let data of excelArrObj | paginate:{id:'excelPagi', itemsPerPage:itemsPerPage,currentPage:page_excel,totalItems:excelArrObj.length}; let i=index;">
+                                 <td>{{((page_excel-1)*itemsPerPage)+i+1}}</td>
                                  <td *ngFor="let header of headerList"
-                                    [ngClass]="{'marked': (header.not_null && !data[header.name]) || (header.ref_field && data[header.name] && (!data[header.ref_field] || getValue(data, header.ref_data))), 'success': getValue(data, header.ref_data) && data[header.name] }">
-                                    <span [ngClass]="{'line-through': getValue(data, header.ref_data)}">
+                                    [ngClass]="{
+                                        'marked': (header.not_null && !data[header.name]) || (header.ref_field && data[header.name] && !data[header.ref_field]),
+                                        'success': header.ref_field && data[header.ref_field] && isDifferent(data[header.name], getValue(data, header.ref_data))
+                                     }">
+                                    <span [ngClass]="{'line-through': isDifferent(data[header.name], getValue(data, header.ref_data))}">
                                        {{data[header.name]}}
-                                    </span> <br />
-                                    <span *ngIf="getValue(data, header.ref_data)">
-                                       {{getValue(data, header.ref_data)}}
                                     </span>
+                                    <ng-container *ngIf="isDifferent(data[header.name], getValue(data, header.ref_data))">
+                                       <br />
+                                       <span>
+                                          {{getValue(data, header.ref_data)}}
+                                       </span>
+                                    </ng-container>
                                  </td>
                               </tr>
                            </tbody>
@@ -375,7 +383,7 @@
                                                 [filterObj]="{ category_id: cat }" [(itemId)]="data.item_id"
                                                 [(subitemId)]="data.subitem_id" (open)="onDropdownOpen()"
                                                 (close)="onDropdownClose()"
-                                                (change)="data.id = $event.item_id; data.id2 = $event.subitem_id; data.item_id = $event.item_id; data.subitem_id = $event.subitem_id; data.item = $event.item; data.subitem = $event.subitem"
+                                                (change)="itemChange($event, data, ((page_unmatched-1) * 10) + i)"
                                                 appendTo="body">
                                              </app-item-dropdown>
                                           </div>

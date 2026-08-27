@@ -734,13 +734,19 @@ class ExcelFunctions {
       }
       // console.log("start matching", this.item);
       if (!this.checkedButNotFound(data, 'item')) {
+         const cleanData = (typeof data === 'string' ? data : String(data || '')).trim().toLowerCase();
          for (let i in this.item) {
-            if ([this.item[i].item_hin, this.item[i].item_eng, this.item[i].item_roman, this.item[i].item_code].includes(data)) {
+            const h = (this.item[i].item_hin || '').trim().toLowerCase();
+            const e = (this.item[i].item_eng || '').trim().toLowerCase();
+            const r = (this.item[i].item_roman || '').trim().toLowerCase();
+            const c = (this.item[i].item_code || '').trim().toLowerCase();
+            if ([h, e, r, c].filter(Boolean).includes(cleanData)) {
                return this.item[i]._id;
             }
          }
          for (let i in this.dict.item) {
-            if (this.dict.item[i].name == data) {
+            const dName = (this.dict.item[i].name || '').trim().toLowerCase();
+            if (dName && dName === cleanData) {
                return this.dict.item[i].id;
             }
          }

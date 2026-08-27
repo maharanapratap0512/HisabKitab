@@ -128,12 +128,12 @@ export class ExcelImportService {
       { col_name: 'max_rate', name: 'max_rate', alt_names: ["max rate"], not_null: false },
     ],
     rel_item_category: [
-      { col_name: 'item_hin', name: 'item_hin', alt_names: ["itemhin", "item hin"], not_null: true, ref_table: 'item', ref_field: 'item_id', ref_data: 'item_hin' },
+      { col_name: 'item', name: 'item', alt_names: ["item", "itemhin", "item hin"], not_null: true, ref_table: 'item', ref_field: 'item_id', ref_data: 'item' },
       { col_name: 'category', name: 'categories', alt_names: ["category", "categories"], not_null: true, ref_table: 'category', ref_field: 'category_id', ref_data: 'category_hin' }
     ],
     rel_subitem_category: [
-      { col_name: 'item_hin', name: 'item_hin', alt_names: ["itemhin", "item hin"], not_null: true, ref_table: 'item', ref_field: 'item_id', ref_data: 'item_hin' },
-      { col_name: 'subitem_hin', name: 'subitem_hin', alt_names: ["subitemhin", "subitem hin", "subitem"], not_null: true, ref_table: 'subitem', ref_field: 'subitem_id', ref_data: 'subitem_hin' },
+      { col_name: 'item', name: 'item', alt_names: ["item", "itemhin", "item hin"], not_null: true, ref_table: 'item', ref_field: 'item_id', ref_data: 'item' },
+      { col_name: 'subitem', name: 'subitem', alt_names: ["subitem", "subitemhin", "subitem hin"], not_null: true, ref_table: 'subitem', ref_field: 'subitem_id', ref_data: 'subitem' },
       { col_name: 'category', name: 'categories', alt_names: ["category", "categories"], not_null: true, ref_table: 'category', ref_field: 'category_id', ref_data: 'category_hin' }
     ],
     support_list: [

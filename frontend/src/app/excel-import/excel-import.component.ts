@@ -286,7 +286,7 @@ export class ExcelImportComponent implements OnInit {
           if (this.headerConfig[j].index) {
             //assign excel data to matched object key and prepare whole row object
             if (this.headerConfig[j].type == "array") {
-              row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index] ? this.excelArr[i][this.headerConfig[j].index].split(",") : [];
+              row[this.headerConfig[j].col_name] = this.excelArr[i][this.headerConfig[j].index] ? this.excelArr[i][this.headerConfig[j].index].split(",").map((v: string) => this.gs.cleanValue(v)).filter(Boolean) : [];
               // if array type with ref_table
               // if (this.headerConfig[j].ref_table) {
               //   row[this.headerConfig[j].col_name] = row[this.headerConfig[j].col_name].map((value: string) => ({ data: this.gs.cleanValue(value), _id: null }));
@@ -314,27 +314,29 @@ export class ExcelImportComponent implements OnInit {
     } else if (this.importType.name == 'rel_item_category' || this.importType.name == 'rel_subitem_category') {
       let combinations: any[] = [];
       for (let i of this.excelArrObj) {
-         if (this.importType.name == 'rel_subitem_category' && i.item_hin && !i.subitem_hin) {
-             continue;
-         }
-         if (i.category && typeof i.category === 'string') {
-             let cats = i.category.split(',');
-             let refItem = null;
-             if (this.importedData && this.importedData.length) {
-                 // Try to match the item by item_hin
-                 refItem = this.importedData.find((d: any) => d.item_hin === i.item_hin && (this.importType.name == 'rel_item_category' || d.subitem_hin === i.subitem_hin));
-             }
-             for (let cat of cats) {
-                 if(cat.trim()) {
-                     combinations.push({
-                         ...i,
-                         item_id: refItem ? refItem.item_id || refItem._id : null,
-                         subitem_id: refItem && this.importType.name == 'rel_subitem_category' ? refItem.subitem_id || refItem._id : null,
-                         categories: cat.trim()
-                     });
-                 }
-             }
-         }
+        const itemVal = i.item || i.item_hin;
+        const subitemVal = i.subitem || i.subitem_hin;
+        if (this.importType.name == 'rel_subitem_category' && itemVal && !subitemVal) {
+          continue;
+        }
+        if (i.category && typeof i.category === 'string') {
+          let cats = i.category.split(',');
+          let refItem = null;
+          if (this.importedData && this.importedData.length) {
+            // Try to match the item by item/item_hin
+            refItem = this.importedData.find((d: any) => (d.item === itemVal || d.item_hin === itemVal) && (this.importType.name == 'rel_item_category' || d.subitem === subitemVal || d.subitem_hin === subitemVal));
+          }
+          for (let cat of cats) {
+            if (cat.trim()) {
+              combinations.push({
+                ...i,
+                item_id: refItem ? refItem.item_id || refItem._id : null,
+                subitem_id: refItem && this.importType.name == 'rel_subitem_category' ? refItem.subitem_id || refItem._id : null,
+                categories: cat.trim()
+              });
+            }
+          }
+        }
       }
       this.excelArrObj = combinations;
     }
@@ -426,7 +428,16 @@ export class ExcelImportComponent implements OnInit {
         this.unmatchedData[i].ignore = true;
       }
     });
+  }
 
+  itemChange(event: any, data: any, index?: any) {
+    // console.log("itemChange event:", event, "data:", data, "index:", index);
+    if (event) {
+      data.id = event.item_id;
+      data.subitem_id = event.subitem_id;
+      data.item = event.item;
+      data.subitem = event.subitem_id ? event.subitem : null;
+    }
   }
 
   correctionSubmit(data: any, index: any) {
@@ -435,33 +446,33 @@ export class ExcelImportComponent implements OnInit {
     // console.log(this.excelArrObj);
 
     if (data.type == 'item') {
-      const selectedItem = data.item || (data.raw ? data.raw.item : null);
-      const selectedSubitem = data.subitem || (data.raw ? data.raw.subitem : null);
-
       for (let i in this.excelArrObj) {
         if (typeof data.name === 'string') {
           if (this.excelArrObj[i].item == data.name) {
-            if (selectedItem) {
-              this.excelArrObj[i].item_id = selectedItem._id;
-              this.excelArrObj[i].item_hin = selectedItem.item_hin;
+            if (data.item) {
+              this.excelArrObj[i].item_id = data.item_id;
+              this.excelArrObj[i].item_hin = data.item.item_hin;
             }
-            if (selectedSubitem) {
-              this.excelArrObj[i].subitem_id = selectedSubitem._id;
-              this.excelArrObj[i].subitem_hin = selectedSubitem.subitem_hin;
+            if (data.subitem) {
+              this.excelArrObj[i].subitem_id = data.subitem_id;
+              this.excelArrObj[i].subitem_hin = data.subitem.subitem_hin;
               this.excelArrObj[i].subitem_corrected = true;
             }
+            console.log("excel data", this.excelArrObj[i]);
+
           }
         } else if (data.name && typeof data.name === 'object' && this.excelArrObj[i].item == data.name.item && this.excelArrObj[i].subitem == data.name.subitem) {
-          if (selectedItem) {
-            this.excelArrObj[i].item_id = selectedItem._id;
-            this.excelArrObj[i].item_hin = selectedItem.item_hin;
+          if (data.item) {
+            this.excelArrObj[i].item_id = data.item_id;
+            this.excelArrObj[i].item_hin = data.item.item_hin;
           }
           this.excelArrObj[i].subitem_corrected = true;
           this.excelArrObj[i].subitem_hin = '-';
-          if (selectedSubitem) {
-            this.excelArrObj[i].subitem_id = selectedSubitem._id;
-            this.excelArrObj[i].subitem_hin = selectedSubitem.subitem_hin;
+          if (data.subitem) {
+            this.excelArrObj[i].subitem_id = data.subitem_id;
+            this.excelArrObj[i].subitem_hin = data.subitem.subitem_hin;
           }
+          console.log("excel data", this.excelArrObj[i]);
         }
       }
     } else if (data.isArray) {
@@ -630,7 +641,7 @@ export class ExcelImportComponent implements OnInit {
             this.isLoader = false;
             try {
               const data = JSON.parse(trimmedLine.replace('data: ', ''));
-              console.log(data);
+              // console.log(data);
 
               // Global Error Handling
               if (data.error) {
@@ -772,6 +783,13 @@ export class ExcelImportComponent implements OnInit {
   getValue(obj: any, path: string) {
     if (!path || !obj) return null;
     return path.split('.').reduce((o, i) => (o ? o[i] : null), obj);
+  }
+
+  isDifferent(excelVal: any, dbVal: any): boolean {
+    if (!dbVal || !excelVal) return false;
+    const str1 = String(excelVal).trim().toLowerCase();
+    const str2 = String(dbVal).trim().toLowerCase();
+    return str1 !== str2;
   }
 
 
