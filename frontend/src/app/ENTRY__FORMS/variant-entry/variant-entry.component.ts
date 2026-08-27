@@ -125,46 +125,16 @@ export class VariantEntryComponent implements OnInit, OnChanges, AfterViewInit {
     return a && b ? (a._id === b._id) : (a === b);
   }
 
-  onItemSelectChange(event: any) {
+  onItemDropdownChange(event: any) {
     this.lastSelectTime = Date.now();
-    if (event && typeof event === 'object') {
-      this.selectedItem = event;
-    } else if (event) {
-      this.selectedItem = (this.items || []).find((i: any) => i._id === event) || null;
+    if (event && event.item_id) {
+      const selectedObj = event.item || (this.items || []).find((i: any) => i._id === event.item_id) || this.selectedItem;
+      this.selectedItem = selectedObj;
     } else {
       this.selectedItem = null;
     }
     this.reset();
     this.focusAttrValueIndex(0);
-  }
-
-  onItemDropdownChange(event: any) {
-    this.onItemSelectChange(event?.item || event?.item_id || event);
-  }
-
-  getItemAliasesString(item: any): string {
-    if (!item) return '';
-    if (Array.isArray(item.item_aliases)) {
-      return item.item_aliases.map((a: any) => (typeof a === 'object' ? a.alias : a)).filter(Boolean).join(', ');
-    }
-    if (typeof item.item_aliases === 'string') {
-      return item.item_aliases;
-    }
-    return '';
-  }
-
-  customItemSearch(term: string, item: any) {
-    term = term ? term.toLowerCase().trim() : '';
-    if (!term) return true;
-    const hin = item.item_hin ? item.item_hin.toLowerCase() : '';
-    const eng = item.item_eng ? item.item_eng.toLowerCase() : '';
-    const roman = item.item_roman ? item.item_roman.toLowerCase() : '';
-    const code = item.item_code ? String(item.item_code).toLowerCase() : '';
-    let aliases = '';
-    if (item.item_aliases && Array.isArray(item.item_aliases)) {
-      aliases = item.item_aliases.map((a: any) => a.alias).join(' ').toLowerCase();
-    }
-    return hin.includes(term) || eng.includes(term) || roman.includes(term) || code.includes(term) || aliases.includes(term);
   }
 
   focusAttrValueIndex(index: number = 0) {
