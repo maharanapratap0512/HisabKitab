@@ -45,6 +45,14 @@
                 "title_hin": "आइटम ड्रॉपडाउन क्रिएशन एवं एक्सेल इम्पोर्ट करेक्शन सुधार",
                 "desc": "Improved (+ Add Item), (+ Add Subitem), and (+ Add Variant) workflows in Item-Dropdown with dynamic body detachment for non-clipped modals, smooth attribute creation navigation, auto-sync with backend subitem records, and instant list updates in Excel Import correction tab.",
                 "desc_hin": "आइटम ड्रॉपडाउन में आइटम, सबआइटम व वेरिएंट क्रिएशन का सुधार, बॉडी-अटैच्ड मोडल्स, सहज एट्रीब्यूट नेविगेशन और एक्सेल इम्पोर्ट करेक्शन टैब में रियल-टाइम लिस्ट सिंक।"
+            },
+            {
+                "type": "improved",
+                "module": "Excel Import Component",
+                "title": "Item Import Improved & Bug Fixed",
+                "title_hin": "आइटम इम्पोर्ट सुधार एवं बग फिक्स",
+                "desc": "Item import process improved with unique filtering, multi-language matching, exact cell highlight rules, and bug fixes.",
+                "desc_hin": "यूनिक फ़िल्टरिंग, बहुभाषी मैचिंग, सटीक सेल हाईलाइट नियम एवं बग फिक्स के साथ आइटम इम्पोर्ट सुधार।"
             }
         ]
     },
