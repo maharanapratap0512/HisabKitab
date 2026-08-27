@@ -37,6 +37,14 @@
                 "title_hin": "इम्पोर्ट कम्पोनेंट में एकीकृत आइटम-सबआइटम ड्रॉपडाउन एवं कैटेगरी फ़िल्टर",
                 "desc": "Replaced separate traditional item and subitem dropdowns in Import & Excel-Import components with the unified Item-Dropdown component, retaining the category filter dropdown alongside full search capabilities.",
                 "desc_hin": "इम्पोर्ट एवं एक्सेल-इम्पोर्ट में अलग-अलग ड्रॉपडाउन के स्थान पर एकीकृत आइटम ड्रॉपडाउन का उपयोग, जिसमें कैटेगरी फ़िल्टर के साथ आइटम, सबआइटम व वेरिएंट खोजना सुगम हुआ है।"
+            },
+            {
+                "type": "improved",
+                "module": "Item Dropdown & Excel Import",
+                "title": "Item Dropdown Creation & Excel Import Correction Enhancements",
+                "title_hin": "आइटम ड्रॉपडाउन क्रिएशन एवं एक्सेल इम्पोर्ट करेक्शन सुधार",
+                "desc": "Improved (+ Add Item), (+ Add Subitem), and (+ Add Variant) workflows in Item-Dropdown with dynamic body detachment for non-clipped modals, smooth attribute creation navigation, auto-sync with backend subitem records, and instant list updates in Excel Import correction tab.",
+                "desc_hin": "आइटम ड्रॉपडाउन में आइटम, सबआइटम व वेरिएंट क्रिएशन का सुधार, बॉडी-अटैच्ड मोडल्स, सहज एट्रीब्यूट नेविगेशन और एक्सेल इम्पोर्ट करेक्शन टैब में रियल-टाइम लिस्ट सिंक।"
             }
         ]
     },

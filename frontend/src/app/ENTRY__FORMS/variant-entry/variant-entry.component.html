@@ -24,9 +24,17 @@
         <!-- 0. Item Selection Section -->
         <div class="mb-3">
             <label class="form-label fw-semibold mb-1" style="font-size:12px;">Item</label>
-            <app-item-dropdown #itemDropdown [items]="items" [itemId]="selectedItem?._id"
-                (change)="onItemDropdownChange($event)" placeholder="Select Item...">
-            </app-item-dropdown>
+            <ng-select class="custom" style="width: 100%;" placeholder="Select Item" [clearable]="true"
+                [virtualScroll]="true" [items]="items" bindLabel="item_hin" [(ngModel)]="selectedItem"
+                (change)="onItemSelectChange($event)">
+                <ng-template ng-option-tmp let-item="item">
+                    <div>
+                        <strong>{{item.item_hin}}</strong>
+                        <span *ngIf="item.item_eng" class="text-muted ms-1">: {{item.item_eng}}</span>
+                        <span *ngIf="item.item_code" class="text-muted ms-1">: {{item.item_code}}</span>
+                    </div>
+                </ng-template>
+            </ng-select>
         </div>
 
         <!-- 1. Attribute Values Section (Prastav Concept) -->
